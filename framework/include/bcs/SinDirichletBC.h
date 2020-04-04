@@ -14,9 +14,6 @@
 // Forward Declarations
 class SinDirichletBC;
 
-template <>
-InputParameters validParams<SinDirichletBC>();
-
 /**
  * A spatially-constant, time-varying NodalBC whose imposed value g(t)
  * varies sinusoidally with time according to the formula:

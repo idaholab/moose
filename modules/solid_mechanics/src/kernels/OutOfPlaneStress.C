@@ -14,8 +14,6 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", OutOfPlaneStress, "07/30/2020 24:00");
 
-defineLegacyParams(OutOfPlaneStress);
-
 InputParameters
 OutOfPlaneStress::validParams()
 {

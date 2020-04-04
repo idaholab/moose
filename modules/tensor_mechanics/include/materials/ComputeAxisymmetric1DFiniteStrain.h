@@ -14,9 +14,6 @@
 
 class ComputeAxisymmetric1DFiniteStrain;
 
-template <>
-InputParameters validParams<ComputeAxisymmetric1DFiniteStrain>();
-
 /**
  * ComputeAxisymmetric1DFiniteStrain defines a strain increment for finite strains
  * in an Axisymmetric 1D problem. The COORD_TYPE in the Problem block must be set to RZ.

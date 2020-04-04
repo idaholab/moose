@@ -14,9 +14,6 @@
 // Forward Declarations
 class ACGrGrBase;
 
-template <>
-InputParameters validParams<ACGrGrBase>();
-
 /**
  * This is the base class for kernels that calculate the residual for grain growth.
  * It calculates the residual of the ith order parameter, and the values of
@@ -37,4 +34,3 @@ protected:
 
   const MaterialProperty<Real> & _mu;
 };
-

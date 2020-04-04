@@ -13,9 +13,6 @@
 
 class MechanicsOSPD;
 
-template <>
-InputParameters validParams<MechanicsOSPD>();
-
 /**
  * Kernel class for ordinary state based peridynamic solid mechanics models for small strain
  */

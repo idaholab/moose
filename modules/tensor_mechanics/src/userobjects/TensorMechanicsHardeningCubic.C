@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCubic);
 
-defineLegacyParams(TensorMechanicsHardeningCubic);
-
 InputParameters
 TensorMechanicsHardeningCubic::validParams()
 {

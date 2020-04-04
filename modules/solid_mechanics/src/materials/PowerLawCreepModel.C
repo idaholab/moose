@@ -13,8 +13,6 @@
 
 registerMooseObject("SolidMechanicsApp", PowerLawCreepModel);
 
-defineLegacyParams(PowerLawCreepModel);
-
 InputParameters
 PowerLawCreepModel::validParams()
 {

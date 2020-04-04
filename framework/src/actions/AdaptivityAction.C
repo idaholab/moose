@@ -28,8 +28,6 @@ registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
 registerMooseAction("MooseApp", AdaptivityAction, "add_geometric_rm");
 registerMooseAction("MooseApp", AdaptivityAction, "add_algebraic_rm");
 
-defineLegacyParams(AdaptivityAction);
-
 InputParameters
 AdaptivityAction::validParams()
 {

@@ -14,9 +14,6 @@
 class FunctionValuePostprocessor;
 class Function;
 
-template <>
-InputParameters validParams<FunctionValuePostprocessor>();
-
 /**
  * This postprocessor displays a single value which is supplied by a MooseFunction.
  * It is designed to prevent the need to create additional

@@ -13,9 +13,6 @@
 
 class SimpleFluidProperties;
 
-template <>
-InputParameters validParams<SimpleFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

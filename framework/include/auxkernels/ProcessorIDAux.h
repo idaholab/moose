@@ -14,9 +14,6 @@
 // Forward Declarations
 class ProcessorIDAux;
 
-template <>
-InputParameters validParams<ProcessorIDAux>();
-
 class ProcessorIDAux : public AuxKernel
 {
 public:
@@ -27,4 +24,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-

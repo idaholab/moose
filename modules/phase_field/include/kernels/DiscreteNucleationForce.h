@@ -15,9 +15,6 @@
 class DiscreteNucleationForce;
 class DiscreteNucleationMap;
 
-template <>
-InputParameters validParams<DiscreteNucleationForce>();
-
 /**
  * Free energy penalty contribution to force the nucleation of subresolution particles
  */
@@ -43,4 +40,3 @@ protected:
   const Real _v1;
   ///@}
 };
-

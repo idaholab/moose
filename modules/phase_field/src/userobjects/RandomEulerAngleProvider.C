@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", RandomEulerAngleProvider);
 
-defineLegacyParams(RandomEulerAngleProvider);
-
 InputParameters
 RandomEulerAngleProvider::validParams()
 {

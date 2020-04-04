@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", BDF2);
 
-defineLegacyParams(BDF2);
-
 InputParameters
 BDF2::validParams()
 {

@@ -13,9 +13,6 @@
 
 class PorousFlowNearestQp;
 
-template <>
-InputParameters validParams<PorousFlowNearestQp>();
-
 /**
  * Material designed to provide the nearest quadpoint to each node
  * in the element

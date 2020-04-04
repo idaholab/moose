@@ -14,9 +14,6 @@
 
 class HydrogenFluidProperties;
 
-template <>
-InputParameters validParams<HydrogenFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
@@ -206,4 +203,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-

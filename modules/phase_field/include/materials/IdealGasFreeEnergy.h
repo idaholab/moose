@@ -14,9 +14,6 @@
 // Forward Declarations
 class IdealGasFreeEnergy;
 
-template <>
-InputParameters validParams<IdealGasFreeEnergy>();
-
 /**
  * Material class that provides the free energy of an ideal gas with the expression builder
  * and uses automatic differentiation to get the derivatives.
@@ -28,4 +25,3 @@ public:
 
   IdealGasFreeEnergy(const InputParameters & parameters);
 };
-

@@ -9,8 +9,6 @@
 
 #include "CrystalPlasticityUOBase.h"
 
-defineLegacyParams(CrystalPlasticityUOBase);
-
 InputParameters
 CrystalPlasticityUOBase::validParams()
 {

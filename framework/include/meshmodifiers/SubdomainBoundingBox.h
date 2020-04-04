@@ -18,9 +18,6 @@
 // Forward declerations
 class SubdomainBoundingBox;
 
-template <>
-InputParameters validParams<SubdomainBoundingBox>();
-
 namespace libMesh
 {
 class BoundingBox;
@@ -50,4 +47,3 @@ private:
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;
 };
-

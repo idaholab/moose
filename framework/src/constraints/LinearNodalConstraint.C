@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", LinearNodalConstraint);
 
-defineLegacyParams(LinearNodalConstraint);
-
 InputParameters
 LinearNodalConstraint::validParams()
 {

@@ -20,8 +20,6 @@
 
 registerMooseObject("PhaseFieldApp", SphereSurfaceMeshGenerator);
 
-defineLegacyParams(SphereSurfaceMeshGenerator);
-
 InputParameters
 SphereSurfaceMeshGenerator::validParams()
 {

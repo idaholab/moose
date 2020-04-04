@@ -14,9 +14,6 @@
 // Forward Declarations
 class ScalarVariable;
 
-template <>
-InputParameters validParams<ScalarVariable>();
-
 /**
  *
  */
@@ -35,4 +32,3 @@ protected:
   MooseVariableScalar & _var;
   unsigned int _idx;
 };
-

@@ -14,8 +14,6 @@
 
 registerMooseAction("TensorMechanicsApp", InclinedNoDisplacementBCAction, "add_bc");
 
-defineLegacyParams(InclinedNoDisplacementBCAction);
-
 InputParameters
 InclinedNoDisplacementBCAction::validParams()
 {

@@ -18,9 +18,6 @@
 
 class InternalSideUserObject;
 
-template <>
-InputParameters validParams<InternalSideUserObject>();
-
 /**
  *
  */

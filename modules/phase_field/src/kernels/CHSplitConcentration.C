@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CHSplitConcentration);
 
-defineLegacyParams(CHSplitConcentration);
-
 InputParameters
 CHSplitConcentration::validParams()
 {

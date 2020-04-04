@@ -25,9 +25,6 @@ class MooseMesh;
 class SubProblem;
 class Assembly;
 
-template <>
-InputParameters validParams<Indicator>();
-
 class Indicator : public MooseObject,
                   public BlockRestrictable,
                   public SetupInterface,

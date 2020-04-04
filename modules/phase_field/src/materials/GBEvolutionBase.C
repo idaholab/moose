@@ -9,8 +9,6 @@
 
 #include "GBEvolutionBase.h"
 
-defineLegacyParams(GBEvolutionBase);
-
 InputParameters
 GBEvolutionBase::validParams()
 {

@@ -19,8 +19,6 @@ constexpr unsigned int GEOMETRIC_MAP_IDX = 0;
 constexpr unsigned int ALGEBRAIC_MAP_IDX = 1;
 }
 
-defineLegacyParams(GhostingUserObject);
-
 InputParameters
 GhostingUserObject::validParams()
 {

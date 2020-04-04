@@ -30,9 +30,6 @@ class Executioner;
 class MooseApp;
 class Factory;
 
-template <>
-InputParameters validParams<Action>();
-
 /**
  * Base class for actions.
  */

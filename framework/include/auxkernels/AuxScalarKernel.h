@@ -26,9 +26,6 @@ class SubProblem;
 class Assembly;
 class AuxScalarKernel;
 
-template <>
-InputParameters validParams<AuxScalarKernel>();
-
 /**
  * Base class for making kernels that work on auxiliary scalar variables
  */
@@ -98,4 +95,3 @@ protected:
    */
   virtual Real computeValue() = 0;
 };
-

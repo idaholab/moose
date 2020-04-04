@@ -14,9 +14,6 @@
 // Forward Declarations
 class StressDivergenceRSphericalTensors;
 
-template <>
-InputParameters validParams<StressDivergenceRSphericalTensors>();
-
 /**
  * StressDivergenceRSphericalTensors is a modification of StressDivergenceTensors
  * for 1D spherically symmetric problems.  The main modifications from the original

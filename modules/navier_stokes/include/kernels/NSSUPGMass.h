@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSSUPGMass;
 
-template <>
-InputParameters validParams<NSSUPGMass>();
-
 /**
  * Compute residual and Jacobian terms form the SUPG
  * terms in the mass equation.
@@ -39,4 +36,3 @@ private:
   // variable numbering.
   Real computeJacobianHelper(unsigned var);
 };
-

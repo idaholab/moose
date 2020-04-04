@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", PFCRFFEnergyDensity);
 
-defineLegacyParams(PFCRFFEnergyDensity);
-
 InputParameters
 PFCRFFEnergyDensity::validParams()
 {

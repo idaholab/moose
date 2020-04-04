@@ -61,4 +61,3 @@ ConservedNormalNoiseVeneer<T>::getQpRandom()
     return _Z2;
   }
 }
-

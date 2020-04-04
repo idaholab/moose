@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticitySlipRateGSS);
 
-defineLegacyParams(CrystalPlasticitySlipRateGSS);
-
 InputParameters
 CrystalPlasticitySlipRateGSS::validParams()
 {

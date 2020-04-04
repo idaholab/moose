@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ParsedAux);
 
-defineLegacyParams(ParsedAux);
-
 InputParameters
 ParsedAux::validParams()
 {

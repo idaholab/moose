@@ -9,8 +9,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-defineLegacyParams(PorousFlowCapillaryPressure);
-
 InputParameters
 PorousFlowCapillaryPressure::validParams()
 {

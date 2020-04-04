@@ -14,9 +14,6 @@
 
 class GenericConstantRankTwoTensor;
 
-template <>
-InputParameters validParams<GenericConstantRankTwoTensor>();
-
 /**
  * Declares a constant material property of type RankTwoTensor.
  */
@@ -33,4 +30,3 @@ protected:
   RankTwoTensor _tensor;
   MaterialProperty<RankTwoTensor> & _prop;
 };
-

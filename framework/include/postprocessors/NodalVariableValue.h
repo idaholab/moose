@@ -20,9 +20,6 @@ namespace libMesh
 class Node;
 }
 
-template <>
-InputParameters validParams<NodalVariableValue>();
-
 /**
  * Sums a nodal value across all processors and multiplies the result
  * by a scale factor.
@@ -44,4 +41,3 @@ protected:
   Node * _node_ptr;
   const Real _scale_factor;
 };
-

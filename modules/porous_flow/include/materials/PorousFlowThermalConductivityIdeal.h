@@ -13,9 +13,6 @@
 
 class PorousFlowThermalConductivityIdeal;
 
-template <>
-InputParameters validParams<PorousFlowThermalConductivityIdeal>();
-
 /**
  * This material computes thermal conductivity for a PorousMedium - fluid
  * system, by using
@@ -57,4 +54,3 @@ protected:
   /// d(Saturation)/d(PorousFlow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_qp_dvar;
 };
-

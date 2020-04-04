@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", VariableGradientMaterial);
 
-defineLegacyParams(VariableGradientMaterial);
-
 InputParameters
 VariableGradientMaterial::validParams()
 {

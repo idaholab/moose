@@ -19,9 +19,6 @@ class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;
 class RotationTensor;
 
-template <>
-InputParameters validParams<EulerAngleUpdaterCheck>();
-
 /**
  * This is a unit test to check the correctness of the updated euler angles
  * An unit vector is rotated as per old euler angles first and then due to the applied torque
@@ -51,4 +48,3 @@ protected:
   std::vector<RealVectorValue> _angles;
   std::vector<RealVectorValue> _angles_old;
 };
-

@@ -15,9 +15,6 @@
 class TestCrackCounter;
 class XFEM;
 
-template <>
-InputParameters validParams<TestCrackCounter>();
-
 class TestCrackCounter : public GeneralPostprocessor
 {
 public:
@@ -41,4 +38,3 @@ protected:
 private:
   std::shared_ptr<XFEM> _xfem;
 };
-

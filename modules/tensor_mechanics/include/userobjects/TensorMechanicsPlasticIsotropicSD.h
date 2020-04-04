@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticIsotropicSD;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticIsotropicSD>();
-
 /**
  * IsotropicSD plasticity model from Yoon (2013)
  * the name of the paper is "Asymmetric yield function based on the

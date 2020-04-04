@@ -14,9 +14,6 @@
 
 class EulerAngleProvider;
 
-template <>
-InputParameters validParams<EulerAngleProvider>();
-
 /**
  * Abstract base class for user objects that implement the Euler Angle provider
  * interface.

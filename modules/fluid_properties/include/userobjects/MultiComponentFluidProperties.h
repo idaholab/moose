@@ -14,9 +14,6 @@
 
 class MultiComponentFluidProperties;
 
-template <>
-InputParameters validParams<MultiComponentFluidProperties>();
-
 #define propfunc(want, prop1, prop2, prop3)                                                        \
   virtual Real want##_from_##prop1##_##prop2##_##prop3(Real, Real, Real) const                     \
   {                                                                                                \

@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(Compute1DIncrementalStrain);
-
 InputParameters
 Compute1DIncrementalStrain::validParams()
 {

@@ -15,9 +15,6 @@
 
 class Statistics;
 
-template <>
-InputParameters validParams<Statistics>();
-
 /**
  * Compute several metrics for supplied VPP vectors.
  *

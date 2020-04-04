@@ -13,8 +13,6 @@
 
 registerMooseObject("FluidPropertiesTestApp", TwoPhaseAverageDensityAux);
 
-defineLegacyParams(TwoPhaseAverageDensityAux);
-
 InputParameters
 TwoPhaseAverageDensityAux::validParams()
 {
@@ -44,5 +42,6 @@ TwoPhaseAverageDensityAux::TwoPhaseAverageDensityAux(const InputParameters & par
 Real
 TwoPhaseAverageDensityAux::computeValue()
 {
-  return 0.5 * (_fp_liquid.rho_from_p_T(_p[_qp], _T[_qp]) + _fp_vapor.rho_from_p_T(_p[_qp], _T[_qp]));
+  return 0.5 *
+         (_fp_liquid.rho_from_p_T(_p[_qp], _T[_qp]) + _fp_vapor.rho_from_p_T(_p[_qp], _T[_qp]));
 }

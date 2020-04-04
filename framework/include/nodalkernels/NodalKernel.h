@@ -38,9 +38,6 @@ class SystemBase;
 class NodalKernel;
 class Assembly;
 
-template <>
-InputParameters validParams<NodalKernel>();
-
 /**
  * Base class for creating new types of boundary conditions
  *
@@ -165,4 +162,3 @@ protected:
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetCFLCondition);
 
-defineLegacyParams(LevelSetCFLCondition);
-
 InputParameters
 LevelSetCFLCondition::validParams()
 {

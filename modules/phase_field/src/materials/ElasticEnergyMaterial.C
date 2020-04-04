@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", ElasticEnergyMaterial);
 
-defineLegacyParams(ElasticEnergyMaterial);
-
 InputParameters
 ElasticEnergyMaterial::validParams()
 {
@@ -103,10 +101,9 @@ ElasticEnergyMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
                  _elasticity_tensor[_qp] * (*_dstrain[i])[_qp])
                     .doubleContraction((*_dstrain[j])[_qp])
 
-                +
-                ( // dstress/dj
-                    (*_delasticity_tensor[j])[_qp] * _strain[_qp] +
-                    _elasticity_tensor[_qp] * (*_dstrain[j])[_qp])
-                    .doubleContraction((*_dstrain[i])[_qp]) +
+                + ( // dstress/dj
+                      (*_delasticity_tensor[j])[_qp] * _strain[_qp] +
+                      _elasticity_tensor[_qp] * (*_dstrain[j])[_qp])
+                      .doubleContraction((*_dstrain[i])[_qp]) +
                 _stress[_qp].doubleContraction((*_d2strain[i][j])[_qp]));
 }

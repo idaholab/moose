@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", JouleHeatingHeatGeneratedAux);
 
-defineLegacyParams(JouleHeatingHeatGeneratedAux);
-
 InputParameters
 JouleHeatingHeatGeneratedAux::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", InertialForce);
 
-defineLegacyParams(InertialForce);
-
 InputParameters
 InertialForce::validParams()
 {

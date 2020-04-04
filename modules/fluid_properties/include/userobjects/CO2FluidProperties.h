@@ -14,9 +14,6 @@
 
 class CO2FluidProperties;
 
-template <>
-InputParameters validParams<CO2FluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
@@ -257,4 +254,3 @@ protected:
 };
 
 #pragma GCC diagnostic pop
-

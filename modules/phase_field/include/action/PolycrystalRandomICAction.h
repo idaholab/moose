@@ -30,7 +30,3 @@ private:
   const std::string _var_name_base;
   const MooseEnum _random_type;
 };
-
-template <>
-InputParameters validParams<PolycrystalRandomICAction>();
-

@@ -13,9 +13,6 @@
 
 class RichardsApp;
 
-template <>
-InputParameters validParams<RichardsApp>();
-
 /**
  * The Richards equation is a nonlinear diffusion
  * equation that models multiphase flow through
@@ -35,4 +32,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

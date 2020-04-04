@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticJ2;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticJ2>();
-
 /**
  * J2 plasticity, associative, with hardning.
  * Yield_function = sqrt(3*J2) - yield_strength

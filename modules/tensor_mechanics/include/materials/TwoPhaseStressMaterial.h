@@ -21,9 +21,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 
-template <>
-InputParameters validParams<TwoPhaseStressMaterial>();
-
 /**
  * Construct a global strain from the phase strains in a manner that is consistent
  * with the construction of the global elastic energy by DerivativeTwoPhaseMaterial.

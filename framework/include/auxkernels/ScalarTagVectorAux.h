@@ -14,9 +14,6 @@
 // Forward Declarations
 class ScalarTagVectorAux;
 
-template <>
-InputParameters validParams<AuxScalarKernel>();
-
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
  * the current AuxVariable. ScalarTagVectorAux returns the coupled value.
@@ -34,4 +31,3 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
-

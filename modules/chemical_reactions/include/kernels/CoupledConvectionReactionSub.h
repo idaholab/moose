@@ -14,9 +14,6 @@
 
 class CoupledConvectionReactionSub;
 
-template <>
-InputParameters validParams<CoupledConvectionReactionSub>();
-
 /**
  * Convection of primary species in given equilibrium species
  */
@@ -63,4 +60,3 @@ protected:
   /// Activity coefficient of equilibrium species
   const VariableValue & _gamma_eq;
 };
-

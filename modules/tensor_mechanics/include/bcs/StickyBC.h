@@ -13,9 +13,6 @@
 
 class StickyBC;
 
-template <>
-InputParameters validParams<StickyBC>();
-
 /**
  * Sticky-type boundary condition, where if
  * the old variable value exceeds the bounds provided

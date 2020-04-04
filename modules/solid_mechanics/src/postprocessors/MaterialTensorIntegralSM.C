@@ -14,8 +14,6 @@
 
 registerMooseObject("SolidMechanicsApp", MaterialTensorIntegralSM);
 
-defineLegacyParams(MaterialTensorIntegralSM);
-
 InputParameters
 MaterialTensorIntegralSM::validParams()
 {

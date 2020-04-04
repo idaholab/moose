@@ -20,9 +20,6 @@
  */
 class CylindricalRankTwoAux;
 
-template <>
-InputParameters validParams<CylindricalRankTwoAux>();
-
 class CylindricalRankTwoAux : public AuxKernel
 {
 public:

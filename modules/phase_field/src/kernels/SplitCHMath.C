@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SplitCHMath);
 
-defineLegacyParams(SplitCHMath);
-
 InputParameters
 SplitCHMath::validParams()
 {

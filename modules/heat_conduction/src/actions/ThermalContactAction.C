@@ -23,8 +23,6 @@ registerMooseAction("HeatConductionApp", ThermalContactAction, "add_dirac_kernel
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_material");
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_slave_flux_vector");
 
-defineLegacyParams(ThermalContactAction);
-
 InputParameters
 ThermalContactAction::validParams()
 {

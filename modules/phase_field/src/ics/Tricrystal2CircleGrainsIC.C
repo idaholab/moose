@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", Tricrystal2CircleGrainsIC);
 
-defineLegacyParams(Tricrystal2CircleGrainsIC);
-
 InputParameters
 Tricrystal2CircleGrainsIC::validParams()
 {

@@ -10,8 +10,6 @@
 #include "MaterialTensorCalculatorTools.h"
 #include "MaterialTensorCalculator.h"
 
-defineLegacyParams(MaterialTensorCalculator);
-
 InputParameters
 MaterialTensorCalculator::validParams()
 {

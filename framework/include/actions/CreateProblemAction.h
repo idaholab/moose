@@ -14,9 +14,6 @@
 
 class CreateProblemAction;
 
-template <>
-InputParameters validParams<CreateProblemAction>();
-
 class CreateProblemAction : public MooseObjectAction
 {
 public:
@@ -26,4 +23,3 @@ public:
 
   virtual void act() override;
 };
-

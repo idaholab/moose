@@ -100,4 +100,3 @@ Real dRelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks);
  */
 Real d2RelativePermeability(Real s, Real c, Real sn, Real ss, Real kn, Real ks);
 }
-

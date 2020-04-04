@@ -13,9 +13,6 @@
 
 class CoupledBEKinetic;
 
-template <>
-InputParameters validParams<CoupledBEKinetic>();
-
 /**
  * Derivative of mineral species concentration wrt time
  */
@@ -39,4 +36,3 @@ private:
   /// Coupled old values of kinetic mineral concentrations
   std::vector<const VariableValue *> _vals_old;
 };
-

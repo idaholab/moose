@@ -15,9 +15,6 @@
 // Forward Declarations
 class InternalSidePostprocessor;
 
-template <>
-InputParameters validParams<InternalSidePostprocessor>();
-
 class InternalSidePostprocessor : public InternalSideUserObject, public Postprocessor
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   InternalSidePostprocessor(const InputParameters & parameters);
 };
-

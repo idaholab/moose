@@ -9,8 +9,6 @@
 
 #include "RDGFluxBase.h"
 
-defineLegacyParams(RDGFluxBase);
-
 InputParameters
 RDGFluxBase::validParams()
 {

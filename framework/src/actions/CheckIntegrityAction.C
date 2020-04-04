@@ -14,8 +14,6 @@
 registerMooseAction("MooseApp", CheckIntegrityAction, "check_integrity");
 registerMooseAction("MooseApp", CheckIntegrityAction, "check_integrity_early");
 
-defineLegacyParams(CheckIntegrityAction);
-
 InputParameters
 CheckIntegrityAction::validParams()
 {

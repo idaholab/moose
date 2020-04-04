@@ -14,9 +14,6 @@
 
 class TensileStressUpdate;
 
-template <>
-InputParameters validParams<TensileStressUpdate>();
-
 /**
  * TensileStressUpdate implements rate-independent associative tensile failure
  * ("Rankine" plasticity) with hardening/softening.

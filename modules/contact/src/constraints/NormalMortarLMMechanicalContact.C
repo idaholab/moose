@@ -12,8 +12,6 @@
 
 registerADMooseObject("ContactApp", NormalMortarLMMechanicalContact);
 
-defineADLegacyParams(NormalMortarLMMechanicalContact);
-
 template <ComputeStage compute_stage>
 InputParameters
 NormalMortarLMMechanicalContact<compute_stage>::validParams()

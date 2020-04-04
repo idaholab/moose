@@ -17,7 +17,7 @@
 
 template <class T, class charT = char, class traits = std::char_traits<charT>>
 class infix_ostream_iterator
-    : public std::iterator<std::output_iterator_tag, void, void, void, void>
+  : public std::iterator<std::output_iterator_tag, void, void, void, void>
 {
   std::basic_ostream<charT, traits> * os;
   charT const * delimiter;
@@ -46,4 +46,3 @@ public:
   infix_ostream_iterator<T, charT, traits> & operator++() { return *this; }
   infix_ostream_iterator<T, charT, traits> & operator++(int) { return *this; }
 };
-

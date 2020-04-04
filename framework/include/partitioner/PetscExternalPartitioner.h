@@ -16,9 +16,6 @@
 class PetscExternalPartitioner;
 class MooseMesh;
 
-template <>
-InputParameters validParams<PetscExternalPartitioner>();
-
 /**
  * Partitions a mesh using external petsc partitioners such as parmetis, ptscotch, chaco, party,
  * etc.

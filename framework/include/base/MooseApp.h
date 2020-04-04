@@ -45,9 +45,6 @@ class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 
-template <>
-InputParameters validParams<MooseApp>();
-
 /**
  * Base class for MOOSE-based applications
  *

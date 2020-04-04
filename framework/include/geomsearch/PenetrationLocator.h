@@ -132,4 +132,3 @@ dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, vo
     loadHelper(stream, m[key], context);
   }
 }
-

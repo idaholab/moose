@@ -15,9 +15,6 @@
 // Forward Declarations
 class KKSMultiFreeEnergy;
 
-template <>
-InputParameters validParams<KKSMultiFreeEnergy>();
-
 /**
  * Compute the free energy in the multi-phase KKS Model
  * \f$ F = \sum_i h_i F_i +  + wg_i + \frac{\kappa}{2}|\eta_i|^2 \f$
@@ -57,4 +54,3 @@ protected:
   /// Gradient interface free energy coefficients
   std::vector<const MaterialProperty<Real> *> _kappas;
 };
-

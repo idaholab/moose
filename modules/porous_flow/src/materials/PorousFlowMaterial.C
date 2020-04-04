@@ -11,8 +11,6 @@
 #include "libmesh/quadrature.h"
 #include <limits>
 
-defineLegacyParams(PorousFlowMaterial);
-
 InputParameters
 PorousFlowMaterial::validParams()
 {

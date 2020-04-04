@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", SideSetsFromBoundingBoxGenerator);
 
-defineLegacyParams(SideSetsFromBoundingBoxGenerator);
-
 InputParameters
 SideSetsFromBoundingBoxGenerator::validParams()
 {

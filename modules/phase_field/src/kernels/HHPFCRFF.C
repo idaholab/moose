@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", HHPFCRFF);
 
-defineLegacyParams(HHPFCRFF);
-
 InputParameters
 HHPFCRFF::validParams()
 {

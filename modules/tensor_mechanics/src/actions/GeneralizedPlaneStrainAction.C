@@ -20,8 +20,6 @@ registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_ker
 
 registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_user_object");
 
-defineLegacyParams(GeneralizedPlaneStrainAction);
-
 InputParameters
 GeneralizedPlaneStrainAction::validParams()
 {

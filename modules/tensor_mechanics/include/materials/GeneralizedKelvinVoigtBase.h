@@ -13,9 +13,6 @@
 
 class GeneralizedKelvinVoigtBase;
 
-template <>
-InputParameters validParams<GeneralizedKelvinVoigtBase>();
-
 /**
  * This class represents an assembly of springs and dashpots following
  * a generalized Kelvin-Voigt model (an arbitrary number of Kelvin-Voigt

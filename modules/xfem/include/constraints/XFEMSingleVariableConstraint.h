@@ -20,9 +20,6 @@ class XFEM;
 
 class Function;
 
-template <>
-InputParameters validParams<XFEMSingleVariableConstraint>();
-
 class XFEMSingleVariableConstraint : public ElemElemConstraint
 {
 public:

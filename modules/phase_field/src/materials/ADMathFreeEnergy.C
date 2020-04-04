@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADMathFreeEnergy);
 
-defineADLegacyParams(ADMathFreeEnergy);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADMathFreeEnergy<compute_stage>::validParams()

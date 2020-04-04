@@ -12,8 +12,6 @@
 
 registerADMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
 
-defineADLegacyParams(LevelSetOlssonReinitialization);
-
 template <ComputeStage compute_stage>
 InputParameters
 LevelSetOlssonReinitialization<compute_stage>::validParams()

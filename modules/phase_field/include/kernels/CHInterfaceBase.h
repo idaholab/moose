@@ -166,4 +166,3 @@ CHInterfaceBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 
   return value;
 }
-

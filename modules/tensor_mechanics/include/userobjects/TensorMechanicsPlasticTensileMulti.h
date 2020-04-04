@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticTensileMulti;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticTensileMulti>();
-
 /**
  * FiniteStrainTensileMulti implements rate-independent associative tensile failure
  * with hardening/softening in the finite-strain framework, using planar (non-smoothed) surfaces

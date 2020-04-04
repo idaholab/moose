@@ -15,9 +15,6 @@
 
 class FXBoundaryBaseUserObject;
 
-template <>
-InputParameters validParams<FXBoundaryBaseUserObject>();
-
 /**
  * This class provides the base for generating a functional expansion on a boundary by inheriting
  * from FXIntegralBaseUserObject and providing SideIntegralVariableUserObject as the template

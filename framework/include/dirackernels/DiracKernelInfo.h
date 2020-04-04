@@ -101,4 +101,3 @@ protected:
   /// threshold distance squared below which two points are considered identical
   const Real _point_equal_distance_sq;
 };
-

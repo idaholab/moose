@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ThumbIC);
 
-defineLegacyParams(ThumbIC);
-
 InputParameters
 ThumbIC::validParams()
 {

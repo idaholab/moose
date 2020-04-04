@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", GrainTextureVectorPostprocessor);
 
-defineLegacyParams(GrainTextureVectorPostprocessor);
-
 InputParameters
 GrainTextureVectorPostprocessor::validParams()
 {

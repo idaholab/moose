@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDiffusivityMillingtonQuirk);
 
-defineLegacyParams(PorousFlowDiffusivityMillingtonQuirk);
-
 InputParameters
 PorousFlowDiffusivityMillingtonQuirk::validParams()
 {

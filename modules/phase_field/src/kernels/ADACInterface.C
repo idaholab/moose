@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADACInterface);
 
-defineADLegacyParams(ADACInterface);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADACInterface<compute_stage>::validParams()

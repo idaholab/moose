@@ -12,8 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-defineLegacyParams(FluidPropertiesApp);
-
 InputParameters
 FluidPropertiesApp::validParams()
 {

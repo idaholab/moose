@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalElasticDrivingForceAction, "add_kernel");
 
-defineLegacyParams(PolycrystalElasticDrivingForceAction);
-
 InputParameters
 PolycrystalElasticDrivingForceAction::validParams()
 {

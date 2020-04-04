@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", GrandPotentialInterface);
 
-defineLegacyParams(GrandPotentialInterface);
-
 InputParameters
 GrandPotentialInterface::validParams()
 {

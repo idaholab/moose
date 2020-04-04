@@ -14,9 +14,6 @@
 // Forward Declaration
 class PrimaryTimeDerivative;
 
-template <>
-InputParameters validParams<PrimaryTimeDerivative>();
-
 /**
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:
  * storage * delta pressure / delta t

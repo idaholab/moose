@@ -33,8 +33,6 @@ registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_aux_kernel
 
 registerMooseAction("TensorMechanicsApp", TensorMechanicsAction, "add_material");
 
-defineLegacyParams(TensorMechanicsAction);
-
 InputParameters
 TensorMechanicsAction::validParams()
 {

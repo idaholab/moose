@@ -22,9 +22,6 @@ class SetupInterface;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<SetupInterface>();
-
 class SetupInterface
 {
 public:

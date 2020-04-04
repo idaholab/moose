@@ -16,9 +16,6 @@
 // Forward Declarations
 class ConservedMaskedNoiseBase;
 
-template <>
-InputParameters validParams<ConservedMaskedNoiseBase>();
-
 /**
  * This Userobject is the base class of Userobjects that generate one
  * random number per timestep and quadrature point in a way that the integral
@@ -50,4 +47,3 @@ protected:
 
   const MaterialProperty<Real> & _mask;
 };
-

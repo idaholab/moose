@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CappedWeakInclinedPlaneStressUpdate);
 
-defineLegacyParams(CappedWeakInclinedPlaneStressUpdate);
-
 InputParameters
 CappedWeakInclinedPlaneStressUpdate::validParams()
 {

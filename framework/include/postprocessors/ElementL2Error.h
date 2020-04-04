@@ -16,9 +16,6 @@ class Function;
 // Forward Declarations
 class ElementL2Error;
 
-template <>
-InputParameters validParams<ElementL2Error>();
-
 class ElementL2Error : public ElementIntegralVariablePostprocessor
 {
 public:

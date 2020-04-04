@@ -15,8 +15,6 @@
 
 #include "libmesh/auto_ptr.h"
 
-defineLegacyParams(OrientedBoxInterface);
-
 InputParameters
 OrientedBoxInterface::validParams()
 {

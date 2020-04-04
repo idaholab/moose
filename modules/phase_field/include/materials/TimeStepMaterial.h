@@ -13,9 +13,6 @@
 
 class TimeStepMaterial;
 
-template <>
-InputParameters validParams<TimeStepMaterial>();
-
 /**
  * Store current time, dt, and time step number in material properties.
  */
@@ -33,4 +30,3 @@ protected:
   MaterialProperty<Real> & _prop_time;
   MaterialProperty<Real> & _prop_time_step;
 };
-

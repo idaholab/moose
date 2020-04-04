@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsDensityConstBulkCut);
 
-defineLegacyParams(RichardsDensityConstBulkCut);
-
 InputParameters
 RichardsDensityConstBulkCut::validParams()
 {

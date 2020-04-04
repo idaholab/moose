@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumInviscidNoPressureImplicitFlowBC);
 
-defineLegacyParams(NSMomentumInviscidNoPressureImplicitFlowBC);
-
 InputParameters
 NSMomentumInviscidNoPressureImplicitFlowBC::validParams()
 {

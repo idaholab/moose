@@ -42,6 +42,3 @@ protected:
   /// Heat transfer coefficient function (Deprecated -- being replaced by _coefficient)
   const Function * const _coef_func;
 };
-
-template <>
-InputParameters validParams<ConvectiveFluxFunction>();

@@ -14,9 +14,6 @@
 class PorousFlowCapillaryPressure;
 class PorousFlow2PhasePP;
 
-template <>
-InputParameters validParams<PorousFlow2PhasePP>();
-
 /**
  * Base material designed to calculate fluid phase porepressure and saturation
  * for the two-phase situation assuming phase porepressures as the nonlinear variables.
@@ -57,4 +54,3 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
-

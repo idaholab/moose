@@ -13,9 +13,6 @@
 
 class CoupledConvectiveHeatFluxBC;
 
-template <>
-InputParameters validParams<CoupledConvectiveHeatFluxBC>();
-
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by auxiliary variables.  Typically used in multi-app coupling scenario. It is possible to
@@ -41,4 +38,3 @@ protected:
   /// Volume fraction of individual phase
   std::vector<const VariableValue *> _alpha;
 };
-

@@ -14,9 +14,6 @@
 
 class CappedMohrCoulombStressUpdate;
 
-template <>
-InputParameters validParams<CappedMohrCoulombStressUpdate>();
-
 /**
  * CappedMohrCoulombStressUpdate implements rate-independent nonassociative
  * Mohr-Coulomb plus tensile plus compressive plasticity with hardening/softening.

@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSEnthalpyAux;
 
-template <>
-InputParameters validParams<NSEnthalpyAux>();
-
 /**
  * Nodal auxiliary variable, for computing enthalpy at the nodes.
  * The total enthalpy is given by:
@@ -42,4 +39,3 @@ protected:
   const VariableValue & _rhoE;
   const VariableValue & _pressure;
 };
-

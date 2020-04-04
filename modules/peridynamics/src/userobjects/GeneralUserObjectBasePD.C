@@ -10,8 +10,6 @@
 #include "GeneralUserObjectBasePD.h"
 #include "PeridynamicsMesh.h"
 
-defineLegacyParams(GeneralUserObjectBasePD);
-
 InputParameters
 GeneralUserObjectBasePD::validParams()
 {

@@ -15,9 +15,6 @@
 class FunctionDirichletBC;
 class Function;
 
-template <>
-InputParameters validParams<FunctionDirichletBC>();
-
 /**
  * Defines a boundary condition that forces the value to be a user specified
  * function at the boundary.

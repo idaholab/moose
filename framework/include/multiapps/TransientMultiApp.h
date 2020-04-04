@@ -17,9 +17,6 @@
 class TransientMultiApp;
 class Transient;
 
-template <>
-InputParameters validParams<TransientMultiApp>();
-
 /**
  * MultiApp Implementation for Transient Apps.
  * In particular, this is important because TransientMultiApps

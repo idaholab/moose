@@ -13,9 +13,6 @@
 
 class PorousFlowConstantBiotModulus;
 
-template <>
-InputParameters validParams<PorousFlowConstantBiotModulus>();
-
 /**
  * Material designed to provide a time-invariant
  * Biot Modulus, M, where
@@ -55,4 +52,3 @@ protected:
   /// Old value of Biot modulus.  This variable is necessary in order to keep Biot modulus constant even if porosity is changing.
   const MaterialProperty<Real> & _biot_modulus_old;
 };
-

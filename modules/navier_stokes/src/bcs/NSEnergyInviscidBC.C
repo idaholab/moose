@@ -14,8 +14,6 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
-defineLegacyParams(NSEnergyInviscidBC);
-
 InputParameters
 NSEnergyInviscidBC::validParams()
 {

@@ -17,8 +17,6 @@ registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_kern
 registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_user_object");
 registerMooseAction("PeridynamicsApp", GeneralizedPlaneStrainActionPD, "add_scalar_kernel");
 
-defineLegacyParams(GeneralizedPlaneStrainActionPD);
-
 InputParameters
 GeneralizedPlaneStrainActionPD::validParams()
 {

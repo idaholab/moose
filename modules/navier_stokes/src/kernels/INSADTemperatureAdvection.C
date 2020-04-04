@@ -11,8 +11,6 @@
 
 registerADMooseObject("NavierStokesApp", INSADTemperatureAdvection);
 
-defineADLegacyParams(INSADTemperatureAdvection);
-
 template <ComputeStage compute_stage>
 InputParameters
 INSADTemperatureAdvection<compute_stage>::validParams()

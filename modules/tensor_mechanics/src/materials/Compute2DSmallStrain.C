@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(Compute2DSmallStrain);
-
 InputParameters
 Compute2DSmallStrain::validParams()
 {

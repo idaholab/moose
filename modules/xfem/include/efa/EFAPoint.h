@@ -32,4 +32,3 @@ public:
   void zero();
   EFAPoint cross(const EFAPoint & point);
 };
-

@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSEnergyViscousFlux;
 
-template <>
-InputParameters validParams<NSEnergyViscousFlux>();
-
 /**
  * Viscous flux terms in energy equation.
  */
@@ -41,4 +38,3 @@ protected:
   template <class U>
   friend class NSViscStressTensorDerivs;
 };
-

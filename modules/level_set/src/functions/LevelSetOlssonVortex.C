@@ -11,8 +11,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetOlssonVortex);
 
-defineLegacyParams(LevelSetOlssonVortex);
-
 InputParameters
 LevelSetOlssonVortex::validParams()
 {

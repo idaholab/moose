@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialRankTwoTensorAux);
 
-defineLegacyParams(MaterialRankTwoTensorAux);
-
 InputParameters
 MaterialRankTwoTensorAux::validParams()
 {

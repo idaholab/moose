@@ -13,9 +13,6 @@
 
 class RichardsSumQuantity;
 
-template <>
-InputParameters validParams<RichardsSumQuantity>();
-
 /**
  * Sums into _total
  * This is used, for instance, to record the total mass
@@ -56,4 +53,3 @@ protected:
   /// this holds the sum
   Real _total;
 };
-

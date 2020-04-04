@@ -20,9 +20,6 @@ class MaterialRankTwoTensorAux;
  * supplied indices.
  */
 
-template <>
-InputParameters validParams<MaterialRankTwoTensorAux>();
-
 class MaterialRankTwoTensorAux : public MaterialAuxBase<RankTwoTensor>
 {
 public:
@@ -38,4 +35,3 @@ protected:
   const unsigned int _j;
   ///@}
 };
-

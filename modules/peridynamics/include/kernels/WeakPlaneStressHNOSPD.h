@@ -13,9 +13,6 @@
 
 class WeakPlaneStressHNOSPD;
 
-template <>
-InputParameters validParams<WeakPlaneStressHNOSPD>();
-
 /**
  * Kernel class for weak plane stress formulation based on horizon stabilized peridynamic
  * correspondence model

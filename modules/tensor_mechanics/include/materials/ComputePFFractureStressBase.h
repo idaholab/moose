@@ -13,9 +13,6 @@
 
 class ComputePFFractureStressBase;
 
-template <>
-InputParameters validParams<ComputePFFractureStressBase>();
-
 /**
   ComputePFFractureStressBase is the base class for stress in phase field fracture model
  */

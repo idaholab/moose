@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", RndBoundingBoxIC);
 
-defineLegacyParams(RndBoundingBoxIC);
-
 InputParameters
 RndBoundingBoxIC::validParams()
 {

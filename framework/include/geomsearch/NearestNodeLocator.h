@@ -123,4 +123,3 @@ public:
   PerfID _reinit_timer;
   PerfID _update_ghosted_elems_timer;
 };
-

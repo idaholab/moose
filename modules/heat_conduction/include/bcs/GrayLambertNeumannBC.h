@@ -14,9 +14,6 @@
 
 class GrayLambertNeumannBC;
 
-template <>
-InputParameters validParams<GrayLambertNeumannBC>();
-
 /**
  * Boundary condition for radiative heat that is computed by the
  * GrayLambertSurfaceRadiationBase userobject

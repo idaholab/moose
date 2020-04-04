@@ -13,9 +13,6 @@
 
 class TestBoundaryFlux;
 
-template <>
-InputParameters validParams<TestBoundaryFlux>();
-
 /**
  * Boundary flux used for testing
  */
@@ -38,4 +35,3 @@ public:
                             const RealVectorValue & dwave,
                             DenseMatrix<Real> & jac1) const override;
 };
-

@@ -16,9 +16,6 @@ class PiecewiseLinear;
 
 class TemperatureDependentHardeningStressUpdate;
 
-template <>
-InputParameters validParams<TemperatureDependentHardeningStressUpdate>();
-
 /**
  * This class inherits from IsotropicPlasticityStressUpdate. It
  * calculates stress as a function of temperature and plastic strain by

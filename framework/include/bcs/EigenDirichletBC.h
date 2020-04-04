@@ -13,9 +13,6 @@
 
 class EigenDirichletBC;
 
-template <>
-InputParameters validParams<NodalBC>();
-
 /**
  * Set Dirichlet boundary condition for eigenvalue problems.
  * Value has to be zero.

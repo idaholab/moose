@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", PlasticTruss);
 
-defineLegacyParams(PlasticTruss);
-
 InputParameters
 PlasticTruss::validParams()
 {

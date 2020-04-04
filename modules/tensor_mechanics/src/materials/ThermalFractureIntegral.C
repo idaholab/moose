@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ThermalFractureIntegral);
 
-defineLegacyParams(ThermalFractureIntegral);
-
 InputParameters
 ThermalFractureIntegral::validParams()
 {

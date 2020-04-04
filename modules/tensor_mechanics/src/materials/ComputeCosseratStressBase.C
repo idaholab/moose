@@ -9,8 +9,6 @@
 
 #include "ComputeCosseratStressBase.h"
 
-defineLegacyParams(ComputeCosseratStressBase);
-
 InputParameters
 ComputeCosseratStressBase::validParams()
 {

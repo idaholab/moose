@@ -14,9 +14,6 @@
 
 class TensorMechanicsPlasticMeanCap;
 
-template <>
-InputParameters validParams<TensorMechanicsPlasticMeanCap>();
-
 /**
  * Class that limits the mean stress
  * Yield function = a*mean_stress - strength

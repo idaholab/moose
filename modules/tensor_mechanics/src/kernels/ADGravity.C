@@ -15,8 +15,6 @@ registerADMooseObject("TensorMechanicsApp", ADGravity);
  * This kernel defines the residual contribution from a gravitational body force
  */
 
-defineADLegacyParams(ADGravity);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADGravity<compute_stage>::validParams()

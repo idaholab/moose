@@ -14,8 +14,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(DerivativeParsedMaterialHelper);
-
 InputParameters
 DerivativeParsedMaterialHelper::validParams()
 {

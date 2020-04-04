@@ -41,4 +41,3 @@ private:
   void init_2D(const ElemType _type = INVALID_ELEM, unsigned int p_level = 0) override;
   void init_3D(const ElemType _type = INVALID_ELEM, unsigned int p_level = 0) override;
 };
-

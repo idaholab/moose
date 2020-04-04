@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsRelPermMonomial);
 
-defineLegacyParams(RichardsRelPermMonomial);
-
 InputParameters
 RichardsRelPermMonomial::validParams()
 {

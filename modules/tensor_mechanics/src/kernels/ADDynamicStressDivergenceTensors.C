@@ -12,8 +12,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
 
-defineADLegacyParams(ADDynamicStressDivergenceTensors);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADDynamicStressDivergenceTensors<compute_stage>::validParams()

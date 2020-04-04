@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ACKappaFunction);
 
-defineLegacyParams(ACKappaFunction);
-
 InputParameters
 ACKappaFunction::validParams()
 {

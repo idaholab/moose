@@ -17,9 +17,6 @@
 // Forward Declarations
 class Q2PSaturationFlux;
 
-template <>
-InputParameters validParams<Q2PSaturationFlux>();
-
 /**
  * This is a fully upwinded flux Kernel
  * The Variable of this Kernel should be the saturation

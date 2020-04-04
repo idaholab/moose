@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", DGFunctionDiffusionDirichletBC);
 
-defineLegacyParams(DGFunctionDiffusionDirichletBC);
-
 InputParameters
 DGFunctionDiffusionDirichletBC::validParams()
 {

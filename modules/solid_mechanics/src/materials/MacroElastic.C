@@ -13,8 +13,6 @@
 
 registerMooseObject("SolidMechanicsApp", MacroElastic);
 
-defineLegacyParams(MacroElastic);
-
 InputParameters
 MacroElastic::validParams()
 {

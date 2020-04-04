@@ -15,9 +15,6 @@
 // Forward Declarations
 class InclusionProperties;
 
-template <>
-InputParameters validParams<InclusionProperties>();
-
 /**
  * This material calculates the stresses, strains, and elastic energies for an
  * ellipsoidal inclusion in a 2D, plane strain configuration with in-plane

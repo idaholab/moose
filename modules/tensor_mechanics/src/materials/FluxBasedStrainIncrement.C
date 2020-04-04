@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", FluxBasedStrainIncrement);
 
-defineLegacyParams(FluxBasedStrainIncrement);
-
 InputParameters
 FluxBasedStrainIncrement::validParams()
 {

@@ -16,8 +16,6 @@
 // Following is used to access PETSc's LAPACK routines
 #include <petscblaslapack.h>
 
-defineLegacyParams(MultiPlasticityLinearSystem);
-
 InputParameters
 MultiPlasticityLinearSystem::validParams()
 {

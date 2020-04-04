@@ -36,4 +36,3 @@ protected:
   /// The required minimum number of timesteps
   const int & _min_t_steps;
 };
-

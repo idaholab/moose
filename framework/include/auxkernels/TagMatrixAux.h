@@ -14,9 +14,6 @@
 // Forward Declarations
 class TagMatrixAux;
 
-template <>
-InputParameters validParams<TagMatrixAux>();
-
 /**
  * For visualization or other purposes, the diagnal of the matrix of a tag
  * is extracted, and nodal values are assigned by using the matrix diagnal values.
@@ -34,4 +31,3 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
-

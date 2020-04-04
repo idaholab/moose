@@ -19,8 +19,6 @@
 
 registerMooseObjectAliased("MooseApp", SingleMatrixPreconditioner, "SMP");
 
-defineLegacyParams(SingleMatrixPreconditioner);
-
 InputParameters
 SingleMatrixPreconditioner::validParams()
 {

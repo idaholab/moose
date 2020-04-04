@@ -15,9 +15,6 @@
 // Forward Declarations
 class EqualValueEmbeddedConstraint;
 
-template <>
-InputParameters validParams<EqualValueEmbeddedConstraint>();
-
 /**
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
  * on overlapping portion of two blocks
@@ -67,4 +64,3 @@ protected:
   /// constraint force needed to enforce the constraint
   Real _constraint_residual;
 };
-

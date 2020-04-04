@@ -14,9 +14,6 @@
 // Forward Declarations
 class KKSCHBulk;
 
-template <>
-InputParameters validParams<KKSCHBulk>();
-
 /**
  * CHBulk child class that takes all the necessary data from a
  * KKSBaseMaterial.

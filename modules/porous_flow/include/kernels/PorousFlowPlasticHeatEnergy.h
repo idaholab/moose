@@ -14,9 +14,6 @@
 
 class PorousFlowPlasticHeatEnergy;
 
-template <>
-InputParameters validParams<PorousFlowPlasticHeatEnergy>();
-
 /**
  * Provides a heat source (J/m^3/s) from plastic deformation:
  * (1 - porosity) * coeff * stress * plastic_strain_rate
@@ -51,4 +48,3 @@ protected:
   /// d(porosity)/d(grad PorousFlow variable) - remember these derivatives will be wrt grad(vars) at qps
   const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
 };
-

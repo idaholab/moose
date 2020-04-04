@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", StretchBasedFailureCriterionPD);
 
-defineLegacyParams(StretchBasedFailureCriterionPD);
-
 InputParameters
 StretchBasedFailureCriterionPD::validParams()
 {

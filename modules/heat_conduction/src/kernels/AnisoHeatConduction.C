@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", AnisoHeatConduction);
 
-defineLegacyParams(AnisoHeatConduction);
-
 InputParameters
 AnisoHeatConduction::validParams()
 {

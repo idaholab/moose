@@ -21,9 +21,6 @@
 // Forward Declarations
 class RichardsMaterial;
 
-template <>
-InputParameters validParams<RichardsMaterial>();
-
 class RichardsMaterial : public Material
 {
 public:
@@ -217,4 +214,3 @@ private:
    */
   void zero2ndDerivedQuantities(unsigned int qp);
 };
-

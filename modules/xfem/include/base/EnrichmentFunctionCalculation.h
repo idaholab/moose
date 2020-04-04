@@ -13,9 +13,6 @@
 
 class EnrichmentFunctionCalculation;
 
-template <>
-InputParameters validParams<EnrichmentFunctionCalculation>();
-
 /**
  * Perform calculation of enrichment function values and derivatives.
  */
@@ -49,4 +46,3 @@ private:
   Real _r;
   Real _theta;
 };
-

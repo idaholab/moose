@@ -13,8 +13,6 @@
 
 registerMooseObject("ExternalPetscSolverApp", ExternalPETScProblem);
 
-defineLegacyParams(ExternalPETScProblem);
-
 InputParameters
 ExternalPETScProblem::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedKelvinVoigtModel);
 
-defineLegacyParams(GeneralizedKelvinVoigtModel);
-
 InputParameters
 GeneralizedKelvinVoigtModel::validParams()
 {

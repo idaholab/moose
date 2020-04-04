@@ -14,9 +14,6 @@
 // Forward Declarations
 class TimeDerivativeNodalKernel;
 
-template <>
-InputParameters validParams<TimeDerivativeNodalKernel>();
-
 /**
  * Represents du/dt
  */
@@ -35,4 +32,3 @@ protected:
 
   virtual Real computeQpJacobian() override;
 };
-

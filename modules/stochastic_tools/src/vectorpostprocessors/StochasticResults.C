@@ -15,8 +15,6 @@
 
 registerMooseObject("StochasticToolsApp", StochasticResults);
 
-defineLegacyParams(StochasticResults);
-
 StochasticResultsData::StochasticResultsData(const VectorPostprocessorName & name,
                                              VectorPostprocessorValue * vpp)
   : name(name), vector(vpp)

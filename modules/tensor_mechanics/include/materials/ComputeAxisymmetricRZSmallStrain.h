@@ -13,9 +13,6 @@
 
 class ComputeAxisymmetricRZSmallStrain;
 
-template <>
-InputParameters validParams<ComputeAxisymmetricRZSmallStrain>();
-
 /**
  * ComputeAxisymmetricRZSmallStrain defines small strains in an Axisymmetric system.
  * The COORD_TYPE in the Problem block must be set to RZ.

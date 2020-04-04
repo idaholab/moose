@@ -29,4 +29,3 @@ public:
   virtual const std::vector<Real> & getForceCJacobians() const = 0;
   virtual const std::vector<std::vector<Real>> & getForceEtaJacobians() const = 0;
 };
-

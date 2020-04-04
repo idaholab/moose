@@ -13,8 +13,6 @@
 
 registerMooseObject("ChemicalReactionsApp", DesorptionFromMatrix);
 
-defineLegacyParams(DesorptionFromMatrix);
-
 InputParameters
 DesorptionFromMatrix::validParams()
 {

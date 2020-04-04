@@ -34,4 +34,3 @@ protected:
 
   usingMaterialMembers;
 };
-

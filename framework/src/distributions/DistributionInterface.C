@@ -12,8 +12,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-defineLegacyParams(DistributionInterface);
-
 InputParameters
 DistributionInterface::validParams()
 {

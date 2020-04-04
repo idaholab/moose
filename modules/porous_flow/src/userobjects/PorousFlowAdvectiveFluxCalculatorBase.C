@@ -12,8 +12,6 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/parallel_sync.h"
 
-defineLegacyParams(PorousFlowAdvectiveFluxCalculatorBase);
-
 InputParameters
 PorousFlowAdvectiveFluxCalculatorBase::validParams()
 {

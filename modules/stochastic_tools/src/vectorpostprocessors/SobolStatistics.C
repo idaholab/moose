@@ -22,8 +22,6 @@
 
 registerMooseObject("StochasticToolsApp", SobolStatistics);
 
-defineLegacyParams(SobolStatistics);
-
 InputParameters
 SobolStatistics::validParams()
 {

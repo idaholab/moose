@@ -54,6 +54,3 @@ protected:
   bool & _initialized;
   Real _start_time;
 };
-
-template <>
-InputParameters validParams<CavityPressureUserObject>();

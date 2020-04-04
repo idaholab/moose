@@ -13,8 +13,6 @@
 
 registerADMooseObject("MooseApp", ADPiecewiseLinearInterpolationMaterial);
 
-defineADLegacyParams(ADPiecewiseLinearInterpolationMaterial);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADPiecewiseLinearInterpolationMaterial<compute_stage>::validParams()

@@ -16,9 +16,6 @@
 class MeshModifier;
 class MooseMesh;
 
-template <>
-InputParameters validParams<MeshModifier>();
-
 /**
  * MeshModifiers are objects that can modify or add to an existing mesh.
  */
@@ -74,4 +71,3 @@ private:
   /// Flag to determine if the mesh should be prepared after this modifier is run
   const bool _force_prepare;
 };
-

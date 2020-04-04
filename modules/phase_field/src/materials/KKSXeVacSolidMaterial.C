@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSXeVacSolidMaterial);
 
-defineLegacyParams(KKSXeVacSolidMaterial);
-
 InputParameters
 KKSXeVacSolidMaterial::validParams()
 {

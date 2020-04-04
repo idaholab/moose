@@ -20,8 +20,6 @@
 
 registerMooseObjectDeprecated("SolidMechanicsApp", StressDivergenceRZ, "07/30/2020 24:00");
 
-defineLegacyParams(StressDivergenceRZ);
-
 InputParameters
 StressDivergenceRZ::validParams()
 {

@@ -249,4 +249,3 @@ template <>
 void dataStore(std::ostream & stream, FormattedTable & table, void * context);
 template <>
 void dataLoad(std::istream & stream, FormattedTable & v, void * context);
-

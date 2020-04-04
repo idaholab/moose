@@ -15,9 +15,6 @@
 // Forward Declarations
 class KKSGlobalFreeEnergy;
 
-template <>
-InputParameters validParams<KKSGlobalFreeEnergy>();
-
 /**
  * Compute the global free energy in the KKS Model
  * \f$ F = hF_a + (1-h)F_b + wg + \frac{\kappa}{2}|\eta|^2 \f$
@@ -43,4 +40,3 @@ protected:
   /// Gradient interface free energy coefficients
   std::vector<const MaterialProperty<Real> *> _kappas;
 };
-

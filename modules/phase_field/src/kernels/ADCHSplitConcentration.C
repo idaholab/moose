@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADCHSplitConcentration);
 
-defineADLegacyParams(ADCHSplitConcentration);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADCHSplitConcentration<compute_stage>::validParams()

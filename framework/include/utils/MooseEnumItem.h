@@ -100,4 +100,3 @@ private:
   /// The numeric value for item
   int _id;
 };
-

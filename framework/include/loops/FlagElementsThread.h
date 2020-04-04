@@ -43,4 +43,3 @@ protected:
   std::vector<Number> & _serialized_solution;
   unsigned int _max_h_level;
 };
-

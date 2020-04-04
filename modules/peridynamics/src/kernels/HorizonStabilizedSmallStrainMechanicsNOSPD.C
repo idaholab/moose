@@ -14,8 +14,6 @@
 
 registerMooseObject("PeridynamicsApp", HorizonStabilizedSmallStrainMechanicsNOSPD);
 
-defineLegacyParams(HorizonStabilizedSmallStrainMechanicsNOSPD);
-
 InputParameters
 HorizonStabilizedSmallStrainMechanicsNOSPD::validParams()
 {

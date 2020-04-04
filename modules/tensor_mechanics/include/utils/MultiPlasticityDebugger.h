@@ -13,9 +13,6 @@
 
 class MultiPlasticityDebugger;
 
-template <>
-InputParameters validParams<MultiPlasticityDebugger>();
-
 /**
  * MultiPlasticityDebugger computes various
  * finite-difference things to help developers

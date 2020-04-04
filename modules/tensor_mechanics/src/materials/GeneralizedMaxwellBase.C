@@ -9,8 +9,6 @@
 
 #include "GeneralizedMaxwellBase.h"
 
-defineLegacyParams(GeneralizedMaxwellBase);
-
 InputParameters
 GeneralizedMaxwellBase::validParams()
 {

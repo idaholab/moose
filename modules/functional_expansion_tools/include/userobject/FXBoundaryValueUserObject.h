@@ -13,9 +13,6 @@
 
 class FXBoundaryValueUserObject;
 
-template <>
-InputParameters validParams<FXBoundaryValueUserObject>();
-
 /**
  * This boundary FX evaluator calculates the values
  */

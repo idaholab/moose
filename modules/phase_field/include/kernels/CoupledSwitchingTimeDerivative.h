@@ -16,9 +16,6 @@
 // Forward Declaration
 class CoupledSwitchingTimeDerivative;
 
-template <>
-InputParameters validParams<CoupledSwitchingTimeDerivative>();
-
 /**
  * This kernel adds a contribution
  * \f$ \left( \frac{\partial F_a}{\partial \eta_{ai}} f_a +

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ConservedUniformNoise);
 
-defineLegacyParams(ConservedUniformNoise);
-
 InputParameters
 ConservedUniformNoise::validParams()
 {

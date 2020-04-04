@@ -11,8 +11,6 @@
 
 registerADMooseObject("MiscApp", ADThermoDiffusion);
 
-defineADLegacyParams(ADThermoDiffusion);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADThermoDiffusion<compute_stage>::validParams()

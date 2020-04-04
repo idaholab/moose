@@ -15,9 +15,6 @@
 
 class TwoParameterPlasticityStressUpdate;
 
-template <>
-InputParameters validParams<TwoParameterPlasticityStressUpdate>();
-
 /**
  * TwoParameterPlasticityStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

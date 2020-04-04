@@ -19,8 +19,6 @@ registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_material"
 
 registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_variable");
 
-defineLegacyParams(DisplacementGradientsAction);
-
 InputParameters
 DisplacementGradientsAction::validParams()
 {

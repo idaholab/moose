@@ -14,9 +14,6 @@
 
 class PFCRFFEnergyDensity;
 
-template <>
-InputParameters validParams<PFCRFFEnergyDensity>();
-
 class PFCRFFEnergyDensity : public AuxKernel
 {
 public:
@@ -37,4 +34,3 @@ protected:
   MooseEnum _log_approach;
   Real _tol;
 };
-

@@ -14,9 +14,6 @@
 
 class SingleVariableReturnMappingSolution;
 
-template <>
-InputParameters validParams<SingleVariableReturnMappingSolution>();
-
 /**
  * Base class that provides capability for Newton return mapping
  * iterations on a single variable

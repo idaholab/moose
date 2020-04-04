@@ -35,7 +35,3 @@ protected:
 private:
   std::shared_ptr<XFEM> _xfem;
 };
-
-template <>
-InputParameters validParams<XFEMVolFracAux>();
-

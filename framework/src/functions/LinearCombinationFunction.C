@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", LinearCombinationFunction);
 
-defineLegacyParams(LinearCombinationFunction);
-
 InputParameters
 LinearCombinationFunction::validParams()
 {

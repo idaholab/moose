@@ -17,8 +17,6 @@
 
 registerMooseObject("TensorMechanicsApp", GlobalDisplacementAux);
 
-defineLegacyParams(GlobalDisplacementAux);
-
 InputParameters
 GlobalDisplacementAux::validParams()
 {

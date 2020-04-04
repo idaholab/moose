@@ -18,9 +18,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 class EshelbyTensor;
 
-template <>
-InputParameters validParams<EshelbyTensor>();
-
 /**
  * EshelbyTensor defines a strain increment and rotation increment, for finite strains.
  */

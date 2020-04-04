@@ -13,8 +13,6 @@
 
 registerMooseObject("HeatConductionApp", ConvectiveFluxFunction);
 
-defineLegacyParams(ConvectiveFluxFunction);
-
 InputParameters
 ConvectiveFluxFunction::validParams()
 {

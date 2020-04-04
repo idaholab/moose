@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", TemperatureDependentHardeningStressUpdate);
 
-defineLegacyParams(TemperatureDependentHardeningStressUpdate);
-
 InputParameters
 TemperatureDependentHardeningStressUpdate::validParams()
 {

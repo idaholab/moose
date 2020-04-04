@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldTestApp", GaussContForcing);
 
-defineLegacyParams(GaussContForcing);
-
 InputParameters
 GaussContForcing::validParams()
 {

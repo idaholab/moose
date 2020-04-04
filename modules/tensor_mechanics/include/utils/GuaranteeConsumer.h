@@ -40,4 +40,3 @@ private:
   /// Access block restrictions of the object with this interface
   BlockRestrictable * const _gc_block_restrict;
 };
-

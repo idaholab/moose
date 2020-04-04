@@ -13,9 +13,6 @@
 
 class HEVPEqvPlasticStrain;
 
-template <>
-InputParameters validParams<HEVPEqvPlasticStrain>();
-
 /**
  * This user object classs
  * Computes equivalent plastic strain

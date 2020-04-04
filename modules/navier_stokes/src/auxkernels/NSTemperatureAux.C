@@ -19,8 +19,6 @@
 
 registerMooseObject("NavierStokesApp", NSTemperatureAux);
 
-defineLegacyParams(NSTemperatureAux);
-
 InputParameters
 NSTemperatureAux::validParams()
 {

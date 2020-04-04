@@ -11,8 +11,6 @@
 #include "MooseMesh.h"
 #include "libmesh/mesh_base.h"
 
-defineLegacyParams(GeometryBase);
-
 InputParameters
 GeometryBase::validParams()
 {

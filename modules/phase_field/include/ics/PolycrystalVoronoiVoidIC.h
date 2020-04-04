@@ -18,9 +18,6 @@ class PolycrystalVoronoiVoidIC;
 class GrainTrackerInterface;
 class PolycrystalVoronoi;
 
-template <>
-InputParameters validParams<PolycrystalVoronoiVoidIC>();
-
 /**
  * PolycrystalVoronoiVoidIC initializes either grain or void values for a
  * voronoi tesselation with voids distributed along the grain boundaries.

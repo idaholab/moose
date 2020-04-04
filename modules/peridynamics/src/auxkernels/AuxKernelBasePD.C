@@ -10,8 +10,6 @@
 #include "AuxKernelBasePD.h"
 #include "PeridynamicsMesh.h"
 
-defineLegacyParams(AuxKernelBasePD);
-
 InputParameters
 AuxKernelBasePD::validParams()
 {

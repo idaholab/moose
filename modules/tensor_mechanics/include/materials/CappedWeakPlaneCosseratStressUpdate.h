@@ -13,9 +13,6 @@
 
 class CappedWeakPlaneCosseratStressUpdate;
 
-template <>
-InputParameters validParams<CappedWeakPlaneCosseratStressUpdate>();
-
 /**
  * CappedWeakPlaneCosseratStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

@@ -15,8 +15,6 @@
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
-defineLegacyParams(ScalarKernel);
-
 InputParameters
 ScalarKernel::validParams()
 {

@@ -13,9 +13,6 @@
 
 class InfiniteCylinderRadiativeBC;
 
-template <>
-InputParameters validParams<InfiniteCylinderRadiativeBC>();
-
 /**
  * Boundary condition for radiative heat exchange with a cylinder, the outer
  * surface of the domain is assumed to be cylindrical as well
@@ -42,4 +39,3 @@ protected:
   /// coefficients are constant and pre-computed
   Real _coefficient;
 };
-

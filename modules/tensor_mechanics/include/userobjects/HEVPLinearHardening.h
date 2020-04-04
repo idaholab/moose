@@ -13,9 +13,6 @@
 
 class HEVPLinearHardening;
 
-template <>
-InputParameters validParams<HEVPLinearHardening>();
-
 /**
  * This user object classs
  * Computes linear hardening

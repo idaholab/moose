@@ -15,9 +15,6 @@
 class PorousFlowFluidState;
 class PorousFlowCapillaryPressure;
 
-template <>
-InputParameters validParams<PorousFlowFluidState>();
-
 /**
  * Fluid state class using a persistent set of primary variables for
  * the mutliphase, multicomponent case.

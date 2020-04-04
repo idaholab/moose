@@ -15,9 +15,6 @@
 // Forward declarations
 class GeneratedMeshGenerator;
 
-template <>
-InputParameters validParams<GeneratedMeshGenerator>();
-
 /**
  * Generates a line, square, or cube mesh with uniformly spaced or biased elements.
  */

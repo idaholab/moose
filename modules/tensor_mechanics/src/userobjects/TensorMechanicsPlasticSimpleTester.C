@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticSimpleTester);
 
-defineLegacyParams(TensorMechanicsPlasticSimpleTester);
-
 InputParameters
 TensorMechanicsPlasticSimpleTester::validParams()
 {

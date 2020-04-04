@@ -17,9 +17,6 @@ class GeneralDamper;
 class SubProblem;
 class SystemBase;
 
-template <>
-InputParameters validParams<GeneralDamper>();
-
 /**
  * Base class for deriving general dampers
  */
@@ -36,4 +33,3 @@ public:
   virtual Real computeDamping(const NumericVector<Number> & solution,
                               const NumericVector<Number> & update) = 0;
 };
-

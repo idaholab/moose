@@ -14,9 +14,6 @@
 // Forward declarations
 class CircleCutUserObject;
 
-template <>
-InputParameters validParams<CircleCutUserObject>();
-
 class CircleCutUserObject : public GeometricCut3DUserObject
 {
 public:
@@ -37,4 +34,3 @@ private:
 
   virtual bool isInsideCutPlane(Point p) const override;
 };
-

@@ -23,4 +23,3 @@ public:
   virtual const RankFourTensor & getJacobian() const = 0;
   virtual const VectorValue<bool> & getPeriodicDirections() const = 0;
 };
-

@@ -19,9 +19,6 @@
 // Forward Declarations
 class RichardsFullyUpwindFlux;
 
-template <>
-InputParameters validParams<RichardsFullyUpwindFlux>();
-
 /**
  * This is a fully upwinded version of RichardsFlux.
  *

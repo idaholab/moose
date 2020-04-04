@@ -16,9 +16,6 @@
 // Forward Declarations
 class NSEnergyViscousBC;
 
-template <>
-InputParameters validParams<NSEnergyViscousBC>();
-
 /**
  * This class corresponds to the viscous part of the "natural"
  * boundary condition for the energy equation, i.e.
@@ -71,4 +68,3 @@ protected:
   // the ctor.
   std::vector<const VariableGradient *> _gradU;
 };
-

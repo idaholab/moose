@@ -26,9 +26,6 @@ class Point;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<ConstantIC>();
-
 /**
  * ConstantIC just returns a constant value.
  */

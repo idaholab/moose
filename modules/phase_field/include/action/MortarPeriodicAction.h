@@ -13,9 +13,6 @@
 
 class MortarPeriodicAction;
 
-template <>
-InputParameters validParams<MortarPeriodicAction>();
-
 /**
  * Set up Mortar based periodicity in an input file with a MortarPeriodicMesh
  */
@@ -38,4 +35,3 @@ protected:
   // the periodic directions
   const MultiMooseEnum _periodic_directions;
 };
-

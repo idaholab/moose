@@ -18,8 +18,6 @@
 
 registerMooseObject("RichardsApp", RichardsFullyUpwindFlux);
 
-defineLegacyParams(RichardsFullyUpwindFlux);
-
 InputParameters
 RichardsFullyUpwindFlux::validParams()
 {

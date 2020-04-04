@@ -13,9 +13,6 @@
 
 class SimpleSplitCHWRes;
 
-template <>
-InputParameters validParams<SimpleSplitCHWRes>();
-
 /**
  * Simple case for SplitCHWRes kernel, only with constant Mobility
  */
@@ -33,4 +30,3 @@ protected:
   /// Mobility
   const MaterialProperty<Real> & _M;
 };
-

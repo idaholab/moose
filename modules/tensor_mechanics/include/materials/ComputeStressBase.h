@@ -17,9 +17,6 @@
 
 class ComputeStressBase;
 
-template <>
-InputParameters validParams<ComputeStressBase>();
-
 /**
  * ComputeStressBase is the base class for stress tensors
  */

@@ -14,9 +14,6 @@
 // Forward Declarations
 class DarcyFlux;
 
-template <>
-InputParameters validParams<DarcyFlux>();
-
 /**
  * Kernel = grad(permeability*(grad(pressure) - weight))
  * This is mass flow according to the Darcy equation

@@ -9,8 +9,6 @@
 
 #include "DiscreteNucleationInserterBase.h"
 
-defineLegacyParams(DiscreteNucleationInserterBase);
-
 InputParameters
 DiscreteNucleationInserterBase::validParams()
 {

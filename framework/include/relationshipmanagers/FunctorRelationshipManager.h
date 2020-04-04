@@ -17,9 +17,6 @@
 class FunctorRelationshipManager;
 class MooseMesh;
 
-template <>
-InputParameters validParams<FunctorRelationshipManager>();
-
 /**
  * Intermediate base class for RelationshipManagers that are simply built
  * using ghosting functors.  The functor should be built in internalInit()
@@ -48,4 +45,3 @@ public:
 protected:
   std::unique_ptr<GhostingFunctor> _functor;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldTestApp", VoronoiICAux);
 
-defineLegacyParams(VoronoiICAux);
-
 InputParameters
 VoronoiICAux::validParams()
 {

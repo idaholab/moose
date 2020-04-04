@@ -13,9 +13,6 @@
 
 class CoupledPressureAction;
 
-template <>
-InputParameters validParams<CoupledPressureAction>();
-
 /**
  * Action that sets up pressure boundary condition on displacement variables
  */

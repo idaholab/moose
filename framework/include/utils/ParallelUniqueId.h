@@ -91,4 +91,3 @@ private:
 
   static bool _initialized;
 };
-

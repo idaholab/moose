@@ -17,9 +17,6 @@ class TimeStepper;
 class FEProblemBase;
 class Transient;
 
-template <>
-InputParameters validParams<TimeStepper>();
-
 /**
  * Base class for time stepping
  */

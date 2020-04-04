@@ -14,9 +14,6 @@
 // Forward declarations
 class ElementGenerator;
 
-template <>
-InputParameters validParams<ElementGenerator>();
-
 /**
  * Generates individual elements given a list of nodal positions
  */
@@ -44,4 +41,3 @@ protected:
   /// The type of element to build.
   const unsigned int _elem_type;
 };
-

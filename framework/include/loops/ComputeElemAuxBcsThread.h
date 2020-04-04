@@ -45,4 +45,3 @@ protected:
 
   bool _need_materials;
 };
-

@@ -14,9 +14,6 @@
 class ComputeDamageStress;
 class DamageBase;
 
-template <>
-InputParameters validParams<ComputeDamageStress>();
-
 /**
  * ComputeDamageStress computes the stress for a damaged elasticity material. This
  * model must be used in conjunction with a damage model (derived from DamageBase)

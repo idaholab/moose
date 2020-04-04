@@ -14,8 +14,6 @@
 
 registerMooseObject("XFEMApp", LineSegmentCutSetUserObject);
 
-defineLegacyParams(LineSegmentCutSetUserObject);
-
 InputParameters
 LineSegmentCutSetUserObject::validParams()
 {

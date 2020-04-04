@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", PFCFreezingIC);
 
-defineLegacyParams(PFCFreezingIC);
-
 InputParameters
 PFCFreezingIC::validParams()
 {

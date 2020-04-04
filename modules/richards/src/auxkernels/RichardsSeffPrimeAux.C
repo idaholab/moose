@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeffPrimeAux);
 
-defineLegacyParams(RichardsSeffPrimeAux);
-
 InputParameters
 RichardsSeffPrimeAux::validParams()
 {

@@ -23,9 +23,6 @@ namespace libMesh
 class Point;
 }
 
-template <>
-InputParameters validParams<VectorConstantIC>();
-
 /**
  * VectorConstantIC just returns a constant value.
  */

@@ -15,9 +15,6 @@
 // Forward Declarations
 class RichardsFlux;
 
-template <>
-InputParameters validParams<RichardsFlux>();
-
 /**
  * Kernel = grad(permeability*relativepermeability/viscosity * (grad(pressure) - density*gravity))
  * This is mass flow according to the Richards equation

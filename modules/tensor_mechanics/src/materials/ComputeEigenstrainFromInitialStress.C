@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeEigenstrainFromInitialStress);
 
-defineLegacyParams(ComputeEigenstrainFromInitialStress);
-
 InputParameters
 ComputeEigenstrainFromInitialStress::validParams()
 {

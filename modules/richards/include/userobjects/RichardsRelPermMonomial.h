@@ -13,9 +13,6 @@
 
 class RichardsRelPermMonomial;
 
-template <>
-InputParameters validParams<RichardsRelPermMonomial>();
-
 /**
  * Monomial form of relative permeability
  * relperm = Seff^n for 0<Seff<=1, where S = (S - simm)/(1 - simm)
@@ -57,4 +54,3 @@ protected:
   /// 0^0, which is used if _n=0
   Real _zero_to_the_zero;
 };
-

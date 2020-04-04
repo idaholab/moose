@@ -13,9 +13,6 @@
 
 class NodalAuxVariableUserObjectBasePD;
 
-template <>
-InputParameters validParams<NodalAuxVariableUserObjectBasePD>();
-
 /**
  * UserObject base class to compute nodal quantities stored as AuxVariable at a material point based
  * on elemental information of bonds connected at the material point

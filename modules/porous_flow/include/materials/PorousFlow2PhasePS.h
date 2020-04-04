@@ -14,9 +14,6 @@
 class PorousFlowCapillaryPressure;
 class PorousFlow2PhasePS;
 
-template <>
-InputParameters validParams<PorousFlow2PhasePS>();
-
 /**
  * Material designed to calculate fluid-phase porepressures and saturations at nodes
  * and qps using a specified capillary pressure formulation
@@ -57,4 +54,3 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
-

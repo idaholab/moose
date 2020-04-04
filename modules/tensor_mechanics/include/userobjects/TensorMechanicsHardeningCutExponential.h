@@ -13,9 +13,6 @@
 
 class TensorMechanicsHardeningCutExponential;
 
-template <>
-InputParameters validParams<TensorMechanicsHardeningCutExponential>();
-
 /**
  * CutExponential hardening
  * The value = _val_res + (val_0 - val_res)*exp(-rate*(internal_parameter - _intnl_0)), for

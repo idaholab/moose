@@ -14,9 +14,6 @@
 // Forward Declarations
 class Mass;
 
-template <>
-InputParameters validParams<Mass>();
-
 /**
  * This postprocessor computes the mass by integrating the density over the volume.
  */

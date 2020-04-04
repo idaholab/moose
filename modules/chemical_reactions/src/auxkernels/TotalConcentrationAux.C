@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", TotalConcentrationAux);
 
-defineLegacyParams(TotalConcentrationAux);
-
 InputParameters
 TotalConcentrationAux::validParams()
 {

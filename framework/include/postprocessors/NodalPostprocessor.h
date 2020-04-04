@@ -16,9 +16,6 @@
 // Forward Declarations
 class NodalPostprocessor;
 
-template <>
-InputParameters validParams<NodalPostprocessor>();
-
 class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {
 public:
@@ -34,4 +31,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

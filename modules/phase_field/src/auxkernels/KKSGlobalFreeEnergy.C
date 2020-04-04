@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSGlobalFreeEnergy);
 
-defineLegacyParams(KKSGlobalFreeEnergy);
-
 InputParameters
 KKSGlobalFreeEnergy::validParams()
 {

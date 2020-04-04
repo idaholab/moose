@@ -17,9 +17,6 @@
 class SideSetHeatTransferMaterial;
 class Function;
 
-template <>
-InputParameters validParams<SideSetHeatTransferMaterial>();
-
 class SideSetHeatTransferMaterial : public InterfaceMaterial
 {
 public:

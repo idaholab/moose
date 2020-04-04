@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", Q2PMaterial);
 
-defineLegacyParams(Q2PMaterial);
-
 InputParameters
 Q2PMaterial::validParams()
 {

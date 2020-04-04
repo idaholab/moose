@@ -15,9 +15,6 @@
 // Forward Declarations
 class MaterialTensorIntegral;
 
-template <>
-InputParameters validParams<MaterialTensorIntegral>();
-
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor as specified by the user-supplied indices.

@@ -47,4 +47,3 @@ private:
   /// Identify hardware by MPI processor name
   void sharedMemoryRanksByProcessorname();
 };
-

@@ -14,9 +14,6 @@
 // Forward Declaration
 class AddExtraNodeset;
 
-template <>
-InputParameters validParams<AddExtraNodeset>();
-
 class AddExtraNodeset : public MeshModifier
 {
 public:
@@ -25,4 +22,3 @@ public:
 protected:
   virtual void modify() override;
 };
-

@@ -14,9 +14,6 @@
 class NodalNormalsEvaluator;
 class AuxiliarySystem;
 
-template <>
-InputParameters validParams<NodalNormalsEvaluator>();
-
 /**
  * Works on top of NodalNormalsPreprocessor
  */
@@ -35,4 +32,3 @@ public:
 protected:
   AuxiliarySystem & _aux;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SplitCHWResAniso);
 
-defineLegacyParams(SplitCHWResAniso);
-
 InputParameters
 SplitCHWResAniso::validParams()
 {

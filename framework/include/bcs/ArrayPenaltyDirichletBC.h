@@ -13,9 +13,6 @@
 
 class ArrayPenaltyDirichletBC;
 
-template <>
-InputParameters validParams<ArrayPenaltyDirichletBC>();
-
 class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 {
 public:

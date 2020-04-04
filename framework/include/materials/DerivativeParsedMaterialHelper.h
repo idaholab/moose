@@ -16,9 +16,6 @@
 // Forward Declarations
 class DerivativeParsedMaterialHelper;
 
-template <>
-InputParameters validParams<DerivativeParsedMaterialHelper>();
-
 /**
  * Helper class to perform the auto derivative taking.
  */

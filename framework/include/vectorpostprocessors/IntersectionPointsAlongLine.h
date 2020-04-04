@@ -14,9 +14,6 @@
 // Forward Declarations
 class IntersectionPointsAlongLine;
 
-template <>
-InputParameters validParams<IntersectionPointsAlongLine>();
-
 /**
  * Get the intersection points for all of the elements that are intersected by a line
  */
@@ -49,4 +46,3 @@ protected:
   /// Tie them together for convenience
   std::vector<VectorPostprocessorValue *> _intersections;
 };
-

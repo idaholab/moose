@@ -20,9 +20,6 @@ class FEProblemBase;
 
 class Split;
 
-template <>
-InputParameters validParams<Split>();
-
 /**
  * Base class for split-based preconditioners.
  */
@@ -72,4 +69,3 @@ protected:
   /// Additional PETSc options
   Moose::PetscSupport::PetscOptions _petsc_options;
 };
-

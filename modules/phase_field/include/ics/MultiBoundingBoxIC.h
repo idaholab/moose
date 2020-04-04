@@ -14,9 +14,6 @@
 // Forward Declarations
 class MultiBoundingBoxIC;
 
-template <>
-InputParameters validParams<MultiBoundingBoxIC>();
-
 /**
  * MultiBoundingBoxIC allows setting the initial condition of a value of a field inside and outside
  * multiple bounding boxes. Each box is axis-aligned and is specified by passing in the x,y,z
@@ -49,4 +46,3 @@ protected:
   /// values outside the boxes
   const Real _outside;
 };
-

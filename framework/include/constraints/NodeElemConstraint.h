@@ -23,9 +23,6 @@ template <typename T>
 class SparseMatrix;
 }
 
-template <>
-InputParameters validParams<NodeElemConstraint>();
-
 /**
  * A NodeElemConstraint is used when you need to create constraints between
  * a slave node and a master element. It works by allowing you to modify the
@@ -255,4 +252,3 @@ public:
   /// stiffness matrix holding slave-slave jacobian
   DenseMatrix<Number> _Kee;
 };
-

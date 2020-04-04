@@ -19,9 +19,6 @@
 class RelationshipManager;
 class MooseMesh;
 
-template <>
-InputParameters validParams<RelationshipManager>();
-
 /**
  * RelationshipManagers are used for describing what kinds of non-local resources are needed for an
  * object's calculations. Non-local resources include geometric element information, or solution

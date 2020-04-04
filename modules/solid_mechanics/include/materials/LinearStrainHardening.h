@@ -13,9 +13,6 @@
 
 class LinearStrainHardening;
 
-template <>
-InputParameters validParams<LinearStrainHardening>();
-
 class LinearStrainHardening : public SolidModel
 {
 public:
@@ -24,4 +21,3 @@ public:
   LinearStrainHardening(const InputParameters & parameters);
   virtual ~LinearStrainHardening() {}
 };
-

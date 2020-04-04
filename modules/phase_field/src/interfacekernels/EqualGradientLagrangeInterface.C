@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", EqualGradientLagrangeInterface);
 
-defineLegacyParams(EqualGradientLagrangeInterface);
-
 InputParameters
 EqualGradientLagrangeInterface::validParams()
 {

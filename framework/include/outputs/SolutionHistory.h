@@ -15,9 +15,6 @@
 // Forward declerations
 class SolutionHistory;
 
-template <>
-InputParameters validParams<SolutionHistory>();
-
 /**
  * Based class for adding basic filename support to output base class
  *
@@ -49,4 +46,3 @@ public:
    */
   virtual std::string filename() override;
 };
-

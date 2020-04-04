@@ -31,8 +31,6 @@ PolycrystalVoronoiVoidIC::actionParameters()
 
 registerMooseObject("PhaseFieldApp", PolycrystalVoronoiVoidIC);
 
-defineLegacyParams(PolycrystalVoronoiVoidIC);
-
 InputParameters
 PolycrystalVoronoiVoidIC::validParams()
 {

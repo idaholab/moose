@@ -20,9 +20,6 @@ class PointValueAtXFEMInterface;
 class XFEM;
 class LineSegmentCutSetUserObject;
 
-template <>
-InputParameters validParams<PointValueAtXFEMInterface>();
-
 class PointValueAtXFEMInterface : public GeneralUserObject
 {
 public:
@@ -122,4 +119,3 @@ protected:
   /// Mapping from point index and its gradient at the negative level set side
   std::map<unsigned int, RealVectorValue> _grad_values_negative_level_set_side;
 };
-

@@ -39,4 +39,3 @@ private:
 
   usingMaterialMembers;
 };
-

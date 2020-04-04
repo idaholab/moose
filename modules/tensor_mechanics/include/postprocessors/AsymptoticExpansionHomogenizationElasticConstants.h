@@ -14,9 +14,6 @@
 // Forward Declarations
 class AsymptoticExpansionHomogenizationElasticConstants;
 
-template <>
-InputParameters validParams<AsymptoticExpansionHomogenizationElasticConstants>();
-
 /**
  * This postprocessor computes homogenized elastic constants
  */

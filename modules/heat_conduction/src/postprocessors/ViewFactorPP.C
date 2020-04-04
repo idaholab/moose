@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", ViewFactorPP);
 
-defineLegacyParams(ViewFactorPP);
-
 InputParameters
 ViewFactorPP::validParams()
 {

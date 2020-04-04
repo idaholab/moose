@@ -112,4 +112,3 @@ protected:
    */
   void calculateLameCoefficients();
 };
-

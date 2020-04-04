@@ -27,9 +27,6 @@ namespace libMesh
 class QGauss;
 }
 
-template <>
-InputParameters validParams<AddSideSetsBase>();
-
 class AddSideSetsBase : public MeshModifier
 {
 public:
@@ -65,4 +62,3 @@ protected:
   std::unique_ptr<QGauss> _qface;
   std::map<BoundaryID, std::set<const Elem *>> _visited;
 };
-

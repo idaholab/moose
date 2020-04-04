@@ -22,9 +22,6 @@ namespace libMesh
 class BoundingBox;
 }
 
-template <>
-InputParameters validParams<BoundingBoxNodeSet>();
-
 /**
  * Selects a set of nodes and assigns a nodeset name to them based on
  * the bounding box specified. Can select nodes "inside" or "outside"
@@ -45,4 +42,3 @@ private:
   /// Bounding box for testing element centroids against. Note that
   BoundingBox _bounding_box;
 };
-

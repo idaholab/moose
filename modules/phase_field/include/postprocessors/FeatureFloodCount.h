@@ -30,9 +30,6 @@
 class FeatureFloodCount;
 class MooseMesh;
 
-template <>
-InputParameters validParams<FeatureFloodCount>();
-
 /**
  * This object will mark nodes or elements of continuous regions all with a unique number for the
  * purpose of counting or "coloring" unique regions in a solution.  It is designed to work with

@@ -18,9 +18,6 @@ class MaterialOutputAction;
 class MooseObjectAction;
 class MaterialBase;
 
-template <>
-InputParameters validParams<MaterialOutputAction>();
-
 /**
  * Creates AuxVariables and AuxKernels for automatic output of material properties
  */
@@ -115,4 +112,3 @@ MaterialOutputAction::hasProperty(const std::string & property_name)
   else
     return false;
 }
-

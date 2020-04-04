@@ -13,9 +13,6 @@
 
 class GeneralizedMaxwellBase;
 
-template <>
-InputParameters validParams<GeneralizedMaxwellBase>();
-
 /**
  * This class represents an assembly of springs and dashpots following
  * a generalized Maxwell model (an arbitrary number of Maxwell

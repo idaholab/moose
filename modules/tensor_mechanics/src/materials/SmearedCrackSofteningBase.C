@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-defineLegacyParams(SmearedCrackSofteningBase);
-
 InputParameters
 SmearedCrackSofteningBase::validParams()
 {

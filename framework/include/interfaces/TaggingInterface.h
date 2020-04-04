@@ -25,9 +25,6 @@ class Assembly;
 template <typename T>
 InputParameters validParams();
 
-template <>
-InputParameters validParams<TaggingInterface>();
-
 class TaggingInterface
 {
 public:

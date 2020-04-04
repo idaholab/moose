@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumInviscidFluxWithGradP);
 
-defineLegacyParams(NSMomentumInviscidFluxWithGradP);
-
 InputParameters
 NSMomentumInviscidFluxWithGradP::validParams()
 {

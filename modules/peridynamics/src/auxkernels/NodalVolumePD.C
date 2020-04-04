@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalVolumePD);
 
-defineLegacyParams(NodalVolumePD);
-
 InputParameters
 NodalVolumePD::validParams()
 {

@@ -15,8 +15,6 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 
-defineLegacyParams(PetscOutput);
-
 InputParameters
 PetscOutput::validParams()
 {

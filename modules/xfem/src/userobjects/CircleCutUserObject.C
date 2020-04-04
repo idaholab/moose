@@ -17,8 +17,6 @@
 
 registerMooseObject("XFEMApp", CircleCutUserObject);
 
-defineLegacyParams(CircleCutUserObject);
-
 InputParameters
 CircleCutUserObject::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerADMooseObject("NavierStokesApp", INSADMassPSPG);
 
-defineADLegacyParams(INSADMassPSPG);
-
 template <ComputeStage compute_stage>
 InputParameters
 INSADMassPSPG<compute_stage>::validParams()

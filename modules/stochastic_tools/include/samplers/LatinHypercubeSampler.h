@@ -13,8 +13,6 @@
 
 class LatinHypercubeSampler;
 
-template <>
-InputParameters validParams<LatinHypercubeSampler>();
 /**
  * A class used to perform Monte Carlo Sampling
  */

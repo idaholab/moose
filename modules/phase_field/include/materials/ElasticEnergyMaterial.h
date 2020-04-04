@@ -20,9 +20,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 
-template <>
-InputParameters validParams<ElasticEnergyMaterial>();
-
 /**
  * Material class to compute the elastic free energy and its derivatives
  */
@@ -59,4 +56,3 @@ protected:
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _d2strain;
   ///@}
 };
-

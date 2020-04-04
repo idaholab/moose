@@ -15,9 +15,6 @@
 
 class ComputeLinearElasticPFFractureStress;
 
-template <>
-InputParameters validParams<ComputeLinearElasticPFFractureStress>();
-
 /**
  * Phase-field fracture
  * This class computes the stress and energy contribution for the

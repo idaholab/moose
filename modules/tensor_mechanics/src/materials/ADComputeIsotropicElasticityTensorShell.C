@@ -19,8 +19,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensorShell);
 
-defineADLegacyParams(ADComputeIsotropicElasticityTensorShell);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeIsotropicElasticityTensorShell<compute_stage>::validParams()

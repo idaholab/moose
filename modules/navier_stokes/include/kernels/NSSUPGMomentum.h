@@ -14,9 +14,6 @@
 // Forward Declarations
 class NSSUPGMomentum;
 
-template <>
-InputParameters validParams<NSSUPGMomentum>();
-
 /**
  * Compute residual and Jacobian terms form the SUPG
  * terms in the momentum equation.
@@ -44,4 +41,3 @@ private:
   // variable numbering.
   Real computeJacobianHelper(unsigned int var);
 };
-

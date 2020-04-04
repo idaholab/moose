@@ -10,8 +10,6 @@
 #include "ComputeMeanThermalExpansionEigenstrainBase.h"
 #include "Function.h"
 
-defineLegacyParams(ComputeMeanThermalExpansionEigenstrainBase);
-
 InputParameters
 ComputeMeanThermalExpansionEigenstrainBase::validParams()
 {
@@ -60,9 +58,8 @@ ComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(Real & thermal_
 
   const Real dalphabar_dT = meanThermalExpansionCoefficientDerivative(current_temp);
   const Real numerator = dalphabar_dT * (current_temp - reference_temperature) + current_alphabar;
-  const Real denominator =
-      1.0 +
-      alphabar_stress_free_temperature * (_stress_free_temperature[_qp] - reference_temperature);
+  const Real denominator = 1.0 + alphabar_stress_free_temperature *
+                                     (_stress_free_temperature[_qp] - reference_temperature);
   if (denominator < small)
     mooseError("Denominator too small in thermal strain calculation");
   instantaneous_cte = numerator / denominator;

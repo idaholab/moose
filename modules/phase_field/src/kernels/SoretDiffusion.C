@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", SoretDiffusion);
 
-defineLegacyParams(SoretDiffusion);
-
 InputParameters
 SoretDiffusion::validParams()
 {

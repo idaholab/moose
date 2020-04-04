@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCap);
 
-defineLegacyParams(TensorMechanicsPlasticMeanCap);
-
 InputParameters
 TensorMechanicsPlasticMeanCap::validParams()
 {

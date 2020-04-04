@@ -14,8 +14,6 @@
 
 registerMooseAction("TensorMechanicsApp", CoupledPressureAction, "add_bc");
 
-defineLegacyParams(CoupledPressureAction);
-
 InputParameters
 CoupledPressureAction::validParams()
 {

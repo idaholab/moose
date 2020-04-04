@@ -15,9 +15,6 @@ class TwoPhaseAverageDensityAux;
 class TwoPhaseFluidProperties;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<TwoPhaseAverageDensityAux>();
-
 /**
  * Computes the average of the densities of the phases corresponding to a
  * 2-phase fluid properties object.
@@ -47,4 +44,3 @@ protected:
   /// Vapor 1-phase fluid properties object
   const SinglePhaseFluidProperties & _fp_vapor;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VariableTimeIntegrationAux);
 
-defineLegacyParams(VariableTimeIntegrationAux);
-
 InputParameters
 VariableTimeIntegrationAux::validParams()
 {

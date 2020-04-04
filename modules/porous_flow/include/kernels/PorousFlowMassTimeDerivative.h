@@ -14,9 +14,6 @@
 
 class PorousFlowMassTimeDerivative;
 
-template <>
-InputParameters validParams<PorousFlowMassTimeDerivative>();
-
 /**
  * Kernel = (mass_component - mass_component_old)/dt
  * where mass_component =
@@ -99,4 +96,3 @@ protected:
    */
   Real computeQpJac(unsigned int pvar);
 };
-

@@ -23,9 +23,6 @@
 class MeshGenerator;
 class MooseMesh;
 
-template <>
-InputParameters validParams<MeshGenerator>();
-
 /**
  * MeshGenerators are objects that can modify or add to an existing mesh.
  */

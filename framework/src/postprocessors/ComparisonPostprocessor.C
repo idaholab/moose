@@ -9,8 +9,6 @@
 
 #include "ComparisonPostprocessor.h"
 
-defineLegacyParams(ComparisonPostprocessor);
-
 InputParameters
 ComparisonPostprocessor::validParams()
 {

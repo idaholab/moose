@@ -14,9 +14,6 @@
 class FunctionScalarAux;
 class Function;
 
-template <>
-InputParameters validParams<FunctionScalarAux>();
-
 /**
  * Sets a value of a scalar variable based on the function
  */

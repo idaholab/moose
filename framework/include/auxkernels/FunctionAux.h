@@ -15,9 +15,6 @@
 class FunctionAux;
 class Function;
 
-template <>
-InputParameters validParams<FunctionAux>();
-
 /**
  * Function auxiliary value
  */

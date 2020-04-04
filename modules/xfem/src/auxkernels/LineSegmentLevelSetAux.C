@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", LineSegmentLevelSetAux);
 
-defineLegacyParams(LineSegmentLevelSetAux);
-
 InputParameters
 LineSegmentLevelSetAux::validParams()
 {

@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", BicrystalBoundingBoxICAction, "add_ic");
 
-defineLegacyParams(BicrystalBoundingBoxICAction);
-
 InputParameters
 BicrystalBoundingBoxICAction::validParams()
 {

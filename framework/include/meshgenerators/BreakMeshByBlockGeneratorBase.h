@@ -14,9 +14,6 @@
 // Forward declarations
 class BreakMeshByBlockGeneratorBase;
 
-template <>
-InputParameters validParams<BreakMeshByBlockGeneratorBase>();
-
 /**
  *
  */
@@ -65,4 +62,3 @@ private:
   void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };
-

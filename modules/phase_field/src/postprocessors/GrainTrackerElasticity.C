@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", GrainTrackerElasticity);
 
-defineLegacyParams(GrainTrackerElasticity);
-
 InputParameters
 GrainTrackerElasticity::validParams()
 {

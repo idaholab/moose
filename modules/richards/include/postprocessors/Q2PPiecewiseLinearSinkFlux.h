@@ -19,9 +19,6 @@ class Function;
 // Forward Declarations
 class Q2PPiecewiseLinearSinkFlux;
 
-template <>
-InputParameters validParams<Q2PPiecewiseLinearSinkFlux>();
-
 /**
  * This postprocessor computes the fluid flux to a Q2PPiecewiseLinearSink.
  * The flux is integral_over_boundary of

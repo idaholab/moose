@@ -18,8 +18,6 @@
 
 registerMooseObject("ContactApp", NodalArea);
 
-defineLegacyParams(NodalArea);
-
 InputParameters
 NodalArea::validParams()
 {

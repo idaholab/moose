@@ -13,9 +13,6 @@
 
 class FXBoundaryFluxUserObject;
 
-template <>
-InputParameters validParams<FXBoundaryFluxUserObject>();
-
 /**
  * This boundary FX evaluator calculates the flux
  */

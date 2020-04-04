@@ -13,9 +13,6 @@
 
 class PHAux;
 
-template <>
-InputParameters validParams<PHAux>();
-
 /**
  * The pH of the solution is defined as
  *
@@ -43,4 +40,3 @@ protected:
   /// Activity coefficient of H+ ions
   const VariableValue & _gamma;
 };
-

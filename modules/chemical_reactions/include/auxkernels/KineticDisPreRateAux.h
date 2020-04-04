@@ -13,9 +13,6 @@
 
 class KineticDisPreRateAux;
 
-template <>
-InputParameters validParams<KineticDisPreRateAux>();
-
 /**
  * Calculate the kinetic mineral species kinetic rate according to transient
  * state theory rate law
@@ -51,4 +48,3 @@ protected:
   /// Coupled primary species concentrations
   std::vector<const VariableValue *> _vals;
 };
-

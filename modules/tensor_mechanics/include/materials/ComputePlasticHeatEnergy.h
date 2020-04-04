@@ -16,9 +16,6 @@
 
 class ComputePlasticHeatEnergy;
 
-template <>
-InputParameters validParams<ComputePlasticHeatEnergy>();
-
 /**
  * ComputePlasticHeatEnergy computes stress * (plastic_strain - plastic_strain_old)
  * and, if currentlyComputingJacobian, then the derivative of this quantity wrt total strain

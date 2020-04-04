@@ -32,8 +32,6 @@
 #include "XFEMApp.h"
 #include "ExternalPetscSolverApp.h"
 
-defineLegacyParams(CombinedApp);
-
 InputParameters
 CombinedApp::validParams()
 {

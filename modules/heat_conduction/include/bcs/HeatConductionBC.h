@@ -13,9 +13,6 @@
 
 class HeatConductionBC;
 
-template <>
-InputParameters validParams<HeatConductionBC>();
-
 /**
  *
  */
@@ -33,4 +30,3 @@ protected:
 
   const MaterialProperty<Real> & _k;
 };
-

@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumLaplaceFormRZ;
 
-template <>
-InputParameters validParams<INSMomentumLaplaceFormRZ>();
-
 /**
  * This class computes additional momentum equation residual and
  * Jacobian contributions for the incompressible Navier-Stokes
@@ -39,4 +36,3 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", INSExplicitTimestepSelector);
 
-defineLegacyParams(INSExplicitTimestepSelector);
-
 InputParameters
 INSExplicitTimestepSelector::validParams()
 {

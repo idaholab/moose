@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", GhostElemPD);
 
-defineLegacyParams(GhostElemPD);
-
 InputParameters
 GhostElemPD::validParams()
 {

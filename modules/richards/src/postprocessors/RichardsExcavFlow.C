@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsExcavFlow);
 
-defineLegacyParams(RichardsExcavFlow);
-
 InputParameters
 RichardsExcavFlow::validParams()
 {

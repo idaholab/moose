@@ -10,8 +10,6 @@
 #include "MultiPlasticityRawComponentAssembler.h"
 #include "RankFourTensor.h"
 
-defineLegacyParams(MultiPlasticityRawComponentAssembler);
-
 InputParameters
 MultiPlasticityRawComponentAssembler::validParams()
 {

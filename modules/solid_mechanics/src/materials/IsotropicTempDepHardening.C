@@ -15,8 +15,6 @@
 
 registerMooseObject("SolidMechanicsApp", IsotropicTempDepHardening);
 
-defineLegacyParams(IsotropicTempDepHardening);
-
 InputParameters
 IsotropicTempDepHardening::validParams()
 {

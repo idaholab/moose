@@ -13,9 +13,6 @@
 
 class CrystalPlasticityStateVariable;
 
-template <>
-InputParameters validParams<CrystalPlasticityStateVariable>();
-
 /**
  * Crystal plasticity state variable userobject class.
  */

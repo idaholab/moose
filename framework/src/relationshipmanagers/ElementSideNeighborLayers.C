@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 
-defineLegacyParams(ElementSideNeighborLayers);
-
 InputParameters
 ElementSideNeighborLayers::validParams()
 {

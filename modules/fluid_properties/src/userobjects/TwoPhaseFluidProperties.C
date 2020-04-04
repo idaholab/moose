@@ -10,8 +10,6 @@
 #include "TwoPhaseFluidProperties.h"
 #include "SinglePhaseFluidProperties.h"
 
-defineLegacyParams(TwoPhaseFluidProperties);
-
 InputParameters
 TwoPhaseFluidProperties::validParams()
 {

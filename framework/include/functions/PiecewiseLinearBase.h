@@ -14,9 +14,6 @@
 // Forward declarations
 class PiecewiseLinearBase;
 
-template <>
-InputParameters validParams<PiecewiseLinearBase>();
-
 /**
  * Base class for functions which provides a piecewise continuous linear
  * interpolation of an (x,y) point data set.

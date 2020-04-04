@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSMassInviscidFlux);
 
-defineLegacyParams(NSMassInviscidFlux);
-
 InputParameters
 NSMassInviscidFlux::validParams()
 {

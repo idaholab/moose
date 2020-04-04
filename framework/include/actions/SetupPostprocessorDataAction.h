@@ -15,9 +15,6 @@
 // Forward declerations
 class SetupPostprocessorDataAction;
 
-template <>
-InputParameters validParams<SetupPostprocessorDataAction>();
-
 /**
  * The PostprocessorInterface::hasPostprocessor method utilizes the PostprocessorData
  * to determine if a postprocessor exists. Since many objects (e.g., Functions) are created
@@ -38,4 +35,3 @@ public:
 
   virtual void act() override;
 };
-

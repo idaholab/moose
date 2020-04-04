@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", RampIC);
 
-defineLegacyParams(RampIC);
-
 InputParameters
 RampIC::validParams()
 {

@@ -13,9 +13,6 @@
 
 class AddFluidPropertiesInterrogatorAction;
 
-template <>
-InputParameters validParams<AddFluidPropertiesInterrogatorAction>();
-
 /**
  * Action that sets up the fluid properties interrogator
  */
@@ -34,4 +31,3 @@ protected:
    */
   void addFluidPropertiesInterrogatorObject() const;
 };
-

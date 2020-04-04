@@ -13,9 +13,6 @@
 
 class PoroMechanicsAction;
 
-template <>
-InputParameters validParams<PoroMechanicsAction>();
-
 class PoroMechanicsAction : public TensorMechanicsAction
 {
 public:

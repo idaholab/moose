@@ -14,9 +14,6 @@
 // Forward Declarations
 class SlopeReconstructionMultiD;
 
-template <>
-InputParameters validParams<SlopeReconstructionMultiD>();
-
 /**
  * Multi-dimensional piecewise linear slope reconstruction
  * to get the slopes of cell average variables
@@ -32,4 +29,3 @@ protected:
   /// store the pair of boundary ID and user object name
   std::map<BoundaryID, UserObjectName> _bnd_uo_name_map;
 };
-

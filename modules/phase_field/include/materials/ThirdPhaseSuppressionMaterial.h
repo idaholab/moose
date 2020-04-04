@@ -15,9 +15,6 @@
 // Forward Declarations
 class ThirdPhaseSuppressionMaterial;
 
-template <>
-InputParameters validParams<ThirdPhaseSuppressionMaterial>();
-
 /**
  * OPInterfaceBarrierMaterial is a Free Energy Penalty contribution
  * material that acts on all of the eta_i variables to
@@ -47,4 +44,3 @@ protected:
   /// Material properties to store the second derivatives.
   std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2g;
 };
-

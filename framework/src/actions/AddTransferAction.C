@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddTransferAction, "add_transfer");
 
-defineLegacyParams(AddTransferAction);
-
 InputParameters
 AddTransferAction::validParams()
 {

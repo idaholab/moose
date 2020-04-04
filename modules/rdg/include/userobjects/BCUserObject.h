@@ -13,9 +13,6 @@
 
 class BCUserObject;
 
-template <>
-InputParameters validParams<BCUserObject>();
-
 /**
  * A base class of user object for calculating
  * the variable values in ghost element
@@ -63,4 +60,3 @@ public:
                                               const std::vector<Real> & uvec1,
                                               const RealVectorValue & dwave) const = 0;
 };
-

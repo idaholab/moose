@@ -14,9 +14,6 @@
 // Forward Declarations
 class ThumbIC;
 
-template <>
-InputParameters validParams<ThumbIC>();
-
 /**
  * ThumbIC creates a rectangle with a half circle on top
  */
@@ -36,4 +33,3 @@ protected:
   const Real _invalue;
   const Real _outvalue;
 };
-

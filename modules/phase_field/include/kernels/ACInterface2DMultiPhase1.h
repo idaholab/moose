@@ -16,9 +16,6 @@
 
 class ACInterface2DMultiPhase1;
 
-template <>
-InputParameters validParams<ACInterface2DMultiPhase1>();
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left(\nabla (L \psi), 1/2 {\partial \kappa} \over {\partial \nabla \eta_{\alpha i}}
@@ -47,4 +44,3 @@ protected:
   std::vector<const VariableValue *> _eta;
   std::vector<const VariableGradient *> _grad_eta;
 };
-

@@ -23,8 +23,6 @@ registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_variable");
 
 registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_kernel");
 
-defineLegacyParams(PorousFlowBasicTHM);
-
 InputParameters
 PorousFlowBasicTHM::validParams()
 {

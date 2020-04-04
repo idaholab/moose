@@ -15,9 +15,6 @@
 class SetupMeshAction;
 class MooseMesh;
 
-template <>
-InputParameters validParams<SetupMeshAction>();
-
 class SetupMeshAction : public MooseObjectAction
 {
 public:

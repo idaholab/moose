@@ -9,8 +9,6 @@
 
 #include "DoubleWellPotential.h"
 
-defineLegacyParams(DoubleWellPotential);
-
 InputParameters
 DoubleWellPotential::validParams()
 {

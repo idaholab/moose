@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", BndsCalcAux);
 
-defineLegacyParams(BndsCalcAux);
-
 InputParameters
 BndsCalcAux::validParams()
 {

@@ -20,9 +20,6 @@ namespace libMesh
 class GhostingFunctor;
 }
 
-template <>
-InputParameters validParams<ElementPointNeighborLayers>();
-
 /**
  * ElementPointNeighborLayers is used to increase the halo or stencil depth of each processor's
  * partition. It is useful when non-local element resources are needed when using DistributedMesh.
@@ -44,4 +41,3 @@ protected:
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
 };
-

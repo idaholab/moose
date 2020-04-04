@@ -14,9 +14,6 @@
 // Forward Declarations
 class INSMomentumNoBCBCLaplaceForm;
 
-template <>
-InputParameters validParams<INSMomentumNoBCBCLaplaceForm>();
-
 /**
  * This class implements the "No BC" boundary condition based on the
  * "Laplace" form of the viscous stress tensor.
@@ -35,4 +32,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

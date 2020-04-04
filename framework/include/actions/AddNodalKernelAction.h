@@ -13,9 +13,6 @@
 
 class AddNodalKernelAction;
 
-template <>
-InputParameters validParams<AddNodalKernelAction>();
-
 class AddNodalKernelAction : public MooseObjectAction
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

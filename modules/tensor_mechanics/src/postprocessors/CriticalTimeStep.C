@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", CriticalTimeStep);
 
-defineLegacyParams(CriticalTimeStep);
-
 InputParameters
 CriticalTimeStep::validParams()
 {

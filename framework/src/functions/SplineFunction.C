@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", SplineFunction);
 
-defineLegacyParams(SplineFunction);
-
 InputParameters
 SplineFunction::validParams()
 {

@@ -14,8 +14,6 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-defineLegacyParams(AuxScalarKernel);
-
 InputParameters
 AuxScalarKernel::validParams()
 {

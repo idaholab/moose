@@ -9,8 +9,6 @@
 
 #include "MutableCoefficientsFunctionInterface.h"
 
-defineLegacyParams(MutableCoefficientsFunctionInterface);
-
 InputParameters
 MutableCoefficientsFunctionInterface::validParams()
 {

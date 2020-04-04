@@ -14,8 +14,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetProblem);
 
-defineLegacyParams(LevelSetProblem);
-
 InputParameters
 LevelSetProblem::validParams()
 {

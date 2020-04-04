@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", InterfaceDiffusionBoundaryTerm);
 
-defineLegacyParams(InterfaceDiffusionBoundaryTerm);
-
 InputParameters
 InterfaceDiffusionBoundaryTerm::validParams()
 {

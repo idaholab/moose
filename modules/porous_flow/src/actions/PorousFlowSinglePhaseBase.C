@@ -13,8 +13,6 @@
 #include "Conversion.h"
 #include "libmesh/string_to_enum.h"
 
-defineLegacyParams(PorousFlowSinglePhaseBase);
-
 InputParameters
 PorousFlowSinglePhaseBase::validParams()
 {

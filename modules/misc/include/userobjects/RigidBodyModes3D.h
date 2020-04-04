@@ -35,4 +35,3 @@ protected:
   unsigned int _disp_y_i;
   unsigned int _disp_z_i;
 };
-

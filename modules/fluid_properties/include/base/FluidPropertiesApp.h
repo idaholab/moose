@@ -13,9 +13,6 @@
 
 class FluidPropertiesApp;
 
-template <>
-InputParameters validParams<FluidPropertiesApp>();
-
 class FluidPropertiesApp : public MooseApp
 {
 public:
@@ -30,4 +27,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsSatAux);
 
-defineLegacyParams(RichardsSatAux);
-
 InputParameters
 RichardsSatAux::validParams()
 {

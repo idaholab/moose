@@ -13,9 +13,6 @@
 
 class VectorCoupledTimeDerivative;
 
-template <>
-InputParameters validParams<VectorCoupledTimeDerivative>();
-
 /**
  *  This calculates the time derivative for a coupled vector variable
  */

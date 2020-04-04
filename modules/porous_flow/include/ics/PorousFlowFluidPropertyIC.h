@@ -14,9 +14,6 @@
 class SinglePhaseFluidProperties;
 class PorousFlowFluidPropertyIC;
 
-template <>
-InputParameters validParams<PorousFlowFluidPropertyIC>();
-
 /**
  * PorousFlowFluidPropertyIC calculates an initial value for a fluid property
  * (such as enthalpy) using pressure and temperature in the single phase regions.

@@ -15,9 +15,6 @@ class ReturnMappingModel;
 
 class CombinedCreepPlasticity;
 
-template <>
-InputParameters validParams<CombinedCreepPlasticity>();
-
 /**
  * One or more constitutive models coupled together.
  */
@@ -54,4 +51,3 @@ protected:
 
 private:
 };
-

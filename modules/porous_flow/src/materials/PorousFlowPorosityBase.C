@@ -9,8 +9,6 @@
 
 #include "PorousFlowPorosityBase.h"
 
-defineLegacyParams(PorousFlowPorosityBase);
-
 InputParameters
 PorousFlowPorosityBase::validParams()
 {

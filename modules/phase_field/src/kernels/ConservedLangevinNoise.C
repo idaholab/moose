@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ConservedLangevinNoise);
 
-defineLegacyParams(ConservedLangevinNoise);
-
 InputParameters
 ConservedLangevinNoise::validParams()
 {

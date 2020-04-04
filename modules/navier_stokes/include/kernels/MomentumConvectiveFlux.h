@@ -13,9 +13,6 @@
 
 class MomentumConvectiveFlux;
 
-template <>
-InputParameters validParams<MomentumConvectiveFlux>();
-
 /**
  * Momentum convective flux: \f$\rho \vec u \vec u : \nabla v \f$
  *
@@ -36,4 +33,3 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 };
-

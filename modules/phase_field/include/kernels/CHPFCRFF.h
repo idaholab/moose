@@ -14,9 +14,6 @@
 // Forward Declarations
 class CHPFCRFF;
 
-template <>
-InputParameters validParams<CHPFCRFF>();
-
 /**
  * This kernel calculates the main portion of the cahn-hilliard residual for the
  * RFF form of the phase field crystal model
@@ -50,4 +47,3 @@ private:
   const Real _b;
   const Real _c;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", TimeStepMaterial);
 
-defineLegacyParams(TimeStepMaterial);
-
 InputParameters
 TimeStepMaterial::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesTestApp", NaNInterfaceTestKernel);
 
-defineLegacyParams(NaNInterfaceTestKernel);
-
 InputParameters
 NaNInterfaceTestKernel::validParams()
 {

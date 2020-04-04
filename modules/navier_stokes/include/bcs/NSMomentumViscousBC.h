@@ -15,9 +15,6 @@
 // Forward Declarations
 class NSMomentumViscousBC;
 
-template <>
-InputParameters validParams<NSMomentumViscousBC>();
-
 /**
  * This class corresponds to the viscous part of the "natural"
  * boundary condition for the momentum equations, i.e.
@@ -56,4 +53,3 @@ protected:
   template <class U>
   friend class NSViscStressTensorDerivs;
 };
-

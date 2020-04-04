@@ -9,8 +9,6 @@
 
 #include "SideIntegralVariableUserObject.h"
 
-defineLegacyParams(SideIntegralVariableUserObject);
-
 InputParameters
 SideIntegralVariableUserObject::validParams()
 {

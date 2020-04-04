@@ -18,9 +18,6 @@
 // Forward Declarations
 class CrackTipEnrichmentStressDivergenceTensors;
 
-template <>
-InputParameters validParams<CrackTipEnrichmentStressDivergenceTensors>();
-
 /**
  * CrackTipEnrichmentStressDivergenceTensors implements the residual and jacobian for enrichement
  * displacement variables.
@@ -73,4 +70,3 @@ private:
   /// enrichment function at node J
   std::vector<Real> _BJ;
 };
-

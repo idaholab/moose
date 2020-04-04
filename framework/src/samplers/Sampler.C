@@ -13,8 +13,6 @@
 // MOOSE includes
 #include "Sampler.h"
 
-defineLegacyParams(Sampler);
-
 InputParameters
 Sampler::validParams()
 {

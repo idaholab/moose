@@ -9,8 +9,6 @@
 
 #include "SlopeReconstructionMultiD.h"
 
-defineLegacyParams(SlopeReconstructionMultiD);
-
 InputParameters
 SlopeReconstructionMultiD::validParams()
 {

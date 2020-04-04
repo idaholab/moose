@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", CosseratStressDivergenceTensors);
 
-defineLegacyParams(CosseratStressDivergenceTensors);
-
 InputParameters
 CosseratStressDivergenceTensors::validParams()
 {

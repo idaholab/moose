@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSMultiACBulkC);
 
-defineLegacyParams(KKSMultiACBulkC);
-
 InputParameters
 KKSMultiACBulkC::validParams()
 {

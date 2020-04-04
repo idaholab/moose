@@ -15,9 +15,6 @@
 // Forward declarations
 class MultiAppVariableValueSampleTransfer;
 
-template <>
-InputParameters validParams<MultiAppVariableValueSampleTransfer>();
-
 /**
  * Samples a variable's value in the Master domain at the point where
  * the MultiApp is.  Copies that value into a field in the MultiApp.

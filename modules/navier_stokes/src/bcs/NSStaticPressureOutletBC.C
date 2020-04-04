@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSStaticPressureOutletBC);
 
-defineLegacyParams(NSStaticPressureOutletBC);
-
 InputParameters
 NSStaticPressureOutletBC::validParams()
 {

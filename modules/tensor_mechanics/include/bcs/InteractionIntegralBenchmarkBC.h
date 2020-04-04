@@ -16,8 +16,6 @@
 class InteractionIntegralBenchmarkBC;
 class Function;
 
-template <>
-InputParameters validParams<InteractionIntegralBenchmarkBC>();
 void addInteractionIntegralBenchmarkBCParams(InputParameters & params);
 
 /**

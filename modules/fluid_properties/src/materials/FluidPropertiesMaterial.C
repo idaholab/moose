@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterial);
 
-defineLegacyParams(FluidPropertiesMaterial);
-
 InputParameters
 FluidPropertiesMaterial::validParams()
 {

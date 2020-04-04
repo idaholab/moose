@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegralBenchmarkBC);
 
-defineLegacyParams(InteractionIntegralBenchmarkBC);
-
 InputParameters
 InteractionIntegralBenchmarkBC::validParams()
 {

@@ -15,8 +15,6 @@
 
 registerMooseObject("PhaseFieldApp", BimodalInverseSuperellipsoidsIC);
 
-defineLegacyParams(BimodalInverseSuperellipsoidsIC);
-
 InputParameters
 BimodalInverseSuperellipsoidsIC::validParams()
 {

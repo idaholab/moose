@@ -15,9 +15,6 @@
 class IdealRealGasMixtureFluidProperties;
 class SinglePhaseFluidProperties;
 
-template <>
-InputParameters validParams<IdealRealGasMixtureFluidProperties>();
-
 /**
  * Class for fluid properties of an arbitrary vapor mixture
  *

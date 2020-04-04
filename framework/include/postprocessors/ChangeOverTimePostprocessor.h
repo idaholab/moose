@@ -13,9 +13,6 @@
 
 class ChangeOverTimePostprocessor;
 
-template <>
-InputParameters validParams<ChangeOverTimePostprocessor>();
-
 /**
  * Computes the change in a post-processor value, or the magnitude of its
  * relative change, over a time step or over the entire transient.
@@ -50,4 +47,3 @@ protected:
   /// initial post-processor value
   Real & _pps_value_initial;
 };
-

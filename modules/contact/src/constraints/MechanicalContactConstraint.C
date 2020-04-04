@@ -28,8 +28,6 @@
 
 registerMooseObject("ContactApp", MechanicalContactConstraint);
 
-defineLegacyParams(MechanicalContactConstraint);
-
 InputParameters
 MechanicalContactConstraint::validParams()
 {

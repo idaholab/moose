@@ -15,8 +15,6 @@
 
 registerMooseObject("ContactApp", NormalNodalMechanicalContact);
 
-defineLegacyParams(NormalNodalMechanicalContact);
-
 InputParameters
 NormalNodalMechanicalContact::validParams()
 {

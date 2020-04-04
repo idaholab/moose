@@ -11,8 +11,6 @@
 //
 #include "RichardsSeff.h"
 
-defineLegacyParams(RichardsSeff);
-
 InputParameters
 RichardsSeff::validParams()
 {

@@ -16,9 +16,6 @@
 // Forward Declarations
 class RichardsSatAux;
 
-template <>
-InputParameters validParams<RichardsSatAux>();
-
 /**
  * Fluid Saturation as a function of effective saturation
  */
@@ -38,4 +35,3 @@ protected:
   /// User object defining saturation as a function of effective saturation
   const RichardsSat & _sat_UO;
 };
-

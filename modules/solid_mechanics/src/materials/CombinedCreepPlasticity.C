@@ -14,8 +14,6 @@
 
 registerMooseObject("SolidMechanicsApp", CombinedCreepPlasticity);
 
-defineLegacyParams(CombinedCreepPlasticity);
-
 InputParameters
 CombinedCreepPlasticity::validParams()
 {

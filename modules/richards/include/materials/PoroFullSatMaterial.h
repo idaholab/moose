@@ -15,9 +15,6 @@
 // Forward Declarations
 class PoroFullSatMaterial;
 
-template <>
-InputParameters validParams<PoroFullSatMaterial>();
-
 /**
  * Material designed to calculate and store all the
  * quantities needed for the fluid-flow part of
@@ -86,4 +83,3 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 };
-

@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", MechanicsOSPD);
 
-defineLegacyParams(MechanicsOSPD);
-
 InputParameters
 MechanicsOSPD::validParams()
 {

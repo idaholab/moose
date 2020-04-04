@@ -13,9 +13,6 @@
 
 class ComputeAxisymmetricRZIncrementalStrain;
 
-template <>
-InputParameters validParams<ComputeAxisymmetricRZIncrementalStrain>();
-
 /**
  * ComputeAxisymmetricRZIncrementalStrain defines a strain increment only
  * for incremental strains in an Axisymmetric simulation.

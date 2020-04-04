@@ -101,4 +101,3 @@ protected:
   Factory & _factory;
   std::shared_ptr<FEProblem> _fe_problem;
 };
-

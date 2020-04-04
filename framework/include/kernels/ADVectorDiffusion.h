@@ -29,4 +29,3 @@ protected:
 
   usingVectorKernelMembers;
 };
-

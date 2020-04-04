@@ -11,7 +11,6 @@
 // Original class author: A.M. Jokisaari
 // O. Heinonen, et al. at ANL also have contributed significantly - thanks guys!
 
-
 #include "SolidMechanicsMaterial.h"
 #include "SymmTensor.h"
 #include "SymmAnisotropicElasticityTensor.h"
@@ -25,9 +24,6 @@
 
 // Forward declaration
 class LinearGeneralAnisotropicMaterial;
-
-template <>
-InputParameters validParams<LinearGeneralAnisotropicMaterial>();
 
 class LinearGeneralAnisotropicMaterial : public SolidMechanicsMaterial
 {
@@ -59,4 +55,3 @@ private:
   // Individual material information
   SymmAnisotropicElasticityTensor _Cijkl_matrix;
 };
-

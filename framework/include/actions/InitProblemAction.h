@@ -13,9 +13,6 @@
 
 class InitProblemAction;
 
-template <>
-InputParameters validParams<InitProblemAction>();
-
 class InitProblemAction : public Action
 {
 public:
@@ -25,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

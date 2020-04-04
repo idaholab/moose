@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", PHAux);
 
-defineLegacyParams(PHAux);
-
 InputParameters
 PHAux::validParams()
 {

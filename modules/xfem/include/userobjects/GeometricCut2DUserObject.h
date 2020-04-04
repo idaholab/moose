@@ -14,9 +14,6 @@
 // Forward declarations
 class GeometricCut2DUserObject;
 
-template <>
-InputParameters validParams<GeometricCut2DUserObject>();
-
 class GeometricCut2DUserObject : public GeometricCutUserObject
 {
 public:
@@ -62,4 +59,3 @@ protected:
   /// Vector of start/end times for each cut segment
   std::vector<std::pair<Real, Real>> _cut_time_ranges;
 };
-

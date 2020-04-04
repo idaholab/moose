@@ -13,9 +13,6 @@
 
 class HorizonStabilizedFiniteStrainMechanicsNOSPD;
 
-template <>
-InputParameters validParams<HorizonStabilizedFiniteStrainMechanicsNOSPD>();
-
 /**
  * Kernel class for horizon-stabilized peridynamic correspondence model for finite strain
  */

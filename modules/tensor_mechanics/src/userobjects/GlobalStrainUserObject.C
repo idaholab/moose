@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", GlobalStrainUserObject);
 
-defineLegacyParams(GlobalStrainUserObject);
-
 InputParameters
 GlobalStrainUserObject::validParams()
 {

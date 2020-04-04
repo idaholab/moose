@@ -14,9 +14,6 @@
 // Forward Declarations
 class PFCRFFMaterial;
 
-template <>
-InputParameters validParams<PFCRFFMaterial>();
-
 class PFCRFFMaterial : public Material
 {
 public:
@@ -52,4 +49,3 @@ private:
 
   unsigned int _num_L;
 };
-

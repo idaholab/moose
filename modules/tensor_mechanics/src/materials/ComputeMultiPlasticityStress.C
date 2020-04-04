@@ -18,8 +18,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeMultiPlasticityStress);
 
-defineLegacyParams(ComputeMultiPlasticityStress);
-
 InputParameters
 ComputeMultiPlasticityStress::validParams()
 {

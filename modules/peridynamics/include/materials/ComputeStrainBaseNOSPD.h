@@ -15,9 +15,6 @@
 
 class ComputeStrainBaseNOSPD;
 
-template <>
-InputParameters validParams<ComputeStrainBaseNOSPD>();
-
 /**
  * Base material class for correspondence material model
  */

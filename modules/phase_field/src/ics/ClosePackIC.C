@@ -15,8 +15,6 @@
 
 registerMooseObject("PhaseFieldApp", ClosePackIC);
 
-defineLegacyParams(ClosePackIC);
-
 InputParameters
 ClosePackIC::validParams()
 {

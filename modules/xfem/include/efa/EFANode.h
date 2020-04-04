@@ -38,4 +38,3 @@ public:
   EFANode * parent() const;
   void removeParent();
 };
-

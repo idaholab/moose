@@ -18,9 +18,6 @@
 // Forward declerations
 class ParsedAddSideset;
 
-template <>
-InputParameters validParams<ParsedAddSideset>();
-
 /**
  * MeshModifier for defining a Sideset by a parsed expression and
  * optionally by looking at the subdomain a side's element belongs to
@@ -54,4 +51,3 @@ private:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
-

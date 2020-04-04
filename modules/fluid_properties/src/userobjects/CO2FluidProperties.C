@@ -15,8 +15,6 @@
 
 registerMooseObject("FluidPropertiesApp", CO2FluidProperties);
 
-defineLegacyParams(CO2FluidProperties);
-
 InputParameters
 CO2FluidProperties::validParams()
 {

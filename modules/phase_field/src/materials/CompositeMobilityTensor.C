@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CompositeMobilityTensor);
 
-defineLegacyParams(CompositeMobilityTensor);
-
 InputParameters
 CompositeMobilityTensor::validParams()
 {

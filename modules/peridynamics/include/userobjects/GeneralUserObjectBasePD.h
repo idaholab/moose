@@ -14,9 +14,6 @@
 
 class GeneralUserObjectBasePD;
 
-template <>
-InputParameters validParams<GeneralUserObjectBasePD>();
-
 class GeneralUserObjectBasePD : public GeneralUserObject
 {
 public:

@@ -32,4 +32,3 @@ public:
   // common methods
   std::vector<EFANode *> getCommonNodes(EFAFragment * other) const;
 };
-

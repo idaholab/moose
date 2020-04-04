@@ -22,8 +22,6 @@
 
 registerMooseObject("HeatConductionApp", UnobstructedPlanarViewFactor);
 
-defineLegacyParams(UnobstructedPlanarViewFactor);
-
 InputParameters
 UnobstructedPlanarViewFactor::validParams()
 {

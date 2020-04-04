@@ -10,8 +10,6 @@
 #include "NodalPatchRecovery.h"
 #include "SwapBackSentinel.h"
 
-defineLegacyParams(NodalPatchRecovery);
-
 InputParameters
 NodalPatchRecovery::validParams()
 {

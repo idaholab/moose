@@ -15,9 +15,6 @@
 // Forward declerations
 class CommonOutputAction;
 
-template <>
-InputParameters validParams<CommonOutputAction>();
-
 /**
  * Meta-action for creating common output object parameters
  * This action serves two purpose, first it adds common output object
@@ -53,4 +50,3 @@ private:
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };
-

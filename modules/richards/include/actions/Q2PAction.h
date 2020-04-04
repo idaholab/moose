@@ -13,9 +13,6 @@
 
 class Q2PAction;
 
-template <>
-InputParameters validParams<Q2PAction>();
-
 class Q2PAction : public Action
 {
 public:
@@ -46,4 +43,3 @@ private:
   bool _total_masses_not_outputted;
   bool _no_mass_calculations;
 };
-

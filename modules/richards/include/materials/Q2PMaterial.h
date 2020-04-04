@@ -14,9 +14,6 @@
 // Forward Declarations
 class Q2PMaterial;
 
-template <>
-InputParameters validParams<Q2PMaterial>();
-
 /**
  * Q2P Material.  Defines permeability, porosity and gravity
  */
@@ -51,4 +48,3 @@ protected:
 
   virtual void computeQpProperties();
 };
-

@@ -16,9 +16,6 @@
 // Forward Declarations
 class LayeredIntegral;
 
-template <>
-InputParameters validParams<LayeredIntegral>();
-
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified
  * number of intervals in a direction (x,y,z).

@@ -25,4 +25,3 @@ public:
   Moose::EigenProblemType _eigen_problem_type;
   Moose::WhichEigenPairs _which_eigen_pairs;
 };
-

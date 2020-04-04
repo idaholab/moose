@@ -18,8 +18,6 @@
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegral);
 
-defineLegacyParams(InteractionIntegral);
-
 MooseEnum
 InteractionIntegral::qFunctionType()
 {

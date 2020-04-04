@@ -41,4 +41,3 @@ protected:
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::computeQpVelocity;
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::_velocity;
 };
-

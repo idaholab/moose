@@ -14,9 +14,6 @@
 
 class SlopeLimitingMultiDBase;
 
-template <>
-InputParameters validParams<SlopeLimitingMultiDBase>();
-
 /**
  * Base class for multi-dimensional slope limiting to limit
  * the slopes of cell average variables
@@ -32,4 +29,3 @@ protected:
   /// slope reconstruction user object
   const SlopeReconstructionBase & _rslope;
 };
-

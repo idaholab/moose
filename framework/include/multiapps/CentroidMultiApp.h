@@ -14,9 +14,6 @@
 
 class CentroidMultiApp;
 
-template <>
-InputParameters validParams<CentroidMultiApp>();
-
 /**
  * Automatically generates Sub-App positions from centroids of elements in the master mesh.
  */

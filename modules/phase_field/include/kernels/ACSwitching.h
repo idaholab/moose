@@ -14,9 +14,6 @@
 // Forward Declarations
 class ACSwitching;
 
-template <>
-InputParameters validParams<ACSwitching>();
-
 /**
  * ACSwitching adds terms of the form
  * \f$ dh_a/d\eta_{ai} F_a + dh_b/d\eta_{ai} F_b + ... \f$

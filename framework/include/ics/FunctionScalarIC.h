@@ -15,9 +15,6 @@
 class FunctionScalarIC;
 class Function;
 
-template <>
-InputParameters validParams<FunctionScalarIC>();
-
 class FunctionScalarIC : public ScalarInitialCondition
 {
 public:

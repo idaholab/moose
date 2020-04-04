@@ -12,8 +12,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FXFluxBC);
 
-defineLegacyParams(FXFluxBC);
-
 InputParameters
 FXFluxBC::validParams()
 {

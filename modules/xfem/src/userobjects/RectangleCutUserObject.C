@@ -17,8 +17,6 @@
 
 registerMooseObject("XFEMApp", RectangleCutUserObject);
 
-defineLegacyParams(RectangleCutUserObject);
-
 InputParameters
 RectangleCutUserObject::validParams()
 {

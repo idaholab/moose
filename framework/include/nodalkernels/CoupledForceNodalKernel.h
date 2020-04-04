@@ -14,9 +14,6 @@
 // Forward Declarations
 class CoupledForceNodalKernel;
 
-template <>
-InputParameters validParams<CoupledForceNodalKernel>();
-
 /**
  * Adds a force proportional to the value of the coupled variable
  */

@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedMassTimeDerivative);
 
-defineLegacyParams(PorousFlowFullySaturatedMassTimeDerivative);
-
 InputParameters
 PorousFlowFullySaturatedMassTimeDerivative::validParams()
 {

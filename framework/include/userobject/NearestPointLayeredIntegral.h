@@ -17,9 +17,6 @@
 // Forward Declarations
 class NearestPointLayeredIntegral;
 
-template <>
-InputParameters validParams<NearestPointLayeredIntegral>();
-
 /**
  * This UserObject computes integrals of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).

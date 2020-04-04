@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", InterfaceReaction);
 
-defineLegacyParams(InterfaceReaction);
-
 InputParameters
 InterfaceReaction::validParams()
 {

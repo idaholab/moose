@@ -14,9 +14,6 @@
 // Forward Declarations
 class GBAnisotropyBase;
 
-template <>
-InputParameters validParams<GBAnisotropyBase>();
-
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)
  * Parameter determination method is elaborated in Phys. Rev. B, 78(2), 024113, 2008, by N. Moelans
@@ -70,4 +67,3 @@ protected:
   std::vector<const VariableValue *> _vals;
   std::vector<const VariableGradient *> _grad_vals;
 };
-

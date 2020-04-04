@@ -14,9 +14,6 @@
 // Forward declarations
 class ElementSubdomainIDGenerator;
 
-template <>
-InputParameters validParams<ElementSubdomainIDGenerator>();
-
 /**
  * MeshGenerator for assigning subdomain IDs of all elements
  */
@@ -32,4 +29,3 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 };
-

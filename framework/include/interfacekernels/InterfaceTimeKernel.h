@@ -15,9 +15,6 @@
 // Forward Declarations
 class InterfaceTimeKernel;
 
-template <>
-InputParameters validParams<InterfaceTimeKernel>();
-
 /**
  * InterfaceTimeKernel is responsible for adding time derivative contributions for physics across
  * interfaces
@@ -51,4 +48,3 @@ protected:
   /// Derivative of _neighbor_value_dot with respect to u
   const VariableValue & _dneighbor_value_dot_du;
 };
-

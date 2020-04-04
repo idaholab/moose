@@ -29,7 +29,3 @@ public:
 private:
   const std::string _var_name_base;
 };
-
-template <>
-InputParameters validParams<EulerAngle2RGBAction>();
-

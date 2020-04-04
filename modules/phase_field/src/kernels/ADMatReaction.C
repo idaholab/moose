@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADMatReaction);
 
-defineADLegacyParams(ADMatReaction);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADMatReaction<compute_stage>::validParams()

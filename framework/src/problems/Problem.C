@@ -11,8 +11,6 @@
 #include "Factory.h"
 #include "Function.h"
 
-defineLegacyParams(Problem);
-
 InputParameters
 Problem::validParams()
 {

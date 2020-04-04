@@ -15,9 +15,6 @@
 class TorqueReaction;
 class AuxiliarySystem;
 
-template <>
-InputParameters validParams<TorqueReaction>();
-
 /*
  * TorqueReaction calculates the torque in 2D and 3D about a user-specified
  * axis of rotation centered at a user-specied origin. The default origin is the

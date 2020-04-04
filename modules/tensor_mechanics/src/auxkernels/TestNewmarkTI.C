@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", TestNewmarkTI);
 
-defineLegacyParams(TestNewmarkTI);
-
 InputParameters
 TestNewmarkTI::validParams()
 {

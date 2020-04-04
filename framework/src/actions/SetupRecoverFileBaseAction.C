@@ -17,8 +17,6 @@
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
 registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "recover_meta_data");
 
-defineLegacyParams(SetupRecoverFileBaseAction);
-
 InputParameters
 SetupRecoverFileBaseAction::validParams()
 {

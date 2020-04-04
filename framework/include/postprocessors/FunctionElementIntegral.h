@@ -13,9 +13,6 @@
 
 class FunctionElementIntegral;
 
-template <>
-InputParameters validParams<FunctionElementIntegral>();
-
 /**
  * Integrates a function over elements
  */

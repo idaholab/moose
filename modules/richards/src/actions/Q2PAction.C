@@ -23,8 +23,6 @@ registerMooseAction("RichardsApp", Q2PAction, "add_function");
 
 registerMooseAction("RichardsApp", Q2PAction, "add_postprocessor");
 
-defineLegacyParams(Q2PAction);
-
 InputParameters
 Q2PAction::validParams()
 {

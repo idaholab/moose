@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesApp", PressureAux);
 
-defineLegacyParams(PressureAux);
-
 InputParameters
 PressureAux::validParams()
 {

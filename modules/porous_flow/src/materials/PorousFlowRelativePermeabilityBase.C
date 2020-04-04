@@ -9,8 +9,6 @@
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
-defineLegacyParams(PorousFlowRelativePermeabilityBase);
-
 InputParameters
 PorousFlowRelativePermeabilityBase::validParams()
 {
