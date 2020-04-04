@@ -1,6 +1,6 @@
-# PolynomialChaosLocalSensitivity
+# PolynomialChaosSobolStatistics
 
-!syntax description /VectorPostprocessors/SobolStatistics
+!syntax description /VectorPostprocessors/PolynomialChaosSobolStatistics
 
 ## Overview
 
