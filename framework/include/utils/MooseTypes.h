@@ -494,6 +494,78 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 #define ADTemplateVariableTestSecond typename OutputTools<T>::VariableTestSecond
 #define ADTemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
 
+#define declareADValidParams(ADObjectType)                                                         \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>();                                           \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()
+
+#define defineADValidParams(ADObjectType, ADBaseObjectType, addedParamCode)                        \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    InputParameters params = validParams<ADBaseObjectType<RESIDUAL>>();                            \
+    addedParamCode;                                                                                \
+    return params;                                                                                 \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return validParams<ADObjectType<RESIDUAL>>();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineLegacyParams(ObjectType)                                                             \
+  template <>                                                                                      \
+  InputParameters validParams<ObjectType>()                                                        \
+  {                                                                                                \
+    return ObjectType::validParams();                                                              \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineADLegacyParams(ADObjectType)                                                         \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    return ADObjectType<RESIDUAL>::validParams();                                                  \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return ADObjectType<JACOBIAN>::validParams();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineADBaseValidParams(ADObjectType, BaseObjectType, addedParamCode)                      \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    InputParameters params = validParams<BaseObjectType>();                                        \
+    addedParamCode;                                                                                \
+    return params;                                                                                 \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return validParams<ADObjectType<RESIDUAL>>();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
+#define defineADValidParamsFromEmpty(ADObjectType, addedParamCode)                                 \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  {                                                                                                \
+    InputParameters params = emptyInputParameters();                                               \
+    addedParamCode;                                                                                \
+    return params;                                                                                 \
+  }                                                                                                \
+  template <>                                                                                      \
+  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
+  {                                                                                                \
+    return validParams<ADObjectType<RESIDUAL>>();                                                  \
+  }                                                                                                \
+  void mooseClangFormatFunction()
+
 namespace Moose
 {
 extern const processor_id_type INVALID_PROCESSOR_ID;
