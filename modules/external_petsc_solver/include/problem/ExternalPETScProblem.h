@@ -25,14 +25,13 @@ public:
   static InputParameters validParams();
 
   ExternalPETScProblem(const InputParameters & params);
-#if LIBMESH_HAVE_PETSC
-  ~ExternalPETScProblem() { VecDestroy(&_petsc_sol); }
-#endif
 
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
   virtual bool converged() override { return _petsc_converged; }
+
+  virtual void advanceState() override;
 
 private:
   /// The name of the variable to transfer to
@@ -45,5 +44,7 @@ private:
   TS & _ts;
   /// PETSc solver solution
   Vec & _petsc_sol;
+  /// Solution at the previous time step
+  Vec & _petsc_sol_old;
 #endif
 };

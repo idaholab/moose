@@ -3,13 +3,27 @@
     type = 'Exodiff'
     input = 'external_petsc_master.i'
     exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
-    max_parallel = 2
-    min_parallel = 2
     requirement = "MOOSE shall support an code coupling interface for PETSc external solver."
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its"'
     design = "ExternalProblem.md"
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
   []
+
+  [external_transient_subcycling]
+    type = 'Exodiff'
+    input = 'external_petsc_master.i'
+    exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
+    requirement = "MOOSE shall support an code coupling interface for PETSc external solver."
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true'
+    design = "ExternalProblem.md"
+    allow_warnings = true
+    prereq = 'external_transient'
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+  []
+
 []

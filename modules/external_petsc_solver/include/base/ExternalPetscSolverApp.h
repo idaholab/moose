@@ -39,10 +39,14 @@ public:
 
   Vec & getExternalPETScTSSolution() { return _petsc_sol; }
 
+  Vec & getExternalPETScTSSolutionOld() { return _petsc_sol_old; }
+
 private:
   /// Time-stepping (TS) object
   TS _ts;
   /// PETSc solver solution
   Vec _petsc_sol;
+  /// Solution at the previous time step
+  Vec _petsc_sol_old;
 #endif
 };

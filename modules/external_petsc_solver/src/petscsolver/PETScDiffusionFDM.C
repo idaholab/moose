@@ -76,7 +76,12 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSetIJacobian(*ts, NULL, NULL, FormIJacobian, NULL);
   CHKERRQ(ierr);
-
+  /*
+   * Make it consistent with the original solver
+   * This can be changed during runtime via -ts_dt
+   */
+  ierr = TSSetTimeStep(*ts, 0.2);
+  CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 

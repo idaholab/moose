@@ -38,6 +38,8 @@ ExternalPetscSolverApp::ExternalPetscSolverApp(InputParameters parameters) : Moo
   // This is required because libMesh incorrectly treats the PETSc parallel vector as a ghost vector
   // We should be able to remove this line of code once libMesh is updated
   VecMPISetGhost(_petsc_sol, 0, nullptr);
+
+  VecDuplicate(_petsc_sol, &_petsc_sol_old);
 #else
   mooseError("You need to have PETSc installed to use ExternalPETScApp");
 #endif
@@ -46,6 +48,8 @@ ExternalPetscSolverApp::ExternalPetscSolverApp(InputParameters parameters) : Moo
 ExternalPetscSolverApp::~ExternalPetscSolverApp()
 {
 #if LIBMESH_HAVE_PETSC
+  VecDestroy(&_petsc_sol);
+  VecDestroy(&_petsc_sol_old);
   PETScExternalSolverDestroy(_ts);
 #endif
 }
@@ -68,6 +72,10 @@ ExternalPetscSolverApp::backup()
   PetscVector<Number> petsc_sol(_petsc_sol, comm());
   dataStore(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
 
+  // Backup the old solution
+  PetscVector<Number> petsc_sol_old(_petsc_sol_old, comm());
+  dataStore(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol_old), nullptr);
+
   return backup;
 }
 
@@ -79,6 +87,10 @@ ExternalPetscSolverApp::restore(std::shared_ptr<Backup> backup, bool for_restart
   // Restore previous solution
   PetscVector<Number> petsc_sol(_petsc_sol, comm());
   dataLoad(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
+
+  // Restore the solution at the previous time step
+  PetscVector<Number> petsc_sol_old(_petsc_sol_old, comm());
+  dataLoad(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol_old), nullptr);
 }
 
 void

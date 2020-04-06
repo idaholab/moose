@@ -17,6 +17,9 @@
 
 [Executioner]
   type = Transient
+  [./TimeStepper]
+    type = ExternalPetscTimeStepper
+  [../]
 []
 
 [AuxVariables]

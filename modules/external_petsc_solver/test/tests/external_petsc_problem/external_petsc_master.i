@@ -78,7 +78,6 @@
 [MultiApps]
   [./sub_app]
     type = TransientMultiApp
-    sub_cycling = true
     input_files = 'petsc_problem_transient.i'
     app_type = ExternalPetscSolverApp
     library_path = '../../../../external_petsc_solver/lib'
@@ -87,7 +86,7 @@
 
 [Transfers]
   [./fromsub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     multi_app = sub_app
     source_variable = u

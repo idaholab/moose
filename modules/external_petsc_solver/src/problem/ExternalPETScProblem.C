@@ -32,9 +32,11 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
 #if LIBMESH_HAVE_PETSC
     ,
     _ts(_petsc_app.getExternalPETScTS()),
-    _petsc_sol(_petsc_app.getExternalPETScTSSolution())
+    _petsc_sol(_petsc_app.getExternalPETScTSSolution()),
+    _petsc_sol_old(_petsc_app.getExternalPETScTSSolutionOld())
 {
   FormInitialSolution(_ts, _petsc_sol, NULL);
+  VecCopy(_petsc_sol, _petsc_sol_old);
 }
 #else
 {
@@ -48,6 +50,16 @@ ExternalPETScProblem::externalSolve()
 #if LIBMESH_HAVE_PETSC
   _console << "PETSc External Solve!" << std::endl;
   externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time(), &_petsc_converged);
+#endif
+}
+
+void
+ExternalPETScProblem::advanceState()
+{
+  FEProblemBase::advanceState();
+#if LIBMESH_HAVE_PETSC
+  // Save current solution because we are moving to the next step
+  VecCopy(_petsc_sol, _petsc_sol_old);
 #endif
 }
 
@@ -106,6 +118,9 @@ ExternalPETScProblem::syncSolutions(Direction direction)
     sync_to_var.sys().solution().close();
 
     DMDAVecRestoreArray(da, _petsc_sol, &_petsc_sol_array);
+
+    // Make the solution and the current local solution consistent
+    sync_to_var.sys().update();
   }
   else if (direction == Direction::TO_EXTERNAL_APP)
   {
