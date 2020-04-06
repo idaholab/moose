@@ -12,7 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declarations
-class MathFreeEnergy;
 
 /**
  * Material class that creates the math free energy and its derivatives

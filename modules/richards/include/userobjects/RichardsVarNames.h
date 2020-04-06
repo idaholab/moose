@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
 
-class RichardsVarNames;
-
 /**
  * This holds maps between pressure_var or pressure_var, sat_var
  * used in RichardsMaterial and kernels, etc, and the

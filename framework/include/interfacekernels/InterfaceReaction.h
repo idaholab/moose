@@ -12,7 +12,6 @@
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class InterfaceReaction;
 
 /**
  * Implements a reaction to establish ReactionRate=k_f*u-k_b*v

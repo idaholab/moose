@@ -11,8 +11,6 @@
 
 #include "BondStatusBasePD.h"
 
-class StretchBasedFailureCriterionPD;
-
 /**
  * Bond stretch based failure ctriterion to update the bond status for fracture modeling
  */

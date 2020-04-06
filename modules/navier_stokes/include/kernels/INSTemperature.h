@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSTemperature;
 
 /**
  * This class computes the residual and Jacobian contributions for the

@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticWeakPlaneTensile;
-
 /**
  * Rate-independent associative weak-plane tensile failure
  * with hardening/softening of the tensile strength

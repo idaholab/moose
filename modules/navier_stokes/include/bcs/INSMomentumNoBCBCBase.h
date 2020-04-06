@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class INSMomentumNoBCBCBase;
 
 /**
  * Base class for the "No BC" boundary condition.  Subclasses will

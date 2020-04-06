@@ -18,10 +18,6 @@
   using ADWeakPlaneStress<compute_stage>::_direction;
 
 // Forward Declarations
-template <ComputeStage>
-class ADWeakPlaneStress;
-
-declareADValidParams(ADWeakPlaneStress);
 
 /**
  * ADWeakPlaneStress is the automatic differentiation version of WeakPlaneStress

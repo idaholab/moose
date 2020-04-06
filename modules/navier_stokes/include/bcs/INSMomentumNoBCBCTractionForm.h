@@ -12,7 +12,6 @@
 #include "INSMomentumNoBCBCBase.h"
 
 // Forward Declarations
-class INSMomentumNoBCBCTractionForm;
 
 /**
  * This class implements the "No BC" boundary condition based on the

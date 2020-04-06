@@ -12,7 +12,6 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class LevelSetOlssonTerminator;
 /**
  * Terminates the solve based on the criteria defined in Olsson et. al. (2007).
  */

@@ -11,8 +11,6 @@
 
 #include "Predictor.h"
 
-class SimplePredictor;
-
 /**
  * A SimplePredictor uses an algorithm that will predict the next solution based on
  * previous solutions.  Basically, it works like:

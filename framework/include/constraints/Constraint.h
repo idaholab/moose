@@ -22,7 +22,6 @@
 
 // Forward Declarations
 class Assembly;
-class Constraint;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;

@@ -15,7 +15,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declaration
-class GrainGrowthAction;
 
 class GrainGrowthAction : public Action
 {

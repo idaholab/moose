@@ -37,7 +37,6 @@ typedef void (*creep_t)(Real DECRA[],
                         int * KINC);
 
 // Forward Declaration
-class AbaqusCreepMaterial;
 
 // class define a property
 // class AbaqusCreepMaterial : public VolumetricModel

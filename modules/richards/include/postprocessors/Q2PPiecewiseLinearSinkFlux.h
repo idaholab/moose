@@ -17,7 +17,6 @@
 class Function;
 
 // Forward Declarations
-class Q2PPiecewiseLinearSinkFlux;
 
 /**
  * This postprocessor computes the fluid flux to a Q2PPiecewiseLinearSink.

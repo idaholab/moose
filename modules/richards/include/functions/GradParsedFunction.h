@@ -12,7 +12,6 @@
 #include "MooseParsedFunction.h"
 
 // Forward declarations
-class GradParsedFunction;
 
 /**
  * returns the central difference approx to the derivative

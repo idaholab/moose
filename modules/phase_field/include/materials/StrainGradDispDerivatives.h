@@ -15,7 +15,6 @@
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-class StrainGradDispDerivatives;
 
 class StrainGradDispDerivatives : public DerivativeMaterialInterface<Material>
 {

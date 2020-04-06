@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class EmptyAction;
-
 /**
  * Do nothing action.
  */

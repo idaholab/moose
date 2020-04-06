@@ -12,8 +12,6 @@
 #include "TimeSequenceStepperBase.h"
 #include "DelimitedFileReader.h"
 
-class CSVTimeSequenceStepper;
-
 /**
  * Solves the PDEs at a sequence of time points given as a column in a
  * text table file (such as a *.csv file). This class uses a

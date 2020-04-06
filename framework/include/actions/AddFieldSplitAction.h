@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddFieldSplitAction;
-
 class AddFieldSplitAction : public MooseObjectAction
 {
 public:

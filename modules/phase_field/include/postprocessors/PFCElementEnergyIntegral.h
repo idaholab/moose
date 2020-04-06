@@ -13,7 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class PFCElementEnergyIntegral;
 
 /**
  * Compute a volume integral of the specified variable.

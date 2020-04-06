@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class CoupledConvectionReactionSub;
-
 /**
  * Convection of primary species in given equilibrium species
  */

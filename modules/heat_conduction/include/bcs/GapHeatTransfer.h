@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 #include "GapConductance.h"
 
-class GapHeatTransfer;
 class PenetrationInfo;
 
 /**

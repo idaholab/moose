@@ -11,8 +11,6 @@
 
 #include "PorousFlowFluidStateBase.h"
 
-class PorousFlowFluidStateFlash;
-
 /**
  * Compositional flash routines for miscible multiphase flow classes with multiple
  * fluid components

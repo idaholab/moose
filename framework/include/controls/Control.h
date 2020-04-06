@@ -20,7 +20,6 @@
 #include "VectorPostprocessorInterface.h"
 
 // Forward declarations
-class Control;
 class FEProblemBase;
 class InputParameterWarehouse;
 

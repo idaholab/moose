@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDGKernelAction;
-
 class AddDGKernelAction : public MooseObjectAction
 {
 public:

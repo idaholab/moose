@@ -13,7 +13,6 @@
 #include "AdvancedOutput.h"
 
 // Forward declerations
-class OversampleOutput;
 class MooseMesh;
 
 // libMesh forward declarations

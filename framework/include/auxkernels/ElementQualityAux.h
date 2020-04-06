@@ -14,7 +14,6 @@
 #include "libmesh/enum_elem_quality.h"
 
 // Forward Declarations
-class ElementQualityAux;
 
 /**
  * Calculates element quality for each element

@@ -11,8 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-class EqualGradientLagrangeMultiplier;
-
 /**
  * Lagrange multiplier "FaceKernel" that is used in conjunction with
  * EqualGradientLagrangeInterface.

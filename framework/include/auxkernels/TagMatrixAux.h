@@ -12,7 +12,6 @@
 #include "TagVectorAux.h"
 
 // Forward Declarations
-class TagMatrixAux;
 
 /**
  * For visualization or other purposes, the diagnal of the matrix of a tag

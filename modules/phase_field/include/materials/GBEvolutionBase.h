@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class GBEvolutionBase;
 
 class GBEvolutionBase : public DerivativeMaterialInterface<Material>
 {

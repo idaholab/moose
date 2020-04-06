@@ -11,8 +11,6 @@
 
 #include "FunctionDirichletBC.h"
 
-class FXValueBC;
-
 /**
  * Defines an FX-based boundary condition that forces the values to match
  */

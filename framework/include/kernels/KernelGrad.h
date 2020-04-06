@@ -13,7 +13,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class KernelGrad;
 
 /**
  * The KernelGrad class is responsible for calculating the residuals in form:

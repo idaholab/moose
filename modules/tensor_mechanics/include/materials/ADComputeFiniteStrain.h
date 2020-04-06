@@ -17,11 +17,6 @@
   using ADComputeFiniteStrain<compute_stage>::computeQpStrain;                                     \
   using ADComputeFiniteStrain<compute_stage>::computeQpIncrements
 
-template <ComputeStage>
-class ADComputeFiniteStrain;
-
-declareADValidParams(ADComputeFiniteStrain);
-
 /**
  * ADComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.
  */

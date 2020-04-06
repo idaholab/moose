@@ -11,11 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADFunctionNeumannBC;
 class Function;
-
-declareADValidParams(ADFunctionNeumannBC);
 
 /**
  * Boundary condition of a Neumann style whose value is computed by a user-defined function

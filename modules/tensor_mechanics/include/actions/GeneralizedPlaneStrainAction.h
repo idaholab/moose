@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class GeneralizedPlaneStrainAction;
-
 class GeneralizedPlaneStrainAction : public Action
 {
 public:

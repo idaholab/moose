@@ -14,7 +14,6 @@
 #include "Restartable.h"
 
 // Forward declarations
-class TimeIntegrator;
 class FEProblemBase;
 class SystemBase;
 class NonlinearSystemBase;

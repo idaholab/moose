@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "RankTwoTensor.h"
 
-class TensorMechanicsPlasticModel;
-
 /**
  * Plastic Model base class
  * The virtual functions written below must be

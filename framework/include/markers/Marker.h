@@ -30,7 +30,6 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-class Marker;
 class Adaptivity;
 
 class Marker : public MooseObject,

@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class DeprecatedBlockAction;
-
 /**
  * Used for marking that some block are deprecated and not be used
  */

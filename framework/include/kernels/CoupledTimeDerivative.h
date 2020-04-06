@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class CoupledTimeDerivative;
 
 /**
  * This calculates the time derivative for a coupled variable

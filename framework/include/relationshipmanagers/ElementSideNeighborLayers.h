@@ -12,7 +12,6 @@
 #include "FunctorRelationshipManager.h"
 
 // Forward declarations
-class ElementSideNeighborLayers;
 namespace libMesh
 {
 class GhostingFunctor;

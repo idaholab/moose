@@ -12,8 +12,6 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-class ComputeExtraStressBase;
-
 /**
  * ComputeExtraStressBase is the base class for extra_stress, which is added to stress
  * calculated by the material's constitutive model

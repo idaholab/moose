@@ -16,12 +16,6 @@
   using ADSplitCHCRes<compute_stage>::_kappa;                                                      \
   using ADSplitCHCRes<compute_stage>::_w
 
-// Forward Declarations
-template <ComputeStage>
-class ADSplitCHCRes;
-
-declareADValidParams(ADSplitCHCRes);
-
 /**
  * The pair, ADSplitCHCRes and ADSplitCHWRes, splits the Cahn-Hilliard equation
  * by replacing chemical potential with 'w'.

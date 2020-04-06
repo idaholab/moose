@@ -18,9 +18,6 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-// Forward declarations
-class AddSideSetsBase;
-
 // libMesh forward declarations
 namespace libMesh
 {
@@ -30,6 +27,8 @@ class QGauss;
 class AddSideSetsBase : public MeshModifier
 {
 public:
+  static InputParameters validParams();
+
   AddSideSetsBase(const InputParameters & parameters);
   virtual ~AddSideSetsBase(); // dtor required for unique_ptr with forward declarations
 

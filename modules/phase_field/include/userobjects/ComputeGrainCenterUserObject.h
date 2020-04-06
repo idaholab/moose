@@ -12,7 +12,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class ComputeGrainCenterUserObject;
 
 /**
  * This UserObject computes a volumes and centers of grains.

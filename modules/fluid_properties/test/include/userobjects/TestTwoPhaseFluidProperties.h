@@ -11,8 +11,6 @@
 
 #include "TwoPhaseFluidProperties.h"
 
-class TestTwoPhaseFluidProperties;
-
 /**
  * Test 2-phase fluid properties
  *

@@ -16,11 +16,6 @@
   using ADCompute1DSmallStrain<compute_stage>::computeStrainYY;                                    \
   using ADCompute1DSmallStrain<compute_stage>::computeStrainZZ
 
-template <ComputeStage>
-class ADCompute1DSmallStrain;
-
-declareADValidParams(ADCompute1DSmallStrain);
-
 /**
  * ADCompute1DSmallStrain defines a strain tensor, assuming small strains,
  * in 1D problems, handling strains in other two directions.

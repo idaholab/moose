@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class HomogenizationKernel;
 class SymmElasticityTensor;
 class SymmTensor;
 

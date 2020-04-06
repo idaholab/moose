@@ -12,7 +12,6 @@
 #include "ODEKernel.h"
 
 // Forward Declarations
-class ODETimeKernel;
 
 /**
  * Base class for ODEKernels that contribute to the time residual

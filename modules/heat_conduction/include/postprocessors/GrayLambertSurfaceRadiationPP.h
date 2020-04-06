@@ -12,8 +12,6 @@
 #include "GeneralPostprocessor.h"
 #include "GrayLambertSurfaceRadiationBase.h"
 
-class GrayLambertSurfaceRadiationPP;
-
 /**
  * A postprocessor that extracts information from
  * the GrayLambertSurfaceRadiationBase UserObject

@@ -20,8 +20,6 @@ class NumericVector;
 class Point;
 }
 
-class MooseVariableFEBase;
-
 class MooseVariableFEBase : public MooseVariableBase
 {
 public:

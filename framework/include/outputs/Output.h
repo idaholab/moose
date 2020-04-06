@@ -18,7 +18,6 @@
 #include "PerfGraphInterface.h"
 
 // Forward declarations
-class Output;
 class MooseMesh;
 
 // libMesh forward declarations

@@ -15,7 +15,6 @@
 class Function;
 
 // Forward Declarations
-class RichardsHalfGaussianSinkFlux;
 
 /**
  * Postprocessor that records the mass flux from porespace to

@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class RenameBoundaryGenerator;
 
 /**
  * MeshGenerator for re-numbering or re-naming boundaries

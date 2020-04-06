@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 class SinglePhaseFluidProperties;
-class PorousFlowFluidPropertyIC;
 
 /**
  * PorousFlowFluidPropertyIC calculates an initial value for a fluid property

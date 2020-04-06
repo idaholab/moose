@@ -13,7 +13,6 @@
 #include "MeshModifier.h"
 
 // Forward declerations
-class SmoothMesh;
 
 /**
  * MeshModifier for doing mesh smoothing

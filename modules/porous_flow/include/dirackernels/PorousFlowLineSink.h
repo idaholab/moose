@@ -13,8 +13,6 @@
 #include "PorousFlowSumQuantity.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowLineSink;
-
 /**
  * Approximates a line sink a sequence of Dirac Points
  */

@@ -18,7 +18,6 @@
 #define usingBlockRestrictableMembers using BlockRestrictable::getBlockCoordSystem
 
 // Forward declarations
-class BlockRestrictable;
 class FEProblemBase;
 class MooseMesh;
 class MooseVariableFEBase;

@@ -11,7 +11,6 @@
 
 #include "Kernel.h"
 
-class NaNInterfaceTestKernel;
 class NaNInterfaceTestFluidProperties;
 
 /**

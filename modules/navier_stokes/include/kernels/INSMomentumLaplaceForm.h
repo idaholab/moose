@@ -12,7 +12,6 @@
 #include "INSMomentumBase.h"
 
 // Forward Declarations
-class INSMomentumLaplaceForm;
 
 /**
  * This class computes momentum equation residual and Jacobian viscous

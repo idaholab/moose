@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NSInternalEnergyAux;
 
 /**
  * Auxiliary kernel for computing the internal energy of the fluid.

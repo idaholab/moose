@@ -12,11 +12,6 @@
 #include "ADCompute2DFiniteStrain.h"
 #include "SubblockIndexProvider.h"
 
-template <ComputeStage>
-class ADComputePlaneFiniteStrain;
-
-declareADValidParams(ADComputePlaneFiniteStrain);
-
 /**
  * ADComputePlaneFiniteStrain defines strain increment and rotation
  * increment for finite strain under 2D planar assumptions.

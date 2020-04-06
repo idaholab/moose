@@ -12,10 +12,6 @@
 #include "ADKernelGrad.h"
 
 // Forward Declarations
-template <ComputeStage>
-class INSADMomentumViscous;
-
-declareADValidParams(INSADMomentumViscous);
 
 /**
  * This class computes the momentum equation residual and Jacobian

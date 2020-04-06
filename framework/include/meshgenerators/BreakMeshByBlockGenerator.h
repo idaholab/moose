@@ -11,8 +11,6 @@
 
 #include "BreakMeshByBlockGeneratorBase.h"
 
-class BreakMeshByBlockGenerator;
-
 class BreakMeshByBlockGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class ElementIntegralMaterialProperty;
-
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
 {
 public:

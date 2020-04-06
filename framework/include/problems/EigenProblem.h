@@ -14,7 +14,6 @@
 #include "Eigenvalue.h"
 
 // Forward declarations
-class EigenProblem;
 class NonlinearEigenSystem;
 
 /**

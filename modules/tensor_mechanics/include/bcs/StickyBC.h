@@ -11,8 +11,6 @@
 
 #include "NodalBC.h"
 
-class StickyBC;
-
 /**
  * Sticky-type boundary condition, where if
  * the old variable value exceeds the bounds provided

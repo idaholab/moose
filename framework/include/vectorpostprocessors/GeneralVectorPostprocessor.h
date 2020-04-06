@@ -14,7 +14,6 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class GeneralVectorPostprocessor;
 
 /**
  * This class is here to combine the VectorPostprocessor interface and

@@ -20,8 +20,6 @@ class InputParameters;
 class MooseObject;
 class SubProblem;
 
-class ComputeReducedOrderEigenstrain;
-
 class ComputeReducedOrderEigenstrain : public ComputeEigenstrainBase
 {
 public:

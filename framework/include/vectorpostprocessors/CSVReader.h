@@ -14,7 +14,6 @@
 #include "DelimitedFileReader.h"
 
 // Forward declarations
-class CSVReader;
 
 class CSVReader : public GeneralVectorPostprocessor
 {

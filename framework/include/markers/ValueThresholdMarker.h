@@ -11,8 +11,6 @@
 
 #include "QuadraturePointMarker.h"
 
-class ValueThresholdMarker;
-
 class ValueThresholdMarker : public QuadraturePointMarker
 {
 public:

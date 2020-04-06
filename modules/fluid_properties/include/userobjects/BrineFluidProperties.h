@@ -12,8 +12,6 @@
 #include "MultiComponentFluidProperties.h"
 #include "Water97FluidProperties.h"
 
-class BrineFluidProperties;
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

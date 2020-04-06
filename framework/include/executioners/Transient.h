@@ -16,7 +16,6 @@
 #include <fstream>
 
 // Forward Declarations
-class Transient;
 class TimeStepper;
 class FEProblemBase;
 

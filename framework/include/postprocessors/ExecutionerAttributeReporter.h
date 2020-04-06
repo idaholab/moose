@@ -13,7 +13,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward declarations
-class ExecutionerAttributeReporter;
 
 /**
  * A class to report class attributes value from Executioners

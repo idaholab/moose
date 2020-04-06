@@ -11,8 +11,6 @@
 
 #include "InternalSideIndicator.h"
 
-class LaplacianJumpIndicator;
-
 class LaplacianJumpIndicator : public InternalSideIndicator
 {
 public:

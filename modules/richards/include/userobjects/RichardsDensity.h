@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsDensity;
-
 /**
  * Base class for fluid density as a function of porepressure
  * The functions density, ddensity and d2density must be

@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class MatCoupledForce;
 
 /**
  * Represents a right hand side force term of the form

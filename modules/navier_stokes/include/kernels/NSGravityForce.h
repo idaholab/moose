@@ -12,7 +12,6 @@
 #include "NSKernel.h"
 
 // Forward Declarations
-class NSGravityForce;
 
 class NSGravityForce : public NSKernel
 {

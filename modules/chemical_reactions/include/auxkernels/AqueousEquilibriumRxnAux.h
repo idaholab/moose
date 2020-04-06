@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class AqueousEquilibriumRxnAux;
-
 /**
  * Calculates equilibrium species concentration according to the mass action law
  */

@@ -11,8 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityConst;
-
 /**
  * Material designed to provide a constant permeability tensor
  */

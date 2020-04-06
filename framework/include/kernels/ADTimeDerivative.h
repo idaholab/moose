@@ -12,10 +12,6 @@
 #include "ADTimeKernelValue.h"
 
 // Forward Declaration
-template <ComputeStage>
-class ADTimeDerivative;
-
-declareADValidParams(ADTimeDerivative);
 
 template <ComputeStage compute_stage>
 class ADTimeDerivative : public ADTimeKernelValue<compute_stage>

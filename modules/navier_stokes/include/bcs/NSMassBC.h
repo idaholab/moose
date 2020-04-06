@@ -12,7 +12,6 @@
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSMassBC;
 
 /**
  * This class corresponds to the "natural" boundary condition

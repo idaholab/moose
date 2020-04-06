@@ -11,8 +11,6 @@
 
 #include "PorousFlowSinkPTDefiner.h"
 
-class PorousFlowHalfGaussianSink;
-
 /**
  * Applies a flux sink to a boundary.  The base flux
  * defined by PorousFlowSink is multiplied by a

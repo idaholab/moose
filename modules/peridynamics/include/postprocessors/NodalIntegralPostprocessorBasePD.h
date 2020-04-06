@@ -11,8 +11,6 @@
 
 #include "NodalPostprocessorBasePD.h"
 
-class NodalIntegralPostprocessorBasePD;
-
 /**
  * Postprocessor class to compute a volume integral of the specified variable
  * Note that specializations of this integral are possible by deriving from this

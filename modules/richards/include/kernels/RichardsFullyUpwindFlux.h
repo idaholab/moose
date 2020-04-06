@@ -17,7 +17,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class RichardsFullyUpwindFlux;
 
 /**
  * This is a fully upwinded version of RichardsFlux.

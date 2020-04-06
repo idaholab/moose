@@ -13,7 +13,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class ElementIntegralUserObject;
 
 /**
  * This postprocessor computes a volume integral of the specified

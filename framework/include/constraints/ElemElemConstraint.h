@@ -14,7 +14,6 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
-class ElemElemConstraint;
 class ElementPairInfo;
 class FEProblemBase;
 

@@ -13,7 +13,6 @@
 #include "VectorPostprocessor.h"
 
 // Forward Declarations
-class ElementVectorPostprocessor;
 
 class ElementVectorPostprocessor : public ElementUserObject, public VectorPostprocessor
 {

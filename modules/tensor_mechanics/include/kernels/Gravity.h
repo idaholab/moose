@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 class Function;
-class Gravity;
 
 /**
  * Gravity computes the body force (force/volume) given the acceleration of gravity (value) and the

@@ -11,8 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityMethane20degC;
-
 /**
  * Methane density - a quadratic fit to expressions in:
  * "Results of (pressure, density, temperature) measurements on methane and on nitrogen in the

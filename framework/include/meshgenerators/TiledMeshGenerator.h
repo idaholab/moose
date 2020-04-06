@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class TiledMeshGenerator;
 
 /**
  * Take an input mesh and repeat it in the x,y and z directions

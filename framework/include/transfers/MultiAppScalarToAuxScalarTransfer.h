@@ -13,7 +13,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declerations
-class MultiAppScalarToAuxScalarTransfer;
 
 /**
  * Copies the value of a SCALAR variable from one App to another.

@@ -13,7 +13,6 @@
 #include "Output.h"
 
 // Forward declarations
-class ControlOutput;
 
 /**
  * Class for output information regarding Controls to the screen

@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-class TiledMesh;
-
 class TiledMesh : public MooseMesh
 {
 public:

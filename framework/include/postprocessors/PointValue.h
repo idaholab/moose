@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class PointValue;
 
 /**
  * Compute the value of a variable at a specified location.

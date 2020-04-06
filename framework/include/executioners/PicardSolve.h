@@ -14,8 +14,6 @@
 // System includes
 #include <string>
 
-class PicardSolve;
-
 class PicardSolve : public SolveObject
 {
 public:

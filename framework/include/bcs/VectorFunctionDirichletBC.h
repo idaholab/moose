@@ -11,8 +11,6 @@
 
 #include "VectorNodalBC.h"
 
-class VectorFunctionDirichletBC;
-
 /**
  * Boundary condition of a Dirichlet type
  *

@@ -12,8 +12,6 @@
 #include "ElementUserObject.h"
 #include "PeridynamicsMesh.h"
 
-class ElementUserObjectBasePD;
-
 /**
  * Base element userobject class for peridynamics
  */

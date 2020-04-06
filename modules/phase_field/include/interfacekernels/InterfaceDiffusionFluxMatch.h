@@ -11,8 +11,6 @@
 
 #include "InterfaceDiffusionBase.h"
 
-class InterfaceDiffusionFluxMatch;
-
 /**
  * Enforce gradient continuity between two different variables across a
  * subdomain boundary.

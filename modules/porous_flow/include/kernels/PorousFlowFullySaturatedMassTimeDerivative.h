@@ -12,8 +12,6 @@
 #include "TimeKernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowFullySaturatedMassTimeDerivative;
-
 /**
  * Time derivative of fluid mass suitable for fully-saturated,
  * single-phase, single-component simulations.

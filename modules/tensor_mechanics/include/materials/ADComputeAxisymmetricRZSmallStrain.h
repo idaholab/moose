@@ -11,11 +11,6 @@
 
 #include "ADCompute2DSmallStrain.h"
 
-template <ComputeStage>
-class ADComputeAxisymmetricRZSmallStrain;
-
-declareADValidParams(ADComputeAxisymmetricRZSmallStrain);
-
 /**
  * ADComputeAxisymmetricRZSmallStrain defines small strains in an Axisymmetric system.
  * The COORD_TYPE in the Problem block must be set to RZ.

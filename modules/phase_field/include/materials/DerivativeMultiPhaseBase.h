@@ -12,7 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declarations
-class DerivativeMultiPhaseBase;
 
 /**
  * DerivativeMaterial child class to evaluate a parsed function for the

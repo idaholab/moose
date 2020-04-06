@@ -14,7 +14,6 @@
 #include "libmesh/fparser_ad.hh"
 
 // Forward Declarations
-class DerivativeParsedMaterialHelper;
 
 /**
  * Helper class to perform the auto derivative taking.

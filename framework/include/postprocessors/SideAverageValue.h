@@ -12,7 +12,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class SideAverageValue;
 
 /**
  * This postprocessor computes a volume integral of the specified variable.

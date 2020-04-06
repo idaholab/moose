@@ -11,8 +11,6 @@
 
 #include "PorousFlowFluidState.h"
 
-class PorousFlowFluidStateWaterNCG;
-
 /**
  * Fluid state class for water and a non-condensable gas. Calculates the solubility
  * of the gas phase in the water using Henry's law, and provides density, viscosity

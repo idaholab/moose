@@ -11,8 +11,6 @@
 
 #include "AddAuxVariableAction.h"
 
-class AddSecondarySpeciesAction;
-
 class AddSecondarySpeciesAction : public AddAuxVariableAction
 {
 public:

@@ -12,7 +12,6 @@
 #include "ScalarKernel.h"
 
 // Forward Declarations
-class GlobalStrain;
 class GlobalStrainUserObjectInterface;
 template <typename>
 class RankTwoTensorTempl;

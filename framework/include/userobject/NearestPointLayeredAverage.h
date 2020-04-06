@@ -15,7 +15,6 @@
 #include "LayeredAverage.h"
 
 // Forward Declarations
-class NearestPointLayeredAverage;
 
 /**
  * This UserObject computes averages of a variable storing partial

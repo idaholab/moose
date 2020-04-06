@@ -13,7 +13,6 @@
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class InterfaceTimeKernel;
 
 /**
  * InterfaceTimeKernel is responsible for adding time derivative contributions for physics across

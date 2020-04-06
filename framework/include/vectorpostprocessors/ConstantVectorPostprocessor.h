@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class ConstantVectorPostprocessor;
 
 class ConstantVectorPostprocessor : public GeneralVectorPostprocessor
 {

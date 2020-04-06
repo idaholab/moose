@@ -12,7 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declarations
-class KKSXeVacSolidMaterial;
 
 class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
 {

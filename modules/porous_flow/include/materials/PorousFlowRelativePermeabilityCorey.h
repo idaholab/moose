@@ -11,8 +11,6 @@
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
-class PorousFlowRelativePermeabilityCorey;
-
 /**
  * Material to calculate Corey-type relative permeability of an arbitrary phase
  * given the effective saturation and Corey exponent of that phase.

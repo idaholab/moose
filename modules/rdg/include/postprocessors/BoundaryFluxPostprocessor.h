@@ -11,7 +11,6 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class BoundaryFluxPostprocessor;
 class BoundaryFluxBase;
 
 /**

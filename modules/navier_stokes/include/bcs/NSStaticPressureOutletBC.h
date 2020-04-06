@@ -11,8 +11,6 @@
 
 #include "MooseObject.h"
 
-class NSStaticPressureOutletBC;
-
 /**
  * This class facilitates adding specified static pressure outlet BCs for
  * the Euler equations.

@@ -11,8 +11,6 @@
 
 #include "ComputeStressBase.h"
 
-class ComputeCosseratStressBase;
-
 /**
  * ComputeCosseratStressBase is the base class for stress tensors
  */

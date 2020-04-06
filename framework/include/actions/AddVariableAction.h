@@ -14,7 +14,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declerations
-class AddVariableAction;
 
 /**
  * Adds nonlinear variable

@@ -19,7 +19,6 @@
 #include "RichardsSUPG.h"
 
 // Forward Declarations
-class RichardsMaterial;
 
 class RichardsMaterial : public Material
 {

@@ -12,7 +12,6 @@
 #include "ElementIntegralPostprocessor.h"
 
 // Forward Declarations
-class NSEntropyError;
 class IdealGasFluidProperties;
 
 class NSEntropyError : public ElementIntegralPostprocessor

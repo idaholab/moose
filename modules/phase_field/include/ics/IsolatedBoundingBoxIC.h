@@ -12,7 +12,6 @@
 #include "SmoothMultiBoundingBoxBaseIC.h"
 
 // Forward Declarations
-class IsolatedBoundingBoxIC;
 
 /**
  * IsolatedBoundingBoxIC creates several isolated boxes defined by their coordinates in the domain.

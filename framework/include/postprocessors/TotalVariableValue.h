@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class TotalVariableValue;
-
 /**
  * Integrate a post-processor value over time using trapezoidal rule
  */

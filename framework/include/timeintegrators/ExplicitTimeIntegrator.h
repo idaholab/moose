@@ -16,7 +16,6 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/numeric_vector.h"
 
-class ExplicitTimeIntegrator;
 class LumpedPreconditioner;
 
 /**

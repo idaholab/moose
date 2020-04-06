@@ -13,7 +13,6 @@
 #include "FunctionParserUtils.h"
 
 // Forward Declarations
-class ParsedODEKernel;
 
 /**
  *

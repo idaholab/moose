@@ -11,7 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class TestDistributionPostprocessor;
 class Distribution;
 
 /**

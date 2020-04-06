@@ -11,8 +11,6 @@
 
 #include "Sampler.h"
 
-class MonteCarloSampler;
-
 /**
  * A class used to perform Monte Carlo Sampling
  */

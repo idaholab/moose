@@ -13,8 +13,6 @@
 
 #include <string>
 
-class SplitMeshAction;
-
 class SplitMeshAction : public Action
 {
 public:

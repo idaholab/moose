@@ -11,8 +11,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-class InternalSideFluxBase;
-
 /**
  * A base class for computing and caching internal side flux
  *

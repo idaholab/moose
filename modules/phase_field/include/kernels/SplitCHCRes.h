@@ -12,7 +12,6 @@
 #include "SplitCHBase.h"
 
 // Forward Declarations
-class SplitCHCRes;
 
 /// The couple, SplitCHCRes and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
 class SplitCHCRes : public SplitCHBase

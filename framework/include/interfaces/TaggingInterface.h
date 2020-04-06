@@ -18,7 +18,6 @@
 // Forward declarations
 class InputParameters;
 class MooseObject;
-class TaggingInterface;
 class SubProblem;
 class Assembly;
 

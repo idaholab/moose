@@ -13,7 +13,6 @@
 #include "MaterialAuxBase.h"
 
 // Forward declarations
-class MaterialRealDenseMatrixAux;
 
 /**
  * AuxKernel for outputting a DenseMatrix<Real> material property component to an AuxVariable

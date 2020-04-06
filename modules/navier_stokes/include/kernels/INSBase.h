@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSBase;
 
 /**
  * This class computes strong and weak components of the INS governing

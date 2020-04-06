@@ -12,7 +12,6 @@
 #include "GeometricCut2DUserObject.h"
 
 // Forward declarations
-class LineSegmentCutSetUserObject;
 
 class LineSegmentCutSetUserObject : public GeometricCut2DUserObject
 {

@@ -13,8 +13,6 @@
 #include "LinearViscoelasticityBase.h"
 #include "RankTwoTensor.h"
 
-class LinearViscoelasticityManager;
-
 /**
  * This class manages a LinearViscoelasticityBase object. Its primary purpose
  * is to initialize the internal MaterialProperties contained in the viscoelastic

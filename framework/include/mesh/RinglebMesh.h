@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-class RinglebMesh;
-
 /**
  * Mesh generated from parameters
  */

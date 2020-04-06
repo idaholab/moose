@@ -11,8 +11,6 @@
 
 #include "DerivativeMultiPhaseBase.h"
 
-class DerivativeMultiPhaseMaterial;
-
 /**
  * Multi phase free energy material that combines an arbitrary number of
  * phase free energies to a global free energy. All switching functions are

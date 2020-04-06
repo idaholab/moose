@@ -12,7 +12,6 @@
 #include "ArrayKernel.h"
 
 // Forward Declaration
-class ArrayTimeKernel;
 
 /**
  * All array time kernels should inherit from this class

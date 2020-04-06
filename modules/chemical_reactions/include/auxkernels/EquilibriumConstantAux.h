@@ -13,8 +13,6 @@
 #include "EquilibriumConstantFit.h"
 #include "PolynomialFit.h"
 
-class EquilibriumConstantAux;
-
 /**
  * Equilibrium constant (in the form log10(Keq)) calculated using a least-squares
  * fit to the data provided (typically taken from a geochemical database).

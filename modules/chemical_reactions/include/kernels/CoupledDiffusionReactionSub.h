@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class CoupledDiffusionReactionSub;
-
 /**
  * Diffusion of primary species in given equilibrium species
  */

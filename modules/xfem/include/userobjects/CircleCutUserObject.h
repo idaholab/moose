@@ -12,7 +12,6 @@
 #include "GeometricCut3DUserObject.h"
 
 // Forward declarations
-class CircleCutUserObject;
 
 class CircleCutUserObject : public GeometricCut3DUserObject
 {

@@ -24,8 +24,6 @@
 
 // Forward Declarations
 class MooseMesh;
-template <typename T>
-class LineMaterialSamplerBase;
 
 /**
  * This is a base class for sampling material properties for the

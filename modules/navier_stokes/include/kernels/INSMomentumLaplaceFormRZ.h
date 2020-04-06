@@ -12,7 +12,6 @@
 #include "INSMomentumLaplaceForm.h"
 
 // Forward Declarations
-class INSMomentumLaplaceFormRZ;
 
 /**
  * This class computes additional momentum equation residual and

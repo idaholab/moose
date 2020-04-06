@@ -12,7 +12,6 @@
 #include "AuxScalarKernel.h"
 
 // Forward Declarations
-class GeneralizedPlaneStrainReferenceResidual;
 class GeneralizedPlaneStrainUserObject;
 
 class GeneralizedPlaneStrainReferenceResidual : public AuxScalarKernel

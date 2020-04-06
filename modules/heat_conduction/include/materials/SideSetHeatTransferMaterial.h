@@ -14,7 +14,6 @@
 #include "Function.h"
 
 // Forward Declarations
-class SideSetHeatTransferMaterial;
 class Function;
 
 class SideSetHeatTransferMaterial : public InterfaceMaterial

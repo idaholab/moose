@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowFluidStateBase;
-
 /// Phase state enum
 enum class FluidStatePhaseEnum
 {

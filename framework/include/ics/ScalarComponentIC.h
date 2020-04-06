@@ -11,8 +11,6 @@
 
 #include "ScalarInitialCondition.h"
 
-class ScalarComponentIC;
-
 /**
  * Initial condition to set different values on each component of scalar variable
  */

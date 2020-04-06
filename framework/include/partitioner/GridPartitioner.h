@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
-class GridPartitioner;
 class MooseMesh;
 
 namespace libMesh

@@ -13,7 +13,6 @@
 #include "libmesh/replicated_mesh.h"
 
 // Forward declarations
-class PatchSidesetGenerator;
 
 /**
  * Subdivides a sidesets into smaller patches each of which is going

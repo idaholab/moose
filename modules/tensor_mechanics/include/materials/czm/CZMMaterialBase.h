@@ -10,7 +10,6 @@
 #pragma once
 
 #include "InterfaceMaterial.h"
-class CZMMaterialBase;
 /**
  * This is the base Material class for implementing a traction separation material model.
  * The responsibility of this class is to rotate the displacement jump from global to local

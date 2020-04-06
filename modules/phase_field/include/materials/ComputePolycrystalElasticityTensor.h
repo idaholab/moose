@@ -13,7 +13,6 @@
 #include "GrainDataTracker.h"
 
 // Forward Declarations
-class ComputePolycrystalElasticityTensor;
 class EulerAngleProvider;
 
 /**

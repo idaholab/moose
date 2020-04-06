@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class PeridynamicsApp;
-
 class PeridynamicsApp : public MooseApp
 {
 public:

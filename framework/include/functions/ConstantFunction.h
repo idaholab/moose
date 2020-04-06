@@ -11,8 +11,6 @@
 
 #include "Function.h"
 
-class ConstantFunction;
-
 /**
  * Class that represents constant function
  */

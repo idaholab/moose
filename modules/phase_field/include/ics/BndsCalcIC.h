@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class BndsCalcIC;
 
 class BndsCalcIC : public InitialCondition
 {

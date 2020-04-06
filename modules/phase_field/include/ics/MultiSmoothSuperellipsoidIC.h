@@ -12,7 +12,6 @@
 #include "SmoothSuperellipsoidBaseIC.h"
 
 // Forward Declarations
-class MultiSmoothSuperellipsoidIC;
 
 /**
  * MultismoothSuperellipsoidIC creates multiple SmoothSuperellipsoid (number = numbub) that are

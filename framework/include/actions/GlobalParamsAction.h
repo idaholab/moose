@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class GlobalParamsAction;
-
 class GlobalParamsAction : public Action
 {
 public:

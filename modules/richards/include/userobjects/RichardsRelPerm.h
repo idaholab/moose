@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsRelPerm;
-
 /**
  * Base class for Richards relative permeability classes
  * that provide relative permeability as a function of effective saturation

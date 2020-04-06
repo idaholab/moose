@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowTotalGravitationalDensityBase;
-
 /**
  * Base class Material designed to provide the density of the porous medium
  */

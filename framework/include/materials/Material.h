@@ -15,7 +15,6 @@
 #include "MaterialPropertyInterface.h"
 
 // forward declarations
-class Material;
 
 /**
  * Materials compute MaterialProperties.

@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class MultiPhaseStressMaterial;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

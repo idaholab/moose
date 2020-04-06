@@ -13,7 +13,6 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class NSImposedVelocityBC;
 
 // Specialization required of all user-level Moose objects
 

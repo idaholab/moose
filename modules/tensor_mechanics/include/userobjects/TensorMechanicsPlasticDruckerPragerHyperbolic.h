@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticDruckerPrager.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticDruckerPragerHyperbolic;
-
 /**
  * Rate-independent non-associative Drucker Prager
  * with hardening/softening.  The cone's tip is smoothed in a hyperbolic fashion

@@ -12,7 +12,6 @@
 #include "BodyForce.h"
 
 // Forward Declarations
-class HeatSource;
 
 class HeatSource : public BodyForce
 {

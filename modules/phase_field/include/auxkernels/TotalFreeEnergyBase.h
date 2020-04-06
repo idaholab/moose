@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class TotalFreeEnergyBase;
 
 /**
  * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined

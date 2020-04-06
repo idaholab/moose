@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class INSTemperatureNoBCBC;
 
 /**
  * This class implements the "No BC" boundary condition

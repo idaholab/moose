@@ -15,7 +15,6 @@
 #include "libmesh/system.h"
 
 // Forward declerations
-class TopResidualDebugOutput;
 
 /**
  * A structure for storing data related to top residuals

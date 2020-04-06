@@ -14,7 +14,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class HeatConductionTimeDerivative;
 
 /**
  * A class for defining the time derivative of the heat equation.

@@ -11,8 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermPower;
-
 /**
  * Power form of relative permeability, usually
  * used for water

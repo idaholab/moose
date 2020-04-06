@@ -11,11 +11,6 @@
 
 #include "ADComputeStrainBase.h"
 
-template <ComputeStage>
-class ADComputeGreenLagrangeStrain;
-
-declareADValidParams(ADComputeGreenLagrangeStrain);
-
 /**
  * ADComputeGreenLagrangeStrain defines a non-linear Green-Lagrange strain tensor
  */

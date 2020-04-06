@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class MaterialTensorIntegral;
 
 /**
  * This postprocessor computes an element integral of a

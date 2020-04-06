@@ -12,7 +12,6 @@
 #include "GrayLambertSurfaceRadiationBase.h"
 
 // Forward Declarations
-class ConstantViewFactorSurfaceRadiation;
 class Function;
 
 /**

@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddSamplerAction;
-
 /**
  * This class adds a Sampler object.
  * The Sampler contains different sampling strategies and is used to provide

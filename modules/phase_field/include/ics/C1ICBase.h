@@ -34,7 +34,6 @@
 #include <string>
 
 // Forward Declarations
-class C1ICBase;
 
 /**
  * C1ICBase is used by the CrossIC.

@@ -11,11 +11,6 @@
 
 #include "ADLAROMANCEStressUpdateBase.h"
 
-template <ComputeStage>
-class SS316HLAROMANCEStressUpdateTest;
-
-declareADValidParams(SS316HLAROMANCEStressUpdateTest);
-
 template <ComputeStage compute_stage>
 class SS316HLAROMANCEStressUpdateTest : public ADLAROMANCEStressUpdateBase<compute_stage>
 {

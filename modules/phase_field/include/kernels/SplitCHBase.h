@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class SplitCHBase;
 
 /// The couple, SplitCHBase and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
 class SplitCHBase : public Kernel

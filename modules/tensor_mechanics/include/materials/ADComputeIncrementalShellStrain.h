@@ -51,10 +51,6 @@
   using ADComputeIncrementalShellStrain<compute_stage>::updatedxyz;                                \
   using ADComputeIncrementalShellStrain<compute_stage>::computeGMatrix
 
-// Forward Declarations
-template <ComputeStage>
-class ADComputeIncrementalShellStrain;
-
 namespace libMesh
 {
 class QGauss;
@@ -64,8 +60,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(ADComputeIncrementalShellStrain);
 
 template <ComputeStage compute_stage>
 class ADComputeIncrementalShellStrain : public ADMaterial<compute_stage>

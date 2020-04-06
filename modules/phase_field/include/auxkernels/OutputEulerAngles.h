@@ -14,7 +14,6 @@
 #include "GrainTracker.h"
 
 // Forward Declarations
-class OutputEulerAngles;
 class GrainTracker;
 class EulerAngleProvider;
 

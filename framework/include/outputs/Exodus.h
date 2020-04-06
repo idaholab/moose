@@ -13,7 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declarations
-class Exodus;
 
 // libMesh forward declarations
 namespace libMesh

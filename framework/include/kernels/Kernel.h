@@ -12,8 +12,6 @@
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
 
-class Kernel;
-
 class Kernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:

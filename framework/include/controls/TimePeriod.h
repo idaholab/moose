@@ -13,7 +13,6 @@
 #include "ConditionalEnableControl.h"
 
 // Forward declarations
-class TimePeriod;
 
 /**
  * A basic control for disabling objects for a portion of the simulation.

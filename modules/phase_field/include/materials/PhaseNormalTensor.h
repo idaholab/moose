@@ -13,8 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensor.h"
 
-class PhaseNormalTensor;
-
 /**
  * Calculate phase normal tensor based on gradient
  */

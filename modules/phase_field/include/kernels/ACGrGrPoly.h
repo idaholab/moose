@@ -12,7 +12,6 @@
 #include "ACGrGrBase.h"
 
 // Forward Declarations
-class ACGrGrPoly;
 
 /**
  * This kernel calculates the residual for grain growth for a single phase,

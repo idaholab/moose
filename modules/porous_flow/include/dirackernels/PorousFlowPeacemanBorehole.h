@@ -11,8 +11,6 @@
 
 #include "PorousFlowLineSink.h"
 
-class PorousFlowPeacemanBorehole;
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */

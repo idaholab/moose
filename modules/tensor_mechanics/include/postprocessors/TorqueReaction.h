@@ -12,7 +12,6 @@
 #include "NodalPostprocessor.h"
 
 // Forward Declarations
-class TorqueReaction;
 class AuxiliarySystem;
 
 /*

@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class PHAux;
-
 /**
  * The pH of the solution is defined as
  *

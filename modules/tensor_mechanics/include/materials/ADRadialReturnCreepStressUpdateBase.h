@@ -16,12 +16,6 @@
   using ADRadialReturnCreepStressUpdateBase<compute_stage>::_creep_strain;                         \
   using ADRadialReturnCreepStressUpdateBase<compute_stage>::_creep_strain_old
 
-// Forward Declarations
-template <ComputeStage>
-class ADRadialReturnCreepStressUpdateBase;
-
-declareADValidParams(ADRadialReturnCreepStressUpdateBase);
-
 /**
  * This class provides baseline functionallity for creep models based on the stress update material
  * in a radial return isotropic creep calculations.

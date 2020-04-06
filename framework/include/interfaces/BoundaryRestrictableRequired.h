@@ -13,7 +13,6 @@
 #include "BoundaryRestrictable.h"
 
 // Forward declarations
-class BoundaryRestrictableRequired;
 
 /**
  * A class for requiring an object to be boundary restricted.

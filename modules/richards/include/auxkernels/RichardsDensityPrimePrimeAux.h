@@ -14,7 +14,6 @@
 #include "RichardsDensity.h"
 
 // Forward Declarations
-class RichardsDensityPrimePrimeAux;
 
 /**
  * Second derivative of fluid density wrt porepressure

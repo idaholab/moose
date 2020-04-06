@@ -15,7 +15,6 @@
 
 // Forward declarations
 class ConstitutiveModel;
-class SolidModel;
 class SymmElasticityTensor;
 class PiecewiseLinear;
 class VolumetricModel;

@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "MooseObjectAction.h"
 
-class CreateProblemAction;
-
 class CreateProblemAction : public MooseObjectAction
 {
 public:

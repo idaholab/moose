@@ -13,8 +13,6 @@
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 
-class NodalScalarKernel;
-
 /**
  *
  */

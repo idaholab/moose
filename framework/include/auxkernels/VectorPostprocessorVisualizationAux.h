@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class VectorPostprocessorVisualizationAux;
 
 /**
  * Read values from a VectorPostprocessor that is producing vectors that are "number of processors"

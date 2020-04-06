@@ -11,8 +11,6 @@
 
 #include "SolidModel.h"
 
-class CLSHPlasticMaterial;
-
 /**
  * Plastic material
  */

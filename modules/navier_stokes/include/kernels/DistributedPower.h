@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class DistributedPower;
 
 /**
  * The DistributedPower kernel computes the kinetic energy contribution of the body force due to

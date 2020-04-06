@@ -14,7 +14,6 @@
 #include "libmesh/replicated_mesh.h"
 
 // Forward declarations
-class ImageMeshGenerator;
 
 /**
  * A 2D GeneratedMesh where xmin, xmax, etc. are determined from an input image file.

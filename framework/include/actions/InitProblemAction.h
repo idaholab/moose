@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class InitProblemAction;
-
 class InitProblemAction : public Action
 {
 public:

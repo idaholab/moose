@@ -12,8 +12,6 @@
 #include "PorousFlowRelativePermeabilityBase.h"
 #include "PorousFlowVanGenuchten.h"
 
-class PorousFlowRelativePermeabilityVG;
-
 /**
  * Material to calculate van Genuchten-type relative permeability
  * of an arbitrary phase given the saturation and exponent of that phase.

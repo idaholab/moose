@@ -16,8 +16,6 @@
 #include "RichardsRelPerm.h"
 #include "RichardsSeff.h"
 
-class RichardsBorehole;
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */

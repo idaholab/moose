@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class AdvectionBC;
 
 /**
  * Boundary terms for inflow/outflow of advected

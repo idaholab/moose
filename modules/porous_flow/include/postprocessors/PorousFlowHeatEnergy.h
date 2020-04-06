@@ -12,8 +12,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowHeatEnergy;
-
 /**
  * Postprocessor produces the sum of heat energy of the porous skeleton and/or fluid components in a
  * region

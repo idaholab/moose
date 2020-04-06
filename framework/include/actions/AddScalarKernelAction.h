@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddScalarKernelAction;
-
 class AddScalarKernelAction : public MooseObjectAction
 {
 public:

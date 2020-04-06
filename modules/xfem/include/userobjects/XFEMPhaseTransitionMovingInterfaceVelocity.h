@@ -11,8 +11,6 @@
 
 #include "XFEMMovingInterfaceVelocityBase.h"
 
-class XFEMPhaseTransitionMovingInterfaceVelocity;
-
 class XFEMPhaseTransitionMovingInterfaceVelocity : public XFEMMovingInterfaceVelocityBase
 {
 public:

@@ -14,7 +14,6 @@
 #include <string>
 
 // Forward Declarations
-class FunctionIC;
 class Function;
 class InputParameters;
 

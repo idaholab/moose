@@ -12,7 +12,6 @@
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
-class PolycrystalVoronoi;
 
 class PolycrystalVoronoi : public PolycrystalUserObjectBase
 {

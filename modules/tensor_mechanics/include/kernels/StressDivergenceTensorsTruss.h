@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class StressDivergenceTensorsTruss;
 
 class StressDivergenceTensorsTruss : public Kernel
 {

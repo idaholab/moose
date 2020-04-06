@@ -19,8 +19,6 @@
  * Usable for generated mesh
  */
 
-class ElementPropertyReadFile;
-
 class ElementPropertyReadFile : public GeneralUserObject
 {
 public:

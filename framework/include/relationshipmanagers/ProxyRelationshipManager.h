@@ -14,7 +14,6 @@
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
-class ProxyRelationshipManager;
 class MooseMesh;
 namespace libMesh
 {

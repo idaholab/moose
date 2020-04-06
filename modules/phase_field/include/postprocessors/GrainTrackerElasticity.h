@@ -12,7 +12,6 @@
 #include "GrainDataTracker.h"
 #include "RankFourTensor.h"
 
-class GrainTrackerElasticity;
 class EulerAngleProvider;
 
 /**

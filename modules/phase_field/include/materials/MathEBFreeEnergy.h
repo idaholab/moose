@@ -13,7 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class MathEBFreeEnergy;
 
 /**
  * Material class that creates the math free energy with the expression builder

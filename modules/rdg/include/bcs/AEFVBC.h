@@ -13,7 +13,6 @@
 #include "BoundaryFluxBase.h"
 
 // Forward Declarations
-class AEFVBC;
 
 /**
  * A boundary condition object for the advection equation

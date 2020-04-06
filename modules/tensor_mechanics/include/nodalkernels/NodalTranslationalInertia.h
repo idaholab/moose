@@ -12,7 +12,6 @@
 #include "TimeNodalKernel.h"
 
 // Forward Declarations
-class NodalTranslationalInertia;
 
 /**
  * Calculates the inertial force and mass proportional damping for a nodal mass

@@ -12,7 +12,6 @@
 #include "PiecewiseLinearBase.h"
 
 // Forward declarations
-class PiecewiseLinear;
 
 /**
  * Function which provides a piecewise continuous linear interpolation

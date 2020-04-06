@@ -31,7 +31,6 @@
 #include "C1ICBase.h"
 
 // Forward Declarations
-class CrossIC;
 
 /**
  * CrossIC creates a C1 continuous initial condition that looks like a cross in

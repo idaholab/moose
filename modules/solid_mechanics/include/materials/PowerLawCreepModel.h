@@ -11,8 +11,6 @@
 
 #include "ReturnMappingModel.h"
 
-class PowerLawCreepModel;
-
 class PowerLawCreepModel : public ReturnMappingModel
 {
 public:

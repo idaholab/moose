@@ -13,7 +13,6 @@
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
-class VoronoiICAux;
 
 /**
  * Visualize the location of grain boundaries in a polycrystalline simulation.

@@ -14,7 +14,6 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
-class NodeFaceConstraint;
 
 // libMesh forward declarations
 namespace libMesh

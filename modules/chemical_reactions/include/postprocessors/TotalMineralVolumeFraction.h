@@ -11,8 +11,6 @@
 
 #include "ElementAverageValue.h"
 
-class TotalMineralVolumeFraction;
-
 /**
  * Calculates the total volume fraction of the coupled solid mineral
  * species (volume of mineral species / volume of model)

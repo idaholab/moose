@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class DynamicObjectRegistrationAction;
-
 class DynamicObjectRegistrationAction : public Action
 {
 public:

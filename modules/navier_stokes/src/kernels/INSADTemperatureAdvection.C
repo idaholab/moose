@@ -45,17 +45,19 @@ adBaseClass(INSADTemperatureAdvection);
 
 registerADMooseObject("NavierStokesApp", INSADTemperatureAdvectionSUPG);
 
-defineADValidParams(
-    INSADTemperatureAdvectionSUPG,
-    ADKernelSUPG,
-    params.addClassDescription(
-        "This class computes the residual and Jacobian contributions for "
-        "SUPG stabilization of temperature advection for a divergence free velocity field.");
-    params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
-    params.addParam<MaterialPropertyName>("cp_name",
-                                          "cp",
-                                          "The name of the specific heat capacity");
-    params.addRequiredCoupledVar("velocity", "The velocity variable"););
+template <ComputeStage compute_stage>
+InputParameters
+INSADTemperatureAdvectionSUPG<compute_stage>::validParams()
+{
+  InputParameters params = ADKernelSUPG<compute_stage>::validParams();
+  params.addClassDescription(
+      "This class computes the residual and Jacobian contributions for "
+      "SUPG stabilization of temperature advection for a divergence free velocity field.");
+  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
+  params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
+  params.addRequiredCoupledVar("velocity", "The velocity variable");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 INSADTemperatureAdvectionSUPG<compute_stage>::INSADTemperatureAdvectionSUPG(

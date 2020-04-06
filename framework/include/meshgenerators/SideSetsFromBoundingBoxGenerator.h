@@ -14,7 +14,6 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declarations
-class SideSetsFromBoundingBoxGenerator;
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of a bounding box

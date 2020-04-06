@@ -28,7 +28,6 @@
 #include "libmesh/vector_value.h"
 
 // forward declaration
-class MooseMesh;
 class Assembly;
 class RelationshipManager;
 

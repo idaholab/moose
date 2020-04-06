@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsSumQuantity;
-
 /**
  * Sums into _total
  * This is used, for instance, to record the total mass

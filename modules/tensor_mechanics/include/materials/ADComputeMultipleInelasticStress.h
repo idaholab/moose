@@ -23,8 +23,6 @@
 
 // Forward Declarations
 template <ComputeStage>
-class ADComputeMultipleInelasticStress;
-template <ComputeStage>
 class ADStressUpdateBase;
 template <typename>
 class RankTwoTensorTempl;
@@ -34,8 +32,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
-
-declareADValidParams(ADComputeMultipleInelasticStress);
 
 /**
  * ADComputeMultipleInelasticStress computes the stress and a decomposition of the strain

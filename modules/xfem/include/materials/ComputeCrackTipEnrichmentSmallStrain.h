@@ -18,8 +18,6 @@
 #include "CrackFrontDefinition.h"
 #include "EnrichmentFunctionCalculation.h"
 
-class ComputeCrackTipEnrichmentSmallStrain;
-
 /**
  * ComputeCrackTipEnrichmentSmallStrain calculates the sum of standard strain and enrichement strain
  */

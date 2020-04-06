@@ -12,8 +12,6 @@
 #include "Material.h"
 #include "PeridynamicsMesh.h"
 
-class PeridynamicsMaterialBase;
-
 /**
  * Base class for peridynamics material models
  */

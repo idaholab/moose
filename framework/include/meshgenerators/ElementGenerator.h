@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class ElementGenerator;
 
 /**
  * Generates individual elements given a list of nodal positions

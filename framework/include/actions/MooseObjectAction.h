@@ -13,8 +13,6 @@
 
 #include <string>
 
-class MooseObjectAction;
-
 class MooseObjectAction : public Action
 {
 public:

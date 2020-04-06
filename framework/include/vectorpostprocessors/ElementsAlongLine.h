@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class ElementsAlongLine;
 
 /**
  * Get all of the elements that are intersected by a line

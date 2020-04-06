@@ -27,7 +27,6 @@
 #include "bitmask_operators.h"
 
 // Forward Declarations
-class FeatureFloodCount;
 class MooseMesh;
 
 /**

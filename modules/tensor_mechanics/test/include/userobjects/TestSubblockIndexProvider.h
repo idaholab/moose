@@ -11,8 +11,6 @@
 
 #include "SubblockIndexProvider.h"
 
-class TestSubblockIndexProvider;
-
 /**
  * A class used to set the subblock index for testing generalized plane strain
  * calculations when more than one out-of-plane strain is provided on different

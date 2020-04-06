@@ -12,7 +12,6 @@
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSPenalizedNormalFlowBC;
 
 /**
  * This class penalizes the the value of u.n on the boundary

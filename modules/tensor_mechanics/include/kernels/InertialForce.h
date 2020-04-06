@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class InertialForce;
 
 class InertialForce : public TimeKernel
 {

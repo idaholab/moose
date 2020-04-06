@@ -11,8 +11,6 @@
 
 #include "MooseObject.h"
 
-class NSWeakStagnationInletBC;
-
 /**
  * This class facilitates adding weak stagnation inlet BCs via an
  * Action by setting up the required parameters.  See also

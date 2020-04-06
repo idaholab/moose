@@ -11,7 +11,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class ACGBPoly;
 
 class ACGBPoly : public ACBulk<Real>
 {

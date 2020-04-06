@@ -19,7 +19,6 @@
 #include "RandomInterface.h"
 
 // Forward Declarations
-class NodalUserObject;
 
 /**
  * A user object that runs over all the nodes and does an aggregation

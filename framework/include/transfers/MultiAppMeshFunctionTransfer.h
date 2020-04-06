@@ -12,7 +12,6 @@
 #include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
-class MultiAppMeshFunctionTransfer;
 
 /**
  * Transfers a vector of variables. For each individual one,

@@ -11,8 +11,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class NaClFluidProperties;
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

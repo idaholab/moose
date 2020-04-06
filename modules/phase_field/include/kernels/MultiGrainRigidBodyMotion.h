@@ -12,7 +12,6 @@
 #include "GrainRigidBodyMotionBase.h"
 
 // Forward Declarations
-class MultiGrainRigidBodyMotion;
 
 class MultiGrainRigidBodyMotion : public GrainRigidBodyMotionBase
 {

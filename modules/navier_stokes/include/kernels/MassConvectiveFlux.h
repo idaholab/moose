@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class MassConvectiveFlux;
-
 /**
  * Mass convective flux: \f$\rho \vec u \cdot \nabla v\f$
  *

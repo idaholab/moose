@@ -13,7 +13,6 @@
 #include "Postprocessor.h"
 
 // Forward Declarations
-class InternalSidePostprocessor;
 
 class InternalSidePostprocessor : public InternalSideUserObject, public Postprocessor
 {

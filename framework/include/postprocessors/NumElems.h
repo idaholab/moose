@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class NumElems;
-
 class NumElems : public GeneralPostprocessor
 {
 public:

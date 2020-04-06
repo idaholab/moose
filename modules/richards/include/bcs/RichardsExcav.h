@@ -12,7 +12,6 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class RichardsExcav;
 class Function;
 
 /**

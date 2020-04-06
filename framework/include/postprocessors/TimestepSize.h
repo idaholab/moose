@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class TimestepSize;
 
 class TimestepSize : public GeneralPostprocessor
 {

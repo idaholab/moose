@@ -17,12 +17,6 @@
   using ADSplitCHWResBase<compute_stage, T>::_mob_name;                                            \
   using ADSplitCHWResBase<compute_stage, T>::_mob
 
-// Forward declarations
-template <ComputeStage compute_stage, typename T = void>
-class ADSplitCHWResBase;
-
-declareADValidParams(ADSplitCHWResBase);
-
 /**
  * ADSplitCHWResBase implements the residual for the chemical potential in the
  * split form of the Cahn-Hilliard equation in a general way that can be templated

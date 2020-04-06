@@ -26,9 +26,6 @@ using ADKernelSUPG = ADKernelSUPGTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorKernelSUPG = ADKernelSUPGTempl<RealVectorValue, compute_stage>;
 
-declareADValidParams(ADKernelSUPG);
-declareADValidParams(ADVectorKernelSUPG);
-
 template <typename T, ComputeStage compute_stage>
 class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T, compute_stage>
 {

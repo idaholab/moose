@@ -12,8 +12,6 @@
 #include "CrystalPlasticityStateVarRateComponent.h"
 #include "MooseTypes.h"
 
-class CrystalPlasticityStateVarRateComponentVoce;
-
 /**
  * Phenomenological constitutive model state variable evolution rate component userobject class.
  */

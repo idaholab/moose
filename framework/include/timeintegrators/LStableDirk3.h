@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class LStableDirk3;
-
 /**
  * Third order diagonally implicit Runge Kutta method (Dirk) with three stages.
  *

@@ -13,7 +13,6 @@
 #include "ElementDamper.h"
 
 // Forward Declarations
-class BoundingValueElementDamper;
 
 /**
  * This class implements a damper that limits the value of a variable to be within

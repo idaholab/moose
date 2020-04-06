@@ -13,7 +13,6 @@
 #include "NSViscStressTensorDerivs.h"
 
 // ForwardDeclarations
-class NSMomentumViscousFlux;
 
 /**
  * Derived instance of the NSViscousFluxBase class

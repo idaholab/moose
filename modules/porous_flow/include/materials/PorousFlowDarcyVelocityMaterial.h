@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterial.h"
 
-class PorousFlowDarcyVelocityMaterial;
-
 /**
  * Material to calculate the Darcy velocity for all phases
  */

@@ -13,8 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-class ACInterface;
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$

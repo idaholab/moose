@@ -14,8 +14,6 @@
 
 #include "libmesh/vector_value.h"
 
-class Transform;
-
 class Transform : public MeshModifier
 {
 public:

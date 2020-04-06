@@ -12,7 +12,6 @@
 #include "SideUserObject.h"
 
 // Forward Declarations
-class GrayLambertSurfaceRadiationBase;
 class Function;
 
 /**

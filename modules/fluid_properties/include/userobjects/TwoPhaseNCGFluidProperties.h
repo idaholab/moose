@@ -12,8 +12,6 @@
 #include "TwoPhaseFluidProperties.h"
 #include "VaporMixtureFluidProperties.h"
 
-class TwoPhaseNCGFluidProperties;
-
 /**
  * Base class for fluid properties used with 2-phase flow with non-condensable
  * gases (NCGs) present.

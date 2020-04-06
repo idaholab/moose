@@ -14,7 +14,6 @@
 class Function;
 
 // Forward Declarations
-class ElementW1pError;
 
 /**
  * This postprocessor computes the Sobolev norm W^{1,p} of the

@@ -12,7 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declaration
-class ElasticEnergyMaterial;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

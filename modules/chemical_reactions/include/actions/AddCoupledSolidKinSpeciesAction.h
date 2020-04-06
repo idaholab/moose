@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class AddCoupledSolidKinSpeciesAction;
-
 class AddCoupledSolidKinSpeciesAction : public Action
 {
 public:

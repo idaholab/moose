@@ -13,10 +13,6 @@
 #include "ADKernelGrad.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetOlssonReinitialization;
-
-declareADValidParams(LevelSetOlssonReinitialization);
 
 /**
  * Implements the re-initialization equation proposed by Olsson et. al. (2007).

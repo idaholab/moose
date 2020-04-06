@@ -12,7 +12,6 @@
 #include "MooseMesh.h"
 
 // forward declaration
-class FileMesh;
 
 class FileMesh : public MooseMesh
 {

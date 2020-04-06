@@ -14,7 +14,6 @@
 #include "MooseParsedFunctionBase.h"
 
 // Forward declarations
-class MooseParsedFunction;
 
 /**
  * This class is used to evaluate symbolic equations passed in to Moose through

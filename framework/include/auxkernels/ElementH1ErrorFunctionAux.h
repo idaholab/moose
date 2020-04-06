@@ -13,7 +13,6 @@
 #include "ElementL2ErrorFunctionAux.h"
 
 // Forward declarations
-class ElementH1ErrorFunctionAux;
 
 /**
  * A class for computing the element-wise H1 error (actually W^{1,p}

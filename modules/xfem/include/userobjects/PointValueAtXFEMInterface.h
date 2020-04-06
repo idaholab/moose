@@ -16,7 +16,6 @@
 #include "libmesh/vector_value.h"
 
 // Forward Declarations
-class PointValueAtXFEMInterface;
 class XFEM;
 class LineSegmentCutSetUserObject;
 

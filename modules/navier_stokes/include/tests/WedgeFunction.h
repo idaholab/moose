@@ -12,8 +12,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class WedgeFunction;
-
 /**
  * Function object for tests/ins/jeffery_hamel responsible for setting
  * the exact value of the velocity and pressure variables.  Inherits

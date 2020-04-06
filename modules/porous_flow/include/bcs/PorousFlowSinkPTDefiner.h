@@ -11,8 +11,6 @@
 
 #include "PorousFlowSink.h"
 
-class PorousFlowSinkPTDefiner;
-
 /**
  * Provides either a porepressure or a temperature
  * to derived classes, depending on _involves_fluid

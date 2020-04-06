@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-class SpiralAnnularMesh;
-
 /**
  * Mesh generated from parameters
  */

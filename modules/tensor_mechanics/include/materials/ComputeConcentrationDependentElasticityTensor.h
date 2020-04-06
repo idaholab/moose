@@ -11,8 +11,6 @@
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
-class ComputeConcentrationDependentElasticityTensor;
-
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object as a function of
  * concentration field.

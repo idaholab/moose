@@ -11,8 +11,6 @@
 
 #include "ArrayDGKernel.h"
 
-class ArrayDGDiffusion;
-
 /**
  * Array version of DGDiffusion
  */

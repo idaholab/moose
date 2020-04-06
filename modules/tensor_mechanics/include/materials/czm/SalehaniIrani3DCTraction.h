@@ -10,7 +10,6 @@
 #pragma once
 
 #include "CZMMaterialBase.h"
-class SalehaniIrani3DCTraction;
 
 /**
  * Implementation of the non-stateful exponential traction separation law

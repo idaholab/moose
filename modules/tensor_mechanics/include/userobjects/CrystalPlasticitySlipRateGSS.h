@@ -12,8 +12,6 @@
 #include "CrystalPlasticitySlipRate.h"
 #include "RankTwoTensor.h"
 
-class CrystalPlasticitySlipRateGSS;
-
 /**
  * Phenomenological constitutive model slip rate userobject class.
  */

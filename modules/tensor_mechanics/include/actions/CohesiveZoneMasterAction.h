@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CohesiveZoneMasterAction;
-
 class CohesiveZoneMasterAction : public Action
 {
 public:

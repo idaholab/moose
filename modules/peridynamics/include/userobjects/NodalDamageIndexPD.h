@@ -11,8 +11,6 @@
 
 #include "NodalAuxVariableUserObjectBasePD.h"
 
-class NodalDamageIndexPD;
-
 /**
  * UserObject class to compute damage index for each material point in PD fracture modeling and
  * simulation

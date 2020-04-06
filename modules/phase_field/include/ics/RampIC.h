@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class RampIC;
 
 /**
  * Makes initial condition which creates a linear ramp of the given variable

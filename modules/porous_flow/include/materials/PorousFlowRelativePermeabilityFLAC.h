@@ -12,8 +12,6 @@
 #include "PorousFlowRelativePermeabilityBase.h"
 #include "PorousFlowFLACrelperm.h"
 
-class PorousFlowRelativePermeabilityFLAC;
-
 /**
  * Material to calculate relative permeability inspired by the
  * formula used in FLAC:

@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowMatrixInternalEnergy;
-
 /**
  * This material computes internal energy (J/m^3) for a rock matrix
  * assuming constant grain density, specific heat capacity, and

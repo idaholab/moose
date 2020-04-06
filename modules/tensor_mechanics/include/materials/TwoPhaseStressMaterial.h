@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class TwoPhaseStressMaterial;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

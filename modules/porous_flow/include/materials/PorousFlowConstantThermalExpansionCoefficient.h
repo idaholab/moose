@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowConstantThermalExpansionCoefficient;
-
 /**
  * Material designed to provide a time-invariant
  * volumetric thermal expansion coefficient

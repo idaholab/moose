@@ -20,7 +20,6 @@
 #endif
 
 // Forward declarations
-class PerfGraphInterface;
 
 /**
  * Interface for objects that needs transient capabilities

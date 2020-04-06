@@ -13,7 +13,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class ElementalVariableValue;
 class MooseMesh;
 
 namespace libMesh

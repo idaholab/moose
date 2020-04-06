@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class PFParamsPolyFreeEnergy;
 
 /**
  * Calculated properties for a single component phase field model using polynomial free energies

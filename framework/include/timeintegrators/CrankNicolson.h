@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class CrankNicolson;
-
 /**
  * Crank-Nicolson time integrator.
  *

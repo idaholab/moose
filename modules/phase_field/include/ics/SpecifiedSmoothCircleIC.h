@@ -12,7 +12,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward Declarations
-class SpecifiedSmoothCircleIC;
 
 /**
  * SpecifiedsmoothCircleIC creates multiple SmoothCircles (number = size of x_positions) that are

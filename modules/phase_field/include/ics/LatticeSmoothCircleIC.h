@@ -12,7 +12,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward Declarations
-class LatticeSmoothCircleIC;
 
 /**
  * LatticeSmoothcircleIC creates a lattice of smoothcircles as an initial condition.

@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class PoroMechanicsCoupling;
 
 /**
  * PoroMechanicsCoupling computes -coefficient*porepressure*grad_test[component]

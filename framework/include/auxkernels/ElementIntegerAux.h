@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class ElementIntegerAux;
-
 class ElementIntegerAux : public AuxKernel
 {
 public:

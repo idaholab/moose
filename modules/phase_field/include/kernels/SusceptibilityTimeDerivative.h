@@ -12,12 +12,10 @@
 #include "TimeDerivative.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
-// Forward Declaration
-class SusceptibilityTimeDerivative;
 
 /**
  * This calculates the time derivative for a variable multiplied by a generalized susceptibility
- **/
+ */
 class SusceptibilityTimeDerivative
   : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {

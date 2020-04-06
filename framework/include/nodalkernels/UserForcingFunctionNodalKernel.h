@@ -12,7 +12,6 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class UserForcingFunctionNodalKernel;
 class Function;
 
 /**

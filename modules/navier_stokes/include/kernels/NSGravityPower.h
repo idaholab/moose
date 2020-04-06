@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class NSGravityPower;
 
 class NSGravityPower : public Kernel
 {

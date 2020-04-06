@@ -13,7 +13,6 @@
 #include "NSViscStressTensorDerivs.h"
 
 // Forward Declarations
-class NSMomentumViscousBC;
 
 /**
  * This class corresponds to the viscous part of the "natural"

@@ -15,7 +15,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class Q2PSaturationFlux;
 
 /**
  * This is a fully upwinded flux Kernel

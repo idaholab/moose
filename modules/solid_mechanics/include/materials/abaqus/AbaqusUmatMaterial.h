@@ -49,7 +49,6 @@ typedef void (*umat_t)(Real STRESS[],
                        int * KINC);
 
 // Forward Declaration
-class AbaqusUmatMaterial;
 
 // AbaqusUmatMateral class define a property
 class AbaqusUmatMaterial : public SolidModel

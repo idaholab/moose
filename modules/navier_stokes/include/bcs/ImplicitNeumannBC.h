@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class ImplicitNeumannBC;
 
 /**
  * This class implements a form of the Neumann boundary condition in

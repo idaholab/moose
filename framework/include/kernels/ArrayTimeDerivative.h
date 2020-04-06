@@ -12,7 +12,6 @@
 #include "ArrayTimeKernel.h"
 
 // Forward Declaration
-class ArrayTimeDerivative;
 
 class ArrayTimeDerivative : public ArrayTimeKernel
 {

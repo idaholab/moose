@@ -11,8 +11,6 @@
 
 #include "Distribution.h"
 
-class NormalDistribution;
-
 /**
  * A class used to generate a normal distribution
  */

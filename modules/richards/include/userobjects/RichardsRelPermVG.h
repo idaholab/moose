@@ -11,8 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermVG;
-
 /**
  * Van-Genuchten form of relative permeability
  * as a function of effective saturation

@@ -14,8 +14,6 @@
 #include "SmearedCrackSofteningBase.h"
 #include "Function.h"
 
-class ComputeSmearedCrackingStress;
-
 /**
  * ComputeSmearedCrackingStress computes the stress for a finite strain
  * material with smeared cracking

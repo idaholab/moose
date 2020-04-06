@@ -11,8 +11,6 @@
 
 #include "VectorKernel.h"
 
-class VectorCoupledTimeDerivative;
-
 /**
  *  This calculates the time derivative for a coupled vector variable
  */

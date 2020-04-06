@@ -17,7 +17,6 @@
 
 // Forward Declarations
 class InputParameters;
-class LayeredBase;
 class SubProblem;
 class UserObject;
 

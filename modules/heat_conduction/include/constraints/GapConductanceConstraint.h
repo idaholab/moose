@@ -11,11 +11,6 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage>
-class GapConductanceConstraint;
-
-declareADValidParams(GapConductanceConstraint);
-
 /**
  * This Constraint implements thermal contact using a "gap
  * conductance" model in which the flux is represented by an

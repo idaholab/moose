@@ -11,8 +11,6 @@
 
 #include "BoostDistribution.h"
 
-class BoostLognormalDistribution;
-
 /**
  * A class used to generate Lognormal distribution via Boost
  */

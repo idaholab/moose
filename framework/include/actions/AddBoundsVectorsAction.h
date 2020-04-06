@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class AddBoundsVectorsAction;
-
 class AddBoundsVectorsAction : public Action
 {
 public:

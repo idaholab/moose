@@ -13,8 +13,6 @@
 #include "PorousFlowDictator.h"
 #include "RankTwoTensor.h"
 
-class PorousFlowMassVolumetricExpansion;
-
 /**
  * Kernel = mass_component * d(volumetric_strain)/dt
  * where mass_component =

@@ -11,8 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class FluxBC;
-
 /**
  * Boundary condition of a flux type \f$ <\vec q * \vec n, v> \f$.
  *

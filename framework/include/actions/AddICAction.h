@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddICAction;
-
 class AddICAction : public MooseObjectAction
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "PorousFlowAdvectiveFluxCalculatorSaturatedHeat.h"
 
-class PorousFlowAdvectiveFluxCalculatorUnsaturatedHeat;
-
 /**
  * Computes the advective flux of heat energy in a given phase, assuming unsaturated conditions.
  * Hence this UserObject is only relevant to single-phase situations, or multi-phase situations

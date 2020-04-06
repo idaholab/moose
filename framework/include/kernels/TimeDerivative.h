@@ -12,7 +12,6 @@
 #include "TimeKernel.h"
 
 // Forward Declaration
-class TimeDerivative;
 
 class TimeDerivative : public TimeKernel
 {

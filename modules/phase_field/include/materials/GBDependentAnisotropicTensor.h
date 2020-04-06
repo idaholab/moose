@@ -11,8 +11,6 @@
 
 #include "GBDependentTensorBase.h"
 
-class GBDependentAnisotropicTensor;
-
 /**
  * GB dependent anisotropic tensor Ref. Forest, MSMSE, 2015
  */

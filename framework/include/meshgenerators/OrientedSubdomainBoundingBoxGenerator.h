@@ -14,7 +14,6 @@
 #include "OrientedBoxInterface.h"
 
 // Forward declarations
-class OrientedSubdomainBoundingBoxGenerator;
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of a bounding box with arbitrary

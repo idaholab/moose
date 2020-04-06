@@ -13,7 +13,6 @@
 #include <vector>
 
 // Forward declaration
-class EulerAngleFileReader;
 
 /**
  * Read a set of Euler angles from a file

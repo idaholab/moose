@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", MaterialStdVectorRealGradientAux);
 InputParameters
 MaterialStdVectorRealGradientAux::validParams()
 {
-  InputParameters params = MaterialStdVectorAuxBase<>::validParams();
+  InputParameters params = MaterialStdVectorAuxBase<RealGradient>::validParams();
   params.addClassDescription("Extracts a component of a material's std::vector<RealGradient> to an "
                              "aux variable.  If the std::vector is not of sufficient size then "
                              "zero is returned");

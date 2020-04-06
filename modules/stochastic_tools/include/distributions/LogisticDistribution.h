@@ -11,8 +11,6 @@
 
 #include "Distribution.h"
 
-class LogisticDistribution;
-
 /**
  * A class used to generate a logistic distribution
  */

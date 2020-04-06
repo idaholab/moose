@@ -11,11 +11,6 @@
 
 #include "ADComputeStressBase.h"
 
-template <ComputeStage>
-class ADComputeStrainIncrementBasedStress;
-
-declareADValidParams(ADComputeStrainIncrementBasedStress);
-
 /**
  * ADComputeStrainIncrementBasedStress computes stress considering list of inelastic strain
  * increments

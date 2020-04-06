@@ -15,7 +15,6 @@
 #include "MooseTypes.h"
 
 // Forward Declarations
-class NodalDamper;
 class SubProblem;
 class SystemBase;
 template <typename>

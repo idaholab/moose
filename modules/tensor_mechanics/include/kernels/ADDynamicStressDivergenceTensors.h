@@ -12,10 +12,6 @@
 #include "ADStressDivergenceTensors.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADDynamicStressDivergenceTensors;
-
-declareADValidParams(ADDynamicStressDivergenceTensors);
 
 /**
  * ADDynamicStressDivergenceTensors is the automatic

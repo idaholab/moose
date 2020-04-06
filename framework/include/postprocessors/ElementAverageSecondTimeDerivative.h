@@ -12,7 +12,6 @@
 #include "ElementAverageValue.h"
 
 // Forward Declarations
-class ElementAverageSecondTimeDerivative;
 
 /**
  * This postprocessor computes a volume integral of the second time derivative of a given variable.

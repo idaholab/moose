@@ -12,7 +12,6 @@
 #include "NSStagnationBC.h"
 
 // Forward Declarations
-class NSStagnationPressureBC;
 
 // Specialization required of all user-level Moose objects
 

@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalExtremeValue;
 
 // Input parameters
 

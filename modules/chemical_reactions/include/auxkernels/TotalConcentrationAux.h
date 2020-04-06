@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class TotalConcentrationAux;
-
 /**
  * Computes the total concentration of given primary species, including its free
  * concentration and its stoichiometric contribution to all secondary equilibrium

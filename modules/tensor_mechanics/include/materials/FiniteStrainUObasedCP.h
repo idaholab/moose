@@ -16,8 +16,6 @@
 #include "CrystalPlasticityStateVariable.h"
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-class FiniteStrainUObasedCP;
-
 /**
  * FiniteStrainUObasedCP uses the multiplicative decomposition of deformation gradient
  * and solves the PK2 stress residual equation at the intermediate configuration to evolve the

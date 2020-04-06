@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class PoroFullSatMaterial;
 
 /**
  * Material designed to calculate and store all the

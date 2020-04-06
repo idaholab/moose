@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class AddRelationshipManager;
-
 /**
  * This Action retrieves all of the Actions from the MooseAction Warehouse and triggers the
  * addRelationshipManagers() call on each of them. Additionally, it is responsible for triggering

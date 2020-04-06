@@ -13,7 +13,6 @@
 #include "PeridynamicsMesh.h"
 
 // Forward Declarations
-class NodalPostprocessorBasePD;
 
 /**
  * Base postprocessor class for peridynamic calculation

@@ -11,8 +11,6 @@
 
 #include "LinearElasticTruss.h"
 
-class PlasticTruss;
-
 class PlasticTruss : public LinearElasticTruss
 {
 public:

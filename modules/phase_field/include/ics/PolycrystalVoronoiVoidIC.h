@@ -14,7 +14,6 @@
 #include "PolycrystalICTools.h"
 
 // Forward Declarationsc
-class PolycrystalVoronoiVoidIC;
 class GrainTrackerInterface;
 class PolycrystalVoronoi;
 

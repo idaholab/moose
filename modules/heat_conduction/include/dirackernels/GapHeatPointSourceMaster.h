@@ -14,7 +14,6 @@
 #include "PenetrationLocator.h"
 
 // Forward Declarations
-class GapHeatPointSourceMaster;
 
 class GapHeatPointSourceMaster : public DiracKernel
 {

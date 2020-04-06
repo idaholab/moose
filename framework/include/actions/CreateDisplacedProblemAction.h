@@ -11,7 +11,6 @@
 
 #include "Action.h"
 
-class CreateDisplacedProblemAction;
 class SystemBase;
 
 /**

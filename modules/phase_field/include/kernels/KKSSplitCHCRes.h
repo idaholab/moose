@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class KKSSplitCHCRes;
 
 /**
  * SplitCHBulk child class that takes all the necessary data from a

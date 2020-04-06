@@ -16,7 +16,6 @@
 
 // Forward declarations
 class InputParameters;
-class SyntaxTree;
 
 class SyntaxTree : public SyntaxFormatterInterface
 {

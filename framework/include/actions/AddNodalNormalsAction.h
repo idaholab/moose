@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class AddNodalNormalsAction;
-
 /**
  * Action to setup computation of nodal normals.
  *

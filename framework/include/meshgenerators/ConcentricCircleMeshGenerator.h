@@ -12,8 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class ConcentricCircleMeshGenerator;
-
 /**
  * Generates a mesh based on concentric circles, given all the parameters
  */

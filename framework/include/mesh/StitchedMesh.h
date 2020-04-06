@@ -12,7 +12,6 @@
 #include "MooseMesh.h"
 
 // Forward declarations
-class StitchedMesh;
 
 namespace libMesh
 {

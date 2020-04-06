@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class PenetrationAux;
 class PenetrationLocator;
 
 class PenetrationAux : public AuxKernel

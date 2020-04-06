@@ -11,8 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureRSC;
-
 /**
  * Rogers-Stallybrass-Clements form of capillary pressure
  */

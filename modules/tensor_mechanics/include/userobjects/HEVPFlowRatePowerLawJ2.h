@@ -11,8 +11,6 @@
 
 #include "HEVPFlowRateUOBase.h"
 
-class HEVPFlowRatePowerLawJ2;
-
 /**
  * This user object classs
  * Computes flow rate based on power law and

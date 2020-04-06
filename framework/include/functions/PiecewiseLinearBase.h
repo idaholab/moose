@@ -12,7 +12,6 @@
 #include "PiecewiseBase.h"
 
 // Forward declarations
-class PiecewiseLinearBase;
 
 /**
  * Base class for functions which provides a piecewise continuous linear

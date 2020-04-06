@@ -12,7 +12,6 @@
 #include "ElementDeletionGeneratorBase.h"
 
 // Forward declarations
-class BlockDeletionGenerator;
 
 /**
  * MeshGenerator for

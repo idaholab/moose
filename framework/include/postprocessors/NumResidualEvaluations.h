@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumResidualEvaluations;
 
 /**
  * Just returns the total number of Residual Evaluations performed.

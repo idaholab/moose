@@ -14,7 +14,6 @@
 #include "OrientedBoxInterface.h"
 
 // Forward declarations
-class OrientedBoxMarker;
 
 /**
  * Creates a box of specified width, length and height,

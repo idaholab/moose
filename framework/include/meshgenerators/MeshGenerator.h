@@ -20,7 +20,6 @@
 #include "libmesh/parameters.h"
 
 // Forward declarations
-class MeshGenerator;
 class MooseMesh;
 
 /**

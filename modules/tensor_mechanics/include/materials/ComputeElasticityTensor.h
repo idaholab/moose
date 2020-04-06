@@ -11,8 +11,6 @@
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
-class ComputeElasticityTensor;
-
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object with a given base name.
  */

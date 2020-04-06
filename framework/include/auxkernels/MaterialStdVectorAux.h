@@ -12,7 +12,6 @@
 #include "MaterialStdVectorAuxBase.h"
 
 // Forward declarations
-class MaterialStdVectorAux;
 
 /**
  * AuxKernel for outputting a std::vector material-property component to an AuxVariable

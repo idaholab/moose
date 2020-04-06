@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class RichardsApp;
-
 /**
  * The Richards equation is a nonlinear diffusion
  * equation that models multiphase flow through

@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddPostprocessorAction;
-
 class AddPostprocessorAction : public MooseObjectAction
 {
 public:

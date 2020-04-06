@@ -14,10 +14,6 @@
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetAdvectionSUPG;
-
-declareADValidParams(LevelSetAdvectionSUPG);
 
 /**
  * SUPG stabilization for the advection portion of the level set equation.

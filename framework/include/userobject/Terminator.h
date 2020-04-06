@@ -17,7 +17,6 @@
 #include "libmesh/fparser.hh"
 
 // Forward Declarations
-class Terminator;
 
 /**
  * This Userobject requests termination of the current solve based on

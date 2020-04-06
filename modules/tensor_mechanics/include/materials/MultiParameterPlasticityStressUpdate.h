@@ -13,8 +13,6 @@
 
 #include <array>
 
-class MultiParameterPlasticityStressUpdate;
-
 /**
  * MultiParameterPlasticityStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

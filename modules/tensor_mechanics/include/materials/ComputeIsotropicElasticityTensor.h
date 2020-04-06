@@ -11,8 +11,6 @@
 
 #include "ComputeElasticityTensorBase.h"
 
-class ComputeIsotropicElasticityTensor;
-
 /**
  * ComputeIsotropicElasticityTensor defines an elasticity tensor material for
  * isotropic materials.

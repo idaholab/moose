@@ -15,8 +15,6 @@
 
 #include "libmesh/vector_value.h"
 
-class PorousFlowActionBase;
-
 /**
  * Base class for PorousFlow actions.  This act() method makes consistency checks and
  * calls several methods that should be implemented in derived classes. This class also

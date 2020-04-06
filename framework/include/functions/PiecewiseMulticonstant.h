@@ -21,7 +21,6 @@ class GriddedData;
  * Gridded data can be 1D, 2D, 3D or 4D.
  * See GriddedData for examples of file format.
  */
-class PiecewiseMulticonstant;
 
 class PiecewiseMulticonstant : public PiecewiseMultiInterpolation
 {

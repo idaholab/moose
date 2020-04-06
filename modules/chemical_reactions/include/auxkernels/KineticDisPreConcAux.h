@@ -11,8 +11,6 @@
 
 #include "KineticDisPreRateAux.h"
 
-class KineticDisPreConcAux;
-
 /**
  * Calculate the kinetic mineral species concentrations according to
  * transient state theory rate law.

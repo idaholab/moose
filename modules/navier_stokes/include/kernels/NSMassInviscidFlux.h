@@ -12,7 +12,6 @@
 #include "NSKernel.h"
 
 // Forward Declarations
-class NSMassInviscidFlux;
 
 class NSMassInviscidFlux : public NSKernel
 {

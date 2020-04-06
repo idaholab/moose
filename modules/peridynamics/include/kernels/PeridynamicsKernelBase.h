@@ -14,7 +14,6 @@
 #include "SystemBase.h"
 
 class PeridynamicsMesh;
-class PeridynamicsKernelBase;
 
 /**
  * Base kernel class for peridynamic models

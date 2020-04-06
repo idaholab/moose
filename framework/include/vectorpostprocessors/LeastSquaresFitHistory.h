@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class LeastSquaresFitHistory;
 
 /**
  *  LeastSquaresFitHistory is a VectorPostprocessor that performs a least squares

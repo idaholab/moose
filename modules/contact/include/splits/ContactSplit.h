@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "Split.h"
 
-class ContactSplit;
-
 /**
  * Split-based preconditioner for contact problems.
  */

@@ -14,7 +14,6 @@
 #include <set>
 
 // Forward Declarations
-class GeneralizedPlaneStrain;
 class GeneralizedPlaneStrainUserObject;
 
 class GeneralizedPlaneStrain : public ScalarKernel
