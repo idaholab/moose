@@ -30,11 +30,11 @@ FVDiffusion<compute_stage>::computeQpResidual()
   return r;
 }
 
-registerADMooseObject("MooseApp", FVAdvection);
+registerADMooseObject("MooseApp", FVMatAdvection);
 
 template <ComputeStage compute_stage>
 InputParameters
-FVAdvection<compute_stage>::validParams()
+FVMatAdvection<compute_stage>::validParams()
 {
   InputParameters params = FVFluxKernel<compute_stage>::validParams();
   params.addRequiredParam<MaterialPropertyName>("vel", "advection velocity");
@@ -42,14 +42,14 @@ FVAdvection<compute_stage>::validParams()
 }
 
 template <ComputeStage compute_stage>
-FVAdvection<compute_stage>::FVAdvection(const InputParameters & params)
+FVMatAdvection<compute_stage>::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel<compute_stage>(params),
     _vel_left(getADMaterialProperty<RealVectorValue>("vel")),
     _vel_right(getNeighborADMaterialProperty<RealVectorValue>("vel")){};
 
 template <ComputeStage compute_stage>
 ADReal
-FVAdvection<compute_stage>::computeQpResidual()
+FVMatAdvection<compute_stage>::computeQpResidual()
 {
   auto v_avg = (_vel_left[_qp] + _vel_right[_qp]) * 0.5;
   ADReal r = 0;
@@ -59,4 +59,3 @@ FVAdvection<compute_stage>::computeQpResidual()
     r = _normal * v_avg * _u_right[_qp];
   return r;
 }
-

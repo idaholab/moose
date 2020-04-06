@@ -19,11 +19,11 @@ protected:
 };
 
 template <ComputeStage compute_stage>
-class FVAdvection : public FVFluxKernel<compute_stage>
+class FVMatAdvection : public FVFluxKernel<compute_stage>
 {
 public:
   static InputParameters validParams();
-  FVAdvection(const InputParameters & params);
+  FVMatAdvection(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

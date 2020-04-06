@@ -1,11 +1,11 @@
 
-#include "FVConstantScalarAdvection.h"
+#include "FVAdvection.h"
 
-registerADMooseObject("MooseApp", FVConstantScalarAdvection);
+registerADMooseObject("MooseApp", FVAdvection);
 
 template <ComputeStage compute_stage>
 InputParameters
-FVConstantScalarAdvection<compute_stage>::validParams()
+FVAdvection<compute_stage>::validParams()
 {
   InputParameters params = FVFluxKernel<compute_stage>::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
@@ -13,14 +13,14 @@ FVConstantScalarAdvection<compute_stage>::validParams()
 }
 
 template <ComputeStage compute_stage>
-FVConstantScalarAdvection<compute_stage>::FVConstantScalarAdvection(const InputParameters & params)
+FVAdvection<compute_stage>::FVAdvection(const InputParameters & params)
   : FVFluxKernel<compute_stage>(params),
     _velocity(getParam<RealVectorValue>("velocity"))
 {};
 
 template <ComputeStage compute_stage>
 ADReal
-FVConstantScalarAdvection<compute_stage>::computeQpResidual()
+FVAdvection<compute_stage>::computeQpResidual()
 {
   ADReal r = 0;
   if (_velocity * _normal > 0)

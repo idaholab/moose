@@ -33,7 +33,7 @@
 
 [FVKernels]
   [./advection]
-    type = FVConstantScalarAdvection
+    type = FVAdvection
     variable = v
     velocity = '1 0.5 0'
   [../]
