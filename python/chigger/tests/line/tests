@@ -68,7 +68,7 @@
     imagediff = 'legend_viewport.png'
     allowed_linux = 0.94
     allowed_darwin = 0.96
-    requirement = 'Chigger shall scale teh legend position relative to the graph viewport'
+    requirement = 'Chigger shall scale the legend position relative to the graph viewport'
     design = ''
     issues = '#7451'
     display_required = true
