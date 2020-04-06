@@ -16,11 +16,11 @@
 
 #include <vector>
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 class MyMat
 {
 public:
-  ADMaterialProperty(T) prop;
+  ADMaterialProperty<T> prop;
 };
 
 TEST(ADTypesTest, vector_DenseMatrix_Real)
