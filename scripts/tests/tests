@@ -7,4 +7,12 @@
     design = 'MooseDocs/generate.md'
     requirement = "MOOSE shall include a utility for examining test specifications for SQA content."
   []
+  [git_news]
+    type = PythonUnitTest
+    input = test_git_news.py
+    buffer = True
+    issues = '#11446'
+    design = 'newsletter/index.html'
+    requirement = "The system shall include a utility for determining author contributions to the repository in the previous month.."
+  []
 []
