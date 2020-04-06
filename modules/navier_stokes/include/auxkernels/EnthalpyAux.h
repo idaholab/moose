@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class EnthalpyAux;
 
 /**
  * Nodal auxiliary variable for enthalpy,

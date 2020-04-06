@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CommonTensorMechanicsAction;
-
 /**
  * Store common tensor mechanics parameters
  */

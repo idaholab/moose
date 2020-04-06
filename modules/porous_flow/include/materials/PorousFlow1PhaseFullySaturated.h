@@ -11,8 +11,6 @@
 
 #include "PorousFlowVariableBase.h"
 
-class PorousFlow1PhaseFullySaturated;
-
 /**
  * Base material designed to calculate fluid phase porepressure and saturation
  * for the single-phase situation assuming full saturation where porepressure

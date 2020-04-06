@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class RadialDisplacementCylinderAux;
-
 /**
  * Calculates the radial displacement for cylindrical geometries.
  * Works for 2D and 3D Cartesian systems and axisymmetric systems

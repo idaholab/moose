@@ -14,7 +14,6 @@
 #include "Sampler.h"
 
 // Forward Declarations
-class SamplerTester;
 
 template <>
 InputParameters validParams<SamplerTester>();

@@ -16,7 +16,6 @@
 
 // Forward declarations
 class InputParameters;
-class Steady;
 class FEProblemBase;
 
 template <typename T>

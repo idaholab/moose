@@ -12,7 +12,6 @@
 #include "ElementPostprocessor.h"
 
 // Forward Declarations
-class AverageElementSize;
 
 /**
  * This postprocessor computes an average element size (h) for the whole domain.

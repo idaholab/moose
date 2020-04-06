@@ -13,7 +13,6 @@
 #include "SamplerBase.h"
 
 // Forward Declarations
-class NodalValueSampler;
 
 /**
  * Samples values of nodal variable(s).

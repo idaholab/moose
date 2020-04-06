@@ -11,8 +11,6 @@
 
 #include "ComputeExtraStressBase.h"
 
-class ComputeExtraStressConstant;
-
 /**
  * Computes a constant extra stress that is added to the stress calculated
  * by the constitutive model

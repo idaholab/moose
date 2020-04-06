@@ -11,8 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-class InterfaceDiffusionBase;
-
 /**
  * Base class for Diffusion equation terms coupling two different
  * variables across a subdomain boundary.

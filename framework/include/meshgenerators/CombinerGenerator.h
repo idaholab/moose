@@ -14,7 +14,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class CombinerGenerator;
 
 /**
  * Collects multiple meshes into a single (unconnected) mesh

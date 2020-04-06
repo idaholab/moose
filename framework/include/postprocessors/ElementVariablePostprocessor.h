@@ -13,7 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class ElementVariablePostprocessor;
 
 class ElementVariablePostprocessor : public ElementPostprocessor,
                                      public MooseVariableInterface<Real>

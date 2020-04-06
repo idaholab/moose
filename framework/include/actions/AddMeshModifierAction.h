@@ -12,7 +12,6 @@
 #include "MooseObjectAction.h"
 
 // Forward Declaration
-class AddMeshModifierAction;
 
 class AddMeshModifierAction : public MooseObjectAction
 {

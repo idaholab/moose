@@ -12,7 +12,6 @@
 #include "SideAverageValue.h"
 
 // Forward Declarations
-class AxisymmetricCenterlineAverageValue;
 
 /**
  * This postprocessor computes a line integral of the specified variable

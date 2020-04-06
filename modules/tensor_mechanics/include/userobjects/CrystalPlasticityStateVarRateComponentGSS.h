@@ -11,8 +11,6 @@
 
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-class CrystalPlasticityStateVarRateComponentGSS;
-
 /**
  * Phenomenological constitutive model state variable evolution rate component userobject class.
  */

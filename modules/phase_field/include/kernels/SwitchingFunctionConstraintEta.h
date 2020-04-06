@@ -13,9 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class SwitchingFunctionConstraintEta;
-
 /**
  * SwitchingFunctionConstraintEta is a constraint kernel that acts on the
  * lambda lagrange multiplier non-linear variables to

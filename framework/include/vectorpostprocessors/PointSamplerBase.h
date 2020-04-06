@@ -16,7 +16,6 @@
 #include "SamplerBase.h"
 
 // Forward Declarations
-class PointSamplerBase;
 
 class PointSamplerBase : public GeneralVectorPostprocessor,
                          public CoupleableMooseVariableDependencyIntermediateInterface,

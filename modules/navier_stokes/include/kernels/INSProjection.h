@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSProjection;
 
 /**
  * This class computes the "projection" part of the "split" method for

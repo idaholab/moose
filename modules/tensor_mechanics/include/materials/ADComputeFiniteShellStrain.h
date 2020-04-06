@@ -14,17 +14,10 @@
 
 #define usingComputeFiniteShellStrainMembers usingComputeIncrementalShellStrainMembers
 
-// Forward Declarations
-template <ComputeStage>
-class ADComputeFiniteShellStrain;
-
-declareADValidParams(ADComputeFiniteShellStrain);
-
 /**
  * ADComputeFiniteShellStrain computes the strain increment term for shell elements under finite
- *displacement/rotation scenarios.
- **/
-
+ * displacement/rotation scenarios.
+ */
 template <ComputeStage compute_stage>
 class ADComputeFiniteShellStrain : public ADComputeIncrementalShellStrain<compute_stage>
 {

@@ -11,9 +11,6 @@
 
 #include "CHBulk.h"
 
-// Forward Declarations
-class CHBulkPFCTrad;
-
 class CHBulkPFCTrad : public CHBulk<Real>
 {
 public:

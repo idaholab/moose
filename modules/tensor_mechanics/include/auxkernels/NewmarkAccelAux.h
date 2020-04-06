@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class NewmarkAccelAux;
-
 class NewmarkAccelAux : public AuxKernel
 {
 public:

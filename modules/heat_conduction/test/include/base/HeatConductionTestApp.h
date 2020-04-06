@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class HeatConductionTestApp;
-
 class HeatConductionTestApp : public MooseApp
 {
 public:

@@ -12,7 +12,6 @@
 #include "ElementAverageValue.h"
 
 // Forward Declarations
-class HomogenizedElasticConstants;
 class SymmElasticityTensor;
 class SymmTensor;
 

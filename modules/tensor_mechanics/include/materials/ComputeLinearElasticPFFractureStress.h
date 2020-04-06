@@ -13,8 +13,6 @@
 #include "MooseEnum.h"
 #include "GuaranteeConsumer.h"
 
-class ComputeLinearElasticPFFractureStress;
-
 /**
  * Phase-field fracture
  * This class computes the stress and energy contribution for the

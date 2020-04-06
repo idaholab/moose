@@ -15,7 +15,6 @@
 
 // Forward declarations
 class Sampler;
-class SamplerInterface;
 
 /**
  * Interface for objects that need to use samplers.

@@ -11,9 +11,6 @@
 
 #include "ACBulk.h"
 
-// Forward Declarations
-class CoupledAllenCahn;
-
 /**
  * CoupledAllenCahn uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to compute the residual

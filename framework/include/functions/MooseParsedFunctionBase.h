@@ -19,7 +19,6 @@
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
-class MooseParsedFunctionBase;
 class MooseParsedFunctionWrapper;
 
 template <typename T>

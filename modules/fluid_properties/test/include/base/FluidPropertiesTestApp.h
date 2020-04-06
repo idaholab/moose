@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class FluidPropertiesTestApp;
-
 class FluidPropertiesTestApp : public MooseApp
 {
 public:

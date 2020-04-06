@@ -13,7 +13,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class KernelValue;
 
 /**
  * The KernelValue class is responsible for calculating the residuals in form:

@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward declaration
-class SolutionAux;
 class SolutionUserObject;
 
 /**

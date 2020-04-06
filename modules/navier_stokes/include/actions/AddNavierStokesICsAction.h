@@ -13,8 +13,6 @@
 
 #include "libmesh/vector_value.h"
 
-class AddNavierStokesICsAction;
-
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds initial conditions for all the

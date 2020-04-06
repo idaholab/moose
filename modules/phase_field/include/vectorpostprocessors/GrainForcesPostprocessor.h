@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class GrainForcesPostprocessor;
 class GrainForceAndTorqueInterface;
 
 /**

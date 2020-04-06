@@ -11,8 +11,6 @@
 
 #include "MeshModifier.h"
 
-class BreakBoundaryOnSubdomain;
-
 class BreakBoundaryOnSubdomain : public MeshModifier
 {
 public:

@@ -14,8 +14,6 @@
 #include "FileOutput.h"
 #include "FormattedTable.h"
 
-class TableOutput;
-
 /**
  * Base class for scalar variables and postprocessors output objects
  *

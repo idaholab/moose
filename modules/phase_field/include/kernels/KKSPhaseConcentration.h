@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class KKSPhaseConcentration;
 
 /**
  * Enforce sum of phase concentrations to be the real concentration.

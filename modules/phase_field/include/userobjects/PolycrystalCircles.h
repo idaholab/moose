@@ -14,7 +14,6 @@
 #include "DelimitedFileReader.h"
 
 // Forward Declarations
-class PolycrystalCircles;
 
 /**
  * PolycrystalCircles creates a polycrystal made up of circles.

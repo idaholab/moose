@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class NumRelationshipManagers;
-
 class NumRelationshipManagers : public GeneralPostprocessor
 {
 public:

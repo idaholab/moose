@@ -11,8 +11,6 @@
 
 #include "Compute2DIncrementalStrain.h"
 
-class ComputeAxisymmetricRZIncrementalStrain;
-
 /**
  * ComputeAxisymmetricRZIncrementalStrain defines a strain increment only
  * for incremental strains in an Axisymmetric simulation.

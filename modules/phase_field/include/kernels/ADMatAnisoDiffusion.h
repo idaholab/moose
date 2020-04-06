@@ -24,5 +24,3 @@ public:
 
   ADMatAnisoDiffusion(const InputParameters & parameters);
 };
-
-declareADValidParams(ADMatAnisoDiffusion);

@@ -15,7 +15,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsPolyLineSink;
 
 /**
  * Approximates a polyline by a sequence of Dirac Points

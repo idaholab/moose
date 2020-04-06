@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupPreconditionerAction;
-
 /**
  * Set the preconditioner up.
  */

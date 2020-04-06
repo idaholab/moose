@@ -12,7 +12,6 @@
 #include "ArrayInitialCondition.h"
 
 // Forward Declarations
-class ArrayFunctionIC;
 class Function;
 
 class ArrayFunctionIC : public ArrayInitialCondition

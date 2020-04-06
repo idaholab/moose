@@ -19,7 +19,6 @@
 // Forward declerations
 class InputParameters;
 class MooseApp;
-class OutputInterface;
 class OutputWarehouse;
 
 template <typename T>

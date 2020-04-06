@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declaration
-class CoupledSwitchingTimeDerivative;
 
 /**
  * This kernel adds a contribution

@@ -14,7 +14,6 @@
 #include "RichardsSat.h"
 
 // Forward Declarations
-class RichardsSatPrimeAux;
 
 /**
  * Derivative of fluid Saturation wrt effective saturation

@@ -12,8 +12,6 @@
 #include "RichardsSeff.h"
 #include "RichardsSeffRSC.h"
 
-class RichardsSeff2waterRSC;
-
 /**
  * Rogers-Stallybrass-Clements version of effective saturation of water phase
  * as a function of (Pwater, Pgas), and its derivs wrt to those pressures.

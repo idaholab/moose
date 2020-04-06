@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class OrderParameterFunctionMaterial;
 
 /**
  * Material base class for materials that provide the switching function

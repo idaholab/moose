@@ -13,7 +13,6 @@
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
 
 // Forward Declaration
-class PorousFlowFluxLimitedTVDAdvection;
 
 /**
  * Advection of a quantity with velocity set in the PorousFlowAdvectiveFluxCalculator

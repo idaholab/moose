@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class SolidMechanicsTestApp;
-
 class SolidMechanicsTestApp : public MooseApp
 {
 public:

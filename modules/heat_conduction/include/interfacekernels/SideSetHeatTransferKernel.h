@@ -12,7 +12,6 @@
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class SideSetHeatTransferKernel;
 
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks

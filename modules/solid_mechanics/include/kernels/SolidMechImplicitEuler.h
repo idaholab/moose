@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class SolidMechImplicitEuler;
 
 class SolidMechImplicitEuler : public SecondDerivativeImplicitEuler
 {

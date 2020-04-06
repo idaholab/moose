@@ -12,8 +12,6 @@
 #include "InputParameters.h"
 #include "Action.h"
 
-class KKSAction;
-
 /**
  * Automatically generates all variables and kernels to set up a KKS phase field simulation
  */

@@ -12,7 +12,6 @@
 #include "MooseObject.h"
 
 class FEProblem;
-class LineSearch;
 
 class LineSearch : public MooseObject
 {

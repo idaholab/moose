@@ -11,8 +11,6 @@
 
 #include "MechanicsBaseNOSPD.h"
 
-class HorizonStabilizedSmallStrainMechanicsNOSPD;
-
 /**
  * Kernel class for horizon-stabilized peridynamic correspondence model for small strain
  */

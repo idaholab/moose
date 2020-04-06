@@ -19,7 +19,6 @@
  */
 
 // Forward Declarations
-class CriticalTimeStep;
 
 class CriticalTimeStep : public ElementPostprocessor, public GuaranteeConsumer
 {

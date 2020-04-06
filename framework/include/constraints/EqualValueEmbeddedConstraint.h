@@ -13,7 +13,6 @@
 #include "NodeElemConstraint.h"
 
 // Forward Declarations
-class EqualValueEmbeddedConstraint;
 
 /**
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same

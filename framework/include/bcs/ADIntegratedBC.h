@@ -72,9 +72,6 @@ using ADIntegratedBC = ADIntegratedBCTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorIntegratedBC = ADIntegratedBCTempl<RealVectorValue, compute_stage>;
 
-declareADValidParams(ADIntegratedBC);
-declareADValidParams(ADVectorIntegratedBC);
-
 #define usingTemplIntegratedBCMembers(type)                                                        \
   usingMooseObjectMembers;                                                                         \
   usingCoupleableMembers;                                                                          \

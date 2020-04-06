@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class SoretDiffusion;
 
 /**
  * SoretDiffusion adds the soret effect in the split form of the Cahn-Hilliard

@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class GenericConstantArray;
 
 class GenericConstantArray : public Material
 {

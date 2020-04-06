@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class MomentumConvectiveFlux;
-
 /**
  * Momentum convective flux: \f$\rho \vec u \vec u : \nabla v \f$
  *

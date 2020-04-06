@@ -12,7 +12,6 @@
 #include "SmoothSuperellipsoidBaseIC.h"
 
 // Forward Declarations
-class SmoothSuperellipsoidIC;
 
 /**
  * SmoothSuperellipsoidIC creates a Superellipsoid of given semiaxes a,b,c and exponent n

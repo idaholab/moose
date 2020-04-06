@@ -11,17 +11,11 @@
 
 #include "ADComputeMultipleInelasticStress.h"
 
-template <ComputeStage>
-class ADComputeMultiplePorousInelasticStress;
-
-declareADValidParams(ADComputeMultiplePorousInelasticStress);
-
 /**
  * Compute state (stress and internal parameters such as plastic
  * strains and internal parameters) using an iterative process. A porosity material property
  * is defined and is calcuated from the trace of inelastic strain increment.
  */
-
 template <ComputeStage compute_stage>
 class ADComputeMultiplePorousInelasticStress
   : public ADComputeMultipleInelasticStress<compute_stage>

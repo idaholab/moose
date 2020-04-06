@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class SetupDampersAction;
-
 class SetupDampersAction : public Action
 {
 public:

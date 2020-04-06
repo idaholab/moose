@@ -13,7 +13,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsHalfGaussianSink;
 
 /**
  * Applies a fluid sink to the boundary.

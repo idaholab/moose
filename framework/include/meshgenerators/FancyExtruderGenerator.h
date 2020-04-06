@@ -14,7 +14,6 @@
 #include "libmesh/point.h"
 
 // Forward declarations
-class FancyExtruderGenerator;
 
 /**
  * Generates a mesh by reading it from an file.

@@ -13,7 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declarations
-class GMVOutput;
 
 /**
  * Class for output data to the GMVOutputII format

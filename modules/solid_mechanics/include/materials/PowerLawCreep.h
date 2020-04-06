@@ -12,7 +12,6 @@
 #include "SolidModel.h"
 
 // Forward declarations
-class PowerLawCreep;
 
 /**
  * Power-law creep material

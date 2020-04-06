@@ -24,7 +24,6 @@ class NumericVector;
 }
 
 // Forward declarations
-class SolutionUserObject;
 
 /**
  * User object that reads an existing solution from an input file and

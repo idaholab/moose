@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ScalePostprocessor;
-
 /**
  * Scale a postprocessor
  */

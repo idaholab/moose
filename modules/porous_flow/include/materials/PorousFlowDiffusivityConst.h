@@ -11,8 +11,6 @@
 
 #include "PorousFlowDiffusivityBase.h"
 
-class PorousFlowDiffusivityConst;
-
 /// Material designed to provide constant tortuosity and diffusion coefficents
 class PorousFlowDiffusivityConst : public PorousFlowDiffusivityBase
 {

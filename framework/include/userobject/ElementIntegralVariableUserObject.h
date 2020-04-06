@@ -13,7 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class ElementIntegralVariableUserObject;
 
 /**
  * This postprocessor computes a volume integral of the specified variable.

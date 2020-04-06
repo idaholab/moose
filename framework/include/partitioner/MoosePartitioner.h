@@ -16,7 +16,6 @@
 #include "libmesh/partitioner.h"
 
 // Forward declarations
-class MoosePartitioner;
 
 /**
  * Base class for MOOSE partitioner

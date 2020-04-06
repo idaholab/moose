@@ -20,7 +20,6 @@
 #include "MaterialPropertyInterface.h"
 
 // Forward Declarations
-class Indicator;
 class MooseMesh;
 class SubProblem;
 class Assembly;

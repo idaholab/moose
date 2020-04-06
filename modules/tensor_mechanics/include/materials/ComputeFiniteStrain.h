@@ -11,8 +11,6 @@
 
 #include "ComputeIncrementalStrainBase.h"
 
-class ComputeFiniteStrain;
-
 /**
  * ComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.
  */

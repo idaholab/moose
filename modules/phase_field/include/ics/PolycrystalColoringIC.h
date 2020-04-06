@@ -13,7 +13,6 @@
 #include "PolycrystalICTools.h"
 
 // Forward Declarations
-class PolycrystalColoringIC;
 class GrainTrackerInterface;
 class PolycrystalUserObjectBase;
 

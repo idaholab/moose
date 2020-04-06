@@ -13,7 +13,6 @@
 #include "NSPressureDerivs.h"
 
 // Forward Declarations
-class NSPressureNeumannBC;
 
 /**
  * This kernel is appropriate for use with a "zero normal flow"

@@ -13,7 +13,6 @@
 #include "TableOutput.h"
 
 // Forward declarations
-class CSV;
 
 /**
  * Based class for adding basic filename support to output base class

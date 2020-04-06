@@ -12,7 +12,6 @@
 #include "DGKernel.h"
 
 // Forward Declarations
-class DGDiffusion;
 
 /**
  * DG kernel for diffusion

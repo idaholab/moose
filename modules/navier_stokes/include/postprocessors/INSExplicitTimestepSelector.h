@@ -11,8 +11,6 @@
 
 #include "ElementPostprocessor.h"
 
-class INSExplicitTimestepSelector;
-
 /**
  * Postprocessor that computes the minimum value of h_min/|u|,
  * where |u| is coupled in as an aux variable.

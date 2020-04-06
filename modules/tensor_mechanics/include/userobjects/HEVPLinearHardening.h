@@ -11,8 +11,6 @@
 
 #include "HEVPStrengthUOBase.h"
 
-class HEVPLinearHardening;
-
 /**
  * This user object classs
  * Computes linear hardening

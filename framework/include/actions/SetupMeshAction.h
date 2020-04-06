@@ -12,7 +12,6 @@
 #include "MooseObjectAction.h"
 
 // Forward Declaration
-class SetupMeshAction;
 class MooseMesh;
 
 class SetupMeshAction : public MooseObjectAction

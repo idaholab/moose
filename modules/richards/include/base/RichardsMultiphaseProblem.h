@@ -11,8 +11,6 @@
 
 #include "FEProblem.h"
 
-class RichardsMultiphaseProblem;
-
 /**
  * Allows a constraint u>=v to be enforced during
  * the nonlinear iteration process.  This is done

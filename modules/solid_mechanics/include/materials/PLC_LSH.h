@@ -12,7 +12,6 @@
 #include "SolidModel.h"
 
 // Forward declarations
-class PLC_LSH;
 
 /**
  * Combined power-law creep and linear strain hardening material

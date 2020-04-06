@@ -12,7 +12,6 @@
 #include "ElemElemConstraint.h"
 
 // Forward Declarations
-class XFEMEqualValueAtInterface;
 class XFEM;
 
 class XFEMEqualValueAtInterface : public ElemElemConstraint

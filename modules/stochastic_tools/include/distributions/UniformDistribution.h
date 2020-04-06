@@ -11,8 +11,6 @@
 
 #include "Distribution.h"
 
-class UniformDistribution;
-
 /**
  * A class used to generate uniform distribution
  */

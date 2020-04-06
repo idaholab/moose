@@ -14,7 +14,6 @@
 #include "VectorPostprocessor.h"
 
 // Forward Declarations
-class NodalVectorPostprocessor;
 
 class NodalVectorPostprocessor : public NodalUserObject, public VectorPostprocessor
 {

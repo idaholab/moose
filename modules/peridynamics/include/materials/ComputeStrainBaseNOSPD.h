@@ -13,8 +13,6 @@
 #include "MechanicsMaterialBasePD.h"
 #include "RankTwoTensor.h"
 
-class ComputeStrainBaseNOSPD;
-
 /**
  * Base material class for correspondence material model
  */

@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class CumulativeValuePostprocessor;
-
 /**
  * Creates a cumulative sum of a post-processor value over a transient.
  *

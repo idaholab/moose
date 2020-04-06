@@ -12,7 +12,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward Declarations
-class SmoothCircleIC;
 
 /**
  * SmoothcircleIC creates a circle of a given radius centered at a given point in the domain.

@@ -18,7 +18,6 @@ class FEProblemBase;
 class InputParameters;
 class MooseRandom;
 class RandomData;
-class RandomInterface;
 
 template <typename T>
 InputParameters validParams();

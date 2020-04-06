@@ -13,8 +13,6 @@
 
 #include "libmesh/enum_elem_quality.h"
 
-class ElementQualityChecker;
-
 class ElementQualityChecker : public ElementUserObject
 {
 public:

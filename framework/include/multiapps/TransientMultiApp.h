@@ -14,7 +14,6 @@
 #include "libmesh/numeric_vector.h"
 
 // Forward declarations
-class TransientMultiApp;
 class Transient;
 
 /**

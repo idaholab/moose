@@ -28,7 +28,6 @@
 
 class MooseMesh;
 class SubProblem;
-class KernelBase;
 class Assembly;
 template <typename>
 class MooseVariableFE;

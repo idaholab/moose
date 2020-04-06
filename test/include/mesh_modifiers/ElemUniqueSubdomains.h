@@ -13,7 +13,6 @@
 #include "MeshModifier.h"
 
 // Forward declerations
-class ElemUniqueSubdomains;
 
 template <>
 InputParameters validParams<ElemUniqueSubdomains>();
@@ -29,4 +28,3 @@ public:
 protected:
   virtual void modify() override;
 };
-

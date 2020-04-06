@@ -12,8 +12,6 @@
 #include "AuxKernel.h"
 #include <sstream>
 
-class PFCRFFEnergyDensity;
-
 class PFCRFFEnergyDensity : public AuxKernel
 {
 public:

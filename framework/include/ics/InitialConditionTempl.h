@@ -20,9 +20,6 @@
 class FEProblemBase;
 class Assembly;
 
-template <typename>
-class InitialConditionTempl;
-
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
  * former method is used for setting block initial conditions. It first projects the initial

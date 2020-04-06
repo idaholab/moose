@@ -13,8 +13,6 @@
 
 #include "SodiumProperties.h"
 
-class SodiumPropertiesMaterial;
-
 class SodiumPropertiesMaterial : public Material
 {
 public:

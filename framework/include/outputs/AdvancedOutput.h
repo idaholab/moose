@@ -23,8 +23,6 @@ class PetscOutput;
 class Console;
 class TransientMultiApp;
 
-class AdvancedOutput;
-
 /**
  * Based class for output objects
  *

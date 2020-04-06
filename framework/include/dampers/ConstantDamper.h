@@ -13,7 +13,6 @@
 #include "GeneralDamper.h"
 
 // Forward Declarations
-class ConstantDamper;
 
 /**
  * Simple constant damper.

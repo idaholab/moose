@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "MoosePartitioner.h"
 
-class RandomPartitioner;
-
 /**
  * Partitions a mesh randomly using element ids as the seed for the generator.
  */

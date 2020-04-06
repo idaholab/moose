@@ -16,7 +16,6 @@
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
-class RelationshipManager;
 class MooseMesh;
 
 /**

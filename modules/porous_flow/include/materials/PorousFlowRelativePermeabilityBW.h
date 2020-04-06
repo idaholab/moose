@@ -12,8 +12,6 @@
 #include "PorousFlowRelativePermeabilityBase.h"
 #include "PorousFlowBroadbridgeWhite.h"
 
-class PorousFlowRelativePermeabilityBW;
-
 /**
  * Material that calculates the Broadbridge-White relative permeability
  * P Broadbridge, I White ``Constant rate rainfall

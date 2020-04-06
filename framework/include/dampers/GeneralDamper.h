@@ -13,7 +13,6 @@
 #include "Damper.h"
 
 // Forward Declarations
-class GeneralDamper;
 class SubProblem;
 class SystemBase;
 

@@ -13,7 +13,6 @@
 #include "MaterialAuxBase.h"
 
 // Forward declarations
-class MaterialRealVectorValueAux;
 
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable

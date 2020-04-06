@@ -11,8 +11,6 @@
 
 #include "PorousFlowActionBase.h"
 
-class PorousFlowSinglePhaseBase;
-
 /**
  * Base class for actions involving a single fluid phase
  */

@@ -12,8 +12,6 @@
 #include "ElementVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
 
-class ElementValueSampler;
-
 /**
  * Samples values of elemental variable(s).
  */

@@ -13,7 +13,6 @@
 #include "FeatureFloodCount.h"
 
 // Forward declarations
-class GrainTrackerInterface;
 
 /**
  * This class defines the interface for the GrainTracking objects.

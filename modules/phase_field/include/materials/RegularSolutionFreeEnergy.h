@@ -13,7 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class RegularSolutionFreeEnergy;
 
 /**
  * Material class that creates regular solution free energy with the expression builder

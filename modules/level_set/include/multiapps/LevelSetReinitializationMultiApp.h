@@ -12,7 +12,6 @@
 #include "MultiApp.h"
 
 // Forward declarations
-class LevelSetReinitializationMultiApp;
 class LevelSetReinitializationProblem;
 /**
  * MultiApp that performs a time reset prior to solving, this enables the level set reinitialization

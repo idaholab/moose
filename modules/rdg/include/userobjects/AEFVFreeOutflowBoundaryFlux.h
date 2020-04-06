@@ -12,7 +12,6 @@
 #include "BoundaryFluxBase.h"
 
 // Forward Declarations
-class AEFVFreeOutflowBoundaryFlux;
 
 /**
  * Free outflow BC based boundary flux user object

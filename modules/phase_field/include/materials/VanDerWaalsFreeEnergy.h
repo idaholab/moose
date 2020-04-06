@@ -12,7 +12,6 @@
 #include "GasFreeEnergyBase.h"
 
 // Forward Declarations
-class VanDerWaalsFreeEnergy;
 
 /**
  * Material class that provides the free energy of a Van der Waals gas with the

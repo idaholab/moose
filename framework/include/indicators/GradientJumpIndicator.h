@@ -11,8 +11,6 @@
 
 #include "InternalSideIndicator.h"
 
-class GradientJumpIndicator;
-
 class GradientJumpIndicator : public InternalSideIndicator
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "GeneralizedKelvinVoigtBase.h"
 
-class GeneralizedKelvinVoigtModel;
-
 /**
  * This class is an implementation of a generalized Kelvin-Voigt model
  * with constant mechanical properties. It consists of an arbitrary number

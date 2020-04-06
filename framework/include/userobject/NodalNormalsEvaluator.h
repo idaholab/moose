@@ -11,7 +11,6 @@
 
 #include "NodalUserObject.h"
 
-class NodalNormalsEvaluator;
 class AuxiliarySystem;
 
 /**

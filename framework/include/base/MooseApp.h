@@ -35,7 +35,6 @@
 
 // Forward declarations
 class Executioner;
-class MooseApp;
 class Backup;
 class FEProblemBase;
 class MeshModifier;

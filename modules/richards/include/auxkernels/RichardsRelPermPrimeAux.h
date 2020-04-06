@@ -14,7 +14,6 @@
 #include "RichardsRelPerm.h"
 
 // Forward Declarations
-class RichardsRelPermPrimeAux;
 
 /**
  * Derivative of relative Permeability wrt effective saturation

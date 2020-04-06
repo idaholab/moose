@@ -11,8 +11,6 @@
 
 #include "BoostDistribution.h"
 
-class BoostNormalDistribution;
-
 /**
  * A class used to generate Normal distribution via Boost
  */

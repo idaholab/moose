@@ -12,7 +12,6 @@
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeThermalExpansionEigenstrainBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

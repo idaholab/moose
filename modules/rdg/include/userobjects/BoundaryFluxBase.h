@@ -11,8 +11,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-class BoundaryFluxBase;
-
 /**
  * A base class for computing/caching fluxes at boundaries
  *

@@ -12,7 +12,6 @@
 #include "SideSetsGeneratorBase.h"
 
 // Forward declarations
-class SideSetsFromPointsGenerator;
 
 /**
  *

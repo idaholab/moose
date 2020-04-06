@@ -39,7 +39,6 @@
 #endif
 
 // Forward declarations
-class ImageSampler;
 class MooseMesh;
 
 /**

@@ -12,7 +12,6 @@
 #include "EulerAngleProvider.h"
 
 // Forward declaration
-class EulerAngleUpdater;
 class RotationTensor;
 class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;

@@ -13,7 +13,6 @@
 #include "ParsedMaterialBase.h"
 
 // Forward Declarations
-class DerivativeParsedMaterial;
 
 /**
  * DerivativeFunctionMaterialBase child class to evaluate a parsed function (for

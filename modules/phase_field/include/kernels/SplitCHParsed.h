@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class SplitCHParsed;
 
 /**
  * CHParsed uses the Free Energy function and derivatives

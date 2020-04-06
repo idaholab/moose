@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class MomentBalancing;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

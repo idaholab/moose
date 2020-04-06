@@ -11,8 +11,6 @@
 
 #include "MechanicsBaseNOSPD.h"
 
-class ForceStabilizedSmallStrainMechanicsNOSPD;
-
 /**
  * Kernel class for fictitious force stabilized peridynamic correspondence material model for small
  * strain

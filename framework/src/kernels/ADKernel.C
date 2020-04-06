@@ -17,9 +17,6 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
-defineADBaseValidParams(ADKernel, KernelBase, params.registerBase("Kernel"););
-defineADBaseValidParams(ADVectorKernel, KernelBase, params.registerBase("VectorKernel"););
-
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADKernelTempl<T, compute_stage>::validParams()

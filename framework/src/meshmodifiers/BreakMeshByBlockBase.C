@@ -10,11 +10,10 @@
 #include "BreakMeshByBlockBase.h"
 #include "MooseMesh.h"
 
-template <>
 InputParameters
-validParams<BreakMeshByBlockBase>()
+BreakMeshByBlockBase::validParams()
 {
-  InputParameters params = validParams<MeshModifier>();
+  InputParameters params = MeshModifier::validParams();
   params.addParam<std::string>(
       "interface_name",
       "interface",

@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class DistributedForce;
 
 /**
  * The DistributedForce kernel computes the body force due to the acceleration of mass in

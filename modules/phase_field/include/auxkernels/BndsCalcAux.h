@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class BndsCalcAux;
 
 /**
  * Visualize the location of grain boundaries in a polycrystalline simulation.

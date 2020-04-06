@@ -12,8 +12,6 @@
 #include "ComputeStressBase.h"
 #include "GuaranteeConsumer.h"
 
-class ComputeFiniteStrainElasticStress;
-
 /**
  * ComputeFiniteStrainElasticStress computes the stress following elasticity
  * theory for finite strains

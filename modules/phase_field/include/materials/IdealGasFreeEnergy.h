@@ -12,7 +12,6 @@
 #include "GasFreeEnergyBase.h"
 
 // Forward Declarations
-class IdealGasFreeEnergy;
 
 /**
  * Material class that provides the free energy of an ideal gas with the expression builder

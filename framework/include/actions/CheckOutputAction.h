@@ -13,7 +13,6 @@
 #include "Action.h"
 
 // Forward declerations
-class CheckOutputAction;
 
 /**
  * Action for checking that "outputs" is properly populated for Materials

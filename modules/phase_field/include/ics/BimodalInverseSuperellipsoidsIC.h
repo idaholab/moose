@@ -12,7 +12,6 @@
 #include "BimodalSuperellipsoidsIC.h"
 
 // Forward Declarations
-class BimodalInverseSuperellipsoidsIC;
 
 /**
  * BimodalInverseSuperellipsoidsIC takes a specified number of superellipsoids, each with given

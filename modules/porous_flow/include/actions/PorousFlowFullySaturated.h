@@ -11,8 +11,6 @@
 
 #include "PorousFlowSinglePhaseBase.h"
 
-class PorousFlowFullySaturated;
-
 /**
  * Action for simulation involving a single phase fully saturated fluid.
  */

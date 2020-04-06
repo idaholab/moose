@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class PiecewiseLinearInterpolationMaterial;
 
 /**
  * This material uses a LinearInterpolation object to define the dependence

@@ -12,7 +12,6 @@
 #include "BoundsAuxBase.h"
 
 // Forward Declarations
-class ConstantBoundsAux;
 
 /**
  * Provides constant bound of a variable

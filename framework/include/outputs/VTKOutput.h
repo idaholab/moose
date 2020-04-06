@@ -13,7 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declerations
-class VTKOutput;
 
 /**
  *

@@ -12,7 +12,6 @@
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowFluidStateMultiComponentBase.h"
 
-class PorousFlowFluidState;
 class PorousFlowCapillaryPressure;
 
 /**

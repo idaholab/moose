@@ -12,8 +12,6 @@
 #include "EulerAngles.h"
 #include "GeneralUserObject.h"
 
-class EulerAngleProvider;
-
 /**
  * Abstract base class for user objects that implement the Euler Angle provider
  * interface.

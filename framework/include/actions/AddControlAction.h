@@ -13,7 +13,6 @@
 #include "MooseObjectAction.h"
 
 // Forward declarations
-class AddControlAction;
 
 /**
  * Action for creating Control objects

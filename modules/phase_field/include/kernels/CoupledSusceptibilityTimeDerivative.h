@@ -13,7 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 // Forward Declaration
-class CoupledSusceptibilityTimeDerivative;
 
 /**
  * This calculates a modified coupled time derivative that multiplies the time derivative of a

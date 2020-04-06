@@ -22,7 +22,6 @@
 #include "ElementIDInterface.h"
 
 // forward declarations
-class InitialConditionBase;
 class SystemBase;
 class MooseVariableFEBase;
 namespace libMesh

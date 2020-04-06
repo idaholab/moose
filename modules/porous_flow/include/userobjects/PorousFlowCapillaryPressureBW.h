@@ -11,8 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureBW;
-
 /**
  * Capillary pressure of Broadbridge and White.
  */

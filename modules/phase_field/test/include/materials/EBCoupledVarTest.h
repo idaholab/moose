@@ -13,7 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class EBCoupledVarTest;
 
 class EBCoupledVarTest : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {

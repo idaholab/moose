@@ -12,8 +12,6 @@
 #include "ComputeStressBase.h"
 #include "MultiPlasticityDebugger.h"
 
-class ComputeMultiPlasticityStress;
-
 /**
  * ComputeMultiPlasticityStress performs the return-map
  * algorithm and associated stress updates for plastic

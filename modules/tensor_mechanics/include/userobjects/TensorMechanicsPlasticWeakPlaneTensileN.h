@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
-class TensorMechanicsPlasticWeakPlaneTensileN;
-
 /**
  * Rate-independent associative weak-plane tensile failure
  * with hardening/softening, and normal direction specified

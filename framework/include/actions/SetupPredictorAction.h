@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupPredictorAction;
-
 /**
  * Sets the predictor
  */

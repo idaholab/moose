@@ -21,7 +21,6 @@
 #include "TaggingInterface.h"
 
 // Forward declarations
-class ScalarKernel;
 class MooseMesh;
 class Problem;
 class SubProblem;

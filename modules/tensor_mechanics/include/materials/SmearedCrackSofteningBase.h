@@ -14,7 +14,6 @@
 #include "Material.h"
 
 // Forward declaration
-class SmearedCrackSofteningBase;
 
 /**
  * SmearedCrackSofteningBase is the base class for a set of models that define the

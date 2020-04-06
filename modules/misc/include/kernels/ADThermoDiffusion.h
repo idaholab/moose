@@ -12,11 +12,6 @@
 #include "ADKernel.h"
 
 template <ComputeStage compute_stage>
-class ADThermoDiffusion;
-
-declareADValidParams(ADThermoDiffusion);
-
-template <ComputeStage compute_stage>
 class ADThermoDiffusion : public ADKernel<compute_stage>
 {
 public:

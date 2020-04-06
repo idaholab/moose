@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward declaration
-class DiscreteNucleationForce;
 class DiscreteNucleationMap;
 
 /**

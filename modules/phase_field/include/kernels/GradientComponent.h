@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class GradientComponent;
-
 class GradientComponent : public Kernel
 {
 public:

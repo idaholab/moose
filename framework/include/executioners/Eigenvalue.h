@@ -12,7 +12,6 @@
 #include "Steady.h"
 
 class InputParameters;
-class Eigenvalue;
 class EigenProblem;
 
 template <typename T>

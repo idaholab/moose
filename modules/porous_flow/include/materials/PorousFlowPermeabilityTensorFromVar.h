@@ -11,8 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityTensorFromVar;
-
 /**
  * Material designed to provide the permeability tensor which is calculated
  * from a tensor multiplied by a scalar:

@@ -16,7 +16,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declarations
-class NodalNormalsPreprocessor;
 class AuxiliarySystem;
 
 /**

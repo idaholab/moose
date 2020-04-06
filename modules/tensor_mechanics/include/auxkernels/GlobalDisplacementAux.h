@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class GlobalDisplacementAux;
 class GlobalStrainUserObjectInterface;
 template <typename>
 class RankTwoTensorTempl;

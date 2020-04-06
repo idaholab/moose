@@ -12,7 +12,6 @@
 #include "SolidMechanicsMaterial.h"
 
 // Forward Declarations
-class LinearIsotropicMaterial;
 class SymmElasticityTensor;
 
 /**

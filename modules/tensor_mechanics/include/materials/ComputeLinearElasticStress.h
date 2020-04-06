@@ -11,8 +11,6 @@
 
 #include "ComputeStressBase.h"
 
-class ComputeLinearElasticStress;
-
 /**
  * ComputeLinearElasticStress computes the stress following linear elasticity theory (small strains)
  */

@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class LineElementAction;
-
 class LineElementAction : public Action
 {
 public:

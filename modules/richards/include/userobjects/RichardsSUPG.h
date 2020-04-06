@@ -13,8 +13,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsSUPG;
-
 /**
  * base class for SUPG of the Richards equation
  * You must override all the functions below with your specific implementation

@@ -18,7 +18,6 @@
 
 // Forward declarations
 class InputParameters;
-class OrientedBoxInterface;
 
 template <typename T>
 InputParameters validParams();

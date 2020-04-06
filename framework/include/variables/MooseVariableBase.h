@@ -24,8 +24,6 @@ class DofMap;
 class Variable;
 }
 
-class MooseVariableBase;
-
 class Assembly;
 class SubProblem;
 class SystemBase;

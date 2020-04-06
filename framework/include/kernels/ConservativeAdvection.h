@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class ConservativeAdvection;
 
 /**
  * Advection of the variable by the velocity provided by the user.

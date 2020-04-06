@@ -14,7 +14,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class StackGenerator;
 
 /**
  * Take several 3D meshes and stitch them on top of each other like a stack.

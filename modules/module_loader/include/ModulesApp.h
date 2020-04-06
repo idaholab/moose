@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class ModulesApp;
-
 class ModulesApp : public MooseApp
 {
 public:

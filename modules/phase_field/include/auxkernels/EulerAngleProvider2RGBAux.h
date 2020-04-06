@@ -15,7 +15,6 @@
 #include "GrainTrackerInterface.h"
 
 // Forward Declarations
-class EulerAngleProvider2RGBAux;
 class EulerAngleProvider;
 
 /**

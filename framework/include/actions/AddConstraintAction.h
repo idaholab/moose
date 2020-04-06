@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddConstraintAction;
-
 class AddConstraintAction : public MooseObjectAction
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "ComputeIncrementalStrainBase.h"
 
-class ComputeIncrementalSmallStrain;
-
 /**
  * ComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
  * strains.

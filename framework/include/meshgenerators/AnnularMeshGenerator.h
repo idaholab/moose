@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class AnnularMeshGenerator;
 
 /**
  * Generates an annular mesh given all the parameters

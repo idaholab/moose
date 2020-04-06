@@ -15,8 +15,6 @@
 #define usingADStressDivergenceShellMembers usingKernelMembers
 
 // Forward Declarations
-template <ComputeStage>
-class ADStressDivergenceShell;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -30,8 +28,6 @@ namespace libMesh
 {
 class QGauss;
 }
-
-declareADValidParams(ADStressDivergenceShell);
 
 /**
  * ADStressDivergenceShell computes the stress divergence term for shell elements.

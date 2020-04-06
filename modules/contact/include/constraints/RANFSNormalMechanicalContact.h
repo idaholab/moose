@@ -18,7 +18,6 @@
 #include <vector>
 #include <unordered_map>
 
-class RANFSNormalMechanicalContact;
 class PenetrationInfo;
 
 namespace libMesh

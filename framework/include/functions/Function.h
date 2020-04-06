@@ -22,7 +22,6 @@
 #include "libmesh/vector_value.h"
 
 // Forward declarations
-class Function;
 
 // libMesh forward declarations
 namespace libMesh

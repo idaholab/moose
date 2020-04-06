@@ -11,8 +11,6 @@
 
 #include "InterfaceDiffusionBase.h"
 
-class InterfaceDiffusionBoundaryTerm;
-
 /**
  * Add weak form surface terms of the Diffusion equation for two different
  * variables across a subdomain boundary

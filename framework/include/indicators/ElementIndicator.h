@@ -18,7 +18,6 @@
 #include "MaterialPropertyInterface.h"
 
 // Forward declarations
-class ElementIndicator;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;

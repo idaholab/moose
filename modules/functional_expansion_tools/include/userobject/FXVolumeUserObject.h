@@ -12,8 +12,6 @@
 #include "ElementIntegralVariableUserObject.h"
 #include "FXIntegralBaseUserObject.h"
 
-class FXVolumeUserObject;
-
 /**
  * This volumetric FX calculates the value
  */

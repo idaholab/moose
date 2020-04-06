@@ -15,7 +15,6 @@
 
 // Forward declarations
 class DisplacedProblem;
-class UpdateDisplacedMeshThread;
 
 // libMesh forward declarations
 namespace libMesh

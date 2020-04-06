@@ -11,8 +11,6 @@
 
 #include "MeshModifier.h"
 
-class SideSetsBetweenSubdomains;
-
 class SideSetsBetweenSubdomains : public MeshModifier
 {
 public:

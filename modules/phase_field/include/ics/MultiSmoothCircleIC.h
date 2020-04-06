@@ -12,7 +12,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward Declarations
-class MultiSmoothCircleIC;
 
 /**
  * MultismoothCircleIC creates multiple SmoothCircles (number = numbub) that are randomly

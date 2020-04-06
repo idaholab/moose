@@ -11,8 +11,6 @@
 
 #include "NodalConstraint.h"
 
-class NodalStickConstraint;
-
 class NodalStickConstraint : public NodalConstraint
 {
 public:

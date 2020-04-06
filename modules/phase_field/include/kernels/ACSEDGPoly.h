@@ -22,7 +22,6 @@
  */
 
 // Forward Declarations
-class ACSEDGPoly;
 class GrainTrackerInterface;
 
 class ACSEDGPoly : public ACBulk<Real>

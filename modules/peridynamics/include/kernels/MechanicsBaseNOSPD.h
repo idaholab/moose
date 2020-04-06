@@ -11,8 +11,6 @@
 
 #include "MechanicsBasePD.h"
 
-class MechanicsBaseNOSPD;
-
 /**
  * Base kernel class for bond-associated correspondence material models
  */

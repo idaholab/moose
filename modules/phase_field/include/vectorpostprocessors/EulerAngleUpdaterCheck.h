@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward declaration
-class EulerAngleUpdaterCheck;
 class EulerAngleUpdater;
 class EulerAngleProvider;
 class GrainTrackerInterface;

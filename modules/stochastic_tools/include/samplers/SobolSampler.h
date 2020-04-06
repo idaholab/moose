@@ -11,8 +11,6 @@
 
 #include "Sampler.h"
 
-class SobolSampler;
-
 /**
  * A class used to perform Monte Carlo sampling for performing Sobol sensitivity analysis.
  *

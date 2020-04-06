@@ -12,7 +12,6 @@
 #include "SideFluxIntegral.h"
 
 // Forward Declarations
-class SideFluxAverage;
 
 class SideFluxAverage : public SideFluxIntegral
 {

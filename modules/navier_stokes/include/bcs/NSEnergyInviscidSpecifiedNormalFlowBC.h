@@ -12,7 +12,6 @@
 #include "NSEnergyInviscidBC.h"
 
 // Forward Declarations
-class NSEnergyInviscidSpecifiedNormalFlowBC;
 
 /**
  * The inviscid energy BC term with specified normal flow.

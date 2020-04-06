@@ -11,7 +11,6 @@
 
 #include "ScalarKernel.h"
 
-class GeneralizedPlaneStrainPD;
 class GeneralizedPlaneStrainUserObjectBasePD;
 
 /**

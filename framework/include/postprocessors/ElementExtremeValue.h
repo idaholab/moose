@@ -12,7 +12,6 @@
 #include "ElementVariablePostprocessor.h"
 
 // Forward Declarations
-class ElementExtremeValue;
 
 // Input parameters
 

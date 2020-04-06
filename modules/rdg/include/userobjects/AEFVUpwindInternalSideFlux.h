@@ -12,7 +12,6 @@
 #include "InternalSideFluxBase.h"
 
 // Forward Declarations
-class AEFVUpwindInternalSideFlux;
 
 /**
  * Upwind numerical flux scheme

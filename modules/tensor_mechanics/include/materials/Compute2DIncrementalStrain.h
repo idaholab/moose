@@ -11,8 +11,6 @@
 
 #include "ComputeIncrementalSmallStrain.h"
 
-class Compute2DIncrementalStrain;
-
 /**
  * Compute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.

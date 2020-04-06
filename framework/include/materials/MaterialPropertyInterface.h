@@ -19,7 +19,6 @@
 
 // Forward declarations
 class InputParameters;
-class MaterialPropertyInterface;
 class MooseObject;
 
 /**

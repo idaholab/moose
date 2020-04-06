@@ -12,7 +12,6 @@
 #include "TimeNodalKernel.h"
 
 // Forward Declarations
-class TimeDerivativeNodalKernel;
 
 /**
  * Represents du/dt

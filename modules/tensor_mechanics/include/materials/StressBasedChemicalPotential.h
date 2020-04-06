@@ -13,8 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensor.h"
 
-class StressBasedChemicalPotential;
-
 /**
  * StressBasedChemicalPotential computes chemical potential based on stress and
  * a direction tensor

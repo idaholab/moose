@@ -11,8 +11,6 @@
 
 #include "PorousFlowPorosity.h"
 
-class PorousFlowPorosityHMBiotModulus;
-
 /**
  * This Matrial evolves porosity so that the PorousFlow equations match
  * the standard equations of poroelasticity theory with a constant BiotModulus.

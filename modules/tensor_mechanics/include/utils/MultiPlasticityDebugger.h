@@ -11,8 +11,6 @@
 
 #include "MultiPlasticityLinearSystem.h"
 
-class MultiPlasticityDebugger;
-
 /**
  * MultiPlasticityDebugger computes various
  * finite-difference things to help developers

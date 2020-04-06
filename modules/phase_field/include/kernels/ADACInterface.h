@@ -23,11 +23,6 @@
   using ADACInterface<compute_stage>::_dLdarg;                                                     \
   using ADACInterface<compute_stage>::_gradarg
 
-template <ComputeStage>
-class ADACInterface;
-
-declareADValidParams(ADACInterface);
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$

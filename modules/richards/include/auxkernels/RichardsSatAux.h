@@ -14,7 +14,6 @@
 #include "RichardsSat.h"
 
 // Forward Declarations
-class RichardsSatAux;
 
 /**
  * Fluid Saturation as a function of effective saturation

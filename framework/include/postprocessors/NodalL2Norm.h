@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalL2Norm;
 
 /**
  * Computes the "nodal" L2-norm of the coupled variable, which is

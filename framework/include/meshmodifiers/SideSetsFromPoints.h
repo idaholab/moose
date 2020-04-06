@@ -11,8 +11,6 @@
 
 #include "AddSideSetsBase.h"
 
-class SideSetsFromPoints;
-
 class SideSetsFromPoints : public AddSideSetsBase
 {
 public:

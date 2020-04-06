@@ -11,8 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermMonomial;
-
 /**
  * Monomial form of relative permeability
  * relperm = Seff^n for 0<Seff<=1, where S = (S - simm)/(1 - simm)

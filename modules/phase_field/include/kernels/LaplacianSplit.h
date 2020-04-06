@@ -12,7 +12,6 @@
 #include "KernelGrad.h"
 
 // Forward Declarations
-class LaplacianSplit;
 
 /**
  * Split with a variable that holds the Laplacian of the phase field.

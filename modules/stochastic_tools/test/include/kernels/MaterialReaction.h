@@ -11,8 +11,6 @@
 
 #include "Reaction.h"
 
-class MaterialReaction;
-
 class MaterialReaction : public Reaction
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class SimpleCHInterface;
-
 /**
  * Compute the Cahn-Hilliard interface term with constant Mobility and Interfacial parameter
  */

@@ -12,7 +12,6 @@
 #include "SidePostprocessor.h"
 
 // Forward Declarations
-class SideIntegralPostprocessor;
 
 /**
  * This postprocessor computes a volume integral of the specified variable.

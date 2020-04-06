@@ -12,8 +12,6 @@
 #include "MooseObject.h"
 #include "PerfGraphInterface.h"
 
-class Distribution;
-
 /**
  * All Distributions should inherit from this class
  */

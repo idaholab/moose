@@ -13,8 +13,6 @@
 
 class ReturnMappingModel;
 
-class CombinedCreepPlasticity;
-
 /**
  * One or more constitutive models coupled together.
  */

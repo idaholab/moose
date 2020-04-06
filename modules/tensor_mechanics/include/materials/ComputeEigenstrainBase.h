@@ -15,8 +15,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-class ComputeEigenstrainBase;
-
 /**
  * ComputeEigenstrainBase is the base class for eigenstrain tensors
  */

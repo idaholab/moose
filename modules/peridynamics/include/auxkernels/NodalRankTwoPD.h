@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class NodalRankTwoPD;
 class PeridynamicsMesh;
 
 /**

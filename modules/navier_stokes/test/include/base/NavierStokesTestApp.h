@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class NavierStokesTestApp;
-
 class NavierStokesTestApp : public MooseApp
 {
 public:

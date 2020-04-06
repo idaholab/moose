@@ -13,7 +13,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumPicardIterations;
 class Transient;
 
 /**

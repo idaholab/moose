@@ -23,9 +23,6 @@ using ADKernelValue = ADKernelValueTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorKernelValue = ADKernelValueTempl<RealVectorValue, compute_stage>;
 
-declareADValidParams(ADKernelValue);
-declareADValidParams(ADVectorKernelValue);
-
 template <typename T, ComputeStage compute_stage>
 class ADKernelValueTempl : public ADKernelTempl<T, compute_stage>
 {

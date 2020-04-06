@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class KineticDisPreRateAux;
-
 /**
  * Calculate the kinetic mineral species kinetic rate according to transient
  * state theory rate law

@@ -12,7 +12,6 @@
 #include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
-class NSMassWeakStagnationBC;
 
 /**
  * The inviscid energy BC term with specified normal flow.

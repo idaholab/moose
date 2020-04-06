@@ -11,8 +11,6 @@
 
 #include "ComputeEigenstrainBeamBase.h"
 
-class ComputeEigenstrainBeamFromVariable;
-
 /**
  * ComputeEigenstrainBeamFromVariable computes an eigenstrain from displacement and rotational
  * eigenstrain variables

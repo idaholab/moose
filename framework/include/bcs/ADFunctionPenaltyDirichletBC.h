@@ -11,11 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADFunctionPenaltyDirichletBC;
 class Function;
-
-declareADValidParams(ADFunctionPenaltyDirichletBC);
 
 /**
  * A different approach to applying Dirichlet BCs

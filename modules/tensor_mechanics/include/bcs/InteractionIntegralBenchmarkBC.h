@@ -13,7 +13,6 @@
 #include "CrackFrontDefinition.h"
 
 // Forward Declarations
-class InteractionIntegralBenchmarkBC;
 class Function;
 
 void addInteractionIntegralBenchmarkBCParams(InputParameters & params);

@@ -12,7 +12,6 @@
 #include "VectorKernel.h"
 
 // Forward Declaration
-class VectorTimeKernel;
 
 /**
  * All vector time kernels should inherit from this class

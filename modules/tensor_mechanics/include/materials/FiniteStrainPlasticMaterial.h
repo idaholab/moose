@@ -12,8 +12,6 @@
 
 #include "ComputeStressBase.h"
 
-class FiniteStrainPlasticMaterial;
-
 /**
  * FiniteStrainPlasticMaterial implements rate-independent associative J2 plasticity
  * with isotropic hardening in the finite-strain framework.

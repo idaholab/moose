@@ -13,7 +13,6 @@
 
 // Forward Declarations
 class InputParameters;
-class VolumeWeightedWeibull;
 
 template <typename T>
 InputParameters validParams();

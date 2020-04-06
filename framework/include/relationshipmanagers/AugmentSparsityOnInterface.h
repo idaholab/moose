@@ -22,8 +22,6 @@ using libMesh::GhostingFunctor;
 using libMesh::MeshBase;
 using libMesh::processor_id_type;
 
-class AugmentSparsityOnInterface;
-
 class AugmentSparsityOnInterface : public RelationshipManager
 {
 public:

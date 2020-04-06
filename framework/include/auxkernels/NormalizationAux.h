@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NormalizationAux;
 
 /**
  * This auxiliary kernel normalizes a variable based on a postprocessor.

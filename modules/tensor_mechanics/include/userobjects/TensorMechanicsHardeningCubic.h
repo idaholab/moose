@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsHardeningCubic;
-
 /**
  * Cubic hardening
  * value = _val_0 for p <= _intnl_0

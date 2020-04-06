@@ -15,7 +15,7 @@ template <ComputeStage compute_stage>
 InputParameters
 ADSplitCHWResAniso<compute_stage>::validParams()
 {
-  InputParameters params = ADSplitCHWResBase<compute_stage>::validParams();
+  InputParameters params = ADSplitCHWResBase<compute_stage, RealTensorValue>::validParams();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential "
                              "variable with a scalar (isotropic) mobility");
   return params;

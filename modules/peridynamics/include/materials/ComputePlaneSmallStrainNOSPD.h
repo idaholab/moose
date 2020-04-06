@@ -12,8 +12,6 @@
 #include "ComputeSmallStrainNOSPD.h"
 #include "RankTwoTensor.h"
 
-class ComputePlaneSmallStrainNOSPD;
-
 /**
  * Material class for 2D correspondence material model for small strain: plane strain, generalized
  * plane strain, weak plane stress

@@ -12,7 +12,6 @@
 #include "KernelValue.h"
 
 // Forward Declarations
-class HHPFCRFF;
 
 /**
  * TODO: This Kernel needs Documentation!!!

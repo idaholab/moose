@@ -12,7 +12,6 @@
 #include "StressDivergenceTensors.h"
 
 // Forward Declarations
-class CosseratStressDivergenceTensors;
 
 /**
  * Computes grad_i(stress_{i component})

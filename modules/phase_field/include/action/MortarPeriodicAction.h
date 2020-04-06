@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class MortarPeriodicAction;
-
 /**
  * Set up Mortar based periodicity in an input file with a MortarPeriodicMesh
  */

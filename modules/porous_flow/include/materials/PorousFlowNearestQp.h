@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterial.h"
 
-class PorousFlowNearestQp;
-
 /**
  * Material designed to provide the nearest quadpoint to each node
  * in the element

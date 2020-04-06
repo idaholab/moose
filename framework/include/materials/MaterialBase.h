@@ -34,7 +34,6 @@
 #include "Assembly.h"
 
 // forward declarations
-class MaterialBase;
 class MooseMesh;
 class SubProblem;
 

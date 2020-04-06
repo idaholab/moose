@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class PrimaryConvection;
-
 /**
  * Define the Kernel for a PrimaryConvection operator that looks like:
  * cond * grad_pressure * grad_u

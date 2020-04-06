@@ -13,7 +13,6 @@
 #include "libmesh/replicated_mesh.h"
 
 // Forward declarations
-class PatternedMeshGenerator;
 
 /**
  * Reads one or more 2D mesh files and stitches them together based on

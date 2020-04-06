@@ -13,7 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward declarations
-class VectorNodalBC;
 
 /**
  * Base class for deriving any boundary condition that works at nodes on vector variables

@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class DebugResidualAux;
-
 /**
  * Auxiliary kernel for debugging convergence.
  */

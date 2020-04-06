@@ -11,8 +11,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class GrainBoundaryArea;
-
 /**
  * Calculate total grain boundary length in 2D and area in 3D.
  */

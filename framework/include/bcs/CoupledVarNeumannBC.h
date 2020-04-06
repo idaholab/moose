@@ -11,8 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class CoupledVarNeumannBC;
-
 /**
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.

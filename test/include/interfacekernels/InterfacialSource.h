@@ -12,7 +12,6 @@
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class InterfacialSource;
 class Function;
 
 template <>

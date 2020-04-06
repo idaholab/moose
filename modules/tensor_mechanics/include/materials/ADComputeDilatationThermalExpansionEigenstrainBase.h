@@ -16,11 +16,6 @@
   usingComputeThermalExpansionEigenstrainBaseMembers;                                              \
   using ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::computeDilatation
 
-template <ComputeStage compute_stage>
-class ADComputeDilatationThermalExpansionEigenstrainBase;
-
-declareADValidParams(ADComputeDilatationThermalExpansionEigenstrainBase);
-
 /**
  * ADComputeDilatationThermalExpansionEigenstrainBase computes an eigenstrain for thermal expansion
  * from an dilatation equation.

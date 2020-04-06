@@ -11,8 +11,6 @@
 
 #include "Distribution.h"
 
-class WeibullDistribution;
-
 /**
  * A class used to generate a three-parameter Weibull distribution
  */

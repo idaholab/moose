@@ -12,7 +12,6 @@
 #include "NSStagnationBC.h"
 
 // Forward Declarations
-class NSStagnationTemperatureBC;
 
 /**
  * This Dirichlet condition imposes the condition T_0 = T_0_desired,

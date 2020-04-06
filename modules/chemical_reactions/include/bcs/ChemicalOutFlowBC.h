@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class ChemicalOutFlowBC;
 
 /**
  * Implements a simple constant VectorNeumann BC where grad(u)=value on the boundary.

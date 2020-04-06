@@ -17,7 +17,6 @@
 #include <memory>
 
 // Forward declartions
-class FunctionParserUtils;
 class InputParameters;
 
 template <typename T>

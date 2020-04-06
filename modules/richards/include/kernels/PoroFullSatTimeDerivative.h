@@ -13,7 +13,6 @@
 #include "TimeDerivative.h"
 
 // Forward Declarations
-class PoroFullSatTimeDerivative;
 
 /**
  * Kernel = biot_coefficient*d(volumetric_strain)/dt + (1/biot_modulus)*d(porepressure)/dt

@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSCompressibilityPenalty;
 
 /**
  * The penalty term may be used when Dirichlet boundary condition is applied to the entire boundary.

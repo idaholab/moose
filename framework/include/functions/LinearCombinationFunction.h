@@ -12,8 +12,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class LinearCombinationFunction;
-
 /**
  * Sum_over_i (w_i * functions_i)
  */

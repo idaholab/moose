@@ -13,7 +13,6 @@
 #include "SymmElasticityTensor.h"
 
 // Forward Declarations
-class SolidMechanicsMaterial;
 class VolumetricModel;
 
 /**

@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // forward declarations
-class VariableTimeIntegrationAux;
 
 /**
  * An AuxKernel that can be used to integrate a field variable in time

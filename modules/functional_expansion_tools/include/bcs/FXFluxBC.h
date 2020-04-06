@@ -11,8 +11,6 @@
 
 #include "FunctionNeumannBC.h"
 
-class FXFluxBC;
-
 /**
  * Defines an FX-based BC that strongly encourages the gradients to match
  */

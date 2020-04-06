@@ -15,7 +15,6 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declarations
-class BoundingBoxNodeSetGenerator;
 
 namespace libMesh
 {

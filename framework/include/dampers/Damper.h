@@ -16,7 +16,6 @@
 #include "MeshChangedInterface.h"
 
 // Forward Declarations
-class Damper;
 class SubProblem;
 class SystemBase;
 

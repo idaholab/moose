@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalProxyMaxValue;
 
 /**
  * Computes the max value at a node and broadcasts it to all

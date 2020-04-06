@@ -11,8 +11,6 @@
 
 #include "FEProblemBase.h"
 
-class ExternalProblem;
-
 class ExternalProblem : public FEProblemBase
 {
 public:

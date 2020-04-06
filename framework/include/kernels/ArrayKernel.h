@@ -13,8 +13,6 @@
 #include "MooseVariableInterface.h"
 #include "MooseVariableScalar.h"
 
-class ArrayKernel;
-
 class ArrayKernel : public KernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:

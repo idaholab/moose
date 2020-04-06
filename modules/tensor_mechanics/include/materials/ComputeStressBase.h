@@ -15,8 +15,6 @@
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeStressBase;
-
 /**
  * ComputeStressBase is the base class for stress tensors
  */

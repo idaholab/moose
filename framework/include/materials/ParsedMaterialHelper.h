@@ -16,7 +16,6 @@
 #include "libmesh/fparser_ad.hh"
 
 // forward declatration
-class ParsedMaterialHelper;
 
 /**
  * Helper class to perform the parsing and optimization of the

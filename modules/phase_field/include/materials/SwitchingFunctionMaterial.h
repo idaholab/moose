@@ -12,7 +12,6 @@
 #include "OrderParameterFunctionMaterial.h"
 
 // Forward Declarations
-class SwitchingFunctionMaterial;
 
 /**
  * Material class to provide the switching function \f$ h(\eta) \f$ for

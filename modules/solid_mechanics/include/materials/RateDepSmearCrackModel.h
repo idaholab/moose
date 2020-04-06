@@ -19,8 +19,6 @@
 extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
 #endif
 
-class RateDepSmearCrackModel;
-
 /**
  * RateDepSmearCrackModel is the base class for rate dependent continuum damage model.
  * The model is local and hence mesh sensitive.

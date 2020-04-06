@@ -30,8 +30,6 @@
 class MooseMesh;
 class SubProblem;
 
-class DGKernelBase;
-
 #define usingDGKernelBaseMembers                                                                   \
   usingNeighborCoupleableMembers;                                                                  \
   usingFunctionInterfaceMembers;                                                                   \

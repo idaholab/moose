@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsAction.h"
 
-class LegacyTensorMechanicsAction;
-
 class LegacyTensorMechanicsAction : public TensorMechanicsAction
 {
 public:

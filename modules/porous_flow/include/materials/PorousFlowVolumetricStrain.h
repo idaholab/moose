@@ -12,8 +12,6 @@
 #include "PorousFlowMaterialVectorBase.h"
 #include "RankTwoTensor.h"
 
-class PorousFlowVolumetricStrain;
-
 /**
  * PorousFlowVolumetricStrain computes volumetric strains, and derivatives thereof
  */

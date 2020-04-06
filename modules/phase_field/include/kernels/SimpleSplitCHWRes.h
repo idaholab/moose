@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class SimpleSplitCHWRes;
-
 /**
  * Simple case for SplitCHWRes kernel, only with constant Mobility
  */

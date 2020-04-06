@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class TensorMechanicsActionBase;
-
 class TensorMechanicsActionBase : public Action
 {
 public:

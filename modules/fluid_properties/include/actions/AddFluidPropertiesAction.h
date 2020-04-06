@@ -11,8 +11,6 @@
 
 #include "AddUserObjectAction.h"
 
-class AddFluidPropertiesAction;
-
 class AddFluidPropertiesAction : public AddUserObjectAction
 {
 public:

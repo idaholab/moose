@@ -12,8 +12,6 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class SetupResidualDebugAction;
-
 /**
  *
  */

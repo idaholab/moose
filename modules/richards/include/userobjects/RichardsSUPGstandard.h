@@ -11,8 +11,6 @@
 
 #include "RichardsSUPG.h"
 
-class RichardsSUPGstandard;
-
 /**
  * standard SUPG relationships
  * valid for the Richards equation.

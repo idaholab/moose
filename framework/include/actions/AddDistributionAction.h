@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDistributionAction;
-
 /**
  * This class adds a distribution object.
  */

@@ -12,7 +12,6 @@
 #include "SmoothMultiBoundingBoxBaseIC.h"
 
 // Forward Declarations
-class NestedBoundingBoxIC;
 
 /**
  * NestedBoundingBoxIC creates several nested boxes defined by their coordinates in the domain.

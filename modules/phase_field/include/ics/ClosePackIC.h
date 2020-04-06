@@ -13,7 +13,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward declarations
-class ClosePackIC;
 
 /**
  * An InitialCondition for initializing phase variable in close packed circles/spheres pattern

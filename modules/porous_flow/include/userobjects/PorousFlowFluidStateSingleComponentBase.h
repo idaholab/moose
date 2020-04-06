@@ -11,8 +11,6 @@
 
 #include "PorousFlowFluidStateBase.h"
 
-class PorousFlowFluidStateSingleComponentBase;
-
 /**
  * Base class for miscible multiphase flow classes with a single fluid component using
  * a pressure and enthalpy formulation (eg, water and steam)

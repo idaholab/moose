@@ -11,8 +11,6 @@
 
 #include "ArrayIntegratedBC.h"
 
-class ArrayVacuumBC;
-
 class ArrayVacuumBC : public ArrayIntegratedBC
 {
 public:

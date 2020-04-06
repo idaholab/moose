@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class PercentChangePostprocessor;
-
 /**
  * This postprocessor displays the change in the postprocessor between
  * adjacent timesteps

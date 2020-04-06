@@ -13,8 +13,6 @@
 
 #include "FXIntegralBaseUserObject.h"
 
-class FXBoundaryBaseUserObject;
-
 /**
  * This class provides the base for generating a functional expansion on a boundary by inheriting
  * from FXIntegralBaseUserObject and providing SideIntegralVariableUserObject as the template

@@ -13,8 +13,6 @@
 
 #include "libmesh/vector_value.h"
 
-class AddCoupledEqSpeciesAction;
-
 class AddCoupledEqSpeciesAction : public Action
 {
 public:

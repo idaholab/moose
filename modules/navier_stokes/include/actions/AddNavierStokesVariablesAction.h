@@ -11,8 +11,6 @@
 
 #include "NSAction.h"
 
-class AddNavierStokesVariablesAction;
-
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds all the required nonlinear

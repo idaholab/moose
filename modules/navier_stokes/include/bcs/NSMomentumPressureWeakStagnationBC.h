@@ -12,7 +12,6 @@
 #include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
-class NSMomentumPressureWeakStagnationBC;
 
 /**
  * This class implements the pressure term of the momentum

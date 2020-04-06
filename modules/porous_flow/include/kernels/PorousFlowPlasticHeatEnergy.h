@@ -12,8 +12,6 @@
 #include "PlasticHeatEnergy.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowPlasticHeatEnergy;
-
 /**
  * Provides a heat source (J/m^3/s) from plastic deformation:
  * (1 - porosity) * coeff * stress * plastic_strain_rate

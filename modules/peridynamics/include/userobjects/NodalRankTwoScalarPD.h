@@ -11,8 +11,6 @@
 
 #include "NodalRankTwoUserObjectBasePD.h"
 
-class NodalRankTwoScalarPD;
-
 /**
  * Userobject class to compute the equivalent scalar values for rank two tensor at individual
  * material point

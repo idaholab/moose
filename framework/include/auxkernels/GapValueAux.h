@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class GapValueAux;
 class PenetrationLocator;
 
 class GapValueAux : public AuxKernel

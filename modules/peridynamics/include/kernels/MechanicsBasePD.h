@@ -12,8 +12,6 @@
 #include "PeridynamicsKernelBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class MechanicsBasePD;
-
 /**
  * Base kernel class for peridynamic solid mechanics models
  */

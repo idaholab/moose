@@ -13,8 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensor.h"
 
-class ComputeVolumetricDeformGrad;
-
 /**
  * ComputeVolumetricDeformGrad is the class to compute volumetric deformation gradient
  * Modification based on pre-multiplication to a deformation gradient

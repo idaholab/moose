@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-class GeneratedMesh;
-
 /**
  * Mesh generated from parameters
  */

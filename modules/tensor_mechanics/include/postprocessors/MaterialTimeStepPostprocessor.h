@@ -11,8 +11,6 @@
 
 #include "ElementPostprocessor.h"
 
-class MaterialTimeStepPostprocessor;
-
 /**
  * This postporocessor calculates an estimated timestep size that limits
  * an auxiliary variable to below a given threshold.

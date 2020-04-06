@@ -16,8 +16,6 @@
 
 #include "libmesh/vector_value.h"
 
-class MaterialTensorCalculator;
-
 class MaterialTensorCalculator
 {
 public:

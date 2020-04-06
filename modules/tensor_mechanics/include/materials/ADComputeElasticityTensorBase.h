@@ -20,13 +20,9 @@
   using ADComputeElasticityTensorBase<compute_stage>::_elasticity_tensor;                          \
   using ADComputeElasticityTensorBase<compute_stage>::issueGuarantee
 
-template <ComputeStage>
-class ADComputeElasticityTensorBase;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-
-declareADValidParams(ADComputeElasticityTensorBase);
 
 /**
  * ADComputeElasticityTensorBase is a the base class for computing elasticity tensors

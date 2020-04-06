@@ -12,7 +12,6 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class NSThermalBC;
 class IdealGasFluidProperties;
 
 class NSThermalBC : public NodalBC

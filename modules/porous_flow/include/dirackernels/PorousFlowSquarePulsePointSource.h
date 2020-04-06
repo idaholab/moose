@@ -11,8 +11,6 @@
 
 #include "DiracKernel.h"
 
-class PorousFlowSquarePulsePointSource;
-
 /**
  * Point source (or sink) that adds (removes) fluid at a constant mass flux rate for times
  * between the specified start and end times. If no start and end times are specified,

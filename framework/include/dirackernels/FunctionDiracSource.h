@@ -13,7 +13,6 @@
 #include "DiracKernel.h"
 
 // Forward Declarations
-class FunctionDiracSource;
 class Function;
 
 class FunctionDiracSource : public DiracKernel

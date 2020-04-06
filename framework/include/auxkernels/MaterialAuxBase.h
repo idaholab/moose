@@ -12,10 +12,6 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward declarations
-template <typename T = Real>
-class MaterialAuxBase;
-
 /**
  * A base class for the various Material related AuxKernal objects
  */

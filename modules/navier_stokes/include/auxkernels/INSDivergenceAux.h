@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class INSDivergenceAux;
 
 /**
  * Computes h_min / |u|

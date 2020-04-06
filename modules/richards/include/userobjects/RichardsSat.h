@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsSat;
-
 /**
  * Saturation of a phase as a function of
  * effective saturation of that phase,

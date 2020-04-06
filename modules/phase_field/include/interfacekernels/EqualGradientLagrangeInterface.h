@@ -11,8 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-class EqualGradientLagrangeInterface;
-
 /**
  * InterfaceKernel to enforce a Lagrange-Multiplier based componentwise
  * continuity of a variable gradient.

@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class ElementsAlongPlane;
 
 /**
  * Get all of the elements that are intersected by a plane

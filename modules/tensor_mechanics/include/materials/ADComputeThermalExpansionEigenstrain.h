@@ -11,11 +11,6 @@
 
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 
-template <ComputeStage>
-class ADComputeThermalExpansionEigenstrain;
-
-declareADValidParams(ADComputeThermalExpansionEigenstrain);
-
 /**
  * ADComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.

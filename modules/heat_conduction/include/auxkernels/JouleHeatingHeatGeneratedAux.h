@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class JouleHeatingHeatGeneratedAux;
-
 /**
  * Auxiliary kernel for computing the heat generated from Joule heating
  */

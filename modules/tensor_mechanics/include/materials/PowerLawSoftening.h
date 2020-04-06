@@ -12,7 +12,6 @@
 #include "SmearedCrackSofteningBase.h"
 
 // Forward declaration
-class PowerLawSoftening;
 
 /**
  * PowerLawSoftening is a smeared crack softening model that

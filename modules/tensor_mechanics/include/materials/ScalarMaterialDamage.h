@@ -12,7 +12,6 @@
 #include "ScalarDamageBase.h"
 
 // Forward declaration
-class ScalarMaterialDamage;
 
 /**
  * Scalar damage model for which the damage is prescribed by another material

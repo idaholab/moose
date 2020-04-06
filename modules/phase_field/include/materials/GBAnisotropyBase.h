@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class GBAnisotropyBase;
 
 /**
  * Function[kappa, gamma, m, L] = parameters (sigma, mob, w_GB, sigma0)

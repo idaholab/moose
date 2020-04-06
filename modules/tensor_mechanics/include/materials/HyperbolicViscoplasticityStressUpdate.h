@@ -11,8 +11,6 @@
 
 #include "RadialReturnStressUpdate.h"
 
-class HyperbolicViscoplasticityStressUpdate;
-
 /**
  * This class uses the Discrete material in an isotropic radial return hyperbolic
  * sine viscoplasticity model.

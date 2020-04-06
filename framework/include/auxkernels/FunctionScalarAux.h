@@ -11,7 +11,6 @@
 
 #include "AuxScalarKernel.h"
 
-class FunctionScalarAux;
 class Function;
 
 /**

@@ -14,7 +14,6 @@
 #include "MooseVariable.h"
 
 // Forward Declarations
-class ElementJacobianDamper;
 class FEProblemBase;
 class MooseMesh;
 class DisplacedProblem;

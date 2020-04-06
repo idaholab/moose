@@ -13,7 +13,6 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class TangentialNodalLMMechanicalContact;
 
 class TangentialNodalLMMechanicalContact : public NodeFaceConstraint
 {

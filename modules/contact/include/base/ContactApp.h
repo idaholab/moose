@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class ContactApp;
-
 class ContactApp : public MooseApp
 {
 public:

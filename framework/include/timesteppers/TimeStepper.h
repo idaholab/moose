@@ -13,7 +13,6 @@
 #include "Restartable.h"
 #include "ScalarCoupleable.h"
 
-class TimeStepper;
 class FEProblemBase;
 class Transient;
 

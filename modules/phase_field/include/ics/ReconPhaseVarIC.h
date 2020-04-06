@@ -14,7 +14,6 @@
 #include "PolycrystalICTools.h"
 
 // Forward Declarations
-class ReconPhaseVarIC;
 
 /**
  * ReconPhaseVarIC initializes a single order parameter to represent a phase

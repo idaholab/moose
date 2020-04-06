@@ -11,8 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class Heun;
-
 /**
  * Heun's (aka improved Euler) time integration method.
  *

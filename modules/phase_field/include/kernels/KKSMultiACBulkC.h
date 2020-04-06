@@ -12,7 +12,6 @@
 #include "KKSMultiACBulkBase.h"
 
 // Forward Declarations
-class KKSMultiACBulkC;
 
 /**
  * KKSACBulkBase child class for the phase concentration term

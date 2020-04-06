@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class TensorMechanicsTestApp;
-
 class TensorMechanicsTestApp : public MooseApp
 {
 public:

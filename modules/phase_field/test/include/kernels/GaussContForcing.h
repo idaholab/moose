@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class GaussContForcing;
-
 /**
  * Note: This class is duplicated from moose_test.  It is useful for testing
  */

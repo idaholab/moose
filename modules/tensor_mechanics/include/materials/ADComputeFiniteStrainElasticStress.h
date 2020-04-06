@@ -21,11 +21,6 @@
   using ADComputeFiniteStrainElasticStress<compute_stage>::_stress_old;                            \
   using ADComputeFiniteStrainElasticStress<compute_stage>::_elastic_strain_old
 
-template <ComputeStage>
-class ADComputeFiniteStrainElasticStress;
-
-declareADValidParams(ADComputeFiniteStrainElasticStress);
-
 /**
  * ADComputeFiniteStrainElasticStress computes the stress following elasticity
  * theory for finite strains

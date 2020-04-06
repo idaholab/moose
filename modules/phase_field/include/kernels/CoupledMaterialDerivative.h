@@ -13,9 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declaration
-class CoupledMaterialDerivative;
-
 /**
  * This kernel adds the term (dFdv, test), where v is a coupled variable.
  */

@@ -12,7 +12,6 @@
 #include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
-class NSMomentumConvectiveWeakStagnationBC;
 
 /**
  * The convective part (sans pressure term) of the momentum equation

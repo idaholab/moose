@@ -11,8 +11,6 @@
 
 #include "MultiPlasticityRawComponentAssembler.h"
 
-class MultiPlasticityLinearSystem;
-
 /**
  * MultiPlasticityLinearSystem computes the linear system
  * and handles linear-dependence removal

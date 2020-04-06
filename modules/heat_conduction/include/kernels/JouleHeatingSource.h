@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class JouleHeatingSource;
 
 /**
  * This kernel calculates the heat source term corresponding to joule heating,

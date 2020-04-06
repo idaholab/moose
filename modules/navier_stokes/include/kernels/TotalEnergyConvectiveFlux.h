@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class TotalEnergyConvectiveFlux;
-
 /**
  * A kernel for computing total energy convective flux
  *

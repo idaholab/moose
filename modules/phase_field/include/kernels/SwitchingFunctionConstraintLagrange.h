@@ -14,9 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "NonlinearSystem.h"
 
-// Forward Declarations
-class SwitchingFunctionConstraintLagrange;
-
 /**
  * SwitchingFunctionConstraintLagrange is a constraint kernel that acts on the
  * lambda lagrange multiplier non-linear variables to

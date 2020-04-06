@@ -13,7 +13,6 @@
 #include "MaterialStdVectorAuxBase.h"
 
 // Forward declarations
-class MaterialStdVectorRealGradientAux;
 
 /**
  * AuxKernel for outputting a std::vector material-property component to an AuxVariable

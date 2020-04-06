@@ -11,8 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityConstFromVar;
-
 /**
  * Material to provide permeability taken from a variable. This material
  * is primarily designed for use with heterogeneous reservoir models

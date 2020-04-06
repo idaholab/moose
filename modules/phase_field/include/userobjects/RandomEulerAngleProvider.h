@@ -13,7 +13,6 @@
 #include "MooseRandom.h"
 
 // Forward declaration
-class RandomEulerAngleProvider;
 class GrainTrackerInterface;
 
 /**

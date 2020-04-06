@@ -13,8 +13,6 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-class AdaptivityAction;
-
 class AdaptivityAction : public Action
 {
 public:

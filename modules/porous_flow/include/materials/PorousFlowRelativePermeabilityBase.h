@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialBase.h"
 
-class PorousFlowRelativePermeabilityBase;
-
 /**
  * Base class for PorousFlow relative permeability materials. All materials
  * that derive from this class must override relativePermeability() and

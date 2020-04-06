@@ -13,8 +13,6 @@
 
 using namespace libMesh;
 
-class GeometricCut3DUserObject;
-
 class GeometricCut3DUserObject : public GeometricCutUserObject
 {
 public:

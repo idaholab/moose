@@ -14,7 +14,6 @@
 
 // Forward declarations
 class NonlinearSystemBase;
-class FieldSplitPreconditioner;
 
 /**
  * Implements a preconditioner designed to map onto PETSc's PCFieldSplit.

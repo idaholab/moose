@@ -23,7 +23,6 @@
  */
 
 // Forward declaration
-class LinearGeneralAnisotropicMaterial;
 
 class LinearGeneralAnisotropicMaterial : public SolidMechanicsMaterial
 {

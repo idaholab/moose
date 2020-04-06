@@ -11,7 +11,6 @@
 
 #include "PeridynamicsMaterialBase.h"
 
-class ThermalMaterialBaseBPD;
 class Function;
 
 /**

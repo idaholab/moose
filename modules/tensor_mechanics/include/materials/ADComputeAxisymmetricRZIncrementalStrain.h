@@ -11,11 +11,6 @@
 
 #include "ADCompute2DIncrementalStrain.h"
 
-template <ComputeStage>
-class ADComputeAxisymmetricRZIncrementalStrain;
-
-declareADValidParams(ADComputeAxisymmetricRZIncrementalStrain);
-
 /**
  * ADComputeAxisymmetricRZIncrementalStrain defines a strain increment only
  * for incremental strains in an Axisymmetric simulation.

@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddInitialConditionAction;
-
 class AddInitialConditionAction : public MooseObjectAction
 {
 public:

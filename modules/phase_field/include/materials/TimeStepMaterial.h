@@ -11,8 +11,6 @@
 
 #include "Material.h"
 
-class TimeStepMaterial;
-
 /**
  * Store current time, dt, and time step number in material properties.
  */

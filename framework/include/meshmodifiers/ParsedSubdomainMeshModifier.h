@@ -14,7 +14,6 @@
 #include "FunctionParserUtils.h"
 
 // Forward declerations
-class ParsedSubdomainMeshModifier;
 
 /**
  * MeshModifier for defining a Subdomain inside or outside of combinatorial geometry

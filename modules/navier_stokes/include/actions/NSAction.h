@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class NSAction;
-
 /**
  * This is a base Action class for the Navier-Stokes module which is
  * responsible for building lists of names that other Actions can

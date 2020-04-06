@@ -13,8 +13,6 @@
 #include "MaterialData.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowMaterial;
-
 /**
  * PorousFlowMaterial is the base class for all PorousFlow Materials
  * It allows users to specify that the Material should be a "nodal"

@@ -12,8 +12,6 @@
 #include "Material.h"
 #include "SinglePhaseFluidProperties.h"
 
-class FluidPropertiesMaterialPT;
-
 /**
  * Computes fluid properties using (pressure, temperature) formulation
  */

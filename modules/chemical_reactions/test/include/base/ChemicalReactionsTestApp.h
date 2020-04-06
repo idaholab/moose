@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class ChemicalReactionsTestApp;
-
 class ChemicalReactionsTestApp : public MooseApp
 {
 public:

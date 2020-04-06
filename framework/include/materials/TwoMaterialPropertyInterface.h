@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class MaterialData;
-class TwoMaterialPropertyInterface;
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {

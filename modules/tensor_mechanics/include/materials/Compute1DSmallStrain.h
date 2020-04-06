@@ -11,8 +11,6 @@
 
 #include "ComputeSmallStrain.h"
 
-class Compute1DSmallStrain;
-
 /**
  * Compute1DSmallStrain defines a strain tensor, assuming small strains,
  * in 1D problems, handling strains in other two directions.

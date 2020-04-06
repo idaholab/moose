@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumVars;
 
 class NumVars : public GeneralPostprocessor
 {

@@ -14,7 +14,6 @@
 #include "SymmTensor.h"
 
 // Forward Declarations
-class InteractionIntegralSM;
 
 /**
  * This vectorpostprocessor computes the Interaction Integral

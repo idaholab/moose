@@ -12,7 +12,6 @@
 #include "TotalFreeEnergyBase.h"
 
 // Forward Declarations
-class TotalFreeEnergy;
 
 /**
  * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined

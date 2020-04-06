@@ -11,8 +11,6 @@
 
 #include "AddVariableAction.h"
 
-class AddPrimarySpeciesAction;
-
 class AddPrimarySpeciesAction : public AddVariableAction
 {
 public:

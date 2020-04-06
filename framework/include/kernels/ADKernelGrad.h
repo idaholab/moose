@@ -23,9 +23,6 @@ using ADKernelGrad = ADKernelGradTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue, compute_stage>;
 
-declareADValidParams(ADKernelGrad);
-declareADValidParams(ADVectorKernelGrad);
-
 template <typename T, ComputeStage compute_stage>
 class ADKernelGradTempl : public ADKernelTempl<T, compute_stage>
 {

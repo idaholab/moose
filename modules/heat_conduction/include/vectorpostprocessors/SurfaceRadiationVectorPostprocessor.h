@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class SurfaceRadiationVectorPostprocessor;
 class GrayLambertSurfaceRadiationBase;
 
 class SurfaceRadiationVectorPostprocessor : public GeneralVectorPostprocessor

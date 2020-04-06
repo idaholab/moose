@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class KKSMultiACBulkBase;
 
 /**
  * ACBulk child class that sets up necessary variables and materials for

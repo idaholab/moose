@@ -12,8 +12,6 @@
 #include "AdvectiveFluxCalculatorBase.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowAdvectiveFluxCalculatorBase;
-
 /**
  * Base class to compute the advective flux of fluid in PorousFlow situations
  * using the Kuzmin-Turek FEM-TVD multidimensional stabilization scheme.

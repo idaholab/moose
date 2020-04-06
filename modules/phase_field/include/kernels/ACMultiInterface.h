@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class ACMultiInterface;
 
 /**
  * Compute the gradient interface terms for a multiphase system. This includes

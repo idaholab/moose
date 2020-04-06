@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class AsymptoticExpansionHomogenizationKernel;
 
 class AsymptoticExpansionHomogenizationKernel : public Kernel
 {

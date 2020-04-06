@@ -20,7 +20,6 @@
 #include "ElementIDInterface.h"
 
 // Forward Declarations
-class ElementUserObject;
 
 namespace libMesh
 {
