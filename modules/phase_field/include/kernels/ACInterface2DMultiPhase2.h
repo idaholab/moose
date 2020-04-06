@@ -14,8 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "ACInterface.h"
 
-class ACInterface2DMultiPhase2;
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa \nabla \eta_{\alpha i}, \nabla (L \psi) \right) \f$

@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class LangmuirMaterial;
 
 /**
  * Holds Langmuir parameters associated with desorption

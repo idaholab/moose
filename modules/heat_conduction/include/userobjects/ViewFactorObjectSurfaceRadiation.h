@@ -12,7 +12,6 @@
 #include "GrayLambertSurfaceRadiationBase.h"
 
 // Forward Declarations
-class ViewFactorObjectSurfaceRadiation;
 class ViewFactorBase;
 
 /**

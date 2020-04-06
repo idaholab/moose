@@ -12,7 +12,6 @@
 #include "LevelSetBiMaterialBase.h"
 
 // Forward Declarations
-class LevelSetBiMaterialReal;
 
 /**
  * Compute a Real material property for bi-materials problem (consisting of two different materials)

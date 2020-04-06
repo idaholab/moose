@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 #include "MaterialTensorCalculator.h"
 
-class MaterialTensorAux;
 class SymmTensor;
 
 class MaterialTensorAux : public AuxKernel

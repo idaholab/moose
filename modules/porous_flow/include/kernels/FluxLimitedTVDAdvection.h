@@ -13,7 +13,6 @@
 #include "AdvectiveFluxCalculatorBase.h"
 
 // Forward Declaration
-class FluxLimitedTVDAdvection;
 
 /**
  * Advection of the variable with velocity set in the AdvectiveFluxCalculator

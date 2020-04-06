@@ -11,8 +11,6 @@
 
 #include "BoundaryFluxBase.h"
 
-class TestBoundaryFlux;
-
 /**
  * Boundary flux used for testing
  */

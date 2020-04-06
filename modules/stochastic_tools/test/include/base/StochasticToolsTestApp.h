@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class StochasticToolsTestApp;
-
 class StochasticToolsTestApp : public MooseApp
 {
 public:

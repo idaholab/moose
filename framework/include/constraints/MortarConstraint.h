@@ -12,7 +12,6 @@
 #include "MortarConstraintBase.h"
 
 // Forward Declarations
-class MortarConstraint;
 
 class MortarConstraint : public MortarConstraintBase
 {

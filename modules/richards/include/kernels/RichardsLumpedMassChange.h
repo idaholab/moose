@@ -17,7 +17,6 @@
 #include "RichardsSat.h"
 
 // Forward Declarations
-class RichardsLumpedMassChange;
 
 /**
  * d(fluid mass in porespace)/dt with the fluid mass

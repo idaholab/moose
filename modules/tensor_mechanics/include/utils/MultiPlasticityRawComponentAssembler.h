@@ -17,8 +17,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "UserObjectInterface.h"
 
-class MultiPlasticityRawComponentAssembler;
-
 /**
  * MultiPlasticityRawComponentAssembler holds and computes yield functions,
  * flow directions, etc, for use in FiniteStrainMultiPlasticity

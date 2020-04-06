@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowHeatConduction;
-
 /**
  * Kernel = grad(test) * thermal_conductivity * grad(temperature)
  */

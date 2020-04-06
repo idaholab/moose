@@ -21,12 +21,6 @@
   using ADRadialReturnStressUpdate<compute_stage>::_effective_inelastic_strain_old;                \
   using ADRadialReturnStressUpdate<compute_stage>::_max_inelastic_increment
 
-// Forward declarations
-template <ComputeStage>
-class ADRadialReturnStressUpdate;
-
-declareADValidParams(ADRadialReturnStressUpdate);
-
 /**
  * ADRadialReturnStressUpdate computes the radial return stress increment for
  * an isotropic elastic-viscoplasticity model after interating on the difference

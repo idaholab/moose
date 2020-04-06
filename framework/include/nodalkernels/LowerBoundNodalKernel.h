@@ -12,7 +12,6 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class LowerBoundNodalKernel;
 
 /**
  * Class used to enforce a lower bound on a coupled variable

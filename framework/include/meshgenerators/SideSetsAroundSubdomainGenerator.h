@@ -14,7 +14,6 @@
 #include "libmesh/point.h"
 
 // Forward declarations
-class SideSetsAroundSubdomainGenerator;
 
 /**
  * Adds the faces on the boundary of given block

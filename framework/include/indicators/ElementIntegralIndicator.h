@@ -11,8 +11,6 @@
 
 #include "ElementIndicator.h"
 
-class ElementIntegralIndicator;
-
 class ElementIntegralIndicator : public ElementIndicator
 {
 public:

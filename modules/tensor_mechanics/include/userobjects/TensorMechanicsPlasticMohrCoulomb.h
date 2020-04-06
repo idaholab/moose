@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticMohrCoulomb;
-
 /**
  * Mohr-Coulomb plasticity, nonassociative with hardening/softening.
  *

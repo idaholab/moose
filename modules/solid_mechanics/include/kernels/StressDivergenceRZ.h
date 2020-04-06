@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class StressDivergenceRZ;
 class SymmElasticityTensor;
 class SymmTensor;
 

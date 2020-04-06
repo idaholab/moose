@@ -11,8 +11,6 @@
 
 #include "PorousFlowDarcyBase.h"
 
-class PorousFlowAdvectiveFlux;
-
 /**
  * Convective flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility

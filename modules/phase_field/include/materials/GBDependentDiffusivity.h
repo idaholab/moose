@@ -11,8 +11,6 @@
 
 #include "GBDependentTensorBase.h"
 
-class GBDependentDiffusivity;
-
 /**
  * GB dependent diffusivity Ref. Forest, MSMSE, 2015
  */

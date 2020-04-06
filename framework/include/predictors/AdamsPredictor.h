@@ -13,7 +13,6 @@
 #include "Predictor.h"
 
 // Forward declarations
-class AdamsPredictor;
 
 namespace libMesh
 {

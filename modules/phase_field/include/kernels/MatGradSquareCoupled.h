@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class MatGradSquareCoupled;
 
 /*
  * This kernel calculates the prefactor * grad_psi * grad_psi in Allen-Cahn equation for phase field

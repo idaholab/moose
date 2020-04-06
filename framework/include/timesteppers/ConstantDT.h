@@ -11,8 +11,6 @@
 
 #include "TimeStepper.h"
 
-class ConstantDT;
-
 class ConstantDT : public TimeStepper
 {
 public:

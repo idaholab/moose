@@ -13,7 +13,6 @@
 #include "EBSDAccessFunctors.h"
 
 // Forward Declarations
-class EBSDReaderAvgDataAux;
 class EBSDReader;
 class GrainTrackerInterface;
 

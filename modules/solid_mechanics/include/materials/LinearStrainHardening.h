@@ -11,8 +11,6 @@
 
 #include "SolidModel.h"
 
-class LinearStrainHardening;
-
 class LinearStrainHardening : public SolidModel
 {
 public:

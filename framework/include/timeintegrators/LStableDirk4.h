@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class LStableDirk4;
-
 /**
  * Fourth-order diagonally implicit Runge Kutta method (Dirk) with five stages.
  *

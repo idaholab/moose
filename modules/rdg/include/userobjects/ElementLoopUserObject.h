@@ -24,7 +24,6 @@
 #include "libmesh/parallel_algebra.h"
 
 // Forward Declarations
-class ElementLoopUserObject;
 
 namespace libMesh
 {

@@ -11,8 +11,6 @@
 
 #include "ComputeElasticityTensorBase.h"
 
-class ComputeVariableIsotropicElasticityTensor;
-
 /**
  * ComputeVariableIsotropicElasticityTensor defines an elasticity tensor material for
  * isotropic materials in which the elastic constants (Young's modulus and Poisson's ratio)

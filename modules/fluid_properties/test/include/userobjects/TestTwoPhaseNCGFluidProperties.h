@@ -11,8 +11,6 @@
 
 #include "TwoPhaseNCGFluidProperties.h"
 
-class TestTwoPhaseNCGFluidProperties;
-
 /**
  * Test 2-phase NCG fluid properties
  *

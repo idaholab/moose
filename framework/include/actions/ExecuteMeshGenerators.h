@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class ExecuteMeshGenerators;
-
 class ExecuteMeshGenerators : public Action
 {
 public:

@@ -12,7 +12,6 @@
 #include "PorousFlowFluidStateIC.h"
 
 class PorousFlowWaterNCG;
-class PorousFlowFluidStateWaterNCGIC;
 
 /**
  * PorousFlowFluidStateWaterNCGIC calculates an initial value for

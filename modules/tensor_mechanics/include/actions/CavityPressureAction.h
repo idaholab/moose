@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CavityPressureAction;
-
 class CavityPressureAction : public Action
 {
 public:

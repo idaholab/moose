@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class LineSegmentLevelSetAux;
 class LineSegmentCutSetUserObject;
 
 /**

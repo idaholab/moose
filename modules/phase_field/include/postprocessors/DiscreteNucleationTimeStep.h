@@ -12,8 +12,6 @@
 #include "GeneralPostprocessor.h"
 #include "DiscreteNucleationInserterBase.h"
 
-class DiscreteNucleationTimeStep;
-
 /**
  * Returns a user defined timestep limit for the simulation step right after the
  * introduction of a new nucleus and between nucleation events to control the probability

@@ -11,8 +11,6 @@
 
 #include "MechanicsBasePD.h"
 
-class MechanicsBPD;
-
 /**
  * Kernel class for bond based peridynamic solid mechanics models
  */

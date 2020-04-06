@@ -11,8 +11,6 @@
 
 #include "ComputeSmallStrainMaterialBaseBPD.h"
 
-class ComputeSmallStrainConstantHorizonMaterialBPD;
-
 /**
  * Material class for bond based peridynamic solid mechanics model based on regular spatial
  * discretization

@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class PorousFlowExponentialDecay;
-
 /**
  * Kernel = _rate * (variable - reference)
  */

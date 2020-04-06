@@ -11,8 +11,6 @@
 
 #include "ExplicitTimeIntegrator.h"
 
-class ExplicitSSPRungeKutta;
-
 /**
  * Explicit strong stability preserving Runge-Kutta methods
  */

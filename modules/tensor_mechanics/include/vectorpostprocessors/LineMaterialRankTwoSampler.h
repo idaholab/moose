@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class LineMaterialRankTwoSampler;
 
 /**
  * This class samples components of RankTwoTensor material properties for the integration points

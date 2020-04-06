@@ -12,7 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward declaration
-class DiscreteNucleation;
 class DiscreteNucleationMap;
 
 /**

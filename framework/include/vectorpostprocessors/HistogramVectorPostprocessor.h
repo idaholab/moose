@@ -11,8 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class HistogramVectorPostprocessor;
-
 /**
  * Computes a histogram for each column in a given VectorPostprocessor
  *

@@ -12,11 +12,6 @@
 #include "ADPowerLawCreepStressUpdate.h"
 
 template <ComputeStage compute_stage>
-class ADPowerLawCreepExceptionTest;
-
-declareADValidParams(ADPowerLawCreepExceptionTest);
-
-template <ComputeStage compute_stage>
 class ADPowerLawCreepExceptionTest : public ADPowerLawCreepStressUpdate<compute_stage>
 {
 public:

@@ -14,7 +14,6 @@
 #include "libmesh/point.h"
 
 // Forward declarations
-class ParsedGenerateSideset;
 
 /**
  * MeshGenerator for defining a Sideset by a parsed expression and

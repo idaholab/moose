@@ -12,7 +12,6 @@
 #include "EigenKernel.h"
 
 // Forward Declarations
-class MassEigenKernel;
 
 class MassEigenKernel : public EigenKernel
 {

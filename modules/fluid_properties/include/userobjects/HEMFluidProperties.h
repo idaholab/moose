@@ -11,8 +11,6 @@
 
 #include "FluidProperties.h"
 
-class HEMFluidProperties;
-
 /**
  * Base class for fluid properties used with HEM
  */

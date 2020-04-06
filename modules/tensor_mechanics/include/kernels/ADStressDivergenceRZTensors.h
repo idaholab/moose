@@ -12,10 +12,6 @@
 #include "ADStressDivergenceTensors.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADStressDivergenceRZTensors;
-
-declareADValidParams(ADStressDivergenceRZTensors);
 
 /**
  * ADStressDivergenceRZTensors is the automatic differentiation version of

@@ -11,9 +11,6 @@
 
 #include "CoupledTimeDerivative.h"
 
-// Forward Declaration
-class CoefCoupledTimeDerivative;
-
 /**
  * This calculates the time derivative for a coupled variable multiplied by a
  * scalar coefficient

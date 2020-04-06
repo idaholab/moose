@@ -13,8 +13,6 @@
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
 
-class SamplerData;
-
 /**
  * A tool for output Sampler data.
  */

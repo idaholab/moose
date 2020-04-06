@@ -12,8 +12,6 @@
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeVolumetricEigenstrain;
-
 /**
  * ComputeVolumetricEigenstrain computes an eigenstrain that is defined by a set of scalar
  * material properties that summed together define the volumetric change.  This also

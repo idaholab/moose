@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 #include "PetscExternalPartitioner.h"
 
-class BlockWeightedPartitioner;
 class MooseMesh;
 
 /**

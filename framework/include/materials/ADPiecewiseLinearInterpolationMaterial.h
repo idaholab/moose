@@ -14,10 +14,6 @@
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADPiecewiseLinearInterpolationMaterial;
-
-declareADValidParams(ADPiecewiseLinearInterpolationMaterial);
 
 /**
  * This material uses a LinearInterpolation object to define the dependence

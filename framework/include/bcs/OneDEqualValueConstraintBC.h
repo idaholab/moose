@@ -11,8 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class OneDEqualValueConstraintBC;
-
 /**
  * This is the \f$ \int \lambda dg\f$ term from the mortar method.
  * This can connect two 1D domains only.

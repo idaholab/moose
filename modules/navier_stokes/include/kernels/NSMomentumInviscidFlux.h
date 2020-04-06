@@ -12,7 +12,6 @@
 #include "NSKernel.h"
 
 // ForwardDeclarations
-class NSMomentumInviscidFlux;
 
 /**
  * The inviscid flux (convective + pressure terms) for the

@@ -14,8 +14,6 @@
 #include "SymmElasticityTensor.h"
 #include "SymmTensor.h"
 
-class ConstitutiveModel;
-
 class ConstitutiveModel : public Material
 {
 public:

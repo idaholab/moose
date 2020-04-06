@@ -13,7 +13,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsMass;
 
 /**
  * This postprocessor computes the fluid mass by integrating the density over the volume

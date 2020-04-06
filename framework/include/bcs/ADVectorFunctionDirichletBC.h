@@ -11,11 +11,6 @@
 
 #include "ADNodalBC.h"
 
-template <ComputeStage>
-class ADVectorFunctionDirichletBC;
-
-declareADValidParams(ADVectorFunctionDirichletBC);
-
 /**
  * Boundary condition of a Dirichlet type
  *

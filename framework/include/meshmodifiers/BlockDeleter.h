@@ -11,8 +11,6 @@
 
 #include "ElementDeleterBase.h"
 
-class BlockDeleter;
-
 class BlockDeleter : public ElementDeleterBase
 {
 public:

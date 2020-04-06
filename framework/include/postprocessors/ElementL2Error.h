@@ -14,7 +14,6 @@
 class Function;
 
 // Forward Declarations
-class ElementL2Error;
 
 class ElementL2Error : public ElementIntegralVariablePostprocessor
 {

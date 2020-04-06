@@ -13,7 +13,6 @@
 #include "SamplerBase.h"
 
 // Forward Declarations
-class SideValueSampler;
 
 class SideValueSampler : public SideVectorPostprocessor, protected SamplerBase
 {

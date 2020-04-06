@@ -16,7 +16,6 @@
 #include "Restartable.h"
 
 // Forward declarations
-class Transfer;
 class SubProblem;
 class FEProblemBase;
 class FEProblem;

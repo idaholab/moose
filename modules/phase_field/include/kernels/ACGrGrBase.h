@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class ACGrGrBase;
 
 /**
  * This is the base class for kernels that calculate the residual for grain growth.

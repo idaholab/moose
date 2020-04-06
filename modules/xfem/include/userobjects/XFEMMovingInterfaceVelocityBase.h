@@ -12,8 +12,6 @@
 #include "DiscreteElementUserObject.h"
 #include "PointValueAtXFEMInterface.h"
 
-class XFEMMovingInterfaceVelocityBase;
-
 class XFEMMovingInterfaceVelocityBase : public DiscreteElementUserObject
 {
 public:

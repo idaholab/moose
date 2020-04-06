@@ -11,8 +11,6 @@
 
 #include "IsotropicPlasticity.h"
 
-class IsotropicPowerLawHardening;
-
 /**
  * This class creates an Isotropic power law hardening plasticity model.
  * Before yield, stress is youngs modulus* strain. After yield, stress is

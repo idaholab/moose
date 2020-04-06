@@ -15,8 +15,6 @@
 #include "SurrogateModelInterface.h"
 #include "SurrogateModel.h"
 
-class SurrogateTester;
-
 /**
  * A tool for output Sampler data.
  */

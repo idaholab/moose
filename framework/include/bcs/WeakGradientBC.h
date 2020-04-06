@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class WeakGradientBC;
 
 /**
  * A FluxBC which is consistent with the boundary terms arising from

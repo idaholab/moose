@@ -14,7 +14,6 @@
 #include "SubblockIndexProvider.h"
 
 // Forward Declarations
-class GeneralizedPlaneStrainOffDiag;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

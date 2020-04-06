@@ -12,8 +12,6 @@
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 
-class FauxGrainTracker;
-
 /**
  * This class is a fake grain tracker object, it will not actually track grains nor remap them
  * but will provide the same interface as the grain tracker and can be used as a lightweight

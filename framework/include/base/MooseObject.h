@@ -23,7 +23,6 @@
   using MooseObject::paramError
 
 class MooseApp;
-class MooseObject;
 
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);

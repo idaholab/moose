@@ -12,7 +12,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class ElementAverageValue;
 
 /**
  * This postprocessor computes a volume integral of the specified variable.

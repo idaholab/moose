@@ -11,8 +11,6 @@
 
 #include "Marker.h"
 
-class ComboMarker;
-
 /**
  * Combines multiple marker fields.  The most conservative wins.
  */

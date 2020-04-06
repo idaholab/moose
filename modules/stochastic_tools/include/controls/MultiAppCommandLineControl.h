@@ -14,7 +14,6 @@
 #include "SamplerInterface.h"
 
 // Forward declarations
-class MultiAppCommandLineControl;
 
 class Function;
 class Sampler;

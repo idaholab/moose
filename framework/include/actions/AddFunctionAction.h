@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddFunctionAction;
-
 /**
  * This class parses functions in the [Functions] block and creates them.
  */

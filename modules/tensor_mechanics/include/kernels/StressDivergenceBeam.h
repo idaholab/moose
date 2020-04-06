@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class StressDivergenceBeam;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

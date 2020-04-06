@@ -12,7 +12,6 @@
 #include "OrderParameterFunctionMaterial.h"
 
 // Forward Declarations
-class BarrierFunctionMaterial;
 
 /**
  * Material class to provide the double well function \f$ g(\eta) \f$ for

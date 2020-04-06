@@ -16,8 +16,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-class StrainEnergyDensity;
-
 /**
  * StrainEnergyDensity calculates the strain energy density.
  */

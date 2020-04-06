@@ -11,8 +11,6 @@
 
 #include "VectorKernel.h"
 
-class VectorDiffusion;
-
 /**
  * This kernel implements the Laplacian operator:
  * $\nabla \vec{u} \cdot \nabla \vec{\phi_i}$

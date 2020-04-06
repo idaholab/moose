@@ -17,7 +17,6 @@
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
 
-class MultiApp;
 class UserObject;
 class FEProblemBase;
 class FEProblem;

@@ -13,7 +13,6 @@
 #include "Function.h"
 
 // Forward declerations
-class TestSetupPostprocessorDataActionFunction;
 
 /**
  * A class for testing SetupPostprocessorDataAction. Function are created before Postprocessors but

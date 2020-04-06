@@ -11,8 +11,6 @@
 
 #include "FXBoundaryBaseUserObject.h"
 
-class FXBoundaryFluxUserObject;
-
 /**
  * This boundary FX evaluator calculates the flux
  */

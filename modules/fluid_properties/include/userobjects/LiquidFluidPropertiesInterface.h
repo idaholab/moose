@@ -9,8 +9,6 @@
 
 #pragma once
 
-class LiquidFluidPropertiesInterface;
-
 /**
  * Interface class for liquid single phase fluid properties
  */

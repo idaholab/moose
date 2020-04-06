@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class GlobalStrainAction;
-
 class GlobalStrainAction : public Action
 {
 public:

@@ -11,11 +11,6 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage>
-class ADMatHeatSource;
-
-declareADValidParams(ADMatHeatSource);
-
 template <ComputeStage compute_stage>
 class ADMatHeatSource : public ADKernel<compute_stage>
 {

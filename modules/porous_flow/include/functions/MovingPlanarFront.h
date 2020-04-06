@@ -12,8 +12,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class MovingPlanarFront;
-
 /**
  * Defines the position of a moving front.
  * The front is an infinite plane with normal pointing from start_posn to end_posn.

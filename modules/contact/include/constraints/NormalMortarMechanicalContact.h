@@ -11,11 +11,6 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage>
-class NormalMortarMechanicalContact;
-
-declareADValidParams(NormalMortarMechanicalContact);
-
 template <ComputeStage compute_stage>
 class NormalMortarMechanicalContact : public ADMortarConstraint<compute_stage>
 {

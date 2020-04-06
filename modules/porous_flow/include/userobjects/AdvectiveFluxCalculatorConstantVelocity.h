@@ -11,8 +11,6 @@
 
 #include "AdvectiveFluxCalculatorBase.h"
 
-class AdvectiveFluxCalculatorConstantVelocity;
-
 /**
  * Computes Advective fluxes for a constant velocity
  */

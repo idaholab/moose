@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class KKSMultiFreeEnergy;
 
 /**
  * Compute the free energy in the multi-phase KKS Model

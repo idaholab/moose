@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class Eigenvalues;
 class NonlinearEigenSystem;
 
 class Eigenvalues : public GeneralVectorPostprocessor

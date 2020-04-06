@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class Function;
-class LineFunctionSampler;
 
 class LineFunctionSampler : public GeneralVectorPostprocessor, protected SamplerBase
 {

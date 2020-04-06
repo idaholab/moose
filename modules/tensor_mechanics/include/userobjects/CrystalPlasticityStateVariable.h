@@ -11,8 +11,6 @@
 
 #include "CrystalPlasticityUOBase.h"
 
-class CrystalPlasticityStateVariable;
-
 /**
  * Crystal plasticity state variable userobject class.
  */

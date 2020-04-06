@@ -16,7 +16,6 @@
 #include "DependencyResolverInterface.h"
 
 // Forward Declarations
-class GeneralUserObject;
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/

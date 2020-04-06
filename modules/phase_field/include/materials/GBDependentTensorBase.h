@@ -13,8 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensor.h"
 
-class GBDependentTensorBase;
-
 /**
  * Base class to define GB dependent properties
  */

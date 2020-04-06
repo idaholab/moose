@@ -13,7 +13,6 @@
 #include "XFEMMovingInterfaceVelocityBase.h"
 
 // Forward declarations
-class MovingLineSegmentCutSetUserObject;
 class PointValueAtXFEMInterface;
 
 class MovingLineSegmentCutSetUserObject : public LineSegmentCutSetUserObject

@@ -13,8 +13,6 @@
 
 class SymmTensor;
 
-class VolumetricModel;
-
 class VolumetricModel : public Material
 {
 public:

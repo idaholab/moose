@@ -13,7 +13,6 @@
 #include "AdvancedOutput.h"
 
 // Forward declarations
-class Nemesis;
 
 // libMesh forward declarations
 namespace libMesh

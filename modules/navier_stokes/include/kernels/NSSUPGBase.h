@@ -12,7 +12,6 @@
 #include "NSKernel.h"
 
 // Forward Declarations
-class NSSUPGBase;
 
 /**
  * This class acts as a base class for stabilization kernels.

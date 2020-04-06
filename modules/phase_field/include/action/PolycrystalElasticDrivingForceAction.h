@@ -13,7 +13,6 @@
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 // Forward Declarations
-class PolycrystalElasticDrivingForceAction;
 
 /**
  * Action that adds the elastic driving force for each order parameter

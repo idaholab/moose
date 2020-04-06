@@ -20,7 +20,6 @@
 // Forward declarations
 class MooseVariableFEBase;
 class AssemblyData;
-class DisplacedProblem;
 class MooseMesh;
 class Assembly;
 class FEProblemBase;

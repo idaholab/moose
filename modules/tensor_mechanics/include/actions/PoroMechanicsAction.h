@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsAction.h"
 
-class PoroMechanicsAction;
-
 class PoroMechanicsAction : public TensorMechanicsAction
 {
 public:

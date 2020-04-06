@@ -12,8 +12,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowMassRadioactiveDecay;
-
 /**
  * Kernel = _decay_rate * masscomponent
  * where mass_component =

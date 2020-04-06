@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class FunctionalExpansionToolsApp;
-
 class FunctionalExpansionToolsApp : public MooseApp
 {
 public:

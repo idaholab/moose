@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticWeakPlaneShear;
-
 /**
  * Rate-independent associative weak-plane tensile failure
  * with hardening/softening.  The cone's tip is smoothed.

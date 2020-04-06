@@ -11,8 +11,6 @@
 
 #include "ConstitutiveModel.h"
 
-class ElasticModel;
-
 class ElasticModel : public ConstitutiveModel
 {
 public:

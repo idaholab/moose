@@ -13,7 +13,6 @@
 #include "LineMaterialSamplerBase.h"
 
 // Forward Declarations
-class LineMaterialRealSampler;
 
 /**
  * This class samples Real material properties for the integration points

@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDiracKernelAction;
-
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:

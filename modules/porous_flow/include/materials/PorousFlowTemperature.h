@@ -12,8 +12,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
 
-class PorousFlowTemperature;
-
 /**
  * Creates temperature Materials
  */

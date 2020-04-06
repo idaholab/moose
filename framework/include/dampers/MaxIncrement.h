@@ -13,7 +13,6 @@
 #include "ElementDamper.h"
 
 // Forward Declarations
-class MaxIncrement;
 
 /**
  * TODO

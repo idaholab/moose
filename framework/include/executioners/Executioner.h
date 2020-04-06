@@ -21,7 +21,6 @@
 #include <string>
 
 class Problem;
-class Executioner;
 
 /**
  * Executioners are objects that do the actual work of solving your problem.

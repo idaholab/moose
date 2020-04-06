@@ -12,8 +12,6 @@
 #include "MaterialDerivativeTestKernelBase.h"
 #include "RankFourTensor.h"
 
-class MaterialDerivativeRankFourTestKernel;
-
 /**
  * This kernel is used for testing derivatives of a material property.
  */

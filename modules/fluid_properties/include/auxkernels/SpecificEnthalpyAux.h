@@ -11,7 +11,6 @@
 
 #include "AuxKernel.h"
 
-class SpecificEnthalpyAux;
 class SinglePhaseFluidProperties;
 
 /**

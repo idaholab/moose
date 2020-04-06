@@ -12,7 +12,6 @@
 #include "NodalVectorPostprocessor.h"
 
 // Forward Declarations
-class NodalVariableVectorPostprocessor;
 
 /**
  * Base class VectorPostprocessors operating on nodal variables.

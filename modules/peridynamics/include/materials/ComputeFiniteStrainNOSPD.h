@@ -12,8 +12,6 @@
 #include "ComputeStrainBaseNOSPD.h"
 #include "RankTwoTensor.h"
 
-class ComputeFiniteStrainNOSPD;
-
 /**
  * Material class for peridynamic correspondence model for finite strain
  */

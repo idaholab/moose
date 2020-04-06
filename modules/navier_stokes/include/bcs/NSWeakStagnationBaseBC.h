@@ -12,7 +12,6 @@
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSWeakStagnationBaseBC;
 
 // Specialization required of all user-level Moose objects
 

@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NSEnthalpyAux;
 
 /**
  * Nodal auxiliary variable, for computing enthalpy at the nodes.

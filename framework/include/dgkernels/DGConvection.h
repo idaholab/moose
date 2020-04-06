@@ -11,8 +11,6 @@
 
 #include "DGKernel.h"
 
-class DGConvection;
-
 class DGConvection : public DGKernel
 {
 public:

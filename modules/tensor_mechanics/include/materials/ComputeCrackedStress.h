@@ -15,8 +15,6 @@
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeCrackedStress;
-
 /**
  * Computes energy and modifies the stress for phase field fracture. Can be used with any
  * constitutive model or elastic symmetry.

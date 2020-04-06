@@ -15,7 +15,6 @@
 #include "MaterialPropertyInterface.h"
 
 // Forward declarations
-class IntegratedBCBase;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;

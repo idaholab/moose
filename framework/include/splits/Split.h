@@ -18,8 +18,6 @@
 // Forward declarations
 class FEProblemBase;
 
-class Split;
-
 /**
  * Base class for split-based preconditioners.
  */

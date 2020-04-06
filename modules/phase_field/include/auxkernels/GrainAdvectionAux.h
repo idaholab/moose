@@ -14,7 +14,6 @@
 #include "GrainForceAndTorqueInterface.h"
 
 // Forward Declarations
-class GrainAdvectionAux;
 
 /**
  * Calculates the advection velocity of grain due to rigid body motion

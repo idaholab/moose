@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class TrussMaterial;
 
 class TrussMaterial : public Material
 {

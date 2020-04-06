@@ -17,12 +17,6 @@
   using ADGrainGrowthBase<compute_stage>::_vals;                                                   \
   using ADGrainGrowthBase<compute_stage>::_mu
 
-// Forward Declarations
-template <ComputeStage>
-class ADGrainGrowthBase;
-
-declareADValidParams(ADGrainGrowthBase);
-
 /**
  * This is the base class for kernels that calculate the residual for grain growth.
  * It calculates the residual of the ith order parameter, and the values of

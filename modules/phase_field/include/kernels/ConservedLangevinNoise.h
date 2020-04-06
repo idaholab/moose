@@ -12,9 +12,6 @@
 #include "LangevinNoise.h"
 #include "ConservedNoiseBase.h"
 
-// Forward Declarations
-class ConservedLangevinNoise;
-
 class ConservedLangevinNoise : public LangevinNoise
 {
 public:

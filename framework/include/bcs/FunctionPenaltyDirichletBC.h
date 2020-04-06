@@ -11,7 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class FunctionPenaltyDirichletBC;
 class Function;
 
 /**

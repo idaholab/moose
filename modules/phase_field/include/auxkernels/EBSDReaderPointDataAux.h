@@ -13,7 +13,6 @@
 #include "EBSDReader.h"
 
 // Forward Declarations
-class EBSDReaderPointDataAux;
 
 /**
  * This kernel makes data from the EBSDReader GeneralUserObject available

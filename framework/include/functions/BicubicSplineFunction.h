@@ -13,8 +13,6 @@
 #include "FunctionInterface.h"
 #include "BicubicSplineInterpolation.h"
 
-class BicubicSplineFunction;
-
 /**
  * Function that uses spline interpolation
  */

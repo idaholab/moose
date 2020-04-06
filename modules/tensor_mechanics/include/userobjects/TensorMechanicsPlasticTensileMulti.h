@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticTensileMulti;
-
 /**
  * FiniteStrainTensileMulti implements rate-independent associative tensile failure
  * with hardening/softening in the finite-strain framework, using planar (non-smoothed) surfaces

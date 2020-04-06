@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class KKSPhaseChemicalPotential;
 
 /**
  * Enforce the equality of the chemical potentials in the two phases.

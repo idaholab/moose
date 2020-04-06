@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class CombinedTestApp;
-
 class CombinedTestApp : public MooseApp
 {
 public:

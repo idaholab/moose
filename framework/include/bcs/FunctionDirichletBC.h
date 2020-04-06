@@ -12,7 +12,6 @@
 #include "DirichletBCBase.h"
 
 // Forward Declarations
-class FunctionDirichletBC;
 class Function;
 
 /**

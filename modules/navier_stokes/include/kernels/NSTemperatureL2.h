@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class NSTemperatureL2;
 
 /**
  * This class was originally used to solve for the temperature

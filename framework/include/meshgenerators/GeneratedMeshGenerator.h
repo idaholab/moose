@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class GeneratedMeshGenerator;
 
 /**
  * Generates a line, square, or cube mesh with uniformly spaced or biased elements.

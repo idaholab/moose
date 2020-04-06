@@ -12,7 +12,6 @@
 #include "ThreadedGeneralUserObject.h"
 
 // Forward Declarations
-class FluidProperties;
 
 // The default DualReal size allows functions of many more variables than
 // common in the FluidProperties module. This makes the computations much

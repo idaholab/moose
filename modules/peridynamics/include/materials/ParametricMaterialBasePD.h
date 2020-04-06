@@ -12,8 +12,6 @@
 #include "MechanicsMaterialBasePD.h"
 #include "RankFourTensor.h"
 
-class ParametricMaterialBasePD;
-
 /**
  * Base material class for bond-based and ordinary state-based peridynamic models, i.e. parameteric
  * material models

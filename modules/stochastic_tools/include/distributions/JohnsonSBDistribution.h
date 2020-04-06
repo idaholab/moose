@@ -11,8 +11,6 @@
 
 #include "NormalDistribution.h"
 
-class JohnsonSBDistribution;
-
 /**
  * A class used to generate a Johnson SB distribution
  */

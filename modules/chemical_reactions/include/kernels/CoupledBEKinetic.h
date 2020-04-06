@@ -11,8 +11,6 @@
 
 #include "TimeDerivative.h"
 
-class CoupledBEKinetic;
-
 /**
  * Derivative of mineral species concentration wrt time
  */

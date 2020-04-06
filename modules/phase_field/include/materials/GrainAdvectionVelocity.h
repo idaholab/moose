@@ -15,7 +15,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class GrainAdvectionVelocity;
 
 /**
  * This Material calculates the advection velocity, it's divergence and

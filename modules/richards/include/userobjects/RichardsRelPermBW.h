@@ -11,8 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermBW;
-
 /**
  * "Broadbridge-White" form of relative permeability as a function of effective saturation
  * P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1.

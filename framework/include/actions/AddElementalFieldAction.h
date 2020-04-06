@@ -11,8 +11,6 @@
 
 #include "AddVariableAction.h"
 
-class AddElementalFieldAction;
-
 class AddElementalFieldAction : public AddVariableAction
 {
 public:

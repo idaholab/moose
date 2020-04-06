@@ -16,7 +16,6 @@
 #include "RankTwoTensor.h"
 
 // Forward declaration
-class StressUpdateBase;
 
 /**
  * TangentCalculationMethod is an enum that determines the calculation method for the tangent

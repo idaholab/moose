@@ -12,7 +12,6 @@
 #include "LinearIsotropicMaterial.h"
 
 // Forward Declarations
-class LinearAnisotropicMaterial;
 class ElasticityTensor;
 
 /**

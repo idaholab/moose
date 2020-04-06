@@ -12,11 +12,6 @@
 #include "ADComputeDilatationThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-template <ComputeStage>
-class ADComputeDilatationThermalExpansionFunctionEigenstrain;
-
-declareADValidParams(ADComputeDilatationThermalExpansionFunctionEigenstrain);
-
 /**
  * ADComputeDilatationThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion from an dilatation function.

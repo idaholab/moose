@@ -14,7 +14,6 @@
 #include "LayeredBase.h"
 
 // Forward Declarations
-class LayeredSideIntegral;
 
 /**
  * This UserObject computes volume integrals of a variable storing

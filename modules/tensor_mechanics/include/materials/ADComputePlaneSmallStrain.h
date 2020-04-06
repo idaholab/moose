@@ -12,11 +12,6 @@
 #include "ADCompute2DSmallStrain.h"
 #include "SubblockIndexProvider.h"
 
-template <ComputeStage>
-class ADComputePlaneSmallStrain;
-
-declareADValidParams(ADComputePlaneSmallStrain);
-
 /**
  * ADComputePlaneSmallStrain defines small strains under generalized
  * plane strain and plane stress assumptions, where the out of plane strain

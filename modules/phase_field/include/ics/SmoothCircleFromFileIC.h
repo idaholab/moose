@@ -15,7 +15,6 @@
 #include "DelimitedFileReader.h"
 
 // Forward Declarations
-class SmoothCircleFromFileIC;
 
 /**
  * Reads multiple circles from a text file with the columns labeled

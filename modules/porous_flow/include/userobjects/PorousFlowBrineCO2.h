@@ -14,7 +14,6 @@
 class BrineFluidProperties;
 class SinglePhaseFluidProperties;
 class Water97FluidProperties;
-class PorousFlowBrineCO2;
 
 /**
  * Specialized class for brine and CO2 including calculation of mutual

@@ -118,8 +118,8 @@ ExecuteMooseObjectWarehouse<T>::~ExecuteMooseObjectWarehouse()
 }
 
 template <typename T>
-const MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::
-operator[](ExecFlagType exec_flag) const
+const MooseObjectWarehouse<T> &
+    ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag) const
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);

@@ -14,7 +14,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsExcavFlow;
 class Function;
 
 /**

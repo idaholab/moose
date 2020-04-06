@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class TestCrackCounter;
 class XFEM;
 
 class TestCrackCounter : public GeneralPostprocessor

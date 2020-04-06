@@ -13,7 +13,6 @@
 #include "FeatureFloodCount.h"
 
 // Forward Declarations
-class FeatureFloodCountAux;
 class GrainTrackerInterface;
 
 /**

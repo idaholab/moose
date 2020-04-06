@@ -12,15 +12,13 @@
 #include "ADMaterial.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADThermalConductivityTest;
-
-declareADValidParams(ADThermalConductivityTest);
 
 template <ComputeStage compute_stage>
 class ADThermalConductivityTest : public ADMaterial<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   ADThermalConductivityTest(const InputParameters & parameters);
 
 protected:

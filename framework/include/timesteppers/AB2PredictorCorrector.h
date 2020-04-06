@@ -16,7 +16,6 @@
 #include <fstream>
 
 // Forward Declarations
-class AB2PredictorCorrector;
 
 namespace libMesh
 {

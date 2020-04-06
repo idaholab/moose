@@ -12,7 +12,6 @@
 #include "EigenExecutionerBase.h"
 
 // Forward Declarations
-class NonlinearEigen;
 
 class NonlinearEigen : public EigenExecutionerBase
 {

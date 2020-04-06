@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumNodes;
 
 class NumNodes : public GeneralPostprocessor
 {

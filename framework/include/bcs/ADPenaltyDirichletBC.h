@@ -11,11 +11,6 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADPenaltyDirichletBC;
-
-declareADValidParams(ADPenaltyDirichletBC);
-
 /**
  * Weakly enforce a Dirichlet BC using a penalty term. This class is
  * an alternative to the DirichletBC that maintains the symmetry (if

@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class Tricrystal2CircleGrainsIC;
 
 /**
  * Tricrystal2CircleGrainsIC creates a 3 grain structure with 2 circle grains and one matrix grain

@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class KKSACBulkBase;
 
 /**
  * ACBulk child class that takes all the necessary data from a

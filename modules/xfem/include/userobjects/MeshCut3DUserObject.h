@@ -13,7 +13,6 @@
 
 #include <array>
 
-class MeshCut3DUserObject;
 class Function;
 
 /**

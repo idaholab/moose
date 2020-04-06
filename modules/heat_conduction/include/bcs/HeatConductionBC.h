@@ -11,8 +11,6 @@
 
 #include "FluxBC.h"
 
-class HeatConductionBC;
-
 /**
  *
  */

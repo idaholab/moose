@@ -11,8 +11,6 @@
 
 #include "ArrayNodalBC.h"
 
-class ArrayDirichletBC;
-
 /**
  * Boundary condition of a Dirichlet type
  *

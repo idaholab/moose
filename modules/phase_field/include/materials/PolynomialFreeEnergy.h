@@ -13,7 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class PolynomialFreeEnergy;
 
 /**
  * Derivative free energy material defining polynomial free energies for single component materials,

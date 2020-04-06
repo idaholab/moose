@@ -12,7 +12,6 @@
 #include "SideIntegralPostprocessor.h"
 
 // Forward Declarations
-class AreaPostprocessor;
 
 /**
  * This postprocessor computes the area of a specified block.

@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class TagVectorAux;
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to

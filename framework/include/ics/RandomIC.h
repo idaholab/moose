@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class InputParameters;
-class RandomIC;
 class Distribution;
 namespace libMesh
 {

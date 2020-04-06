@@ -14,7 +14,6 @@
 #include "LayeredBase.h"
 
 // Forward Declarations
-class LayeredIntegral;
 
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified

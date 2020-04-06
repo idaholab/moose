@@ -11,8 +11,6 @@
 
 #include "SpatialAverageBase.h"
 
-class SphericalAverage;
-
 /**
  * Compute a spherical average of a variable as a function of radius throughout the
  * simulation domain.

@@ -16,7 +16,6 @@
 #include "EnrichmentFunctionCalculation.h"
 
 // Forward Declarations
-class CrackTipEnrichmentStressDivergenceTensors;
 
 /**
  * CrackTipEnrichmentStressDivergenceTensors implements the residual and jacobian for enrichement

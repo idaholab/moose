@@ -19,8 +19,6 @@ template <typename T>
 class NumericVector;
 }
 
-class MooseVariableScalar;
-
 /**
  * Class for scalar variables (they are different).
  */

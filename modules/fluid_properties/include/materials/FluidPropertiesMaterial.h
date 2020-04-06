@@ -11,7 +11,6 @@
 
 #include "Material.h"
 
-class FluidPropertiesMaterial;
 class SinglePhaseFluidProperties;
 
 /**

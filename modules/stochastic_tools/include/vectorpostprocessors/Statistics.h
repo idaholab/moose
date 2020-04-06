@@ -13,8 +13,6 @@
 #include "Calculators.h"
 #include "BootstrapCalculators.h"
 
-class Statistics;
-
 /**
  * Compute several metrics for supplied VPP vectors.
  *

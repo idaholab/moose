@@ -12,7 +12,6 @@
 #include "SlopeLimitingBase.h"
 
 // Forward Declarations
-class AEFVSlopeLimitingOneD;
 
 /**
  * One-dimensional slope limiting to get

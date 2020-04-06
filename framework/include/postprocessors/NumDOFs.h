@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumDOFs;
 
 // libMesh forward declarations
 namespace libMesh

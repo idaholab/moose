@@ -13,7 +13,6 @@
 #include "FunctionParserUtils.h"
 
 // Forward declarations
-class ParsedSubdomainMeshGenerator;
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of combinatorial geometry

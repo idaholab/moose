@@ -12,7 +12,6 @@
 #include "TimeKernel.h"
 
 // Forward Declarations
-class SecondDerivativeImplicitEuler;
 
 class SecondDerivativeImplicitEuler : public TimeKernel
 {

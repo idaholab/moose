@@ -13,7 +13,6 @@
 #include "MooseRandom.h"
 
 // Forward Declarations
-class SmoothSuperellipsoidBaseIC;
 
 /**
  * SmoothSuperellipsoidBaseIC is the base class for all initial conditions that create

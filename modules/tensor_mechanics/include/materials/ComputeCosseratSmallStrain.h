@@ -11,8 +11,6 @@
 
 #include "ComputeStrainBase.h"
 
-class ComputeCosseratSmallStrain;
-
 /**
  * ComputeCosseratSmallStrain defines Cossserat strain tensor, assuming small strains.
  */

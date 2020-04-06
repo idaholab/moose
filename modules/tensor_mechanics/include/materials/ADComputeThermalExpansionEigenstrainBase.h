@@ -18,13 +18,9 @@
   using ADComputeThermalExpansionEigenstrainBase<compute_stage>::_stress_free_temperature;         \
   using ADComputeThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain
 
-template <ComputeStage>
-class ADComputeThermalExpansionEigenstrainBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-declareADValidParams(ADComputeThermalExpansionEigenstrainBase);
 
 /**
  * ADComputeThermalExpansionEigenstrainBase is a base class for all models that

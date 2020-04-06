@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class MultiBoundingBoxIC;
 
 /**
  * MultiBoundingBoxIC allows setting the initial condition of a value of a field inside and outside

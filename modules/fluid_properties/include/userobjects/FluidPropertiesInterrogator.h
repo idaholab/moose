@@ -12,7 +12,6 @@
 #include "GeneralUserObject.h"
 #include "json/json.h"
 
-class FluidPropertiesInterrogator;
 class FluidProperties;
 class SinglePhaseFluidProperties;
 class VaporMixtureFluidProperties;

@@ -12,7 +12,6 @@
 #include "AuxScalarKernel.h"
 
 // Forward Declarations
-class ScalarTagVectorAux;
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to

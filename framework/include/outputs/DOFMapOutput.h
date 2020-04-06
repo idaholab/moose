@@ -13,7 +13,6 @@
 #include "FileOutput.h"
 
 // Forward declarations
-class DOFMapOutput;
 class MooseMesh;
 
 /**

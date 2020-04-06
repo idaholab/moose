@@ -13,7 +13,6 @@
 #include "MaterialTensorCalculator.h"
 
 // Forward Declarations
-class LineMaterialSymmTensorSampler;
 
 /**
  * This class samples SymmTensor material properties for the integration points

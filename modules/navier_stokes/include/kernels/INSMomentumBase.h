@@ -12,7 +12,6 @@
 #include "INSBase.h"
 
 // Forward Declarations
-class INSMomentumBase;
 
 /**
  * This class computes the momentum equation residual and Jacobian

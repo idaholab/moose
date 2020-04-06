@@ -11,8 +11,6 @@
 
 #include "NodalNormalBC.h"
 
-class MomentumFreeSlipBC;
-
 /**
  * Boundary condition that applies free slip condition at nodes
  */

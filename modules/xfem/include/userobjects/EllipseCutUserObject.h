@@ -12,7 +12,6 @@
 #include "GeometricCut3DUserObject.h"
 
 // Forward declarations
-class EllipseCutUserObject;
 
 class EllipseCutUserObject : public GeometricCut3DUserObject
 {

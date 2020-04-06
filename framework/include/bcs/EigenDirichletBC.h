@@ -11,8 +11,6 @@
 
 #include "NodalBC.h"
 
-class EigenDirichletBC;
-
 /**
  * Set Dirichlet boundary condition for eigenvalue problems.
  * Value has to be zero.

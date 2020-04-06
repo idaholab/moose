@@ -40,7 +40,6 @@
 // Forward declarations
 class AuxiliarySystem;
 class DisplacedProblem;
-class FEProblemBase;
 class MooseMesh;
 class NonlinearSystemBase;
 class NonlinearSystem;

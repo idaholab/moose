@@ -11,8 +11,6 @@
 
 #include "NodalConstraint.h"
 
-class NodalFrictionalConstraint;
-
 class NodalFrictionalConstraint : public NodalConstraint
 {
 public:

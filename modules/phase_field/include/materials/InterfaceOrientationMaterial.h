@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class InterfaceOrientationMaterial;
 
 /**
  * Material to compute the angular orientation of order parameter interfaces.

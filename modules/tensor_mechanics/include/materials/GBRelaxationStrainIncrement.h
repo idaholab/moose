@@ -13,8 +13,6 @@
 #include "RankTwoTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class GBRelaxationStrainIncrement;
-
 /**
  * GBRelaxationStrainIncrement computes strain increment due to lattice relaxation at GB
  * Forest et. al. MSMSE 2015

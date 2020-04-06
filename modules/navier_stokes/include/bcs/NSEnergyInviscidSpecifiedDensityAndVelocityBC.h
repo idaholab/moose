@@ -12,7 +12,6 @@
 #include "NSEnergyInviscidBC.h"
 
 // Forward Declarations
-class NSEnergyInviscidSpecifiedDensityAndVelocityBC;
 
 /**
  * The inviscid energy BC term with specified density and velocity components.

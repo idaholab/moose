@@ -13,8 +13,6 @@
 #include "TensorMechanicsHardeningModel.h"
 #include "TensorMechanicsPlasticDruckerPrager.h"
 
-class CappedDruckerPragerStressUpdate;
-
 /**
  * CappedDruckerPragerStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

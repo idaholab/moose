@@ -11,8 +11,6 @@
 
 #include "FluidProperties.h"
 
-class VaporMixtureFluidProperties;
-
 /**
  * Base class for fluid properties of vapor mixtures
  *

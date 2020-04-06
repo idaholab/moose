@@ -11,8 +11,6 @@
 
 #include "AuxScalarKernel.h"
 
-class QuotientScalarAux;
-
 /**
  * This auxiliary kernel computes its value by dividing "numerator" by
  * "denominator.  For efficiency, it doesn't check the denominator for

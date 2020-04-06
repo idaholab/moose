@@ -13,7 +13,6 @@
 #include "Control.h"
 
 // Forward declarations
-class RealFunctionControl;
 class Function;
 
 /**

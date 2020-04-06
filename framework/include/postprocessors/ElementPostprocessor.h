@@ -13,7 +13,6 @@
 #include "Postprocessor.h"
 
 // Forward Declarations
-class ElementPostprocessor;
 
 class ElementPostprocessor : public ElementUserObject, public Postprocessor
 {

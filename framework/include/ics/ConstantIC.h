@@ -15,7 +15,6 @@
 #include <string>
 
 // Forward Declarations
-class ConstantIC;
 class InputParameters;
 
 namespace libMesh

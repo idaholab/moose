@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class LevelSetBiMaterialRankTwo;
 
 /**
  * Compute a RankTwoTensor material property for bi-materials problem (consisting of two different

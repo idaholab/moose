@@ -14,7 +14,6 @@
 #include "ImageSampler.h"
 
 // Forward declarations
-class ImageSubdomain;
 
 /**
  * MeshModifier for defining a Subdomains based on Image data.

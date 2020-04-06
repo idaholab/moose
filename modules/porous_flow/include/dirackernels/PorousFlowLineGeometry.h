@@ -11,8 +11,6 @@
 
 #include "DiracKernel.h"
 
-class PorousFlowLineGeometry;
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */

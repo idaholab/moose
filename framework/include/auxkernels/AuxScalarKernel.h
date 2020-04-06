@@ -24,7 +24,6 @@
 class MooseMesh;
 class SubProblem;
 class Assembly;
-class AuxScalarKernel;
 
 /**
  * Base class for making kernels that work on auxiliary scalar variables

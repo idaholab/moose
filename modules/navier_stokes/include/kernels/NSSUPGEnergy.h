@@ -12,7 +12,6 @@
 #include "NSSUPGBase.h"
 
 // Forward Declarations
-class NSSUPGEnergy;
 
 /**
  * Compute residual and Jacobian terms form the SUPG

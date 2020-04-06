@@ -11,7 +11,6 @@
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
-class NodalFunctionsL2NormPD;
 class Function;
 
 /**

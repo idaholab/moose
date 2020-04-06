@@ -13,7 +13,6 @@
 #include "ElementLoopUserObject.h"
 
 // Forward Declarations
-class SlopeReconstructionBase;
 
 /**
  * Base class for piecewise linear slope reconstruction

@@ -12,8 +12,6 @@
 #include "ElementUserObject.h"
 #include "PorousFlowConnectedNodes.h"
 
-class AdvectiveFluxCalculatorBase;
-
 /**
  * Base class to compute Advective fluxes.  Specifically,
  * computes K_ij, D_ij, L_ij, R+, R-, f^a_ij detailed in

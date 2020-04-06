@@ -14,7 +14,6 @@
 #include "RichardsSeff.h"
 
 // Forward Declarations
-class RichardsSeffAux;
 
 /**
  * Calculates effective saturation for a specified variable

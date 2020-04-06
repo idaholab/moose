@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddMaterialAction;
-
 class AddMaterialAction : public MooseObjectAction
 {
 public:

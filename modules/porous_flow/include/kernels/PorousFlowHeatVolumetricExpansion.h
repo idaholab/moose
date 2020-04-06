@@ -12,8 +12,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowHeatVolumetricExpansion;
-
 /**
  * Kernel = energy_density * d(volumetric_strain)/dt
  * which is lumped to the nodes

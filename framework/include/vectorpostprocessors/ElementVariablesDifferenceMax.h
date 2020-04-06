@@ -12,7 +12,6 @@
 #include "ElementVectorPostprocessor.h"
 
 // Forward Declarations
-class ElementVariablesDifferenceMax;
 
 /**
  * \brief     Finds the largest difference between two variable fields

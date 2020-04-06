@@ -13,7 +13,6 @@
 
 #include "StressUpdateBase.h"
 
-class ComputeMultipleInelasticStress;
 class DamageBase;
 
 /**

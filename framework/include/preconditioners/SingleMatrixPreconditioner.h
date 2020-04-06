@@ -11,8 +11,6 @@
 
 #include "MoosePreconditioner.h"
 
-class SingleMatrixPreconditioner;
-
 /**
  * Single matrix preconditioner.
  */

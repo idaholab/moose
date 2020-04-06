@@ -11,8 +11,6 @@
 
 #include "DiscreteElementUserObject.h"
 
-class PorousFlowCapillaryPressure;
-
 /**
  * Base class for capillary pressure for multiphase flow in porous media. To implement
  * an effective saturation formulation, override effectiveSaturation() and derivatives.

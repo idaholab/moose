@@ -14,7 +14,6 @@
 #include "MaterialData.h"
 
 // Forward declarations
-class MaterialOutputAction;
 class MooseObjectAction;
 class MaterialBase;
 

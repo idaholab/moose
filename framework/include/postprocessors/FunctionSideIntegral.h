@@ -12,7 +12,6 @@
 #include "SideIntegralPostprocessor.h"
 
 // Forward Declarations
-class FunctionSideIntegral;
 class Function;
 
 /**

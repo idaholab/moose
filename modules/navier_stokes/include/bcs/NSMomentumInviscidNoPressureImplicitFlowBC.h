@@ -12,7 +12,6 @@
 #include "NSMomentumInviscidBC.h"
 
 // Forward Declarations
-class NSMomentumInviscidNoPressureImplicitFlowBC;
 
 /**
  * Momentum equation boundary condition used when pressure *is not*

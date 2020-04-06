@@ -11,8 +11,6 @@
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
-class PorousFlowFullySaturatedHeatAdvection;
-
 /**
  * Advection of heat via flux via Darcy flow of a single phase
  * fully-saturated fluid.  No upwinding is used.

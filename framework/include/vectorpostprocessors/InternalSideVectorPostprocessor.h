@@ -13,7 +13,6 @@
 #include "VectorPostprocessor.h"
 
 // Forward Declarations
-class InternalSideVectorPostprocessor;
 
 class InternalSideVectorPostprocessor : public InternalSideUserObject, public VectorPostprocessor
 {

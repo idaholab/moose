@@ -18,7 +18,6 @@
 // Forward declarations
 class Function;
 class FEProblemBase;
-class FunctionInterface;
 class Function;
 class InputParameters;
 class MooseObject;

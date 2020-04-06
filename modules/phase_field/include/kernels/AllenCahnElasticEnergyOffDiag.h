@@ -14,7 +14,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class AllenCahnElasticEnergyOffDiag;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

@@ -15,7 +15,6 @@
 
 #include "StochasticToolsTypes.h"
 
-class SamplerTransientMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
 

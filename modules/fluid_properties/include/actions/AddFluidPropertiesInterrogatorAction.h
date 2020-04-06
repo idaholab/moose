@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class AddFluidPropertiesInterrogatorAction;
-
 /**
  * Action that sets up the fluid properties interrogator
  */

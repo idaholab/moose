@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class CHSplitConcentration;
-
 /**
  * Solves Cahn-Hilliard equation using
  * chemical potential as non-linear variable

@@ -12,8 +12,6 @@
 #include "HelmholtzFluidProperties.h"
 #include <array>
 
-class HydrogenFluidProperties;
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

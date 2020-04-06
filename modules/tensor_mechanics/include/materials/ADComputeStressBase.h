@@ -21,8 +21,6 @@
   using ADComputeStressBase<compute_stage>::_initial_stress_fcn
 
 // Forward Declarations
-template <ComputeStage>
-class ADComputeStressBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -31,8 +29,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
-
-declareADValidParams(ADComputeStressBase);
 
 /**
  * ADComputeStressBase is the base class for stress tensors

@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class DifferencePostprocessor;
-
 /**
  * Computes the difference between two postprocessors
  *

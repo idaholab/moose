@@ -11,8 +11,6 @@
 
 #include "PorousFlowPorosityBase.h"
 
-class PorousFlowPorosityExponentialBase;
-
 /**
  * Base class Material designed to provide the porosity.
  * In this class

@@ -13,7 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declarations
-class Tecplot;
 
 /**
  * Class for output data to the TecplotII format

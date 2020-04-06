@@ -14,8 +14,6 @@
 
 #include "libmesh/point.h"
 
-class PeridynamicsMesh;
-
 /**
  * Peridynamics mesh class
  */

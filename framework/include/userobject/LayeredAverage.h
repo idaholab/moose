@@ -12,7 +12,6 @@
 #include "LayeredIntegral.h"
 
 // Forward Declarations
-class LayeredAverage;
 
 /**
  * This UserObject computes averages of a variable storing partial

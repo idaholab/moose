@@ -13,8 +13,6 @@
 
 #include "libmesh/point.h"
 
-class SideSetsAroundSubdomain;
-
 /**
  * Adds the faces on the boundary of given block
  * to the sidesets specified by "boundary"

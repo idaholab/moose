@@ -13,7 +13,6 @@
 #include "GrainForceAndTorqueInterface.h"
 
 // Forward Declarations
-class ConstantGrainForceAndTorque;
 
 /**
  * This class is here to get the force and torque acting on a grain

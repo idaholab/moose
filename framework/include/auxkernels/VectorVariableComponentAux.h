@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-class VectorVariableComponentAux;
 
 /**
  * Extract a component from a vector variable

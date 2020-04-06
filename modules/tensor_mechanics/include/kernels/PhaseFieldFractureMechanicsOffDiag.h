@@ -19,8 +19,6 @@
  * Useful if user wants to add the off diagonal Jacobian term
  */
 
-class PhaseFieldFractureMechanicsOffDiag;
-
 class PhaseFieldFractureMechanicsOffDiag : public DerivativeMaterialInterface<Kernel>
 {
 public:

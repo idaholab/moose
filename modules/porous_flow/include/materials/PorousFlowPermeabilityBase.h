@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowPermeabilityBase;
-
 /**
  * Base class Material designed to provide the permeability tensor.
  */

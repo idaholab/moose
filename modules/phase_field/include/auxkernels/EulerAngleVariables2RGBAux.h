@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class EulerAngleVariables2RGBAux;
-
 /**
  * Create an encoded RGB triplet from Euler angle data.
  * The color value is encoded as (R*256+G)*256+B with R,G, and B ranging

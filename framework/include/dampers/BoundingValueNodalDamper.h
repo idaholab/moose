@@ -13,7 +13,6 @@
 #include "NodalDamper.h"
 
 // Forward Declarations
-class BoundingValueNodalDamper;
 
 /**
  * This class implements a damper that limits the value of a variable to be within

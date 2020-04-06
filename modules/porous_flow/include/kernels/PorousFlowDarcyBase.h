@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowDarcyBase;
-
 /**
  * Darcy advective flux.
  * A fully-updwinded version is implemented, where the mobility

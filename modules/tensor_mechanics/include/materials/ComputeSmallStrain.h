@@ -11,8 +11,6 @@
 
 #include "ComputeStrainBase.h"
 
-class ComputeSmallStrain;
-
 /**
  * ComputeSmallStrain defines a strain tensor, assuming small strains.
  */

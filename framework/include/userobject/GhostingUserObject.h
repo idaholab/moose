@@ -16,7 +16,6 @@
 #include <unordered_map>
 
 // Forward Declarations
-class GhostingUserObject;
 class MooseMesh;
 class NonlinearSystemBase;
 

@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class AnisotropicDiffusion;
-
 /**
  * This kernel implements the Laplacian operator
  * multiplied by a 2nd order tensor giving

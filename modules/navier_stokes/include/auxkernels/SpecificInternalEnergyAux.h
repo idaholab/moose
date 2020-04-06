@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class SpecificInternalEnergyAux;
-
 /**
  * Computes specific internal energy
  */

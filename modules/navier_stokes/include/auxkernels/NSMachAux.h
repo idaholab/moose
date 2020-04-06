@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NSMachAux;
 class SinglePhaseFluidProperties;
 
 /**

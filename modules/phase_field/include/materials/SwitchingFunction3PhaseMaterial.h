@@ -13,7 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class SwitchingFunction3PhaseMaterial;
 
 /**
  * Material class to provide switching functions that prevent formation of a

@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class ArrayVariableComponent;
-
 class ArrayVariableComponent : public AuxKernel
 {
 public:

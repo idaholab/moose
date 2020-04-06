@@ -11,7 +11,6 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
-class ComputeDamageStress;
 class DamageBase;
 
 /**

@@ -13,8 +13,6 @@
 
 #include <array>
 
-class EBSDMesh;
-
 /**
  * Mesh generated from parameters
  */

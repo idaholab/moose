@@ -11,8 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class Ralston;
-
 /**
  * Ralston's time integration method.
  *

@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class SimpleCoupledACInterface;
-
 /**
  * Compute the Allen-Cahn interface term with constant Mobility and Interfacial parameter
  */

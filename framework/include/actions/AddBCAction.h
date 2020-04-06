@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddBCAction;
-
 class AddBCAction : public MooseObjectAction
 {
 public:

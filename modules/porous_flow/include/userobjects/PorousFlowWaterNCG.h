@@ -13,7 +13,6 @@
 
 class SinglePhaseFluidProperties;
 class Water97FluidProperties;
-class PorousFlowWaterNCG;
 
 /**
  * Specialized class for water and a non-condensable gas (NCG)

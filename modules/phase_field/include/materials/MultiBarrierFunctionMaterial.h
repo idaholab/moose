@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class MultiBarrierFunctionMaterial;
 
 /**
  * Double well phase transformation barrier free energy contribution.

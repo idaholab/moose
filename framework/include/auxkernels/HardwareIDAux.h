@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class HardwareIDAux;
 
 /**
  * "Paints" the ID of of the physical "node" in the cluster the element

@@ -11,8 +11,6 @@
 
 #include "ComputeElasticityTensorBase.h"
 
-class ComputeLayeredCosseratElasticityTensor;
-
 /**
  * ComputeLayeredCosseratElasticityTensor defines an
  * elasticity tensor and an elastic flexural rigidity

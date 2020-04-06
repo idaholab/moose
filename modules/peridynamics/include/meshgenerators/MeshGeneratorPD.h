@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class MeshGeneratorPD;
 
 /**
  * Generate peridynamics mesh based on finite element mesh

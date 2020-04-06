@@ -11,8 +11,6 @@
 
 #include "PorousFlowThermalConductivityBase.h"
 
-class PorousFlowThermalConductivityIdeal;
-
 /**
  * This material computes thermal conductivity for a PorousMedium - fluid
  * system, by using

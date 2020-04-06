@@ -13,7 +13,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class DiscreteElementUserObject;
 
 class DiscreteElementUserObject : public ElementUserObject
 {

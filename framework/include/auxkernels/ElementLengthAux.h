@@ -12,9 +12,6 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ElementLengthAux;
-
 /**
  * Computes the min or max of element length.
  */

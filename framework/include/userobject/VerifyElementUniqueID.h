@@ -13,7 +13,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class VerifyElementUniqueID;
 
 class VerifyElementUniqueID : public ElementUserObject
 {

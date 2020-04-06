@@ -13,8 +13,6 @@
 #include "RankTwoTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class SumTensorIncrements;
-
 /**
  * SumTensorIncrements update a tensor by summing tensor increments passed as property
  */

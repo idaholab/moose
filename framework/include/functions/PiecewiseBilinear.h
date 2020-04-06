@@ -11,7 +11,6 @@
 
 #include "Function.h"
 
-class PiecewiseBilinear;
 template <typename>
 class ColumnMajorMatrixTempl;
 typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;

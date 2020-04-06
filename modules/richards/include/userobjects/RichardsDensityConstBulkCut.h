@@ -11,8 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityConstBulkCut;
-
 /**
  * Fluid density assuming constant bulk modulus, for p>cut_limit
  * Then following a cubic for zero_point <= p <= cut_limit

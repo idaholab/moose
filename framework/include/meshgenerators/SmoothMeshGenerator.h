@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class SmoothMeshGenerator;
 
 /**
  * MeshGenerator for doing mesh smoothing

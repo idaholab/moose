@@ -14,7 +14,6 @@
 #include "BoundaryRestrictable.h"
 #include <set>
 
-class CrackFrontDefinition;
 class AuxiliarySystem;
 template <typename>
 class RankTwoTensorTempl;

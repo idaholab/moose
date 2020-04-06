@@ -11,8 +11,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-class RDGFluxBase;
-
 /**
  * Abstract base class for computing and caching internal or boundary fluxes for RDG
  *

@@ -11,8 +11,6 @@
 
 #include "ComputeFiniteStrain.h"
 
-class Compute2DFiniteStrain;
-
 /**
  * Compute2DFiniteStrain defines a strain increment and a rotation increment
  * for finite strains in 2D geometries, handling the out of plane strains.

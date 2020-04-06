@@ -13,7 +13,6 @@
 #include "MooseRandom.h"
 
 // Forward Declarations
-class PolycrystalHex;
 
 /**
  * PolycrystalHex creates a hexagonal polycrystal initial condition.

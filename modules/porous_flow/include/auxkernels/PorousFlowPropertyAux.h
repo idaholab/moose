@@ -12,8 +12,6 @@
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowPropertyAux;
-
 /**
  * Provides a simple interface to PorousFlow material properties.
  * Note that as all properties are in materials, only elemental

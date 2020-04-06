@@ -13,7 +13,6 @@
 #include "RankFourTensor.h"
 
 // Forward Declarations
-class LevelSetBiMaterialRankFour;
 
 /**
  * Compute a RankFourTensor material property for bi-materials problem (consisting of two different

@@ -13,7 +13,6 @@
 #include "PetscOutput.h"
 
 // Forward declerations
-class FileOutput;
 
 /**
  * An outputter with filename support

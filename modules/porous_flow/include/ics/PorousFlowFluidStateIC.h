@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 class PorousFlowDictator;
-class PorousFlowFluidStateIC;
 class PorousFlowFluidStateMultiComponentBase;
 
 /**

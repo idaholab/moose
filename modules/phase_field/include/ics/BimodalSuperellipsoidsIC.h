@@ -12,7 +12,6 @@
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 
 // Forward Declarations
-class BimodalSuperellipsoidsIC;
 
 /**
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters

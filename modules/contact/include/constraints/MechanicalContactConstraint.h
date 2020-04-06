@@ -14,7 +14,6 @@
 #include "PenetrationLocator.h"
 
 // Forward Declarations
-class MechanicalContactConstraint;
 class ContactLineSearchBase;
 enum class ContactModel;
 enum class ContactFormulation;

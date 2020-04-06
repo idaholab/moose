@@ -14,8 +14,6 @@
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
 
-class SetupQuadratureAction;
-
 /**
  * Sets the quadrature
  */

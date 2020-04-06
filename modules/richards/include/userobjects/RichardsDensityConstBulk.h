@@ -11,8 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityConstBulk;
-
 /**
  * Fluid density assuming constant bulk modulus
  */

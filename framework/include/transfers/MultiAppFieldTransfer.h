@@ -12,7 +12,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class MultiAppFieldTransfer;
 class MooseVariableFEBase;
 namespace libMesh
 {

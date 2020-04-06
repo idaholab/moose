@@ -11,8 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class NeumannBC;
-
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.

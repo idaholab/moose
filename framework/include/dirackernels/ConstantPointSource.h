@@ -13,7 +13,6 @@
 #include "DiracKernel.h"
 
 // Forward Declarations
-class ConstantPointSource;
 
 /**
  * TOOD

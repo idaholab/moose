@@ -13,8 +13,6 @@
 #include "MemoryUsageReporter.h"
 #include "MemoryUtils.h"
 
-class MemoryUsage;
-
 /**
  * Output maximum, average, or total process memory usage
  */

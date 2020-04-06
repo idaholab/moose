@@ -12,7 +12,6 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class PenaltyDirichletOldValuePD;
 
 class PenaltyDirichletOldValuePD : public NodalKernel
 {

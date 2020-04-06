@@ -11,7 +11,6 @@
 
 #include "ConditionalEnableControl.h"
 
-class ConditionalFunctionEnableControl;
 class Function;
 
 /**

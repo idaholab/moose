@@ -11,8 +11,6 @@
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
-class NodalVariableIntegralPD;
-
 /**
  * Postprocessor class to compute nodal variable integral in peridynamic discretization
  */

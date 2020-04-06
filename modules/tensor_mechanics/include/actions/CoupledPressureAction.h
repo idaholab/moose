@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CoupledPressureAction;
-
 /**
  * Action that sets up pressure boundary condition on displacement variables
  */

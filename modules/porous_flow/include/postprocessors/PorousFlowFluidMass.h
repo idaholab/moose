@@ -12,8 +12,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowFluidMass;
-
 /**
  * Postprocessor produces the mass of a given fluid component in a region
  */

@@ -12,7 +12,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class ConservedNoiseInterface;
 
 /**
  * This Userobject is the base class of Userobjects that generate one

@@ -11,8 +11,6 @@
 
 #include "DiscreteElementUserObject.h"
 
-class CrystalPlasticityUOBase;
-
 /**
  * Crystal plasticity system userobject base class.
  */

@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class DarcyFlux;
 
 /**
  * Kernel = grad(permeability*(grad(pressure) - weight))

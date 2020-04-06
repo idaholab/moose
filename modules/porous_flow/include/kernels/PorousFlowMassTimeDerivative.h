@@ -12,8 +12,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowMassTimeDerivative;
-
 /**
  * Kernel = (mass_component - mass_component_old)/dt
  * where mass_component =

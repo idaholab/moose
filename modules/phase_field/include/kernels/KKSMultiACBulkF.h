@@ -12,7 +12,6 @@
 #include "KKSMultiACBulkBase.h"
 
 // Forward Declarations
-class KKSMultiACBulkF;
 
 /**
  * KKSMultiACBulkBase child class for the free energy term

@@ -11,8 +11,6 @@
 
 #include "PorousFlowAdvectiveFluxCalculatorSaturatedMultiComponent.h"
 
-class PorousFlowAdvectiveFluxCalculatorUnsaturatedMultiComponent;
-
 /**
  * Computes the advective flux of fluid of given phase and component.
  * Hence this UserObject is relevant to multi-phase, multi-component situations.

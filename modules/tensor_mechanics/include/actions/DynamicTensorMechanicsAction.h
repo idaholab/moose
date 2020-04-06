@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsAction.h"
 
-class DynamicTensorMechanicsAction;
-
 class DynamicTensorMechanicsAction : public TensorMechanicsAction
 {
 public:

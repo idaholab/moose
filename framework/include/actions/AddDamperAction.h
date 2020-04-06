@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDamperAction;
-
 class AddDamperAction : public MooseObjectAction
 {
 public:

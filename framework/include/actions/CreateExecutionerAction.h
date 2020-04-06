@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class CreateExecutionerAction;
-
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:

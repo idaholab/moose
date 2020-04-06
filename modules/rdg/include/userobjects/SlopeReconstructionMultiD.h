@@ -12,7 +12,6 @@
 #include "SlopeReconstructionBase.h"
 
 // Forward Declarations
-class SlopeReconstructionMultiD;
 
 /**
  * Multi-dimensional piecewise linear slope reconstruction

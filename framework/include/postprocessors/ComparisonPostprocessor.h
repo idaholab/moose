@@ -11,8 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ComparisonPostprocessor;
-
 /**
  * Base class for comparing quantities and producing a boolean value
  *

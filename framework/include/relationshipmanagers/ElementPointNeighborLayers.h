@@ -14,7 +14,6 @@
 #include "libmesh/default_coupling.h"
 
 // Forward declarations
-class ElementPointNeighborLayers;
 namespace libMesh
 {
 class GhostingFunctor;

@@ -12,8 +12,6 @@
 #include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
 
-class PorousFlowMaterialVectorBase;
-
 /**
  * Base class for all PorousFlow vector materials
  */

@@ -12,8 +12,6 @@
 #include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 
-class HEVPInternalVarRateUOBase;
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes computes internal variable rate and derivatives

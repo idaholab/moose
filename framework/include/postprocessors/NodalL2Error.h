@@ -11,8 +11,6 @@
 
 #include "NodalVariablePostprocessor.h"
 
-class NodalL2Error;
-
 /**
  *
  */

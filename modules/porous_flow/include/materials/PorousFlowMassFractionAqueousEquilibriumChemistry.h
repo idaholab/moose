@@ -11,8 +11,6 @@
 
 #include "PorousFlowMassFraction.h"
 
-class PorousFlowMassFractionAqueousEquilibriumChemistry;
-
 /**
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from primary-species concentrations

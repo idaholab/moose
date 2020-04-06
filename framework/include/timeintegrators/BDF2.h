@@ -12,8 +12,6 @@
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
 
-class BDF2;
-
 /**
  * BDF2 time integrator
  */

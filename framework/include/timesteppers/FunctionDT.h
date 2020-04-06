@@ -13,7 +13,6 @@
 #include "FunctionInterface.h"
 #include "LinearInterpolation.h"
 
-class FunctionDT;
 class Function;
 
 class FunctionDT : public TimeStepper, public FunctionInterface

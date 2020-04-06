@@ -15,7 +15,6 @@
 
 // Forward Declarations
 class InputParameters;
-class RandomICBase;
 namespace libMesh
 {
 class Point;

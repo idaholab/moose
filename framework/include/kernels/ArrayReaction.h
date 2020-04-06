@@ -11,8 +11,6 @@
 
 #include "ArrayKernel.h"
 
-class ArrayReaction;
-
 class ArrayReaction : public ArrayKernel
 {
 public:

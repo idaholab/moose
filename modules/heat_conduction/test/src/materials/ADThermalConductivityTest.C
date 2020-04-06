@@ -11,12 +11,16 @@
 
 registerADMooseObject("HeatConductionTestApp", ADThermalConductivityTest);
 
-defineADValidParams(
-    ADThermalConductivityTest,
-    ADMaterial,
-    params.addRequiredCoupledVar("temperature", "Coupled temperature");
-    params.addRequiredCoupledVar(
-        "c", "Coupled variable used to help verify automatic differentiation capability"););
+template <ComputeStage compute_stage>
+InputParameters
+ADThermalConductivityTest<compute_stage>::validParams()
+{
+  auto params = ADMaterial<compute_stage>::validParams();
+  params.addRequiredCoupledVar("temperature", "Coupled temperature");
+  params.addRequiredCoupledVar(
+      "c", "Coupled variable used to help verify automatic differentiation capability");
+  return params;
+}
 
 template <ComputeStage compute_stage>
 ADThermalConductivityTest<compute_stage>::ADThermalConductivityTest(

@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class DarcyFluxPressure;
-
 /**
  * Darcy flux: - cond * (Grad P - rho * g)
  * where cond is the hydraulic conductivity, P is fluid pressure,

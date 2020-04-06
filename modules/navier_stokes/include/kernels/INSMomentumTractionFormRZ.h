@@ -12,7 +12,6 @@
 #include "INSMomentumTractionForm.h"
 
 // Forward Declarations
-class INSMomentumTractionFormRZ;
 
 /**
  * This class computes additional momentum equation residual and

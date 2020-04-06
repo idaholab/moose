@@ -13,7 +13,6 @@
 #include "Action.h"
 
 // Forward declerations
-class CommonOutputAction;
 
 /**
  * Meta-action for creating common output object parameters

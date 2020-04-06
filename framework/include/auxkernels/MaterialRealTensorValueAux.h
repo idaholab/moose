@@ -13,7 +13,6 @@
 #include "MaterialAuxBase.h"
 
 // Forward declerations
-class MaterialRealTensorValueAux;
 
 /**
  * AuxKernel for outputting a RealTensorValue material property component to an AuxVariable

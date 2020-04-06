@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class GenericConstantMaterial;
 
 /**
  * This material automatically declares as material properties whatever is passed to it

@@ -12,8 +12,6 @@
 #include "InputParameters.h"
 #include "ConsoleStream.h"
 
-class SingleVariableReturnMappingSolution;
-
 /**
  * Base class that provides capability for Newton return mapping
  * iterations on a single variable

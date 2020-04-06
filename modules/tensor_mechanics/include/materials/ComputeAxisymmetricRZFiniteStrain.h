@@ -11,8 +11,6 @@
 
 #include "Compute2DFiniteStrain.h"
 
-class ComputeAxisymmetricRZFiniteStrain;
-
 /**
  * ComputeAxisymmetricRZFiniteStrain defines a strain increment and rotation
  * increment for finite strains in an Axisymmetric simulation.

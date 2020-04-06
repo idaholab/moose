@@ -12,8 +12,6 @@
 #include "PorousFlowMaterial.h"
 #include "DerivativeMaterialInterface.h"
 
-class PorousFlowMaterialBase;
-
 /**
  * Base class for all PorousFlow materials that provide phase-dependent properties.
  * These include: fluid properties, relative permeabilities and capillary pressures.

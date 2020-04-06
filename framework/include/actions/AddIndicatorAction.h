@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddIndicatorAction;
-
 class AddIndicatorAction : public MooseObjectAction
 {
 public:

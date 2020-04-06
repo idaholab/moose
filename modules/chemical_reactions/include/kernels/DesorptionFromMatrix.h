@@ -13,7 +13,6 @@
 #include "LangmuirMaterial.h"
 
 // Forward Declarations
-class DesorptionFromMatrix;
 
 /**
  * Mass flow rate of adsorbed fluid from matrix

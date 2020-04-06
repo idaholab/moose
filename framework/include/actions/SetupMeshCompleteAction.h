@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class SetupMeshCompleteAction;
-
 class SetupMeshCompleteAction : public Action
 {
 public:

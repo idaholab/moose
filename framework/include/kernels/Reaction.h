@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class Reaction;
 
 class Reaction : public Kernel
 {

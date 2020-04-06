@@ -12,7 +12,6 @@
 #include "TotalFreeEnergyBase.h"
 
 // Forward Declarations
-class CrossTermGradientFreeEnergy;
 
 /**
  * Cross term gradient free energy contribution used by ACMultiInterface

@@ -11,8 +11,6 @@
 
 #include "MooseObject.h"
 
-class NSNoPenetrationBC;
-
 /**
  * This class facilitates adding solid wall "no penetration" BCs for
  * the Euler equations.

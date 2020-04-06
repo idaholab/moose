@@ -13,8 +13,6 @@
 
 #include "libmesh/bounding_box.h"
 
-class BoxMarker;
-
 class BoxMarker : public Marker
 {
 public:

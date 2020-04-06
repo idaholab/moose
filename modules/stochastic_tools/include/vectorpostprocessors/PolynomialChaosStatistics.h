@@ -14,8 +14,6 @@
 #include "PolynomialChaos.h"
 #include "SurrogateModelInterface.h"
 
-class PolynomialChaosStatistics;
-
 class PolynomialChaosStatistics : public GeneralVectorPostprocessor, SurrogateModelInterface
 {
 public:

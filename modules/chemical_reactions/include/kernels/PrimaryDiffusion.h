@@ -11,7 +11,6 @@
 #include "Diffusion.h"
 
 // Forward Declarations
-class PrimaryDiffusion;
 
 /**
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:

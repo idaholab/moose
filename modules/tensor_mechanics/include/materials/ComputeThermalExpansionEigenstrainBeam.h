@@ -12,8 +12,6 @@
 #include "ComputeThermalExpansionEigenstrainBeamBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeThermalExpansionEigenstrainBeam;
-
 /**
  * ComputeThermalExpansionEigenstrainBeam computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.

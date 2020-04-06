@@ -11,8 +11,6 @@
 
 #include "ComparisonPostprocessor.h"
 
-class VectorPostprocessorComparison;
-
 /**
  * Compares two vector post-processors of equal size and produces a boolean value
  *

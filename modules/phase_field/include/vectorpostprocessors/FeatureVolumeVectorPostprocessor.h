@@ -14,7 +14,6 @@
 #include "BoundaryRestrictable.h"
 
 // Forward Declarations
-class FeatureVolumeVectorPostprocessor;
 class FeatureFloodCount;
 
 /**

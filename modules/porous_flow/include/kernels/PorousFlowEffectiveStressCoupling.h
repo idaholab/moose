@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowEffectiveStressCoupling;
-
 /**
  * PorousFlowEffectiveStressCoupling computes
  * -coefficient*effective_porepressure*grad_component(test)

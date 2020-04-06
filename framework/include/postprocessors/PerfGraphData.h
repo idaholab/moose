@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class PerfGraphData;
 
 // libMesh forward declarations
 namespace libMesh

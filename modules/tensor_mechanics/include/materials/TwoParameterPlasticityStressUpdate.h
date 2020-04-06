@@ -13,8 +13,6 @@
 
 #include <array>
 
-class TwoParameterPlasticityStressUpdate;
-
 /**
  * TwoParameterPlasticityStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

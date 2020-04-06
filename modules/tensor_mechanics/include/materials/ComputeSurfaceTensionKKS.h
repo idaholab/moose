@@ -11,7 +11,6 @@
 
 #include "Material.h"
 
-class ComputeSurfaceTensionKKS;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

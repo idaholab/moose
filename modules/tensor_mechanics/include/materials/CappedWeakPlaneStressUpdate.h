@@ -14,8 +14,6 @@
 
 #include <array>
 
-class CappedWeakPlaneStressUpdate;
-
 /**
  * CappedWeakPlaneStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

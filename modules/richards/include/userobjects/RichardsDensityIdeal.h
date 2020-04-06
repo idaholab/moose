@@ -11,8 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityIdeal;
-
 /**
  * Fluid density of an ideal gas
  */

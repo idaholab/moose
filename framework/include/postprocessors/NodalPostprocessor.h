@@ -14,7 +14,6 @@
 #include "NodalUserObject.h"
 
 // Forward Declarations
-class NodalPostprocessor;
 
 class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {

@@ -13,7 +13,6 @@
 #include "GeneralDamper.h"
 
 // Forward Declarations
-class ContactSlipDamper;
 class AuxiliarySystem;
 class DisplacedProblem;
 class PenetrationLocator;

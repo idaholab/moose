@@ -12,7 +12,6 @@
 #include "Action.h"
 #include "PorousFlowDependencies.h"
 
-class PorousFlowAddMaterialAction;
 class AddMaterialAction;
 
 /**

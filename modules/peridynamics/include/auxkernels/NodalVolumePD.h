@@ -11,7 +11,6 @@
 
 #include "AuxKernelBasePD.h"
 
-class NodalVolumePD;
 class PeridynamicsMesh;
 
 /**

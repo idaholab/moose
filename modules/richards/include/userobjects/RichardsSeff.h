@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsSeff;
-
 /**
  * Base class for effective saturation as a function of porepressure(s)
  * The functions seff, dseff and d2seff must be over-ridden in the derived class

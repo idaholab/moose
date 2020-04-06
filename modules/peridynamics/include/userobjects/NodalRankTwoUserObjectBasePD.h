@@ -11,8 +11,6 @@
 
 #include "NodalAuxVariableUserObjectBasePD.h"
 
-class NodalRankTwoUserObjectBasePD;
-
 /**
  * Base userobject class for rank two tensor at individual material point
  */

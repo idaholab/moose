@@ -11,8 +11,6 @@
 
 #include "MeshModifier.h"
 
-class ElementDeleterBase;
-
 /**
  * This class deletes elements from the mesh data structure
  * after it has been generated or read but before any FEM
@@ -23,6 +21,8 @@ class ElementDeleterBase;
 class ElementDeleterBase : public MeshModifier
 {
 public:
+  static InputParameters validParams();
+
   ElementDeleterBase(const InputParameters & parameters);
 
 protected:

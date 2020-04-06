@@ -13,7 +13,6 @@
 #include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
-class MultiAppNearestNodeTransfer;
 namespace libMesh
 {
 class DofObject;

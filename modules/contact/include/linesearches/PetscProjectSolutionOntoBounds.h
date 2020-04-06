@@ -22,7 +22,6 @@
 
 using namespace libMesh;
 
-class PetscProjectSolutionOntoBounds;
 class GeometricSearchData;
 class PenetrationLocator;
 class NonlinearSystemBase;

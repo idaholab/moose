@@ -32,11 +32,6 @@
   using ADDGKernel<compute_stage>::_grad_test_neighbor
 
 template <ComputeStage compute_stage>
-class ADDGKernel;
-
-declareADValidParams(ADDGKernel);
-
-template <ComputeStage compute_stage>
 class ADDGKernel : public DGKernelBase, public NeighborMooseVariableInterface<Real>
 {
 public:

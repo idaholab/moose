@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class RndBoundingBoxIC;
 
 /**
  * RndBoundingBoxIC allows setting the initial condition of a value inside and outside of a

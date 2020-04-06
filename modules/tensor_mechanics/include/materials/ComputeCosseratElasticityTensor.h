@@ -11,8 +11,6 @@
 
 #include "ComputeElasticityTensorBase.h"
 
-class ComputeCosseratElasticityTensor;
-
 /**
  * ComputeElasticityTensor defines an elasticity tensor material for isi.
  */

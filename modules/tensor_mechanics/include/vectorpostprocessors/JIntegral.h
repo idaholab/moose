@@ -13,7 +13,6 @@
 #include "CrackFrontDefinition.h"
 
 // Forward Declarations
-class JIntegral;
 
 /**
  * This vectorpostprocessor computes the J-Integral, which is a measure of

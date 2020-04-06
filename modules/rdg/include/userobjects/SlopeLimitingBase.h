@@ -12,7 +12,6 @@
 #include "ElementLoopUserObject.h"
 
 // Forward Declarations
-class SlopeLimitingBase;
 
 /**
  * Base class for slope limiting to limit

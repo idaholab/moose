@@ -13,7 +13,6 @@
 #include "GrainForceAndTorqueInterface.h"
 
 // Forward Declarations
-class GrainRigidBodyMotionBase;
 class GrainTrackerInterface;
 
 class GrainRigidBodyMotionBase : public NonlocalKernel
