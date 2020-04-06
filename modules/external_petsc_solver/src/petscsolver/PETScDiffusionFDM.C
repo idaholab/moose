@@ -150,6 +150,11 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, Petsc
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSetFromOptions(ts);
   CHKERRQ(ierr);
+  /*
+  * Let the passed-in dt take the priority
+  */
+  ierr = TSSetTimeStep(ts, dt);
+  CHKERRQ(ierr);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Solve nonlinear system
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

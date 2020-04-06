@@ -30,7 +30,7 @@
     type = 'Exodiff'
     input = 'external_petsc_master.i'
     exodiff = 'external_petsc_master_multistep_out.e external_petsc_master_multistep_out_sub_app0.e'
-    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" Outputs/file_base=external_petsc_master_multistep_out MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true -ts_dt 0.05'
+    cli_args = 'sub_app:Outputs/hide="pid" sub_app:Executioner/dtmin=0.05 Outputs/hide="picard_its" Outputs/file_base=external_petsc_master_multistep_out MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true -ts_dt 0.05'
     allow_warnings = true
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
@@ -48,4 +48,18 @@
     library_mode = 'DYNAMIC'
     requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is smaller than master app."
   []
+
+  [external_petsc_large_dt]
+    type = 'Exodiff'
+    input = 'external_petsc_master.i'
+    exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" -ts_dt 0.25'
+    allow_warnings = true
+    prereq = 'external_petsc_subcycling'
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is larger than master app."
+  []
+
 []
