@@ -2,7 +2,7 @@
   design = "ExternalProblem.md"
   issues = "#12595"
 
-  [external_transient]
+  [external_petsc]
     type = 'Exodiff'
     input = 'external_petsc_master.i'
     exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
@@ -14,19 +14,19 @@
     library_mode = 'DYNAMIC'
   []
 
-  [external_transient_subcycling]
+  [external_petsc_subcycling]
     type = 'Exodiff'
     input = 'external_petsc_master.i'
     exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
     cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true'
     allow_warnings = true
-    prereq = 'external_transient'
+    prereq = 'external_petsc'
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
     requirement = "MOOSE shall be able to couple the PETSc external solver with subcycling."
   []
 
-  [external_transient_subcycling_multistep]
+  [external_petsc_subcycling_multistep]
     type = 'Exodiff'
     input = 'external_petsc_master.i'
     exodiff = 'external_petsc_master_multistep_out.e external_petsc_master_multistep_out_sub_app0.e'
@@ -37,4 +37,15 @@
     requirement = "MOOSE shall be able to couple with the PETSc external solver with multistep subcycling."
   []
 
+  [external_petsc_small_dt]
+    type = 'Exodiff'
+    input = 'external_petsc_master.i'
+    exodiff = 'external_petsc_master_small_dt_out.e external_petsc_master_small_dt_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" Outputs/file_base=external_petsc_master_small_dt_out -ts_dt 0.1'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is smaller than master app."
+  []
 []
