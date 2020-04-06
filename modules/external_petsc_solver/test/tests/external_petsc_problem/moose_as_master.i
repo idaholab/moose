@@ -78,7 +78,7 @@
 [MultiApps]
   [./sub_app]
     type = TransientMultiApp
-    input_files = 'petsc_problem_transient.i'
+    input_files = 'petsc_transient_as_sub.i'
     app_type = ExternalPetscSolverApp
     library_path = '../../../../external_petsc_solver/lib'
   [../]
