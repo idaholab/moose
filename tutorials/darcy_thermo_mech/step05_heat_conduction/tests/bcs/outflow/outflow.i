@@ -15,11 +15,11 @@
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temperature
   []
   [heat_conduction_time_derivative]
-    type = SpecificHeatConductionTimeDerivative
+    type = ADHeatConductionTimeDerivative
     variable = temperature
   []
 []
@@ -40,7 +40,7 @@
 
 [Materials]
   [steel]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '18 466 8000' # W/m*K, J/kg-K, kg/m^3 @ 296K
   []

@@ -70,8 +70,7 @@ CustomObject::doSomething()
 
 #include "ADBaseObject.h"
 
-template <ComputeStage compute_stage>
-class ADCustomObject : public ADBaseObject<compute_stage>
+class ADCustomObject : public ADBaseObject
 {
 public:
   static InputParameters validParams();
@@ -82,8 +81,6 @@ protected:
   virtual ADReal doSomething() override;
 
   const Real & _scale;
-
-  usingBaseObjectMembers;
 };
 ```
 
@@ -94,32 +91,27 @@ protected:
 ```cpp
 #include "ADCustomObject.h"
 
-registerADMooseObject("MooseApp", ADCustomObject);
+registerMooseObject("MooseApp", ADCustomObject);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCustomObject<compute_stage>::validParams()
+ADCustomObject::validParams()
 {
-    InputParameters params = ADCustomObject<
+    InputParameters params = ADCustomObject::validParams();
     params.addParam<Real>("scale", 1, "A scale factor for use when doing something.");
     params.addClassDescription("The ADCustomObject does something with a scale parameter.");
     params;
 )
 
-template <ComputeStage compute_stage>
-ADCustomObject<compute_stage>::ADCustomObject(const InputParameters & parameters)
-  : ADBaseObject<compute_stage>(parameters),
-    _scale(adGetParam<Real>("scale"))
+ADCustomObject::ADCustomObject(const InputParameters & parameters)
+  : ADBaseObject(parameters),
+    _scale(getParam<Real>("scale"))
 
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCustomObject<compute_stage>::doSomething()
+ADCustomObject::doSomething()
 {
   return _scale;
 }
-
-adBaseClass(ADCustomObject);
 ```

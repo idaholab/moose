@@ -152,7 +152,7 @@
   []
 
   [elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
 

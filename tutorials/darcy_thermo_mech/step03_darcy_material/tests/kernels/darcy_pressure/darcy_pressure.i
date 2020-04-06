@@ -36,7 +36,7 @@
 
 [Materials]
   [pressure]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_values = '0.8451e-9 7.98e-4'
     prop_names = 'permeability viscosity'
   []

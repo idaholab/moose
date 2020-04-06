@@ -13,11 +13,10 @@
 
 registerMooseObject("DarcyThermoMechApp", PackedColumn);
 
-template <ComputeStage compute_stage>
 InputParameters
-PackedColumn<compute_stage>::validParams()
+PackedColumn::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addRequiredCoupledVar("temperature", "The temperature (C) of the fluid.");
 
   // Add a parameter to get the radius of the spheres in the column
@@ -106,9 +105,8 @@ PackedColumn<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+PackedColumn::PackedColumn(const InputParameters & parameters)
+  : ADMaterial(parameters),
     // Get the one parameter from the input file
     _input_radius(getFunction("radius")),
     _input_porosity(getFunction("porosity")),
@@ -128,8 +126,8 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
     _solid_cte(getParam<Real>("solid_thermal_expansion")),
 
     // Material Properties being produced by this object
-    _permeability(declareProperty<Real>("permeability")),
-    _porosity(declareProperty<Real>("porosity")),
+    _permeability(declareADProperty<Real>("permeability")),
+    _porosity(declareADProperty<Real>("porosity")),
     _viscosity(declareADProperty<Real>("viscosity")),
     _thermal_conductivity(declareADProperty<Real>("thermal_conductivity")),
     _specific_heat(declareADProperty<Real>("specific_heat")),
@@ -155,9 +153,8 @@ PackedColumn<compute_stage>::PackedColumn(const InputParameters & parameters)
   _use_solid_cte_interp = initInputData("solid_thermal_expansion_file", _solid_cte_interpolation);
 }
 
-template <ComputeStage compute_stage>
 void
-PackedColumn<compute_stage>::computeQpProperties()
+PackedColumn::computeQpProperties()
 {
   // Current temperature
   ADReal temp = _temperature[_qp] - 273.15;
@@ -203,10 +200,8 @@ PackedColumn<compute_stage>::computeQpProperties()
   _thermal_expansion[_qp] = _porosity[_qp] * fluid_cte + (1.0 - _porosity[_qp]) * solid_cte;
 }
 
-template <ComputeStage compute_stage>
 bool
-PackedColumn<compute_stage>::initInputData(const std::string & param_name,
-                                           ADLinearInterpolation & interp)
+PackedColumn::initInputData(const std::string & param_name, ADLinearInterpolation & interp)
 {
   if (isParamValid(param_name))
   {

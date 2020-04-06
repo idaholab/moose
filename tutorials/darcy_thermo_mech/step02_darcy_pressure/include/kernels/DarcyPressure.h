@@ -19,8 +19,7 @@
  * the grad_u * grad_phi is already coded and all that is
  * needed is to specialize that calculation by multiplying by K / mu.
  */
-template <ComputeStage compute_stage>
-class DarcyPressure : public ADKernel<compute_stage>
+class DarcyPressure : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -34,6 +33,4 @@ protected:
   /// References to be set from input file
   const Real & _permeability;
   const Real & _viscosity;
-
-  usingKernelMembers;
 };
