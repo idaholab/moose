@@ -23,6 +23,9 @@ supports reading and writing a large number of formats and could be extended to 
 | .xda, .xdr  | libMesh formats |
 | .vtk, .pvtu | Visualization Toolkit |
 
+When reading a mesh file in Sandia's ExodusII format, users can use parameter *exodus_extra_element_integers* to load elemental variables for setting extra element integers of the mesh.
+The names of the extra element integers will be the same as the names of the element variables in the mesh file.
+
 ## Further FileMeshGenerator Documentation
 
 !syntax parameters /MeshGenerators/FileMeshGenerator
