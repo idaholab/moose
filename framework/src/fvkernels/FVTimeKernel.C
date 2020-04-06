@@ -46,7 +46,7 @@ FVTimeKernel<compute_stage>::validParams()
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
-
+  params.registerSystemAttributeName("FVElementalKernel");
   return params;
 }
 

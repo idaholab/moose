@@ -2619,15 +2619,7 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     std::shared_ptr<FVKernel> k = _factory.create<FVKernel>(fv_kernel_name, name, parameters, tid);
-    // TODO: this logic will change once we rebase onto andrew's updated
-    // system attribute - instead of passing in the system, we will need to
-    // update the FVTimeKernel validParams function to call andrew's new
-    // special function for specifying/overriding FVTimeKernel's parent
-    // class's registered system base using "FVElementalKernel"
-    if (dynamic_cast<FVElementalKernel *>(k.get()))
-      theWarehouse().add(k, "FVElementalKernel");
-    else
-      theWarehouse().add(k, "FVKernel");
+    theWarehouse().add(k);
   }
 }
 
@@ -2659,7 +2651,7 @@ FEProblemBase::addFVBC(const std::string & fv_bc_name,
   {
     std::shared_ptr<FVBoundaryCondition> bc =
         _factory.create<FVBoundaryCondition>(fv_bc_name, name, parameters, tid);
-    theWarehouse().add(bc, "FVBoundaryCondition");
+    theWarehouse().add(bc);
   }
 }
 
