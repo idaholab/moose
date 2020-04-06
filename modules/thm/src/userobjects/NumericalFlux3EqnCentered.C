@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", NumericalFlux3EqnCentered);
 
-template <>
 InputParameters
-validParams<NumericalFlux3EqnCentered>()
+NumericalFlux3EqnCentered::validParams()
 {
-  InputParameters params = validParams<NumericalFlux3EqnBase>();
+  InputParameters params = NumericalFlux3EqnBase::validParams();
 
   params.addClassDescription(
       "Computes internal side flux for the 1-D, 1-phase, variable-area Euler equations using a "

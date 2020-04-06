@@ -2,11 +2,6 @@
 
 #include "FlowJunction.h"
 
-class JunctionWithLossesBase;
-
-template <>
-InputParameters validParams<JunctionWithLossesBase>();
-
 /**
  * Base class for junctions that have losses
  */
@@ -22,4 +17,7 @@ protected:
   std::vector<Real> _kr_coeffs;
   /// A reference area for this junction to calculate its reference velocity (User input)
   const Real & _ref_area;
+
+public:
+  static InputParameters validParams();
 };

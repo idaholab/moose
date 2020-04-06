@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", OneDEnergyStaticPressureSupersonicBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyStaticPressureSupersonicBC>()
+OneDEnergyStaticPressureSupersonicBC::validParams()
 {
-  InputParameters params = validParams<OneDEnergyFreeBC>();
+  InputParameters params = OneDEnergyFreeBC::validParams();
   params.addParam<bool>("reversible", false, "If the BC is reversible.");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");

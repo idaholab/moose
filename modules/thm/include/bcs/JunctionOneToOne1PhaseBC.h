@@ -2,11 +2,7 @@
 
 #include "OneDIntegratedBC.h"
 
-class JunctionOneToOne1PhaseBC;
 class JunctionOneToOne1PhaseUserObject;
-
-template <>
-InputParameters validParams<JunctionOneToOne1PhaseBC>();
 
 /**
  * Adds boundary fluxes for flow channels connected to a 1-phase one-to-one junction
@@ -52,4 +48,7 @@ protected:
   const std::map<unsigned int, unsigned int> _jvar_map;
   /// Index within local system of the equation upon which this object acts
   const unsigned int _equation_index;
+
+public:
+  static InputParameters validParams();
 };

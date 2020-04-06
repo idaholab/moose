@@ -2,11 +2,6 @@
 
 #include "Sampler1DBase.h"
 
-class Sampler1DReal;
-
-template <>
-InputParameters validParams<Sampler1DReal>();
-
 /**
  * This class samples Real material properties for the integration points
  * in all elements in a block of a 1-D mesh.
@@ -29,4 +24,7 @@ public:
    * @return A scalar value from this material property to be output
    */
   virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
+
+public:
+  static InputParameters validParams();
 };

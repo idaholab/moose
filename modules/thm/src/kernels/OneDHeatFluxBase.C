@@ -3,11 +3,10 @@
 #include "HeatConductionModel.h"
 #include "Assembly.h"
 
-template <>
 InputParameters
-validParams<OneDHeatFluxBase>()
+OneDHeatFluxBase::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<UserObjectName>(
       "q_uo", "The name of the user object that computed the heat flux");
   return params;

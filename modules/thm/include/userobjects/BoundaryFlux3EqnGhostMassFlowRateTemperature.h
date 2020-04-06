@@ -2,11 +2,7 @@
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
-class BoundaryFlux3EqnGhostMassFlowRateTemperature;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostMassFlowRateTemperature>();
 
 /**
  * Computes a boundary flux from a specified mass flow rate and temperature for
@@ -32,4 +28,7 @@ protected:
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

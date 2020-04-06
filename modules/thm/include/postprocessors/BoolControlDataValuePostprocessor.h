@@ -3,11 +3,7 @@
 #include "GeneralPostprocessor.h"
 #include "ControlData.h"
 
-class BoolControlDataValuePostprocessor;
 class THMProblem;
-
-template <>
-InputParameters validParams<BoolControlDataValuePostprocessor>();
 
 /**
  * Reads a boolean control value data and prints it out
@@ -27,4 +23,7 @@ protected:
   const std::string & _control_data_name;
   /// The boolean value of the control data
   const ControlData<bool> * _control_data_value;
+
+public:
+  static InputParameters validParams();
 };

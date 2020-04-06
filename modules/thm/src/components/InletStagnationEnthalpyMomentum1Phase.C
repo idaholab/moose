@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", InletStagnationEnthalpyMomentum1Phase);
 
-template <>
 InputParameters
-validParams<InletStagnationEnthalpyMomentum1Phase>()
+InletStagnationEnthalpyMomentum1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addRequiredParam<Real>("rhou", "Prescribed momentum density [kg/(m^2-s)]");
   params.addRequiredParam<Real>("H", "Prescribed specific total enthalpy [J/kg]");
   params.addParam<bool>("reversible", false, "True for reversible, false (default) for pure inlet");

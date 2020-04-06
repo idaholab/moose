@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMomentumFlux;
-
-template <>
-InputParameters validParams<OneD3EqnMomentumFlux>();
-
 /**
  * Momentum flux for 1-phase flow
  */
@@ -41,4 +36,7 @@ protected:
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
   const unsigned int _arhoEA_var_number;
+
+public:
+  static InputParameters validParams();
 };

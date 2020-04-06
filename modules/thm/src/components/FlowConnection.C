@@ -14,11 +14,10 @@ THM::stringToEnum(const std::string & s)
   return stringToEnum<FlowConnection::EEndType>(s, FlowConnection::_end_type_to_enum);
 }
 
-template <>
 InputParameters
-validParams<FlowConnection>()
+FlowConnection::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   return params;
 }
 

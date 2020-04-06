@@ -6,11 +6,10 @@
 
 registerMooseObject("THMApp", OneDMassStagnationPandTBC);
 
-template <>
 InputParameters
-validParams<OneDMassStagnationPandTBC>()
+OneDMassStagnationPandTBC::validParams()
 {
-  InputParameters params = validParams<OneDNodalBC>();
+  InputParameters params = OneDNodalBC::validParams();
   params.addParam<bool>(
       "reversible", false, "true, if the boundary condition reversible, otherwise false.");
   params.addRequiredParam<Real>("T0", "Stagnation temperature");

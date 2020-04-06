@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CopyValueAux);
 
-template <>
 InputParameters
-validParams<CopyValueAux>()
+CopyValueAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("source", "Source variable to be copied.");
 
   return params;

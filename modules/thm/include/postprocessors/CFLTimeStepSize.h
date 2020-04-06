@@ -2,11 +2,6 @@
 
 #include "ElementPostprocessor.h"
 
-class CFLTimeStepSize;
-
-template <>
-InputParameters validParams<CFLTimeStepSize>();
-
 /**
  * Computes a time step size based on user-specified CFL number
  */
@@ -40,4 +35,7 @@ protected:
 
   /// Time step size
   Real _dt;
+
+public:
+  static InputParameters validParams();
 };

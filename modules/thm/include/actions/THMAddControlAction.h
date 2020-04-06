@@ -2,11 +2,6 @@
 
 #include "AddControlAction.h"
 
-class THMAddControlAction;
-
-template <>
-InputParameters validParams<THMAddControlAction>();
-
 /**
  * Action for adding THM control objects
  */
@@ -20,4 +15,7 @@ public:
   THMAddControlAction(InputParameters parameters);
 
   virtual void act() override;
+
+public:
+  static InputParameters validParams();
 };

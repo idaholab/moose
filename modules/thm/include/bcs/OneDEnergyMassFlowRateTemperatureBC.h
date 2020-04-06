@@ -3,11 +3,7 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDEnergyMassFlowRateTemperatureBC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<OneDEnergyMassFlowRateTemperatureBC>();
 
 /**
  * Mass flow rate (m_dot) and temperature (T) BC
@@ -40,4 +36,7 @@ protected:
   unsigned int _beta_var_num;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

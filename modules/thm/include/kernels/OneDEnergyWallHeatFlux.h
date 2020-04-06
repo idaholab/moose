@@ -2,11 +2,6 @@
 
 #include "Kernel.h"
 
-class OneDEnergyWallHeatFlux;
-
-template <>
-InputParameters validParams<OneDEnergyWallHeatFlux>();
-
 class OneDEnergyWallHeatFlux : public Kernel
 {
 public:
@@ -21,4 +16,7 @@ protected:
   const MaterialProperty<Real> & _q_wall;
   /// Heat flux perimeter
   const VariableValue & _P_hf;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneD3EqnEnergyFlux);
 
-template <>
 InputParameters
-validParams<OneD3EqnEnergyFlux>()
+OneD3EqnEnergyFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");

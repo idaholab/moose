@@ -4,11 +4,6 @@
 
 #include "libmesh/vector_value.h"
 
-class RZSymmetry;
-
-template <>
-InputParameters validParams<RZSymmetry>();
-
 /**
  * Interface class for enabling objects to be RZ symmetric about arbitrary axis
  */
@@ -26,4 +21,7 @@ protected:
   const RealVectorValue & _axis_dir;
   /// Radial offset of the axis of symmetry
   const Real & _offset;
+
+public:
+  static InputParameters validParams();
 };

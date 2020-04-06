@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CosineHumpFunction);
 
-template <>
 InputParameters
-validParams<CosineHumpFunction>()
+CosineHumpFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   MooseEnum axis("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>("axis", axis, "Coordinate axis on which the hump occurs");

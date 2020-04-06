@@ -2,11 +2,6 @@
 
 #include "HSBoundary.h"
 
-class HSBoundaryHeatFlux;
-
-template <>
-InputParameters validParams<HSBoundaryHeatFlux>();
-
 /**
  * Applies a specified heat flux to a heat structure boundary
  */
@@ -22,4 +17,7 @@ protected:
 
   /// Heat flux function name
   const FunctionName & _q_fn_name;
+
+public:
+  static InputParameters validParams();
 };

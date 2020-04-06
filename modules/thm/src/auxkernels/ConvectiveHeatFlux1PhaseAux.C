@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ConvectiveHeatFlux1PhaseAux);
 
-template <>
 InputParameters
-validParams<ConvectiveHeatFlux1PhaseAux>()
+ConvectiveHeatFlux1PhaseAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes convective heat flux for 1-phase flow.");
   params.addRequiredCoupledVar("T_wall", "Wall temperature");
   params.addRequiredParam<MaterialPropertyName>("T", "Material property name of fluid temperature");

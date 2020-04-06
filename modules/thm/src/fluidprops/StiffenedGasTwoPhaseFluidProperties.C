@@ -5,12 +5,11 @@ const Real StiffenedGasTwoPhaseFluidProperties::_P_critical = 22.09E+6;
 
 registerMooseObject("THMApp", StiffenedGasTwoPhaseFluidProperties);
 
-template <>
 InputParameters
-validParams<StiffenedGasTwoPhaseFluidProperties>()
+StiffenedGasTwoPhaseFluidProperties::validParams()
 {
-  InputParameters params = validParams<TwoPhaseFluidProperties>();
-  params += validParams<NaNInterface>();
+  InputParameters params = TwoPhaseFluidProperties::validParams();
+  params += NaNInterface::validParams();
 
   // Default parameters for Stiffened Gas EOS (liquid phase)
   params.addParam<Real>("gamma_liquid", 2.35, "");

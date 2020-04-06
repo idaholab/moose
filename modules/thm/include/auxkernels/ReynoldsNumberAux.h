@@ -2,11 +2,7 @@
 
 #include "AuxKernel.h"
 
-class ReynoldsNumberAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<ReynoldsNumberAux>();
 
 /**
  * Computes Reynolds number
@@ -33,4 +29,7 @@ protected:
   const VariableValue & _e;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

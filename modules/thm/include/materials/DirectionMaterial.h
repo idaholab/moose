@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class DirectionMaterial;
-
-template <>
-InputParameters validParams<DirectionMaterial>();
-
 /**
  * Computes the directional vector of 1D elements in 3D space
  */
@@ -20,4 +15,7 @@ protected:
 
   /// The direction of the geometry (1D elements in 3D space)
   MaterialProperty<RealVectorValue> & _dir;
+
+public:
+  static InputParameters validParams();
 };

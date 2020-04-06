@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", OneDMomentumStaticPressureReverseBC);
 
-template <>
 InputParameters
-validParams<OneDMomentumStaticPressureReverseBC>()
+OneDMomentumStaticPressureReverseBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
 
   params.addParam<bool>("is_liquid", true, "Does the phase correspond to liquid? (two-phase only)");
   params.addCoupledVar("alpha", 1.0, "Volume fraction");

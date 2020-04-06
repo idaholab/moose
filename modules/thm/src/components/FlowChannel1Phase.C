@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", FlowChannel1Phase);
 
-template <>
 InputParameters
-validParams<FlowChannel1Phase>()
+FlowChannel1Phase::validParams()
 {
-  InputParameters params = validParams<FlowChannelBase>();
+  InputParameters params = FlowChannelBase::validParams();
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function [m^2]");
   params.addParam<Real>("roughness", 0.0, "Roughness [m]");

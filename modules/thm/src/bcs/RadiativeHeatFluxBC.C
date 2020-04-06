@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", RadiativeHeatFluxBC);
 
-template <>
 InputParameters
-validParams<RadiativeHeatFluxBC>()
+RadiativeHeatFluxBC::validParams()
 {
-  InputParameters params = validParams<RadiativeHeatFluxBCBase>();
+  InputParameters params = RadiativeHeatFluxBCBase::validParams();
 
   params.addParam<FunctionName>("view_factor", "1", "View factor function");
   params.addParam<PostprocessorName>(

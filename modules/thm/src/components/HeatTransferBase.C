@@ -5,11 +5,10 @@
 #include "ClosuresBase.h"
 #include "MooseUtils.h"
 
-template <>
 InputParameters
-validParams<HeatTransferBase>()
+HeatTransferBase::validParams()
 {
-  InputParameters params = validParams<ConnectorBase>();
+  InputParameters params = ConnectorBase::validParams();
   params.addDeprecatedParam<std::string>(
       "pipe", "Name of pipe component to connect", "Use 'flow_channel' parameter instead.");
   params.addRequiredParam<std::string>("flow_channel",

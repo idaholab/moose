@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", TimeRampFunction);
 
-template <>
 InputParameters
-validParams<TimeRampFunction>()
+TimeRampFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   params.addRequiredParam<Real>("initial_value", "Initial value");
   params.addRequiredParam<Real>("final_value", "Final value");

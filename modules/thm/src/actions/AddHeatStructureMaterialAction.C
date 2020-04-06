@@ -2,11 +2,10 @@
 
 registerMooseAction("THMApp", AddHeatStructureMaterialAction, "THM:add_heat_structure_material");
 
-template <>
 InputParameters
-validParams<AddHeatStructureMaterialAction>()
+AddHeatStructureMaterialAction::validParams()
 {
-  return validParams<AddUserObjectAction>();
+  return AddUserObjectAction::validParams();
 }
 
 AddHeatStructureMaterialAction::AddHeatStructureMaterialAction(InputParameters params)

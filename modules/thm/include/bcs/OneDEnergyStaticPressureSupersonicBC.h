@@ -2,12 +2,7 @@
 
 #include "OneDEnergyFreeBC.h"
 
-// Forward Declarations
-class OneDEnergyStaticPressureSupersonicBC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<OneDEnergyStaticPressureSupersonicBC>();
 
 /**
  *
@@ -27,4 +22,7 @@ protected:
   const MaterialProperty<Real> & _c;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

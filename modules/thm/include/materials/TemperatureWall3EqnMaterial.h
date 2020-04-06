@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class TemperatureWall3EqnMaterial;
-
-template <>
-InputParameters validParams<TemperatureWall3EqnMaterial>();
-
 /**
  * Computes T_wall from the constitutive model
  */
@@ -26,4 +21,7 @@ protected:
   const MaterialProperty<Real> & _Hw;
   /// Fluid temperature
   const MaterialProperty<Real> & _T;
+
+public:
+  static InputParameters validParams();
 };

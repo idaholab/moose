@@ -2,15 +2,13 @@
 
 #include "Action.h"
 
-class THMPrintComponentLoopsAction;
-
-template <>
-InputParameters validParams<THMPrintComponentLoopsAction>();
-
 class THMPrintComponentLoopsAction : public Action
 {
 public:
   THMPrintComponentLoopsAction(InputParameters params);
 
   virtual void act();
+
+public:
+  static InputParameters validParams();
 };

@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", HeatStructureEnergyRZ);
 
-template <>
 InputParameters
-validParams<HeatStructureEnergyRZ>()
+HeatStructureEnergyRZ::validParams()
 {
-  InputParameters params = validParams<HeatStructureEnergyBase>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = HeatStructureEnergyBase::validParams();
+  params += RZSymmetry::validParams();
   params.addClassDescription("Computes the total energy for a cylindrical heat structure.");
   return params;
 }

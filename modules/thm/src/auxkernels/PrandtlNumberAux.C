@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", PrandtlNumberAux);
 
-template <>
 InputParameters
-validParams<PrandtlNumberAux>()
+PrandtlNumberAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
   params.addRequiredParam<UserObjectName>("fp",

@@ -3,9 +3,8 @@
 #include "AddVariableAction.h"
 #include "Numerics.h"
 
-template <>
 InputParameters
-validParams<FlowModelSetup>()
+FlowModelSetup::validParams()
 {
   InputParameters params = emptyInputParameters();
 

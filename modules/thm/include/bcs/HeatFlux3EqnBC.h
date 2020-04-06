@@ -2,11 +2,6 @@
 
 #include "HeatFluxBaseBC.h"
 
-class HeatFlux3EqnBC;
-
-template <>
-InputParameters validParams<HeatFlux3EqnBC>();
-
 class HeatFlux3EqnBC : public HeatFluxBaseBC
 {
 public:
@@ -35,4 +30,7 @@ protected:
   const unsigned int _T_wall_jvar;
   /// Map of coupled variable index to local equation system index
   const std::map<unsigned int, unsigned int> _jvar_map;
+
+public:
+  static InputParameters validParams();
 };

@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMomentumFriction;
-
-template <>
-InputParameters validParams<OneD3EqnMomentumFriction>();
-
 /**
  * Computes wall friction term for single phase flow
  *
@@ -47,4 +42,7 @@ protected:
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;
+
+public:
+  static InputParameters validParams();
 };

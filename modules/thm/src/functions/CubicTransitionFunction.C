@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CubicTransitionFunction);
 
-template <>
 InputParameters
-validParams<CubicTransitionFunction>()
+CubicTransitionFunction::validParams()
 {
-  InputParameters params = validParams<SmoothTransitionFunction>();
+  InputParameters params = SmoothTransitionFunction::validParams();
 
   params.addRequiredParam<Real>("function1_derivative_end_point", "First function");
   params.addRequiredParam<Real>("function2_derivative_end_point", "Second function");

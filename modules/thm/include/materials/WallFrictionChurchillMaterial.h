@@ -3,11 +3,6 @@
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class WallFrictionChurchillMaterial;
-
-template <>
-InputParameters validParams<WallFrictionChurchillMaterial>();
-
 /**
  * Computes drag coefficient using the Churchill formula for Fanning friction factor
  */
@@ -37,4 +32,7 @@ protected:
   const MaterialProperty<Real> & _D_h;
   /// Roughness of the surface
   const Real & _roughness;
+
+public:
+  static InputParameters validParams();
 };

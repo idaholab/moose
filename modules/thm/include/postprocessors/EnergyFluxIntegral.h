@@ -2,11 +2,6 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class EnergyFluxIntegral;
-
-template <>
-InputParameters validParams<EnergyFluxIntegral>();
-
 /**
  * Computes the boundary integral of the energy flux.
  *
@@ -29,4 +24,7 @@ protected:
 
   const VariableValue & _arhouA;
   const VariableValue & _enthalpy;
+
+public:
+  static InputParameters validParams();
 };

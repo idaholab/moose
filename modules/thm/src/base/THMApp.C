@@ -30,11 +30,10 @@ FlowModelID FM_TWO_PHASE_NCG = registerFlowModelID();
 
 } // namespace THM
 
-template <>
 InputParameters
-validParams<THMApp>()
+THMApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   params.set<bool>("use_legacy_dirichlet_bc") = false;
   params.set<bool>("use_legacy_output_syntax") = false;
   return params;

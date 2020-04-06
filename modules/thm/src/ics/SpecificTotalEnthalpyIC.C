@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SpecificTotalEnthalpyIC);
 
-template <>
 InputParameters
-validParams<SpecificTotalEnthalpyIC>()
+SpecificTotalEnthalpyIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
   params.addRequiredCoupledVar("p", "Pressure");

@@ -2,11 +2,6 @@
 
 #include "HeatTransferBase.h"
 
-class HeatTransfer1PhaseBase;
-
-template <>
-InputParameters validParams<HeatTransfer1PhaseBase>();
-
 /**
  * Base class for heat transfer connections to 1-phase flow channels
  */
@@ -31,4 +26,7 @@ protected:
 
   /// 1-phase wall heat transfer coefficient name
   MaterialPropertyName _Hw_1phase_name;
+
+public:
+  static InputParameters validParams();
 };

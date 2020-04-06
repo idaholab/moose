@@ -3,11 +3,6 @@
 #include "BoundaryBase.h"
 #include "HeatStructureBase.h"
 
-class HSBoundary;
-
-template <>
-InputParameters validParams<HSBoundary>();
-
 /**
  * Base class for heat structure boundary components
  */
@@ -35,4 +30,7 @@ protected:
 
   /// Heat structure sides for each boundary
   const std::vector<HeatStructureBase::SideType> _hs_sides;
+
+public:
+  static InputParameters validParams();
 };

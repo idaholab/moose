@@ -2,11 +2,6 @@
 
 #include "FlowConnection.h"
 
-class FlowBoundary;
-
-template <>
-InputParameters validParams<FlowBoundary>();
-
 /**
  * Base class for boundary components connected to flow channels
  */
@@ -56,4 +51,7 @@ protected:
   UserObjectName _numerical_flux_name;
   /// rDG interfacial variables user object name
   UserObjectName _rdg_int_var_uo_name;
+
+public:
+  static InputParameters validParams();
 };

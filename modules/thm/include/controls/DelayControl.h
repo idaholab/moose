@@ -3,11 +3,6 @@
 #include "THMControl.h"
 #include "LinearInterpolation.h"
 
-class DelayControl;
-
-template <>
-InputParameters validParams<DelayControl>();
-
 /**
  * Time delay control
  *
@@ -49,4 +44,7 @@ protected:
   std::deque<Real> & _input_time;
   /// Values of 'input' corresponding to _input_time
   std::deque<Real> & _input_vals;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,12 +2,6 @@
 
 #include "IntegratedBC.h"
 
-// Forward Declarations
-class ConvectionHeatTransferBC;
-
-template <>
-InputParameters validParams<ConvectionHeatTransferBC>();
-
 class ConvectionHeatTransferBC : public IntegratedBC
 {
 public:
@@ -23,4 +17,7 @@ protected:
   const Real & _htc_ambient;
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
+
+public:
+  static InputParameters validParams();
 };

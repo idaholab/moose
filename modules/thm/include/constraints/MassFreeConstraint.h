@@ -2,11 +2,6 @@
 
 #include "NodalConstraint.h"
 
-class MassFreeConstraint;
-
-template <>
-InputParameters validParams<MassFreeConstraint>();
-
 /**
  * Free BC for the mass equation
  */
@@ -26,4 +21,7 @@ protected:
   const VariableValue & _rhouA;
 
   unsigned int _rhouA_var_number;
+
+public:
+  static InputParameters validParams();
 };

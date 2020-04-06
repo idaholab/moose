@@ -2,11 +2,7 @@
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
-class BoundaryFlux3EqnGhostDensityVelocity;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostDensityVelocity>();
 
 /**
  * Computes boundary flux from densities and velocities for the 3-equation model
@@ -31,4 +27,7 @@ protected:
   const bool & _reversible;
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

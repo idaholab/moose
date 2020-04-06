@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ConvectionHeatTransferBC);
 
-template <>
 InputParameters
-validParams<ConvectionHeatTransferBC>()
+ConvectionHeatTransferBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<Real>("T_ambient", "Ambient Temperature");
   params.addRequiredParam<Real>("htc_ambient", "Heat transfer coefficient with ambient");
   params.addParam<PostprocessorName>(

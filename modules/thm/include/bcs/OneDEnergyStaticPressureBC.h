@@ -2,13 +2,8 @@
 
 #include "OneDNodalBC.h"
 
-// Forward Declarations
-class OneDEnergyStaticPressureBC;
 class SinglePhaseFluidProperties;
 class VolumeFractionMapper;
-
-template <>
-InputParameters validParams<OneDEnergyStaticPressureBC>();
 
 /**
  *
@@ -49,4 +44,7 @@ protected:
 
   const SinglePhaseFluidProperties & _fp;
   const VolumeFractionMapper * _vfm;
+
+public:
+  static InputParameters validParams();
 };

@@ -3,11 +3,7 @@
 #include "FlowJunctionUserObject.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class GateValve1PhaseUserObject;
 class NumericalFlux3EqnBase;
-
-template <>
-InputParameters validParams<GateValve1PhaseUserObject>();
 
 /**
  * Gate valve user object for 1-phase flow
@@ -114,4 +110,7 @@ protected:
 
   /// Pairs of variable names vs. their corresponding equation indices
   static const std::vector<std::pair<std::string, unsigned int>> _varname_eq_index_pairs;
+
+public:
+  static InputParameters validParams();
 };

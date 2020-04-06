@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", TemperatureWall3EqnMaterial);
 
-template <>
 InputParameters
-validParams<TemperatureWall3EqnMaterial>()
+TemperatureWall3EqnMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Heat transfer coefficient");
   params.addRequiredParam<MaterialPropertyName>("q_wall", "Wall heat flux");

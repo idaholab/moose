@@ -2,11 +2,6 @@
 
 #include "Sampler1DBase.h"
 
-class Sampler1DVector;
-
-template <>
-InputParameters validParams<Sampler1DVector>();
-
 /**
  * This class samples a component of a vector material property in a 1-D mesh.
  */
@@ -21,4 +16,7 @@ public:
 protected:
   /// index of the component of the vector-valued material property
   const unsigned int _index;
+
+public:
+  static InputParameters validParams();
 };

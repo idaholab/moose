@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", InletDensityVelocity1Phase);
 
-template <>
 InputParameters
-validParams<InletDensityVelocity1Phase>()
+InletDensityVelocity1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addRequiredParam<Real>("rho", "Prescribed density [kg/m^3]");
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");

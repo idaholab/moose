@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", JunctionOneToOne);
 
-template <>
 InputParameters
-validParams<JunctionOneToOne>()
+JunctionOneToOne::validParams()
 {
-  InputParameters params = validParams<FlowJunction>();
+  InputParameters params = FlowJunction::validParams();
 
   params.addClassDescription("Junction connecting one flow channel to one other flow channel");
 

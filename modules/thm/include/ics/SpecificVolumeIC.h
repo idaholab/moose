@@ -2,11 +2,6 @@
 
 #include "InitialCondition.h"
 
-class SpecificVolumeIC;
-
-template <>
-InputParameters validParams<SpecificVolumeIC>();
-
 /**
  *
  */
@@ -21,4 +16,7 @@ protected:
   const VariableValue & _rhoA;
   const VariableValue & _area;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

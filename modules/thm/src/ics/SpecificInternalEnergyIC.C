@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SpecificInternalEnergyIC);
 
-template <>
 InputParameters
-validParams<SpecificInternalEnergyIC>()
+SpecificInternalEnergyIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");

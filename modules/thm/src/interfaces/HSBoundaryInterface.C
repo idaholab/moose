@@ -2,9 +2,8 @@
 #include "Component.h"
 #include "THMMesh.h"
 
-template <>
 InputParameters
-validParams<HSBoundaryInterface>()
+HSBoundaryInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 

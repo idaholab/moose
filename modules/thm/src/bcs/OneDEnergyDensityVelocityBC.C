@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDEnergyDensityVelocityBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyDensityVelocityBC>()
+OneDEnergyDensityVelocityBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addRequiredParam<Real>("rho", "Density");
   params.addRequiredParam<Real>("vel", "x-component of the velocity");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction");

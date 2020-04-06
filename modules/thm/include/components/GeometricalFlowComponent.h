@@ -4,11 +4,6 @@
 #include "FlowModel.h"
 #include "FlowConnection.h"
 
-class GeometricalFlowComponent;
-
-template <>
-InputParameters validParams<GeometricalFlowComponent>();
-
 /**
  * Base class for geometrical components that have fluid flow
  */
@@ -90,4 +85,7 @@ protected:
 
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
+
+public:
+  static InputParameters validParams();
 };

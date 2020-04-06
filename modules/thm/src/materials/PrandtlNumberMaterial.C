@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", PrandtlNumberMaterial);
 
-template <>
 InputParameters
-validParams<PrandtlNumberMaterial>()
+PrandtlNumberMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("cp", "Constant-pressure specific heat");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
   params.addRequiredParam<MaterialPropertyName>("k", "Thermal conductivity");

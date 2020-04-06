@@ -3,12 +3,6 @@
 #include "Material.h"
 #include "SolidMaterialProperties.h"
 
-// Forward Declarations
-class SolidMaterial;
-
-template <>
-InputParameters validParams<SolidMaterial>();
-
 /**
  * A class to define materials for the solid structures in the THM application.
  */
@@ -29,4 +23,7 @@ protected:
   const VariableValue & _temp;
   /// User object with material properties
   const SolidMaterialProperties & _props;
+
+public:
+  static InputParameters validParams();
 };

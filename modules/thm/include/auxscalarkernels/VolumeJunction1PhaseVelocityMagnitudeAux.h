@@ -2,11 +2,6 @@
 
 #include "AuxScalarKernel.h"
 
-class VolumeJunction1PhaseVelocityMagnitudeAux;
-
-template <>
-InputParameters validParams<VolumeJunction1PhaseVelocityMagnitudeAux>();
-
 /**
  * Computes magnitude of velocity from the 1-phase volume junction variables
  */
@@ -26,4 +21,7 @@ protected:
   const VariableValue & _rhovV;
   /// rho*w*V of the junction
   const VariableValue & _rhowV;
+
+public:
+  static InputParameters validParams();
 };

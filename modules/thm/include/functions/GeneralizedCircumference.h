@@ -3,11 +3,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class GeneralizedCircumference;
-
-template <>
-InputParameters validParams<GeneralizedCircumference>();
-
 /**
  * The generalized circumference, sigma_w, is defined such that the
  *
@@ -35,4 +30,7 @@ public:
 protected:
   // The generalized circumference function depends on the cross-sectional area.
   const Function & _area_func;
+
+public:
+  static InputParameters validParams();
 };

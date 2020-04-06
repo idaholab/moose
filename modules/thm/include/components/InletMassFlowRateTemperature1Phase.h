@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class InletMassFlowRateTemperature1Phase;
-
-template <>
-InputParameters validParams<InletMassFlowRateTemperature1Phase>();
-
 /**
  * Boundary condition with prescribed mass flow rate and temperature for 1-phase flow channels
  */
@@ -25,4 +20,7 @@ protected:
 
   void setup1PhaseCG();
   void setup1PhaseRDG();
+
+public:
+  static InputParameters validParams();
 };

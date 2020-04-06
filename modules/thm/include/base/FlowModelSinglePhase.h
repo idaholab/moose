@@ -2,11 +2,6 @@
 
 #include "FlowModel.h"
 
-class FlowModelSinglePhase;
-
-template <>
-InputParameters validParams<FlowModelSinglePhase>();
-
 /**
  * Sets up the single-phase flow model using Euler's equations
  */
@@ -41,4 +36,6 @@ public:
   static const std::string TEMPERATURE;
   static const std::string THERMAL_CONDUCTIVITY;
   static const std::string VELOCITY;
+
+  static InputParameters validParams();
 };

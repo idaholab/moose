@@ -2,11 +2,6 @@
 
 #include "AuxKernel.h"
 
-class THMSpecificInternalEnergyAux;
-
-template <>
-InputParameters validParams<THMSpecificInternalEnergyAux>();
-
 /**
  * Computes specific internal energy
  */
@@ -24,4 +19,7 @@ protected:
   const VariableValue & _rhou;
   /// total energy, rhoE
   const VariableValue & _rhoE;
+
+public:
+  static InputParameters validParams();
 };

@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", ReynoldsNumberMaterial);
 
-template <>
 InputParameters
-validParams<ReynoldsNumberMaterial>()
+ReynoldsNumberMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addCoupledVar("beta", "Remapped volume fraction of liquid");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");

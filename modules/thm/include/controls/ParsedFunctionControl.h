@@ -3,11 +3,7 @@
 #include "THMControl.h"
 #include "MooseParsedFunctionBase.h"
 
-class ParsedFunctionControl;
 class THMParsedFunctionWrapper;
-
-template <>
-InputParameters validParams<ParsedFunctionControl>();
 
 /**
  * This control block takes a parsed function and evaluates it
@@ -33,4 +29,7 @@ protected:
   Real & _value;
   /// Pointer to the Parsed function wrapper object
   std::unique_ptr<THMParsedFunctionWrapper> _function_ptr;
+
+public:
+  static InputParameters validParams();
 };

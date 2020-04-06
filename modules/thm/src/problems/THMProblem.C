@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", THMProblem);
 
-template <>
 InputParameters
-validParams<THMProblem>()
+THMProblem::validParams()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = FEProblem::validParams();
 
   // default scaling factors
   std::vector<Real> sf_1phase(3, 1.0);

@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDAreaTimesConstantBC);
 
-template <>
 InputParameters
-validParams<OneDAreaTimesConstantBC>()
+OneDAreaTimesConstantBC::validParams()
 {
-  InputParameters params = validParams<OneDNodalBC>();
+  InputParameters params = OneDNodalBC::validParams();
   params.addRequiredParam<Real>("value", "The constant value used.");
   params.addRequiredCoupledVar("A", "Area");
   params.declareControllable("value");

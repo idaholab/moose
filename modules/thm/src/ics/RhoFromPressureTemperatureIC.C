@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", RhoFromPressureTemperatureIC);
 
-template <>
 InputParameters
-validParams<RhoFromPressureTemperatureIC>()
+RhoFromPressureTemperatureIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("fp", "The name of fluid properties user object.");
   params.addRequiredCoupledVar("p", "The pressure");
   params.addRequiredCoupledVar("T", "The temperature");

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", WeightedAverageMaterial);
 
-template <>
 InputParameters
-validParams<WeightedAverageMaterial>()
+WeightedAverageMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addClassDescription(
       "Weighted average of material properties using aux variables as weights");

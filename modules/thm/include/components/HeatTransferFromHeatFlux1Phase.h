@@ -2,11 +2,6 @@
 
 #include "HeatTransfer1PhaseBase.h"
 
-class HeatTransferFromHeatFlux1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromHeatFlux1Phase>();
-
 /**
  * Heat transfer specified by heat flux going into 1-phase flow channel
  */
@@ -22,4 +17,7 @@ public:
 protected:
   /// wall heat flux function name
   const FunctionName _q_wall_fn_name;
+
+public:
+  static InputParameters validParams();
 };

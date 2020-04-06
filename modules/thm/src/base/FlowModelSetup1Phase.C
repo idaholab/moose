@@ -1,11 +1,10 @@
 #include "FlowModelSetup1Phase.h"
 #include "MooseObjectAction.h"
 
-template <>
 InputParameters
-validParams<FlowModelSetup1Phase>()
+FlowModelSetup1Phase::validParams()
 {
-  InputParameters params = validParams<FlowModelSetup>();
+  InputParameters params = FlowModelSetup::validParams();
 
   params.addRequiredParam<FunctionName>("p", "Initial pressure function");
   params.addRequiredParam<FunctionName>("T", "Initial temperature function");

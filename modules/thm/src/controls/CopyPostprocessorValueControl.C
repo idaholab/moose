@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CopyPostprocessorValueControl);
 
-template <>
 InputParameters
-validParams<CopyPostprocessorValueControl>()
+CopyPostprocessorValueControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor.");
   return params;
 }

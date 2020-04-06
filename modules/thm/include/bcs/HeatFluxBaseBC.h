@@ -2,11 +2,7 @@
 
 #include "IntegratedBC.h"
 
-class HeatFluxBaseBC;
 class HeatFluxFromHeatStructureBaseUserObject;
-
-template <>
-InputParameters validParams<HeatFluxBaseBC>();
 
 /**
  * Base class for handling heat flux between flow channels and heat structures
@@ -58,4 +54,7 @@ protected:
   const Real _hs_scale;
   /// Variable numbers for the off-diagonal jacobian computation
   std::vector<unsigned int> _off_diag_var_nums;
+
+public:
+  static InputParameters validParams();
 };

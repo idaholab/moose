@@ -2,11 +2,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddComponentAction;
-
-template <>
-InputParameters validParams<AddComponentAction>();
-
 class AddComponentAction : public MooseObjectAction
 {
 public:
@@ -17,4 +12,7 @@ public:
 protected:
   /// True if building a component group
   bool _group;
+
+public:
+  static InputParameters validParams();
 };

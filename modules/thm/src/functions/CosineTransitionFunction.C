@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CosineTransitionFunction);
 
-template <>
 InputParameters
-validParams<CosineTransitionFunction>()
+CosineTransitionFunction::validParams()
 {
-  InputParameters params = validParams<SmoothTransitionFunction>();
+  InputParameters params = SmoothTransitionFunction::validParams();
 
   params.addClassDescription(
       "Computes a cosine transtition of a user-specified width between two values");

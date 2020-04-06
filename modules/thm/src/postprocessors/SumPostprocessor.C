@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SumPostprocessor);
 
-template <>
 InputParameters
-validParams<SumPostprocessor>()
+SumPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addParam<std::vector<PostprocessorName>>("values", "List of postprocessors to add");
   params.addDeprecatedParam<PostprocessorName>("a", "First postprocessor", "Use 'values' instead.");
   params.addDeprecatedParam<PostprocessorName>(

@@ -1,10 +1,9 @@
 #include "OneDNodalBC.h"
 
-template <>
 InputParameters
-validParams<OneDNodalBC>()
+OneDNodalBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredParam<Real>("normal", "Component of outward normal along 1-D direction");
   return params;
 }

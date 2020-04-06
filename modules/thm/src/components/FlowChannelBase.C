@@ -48,11 +48,10 @@ THM::stringToEnum(const std::string & s)
   return stringToEnum<FlowChannelBase::EPipeType>(s, FlowChannelBase::_pipe_type_to_enum);
 }
 
-template <>
 InputParameters
-validParams<FlowChannelBase>()
+FlowChannelBase::validParams()
 {
-  InputParameters params = validParams<GeometricalFlowComponent>();
+  InputParameters params = GeometricalFlowComponent::validParams();
   params.addRequiredParam<FunctionName>(
       "A", "Area of the flow channel, can be a constant or a function");
   params.addParam<Real>("roughness", 0.0, "Roughness [m]");

@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", FunctionElementIntegralRZ);
 
-template <>
 InputParameters
-validParams<FunctionElementIntegralRZ>()
+FunctionElementIntegralRZ::validParams()
 {
-  InputParameters params = validParams<FunctionElementIntegral>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = FunctionElementIntegral::validParams();
+  params += RZSymmetry::validParams();
 
   params.addClassDescription(
       "Integrates a function over elements for RZ geometry modeled by XY domain");

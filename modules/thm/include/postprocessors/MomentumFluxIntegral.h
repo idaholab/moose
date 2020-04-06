@@ -2,11 +2,6 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class MomentumFluxIntegral;
-
-template <>
-InputParameters validParams<MomentumFluxIntegral>();
-
 /**
  * Computes the boundary integral of the momentum flux.
  *
@@ -32,4 +27,7 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _area;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

@@ -7,13 +7,9 @@
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
 
-class Component;
 class THMProblem;
 class THMMesh;
 class THMApp;
-
-template <>
-InputParameters validParams<Component>();
 
 /**
  * Base class for THM components
@@ -430,6 +426,9 @@ private:
 
   /// List of names of components that this component depends upon
   std::vector<std::string> _dependencies;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", RhoVaporMixtureFromPressureTemperatureIC);
 
-template <>
 InputParameters
-validParams<RhoVaporMixtureFromPressureTemperatureIC>()
+RhoVaporMixtureFromPressureTemperatureIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
-  params += validParams<VaporMixtureInterface<>>();
+  InputParameters params = InitialCondition::validParams();
+  params += VaporMixtureInterface<>::validParams();
 
   params.addClassDescription(
       "Computes the density of a vapor mixture from pressure and temperature.");

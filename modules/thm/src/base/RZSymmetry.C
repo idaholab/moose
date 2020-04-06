@@ -1,9 +1,8 @@
 #include "RZSymmetry.h"
 #include "libmesh/point.h"
 
-template <>
 InputParameters
-validParams<RZSymmetry>()
+RZSymmetry::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addRequiredParam<Point>("axis_point", "A point on the axis of RZ symmetry.");

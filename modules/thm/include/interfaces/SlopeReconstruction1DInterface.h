@@ -4,11 +4,7 @@
 #include "InputParameters.h"
 #include "Enums.h"
 
-class SlopeReconstruction1DInterface;
 class MooseObject;
-
-template <>
-InputParameters validParams<SlopeReconstruction1DInterface>();
 
 /**
  * Interface class for 1-D slope reconstruction
@@ -64,6 +60,10 @@ protected:
   /// Slope reconstruction scheme
   const ESlopeReconstructionType _scheme;
 
+public:
+  static InputParameters validParams();
+
+protected:
   /// Number of sides
   static const unsigned int _n_side;
   /// Number of elemental values in stencil for computing slopes

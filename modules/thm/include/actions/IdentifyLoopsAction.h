@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class IdentifyLoopsAction;
-
-template <>
-InputParameters validParams<IdentifyLoopsAction>();
-
 /**
  * Identifies the component loops.
  */
@@ -16,4 +11,7 @@ public:
   IdentifyLoopsAction(InputParameters parameters);
 
   virtual void act();
+
+public:
+  static InputParameters validParams();
 };

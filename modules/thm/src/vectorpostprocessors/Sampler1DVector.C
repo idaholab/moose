@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", Sampler1DVector);
 
-template <>
 InputParameters
-validParams<Sampler1DVector>()
+Sampler1DVector::validParams()
 {
-  InputParameters params = validParams<Sampler1DBase<Real>>();
+  InputParameters params = Sampler1DBase<Real>::validParams();
   params.addRequiredParam<unsigned int>("index",
                                         "Index of the vector property component to sample");
   return params;

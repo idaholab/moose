@@ -1,11 +1,10 @@
 #include "ClosuresBase.h"
 #include "FlowChannelBase.h"
 
-template <>
 InputParameters
-validParams<ClosuresBase>()
+ClosuresBase::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
 
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Logger *>("_logger");

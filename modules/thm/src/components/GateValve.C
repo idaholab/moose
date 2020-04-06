@@ -6,11 +6,10 @@
 
 registerMooseObject("THMApp", GateValve);
 
-template <>
 InputParameters
-validParams<GateValve>()
+GateValve::validParams()
 {
-  InputParameters params = validParams<FlowJunction>();
+  InputParameters params = FlowJunction::validParams();
 
   params.addRequiredParam<Real>("open_area_fraction", "Fraction of flow area that is open [-]");
 

@@ -3,11 +3,6 @@
 #include "FunctionElementIntegral.h"
 #include "RZSymmetry.h"
 
-class FunctionElementIntegralRZ;
-
-template <>
-InputParameters validParams<FunctionElementIntegralRZ>();
-
 /**
  * Integrates a function over elements for RZ geometry modeled by XY domain
  */
@@ -18,4 +13,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral() override;
+
+public:
+  static InputParameters validParams();
 };

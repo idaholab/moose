@@ -2,11 +2,6 @@
 
 #include "OneDHeatFluxBase.h"
 
-class OneD3EqnEnergyHeatFlux;
-
-template <>
-InputParameters validParams<OneD3EqnEnergyHeatFlux>();
-
 class OneD3EqnEnergyHeatFlux : public OneDHeatFluxBase
 {
 public:
@@ -32,4 +27,7 @@ protected:
   const unsigned int _rhoEA_jvar;
   /// Map of coupled variable index to local equation system index
   const std::map<unsigned int, unsigned int> _jvar_map;
+
+public:
+  static InputParameters validParams();
 };

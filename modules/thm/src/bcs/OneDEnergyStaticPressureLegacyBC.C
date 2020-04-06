@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDEnergyStaticPressureLegacyBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyStaticPressureLegacyBC>()
+OneDEnergyStaticPressureLegacyBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addParam<bool>("reversible", false, "true for reversible behavior");
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction");

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneD3EqnEnergyFriction);
 
-template <>
 InputParameters
-validParams<OneD3EqnEnergyFriction>()
+OneD3EqnEnergyFriction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
   params.addRequiredCoupledVar("arhoA", "Solution variable alpha*rho*A");

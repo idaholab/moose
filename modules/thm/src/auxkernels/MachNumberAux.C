@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", MachNumberAux);
 
-template <>
 InputParameters
-validParams<MachNumberAux>()
+MachNumberAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes Mach number.");
   params.addRequiredCoupledVar("vel", "x-component of phase velocity");
   params.addRequiredCoupledVar("v", "Specific volume");

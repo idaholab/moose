@@ -3,12 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-// Forward Declarations
-class OneDEnergyWallHeating;
-
-template <>
-InputParameters validParams<OneDEnergyWallHeating>();
-
 // The spatial part of the 1D energy conservation for Navier-Stokes flow
 class OneDEnergyWallHeating : public DerivativeMaterialInterfaceTHM<Kernel>
 {
@@ -32,4 +26,7 @@ protected:
   // For Jacobian terms
   unsigned _rhoA_var_number;
   unsigned _rhouA_var_number;
+
+public:
+  static InputParameters validParams();
 };

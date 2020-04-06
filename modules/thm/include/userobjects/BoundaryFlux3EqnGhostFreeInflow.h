@@ -3,11 +3,6 @@
 #include "BoundaryFlux3EqnGhostBase.h"
 #include "SinglePhaseFluidProperties.h"
 
-class BoundaryFlux3EqnGhostFreeInflow;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostFreeInflow>();
-
 /**
  * Free inflow boundary conditions from a ghost cell for the 1-D, 1-phase, variable-area Euler
  * equations
@@ -31,4 +26,7 @@ protected:
 
   /// fluid properties object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

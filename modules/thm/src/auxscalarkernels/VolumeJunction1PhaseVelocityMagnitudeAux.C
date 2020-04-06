@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", VolumeJunction1PhaseVelocityMagnitudeAux);
 
-template <>
 InputParameters
-validParams<VolumeJunction1PhaseVelocityMagnitudeAux>()
+VolumeJunction1PhaseVelocityMagnitudeAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredCoupledVar("rhoV", "rho*V of the junction");
   params.addRequiredCoupledVar("rhouV", "rho*u*V of the junction");
   params.addRequiredCoupledVar("rhovV", "rho*v*V of the junction");

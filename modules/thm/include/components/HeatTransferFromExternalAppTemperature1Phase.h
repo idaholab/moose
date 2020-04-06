@@ -2,11 +2,6 @@
 
 #include "HeatTransferFromTemperature1Phase.h"
 
-class HeatTransferFromExternalAppTemperature1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromExternalAppTemperature1Phase>();
-
 /**
  * Heat transfer into 1-phase flow channel from temperature provided by an external application
  */
@@ -26,4 +21,7 @@ protected:
   const FunctionName _T_wall_fn_name;
   /// The type of the wall temperature variable
   FEType _fe_type;
+
+public:
+  static InputParameters validParams();
 };

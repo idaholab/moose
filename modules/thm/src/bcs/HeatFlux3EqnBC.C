@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", HeatFlux3EqnBC);
 
-template <>
 InputParameters
-validParams<HeatFlux3EqnBC>()
+HeatFlux3EqnBC::validParams()
 {
-  InputParameters params = validParams<HeatFluxBaseBC>();
+  InputParameters params = HeatFluxBaseBC::validParams();
   params.addRequiredCoupledVar("rhoA", "rho*A of the flow channel");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the flow channel");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the flow channel");

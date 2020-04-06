@@ -7,11 +7,6 @@
 template <typename T = InitialCondition>
 class VaporMixtureInterface;
 
-class VaporMixtureFluidProperties;
-
-template <>
-InputParameters validParams<VaporMixtureInterface<>>();
-
 /**
  * Interface for calculations involving vapor mixtures
  */
@@ -34,7 +29,23 @@ protected:
   const VaporMixtureFluidProperties & _fp_vapor_mixture;
   /// Number of secondary vapors
   const unsigned int _n_secondary_vapors;
+
+public:
+  static InputParameters validParams();
 };
+
+template <class T>
+InputParameters
+VaporMixtureInterface<T>::validParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  params.addRequiredCoupledVar("x_secondary_vapors", "Mass fractions of secondary vapors");
+  params.addRequiredParam<UserObjectName>("fp_vapor_mixture",
+                                          "Vapor mixture fluid properties user object name");
+
+  return params;
+}
 
 template <class T>
 VaporMixtureInterface<T>::VaporMixtureInterface(const InputParameters & parameters)

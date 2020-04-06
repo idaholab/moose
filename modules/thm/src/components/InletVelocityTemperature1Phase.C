@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", InletVelocityTemperature1Phase);
 
-template <>
 InputParameters
-validParams<InletVelocityTemperature1Phase>()
+InletVelocityTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addRequiredParam<Real>("vel", "Prescribed velocity [m/s]");
   params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");

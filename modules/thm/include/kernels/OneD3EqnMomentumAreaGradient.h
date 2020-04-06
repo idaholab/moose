@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMomentumAreaGradient;
-
-template <>
-InputParameters validParams<OneD3EqnMomentumAreaGradient>();
-
 /**
  * Computes the area gradient term in the momentum equation.
  *
@@ -38,4 +33,7 @@ protected:
 
   unsigned int _arhoA_var_number;
   unsigned int _arhoE_var_number;
+
+public:
+  static InputParameters validParams();
 };

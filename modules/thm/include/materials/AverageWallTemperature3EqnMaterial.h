@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class AverageWallTemperature3EqnMaterial;
-
-template <>
-InputParameters validParams<AverageWallTemperature3EqnMaterial>();
-
 /**
  * Weighted average of wall temperature between multiple heat sources to
  * preserve total wall heat, for 1-phase flow.
@@ -37,4 +32,7 @@ protected:
   const VariableValue & _T_fluid;
   /// Total heated perimeter
   const VariableValue & _P_hf_total;
+
+public:
+  static InputParameters validParams();
 };

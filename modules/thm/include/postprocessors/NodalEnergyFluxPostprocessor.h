@@ -2,11 +2,6 @@
 
 #include "NodalPostprocessor.h"
 
-class NodalEnergyFluxPostprocessor;
-
-template <>
-InputParameters validParams<NodalEnergyFluxPostprocessor>();
-
 /**
  * Computes sum of energy flux for a phase over nodes
  */
@@ -24,4 +19,7 @@ protected:
   Real _value;
   const VariableValue & _arhouA;
   const VariableValue & _H;
+
+public:
+  static InputParameters validParams();
 };

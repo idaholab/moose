@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", THMSpecificInternalEnergyAux);
 
-template <>
 InputParameters
-validParams<THMSpecificInternalEnergyAux>()
+THMSpecificInternalEnergyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhouA", "Conserved momentum");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");

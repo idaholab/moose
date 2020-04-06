@@ -2,11 +2,7 @@
 
 #include "AuxKernel.h"
 
-class ConvectiveHeatFlux1PhaseAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<ConvectiveHeatFlux1PhaseAux>();
 
 /**
  * Computes convective heat flux for 1-phase flow
@@ -27,4 +23,7 @@ protected:
   const MaterialProperty<Real> & _Hw;
   /// Scaling factor
   const Real & _scaling_factor;
+
+public:
+  static InputParameters validParams();
 };

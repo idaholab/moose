@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class Outlet1Phase;
-
-template <>
-InputParameters validParams<Outlet1Phase>();
-
 /**
  * Boundary condition with prescribed pressure for 1-phase flow channels
  */
@@ -27,4 +22,7 @@ protected:
   void add3EqnStaticPBCLegacy();
   void add3EqnStaticPReverseBC();
   void addMooseObjects3EqnRDG();
+
+public:
+  static InputParameters validParams();
 };

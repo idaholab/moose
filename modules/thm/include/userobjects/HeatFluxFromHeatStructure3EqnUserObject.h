@@ -3,11 +3,6 @@
 #include "HeatFluxFromHeatStructureBaseUserObject.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class HeatFluxFromHeatStructure3EqnUserObject;
-
-template <>
-InputParameters validParams<HeatFluxFromHeatStructure3EqnUserObject>();
-
 /**
  * Cache the heat flux between a single phase flow channel and a heat structure
  */
@@ -28,4 +23,7 @@ protected:
   const MaterialProperty<Real> & _dT_drhoA;
   const MaterialProperty<Real> & _dT_drhouA;
   const MaterialProperty<Real> & _dT_drhoEA;
+
+public:
+  static InputParameters validParams();
 };

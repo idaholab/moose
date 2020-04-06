@@ -2,11 +2,6 @@
 
 #include "HSBoundary.h"
 
-class HSBoundaryAmbientConvection;
-
-template <>
-InputParameters validParams<HSBoundaryAmbientConvection>();
-
 /**
  * Boundary condition for heat transfer between heat structure and ambient environment
  */
@@ -24,4 +19,7 @@ protected:
   const Real & _T_ambient;
   /// The value of convective heat transfer coefficient
   const Real & _htc_ambient;
+
+public:
+  static InputParameters validParams();
 };

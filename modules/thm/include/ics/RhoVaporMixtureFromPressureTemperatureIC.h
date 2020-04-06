@@ -3,11 +3,6 @@
 #include "InitialCondition.h"
 #include "VaporMixtureInterface.h"
 
-class RhoVaporMixtureFromPressureTemperatureIC;
-
-template <>
-InputParameters validParams<RhoVaporMixtureFromPressureTemperatureIC>();
-
 /**
  * Computes the density of a vapor mixture from pressure and temperature.
  */
@@ -23,4 +18,7 @@ protected:
   const VariableValue & _p;
   /// Temperature
   const VariableValue & _T;
+
+public:
+  static InputParameters validParams();
 };

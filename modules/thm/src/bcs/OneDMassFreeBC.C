@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDMassFreeBC);
 
-template <>
 InputParameters
-validParams<OneDMassFreeBC>()
+OneDMassFreeBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   return params;
 }

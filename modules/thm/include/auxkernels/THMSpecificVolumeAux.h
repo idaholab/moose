@@ -2,11 +2,6 @@
 
 #include "AuxKernel.h"
 
-class THMSpecificVolumeAux;
-
-template <>
-InputParameters validParams<THMSpecificVolumeAux>();
-
 /**
  * Computes specific volume
  */
@@ -21,4 +16,7 @@ protected:
   const VariableValue & _rhoA;
   const VariableValue & _area;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

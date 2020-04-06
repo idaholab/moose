@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", FunctionSideIntegralRZ);
 
-template <>
 InputParameters
-validParams<FunctionSideIntegralRZ>()
+FunctionSideIntegralRZ::validParams()
 {
-  InputParameters params = validParams<FunctionSideIntegral>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = FunctionSideIntegral::validParams();
+  params += RZSymmetry::validParams();
 
   params.addClassDescription(
       "Integrates a function over sides for RZ geometry modeled by XY domain");

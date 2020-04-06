@@ -3,11 +3,6 @@
 #include "SmoothTransitionFunction.h"
 #include "CubicTransition.h"
 
-class CubicTransitionFunction;
-
-template <>
-InputParameters validParams<CubicTransitionFunction>();
-
 /**
  * Computes a cubic polynomial transition between two functions
  *
@@ -31,4 +26,7 @@ protected:
 
   /// Transition object
   CubicTransition _transition;
+
+public:
+  static InputParameters validParams();
 };

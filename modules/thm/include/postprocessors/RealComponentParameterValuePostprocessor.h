@@ -3,11 +3,6 @@
 #include "GeneralPostprocessor.h"
 #include "MooseObjectParameterName.h"
 
-class RealComponentParameterValuePostprocessor;
-
-template <>
-InputParameters validParams<RealComponentParameterValuePostprocessor>();
-
 class RealComponentParameterValuePostprocessor : public GeneralPostprocessor
 {
 public:
@@ -26,4 +21,7 @@ protected:
   MooseObjectParameterName _ctrl_param_name;
 
   Real _value;
+
+public:
+  static InputParameters validParams();
 };

@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", UnitTripControl);
 
-template <>
 InputParameters
-validParams<UnitTripControl>()
+UnitTripControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
-  params += validParams<MooseParsedFunctionBase>();
+  InputParameters params = THMControl::validParams();
+  params += MooseParsedFunctionBase::validParams();
   params.addRequiredCustomTypeParam<std::string>(
       "condition",
       "FunctionExpression",

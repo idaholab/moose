@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDEnergyWallHeatFlux);
 
-template <>
 InputParameters
-validParams<OneDEnergyWallHeatFlux>()
+OneDEnergyWallHeatFlux::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("q_wall", "Wall heat flux material property");
   params.addRequiredCoupledVar("P_hf", "heat flux perimeter");
   return params;

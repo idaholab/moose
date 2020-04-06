@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", ParsedFunctionControl);
 
-template <>
 InputParameters
-validParams<ParsedFunctionControl>()
+ParsedFunctionControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
-  params += validParams<MooseParsedFunctionBase>();
+  InputParameters params = THMControl::validParams();
+  params += MooseParsedFunctionBase::validParams();
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "The function to be evaluated by this control.");
   params.addClassDescription("Control that evaluates a parsed function");

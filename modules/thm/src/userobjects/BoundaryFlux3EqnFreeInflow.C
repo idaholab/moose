@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnFreeInflow);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnFreeInflow>()
+BoundaryFlux3EqnFreeInflow::validParams()
 {
-  InputParameters params = validParams<BoundaryFluxBase>();
+  InputParameters params = BoundaryFluxBase::validParams();
 
   params.addClassDescription("Computes the inflow boundary flux directly for the 1-D, 1-phase, "
                              "variable-area Euler equations");

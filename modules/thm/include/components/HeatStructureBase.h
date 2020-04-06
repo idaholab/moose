@@ -3,11 +3,6 @@
 #include "GeometricalComponent.h"
 #include "HeatConductionModel.h"
 
-class HeatStructureBase;
-
-template <>
-InputParameters validParams<HeatStructureBase>();
-
 class HeatStructureBase : public GeometricalComponent
 {
 public:
@@ -149,6 +144,8 @@ public:
    * @returns MooseEnum for heat structure side type
    */
   static MooseEnum getSideType(const std::string & name = "");
+
+  static InputParameters validParams();
 };
 
 namespace THM

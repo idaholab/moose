@@ -4,11 +4,10 @@
 
 registerMooseAction("THMApp", PostprocessorAsControlAction, "add_postprocessor");
 
-template <>
 InputParameters
-validParams<PostprocessorAsControlAction>()
+PostprocessorAsControlAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription(
       "This action adds a control object that copies a postprocessor value into the control "
       "system so that users can work with the postprocessor name directly.");

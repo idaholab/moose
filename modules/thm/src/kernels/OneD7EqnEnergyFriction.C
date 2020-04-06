@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneD7EqnEnergyFriction);
 
-template <>
 InputParameters
-validParams<OneD7EqnEnergyFriction>()
+OneD7EqnEnergyFriction::validParams()
 {
-  InputParameters params = validParams<OneD3EqnEnergyFriction>();
+  InputParameters params = OneD3EqnEnergyFriction::validParams();
   params.addRequiredCoupledVar("beta", "Solution variable beta");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("2phase_multiplier", "2-phase multiplier property");

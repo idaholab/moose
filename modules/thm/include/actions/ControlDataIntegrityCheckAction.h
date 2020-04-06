@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class ControlDataIntegrityCheckAction;
-
-template <>
-InputParameters validParams<ControlDataIntegrityCheckAction>();
-
 /**
  * Action to trigger the check of control data integrity
  */
@@ -17,5 +12,6 @@ public:
 
   virtual void act();
 
-protected:
+public:
+  static InputParameters validParams();
 };

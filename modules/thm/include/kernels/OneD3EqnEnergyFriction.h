@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnEnergyFriction;
-
-template <>
-InputParameters validParams<OneD3EqnEnergyFriction>();
-
 /**
  * Computes energy dissipation caused by wall friction in 1-phase flow
  */
@@ -45,4 +40,7 @@ protected:
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;
+
+public:
+  static InputParameters validParams();
 };

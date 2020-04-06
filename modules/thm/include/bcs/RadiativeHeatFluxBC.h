@@ -2,11 +2,6 @@
 
 #include "RadiativeHeatFluxBCBase.h"
 
-class RadiativeHeatFluxBC;
-
-template <>
-InputParameters validParams<RadiativeHeatFluxBC>();
-
 /**
  * Radiative heat transfer boundary condition for a plate heat structure
  */
@@ -23,4 +18,7 @@ protected:
 
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
+
+public:
+  static InputParameters validParams();
 };

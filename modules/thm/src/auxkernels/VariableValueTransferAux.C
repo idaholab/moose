@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", VariableValueTransferAux);
 
-template <>
 InputParameters
-validParams<VariableValueTransferAux>()
+VariableValueTransferAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Retrieves a field value from the closest node on the paired boundary "
                              "and stores it on this boundary or block.");
   params.set<bool>("_dual_restrictable") = true;

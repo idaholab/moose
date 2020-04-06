@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatGeneration);
 
-template <>
 InputParameters
-validParams<HeatGeneration>()
+HeatGeneration::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addRequiredParam<std::string>("hs", "Heat structure in which to apply heat source");
   params.addRequiredParam<std::vector<std::string>>(
       "regions", "Heat structure regions where heat generation is to be applied");

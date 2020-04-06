@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", HeatTransferFromExternalAppHeatFlux1Phase);
 
-template <>
 InputParameters
-validParams<HeatTransferFromExternalAppHeatFlux1Phase>()
+HeatTransferFromExternalAppHeatFlux1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransfer1PhaseBase>();
+  InputParameters params = HeatTransfer1PhaseBase::validParams();
   params.addClassDescription("Heat transfer specified by heat flux provided by an external "
                              "application going into 1-phase flow channel.");
   return params;

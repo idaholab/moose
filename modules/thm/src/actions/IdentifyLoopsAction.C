@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", IdentifyLoopsAction, "THM:identify_loops");
 
-template <>
 InputParameters
-validParams<IdentifyLoopsAction>()
+IdentifyLoopsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   return params;
 }

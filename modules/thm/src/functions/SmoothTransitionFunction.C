@@ -1,10 +1,9 @@
 #include "SmoothTransitionFunction.h"
 
-template <>
 InputParameters
-validParams<SmoothTransitionFunction>()
+SmoothTransitionFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   MooseEnum axis("x=0 y=1 z=2 t=3");
   params.addRequiredParam<MooseEnum>(

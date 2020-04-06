@@ -3,11 +3,7 @@
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class ReynoldsNumberMaterial;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<ReynoldsNumberMaterial>();
 
 /**
  * Computes Reynolds number as a material property
@@ -49,4 +45,7 @@ protected:
   MaterialProperty<Real> & _dRe_darhoA;
   MaterialProperty<Real> & _dRe_darhouA;
   MaterialProperty<Real> & _dRe_darhoEA;
+
+public:
+  static InputParameters validParams();
 };

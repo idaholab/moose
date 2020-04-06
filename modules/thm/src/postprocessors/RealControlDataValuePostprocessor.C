@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", RealControlDataValuePostprocessor);
 
-template <>
 InputParameters
-validParams<RealControlDataValuePostprocessor>()
+RealControlDataValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<std::string>("control_data_name",
                                        "The name of the control data to output.");
   return params;

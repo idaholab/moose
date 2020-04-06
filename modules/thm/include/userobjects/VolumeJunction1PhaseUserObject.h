@@ -2,12 +2,8 @@
 
 #include "VolumeJunctionBaseUserObject.h"
 
-class VolumeJunction1PhaseUserObject;
 class SinglePhaseFluidProperties;
 class NumericalFlux3EqnBase;
-
-template <>
-InputParameters validParams<VolumeJunction1PhaseUserObject>();
 
 /**
  * Computes and caches flux and residual vectors for a 1-phase volume junction
@@ -72,4 +68,7 @@ protected:
 
   /// Vector of numerical flux user objects for each connected flow channel
   std::vector<const NumericalFlux3EqnBase *> _numerical_flux_uo;
+
+public:
+  static InputParameters validParams();
 };

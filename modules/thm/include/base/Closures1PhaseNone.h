@@ -2,11 +2,6 @@
 
 #include "Closures1PhaseBase.h"
 
-class Closures1PhaseNone;
-
-template <>
-InputParameters validParams<Closures1PhaseNone>();
-
 /**
  * Sets up no 1-phase closures
  *
@@ -21,4 +16,7 @@ public:
   virtual void check(const HeatTransferBase & heat_transfer) const override;
   virtual void addMooseObjects(const FlowChannelBase & flow_channel) override;
   virtual void addMooseObjects(const HeatTransferBase & heat_transfer) override;
+
+public:
+  static InputParameters validParams();
 };

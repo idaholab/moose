@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMAddVariablesAction, "THM:add_variables");
 
-template <>
 InputParameters
-validParams<THMAddVariablesAction>()
+THMAddVariablesAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

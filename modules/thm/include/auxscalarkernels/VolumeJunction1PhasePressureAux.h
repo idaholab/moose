@@ -2,11 +2,7 @@
 
 #include "AuxScalarKernel.h"
 
-class VolumeJunction1PhasePressureAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<VolumeJunction1PhasePressureAux>();
 
 /**
  * Computes pressure from the 1-phase volume junction variables
@@ -33,4 +29,7 @@ protected:
   const VariableValue & _rhoEV;
   /// Single-phase fluid properties user object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

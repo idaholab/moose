@@ -11,8 +11,6 @@ class SinglePhaseFluidProperties;
 class DynamicViscosityMaterial : public DerivativeMaterialInterfaceTHM<Material>
 {
 public:
-  static InputParameters validParams();
-
   DynamicViscosityMaterial(const InputParameters & parameters);
 
 protected:
@@ -41,4 +39,7 @@ protected:
 
   /// Single-phase fluid properties
   const SinglePhaseFluidProperties & _fp_1phase;
+
+public:
+  static InputParameters validParams();
 };

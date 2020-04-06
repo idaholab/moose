@@ -2,11 +2,6 @@
 
 #include "InitialCondition.h"
 
-class VariableProductIC;
-
-template <>
-InputParameters validParams<VariableProductIC>();
-
 /**
  * Computes the product of coupled variables
  */
@@ -22,4 +17,7 @@ protected:
   unsigned int _n;
   /// The values being multipled
   std::vector<const VariableValue *> _values;
+
+public:
+  static InputParameters validParams();
 };

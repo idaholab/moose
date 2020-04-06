@@ -2,11 +2,6 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class MassFluxIntegral;
-
-template <>
-InputParameters validParams<MassFluxIntegral>();
-
 /**
  * Computes the boundary integral of the mass flux.
  *
@@ -28,4 +23,7 @@ protected:
   virtual Real computeQpIntegral() override;
 
   const VariableValue & _arhouA;
+
+public:
+  static InputParameters validParams();
 };

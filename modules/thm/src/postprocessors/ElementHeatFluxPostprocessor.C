@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ElementHeatFluxPostprocessor);
 
-template <>
 InputParameters
-validParams<ElementHeatFluxPostprocessor>()
+ElementHeatFluxPostprocessor::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("T_wall", "Wall temperature");
   params.addRequiredCoupledVar("Tfluid", "Temperature of the fluid on the slave side");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Wall heat transfer coefficient");

@@ -2,11 +2,7 @@
 
 #include "GeometricalFlowComponent.h"
 
-class FlowChannelBase;
 class ClosuresBase;
-
-template <>
-InputParameters validParams<FlowChannelBase>();
 
 /**
  * A base class for flow channels
@@ -210,6 +206,9 @@ protected:
   std::vector<VariableName> _T_wall_names;
   /// wall heat flux names for connected heat transfers
   std::vector<MaterialPropertyName> _q_wall_names;
+
+public:
+  static InputParameters validParams();
 };
 
 namespace THM

@@ -3,11 +3,7 @@
 #include "THMControl.h"
 #include "MooseParsedFunctionBase.h"
 
-class UnitTripControl;
 class THMParsedFunctionWrapper;
-
-template <>
-InputParameters validParams<UnitTripControl>();
 
 /**
  * This control block uses a user-defined condition to determine if a trip happened.
@@ -38,4 +34,7 @@ protected:
 
   /// Pointer to the Parsed function wrapper object
   std::unique_ptr<THMParsedFunctionWrapper> _condition_ptr;
+
+public:
+  static InputParameters validParams();
 };

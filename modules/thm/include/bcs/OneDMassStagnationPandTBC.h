@@ -3,13 +3,8 @@
 #include "OneDNodalBC.h"
 #include "OneDStagnationPandTBase.h"
 
-// Forward Declarations
-class OneDMassStagnationPandTBC;
 class SinglePhaseFluidProperties;
 class VolumeFractionMapper;
-
-template <>
-InputParameters validParams<OneDMassStagnationPandTBC>();
 
 /**
  * Stagnation P and T BC
@@ -45,4 +40,7 @@ protected:
   const unsigned int _arhoEA_var_number;
 
   const VolumeFractionMapper * _vfm;
+
+public:
+  static InputParameters validParams();
 };

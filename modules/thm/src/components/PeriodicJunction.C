@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", PeriodicJunction);
 
-template <>
 InputParameters
-validParams<PeriodicJunction>()
+PeriodicJunction::validParams()
 {
-  InputParameters params = validParams<FlowJunction>();
+  InputParameters params = FlowJunction::validParams();
   return params;
 }
 

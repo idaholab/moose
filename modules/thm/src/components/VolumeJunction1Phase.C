@@ -7,11 +7,10 @@ registerMooseObject("THMApp", VolumeJunction1Phase);
 
 const unsigned int VolumeJunction1Phase::N_EQ = 5;
 
-template <>
 InputParameters
-validParams<VolumeJunction1Phase>()
+VolumeJunction1Phase::validParams()
 {
-  InputParameters params = validParams<VolumeJunctionBase>();
+  InputParameters params = VolumeJunctionBase::validParams();
 
   params.addParam<FunctionName>("initial_p", "Initial pressure [Pa]");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");

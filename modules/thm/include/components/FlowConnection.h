@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class FlowConnection;
-
-template <>
-InputParameters validParams<FlowConnection>();
-
 /**
  * Base class for components that connect to flow channels (junctions and boundaries)
  */
@@ -163,6 +158,9 @@ protected:
   std::vector<std::string> _connected_component_names;
   /// Vector of subdomain names of the connected geometrical flow components
   std::vector<SubdomainName> _connected_subdomain_names;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

@@ -2,11 +2,6 @@
 
 #include "ODEKernel.h"
 
-class PostprocessorSourceScalarKernel;
-
-template <>
-InputParameters validParams<PostprocessorSourceScalarKernel>();
-
 /**
  * Adds an arbitrary post-processor value as a source term
  */
@@ -20,4 +15,7 @@ public:
 protected:
   /// Post-processor to act as source
   const PostprocessorValue & _pp;
+
+public:
+  static InputParameters validParams();
 };

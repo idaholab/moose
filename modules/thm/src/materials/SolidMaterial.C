@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SolidMaterial);
 
-template <>
 InputParameters
-validParams<SolidMaterial>()
+SolidMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   // Coupled variables
   params.addRequiredCoupledVar("T", "Temperature in the solid");
 

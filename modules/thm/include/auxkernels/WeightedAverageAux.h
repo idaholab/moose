@@ -2,11 +2,6 @@
 
 #include "AuxKernel.h"
 
-class WeightedAverageAux;
-
-template <>
-InputParameters validParams<WeightedAverageAux>();
-
 /**
  * Weighted average of an aux variable using another aux variable as the weights
  *
@@ -27,4 +22,7 @@ protected:
   const unsigned int _n_values;
   std::vector<const VariableValue *> _values;
   std::vector<const VariableValue *> _weights;
+
+public:
+  static InputParameters validParams();
 };

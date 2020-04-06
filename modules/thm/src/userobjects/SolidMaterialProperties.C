@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SolidMaterialProperties);
 
-template <>
 InputParameters
-validParams<SolidMaterialProperties>()
+SolidMaterialProperties::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<FunctionName>("k", "Thermal conductivity [W/(m-K)]");
   params.addRequiredParam<FunctionName>("Cp", "Specific heat [J/(kg-K)]");
   params.addRequiredParam<FunctionName>("rho", "Density [kg/m^3]");

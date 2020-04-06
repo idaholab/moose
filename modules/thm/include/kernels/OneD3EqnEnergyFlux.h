@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnEnergyFlux;
-
-template <>
-InputParameters validParams<OneD3EqnEnergyFlux>();
-
 /**
  * Energy flux for single phase flow
  */
@@ -45,4 +40,7 @@ protected:
 
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "GeneralUserObject.h"
 
-class HeatExchangeCoefficientPartitioning;
-
-template <>
-InputParameters validParams<HeatExchangeCoefficientPartitioning>();
-
 /**
  * Computes the partitioning of the interphase heat exchange coefficients
  */
@@ -27,4 +22,7 @@ protected:
   Real _lower;
   /// Lower cut-off limit
   Real _upper;
+
+public:
+  static InputParameters validParams();
 };
