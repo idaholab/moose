@@ -1,0 +1,9 @@
+[Tests]
+  [./fv_burger]
+    type = 'Exodiff'
+    input = 'fv_burger.i'
+    exodiff = 'fv_burger_out.e'
+
+    requirement = 'The system shall be able to solve the Burgers equation in 1D using the FV method'
+  [../]
+[]
