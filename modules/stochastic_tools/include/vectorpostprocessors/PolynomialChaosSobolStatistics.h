@@ -12,26 +12,25 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
+#include "SurrogateModelInterface.h"
 
-class PolynomialChaosSobolStatistics : public GeneralVectorPostprocessor
+class PolynomialChaosSobolStatistics : public GeneralVectorPostprocessor,
+                                       public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
 
   PolynomialChaosSobolStatistics(const InputParameters & parameters);
-
+  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Reference to PolynomialChaos
   const PolynomialChaos & _pc_uo;
   /// The selected Sobol sensitivity orders to compute
   const MultiMooseEnum & _order;
-  /// Whether or not we have initialized the vectors
-  bool _initialized;
   /// Vector containing the Sobol statistics
   VectorPostprocessorValue & _stats;
   /// Vector containing the Sobol total sensitivity indices

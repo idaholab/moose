@@ -33,7 +33,9 @@ StochasticResults::validParams()
 
   params.addParam<std::vector<SamplerName>>("samplers",
                                             "A list of sampler names of associated data.");
-  params.set<bool>("_auto_broadcast") = false;
+
+  // If 'parallel_type = REPLICATED' broadcast the vector automatically
+  params.set<bool>("_auto_broadcast") = true;
   return params;
 }
 

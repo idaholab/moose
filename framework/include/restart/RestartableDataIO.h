@@ -61,6 +61,7 @@ public:
    * processors and threads.
    */
   bool readRestartableDataHeader(bool per_proc_id, const std::string & suffix = "");
+  bool readRestartableDataHeaderFromFile(const std::string & recover_file, bool per_proc_id);
 
   /**
    * Read the restartable data.
@@ -86,6 +87,16 @@ public:
   }
 
   std::string getRestartableDataExt() const { return RESTARTABLE_DATA_EXT; }
+
+  ///@{
+  /*
+   * Enable/Disable certain errors
+   *
+   * See LoadSurrogateModelAction for use case
+   */
+  void setErrorOnLoadWithDifferentNumberOfProcessors(bool value);
+  void setErrorOnLoadWithDifferentNumberOfThreads(bool value);
+  ///@}
 
 private:
   /**
@@ -132,4 +143,8 @@ private:
   static constexpr auto RESTARTABLE_DATA_EXT = ".rd";
   static constexpr auto ES_BINARY_EXT = ".xdr";
   static constexpr auto ES_ASCII_EXT = ".xda";
+
+  /// Error check controls
+  bool _error_on_different_number_of_processors = true;
+  bool _error_on_different_number_of_threads = true;
 };

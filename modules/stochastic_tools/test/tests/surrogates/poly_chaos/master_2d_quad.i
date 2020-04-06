@@ -28,7 +28,13 @@
     type = MonteCarlo
     num_rows = 100
     distributions = 'D_dist S_dist'
-    execute_on = initial
+    execute_on = timestep_end
+  []
+  [quadrature]
+    type = Quadrature
+    distributions = 'D_dist S_dist'
+    execute_on = INITIAL
+    order = 5
   []
 []
 
@@ -36,7 +42,7 @@
   [quad_sub]
     type = SamplerFullSolveMultiApp
     input_files = sub.i
-    sampler = sample
+    sampler = quadrature
     mode = batch-restore
   []
 []
@@ -45,14 +51,14 @@
   [quad]
     type = SamplerParameterTransfer
     multi_app = quad_sub
-    sampler = sample
+    sampler = quadrature
     parameters = 'Materials/diffusivity/prop_values Materials/xs/prop_values'
     to_control = 'stochastic'
   []
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = quad_sub
-    sampler = sample
+    sampler = quadrature
     to_vector_postprocessor = storage
     from_postprocessor = avg
   []
@@ -62,7 +68,7 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = sample
+    samplers = quadrature
   []
   [pc_coeff]
     type = PolynomialChaosData
@@ -81,12 +87,19 @@
 [Surrogates]
   [poly_chaos]
     type = PolynomialChaos
+    trainer = poly_chaos
+  []
+[]
+
+[Trainers]
+  [poly_chaos]
+    type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 5
     distributions = 'D_dist S_dist'
-    training_sampler = sample
+    sampler = quadrature
     results_vpp = storage
-    results_vector = sample
+    results_vector = quadrature
   []
 []
 

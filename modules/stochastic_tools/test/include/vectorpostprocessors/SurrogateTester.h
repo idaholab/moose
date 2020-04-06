@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
+#include "SurrogateModelInterface.h"
 #include "SurrogateModel.h"
 
 class SurrogateTester;
@@ -22,7 +23,7 @@ InputParameters validParams<SurrogateTester>();
 /**
  * A tool for output Sampler data.
  */
-class SurrogateTester : public GeneralVectorPostprocessor, SamplerInterface
+class SurrogateTester : public GeneralVectorPostprocessor, SamplerInterface, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();

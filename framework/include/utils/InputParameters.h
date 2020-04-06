@@ -742,14 +742,12 @@ public:
   /**
    * Return list of controllable parameters
    */
-  std::set<std::string> getControllableParameters() const
-  {
-    std::set<std::string> controllable;
-    for (auto it = _params.begin(); it != _params.end(); ++it)
-      if (it->second._controllable)
-        controllable.insert(it->first);
-    return controllable;
-  }
+  std::set<std::string> getControllableParameters() const;
+
+  /**
+   * Return names of parameters within a group.
+   */
+  std::set<std::string> getGroupParameters(const std::string & group) const;
 
   /**
    * Provide a set of reserved values for a parameter. These are values that are in addition

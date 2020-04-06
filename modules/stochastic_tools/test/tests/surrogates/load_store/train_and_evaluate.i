@@ -72,15 +72,22 @@
   []
 []
 
-[Surrogates]
+[Trainers]
   [poly_chaos]
-    type = PolynomialChaos
+    type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 5
     distributions = 'D_dist S_dist'
-    training_sampler = quadrature
+    sampler = quadrature
     results_vpp = storage
     results_vector = quadrature
+  []
+[]
+
+[Surrogates]
+  [poly_chaos]
+    type = PolynomialChaos
+    trainer = poly_chaos
   []
 []
 
@@ -94,8 +101,6 @@
 []
 
 [Outputs]
-  [out]
-    type = CSV
-    execute_on = FINAL
-  []
+  csv = true
+  execute_on = FINAL
 []

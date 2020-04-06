@@ -9,11 +9,12 @@
 
 #pragma once
 
+#include "libmesh/utility.h"
+
+#include "DataIO.h"
 #include "UniformDistribution.h"
 #include "NormalDistribution.h"
 #include "BoostNormalDistribution.h"
-#include "libmesh/utility.h"
-
 #include "CartesianProduct.h"
 
 /**
@@ -34,6 +35,7 @@ class Polynomial
 public:
   Polynomial() {}
   virtual ~Polynomial() = default;
+  virtual void store(std::ostream & stream, void * context) const;
   virtual Real compute(const unsigned int order, const Real x, const bool normalize = true) const;
   /// Computes the mth derivative of polynomial: d^mP_n/dx^m
   virtual Real
@@ -55,7 +57,9 @@ public:
 class Legendre : public Polynomial
 {
 public:
-  Legendre(const UniformDistribution * dist);
+  Legendre(const Real lower_bound, const Real upper_bound);
+  virtual void store(std::ostream & stream, void * context) const override;
+
   /// Legendre polynomial using static function then scales by <P_n^2> = 1 / (2n+1)
   virtual Real
   compute(const unsigned int order, const Real x, const bool normalize = true) const override;
@@ -66,13 +70,8 @@ public:
   virtual Real computeDerivative(const unsigned int order,
                                  const Real x,
                                  const unsigned int m = 1) const override;
-  /// Compute derivative on referene points
-  Real
-  computeDerivativeRef(const unsigned int order, const Real xref, const unsigned int m = 1) const;
-  virtual Real innerProduct(const unsigned int order) const override
-  {
-    return 1. / (2. * (Real)order + 1.);
-  };
+  Real computeDerivativeRef(const unsigned int order, const Real x, const unsigned int m = 1) const;
+  virtual Real innerProduct(const unsigned int order) const override;
 
   /// Gauss-Legendre quadrature: sum(weights) = 2
   virtual void gaussQuadrature(const unsigned int order,
@@ -85,8 +84,8 @@ public:
                                   std::vector<Real> & weights) const override;
 
 private:
-  const Real & _lower_bound;
-  const Real & _upper_bound;
+  const Real _lower_bound;
+  const Real _upper_bound;
 };
 
 /**
@@ -95,19 +94,18 @@ private:
 class Hermite : public Polynomial
 {
 public:
-  Hermite(const NormalDistribution * dist);
-  Hermite(const BoostNormalDistribution * dist);
+  Hermite(const Real mu, const Real sig);
+  virtual void store(std::ostream & stream, void * context) const override;
+
   /// Hermite polynomial using static function then scales by <P_n^2> = n!
   virtual Real
   compute(const unsigned int order, const Real x, const bool normalize = true) const override;
+
   /// Compute derivative of Hermite polynomial P'_n = nP_{n-1}
   virtual Real computeDerivative(const unsigned int order,
                                  const Real x,
                                  const unsigned int m = 1) const override;
-  virtual Real innerProduct(const unsigned int order) const override
-  {
-    return (Real)Utility::factorial(order);
-  };
+  virtual Real innerProduct(const unsigned int order) const override;
 
   /// Gauss-Hermite quadrature: sum(weights) = sqrt(2\pi)
   virtual void gaussQuadrature(const unsigned int order,
@@ -115,8 +113,8 @@ public:
                                std::vector<Real> & weights) const override;
 
 private:
-  const Real & _mu;
-  const Real & _sig;
+  const Real _mu;
+  const Real _sig;
 };
 
 /**
@@ -275,3 +273,12 @@ void gauss_hermite(const unsigned int order,
 void
 clenshaw_curtis(const unsigned int order, std::vector<Real> & points, std::vector<Real> & weights);
 }
+
+template <>
+void dataStore(std::ostream & stream,
+               std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
+               void * context);
+template <>
+void dataLoad(std::istream & stream,
+              std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
+              void * context);

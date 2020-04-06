@@ -24,12 +24,6 @@
 []
 
 [Samplers]
-  [sample]
-    type = MonteCarlo
-    num_rows = 100
-    distributions = 'D_dist S_dist'
-    execute_on = timestep_end
-  []
   [quadrature]
     type = Quadrature
     distributions = 'D_dist S_dist'
@@ -70,16 +64,10 @@
     parallel_type = REPLICATED
     samplers = quadrature
   []
-  [pc_coeff]
-    type = PolynomialChaosData
+  [pc_moments]
+    type = PolynomialChaosStatistics
     pc_name = poly_chaos
-    execute_on = final
-  []
-  [pc_samp]
-    type = SurrogateTester
-    model = poly_chaos
-    sampler = sample
-    output_samples = true
+    compute = 'mean stddev skewness kurtosis'
     execute_on = final
   []
 []
@@ -87,10 +75,17 @@
 [Surrogates]
   [poly_chaos]
     type = PolynomialChaos
+    trainer = poly_chaos
+  []
+[]
+
+[Trainers]
+  [poly_chaos]
+    type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 5
     distributions = 'D_dist S_dist'
-    training_sampler = quadrature
+    sampler = quadrature
     results_vpp = storage
     results_vector = quadrature
   []

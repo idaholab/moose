@@ -61,27 +61,27 @@ public:
 
 private:
   /// Parameters of the object with this interface
-  const InputParameters & _smi_params;
+  const InputParameters & _si_params;
 
   /// Reference to FEProblemBase instance
-  FEProblemBase & _smi_feproblem;
+  FEProblemBase & _si_feproblem;
 
   /// Thread ID
-  THREAD_ID _smi_tid;
+  THREAD_ID _si_tid;
 };
 
 template <typename T>
 T &
 SamplerInterface::getSampler(const std::string & name)
 {
-  return getSamplerByName<T>(_smi_params.get<SamplerName>(name));
+  return getSamplerByName<T>(_si_params.get<SamplerName>(name));
 }
 
 template <typename T>
 T &
 SamplerInterface::getSamplerByName(const SamplerName & name)
 {
-  Sampler * base_ptr = &_smi_feproblem.getSampler(name, _smi_tid);
+  Sampler * base_ptr = &_si_feproblem.getSampler(name, _si_tid);
   T * obj_ptr = dynamic_cast<T *>(base_ptr);
   if (!obj_ptr)
     mooseError("Failed to find a Sampler object with the name '", name, "' for the desired type.");

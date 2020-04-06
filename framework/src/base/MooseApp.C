@@ -444,6 +444,12 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
+
+  // Data specifically associated with the mesh (meta-data) that will read from the restart
+  // file early during the simulation setup so that they are available to Actions and other objects
+  // that need them during the setup process. Most of the restartable data isn't made available
+  // until all objects have been created and all Actions have been executed (i.e. initialSetup).
+  registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
 }
 
 void
@@ -1156,11 +1162,20 @@ RestartableDataValue &
 MooseApp::registerRestartableData(const std::string & name,
                                   std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid,
-                                  bool mesh_meta_data,
-                                  bool read_only)
+                                  bool read_only,
+                                  const RestartableDataMapName & metaname)
 {
+  if (!metaname.empty() && tid != 0)
+    mooseError(
+        "The meta data storage for '", metaname, "' is not threaded, so the tid must be zero.");
+
+  mooseAssert(metaname.empty() ||
+                  _restartable_meta_data.find(metaname) != _restartable_meta_data.end(),
+              "The desired meta data name does not exist: " + metaname);
+
   // Select the data store for saving this piece of restartable data (mesh or everything else)
-  auto & data_ref = mesh_meta_data ? _mesh_meta_data_map : _restartable_data[tid];
+  auto & data_ref =
+      metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
   auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
 
@@ -2041,21 +2056,53 @@ MooseApp::meshReinitForRMs()
 }
 
 void
-MooseApp::checkMeshMetaDataIntegrity() const
+MooseApp::checkMetaDataIntegrity() const
 {
-  std::vector<std::string> not_declared;
-
-  for (const auto & pair : _mesh_meta_data_map)
-    if (!pair.second.declared)
-      not_declared.push_back(pair.first);
-
-  if (!not_declared.empty())
+  for (auto map_iter = _restartable_meta_data.begin(); map_iter != _restartable_meta_data.end();
+       ++map_iter)
   {
-    std::ostringstream oss;
-    std::copy(
-        not_declared.begin(), not_declared.end(), infix_ostream_iterator<std::string>(oss, ", "));
+    const RestartableDataMapName & name = map_iter->first;
+    const RestartableDataMap & meta_data = map_iter->second.first;
 
-    mooseError("The following Mesh meta-data properties were retrieved but never declared: ",
-               oss.str());
+    std::vector<std::string> not_declared;
+
+    for (const auto & pair : meta_data)
+      if (!pair.second.declared)
+        not_declared.push_back(pair.first);
+
+    if (!not_declared.empty())
+    {
+      std::ostringstream oss;
+      std::copy(
+          not_declared.begin(), not_declared.end(), infix_ostream_iterator<std::string>(oss, ", "));
+
+      mooseError("The following '",
+                 name,
+                 "' meta-data properties were retrieved but never declared: ",
+                 oss.str());
+    }
   }
+}
+
+const RestartableDataMapName MooseApp::MESH_META_DATA = "MeshMetaData";
+
+const RestartableDataMap &
+MooseApp::getRestartableDataMap(const RestartableDataMapName & name) const
+{
+  auto iter = _restartable_meta_data.find(name);
+  if (iter == _restartable_meta_data.end())
+    mooseError("Unable to find RestartableDataMap object for the supplied name '",
+               name,
+               "', did you call registerRestartableDataMapName in the application constructor?");
+  return iter->second.first;
+}
+
+void
+MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, std::string suffix)
+{
+  if (suffix.empty())
+    std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+  suffix.insert(0, "_");
+  _restartable_meta_data.emplace(
+      std::make_pair(name, std::make_pair(RestartableDataMap(), suffix)));
 }

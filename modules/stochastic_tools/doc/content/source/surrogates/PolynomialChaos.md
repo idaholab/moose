@@ -151,7 +151,7 @@ After the sub-app is set with the diffusion-reaction problem, distributions are 
 
 A sampler is then defined, either using Monte Carlo,
 
-!listing poly_chaos/master_2d_mc.i block=Samplers
+!listing poly_chaos/master_2d_mc.i block=Samplers Trainers
 
 or quadrature,
 
@@ -163,7 +163,7 @@ It is important that the order in the quadrature sampler input matches the order
 
 All this information is ready to be sent to the PolynomialChaos user object:
 
-!listing poly_chaos/master_2d_quad.i block=Surrogates
+!listing poly_chaos/master_2d_quad.i block=Surrogates Trainers
 
 !syntax parameters /Surrogates/PolynomialChaos
 

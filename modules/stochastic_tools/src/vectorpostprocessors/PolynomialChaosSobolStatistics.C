@@ -18,6 +18,7 @@ InputParameters
 PolynomialChaosSobolStatistics::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription(
       "Compute SOBOL statistics values of a trained PolynomialChaos surrogate.");
 
@@ -33,69 +34,66 @@ PolynomialChaosSobolStatistics::validParams()
 
 PolynomialChaosSobolStatistics::PolynomialChaosSobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _pc_uo(getUserObject<PolynomialChaos>("pc_name")),
+    SurrogateModelInterface(this),
+    _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
     _order(getParam<MultiMooseEnum>("sensitivity_order")),
-    _initialized(false),
     _stats(declareVector("value")),
     _total_ind(_order.contains("total") ? &declareVector("i_T") : nullptr)
 {
 }
 
 void
-PolynomialChaosSobolStatistics::initialize()
+PolynomialChaosSobolStatistics::initialSetup()
 {
-  // This needs to be put in initialize since the user object doesn't know the
-  // number of parameters until after initialSetup.
-  if (!_initialized)
+  _nind = 0;
+  _nval = 0;
+
+  if (_order.contains("all"))
   {
-    _nind = 0;
-    _nval = 0;
+    _nind = _pc_uo.getNumberOfParameters();
+    _nval = 1;
+    for (unsigned int j = 0; j < _pc_uo.getNumberOfParameters(); ++j)
+      _nval *= 2;
+    _nval -= 1;
 
-    if (_order.contains("all"))
+    for (unsigned int i = 1; i <= _nind; ++i)
     {
-      _nind = _pc_uo.getNumberOfParameters();
-      _nval = 1;
-      for (unsigned int j = 0; j < _pc_uo.getNumberOfParameters(); ++j)
-        _nval *= 2;
-      _nval -= 1;
-
-      for (unsigned int i = 1; i <= _nind; ++i)
-      {
-        std::set<std::set<unsigned int>> indi =
-            buildSobolIndices(i, _pc_uo.getNumberOfParameters(), 0);
-        _ind.insert(indi.begin(), indi.end());
-      }
+      std::set<std::set<unsigned int>> indi =
+          buildSobolIndices(i, _pc_uo.getNumberOfParameters(), 0);
+      _ind.insert(indi.begin(), indi.end());
     }
-    else
+  }
+  else
+  {
+    if (_order.contains("first"))
     {
-      if (_order.contains("first"))
-      {
-        _nind = 1;
-        _nval = _pc_uo.getNumberOfParameters();
-        std::set<std::set<unsigned int>> indi =
-            buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
-        _ind.insert(indi.begin(), indi.end());
-      }
-      if (_order.contains("second"))
-      {
-        _nind = 2;
-        _nval += Utility::binomial(_pc_uo.getNumberOfParameters(), (unsigned int)2);
-        std::set<std::set<unsigned int>> indi =
-            buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
-        _ind.insert(indi.begin(), indi.end());
-      }
+      _nind = 1;
+      _nval = _pc_uo.getNumberOfParameters();
+      std::set<std::set<unsigned int>> indi =
+          buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
+      _ind.insert(indi.begin(), indi.end());
     }
-
-    _ind_vector.reserve(_nind);
-    for (unsigned int i = 0; i < _nind; ++i)
-      _ind_vector.push_back(&declareVector("i_" + std::to_string(i + 1)));
-
-    if (_order.contains("total"))
-      _nval += _pc_uo.getNumberOfParameters();
+    if (_order.contains("second"))
+    {
+      _nind = 2;
+      _nval += Utility::binomial(_pc_uo.getNumberOfParameters(), static_cast<std::size_t>(2));
+      std::set<std::set<unsigned int>> indi =
+          buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
+      _ind.insert(indi.begin(), indi.end());
+    }
   }
 
-  _initialized = true;
+  _ind_vector.reserve(_nind);
+  for (unsigned int i = 0; i < _nind; ++i)
+    _ind_vector.push_back(&declareVector("i_" + std::to_string(i + 1)));
 
+  if (_order.contains("total"))
+    _nval += _pc_uo.getNumberOfParameters();
+}
+
+void
+PolynomialChaosSobolStatistics::initialize()
+{
   _stats.reserve(_nval);
 
   if (_total_ind)
@@ -142,15 +140,6 @@ void
 PolynomialChaosSobolStatistics::finalize()
 {
   gatherSum(_stats);
-}
-
-void
-PolynomialChaosSobolStatistics::threadJoin(const UserObject & y)
-{
-  const PolynomialChaosSobolStatistics & pps =
-      static_cast<const PolynomialChaosSobolStatistics &>(y);
-  for (unsigned int i = 0; i < _stats.size(); ++i)
-    _stats[i] += pps._stats[i];
 }
 
 std::set<std::set<unsigned int>>

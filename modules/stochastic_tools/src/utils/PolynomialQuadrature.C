@@ -10,6 +10,7 @@
 #include "PolynomialQuadrature.h"
 
 #include "MooseError.h"
+#include "DataIO.h"
 #include "libmesh/auto_ptr.h"
 
 // For computing legendre quadrature
@@ -31,18 +32,28 @@ makePolynomial(const Distribution * dist)
 {
   const UniformDistribution * u_dist = dynamic_cast<const UniformDistribution *>(dist);
   if (u_dist)
-    return libmesh_make_unique<const Legendre>(u_dist);
+    return libmesh_make_unique<const Legendre>(dist->getParamTempl<Real>("lower_bound"),
+                                               dist->getParamTempl<Real>("upper_bound"));
 
   const NormalDistribution * n_dist = dynamic_cast<const NormalDistribution *>(dist);
   if (n_dist)
-    return libmesh_make_unique<const Hermite>(n_dist);
+    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
+                                              dist->getParamTempl<Real>("standard_deviation"));
 
   const BoostNormalDistribution * bn_dist = dynamic_cast<const BoostNormalDistribution *>(dist);
   if (bn_dist)
-    return libmesh_make_unique<const Hermite>(bn_dist);
+    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
+                                              dist->getParamTempl<Real>("standard_deviation"));
 
   ::mooseError("Polynomials for '", dist->type(), "' distributions have not been implemented.");
   return nullptr;
+}
+
+void
+Polynomial::store(std::ostream & /*stream*/, void * /*context*/) const
+{
+  // Cannot be pure virtual because for dataLoad operations the base class must be constructed
+  ::mooseError("Polynomial child class must override this method.");
 }
 
 Real
@@ -98,11 +109,18 @@ Polynomial::productIntegral(const std::vector<unsigned int> order) const
   return val / std::accumulate(wq.begin(), wq.end(), 0.0);
 }
 
-Legendre::Legendre(const UniformDistribution * dist)
-  : Polynomial(),
-    _lower_bound(dist->getParamTempl<Real>("lower_bound")),
-    _upper_bound(dist->getParamTempl<Real>("upper_bound"))
+Legendre::Legendre(const Real lower_bound, const Real upper_bound)
+  : Polynomial(), _lower_bound(lower_bound), _upper_bound(upper_bound)
 {
+}
+
+void
+Legendre::store(std::ostream & stream, void * context) const
+{
+  std::string type = "Legendre";
+  dataStore(stream, type, context);
+  dataStore(stream, _lower_bound, context);
+  dataStore(stream, _upper_bound, context);
 }
 
 Real
@@ -166,6 +184,12 @@ Legendre::clenshawQuadrature(const unsigned int order,
 }
 
 Real
+Legendre::innerProduct(const unsigned int order) const
+{
+  return 1. / (2. * static_cast<Real>(order) + 1.);
+}
+
+Real
 legendre(const unsigned int order, const Real x, const Real lower_bound, const Real upper_bound)
 {
   Real xref = 2 / (upper_bound - lower_bound) * (x - (upper_bound + lower_bound) / 2);
@@ -191,24 +215,30 @@ legendre(const unsigned int order, const Real x, const Real lower_bound, const R
     return val / pow(2.0, order);
   }
   else
-    return ((2.0 * (Real)order - 1.0) * xref * legendre(order - 1, xref) -
-            ((Real)order - 1.0) * legendre(order - 2, xref)) /
-           (Real)order;
+  {
+    Real ord = order;
+    return ((2.0 * ord - 1.0) * xref * legendre(order - 1, xref) -
+            (ord - 1.0) * legendre(order - 2, xref)) /
+           ord;
+  }
 #endif
 }
 
-Hermite::Hermite(const NormalDistribution * dist)
-  : Polynomial(),
-    _mu(dist->getParamTempl<Real>("mean")),
-    _sig(dist->getParamTempl<Real>("standard_deviation"))
+Hermite::Hermite(const Real mu, const Real sig) : Polynomial(), _mu(mu), _sig(sig) {}
+
+Real
+Hermite::innerProduct(const unsigned int order) const
 {
+  return (Real)Utility::factorial(order);
 }
 
-Hermite::Hermite(const BoostNormalDistribution * dist)
-  : Polynomial(),
-    _mu(dist->getParamTempl<Real>("mean")),
-    _sig(dist->getParamTempl<Real>("standard_deviation"))
+void
+Hermite::store(std::ostream & stream, void * context) const
 {
+  std::string type = "Hermite";
+  dataStore(stream, type, context);
+  dataStore(stream, _mu, context);
+  dataStore(stream, _sig, context);
 }
 
 Real
@@ -273,7 +303,8 @@ hermite(const unsigned int order, const Real x, const Real mu, const Real sig)
     return val * Utility::factorial(order);
   }
   else
-    return xref * hermite(order - 1, xref) - ((Real)order - 1.0) * hermite(order - 2, xref);
+    return xref * hermite(order - 1, xref) -
+           (static_cast<Real>(order) - 1.0) * hermite(order - 2, xref);
 #endif
 }
 
@@ -294,7 +325,8 @@ gauss_legendre(const unsigned int order,
   DenseMatrix<Real> vec(n, n);
   for (unsigned int i = 1; i < n; ++i)
   {
-    mat(i, i - 1) = (Real)i / std::sqrt(((2. * (Real)i - 1.) * (2. * (Real)i + 1.)));
+    Real ri = i;
+    mat(i, i - 1) = ri / std::sqrt(((2. * ri - 1.) * (2. * ri + 1.)));
     mat(i - 1, i) = mat(i, i - 1);
   }
   mat.evd_right(lambda, lambdai, vec);
@@ -326,7 +358,7 @@ gauss_hermite(const unsigned int order,
   DenseMatrix<Real> vec(n, n);
   for (unsigned int i = 1; i < n; ++i)
   {
-    mat(i, i - 1) = std::sqrt((Real)i);
+    mat(i, i - 1) = std::sqrt(static_cast<Real>(i));
     mat(i - 1, i) = mat(i, i - 1);
   }
   mat.evd_right(lambda, lambdai, vec);
@@ -510,5 +542,39 @@ ClenshawCurtisGrid::ClenshawCurtisGrid(const unsigned int max_order,
   for (const auto & it : quad_map)
     _quadrature.push_back(it);
 }
-
 } // namespace PolynomialQuadrature
+
+template <>
+void
+dataStore(std::ostream & stream,
+          std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
+          void * context)
+{
+  ptr->store(stream, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream,
+         std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
+         void * context)
+{
+  std::string poly_type;
+  dataLoad(stream, poly_type, context);
+  if (poly_type == "Legendre")
+  {
+    Real lower_bound, upper_bound;
+    dataLoad(stream, lower_bound, context);
+    dataLoad(stream, upper_bound, context);
+    ptr = libmesh_make_unique<const PolynomialQuadrature::Legendre>(lower_bound, upper_bound);
+  }
+  else if (poly_type == "Hermite")
+  {
+    Real mean, stddev;
+    dataLoad(stream, mean, context);
+    dataLoad(stream, stddev, context);
+    ptr = libmesh_make_unique<const PolynomialQuadrature::Hermite>(mean, stddev);
+  }
+  else
+    ::mooseError("Unknown Polynomaial type: ", poly_type);
+}
