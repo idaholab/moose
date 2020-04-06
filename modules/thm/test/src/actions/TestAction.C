@@ -4,11 +4,10 @@
 #include "ActionWarehouse.h"
 #include "FEProblemBase.h"
 
-template <>
 InputParameters
-validParams<TestAction>()
+TestAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   params.addParam<bool>("use_transient_executioner", "Option to use a transient executioner");
   params.addParam<bool>("generate_mesh", true, "Option to have the action generate the mesh");

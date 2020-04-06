@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class TestAction;
-
-template <>
-InputParameters validParams<TestAction>();
-
 /**
  * Base class for adding common actions for testing
  */
@@ -146,4 +141,7 @@ protected:
   const std::string _fe_family;
   /// Default FE order
   const std::string _fe_order;
+
+public:
+  static InputParameters validParams();
 };

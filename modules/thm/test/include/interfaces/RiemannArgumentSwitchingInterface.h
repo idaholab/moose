@@ -2,11 +2,7 @@
 
 #include "InputParameters.h"
 
-class RiemannArgumentSwitchingInterface;
 class MooseObject;
-
-template <>
-InputParameters validParams<RiemannArgumentSwitchingInterface>();
 
 /**
  * Interface class for switching the order of arguments to test the symmetry
@@ -23,4 +19,7 @@ public:
 protected:
   /// Switch the left and right arguments?
   const bool _switch_left_and_right;
+
+public:
+  static InputParameters validParams();
 };

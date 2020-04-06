@@ -2,11 +2,10 @@
 
 registerMooseObject("THMTestApp", VectorPropertyTestMaterial);
 
-template <>
 InputParameters
-validParams<VectorPropertyTestMaterial>()
+VectorPropertyTestMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Test material with vector properties");
   return params;
 }

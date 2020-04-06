@@ -2,11 +2,10 @@
 
 registerMooseObject("THMTestApp", LinearTestFluidProperties);
 
-template <>
 InputParameters
-validParams<LinearTestFluidProperties>()
+LinearTestFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   return params;
 }
 

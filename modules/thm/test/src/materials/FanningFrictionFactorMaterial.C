@@ -2,11 +2,10 @@
 
 registerMooseObject("THMTestApp", FanningFrictionFactorMaterial);
 
-template <>
 InputParameters
-validParams<FanningFrictionFactorMaterial>()
+FanningFrictionFactorMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredParam<MaterialPropertyName>(
       "f_F", "Name to give Fanning friction factor material property");

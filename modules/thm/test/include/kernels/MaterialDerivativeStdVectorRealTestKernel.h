@@ -4,11 +4,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-class MaterialDerivativeStdVectorRealTestKernel;
-
-template <>
-InputParameters validParams<MaterialDerivativeStdVectorRealTestKernel>();
-
 /**
  * Kernel for testing derivatives of a std::vector<Real> material property
  */
@@ -39,4 +34,7 @@ protected:
 
   /// the component of the std::vector material property
   const unsigned int _component_i;
+
+public:
+  static InputParameters validParams();
 };

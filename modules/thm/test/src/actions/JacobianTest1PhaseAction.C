@@ -2,13 +2,12 @@
 
 registerMooseAction("THMTestApp", JacobianTest1PhaseAction, "meta_action");
 
-template <>
 InputParameters
-validParams<JacobianTest1PhaseAction>()
+JacobianTest1PhaseAction::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params += validParams<JacobianTestAction>();
-  params += validParams<FlowModelSetup1Phase>();
+  params += JacobianTestAction::validParams();
+  params += FlowModelSetup1Phase::validParams();
 
   params.set<std::string>("fe_family") = "LAGRANGE";
   params.set<std::string>("fe_order") = "FIRST";

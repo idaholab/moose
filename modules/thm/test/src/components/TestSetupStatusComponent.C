@@ -3,11 +3,10 @@
 
 registerMooseObject("THMTestApp", TestSetupStatusComponent);
 
-template <>
 InputParameters
-validParams<TestSetupStatusComponent>()
+TestSetupStatusComponent::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
 
   params.addRequiredParam<std::string>("flow_channel", "Name of flow channel to use for test");
 
