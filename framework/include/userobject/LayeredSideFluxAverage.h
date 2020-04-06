@@ -13,7 +13,6 @@
 #include "LayeredSideAverage.h"
 
 // Forward Declarations
-class LayeredSideFluxAverage;
 
 /**
  * This UserObject computes side averages of a flux storing partial

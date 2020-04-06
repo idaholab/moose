@@ -12,7 +12,6 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class NodalGravity;
 
 /**
  * Calculates the gravitational force proportional to nodal mass

@@ -12,7 +12,6 @@
 #include "SmearedCrackSofteningBase.h"
 
 // Forward declaration
-class AbruptSoftening;
 
 /**
  * AbruptSoftening is a smeared crack softening model that abruptly

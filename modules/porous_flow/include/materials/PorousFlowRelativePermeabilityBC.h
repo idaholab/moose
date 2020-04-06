@@ -11,8 +11,6 @@
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
-class PorousFlowRelativePermeabilityBC;
-
 /**
  * Material to calculate Brooks-Corey relative permeability of an arbitrary phase
  * given the effective saturation and exponent of that phase.

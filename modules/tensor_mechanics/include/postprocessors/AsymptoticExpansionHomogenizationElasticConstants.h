@@ -12,7 +12,6 @@
 #include "ElementIntegralPostprocessor.h"
 
 // Forward Declarations
-class AsymptoticExpansionHomogenizationElasticConstants;
 
 /**
  * This postprocessor computes homogenized elastic constants

@@ -12,7 +12,6 @@
 #include "MultiApp.h"
 
 // Forward declarations
-class FullSolveMultiApp;
 class Executioner;
 
 /**

@@ -11,8 +11,6 @@
 
 #include "CrystalPlasticitySlipResistance.h"
 
-class CrystalPlasticitySlipResistanceGSS;
-
 /**
  * Phenomenological constitutive model slip resistance userobject class.
  */

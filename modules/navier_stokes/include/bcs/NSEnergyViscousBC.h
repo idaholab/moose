@@ -14,7 +14,6 @@
 #include "NSTemperatureDerivs.h"
 
 // Forward Declarations
-class NSEnergyViscousBC;
 
 /**
  * This class corresponds to the viscous part of the "natural"

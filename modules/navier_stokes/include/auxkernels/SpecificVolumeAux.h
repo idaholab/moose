@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class SpecificVolumeAux;
-
 /**
  * Computes specific volume
  */

@@ -11,7 +11,6 @@
 
 #include "XFEMMaterialStateMarkerBase.h"
 
-class XFEMRankTwoTensorMarkerUserObject;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

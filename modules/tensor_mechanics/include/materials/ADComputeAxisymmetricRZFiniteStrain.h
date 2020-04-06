@@ -11,11 +11,6 @@
 
 #include "ADCompute2DFiniteStrain.h"
 
-template <ComputeStage>
-class ADComputeAxisymmetricRZFiniteStrain;
-
-declareADValidParams(ADComputeAxisymmetricRZFiniteStrain);
-
 /**
  * ADComputeAxisymmetricRZFiniteStrain defines a strain increment and rotation
  * increment for finite strains in an Axisymmetric simulation.

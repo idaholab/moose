@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ElectricalConductivity;
 
 /**
  * Calculates resistivity and electrical conductivity as a function of temperature.

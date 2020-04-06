@@ -16,7 +16,6 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declerations
-class SubdomainBoundingBox;
 
 namespace libMesh
 {

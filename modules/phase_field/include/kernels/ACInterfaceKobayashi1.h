@@ -13,8 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-class ACInterfaceKobayashi1;
-
 /**
  * Kernel 1 of 2 for interfacial energy anisotropy in the Allen-Cahn equation as
  * implemented in R. Kobayashi, Physica D, 63, 410-423 (1993).

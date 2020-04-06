@@ -12,15 +12,13 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
+// Forward Declarations
+class Function;
+
 /**
  * ComputeIncrementalBeamStrain defines a displacement and rotation strain increment and rotation
  * increment (=1), for small strains.
  */
-
-// Forward Declarations
-class ComputeIncrementalBeamStrain;
-class Function;
-
 class ComputeIncrementalBeamStrain : public Material
 {
 public:

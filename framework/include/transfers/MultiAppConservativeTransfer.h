@@ -12,7 +12,6 @@
 #include "MultiAppFieldTransfer.h"
 
 // Forward declarations
-class MultiAppConservativeTransfer;
 
 /**
  *  Transfers variables on possibly differne meshes while conserving a user

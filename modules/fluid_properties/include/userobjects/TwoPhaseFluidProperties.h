@@ -11,7 +11,6 @@
 
 #include "FluidProperties.h"
 
-class TwoPhaseFluidProperties;
 class SinglePhaseFluidProperties;
 
 /**

@@ -12,7 +12,6 @@
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
-class PolycrystalEBSD;
 class EBSDReader;
 
 class PolycrystalEBSD : public PolycrystalUserObjectBase

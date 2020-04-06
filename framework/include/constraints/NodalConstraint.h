@@ -14,7 +14,6 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
-class NodalConstraint;
 
 class NodalConstraint : public Constraint,
                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,

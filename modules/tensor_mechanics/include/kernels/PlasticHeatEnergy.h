@@ -13,7 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class PlasticHeatEnergy;
 
 /**
  * Provides a heat source from plastic deformation:

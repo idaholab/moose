@@ -13,7 +13,6 @@
 #include "MeshModifier.h"
 
 // Forward declerations
-class RenameBlock;
 
 /**
  * MeshModifier for re-numbering or re-naming blocks

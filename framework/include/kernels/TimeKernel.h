@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class TimeKernel;
 
 /**
  * All time kernels should inherit from this class

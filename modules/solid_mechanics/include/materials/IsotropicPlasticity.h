@@ -13,8 +13,6 @@
 
 class PiecewiseLinear;
 
-class IsotropicPlasticity;
-
 class IsotropicPlasticity : public ReturnMappingModel
 {
 public:

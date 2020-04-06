@@ -11,8 +11,6 @@
 
 #include "FXBoundaryBaseUserObject.h"
 
-class FXBoundaryValueUserObject;
-
 /**
  * This boundary FX evaluator calculates the values
  */

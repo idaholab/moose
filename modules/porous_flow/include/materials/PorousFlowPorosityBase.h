@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowPorosityBase;
-
 /**
  * Base class Material designed to provide the porosity.
  */

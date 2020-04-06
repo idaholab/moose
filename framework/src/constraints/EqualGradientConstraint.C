@@ -47,3 +47,5 @@ EqualGradientConstraint<compute_stage>::computeQpResidual(Moose::MortarType mort
       return 0;
   }
 }
+
+adBaseClass(EqualGradientConstraint);

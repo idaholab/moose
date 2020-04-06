@@ -13,7 +13,6 @@
 #include "NodalUserObject.h"
 
 // Forward Declarations
-class VerifyNodalUniqueID;
 
 class VerifyNodalUniqueID : public NodalUserObject
 {

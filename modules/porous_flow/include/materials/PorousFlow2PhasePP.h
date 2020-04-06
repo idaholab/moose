@@ -12,7 +12,6 @@
 #include "PorousFlowVariableBase.h"
 
 class PorousFlowCapillaryPressure;
-class PorousFlow2PhasePP;
 
 /**
  * Base material designed to calculate fluid phase porepressure and saturation

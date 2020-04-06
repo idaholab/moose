@@ -13,11 +13,6 @@
 
 #define usingComputeSmallStrainMembers usingComputeStrainBaseMembers
 
-template <ComputeStage>
-class ADComputeSmallStrain;
-
-declareADValidParams(ADComputeSmallStrain);
-
 /**
  * ADComputeSmallStrain defines a strain tensor, assuming small strains.
  */

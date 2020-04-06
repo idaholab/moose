@@ -14,8 +14,6 @@
 
 #include "RichardsSeff1VG.h"
 
-class RichardsSeff1VGcut;
-
 /**
  * Effective saturation as a function of porepressure
  * using the van Genuchten formula, but when p<p_cut use a

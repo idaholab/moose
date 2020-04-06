@@ -13,7 +13,6 @@
 #include "SideIntegralPostprocessor.h"
 
 // Forward Declarations
-class VolumetricFlowRate;
 
 /**
  * This postprocessor computes the volumetric flow rate through a boundary.

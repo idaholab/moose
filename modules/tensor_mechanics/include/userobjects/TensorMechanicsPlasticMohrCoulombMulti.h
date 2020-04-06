@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticMohrCoulombMulti;
-
 /**
  * FiniteStrainMohrCoulombMulti implements rate-independent non-associative mohr-coulomb
  * with hardening/softening in the finite-strain framework, using planar (non-smoothed) surfaces

@@ -11,8 +11,6 @@
 
 #include "MortarConstraint.h"
 
-class OldEqualValueConstraint;
-
 /**
  * Constrain the value of a variable to be the same on both sides of an
  * interface.

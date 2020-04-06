@@ -12,7 +12,6 @@
 #include "StressDivergenceTensors.h"
 
 // Forward Declarations
-class StressDivergenceRZTensors;
 
 /**
  * StressDivergenceRZTensors is a modification of StressDivergenceTensors to

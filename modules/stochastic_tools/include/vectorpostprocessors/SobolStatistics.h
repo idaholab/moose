@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
 
-class SobolStatistics;
 class SobolSampler;
 
 /**

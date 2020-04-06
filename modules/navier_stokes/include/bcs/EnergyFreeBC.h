@@ -11,8 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class EnergyFreeBC;
-
 /**
  *
  */

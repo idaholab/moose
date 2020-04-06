@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class InputParameters;
-class SamplerBase;
 class VectorPostprocessor;
 
 namespace libMesh

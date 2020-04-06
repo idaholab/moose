@@ -11,8 +11,6 @@
 
 #include "SolidModel.h"
 
-class Elastic;
-
 class Elastic : public SolidModel
 {
 public:

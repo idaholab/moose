@@ -13,7 +13,6 @@
 #include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
-class MultiAppUserObjectTransfer;
 
 /**
  * Samples a variable's value in the Master domain at the point where

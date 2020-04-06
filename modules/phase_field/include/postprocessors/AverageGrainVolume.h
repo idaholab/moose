@@ -15,7 +15,6 @@
 
 // Forward Declarations
 class FeatureFloodCount;
-class AverageGrainVolume;
 class MooseMesh;
 
 /**

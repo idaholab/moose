@@ -11,8 +11,6 @@
 
 #include "NodalConstraint.h"
 
-class EqualValueBoundaryConstraint;
-
 class EqualValueBoundaryConstraint : public NodalConstraint
 {
 public:

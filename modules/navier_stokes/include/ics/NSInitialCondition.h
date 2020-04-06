@@ -13,7 +13,6 @@
 #include "InputParameters.h"
 
 // Forward Declarations
-class NSInitialCondition;
 class IdealGasFluidProperties;
 
 /**

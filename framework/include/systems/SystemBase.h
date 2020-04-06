@@ -35,7 +35,6 @@ typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class SubProblem;
-class SystemBase;
 class TimeIntegrator;
 class InputParameters;
 

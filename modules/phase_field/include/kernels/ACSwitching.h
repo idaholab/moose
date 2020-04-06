@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class ACSwitching;
 
 /**
  * ACSwitching adds terms of the form

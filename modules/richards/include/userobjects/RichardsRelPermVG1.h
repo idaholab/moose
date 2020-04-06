@@ -11,8 +11,6 @@
 
 #include "RichardsRelPermVG.h"
 
-class RichardsRelPermVG1;
-
 /**
  * Van-Genuchten form of relative permeability when seff <= _scut
  * cubic relative permeability for seff >= _scut

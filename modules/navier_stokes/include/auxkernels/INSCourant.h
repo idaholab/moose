@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class INSCourant;
 
 /**
  * Computes h_min / |u|

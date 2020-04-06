@@ -11,8 +11,6 @@
 
 #include "FiniteStrainCrystalPlasticity.h"
 
-class FiniteStrainCPSlipRateRes;
-
 class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
 {
 public:

@@ -14,7 +14,6 @@
 class Function;
 
 // Forward Declarations
-class ElementVectorL2Error;
 
 class ElementVectorL2Error : public ElementIntegralPostprocessor
 {

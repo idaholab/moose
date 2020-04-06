@@ -11,8 +11,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class FunctionElementIntegral;
-
 /**
  * Integrates a function over elements
  */

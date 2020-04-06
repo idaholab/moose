@@ -13,7 +13,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class SideFluxIntegral;
 
 /**
  * This postprocessor computes a side integral of the mass flux.

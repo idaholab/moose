@@ -11,8 +11,6 @@
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
-class PorousFlowFullySaturatedDarcyFlow;
-
 /**
  * Darcy advective flux for a fully-saturated,
  * single-phase, multi-component fluid.

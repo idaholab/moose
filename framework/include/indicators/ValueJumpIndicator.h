@@ -11,8 +11,6 @@
 
 #include "InternalSideIndicator.h"
 
-class ValueJumpIndicator;
-
 class ValueJumpIndicator : public InternalSideIndicator
 {
 public:

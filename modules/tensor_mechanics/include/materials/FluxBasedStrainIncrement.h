@@ -13,8 +13,6 @@
 #include "RankTwoTensor.h"
 #include "DerivativeMaterialInterface.h"
 
-class FluxBasedStrainIncrement;
-
 /**
  * FluxBasedStrainIncrement computes strain increment based on flux (vacancy)
  * Forest et. al. MSMSE 2015

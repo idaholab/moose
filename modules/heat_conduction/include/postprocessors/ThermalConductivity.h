@@ -12,7 +12,6 @@
 #include "SideAverageValue.h"
 
 // Forward Declarations
-class ThermalConductivity;
 
 /**
  * This postprocessor computes the thermal conductivity of the bulk.

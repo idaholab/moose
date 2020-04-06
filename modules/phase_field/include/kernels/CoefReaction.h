@@ -11,9 +11,6 @@
 
 #include "Reaction.h"
 
-// Forward Declarations
-class CoefReaction;
-
 class CoefReaction : public Reaction
 {
 public:

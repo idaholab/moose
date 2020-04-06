@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumNonlinearIterations;
 
 /**
  * NumNonlinearIterations is a postprocessor that reports the number of nonlinear iterations

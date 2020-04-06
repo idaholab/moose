@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class Function;
-class ScalarL2Error;
 class MooseVariableScalar;
 
 /**

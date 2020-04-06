@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class DoubleWellPotential;
 
 /**
  * Algebraic double well potential.

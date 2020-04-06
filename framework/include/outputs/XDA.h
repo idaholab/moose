@@ -13,7 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declearations
-class XDA;
 
 /**
  * Class for output data to the XDAII format

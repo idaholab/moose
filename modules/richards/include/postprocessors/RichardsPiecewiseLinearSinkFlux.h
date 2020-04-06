@@ -16,7 +16,6 @@
 class Function;
 
 // Forward Declarations
-class RichardsPiecewiseLinearSinkFlux;
 
 /**
  * This postprocessor computes the fluid flux to a RichardsPiecewiseLinearSink.

@@ -11,8 +11,6 @@
 
 #include "PorousFlowThermalConductivityBase.h"
 
-class PorousFlowThermalConductivityFromPorosity;
-
 /**
  * This Material calculates rock-fluid combined thermal conductivity
  * for the single phase, fully saturated case by using a linear

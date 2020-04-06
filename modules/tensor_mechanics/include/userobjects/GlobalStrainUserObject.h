@@ -15,8 +15,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class GlobalStrainUserObject;
-
 class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUserObjectInterface
 {
 public:

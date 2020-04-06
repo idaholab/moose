@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ImplicitMidpoint;
-
 /**
  * Second-order Runge-Kutta (implicit midpoint) time integration.
  *

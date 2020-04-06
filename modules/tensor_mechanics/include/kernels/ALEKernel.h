@@ -13,8 +13,6 @@
 #include "Assembly.h"
 #include "DerivativeMaterialInterface.h"
 
-class ALEKernel;
-
 class ALEKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:

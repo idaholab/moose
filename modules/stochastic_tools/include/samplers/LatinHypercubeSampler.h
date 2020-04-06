@@ -11,8 +11,6 @@
 
 #include "Sampler.h"
 
-class LatinHypercubeSampler;
-
 /**
  * A class used to perform Monte Carlo Sampling
  */

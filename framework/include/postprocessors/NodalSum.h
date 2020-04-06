@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalSum;
 
 /**
  * Computes a sum of the nodal values of the coupled variable.

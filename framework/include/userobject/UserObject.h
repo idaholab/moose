@@ -27,7 +27,6 @@
 #include "libmesh/parallel.h"
 
 // Forward declarations
-class UserObject;
 class FEProblemBase;
 class SubProblem;
 class Assembly;

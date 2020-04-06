@@ -11,8 +11,6 @@
 
 #include "GeometryBase.h"
 
-class GeometrySphere;
-
 /**
  * Snaps the selected nodes to the surface of a sphere (or circular disk in 2D)
  */

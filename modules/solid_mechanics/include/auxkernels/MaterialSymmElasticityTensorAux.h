@@ -22,7 +22,6 @@
 #include "SymmElasticityTensor.h"
 
 // Forward declarations
-class MaterialSymmElasticityTensorAux;
 class SymmElasticityTensor;
 
 class MaterialSymmElasticityTensorAux : public AuxKernel

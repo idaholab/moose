@@ -12,7 +12,6 @@
 #include "Function.h"
 
 // Forward Declarations
-class RichardsExcavGeom;
 
 /**
  * Defines excavation geometry.  It is used to enforce

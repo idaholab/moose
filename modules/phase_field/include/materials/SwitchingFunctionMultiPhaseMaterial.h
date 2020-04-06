@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class SwitchingFunctionMultiPhaseMaterial;
 
 /**
  * SwitchingFunctionMultiPhaseMaterial is a switching function for a multi-phase,

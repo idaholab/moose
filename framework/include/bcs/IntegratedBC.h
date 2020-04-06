@@ -13,7 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward declarations
-class IntegratedBC;
 
 /**
  * Base class for deriving any boundary condition of a integrated type

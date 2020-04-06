@@ -14,8 +14,6 @@
 #include "ContactMaster.h"
 #include "MechanicalContactConstraint.h"
 
-class AugmentedLagrangianContactProblem;
-
 /**
  * Class to manage nested solution for augmented Lagrange contact.
  * The AugmentedLagrangianContactProblem manages the nested solution procedure,

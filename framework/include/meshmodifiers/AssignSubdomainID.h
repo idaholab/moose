@@ -13,7 +13,6 @@
 #include "MeshModifier.h"
 
 // Forward declerations
-class AssignSubdomainID;
 
 /**
  * MeshModifier for assigning a subdomain ID to all elements

@@ -11,7 +11,6 @@
 
 #include "Function.h"
 
-class FourierNoise;
 class FEProblemBase;
 
 /**

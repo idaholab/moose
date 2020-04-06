@@ -14,7 +14,6 @@
 #include "libmesh/vector_value.h"
 
 // Forward Declarations
-class VectorNeumannBC;
 
 /**
  * Implements a flux boundary condition grad(u).n = V.n, where the

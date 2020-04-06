@@ -15,12 +15,6 @@
   usingGrainGrowthBaseMembers;                                                                     \
   using ADACInterface<compute_stage>::_gamma
 
-// Forward Declarations
-template <ComputeStage compute_stage>
-class ADGrainGrowth;
-
-declareADValidParams(ADGrainGrowth);
-
 /**
  * This kernel calculates the residual for grain growth for a single phase,
  * poly-crystal system. A single material property gamma_asymm is used for

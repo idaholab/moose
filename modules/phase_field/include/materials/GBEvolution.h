@@ -12,7 +12,6 @@
 #include "GBEvolutionBase.h"
 
 // Forward Declarations
-class GBEvolution;
 
 /**
  * Grain boundary energy parameters for isotropic uniform grain boundary energies

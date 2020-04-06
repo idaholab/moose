@@ -13,7 +13,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declerations
-class MultiAppPostprocessorToAuxScalarTransfer;
 
 /**
  * Copies the value of a Postprocessor from one app to a scalar AuxVariable in another.

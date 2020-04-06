@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowDiffusivityBase;
-
 /// Base class Material designed to provide the tortuosity and diffusion coefficents
 class PorousFlowDiffusivityBase : public PorousFlowMaterialVectorBase
 {

@@ -11,8 +11,6 @@
 
 #include "ElementUserObject.h"
 
-class DiscreteNucleationInserterBase;
-
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
  * domain it manages a list of nuclei with their insertion times and their center

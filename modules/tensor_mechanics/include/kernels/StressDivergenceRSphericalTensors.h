@@ -12,7 +12,6 @@
 #include "StressDivergenceTensors.h"
 
 // Forward Declarations
-class StressDivergenceRSphericalTensors;
 
 /**
  * StressDivergenceRSphericalTensors is a modification of StressDivergenceTensors

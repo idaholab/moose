@@ -12,7 +12,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class MultiAppVectorPostprocessorTransfer;
 
 /**
  * Copies the values of a VectorPostprocessor from the Master to postprocessors

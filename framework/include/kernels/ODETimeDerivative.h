@@ -12,7 +12,6 @@
 #include "ODETimeKernel.h"
 
 // Forward Declaration
-class ODETimeDerivative;
 
 class ODETimeDerivative : public ODETimeKernel
 {

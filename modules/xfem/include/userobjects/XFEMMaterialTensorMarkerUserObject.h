@@ -12,8 +12,6 @@
 #include "XFEMMaterialStateMarkerBase.h"
 #include "MaterialTensorCalculator.h"
 
-class XFEMMaterialTensorMarkerUserObject;
-
 class XFEMMaterialTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:

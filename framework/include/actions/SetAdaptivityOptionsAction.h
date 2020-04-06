@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class SetAdaptivityOptionsAction;
-
 class SetAdaptivityOptionsAction : public Action
 {
 public:

@@ -12,7 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class Receiver;
 
 /**
  * A class for storing data, it allows the user to change the value of the

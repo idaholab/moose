@@ -12,7 +12,6 @@
 #include "ArrayInitialCondition.h"
 
 // Forward Declarations
-class ArrayConstantIC;
 namespace libMesh
 {
 class Point;

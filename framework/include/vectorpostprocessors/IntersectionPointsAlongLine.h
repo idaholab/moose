@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class IntersectionPointsAlongLine;
 
 /**
  * Get the intersection points for all of the elements that are intersected by a line

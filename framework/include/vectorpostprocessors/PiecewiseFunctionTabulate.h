@@ -11,7 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class PiecewiseFunctionTabulate;
 class PiecewiseBase;
 
 /**

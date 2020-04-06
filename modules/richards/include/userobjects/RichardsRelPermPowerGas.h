@@ -11,8 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermPowerGas;
-
 /**
  * PowerGas form of relative permeability
  * Define s = (seff - simm)/(1 - simm).

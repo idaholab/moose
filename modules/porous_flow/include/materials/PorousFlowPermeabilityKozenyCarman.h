@@ -11,8 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityKozenyCarman;
-
 /**
  * Material designed to provide the permeability tensor which is calculated
  * from porosity using a form of the Kozeny-Carman equation (e.g. Oelkers

@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CommonLineElementAction;
-
 /**
  * Store common line element action parameters
  */

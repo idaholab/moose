@@ -12,8 +12,6 @@
 #include "AuxKernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowDarcyVelocityComponent;
-
 /**
  * Computes a component of the Darcy velocity:
  * -k_ij * krel /mu (nabla_j P - w_j)

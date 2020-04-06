@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class DiffusionFluxAux;
-
 /**
  * Auxiliary kernel responsible for computing the components of the flux vector
  * in diffusion problems

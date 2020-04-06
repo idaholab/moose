@@ -11,8 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class ExplicitMidpoint;
-
 /**
  * The explicit midpoint time integration method.
  *

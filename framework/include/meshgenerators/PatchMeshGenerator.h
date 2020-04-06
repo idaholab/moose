@@ -12,8 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class PatchMeshGenerator;
-
 class PatchMeshGenerator : public MeshGenerator
 {
 public:

@@ -12,8 +12,6 @@
 #include "Function.h"
 #include "SplineInterpolation.h"
 
-class SplineFunction;
-
 /**
  * Function that uses spline interpolation
  */

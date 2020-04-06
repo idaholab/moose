@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class ElementDeletionGeneratorBase;
 
 /**
  * This class deletes elements from the mesh data structure

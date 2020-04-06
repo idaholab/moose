@@ -15,7 +15,6 @@
 
 // Forward declarations
 class Distribution;
-class DistributionInterface;
 
 /**
  * Interface for objects that need to use distributions

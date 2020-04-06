@@ -22,7 +22,6 @@
 
 // Forward declarations
 class NonlinearSystemBase;
-class PhysicsBasedPreconditioner;
 
 /**
  * Implements a segregated solve preconditioner.

@@ -13,7 +13,6 @@
 #include "Restartable.h"
 
 // Forward declarations
-class MeshModifier;
 class MooseMesh;
 
 /**
@@ -22,6 +21,8 @@ class MooseMesh;
 class MeshModifier : public MooseObject, public Restartable
 {
 public:
+  static InputParameters validParams();
+
   /**
    * Constructor
    *

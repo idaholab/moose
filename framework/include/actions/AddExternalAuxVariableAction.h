@@ -13,7 +13,6 @@
 #include "Action.h"
 
 // Forward declarations
-class AddExternalAuxVariableAction;
 
 /**
  * Action for creating Auxiliary variables

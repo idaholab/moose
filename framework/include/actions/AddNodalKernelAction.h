@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddNodalKernelAction;
-
 class AddNodalKernelAction : public MooseObjectAction
 {
 public:

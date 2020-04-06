@@ -12,7 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class ACGrGrElasticDrivingForce;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowAqueousPreDisMineral;
-
 /**
  * Material designed to form a std::vector
  * of mass fractions of mineral concentrations from reaction rates

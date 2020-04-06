@@ -11,8 +11,6 @@
 
 #include "HEVPStrengthUOBase.h"
 
-class HEVPRambergOsgoodHardening;
-
 /**
  * This user object classs
  * Computes power law  hardening

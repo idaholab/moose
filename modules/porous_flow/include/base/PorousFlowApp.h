@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class PorousFlowApp;
-
 class PorousFlowApp : public MooseApp
 {
 public:

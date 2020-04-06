@@ -11,8 +11,6 @@
 
 #include "ComputeThermalExpansionEigenstrainBase.h"
 
-class ComputeMeanThermalExpansionEigenstrainBase;
-
 /**
  * ComputeMeanThermalExpansionEigenstrainBase is a base class for computing the
  * thermal expansion eigenstrain according to a temperature-dependent mean thermal

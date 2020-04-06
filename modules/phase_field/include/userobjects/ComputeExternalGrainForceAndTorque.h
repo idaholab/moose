@@ -14,7 +14,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ComputeExternalGrainForceAndTorque;
 class GrainTrackerInterface;
 
 /**

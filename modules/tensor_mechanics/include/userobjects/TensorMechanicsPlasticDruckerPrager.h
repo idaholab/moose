@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticDruckerPrager;
-
 /**
  * Rate-independent non-associative Drucker Prager
  * with hardening/softening.  The cone's tip is not smoothed.

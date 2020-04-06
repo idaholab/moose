@@ -13,7 +13,6 @@
 #include "Output.h"
 
 // Forward declerations
-class PetscOutput;
 
 /**
  * Adds the ability to output on every nonlinear and/or linear residual

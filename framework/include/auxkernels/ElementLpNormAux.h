@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-class ElementLpNormAux;
 
 /**
  * Compute an elemental field variable (single value per element)

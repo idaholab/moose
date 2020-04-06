@@ -13,7 +13,6 @@
 #include "MaterialTensorCalculator.h"
 
 // Forward Declarations
-class MaterialTensorIntegralSM;
 class SymmTensor;
 
 /**

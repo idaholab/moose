@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
 
-class PorousFlowDictator;
-
 /**
  * This holds maps between the nonlinear variables
  * used in a PorousFlow simulation and the

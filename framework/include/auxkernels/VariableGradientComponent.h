@@ -13,7 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-class VariableGradientComponent;
 
 /**
  * Extract a component from the gradient of a variable

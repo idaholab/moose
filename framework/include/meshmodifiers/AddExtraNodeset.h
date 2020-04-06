@@ -12,7 +12,6 @@
 #include "MeshModifier.h"
 
 // Forward Declaration
-class AddExtraNodeset;
 
 class AddExtraNodeset : public MeshModifier
 {

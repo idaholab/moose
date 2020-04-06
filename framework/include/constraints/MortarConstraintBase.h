@@ -18,7 +18,6 @@
 #include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
-class MortarConstraintBase;
 class FEProblemBase;
 namespace libMesh
 {

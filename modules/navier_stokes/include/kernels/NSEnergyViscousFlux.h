@@ -13,7 +13,6 @@
 #include "NSViscStressTensorDerivs.h"
 
 // Forward Declarations
-class NSEnergyViscousFlux;
 
 /**
  * Viscous flux terms in energy equation.

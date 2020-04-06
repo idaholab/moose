@@ -12,10 +12,6 @@
 #include "ADKernelGrad.h"
 
 // Forward Declarations
-template <ComputeStage>
-class INSADMassPSPG;
-
-declareADValidParams(INSADMassPSPG);
 
 /**
  * This class adds PSPG stabilization to the mass equation, enabling use of

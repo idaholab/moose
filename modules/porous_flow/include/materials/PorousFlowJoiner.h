@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowJoiner;
-
 /**
  * Material designed to form a std::vector of property
  * and derivatives of these wrt the nonlinear variables

@@ -12,7 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class ExtraNodesetGenerator;
 
 class ExtraNodesetGenerator : public MeshGenerator
 {

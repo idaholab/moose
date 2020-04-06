@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class PhaseFieldTestApp;
-
 class PhaseFieldTestApp : public MooseApp
 {
 public:

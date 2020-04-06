@@ -12,7 +12,6 @@
 // MOOSE includes
 #include "Action.h"
 
-class SetupDebugAction;
 class MooseObjectAction;
 
 class SetupDebugAction : public Action

@@ -11,7 +11,6 @@
 
 #include "AuxKernel.h"
 
-class InternalEnergyAux;
 class SinglePhaseFluidProperties;
 
 /**

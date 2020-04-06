@@ -12,8 +12,6 @@
 #include "MaterialAuxBase.h"
 #include "RankTwoTensor.h"
 
-class MaterialRankTwoTensorAux;
-
 /**
  * MaterialRankTwoTensorAux is designed to take the data in the RankTwoTensor material
  * property, for example stress or strain, and output the value for the

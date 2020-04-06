@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ImplicitEuler;
-
 /**
  * Implicit Euler's method
  */

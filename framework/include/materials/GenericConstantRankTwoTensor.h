@@ -12,8 +12,6 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-class GenericConstantRankTwoTensor;
-
 /**
  * Declares a constant material property of type RankTwoTensor.
  */

@@ -9,4 +9,12 @@
 
 #include "FaceFaceConstraint.h"
 
-defineADValidParams(FaceFaceConstraint, ADMortarConstraint, );
+template <ComputeStage compute_stage>
+InputParameters
+FaceFaceConstraint<compute_stage>::validParams()
+{
+  auto params = ADMortarConstraint<compute_stage>::validParams();
+  return params;
+}
+
+adBaseClass(FaceFaceConstraint);

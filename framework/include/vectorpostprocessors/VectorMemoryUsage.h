@@ -13,8 +13,6 @@
 #include "MemoryUsageReporter.h"
 #include "MemoryUtils.h"
 
-class VectorMemoryUsage;
-
 /**
  * Generate a table of various memory metrics indexed by MPI rank. Visualize this using
  * VectorPostprocessorVisualizationAux.

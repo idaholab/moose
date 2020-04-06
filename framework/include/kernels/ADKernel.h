@@ -70,9 +70,6 @@ using ADKernel = ADKernelTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorKernel = ADKernelTempl<RealVectorValue, compute_stage>;
 
-declareADValidParams(ADKernel);
-declareADValidParams(ADVectorKernel);
-
 template <typename T, ComputeStage compute_stage>
 class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
 {

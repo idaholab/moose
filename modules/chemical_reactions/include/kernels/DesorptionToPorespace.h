@@ -13,7 +13,6 @@
 #include "LangmuirMaterial.h"
 
 // Forward Declarations
-class DesorptionToPorespace;
 
 /**
  * Mass flow rate of fluid to the porespace from the matrix

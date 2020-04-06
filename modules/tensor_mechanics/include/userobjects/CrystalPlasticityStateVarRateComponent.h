@@ -11,8 +11,6 @@
 
 #include "CrystalPlasticityUOBase.h"
 
-class CrystalPlasticityStateVarRateComponent;
-
 /**
  * Crystal plasticity state variable evolution rate component userobject base class.
  * The virtual functions written below must be

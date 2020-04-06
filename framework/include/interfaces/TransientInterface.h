@@ -21,7 +21,6 @@
 class FEProblemBase;
 class InputParameters;
 class MooseObject;
-class TransientInterface;
 
 template <typename T>
 InputParameters validParams();

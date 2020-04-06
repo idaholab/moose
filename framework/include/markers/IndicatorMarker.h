@@ -11,8 +11,6 @@
 
 #include "Marker.h"
 
-class IndicatorMarker;
-
 class IndicatorMarker : public Marker
 {
 public:

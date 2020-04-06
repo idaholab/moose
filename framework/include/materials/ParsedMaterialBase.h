@@ -12,7 +12,6 @@
 #include "InputParameters.h"
 
 // Forward Declarations
-class ParsedMaterialBase;
 
 /**
  * Helper class for ParsedMaterial and DerivativeParsedMaterial

@@ -12,7 +12,6 @@
 #include "GeometricCutUserObject.h"
 
 // Forward declarations
-class LevelSetCutUserObject;
 
 class LevelSetCutUserObject : public GeometricCutUserObject
 {

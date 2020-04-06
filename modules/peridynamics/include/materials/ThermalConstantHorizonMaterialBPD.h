@@ -11,8 +11,6 @@
 
 #include "ThermalMaterialBaseBPD.h"
 
-class ThermalConstantHorizonMaterialBPD;
-
 /**
  * Material class for bond based peridynamic heat conduction model based on regular spatial
  * discretization

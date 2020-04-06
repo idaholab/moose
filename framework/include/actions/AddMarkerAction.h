@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddMarkerAction;
-
 class AddMarkerAction : public MooseObjectAction
 {
 public:

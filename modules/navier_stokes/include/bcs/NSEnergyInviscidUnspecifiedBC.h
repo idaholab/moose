@@ -12,7 +12,6 @@
 #include "NSEnergyInviscidBC.h"
 
 // Forward Declarations
-class NSEnergyInviscidUnspecifiedBC;
 
 /**
  * The inviscid energy BC term with specified pressure.

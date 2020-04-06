@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticJ2.h"
 #include "RankFourTensor.h"
 
-class TensorMechanicsPlasticIsotropicSD;
-
 /**
  * IsotropicSD plasticity model from Yoon (2013)
  * the name of the paper is "Asymmetric yield function based on the

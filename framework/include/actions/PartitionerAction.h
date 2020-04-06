@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class PartitionerAction;
-
 class PartitionerAction : public MooseObjectAction
 {
 public:

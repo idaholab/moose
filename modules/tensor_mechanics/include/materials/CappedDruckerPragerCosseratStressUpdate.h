@@ -11,8 +11,6 @@
 
 #include "CappedDruckerPragerStressUpdate.h"
 
-class CappedDruckerPragerCosseratStressUpdate;
-
 /**
  * CappedDruckerPragerCosseratStressUpdate performs the return-map
  * algorithm and associated stress updates for plastic

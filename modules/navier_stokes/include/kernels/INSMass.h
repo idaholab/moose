@@ -12,7 +12,6 @@
 #include "INSBase.h"
 
 // Forward Declarations
-class INSMass;
 
 /**
  * This class computes the mass equation residual and Jacobian

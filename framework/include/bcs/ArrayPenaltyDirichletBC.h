@@ -11,8 +11,6 @@
 
 #include "ArrayIntegratedBC.h"
 
-class ArrayPenaltyDirichletBC;
-
 class ArrayPenaltyDirichletBC : public ArrayIntegratedBC
 {
 public:

@@ -11,8 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class BCUserObject;
-
 /**
  * A base class of user object for calculating
  * the variable values in ghost element

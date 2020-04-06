@@ -13,7 +13,6 @@
 #include "TimeStepper.h"
 
 // Forward declarations
-class DT2;
 
 namespace libMesh
 {

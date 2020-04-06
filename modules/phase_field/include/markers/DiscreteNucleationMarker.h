@@ -12,7 +12,6 @@
 #include "Marker.h"
 #include "DiscreteNucleationInserterBase.h"
 
-class DiscreteNucleationMarker;
 class DiscreteNucleationMap;
 
 /**

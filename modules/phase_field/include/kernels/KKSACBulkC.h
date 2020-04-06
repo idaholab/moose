@@ -12,7 +12,6 @@
 #include "KKSACBulkBase.h"
 
 // Forward Declarations
-class KKSACBulkC;
 
 /**
  * KKSACBulkBase child class for the phase concentration difference term

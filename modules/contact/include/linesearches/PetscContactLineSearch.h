@@ -20,7 +20,6 @@
 
 using namespace libMesh;
 
-class PetscContactLineSearch;
 namespace libMesh
 {
 template <typename>

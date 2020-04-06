@@ -14,10 +14,6 @@
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetTimeDerivativeSUPG;
-
-declareADValidParams(LevelSetTimeDerivativeSUPG);
 
 /**
  * Applies SUPG stabilization to the time derivative.

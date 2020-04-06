@@ -12,7 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class VectorOfPostprocessors;
 
 /**
  *  VectorOfPostprocessors is a type of VectorPostprocessor that outputs the

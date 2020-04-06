@@ -12,8 +12,6 @@
 #include "DGKernel.h"
 #include "InternalSideFluxBase.h"
 
-class AEFVKernel;
-
 /**
  * A dgkernel for the advection equation
  * using a cell-centered finite volume method

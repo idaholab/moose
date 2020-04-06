@@ -11,8 +11,6 @@
 
 #include "PorousFlowDiffusivityBase.h"
 
-class PorousFlowDiffusivityMillingtonQuirk;
-
 /**
  * Material to provide saturation dependent diffusivity using the model of
  * Millington and Quirk, from

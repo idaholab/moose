@@ -11,8 +11,6 @@
 
 #include "NodalScalarKernel.h"
 
-class NodalEqualValueConstraint;
-
 /**
  * Constraint to enforce equal values (in 1D)
  *

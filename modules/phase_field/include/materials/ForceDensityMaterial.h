@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ForceDensityMaterial;
 
 /**
  * This Material calculates the force density acting on a particle/grain

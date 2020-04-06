@@ -13,7 +13,6 @@
 #include "LayeredSideIntegral.h"
 
 // Forward Declarations
-class LayeredSideAverage;
 
 /**
  * This UserObject computes side averages of a variable storing partial sums for the specified

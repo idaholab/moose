@@ -12,7 +12,6 @@
 #include "INSBase.h"
 
 // Forward Declarations
-class Advection;
 
 /**
  * This class is responsible for solving the scalar advection

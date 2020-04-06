@@ -12,8 +12,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
 
-class PorousFlowVariableBase;
-
 /**
  * Base class for thermophysical variable materials, which assemble materials for
  * primary variables such as porepressure and saturation at the nodes

@@ -11,11 +11,6 @@
 
 #include "ADKernelValue.h"
 
-template <ComputeStage>
-class ADGravity;
-
-declareADValidParams(ADGravity);
-
 template <ComputeStage compute_stage>
 class ADGravity : public ADKernelValue<compute_stage>
 {

@@ -18,7 +18,6 @@
 #include "RichardsSeff.h"
 
 // Forward Declarations
-class RichardsPiecewiseLinearSink;
 
 /**
  * Applies a flux sink to a boundary

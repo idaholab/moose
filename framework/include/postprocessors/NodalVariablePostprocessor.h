@@ -14,7 +14,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class NodalVariablePostprocessor;
 
 /**
  * This is a base class for other classes which compute post-processed

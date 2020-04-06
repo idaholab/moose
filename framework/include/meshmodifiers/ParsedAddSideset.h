@@ -16,7 +16,6 @@
 #include "libmesh/point.h"
 
 // Forward declerations
-class ParsedAddSideset;
 
 /**
  * MeshModifier for defining a Sideset by a parsed expression and

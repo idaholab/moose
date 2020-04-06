@@ -11,8 +11,6 @@
 
 #include "SolveObject.h"
 
-class FEProblemSolve;
-
 class FEProblemSolve : public SolveObject
 {
 public:

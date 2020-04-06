@@ -11,8 +11,6 @@
 
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
 
-class PorousFlowAdvectiveFluxCalculatorSaturated;
-
 /**
  * Computes the advective flux of fluid of given phase, assuming fully-saturated conditions.
  * Hence this UserObject is only relevant to single-phase situations.

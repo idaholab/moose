@@ -14,7 +14,6 @@
 
 #include "libmesh/bounding_box.h"
 
-class GrainTracker;
 class PolycrystalUserObjectBase;
 struct GrainDistance;
 

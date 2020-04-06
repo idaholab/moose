@@ -15,7 +15,6 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 
-class MutableCoefficientsInterface;
 class ConsoleStream;
 
 /**

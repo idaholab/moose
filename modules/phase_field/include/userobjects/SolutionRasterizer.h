@@ -12,7 +12,6 @@
 #include "SolutionUserObject.h"
 
 // Forward Declarations
-class SolutionRasterizer;
 
 /**
  * This Userobject is the base class of Userobjects that generate one

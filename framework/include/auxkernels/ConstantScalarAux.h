@@ -11,8 +11,6 @@
 
 #include "AuxScalarKernel.h"
 
-class ConstantScalarAux;
-
 /**
  * Sets a constant value on a scalar variable
  */

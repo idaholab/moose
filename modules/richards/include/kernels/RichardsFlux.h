@@ -13,7 +13,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsFlux;
 
 /**
  * Kernel = grad(permeability*relativepermeability/viscosity * (grad(pressure) - density*gravity))

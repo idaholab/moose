@@ -11,8 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureBC;
-
 /**
  * Brooks-Corey effective saturation, capillary pressure and relative
  * permeability functions.

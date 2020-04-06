@@ -11,8 +11,6 @@
 
 #include "IndicatorMarker.h"
 
-class ErrorFractionMarker;
-
 class ErrorFractionMarker : public IndicatorMarker
 {
 public:

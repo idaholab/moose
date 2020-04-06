@@ -14,7 +14,6 @@
 #include "MooseParsedFunctionBase.h"
 
 // Forward declerations
-class MooseParsedGradFunction;
 
 /**
  * This class is similar to ParsedFunction except it also supports returning the

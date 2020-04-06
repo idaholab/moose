@@ -13,7 +13,6 @@
 #include "Action.h"
 
 // Forward Declarations
-class PFCRFFVariablesAction;
 
 /**
  * Automatically generates all the L variables for the RFF phase field crystal model.

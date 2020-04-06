@@ -13,7 +13,6 @@
 #include "Action.h"
 
 // Forward declerations
-class SetupRecoverFileBaseAction;
 
 /**
  *

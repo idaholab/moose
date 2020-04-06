@@ -14,7 +14,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class InertialForceBeam;
 
 class InertialForceBeam : public TimeKernel
 {

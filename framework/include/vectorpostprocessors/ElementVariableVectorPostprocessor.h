@@ -11,8 +11,6 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class ElementVariableVectorPostprocessor;
-
 /**
  * Base class VectorPostprocessors operating on elemental variables.
  */

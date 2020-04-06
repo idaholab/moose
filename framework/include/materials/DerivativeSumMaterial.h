@@ -11,8 +11,6 @@
 
 #include "DerivativeFunctionMaterialBase.h"
 
-class DerivativeSumMaterial;
-
 class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 {
 public:

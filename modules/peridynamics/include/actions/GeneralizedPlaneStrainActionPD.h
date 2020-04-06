@@ -12,8 +12,6 @@
 #include "Action.h"
 #include "MooseEnum.h"
 
-class GeneralizedPlaneStrainActionPD;
-
 /**
  * Action class to setup peridynamic generalized plane strain models
  */

@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CheckIntegrityAction;
-
 class CheckIntegrityAction : public Action
 {
 public:

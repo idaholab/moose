@@ -11,8 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityVDW;
-
 /**
  * Density of a gas according to the van der Waals expression
  * (P + n^2 a/V^2)(V - nb) = nRT

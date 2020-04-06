@@ -13,7 +13,6 @@
 #include "Control.h"
 
 // Forward declarations
-class SamplerReceiver;
 class Function;
 
 /**

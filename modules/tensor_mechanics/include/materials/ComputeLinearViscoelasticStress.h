@@ -12,8 +12,6 @@
 #include "ComputeLinearElasticStress.h"
 #include "LinearViscoelasticityBase.h"
 
-class ComputeLinearViscoelasticStress;
-
 /**
  * Computes the stress of a linear viscoelastic material, using total
  * small strains. The mechanical strain is decomposed into the elastic

@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class TestNewmarkTI;
-
 class TestNewmarkTI : public AuxKernel
 {
 public:

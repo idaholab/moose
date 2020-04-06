@@ -11,8 +11,6 @@
 
 #include "TimeDerivative.h"
 
-class CoupledBEEquilibriumSub;
-
 /**
  * Time derivative of primary species in given equilibrium species
  */

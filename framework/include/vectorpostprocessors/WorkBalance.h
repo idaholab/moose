@@ -11,8 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class WorkBalance;
-
 /**
  * Compute several metrics for each MPI process.
  *

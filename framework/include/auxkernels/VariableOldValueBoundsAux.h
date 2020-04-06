@@ -12,7 +12,6 @@
 #include "BoundsAuxBase.h"
 
 // Forward Declarations
-class VariableOldValueBoundsAux;
 
 /**
  * Provides a bound of a variable using its old value.

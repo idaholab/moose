@@ -11,8 +11,6 @@
 
 #include "PorousFlowDarcyVelocityComponent.h"
 
-class PorousFlowDarcyVelocityComponentLowerDimensional;
-
 /**
  * Computes a component of the Darcy velocity:
  * -k_ij * krel /(mu a) (nabla_j P - w_j)

@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class CrossTermBarrierFunctionBase;
 
 /**
  * CrossTermBarrierFunctionBase is the base to a set of free energy penalties that

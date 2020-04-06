@@ -11,8 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureVG;
-
 /**
  * van Genuchten form of capillary pressure.
  *

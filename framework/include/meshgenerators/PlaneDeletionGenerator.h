@@ -12,7 +12,6 @@
 #include "ElementDeletionGeneratorBase.h"
 
 // Forward declarations
-class PlaneDeletionGenerator;
 
 namespace libmesh
 {

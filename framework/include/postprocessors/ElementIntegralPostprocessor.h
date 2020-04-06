@@ -12,7 +12,6 @@
 #include "ElementPostprocessor.h"
 
 // Forward Declarations
-class ElementIntegralPostprocessor;
 
 /**
  * This postprocessor computes a volume integral of the specified variable.

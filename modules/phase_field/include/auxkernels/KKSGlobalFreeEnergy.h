@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class KKSGlobalFreeEnergy;
 
 /**
  * Compute the global free energy in the KKS Model

@@ -11,8 +11,6 @@
 
 #include "BoostDistribution.h"
 
-class BoostWeibullDistribution;
-
 /**
  * A class used to generate Weibull distribution via Boost
  */

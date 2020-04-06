@@ -13,8 +13,6 @@
 
 #include "MutableCoefficientsInterface.h"
 
-class MultiAppFXTransfer;
-
 /**
  * Transfers mutable coefficient arrays between supported object types
  */

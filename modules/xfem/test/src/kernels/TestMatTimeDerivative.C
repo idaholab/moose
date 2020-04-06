@@ -11,11 +11,10 @@
 
 registerMooseObject("XFEMTestApp", TestMatTimeDerivative);
 
-template <>
 InputParameters
-validParams<TestMatTimeDerivative>()
+TestMatTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop_value",
                                                 "Material "
                                                 "property to multiply by time "

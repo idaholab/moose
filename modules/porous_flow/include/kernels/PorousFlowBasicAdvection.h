@@ -12,8 +12,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowBasicAdvection;
-
 /**
  * Kernel = grad(test) * darcy_velocity * u
  */

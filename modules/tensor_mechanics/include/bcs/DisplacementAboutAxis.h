@@ -15,7 +15,6 @@
 #include "ColumnMajorMatrix.h"
 
 // Forward Declarations
-class DisplacementAboutAxis;
 class Function;
 
 void addDisplacementAboutAxisParams(InputParameters & params);

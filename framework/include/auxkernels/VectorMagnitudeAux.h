@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-class VectorMagnitudeAux;
-
 /**
  * Computes the magnitude of a vector whose components are given by up
  * to three coupled variables.

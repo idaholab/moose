@@ -11,8 +11,6 @@
 
 #include "ParametricMaterialBasePD.h"
 
-class ComputeSmallStrainMaterialBaseBPD;
-
 /**
  * Base material class for bond based peridynamic solid mechanics models
  */

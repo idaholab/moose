@@ -12,8 +12,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowDesorpedMassTimeDerivative;
-
 /**
  * Kernel = (desorped_mass - desorped_mass_old)/dt
  * It is NOT lumped to the nodes

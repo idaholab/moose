@@ -10,11 +10,10 @@
 #include "MeshModifier.h"
 #include "MooseMesh.h"
 
-template <>
 InputParameters
-validParams<MeshModifier>()
+MeshModifier::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addParam<std::vector<std::string>>(
       "depends_on",
       "The MeshModifiers that this modifier relies upon (i.e. must execute before this one)");

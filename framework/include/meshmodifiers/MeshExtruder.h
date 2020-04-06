@@ -12,8 +12,6 @@
 #include "MeshModifier.h"
 #include "libmesh/mesh_generation.h"
 
-class MeshExtruder;
-
 class MeshExtruder : public MeshModifier
 {
 public:

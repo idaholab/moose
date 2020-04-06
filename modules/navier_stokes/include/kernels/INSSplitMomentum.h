@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSSplitMomentum;
 
 /**
  * This class computes the "split" momentum equation residual.  In the

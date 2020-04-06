@@ -11,8 +11,6 @@
 
 #include "ComputeFiniteStrain.h"
 
-class ComputeRSphericalFiniteStrain;
-
 /**
  * ComputeRSphericalFiniteStrain defines a strain increment and a rotation increment
  * for finite strains in 1D spherical symmetry geometries.  The strains in the

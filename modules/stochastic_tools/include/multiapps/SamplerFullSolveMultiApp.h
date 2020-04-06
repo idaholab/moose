@@ -15,7 +15,6 @@
 
 #include "StochasticToolsTypes.h"
 
-class SamplerFullSolveMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
 

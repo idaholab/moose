@@ -14,8 +14,6 @@
 
 class PiecewiseLinear;
 
-class IsotropicTempDepHardening;
-
 class IsotropicTempDepHardening : public IsotropicPlasticity
 {
 public:

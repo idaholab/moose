@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowMassFraction;
-
 /**
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from the individual mass fraction variables

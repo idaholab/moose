@@ -12,9 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class SwitchingFunctionPenalty;
-
 /**
  * SwitchingFunctionPenalty is a constraint kernel adds a penalty
  * to each order parameter to

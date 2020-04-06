@@ -11,8 +11,6 @@
 
 #include "Marker.h"
 
-class UniformMarker;
-
 class UniformMarker : public Marker
 {
 public:

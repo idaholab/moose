@@ -16,7 +16,6 @@
 
 // Forward declarations
 class FEProblemBase;
-class MoosePreconditioner;
 
 namespace libMesh
 {

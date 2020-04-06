@@ -13,7 +13,6 @@
 
 #include "libmesh/ghosting_functor.h"
 
-class GhostingAux;
 class GhostingUserObject;
 
 class GhostingAux : public AuxKernel

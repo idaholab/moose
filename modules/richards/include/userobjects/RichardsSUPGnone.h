@@ -11,8 +11,6 @@
 
 #include "RichardsSUPG.h"
 
-class RichardsSUPGnone;
-
 /**
  * no Richards SUPG.
  * Use this class if you don't want any SUPG for the Richards equations in your simulation

@@ -11,7 +11,6 @@
 
 #include "AuxKernel.h"
 
-class TwoPhaseAverageDensityAux;
 class TwoPhaseFluidProperties;
 class SinglePhaseFluidProperties;
 

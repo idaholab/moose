@@ -14,8 +14,6 @@
 #include "Function.h"
 #include "RichardsSumQuantity.h"
 
-class PeacemanBorehole;
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */

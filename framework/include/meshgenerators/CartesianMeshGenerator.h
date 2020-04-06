@@ -12,8 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class CartesianMeshGenerator;
-
 class CartesianMeshGenerator : public MeshGenerator
 {
 public:

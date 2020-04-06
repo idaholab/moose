@@ -14,10 +14,6 @@
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetForcingFunctionSUPG;
-
-declareADValidParams(LevelSetForcingFunctionSUPG);
 
 /**
  * SUPG stabilization term for a forcing function.

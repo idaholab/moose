@@ -12,7 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class TricrystalTripleJunctionIC;
 
 /**
  * TricrystalTripleJunctionIC creates a 3-grain structure with a triple junction

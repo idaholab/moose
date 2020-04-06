@@ -13,7 +13,6 @@
 #include "ConservedNormalNoiseVeneer.h"
 
 // Forward delcarations
-class ConservedNormalNoise;
 
 /**
  * Userobject that generates a normaly distributed random number

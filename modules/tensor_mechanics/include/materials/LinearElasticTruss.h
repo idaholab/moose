@@ -11,8 +11,6 @@
 
 #include "TrussMaterial.h"
 
-class LinearElasticTruss;
-
 class LinearElasticTruss : public TrussMaterial
 {
 public:

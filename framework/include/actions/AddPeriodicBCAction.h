@@ -11,7 +11,6 @@
 
 #include "Action.h"
 
-class AddPeriodicBCAction;
 class MooseMesh;
 namespace libMesh
 {

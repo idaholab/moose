@@ -14,8 +14,6 @@
 #include "RankTwoTensor.h"
 #include "RotationTensor.h"
 
-class ComputeElasticityTensorCP;
-
 /**
  * ComputeElasticityTensorCP defines an elasticity tensor material object for crystal plasticity.
  */

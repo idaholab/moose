@@ -3,7 +3,6 @@
 #include "SideIntegralPostprocessor.h"
 
 // Forward Declarations
-class ConvectiveHeatTransferSideIntegral;
 
 /**
  * Computes the total convective heat transfer across a boundary

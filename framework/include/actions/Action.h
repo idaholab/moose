@@ -21,7 +21,6 @@
 #include <string>
 #include <ostream>
 
-class Action;
 class ActionWarehouse;
 class ActionFactory;
 class MooseMesh;

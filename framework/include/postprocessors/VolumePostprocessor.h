@@ -12,7 +12,6 @@
 #include "ElementIntegralPostprocessor.h"
 
 // Forward Declarations
-class VolumePostprocessor;
 
 /**
  * This postprocessor computes the volume of a specified block.

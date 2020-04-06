@@ -25,7 +25,6 @@ class GhostingFunctor;
 }
 
 class MooseMesh;
-class SubProblem;
 class Factory;
 class Assembly;
 class MooseVariableFEBase;

@@ -13,7 +13,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class TransformGenerator;
 
 class TransformGenerator : public MeshGenerator
 {

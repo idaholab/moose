@@ -11,8 +11,6 @@
 
 #include "ArrayKernel.h"
 
-class ArrayDiffusion;
-
 class ArrayDiffusion : public ArrayKernel
 {
 public:

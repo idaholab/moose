@@ -12,11 +12,6 @@
 #include "ADViscoplasticityStressUpdateBase.h"
 #include "ADSingleVariableReturnMappingSolution.h"
 
-template <ComputeStage>
-class ADViscoplasticityStressUpdate;
-
-declareADValidParams(ADViscoplasticityStressUpdate);
-
 template <ComputeStage compute_stage>
 class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase<compute_stage>,
                                       public ADSingleVariableReturnMappingSolution<compute_stage>

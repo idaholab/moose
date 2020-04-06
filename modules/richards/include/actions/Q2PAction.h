@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class Q2PAction;
-
 class Q2PAction : public Action
 {
 public:

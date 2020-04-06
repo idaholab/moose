@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class QuotientAux;
 
 /**
  * This auxiliary kernel computes its value by dividing "numerator" by

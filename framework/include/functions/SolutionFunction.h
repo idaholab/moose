@@ -12,7 +12,6 @@
 #include "Function.h"
 
 // Forward decleration
-class SolutionFunction;
 class SolutionUserObject;
 
 /** Function for reading a solution from file

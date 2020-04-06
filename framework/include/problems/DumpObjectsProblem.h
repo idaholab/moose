@@ -11,7 +11,6 @@
 
 #include "FEProblemBase.h"
 
-class DumpObjectsProblem;
 class DumpObjectsNonlinearSystem;
 
 /**

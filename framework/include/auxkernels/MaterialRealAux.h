@@ -13,7 +13,6 @@
 #include "MaterialAuxBase.h"
 
 // Forward Declarations
-class MaterialRealAux;
 
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable

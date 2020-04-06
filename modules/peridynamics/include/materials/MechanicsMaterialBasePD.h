@@ -11,8 +11,6 @@
 
 #include "PeridynamicsMaterialBase.h"
 
-class MechanicsMaterialBasePD;
-
 /**
  * Base material class for peridynamic solid mechanics models
  */

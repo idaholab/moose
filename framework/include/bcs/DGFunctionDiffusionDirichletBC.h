@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class DGFunctionDiffusionDirichletBC;
 
 /**
  * Implements a simple BC for DG

@@ -12,7 +12,6 @@
 #include "Executioner.h"
 
 // Forward Declarations
-class EigenExecutionerBase;
 class MooseEigenSystem;
 class FEProblemBase;
 

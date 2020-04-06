@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowConstantBiotModulus;
-
 /**
  * Material designed to provide a time-invariant
  * Biot Modulus, M, where

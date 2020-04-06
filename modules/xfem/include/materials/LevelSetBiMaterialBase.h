@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class LevelSetBiMaterialBase;
 class XFEM;
 
 /**

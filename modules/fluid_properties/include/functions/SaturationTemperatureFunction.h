@@ -12,7 +12,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class SaturationTemperatureFunction;
 class TwoPhaseFluidProperties;
 
 /**

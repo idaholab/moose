@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddTransferAction;
-
 class AddTransferAction : public MooseObjectAction
 {
 public:

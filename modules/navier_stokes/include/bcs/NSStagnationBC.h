@@ -12,7 +12,6 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class NSStagnationBC;
 class IdealGasFluidProperties;
 
 // Specialization required of all user-level Moose objects

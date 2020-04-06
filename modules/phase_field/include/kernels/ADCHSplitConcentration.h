@@ -12,10 +12,6 @@
 #include "ADKernel.h"
 
 // Forward Declaration
-template <ComputeStage>
-class ADCHSplitConcentration;
-
-declareADValidParams(ADCHSplitConcentration);
 
 /**
  * Solves Cahn-Hilliard equation using chemical potential as non-linear variable

@@ -11,8 +11,6 @@
 
 #include "Material.h"
 
-class ComputeEigenstrainBeamBase;
-
 /**
  * ComputeEigenstrainBeamBase is the base class for beam eigenstrain vectors
  */

@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalMaxValue;
 
 /**
  * This class computes a maximum (over all the nodal values) of the

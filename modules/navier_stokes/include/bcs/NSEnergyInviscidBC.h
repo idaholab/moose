@@ -13,7 +13,6 @@
 #include "NSPressureDerivs.h"
 
 // Forward Declarations
-class NSEnergyInviscidBC;
 
 /**
  * This class corresponds to the inviscid part of the "natural"

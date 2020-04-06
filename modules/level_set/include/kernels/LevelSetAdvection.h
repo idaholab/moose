@@ -14,10 +14,6 @@
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetAdvection;
-
-declareADValidParams(LevelSetAdvection);
 
 /**
  * Advection Kernel for the levelset equation.

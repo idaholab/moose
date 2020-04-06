@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class CoupledForce;
 
 /**
  * Simple class to demonstrate off diagonal Jacobian contributions.

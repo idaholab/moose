@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class SinNeumannBC;
 
 /**
  * Implements a spatially-constant, time-varying flux boundary

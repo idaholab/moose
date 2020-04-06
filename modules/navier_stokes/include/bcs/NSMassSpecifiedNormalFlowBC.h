@@ -12,7 +12,6 @@
 #include "NSMassBC.h"
 
 // Forward Declarations
-class NSMassSpecifiedNormalFlowBC;
 
 /**
  * This class implements the mass equation boundary term with

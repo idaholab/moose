@@ -11,8 +11,6 @@
 
 #include "NodalBC.h"
 
-class PostprocessorDirichletBC;
-
 /**
  * Boundary condition of a Dirichlet type
  *

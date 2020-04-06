@@ -13,7 +13,6 @@
 #include "NSPressureDerivs.h"
 
 // ForwardDeclarations
-class NSMomentumInviscidFluxWithGradP;
 
 class NSMomentumInviscidFluxWithGradP : public NSKernel
 {

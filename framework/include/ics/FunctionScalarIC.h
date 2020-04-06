@@ -12,7 +12,6 @@
 #include "ScalarInitialCondition.h"
 
 // Forward Declarations
-class FunctionScalarIC;
 class Function;
 
 class FunctionScalarIC : public ScalarInitialCondition

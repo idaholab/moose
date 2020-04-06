@@ -12,8 +12,6 @@
 #include "SlopeLimitingBase.h"
 #include "SlopeReconstructionBase.h"
 
-class SlopeLimitingMultiDBase;
-
 /**
  * Base class for multi-dimensional slope limiting to limit
  * the slopes of cell average variables

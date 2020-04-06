@@ -11,8 +11,6 @@
 
 #include "MooseApp.h"
 
-class XFEMApp;
-
 class XFEMApp : public MooseApp
 {
 public:

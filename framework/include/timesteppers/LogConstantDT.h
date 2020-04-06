@@ -11,8 +11,6 @@
 
 #include "TimeStepper.h"
 
-class LogConstantDT;
-
 /** Simple time-stepper which imposes a time step constant in the logarithmic
  * space */
 class LogConstantDT : public TimeStepper

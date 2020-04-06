@@ -18,11 +18,6 @@
   using INSADMaterial<compute_stage>::_velocity;                                                   \
   using INSADMaterial<compute_stage>::_transient_term
 
-template <ComputeStage>
-class INSADMaterial;
-
-declareADValidParams(INSADMaterial);
-
 template <ComputeStage compute_stage>
 class INSADMaterial : public ADMaterial<compute_stage>
 {

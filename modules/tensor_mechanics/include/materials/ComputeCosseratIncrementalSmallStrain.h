@@ -11,8 +11,6 @@
 
 #include "ComputeIncrementalStrainBase.h"
 
-class ComputeCosseratIncrementalSmallStrain;
-
 /**
  * ComputeCosseratIncrementalSmallStrain defines various incremental versions
  * of the Cossserat strain tensor, assuming small strains.

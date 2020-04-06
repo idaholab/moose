@@ -12,8 +12,6 @@
 #include "Action.h"
 #include "UserObjectInterface.h"
 
-class XFEMAction;
-
 class XFEMAction : public Action
 {
 public:

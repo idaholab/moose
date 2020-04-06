@@ -11,7 +11,6 @@
 
 #include "AuxKernelBasePD.h"
 
-class BoundaryOffsetPD;
 class PeridynamicsMesh;
 
 /**

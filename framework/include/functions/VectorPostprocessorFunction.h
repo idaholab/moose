@@ -14,7 +14,6 @@
 #include "VectorPostprocessorInterface.h"
 
 // Forward declarations
-class VectorPostprocessorFunction;
 
 /**
  * Function which provides a piecewise continuous linear interpolation

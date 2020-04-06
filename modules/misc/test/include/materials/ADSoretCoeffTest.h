@@ -11,11 +11,6 @@
 
 #include "ADMaterial.h"
 
-template <ComputeStage>
-class ADSoretCoeffTest;
-
-declareADValidParams(ADSoretCoeffTest);
-
 template <ComputeStage compute_stage>
 class ADSoretCoeffTest : public ADMaterial<compute_stage>
 {

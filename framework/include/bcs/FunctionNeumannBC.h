@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class FunctionNeumannBC;
 class Function;
 
 /**

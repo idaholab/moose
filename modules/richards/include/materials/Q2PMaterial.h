@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class Q2PMaterial;
 
 /**
  * Q2P Material.  Defines permeability, porosity and gravity

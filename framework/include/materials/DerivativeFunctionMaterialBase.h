@@ -12,7 +12,6 @@
 #include "FunctionMaterialBase.h"
 
 // Forward Declarations
-class DerivativeFunctionMaterialBase;
 
 /**
  * Material base class to compute a function and its derivatives.

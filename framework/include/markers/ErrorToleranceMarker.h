@@ -11,8 +11,6 @@
 
 #include "IndicatorMarker.h"
 
-class ErrorToleranceMarker;
-
 class ErrorToleranceMarker : public IndicatorMarker
 {
 public:

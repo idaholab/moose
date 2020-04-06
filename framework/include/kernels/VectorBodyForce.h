@@ -12,7 +12,6 @@
 #include "VectorKernel.h"
 
 // Forward Declarations
-class VectorBodyForce;
 class Function;
 
 /**

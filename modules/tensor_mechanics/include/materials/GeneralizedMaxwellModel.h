@@ -11,8 +11,6 @@
 
 #include "GeneralizedMaxwellBase.h"
 
-class GeneralizedMaxwellModel;
-
 /**
  * This class is an implementation of a generalized Maxwell model
  * with constant mechanical properties. It consists of an arbitrary number

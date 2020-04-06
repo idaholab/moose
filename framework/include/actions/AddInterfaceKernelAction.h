@@ -11,8 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddInterfaceKernelAction;
-
 class AddInterfaceKernelAction : public MooseObjectAction
 {
 public:

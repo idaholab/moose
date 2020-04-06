@@ -12,8 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticMeanCap;
-
 /**
  * Class that limits the mean stress
  * Yield function = a*mean_stress - strength

@@ -13,7 +13,6 @@
 #include "Moose.h"
 
 // Forward declarations
-class FileRangeBuilder;
 class InputParameters;
 
 template <typename T>

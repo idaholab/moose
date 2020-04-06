@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSChorinPressurePoisson;
 
 /**
  * This class computes the pressure Poisson solve which is part of

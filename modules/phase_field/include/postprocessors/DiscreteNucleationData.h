@@ -12,8 +12,6 @@
 #include "GeneralPostprocessor.h"
 #include "DiscreteNucleationInserterBase.h"
 
-class DiscreteNucleationData;
-
 /**
  * Output diagnostic data on a DiscreteNucleationInserter
  */

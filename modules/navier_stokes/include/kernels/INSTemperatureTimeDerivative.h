@@ -12,7 +12,6 @@
 #include "TimeDerivative.h"
 
 // Forward Declarations
-class INSTemperatureTimeDerivative;
 
 /**
  * This class computes the time derivative for the incompressible

@@ -12,7 +12,6 @@
 #include "SmoothCircleIC.h"
 
 // Forward Declarations
-class RndSmoothCircleIC;
 
 /**
  * RndSmoothcircleIC creates a smooth circle with a random distribution

@@ -12,7 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class AverageNodalVariableValue;
 
 class AverageNodalVariableValue : public NodalVariablePostprocessor
 {

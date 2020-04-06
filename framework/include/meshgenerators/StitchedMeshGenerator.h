@@ -14,7 +14,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class StitchedMeshGenerator;
 
 /**
  * Generates individual elements given a list of nodal positions

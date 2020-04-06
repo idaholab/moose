@@ -13,7 +13,6 @@
 #include "FunctionParserUtils.h"
 
 // Forward Declarations
-class ParsedAux;
 
 /**
  * AuxKernel that evaluates a parsed function expression

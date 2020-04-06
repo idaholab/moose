@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class GenericConstant2DArray;
 
 class GenericConstant2DArray : public Material
 {

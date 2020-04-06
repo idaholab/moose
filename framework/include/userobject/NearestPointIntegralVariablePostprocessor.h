@@ -14,7 +14,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "ElementVariableVectorPostprocessor.h"
 // Forward Declarations
-class NearestPointIntegralVariablePostprocessor;
 
 /**
  * Given a list of points this object computes the variable integral

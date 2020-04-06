@@ -12,7 +12,6 @@
 #include "VaporMixtureFluidProperties.h"
 #include "NaNInterface.h"
 
-class IdealRealGasMixtureFluidProperties;
 class SinglePhaseFluidProperties;
 
 /**

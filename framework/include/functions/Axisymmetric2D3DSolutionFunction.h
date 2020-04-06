@@ -12,7 +12,6 @@
 #include "Function.h"
 
 // Forward decleration
-class Axisymmetric2D3DSolutionFunction;
 class SolutionUserObject;
 
 /**

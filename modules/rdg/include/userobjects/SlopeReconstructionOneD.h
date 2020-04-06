@@ -12,7 +12,6 @@
 #include "SlopeReconstructionBase.h"
 
 // Forward Declarations
-class SlopeReconstructionOneD;
 
 /**
  * One-dimensional piecewise linear slope reconstruction

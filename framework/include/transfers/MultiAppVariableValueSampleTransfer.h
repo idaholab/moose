@@ -13,7 +13,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class MultiAppVariableValueSampleTransfer;
 
 /**
  * Samples a variable's value in the Master domain at the point where

@@ -15,8 +15,6 @@
 #define usingComputeShellStressMembers usingMaterialMembers
 
 // Forward Declarations
-template <ComputeStage>
-class ADComputeShellStress;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -30,8 +28,6 @@ namespace libMesh
 {
 class QGauss;
 }
-
-declareADValidParams(ADComputeShellStress);
 
 template <ComputeStage compute_stage>
 class ADComputeShellStress : public ADMaterial<compute_stage>

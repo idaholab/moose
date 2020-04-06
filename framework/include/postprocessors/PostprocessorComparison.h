@@ -11,8 +11,6 @@
 
 #include "ComparisonPostprocessor.h"
 
-class PostprocessorComparison;
-
 /**
  * Compares two post-processors and produces a boolean value
  *

@@ -11,8 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowThermalConductivityBase;
-
 /**
  * Base class for materials that provide thermal conducitivity
  */

@@ -12,7 +12,6 @@
 #include "TimeDerivative.h"
 
 // Forward Declaration
-class PrimaryTimeDerivative;
 
 /**
  * Define the Kernel for a CoupledConvectionReactionSub operator that looks like:

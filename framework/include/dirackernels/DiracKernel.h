@@ -28,7 +28,6 @@
 
 // Forward Declarations
 class Assembly;
-class DiracKernel;
 class SubProblem;
 class MooseMesh;
 

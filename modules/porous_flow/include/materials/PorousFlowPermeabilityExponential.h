@@ -11,8 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityExponential;
-
 /**
  * Material designed to provide the permeability tensor which is calculated
  * from porosity using the equation:

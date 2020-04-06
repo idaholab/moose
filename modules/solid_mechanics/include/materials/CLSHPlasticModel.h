@@ -11,8 +11,6 @@
 
 #include "ReturnMappingModel.h"
 
-class CLSHPlasticModel;
-
 /**
  * Plastic material
  */

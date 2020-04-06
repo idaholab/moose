@@ -11,8 +11,6 @@
 
 #include "FunctionPenaltyDirichletBC.h"
 
-class FXValuePenaltyBC;
-
 /**
  * Defines an FX-based BC that strongly encourages the values to match
  */

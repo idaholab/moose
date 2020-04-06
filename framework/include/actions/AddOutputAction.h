@@ -13,7 +13,6 @@
 #include "MooseObjectAction.h"
 
 // Forward declerations
-class AddOutputAction;
 
 /**
  * Action for creating output objects

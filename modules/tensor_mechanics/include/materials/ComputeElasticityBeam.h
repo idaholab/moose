@@ -15,9 +15,6 @@
  * ComputeElasticityBeam computes the equivalent of the elasticity tensor for the beam element,
  * which are vectors of material translational and flexural stiffness
  */
-
-class ComputeElasticityBeam;
-
 class ComputeElasticityBeam : public Material
 {
 public:

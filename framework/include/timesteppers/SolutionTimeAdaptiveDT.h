@@ -13,8 +13,6 @@
 
 #include <fstream>
 
-class SolutionTimeAdaptiveDT;
-
 /**
  *
  */

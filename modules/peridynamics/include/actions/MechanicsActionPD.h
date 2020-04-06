@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class MechanicsActionPD;
-
 /**
  * Action class to setup peridynamic models for solid mechanics problems
  */

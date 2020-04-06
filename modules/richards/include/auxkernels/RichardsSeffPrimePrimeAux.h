@@ -14,7 +14,6 @@
 #include "RichardsSeff.h"
 
 // Forward Declarations
-class RichardsSeffPrimePrimeAux;
 
 /**
  * Calculates derivative of effective saturation wrt specified porepressures

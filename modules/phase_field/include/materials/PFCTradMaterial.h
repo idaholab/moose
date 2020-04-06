@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class PFCTradMaterial;
 
 class PFCTradMaterial : public Material
 {

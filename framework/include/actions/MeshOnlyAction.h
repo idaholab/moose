@@ -13,8 +13,6 @@
 
 #include <string>
 
-class MeshOnlyAction;
-
 class MeshOnlyAction : public Action
 {
 public:

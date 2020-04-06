@@ -12,7 +12,6 @@
 #include "IntegratedBC.h"
 
 class Function;
-class Pressure;
 
 /**
  * Pressure applies a pressure on a given boundary in the direction defined by component

@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ThirdPhaseSuppressionMaterial;
 
 /**
  * OPInterfaceBarrierMaterial is a Free Energy Penalty contribution

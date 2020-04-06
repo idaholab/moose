@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class INSStressComponentAux;
 
 /**
  * Computes h_min / |u|

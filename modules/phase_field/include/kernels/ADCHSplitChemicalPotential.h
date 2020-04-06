@@ -12,10 +12,6 @@
 #include "ADKernel.h"
 
 // Forward Declaration
-template <ComputeStage>
-class ADCHSplitChemicalPotential;
-
-declareADValidParams(ADCHSplitChemicalPotential);
 
 /**
  * Solves chemical potential in a weak sense (mu-mu_prop=0).  Can be coupled to Cahn-Hilliard

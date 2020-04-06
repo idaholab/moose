@@ -11,11 +11,6 @@
 
 #include "ADComputeIncrementalSmallStrain.h"
 
-template <ComputeStage>
-class ADComputeRSphericalIncrementalStrain;
-
-declareADValidParams(ADComputeRSphericalIncrementalStrain);
-
 /**
  * ADComputeRSphericalIncrementalStrain defines a strain increment only
  * for small strains in 1D spherical symmetry geometries.  The strains in the

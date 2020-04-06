@@ -13,7 +13,6 @@
 #include "Output.h"
 
 // Forward declerations
-class MaterialPropertyDebugOutput;
 class MaterialBase;
 
 /**

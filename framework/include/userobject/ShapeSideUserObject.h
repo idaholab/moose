@@ -13,7 +13,6 @@
 #include "ShapeUserObject.h"
 
 // Forward Declarations
-class ShapeSideUserObject;
 
 /**
  * SideUserObject class in which the _phi and _grad_phi shape function data

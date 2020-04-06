@@ -12,8 +12,6 @@
 #include "MeshGenerator.h"
 #include "libmesh/point.h"
 
-class SphereSurfaceMeshGenerator;
-
 /**
  * Create a sphere surface mesh based on the recursive subdivision of the faces
  * of a regular icosahedron.

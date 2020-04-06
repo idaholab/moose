@@ -16,7 +16,6 @@
 #include <string>
 
 // Forward Declarations
-class VectorFunctionIC;
 class InputParameters;
 
 namespace libMesh

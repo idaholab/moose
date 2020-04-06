@@ -13,7 +13,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class InertialTorque;
 
 /**
  * Computes the inertial torque, which is

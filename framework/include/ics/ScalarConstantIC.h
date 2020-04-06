@@ -12,7 +12,6 @@
 #include "ScalarInitialCondition.h"
 
 // Forward Declarations
-class ScalarConstantIC;
 
 /**
  * ScalarConstantIC just returns a constant value.

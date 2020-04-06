@@ -11,8 +11,6 @@
 
 #include "Elastic.h"
 
-class MacroElastic;
-
 class MacroElastic : public Elastic
 {
 public:

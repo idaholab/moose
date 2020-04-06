@@ -11,8 +11,6 @@
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
-class NodalDisplacementDifferenceL2NormPD;
-
 /**
  * Postprocessor class to compute L2 norm of displacements difference between prediction and
  * analytical solution for peridynamic model

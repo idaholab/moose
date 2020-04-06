@@ -15,9 +15,6 @@
 /**
  * ComputeBeamResultants computes forces and moments using elasticity
  */
-
-class ComputeBeamResultants;
-
 class ComputeBeamResultants : public Material
 {
 public:

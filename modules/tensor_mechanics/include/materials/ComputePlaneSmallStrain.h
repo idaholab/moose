@@ -12,8 +12,6 @@
 #include "Compute2DSmallStrain.h"
 #include "SubblockIndexProvider.h"
 
-class ComputePlaneSmallStrain;
-
 /**
  * ComputePlaneSmallStrain defines small strains under generalized
  * plane strain and plane stress assumptions, where the out of plane strain

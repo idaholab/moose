@@ -14,7 +14,6 @@
 #include <unordered_map>
 
 // Forward Declarations
-class ConservedNoiseBase;
 
 /**
  * This Userobject is the base class of Userobjects that generate one

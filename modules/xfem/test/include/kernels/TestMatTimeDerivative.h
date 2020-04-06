@@ -11,15 +11,11 @@
 
 #include "TimeDerivative.h"
 
-// Forward Declaration
-class TestMatTimeDerivative;
-
-template <>
-InputParameters validParams<TestMatTimeDerivative>();
-
 class TestMatTimeDerivative : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   TestMatTimeDerivative(const InputParameters & parameters);
 
 protected:

@@ -11,8 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureConst;
-
 /**
  * Constant capillary pressure
  */

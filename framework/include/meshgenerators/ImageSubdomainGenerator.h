@@ -13,7 +13,6 @@
 #include "MeshBaseImageSampler.h"
 
 // Forward declarations
-class ImageSubdomainGenerator;
 
 /**
  * MeshGenerator for defining a subdomain based on image data

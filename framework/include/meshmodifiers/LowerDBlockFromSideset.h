@@ -11,8 +11,6 @@
 
 #include "MeshModifier.h"
 
-class LowerDBlockFromSideset;
-
 /**
  * Creates lower-dimensional elements on the specified sidesets
  */

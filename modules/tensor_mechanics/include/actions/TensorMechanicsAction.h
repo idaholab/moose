@@ -11,8 +11,6 @@
 
 #include "TensorMechanicsActionBase.h"
 
-class TensorMechanicsAction;
-
 class TensorMechanicsAction : public TensorMechanicsActionBase
 {
 public:

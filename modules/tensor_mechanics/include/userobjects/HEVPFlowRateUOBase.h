@@ -13,8 +13,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class HEVPFlowRateUOBase;
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes computes flow rate, direction and derivatives

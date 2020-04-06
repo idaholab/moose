@@ -11,9 +11,6 @@
 
 #include "CHBulk.h"
 
-// Forward Declarations
-class CHMath;
-
 /**Cahn-Hilliard Kernel implementing the free energy f = 1/4(1-c^2)^2, such that grad df/dc = (3 c^2
  *-1) grad_c.
  * Most of the Cahn-Hilliard equation is implemented in CHBulk and CHInterface.  This kernel

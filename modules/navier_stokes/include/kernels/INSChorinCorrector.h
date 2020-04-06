@@ -12,7 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSChorinCorrector;
 
 /**
  * This class computes the "Chorin" Corrector equation in fully-discrete

@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class CopyNodalVarsAction;
-
 class CopyNodalVarsAction : public Action
 {
 public:

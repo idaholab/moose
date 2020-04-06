@@ -12,7 +12,6 @@
 #include "CrossTermBarrierFunctionBase.h"
 
 // Forward Declarations
-class CrossTermBarrierFunctionMaterial;
 
 /**
  * CrossTermBarrierFunctionMaterial adds free energy contribution on the interfaces

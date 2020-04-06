@@ -12,7 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class ProcessorIDAux;
 
 class ProcessorIDAux : public AuxKernel
 {

@@ -16,7 +16,6 @@
 #include <deque>
 
 // Forward declarations
-class Checkpoint;
 class MaterialPropertyStorage;
 
 /**

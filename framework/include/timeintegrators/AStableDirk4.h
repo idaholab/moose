@@ -12,7 +12,6 @@
 #include "TimeIntegrator.h"
 
 // Forward declarations
-class AStableDirk4;
 class LStableDirk4;
 
 /**

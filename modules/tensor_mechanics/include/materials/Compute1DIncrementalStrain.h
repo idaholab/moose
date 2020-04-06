@@ -11,8 +11,6 @@
 
 #include "ComputeIncrementalSmallStrain.h"
 
-class Compute1DIncrementalStrain;
-
 /**
  * Compute1DIncrementalStrain defines a strain increment only for incremental
  * small strains in 1D problems, handling strains in other two directions.

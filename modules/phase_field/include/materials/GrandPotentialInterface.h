@@ -11,8 +11,6 @@
 
 #include "Material.h"
 
-class GrandPotentialInterface;
-
 /**
  * Calculate Grand Potential interface parameters for a specified interfacial free energy and width.
  */

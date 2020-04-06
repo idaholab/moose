@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "PeridynamicsMesh.h"
 
-class GeneralUserObjectBasePD;
-
 class GeneralUserObjectBasePD : public GeneralUserObject
 {
 public:

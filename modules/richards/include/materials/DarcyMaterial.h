@@ -12,7 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class DarcyMaterial;
 
 /**
  * Defines the permeability tensor used in Darcy flow

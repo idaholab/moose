@@ -11,8 +11,6 @@
 
 #include "CrackFrontDefinition.h"
 
-class EnrichmentFunctionCalculation;
-
 /**
  * Perform calculation of enrichment function values and derivatives.
  */

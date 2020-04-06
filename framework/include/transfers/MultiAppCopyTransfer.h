@@ -12,7 +12,6 @@
 #include "MultiAppFieldTransfer.h"
 
 // Forward declarations
-class MultiAppCopyTransfer;
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.

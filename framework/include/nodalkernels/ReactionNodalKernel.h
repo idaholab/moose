@@ -11,8 +11,6 @@
 
 #include "NodalKernel.h"
 
-class ReactionNodalKernel;
-
 /**
  * Represents a nodal reaction term equivalent to $a * u$
  */

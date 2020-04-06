@@ -25,7 +25,6 @@
 #include "TaggingInterface.h"
 
 // Forward Declarations
-class InterfaceKernelBase;
 
 /**
  * InterfaceKernelBase is the base class for all InterfaceKernel type classes.

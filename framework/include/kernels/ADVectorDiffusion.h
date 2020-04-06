@@ -11,11 +11,6 @@
 
 #include "ADVectorKernel.h"
 
-template <ComputeStage>
-class ADVectorDiffusion;
-
-declareADValidParams(ADVectorDiffusion);
-
 template <ComputeStage compute_stage>
 class ADVectorDiffusion : public ADVectorKernel<compute_stage>
 {

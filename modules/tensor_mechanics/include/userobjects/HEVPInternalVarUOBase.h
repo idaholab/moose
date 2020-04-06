@@ -12,8 +12,6 @@
 #include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 
-class HEVPInternalVarUOBase;
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes integrate internal variables

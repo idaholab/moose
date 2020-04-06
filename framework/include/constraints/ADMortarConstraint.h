@@ -12,10 +12,6 @@
 #include "MortarConstraintBase.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADMortarConstraint;
-
-declareADValidParams(ADMortarConstraint);
 
 template <ComputeStage compute_stage>
 class ADMortarConstraint : public MortarConstraintBase

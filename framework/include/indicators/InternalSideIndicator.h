@@ -16,7 +16,6 @@
 #include "NeighborMooseVariableInterface.h"
 
 // Forward Declarations
-class InternalSideIndicator;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;

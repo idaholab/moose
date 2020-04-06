@@ -13,7 +13,6 @@
 #include "PointSamplerBase.h"
 
 // Forward Declarations
-class LineValueSampler;
 
 class LineValueSampler : public PointSamplerBase
 {

@@ -11,8 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ExplicitEuler;
-
 /**
  * Explicit Euler time integrator
  */

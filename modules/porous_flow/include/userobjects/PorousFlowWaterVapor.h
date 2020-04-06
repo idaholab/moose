@@ -12,7 +12,6 @@
 #include "PorousFlowFluidStateSingleComponentBase.h"
 
 class SinglePhaseFluidProperties;
-class PorousFlowWaterVapor;
 
 /**
  * Specialized class for water and vapor mixture using pressure and enthalpy.

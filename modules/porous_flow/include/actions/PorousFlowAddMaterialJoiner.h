@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-class PorousFlowAddMaterialJoiner;
-
 /**
  * Action to programatically add PorousFlowJoiner materials without having
  * to manually enter them in the input file
