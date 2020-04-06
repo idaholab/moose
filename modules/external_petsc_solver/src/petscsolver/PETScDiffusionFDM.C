@@ -82,6 +82,8 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
    */
   ierr = TSSetTimeStep(*ts, 0.2);
   CHKERRQ(ierr);
+  ierr = TSSetFromOptions(*ts);
+  CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
