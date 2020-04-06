@@ -41,7 +41,7 @@ protected:
   /// nucleus count changes performed by the inserter
   const DiscreteNucleationInserterBase::NucleusChanges & _changes_made;
 
-  /// total nucleation rate integrated over teh entire domain
+  /// total nucleation rate integrated over the entire domain
   const Real & _rate;
 
   /**
