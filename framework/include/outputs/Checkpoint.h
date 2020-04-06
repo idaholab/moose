@@ -37,7 +37,7 @@ struct CheckpointFileNames
   std::string restart;
 
   /// Filename for restartable data filename
-  std::vector<std::string> restart_meta_data;
+  std::set<std::string> restart_meta_data;
 };
 
 /**

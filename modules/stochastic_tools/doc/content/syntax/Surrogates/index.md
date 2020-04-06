@@ -48,7 +48,7 @@ File based data initialization happens by using the [!param](/Surrogates/Polynom
 The supplied file must have declared data with the same names and types as the get methods used
 within this class. Refer to [SurrogateTrainerOutput.md] for more information.
 
-It is also possible to use data directly from a trainer object bu using the
+It is also possible to use data directly from a trainer object by using the
 [!param](/Surrogates/PolynomialChaos/trainer) parameter. This method directly shares the same
 training data, so if the trainer updates the data the model has a reference to the same data.
 

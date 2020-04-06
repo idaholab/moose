@@ -57,7 +57,7 @@ private:
   // The following items are stored using declareModelData for use as a trained model.
 
   /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
-  unsigned int & _order;
+  const unsigned int & _order;
 
   /// Total number of parameters/dimensions
   unsigned int & _ndim;

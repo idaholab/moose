@@ -124,7 +124,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
       const std::string filename(current_file + suffix +
                                  _restartable_data_io.getRestartableDataExt());
 
-      curr_file_struct.restart_meta_data.push_back(filename);
+      curr_file_struct.restart_meta_data.emplace(filename);
       _restartable_data_io.writeRestartableData(filename, meta_data);
     }
   }

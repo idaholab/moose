@@ -18,16 +18,14 @@ PolynomialChaosTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
   params.addClassDescription("Computes and evaluates polynomial chaos surrogate model.");
-
-  // Training parameters
-  params.addParam<SamplerName>("sampler", "Training set defined by a sampler object.");
-  params.addParam<VectorPostprocessorName>(
+  params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
+  params.addRequiredParam<VectorPostprocessorName>(
       "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
-  params.addParam<std::string>(
+  params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
-  params.addParam<unsigned int>("order", "Maximum polynomial order.");
-  params.addParam<std::vector<DistributionName>>(
+  params.addRequiredParam<unsigned int>("order", "Maximum polynomial order.");
+  params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
 
   return params;
