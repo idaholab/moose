@@ -2890,6 +2890,10 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // Non-boundary restricted require face and neighbor objects
     else
     {
+      // TODO: we only need to do this if we have needs for face materials (e.g.
+      // FV, DG, etc.) - but currently we always do it.  Figure out how to fix
+      // this.
+
       // The name of the object being created, this is changed multiple times as objects are created
       // below
       std::string object_name;
