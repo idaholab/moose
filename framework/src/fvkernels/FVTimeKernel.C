@@ -13,18 +13,7 @@ InputParameters
 FVElementalKernel::validParams()
 {
   InputParameters params = FVKernel::validParams();
-
-  // TODO: this will need to eventually override/register a "FVElementalKernel"
-  // system string with the params instead of just using the parent class's
-  // FVKernel - this is a new feature added to attributes and params by andrew
-  // recently where the system attribute is grabbed from params instead of
-  // registered manually when objercts are added to the warehouse.  It is okay
-  // for FVTimeKernels to have a different system because they don't need to
-  // be retrieved with all FVKernels - they only need to ever be retrieved
-  // with volumetric fv kernels (i.e. source and time kernels).
-  // FV source kernels will also need to register their base as
-  // "FVElementalKernel".
-
+  params.registerSystemAttributeName("FVElementalKernel");
   return params;
 }
 
@@ -43,10 +32,8 @@ InputParameters
 FVTimeKernel<compute_stage>::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
-  params.registerSystemAttributeName("FVElementalKernel");
   return params;
 }
 
