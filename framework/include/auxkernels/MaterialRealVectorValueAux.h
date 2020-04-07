@@ -13,7 +13,10 @@
 #include "MaterialAuxBase.h"
 
 // Forward declarations
-class MaterialRealVectorValueAux;
+template <bool>
+class MaterialRealVectorValueAuxTempl;
+typedef MaterialRealVectorValueAuxTempl<false> MaterialRealVectorValueAux;
+typedef MaterialRealVectorValueAuxTempl<true> ADMaterialRealVectorValueAux;
 
 template <>
 InputParameters validParams<MaterialRealVectorValueAux>();
@@ -21,7 +24,8 @@ InputParameters validParams<MaterialRealVectorValueAux>();
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
  */
-class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
+template <bool is_ad>
+class MaterialRealVectorValueAuxTempl : public MaterialAuxBaseTempl<RealVectorValue, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -30,7 +34,7 @@ public:
    * Class constructor
    * @param parameters The input parameters for this object
    */
-  MaterialRealVectorValueAux(const InputParameters & parameters);
+  MaterialRealVectorValueAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real getRealValue() override;
@@ -38,4 +42,3 @@ protected:
   /// The vector component to output
   unsigned int _component;
 };
-

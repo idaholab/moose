@@ -11,6 +11,8 @@
 
 #include "MooseTypes.h"
 
+#include <vector>
+
 template <typename T, bool is_ad>
 struct MooseADWrapperStruct
 {
@@ -27,6 +29,12 @@ template <template <typename> class W>
 struct MooseADWrapperStruct<W<Real>, true>
 {
   typedef W<ADReal> type;
+};
+
+template <template <typename> class W>
+struct MooseADWrapperStruct<std::vector<W<Real>>, true>
+{
+  typedef std::vector<W<ADReal>> type;
 };
 
 template <typename T, bool is_ad>

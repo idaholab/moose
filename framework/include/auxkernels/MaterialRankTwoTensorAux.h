@@ -27,7 +27,7 @@ template <>
 InputParameters validParams<MaterialRankTwoTensorAux>();
 
 template <bool is_ad>
-class MaterialRankTwoTensorAuxTempl : public MaterialAuxGenericBase<RankTwoTensor, is_ad>
+class MaterialRankTwoTensorAuxTempl : public MaterialAuxBaseTempl<RankTwoTensor, is_ad>
 {
 public:
   static InputParameters validParams();

@@ -20,7 +20,7 @@ template <bool is_ad>
 InputParameters
 MaterialRankTwoTensorAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxGenericBase<RankTwoTensor, is_ad>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<RankTwoTensor, is_ad>::validParams();
   params.addClassDescription(
       "Access a component of a RankTwoTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ij for the tensor to output");
@@ -31,7 +31,7 @@ MaterialRankTwoTensorAuxTempl<is_ad>::validParams()
 template <bool is_ad>
 MaterialRankTwoTensorAuxTempl<is_ad>::MaterialRankTwoTensorAuxTempl(
     const InputParameters & parameters)
-  : MaterialAuxGenericBase<RankTwoTensor, is_ad>(parameters),
+  : MaterialAuxBaseTempl<RankTwoTensor, is_ad>(parameters),
     _i(this->template getParam<unsigned int>("i")),
     _j(this->template getParam<unsigned int>("j"))
 {

@@ -14,16 +14,16 @@
 
 // Forward declarations
 template <typename T = Real, bool is_ad = false>
-class MaterialAuxGenericBase;
+class MaterialAuxBaseTempl;
 
 template <>
-InputParameters validParams<MaterialAuxGenericBase<>>();
+InputParameters validParams<MaterialAuxBaseTempl<>>();
 
 /**
  * A base class for the various Material related AuxKernal objects
  */
 template <typename T, bool is_ad>
-class MaterialAuxGenericBase : public AuxKernel
+class MaterialAuxBaseTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -32,7 +32,7 @@ public:
    * Class constructor
    * @param parameters The input parameters for this object
    */
-  MaterialAuxGenericBase(const InputParameters & parameters);
+  MaterialAuxBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
@@ -53,7 +53,7 @@ private:
 
 template <typename T, bool is_ad>
 InputParameters
-MaterialAuxGenericBase<T, is_ad>::validParams()
+MaterialAuxBaseTempl<T, is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
@@ -65,7 +65,7 @@ MaterialAuxGenericBase<T, is_ad>::validParams()
 }
 
 template <typename T, bool is_ad>
-MaterialAuxGenericBase<T, is_ad>::MaterialAuxGenericBase(const InputParameters & parameters)
+MaterialAuxBaseTempl<T, is_ad>::MaterialAuxBaseTempl(const InputParameters & parameters)
   : AuxKernel(parameters),
     _prop(getGenericMaterialProperty<T, is_ad>("property")),
     _factor(getParam<Real>("factor")),
@@ -75,10 +75,10 @@ MaterialAuxGenericBase<T, is_ad>::MaterialAuxGenericBase(const InputParameters &
 
 template <typename T, bool is_ad>
 Real
-MaterialAuxGenericBase<T, is_ad>::computeValue()
+MaterialAuxBaseTempl<T, is_ad>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
 
 template <typename T = Real>
-using MaterialAuxBase = MaterialAuxGenericBase<T, false>;
+using MaterialAuxBase = MaterialAuxBaseTempl<T, false>;

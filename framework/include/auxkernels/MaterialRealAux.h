@@ -24,7 +24,7 @@ InputParameters validParams<MaterialRealAux>();
  * Object for passing a scalar, REAL material property to an AuxVariable
  */
 template <bool is_ad>
-class MaterialRealAuxTempl : public MaterialAuxGenericBase<Real, is_ad>
+class MaterialRealAuxTempl : public MaterialAuxBaseTempl<Real, is_ad>
 {
 public:
   static InputParameters validParams();

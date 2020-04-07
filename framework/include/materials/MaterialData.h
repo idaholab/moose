@@ -307,24 +307,46 @@ MaterialData::declarePropertyOlder(const std::string & prop_name)
 template <typename T>
 MaterialProperty<T> &
 MaterialData::declareHelper(MaterialProperties & props,
-                            const std::string & libmesh_dbg_var(prop_name),
+                            const std::string & prop_name,
                             unsigned int prop_id)
 {
   resizeProps<T>(prop_id);
   auto prop = dynamic_cast<MaterialProperty<T> *>(props[prop_id]);
-  mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
+  if (!prop)
+  {
+    // We didn't find a regular material property so we're going to error out. But we can check to
+    // see whether there is an AD property of the same name in the hope that we can give the user a
+    // more meaningful error message
+    auto ad_prop = dynamic_cast<ADMaterialProperty<T> *>(_props[prop_id]);
+    if (ad_prop)
+      mooseError("Attempting to declare regular material property " + prop_name +
+                 ", but it is already retrieved/declared as an AD property.");
+    else
+      mooseError("Material has no property named: " + prop_name);
+  }
   return *prop;
 }
 
 template <typename T>
 ADMaterialProperty<T> &
 MaterialData::declareADHelper(MaterialProperties & props,
-                              const std::string & libmesh_dbg_var(prop_name),
+                              const std::string & prop_name,
                               unsigned int prop_id)
 {
   resizePropsAD<T>(prop_id);
   auto prop = dynamic_cast<ADMaterialProperty<T> *>(props[prop_id]);
-  mooseAssert(prop != nullptr, "Internal error in declaring material property: " + prop_name);
+  if (!prop)
+  {
+    // We didn't find an AD material property so we're going to error out. But we can check to
+    // see whether there is a regular property of the same name in the hope that we can give the
+    // user a more meaningful error message
+    auto regular_prop = dynamic_cast<MaterialProperty<T> *>(_props[prop_id]);
+    if (regular_prop)
+      mooseError("Attempting to declare AD material property " + prop_name +
+                 ", but it is already retrieved/declared as a regular material property.");
+    else
+      mooseError("Material has no property named: " + prop_name);
+  }
   return *prop;
 }
 

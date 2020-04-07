@@ -18,14 +18,14 @@ template <bool is_ad>
 InputParameters
 MaterialRealAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxGenericBase<Real, is_ad>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<Real, is_ad>::validParams();
   params.addClassDescription("Outputs element volume-averaged material properties");
   return params;
 }
 
 template <bool is_ad>
 MaterialRealAuxTempl<is_ad>::MaterialRealAuxTempl(const InputParameters & parameters)
-  : MaterialAuxGenericBase<Real, is_ad>(parameters)
+  : MaterialAuxBaseTempl<Real, is_ad>(parameters)
 {
 }
 
