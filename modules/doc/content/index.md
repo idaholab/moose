@@ -30,6 +30,10 @@ MOOSE works on Mac OS, Linux, and Windows, and it is easy to [get started](getti
 !col-end!
 !row-end!
 
+# Remote Access Tips
+
+With many people working from home, you may want to take a few minutes to configure your system for remote access. Please see our [Remote HPC Connectivity](help/remotehpcconnectivity.md) instructions.
+
 !include upcoming_training.md
 
 !gallery! large=6

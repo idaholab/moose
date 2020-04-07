@@ -1,4 +1,4 @@
-# HPC Connectivity
+# Remote Access HPC Connectivity
 
 !alert warning
 Users should only follow these instructions if/when they are operating on a machine located out side
@@ -25,8 +25,14 @@ Host hpclogin
 
 ## Forwarding
 Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.inl.gov hpcgitlab.hpc.inl.gov hpcsc.inl.gov
-  ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
+  ProxyJump hpclogin
 ```
+
+!alert note
+If your remote username is different from your local username you will need to add `User` directives in the appropriate places. See the instructions [here](remoteconfigdifferentuser.md).
+
+!alert note
+If your SSH client version is from before 2017. The `ProxyJump` command in the config file above will not be recognized. You should strongly consider upgrading your client. If that is not possible replace the ProxyJump directive with the following line: `  ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p`
 
 ### SSH Tunnel
 
@@ -55,10 +61,13 @@ We say +least+ favorite, because once you adjust this setting, you will have to 
 once you disconnect for that browser to work again. There are other ways to switch back and forth
 by creating profiles. You may want to consult the Internet on how to set this up for your browser or OS.
 
+Finally, you may want to enter a few hostnames that you do +not+ want to go resolve through your proxy.
+These would typically be external INL systems that are resolvable on the Internet (e.g. +gitlab.software.inl.gov+, +www.inl.gov+). This will allow you to both internal and external INL sites when connected through the SOCKS proxy.
+
 ### Log in to HPC Gitlab
 
 Go to the following link: [https://hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov)
-Log in using your HPC id and password, +not+ your RSA token or PIN.+
+Log in using your HPC id and password, +not+ your RSA token or PIN.
 
 ### SSH Keys
 
@@ -86,3 +95,7 @@ git clone git@hpcgitlab.hpc.inl.gov:<your user id>/<project>.git
 
 Using the same browser you modified your socks proxy settings, you should be able to navigate to
 [https://moosebuild.inl.gov](https://moosebuild.inl.gov).
+
+### Visit the internal HPC webpage
+
+[https://hpcweb.hpc.inl.gov](https://hpcweb.hpc.inl.gov)
