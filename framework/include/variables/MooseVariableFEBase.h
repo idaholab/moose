@@ -130,7 +130,6 @@ public:
    */
   virtual void computeNodalValues() = 0;
 
-  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const = 0;
   /**
    * Get neighbor DOF indices for currently selected element
    * @return the neighbor degree of freedom indices

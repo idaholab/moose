@@ -108,6 +108,12 @@ public:
    */
   const DofMap & dofMap() const { return _dof_map; }
 
+  virtual void getDofIndices(const Elem * /*elem*/,
+                             std::vector<dof_id_type> & /*dof_indices*/) const
+  {
+    mooseError("not implemented");
+  };
+
   /**
    * Get local DoF indices
    */

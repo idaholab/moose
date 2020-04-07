@@ -1,0 +1,1175 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "MooseVariableDataFV.h"
+#include "Assembly.h"
+#include "MooseError.h"
+#include "DisplacedSystem.h"
+#include "TimeIntegrator.h"
+#include "MooseVariableFE.h"
+#include "MooseTypes.h"
+#include "ComputeFVFaceResidualsThread.h" // TODO: change this once FaceInfo is placed in its own file
+
+#include "libmesh/quadrature.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/system.h"
+#include "libmesh/type_n_tensor.h"
+
+template <typename OutputType>
+MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<OutputType> & var,
+                                                     const SystemBase & sys,
+                                                     THREAD_ID tid,
+                                                     Moose::ElementType element_type,
+                                                     const Elem * const & elem)
+
+  : _var(var),
+    _fe_type(_var.feType()),
+    _var_num(_var.number()),
+    _sys(sys),
+    _subproblem(_sys.subproblem()),
+    _tid(tid),
+    _assembly(_subproblem.assembly(_tid)),
+    _dof_map(_sys.dofMap()),
+    _element_type(element_type),
+    _count(var.count()),
+    _ad_zero(0),
+    _need_u_old(false),
+    _need_u_older(false),
+    _need_u_previous_nl(false),
+    _need_u_dot(false),
+    _need_ad_u_dot(false),
+    _need_u_dotdot(false),
+    _need_u_dot_old(false),
+    _need_u_dotdot_old(false),
+    _need_du_dot_du(false),
+    _need_du_dotdot_du(false),
+    _need_grad_old(false),
+    _need_grad_older(false),
+    _need_grad_previous_nl(false),
+    _need_grad_dot(false),
+    _need_grad_dotdot(false),
+    _need_second(false),
+    _need_second_old(false),
+    _need_second_older(false),
+    _need_second_previous_nl(false),
+    _need_curl(false),
+    _need_curl_old(false),
+    _need_curl_older(false),
+    _need_ad(false),
+    _need_ad_u(false),
+    _need_ad_grad_u(false),
+    _need_ad_second_u(false),
+    _need_dof_values(false),
+    _need_dof_values_old(false),
+    _need_dof_values_older(false),
+    _need_dof_values_previous_nl(false),
+    _need_dof_values_dot(false),
+    _need_dof_values_dotdot(false),
+    _need_dof_values_dot_old(false),
+    _need_dof_values_dotdot_old(false),
+    _need_dof_du_dot_du(false),
+    _need_dof_du_dotdot_du(false),
+    _time_integrator(nullptr),
+    _elem(elem),
+    _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false)
+{
+  auto num_vector_tags = _sys.subproblem().numVectorTags();
+
+  _vector_tags_dof_u.resize(num_vector_tags);
+  _need_vector_tag_dof_u.resize(num_vector_tags);
+
+  _need_vector_tag_u.resize(num_vector_tags);
+  _vector_tag_u.resize(num_vector_tags);
+
+  auto num_matrix_tags = _sys.subproblem().numMatrixTags();
+
+  _matrix_tags_dof_u.resize(num_matrix_tags);
+  _need_matrix_tag_dof_u.resize(num_matrix_tags);
+
+  _need_matrix_tag_u.resize(num_matrix_tags);
+  _matrix_tag_u.resize(num_matrix_tags);
+
+  _time_integrator = _sys.getTimeIntegrator();
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::setGeometry(Moose::GeometryType gm_type)
+{
+  switch (gm_type)
+  {
+    case Moose::Volume:
+    {
+      // TODO: set integration multiplier to cell volume
+      break;
+    }
+    case Moose::Face:
+    {
+      // TODO: set integration multiplier to face area
+      break;
+    }
+  }
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::sln(Moose::SolutionState state) const
+{
+  switch (state)
+  {
+    case Moose::Current:
+      return _u;
+
+    case Moose::Old:
+    {
+      _need_u_old = true;
+      return _u_old;
+    }
+
+    case Moose::Older:
+    {
+      _need_u_older = true;
+      return _u_older;
+    }
+
+    case Moose::PreviousNL:
+    {
+      _need_u_previous_nl = true;
+      return _u_previous_nl;
+    }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
+  }
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::uDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_u_dot = true;
+    return _u_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::uDotDot() const
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_u_dotdot = true;
+    return _u_dotdot;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::uDotOld() const
+{
+  if (_sys.solutionUDotOld())
+  {
+    _need_u_dot_old = true;
+    return _u_dot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old time derivative of solution (`u_dot_old`) is not stored. "
+               "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+               "`u_dot_old`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableValue &
+MooseVariableDataFV<OutputType>::uDotDotOld() const
+{
+  if (_sys.solutionUDotDotOld())
+  {
+    _need_u_dotdot_old = true;
+    return _u_dotdot_old;
+  }
+  else
+    mooseError("MooseVariableFE: Old second time derivative of solution (`u_dotdot_old`) is not "
+               "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+               "requesting `u_dotdot_old`");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableGradient &
+MooseVariableDataFV<OutputType>::gradSln(Moose::SolutionState state) const
+{
+  switch (state)
+  {
+    case Moose::Current:
+      return _grad_u;
+
+    case Moose::Old:
+    {
+      _need_grad_old = true;
+      return _grad_u_old;
+    }
+
+    case Moose::Older:
+    {
+      _need_grad_older = true;
+      return _grad_u_older;
+    }
+
+    case Moose::PreviousNL:
+    {
+      _need_grad_previous_nl = true;
+      return _grad_u_previous_nl;
+    }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
+  }
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableGradient &
+MooseVariableDataFV<OutputType>::gradSlnDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_grad_dot = true;
+    return _grad_u_dot;
+  }
+  else
+    mooseError("MooseVariableFE: Time derivative of solution (`u_dot`) is not stored. Please set "
+               "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableGradient &
+MooseVariableDataFV<OutputType>::gradSlnDotDot() const
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_grad_dotdot = true;
+    return _grad_u_dotdot;
+  }
+  else
+    mooseError("MooseVariableFE: Second time derivative of solution (`u_dotdot`) is not stored. "
+               "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+               "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableSecond &
+MooseVariableDataFV<OutputType>::secondSln(Moose::SolutionState state) const
+{
+  switch (state)
+  {
+    case Moose::Current:
+    {
+      _need_second = true;
+      return _second_u;
+    }
+
+    case Moose::Old:
+    {
+      _need_second_old = true;
+      return _second_u_old;
+    }
+
+    case Moose::Older:
+    {
+      _need_second_older = true;
+      return _second_u_older;
+    }
+
+    case Moose::PreviousNL:
+    {
+      _need_second_previous_nl = true;
+      return _second_u_previous_nl;
+    }
+
+    default:
+      // We should never get here but gcc requires that we have a default. See
+      // htpps://stackoverflow.com/questions/18680378/after-defining-case-for-all-enum-values-compiler-still-says-control-reaches-e
+      mooseError("Unknown SolutionState!");
+  }
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::FieldVariableCurl &
+MooseVariableDataFV<OutputType>::curlSln(Moose::SolutionState state) const
+{
+  switch (state)
+  {
+    case Moose::Current:
+    {
+      _need_curl = true;
+      return _curl_u;
+    }
+
+    case Moose::Old:
+    {
+      _need_curl_old = true;
+      return _curl_u_old;
+    }
+
+    case Moose::Older:
+    {
+      _need_curl_older = true;
+      return _curl_u_older;
+    }
+
+    default:
+      mooseError("We don't currently support curl from the previous non-linear iteration");
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::initializeSolnVars()
+{
+  auto && active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+  unsigned int nqp = 1;
+
+  _u.resize(nqp);
+  _u[0] = 0;
+  _grad_u.resize(nqp);
+  _grad_u[0] = 0;
+
+  for (auto tag : active_coupleable_vector_tags)
+    if (_need_vector_tag_u[tag])
+    {
+      _vector_tag_u[tag].resize(nqp);
+      _vector_tag_u[tag][0] = 0;
+    }
+
+  for (auto tag : active_coupleable_matrix_tags)
+    if (_need_matrix_tag_u[tag])
+    {
+      _matrix_tag_u[tag].resize(nqp);
+      _matrix_tag_u[tag][0] = 0;
+    }
+
+  if (_need_second)
+  {
+    _second_u.resize(nqp);
+    _second_u[0] = 0;
+  }
+
+  if (_need_curl)
+  {
+    _curl_u.resize(nqp);
+    _curl_u[0] = 0;
+  }
+
+  if (_need_u_previous_nl)
+  {
+    _u_previous_nl.resize(nqp);
+    _u_previous_nl[0] = 0;
+  }
+
+  if (_need_grad_previous_nl)
+  {
+    _grad_u_previous_nl.resize(nqp);
+    _grad_u_previous_nl[0] = 0;
+  }
+
+  if (_need_second_previous_nl)
+  {
+    _second_u_previous_nl.resize(nqp);
+    _second_u_previous_nl[0] = 0;
+  }
+
+  if (_subproblem.isTransient())
+  {
+    if (_need_u_dot)
+    {
+      _u_dot.resize(nqp);
+      _u_dot[0] = 0;
+    }
+
+    if (_need_u_dotdot)
+    {
+      _u_dotdot.resize(nqp);
+      _u_dotdot[0] = 0;
+    }
+
+    if (_need_u_dot_old)
+    {
+      _u_dot_old.resize(nqp);
+      _u_dot_old[0] = 0;
+    }
+
+    if (_need_u_dotdot_old)
+    {
+      _u_dotdot_old.resize(nqp);
+      _u_dotdot_old[0] = 0;
+    }
+
+    if (_need_du_dot_du)
+    {
+      _du_dot_du.resize(nqp);
+      _du_dot_du[0] = 0;
+    }
+
+    if (_need_du_dotdot_du)
+    {
+      _du_dotdot_du.resize(nqp);
+      _du_dotdot_du[0] = 0;
+    }
+
+    if (_need_grad_dot)
+    {
+      _grad_u_dot.resize(nqp);
+      _grad_u_dot[0] = 0;
+    }
+
+    if (_need_grad_dotdot)
+    {
+      _grad_u_dotdot.resize(nqp);
+      _grad_u_dotdot[0] = 0;
+    }
+
+    if (_need_u_old)
+    {
+      _u_old.resize(nqp);
+      _u_old[0] = 0;
+    }
+
+    if (_need_u_older)
+    {
+      _u_older.resize(nqp);
+      _u_older[0] = 0;
+    }
+
+    if (_need_grad_old)
+    {
+      _grad_u_old.resize(nqp);
+      _grad_u_old[0] = 0;
+    }
+
+    if (_need_grad_older)
+    {
+      _grad_u_older.resize(nqp);
+      _grad_u_older[0] = 0;
+    }
+
+    if (_need_second_old)
+    {
+      _second_u_old.resize(nqp);
+      _second_u_old[0] = 0;
+    }
+
+    if (_need_curl_old)
+    {
+      _curl_u_old.resize(nqp);
+      _curl_u_old[0] = 0;
+    }
+
+    if (_need_second_older)
+    {
+      _second_u_older.resize(nqp);
+      _second_u_older[0] = 0;
+    }
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+
+  // TODO: compute reconstructed values somehow.  For now, just do the trivial
+  // reconstruction where we take the const cell value from the centroid and
+  // use that value on the face.  How will users affect the reconstruction
+  // method used here?  After reconstruction, we should cache the compute
+  // soln/gradients per element so we don't have to recompute them again for
+  // other faces that share an element with this face.
+  computeValues(true);
+
+  // TODO: this code should go away once we have a real reconstruction
+  // routine. - or maybe this becomes a separate _grad_u_interface that is
+  // only used for diffusion terms that need an interface gradient.  Also -
+  // this will need cross-diffusion corrections for non-orthogonal meshes
+  // eventually.
+  std::vector<dof_id_type> indices(1);
+  DoFValue values;
+  values.resize(1);
+  auto & soln = *_sys.currentSolution();
+  auto uleft = soln(fi.leftDofIndices(_var_num)[0]);
+  auto uright = soln(fi.rightDofIndices(_var_num)[0]);
+  _grad_u[0] = (uright - uleft) / ((fi.rightCentroid() - fi.leftCentroid()).norm());
+
+  // TODO: figure out how to store old/older values of reconstructed
+  // solutions/gradient states without having to re-reconstruct them from
+  // older dof/soln values.
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::computeValues(bool force)
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+
+  unsigned int num_dofs = _dof_indices.size();
+
+  if (num_dofs > 0)
+    fetchDoFValues();
+
+  bool is_transient = _subproblem.isTransient();
+  unsigned int nqp = 1;
+  auto && active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  auto && active_coupleable_matrix_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+
+  initializeSolnVars();
+
+  _u[0] = _dof_values[0];
+  _grad_u[0] = 0;
+
+  bool second_required =
+      _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
+  bool curl_required = _need_curl || _need_curl_old;
+
+  if (is_transient)
+  {
+    if (_need_u_old)
+      _u_old[0] = _dof_values_old[0];
+
+    if (_need_u_older)
+      _u_older[0] = _dof_values_older[0];
+
+    if (_need_u_dot)
+      _u_dot[0] = _dof_values_dot[0];
+
+    if (_need_u_dotdot)
+      _u_dotdot[0] = _dof_values_dotdot[0];
+
+    if (_need_u_dot_old)
+      _u_dot_old[0] = _dof_values_dot_old[0];
+
+    if (_need_u_dotdot_old)
+      _u_dotdot_old[0] = _dof_values_dotdot_old[0];
+
+    if (_need_du_dot_du)
+      _du_dot_du[0] = _dof_du_dot_du[0];
+
+    if (_need_du_dotdot_du)
+      _du_dotdot_du[0] = _dof_du_dotdot_du[0];
+  }
+
+  if (second_required)
+  {
+    if (_need_second)
+      _second_u[0] = 0;
+
+    if (_need_second_previous_nl)
+      _second_u_previous_nl[0] = 0;
+
+    if (is_transient)
+    {
+      if (_need_second_old)
+        _second_u_old[0] = 0;
+
+      if (_need_second_older)
+        _second_u_older[0] = 0;
+    }
+  }
+
+  if (curl_required)
+  {
+    if (_need_curl)
+      _curl_u[0] = 0;
+
+    if (is_transient && _need_curl_old)
+      _curl_u_old[0] = 0;
+  }
+
+  for (auto tag : active_coupleable_vector_tags)
+    if (_need_vector_tag_u[tag])
+      _vector_tag_u[tag][0] = _vector_tags_dof_u[tag][0];
+
+  for (auto tag : active_coupleable_matrix_tags)
+    if (_need_matrix_tag_u[tag])
+      _matrix_tag_u[tag][0] = _matrix_tags_dof_u[tag][0];
+
+  if (_need_u_previous_nl)
+    _u_previous_nl[0] = _dof_values_previous_nl[0];
+
+  if (_need_grad_previous_nl)
+    _grad_u_previous_nl[0] = _dof_values_previous_nl[0];
+
+  // Automatic differentiation
+  if (_need_ad && _subproblem.currentlyComputingJacobian())
+    computeAD(num_dofs, nqp);
+}
+
+// TODO: update this func for FV (remove phi usage and such).
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
+{
+  /*
+  _ad_dof_values.resize(num_dofs);
+  if (_need_ad_u)
+    _ad_u.resize(nqp);
+
+  if (_need_ad_grad_u)
+    _ad_grad_u.resize(nqp);
+
+  if (_need_ad_second_u)
+    _ad_second_u.resize(nqp);
+
+  if (_need_ad_u_dot)
+  {
+    _ad_dofs_dot.resize(num_dofs);
+    _ad_u_dot.resize(nqp);
+  }
+
+  // Derivatives are offset by the variable number
+  size_t ad_offset;
+  switch (_element_type)
+  {
+    case Moose::ElementType::Element:
+      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
+      break;
+
+    case Moose::ElementType::Neighbor:
+      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem() +
+                  (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
+      break;
+
+    case Moose::ElementType::Lower:
+      // At the time of writing, this Lower case is only used in mortar applications where we are
+      // re-init'ing on Element, Neighbor, and Lower dimensional elements
+      // simultaneously. Consequently, we make sure here that our offset is greater than the sum of
+      // the element and neighbor dofs. I can imagine a future case in which you're not re-init'ing
+      // on all three simultaneously in which case this offset could be smaller. Also note that the
+      // number of dofs on lower-d elements is guaranteed to be lower than on the higher dimensional
+      // element, but we're not using that knowledge here. In the future we could implement
+      // something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
+      ad_offset = 2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
+                  _var_num * _sys.getMaxVarNDofsPerElem();
+      break;
+
+    default:
+      mooseError(
+          "Unsupported element type ",
+          static_cast<typename std::underlying_type<decltype(_element_type)>::type>(_element_type));
+  }
+  mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
+              "Either this is the zeroth variable or we should have an offset");
+
+#ifndef MOOSE_SPARSE_AD
+  if (ad_offset + num_dofs > MOOSE_AD_MAX_DOFS_PER_ELEM)
+    mooseError("Current number of dofs per element ",
+               ad_offset + num_dofs,
+               " is greater than AD_MAX_DOFS_PER_ELEM of ",
+               MOOSE_AD_MAX_DOFS_PER_ELEM,
+               ". You can run `configure --with-derivative-size=<n>` to request a larger "
+               "derivative container.");
+#endif
+
+  for (unsigned int qp = 0; qp < nqp; qp++)
+  {
+    if (_need_ad_u)
+      _ad_u[qp] = _ad_zero;
+
+    if (_need_ad_grad_u)
+      _ad_grad_u[qp] = _ad_zero;
+
+    if (_need_ad_second_u)
+      _ad_second_u[qp] = _ad_zero;
+
+    if (_need_ad_u_dot)
+      _ad_u_dot[qp] = _ad_zero;
+  }
+
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
+    _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
+
+    // NOTE!  You have to do this AFTER setting the value!
+    if (_var.kind() == Moose::VAR_NONLINEAR)
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
+
+    if (_need_ad_u_dot && _time_integrator)
+    {
+      _ad_dofs_dot[i] = _ad_dof_values[i];
+      _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
+    }
+  }
+
+  // Now build up the solution at each quadrature point:
+  for (unsigned int i = 0; i < num_dofs; i++)
+  {
+    for (unsigned int qp = 0; qp < nqp; qp++)
+    {
+      if (_need_ad_u)
+        _ad_u[qp] += _ad_dof_values[i];
+
+      if (_need_ad_grad_u)
+      {
+        // The latter check here is for handling the fact that we have not yet implemented
+        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that situation
+        // we need to default to using the non-ad grad_phi
+        if (_displaced)
+          _ad_grad_u[qp] += _ad_dof_values[i];
+        else
+          _ad_grad_u[qp] += _ad_dof_values[i];
+      }
+
+      if (_need_ad_second_u)
+        // Note that this will not carry any derivatives with respect to displacements because those
+        // calculations have not yet been implemented in Assembly
+        _ad_second_u[qp] += _ad_dof_values[i];
+
+      if (_need_ad_u_dot && _time_integrator)
+        _ad_u_dot[qp] += _ad_dofs_dot[i];
+    }
+  }
+
+  if (_need_ad_u_dot && !_time_integrator)
+    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
+      _ad_u_dot[qp] = _u_dot[qp];
+*/
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+{
+  _dof_values[index] = value;
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
+{
+  for (unsigned int i = 0; i < values.size(); i++)
+    _dof_values[i] = values(i);
+}
+
+template <typename OutputType>
+typename MooseVariableDataFV<OutputType>::OutputData
+MooseVariableDataFV<OutputType>::getElementalValue(const Elem * elem,
+                                                   Moose::SolutionState state,
+                                                   unsigned int idx) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  switch (state)
+  {
+    case Moose::Current:
+      return (*_sys.currentSolution())(dof_indices[idx]);
+
+    case Moose::Old:
+      return _sys.solutionOld()(dof_indices[idx]);
+
+    case Moose::Older:
+      return _sys.solutionOlder()(dof_indices[idx]);
+
+    default:
+      mooseError("PreviousNL not currently supported for getElementalValue");
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::getDofIndices(const Elem * elem,
+                                               std::vector<dof_id_type> & dof_indices) const
+{
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::insert(NumericVector<Number> & residual)
+{
+  residual.insert(&_dof_values[0], _dof_indices);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::add(NumericVector<Number> & residual)
+{
+  residual.add_vector(&_dof_values[0], _dof_indices);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::addSolution(NumericVector<Number> & sol,
+                                             const DenseVector<Number> & v) const
+{
+  sol.add_vector(v, _dof_indices);
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValues() const
+{
+  _need_dof_values = true;
+  return _dof_values;
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesOld() const
+{
+  _need_dof_values_old = true;
+  return _dof_values_old;
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesOlder() const
+{
+  _need_dof_values_older = true;
+  return _dof_values_older;
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesPreviousNL() const
+{
+  _need_dof_values_previous_nl = true;
+  return _dof_values_previous_nl;
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesDot() const
+{
+  if (_sys.solutionUDot())
+  {
+    _need_dof_values_dot = true;
+    return _dof_values_dot;
+  }
+  else
+    mooseError(
+        "MooseVariableDataFV: Time derivative of solution (`u_dot`) is not stored. Please set "
+        "uDotRequested() to true in FEProblemBase before requesting `u_dot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesDotDot() const
+{
+  if (_sys.solutionUDotDot())
+  {
+    _need_dof_values_dotdot = true;
+    return _dof_values_dotdot;
+  }
+  else
+    mooseError(
+        "MooseVariableDataFV: Second time derivative of solution (`u_dotdot`) is not stored. "
+        "Please set uDotDotRequested() to true in FEProblemBase before requesting "
+        "`u_dotdot`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesDotOld() const
+{
+  if (_sys.solutionUDotOld())
+  {
+    _need_dof_values_dot_old = true;
+    return _dof_values_dot_old;
+  }
+  else
+    mooseError("MooseVariableDataFV: Old time derivative of solution (`u_dot_old`) is not stored. "
+               "Please set uDotOldRequested() to true in FEProblemBase before requesting "
+               "`u_dot_old`.");
+}
+
+template <typename OutputType>
+const typename MooseVariableDataFV<OutputType>::DoFValue &
+MooseVariableDataFV<OutputType>::dofValuesDotDotOld() const
+{
+  if (_sys.solutionUDotDotOld())
+  {
+    _need_dof_values_dotdot_old = true;
+    return _dof_values_dotdot_old;
+  }
+  else
+    mooseError(
+        "MooseVariableDataFV: Old second time derivative of solution (`u_dotdot_old`) is not "
+        "stored. Please set uDotDotOldRequested() to true in FEProblemBase before "
+        "requesting `u_dotdot_old`.");
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableDataFV<OutputType>::dofValuesDuDotDu() const
+{
+  _need_dof_du_dot_du = true;
+  return _dof_du_dot_du;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableDataFV<OutputType>::dofValuesDuDotDotDu() const
+{
+  _need_dof_du_dotdot_du = true;
+  return _dof_du_dotdot_du;
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::fetchDoFValues()
+{
+  bool is_transient = _subproblem.isTransient();
+
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+
+  _dof_values.resize(n);
+  _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
+
+  if (is_transient)
+  {
+    if (_need_u_old || _need_grad_old || _need_second_old || _need_curl_old || _need_dof_values_old)
+    {
+      _dof_values_old.resize(n);
+      _sys.solutionOld().get(_dof_indices, &_dof_values_old[0]);
+    }
+    if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
+    {
+      _dof_values_older.resize(n);
+      _sys.solutionOlder().get(_dof_indices, &_dof_values_older[0]);
+    }
+    if (_need_u_dot || _need_grad_dot || _need_dof_values_dot)
+    {
+      libmesh_assert(_sys.solutionUDot());
+      _dof_values_dot.resize(n);
+      _sys.solutionUDot()->get(_dof_indices, &_dof_values_dot[0]);
+    }
+    if (_need_u_dotdot || _need_grad_dotdot || _need_dof_values_dotdot)
+    {
+      libmesh_assert(_sys.solutionUDotDot());
+      _dof_values_dotdot.resize(n);
+      _sys.solutionUDotDot()->get(_dof_indices, &_dof_values_dotdot[0]);
+    }
+    if (_need_u_dot_old || _need_dof_values_dot_old)
+    {
+      libmesh_assert(_sys.solutionUDotOld());
+      _dof_values_dot_old.resize(n);
+      _sys.solutionUDotOld()->get(_dof_indices, &_dof_values_dot_old[0]);
+    }
+    if (_need_u_dotdot_old || _need_dof_values_dotdot_old)
+    {
+      libmesh_assert(_sys.solutionUDotDotOld());
+      _dof_values_dotdot_old.resize(n);
+      _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
+    }
+  }
+
+  if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
+      _need_dof_values_previous_nl)
+  {
+    _dof_values_previous_nl.resize(n);
+    _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
+  }
+
+  if (_sys.subproblem().safeAccessTaggedVectors())
+  {
+    auto & active_coupleable_vector_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+    for (auto tag : active_coupleable_vector_tags)
+      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+        {
+          auto & vec = _sys.getVector(tag);
+          _vector_tags_dof_u[tag].resize(n);
+          vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
+        }
+  }
+
+  if (_sys.subproblem().safeAccessTaggedMatrices())
+  {
+    auto & active_coupleable_matrix_tags =
+        _sys.subproblem().getActiveFEVariableCoupleableMatrixTags(_tid);
+    for (auto tag : active_coupleable_matrix_tags)
+    {
+      _matrix_tags_dof_u[tag].resize(n);
+      if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        {
+          auto & mat = _sys.getMatrix(tag);
+          for (unsigned i = 0; i < n; i++)
+          {
+            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+            _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
+          }
+        }
+    }
+  }
+
+  if (_need_du_dot_du || _need_dof_du_dot_du)
+  {
+    _dof_du_dot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dot_du[i] = _sys.duDotDu();
+  }
+  if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
+  {
+    _dof_du_dotdot_du.resize(n);
+    for (decltype(n) i = 0; i < n; ++i)
+      _dof_du_dotdot_du[i] = _sys.duDotDotDu();
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::fetchADDoFValues()
+{
+  auto n = _dof_indices.size();
+  libmesh_assert(n);
+  _ad_dof_values.resize(n);
+  auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
+
+  for (decltype(n) i = 0; i < n; ++i)
+  {
+    _ad_dof_values[i] = _dof_values[i];
+    if (_var.kind() == Moose::VAR_NONLINEAR)
+      Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::zeroSizeDofValues()
+{
+  _dof_values.resize(0);
+  if (_need_dof_values_previous_nl)
+    _dof_values_previous_nl.resize(0);
+  if (_subproblem.isTransient())
+  {
+    _dof_values_old.resize(0);
+    _dof_values_older.resize(0);
+    _dof_values_dot.resize(0);
+    _dof_values_dotdot.resize(0);
+    _dof_values_dot_old.resize(0);
+    _dof_values_dotdot_old.resize(0);
+    _dof_du_dot_du.resize(0);
+    _dof_du_dotdot_du.resize(0);
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableDataFV<OutputType>::prepareIC()
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  _dof_values.resize(_dof_indices.size());
+
+  unsigned int nqp = 1;
+  _u.resize(nqp);
+}
+
+template <>
+template <>
+const VariableValue &
+MooseVariableDataFV<Real>::adSln<RESIDUAL>() const
+{
+  return _u;
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableDataFV<RealVectorValue>::adSln<RESIDUAL>() const
+{
+  return _u;
+}
+
+template <>
+template <>
+const VariableGradient &
+MooseVariableDataFV<Real>::adGradSln<RESIDUAL>() const
+{
+  return _grad_u;
+}
+
+template <>
+template <>
+const VectorVariableGradient &
+MooseVariableDataFV<RealVectorValue>::adGradSln<RESIDUAL>() const
+{
+  return _grad_u;
+}
+
+template <>
+template <>
+const VariableSecond &
+MooseVariableDataFV<Real>::adSecondSln<RESIDUAL>() const
+{
+  _need_second = true;
+  return _second_u;
+}
+
+template <>
+template <>
+const VectorVariableSecond &
+MooseVariableDataFV<RealVectorValue>::adSecondSln<RESIDUAL>() const
+{
+  _need_second = true;
+  return _second_u;
+}
+
+template <>
+template <>
+const VariableValue &
+MooseVariableDataFV<Real>::adUDot<RESIDUAL>() const
+{
+
+  return uDot();
+}
+
+template <>
+template <>
+const VectorVariableValue &
+MooseVariableDataFV<RealVectorValue>::adUDot<RESIDUAL>() const
+{
+  return uDot();
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableDataFV<Real>::adDofValues<RESIDUAL>() const
+{
+  return _dof_values;
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableDataFV<RealVectorValue>::adDofValues<RESIDUAL>() const
+{
+  return _dof_values;
+}
+
+template class MooseVariableDataFV<Real>;
+template class MooseVariableDataFV<RealVectorValue>;
