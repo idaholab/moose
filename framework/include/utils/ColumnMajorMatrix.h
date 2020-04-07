@@ -617,8 +617,8 @@ inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::operator*(T scalar) 
 }
 
 template <typename T>
-inline ColumnMajorMatrixTempl<T>
-    ColumnMajorMatrixTempl<T>::operator*(const TypeVector<T> & rhs) const
+inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::
+operator*(const TypeVector<T> & rhs) const
 {
   if (_n_cols != LIBMESH_DIM)
     mooseError("Cannot perform matvec operation! The column dimension of "
@@ -651,8 +651,8 @@ inline ColumnMajorMatrixTempl<T>
 // }
 
 template <typename T>
-inline ColumnMajorMatrixTempl<T>
-    ColumnMajorMatrixTempl<T>::operator*(const ColumnMajorMatrixTempl<T> & rhs) const
+inline ColumnMajorMatrixTempl<T> ColumnMajorMatrixTempl<T>::
+operator*(const ColumnMajorMatrixTempl<T> & rhs) const
 {
   if (_n_cols != rhs._n_rows)
     mooseError(
