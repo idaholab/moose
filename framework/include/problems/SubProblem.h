@@ -38,6 +38,7 @@ typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
 class LineSearch;
+class FaceInfo;
 
 // libMesh forward declarations
 namespace libMesh

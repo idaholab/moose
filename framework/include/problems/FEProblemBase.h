@@ -361,6 +361,7 @@ public:
 
   virtual void sizeZeroes(unsigned int size, THREAD_ID tid);
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
+
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
@@ -650,6 +651,10 @@ public:
 
   // DG /////
   virtual void addDGKernel(const std::string & kernel_name,
+                           const std::string & name,
+                           InputParameters & parameters);
+
+  virtual void addFVKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters);
 

@@ -12,6 +12,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "MooseVariableScalar.h"
 #include "MooseVariableConstMonomial.h"
 #include "Conversion.h"

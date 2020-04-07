@@ -501,7 +501,7 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   // TODO: compute reconstructed values somehow.  For now, just do the trivial
   // reconstruction where we take the const cell value from the centroid and
   // use that value on the face.  How will users affect the reconstruction
-  // method used here?  After reconstruction, we should cache the compute
+  // method used here?  After reconstruction, we should cache the computed
   // soln/gradients per element so we don't have to recompute them again for
   // other faces that share an element with this face.
   computeValues(true);
@@ -510,7 +510,9 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   // routine. - or maybe this becomes a separate _grad_u_interface that is
   // only used for diffusion terms that need an interface gradient.  Also -
   // this will need cross-diffusion corrections for non-orthogonal meshes
-  // eventually.
+  // eventually. Or maybe we just leave this alone at zero and have users
+  // calculate whatever grad_interface value they want and provide some
+  // helper functions for cross-diffusion correction.
   std::vector<dof_id_type> indices(1);
   DoFValue values;
   values.resize(1);

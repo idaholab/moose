@@ -171,6 +171,7 @@ public:
   virtual void prepareAssemblyNeighbor(THREAD_ID tid);
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
+
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
