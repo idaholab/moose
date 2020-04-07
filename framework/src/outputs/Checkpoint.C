@@ -115,12 +115,11 @@ Checkpoint::output(const ExecFlagType & /*type*/)
   // Write out the restartable mesh meta data if there is any (only on processor zero)
   if (processor_id() == 0)
   {
-    for (auto map_iter = _app.getRestartableDataMapBegin();
-         map_iter != _app.getRestartableDataMapEnd();
-         ++map_iter)
+    for (auto & map_pair :
+         libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
     {
-      const RestartableDataMap & meta_data = map_iter->second.first;
-      const std::string & suffix = map_iter->second.second;
+      const RestartableDataMap & meta_data = map_pair.second.first;
+      const std::string & suffix = map_pair.second.second;
       const std::string filename(current_file + suffix +
                                  _restartable_data_io.getRestartableDataExt());
 

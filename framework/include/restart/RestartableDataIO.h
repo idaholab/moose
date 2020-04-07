@@ -90,7 +90,7 @@ public:
 
   ///@{
   /*
-   * Enable/Disable certain errors
+   * Enable/Disable errors to allow meta data to be created/loaded on different number or processors
    *
    * See LoadSurrogateModelAction for use case
    */

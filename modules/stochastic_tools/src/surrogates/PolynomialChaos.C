@@ -78,6 +78,7 @@ PolynomialChaos::getCoefficients() const
 Real
 PolynomialChaos::computeMean() const
 {
+  mooseAssert(_coeff.size() > 0, "The coefficient matrix is empty.");
   return _coeff[0];
 }
 
