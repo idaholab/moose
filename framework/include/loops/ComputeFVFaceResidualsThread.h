@@ -13,6 +13,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseException.h"
+#include "MooseVariableFVBase.h"
 #include "FVKernel.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
@@ -22,8 +23,24 @@
 #include <set>
 
 class FVBoundaryCondition;
-class FaceInfo;
 class MooseVariableFVBase;
+
+struct OnScopeExit
+{
+  std::function<void()> _f;
+  OnScopeExit(std::function<void()> f) noexcept : _f(std::move(f)) {}
+  OnScopeExit(OnScopeExit && other) : _f(std::move(other._f)) {}
+  OnScopeExit & operator=(OnScopeExit && other)
+  {
+    _f = std::move(other._f);
+    return *this;
+  }
+  ~OnScopeExit()
+  {
+    if (_f)
+      _f();
+  }
+};
 
 /**
  * Base class for assembly-like calculations.
@@ -108,9 +125,9 @@ private:
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
 
-  void reinitVariables(const FaceInfo & fi);
+  OnScopeExit reinitVariables(const FaceInfo & fi);
 
-  std::set<MooseVariableFVBase *> _needed_moose_vars;
+  std::set<MooseVariableFVBase *> _needed_fv_vars;
 };
 
 template <typename RangeType>
@@ -209,7 +226,7 @@ ComputeFVFaceResidualsThread<RangeType>::post()
 }
 
 template <typename RangeType>
-void
+OnScopeExit
 ComputeFVFaceResidualsThread<RangeType>::reinitVariables(const FaceInfo & fi)
 {
   // TODO: for FE variables, this is handled via setting needed vars through
@@ -219,12 +236,31 @@ ComputeFVFaceResidualsThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // the call forwarding seems silly, but it does allow the displaced problem
   // to be easily kept in sync.  However, the displaced problem has different
   // pointers for its own face info objects, etc, we can't just pass in fe
-  // problems face info down to the sub-problem, centroids are different,
+  // problem's face info down to the sub-problem -- centroids are different,
   // volumes are different, etc.  To support displaced meshes correctly, we
   // need to be able to reinit the subproblems variables using its equivalent
   // face info object.  How?
-  for (const auto & var : _needed_moose_vars)
+
+  // TODO: this triggers a bunch of FE-specific stuff to occur that we might
+  // not need if only FV variables are active.  Some of the stuff triggered by
+  // this call, however is necessary - particularly for reiniting materials.
+  // Figure out a way to only do the minimum required here if we only have FV
+  // variables.
+  _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
+
+  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
+
+  for (const auto & var : _needed_fv_vars)
     var->computeFaceValues(fi);
+
+  // this is the swap-back object - don't forget to catch it into local var
+  std::function<void()> fn = [this] {
+    _fe_problem.swapBackMaterialsFace(_tid);
+    _fe_problem.swapBackMaterialsNeighbor(_tid);
+  };
+  OnScopeExit ose(fn);
+  return ose;
 }
 
 template <typename RangeType>
@@ -243,7 +279,7 @@ ComputeFVFaceResidualsThread<RangeType>::onFace(const FaceInfo & fi)
   if (kernels.size() == 0)
     return;
 
-  reinitVariables(fi);
+  auto swap_back_sentinel = reinitVariables(fi);
 
   // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
   // still remember to swap back during stack unwinding.
@@ -274,7 +310,7 @@ ComputeFVFaceResidualsThread<RangeType>::onBoundary(const FaceInfo & fi, Boundar
   if (bcs.size() == 0)
     return;
 
-  reinitVariables(fi);
+  auto swap_back_sentinel = reinitVariables(fi);
 
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.
@@ -291,10 +327,12 @@ template <typename RangeType>
 void
 ComputeFVFaceResidualsThread<RangeType>::subdomainChanged()
 {
-  _needed_moose_vars.clear();
+  _needed_fv_vars.clear();
   std::set<unsigned int> needed_mat_props;
 
-  // TODO: do this for other relevant objects - like FV BCs, FV source term kernels, etc.
+  // TODO: do this for other relevant objects - like FV BCs, FV source term
+  // kernels, etc. - but we don't need to add them for other types of objects
+  // like FE or DG kernels because those kernels don't run in this loop.
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
@@ -305,14 +343,21 @@ ComputeFVFaceResidualsThread<RangeType>::subdomainChanged()
       .template condition<AttribVectorTags>(_tags)
       .queryInto(kernels);
 
+  std::set<MooseVariableFEBase *> needed_fe_vars;
+  MooseVariableFVBase * fvptr = nullptr;
   for (auto k : kernels)
   {
     const auto & deps = k->getMooseVariableDependencies();
-    _needed_moose_vars.insert(deps.begin(), deps.end());
+    for (auto var : deps)
+      if ((fvptr = dynamic_cast<MooseVariableFVBase *>(var)))
+        _needed_fv_vars.insert(fvptr);
+      else
+        needed_fe_vars.insert(var);
     const auto & mdeps = k->getMatPropDependencies();
     needed_mat_props.insert(mdeps.begin(), mdeps.end());
   }
 
+  _fe_problem.setActiveElementalMooseVariables(needed_fe_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
