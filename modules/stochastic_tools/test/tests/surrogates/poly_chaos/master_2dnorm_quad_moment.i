@@ -12,24 +12,20 @@
 
 [Distributions]
   [D_dist]
-    type = NormalDistribution
+    type = Normal
     mean = 5
     standard_deviation = 0.5
   []
   [S_dist]
-    type = NormalDistribution
+    type = Normal
     mean = 8
     standard_deviation = 0.7
   []
 []
 
 [Samplers]
-  [grid]
-    type = CartesianProductSampler
-    linear_space_items = '2.5 0.5 10  3 1 10'
-  []
   [quadrature]
-    type = QuadratureSampler
+    type = Quadrature
     distributions = 'D_dist S_dist'
     execute_on = INITIAL
     order = 5
@@ -68,13 +64,10 @@
     parallel_type = REPLICATED
     samplers = quadrature
   []
-  [local_sense]
-    type = PolynomialChaosLocalSensitivity
+  [pc_moments]
+    type = PolynomialChaosStatistics
     pc_name = poly_chaos
-    local_points_sampler = grid
-    local_points = '3.14159 3.14159 2.7182 3.14159 3.14159 2.7182 2.7182 2.7182'
-    output_points = true
-    sensitivity_parameters = '0 1'
+    compute = 'mean stddev skewness kurtosis'
     execute_on = final
   []
 []
@@ -82,10 +75,17 @@
 [Surrogates]
   [poly_chaos]
     type = PolynomialChaos
+    trainer = poly_chaos
+  []
+[]
+
+[Trainers]
+  [poly_chaos]
+    type = PolynomialChaosTrainer
     execute_on = timestep_end
     order = 5
     distributions = 'D_dist S_dist'
-    training_sampler = quadrature
+    sampler = quadrature
     results_vpp = storage
     results_vector = quadrature
   []

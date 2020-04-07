@@ -130,3 +130,18 @@ VectorPostprocessorInterface::hasVectorPostprocessorByName(
 {
   return _vpi_feproblem.hasVectorPostprocessor(name);
 }
+
+bool
+VectorPostprocessorInterface::isVectorPostprocessorDistributed(const std::string & name) const
+{
+  const VectorPostprocessorData & data = _vpi_feproblem.getVectorPostprocessorData();
+  return data.isDistributed(_vpi_params.get<VectorPostprocessorName>(name));
+}
+
+bool
+VectorPostprocessorInterface::isVectorPostprocessorDistributedByName(
+    const VectorPostprocessorName & name) const
+{
+  const VectorPostprocessorData & data = _vpi_feproblem.getVectorPostprocessorData();
+  return data.isDistributed(name);
+}

@@ -36,10 +36,17 @@
 [Surrogates]
   [poly_chaos]
     type = PolynomialChaos
+    trainer = poly_chaos
+  []
+[]
+
+[Trainers]
+  [poly_chaos]
+    type = PolynomialChaosTrainer
     execute_on = final
     order = 4
     distributions = 'uniform uniform uniform uniform uniform uniform'
-    training_sampler = sample
+    sampler = sample
     results_vpp = results
     results_vector = g_values
   []

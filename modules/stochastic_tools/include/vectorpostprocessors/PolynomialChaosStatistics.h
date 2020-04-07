@@ -12,10 +12,11 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
+#include "SurrogateModelInterface.h"
 
 class PolynomialChaosStatistics;
 
-class PolynomialChaosStatistics : public GeneralVectorPostprocessor
+class PolynomialChaosStatistics : public GeneralVectorPostprocessor, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -25,7 +26,6 @@ public:
   virtual void initialize() override{};
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Reference to PolynomialChaos

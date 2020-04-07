@@ -10,15 +10,17 @@
 #include "AddSurrogateAction.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "SurrogateModel.h"
 
+registerMooseAction("StochasticToolsApp", AddSurrogateAction, "add_trainer");
 registerMooseAction("StochasticToolsApp", AddSurrogateAction, "add_surrogate");
 
 InputParameters
 AddSurrogateAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription(
-      "Adds SurrogateModel objects contained within the `[Surrogates]` input block.");
+  params.addClassDescription("Adds SurrogateTrainer and SurrogateModel objects contained within "
+                             "the `[Trainers]` and `[Surrogates]` input blocks.");
   return params;
 }
 
@@ -27,5 +29,12 @@ AddSurrogateAction::AddSurrogateAction(InputParameters params) : MooseObjectActi
 void
 AddSurrogateAction::act()
 {
-  _problem->addUserObject(_type, _name, _moose_object_pars);
+  if (_current_task == "add_trainer")
+    _problem->addUserObject(_type, _name, _moose_object_pars);
+  else if (_current_task == "add_surrogate")
+  {
+    std::shared_ptr<SurrogateModel> model =
+        _factory.create<SurrogateModel>(_type, _name, _moose_object_pars);
+    _problem->theWarehouse().add(model);
+  }
 }

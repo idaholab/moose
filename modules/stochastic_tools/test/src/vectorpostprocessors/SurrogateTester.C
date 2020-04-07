@@ -20,6 +20,8 @@ InputParameters
 SurrogateTester::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SamplerInterface::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling surrogate model.");
   params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
   params += SamplerInterface::validParams();
@@ -34,9 +36,10 @@ SurrogateTester::validParams()
 SurrogateTester::SurrogateTester(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
+    SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples")),
-    _model(getUserObject<SurrogateModel>("model")),
+    _model(getSurrogateModel("model")),
     _value_vector(declareVector("value"))
 {
   if (_output_samples)
@@ -47,12 +50,9 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
 void
 SurrogateTester::initialize()
 {
-  mooseAssert(_sampler.getNumberOfCols() == _model.getNumberOfParameters(),
-              "Number of sampler columns does not match number of parameters in PCE.");
-
   _value_vector.resize(_sampler.getNumberOfLocalRows(), 0);
   if (_output_samples)
-    for (unsigned int d = 0; d < _model.getNumberOfParameters(); ++d)
+    for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
 }
 
@@ -65,7 +65,7 @@ SurrogateTester::execute()
     std::vector<Real> data = _sampler.getNextLocalRow();
     _value_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data);
     if (_output_samples)
-      for (unsigned int d = 0; d < _model.getNumberOfParameters(); ++d)
+      for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       {
         (*_sample_vector[d])[p - _sampler.getLocalRowBegin()] = data[d];
       }

@@ -1113,3 +1113,23 @@ InputParameters::shouldIgnore(const std::string & name)
     return it->second._ignore;
   mooseError("Parameter ", name, " does not exist");
 }
+
+std::set<std::string>
+InputParameters::getGroupParameters(const std::string & group) const
+{
+  std::set<std::string> names;
+  for (auto it = _params.begin(); it != _params.end(); ++it)
+    if (it->second._group == group)
+      names.emplace(it->first);
+  return names;
+}
+
+std::set<std::string>
+InputParameters::getControllableParameters() const
+{
+  std::set<std::string> controllable;
+  for (auto it = _params.begin(); it != _params.end(); ++it)
+    if (it->second._controllable)
+      controllable.emplace(it->first);
+  return controllable;
+}

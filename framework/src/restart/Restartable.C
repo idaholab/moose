@@ -49,7 +49,7 @@ Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
-  return _restartable_app.registerRestartableData(name, std::move(data), tid, false, false);
+  return _restartable_app.registerRestartableData(name, std::move(data), tid, false);
 }
 
 void

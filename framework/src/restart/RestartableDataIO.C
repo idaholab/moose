@@ -221,6 +221,15 @@ RestartableDataIO::deserializeSystems(std::istream & stream)
 bool
 RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string & suffix)
 {
+  const std::string filename =
+      _moose_app.getRestartRecoverFileBase() + suffix + RESTARTABLE_DATA_EXT;
+  return readRestartableDataHeaderFromFile(filename, per_proc_id);
+}
+
+bool
+RestartableDataIO::readRestartableDataHeaderFromFile(const std::string & recover_file,
+                                                     bool per_proc_id)
+{
   unsigned int n_threads = libMesh::n_threads();
   unsigned int n_files = per_proc_id ? n_threads : 1;
 
@@ -229,11 +238,10 @@ RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string
 
   _in_file_handles.resize(n_files);
 
-  std::string recover_file_base = _moose_app.getRestartRecoverFileBase();
   for (unsigned int tid = 0; tid < n_files; tid++)
   {
     std::ostringstream file_name_stream;
-    file_name_stream << recover_file_base + suffix + RESTARTABLE_DATA_EXT;
+    file_name_stream << recover_file;
 
     if (per_proc_id)
     {
@@ -278,10 +286,10 @@ RestartableDataIO::readRestartableDataHeader(bool per_proc_id, const std::string
       mooseError("Trying to restart from an older file version - you need to checkout an older "
                  "version of MOOSE.");
 
-    if (this_n_procs != n_procs)
+    if (_error_on_different_number_of_processors && (this_n_procs != n_procs))
       mooseError("Cannot restart using a different number of processors!");
 
-    if (this_n_threads != n_threads)
+    if (_error_on_different_number_of_threads && (this_n_threads != n_threads))
       mooseError("Cannot restart using a different number of threads!");
   }
 
@@ -416,4 +424,16 @@ RestartableDataIO::restartEquationSystemsObject()
   _fe_problem_ptr->es().read(file_name, read_flags, renumber);
 
   _fe_problem_ptr->getNonlinearSystemBase().update();
+}
+
+void
+RestartableDataIO::setErrorOnLoadWithDifferentNumberOfProcessors(bool value)
+{
+  _error_on_different_number_of_processors = value;
+}
+
+void
+RestartableDataIO::setErrorOnLoadWithDifferentNumberOfThreads(bool value)
+{
+  _error_on_different_number_of_threads = value;
 }

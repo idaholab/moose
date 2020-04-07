@@ -166,5 +166,4 @@ WeightedCartesianProduct<T, W>::computeWeight(std::size_t row) const
   std::vector<W> vec = _weight.computeRow(row);
   return std::accumulate(vec.begin(), vec.end(), static_cast<W>(1), std::multiplies<W>());
 }
-
 } // namespace

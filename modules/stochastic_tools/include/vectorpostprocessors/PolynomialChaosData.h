@@ -12,8 +12,9 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "PolynomialChaos.h"
+#include "SurrogateModelInterface.h"
 
-class PolynomialChaosData : public GeneralVectorPostprocessor
+class PolynomialChaosData : public GeneralVectorPostprocessor, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -27,6 +28,7 @@ public:
 protected:
   /// Reference to PolynomialChaos
   const PolynomialChaos & _pc_uo;
+
   /// Reference to PC user object coefficient vector
   const std::vector<Real> & _coeff;
   /// Vector containing PCE coefficients
