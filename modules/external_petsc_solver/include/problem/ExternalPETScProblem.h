@@ -35,9 +35,13 @@ public:
 
   virtual void advanceState() override;
 
+  virtual Real computeResidualL2Norm() override;
+
   Vec & solutionOld() { return _petsc_sol_old; }
 
   Vec & currentSolution() { return _petsc_sol; }
+
+  Vec & udot() { return _petsc_udot; }
 
   TS & getPetscTS() { return _ts; }
 
@@ -50,7 +54,11 @@ private:
   /// PETSc solver
   TS & _ts;
   /// PETSc solver solution
-  Vec _petsc_sol;
+  Vec & _petsc_sol;
   /// Solution at the previous time step
-  Vec _petsc_sol_old;
+  Vec & _petsc_sol_old;
+  /// Udot (u_n-u_{n-1})/dt
+  Vec & _petsc_udot;
+  /// RHS vector
+  Vec _petsc_rhs;
 };

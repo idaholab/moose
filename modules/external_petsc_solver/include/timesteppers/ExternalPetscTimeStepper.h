@@ -22,7 +22,6 @@ public:
 protected:
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
-  virtual void preSolve() override;
 
 private:
   ExternalPETScProblem & _external_petsc_problem;

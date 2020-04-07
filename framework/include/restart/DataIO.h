@@ -394,6 +394,9 @@ dataStore(std::ostream & stream, NumericVector<T> & v, void * context)
   }
 }
 
+template <>
+void dataStore(std::ostream & stream, Vec & v, void * context);
+
 template <typename T>
 void
 dataStore(std::ostream & stream, DenseVector<T> & v, void * context)
@@ -668,6 +671,9 @@ dataLoad(std::istream & stream, NumericVector<T> & v, void * context)
   }
   v.close();
 }
+
+template <>
+void dataLoad(std::istream & stream, Vec & v, void * context);
 
 template <typename T>
 void

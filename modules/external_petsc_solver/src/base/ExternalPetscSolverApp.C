@@ -57,12 +57,13 @@ ExternalPetscSolverApp::backup()
       static_cast<ExternalPETScProblem &>(_executioner->feProblem());
 
   // Backup current solution
-  PetscVector<Number> petsc_sol(external_petsc_problem.currentSolution(), comm());
-  dataStore(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
+  dataStore(backup->_system_data, external_petsc_problem.currentSolution(), nullptr);
 
   // Backup the old solution
-  PetscVector<Number> petsc_sol_old(external_petsc_problem.solutionOld(), comm());
-  dataStore(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol_old), nullptr);
+  dataStore(backup->_system_data, external_petsc_problem.solutionOld(), nullptr);
+
+  // Backup Udot
+  dataStore(backup->_system_data, external_petsc_problem.udot(), nullptr);
 
   return backup;
 }
@@ -76,12 +77,13 @@ ExternalPetscSolverApp::restore(std::shared_ptr<Backup> backup, bool for_restart
       static_cast<ExternalPETScProblem &>(_executioner->feProblem());
 
   // Restore previous solution
-  PetscVector<Number> petsc_sol(external_petsc_problem.currentSolution(), comm());
-  dataLoad(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
+  dataLoad(backup->_system_data, external_petsc_problem.currentSolution(), nullptr);
 
   // Restore the solution at the previous time step
-  PetscVector<Number> petsc_sol_old(external_petsc_problem.solutionOld(), comm());
-  dataLoad(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol_old), nullptr);
+  dataLoad(backup->_system_data, external_petsc_problem.solutionOld(), nullptr);
+
+  // Restore udot
+  dataLoad(backup->_system_data, external_petsc_problem.udot(), nullptr);
 }
 
 void

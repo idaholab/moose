@@ -29,7 +29,11 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
     _sync_to_var_name(getParam<VariableName>("sync_variable")),
     // Require ExternalPetscSolverApp
     _external_petsc_app(static_cast<ExternalPetscSolverApp &>(_app)),
-    _ts(_external_petsc_app.getPetscTS())
+    _ts(_external_petsc_app.getPetscTS()),
+    // RestartableData is required for recovering when PETSc solver runs as a master app
+    _petsc_sol(declareRestartableData<Vec>("petsc_sol")),
+    _petsc_sol_old(declareRestartableData<Vec>("petsc_sol_old")),
+    _petsc_udot(declareRestartableData<Vec>("petsc_udot"))
 {
   DM da;
   TSGetDM(_ts, &da);
@@ -40,9 +44,14 @@ ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
   VecMPISetGhost(_petsc_sol, 0, nullptr);
   // The solution at the previous time step
   VecDuplicate(_petsc_sol, &_petsc_sol_old);
+  // Udot
+  VecDuplicate(_petsc_sol, &_petsc_udot);
+  // RHS
+  VecDuplicate(_petsc_sol, &_petsc_rhs);
   // Form an initial condition
   FormInitialSolution(_ts, _petsc_sol, NULL);
   VecCopy(_petsc_sol, _petsc_sol_old);
+  VecSet(_petsc_udot, 0);
 }
 
 ExternalPETScProblem::~ExternalPETScProblem()
@@ -50,17 +59,19 @@ ExternalPETScProblem::~ExternalPETScProblem()
   // Destroy all handles of external Petsc solver
   VecDestroy(&_petsc_sol);
   VecDestroy(&_petsc_sol_old);
+  VecDestroy(&_petsc_udot);
+  VecDestroy(&_petsc_rhs);
 }
 
 void
 ExternalPETScProblem::externalSolve()
 {
   _console << "PETSc External Solve!" << std::endl;
-  // "_petsc_sol" is the solution of the current time step, and it will be updated
+  // "_petsc_sol_old" is the solution of the current time step, and "_petsc_sol" will be updated
   // to store the solution of the next time step after this call.
-  // This call advance a time step so that there is an opportunity to
+  // This call advances a time step so that there is an opportunity to
   // exchange information with MOOSE simulations.
-  externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time(), &_petsc_converged);
+  externalPETScDiffusionFDMSolve(_ts, _petsc_sol_old, _petsc_sol, dt(), time(), &_petsc_converged);
 }
 
 // This function is called when MOOSE time stepper actually moves to the next time step
@@ -69,8 +80,24 @@ void
 ExternalPETScProblem::advanceState()
 {
   FEProblemBase::advanceState();
+  // Compute udot using a backward Euler method
+  // If the external code uses a different method,
+  // udot should be retrieved from the external solver
+  VecCopy(_petsc_sol, _petsc_udot);
+  VecAXPY(_petsc_udot, -1., _petsc_sol_old);
+  VecScale(_petsc_udot, 1. / dt());
   // Save current solution because we are moving to the next time step
   VecCopy(_petsc_sol, _petsc_sol_old);
+}
+
+Real
+ExternalPETScProblem::computeResidualL2Norm()
+{
+  TSComputeIFunction(_ts, time(), _petsc_sol, _petsc_udot, _petsc_rhs, PETSC_FALSE);
+  PetscReal norm;
+  VecNorm(_petsc_rhs, NORM_2, &norm);
+
+  return norm;
 }
 
 void

@@ -46,14 +46,3 @@ ExternalPetscTimeStepper::computeDT()
   TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
   return dt;
 }
-
-void
-ExternalPetscTimeStepper::preSolve()
-{
-  // This function will be called right before "takeStep"
-  // "preStep" sometimes will not be called. Therefore, "preSolve"
-  // is the right function to set the initial condition for the current
-  // time step.
-  // Old solution is the initial condition of this time step
-  VecCopy(_external_petsc_problem.solutionOld(), _external_petsc_problem.currentSolution());
-}

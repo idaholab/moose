@@ -102,7 +102,8 @@ PETScExternalSolverDestroy(TS ts)
  * to demonstrate how MOOSE interact with an external solver package
  */
 PetscErrorCode
-externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, PetscBool * converged)
+externalPETScDiffusionFDMSolve(
+    TS ts, Vec u0, Vec u, PetscReal dt, PetscReal time, PetscBool * converged)
 {
   PetscErrorCode ierr;
   TSConvergedReason reason;
@@ -112,6 +113,13 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, Petsc
   DM da;
 
   PetscFunctionBeginUser;
+  PetscValidHeaderSpecific(ts, TS_CLASSID, 1);
+  PetscValidType(ts, 1);
+  PetscValidHeaderSpecific(u0, VEC_CLASSID, 2);
+  PetscValidType(u0, 2);
+  PetscValidHeaderSpecific(u, VEC_CLASSID, 3);
+  PetscValidType(u, 3);
+  PetscValidPointer(converged, 6);
 
   ierr = TSGetDM(ts, &da);
   CHKERRQ(ierr);
@@ -128,6 +136,9 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, Petsc
 
   /*ierr = TSSetMaxTime(ts,1.0);CHKERRQ(ierr);*/
   ierr = TSSetExactFinalTime(ts, TS_EXACTFINALTIME_STEPOVER);
+  CHKERRQ(ierr);
+
+  ierr = VecCopy(u0, u);
   CHKERRQ(ierr);
 
   ierr = TSSetSolution(ts, u);
@@ -159,12 +170,11 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, Petsc
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSolve(ts, u);
   CHKERRQ(ierr);
-  if (converged)
-  {
-    ierr = TSGetConvergedReason(ts, &reason);
-    CHKERRQ(ierr);
-    *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
-  }
+
+  ierr = TSGetConvergedReason(ts, &reason);
+  CHKERRQ(ierr);
+  *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
+
   PetscFunctionReturn(0);
 }
 
