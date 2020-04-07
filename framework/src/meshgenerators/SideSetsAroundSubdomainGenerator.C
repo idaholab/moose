@@ -127,8 +127,9 @@ SideSetsAroundSubdomainGenerator::generate()
       {
         if (_using_normal)
         {
+          const std::vector<Point> & normals = _fe_face->get_normals();
           _fe_face->reinit(elem, side);
-          face_normal = _fe_face->get_normals()[0];
+          face_normal = normals[0];
           add_to_bdy = (_normal * face_normal >= 1.0 - _normal_tol);
         }
 
@@ -184,8 +185,9 @@ SideSetsAroundSubdomainGenerator::generate()
         {
           if (_using_normal)
           {
+            const std::vector<Point> & normals = _fe_face->get_normals();
             _fe_face->reinit(elem, side);
-            face_normal = _fe_face->get_normals()[0];
+            face_normal = normals[0];
             add_to_bdy = (_normal * face_normal >= 1.0 - _normal_tol);
           }
 

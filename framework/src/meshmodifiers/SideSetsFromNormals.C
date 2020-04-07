@@ -80,8 +80,8 @@ SideSetsFromNormals::modify()
       if (elem->neighbor_ptr(side))
         continue;
 
-      _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
+      _fe_face->reinit(elem, side);
 
       for (unsigned int i = 0; i < boundary_ids.size(); ++i)
       {
