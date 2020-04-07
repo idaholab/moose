@@ -16,7 +16,7 @@
 - [Developer Tools](help/development/index.md)
 - [Finite Element Concepts](finite_element_concepts/index.md)
 - [C++ Fundamentals](help/c++/index.md)
-- [INL HPC Connectivity](help/inlhpcconnectivity.md)
+- [Remote HPC Connectivity](help/remotehpcconnectivity.md)
 
 !col-end!
 !row-end!
