@@ -2,11 +2,7 @@
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
-class BoundaryFlux3EqnGhostStagnationPressureTemperature;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostStagnationPressureTemperature>();
 
 /**
  * Computes boundary flux from a specified stagnation pressure and temperature
@@ -32,4 +28,7 @@ protected:
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

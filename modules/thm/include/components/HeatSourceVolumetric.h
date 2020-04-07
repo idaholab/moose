@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class HeatSourceVolumetric;
-
-template <>
-InputParameters validParams<HeatSourceVolumetric>();
-
 /**
  * Volumetric heat source applied on a flow channel
  */
@@ -17,4 +12,7 @@ public:
 
   virtual void check() const override;
   virtual void addMooseObjects() override;
+
+public:
+  static InputParameters validParams();
 };

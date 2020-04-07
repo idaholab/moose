@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class SolidWall;
-
-template <>
-InputParameters validParams<SolidWall>();
-
 /**
  * A simple component for solid wall BC
  */
@@ -21,4 +16,7 @@ protected:
   virtual void addMooseObjects1Phase();
   virtual void addMooseObjects2Phase();
   virtual void addMooseObjects2PhaseNCG();
+
+public:
+  static InputParameters validParams();
 };

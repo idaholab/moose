@@ -2,11 +2,6 @@
 
 #include "ThreadedGeneralUserObject.h"
 
-class NumericalFlux3EqnBase;
-
-template <>
-InputParameters validParams<NumericalFlux3EqnBase>();
-
 /**
  * Abstract base class for computing and caching internal or boundary fluxes for RDG
  * for the 3-equation model of 1-phase flow.
@@ -164,4 +159,7 @@ protected:
 
   /// Index describing the region last entered, which is useful for testing and debugging
   mutable unsigned int _last_region_index;
+
+public:
+  static InputParameters validParams();
 };

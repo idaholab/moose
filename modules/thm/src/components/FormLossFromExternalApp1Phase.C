@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", FormLossFromExternalApp1Phase);
 
-template <>
 InputParameters
-validParams<FormLossFromExternalApp1Phase>()
+FormLossFromExternalApp1Phase::validParams()
 {
-  InputParameters params = validParams<FormLoss1PhaseBase>();
+  InputParameters params = FormLoss1PhaseBase::validParams();
 
   params.addClassDescription("Apply a distributed form loss over a 1-phase flow channel computed "
                              "by an external application.");

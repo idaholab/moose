@@ -2,11 +2,6 @@
 
 #include "FunctionNeumannBC.h"
 
-class HSHeatFluxBC;
-
-template <>
-InputParameters validParams<HSHeatFluxBC>();
-
 /**
  * Applies a specified heat flux to the side of a plate heat structure
  */
@@ -19,4 +14,7 @@ public:
 
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
+
+public:
+  static InputParameters validParams();
 };

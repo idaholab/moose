@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", CFLTimeStepSize);
 
-template <>
 InputParameters
-validParams<CFLTimeStepSize>()
+CFLTimeStepSize::validParams()
 {
-  InputParameters params = validParams<ElementPostprocessor>();
+  InputParameters params = ElementPostprocessor::validParams();
 
   params.addParam<Real>("CFL", 0.5, "The CFL number to use in computing time step size");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("vel_names",

@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneD3EqnEnergyHeatSource);
 
-template <>
 InputParameters
-validParams<OneD3EqnEnergyHeatSource>()
+OneD3EqnEnergyHeatSource::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<FunctionName>("q", "Volumetric heat source");
   params.addRequiredCoupledVar("A", "Cross sectional area");
   params.addClassDescription("Volumetric heat source for 1-phase flow channel");

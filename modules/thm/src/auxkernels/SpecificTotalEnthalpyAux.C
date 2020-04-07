@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SpecificTotalEnthalpyAux);
 
-template <>
 InputParameters
-validParams<SpecificTotalEnthalpyAux>()
+SpecificTotalEnthalpyAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rhoA", "Conserved density");
   params.addRequiredCoupledVar("rhoEA", "Conserved total energy");
   params.addRequiredCoupledVar("p", "Pressure");

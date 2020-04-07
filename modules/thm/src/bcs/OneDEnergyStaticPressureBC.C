@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", OneDEnergyStaticPressureBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyStaticPressureBC>()
+OneDEnergyStaticPressureBC::validParams()
 {
-  InputParameters params = validParams<OneDNodalBC>();
+  InputParameters params = OneDNodalBC::validParams();
   params.addParam<bool>("reversible", false, "true for reversible behavior");
   params.addRequiredParam<bool>("is_liquid", "Is liquid phase?");
   params.addCoupledVar("beta", 0., "Remapped volume fraction of liquid (two-phase only)");

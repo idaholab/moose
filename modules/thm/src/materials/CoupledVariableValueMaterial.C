@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CoupledVariableValueMaterial);
 
-template <>
 InputParameters
-validParams<CoupledVariableValueMaterial>()
+CoupledVariableValueMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "The name of the material property where we store the variable values.");
   params.addRequiredCoupledVar(

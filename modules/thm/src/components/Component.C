@@ -4,11 +4,10 @@
 #include "ConstantFunction.h"
 #include "Numerics.h"
 
-template <>
 InputParameters
-validParams<Component>()
+Component::validParams()
 {
-  InputParameters params = validParams<THMObject>();
+  InputParameters params = THMObject::validParams();
   params.addParam<RealVectorValue>(
       "gravity_vector", THM::default_gravity_vector, "Gravitational acceleration vector [m/s^2]");
   params.addPrivateParam<THMProblem *>("_thm_problem");

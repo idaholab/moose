@@ -3,11 +3,6 @@
 #include "SmoothTransitionFunction.h"
 #include "WeightedTransition.h"
 
-class CosineTransitionFunction;
-
-template <>
-InputParameters validParams<CosineTransitionFunction>();
-
 /**
  * Computes a cosine transtition of a user-specified width between two values
  *
@@ -26,4 +21,7 @@ public:
 protected:
   /// Transition object
   const WeightedTransition _transition;
+
+public:
+  static InputParameters validParams();
 };

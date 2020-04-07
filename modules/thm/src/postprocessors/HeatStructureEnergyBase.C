@@ -1,11 +1,10 @@
 #include "HeatStructureEnergyBase.h"
 #include "HeatConductionModel.h"
 
-template <>
 InputParameters
-validParams<HeatStructureEnergyBase>()
+HeatStructureEnergyBase::validParams()
 {
-  InputParameters params = validParams<ElementIntegralPostprocessor>();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
 
   params.addClassDescription("Computes the total energy for a heat structure.");
 

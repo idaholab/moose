@@ -2,11 +2,6 @@
 
 #include "MooseObject.h"
 
-class THMObject;
-
-template <>
-InputParameters validParams<THMObject>();
-
 /**
  *
  */
@@ -40,6 +35,9 @@ protected:
    */
   template <typename T>
   void passParameter(const std::string & name, InputParameters & params) const;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

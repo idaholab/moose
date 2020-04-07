@@ -2,11 +2,6 @@
 
 #include "HeatTransferFromTemperature1Phase.h"
 
-class HeatTransferFromSpecifiedTemperature1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromSpecifiedTemperature1Phase>();
-
 /**
  * Heat transfer connection from a fixed temperature function for 1-phase flow
  */
@@ -21,4 +16,7 @@ public:
 protected:
   /// wall temperature function name
   const FunctionName _T_wall_fn_name;
+
+public:
+  static InputParameters validParams();
 };

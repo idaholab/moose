@@ -2,11 +2,10 @@
 
 registerMooseObject("MooseApp", MaterialDerivativeStdVectorRealTestKernel);
 
-template <>
 InputParameters
-validParams<MaterialDerivativeStdVectorRealTestKernel>()
+MaterialDerivativeStdVectorRealTestKernel::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Class used for testing derivatives of a std::vector<Real> material property.");
   params.addRequiredParam<MaterialPropertyName>(

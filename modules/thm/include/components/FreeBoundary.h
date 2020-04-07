@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class FreeBoundary;
-
-template <>
-InputParameters validParams<FreeBoundary>();
-
 /**
  * Adds the boundary terms resulting from an integration by parts of the
  * advection terms, using no external boundary data.
@@ -36,4 +31,7 @@ protected:
   std::vector<VariableName> _velocity_name;
   std::vector<VariableName> _enthalpy_name;
   std::vector<VariableName> _pressure_name;
+
+public:
+  static InputParameters validParams();
 };

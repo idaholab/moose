@@ -3,11 +3,6 @@
 #include "SideIntegralPostprocessor.h"
 #include "RZSymmetry.h"
 
-class HeatRateRadiationRZ;
-
-template <>
-InputParameters validParams<HeatRateRadiationRZ>();
-
 /**
  * Integrates a cylindrical heat structure boundary radiative heat flux
  */
@@ -29,4 +24,7 @@ protected:
   const Function & _view_factor_fn;
   /// Stefan-Boltzmann constant
   const Real & _sigma_stefan_boltzmann;
+
+public:
+  static InputParameters validParams();
 };

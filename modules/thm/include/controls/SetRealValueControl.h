@@ -2,11 +2,7 @@
 
 #include "THMControl.h"
 
-class SetRealValueControl;
 class Function;
-
-template <>
-InputParameters validParams<SetRealValueControl>();
 
 /**
  * This block reads an input computed by the control logic system and sets a value in a specified
@@ -28,4 +24,7 @@ protected:
   MooseObjectParameterName _ctrl_param_name;
   /// The value that is written into the component
   const Real & _value;
+
+public:
+  static InputParameters validParams();
 };

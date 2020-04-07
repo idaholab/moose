@@ -1,10 +1,9 @@
 #include "OneDIntegratedBC.h"
 
-template <>
 InputParameters
-validParams<OneDIntegratedBC>()
+OneDIntegratedBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<Real>("normal", "Component of outward normal along 1-D direction");
   return params;
 }

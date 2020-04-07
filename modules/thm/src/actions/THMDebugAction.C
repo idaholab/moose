@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMDebugAction, "THM:debug_action");
 
-template <>
 InputParameters
-validParams<THMDebugAction>()
+THMDebugAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<bool>("check_jacobian", false, "Set to true to check jacobian");
 
   return params;

@@ -2,11 +2,10 @@
 #include "FluidProperties.h"
 #include "SlopeReconstruction1DInterface.h"
 
-template <>
 InputParameters
-validParams<GeometricalFlowComponent>()
+GeometricalFlowComponent::validParams()
 {
-  InputParameters params = validParams<GeometricalComponent>();
+  InputParameters params = GeometricalComponent::validParams();
 
   params.addClassDescription("Base class for geometrical components that have fluid flow");
 

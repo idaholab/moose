@@ -13,11 +13,10 @@ const std::vector<std::pair<std::string, unsigned int>>
 
 Threads::spin_mutex JunctionOneToOne1PhaseUserObject::_spin_mutex;
 
-template <>
 InputParameters
-validParams<JunctionOneToOne1PhaseUserObject>()
+JunctionOneToOne1PhaseUserObject::validParams()
 {
-  InputParameters params = validParams<FlowJunctionUserObject>();
+  InputParameters params = FlowJunctionUserObject::validParams();
 
   params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");

@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", ConvectionHeatTransferRZBC);
 
-template <>
 InputParameters
-validParams<ConvectionHeatTransferRZBC>()
+ConvectionHeatTransferRZBC::validParams()
 {
-  InputParameters params = validParams<ConvectionHeatTransferBC>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = ConvectionHeatTransferBC::validParams();
+  params += RZSymmetry::validParams();
 
   params.addClassDescription("Convection BC for RZ domain in XY coordinate system");
 

@@ -2,11 +2,6 @@
 
 #include "HeatSourceBase.h"
 
-class HeatSourceFromTotalPower;
-
-template <>
-InputParameters validParams<HeatSourceFromTotalPower>();
-
 /**
  * Heat generation from total power
  */
@@ -29,4 +24,7 @@ protected:
   const bool _has_psf;
   /// The name of the power shape function
   FunctionName _power_shape_func;
+
+public:
+  static InputParameters validParams();
 };

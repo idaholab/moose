@@ -2,11 +2,10 @@
 #include "ConstantFunction.h"
 #include "THMMesh.h"
 
-template <>
 InputParameters
-validParams<GeometricalComponent>()
+GeometricalComponent::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
 
   params.addRequiredParam<Point>("position", "Origin (start) of the component [m]");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the component");

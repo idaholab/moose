@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMassFlux;
-
-template <>
-InputParameters validParams<OneD3EqnMassFlux>();
-
 /**
  * Mass flux for 1-phase flow
  */
@@ -34,4 +29,7 @@ protected:
   const MaterialProperty<Real> & _dvel_darhouA;
 
   const unsigned int _arhouA_var_number;
+
+public:
+  static InputParameters validParams();
 };

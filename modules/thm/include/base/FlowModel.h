@@ -11,10 +11,6 @@ class Factory;
 class THMApp;
 class FluidProperties;
 class FlowChannelBase;
-class FlowModel;
-
-template <>
-InputParameters validParams<FlowModel>();
 
 /**
  * Provides functions to setup the flow model.  Should be used by components that has flow in them
@@ -155,6 +151,8 @@ public:
   static const std::string TEMPERATURE_WALL;
   static const std::string UNITY;
   static const std::string DIRECTION;
+
+  static InputParameters validParams();
 };
 
 namespace THM

@@ -3,11 +3,6 @@
 #include "ElementUserObject.h"
 #include "FlowChannelAlignment.h"
 
-class HeatFluxFromHeatStructureBaseUserObject;
-
-template <>
-InputParameters validParams<HeatFluxFromHeatStructureBaseUserObject>();
-
 /**
  * Base class for caching heat flux between a flow channel and a heat structure.
  *
@@ -64,4 +59,7 @@ protected:
   std::map<dof_id_type, std::vector<DenseVector<Real>>> _heat_flux_jacobian;
   /// Coupled heated perimeter variable
   const VariableValue & _P_hf;
+
+public:
+  static InputParameters validParams();
 };

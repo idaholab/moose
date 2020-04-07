@@ -2,11 +2,6 @@
 
 #include "FlowJunction.h"
 
-class VolumeJunctionBase;
-
-template <>
-InputParameters validParams<FlowJunction>();
-
 /**
  * Base class for volumetric junction components
  */
@@ -21,4 +16,7 @@ protected:
 
   /// Spatial position of center of the junction
   const Point & _position;
+
+public:
+  static InputParameters validParams();
 };

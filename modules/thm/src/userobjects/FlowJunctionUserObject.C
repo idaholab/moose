@@ -1,11 +1,10 @@
 #include "FlowJunctionUserObject.h"
 #include "MooseMesh.h"
 
-template <>
 InputParameters
-validParams<FlowJunctionUserObject>()
+FlowJunctionUserObject::validParams()
 {
-  InputParameters params = validParams<SideUserObject>();
+  InputParameters params = SideUserObject::validParams();
 
   params.addRequiredParam<std::vector<Real>>(
       "normals", "Flow channel outward normals or junction inward normals");

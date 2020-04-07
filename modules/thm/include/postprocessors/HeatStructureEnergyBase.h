@@ -2,11 +2,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class HeatStructureEnergyBase;
-
-template <>
-InputParameters validParams<HeatStructureEnergyBase>();
-
 /**
  * Base class for computing the total energy for heat structures
  */
@@ -34,4 +29,7 @@ protected:
   MooseVariable * _T_var;
   /// Temperature variable value
   const VariableValue & _T;
+
+public:
+  static InputParameters validParams();
 };

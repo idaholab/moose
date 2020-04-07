@@ -20,11 +20,10 @@ THM::stringToEnum(const std::string & s)
   return stringToEnum<HeatStructureBase::SideType>(s, HeatStructureBase::_side_type_to_enum);
 }
 
-template <>
 InputParameters
-validParams<HeatStructureBase>()
+HeatStructureBase::validParams()
 {
-  InputParameters params = validParams<GeometricalComponent>();
+  InputParameters params = GeometricalComponent::validParams();
   params.addPrivateParam<std::string>("component_type", "heat_struct");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
   params.addRequiredParam<std::vector<std::string>>("names", "User given heat structure names");

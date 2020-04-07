@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class TotalPowerBase;
-
-template <>
-InputParameters validParams<TotalPowerBase>();
-
 /**
  * Base class for components that provide total power
  */
@@ -21,4 +16,7 @@ public:
 protected:
   /// The scalar variable holding the value of power
   const VariableName _power_var_name;
+
+public:
+  static InputParameters validParams();
 };

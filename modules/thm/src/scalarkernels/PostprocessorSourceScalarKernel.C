@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", PostprocessorSourceScalarKernel);
 
-template <>
 InputParameters
-validParams<PostprocessorSourceScalarKernel>()
+PostprocessorSourceScalarKernel::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
 
   params.addRequiredParam<PostprocessorName>("pp", "Post-processor to act as source");
 

@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", FreeBoundary);
 
-template <>
 InputParameters
-validParams<FreeBoundary>()
+FreeBoundary::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   return params;
 }
 

@@ -2,11 +2,6 @@
 
 #include "THMControl.h"
 
-class PIDControl;
-
-template <>
-InputParameters validParams<PIDControl>();
-
 /**
  * This block represents a proportional-integral-derivative controller (PID controller). It
  * continuously calculates an error value e(t) as the difference between a desired setpoint and a
@@ -37,4 +32,7 @@ protected:
   Real & _integral;
   /// The old value of the error
   Real _error_old;
+
+public:
+  static InputParameters validParams();
 };

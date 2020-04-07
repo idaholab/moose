@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMInitSimulationAction, "THM:init_simulation");
 
-template <>
 InputParameters
-validParams<THMInitSimulationAction>()
+THMInitSimulationAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   return params;
 }

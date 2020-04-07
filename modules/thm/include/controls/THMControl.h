@@ -4,11 +4,6 @@
 #include "ControlData.h"
 #include "THMProblem.h"
 
-class THMControl;
-
-template <>
-InputParameters validParams<THMControl>();
-
 class THMControl : public Control
 {
 public:
@@ -58,6 +53,9 @@ protected:
 
   /// A list of control data that are required to run before this control may run
   std::vector<std::string> _control_data_depends_on;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

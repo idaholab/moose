@@ -3,11 +3,6 @@
 #include "HeatConduction.h"
 #include "RZSymmetry.h"
 
-class HeatConductionRZ;
-
-template <>
-InputParameters validParams<HeatConductionRZ>();
-
 /**
  * Heat conduction kernel in arbitrary RZ symmetry
  */
@@ -19,4 +14,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+public:
+  static InputParameters validParams();
 };

@@ -2,12 +2,6 @@
 
 #include "OneDMassFreeBC.h"
 
-// Forward Declarations
-class OneDMassFreeInletReverseBC;
-
-template <>
-InputParameters validParams<OneDMassFreeInletReverseBC>();
-
 /**
  * A BC for the mass equation in which nothing is specified (i.e.
  * everything is allowed to be "free") and is used for reversible
@@ -23,4 +17,7 @@ protected:
 
   const bool & _reversible;
   const VariableValue & _arhouA_old;
+
+public:
+  static InputParameters validParams();
 };

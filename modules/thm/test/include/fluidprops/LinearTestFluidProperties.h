@@ -2,11 +2,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class LinearTestFluidProperties;
-
-template <>
-InputParameters validParams<LinearTestFluidProperties>();
-
 /**
  * single phase fluid properties class used for testing derivatives
  *
@@ -36,4 +31,6 @@ public:
 #pragma GCC diagnostic pop
 
 protected:
+public:
+  static InputParameters validParams();
 };

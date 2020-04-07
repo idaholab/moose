@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatStructurePlate);
 
-template <>
 InputParameters
-validParams<HeatStructurePlate>()
+HeatStructurePlate::validParams()
 {
-  InputParameters params = validParams<HeatStructureBase>();
+  InputParameters params = HeatStructureBase::validParams();
   params.addRequiredParam<Real>("depth", "Dimension of plate fuel in the third direction [m]");
   params.addClassDescription("Plate heat structure");
   return params;

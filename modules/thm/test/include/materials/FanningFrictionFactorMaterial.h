@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class FanningFrictionFactorMaterial;
-
-template <>
-InputParameters validParams<FanningFrictionFactorMaterial>();
-
 /**
  * Computes Fanning friction factor from Darcy friction factor
  */
@@ -23,4 +18,7 @@ protected:
 
   /// Fanning friction factor
   MaterialProperty<Real> & _f_F;
+
+public:
+  static InputParameters validParams();
 };

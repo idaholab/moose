@@ -3,11 +3,6 @@
 #include "JacobianTestAction.h"
 #include "MooseEnum.h"
 
-class JacobianTest1PhaseRDGAction;
-
-template <>
-InputParameters validParams<JacobianTest1PhaseRDGAction>();
-
 /**
  * Sets up a Jacobian test for 1-phase rDG
  */
@@ -73,4 +68,7 @@ protected:
 
   /// fluid properties object name
   const UserObjectName _fp_name;
+
+public:
+  static InputParameters validParams();
 };

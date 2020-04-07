@@ -3,11 +3,6 @@
 #include "NumericalFlux3EqnBase.h"
 #include "SinglePhaseFluidProperties.h"
 
-class NumericalFlux3EqnHLLC;
-
-template <>
-InputParameters validParams<NumericalFlux3EqnHLLC>();
-
 /**
  * Computes internal side flux for the 1-D, 1-phase, variable-area Euler equations using
  * the HLLC approximate Riemann solver.
@@ -46,4 +41,7 @@ protected:
 
   /// use frozen acoustic speeds Jacobian approximation
   const bool _use_approximate_jacobian;
+
+public:
+  static InputParameters validParams();
 };

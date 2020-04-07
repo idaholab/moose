@@ -2,11 +2,6 @@
 
 #include "DerivativeMaterialInterface.h"
 
-class LinearTestMaterial;
-
-template <>
-InputParameters validParams<LinearTestMaterial>();
-
 /**
  * Computes a material property that is linear with respect to a list of aux variables
  *
@@ -47,4 +42,7 @@ protected:
 
   /// Derivatives of material property with respect to each aux variable
   std::vector<MaterialProperty<Real> *> _y_derivatives;
+
+public:
+  static InputParameters validParams();
 };

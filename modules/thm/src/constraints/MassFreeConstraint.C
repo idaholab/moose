@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", MassFreeConstraint);
 
-template <>
 InputParameters
-validParams<MassFreeConstraint>()
+MassFreeConstraint::validParams()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  InputParameters params = NodalConstraint::validParams();
   params.addRequiredParam<std::vector<Real>>("normals", "node normals");
   params.addRequiredParam<std::vector<dof_id_type>>("nodes", "node IDs");
   params.addRequiredCoupledVar("rhouA", "Momentum");

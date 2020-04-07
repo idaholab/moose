@@ -2,11 +2,7 @@
 
 #include "Kernel.h"
 
-class OneDHeatFluxBase;
 class HeatFluxFromHeatStructureBaseUserObject;
-
-template <>
-InputParameters validParams<OneDHeatFluxBase>();
 
 class OneDHeatFluxBase : public Kernel
 {
@@ -24,4 +20,7 @@ protected:
   const VariablePhiValue & _phi_neighbor;
   /// User object that computes the heat flux
   const HeatFluxFromHeatStructureBaseUserObject & _q_uo;
+
+public:
+  static InputParameters validParams();
 };

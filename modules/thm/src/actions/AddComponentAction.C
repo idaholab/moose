@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", AddComponentAction, "THM:add_component");
 
-template <>
 InputParameters
-validParams<AddComponentAction>()
+AddComponentAction::validParams()
 {
-  InputParameters params = validParams<MooseObjectAction>();
+  InputParameters params = MooseObjectAction::validParams();
   params.makeParamNotRequired<std::string>("type");
   params.set<std::string>("type") = "ComponentGroup";
   return params;

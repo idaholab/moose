@@ -2,11 +2,7 @@
 
 #include "AuxKernel.h"
 
-class MachNumberAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<MachNumberAux>();
 
 /**
  * Computes Mach number
@@ -24,4 +20,7 @@ protected:
   const VariableValue & _e;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,13 +2,12 @@
 
 registerMooseAction("THMTestApp", ClosureTest1PhaseAction, "meta_action");
 
-template <>
 InputParameters
-validParams<ClosureTest1PhaseAction>()
+ClosureTest1PhaseAction::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params += validParams<ClosureTestAction>();
-  params += validParams<FlowModelSetup1Phase>();
+  params += ClosureTestAction::validParams();
+  params += FlowModelSetup1Phase::validParams();
 
   return params;
 }

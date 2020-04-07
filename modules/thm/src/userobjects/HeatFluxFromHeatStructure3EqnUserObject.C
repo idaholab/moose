@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", HeatFluxFromHeatStructure3EqnUserObject);
 
-template <>
 InputParameters
-validParams<HeatFluxFromHeatStructure3EqnUserObject>()
+HeatFluxFromHeatStructure3EqnUserObject::validParams()
 {
-  InputParameters params = validParams<HeatFluxFromHeatStructureBaseUserObject>();
+  InputParameters params = HeatFluxFromHeatStructureBaseUserObject::validParams();
   params.addRequiredCoupledVar("T_wall", "Wall temperature");
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("Hw", "Convective heat transfer coefficient");

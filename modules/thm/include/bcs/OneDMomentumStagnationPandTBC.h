@@ -4,12 +4,7 @@
 #include "DerivativeMaterialInterfaceTHM.h"
 #include "OneDStagnationPandTBase.h"
 
-// Forward Declarations
-class OneDMomentumStagnationPandTBC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<OneDMomentumStagnationPandTBC>();
 
 /**
  * Stagnation P and T BC
@@ -44,4 +39,7 @@ protected:
   const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;
   const unsigned int _arhoEA_var_number;
+
+public:
+  static InputParameters validParams();
 };

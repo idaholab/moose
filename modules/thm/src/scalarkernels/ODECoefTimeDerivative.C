@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ODECoefTimeDerivative);
 
-template <>
 InputParameters
-validParams<ODECoefTimeDerivative>()
+ODECoefTimeDerivative::validParams()
 {
-  InputParameters params = validParams<ODETimeDerivative>();
+  InputParameters params = ODETimeDerivative::validParams();
   params.addRequiredParam<Real>("coef", "The coefficient multiplying the time derivative term");
   params.addClassDescription("Time derivative term multiplied by a coefficient - used by ODEs.");
   params.declareControllable("coef");

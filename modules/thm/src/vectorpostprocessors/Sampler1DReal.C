@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", Sampler1DReal);
 
-template <>
 InputParameters
-validParams<Sampler1DReal>()
+Sampler1DReal::validParams()
 {
-  InputParameters params = validParams<Sampler1DBase<Real>>();
+  InputParameters params = Sampler1DBase<Real>::validParams();
   return params;
 }
 

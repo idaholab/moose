@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class WallHeatTransferCoefficient3EqnDittusBoelterMaterial;
-
-template <>
-InputParameters validParams<WallHeatTransferCoefficient3EqnDittusBoelterMaterial>();
-
 /**
  * Computes wall heat transfer coefficient using Dittus-Boelter equation
  */
@@ -36,4 +31,7 @@ protected:
   const MaterialProperty<Real> & _T;
   /// Wall temperature
   const MaterialProperty<Real> & _T_wall;
+
+public:
+  static InputParameters validParams();
 };

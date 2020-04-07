@@ -2,11 +2,6 @@
 
 #include "FlowChannel1Phase.h"
 
-class ElbowPipe1Phase;
-
-template <>
-InputParameters validParams<ElbowPipe1Phase>();
-
 /**
  * Bent pipe for 1-phase flow
  */
@@ -26,4 +21,7 @@ protected:
   Real _end_angle;
   /// central angle
   Real _central_angle;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "SideUserObject.h"
 
-class FlowJunctionUserObject;
-
-template <>
-InputParameters validParams<FlowJunctionUserObject>();
-
 /**
  * Provides common interfaces for flow junction user objects
  */
@@ -52,4 +47,7 @@ protected:
   const MaterialProperty<RealVectorValue> & _dir;
   /// Number of connected flow channels
   const unsigned int _n_connections;
+
+public:
+  static InputParameters validParams();
 };

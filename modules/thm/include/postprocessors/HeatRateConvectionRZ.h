@@ -3,11 +3,6 @@
 #include "SideIntegralPostprocessor.h"
 #include "RZSymmetry.h"
 
-class HeatRateConvectionRZ;
-
-template <>
-InputParameters validParams<HeatRateConvectionRZ>();
-
 /**
  * Integrates a cylindrical heat structure boundary convective heat flux
  */
@@ -25,4 +20,7 @@ protected:
   const Real & _T_ambient;
   /// Heat transfer coefficient
   const Real & _htc;
+
+public:
+  static InputParameters validParams();
 };

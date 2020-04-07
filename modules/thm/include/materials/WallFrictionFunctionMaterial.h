@@ -3,11 +3,7 @@
 #include "Material.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class WallFrictionFunctionMaterial;
 class Function;
-
-template <>
-InputParameters validParams<WallFrictionFunctionMaterial>();
 
 /**
  * Converts Darcy friction factor function into material property
@@ -28,4 +24,7 @@ protected:
   MaterialProperty<Real> & _df_D_darhoA;
   MaterialProperty<Real> & _df_D_darhouA;
   MaterialProperty<Real> & _df_D_darhoEA;
+
+public:
+  static InputParameters validParams();
 };

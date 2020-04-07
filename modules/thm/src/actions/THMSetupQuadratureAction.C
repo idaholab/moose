@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMSetupQuadratureAction, "setup_quadrature");
 
-template <>
 InputParameters
-validParams<THMSetupQuadratureAction>()
+THMSetupQuadratureAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

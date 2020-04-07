@@ -3,11 +3,6 @@
 #include "HeatStructureBase.h"
 #include "HeatConductionModel.h"
 
-class HeatStructureCylindrical;
-
-template <>
-InputParameters validParams<HeatStructureCylindrical>();
-
 /**
  * Component to model cylindrical heat structure
  */
@@ -29,4 +24,7 @@ public:
 protected:
   /// Inner radius of the heat structure
   const Real & _inner_radius;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", WeightedAverageAux);
 
-template <>
 InputParameters
-validParams<WeightedAverageAux>()
+WeightedAverageAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription(
       "Weighted average of aux variables using other aux variables as weights");

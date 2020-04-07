@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", HeatTransferFromHeatFlux1Phase);
 
-template <>
 InputParameters
-validParams<HeatTransferFromHeatFlux1Phase>()
+HeatTransferFromHeatFlux1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransfer1PhaseBase>();
+  InputParameters params = HeatTransfer1PhaseBase::validParams();
   params.addRequiredParam<FunctionName>("q_wall", "Specified wall heat flux [W/m^2]");
   params.addClassDescription(
       "Heat transfer specified by heat flux going into 1-phase flow channel.");

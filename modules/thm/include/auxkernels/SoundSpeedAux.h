@@ -2,11 +2,7 @@
 
 #include "AuxKernel.h"
 
-class SoundSpeedAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<SoundSpeedAux>();
 
 /**
  * Computes the sound speed, given the equation of state
@@ -23,4 +19,7 @@ protected:
   const VariableValue & _e;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

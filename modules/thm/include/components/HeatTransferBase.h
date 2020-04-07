@@ -2,11 +2,7 @@
 
 #include "ConnectorBase.h"
 
-class HeatTransferBase;
 class ClosuresBase;
-
-template <>
-InputParameters validParams<HeatTransferBase>();
 
 /**
  * Base class for heat transfer connections
@@ -93,4 +89,7 @@ protected:
   FunctionName _A_fn_name;
   /// heated perimeter function name
   FunctionName _P_hf_fn_name;
+
+public:
+  static InputParameters validParams();
 };

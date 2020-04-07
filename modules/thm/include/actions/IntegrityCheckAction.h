@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class IntegrityCheckAction;
-
-template <>
-InputParameters validParams<IntegrityCheckAction>();
-
 /**
  * Check the integrity of the simulation
  */
@@ -17,5 +12,6 @@ public:
 
   virtual void act();
 
-protected:
+public:
+  static InputParameters validParams();
 };

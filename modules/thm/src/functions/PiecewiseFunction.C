@@ -1,21 +1,11 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #include "PiecewiseFunction.h"
 
 registerMooseObject("THMApp", PiecewiseFunction);
 
-template <>
 InputParameters
-validParams<PiecewiseFunction>()
+PiecewiseFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   MooseEnum axis("x=0 y=1 z=2 t=3");
   params.addRequiredParam<MooseEnum>("axis", axis, "Axis on which the N-1 delimiting points lie");

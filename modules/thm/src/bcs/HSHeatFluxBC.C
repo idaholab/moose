@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HSHeatFluxBC);
 
-template <>
 InputParameters
-validParams<HSHeatFluxBC>()
+HSHeatFluxBC::validParams()
 {
-  InputParameters params = validParams<FunctionNeumannBC>();
+  InputParameters params = FunctionNeumannBC::validParams();
 
   params.addParam<PostprocessorName>(
       "scale_pp", 1.0, "Post-processor by which to scale boundary condition");

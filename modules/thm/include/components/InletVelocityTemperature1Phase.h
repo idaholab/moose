@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class InletVelocityTemperature1Phase;
-
-template <>
-InputParameters validParams<InletVelocityTemperature1Phase>();
-
 /**
  * Boundary condition with prescribed velocity and temperature for 1-phase flow channels
  */
@@ -24,4 +19,7 @@ protected:
   bool _reversible;
 
   void setup1PhaseRDG();
+
+public:
+  static InputParameters validParams();
 };

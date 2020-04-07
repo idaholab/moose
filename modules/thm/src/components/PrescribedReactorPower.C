@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", PrescribedReactorPower);
 
-template <>
 InputParameters
-validParams<PrescribedReactorPower>()
+PrescribedReactorPower::validParams()
 {
-  InputParameters params = validParams<TotalPowerBase>();
+  InputParameters params = TotalPowerBase::validParams();
   params.addRequiredParam<Real>("power", "Total power [W]");
   return params;
 }

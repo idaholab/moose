@@ -3,11 +3,10 @@
 #include "FlowChannelBase.h"
 #include "ConstantFunction.h"
 
-template <>
 InputParameters
-validParams<FlowModel>()
+FlowModel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<FlowChannelBase *>("_flow_channel");
   params.addRequiredParam<UserObjectName>(

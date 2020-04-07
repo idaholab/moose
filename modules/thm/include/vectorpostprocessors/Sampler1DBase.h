@@ -14,11 +14,6 @@
 
 // Forward Declarations
 class MooseMesh;
-template <typename T>
-class Sampler1DBase;
-
-template <>
-InputParameters validParams<Sampler1DBase<Real>>();
 
 /**
  * This is a base class for sampling material properties for the
@@ -77,6 +72,9 @@ protected:
 
   /// The quadrature points
   const MooseArray<Point> & _q_point;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

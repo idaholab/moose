@@ -2,11 +2,6 @@
 
 #include "FlowJunction.h"
 
-class GateValve;
-
-template <>
-InputParameters validParams<GateValve>();
-
 /**
  * Gate valve component
  */
@@ -22,4 +17,7 @@ protected:
   virtual void setupMesh() override;
   virtual void addMooseObjects1Phase() const;
   virtual void addMooseObjects2Phase() const;
+
+public:
+  static InputParameters validParams();
 };

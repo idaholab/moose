@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", FluidProperties3EqnMaterial);
 
-template <>
 InputParameters
-validParams<FluidProperties3EqnMaterial>()
+FluidProperties3EqnMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("rhoA", "Conserved density");

@@ -3,11 +3,6 @@
 #include "HeatConductionTimeDerivative.h"
 #include "RZSymmetry.h"
 
-class HeatConductionTimeDerivativeRZ;
-
-template <>
-InputParameters validParams<HeatConductionTimeDerivativeRZ>();
-
 /**
  * Time derivative kernel used by heat conduction equation in arbitrary RZ symmetry
  */
@@ -19,4 +14,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+public:
+  static InputParameters validParams();
 };

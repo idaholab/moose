@@ -13,11 +13,10 @@
 
 registerMooseAction("THMApp", THMSetupOutputAction, "THM:setup_output");
 
-template <>
 InputParameters
-validParams<THMSetupOutputAction>()
+THMSetupOutputAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

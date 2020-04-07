@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostPressure);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostPressure>()
+BoundaryFlux3EqnGhostPressure::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription("Computes boundary flux from a specified pressure for the 1-D, "
                              "1-phase, variable-area Euler equations");

@@ -3,11 +3,6 @@
 #include "HeatStructureEnergyBase.h"
 #include "RZSymmetry.h"
 
-class HeatStructureEnergyRZ;
-
-template <>
-InputParameters validParams<HeatStructureEnergyRZ>();
-
 /**
  * Computes the total energy for a cylindrical heat structure.
  */
@@ -18,4 +13,7 @@ public:
 
 protected:
   virtual Real computeQpIntegral();
+
+public:
+  static InputParameters validParams();
 };

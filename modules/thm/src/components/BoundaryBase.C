@@ -1,10 +1,9 @@
 #include "BoundaryBase.h"
 
-template <>
 InputParameters
-validParams<BoundaryBase>()
+BoundaryBase::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addPrivateParam<std::string>("component_type", "boundary");
   return params;
 }

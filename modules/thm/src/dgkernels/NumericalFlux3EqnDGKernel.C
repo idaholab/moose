@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", NumericalFlux3EqnDGKernel);
 
-template <>
 InputParameters
-validParams<NumericalFlux3EqnDGKernel>()
+NumericalFlux3EqnDGKernel::validParams()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = DGKernel::validParams();
 
   params.addClassDescription(
       "Adds side fluxes for the 1-D, 1-phase, variable-area Euler equations");

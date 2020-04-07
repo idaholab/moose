@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDMomentumMassFlowRateTemperatureBC);
 
-template <>
 InputParameters
-validParams<OneDMomentumMassFlowRateTemperatureBC>()
+OneDMomentumMassFlowRateTemperatureBC::validParams()
 {
-  InputParameters params = validParams<OneDNodalBC>();
+  InputParameters params = OneDNodalBC::validParams();
   params.addRequiredParam<Real>("m_dot", "The specified mass flow rate value.");
 
   params.declareControllable("m_dot");

@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", InletStagnationPressureTemperature1Phase);
 
-template <>
 InputParameters
-validParams<InletStagnationPressureTemperature1Phase>()
+InletStagnationPressureTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure [Pa]");
   params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");

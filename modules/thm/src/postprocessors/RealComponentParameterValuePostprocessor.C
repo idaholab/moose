@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", RealComponentParameterValuePostprocessor);
 
-template <>
 InputParameters
-validParams<RealComponentParameterValuePostprocessor>()
+RealComponentParameterValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<std::string>("component", "The name of the component to be controlled.");
   params.addRequiredParam<std::string>(
       "parameter", "The name of the parameter in the component to be controlled.");

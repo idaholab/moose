@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", WallFrictionFunctionMaterial);
 
-template <>
 InputParameters
-validParams<WallFrictionFunctionMaterial>()
+WallFrictionFunctionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
 

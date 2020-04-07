@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class InletStagnationEnthalpyMomentum1Phase;
-
-template <>
-InputParameters validParams<InletStagnationEnthalpyMomentum1Phase>();
-
 /**
  * Boundary condition with prescribed stagnation enthalpy and momentum for 1-phase flow channels
  */
@@ -22,4 +17,7 @@ protected:
 
   /// True to allow the flow to reverse, otherwise false
   bool _reversible;
+
+public:
+  static InputParameters validParams();
 };

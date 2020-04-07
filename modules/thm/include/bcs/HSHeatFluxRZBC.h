@@ -3,11 +3,6 @@
 #include "HSHeatFluxBC.h"
 #include "RZSymmetry.h"
 
-class HSHeatFluxRZBC;
-
-template <>
-InputParameters validParams<HSHeatFluxRZBC>();
-
 /**
  * Applies a specified heat flux to the side of a cylindrical heat structure
  */
@@ -18,4 +13,7 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
+
+public:
+  static InputParameters validParams();
 };

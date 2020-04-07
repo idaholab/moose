@@ -3,11 +3,10 @@
 #include "HeatStructureCylindrical.h"
 #include "HeatStructurePlate.h"
 
-template <>
 InputParameters
-validParams<HeatSourceBase>()
+HeatSourceBase::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addRequiredParam<std::string>("hs", "Heat structure in which to apply heat source");
   params.addRequiredParam<std::vector<std::string>>(
       "regions", "Heat structure regions where heat generation is to be applied");

@@ -6,11 +6,10 @@
 #include "FEProblemBase.h"
 #include "Conversion.h"
 
-template <>
 InputParameters
-validParams<JacobianTestAction>()
+JacobianTestAction::validParams()
 {
-  InputParameters params = validParams<TestAction>();
+  InputParameters params = TestAction::validParams();
 
   params.addParam<Real>("snes_test_err", 1e-8, "Finite differencing parameter");
 

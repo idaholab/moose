@@ -1,11 +1,10 @@
 #include "VolumeJunctionBaseUserObject.h"
 #include "MooseVariableScalar.h"
 
-template <>
 InputParameters
-validParams<VolumeJunctionBaseUserObject>()
+VolumeJunctionBaseUserObject::validParams()
 {
-  InputParameters params = validParams<FlowJunctionUserObject>();
+  InputParameters params = FlowJunctionUserObject::validParams();
 
   params.addRequiredParam<Real>("volume", "Volume of the junction");
   params.addRequiredParam<std::vector<UserObjectName>>(

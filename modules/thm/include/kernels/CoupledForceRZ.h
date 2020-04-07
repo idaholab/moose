@@ -3,11 +3,6 @@
 #include "CoupledForce.h"
 #include "RZSymmetry.h"
 
-class CoupledForceRZ;
-
-template <>
-InputParameters validParams<CoupledForceRZ>();
-
 /**
  * Source term proportional to the coupled variable in RZ coordinates
  */
@@ -20,4 +15,7 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+public:
+  static InputParameters validParams();
 };

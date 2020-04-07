@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", ReynoldsNumberAux);
 
-template <>
 InputParameters
-validParams<ReynoldsNumberAux>()
+ReynoldsNumberAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addCoupledVar("alpha", 1, "Volume fraction of the phase");
   params.addRequiredCoupledVar("rho", "Density of the phase");
   params.addRequiredCoupledVar("vel", "x-component of phase velocity");

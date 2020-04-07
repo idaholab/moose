@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ConstantMaterial);
 
-template <>
 InputParameters
-validParams<ConstantMaterial>()
+ConstantMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("value", 0., "Constant value being assigned into the property");
   params.addRequiredParam<std::string>("property_name", "The property name to declare");
   params.addCoupledVar(

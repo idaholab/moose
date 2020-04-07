@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDMassFreeInletReverseBC);
 
-template <>
 InputParameters
-validParams<OneDMassFreeInletReverseBC>()
+OneDMassFreeInletReverseBC::validParams()
 {
-  InputParameters params = validParams<OneDMassFreeBC>();
+  InputParameters params = OneDMassFreeBC::validParams();
   params.addRequiredParam<bool>("reversible",
                                 "true if the boundary condition is reversible, otherwise false.");
   return params;

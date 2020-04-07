@@ -2,11 +2,6 @@
 
 #include "InitialCondition.h"
 
-class FunctionNodalAverageIC;
-
-template <>
-InputParameters validParams<FunctionNodalAverageIC>();
-
 /**
  * Initial conditions for an elemental variable from a function using nodal average.
  *
@@ -30,4 +25,7 @@ protected:
 
   /// function
   const Function & _func;
+
+public:
+  static InputParameters validParams();
 };

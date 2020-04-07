@@ -2,12 +2,11 @@
 
 registerMooseObject("MooseApp", CoupledForceRZ);
 
-template <>
 InputParameters
-validParams<CoupledForceRZ>()
+CoupledForceRZ::validParams()
 {
-  InputParameters params = validParams<CoupledForce>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = CoupledForce::validParams();
+  params += RZSymmetry::validParams();
   return params;
 }
 

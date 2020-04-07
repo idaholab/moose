@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMPrintComponentLoopsAction, "THM:print_component_loops");
 
-template <>
 InputParameters
-validParams<THMPrintComponentLoopsAction>()
+THMPrintComponentLoopsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<bool>("print_component_loops", false, "Flag to print component loops");
 
   return params;

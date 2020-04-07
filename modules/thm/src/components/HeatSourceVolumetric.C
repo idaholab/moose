@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", HeatSourceVolumetric);
 
-template <>
 InputParameters
-validParams<HeatSourceVolumetric>()
+HeatSourceVolumetric::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addRequiredParam<std::string>("flow_channel",
                                        "Flow channel name in which to apply heat source");
   params.addRequiredParam<FunctionName>("q", "Volumetric heat source [W/m^3]");

@@ -4,11 +4,7 @@
 #include "LinearInterpolation.h"
 #include "NaNInterface.h"
 
-class StiffenedGasTwoPhaseFluidProperties;
 class StiffenedGasFluidProperties;
-
-template <>
-InputParameters validParams<StiffenedGasTwoPhaseFluidProperties>();
 
 /**
  * Two-phase stiffened gas fluid properties
@@ -82,4 +78,7 @@ protected:
 
   // Critical pressure
   static const Real _P_critical;
+
+public:
+  static InputParameters validParams();
 };

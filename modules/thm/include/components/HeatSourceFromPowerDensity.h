@@ -2,11 +2,6 @@
 
 #include "HeatSourceBase.h"
 
-class HeatSourceFromPowerDensity;
-
-template <>
-InputParameters validParams<HeatSourceFromPowerDensity>();
-
 /**
  * Heat source from power density
  */
@@ -20,4 +15,7 @@ public:
 protected:
   /// The name of the power density variable (typically an aux variable)
   const VariableName _power_density_name;
+
+public:
+  static InputParameters validParams();
 };

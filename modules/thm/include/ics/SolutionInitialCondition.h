@@ -2,11 +2,7 @@
 
 #include "InitialCondition.h"
 
-class SolutionInitialCondition;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<SolutionInitialCondition>();
 
 /**
  * Class for reading an initial condition from a solution user object
@@ -24,4 +20,7 @@ protected:
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;
+
+public:
+  static InputParameters validParams();
 };

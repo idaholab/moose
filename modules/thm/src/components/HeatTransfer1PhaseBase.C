@@ -4,11 +4,10 @@
 #include "ClosuresBase.h"
 #include "MooseUtils.h"
 
-template <>
 InputParameters
-validParams<HeatTransfer1PhaseBase>()
+HeatTransfer1PhaseBase::validParams()
 {
-  InputParameters params = validParams<HeatTransferBase>();
+  InputParameters params = HeatTransferBase::validParams();
   params.addParam<FunctionName>("Hw", "Convective heat transfer coefficient [W/(m^2-K)]");
   return params;
 }

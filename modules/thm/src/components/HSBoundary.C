@@ -2,11 +2,10 @@
 #include "HeatStructureBase.h"
 #include "MooseUtils.h"
 
-template <>
 InputParameters
-validParams<HSBoundary>()
+HSBoundary::validParams()
 {
-  InputParameters params = validParams<BoundaryBase>();
+  InputParameters params = BoundaryBase::validParams();
 
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "List of boundary names for which this component applies");

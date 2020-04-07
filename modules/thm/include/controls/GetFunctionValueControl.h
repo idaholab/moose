@@ -2,11 +2,7 @@
 
 #include "THMControl.h"
 
-class GetFunctionValueControl;
 class Function;
-
-template <>
-InputParameters validParams<GetFunctionValueControl>();
 
 /**
  * This control takes a function and converts it into a control data
@@ -23,4 +19,7 @@ protected:
   Real & _value;
   /// Function that is sampled
   const Function & _function;
+
+public:
+  static InputParameters validParams();
 };

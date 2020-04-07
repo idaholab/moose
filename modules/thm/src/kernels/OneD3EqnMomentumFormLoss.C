@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneD3EqnMomentumFormLoss);
 
-template <>
 InputParameters
-validParams<OneD3EqnMomentumFormLoss>()
+OneD3EqnMomentumFormLoss::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addRequiredCoupledVar("arhoA", "Solution variable alpha*rho*A");
   params.addRequiredCoupledVar("arhouA", "Solution variable alpha*rho*u*A");

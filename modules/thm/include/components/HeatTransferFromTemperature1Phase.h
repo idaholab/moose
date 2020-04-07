@@ -2,11 +2,6 @@
 
 #include "HeatTransfer1PhaseBase.h"
 
-class HeatTransferFromTemperature1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromTemperature1Phase>();
-
 /**
  * Base class for heat transfer connections from temperature for 1-phase flow
  */
@@ -28,4 +23,7 @@ protected:
    * Adds 1-phase heat transfer kernels
    */
   void addHeatTransferKernels();
+
+public:
+  static InputParameters validParams();
 };

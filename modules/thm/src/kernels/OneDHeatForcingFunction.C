@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDHeatForcingFunction);
 
-template <>
 InputParameters
-validParams<OneDHeatForcingFunction>()
+OneDHeatForcingFunction::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addRequiredParam<Real>("num_units", "The number of units");

@@ -2,11 +2,6 @@
 
 #include "InitialCondition.h"
 
-class SumIC;
-
-template <>
-InputParameters validParams<SumIC>();
-
 /**
  * Sum of aux variables
  *
@@ -28,4 +23,7 @@ protected:
   const unsigned int _n_values;
   /// vector of pointers to values to sum
   std::vector<const VariableValue *> _values;
+
+public:
+  static InputParameters validParams();
 };

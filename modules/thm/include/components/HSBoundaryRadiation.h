@@ -2,11 +2,6 @@
 
 #include "HSBoundary.h"
 
-class HSBoundaryRadiation;
-
-template <>
-InputParameters validParams<HSBoundaryRadiation>();
-
 /**
  * Radiative heat transfer boundary condition for heat structure
  */
@@ -19,4 +14,7 @@ public:
 
 protected:
   virtual void check() const override;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "FlowJunction.h"
 
-class JunctionOneToOne;
-
-template <>
-InputParameters validParams<JunctionOneToOne>();
-
 /**
  * Junction connecting one flow channel to one other flow channel
  *
@@ -26,4 +21,7 @@ protected:
   virtual void setupMesh() override;
   virtual void addMooseObjects1Phase() const;
   virtual void addMooseObjects2Phase() const;
+
+public:
+  static InputParameters validParams();
 };

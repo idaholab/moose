@@ -6,11 +6,10 @@
 
 registerMooseObject("THMApp", NumericalFlux3EqnHLLC);
 
-template <>
 InputParameters
-validParams<NumericalFlux3EqnHLLC>()
+NumericalFlux3EqnHLLC::validParams()
 {
-  InputParameters params = validParams<NumericalFlux3EqnBase>();
+  InputParameters params = NumericalFlux3EqnBase::validParams();
 
   params.addClassDescription("Computes internal side flux for the 1-D, 1-phase, variable-area "
                              "Euler equations using the HLLC approximate Riemann solver.");

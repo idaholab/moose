@@ -2,12 +2,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-class SpecificTotalEnthalpyIC;
-
-template <>
-InputParameters validParams<SpecificTotalEnthalpyIC>();
-
 /**
  * Initial condition for specific total enthalpy
  *
@@ -29,4 +23,7 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _area;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

@@ -4,17 +4,10 @@
 
 using libMesh::processor_id_type;
 
-class AugmentSparsityBetweenElements;
-
-template <>
-InputParameters validParams<AugmentSparsityBetweenElements>();
-
 class AugmentSparsityBetweenElements : public RelationshipManager
 {
 public:
   AugmentSparsityBetweenElements(const InputParameters &);
-
-  static InputParameters validParams();
 
   /**
    * This function must be overriden by application codes to add
@@ -47,4 +40,7 @@ protected:
   virtual void internalInit() override;
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _elem_map;
+
+public:
+  static InputParameters validParams();
 };

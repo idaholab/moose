@@ -2,11 +2,6 @@
 
 #include "FlowJunctionUserObject.h"
 
-class VolumeJunctionBaseUserObject;
-
-template <>
-InputParameters validParams<VolumeJunctionBaseUserObject>();
-
 /**
  * Base class for computing and caching flux and residual vectors for a volume junction
  *
@@ -138,4 +133,7 @@ protected:
   /// Cached scalar residual Jacobian matrices w.r.t. flow channel variables,
   /// for each connection (first index) and each scalar variable (second index)
   std::vector<std::vector<DenseMatrix<Real>>> _residual_jacobian_flow_channel_vars;
+
+public:
+  static InputParameters validParams();
 };

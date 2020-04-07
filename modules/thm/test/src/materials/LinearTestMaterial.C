@@ -2,11 +2,10 @@
 
 registerMooseObject("THMTestApp", LinearTestMaterial);
 
-template <>
 InputParameters
-validParams<LinearTestMaterial>()
+LinearTestMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addRequiredCoupledVar("vars",
                                "List of aux variables that the material property depends upon");

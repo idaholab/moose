@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SumAux);
 
-template <>
 InputParameters
-validParams<SumAux>()
+SumAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
 
   params.addClassDescription("Sum of aux variables");
 

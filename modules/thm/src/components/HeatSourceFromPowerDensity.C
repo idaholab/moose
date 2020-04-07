@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", HeatSourceFromPowerDensity);
 
-template <>
 InputParameters
-validParams<HeatSourceFromPowerDensity>()
+HeatSourceFromPowerDensity::validParams()
 {
-  InputParameters params = validParams<HeatSourceBase>();
+  InputParameters params = HeatSourceBase::validParams();
   params.addRequiredParam<VariableName>("power_density", "Power density variable");
   params.addClassDescription("Heat source from power density");
   return params;

@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class TestSetupStatusComponent;
-
-template <>
-InputParameters validParams<TestSetupStatusComponent>();
-
 /**
  * Component used to test setup-status-checking capability
  */
@@ -17,4 +12,7 @@ public:
 
 protected:
   virtual void init() override;
+
+public:
+  static InputParameters validParams();
 };

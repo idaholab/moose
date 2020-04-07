@@ -2,11 +2,6 @@
 
 #include "MooseObjectAction.h"
 
-class PostprocessorAsControlAction;
-
-template <>
-InputParameters validParams<PostprocessorAsControlAction>();
-
 /**
  * This action creates a control value named the same as the postprocessor being added
  *
@@ -18,4 +13,7 @@ public:
   PostprocessorAsControlAction(InputParameters params);
 
   virtual void act();
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "HeatTransfer1PhaseBase.h"
 
-class HeatTransferFromExternalAppHeatFlux1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromExternalAppHeatFlux1Phase>();
-
 /**
  * Heat transfer specified by heat flux computed by external application going into 1-phase flow
  * channel
@@ -20,4 +15,7 @@ public:
   virtual void addMooseObjects() override;
 
   virtual bool isTemperatureType() const override;
+
+public:
+  static InputParameters validParams();
 };

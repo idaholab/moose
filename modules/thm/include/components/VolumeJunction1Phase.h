@@ -2,11 +2,6 @@
 
 #include "VolumeJunctionBase.h"
 
-class VolumeJunction1Phase;
-
-template <>
-InputParameters validParams<VolumeJunctionBase>();
-
 /**
  * Junction between 1-phase flow channels that has a non-zero volume
  */
@@ -70,4 +65,7 @@ protected:
   const Real & _K;
   /// Reference area
   const Real & _A_ref;
+
+public:
+  static InputParameters validParams();
 };

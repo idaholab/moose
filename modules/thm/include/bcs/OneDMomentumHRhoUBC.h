@@ -3,11 +3,6 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDMomentumHRhoUBC;
-
-template <>
-InputParameters validParams<OneDMomentumHRhoUBC>();
-
 /**
  *
  */
@@ -37,4 +32,7 @@ protected:
   unsigned int _arhoA_var_num;
   unsigned int _arhoEA_var_num;
   unsigned int _beta_var_num;
+
+public:
+  static InputParameters validParams();
 };

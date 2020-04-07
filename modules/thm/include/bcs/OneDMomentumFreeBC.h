@@ -3,12 +3,6 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-// Forward Declarations
-class OneDMomentumFreeBC;
-
-template <>
-InputParameters validParams<OneDMomentumFreeBC>();
-
 /**
  * A BC for the mass equation in which nothing is specified (i.e.
  * everything is allowed to be "free".
@@ -38,4 +32,7 @@ protected:
   unsigned int _beta_var_number;
   const MaterialProperty<Real> * _dp_dbeta;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

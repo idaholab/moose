@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostWall);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostWall>()
+BoundaryFlux3EqnGhostWall::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription(
       "Wall boundary conditions for the 1-D, 1-phase, variable-area Euler equations");

@@ -6,12 +6,11 @@
 
 registerMooseAction("THMTestApp", JacobianTest1PhaseRDGAction, "meta_action");
 
-template <>
 InputParameters
-validParams<JacobianTest1PhaseRDGAction>()
+JacobianTest1PhaseRDGAction::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params += validParams<JacobianTestAction>();
+  params += JacobianTestAction::validParams();
 
   params.addClassDescription("Sets up a Jacobian test for rDG");
 

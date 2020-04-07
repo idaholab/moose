@@ -3,11 +3,6 @@
 #include "ClosureTestAction.h"
 #include "FlowModelSetup1Phase.h"
 
-class ClosureTest1PhaseAction;
-
-template <>
-InputParameters validParams<ClosureTest1PhaseAction>();
-
 /**
  * Action for setting up a closure test for 1-phase flow
  */
@@ -21,4 +16,7 @@ protected:
   virtual void addAuxVariables() override;
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
+
+public:
+  static InputParameters validParams();
 };

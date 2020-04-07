@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class THMSetupQuadratureAction;
-
-template <>
-InputParameters validParams<THMSetupQuadratureAction>();
-
 /**
  * Sets the quadrature
  */
@@ -16,4 +11,7 @@ public:
   THMSetupQuadratureAction(InputParameters parameters);
 
   virtual void act() override;
+
+public:
+  static InputParameters validParams();
 };

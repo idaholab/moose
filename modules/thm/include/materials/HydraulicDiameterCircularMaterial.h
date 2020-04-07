@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class HydraulicDiameterCircularMaterial;
-
-template <>
-InputParameters validParams<HydraulicDiameterCircularMaterial>();
-
 /**
  * Computes hydraulic diameter for a circular flow channel
  */
@@ -21,4 +16,7 @@ protected:
   MaterialProperty<Real> & _D_h;
 
   const VariableValue & _area;
+
+public:
+  static InputParameters validParams();
 };

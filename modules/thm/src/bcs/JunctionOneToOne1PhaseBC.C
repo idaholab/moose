@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", JunctionOneToOne1PhaseBC);
 
-template <>
 InputParameters
-validParams<JunctionOneToOne1PhaseBC>()
+JunctionOneToOne1PhaseBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
 
   params.addRequiredParam<unsigned int>("connection_index", "Index of the connected flow channel");
   params.addRequiredParam<UserObjectName>("junction_uo", "1-phase one-to-one junction user object");

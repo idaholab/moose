@@ -7,11 +7,10 @@
 
 registerMooseAction("THMApp", THMAddControlAction, "add_control");
 
-template <>
 InputParameters
-validParams<THMAddControlAction>()
+THMAddControlAction::validParams()
 {
-  InputParameters params = validParams<AddControlAction>();
+  InputParameters params = AddControlAction::validParams();
   return params;
 }
 

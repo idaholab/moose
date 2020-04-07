@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", ComponentGroup);
 
-template <>
 InputParameters
-validParams<ComponentGroup>()
+ComponentGroup::validParams()
 {
-  InputParameters params = validParams<THMObject>();
+  InputParameters params = THMObject::validParams();
   params.addClassDescription("Group of components. Used only for parsing input files.");
   params.addPrivateParam<std::string>("built_by_action", "add_component");
   params.registerBase("Component");

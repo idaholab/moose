@@ -2,11 +2,6 @@
 
 #include "OneDNodalBC.h"
 
-class OneDMomentumMassFlowRateTemperatureBC;
-
-template <>
-InputParameters validParams<OneDMomentumMassFlowRateTemperatureBC>();
-
 /**
  * Mass flow rate (m_dot) and temperature (T) BC
  */
@@ -20,4 +15,7 @@ protected:
   virtual Real computeQpJacobian();
 
   const Real & _m_dot;
+
+public:
+  static InputParameters validParams();
 };

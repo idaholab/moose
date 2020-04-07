@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class AddIterationCountPostprocessorsAction;
-
-template <>
-InputParameters validParams<AddIterationCountPostprocessorsAction>();
-
 /**
  * Action that adds postprocessors for linear and nonlinear iterations
  */
@@ -20,4 +15,7 @@ public:
 protected:
   /// True if iteration count postprocessors should be added
   bool _add_pps;
+
+public:
+  static InputParameters validParams();
 };

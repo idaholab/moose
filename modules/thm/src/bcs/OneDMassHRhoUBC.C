@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDMassHRhoUBC);
 
-template <>
 InputParameters
-validParams<OneDMassHRhoUBC>()
+OneDMassHRhoUBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction");
   params.addRequiredParam<Real>("rhou", "Specified momentum");
   params.addRequiredCoupledVar("A", "Area");

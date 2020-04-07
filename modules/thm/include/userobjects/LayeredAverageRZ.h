@@ -3,11 +3,6 @@
 #include "LayeredAverage.h"
 #include "RZSymmetry.h"
 
-class LayeredAverageRZ;
-
-template <>
-InputParameters validParams<LayeredAverageRZ>();
-
 /**
  * The same functionality as LayeredAverage but for arbitrary RZ symmetry
  *
@@ -22,4 +17,7 @@ public:
 
 protected:
   virtual Real computeIntegral() override;
+
+public:
+  static InputParameters validParams();
 };

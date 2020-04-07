@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", RadiativeHeatFluxRZBC);
 
-template <>
 InputParameters
-validParams<RadiativeHeatFluxRZBC>()
+RadiativeHeatFluxRZBC::validParams()
 {
-  InputParameters params = validParams<RadiativeHeatFluxBC>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = RadiativeHeatFluxBC::validParams();
+  params += RZSymmetry::validParams();
 
   params.addClassDescription(
       "Radiative heat transfer boundary condition for a cylindrical heat structure");

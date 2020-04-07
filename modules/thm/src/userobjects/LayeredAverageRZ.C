@@ -2,12 +2,11 @@
 
 registerMooseObject("MooseApp", LayeredAverageRZ);
 
-template <>
 InputParameters
-validParams<LayeredAverageRZ>()
+LayeredAverageRZ::validParams()
 {
-  InputParameters params = validParams<LayeredAverage>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = LayeredAverage::validParams();
+  params += RZSymmetry::validParams();
   params.addRequiredParam<Real>("length",
                                 "The length of the block in the direction given by 'axis_dir'.");
   return params;

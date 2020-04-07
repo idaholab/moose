@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", EnergyFluxIntegral);
 
-template <>
 InputParameters
-validParams<EnergyFluxIntegral>()
+EnergyFluxIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
   return params;

@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", HSBoundaryHeatFlux);
 
-template <>
 InputParameters
-validParams<HSBoundaryHeatFlux>()
+HSBoundaryHeatFlux::validParams()
 {
-  InputParameters params = validParams<HSBoundary>();
+  InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<FunctionName>("q", "Heat flux [W/m^2]");
   params.addParam<PostprocessorName>("scale_pp",
