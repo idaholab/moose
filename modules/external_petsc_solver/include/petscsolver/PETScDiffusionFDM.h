@@ -9,9 +9,7 @@
 
 #pragma once
 
-#include "libmesh/libmesh.h" // Real, LIBMESH_HAVE_PETSC
-
-#ifdef LIBMESH_HAVE_PETSC
+#include "libmesh/libmesh.h"
 
 #include "libmesh/petsc_macro.h"
 #include <petscdm.h>
@@ -25,4 +23,3 @@ PETSC_EXTERN PetscErrorCode PETScExternalSolverDestroy(TS);
 PETSC_EXTERN PetscErrorCode FormIFunction(TS, PetscReal, Vec, Vec, Vec, void *);
 PETSC_EXTERN PetscErrorCode FormIJacobian(TS, PetscReal, Vec, Vec, PetscReal, Mat, Mat, void *);
 PETSC_EXTERN PetscErrorCode FormInitialSolution(TS, Vec, void *);
-#endif

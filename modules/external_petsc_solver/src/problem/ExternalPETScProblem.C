@@ -27,46 +27,55 @@ ExternalPETScProblem::validParams()
 ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
   : ExternalProblem(params),
     _sync_to_var_name(getParam<VariableName>("sync_variable")),
-    // ExternalPETScProblem always requires ExternalPetscSolverApp
-    _petsc_app(static_cast<ExternalPetscSolverApp &>(_app))
-#if LIBMESH_HAVE_PETSC
-    ,
-    _ts(_petsc_app.getExternalPETScTS()),
-    _petsc_sol(_petsc_app.getExternalPETScTSSolution()),
-    _petsc_sol_old(_petsc_app.getExternalPETScTSSolutionOld())
+    // Require ExternalPetscSolverApp
+    _external_petsc_app(static_cast<ExternalPetscSolverApp &>(_app)),
+    _ts(_external_petsc_app.getPetscTS())
 {
+  DM da;
+  TSGetDM(_ts, &da);
+  // Create a global solution vector
+  DMCreateGlobalVector(da, &_petsc_sol);
+  // This is required because libMesh incorrectly treats the PETSc parallel vector as a ghost vector
+  // We should be able to remove this line of code once libMesh is updated
+  VecMPISetGhost(_petsc_sol, 0, nullptr);
+  // The solution at the previous time step
+  VecDuplicate(_petsc_sol, &_petsc_sol_old);
+  // Form an initial condition
   FormInitialSolution(_ts, _petsc_sol, NULL);
   VecCopy(_petsc_sol, _petsc_sol_old);
 }
-#else
+
+ExternalPETScProblem::~ExternalPETScProblem()
 {
-  mooseError("You need to have PETSc installed to use ExternalPETScProblem");
+  // Destroy all handles of external Petsc solver
+  VecDestroy(&_petsc_sol);
+  VecDestroy(&_petsc_sol_old);
 }
-#endif
 
 void
 ExternalPETScProblem::externalSolve()
 {
-#if LIBMESH_HAVE_PETSC
   _console << "PETSc External Solve!" << std::endl;
+  // "_petsc_sol" is the solution of the current time step, and it will be updated
+  // to store the solution of the next time step after this call.
+  // This call advance a time step so that there is an opportunity to
+  // exchange information with MOOSE simulations.
   externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time(), &_petsc_converged);
-#endif
 }
 
+// This function is called when MOOSE time stepper actually moves to the next time step
+// "PostTimeStep" may not be called for certain cases (e.g., auto_advance=false)
 void
 ExternalPETScProblem::advanceState()
 {
   FEProblemBase::advanceState();
-#if LIBMESH_HAVE_PETSC
-  // Save current solution because we are moving to the next step
+  // Save current solution because we are moving to the next time step
   VecCopy(_petsc_sol, _petsc_sol_old);
-#endif
 }
 
 void
 ExternalPETScProblem::syncSolutions(Direction direction)
 {
-#if LIBMESH_HAVE_PETSC
   if (direction == Direction::FROM_EXTERNAL_APP)
   {
     _console << "syncSolutions from external petsc App" << std::endl;
@@ -107,6 +116,10 @@ ExternalPETScProblem::syncSolutions(Direction direction)
       for (i = xs; i < xs + xm; i++)
       {
         Node * to_node = to_mesh.node_ptr(i + j * Mx);
+        // For the current example, we need to update only one variable.
+        // This line of code is used to make sure users won't make a mistake in the demo input file.
+        // If multiple variables need to be transfered for some use cases, users should
+        // loop over variables and copy necessary data.
         if (to_node->n_comp(sync_to_var.sys().number(), sync_to_var.number()) > 1)
           mooseError("Does not support multiple components");
 
@@ -127,5 +140,4 @@ ExternalPETScProblem::syncSolutions(Direction direction)
     _console << "syncSolutions to external petsc App " << std::endl;
     // We could the similar thing to sync the solution back to PETSc.
   }
-#endif
 }

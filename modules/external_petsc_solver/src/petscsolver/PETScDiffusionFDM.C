@@ -9,7 +9,6 @@
 
 #include <PETScDiffusionFDM.h>
 
-#ifdef LIBMESH_HAVE_PETSC
 /*
    u_t = uxx + uyy
    0 < x < 1, 0 < y < 1;
@@ -151,8 +150,8 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time, Petsc
   ierr = TSSetFromOptions(ts);
   CHKERRQ(ierr);
   /*
-  * Let the passed-in dt take the priority
-  */
+   * Let the passed-in dt take the priority
+   */
   ierr = TSSetTimeStep(ts, dt);
   CHKERRQ(ierr);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -507,5 +506,3 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
-
-#endif

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExternalPetscTimeStepper.h"
+#include "ExternalPETScProblem.h"
 
 registerMooseObject("ExternalPetscSolverApp", ExternalPetscTimeStepper);
 
@@ -17,46 +18,42 @@ ExternalPetscTimeStepper::validParams()
   InputParameters params = TimeStepper::validParams();
 
   params.addClassDescription("Timestepper that queries the step size of the external petsc solver, "
-                             "and use that as the time step");
+                             "and use that as the time step size.");
   return params;
 }
 
 ExternalPetscTimeStepper::ExternalPetscTimeStepper(const InputParameters & parameters)
   : TimeStepper(parameters),
-    // ExternalPetscTimeStepper always requires ExternalPetscSolverApp
-    _petsc_app(static_cast<ExternalPetscSolverApp &>(_app))
-#if LIBMESH_HAVE_PETSC
-    ,
-    _ts(_petsc_app.getExternalPETScTS())
-#endif
+    // ExternalPetscTimeStepper always requires ExternalPETScProblem
+    _external_petsc_problem(static_cast<ExternalPETScProblem &>(_fe_problem))
 {
 }
 
 Real
 ExternalPetscTimeStepper::computeInitialDT()
 {
-#if LIBMESH_HAVE_PETSC
+  // Query the time step size of PETSc solver
   PetscReal dt;
-  TSGetTimeStep(_ts, &dt);
+  TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
   return dt;
-#endif
 }
 
 Real
 ExternalPetscTimeStepper::computeDT()
 {
-#if LIBMESH_HAVE_PETSC
+  // Query the time step size of PETSc solver
   PetscReal dt;
-  TSGetTimeStep(_ts, &dt);
+  TSGetTimeStep(_external_petsc_problem.getPetscTS(), &dt);
   return dt;
-#endif
 }
 
 void
 ExternalPetscTimeStepper::preSolve()
 {
-#if LIBMESH_HAVE_PETSC
+  // This function will be called right before "takeStep"
+  // "preStep" sometimes will not be called. Therefore, "preSolve"
+  // is the right function to set the initial condition for the current
+  // time step.
   // Old solution is the initial condition of this time step
-  VecCopy(_petsc_app.getExternalPETScTSSolutionOld(), _petsc_app.getExternalPETScTSSolution());
-#endif
+  VecCopy(_external_petsc_problem.solutionOld(), _external_petsc_problem.currentSolution());
 }

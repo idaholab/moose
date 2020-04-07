@@ -10,7 +10,7 @@
 #pragma once
 
 #include "TimeStepper.h"
-#include "ExternalPetscSolverApp.h"
+#include "ExternalPETScProblem.h"
 
 class ExternalPetscTimeStepper : public TimeStepper
 {
@@ -25,8 +25,5 @@ protected:
   virtual void preSolve() override;
 
 private:
-  ExternalPetscSolverApp & _petsc_app;
-#if LIBMESH_HAVE_PETSC
-  TS & _ts;
-#endif
+  ExternalPETScProblem & _external_petsc_problem;
 };

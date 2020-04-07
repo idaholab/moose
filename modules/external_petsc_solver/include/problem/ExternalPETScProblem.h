@@ -26,6 +26,8 @@ public:
 
   ExternalPETScProblem(const InputParameters & params);
 
+  ~ExternalPETScProblem();
+
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
@@ -33,18 +35,22 @@ public:
 
   virtual void advanceState() override;
 
+  Vec & solutionOld() { return _petsc_sol_old; }
+
+  Vec & currentSolution() { return _petsc_sol; }
+
+  TS & getPetscTS() { return _ts; }
+
 private:
   /// The name of the variable to transfer to
   const VariableName & _sync_to_var_name;
-  ExternalPetscSolverApp & _petsc_app;
-#if LIBMESH_HAVE_PETSC
   /// If PETSc solver converged
   PetscBool _petsc_converged;
+  ExternalPetscSolverApp & _external_petsc_app;
   /// PETSc solver
   TS & _ts;
   /// PETSc solver solution
-  Vec & _petsc_sol;
+  Vec _petsc_sol;
   /// Solution at the previous time step
-  Vec & _petsc_sol_old;
-#endif
+  Vec _petsc_sol_old;
 };
