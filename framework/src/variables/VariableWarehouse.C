@@ -9,6 +9,7 @@
 
 #include "VariableWarehouse.h"
 #include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
@@ -29,6 +30,11 @@ VariableWarehouse::add(const std::string & var_name, std::shared_ptr<MooseVariab
     {
       _regular_vars_by_number[tmp_var->number()] = tmp_var;
       _regular_vars_by_name[var_name] = tmp_var;
+    }
+    else if (auto * tmp_var = dynamic_cast<MooseVariableFVReal *>(raw_var))
+    {
+      _fv_vars_by_number[tmp_var->number()] = tmp_var;
+      _fv_vars_by_name[var_name] = tmp_var;
     }
     else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(raw_var))
     {
@@ -118,6 +124,9 @@ template <typename T>
 MooseVariableFE<T> *
 VariableWarehouse::getFieldVariable(const std::string & var_name)
 {
+  // TODO: the requested variable might be an FV variable - how to we
+  // reconcile this since this function returns an FE (not FEBase) pointer?
+  // crap tons of objects depend on this.
   return _regular_vars_by_name.at(var_name);
 }
 
@@ -125,6 +134,9 @@ template <typename T>
 MooseVariableFE<T> *
 VariableWarehouse::getFieldVariable(unsigned int var_number)
 {
+  // TODO: the requested variable might be an FV variable - how to we
+  // reconcile this since this function returns an FE (not FEBase) pointer?
+  // crap tons of objects depend on this.
   return _regular_vars_by_number.at(var_number);
 }
 
@@ -132,6 +144,9 @@ template <>
 VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
 {
+  // TODO: the requested variable might be an FV variable - how to we
+  // reconcile this since this function returns an FE (not FEBase) pointer?
+  // crap tons of objects depend on this.
   return _vector_vars_by_name.at(var_name);
 }
 
@@ -139,6 +154,9 @@ template <>
 VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
 {
+  // TODO: the requested variable might be an FV variable - how to we
+  // reconcile this since this function returns an FE (not FEBase) pointer?
+  // crap tons of objects depend on this.
   return _vector_vars_by_number.at(var_number);
 }
 

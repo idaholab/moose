@@ -22,9 +22,10 @@
 #include "libmesh/dense_vector.h"
 #include "libmesh/dense_vector.h"
 
-class TimeIntegrator;
 template <typename>
 class MooseVariableFV;
+
+typedef MooseVariableFV<Real> MooseVariableFVReal;
 
 /**
  * Class for stuff related to variables

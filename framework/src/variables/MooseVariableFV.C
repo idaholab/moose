@@ -15,6 +15,15 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
+registerMooseObject("MooseApp", MooseVariableFVReal);
+
+template <typename OutputType>
+InputParameters
+MooseVariableFV<OutputType>::validParams()
+{
+  return MooseVariableFVBase::validParams();
+}
+
 template <typename OutputType>
 MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableFVBase(parameters)

@@ -30,6 +30,11 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
+
+template <typename>
+class MooseVariableFV;
+typedef MooseVariableFV<Real> MooseVariableFVReal;
+
 class MooseVariableScalar;
 
 /**
@@ -134,11 +139,17 @@ protected:
   /// list of finite element variables
   std::vector<MooseVariableFEBase *> _vars;
 
+  /// map of non-vector finite element variables with unsigned keys
+  HashMap<unsigned, MooseVariable *> _regular_vars_by_number;
+
+  /// map of non-vector finite element variables with name keys
+  HashMap<std::string, MooseVariableFVReal *> _fv_vars_by_name;
+
   /// map of non-vector finite element variables with name keys
   HashMap<std::string, MooseVariable *> _regular_vars_by_name;
 
   /// map of non-vector finite element variables with unsigned keys
-  HashMap<unsigned, MooseVariable *> _regular_vars_by_number;
+  HashMap<unsigned, MooseVariableFVReal *> _fv_vars_by_number;
 
   /// map of vector finite element variables with name keys
   HashMap<std::string, VectorMooseVariable *> _vector_vars_by_name;
