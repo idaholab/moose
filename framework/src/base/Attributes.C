@@ -25,6 +25,7 @@
 #include "ShapeUserObject.h"
 #include "ShapeSideUserObject.h"
 #include "ShapeElementUserObject.h"
+#include "FVKernel.h"
 
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
@@ -62,12 +63,14 @@ bool
 AttribTagBase::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribTagBase *>(&other);
-  if (!a || a->_vals.size() < 1)
+  if (!a)
     return false;
+  if (a->_vals.size() == 0)
+    return true; // the condition is empty tags - which we take to mean any tag should match
 
-  auto cond = a->_vals[0];
+  // return true if a single tag matches between the two attribute objects
   for (auto val : _vals)
-    if (val == cond)
+    if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
       return true;
   return false;
 }
@@ -369,6 +372,7 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::ShapeSideUserObject       * (dynamic_cast<const ShapeSideUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::Postprocessor             * (dynamic_cast<const Postprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVFluxKernel              * (dynamic_cast<const FVFluxKernelBase *>(obj) != nullptr);
   // clang-format on
 }
 

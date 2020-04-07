@@ -30,6 +30,7 @@ enum class Interfaces
   Postprocessor = 1 << 10,
   VectorPostprocessor = 1 << 11,
   InterfaceUserObject = 1 << 12,
+  FVFluxKernel = 1 << 13,
 };
 
 template <>
@@ -62,6 +63,14 @@ public:
     : Attribute(w, attrib_name)
   {
     _vals.push_back(tag);
+  }
+  AttribTagBase(TheWarehouse & w,
+                const std::set<unsigned int> tags,
+                const std::string & attrib_name)
+    : Attribute(w, attrib_name)
+  {
+    for (auto tag : tags)
+      _vals.push_back(tag);
   }
 
   virtual bool isMatch(const Attribute & other) const override;
@@ -102,6 +111,10 @@ public:
 
   AttribVectorTags(TheWarehouse & w) : AttribTagBase(w, "vector_tags") {}
   AttribVectorTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "vector_tags") {}
+  AttribVectorTags(TheWarehouse & w, const std::set<unsigned int> & tags)
+    : AttribTagBase(w, tags, "vector_tags")
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
 };
 
