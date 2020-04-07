@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnEnergyGravity;
-
-template <>
-InputParameters validParams<OneD3EqnEnergyGravity>();
-
 /**
  * Computes gravity term for the energy equation in 1-phase flow
  */
@@ -37,4 +32,7 @@ protected:
 
   const unsigned int _arhoA_var_number;
   const unsigned int _arhouA_var_number;
+
+public:
+  static InputParameters validParams();
 };

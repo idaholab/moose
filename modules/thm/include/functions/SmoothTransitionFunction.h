@@ -3,11 +3,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class SmoothTransitionFunction;
-
-template <>
-InputParameters validParams<SmoothTransitionFunction>();
-
 /**
  * Base class for functions to smoothly transition from one function to another
  *
@@ -35,4 +30,7 @@ protected:
   const Real & _x_center;
   /// Width of transition
   const Real & _transition_width;
+
+public:
+  static InputParameters validParams();
 };

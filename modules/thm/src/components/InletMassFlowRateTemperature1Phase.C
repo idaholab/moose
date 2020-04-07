@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", InletMassFlowRateTemperature1Phase);
 
-template <>
 InputParameters
-validParams<InletMassFlowRateTemperature1Phase>()
+InletMassFlowRateTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addRequiredParam<Real>("m_dot", "Prescribed mass flow rate [kg/s]");
   params.addRequiredParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");

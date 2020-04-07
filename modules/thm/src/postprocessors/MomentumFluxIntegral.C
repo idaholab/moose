@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", MomentumFluxIntegral);
 
-template <>
 InputParameters
-validParams<MomentumFluxIntegral>()
+MomentumFluxIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("arhouA", "Momentum equation variable");
   params.addRequiredCoupledVar("vel", "Velocity");
   params.addRequiredCoupledVar("p", "Pressure");

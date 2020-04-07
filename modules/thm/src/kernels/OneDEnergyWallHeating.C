@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDEnergyWallHeating);
 
-template <>
 InputParameters
-validParams<OneDEnergyWallHeating>()
+OneDEnergyWallHeating::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("rhoA", "");
   params.addRequiredCoupledVar("rhouA", "");
   params.addRequiredCoupledVar("rhoEA", "Energy equation variable");

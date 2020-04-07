@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", SupersonicInlet);
 
-template <>
 InputParameters
-validParams<SupersonicInlet>()
+SupersonicInlet::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<Real>("T", "Prescribed temperature [K]");
   params.addParam<Real>("vel", "Prescribed velocity [m/s]");

@@ -2,11 +2,6 @@
 
 #include "FlowModelSetup.h"
 
-class FlowModelSetup1Phase;
-
-template <>
-InputParameters validParams<FlowModelSetup1Phase>();
-
 /**
  * Helper class to set up some objects for 1-phase flow
  */
@@ -64,4 +59,7 @@ protected:
   const VariableName _H_name;
   /// Name of dynamic viscosity variable
   const VariableName _mu_name;
+
+public:
+  static InputParameters validParams();
 };

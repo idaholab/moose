@@ -2,11 +2,11 @@
 
 template <>
 InputParameters
-validParams<Sampler1DBase<Real>>()
+Sampler1DBase<Real>::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
-  params += validParams<SamplerBase>();
-  params += validParams<BlockRestrictable>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SamplerBase::validParams();
+  params += BlockRestrictable::validParams();
 
   params.addRequiredParam<std::vector<std::string>>(
       "property", "Names of the material properties to be output along a line");

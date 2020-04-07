@@ -2,12 +2,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class SpecificTotalEnthalpyAux;
-
-template <>
-InputParameters validParams<SpecificTotalEnthalpyAux>();
-
 /**
  * Nodal auxiliary variable for specific total enthalpy
  *
@@ -29,4 +23,7 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _area;
   const VariableValue & _alpha;
+
+public:
+  static InputParameters validParams();
 };

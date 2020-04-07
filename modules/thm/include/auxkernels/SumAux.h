@@ -2,11 +2,6 @@
 
 #include "AuxKernel.h"
 
-class SumAux;
-
-template <>
-InputParameters validParams<SumAux>();
-
 /**
  * Sum of aux variables
  *
@@ -26,4 +21,7 @@ protected:
 
   const unsigned int _n_values;
   std::vector<const VariableValue *> _values;
+
+public:
+  static InputParameters validParams();
 };

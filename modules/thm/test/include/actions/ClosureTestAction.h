@@ -2,11 +2,6 @@
 
 #include "TestAction.h"
 
-class ClosureTestAction;
-
-template <>
-InputParameters validParams<ClosureTestAction>();
-
 /**
  * Action for setting up a closure test for 2-phase flow
  */
@@ -37,4 +32,7 @@ protected:
   const Real & _q_wall;
   /// List of material properties to output
   const std::vector<std::string> & _output_properties;
+
+public:
+  static InputParameters validParams();
 };

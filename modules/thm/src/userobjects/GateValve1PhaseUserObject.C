@@ -12,11 +12,10 @@ const std::vector<std::pair<std::string, unsigned int>>
         std::pair<std::string, unsigned int>("rhouA", THM3Eqn::EQ_MOMENTUM),
         std::pair<std::string, unsigned int>("rhoEA", THM3Eqn::EQ_ENERGY)};
 
-template <>
 InputParameters
-validParams<GateValve1PhaseUserObject>()
+GateValve1PhaseUserObject::validParams()
 {
-  InputParameters params = validParams<FlowJunctionUserObject>();
+  InputParameters params = FlowJunctionUserObject::validParams();
 
   params.addRequiredParam<Real>("open_area_fraction",
                                 "Fraction of possible flow area that is open");

@@ -3,11 +3,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class PiecewiseFunction;
-
-template <>
-InputParameters validParams<PiecewiseFunction>();
-
 /**
  * Function which provides a piecewise representation of arbitrary functions.
  */
@@ -44,4 +39,7 @@ protected:
   const unsigned int _n_functions;
   /// Functions in the N regions
   std::vector<const Function *> _functions;
+
+public:
+  static InputParameters validParams();
 };

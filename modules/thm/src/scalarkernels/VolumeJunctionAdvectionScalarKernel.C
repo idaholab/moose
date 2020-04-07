@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", VolumeJunctionAdvectionScalarKernel);
 
-template <>
 InputParameters
-validParams<VolumeJunctionAdvectionScalarKernel>()
+VolumeJunctionAdvectionScalarKernel::validParams()
 {
-  InputParameters params = validParams<ScalarKernel>();
+  InputParameters params = ScalarKernel::validParams();
 
   params.addRequiredParam<unsigned int>("equation_index", "Equation index");
   params.addRequiredParam<UserObjectName>("volume_junction_uo", "Volume junction user object name");

@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostDensityVelocity);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostDensityVelocity>()
+BoundaryFlux3EqnGhostDensityVelocity::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription("Computes boundary flux from density and velocity for the 3-equation "
                              "model using a ghost cell approach.");

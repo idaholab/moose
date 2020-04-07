@@ -8,11 +8,10 @@
 
 registerMooseAction("THMApp", THMCreateMeshAction, "setup_mesh");
 
-template <>
 InputParameters
-validParams<THMCreateMeshAction>()
+THMCreateMeshAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription("Action that creates an empty mesh (in case one was not already "
                              "created) and also builds THMProblem.");
   return params;

@@ -3,11 +3,6 @@
 #include "OneDHeatForcingFunction.h"
 #include "RZSymmetry.h"
 
-class OneDHeatForcingFunctionRZ;
-
-template <>
-InputParameters validParams<OneDHeatForcingFunctionRZ>();
-
 /**
  * Forcing function used in the heat conduction equation in arbitrary RZ symmetry
  */
@@ -19,4 +14,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+
+public:
+  static InputParameters validParams();
 };

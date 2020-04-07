@@ -1,10 +1,9 @@
 #include "JunctionWithLossesBase.h"
 
-template <>
 InputParameters
-validParams<JunctionWithLossesBase>()
+JunctionWithLossesBase::validParams()
 {
-  InputParameters params = validParams<FlowJunction>();
+  InputParameters params = FlowJunction::validParams();
   params.addRequiredParam<std::vector<Real>>("K", "Form loss coefficients [-]");
   // use same values in K for K_reverse if not provided
   params.addParam<std::vector<Real>>("K_reverse", "Reverse form loss coefficients [-]");

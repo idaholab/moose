@@ -2,11 +2,7 @@
 
 #include "FlowJunctionUserObject.h"
 
-class JunctionOneToOne1PhaseUserObject;
 class NumericalFlux3EqnBase;
-
-template <>
-InputParameters validParams<JunctionOneToOne1PhaseUserObject>();
 
 /**
  * Computes flux between two subdomains for 1-phase one-to-one junction
@@ -92,4 +88,7 @@ protected:
 
   /// Thread lock
   static Threads::spin_mutex _spin_mutex;
+
+public:
+  static InputParameters validParams();
 };

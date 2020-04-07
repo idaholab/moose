@@ -4,11 +4,7 @@
 #include "HeatStructureBase.h"
 #include "LoggingInterface.h"
 
-class HSBoundaryInterface;
 class Component;
-
-template <>
-InputParameters validParams<HSBoundaryInterface>();
 
 /**
  * Interface class for coupling to a heat structure boundary
@@ -36,4 +32,7 @@ protected:
   const HeatStructureBase::SideType _hs_side;
   /// True of valid heat structure side was provided
   bool _hs_side_valid;
+
+public:
+  static InputParameters validParams();
 };

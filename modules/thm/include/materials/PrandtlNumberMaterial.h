@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class PrandtlNumberMaterial;
-
-template <>
-InputParameters validParams<PrandtlNumberMaterial>();
-
 /**
  * Computes Prandtl number as material property
  */
@@ -26,4 +21,7 @@ protected:
   const MaterialProperty<Real> & _mu;
   /// Thermal conductivity
   const MaterialProperty<Real> & _k;
+
+public:
+  static InputParameters validParams();
 };

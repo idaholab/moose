@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", NodalEnergyFluxPostprocessor);
 
-template <>
 InputParameters
-validParams<NodalEnergyFluxPostprocessor>()
+NodalEnergyFluxPostprocessor::validParams()
 {
-  InputParameters params = validParams<NodalPostprocessor>();
+  InputParameters params = NodalPostprocessor::validParams();
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("H", "Specific total enthalpy");
 

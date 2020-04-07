@@ -2,11 +2,7 @@
 
 #include "InitialCondition.h"
 
-class RhoEAFromPressureTemperatureVelocityIC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<RhoEAFromPressureTemperatureVelocityIC>();
 
 /**
  * The RhoEAFromPressureTemperatureVelocityIC returns:
@@ -31,4 +27,7 @@ protected:
   const VariableValue & _vel;
   /// Cross-sectional area
   const VariableValue & _area;
+
+public:
+  static InputParameters validParams();
 };

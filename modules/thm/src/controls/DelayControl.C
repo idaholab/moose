@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", DelayControl);
 
-template <>
 InputParameters
-validParams<DelayControl>()
+DelayControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("input", "The name of the control data that we read in.");
   params.addRequiredParam<Real>("tau", "Time period [s]");
   params.addParam<Real>("initial_value", 0., "Initial value");

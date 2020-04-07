@@ -2,11 +2,10 @@
 #include "GeometricalFlowComponent.h"
 #include "THMMesh.h"
 
-template <>
 InputParameters
-validParams<FlowJunction>()
+FlowJunction::validParams()
 {
-  InputParameters params = validParams<FlowConnection>();
+  InputParameters params = FlowConnection::validParams();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
   params.addRequiredParam<std::vector<BoundaryName>>("connections", "Junction connections");
   return params;

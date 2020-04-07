@@ -2,11 +2,7 @@
 
 #include "Kernel.h"
 
-class OneD3EqnEnergyHeatSource;
 class Function;
-
-template <>
-InputParameters validParams<OneD3EqnEnergyHeatSource>();
 
 /**
  * Volumetric heat source for 1-phase flow channel
@@ -25,4 +21,7 @@ protected:
   const Function & _q;
   /// Cross sectional area
   const VariableValue & _A;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneD3EqnMomentumAreaGradient);
 
-template <>
 InputParameters
-validParams<OneD3EqnMomentumAreaGradient>()
+OneD3EqnMomentumAreaGradient::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("arhoA", "The density of the kth phase");
   params.addRequiredCoupledVar("arhouA", "The momentum of the kth phase");
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");

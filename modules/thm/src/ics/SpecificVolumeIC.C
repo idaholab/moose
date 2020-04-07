@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SpecificVolumeIC);
 
-template <>
 InputParameters
-validParams<SpecificVolumeIC>()
+SpecificVolumeIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("rhoA",
                                "Density of the phase (conserved), \alpha \rho A for 2-phase model");
   params.addRequiredCoupledVar("A", "Cross-sectional area");

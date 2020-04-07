@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", SumIC);
 
-template <>
 InputParameters
-validParams<SumIC>()
+SumIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
 
   params.addClassDescription("IC for sum of variables");
 

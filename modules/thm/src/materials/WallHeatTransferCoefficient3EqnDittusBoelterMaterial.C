@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", WallHeatTransferCoefficient3EqnDittusBoelterMaterial);
 
-template <>
 InputParameters
-validParams<WallHeatTransferCoefficient3EqnDittusBoelterMaterial>()
+WallHeatTransferCoefficient3EqnDittusBoelterMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("rho", "Density of the liquid");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the liquid velocity");
   params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");

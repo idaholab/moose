@@ -6,11 +6,10 @@
 
 registerMooseObject("THMApp", HeatSourceFromTotalPower);
 
-template <>
 InputParameters
-validParams<HeatSourceFromTotalPower>()
+HeatSourceFromTotalPower::validParams()
 {
-  InputParameters params = validParams<HeatSourceBase>();
+  InputParameters params = HeatSourceBase::validParams();
   params.addRequiredParam<std::string>("power", "Component that provides total power");
   params.addParam<Real>(
       "power_fraction", 1., "Fraction of the total power that goes into the heat structure [-]");

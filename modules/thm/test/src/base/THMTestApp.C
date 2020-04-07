@@ -10,11 +10,10 @@
 #include "FluidPropertiesApp.h"
 #include "FluidPropertiesTestApp.h"
 
-template <>
 InputParameters
-validParams<THMTestApp>()
+THMTestApp::validParams()
 {
-  InputParameters params = validParams<THMApp>();
+  InputParameters params = THMApp::validParams();
   return params;
 }
 

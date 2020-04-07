@@ -6,11 +6,6 @@
 #include "MooseApp.h"
 #include "MooseTypes.h"
 
-class FlowModelSetup;
-
-template <>
-InputParameters validParams<FlowModelSetup>();
-
 /**
  * Base helper class to provide interfaces to common flow model setup functions
  */
@@ -68,6 +63,9 @@ protected:
 
   /// Gravitational acceleration magnitude
   const Real & _gravity_magnitude;
+
+public:
+  static InputParameters validParams();
 };
 
 template <typename T>

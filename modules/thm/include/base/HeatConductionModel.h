@@ -66,6 +66,8 @@ public:
   static const std::string THERMAL_CONDUCTIVITY;
   static const std::string SPECIFIC_HEAT_CONSTANT_PRESSURE;
 
+  static InputParameters validParams();
+
 protected:
   // FE type used for heat conduction
   static FEType _fe_type;

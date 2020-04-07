@@ -2,11 +2,6 @@
 
 #include "DerivativeMaterialInterface.h"
 
-class ConstantMaterial;
-
-template <>
-InputParameters validParams<ConstantMaterial>();
-
 /**
  * Constant material with zero-valued derivatives
  */
@@ -32,4 +27,7 @@ protected:
 
   /// Derivatives of material property with respect to each variable
   std::vector<MaterialProperty<Real> *> _derivative_properties;
+
+public:
+  static InputParameters validParams();
 };

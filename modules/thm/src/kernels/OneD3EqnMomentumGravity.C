@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneD3EqnMomentumGravity);
 
-template <>
 InputParameters
-validParams<OneD3EqnMomentumGravity>()
+OneD3EqnMomentumGravity::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
   params.addRequiredParam<MaterialPropertyName>(

@@ -3,11 +3,6 @@
 #include "NumericalFlux3EqnBase.h"
 #include "SinglePhaseFluidProperties.h"
 
-class NumericalFlux3EqnCentered;
-
-template <>
-InputParameters validParams<NumericalFlux3EqnCentered>();
-
 /**
  * Computes internal side flux for the 1-D, 1-phase, variable-area Euler equations using
  * a centered average of the left and right side fluxes
@@ -40,4 +35,7 @@ protected:
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,10 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowChannel1Phase.h"
 
-template <>
 InputParameters
-validParams<Closures1PhaseBase>()
+Closures1PhaseBase::validParams()
 {
-  InputParameters params = validParams<ClosuresBase>();
+  InputParameters params = ClosuresBase::validParams();
   return params;
 }
 

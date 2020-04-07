@@ -6,11 +6,10 @@
 
 registerMooseObject("THMApp", OneD3EqnEnergyHeatFlux);
 
-template <>
 InputParameters
-validParams<OneD3EqnEnergyHeatFlux>()
+OneD3EqnEnergyHeatFlux::validParams()
 {
-  InputParameters params = validParams<OneDHeatFluxBase>();
+  InputParameters params = OneDHeatFluxBase::validParams();
   params.addRequiredCoupledVar("rhoA", "rho*A of the flow channel");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the flow channel");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the flow channel");

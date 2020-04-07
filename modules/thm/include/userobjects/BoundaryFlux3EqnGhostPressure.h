@@ -2,11 +2,7 @@
 
 #include "BoundaryFlux3EqnGhostBase.h"
 
-class BoundaryFlux3EqnGhostPressure;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostPressure>();
 
 /**
  * Computes boundary flux from a specified pressure for the 1-D, 1-phase, variable-area Euler
@@ -27,4 +23,7 @@ protected:
 
   /// Fluid properties object
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

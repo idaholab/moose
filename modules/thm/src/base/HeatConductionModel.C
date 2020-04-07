@@ -6,11 +6,10 @@
 #include "HeatStructureBase.h"
 #include "HeatStructureCylindrical.h"
 
-template <>
 InputParameters
-validParams<HeatConductionModel>()
+HeatConductionModel::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<HeatStructureBase *>("_hs");
   params.registerBase("THM:heat_conduction_model");

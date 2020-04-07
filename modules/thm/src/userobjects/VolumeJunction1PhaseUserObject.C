@@ -7,11 +7,10 @@
 
 registerMooseObject("THMApp", VolumeJunction1PhaseUserObject);
 
-template <>
 InputParameters
-validParams<VolumeJunction1PhaseUserObject>()
+VolumeJunction1PhaseUserObject::validParams()
 {
-  InputParameters params = validParams<VolumeJunctionBaseUserObject>();
+  InputParameters params = VolumeJunctionBaseUserObject::validParams();
 
   params.addRequiredCoupledVar("A", "Cross-sectional area of connected flow channels");
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");

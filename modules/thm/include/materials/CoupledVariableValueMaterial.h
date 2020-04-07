@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class CoupledVariableValueMaterial;
-
-template <>
-InputParameters validParams<CoupledVariableValueMaterial>();
-
 /**
  * Stores values of a variable into material properties
  */
@@ -24,4 +19,7 @@ protected:
   MaterialProperty<Real> & _prop;
   /// The coupled variable values
   const VariableValue & _value;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,12 +2,6 @@
 
 #include "OneDIntegratedBC.h"
 
-// Forward Declarations
-class OneDMassFreeBC;
-
-template <>
-InputParameters validParams<OneDMassFreeBC>();
-
 /**
  * A BC for the mass equation in which nothing is specified (i.e.
  * everything is allowed to be "free".
@@ -25,4 +19,7 @@ protected:
   // Coupled variables
   unsigned int _arhouA_var_number;
   const VariableValue & _arhouA;
+
+public:
+  static InputParameters validParams();
 };

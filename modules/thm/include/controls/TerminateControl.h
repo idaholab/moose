@@ -2,11 +2,6 @@
 
 #include "THMControl.h"
 
-class TerminateControl;
-
-template <>
-InputParameters validParams<TerminateControl>();
-
 /**
  * This control block will terminate a run if its input indicates so.
  */
@@ -26,4 +21,7 @@ protected:
 
   /// The control data that indicates if the simulation should be terminated
   const bool & _terminate;
+
+public:
+  static InputParameters validParams();
 };

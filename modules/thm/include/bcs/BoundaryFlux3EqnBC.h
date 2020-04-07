@@ -3,11 +3,6 @@
 #include "OneDIntegratedBC.h"
 #include "BoundaryFluxBase.h"
 
-class BoundaryFlux3EqnBC;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnBC>();
-
 /**
  * Boundary conditions for the 1-D, 1-phase, variable-area Euler equations
  * using a boundary flux user object
@@ -52,4 +47,7 @@ protected:
 
   /// boundary flux user object
   const BoundaryFluxBase & _flux;
+
+public:
+  static InputParameters validParams();
 };

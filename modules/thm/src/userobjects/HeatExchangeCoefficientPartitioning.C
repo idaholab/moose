@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatExchangeCoefficientPartitioning);
 
-template <>
 InputParameters
-validParams<HeatExchangeCoefficientPartitioning>()
+HeatExchangeCoefficientPartitioning::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addParam<Real>("lower", 0.001, "Lower cut-off limit");
   params.addParam<Real>("upper", 0.999, "Upper cut-off limit");
 

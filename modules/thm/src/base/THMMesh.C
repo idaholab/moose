@@ -9,11 +9,10 @@ registerMooseObject("THMApp", THMMesh);
 
 const BoundaryName THMMesh::INVALID_BOUNDARY_ID = "invalid_boundary_id";
 
-template <>
 InputParameters
-validParams<THMMesh>()
+THMMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   // we do not allow renumbering, becuase we generate our meshes
   params.set<bool>("allow_renumbering") = false;
   return params;

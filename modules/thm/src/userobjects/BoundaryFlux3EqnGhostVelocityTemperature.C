@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostVelocityTemperature);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostVelocityTemperature>()
+BoundaryFlux3EqnGhostVelocityTemperature::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription(
       "Computes a boundary flux from a specified velocity and temperature for the 1-D, "

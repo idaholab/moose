@@ -3,11 +3,7 @@
 #include "Material.h"
 #include "SlopeReconstruction1DInterface.h"
 
-class RDG3EqnMaterial;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<RDG3EqnMaterial>();
 
 /**
  * Reconstructed solution values for the 1-D, 1-phase, variable-area Euler equations
@@ -61,4 +57,7 @@ protected:
     VELOCITY = 1,
     TEMPERATURE = 2
   };
+
+public:
+  static InputParameters validParams();
 };

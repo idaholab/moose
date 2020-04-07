@@ -2,11 +2,6 @@
 
 #include "AuxKernel.h"
 
-class CopyValueAux;
-
-template <>
-InputParameters validParams<CopyValueAux>();
-
 /**
  *
  */
@@ -19,4 +14,7 @@ protected:
   virtual Real computeValue();
 
   const VariableValue & _source_var;
+
+public:
+  static InputParameters validParams();
 };

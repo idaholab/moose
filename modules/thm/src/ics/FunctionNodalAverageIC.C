@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", FunctionNodalAverageIC);
 
-template <>
 InputParameters
-validParams<FunctionNodalAverageIC>()
+FunctionNodalAverageIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
 
   params.addClassDescription(
       "Initial conditions for an elemental variable from a function using nodal average.");

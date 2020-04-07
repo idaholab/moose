@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", HSBoundaryAmbientConvection);
 
-template <>
 InputParameters
-validParams<HSBoundaryAmbientConvection>()
+HSBoundaryAmbientConvection::validParams()
 {
-  InputParameters params = validParams<HSBoundary>();
+  InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<Real>("htc_ambient",
                                 "Convective heat transfer coefficient with ambient [W/(m^2-K)]");

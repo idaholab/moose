@@ -3,12 +3,7 @@
 #include "OneDIntegratedBC.h"
 #include "Function.h"
 
-// Forward Declarations
-class OneDMomentumStaticPressureReverseBC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<OneDMomentumStaticPressureReverseBC>();
 
 /**
  * Static p, T applied at the outlet in case of reversal flow
@@ -41,4 +36,7 @@ protected:
   Real _p;
 
   const SinglePhaseFluidProperties & _spfp;
+
+public:
+  static InputParameters validParams();
 };

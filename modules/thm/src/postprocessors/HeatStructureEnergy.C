@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatStructureEnergy);
 
-template <>
 InputParameters
-validParams<HeatStructureEnergy>()
+HeatStructureEnergy::validParams()
 {
-  InputParameters params = validParams<HeatStructureEnergyBase>();
+  InputParameters params = HeatStructureEnergyBase::validParams();
 
   params.addClassDescription("Computes the total energy for a plate heat structure.");
 

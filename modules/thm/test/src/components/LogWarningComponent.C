@@ -2,11 +2,10 @@
 
 registerMooseObject("THMTestApp", LogWarningComponent);
 
-template <>
 InputParameters
-validParams<LogWarningComponent>()
+LogWarningComponent::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addClassDescription("Component that logs a warning.");
   return params;
 }

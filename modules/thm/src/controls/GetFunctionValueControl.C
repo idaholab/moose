@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", GetFunctionValueControl);
 
-template <>
 InputParameters
-validParams<GetFunctionValueControl>()
+GetFunctionValueControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<FunctionName>("function",
                                         "The name of the function prescribing a value.");
   return params;

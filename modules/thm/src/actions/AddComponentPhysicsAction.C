@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", AddComponentPhysicsAction, "THM:add_component_physics");
 
-template <>
 InputParameters
-validParams<AddComponentPhysicsAction>()
+AddComponentPhysicsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", CircularAreaHydraulicDiameterFunction);
 
-template <>
 InputParameters
-validParams<CircularAreaHydraulicDiameterFunction>()
+CircularAreaHydraulicDiameterFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
 
   params.addRequiredParam<FunctionName>("area_function", "Area function");
 

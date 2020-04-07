@@ -2,11 +2,6 @@
 
 #include "THMControl.h"
 
-class CopyPostprocessorValueControl;
-
-template <>
-InputParameters validParams<CopyPostprocessorValueControl>();
-
 /**
  * This control takes a postprocessor and copies its value into a control data value
  */
@@ -20,4 +15,7 @@ public:
 protected:
   Real & _value;
   const Real & _pps_value;
+
+public:
+  static InputParameters validParams();
 };

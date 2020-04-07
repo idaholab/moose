@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", Closures1PhaseNone);
 
-template <>
 InputParameters
-validParams<Closures1PhaseNone>()
+Closures1PhaseNone::validParams()
 {
-  InputParameters params = validParams<Closures1PhaseBase>();
+  InputParameters params = Closures1PhaseBase::validParams();
   params.addClassDescription("No 1-phase closures. Useful for testing with one-time correlations.");
   return params;
 }

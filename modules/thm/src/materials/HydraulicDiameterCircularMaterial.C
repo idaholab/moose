@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", HydraulicDiameterCircularMaterial);
 
-template <>
 InputParameters
-validParams<HydraulicDiameterCircularMaterial>()
+HydraulicDiameterCircularMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   return params;
 }

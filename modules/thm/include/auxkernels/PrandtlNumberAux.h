@@ -2,11 +2,7 @@
 
 #include "AuxKernel.h"
 
-class PrandtlNumberAux;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<PrandtlNumberAux>();
 
 /**
  * Computes Prandtl number
@@ -25,4 +21,7 @@ protected:
   const VariableValue & _e;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

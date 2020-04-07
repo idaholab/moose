@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnBC);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnBC>()
+BoundaryFlux3EqnBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
 
   params.addClassDescription(
       "Boundary conditions for the 1-D, 1-phase, variable-area Euler equations");

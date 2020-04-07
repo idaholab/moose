@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostFreeInflow);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostFreeInflow>()
+BoundaryFlux3EqnGhostFreeInflow::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription("Free inflow boundary conditions from a ghost cell for the 1-D, "
                              "1-phase, variable-area Euler equations");

@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class WeightedAverageMaterial;
-
-template <>
-InputParameters validParams<WeightedAverageMaterial>();
-
 /**
  * Weighted average of material properties using aux variables as the weights
  *
@@ -32,4 +27,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _values;
   /// Weights of the values
   std::vector<const VariableValue *> _weights;
+
+public:
+  static InputParameters validParams();
 };

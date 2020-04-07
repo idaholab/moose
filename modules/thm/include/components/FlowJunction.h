@@ -2,11 +2,6 @@
 
 #include "FlowConnection.h"
 
-class FlowJunction;
-
-template <>
-InputParameters validParams<FlowJunction>();
-
 /**
  * Base class for flow junctions
  */
@@ -17,4 +12,7 @@ public:
 
 protected:
   virtual void setupMesh() override;
+
+public:
+  static InputParameters validParams();
 };

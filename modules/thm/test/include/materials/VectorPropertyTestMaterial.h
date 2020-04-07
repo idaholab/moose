@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class VectorPropertyTestMaterial;
-
-template <>
-InputParameters validParams<VectorPropertyTestMaterial>();
-
 /**
  * Test material with vector properties
  */
@@ -19,4 +14,7 @@ protected:
   virtual void computeQpProperties() override;
 
   MaterialProperty<std::vector<Real>> & _vec;
+
+public:
+  static InputParameters validParams();
 };

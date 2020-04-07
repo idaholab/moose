@@ -3,12 +3,8 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDEnergyDensityVelocityBC;
 class SinglePhaseFluidProperties;
 class VolumeFractionMapper;
-
-template <>
-InputParameters validParams<OneDEnergyDensityVelocityBC>();
 
 /**
  *
@@ -35,4 +31,7 @@ protected:
   unsigned int _beta_var_num;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

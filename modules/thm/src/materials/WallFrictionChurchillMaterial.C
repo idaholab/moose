@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", WallFrictionChurchillMaterial);
 
-template <>
 InputParameters
-validParams<WallFrictionChurchillMaterial>()
+WallFrictionChurchillMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("rhoA", "Mass equation variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Momentum equation variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Total energy equation variable: rho*E*A");

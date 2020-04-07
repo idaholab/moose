@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class FormLoss1PhaseBase;
-
-template <>
-InputParameters validParams<FormLoss1PhaseBase>();
-
 /**
  * Base class for prescribing a form loss over a 1-phase flow channel
  */
@@ -24,4 +19,7 @@ protected:
   std::vector<SubdomainName> _flow_channel_subdomains;
   /// Name of the flow channel component
   const std::string & _flow_channel_name;
+
+public:
+  static InputParameters validParams();
 };

@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", ElbowPipe1Phase);
 
-template <>
 InputParameters
-validParams<ElbowPipe1Phase>()
+ElbowPipe1Phase::validParams()
 {
-  InputParameters params = validParams<FlowChannel1Phase>();
+  InputParameters params = FlowChannel1Phase::validParams();
   params.addRequiredParam<Real>("radius", "Radius of the pipe [m]");
   params.addRequiredParam<Real>("start_angle", "Angle at which the pipe starts [degrees]");
   params.addRequiredParam<Real>("end_angle", "Angle at which the pipe ends [degrees]");

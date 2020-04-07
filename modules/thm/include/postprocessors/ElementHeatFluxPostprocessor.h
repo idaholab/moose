@@ -2,11 +2,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class ElementHeatFluxPostprocessor;
-
-template <>
-InputParameters validParams<ElementHeatFluxPostprocessor>();
-
 /**
  * Postprocessor to compute total heat flux going into the fluid
  *
@@ -27,4 +22,7 @@ protected:
   const MaterialProperty<Real> & _Hw;
   /// Heat flux perimeter
   const VariableValue & _P_hf;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "TotalPowerBase.h"
 
-class TotalPower;
-
-template <>
-InputParameters validParams<TotalPower>();
-
 /**
  * Prescribes total power via a user supplied value
  */
@@ -21,4 +16,7 @@ public:
 protected:
   /// The value of power
   const Real & _power;
+
+public:
+  static InputParameters validParams();
 };

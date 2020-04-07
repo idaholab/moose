@@ -2,11 +2,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class SumPostprocessor;
-
-template <>
-InputParameters validParams<SumPostprocessor>();
-
 /**
  * Computes a sum of postprocessor values
  *
@@ -24,4 +19,7 @@ public:
 protected:
   /// Postprocessors to add up
   std::vector<const PostprocessorValue *> _values;
+
+public:
+  static InputParameters validParams();
 };

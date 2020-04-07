@@ -2,11 +2,6 @@
 
 #include "Function.h"
 
-class CosineHumpFunction;
-
-template <>
-InputParameters validParams<CosineHumpFunction>();
-
 /**
  * Computes a cosine hump of a user-specified width and height
  *
@@ -42,4 +37,7 @@ protected:
   const Real _hump_left_end;
   /// Right end of hump
   const Real _hump_right_end;
+
+public:
+  static InputParameters validParams();
 };

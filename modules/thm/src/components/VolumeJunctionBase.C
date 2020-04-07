@@ -1,10 +1,9 @@
 #include "VolumeJunctionBase.h"
 
-template <>
 InputParameters
-validParams<VolumeJunctionBase>()
+VolumeJunctionBase::validParams()
 {
-  InputParameters params = validParams<FlowJunction>();
+  InputParameters params = FlowJunction::validParams();
 
   params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
   params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");

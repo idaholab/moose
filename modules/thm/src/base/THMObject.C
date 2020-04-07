@@ -1,10 +1,9 @@
 #include "THMObject.h"
 
-template <>
 InputParameters
-validParams<THMObject>()
+THMObject::validParams()
 {
-  InputParameters params = validParams<MooseObject>();
+  InputParameters params = MooseObject::validParams();
   return params;
 }
 

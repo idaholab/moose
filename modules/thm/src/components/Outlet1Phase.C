@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", Outlet1Phase);
 
-template <>
 InputParameters
-validParams<Outlet1Phase>()
+Outlet1Phase::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   params.addParam<bool>("reversible", false, "True for reversible outlet boundary conditions");
   params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
   params.addParam<bool>(

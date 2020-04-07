@@ -3,11 +3,6 @@
 #include "BoundaryFluxBase.h"
 #include "SinglePhaseFluidProperties.h"
 
-class BoundaryFlux3EqnFreeInflow;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnFreeInflow>();
-
 /**
  * Computes the inflow boundary flux directly for the 1-D, 1-phase, variable-area Euler equations
  */
@@ -34,4 +29,7 @@ protected:
   const Real _p_inf;
 
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

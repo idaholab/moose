@@ -2,11 +2,6 @@
 
 #include "JacobianTestAction.h"
 
-class JacobianTestGeneralAction;
-
-template <>
-InputParameters validParams<JacobianTestGeneralAction>();
-
 /**
  * Action for setting up a Jacobian test that does not need physics setup
  *
@@ -31,4 +26,7 @@ protected:
 
   /// List of values for the variables to add
   const std::vector<FunctionName> _variable_values;
+
+public:
+  static InputParameters validParams();
 };

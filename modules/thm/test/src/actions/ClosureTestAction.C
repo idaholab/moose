@@ -3,11 +3,10 @@
 #include "ActionWarehouse.h"
 #include "MooseObjectAction.h"
 
-template <>
 InputParameters
-validParams<ClosureTestAction>()
+ClosureTestAction::validParams()
 {
-  InputParameters params = validParams<TestAction>();
+  InputParameters params = TestAction::validParams();
 
   params.addParam<FunctionName>("T_wall", "Wall temperature function");
   params.addParam<Real>("q_wall", 0., "Convective wall heat flux");

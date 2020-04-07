@@ -3,11 +3,6 @@
 #include "RadiativeHeatFluxBC.h"
 #include "RZSymmetry.h"
 
-class RadiativeHeatFluxRZBC;
-
-template <>
-InputParameters validParams<RadiativeHeatFluxRZBC>();
-
 /**
  * Radiative heat transfer boundary condition for a cylindrical heat structure
  */
@@ -19,4 +14,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+
+public:
+  static InputParameters validParams();
 };

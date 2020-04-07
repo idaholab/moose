@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", ConvectiveHeatTransferCoefficientMaterial);
 
-template <>
 InputParameters
-validParams<ConvectiveHeatTransferCoefficientMaterial>()
+ConvectiveHeatTransferCoefficientMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("Nu", "Nusselt number");
   params.addRequiredParam<MaterialPropertyName>("D_h", "Hydraulic diameter");
   params.addRequiredParam<MaterialPropertyName>("k", "Thermal conductivity");

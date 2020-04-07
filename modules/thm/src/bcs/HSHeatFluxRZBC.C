@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", HSHeatFluxRZBC);
 
-template <>
 InputParameters
-validParams<HSHeatFluxRZBC>()
+HSHeatFluxRZBC::validParams()
 {
-  InputParameters params = validParams<HSHeatFluxBC>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = HSHeatFluxBC::validParams();
+  params += RZSymmetry::validParams();
 
   params.addClassDescription(
       "Applies a specified heat flux to the side of a cylindrical heat structure");

@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", SolidWall);
 
-template <>
 InputParameters
-validParams<SolidWall>()
+SolidWall::validParams()
 {
-  InputParameters params = validParams<FlowBoundary>();
+  InputParameters params = FlowBoundary::validParams();
   return params;
 }
 

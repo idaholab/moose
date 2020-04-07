@@ -3,11 +3,10 @@
 
 registerMooseAction("THMApp", THMBuildMeshAction, "THM:build_mesh");
 
-template <>
 InputParameters
-validParams<THMBuildMeshAction>()
+THMBuildMeshAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   return params;
 }
 

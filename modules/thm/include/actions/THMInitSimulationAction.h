@@ -2,11 +2,6 @@
 
 #include "Action.h"
 
-class THMInitSimulationAction;
-
-template <>
-InputParameters validParams<THMInitSimulationAction>();
-
 /**
  *
  */
@@ -16,4 +11,7 @@ public:
   THMInitSimulationAction(InputParameters parameters);
 
   virtual void act();
+
+public:
+  static InputParameters validParams();
 };

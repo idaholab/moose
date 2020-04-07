@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", GateValve1PhaseBC);
 
-template <>
 InputParameters
-validParams<GateValve1PhaseBC>()
+GateValve1PhaseBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
 
   params.addRequiredParam<unsigned int>("connection_index", "Index of the connected flow channel");
   params.addRequiredParam<UserObjectName>("gate_valve_uo", "1-phase gate valve user object");

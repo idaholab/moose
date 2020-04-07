@@ -3,11 +3,10 @@
 #include "KDTree.h"
 #include "Assembly.h"
 
-template <>
 InputParameters
-validParams<HeatFluxFromHeatStructureBaseUserObject>()
+HeatFluxFromHeatStructureBaseUserObject::validParams()
 {
-  InputParameters params = validParams<ElementUserObject>();
+  InputParameters params = ElementUserObject::validParams();
   params.addRequiredParam<FlowChannelAlignment *>("_fch_alignment",
                                                   "Flow channel alignement object");
   params.addRequiredCoupledVar("P_hf", "Heat flux perimeter");

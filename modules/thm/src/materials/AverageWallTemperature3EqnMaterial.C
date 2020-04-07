@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", AverageWallTemperature3EqnMaterial);
 
-template <>
 InputParameters
-validParams<AverageWallTemperature3EqnMaterial>()
+AverageWallTemperature3EqnMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addClassDescription(
       "Weighted average wall temperature from multiple sources for 1-phase flow");

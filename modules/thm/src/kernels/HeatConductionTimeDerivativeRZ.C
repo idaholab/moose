@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", HeatConductionTimeDerivativeRZ);
 
-template <>
 InputParameters
-validParams<HeatConductionTimeDerivativeRZ>()
+HeatConductionTimeDerivativeRZ::validParams()
 {
-  InputParameters params = validParams<HeatConductionTimeDerivative>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = HeatConductionTimeDerivative::validParams();
+  params += RZSymmetry::validParams();
   return params;
 }
 

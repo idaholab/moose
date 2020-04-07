@@ -28,9 +28,8 @@ THM::stringToEnum(const std::string & s)
 const unsigned int SlopeReconstruction1DInterface::_n_side = 2;
 const unsigned int SlopeReconstruction1DInterface::_n_sten = 3;
 
-template <>
 InputParameters
-validParams<SlopeReconstruction1DInterface>()
+SlopeReconstruction1DInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 

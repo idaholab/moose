@@ -2,11 +2,7 @@
 
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class FluidProperties3EqnMaterial;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<FluidProperties3EqnMaterial>();
 
 /**
  * Computes velocity and thermodynamic variables from solution variables for 1-phase flow.
@@ -82,4 +78,7 @@ protected:
 
   /// Fluid properties
   const SinglePhaseFluidProperties & _fp;
+
+public:
+  static InputParameters validParams();
 };

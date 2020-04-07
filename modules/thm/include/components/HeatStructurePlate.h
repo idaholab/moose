@@ -3,11 +3,6 @@
 #include "HeatStructureBase.h"
 #include "HeatConductionModel.h"
 
-class HeatStructurePlate;
-
-template <>
-InputParameters validParams<HeatStructurePlate>();
-
 /**
  * Component to model plate heat structure
  */
@@ -22,4 +17,7 @@ public:
 protected:
   /// plate fuel depth
   const Real & _depth;
+
+public:
+  static InputParameters validParams();
 };

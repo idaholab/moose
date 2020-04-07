@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", RDG3EqnMaterial);
 
-template <>
 InputParameters
-validParams<RDG3EqnMaterial>()
+RDG3EqnMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
-  params += validParams<SlopeReconstruction1DInterface>();
+  InputParameters params = Material::validParams();
+  params += SlopeReconstruction1DInterface::validParams();
 
   params.addClassDescription(
       "Reconstructed solution values for the 1-D, 1-phase, variable-area Euler equations");

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatTransferFromSpecifiedTemperature1Phase);
 
-template <>
 InputParameters
-validParams<HeatTransferFromSpecifiedTemperature1Phase>()
+HeatTransferFromSpecifiedTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
+  InputParameters params = HeatTransferFromTemperature1Phase::validParams();
   params.addRequiredParam<FunctionName>("T_wall", "Specified wall temperature [K]");
   params.addClassDescription(
       "Heat transfer connection from a fixed temperature function for 1-phase flow");

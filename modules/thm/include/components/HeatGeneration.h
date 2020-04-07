@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class HeatGeneration;
-
-template <>
-InputParameters validParams<HeatGeneration>();
-
 /**
  * Adds heat generation to a heat structure
  *
@@ -16,4 +11,7 @@ class HeatGeneration : public Component
 {
 public:
   HeatGeneration(const InputParameters & parameters);
+
+public:
+  static InputParameters validParams();
 };

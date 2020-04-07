@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", Closures1PhaseSimple);
 
-template <>
 InputParameters
-validParams<Closures1PhaseSimple>()
+Closures1PhaseSimple::validParams()
 {
-  InputParameters params = validParams<Closures1PhaseBase>();
+  InputParameters params = Closures1PhaseBase::validParams();
 
   params.addClassDescription("Simple 1-phase closures");
 

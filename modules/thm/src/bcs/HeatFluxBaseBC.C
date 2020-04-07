@@ -4,11 +4,10 @@
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
 
-template <>
 InputParameters
-validParams<HeatFluxBaseBC>()
+HeatFluxBaseBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<UserObjectName>(
       "q_uo", "The name of the user object that computes the heat flux");
   params.addRequiredParam<Real>("P_hs_unit", "Perimeter of a single unit of heat structure");

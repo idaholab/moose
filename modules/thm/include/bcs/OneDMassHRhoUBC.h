@@ -3,11 +3,6 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneDMassHRhoUBC;
-
-template <>
-InputParameters validParams<OneDMassHRhoUBC>();
-
 /**
  *
  */
@@ -30,4 +25,7 @@ protected:
   const VariableValue & _area;
 
   unsigned int _beta_var_num;
+
+public:
+  static InputParameters validParams();
 };

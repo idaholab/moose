@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class HeatSourceBase;
-
-template <>
-InputParameters validParams<HeatSourceBase>();
-
 /**
  * Base class for heat source components
  */
@@ -20,4 +15,7 @@ protected:
 
   /// Names of the heat structure regions where heat generation is to be applied
   const std::vector<std::string> & _region_names;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", LinearFluidProperties);
 
-template <>
 InputParameters
-validParams<LinearFluidProperties>()
+LinearFluidProperties::validParams()
 {
-  InputParameters params = validParams<SinglePhaseFluidProperties>();
+  InputParameters params = SinglePhaseFluidProperties::validParams();
   params.addRequiredParam<Real>("p_0", "Reference pressure");
   params.addRequiredParam<Real>("rho_0", "Reference density");
   params.addRequiredParam<Real>("a2", "dp/d(rho)");

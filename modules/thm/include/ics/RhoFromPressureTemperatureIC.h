@@ -2,11 +2,7 @@
 
 #include "InitialCondition.h"
 
-class RhoFromPressureTemperatureIC;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<RhoFromPressureTemperatureIC>();
 
 /**
  * Computes density from pressure and temperature
@@ -24,4 +20,7 @@ protected:
   const VariableValue & _p;
   /// The temperature
   const VariableValue & _T;
+
+public:
+  static InputParameters validParams();
 };

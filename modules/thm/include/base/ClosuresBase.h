@@ -4,14 +4,10 @@
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
 
-class ClosuresBase;
 class FlowChannelBase;
 class HeatTransferBase;
 class THMProblem;
 class Factory;
-
-template <>
-InputParameters validParams<ClosuresBase>();
 
 /**
  * Base class for closures implementations
@@ -76,4 +72,7 @@ protected:
 
   /// Factory associated with the MooseApp
   Factory & _factory;
+
+public:
+  static InputParameters validParams();
 };

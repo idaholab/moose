@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", HeatTransferFromExternalAppTemperature1Phase);
 
-template <>
 InputParameters
-validParams<HeatTransferFromExternalAppTemperature1Phase>()
+HeatTransferFromExternalAppTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
+  InputParameters params = HeatTransferFromTemperature1Phase::validParams();
   params.addParam<FunctionName>("initial_T_wall", "Initial condition for wall temperature [K]");
   MooseEnum var_type("nodal elemental", "nodal", false);
   params.addParam<MooseEnum>(

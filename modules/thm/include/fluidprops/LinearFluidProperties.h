@@ -2,11 +2,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class LinearFluidProperties;
-
-template <>
-InputParameters validParams<LinearFluidProperties>();
-
 /**
  * Linear fluid properties
  */
@@ -72,4 +67,7 @@ protected:
   Real _mu;
   Real _k;
   Real _Pr;
+
+public:
+  static InputParameters validParams();
 };

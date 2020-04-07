@@ -3,11 +3,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMomentumGravity;
-
-template <>
-InputParameters validParams<OneD3EqnMomentumGravity>();
-
 /**
  * Computes gravity term for the momentum equation for 1-phase flow
  */
@@ -32,4 +27,7 @@ protected:
   const RealVectorValue & _gravity_vector;
 
   const unsigned int _arhoA_var_number;
+
+public:
+  static InputParameters validParams();
 };

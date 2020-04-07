@@ -2,11 +2,6 @@
 
 #include "FlowJunction.h"
 
-class PeriodicJunction;
-
-template <>
-InputParameters validParams<PeriodicJunction>();
-
 /**
  * Junction that adds periodic BC for all variables
  */
@@ -26,4 +21,7 @@ protected:
 
   /// Vector which when added to primary boundary coordinates gives secondary boundary coordinates
   RealVectorValue _translation_vector;
+
+public:
+  static InputParameters validParams();
 };

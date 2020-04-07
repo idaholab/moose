@@ -2,11 +2,7 @@
 
 #include "ScalarInitialCondition.h"
 
-class ScalarSolutionInitialCondition;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<ScalarSolutionInitialCondition>();
 
 /**
  * Class for reading an initial condition from a solution user object
@@ -24,4 +20,7 @@ protected:
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;
+
+public:
+  static InputParameters validParams();
 };

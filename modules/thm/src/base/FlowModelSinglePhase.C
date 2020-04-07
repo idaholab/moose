@@ -19,11 +19,10 @@ const std::string FlowModelSinglePhase::TEMPERATURE = "T";
 const std::string FlowModelSinglePhase::THERMAL_CONDUCTIVITY = "k";
 const std::string FlowModelSinglePhase::VELOCITY = "vel";
 
-template <>
 InputParameters
-validParams<FlowModelSinglePhase>()
+FlowModelSinglePhase::validParams()
 {
-  InputParameters params = validParams<FlowModel>();
+  InputParameters params = FlowModel::validParams();
   return params;
 }
 

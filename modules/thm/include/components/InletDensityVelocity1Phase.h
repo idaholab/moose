@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class InletDensityVelocity1Phase;
-
-template <>
-InputParameters validParams<InletDensityVelocity1Phase>();
-
 /**
  * Boundary condition with prescribed density and velocity for 1-phase flow channels
  */
@@ -25,4 +20,7 @@ protected:
 
   /// True to allow the flow to reverse, otherwise false
   bool _reversible;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class InletStagnationPressureTemperature1Phase;
-
-template <>
-InputParameters validParams<InletStagnationPressureTemperature1Phase>();
-
 /**
  * Boundary condition with prescribed stagnation pressure and temperature for 1-phase flow channels
  */
@@ -25,4 +20,7 @@ protected:
 
   void setup1PhaseCG();
   void setup1PhaseRDG();
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "MooseMesh.h"
 
-class THMMesh;
-
-template <>
-InputParameters validParams<THMMesh>();
-
 /**
  * Mesh for THM
  */
@@ -64,4 +59,6 @@ protected:
 
 public:
   static const BoundaryName INVALID_BOUNDARY_ID;
+
+  static InputParameters validParams();
 };

@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", SolutionInitialCondition);
 
-template <>
 InputParameters
-validParams<SolutionInitialCondition>()
+SolutionInitialCondition::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("solution_uo",
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(

@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", FormLossFromFunction1Phase);
 
-template <>
 InputParameters
-validParams<FormLossFromFunction1Phase>()
+FormLossFromFunction1Phase::validParams()
 {
-  InputParameters params = validParams<FormLoss1PhaseBase>();
+  InputParameters params = FormLoss1PhaseBase::validParams();
   params.addRequiredParam<FunctionName>("K_prime",
                                         "Form loss coefficient per unit length function [1/m]");
 

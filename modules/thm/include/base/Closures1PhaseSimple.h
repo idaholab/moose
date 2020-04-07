@@ -2,11 +2,6 @@
 
 #include "Closures1PhaseBase.h"
 
-class Closures1PhaseSimple;
-
-template <>
-InputParameters validParams<Closures1PhaseSimple>();
-
 /**
  * Simple 1-phase closures
  */
@@ -27,4 +22,7 @@ protected:
    * @param[in] flow_channel   Flow channel component
    */
   void addWallTemperatureFromHeatFluxMaterial(const FlowChannel1Phase & flow_channel) const;
+
+public:
+  static InputParameters validParams();
 };

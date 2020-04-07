@@ -4,11 +4,10 @@
 
 registerMooseAction("THMApp", IntegrityCheckAction, "THM:integrity_check");
 
-template <>
 InputParameters
-validParams<IntegrityCheckAction>()
+IntegrityCheckAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
 
   return params;
 }

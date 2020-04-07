@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", DirectionMaterial);
 
-template <>
 InputParameters
-validParams<DirectionMaterial>()
+DirectionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.set<MooseEnum>("constant_on") = 1; // constant on element
   return params;
 }

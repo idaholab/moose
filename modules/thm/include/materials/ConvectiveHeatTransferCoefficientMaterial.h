@@ -2,11 +2,6 @@
 
 #include "Material.h"
 
-class ConvectiveHeatTransferCoefficientMaterial;
-
-template <>
-InputParameters validParams<ConvectiveHeatTransferCoefficientMaterial>();
-
 /**
  * Computes convective heat transfer coefficient from Nusselt number
  */
@@ -26,4 +21,7 @@ protected:
   const MaterialProperty<Real> & _D_h;
   /// Thermal conductivity
   const MaterialProperty<Real> & _k;
+
+public:
+  static InputParameters validParams();
 };

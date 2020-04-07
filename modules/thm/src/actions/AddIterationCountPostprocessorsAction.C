@@ -5,11 +5,10 @@
 
 registerMooseAction("THMApp", AddIterationCountPostprocessorsAction, "meta_action");
 
-template <>
 InputParameters
-validParams<AddIterationCountPostprocessorsAction>()
+AddIterationCountPostprocessorsAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<bool>(
       "count_iterations", false, "Add postprocessors for linear and nonlinear iterations");
   params.addClassDescription("Adds postprocessors for linear and nonlinear iterations");

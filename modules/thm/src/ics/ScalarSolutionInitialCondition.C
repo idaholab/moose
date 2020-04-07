@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", ScalarSolutionInitialCondition);
 
-template <>
 InputParameters
-validParams<ScalarSolutionInitialCondition>()
+ScalarSolutionInitialCondition::validParams()
 {
-  InputParameters params = validParams<ScalarInitialCondition>();
+  InputParameters params = ScalarInitialCondition::validParams();
   params.addRequiredParam<UserObjectName>("solution_uo",
                                           "The SolutionUserObject to extract data from.");
   params.addRequiredParam<VariableName>(

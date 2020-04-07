@@ -2,11 +2,6 @@
 
 #include "OneDNodalBC.h"
 
-class OneDAreaTimesConstantBC;
-
-template <>
-InputParameters validParams<OneDAreaTimesConstantBC>();
-
 /**
  *
  */
@@ -20,4 +15,7 @@ protected:
 
   const Real & _value;
   const VariableValue & _area;
+
+public:
+  static InputParameters validParams();
 };

@@ -2,11 +2,6 @@
 
 #include "Component.h"
 
-class GeometricalComponent;
-
-template <>
-InputParameters validParams<GeometricalComponent>();
-
 /**
  * Intermediate class for all geometrical components (i.e components that have position, direction,
  * etc. in space - they generate a mesh)
@@ -147,4 +142,7 @@ private:
   void placeLocalNodeLocations(Real start_length,
                                unsigned int start_node,
                                std::vector<Real> & local_node_locations);
+
+public:
+  static InputParameters validParams();
 };

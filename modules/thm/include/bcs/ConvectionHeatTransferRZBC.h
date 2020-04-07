@@ -3,11 +3,6 @@
 #include "ConvectionHeatTransferBC.h"
 #include "RZSymmetry.h"
 
-class ConvectionHeatTransferRZBC;
-
-template <>
-InputParameters validParams<ConvectionHeatTransferRZBC>();
-
 /**
  * Convection BC for RZ domain in XY coordinate system
  */
@@ -19,4 +14,7 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+
+public:
+  static InputParameters validParams();
 };

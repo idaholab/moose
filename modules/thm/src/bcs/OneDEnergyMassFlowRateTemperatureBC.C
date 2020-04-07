@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDEnergyMassFlowRateTemperatureBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyMassFlowRateTemperatureBC>()
+OneDEnergyMassFlowRateTemperatureBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addRequiredParam<Real>("m_dot", "The specified mass flow rate value.");
   params.addRequiredParam<Real>("T", "The specified temperature value.");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction");

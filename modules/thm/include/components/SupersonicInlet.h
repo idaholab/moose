@@ -2,11 +2,6 @@
 
 #include "FlowBoundary.h"
 
-class SupersonicInlet;
-
-template <>
-InputParameters validParams<SupersonicInlet>();
-
 /**
  *
  */
@@ -19,4 +14,7 @@ public:
 
 protected:
   virtual void check() const override;
+
+public:
+  static InputParameters validParams();
 };

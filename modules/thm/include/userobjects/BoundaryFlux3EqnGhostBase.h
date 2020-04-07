@@ -2,11 +2,7 @@
 
 #include "BoundaryFluxBase.h"
 
-class BoundaryFlux3EqnGhostBase;
 class NumericalFlux3EqnBase;
-
-template <>
-InputParameters validParams<BoundaryFlux3EqnGhostBase>();
 
 /**
  * Computes boundary fluxes for the 1-D, variable-area Euler equations using a
@@ -52,4 +48,7 @@ protected:
   const NumericalFlux3EqnBase & _numerical_flux;
   /// Outward normal
   const Real & _normal;
+
+public:
+  static InputParameters validParams();
 };

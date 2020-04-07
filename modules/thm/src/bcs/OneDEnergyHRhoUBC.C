@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", OneDEnergyHRhoUBC);
 
-template <>
 InputParameters
-validParams<OneDEnergyHRhoUBC>()
+OneDEnergyHRhoUBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction");
   params.addRequiredParam<Real>("H", "Specified enthalpy");
   params.addRequiredParam<Real>("rhou", "Specified momentum");

@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", HSBoundaryRadiation);
 
-template <>
 InputParameters
-validParams<HSBoundaryRadiation>()
+HSBoundaryRadiation::validParams()
 {
-  InputParameters params = validParams<HSBoundary>();
+  InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<Real>("emissivity", "Emissivity of flow channel [-]");
   params.addParam<FunctionName>("view_factor", "1", "View factor function [-]");

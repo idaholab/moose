@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", TimeFunctionControl);
 
-template <>
 InputParameters
-validParams<TimeFunctionControl>()
+TimeFunctionControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("component",
                                        "The name of the component we will be controlling.");
   params.addRequiredParam<std::string>(

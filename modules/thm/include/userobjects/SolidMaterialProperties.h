@@ -3,11 +3,6 @@
 #include "GeneralUserObject.h"
 #include "Function.h"
 
-class SolidMaterialProperties;
-
-template <>
-InputParameters validParams<SolidMaterialProperties>();
-
 /**
  *
  */
@@ -32,4 +27,7 @@ protected:
   const Function & _k;
   const Function & _Cp;
   const Function & _rho;
+
+public:
+  static InputParameters validParams();
 };

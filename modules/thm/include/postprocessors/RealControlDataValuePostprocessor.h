@@ -3,11 +3,7 @@
 #include "GeneralPostprocessor.h"
 #include "ControlData.h"
 
-class RealControlDataValuePostprocessor;
 class THMProblem;
-
-template <>
-InputParameters validParams<RealControlDataValuePostprocessor>();
 
 /**
  * Reads a control value data and prints it out
@@ -27,4 +23,7 @@ protected:
   const std::string & _control_data_name;
   /// The value of the control data
   const ControlData<Real> * _control_data_value;
+
+public:
+  static InputParameters validParams();
 };

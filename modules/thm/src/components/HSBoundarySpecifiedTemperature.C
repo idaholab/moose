@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", HSBoundarySpecifiedTemperature);
 
-template <>
 InputParameters
-validParams<HSBoundarySpecifiedTemperature>()
+HSBoundarySpecifiedTemperature::validParams()
 {
-  InputParameters params = validParams<HSBoundary>();
+  InputParameters params = HSBoundary::validParams();
 
   params.addRequiredParam<FunctionName>("T", "Prescribed temperature [K]");
 

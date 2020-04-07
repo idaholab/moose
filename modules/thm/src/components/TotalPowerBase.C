@@ -1,10 +1,9 @@
 #include "TotalPowerBase.h"
 
-template <>
 InputParameters
-validParams<TotalPowerBase>()
+TotalPowerBase::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   return params;
 }
 

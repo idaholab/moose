@@ -3,12 +3,11 @@
 
 registerMooseObject("THMApp", HeatRateRadiationRZ);
 
-template <>
 InputParameters
-validParams<HeatRateRadiationRZ>()
+HeatRateRadiationRZ::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
+  params += RZSymmetry::validParams();
 
   params.addRequiredCoupledVar("T", "Temperature");
   params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature");

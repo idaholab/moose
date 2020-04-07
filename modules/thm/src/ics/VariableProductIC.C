@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", VariableProductIC);
 
-template <>
 InputParameters
-validParams<VariableProductIC>()
+VariableProductIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredCoupledVar("values", "The values being multiplied");
   return params;
 }

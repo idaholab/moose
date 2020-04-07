@@ -3,11 +3,7 @@
 #include "ScalarKernel.h"
 #include "Assembly.h"
 
-class VolumeJunctionAdvectionScalarKernel;
 class VolumeJunctionBaseUserObject;
-
-template <>
-InputParameters validParams<VolumeJunctionAdvectionScalarKernel>();
 
 /**
  * Adds advective fluxes for the junction variables for a volume junction
@@ -27,4 +23,7 @@ protected:
 
   /// Volume junction user object
   const VolumeJunctionBaseUserObject & _volume_junction_uo;
+
+public:
+  static InputParameters validParams();
 };

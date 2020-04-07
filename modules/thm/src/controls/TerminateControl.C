@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", TerminateControl);
 
-template <>
 InputParameters
-validParams<TerminateControl>()
+TerminateControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>(
       "input", "The name of boolean control data indicating if simulation should be terminated.");
   params.addParam<bool>("throw_error", false, "Flag to throw an error on termination");

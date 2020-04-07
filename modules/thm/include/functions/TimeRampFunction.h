@@ -2,11 +2,6 @@
 
 #include "Function.h"
 
-class TimeRampFunction;
-
-template <>
-InputParameters validParams<TimeRampFunction>();
-
 /**
  * Ramps up to a value from another value over time.
  *
@@ -37,4 +32,7 @@ protected:
   const Real _ramp_end_time;
   /// Ramp slope
   const Real _ramp_slope;
+
+public:
+  static InputParameters validParams();
 };

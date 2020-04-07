@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", HeatConductionRZ);
 
-template <>
 InputParameters
-validParams<HeatConductionRZ>()
+HeatConductionRZ::validParams()
 {
-  InputParameters params = validParams<HeatConductionKernel>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = HeatConductionKernel::validParams();
+  params += RZSymmetry::validParams();
   return params;
 }
 

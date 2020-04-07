@@ -3,11 +3,7 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-class OneD3EqnMomentumFormLoss;
 class Function;
-
-template <>
-InputParameters validParams<OneD3EqnMomentumFormLoss>();
 
 /**
  * Computes the force per unit length due to form loss, provided a form
@@ -43,4 +39,7 @@ protected:
   unsigned int _arhoA_var_number;
   unsigned int _arhouA_var_number;
   unsigned int _arhoEA_var_number;
+
+public:
+  static InputParameters validParams();
 };

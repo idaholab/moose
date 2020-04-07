@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", THMSpecificVolumeAux);
 
-template <>
 InputParameters
-validParams<THMSpecificVolumeAux>()
+THMSpecificVolumeAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("rhoA",
                                "Density of the phase (conserved), \alpha \rho A for 2-phase model");
   params.addRequiredCoupledVar("A", "Cross-sectional area");

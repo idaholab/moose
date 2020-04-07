@@ -1,11 +1,10 @@
 #include "BoundaryFlux3EqnGhostBase.h"
 #include "NumericalFlux3EqnBase.h"
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostBase>()
+BoundaryFlux3EqnGhostBase::validParams()
 {
-  InputParameters params = validParams<BoundaryFluxBase>();
+  InputParameters params = BoundaryFluxBase::validParams();
 
   params.addClassDescription("Computes boundary fluxes for the 1-D, variable-area Euler equations "
                              "using a numerical flux user object and a ghost cell solution");

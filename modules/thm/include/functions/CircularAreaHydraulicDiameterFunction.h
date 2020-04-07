@@ -3,11 +3,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class CircularAreaHydraulicDiameterFunction;
-
-template <>
-InputParameters validParams<CircularAreaHydraulicDiameterFunction>();
-
 /**
  * Computes hydraulic diameter for a circular area from its area function
  */
@@ -22,4 +17,7 @@ public:
 protected:
   /// Area function
   const Function & _area_function;
+
+public:
+  static InputParameters validParams();
 };

@@ -1,10 +1,9 @@
 #include "ConnectorBase.h"
 
-template <>
 InputParameters
-validParams<ConnectorBase>()
+ConnectorBase::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   return params;
 }
 

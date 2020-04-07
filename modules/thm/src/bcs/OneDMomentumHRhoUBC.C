@@ -3,11 +3,10 @@
 
 registerMooseObject("THMApp", OneDMomentumHRhoUBC);
 
-template <>
 InputParameters
-validParams<OneDMomentumHRhoUBC>()
+OneDMomentumHRhoUBC::validParams()
 {
-  InputParameters params = validParams<OneDIntegratedBC>();
+  InputParameters params = OneDIntegratedBC::validParams();
   params.addParam<bool>("is_liquid", true, "true for liquid, false for vapor");
   params.addRequiredParam<Real>("rhou", "Specified momentum");
 

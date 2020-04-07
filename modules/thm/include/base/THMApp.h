@@ -3,7 +3,6 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 
-class THMApp;
 class FluidProperties;
 class Simulation;
 
@@ -36,9 +35,6 @@ extern FlowModelID FM_TWO_PHASE_NCG;
 static const size_t MAX_VARIABLE_LENGTH = 31;
 
 }
-
-template <>
-InputParameters validParams<THMApp>();
 
 class THMApp : public MooseApp
 {
@@ -77,8 +73,11 @@ public:
    */
   const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
 
+public:
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
+
+  static InputParameters validParams();
 
 protected:
   /// Map from flow model ID to map of closures option to its class

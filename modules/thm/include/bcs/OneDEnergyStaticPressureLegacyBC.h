@@ -3,12 +3,6 @@
 #include "OneDIntegratedBC.h"
 #include "DerivativeMaterialInterfaceTHM.h"
 
-// Forward Declarations
-class OneDEnergyStaticPressureLegacyBC;
-
-template <>
-InputParameters validParams<OneDEnergyStaticPressureLegacyBC>();
-
 /**
  *
  */
@@ -41,4 +35,7 @@ protected:
   // Required parameters
   /// the desired input static pressure
   const Real & _p_in;
+
+public:
+  static InputParameters validParams();
 };

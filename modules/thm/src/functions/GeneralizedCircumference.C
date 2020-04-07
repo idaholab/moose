@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", GeneralizedCircumference);
 
-template <>
 InputParameters
-validParams<GeneralizedCircumference>()
+GeneralizedCircumference::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addRequiredParam<FunctionName>("area_function", "function to compute the cross section");
   return params;
 }

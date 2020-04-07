@@ -3,11 +3,10 @@
 #include "FlowModelTwoPhase.h"
 #include "HeatConductionModel.h"
 
-template <>
 InputParameters
-validParams<HeatTransferFromTemperature1Phase>()
+HeatTransferFromTemperature1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransfer1PhaseBase>();
+  InputParameters params = HeatTransfer1PhaseBase::validParams();
   return params;
 }
 

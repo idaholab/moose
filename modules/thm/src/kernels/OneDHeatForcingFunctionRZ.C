@@ -2,12 +2,11 @@
 
 registerMooseObject("THMApp", OneDHeatForcingFunctionRZ);
 
-template <>
 InputParameters
-validParams<OneDHeatForcingFunctionRZ>()
+OneDHeatForcingFunctionRZ::validParams()
 {
-  InputParameters params = validParams<OneDHeatForcingFunction>();
-  params += validParams<RZSymmetry>();
+  InputParameters params = OneDHeatForcingFunction::validParams();
+  params += RZSymmetry::validParams();
   return params;
 }
 

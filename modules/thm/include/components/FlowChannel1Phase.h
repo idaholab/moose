@@ -2,11 +2,7 @@
 
 #include "FlowChannelBase.h"
 
-class FlowChannel1Phase;
 class ClosuresBase;
-
-template <>
-InputParameters validParams<FlowChannel1Phase>();
 
 /**
  * A class representing a 1-phase flow channel
@@ -37,4 +33,7 @@ protected:
 
   /// 1-phase wall heat transfer coefficient names for connected heat transfers
   std::vector<MaterialPropertyName> _Hw_1phase_names;
+
+public:
+  static InputParameters validParams();
 };

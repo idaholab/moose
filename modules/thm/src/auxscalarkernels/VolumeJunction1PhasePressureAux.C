@@ -4,11 +4,10 @@
 
 registerMooseObject("THMApp", VolumeJunction1PhasePressureAux);
 
-template <>
 InputParameters
-validParams<VolumeJunction1PhasePressureAux>()
+VolumeJunction1PhasePressureAux::validParams()
 {
-  InputParameters params = validParams<AuxScalarKernel>();
+  InputParameters params = AuxScalarKernel::validParams();
   params.addRequiredParam<Real>("volume", "Volume of the junction");
   params.addRequiredCoupledVar("rhoV", "rho*V of the junction");
   params.addRequiredCoupledVar("rhouV", "rho*u*V of the junction");

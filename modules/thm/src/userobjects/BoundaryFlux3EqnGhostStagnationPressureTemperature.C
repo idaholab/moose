@@ -5,11 +5,10 @@
 
 registerMooseObject("THMApp", BoundaryFlux3EqnGhostStagnationPressureTemperature);
 
-template <>
 InputParameters
-validParams<BoundaryFlux3EqnGhostStagnationPressureTemperature>()
+BoundaryFlux3EqnGhostStagnationPressureTemperature::validParams()
 {
-  InputParameters params = validParams<BoundaryFlux3EqnGhostBase>();
+  InputParameters params = BoundaryFlux3EqnGhostBase::validParams();
 
   params.addClassDescription("Computes boundary flux from a specified stagnation pressure and "
                              "temperature for the 1-D, 1-phase, variable-area Euler equations");

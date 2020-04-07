@@ -2,11 +2,10 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowChannel1Phase.h"
 
-template <>
 InputParameters
-validParams<FormLoss1PhaseBase>()
+FormLoss1PhaseBase::validParams()
 {
-  InputParameters params = validParams<Component>();
+  InputParameters params = Component::validParams();
   params.addRequiredParam<std::string>("flow_channel",
                                        "Flow channel where form loss will be applied");
   params.addClassDescription("Base class for prescribing a form loss over a 1-phase flow channel");

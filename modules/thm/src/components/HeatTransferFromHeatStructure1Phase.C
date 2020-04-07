@@ -7,12 +7,11 @@
 
 registerMooseObject("THMApp", HeatTransferFromHeatStructure1Phase);
 
-template <>
 InputParameters
-validParams<HeatTransferFromHeatStructure1Phase>()
+HeatTransferFromHeatStructure1Phase::validParams()
 {
-  InputParameters params = validParams<HeatTransferFromTemperature1Phase>();
-  params += validParams<HSBoundaryInterface>();
+  InputParameters params = HeatTransferFromTemperature1Phase::validParams();
+  params += HSBoundaryInterface::validParams();
 
   params.addClassDescription("Connects a 1-phase flow channel and a heat structure");
 

@@ -2,11 +2,6 @@
 
 #include "ODETimeDerivative.h"
 
-class ODECoefTimeDerivative;
-
-template <>
-InputParameters validParams<ODECoefTimeDerivative>();
-
 /**
  * Time derivative multiplied by a coefficient for ODEs
  */
@@ -21,4 +16,7 @@ protected:
 
   /// Coefficient that the time derivative terms is multiplied with
   const Real & _coef;
+
+public:
+  static InputParameters validParams();
 };

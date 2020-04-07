@@ -4,11 +4,6 @@
 #include "HSBoundaryInterface.h"
 #include "FlowChannelAlignment.h"
 
-class HeatTransferFromHeatStructure1Phase;
-
-template <>
-InputParameters validParams<HeatTransferFromHeatStructure1Phase>();
-
 /**
  * Connects a 1-phase flow channel and a heat structure
  */
@@ -39,4 +34,7 @@ protected:
   const BoundaryName & getSlaveSideName() const;
 
   FlowChannelAlignment _fch_alignment;
+
+public:
+  static InputParameters validParams();
 };

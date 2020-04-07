@@ -1,10 +1,9 @@
 #include "NumericalFlux3EqnBase.h"
 
-template <>
 InputParameters
-validParams<NumericalFlux3EqnBase>()
+NumericalFlux3EqnBase::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   return params;
 }
 

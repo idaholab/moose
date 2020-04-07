@@ -2,11 +2,10 @@
 
 registerMooseObject("THMApp", PIDControl);
 
-template <>
 InputParameters
-validParams<PIDControl>()
+PIDControl::validParams()
 {
-  InputParameters params = validParams<THMControl>();
+  InputParameters params = THMControl::validParams();
   params.addRequiredParam<std::string>("input", "The name of the control data that we read in.");
   params.addRequiredParam<std::string>("set_point",
                                        "The name of the control data with the set point.");
