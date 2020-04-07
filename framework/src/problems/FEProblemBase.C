@@ -336,6 +336,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
 {
+  //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
+  //  things that we setup early in the simulation actually get their derivative vectors initalized.
+  //  We will toggle this to false when doing residual evaluations
+  ADReal::do_derivatives = true;
+
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -4908,9 +4913,11 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
 {
   TIME_SECTION(_compute_residual_sys_timer);
 
-  MetaPhysicL::DualNumber<Real, DNDerivativeType, true>::do_derivatives = false;
+  ADReal::do_derivatives = false;
 
   computeResidual(soln, residual);
+
+  ADReal::do_derivatives = true;
 }
 
 void
@@ -5150,8 +5157,6 @@ FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & /*sys*/,
                                   const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian)
 {
-  MetaPhysicL::DualNumber<Real, DNDerivativeType, true>::do_derivatives = true;
-
   computeJacobian(soln, jacobian);
 }
 
