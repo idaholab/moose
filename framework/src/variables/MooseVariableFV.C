@@ -278,9 +278,27 @@ void
 MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
 {
   _element_data->setGeometry(Moose::Face);
-  _element_data->computeValuesFace(fi);
   _neighbor_data->setGeometry(Moose::Face);
-  _neighbor_data->computeValuesFace(fi);
+
+  auto facetype = fi.faceType(_var_name);
+  if (facetype == FaceInfo::VarFaceNeighbors::NEITHER)
+    return;
+  else if (facetype == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    _element_data->computeValuesFace(fi);
+    _neighbor_data->computeValuesFace(fi);
+  }
+  else if (facetype == FaceInfo::VarFaceNeighbors::LEFT)
+  {
+    _element_data->computeValuesFace(fi);
+    _neighbor_data->computeGhostValuesFace(fi, *_element_data);
+  }
+  else if (facetype == FaceInfo::VarFaceNeighbors::RIGHT)
+  {
+    _neighbor_data->computeValuesFace(fi);
+    _element_data->computeGhostValuesFace(fi, *_neighbor_data);
+  }
+  mooseError("robert wrote broken code");
 }
 
 template <typename OutputType>
@@ -296,7 +314,7 @@ MooseVariableFV<OutputType>::getValue(const Elem * elem) const
 
 template <typename OutputType>
 typename OutputTools<OutputType>::OutputGradient
-MooseVariableFV<OutputType>::getGradient(const Elem * elem) const
+MooseVariableFV<OutputType>::getGradient(const Elem * /*elem*/) const
 {
   return {};
 }

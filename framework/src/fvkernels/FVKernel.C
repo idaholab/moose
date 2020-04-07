@@ -38,6 +38,8 @@ FVKernel::validParams()
   return params;
 }
 
+#include "ComputeFVFaceResidualsThread.h"
+
 FVKernel::FVKernel(const InputParameters & params)
   : MooseObject(params),
     TaggingInterface(this),

@@ -12,9 +12,11 @@
 #include "MooseError.h"
 #include "DisplacedSystem.h"
 #include "TimeIntegrator.h"
-#include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "MooseTypes.h"
-#include "ComputeFVFluxThread.h" // TODO: change this once FaceInfo is placed in its own file
+#include "MooseMesh.h"
+#include "Attributes.h"
+#include "FVDirichletBC.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -495,6 +497,38 @@ MooseVariableDataFV<OutputType>::initializeSolnVars()
 
 template <typename OutputType>
 void
+MooseVariableDataFV<OutputType>::computeGhostValuesFace(
+    const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face)
+{
+  initializeSolnVars();
+  auto & u_other = other_face.sln(Moose::Current);
+
+  std::vector<FVDirichletBC *> bcs;
+
+  // TODO: this query probably (maybe?)needs to also filter based on the
+  // active tags - these currently live in the flux thread loop object and I'm
+  // not sure how best to get them here.
+  _subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVBoundaryCondition")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribBoundaries>(fi.boundaryIDs())
+      .template condition<AttribVar>(_var_num)
+      .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
+      .queryInto(bcs);
+  mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
+  if (bcs.size() == 0)
+    return;
+
+  auto bc = bcs[0];
+  auto u_face = bc->boundaryValue(fi);
+  _u[0] = 2 * u_face - u_other[0];
+  // TODO: what do we do for _grad_u?
+}
+
+template <typename OutputType>
+void
 MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
@@ -505,7 +539,7 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   // method used here?  After reconstruction, we should cache the computed
   // soln/gradients per element so we don't have to recompute them again for
   // other faces that share an element with this face.
-  computeValues(true);
+  computeValues();
 
   // TODO: this code should go away once we have a real reconstruction
   // routine. - or maybe this becomes a separate _grad_u_interface that is
@@ -529,7 +563,7 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
 
 template <typename OutputType>
 void
-MooseVariableDataFV<OutputType>::computeValues(bool force)
+MooseVariableDataFV<OutputType>::computeValues()
 {
   initDofIndices();
 
@@ -1133,4 +1167,7 @@ MooseVariableDataFV<RealVectorValue>::adDofValues<RESIDUAL>() const
 }
 
 template class MooseVariableDataFV<Real>;
-template class MooseVariableDataFV<RealVectorValue>;
+// TODO: implement vector fv variable support. This will require some template
+// specializations for various member functions in this and the FV variable
+// classes. And then you will need to uncomment out the line below:
+// template class MooseVariableDataFV<RealVectorValue>;

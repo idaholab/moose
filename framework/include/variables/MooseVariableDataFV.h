@@ -18,6 +18,7 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_type.h"
+#include "libmesh/dof_map.h"
 #include "DualRealOps.h"
 
 #include <functional>
@@ -74,10 +75,12 @@ public:
    */
   void computeValuesFace(const FaceInfo & fi);
 
+  void computeGhostValuesFace(const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face);
+
   /**
    * compute the variable values
    */
-  void computeValues(bool force = false);
+  void computeValues();
 
   /**
    * compute AD things
