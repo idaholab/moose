@@ -112,7 +112,7 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
 
 template <>
 void
-FVFluxKernel<RESIDUAL>::computeJacobian(const FaceInfo & fi)
+FVFluxKernel<RESIDUAL>::computeJacobian(const FaceInfo & /*fi*/)
 {
 }
 
@@ -124,7 +124,6 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   _normal = fi.normal();
   DualReal r = fi.faceArea() * computeQpResidual();
 
-  unsigned int ad_offset = 0;
   auto & sys = _subproblem.systemBaseNonlinear();
   unsigned int dofs_per_elem = sys.getMaxVarNDofsPerElem();
   unsigned int var_num = _var.number();
