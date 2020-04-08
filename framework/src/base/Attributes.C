@@ -26,6 +26,7 @@
 #include "ShapeSideUserObject.h"
 #include "ShapeElementUserObject.h"
 #include "FVKernel.h"
+#include "FVDirichletBC.h"
 
 std::ostream &
 operator<<(std::ostream & os, Interfaces & iface)
@@ -221,12 +222,14 @@ AttribBoundaries::isMatch(const Attribute & other) const
   if (!a || a->_vals.size() < 1)
     return false;
 
-  auto cond = a->_vals[0];
-  if (cond == Moose::ANY_BOUNDARY_ID)
-    return true;
-  for (auto id : _vals)
+  // return true if a single tag matches between the two attribute objects
+  for (auto val : _vals)
   {
-    if (id == cond || (!a->_must_be_restricted && (id == Moose::ANY_BOUNDARY_ID)))
+    if (!a->_must_be_restricted && (val == Moose::ANY_BOUNDARY_ID))
+      return true;
+    if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
+      return true;
+    else if (std::find(a->_vals.begin(), a->_vals.end(), Moose::ANY_BOUNDARY_ID) != a->_vals.end())
       return true;
   }
   return false;
@@ -392,6 +395,8 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::Postprocessor             * (dynamic_cast<const Postprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::FVFluxKernel              * (dynamic_cast<const FVFluxKernelBase *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVDirichletBC             * (dynamic_cast<const FVDirichletBC *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVFluxBC                  * (dynamic_cast<const FVFluxBC *>(obj) != nullptr);
   // clang-format on
 }
 
