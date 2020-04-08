@@ -159,7 +159,6 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       for (faceinfo = range.begin(); faceinfo != range.end(); ++faceinfo)
       {
         const Elem & elem = faceinfo->leftElem();
-        unsigned int side = faceinfo->leftSideID();
 
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
