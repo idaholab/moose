@@ -44,16 +44,18 @@ FVFluxBC<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto ft = fi.faceType(_var.name());
 
-  // We always want the normal to point outward on boundaries
-  // so we flip it if this variabele is defined on the right side
-  // of the face
+  // We always want the normal to point outward on boundaries so we flip it if
+  // this variable is defined on the right side of the face (instead of left)
+  // since the FaceInfo normal polarity is always left-elem oriented.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
 
-  // compute the residual contribution and immediately multiply
-  // by face area
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
+  // This could be an "internal" boundary - one created by variable block
+  // restriction where the var is only defined on one side of the face.  We
+  // need to make sure that we add the residual contribution to the correct
+  // side - the one where the variable is defined.
   if (ft == FaceInfo::VarFaceNeighbors::LEFT)
     prepareVectorTag(_assembly, _var.number());
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
@@ -77,6 +79,14 @@ FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
+  auto ft = fi.faceType(_var.name());
+
+  // We always want the normal to point outward on boundaries so we flip it if
+  // this variable is defined on the right side of the face (instead of left)
+  // since the FaceInfo normal polarity is always left-elem oriented.
+  if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
+    _normal = -_normal;
+
   DualReal r = fi.faceArea() * computeQpResidual();
 
   auto & sys = _subproblem.systemBaseNonlinear();
@@ -84,13 +94,32 @@ FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
   unsigned int var_num = _var.number();
   unsigned int nvars = sys.system().n_vars();
 
-  auto ft = fi.faceType(_var.name());
-  prepareMatrixTag(_assembly, var_num, var_num);
+  // This could be an "internal" boundary - one created by variable block
+  // restriction where the var is only defined on one side of the face.  We
+  // need to make sure that we add the residual contribution to the correct
+  // side - the one where the variable is defined.
   if (ft == FaceInfo::VarFaceNeighbors::LEFT)
+  {
+    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
+    accumulateTaggedLocalMatrix();
+
+    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
+    _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
+    accumulateTaggedLocalMatrix();
+  }
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
-    _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
-  accumulateTaggedLocalMatrix();
+  {
+    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
+    _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
+    accumulateTaggedLocalMatrix();
+
+    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
+    _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
+    accumulateTaggedLocalMatrix();
+  }
+  else
+    mooseError("should never get here");
 }
 
 adBaseClass(FVFluxBC);
