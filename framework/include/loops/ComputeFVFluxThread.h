@@ -321,51 +321,6 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 
 template <typename RangeType>
 void
-ComputeFVFluxThread<RangeType>::post()
-{
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  if (_do_jacobian)
-    _fe_problem.addCachedJacobian(_tid);
-  else
-    _fe_problem.addCachedResidual(_tid);
-
-  _fe_problem.clearActiveElementalMooseVariables(_tid);
-  _fe_problem.clearActiveMaterialProperties(_tid);
-}
-
-template <typename RangeType>
-void
-ComputeFVFluxThread<RangeType>::postFace(const FaceInfo & /*fi*/)
-{
-  _num_cached++;
-  if (_do_jacobian)
-  {
-    // TODO: do we need both calls - or just the neighbor one? - confirm this
-    _fe_problem.cacheJacobian(_tid);
-    _fe_problem.cacheJacobianNeighbor(_tid);
-
-    if (_num_cached % 20 == 0)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addCachedJacobian(_tid);
-    }
-  }
-  else
-  {
-    // TODO: do we need both calls - or just the neighbor one? - confirm this
-    _fe_problem.cacheResidual(_tid);
-    _fe_problem.cacheResidualNeighbor(_tid);
-
-    if (_num_cached % 20 == 0)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      _fe_problem.addCachedResidual(_tid);
-    }
-  }
-}
-
-template <typename RangeType>
-void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
   std::vector<FVFluxKernelBase *> kernels;
@@ -429,6 +384,51 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       bc->computeJacobian(fi);
     else
       bc->computeResidual(fi);
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::postFace(const FaceInfo & /*fi*/)
+{
+  _num_cached++;
+  if (_do_jacobian)
+  {
+    // TODO: do we need both calls - or just the neighbor one? - confirm this
+    _fe_problem.cacheJacobian(_tid);
+    _fe_problem.cacheJacobianNeighbor(_tid);
+
+    if (_num_cached % 20 == 0)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addCachedJacobian(_tid);
+    }
+  }
+  else
+  {
+    // TODO: do we need both calls - or just the neighbor one? - confirm this
+    _fe_problem.cacheResidual(_tid);
+    _fe_problem.cacheResidualNeighbor(_tid);
+
+    if (_num_cached % 20 == 0)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addCachedResidual(_tid);
+    }
+  }
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::post()
+{
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  if (_do_jacobian)
+    _fe_problem.addCachedJacobian(_tid);
+  else
+    _fe_problem.addCachedResidual(_tid);
+
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 template <typename RangeType>
