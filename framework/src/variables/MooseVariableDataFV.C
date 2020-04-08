@@ -519,7 +519,7 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   auto & soln = *_sys.currentSolution();
   auto uleft = soln(fi.leftDofIndices(_var_num)[0]);
   auto uright = soln(fi.rightDofIndices(_var_num)[0]);
-  _grad_u[0] = (uright - uleft) / ((fi.rightCentroid() - fi.leftCentroid()).norm());
+  _grad_u[0] = fi.normal() * (uright - uleft) / ((fi.rightCentroid() - fi.leftCentroid()).norm());
 
   // TODO: figure out how to store old/older values of reconstructed
   // solutions/gradient states without having to re-reconstruct them from
@@ -1083,6 +1083,7 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::prepareIC()
 {
+  // TODO: implement this function
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   _dof_values.resize(_dof_indices.size());
 
