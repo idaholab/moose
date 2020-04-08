@@ -57,6 +57,8 @@ public:
   void join(const ThreadedFaceLoop & /*y*/){};
 
   virtual void onFace(const FaceInfo & fi) = 0;
+  virtual void postFace(const FaceInfo & fi) {}
+  virtual void post() {}
 
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) = 0;
 
@@ -169,6 +171,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         // get elem's face residual contribution to it's neighbor
         onFace(*faceinfo);
+        postFace(*faceinfo);
 
         // boundary faces only border one element and so only contribute to
         // one element's residual
@@ -176,6 +179,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         for (auto it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(*faceinfo, *it);
       } // range
+      post();
     }
     catch (libMesh::LogicError & e)
     {
@@ -202,6 +206,8 @@ public:
   virtual ~ComputeFVFluxThread();
 
   virtual void onFace(const FaceInfo & fi) override;
+  virtual void postFace(const FaceInfo & fi) override;
+  virtual void post() override;
 
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) override;
 
@@ -212,6 +218,7 @@ private:
 
   std::set<MooseVariableFVBase *> _needed_fv_vars;
   const bool _do_jacobian;
+  unsigned int _num_cached = 0;
 
   using ThreadedFaceLoop<RangeType>::_fe_problem;
   using ThreadedFaceLoop<RangeType>::_mesh;
@@ -285,6 +292,51 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
     _fe_problem.swapBackMaterialsNeighbor(_tid);
   };
   return OnScopeExit(fn);
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::post()
+{
+  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  if (_do_jacobian)
+    _fe_problem.addCachedJacobian(_tid);
+  else
+    _fe_problem.addCachedResidual(_tid);
+
+  _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
+}
+
+template <typename RangeType>
+void
+ComputeFVFluxThread<RangeType>::postFace(const FaceInfo & fi)
+{
+  _num_cached++;
+  if (_do_jacobian)
+  {
+    // TODO: do we need both calls - or just the neighbor one? - confirm this
+    _fe_problem.cacheJacobian(_tid);
+    _fe_problem.cacheJacobianNeighbor(_tid);
+
+    if (_num_cached % 20 == 0)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addCachedJacobian(_tid);
+    }
+  }
+  else
+  {
+    // TODO: do we need both calls - or just the neighbor one? - confirm this
+    _fe_problem.cacheResidual(_tid);
+    _fe_problem.cacheResidualNeighbor(_tid);
+
+    if (_num_cached % 20 == 0)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addCachedResidual(_tid);
+    }
+  }
 }
 
 template <typename RangeType>
