@@ -83,10 +83,10 @@ xxxxx  ny = 10
 xxxxx[]
 xxxxx
 xxxxx[Kernels]
-xxxxx  [./diff]
+xxxxx  [diff]
 xxxxx    type = Diffusion
 xxxxx    variable = u
-xxxxx  [../]
+xxxxx  []
 xxxxx[]
 </code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</a><div class="modal moose-modal" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><div class="modal-content"><h4>${MOOSE_DIR}/test/tests/kernels/simple_diffusion/simple_diffusion.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
@@ -96,30 +96,30 @@ xxxxx[]
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -133,10 +133,10 @@ xxxxx[]
   exodus = true
 []
 </code></pre></div><div class="modal-footer"><a class="modal-close btn-flat">Close</a></div></div><pre class="moose-pre"><code class="language-text">[AuxKernels]
-    [./diff]
+    [diff]
       type = Diffusion
       variable = u
-    [../]
+    []
 [./]</code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(test/tests/kernels/simple_diffusion/simple_diffusion.i)</a><div class="modal moose-modal" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><div class="modal-content"><h4>${MOOSE_DIR}/test/tests/kernels/simple_diffusion/simple_diffusion.i</h4><pre class="moose-pre"><code class="language-text">[Mesh]
   type = GeneratedMesh
   dim = 2
@@ -145,30 +145,30 @@ xxxxx[]
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
