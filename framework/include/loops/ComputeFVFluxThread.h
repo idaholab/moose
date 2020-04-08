@@ -164,20 +164,26 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         if (_subdomain != _old_subdomain)
           subdomainChanged();
 
-        _old_neighbor_subdomain = _neighbor_subdomain;
-        _neighbor_subdomain = faceinfo->rightElem().subdomain_id();
-        if (_neighbor_subdomain != _old_neighbor_subdomain)
-          neighborSubdomainChanged();
+        // the neighbor subdomain should only be updated if there is a neighbor
+        // onFace should not apply on domain boundary faces
+        if (faceinfo->rightElemPtr())
+        {
+          _old_neighbor_subdomain = _neighbor_subdomain;
+          _neighbor_subdomain = faceinfo->rightElem().subdomain_id();
+          if (_neighbor_subdomain != _old_neighbor_subdomain)
+            neighborSubdomainChanged();
 
-        // get elem's face residual contribution to it's neighbor
-        onFace(*faceinfo);
-        postFace(*faceinfo);
+          // get elem's face residual contribution to it's neighbor
+          onFace(*faceinfo);
+          postFace(*faceinfo);
+        }
 
         // boundary faces only border one element and so only contribute to
         // one element's residual
         std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(&elem, side);
         for (auto it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(*faceinfo, *it);
+
       } // range
       post();
     }
