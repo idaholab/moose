@@ -3,9 +3,7 @@
 #include "ElementIntegralPostprocessor.h"
 
 /**
- * Postprocessor to compute total heat flux going into the fluid
- *
- * This is used for debugging.
+ * Computes convective heat rate into a 1-phase flow channel
  */
 class HeatRateConvection1Phase : public ElementIntegralPostprocessor
 {
@@ -17,8 +15,9 @@ protected:
 
   /// Wall temperature
   const MaterialProperty<Real> & _T_wall;
-  const VariableValue & _Tfluid;
-  /// convective heat transfer coefficient, W/m^2-K
+  /// Fluid temperature
+  const MaterialProperty<Real> & _T;
+  /// Convective heat transfer coefficient, W/m^2-K
   const MaterialProperty<Real> & _Hw;
   /// Heat flux perimeter
   const VariableValue & _P_hf;

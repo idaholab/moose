@@ -286,7 +286,6 @@
 
 - /Problem/THMProblem
 
-- /Postprocessors/HeatRateConvection1Phase
 - /Postprocessors/BoolControlDataValuePostprocessor
 - /Postprocessors/CFLTimeStepSize1Phase
 - /Postprocessors/CFLTimeStepSize2Phase

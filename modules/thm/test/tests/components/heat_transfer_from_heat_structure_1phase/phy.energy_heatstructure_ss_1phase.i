@@ -133,7 +133,7 @@
     type = HeatRateConvection1Phase
     block = core:pipe
     T_wall = T_wall
-    Tfluid = T
+    T = T
     Hw = Hw
     P_hf = P_hf
     execute_on = 'initial timestep_end'
