@@ -5,6 +5,8 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
+#include "ComputeFVFluxThread.h"
+
 InputParameters
 FVKernel::validParams()
 {

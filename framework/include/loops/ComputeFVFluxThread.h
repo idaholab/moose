@@ -192,14 +192,14 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
  * Base class for assembly-like calculations.
  */
 template <typename RangeType>
-class ComputeFVFaceResidualsThread : public ThreadedFaceLoop<RangeType>
+class ComputeFVFluxThread : public ThreadedFaceLoop<RangeType>
 {
 public:
-  ComputeFVFaceResidualsThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ComputeFVFluxThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
 
-  ComputeFVFaceResidualsThread(ComputeFVFaceResidualsThread & x, Threads::split split);
+  ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split);
 
-  virtual ~ComputeFVFaceResidualsThread();
+  virtual ~ComputeFVFluxThread();
 
   virtual void onFace(const FaceInfo & fi) override;
 
@@ -211,6 +211,7 @@ private:
   OnScopeExit reinitVariables(const FaceInfo & fi);
 
   std::set<MooseVariableFVBase *> _needed_fv_vars;
+  const bool _do_jacobian;
 
   using ThreadedFaceLoop<RangeType>::_fe_problem;
   using ThreadedFaceLoop<RangeType>::_mesh;
@@ -220,27 +221,29 @@ private:
 };
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(FEProblemBase & fe_problem,
-                                                                      const std::set<TagID> & tags)
-  : ThreadedFaceLoop<RangeType>(fe_problem, tags)
+ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
+                                                    const std::set<TagID> & tags)
+  : ThreadedFaceLoop<RangeType>(fe_problem, tags),
+    _do_jacobian(fe_problem.currentlyComputingJacobian())
 {
 }
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::ComputeFVFaceResidualsThread(
-    ComputeFVFaceResidualsThread & x, Threads::split split)
-  : ThreadedFaceLoop<RangeType>(x, split), _needed_fv_vars(x._needed_fv_vars)
+ComputeFVFluxThread<RangeType>::ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split)
+  : ThreadedFaceLoop<RangeType>(x, split),
+    _needed_fv_vars(x._needed_fv_vars),
+    _do_jacobian(x._do_jacobian)
 {
 }
 
 template <typename RangeType>
-ComputeFVFaceResidualsThread<RangeType>::~ComputeFVFaceResidualsThread()
+ComputeFVFluxThread<RangeType>::~ComputeFVFluxThread()
 {
 }
 
 template <typename RangeType>
 OnScopeExit
-ComputeFVFaceResidualsThread<RangeType>::reinitVariables(const FaceInfo & fi)
+ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 {
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -278,7 +281,7 @@ ComputeFVFaceResidualsThread<RangeType>::reinitVariables(const FaceInfo & fi)
 
 template <typename RangeType>
 void
-ComputeFVFaceResidualsThread<RangeType>::onFace(const FaceInfo & fi)
+ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
@@ -305,12 +308,15 @@ ComputeFVFaceResidualsThread<RangeType>::onFace(const FaceInfo & fi)
   _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
 
   for (const auto k : kernels)
-    k->computeResidual(fi);
+    if (_do_jacobian)
+      k->computeResidual(fi);
+    else
+      k->computeJacobian(fi);
 }
 
 template <typename RangeType>
 void
-ComputeFVFaceResidualsThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
+ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
   std::vector<FVBoundaryCondition *> bcs;
   _fe_problem.theWarehouse()
@@ -332,11 +338,12 @@ ComputeFVFaceResidualsThread<RangeType>::onBoundary(const FaceInfo & fi, Boundar
 
   for (const auto & bc : bcs)
     /*TODO: implement FV BCs - so we can bc->computeResidual(); here*/;
+  // TODO: don't forget to add the if(_do_jacobian) logic too!
 }
 
 template <typename RangeType>
 void
-ComputeFVFaceResidualsThread<RangeType>::subdomainChanged()
+ComputeFVFluxThread<RangeType>::subdomainChanged()
 {
   _needed_fv_vars.clear();
   std::set<unsigned int> needed_mat_props;
@@ -373,4 +380,3 @@ ComputeFVFaceResidualsThread<RangeType>::subdomainChanged()
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
-

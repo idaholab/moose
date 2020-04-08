@@ -14,7 +14,7 @@
 #include "TimeIntegrator.h"
 #include "MooseVariableFE.h"
 #include "MooseTypes.h"
-#include "ComputeFVFaceResidualsThread.h" // TODO: change this once FaceInfo is placed in its own file
+#include "ComputeFVFluxThread.h" // TODO: change this once FaceInfo is placed in its own file
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"

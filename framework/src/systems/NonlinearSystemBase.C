@@ -19,6 +19,7 @@
 #include "ThreadedElementLoop.h"
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
+#include "ComputeFVFluxThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeJacobianForScalingThread.h"
 #include "ComputeFullJacobianThread.h"
@@ -1368,8 +1369,12 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
     ComputeResidualThread cr(_fe_problem, tags);
-
     Threads::parallel_reduce(elem_range, cr);
+
+    using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+    ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
+    FVRange faces(&_fe_problem.mesh().faceInfo());
+    Threads::parallel_reduce(faces, fvr);
 
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
@@ -2352,6 +2357,13 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
 
+        // the same loop works for both residual and jacobians because it keys
+        // off of FEProblem's _currently_computing_jacobian parameter
+        using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+        ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+        FVRange faces(&_fe_problem.mesh().faceInfo());
+        Threads::parallel_reduce(faces, fvj);
+
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any Jacobian contributions still hanging around
@@ -2378,6 +2390,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeFullJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
+
+        // TODO: insert code to compute full jacobian for FV variables
 
         for (unsigned int i = 0; i < n_threads; i++)
           _fe_problem.addCachedJacobian(i);
