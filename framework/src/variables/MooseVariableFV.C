@@ -341,4 +341,7 @@ MooseVariableFV<OutputType>::isVector() const
 }
 
 template class MooseVariableFV<Real>;
-template class MooseVariableFV<RealVectorValue>;
+// TODO: implement vector fv variable support. This will require some template
+// specializations for various member functions in this and the FV variable
+// classes. And then you will need to uncomment out the line below:
+//template class MooseVariableFV<RealVectorValue>;
