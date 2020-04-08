@@ -130,7 +130,7 @@
   [../]
 
   [./hf_pipe]
-    type = ElementHeatFluxPostprocessor
+    type = HeatRateConvection1Phase
     block = core:pipe
     T_wall = T_wall
     Tfluid = T

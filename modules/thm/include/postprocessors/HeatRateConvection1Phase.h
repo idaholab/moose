@@ -7,10 +7,10 @@
  *
  * This is used for debugging.
  */
-class ElementHeatFluxPostprocessor : public ElementIntegralPostprocessor
+class HeatRateConvection1Phase : public ElementIntegralPostprocessor
 {
 public:
-  ElementHeatFluxPostprocessor(const InputParameters & parameters);
+  HeatRateConvection1Phase(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();

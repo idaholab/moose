@@ -1,9 +1,9 @@
-#include "ElementHeatFluxPostprocessor.h"
+#include "HeatRateConvection1Phase.h"
 
-registerMooseObject("THMApp", ElementHeatFluxPostprocessor);
+registerMooseObject("THMApp", HeatRateConvection1Phase);
 
 InputParameters
-ElementHeatFluxPostprocessor::validParams()
+HeatRateConvection1Phase::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("T_wall", "Wall temperature");
@@ -14,7 +14,7 @@ ElementHeatFluxPostprocessor::validParams()
   return params;
 }
 
-ElementHeatFluxPostprocessor::ElementHeatFluxPostprocessor(const InputParameters & parameters)
+HeatRateConvection1Phase::HeatRateConvection1Phase(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _T_wall(getMaterialProperty<Real>("T_wall")),
     _Tfluid(coupledValue("Tfluid")),
@@ -24,7 +24,7 @@ ElementHeatFluxPostprocessor::ElementHeatFluxPostprocessor(const InputParameters
 }
 
 Real
-ElementHeatFluxPostprocessor::computeQpIntegral()
+HeatRateConvection1Phase::computeQpIntegral()
 {
   return -_Hw[_qp] * _P_hf[_qp] * (_Tfluid[_qp] - _T_wall[_qp]);
 }
