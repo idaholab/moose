@@ -340,7 +340,7 @@ AttribVar::initFrom(const MooseObject * obj)
 {
   auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj);
   if (vi)
-    _val = static_cast<int>(vi->mooseVariable()->number());
+    _val = static_cast<int>(vi->mooseVariableBase()->number());
 }
 bool
 AttribVar::isMatch(const Attribute & other) const
