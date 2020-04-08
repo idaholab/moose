@@ -139,7 +139,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
   std::vector<FVKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVKernels")
+      .template condition<AttribSystem>("FVKernel")
       .queryInto(kernels);
   if (kernels.size() == 0)
     return;
@@ -330,7 +330,7 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
                .template condition<AttribSubdomains>(_subdomain)
                .template condition<AttribVectorTags>(_tags)
                .template condition<AttribThread>(_tid)
-               .template condition<AttribSystem>("FVKernels")
+               .template condition<AttribSystem>("FVKernel")
                .template condition<AttribIsADJac>(_do_jacobian)
                .queryInto(kernels);
 
@@ -445,7 +445,7 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   std::vector<FVFluxKernelBase *> kernels;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVKernels")
+      .template condition<AttribSystem>("FVKernel")
       .template condition<AttribSubdomains>(_subdomain)
       .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
       .template condition<AttribThread>(_tid)

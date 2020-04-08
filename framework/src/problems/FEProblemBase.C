@@ -2616,7 +2616,7 @@ FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     std::shared_ptr<FVKernel> k = _factory.create<FVKernel>(fv_kernel_name, name, parameters, tid);
-    theWarehouse().add(k, "FVKernels");
+    theWarehouse().add(k, "FVKernel");
   }
 }
 
