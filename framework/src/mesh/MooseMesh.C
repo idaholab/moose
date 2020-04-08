@@ -71,22 +71,6 @@ FaceInfo::FaceInfo(const Elem * elem,
   _left_centroid = elem->centroid();
   _left_volume = elem->volume();
 
-  // the right info does not exist for domain boundaries
-  if (!_right)
-  {
-    _right_side_id = std::numeric_limits<unsigned int>::max();
-    _right_centroid = Point(std::numeric_limits<Real>::max(),
-                            std::numeric_limits<Real>::max(),
-                            std::numeric_limits<Real>::max());
-    _right_volume = 0;
-  }
-  else
-  {
-    _right_side_id = neighbor->which_neighbor_am_i(elem);
-    _right_centroid = neighbor->centroid();
-    _right_volume = neighbor->volume();
-  }
-
   std::unique_ptr<const Elem> face = elem->build_side_ptr(_left_side_id);
   _face_area = face->volume();
 
@@ -116,6 +100,21 @@ FaceInfo::FaceInfo(const Elem * elem,
 
   _normal = average_normal;
   _face_centroid = face_centroid;
+
+  // the right info does not exist for domain boundaries
+  if (!_right)
+  {
+    _right_side_id = std::numeric_limits<unsigned int>::max();
+    _right_centroid = 2 * (_face_centroid - _left_centroid) + _left_centroid;
+    _right_volume = _left_volume;
+  }
+  else
+  {
+    _right_side_id = neighbor->which_neighbor_am_i(elem);
+    _right_centroid = neighbor->centroid();
+    _right_volume = neighbor->volume();
+  }
+
 }
 
 defineLegacyParams(MooseMesh);
