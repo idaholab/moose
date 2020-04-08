@@ -541,20 +541,12 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   // other faces that share an element with this face.
   computeValues();
 
-  // TODO: this code should go away once we have a real reconstruction
-  // routine. - or maybe this becomes a separate _grad_u_interface that is
+  // TODO: maybe initialize a separate _grad_u_interface here that is
   // only used for diffusion terms that need an interface gradient.  Also -
-  // this will need cross-diffusion corrections for non-orthogonal meshes
-  // eventually. Or maybe we just leave this alone at zero and have users
+  // it would need cross-diffusion corrections for non-orthogonal meshes
+  // eventually. Or maybe we just leave this alone zero and have users
   // calculate whatever grad_interface value they want and provide some
   // helper functions for cross-diffusion correction.
-  std::vector<dof_id_type> indices(1);
-  DoFValue values;
-  values.resize(1);
-  auto & soln = *_sys.currentSolution();
-  auto uleft = soln(fi.leftDofIndices(_var_name)[0]);
-  auto uright = soln(fi.rightDofIndices(_var_name)[0]);
-  _grad_u[0] = fi.normal() * (uright - uleft) / ((fi.rightCentroid() - fi.leftCentroid()).norm());
 
   // TODO: figure out how to store old/older values of reconstructed
   // solutions/gradient states without having to re-reconstruct them from

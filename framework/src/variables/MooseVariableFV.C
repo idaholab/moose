@@ -298,7 +298,8 @@ MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
     _neighbor_data->computeValuesFace(fi);
     _element_data->computeGhostValuesFace(fi, *_neighbor_data);
   }
-  mooseError("robert wrote broken code");
+  else
+    mooseError("robert wrote broken MooseVariableFV code");
 }
 
 template <typename OutputType>
