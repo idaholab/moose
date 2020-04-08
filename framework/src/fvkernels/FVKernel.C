@@ -97,6 +97,12 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
+  // The fancy face type if condition checks here are because we might
+  // currently be running on a face for which this kernel's variable is only
+  // defined on one side. If this is the case, we need to only calculate+add
+  // the residual contribution if there is a dirichlet bc for the active
+  // face+variable.  We always need to add the residual contribution when the
+  // variable is defined on both sides of the face.
   auto ft = fi.faceType(_var.name());
   if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
@@ -131,6 +137,12 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   unsigned int var_num = _var.number();
   unsigned int nvars = sys.system().n_vars();
 
+  // The fancy face type if condition checks here are because we might
+  // currently be running on a face for which this kernel's variable is only
+  // defined on one side. If this is the case, we need to only calculate+add
+  // the residual contribution if there is a dirichlet bc for the active
+  // face+variable.  We always need to add the residual contribution when the
+  // variable is defined on both sides of the face.
   auto ft = fi.faceType(_var.name());
   if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
