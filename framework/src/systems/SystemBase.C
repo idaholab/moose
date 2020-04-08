@@ -24,6 +24,8 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "FVBoundaryCondition.h"
+#include "FVDirichletBC.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
@@ -1196,6 +1198,8 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 void
 SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
 {
+  using Keytype = std::pair<const Elem *, unsigned short int>;
+
   // prepare a vector of MooseVariables from names
   std::vector<MooseVariableBase *> moose_vars;
   for (auto & v : vars)
@@ -1210,25 +1214,103 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
     moose_vars.push_back(&getVariable(0, v));
   }
 
+  // get a map from elem/side to boundary ids
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
+      _mesh.buildSideList();
+  std::map<Keytype, std::set<boundary_id_type>> side_map;
+  for (auto & e : side_list)
+  {
+    const Elem * elem = _mesh.getMesh().elem_ptr(std::get<0>(e));
+    Keytype key(elem, std::get<1>(e));
+    auto it = side_map.find(key);
+    if (it == side_map.end())
+      side_map[key] = {std::get<2>(e)};
+    else
+      side_map[key].insert(std::get<2>(e));
+  }
+
   // loop over all faces
   for (auto & p : mesh().faceInfo())
   {
+    // get left & right elements, and set subdomain ids
     const Elem & left_elem = p.leftElem();
-    const Elem & right_elem = p.rightElem();
+    const Elem * right_elem = p.rightElemPtr();
+    SubdomainID left_subdomain_id = left_elem.subdomain_id();
+    SubdomainID right_subdomain_id = Elem::invalid_subdomain_id;
+    if (right_elem)
+      right_subdomain_id = right_elem->subdomain_id();
+
+    // get all the sidesets that this face is contained in
+    std::set<boundary_id_type> & boundary_ids = p.boundaryIDs();
+    boundary_ids.clear();
+
+    auto lit = side_map.find(Keytype(&left_elem, p.leftSideID()));
+    if (lit != side_map.end())
+      boundary_ids.insert(lit->second.begin(), lit->second.end());
+
+    if (right_elem)
+    {
+      auto rit = side_map.find(Keytype(right_elem, p.rightSideID()));
+      if (rit != side_map.end())
+        boundary_ids.insert(rit->second.begin(), rit->second.end());
+    }
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
     {
+      // get the variable, its name, and its domain of definition
       auto var = moose_vars[j];
-      auto var_num = var->number();
+      auto var_name = var->name();
+      std::set<SubdomainID> var_subdomains = var->blockIDs();
 
+      // unfortunately, MOOSE is lazy and all subdomains has its own
+      // ID. If ANY_BLOCK_ID is in var_subdomains, inject all subdomains explicitly
+      if (var_subdomains.find(Moose::ANY_BLOCK_ID) != var_subdomains.end())
+        var_subdomains = _mesh.meshSubdomains();
+
+      // first stash away DoF information; this is more difficult than you would
+      // think because var can be defined on the left subdomain, the right subdomain
+      // or both subdomains
+      // left
       std::vector<dof_id_type> left_dof_indices;
-      var->getDofIndices(&left_elem, left_dof_indices);
+      if (var_subdomains.find(left_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(&left_elem, left_dof_indices);
+      else
+        left_dof_indices = {libMesh::DofObject::invalid_id};
+      p.leftDofIndices(var_name) = left_dof_indices;
+      // right
       std::vector<dof_id_type> right_dof_indices;
-      var->getDofIndices(&right_elem, right_dof_indices);
+      if (right_elem && var_subdomains.find(right_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(right_elem, right_dof_indices);
+      else
+        right_dof_indices = {libMesh::DofObject::invalid_id};
+      p.rightDofIndices(var_name) = right_dof_indices;
 
-      p.leftDofIndices(var_num) = left_dof_indices;
-      p.rightDofIndices(var_num) = right_dof_indices;
+      /**
+       * The following paragraph of code assigns the VarFaceNeighbors
+       * 1. The face is an internal face of this variable if it is defined on
+       *    the left and right subdomains
+       * 2. The face is an invalid face of this variable if it is neither defined
+       *    on the left nor the right subdomains
+       * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
+       *    applies
+       */
+      bool var_defined_left = var_subdomains.find(left_subdomain_id) != var_subdomains.end();
+      bool var_defined_right = var_subdomains.find(right_subdomain_id) != var_subdomains.end();
+      if (var_defined_left && var_defined_right)
+        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+      else if (!var_defined_left && !var_defined_right)
+        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+      else
+      {
+        // this is a boundary face for this variable, set left or right
+        if (var_defined_left)
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::LEFT;
+        else if (var_defined_right)
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::RIGHT;
+        else
+          mooseError("Should never get here");
+      }
     }
   }
 }

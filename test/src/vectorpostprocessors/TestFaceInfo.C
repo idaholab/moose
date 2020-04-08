@@ -68,9 +68,12 @@ TestFaceInfo::execute()
     _face_id.push_back(j);
     _face_area.push_back(p.faceArea());
     _left_element_id.push_back(p.leftElem().id());
-    _right_element_id.push_back(p.rightElem().id());
     _left_element_side.push_back(p.leftSideID());
-    _right_element_side.push_back(p.rightSideID());
+    // the right element might be a nullptr
+    if (!p.rightElemPtr())
+      _right_element_id.push_back(Elem::invalid_id);
+    else
+      _right_element_id.push_back(p.rightElem().id());
 
     Point normal = p.normal();
     _nx.push_back(normal(0));
@@ -91,11 +94,10 @@ TestFaceInfo::execute()
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {
-      auto var_num = coupled(_vars[l]);
-      auto & dofs = p.leftDofIndices(var_num);
+      auto & dofs = p.leftDofIndices(_vars[l]);
       _var_left_dof[l]->push_back(dofs[0]);
       _var_left_dof_size[l]->push_back(dofs.size());
-      dofs = p.rightDofIndices(var_num);
+      dofs = p.rightDofIndices(_vars[l]);
       _var_right_dof[l]->push_back(dofs[0]);
       _var_right_dof_size[l]->push_back(dofs.size());
     }
