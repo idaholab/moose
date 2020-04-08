@@ -173,12 +173,9 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
 
-        // get elem's face residual contribution to it's neighbor
         onFace(*faceinfo);
         postFace(*faceinfo);
 
-        // boundary faces only border one element and so only contribute to
-        // one element's residual
         std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(&elem, side);
         for (auto it = boundary_ids.begin(); it != boundary_ids.end(); ++it)
           onBoundary(*faceinfo, *it);
@@ -265,6 +262,11 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // most of that is (obviously) FE specific.  Also - we need to fall back to
   // reiniting everything like normal if there is any FV-FE variable coupling.
   _fe_problem.prepare(&fi.leftElem(), _tid);
+  //_fe_problem.reinitElem(&fi.leftElem(), _tid);
+
+  // I'm not sure of any other way to get the qRuleFace to be initialized
+  // other than this direct call.  How does it work for DG?
+  _fe_problem.assembly(_tid).reinit(&fi.leftElem(), fi.leftSideID());
 
   // TODO: this triggers a bunch of FE-specific stuff to occur that we might
   // not need if only FV variables are active.  Some of the stuff triggered by
@@ -289,7 +291,7 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   for (auto var : _needed_fv_vars)
     var->computeFaceValues(fi);
 
-  // TODO: do we really need both reinitMaterials and reinitMaterialsFace - I
+  // TODO: do we really need both reinitMaterials and reinitMaterialsFace? - I
   // think we do need both.
   _fe_problem.reinitMaterials(fi.leftElem().subdomain_id(), _tid);
   _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
@@ -307,7 +309,10 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
     // neighbor (face) material properties data structure.
     auto dst = _fe_problem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, _tid);
     auto src = _fe_problem.getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _tid);
-    dst->copyPropsFrom(*src);
+
+    // FIXME/TODO: this needs to be enabled/uncommented, but it currently
+    // fails due to differing number of qp's for props between src and dst.
+    //dst->copyPropsFrom(*src);
   }
 
   // this is the swap-back object - don't forget to catch it into local var
@@ -326,11 +331,11 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
   std::vector<FVFluxKernelBase *> kernels;
   auto q = _fe_problem.theWarehouse()
                .query()
+               .template condition<AttribSystem>("FVKernel")
                .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
                .template condition<AttribSubdomains>(_subdomain)
                .template condition<AttribVectorTags>(_tags)
                .template condition<AttribThread>(_tid)
-               .template condition<AttribSystem>("FVKernel")
                .template condition<AttribIsADJac>(_do_jacobian)
                .queryInto(kernels);
 
@@ -338,16 +343,6 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
     return;
 
   auto swap_back_sentinel = reinitVariables(fi);
-
-  // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-  // still remember to swap back during stack unwinding.
-  SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
-
-  // this reinits the materials for the neighbor element on the face (although it may not look like
-  // it)
-  SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-  _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
 
   for (const auto k : kernels)
     if (_do_jacobian)
@@ -376,6 +371,8 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
 
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
 
+  // boundary faces only border one element and so only contribute to one element's residual
+  // and we only need to reinit the one side.
   _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
