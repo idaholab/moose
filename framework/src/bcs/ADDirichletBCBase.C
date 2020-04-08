@@ -9,6 +9,8 @@
 
 #include "ADDirichletBCBase.h"
 
+defineADLegacyParams(ADDirichletBCBase);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADDirichletBCBase<compute_stage>::validParams()

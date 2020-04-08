@@ -14,6 +14,8 @@
 
 registerMooseAction("MooseApp", SetupQuadratureAction, "setup_quadrature");
 
+defineLegacyParams(SetupQuadratureAction);
+
 InputParameters
 SetupQuadratureAction::validParams()
 {

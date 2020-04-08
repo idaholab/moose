@@ -9,6 +9,8 @@
 
 #include "ConditionalEnableControl.h"
 
+defineLegacyParams(ConditionalEnableControl);
+
 InputParameters
 ConditionalEnableControl::validParams()
 {

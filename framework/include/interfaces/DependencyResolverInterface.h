@@ -103,3 +103,4 @@ DependencyResolverInterface::cyclicDependencyError(CyclicDependencyException<T> 
         << "\n";
   mooseError(oss.str());
 }
+

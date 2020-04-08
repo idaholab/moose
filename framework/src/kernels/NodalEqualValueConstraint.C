@@ -15,6 +15,8 @@
 
 registerMooseObject("MooseApp", NodalEqualValueConstraint);
 
+defineLegacyParams(NodalEqualValueConstraint);
+
 InputParameters
 NodalEqualValueConstraint::validParams()
 {

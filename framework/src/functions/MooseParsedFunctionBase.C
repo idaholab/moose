@@ -14,6 +14,8 @@
 #include "MooseError.h"
 #include "MooseParsedFunctionWrapper.h"
 
+defineLegacyParams(MooseParsedFunctionBase);
+
 InputParameters
 MooseParsedFunctionBase::validParams()
 {

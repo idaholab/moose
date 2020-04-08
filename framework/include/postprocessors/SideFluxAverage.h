@@ -12,6 +12,10 @@
 #include "SideFluxIntegral.h"
 
 // Forward Declarations
+class SideFluxAverage;
+
+template <>
+InputParameters validParams<SideFluxAverage>();
 
 class SideFluxAverage : public SideFluxIntegral
 {
@@ -28,3 +32,4 @@ public:
 protected:
   Real _volume;
 };
+

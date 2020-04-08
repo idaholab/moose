@@ -11,6 +11,11 @@
 
 #include "ExplicitRK2.h"
 
+class Ralston;
+
+template <>
+InputParameters validParams<Ralston>();
+
 /**
  * Ralston's time integration method.
  *
@@ -35,3 +40,4 @@ protected:
   virtual Real b1() const { return .25; }
   virtual Real b2() const { return .75; }
 };
+

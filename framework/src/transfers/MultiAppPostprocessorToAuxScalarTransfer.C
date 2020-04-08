@@ -22,6 +22,8 @@
 // Define the input parameters
 registerMooseObject("MooseApp", MultiAppPostprocessorToAuxScalarTransfer);
 
+defineLegacyParams(MultiAppPostprocessorToAuxScalarTransfer);
+
 InputParameters
 MultiAppPostprocessorToAuxScalarTransfer::validParams()
 {

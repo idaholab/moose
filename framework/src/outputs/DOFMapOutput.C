@@ -25,6 +25,8 @@
 
 registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
 
+defineLegacyParams(DOFMapOutput);
+
 InputParameters
 DOFMapOutput::validParams()
 {

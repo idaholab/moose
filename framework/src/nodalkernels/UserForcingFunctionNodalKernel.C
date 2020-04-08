@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", UserForcingFunctionNodalKernel);
 
+defineLegacyParams(UserForcingFunctionNodalKernel);
+
 InputParameters
 UserForcingFunctionNodalKernel::validParams()
 {

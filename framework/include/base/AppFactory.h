@@ -131,3 +131,4 @@ private:
   // Private constructor for singleton pattern
   AppFactory() {}
 };
+

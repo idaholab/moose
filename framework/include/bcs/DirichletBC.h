@@ -11,6 +11,11 @@
 
 #include "DirichletBCBase.h"
 
+class DirichletBC;
+
+template <>
+InputParameters validParams<DirichletBC>();
+
 /**
  * Boundary condition of a Dirichlet type
  *

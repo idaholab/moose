@@ -16,6 +16,10 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declerations
+class AddSideSetsFromBoundingBox;
+
+template <>
+InputParameters validParams<AddSideSetsFromBoundingBox>();
 
 namespace libMesh
 {
@@ -52,3 +56,4 @@ private:
   /// Flag to determine if the provided boundaries need to overlap
   const bool _boundary_id_overlap;
 };
+

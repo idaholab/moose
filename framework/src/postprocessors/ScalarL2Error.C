@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ScalarL2Error);
 
+defineLegacyParams(ScalarL2Error);
+
 InputParameters
 ScalarL2Error::validParams()
 {

@@ -208,3 +208,4 @@ MooseADWrapper<std::vector<DenseMatrix<Real>>>::copyDualNumberToValue() const
         _val[h](i, j) = val(i, j).value();
   }
 }
+

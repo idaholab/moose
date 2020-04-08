@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddConstraintAction, "add_constraint");
 
+defineLegacyParams(AddConstraintAction);
+
 InputParameters
 AddConstraintAction::validParams()
 {

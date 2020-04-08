@@ -11,6 +11,11 @@
 
 #include "IndicatorMarker.h"
 
+class ErrorToleranceMarker;
+
+template <>
+InputParameters validParams<ErrorToleranceMarker>();
+
 class ErrorToleranceMarker : public IndicatorMarker
 {
 public:
@@ -24,3 +29,4 @@ protected:
   Real _coarsen;
   Real _refine;
 };
+

@@ -57,3 +57,4 @@ protected:
   /// Number of contributions cached up
   unsigned int _num_cached;
 };
+

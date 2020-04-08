@@ -15,6 +15,7 @@
 #include "MooseTypes.h"
 
 // Forward Declarations
+class ElementDamper;
 class SubProblem;
 class SystemBase;
 template <typename>
@@ -22,6 +23,9 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class Assembly;
+
+template <>
+InputParameters validParams<ElementDamper>();
 
 /**
  * Base class for deriving element dampers
@@ -80,3 +84,4 @@ protected:
   /// Holds the current solution gradient at the current quadrature point
   const VariableGradient & _grad_u;
 };
+

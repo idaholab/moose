@@ -13,6 +13,10 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
+class SideIntegralVariableUserObject;
+
+template <>
+InputParameters validParams<SideIntegralVariableUserObject>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -36,3 +40,4 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
 };
+

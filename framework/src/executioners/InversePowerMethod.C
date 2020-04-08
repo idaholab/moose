@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", InversePowerMethod);
 
+defineLegacyParams(InversePowerMethod);
+
 InputParameters
 InversePowerMethod::validParams()
 {

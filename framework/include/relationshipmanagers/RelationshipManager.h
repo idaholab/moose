@@ -16,7 +16,11 @@
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
+class RelationshipManager;
 class MooseMesh;
+
+template <>
+InputParameters validParams<RelationshipManager>();
 
 /**
  * RelationshipManagers are used for describing what kinds of non-local resources are needed for an

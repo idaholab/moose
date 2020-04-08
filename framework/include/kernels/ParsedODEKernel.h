@@ -13,6 +13,10 @@
 #include "FunctionParserUtils.h"
 
 // Forward Declarations
+class ParsedODEKernel;
+
+template <>
+InputParameters validParams<ParsedODEKernel>();
 
 /**
  *

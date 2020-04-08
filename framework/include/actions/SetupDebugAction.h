@@ -12,7 +12,11 @@
 // MOOSE includes
 #include "Action.h"
 
+class SetupDebugAction;
 class MooseObjectAction;
+
+template <>
+InputParameters validParams<SetupDebugAction>();
 
 class SetupDebugAction : public Action
 {
@@ -23,3 +27,4 @@ public:
 
   virtual void act() override;
 };
+

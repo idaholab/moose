@@ -19,6 +19,8 @@
 
 registerMooseObject("MooseApp", PNGOutput);
 
+defineLegacyParams(PNGOutput);
+
 InputParameters
 PNGOutput::validParams()
 {

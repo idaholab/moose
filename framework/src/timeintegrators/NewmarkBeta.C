@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", NewmarkBeta);
 
+defineLegacyParams(NewmarkBeta);
+
 InputParameters
 NewmarkBeta::validParams()
 {

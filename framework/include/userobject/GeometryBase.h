@@ -11,6 +11,11 @@
 
 #include "GeneralUserObject.h"
 
+class GeometryBase;
+
+template <>
+InputParameters validParams<GeometryBase>();
+
 /**
  * Base class for userobjects that snap nodes to a defined geometry when
  * adaptivity happens.
@@ -42,3 +47,4 @@ protected:
   /// List of boundaries (or node sets) that will be snapped to a geometry
   const std::vector<BoundaryID> _boundary_ids;
 };
+

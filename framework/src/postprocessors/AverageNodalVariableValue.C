@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", AverageNodalVariableValue);
 
+defineLegacyParams(AverageNodalVariableValue);
+
 InputParameters
 AverageNodalVariableValue::validParams()
 {

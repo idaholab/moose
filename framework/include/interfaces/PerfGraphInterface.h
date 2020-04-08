@@ -20,6 +20,10 @@
 #endif
 
 // Forward declarations
+class PerfGraphInterface;
+
+template <>
+InputParameters validParams<PerfGraphInterface>();
 
 /**
  * Interface for objects that needs transient capabilities

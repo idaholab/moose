@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MaterialDerivativeRankFourTestKernel);
 
+defineLegacyParams(MaterialDerivativeRankFourTestKernel);
+
 InputParameters
 MaterialDerivativeRankFourTestKernel::validParams()
 {

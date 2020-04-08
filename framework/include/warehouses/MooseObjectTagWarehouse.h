@@ -256,3 +256,4 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
 
   return matrix_tags_to_object_warehouse[m_tags];
 }
+

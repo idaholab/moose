@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", ElementExtremeValue);
 
+defineLegacyParams(ElementExtremeValue);
+
 InputParameters
 ElementExtremeValue::validParams()
 {

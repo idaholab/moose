@@ -11,7 +11,11 @@
 
 #include "IntegratedBC.h"
 
+class FunctionPenaltyDirichletBC;
 class Function;
+
+template <>
+InputParameters validParams<FunctionPenaltyDirichletBC>();
 
 /**
  * A different approach to applying Dirichlet BCs

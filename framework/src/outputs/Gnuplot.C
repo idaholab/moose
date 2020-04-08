@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", Gnuplot);
 
+defineLegacyParams(Gnuplot);
+
 InputParameters
 Gnuplot::validParams()
 {

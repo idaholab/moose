@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ParsedMaterial);
 
+defineLegacyParams(ParsedMaterial);
+
 InputParameters
 ParsedMaterial::validParams()
 {

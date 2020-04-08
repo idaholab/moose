@@ -14,6 +14,10 @@
 #include "NodalUserObject.h"
 
 // Forward Declarations
+class NodalPostprocessor;
+
+template <>
+InputParameters validParams<NodalPostprocessor>();
 
 class NodalPostprocessor : public NodalUserObject, public Postprocessor
 {
@@ -30,3 +34,4 @@ public:
    */
   virtual void finalize() override {}
 };
+

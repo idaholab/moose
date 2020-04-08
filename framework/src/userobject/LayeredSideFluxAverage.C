@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", LayeredSideFluxAverage);
 
+defineLegacyParams(LayeredSideFluxAverage);
+
 InputParameters
 LayeredSideFluxAverage::validParams()
 {

@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", ElementLpNormAux);
 
+defineLegacyParams(ElementLpNormAux);
+
 InputParameters
 ElementLpNormAux::validParams()
 {

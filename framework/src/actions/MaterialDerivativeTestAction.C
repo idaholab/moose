@@ -24,6 +24,8 @@ registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_kernel");
 
 registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_preconditioning");
 
+defineLegacyParams(MaterialDerivativeTestAction);
+
 InputParameters
 MaterialDerivativeTestAction::validParams()
 {

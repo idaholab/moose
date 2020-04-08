@@ -15,6 +15,11 @@
   usingDirichletBCBaseMembers;                                                                     \
   using ADDirichletBC<compute_stage>::computeQpValue
 
+template <ComputeStage>
+class ADDirichletBC;
+
+declareADValidParams(ADDirichletBC);
+
 /**
  * Boundary condition of a Dirichlet type
  *

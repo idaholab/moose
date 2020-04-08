@@ -11,6 +11,8 @@
 
 registerADMooseObject("MooseApp", ADDiffusion);
 
+defineADLegacyParams(ADDiffusion);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADDiffusion<compute_stage>::validParams()

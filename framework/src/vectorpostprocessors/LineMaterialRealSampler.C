@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", LineMaterialRealSampler);
 
+defineLegacyParams(LineMaterialRealSampler);
+
 InputParameters
 LineMaterialRealSampler::validParams()
 {

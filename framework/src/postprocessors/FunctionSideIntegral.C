@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", FunctionSideIntegral);
 
+defineLegacyParams(FunctionSideIntegral);
+
 InputParameters
 FunctionSideIntegral::validParams()
 {

@@ -12,6 +12,10 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
+class SideSetsBetweenSubdomainsGenerator;
+
+template <>
+InputParameters validParams<SideSetsBetweenSubdomainsGenerator>();
 
 /**
  * MeshGenerator for
@@ -28,3 +32,4 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 };
+

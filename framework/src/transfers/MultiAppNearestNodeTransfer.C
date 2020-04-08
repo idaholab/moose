@@ -24,6 +24,8 @@
 
 registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
 
+defineLegacyParams(MultiAppNearestNodeTransfer);
+
 InputParameters
 MultiAppNearestNodeTransfer::validParams()
 {

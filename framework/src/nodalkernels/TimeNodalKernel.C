@@ -14,6 +14,8 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
+defineLegacyParams(TimeNodalKernel);
+
 InputParameters
 TimeNodalKernel::validParams()
 {

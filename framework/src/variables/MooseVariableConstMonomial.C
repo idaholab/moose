@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", MooseVariableConstMonomial);
 
+defineLegacyParams(MooseVariableConstMonomial);
+
 InputParameters
 MooseVariableConstMonomial::validParams()
 {

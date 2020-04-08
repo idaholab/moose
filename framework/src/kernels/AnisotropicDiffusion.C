@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", AnisotropicDiffusion);
 
+defineLegacyParams(AnisotropicDiffusion);
+
 InputParameters
 AnisotropicDiffusion::validParams()
 {

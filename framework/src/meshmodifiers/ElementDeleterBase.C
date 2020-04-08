@@ -12,10 +12,11 @@
 
 #include "libmesh/remote_elem.h"
 
+template <>
 InputParameters
-ElementDeleterBase::validParams()
+validParams<ElementDeleterBase>()
 {
-  InputParameters params = MeshModifier::validParams();
+  InputParameters params = validParams<MeshModifier>();
   params.addParam<BoundaryName>("new_boundary",
                                 "optional boundary name to assign to the cut surface");
   return params;

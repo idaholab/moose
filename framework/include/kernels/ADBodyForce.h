@@ -12,7 +12,11 @@
 #include "ADKernelValue.h"
 
 // Forward Declaration
+template <ComputeStage>
+class ADBodyForce;
 class Function;
+
+declareADValidParams(ADBodyForce);
 
 /**
  * This kernel implements a generic functional

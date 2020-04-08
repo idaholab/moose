@@ -11,6 +11,11 @@
 
 #include "Marker.h"
 
+class UniformMarker;
+
+template <>
+InputParameters validParams<UniformMarker>();
+
 class UniformMarker : public Marker
 {
 public:
@@ -23,3 +28,4 @@ protected:
 
   MarkerValue _mark;
 };
+

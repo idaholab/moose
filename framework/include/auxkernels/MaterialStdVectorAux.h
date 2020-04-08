@@ -12,6 +12,10 @@
 #include "MaterialStdVectorAuxBase.h"
 
 // Forward declarations
+class MaterialStdVectorAux;
+
+template <>
+InputParameters validParams<MaterialStdVectorAux>();
 
 /**
  * AuxKernel for outputting a std::vector material-property component to an AuxVariable
@@ -36,3 +40,4 @@ protected:
   /// The std::vector will be evaluated at this quadpoint only
   const unsigned int _selected_qp;
 };
+

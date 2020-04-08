@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class EmptyPostprocessor;
+
+template <>
+InputParameters validParams<EmptyPostprocessor>();
 
 class EmptyPostprocessor : public GeneralPostprocessor
 {
@@ -24,3 +28,4 @@ public:
   virtual void execute() override {}
   virtual Real getValue() override { return 0; }
 };
+

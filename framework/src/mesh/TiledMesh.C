@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", TiledMesh);
 
+defineLegacyParams(TiledMesh);
+
 InputParameters
 TiledMesh::validParams()
 {

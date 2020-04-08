@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", ParsedSubdomainMeshGenerator);
 
+defineLegacyParams(ParsedSubdomainMeshGenerator);
+
 InputParameters
 ParsedSubdomainMeshGenerator::validParams()
 {

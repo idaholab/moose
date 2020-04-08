@@ -14,6 +14,11 @@
 
 #include "libmesh/vector_value.h"
 
+class Transform;
+
+template <>
+InputParameters validParams<Transform>();
+
 class Transform : public MeshModifier
 {
 public:
@@ -25,3 +30,4 @@ protected:
   MooseEnum _transform;
   RealVectorValue _vector_value;
 };
+

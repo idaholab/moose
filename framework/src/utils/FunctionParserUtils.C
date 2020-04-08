@@ -13,6 +13,8 @@
 #include "InputParameters.h"
 #include "MooseEnum.h"
 
+defineLegacyParams(FunctionParserUtils);
+
 InputParameters
 FunctionParserUtils::validParams()
 {

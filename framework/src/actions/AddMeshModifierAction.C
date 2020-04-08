@@ -15,6 +15,8 @@
 
 registerMooseAction("MooseApp", AddMeshModifierAction, "add_mesh_modifier");
 
+defineLegacyParams(AddMeshModifierAction);
+
 InputParameters
 AddMeshModifierAction::validParams()
 {

@@ -18,6 +18,7 @@
 #include "PerfGraphInterface.h"
 
 // Forward declarations
+class Output;
 class MooseMesh;
 
 // libMesh forward declarations
@@ -25,6 +26,9 @@ namespace libMesh
 {
 class EquationSystems;
 }
+
+template <>
+InputParameters validParams<Output>();
 
 /**
  * Based class for output objects
@@ -63,11 +67,11 @@ public:
   virtual Real time();
 
   /**
-   * Get the old output time.
-   * @return The old output time, which may be different than the simulation time
-   *
-   * @see time()
-   */
+  * Get the old output time.
+  * @return The old output time, which may be different than the simulation time
+  *
+  * @see time()
+  */
   virtual Real timeOld();
 
   /**
@@ -244,3 +248,4 @@ protected:
 
   friend class OutputWarehouse;
 };
+

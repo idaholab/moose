@@ -11,6 +11,8 @@
 
 #include "ElementIntegralMaterialProperty.h"
 
+class ElementAverageMaterialProperty;
+
 /**
  * Computes the average of a material property over a volume.
  */

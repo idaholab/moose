@@ -2535,8 +2535,8 @@ DMCreate_Moose(DM dm)
   dm->ops->creatematrix = DMCreateMatrix_Moose;
   dm->ops->createinterpolation = 0; // DMCreateInterpolation_Moose;
 
-  dm->ops->refine = 0;  // DMRefine_Moose;
-  dm->ops->coarsen = 0; // DMCoarsen_Moose;
+  dm->ops->refine = 0;        // DMRefine_Moose;
+  dm->ops->coarsen = 0;       // DMCoarsen_Moose;
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   dm->ops->getinjection = 0;  // DMGetInjection_Moose;
   dm->ops->getaggregates = 0; // DMGetAggregates_Moose;

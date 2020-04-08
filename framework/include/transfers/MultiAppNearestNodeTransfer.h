@@ -13,10 +13,14 @@
 #include "MultiAppConservativeTransfer.h"
 
 // Forward declarations
+class MultiAppNearestNodeTransfer;
 namespace libMesh
 {
 class DofObject;
 }
+
+template <>
+InputParameters validParams<MultiAppNearestNodeTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.

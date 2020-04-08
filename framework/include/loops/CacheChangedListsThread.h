@@ -33,3 +33,4 @@ public:
   /// Map of Parent elements to children elements for elements that were just coarsened.
   std::map<const Elem *, std::vector<const Elem *>> _coarsened_element_children;
 };
+

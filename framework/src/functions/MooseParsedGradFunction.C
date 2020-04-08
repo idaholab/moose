@@ -12,6 +12,8 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedGradFunction, "ParsedGradFunction");
 
+defineLegacyParams(MooseParsedGradFunction);
+
 InputParameters
 MooseParsedGradFunction::validParams()
 {

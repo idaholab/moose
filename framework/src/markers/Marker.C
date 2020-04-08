@@ -15,6 +15,8 @@
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
 
+defineLegacyParams(Marker);
+
 InputParameters
 Marker::validParams()
 {

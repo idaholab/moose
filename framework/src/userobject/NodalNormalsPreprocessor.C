@@ -22,6 +22,8 @@ Threads::spin_mutex nodal_normals_preprocessor_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsPreprocessor);
 
+defineLegacyParams(NodalNormalsPreprocessor);
+
 InputParameters
 NodalNormalsPreprocessor::validParams()
 {

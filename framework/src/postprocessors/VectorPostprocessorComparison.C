@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorComparison);
 
+defineLegacyParams(VectorPostprocessorComparison);
+
 InputParameters
 VectorPostprocessorComparison::validParams()
 {

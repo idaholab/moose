@@ -12,6 +12,10 @@
 #include "SidePostprocessor.h"
 
 // Forward Declarations
+class SideIntegralPostprocessor;
+
+template <>
+InputParameters validParams<SideIntegralPostprocessor>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -39,3 +43,4 @@ protected:
 
   Real _integral_value;
 };
+

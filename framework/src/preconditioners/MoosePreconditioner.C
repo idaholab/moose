@@ -15,6 +15,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+defineLegacyParams(MoosePreconditioner);
+
 InputParameters
 MoosePreconditioner::validParams()
 {

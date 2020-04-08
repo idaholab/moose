@@ -12,6 +12,10 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
+class NormalizationAux;
+
+template <>
+InputParameters validParams<NormalizationAux>();
 
 /**
  * This auxiliary kernel normalizes a variable based on a postprocessor.
@@ -33,3 +37,4 @@ protected:
   const Real * _shift;
   Real _normal_factor;
 };
+

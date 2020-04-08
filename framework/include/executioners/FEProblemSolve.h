@@ -11,6 +11,11 @@
 
 #include "SolveObject.h"
 
+class FEProblemSolve;
+
+template <>
+InputParameters validParams<FEProblemSolve>();
+
 class FEProblemSolve : public SolveObject
 {
 public:

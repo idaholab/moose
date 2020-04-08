@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
+defineLegacyParams(FEProblemSolve);
+
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
 const std::set<std::string> &

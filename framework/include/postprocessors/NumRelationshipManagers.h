@@ -11,6 +11,11 @@
 
 #include "GeneralPostprocessor.h"
 
+class NumRelationshipManagers;
+
+template <>
+InputParameters validParams<NumRelationshipManagers>();
+
 class NumRelationshipManagers : public GeneralPostprocessor
 {
 public:

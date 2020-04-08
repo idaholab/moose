@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", TestSetupPostprocessorDataActionFunction);
 
+defineLegacyParams(TestSetupPostprocessorDataActionFunction);
+
 InputParameters
 TestSetupPostprocessorDataActionFunction::validParams()
 {

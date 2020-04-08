@@ -14,6 +14,10 @@
 #include "VectorPostprocessorInterface.h"
 
 // Forward declarations
+class VectorPostprocessorFunction;
+
+template <>
+InputParameters validParams<VectorPostprocessorFunction>();
 
 /**
  * Function which provides a piecewise continuous linear interpolation

@@ -80,3 +80,4 @@ public:
                                   const std::string & search_string,
                                   bool & found) = 0;
 };
+

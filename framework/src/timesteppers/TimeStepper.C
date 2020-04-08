@@ -12,6 +12,8 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
+defineLegacyParams(TimeStepper);
+
 InputParameters
 TimeStepper::validParams()
 {

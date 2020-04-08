@@ -11,6 +11,11 @@
 
 #include "GeneralPostprocessor.h"
 
+class NumElems;
+
+template <>
+InputParameters validParams<NumElems>();
+
 class NumElems : public GeneralPostprocessor
 {
 public:
@@ -34,3 +39,4 @@ private:
 
   const MeshBase & _mesh;
 };
+

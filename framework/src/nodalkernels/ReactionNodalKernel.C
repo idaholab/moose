@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ReactionNodalKernel);
 
+defineLegacyParams(ReactionNodalKernel);
+
 InputParameters
 ReactionNodalKernel::validParams()
 {

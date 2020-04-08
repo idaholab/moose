@@ -12,7 +12,11 @@
 #include "TimeIntegrator.h"
 
 // Forward declarations
+class AStableDirk4;
 class LStableDirk4;
+
+template <>
+InputParameters validParams<AStableDirk4>();
 
 /**
  * Fourth-order diagonally implicit Runge Kutta method (Dirk) with
@@ -109,3 +113,4 @@ AStableDirk4::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 1. / _dt;
 }
+

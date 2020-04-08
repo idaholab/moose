@@ -13,6 +13,10 @@
 #include "Action.h"
 
 // Forward declerations
+class CommonOutputAction;
+
+template <>
+InputParameters validParams<CommonOutputAction>();
 
 /**
  * Meta-action for creating common output object parameters
@@ -49,3 +53,4 @@ private:
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };
+

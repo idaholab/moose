@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", OrientedSubdomainBoundingBoxGenerator);
 
+defineLegacyParams(OrientedSubdomainBoundingBoxGenerator);
+
 InputParameters
 OrientedSubdomainBoundingBoxGenerator::validParams()
 {

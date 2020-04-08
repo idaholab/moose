@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddAuxVariableAction, "add_aux_variable");
 
+defineLegacyParams(AddAuxVariableAction);
+
 InputParameters
 AddAuxVariableAction::validParams()
 {

@@ -12,6 +12,10 @@
 #include "VectorTimeKernel.h"
 
 // Forward Declaration
+class VectorTimeDerivative;
+
+template <>
+InputParameters validParams<VectorTimeDerivative>();
 
 class VectorTimeDerivative : public VectorTimeKernel
 {

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MaterialRealAux);
 
+defineLegacyParams(MaterialRealAux);
+
 InputParameters
 MaterialRealAux::validParams()
 {

@@ -15,6 +15,8 @@
 
 registerMooseObject("MooseApp", VectorMemoryUsage);
 
+defineLegacyParams(VectorMemoryUsage);
+
 InputParameters
 VectorMemoryUsage::validParams()
 {

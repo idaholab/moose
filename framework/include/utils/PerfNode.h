@@ -15,6 +15,7 @@
  * within the Node - and only raw pointers are handed back out.
  */
 
+
 #include "MooseTypes.h"
 
 #include <map>
@@ -120,3 +121,4 @@ protected:
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
 };
+

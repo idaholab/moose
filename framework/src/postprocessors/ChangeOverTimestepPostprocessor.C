@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ChangeOverTimestepPostprocessor);
 
+defineLegacyParams(ChangeOverTimestepPostprocessor);
+
 InputParameters
 ChangeOverTimestepPostprocessor::validParams()
 {

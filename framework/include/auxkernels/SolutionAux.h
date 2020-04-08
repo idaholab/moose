@@ -12,7 +12,11 @@
 #include "AuxKernel.h"
 
 // Forward declaration
+class SolutionAux;
 class SolutionUserObject;
+
+template <>
+InputParameters validParams<SolutionAux>();
 
 /**
  * AuxKernel for reading a solution from file.
@@ -56,3 +60,4 @@ protected:
   /// Additional factor added to the solution, the b of ax+b
   const Real _add_factor;
 };
+

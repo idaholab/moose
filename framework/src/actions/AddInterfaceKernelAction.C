@@ -13,6 +13,8 @@
 
 registerMooseAction("MooseApp", AddInterfaceKernelAction, "add_interface_kernel");
 
+defineLegacyParams(AddInterfaceKernelAction);
+
 InputParameters
 AddInterfaceKernelAction::validParams()
 {

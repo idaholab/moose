@@ -13,6 +13,10 @@
 #include "PointSamplerBase.h"
 
 // Forward Declarations
+class LineValueSampler;
+
+template <>
+InputParameters validParams<LineValueSampler>();
 
 class LineValueSampler : public PointSamplerBase
 {
@@ -63,3 +67,4 @@ protected:
   /// Length of line segment
   const Real _line_vector_norm;
 };
+

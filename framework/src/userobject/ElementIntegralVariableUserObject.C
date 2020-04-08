@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ElementIntegralVariableUserObject);
 
+defineLegacyParams(ElementIntegralVariableUserObject);
+
 InputParameters
 ElementIntegralVariableUserObject::validParams()
 {

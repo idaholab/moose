@@ -11,6 +11,11 @@
 
 #include "TimeSequenceStepperBase.h"
 
+class TimeSequenceStepper;
+
+template <>
+InputParameters validParams<TimeSequenceStepper>();
+
 /**
  * Solves the PDEs at a sequence of time points given as a vector in the input file.
  * Adjusts the time sequence vector according to Transient start_time and end_time.
@@ -24,3 +29,4 @@ public:
 
   virtual void init() override;
 };
+

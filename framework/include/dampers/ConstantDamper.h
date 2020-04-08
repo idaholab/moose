@@ -13,6 +13,10 @@
 #include "GeneralDamper.h"
 
 // Forward Declarations
+class ConstantDamper;
+
+template <>
+InputParameters validParams<ConstantDamper>();
 
 /**
  * Simple constant damper.
@@ -36,3 +40,4 @@ protected:
   /// The constant amount of the Newton update to take.
   Real _damping;
 };
+

@@ -14,6 +14,10 @@
 #include "libmesh/point.h"
 
 // Forward declarations
+class FancyExtruderGenerator;
+
+template <>
+InputParameters validParams<FancyExtruderGenerator>();
 
 /**
  * Generates a mesh by reading it from an file.

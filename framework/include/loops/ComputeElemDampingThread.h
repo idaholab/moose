@@ -41,3 +41,4 @@ protected:
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<ElementDamper> & _element_dampers;
 };
+

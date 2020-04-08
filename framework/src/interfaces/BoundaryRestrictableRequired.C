@@ -11,6 +11,8 @@
 
 #include "InputParameters.h"
 
+defineLegacyParams(BoundaryRestrictableRequired);
+
 InputParameters
 BoundaryRestrictableRequired::validParams()
 {

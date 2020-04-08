@@ -15,6 +15,8 @@
 
 registerMooseObject("MooseApp", NumResidualEvaluations);
 
+defineLegacyParams(NumResidualEvaluations);
+
 InputParameters
 NumResidualEvaluations::validParams()
 {

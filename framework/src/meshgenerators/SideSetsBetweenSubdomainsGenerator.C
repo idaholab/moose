@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", SideSetsBetweenSubdomainsGenerator);
 
+defineLegacyParams(SideSetsBetweenSubdomainsGenerator);
+
 InputParameters
 SideSetsBetweenSubdomainsGenerator::validParams()
 {

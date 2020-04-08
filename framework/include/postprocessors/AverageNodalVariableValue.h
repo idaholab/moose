@@ -12,6 +12,10 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
+class AverageNodalVariableValue;
+
+template <>
+InputParameters validParams<AverageNodalVariableValue>();
 
 class AverageNodalVariableValue : public NodalVariablePostprocessor
 {
@@ -30,3 +34,4 @@ protected:
   Real _sum;
   unsigned int _n;
 };
+

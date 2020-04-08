@@ -11,6 +11,11 @@
 
 #include "MeshModifier.h"
 
+class BreakBoundaryOnSubdomain;
+
+template <>
+InputParameters validParams<BreakBoundaryOnSubdomain>();
+
 class BreakBoundaryOnSubdomain : public MeshModifier
 {
 public:
@@ -18,3 +23,4 @@ public:
 
   virtual void modify();
 };
+

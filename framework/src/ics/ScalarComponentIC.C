@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", ScalarComponentIC);
 
+defineLegacyParams(ScalarComponentIC);
+
 InputParameters
 ScalarComponentIC::validParams()
 {

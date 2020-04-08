@@ -13,6 +13,8 @@
 
 registerADMooseObject("MooseApp", EqualValueConstraint);
 
+defineADLegacyParams(EqualValueConstraint);
+
 template <ComputeStage compute_stage>
 InputParameters
 EqualValueConstraint<compute_stage>::validParams()
@@ -45,5 +47,3 @@ EqualValueConstraint<compute_stage>::computeQpResidual(Moose::MortarType mortar_
       return 0;
   }
 }
-
-adBaseClass(EqualValueConstraint);

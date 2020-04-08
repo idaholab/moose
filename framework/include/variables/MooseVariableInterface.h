@@ -202,3 +202,4 @@ protected:
 protected:
   Assembly * _mvi_assembly;
 };
+

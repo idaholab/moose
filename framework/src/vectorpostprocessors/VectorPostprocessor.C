@@ -15,6 +15,8 @@
 #include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
+defineLegacyParams(VectorPostprocessor);
+
 InputParameters
 VectorPostprocessor::validParams()
 {

@@ -30,6 +30,8 @@ valueHelper(dof_id_type id, MooseRandom & generator, std::map<dof_id_type, Real>
 }
 }
 
+defineLegacyParams(RandomICBase);
+
 InputParameters
 RandomICBase::validParams()
 {

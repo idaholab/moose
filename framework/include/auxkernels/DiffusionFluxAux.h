@@ -11,6 +11,11 @@
 
 #include "AuxKernel.h"
 
+class DiffusionFluxAux;
+
+template <>
+InputParameters validParams<DiffusionFluxAux>();
+
 /**
  * Auxiliary kernel responsible for computing the components of the flux vector
  * in diffusion problems
@@ -33,3 +38,4 @@ protected:
   /// Holds the diffusivity from the material system
   const MaterialProperty<Real> & _diffusion_coef;
 };
+

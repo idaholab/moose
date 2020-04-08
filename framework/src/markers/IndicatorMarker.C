@@ -9,6 +9,8 @@
 
 #include "IndicatorMarker.h"
 
+defineLegacyParams(IndicatorMarker);
+
 InputParameters
 IndicatorMarker::validParams()
 {

@@ -20,6 +20,8 @@
 #include <vector>
 #include <limits>
 
+defineLegacyParams(Executioner);
+
 InputParameters
 Executioner::validParams()
 {

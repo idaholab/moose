@@ -12,6 +12,10 @@
 #include "BoundsAuxBase.h"
 
 // Forward Declarations
+class ConstantBoundsAux;
+
+template <>
+InputParameters validParams<ConstantBoundsAux>();
 
 /**
  * Provides constant bound of a variable

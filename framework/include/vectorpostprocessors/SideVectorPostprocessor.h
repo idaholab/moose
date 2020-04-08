@@ -13,6 +13,10 @@
 #include "VectorPostprocessor.h"
 
 // Forward Declarations
+class SideVectorPostprocessor;
+
+template <>
+InputParameters validParams<SideVectorPostprocessor>();
 
 class SideVectorPostprocessor : public SideUserObject, public VectorPostprocessor
 {
@@ -27,3 +31,4 @@ public:
    */
   virtual void finalize() override {}
 };
+

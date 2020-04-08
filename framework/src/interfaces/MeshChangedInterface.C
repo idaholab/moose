@@ -11,6 +11,8 @@
 
 #include "FEProblem.h"
 
+defineLegacyParams(MeshChangedInterface);
+
 InputParameters
 MeshChangedInterface::validParams()
 {

@@ -243,3 +243,4 @@ ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid /* = 0*/)
   for (auto & object_pair : _execute_objects)
     object_pair.second.sort(tid);
 }
+

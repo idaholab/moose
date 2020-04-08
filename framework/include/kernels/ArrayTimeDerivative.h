@@ -12,6 +12,10 @@
 #include "ArrayTimeKernel.h"
 
 // Forward Declaration
+class ArrayTimeDerivative;
+
+template <>
+InputParameters validParams<ArrayTimeDerivative>();
 
 class ArrayTimeDerivative : public ArrayTimeKernel
 {

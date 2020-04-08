@@ -14,7 +14,11 @@
 #include "Eigenvalue.h"
 
 // Forward declarations
+class EigenProblem;
 class NonlinearEigenSystem;
+
+template <>
+InputParameters validParams<EigenProblem>();
 
 /**
  * Problem for solving eigenvalue problems

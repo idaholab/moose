@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", VectorMagnitudeAux);
 
+defineLegacyParams(VectorMagnitudeAux);
+
 InputParameters
 VectorMagnitudeAux::validParams()
 {

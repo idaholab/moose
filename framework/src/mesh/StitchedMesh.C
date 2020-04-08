@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", StitchedMesh);
 
+defineLegacyParams(StitchedMesh);
+
 InputParameters
 StitchedMesh::validParams()
 {

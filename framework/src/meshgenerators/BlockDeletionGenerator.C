@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", BlockDeletionGenerator);
 
+defineLegacyParams(BlockDeletionGenerator);
+
 InputParameters
 BlockDeletionGenerator::validParams()
 {

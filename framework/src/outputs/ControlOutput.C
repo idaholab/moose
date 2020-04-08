@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ControlOutput);
 
+defineLegacyParams(ControlOutput);
+
 InputParameters
 ControlOutput::validParams()
 {
@@ -71,26 +73,26 @@ ControlOutput::outputActiveObjects()
   // Loop through unique objects
   oss << "Active Objects:\n" << COLOR_DEFAULT;
   for (const auto & iter : objects)
-  {
-    std::shared_ptr<InputParameters> ptr = iter.first;
-    if (ptr->get<bool>("enable"))
     {
-      // We print slightly differently in the first iteration of the loop.
-      bool first_iteration = true;
-      for (const auto & obj_name : iter.second)
+      std::shared_ptr<InputParameters> ptr = iter.first;
+      if (ptr->get<bool>("enable"))
       {
-        if (first_iteration)
+        // We print slightly differently in the first iteration of the loop.
+        bool first_iteration = true;
+        for (const auto & obj_name : iter.second)
         {
-          oss << ConsoleUtils::indent(2) << COLOR_YELLOW << obj_name << COLOR_DEFAULT << '\n';
-          first_iteration = false;
+          if (first_iteration)
+          {
+            oss << ConsoleUtils::indent(2) << COLOR_YELLOW << obj_name << COLOR_DEFAULT << '\n';
+            first_iteration = false;
+          }
+          else
+            oss << ConsoleUtils::indent(4) << obj_name << '\n';
         }
-        else
-          oss << ConsoleUtils::indent(4) << obj_name << '\n';
       }
     }
-  }
 
-  _console << oss.str() << std::endl;
+    _console << oss.str() << std::endl;
 }
 
 void

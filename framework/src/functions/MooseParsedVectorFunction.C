@@ -12,6 +12,8 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedVectorFunction, "ParsedVectorFunction");
 
+defineLegacyParams(MooseParsedVectorFunction);
+
 InputParameters
 MooseParsedVectorFunction::validParams()
 {

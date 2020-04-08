@@ -18,11 +18,15 @@
 #include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
+class MortarConstraintBase;
 class FEProblemBase;
 namespace libMesh
 {
 class QBase;
 }
+
+template <>
+InputParameters validParams<MortarConstraintBase>();
 
 /**
  * User for mortar methods

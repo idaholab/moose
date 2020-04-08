@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", DGConvection);
 
+defineLegacyParams(DGConvection);
+
 InputParameters
 DGConvection::validParams()
 {

@@ -9,6 +9,8 @@
 
 #include "InterfaceTimeKernel.h"
 
+defineLegacyParams(InterfaceTimeKernel);
+
 InputParameters
 InterfaceTimeKernel::validParams()
 {

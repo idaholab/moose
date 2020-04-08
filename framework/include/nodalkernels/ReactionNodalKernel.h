@@ -11,6 +11,11 @@
 
 #include "NodalKernel.h"
 
+class ReactionNodalKernel;
+
+template <>
+InputParameters validParams<ReactionNodalKernel>();
+
 /**
  * Represents a nodal reaction term equivalent to $a * u$
  */

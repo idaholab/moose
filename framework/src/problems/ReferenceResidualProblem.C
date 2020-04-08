@@ -23,6 +23,8 @@
 
 registerMooseObject("MooseApp", ReferenceResidualProblem);
 
+defineLegacyParams(ReferenceResidualProblem);
+
 InputParameters
 ReferenceResidualProblem::validParams()
 {

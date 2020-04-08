@@ -20,6 +20,8 @@ Threads::spin_mutex nodal_normals_corner_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsCorner);
 
+defineLegacyParams(NodalNormalsCorner);
+
 InputParameters
 NodalNormalsCorner::validParams()
 {

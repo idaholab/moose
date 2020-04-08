@@ -9,6 +9,8 @@
 
 #include "GeneralUserObject.h"
 
+defineLegacyParams(GeneralUserObject);
+
 InputParameters
 GeneralUserObject::validParams()
 {

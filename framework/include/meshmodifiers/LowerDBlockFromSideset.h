@@ -11,6 +11,11 @@
 
 #include "MeshModifier.h"
 
+class LowerDBlockFromSideset;
+
+template <>
+InputParameters validParams<LowerDBlockFromSideset>();
+
 /**
  * Creates lower-dimensional elements on the specified sidesets
  */
@@ -27,3 +32,4 @@ protected:
   /// The sidesets on which to create the lower dimensional elements
   std::vector<BoundaryID> _sidesets;
 };
+

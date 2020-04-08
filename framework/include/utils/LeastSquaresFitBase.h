@@ -77,3 +77,4 @@ protected:
   /// The number of coefficients
   unsigned int _num_coeff;
 };
+

@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", NumVars);
 
+defineLegacyParams(NumVars);
+
 InputParameters
 NumVars::validParams()
 {

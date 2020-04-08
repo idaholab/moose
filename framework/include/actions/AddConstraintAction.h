@@ -11,6 +11,11 @@
 
 #include "MooseObjectAction.h"
 
+class AddConstraintAction;
+
+template <>
+InputParameters validParams<AddConstraintAction>();
+
 class AddConstraintAction : public MooseObjectAction
 {
 public:
@@ -20,3 +25,4 @@ public:
 
   virtual void act() override;
 };
+

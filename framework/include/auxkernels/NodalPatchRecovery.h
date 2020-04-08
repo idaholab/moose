@@ -22,6 +22,10 @@
  * posteriori error estimates. Part 1: The recovery technique. Int. J. Numer. Meth. Engng., 33:
  * 1331-1364. doi:10.1002/nme.1620330702
  */
+class NodalPatchRecovery;
+
+template <>
+InputParameters validParams<NodalPatchRecovery>();
 
 class NodalPatchRecovery : public AuxKernel
 {

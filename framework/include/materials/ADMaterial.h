@@ -40,6 +40,10 @@
   using ADMaterial<compute_stage>::getPostprocessorValueOld
 
 // forward declarations
+template <ComputeStage>
+class ADMaterial;
+
+declareADValidParams(ADMaterial);
 
 /**
  * ADMaterials compute ADMaterialProperties.

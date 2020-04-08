@@ -21,6 +21,8 @@
 
 registerMooseAction("MooseApp", CouplingFunctorCheckAction, "coupling_functor_check");
 
+defineLegacyParams(CouplingFunctorCheckAction);
+
 InputParameters
 CouplingFunctorCheckAction::validParams()
 {

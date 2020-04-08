@@ -11,6 +11,11 @@
 
 #include "SpatialAverageBase.h"
 
+class CylindricalAverage;
+
+template <>
+InputParameters validParams<CylindricalAverage>();
+
 /**
  * Compute a cylindrical average of a variableas a function of radius throughout the
  * simulation domain.
@@ -32,3 +37,4 @@ protected:
   /// axis norm
   const Real _cyl_axis_norm;
 };
+

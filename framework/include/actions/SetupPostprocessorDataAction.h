@@ -13,6 +13,10 @@
 #include "Action.h"
 
 // Forward declerations
+class SetupPostprocessorDataAction;
+
+template <>
+InputParameters validParams<SetupPostprocessorDataAction>();
 
 /**
  * The PostprocessorInterface::hasPostprocessor method utilizes the PostprocessorData
@@ -34,3 +38,4 @@ public:
 
   virtual void act() override;
 };
+

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", GradientJumpIndicator);
 
+defineLegacyParams(GradientJumpIndicator);
+
 InputParameters
 GradientJumpIndicator::validParams()
 {

@@ -12,10 +12,14 @@
 #include "FunctorRelationshipManager.h"
 
 // Forward declarations
+class ElementSideNeighborLayers;
 namespace libMesh
 {
 class GhostingFunctor;
 }
+
+template <>
+InputParameters validParams<ElementSideNeighborLayers>();
 
 /**
  * ElementSideNeighborLayers is used to increase the halo or stencil depth of each processor's

@@ -13,6 +13,11 @@
 #include "MooseVariableInterface.h"
 #include "MooseVariableScalar.h"
 
+class ArrayKernel;
+
+template <>
+InputParameters validParams<ArrayKernel>();
+
 class ArrayKernel : public KernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:

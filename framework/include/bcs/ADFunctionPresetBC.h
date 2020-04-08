@@ -12,7 +12,11 @@
 #include "ADDirichletBCBase.h"
 
 // Forward Declarations
+template <ComputeStage>
+class ADFunctionPresetBC;
 class Function;
+
+declareADValidParams(ADFunctionPresetBC);
 
 /**
  * Defines a boundary condition that forces the value to be a user specified

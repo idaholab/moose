@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", NullKernel);
 
+defineLegacyParams(NullKernel);
+
 InputParameters
 NullKernel::validParams()
 {

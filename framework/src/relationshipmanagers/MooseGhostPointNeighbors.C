@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", MooseGhostPointNeighbors);
 
+defineLegacyParams(MooseGhostPointNeighbors);
+
 InputParameters
 MooseGhostPointNeighbors::validParams()
 {

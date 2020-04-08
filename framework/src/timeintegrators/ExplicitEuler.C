@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ExplicitEuler);
 
+defineLegacyParams(ExplicitEuler);
+
 InputParameters
 ExplicitEuler::validParams()
 {

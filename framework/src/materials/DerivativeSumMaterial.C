@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", DerivativeSumMaterial);
 
+defineLegacyParams(DerivativeSumMaterial);
+
 InputParameters
 DerivativeSumMaterial::validParams()
 {

@@ -13,6 +13,10 @@
 #include "Postprocessor.h"
 
 // Forward Declarations
+class ElementPostprocessor;
+
+template <>
+InputParameters validParams<ElementPostprocessor>();
 
 class ElementPostprocessor : public ElementUserObject, public Postprocessor
 {
@@ -29,3 +33,4 @@ public:
    */
   virtual void finalize() override {}
 };
+

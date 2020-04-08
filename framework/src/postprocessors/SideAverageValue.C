@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", SideAverageValue);
 
+defineLegacyParams(SideAverageValue);
+
 InputParameters
 SideAverageValue::validParams()
 {

@@ -13,6 +13,10 @@
 #include "FunctionParserUtils.h"
 
 // Forward declarations
+class ParsedSubdomainMeshGenerator;
+
+template <>
+InputParameters validParams<ParsedSubdomainMeshGenerator>();
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of combinatorial geometry
@@ -41,3 +45,4 @@ protected:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
+

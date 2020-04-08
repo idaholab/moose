@@ -12,6 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class PerfGraphData;
 
 // libMesh forward declarations
 namespace libMesh
@@ -19,6 +20,9 @@ namespace libMesh
 class System;
 class EquationSystems;
 }
+
+template <>
+InputParameters validParams<PerfGraphData>();
 
 class PerfGraphData : public GeneralPostprocessor
 {
@@ -36,3 +40,4 @@ protected:
 
   const std::string & _section_name;
 };
+

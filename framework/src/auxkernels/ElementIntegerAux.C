@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ElementIntegerAux);
 
+defineLegacyParams(ElementIntegerAux);
+
 InputParameters
 ElementIntegerAux::validParams()
 {

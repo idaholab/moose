@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", ElementH1SemiError);
 
+defineLegacyParams(ElementH1SemiError);
+
 InputParameters
 ElementH1SemiError::validParams()
 {

@@ -26,6 +26,8 @@
 
 registerMooseObject("MooseApp", DT2);
 
+defineLegacyParams(DT2);
+
 InputParameters
 DT2::validParams()
 {

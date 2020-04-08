@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", HistogramVectorPostprocessor);
 
+defineLegacyParams(HistogramVectorPostprocessor);
+
 InputParameters
 HistogramVectorPostprocessor::validParams()
 {

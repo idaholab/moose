@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddDiracKernelAction, "add_dirac_kernel");
 
+defineLegacyParams(AddDiracKernelAction);
+
 InputParameters
 AddDiracKernelAction::validParams()
 {

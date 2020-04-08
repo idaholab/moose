@@ -11,6 +11,11 @@
 
 #include "TimeStepper.h"
 
+class ConstantDT;
+
+template <>
+InputParameters validParams<ConstantDT>();
+
 class ConstantDT : public TimeStepper
 {
 public:
@@ -26,3 +31,4 @@ private:
   const Real _constant_dt;
   const Real _growth_factor;
 };
+

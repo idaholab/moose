@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ExecutionerAttributeReporter);
 
+defineLegacyParams(ExecutionerAttributeReporter);
+
 InputParameters
 ExecutionerAttributeReporter::validParams()
 {

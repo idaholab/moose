@@ -17,6 +17,8 @@
 
 #include "libmesh/threads.h"
 
+defineLegacyParams(Indicator);
+
 InputParameters
 Indicator::validParams()
 {

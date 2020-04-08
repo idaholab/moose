@@ -12,6 +12,8 @@
 
 registerADMooseObjectDeprecated("MooseApp", ADFunctionPresetBC, "06/30/2020 24:00");
 
+defineADLegacyParams(ADFunctionPresetBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADFunctionPresetBC<compute_stage>::validParams()

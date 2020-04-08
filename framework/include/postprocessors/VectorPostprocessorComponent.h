@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class VectorPostprocessorComponent;
+
+template <>
+InputParameters validParams<VectorPostprocessorComponent>();
 
 class VectorPostprocessorComponent : public GeneralPostprocessor
 {

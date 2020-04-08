@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", Axisymmetric2D3DSolutionFunction);
 
+defineLegacyParams(Axisymmetric2D3DSolutionFunction);
+
 InputParameters
 Axisymmetric2D3DSolutionFunction::validParams()
 {

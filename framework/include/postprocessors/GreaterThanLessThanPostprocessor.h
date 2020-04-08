@@ -12,11 +12,15 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class GreaterThanLessThanPostprocessor;
 class MooseVariableFEBase;
 namespace libMesh
 {
 class MeshBase;
 }
+
+template <>
+InputParameters validParams<GreaterThanLessThanPostprocessor>();
 
 class GreaterThanLessThanPostprocessor : public GeneralPostprocessor
 {

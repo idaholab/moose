@@ -284,3 +284,4 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
 };
+

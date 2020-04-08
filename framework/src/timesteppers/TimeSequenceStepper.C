@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", TimeSequenceStepper);
 
+defineLegacyParams(TimeSequenceStepper);
+
 InputParameters
 TimeSequenceStepper::validParams()
 {

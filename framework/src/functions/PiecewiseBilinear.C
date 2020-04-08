@@ -15,6 +15,8 @@
 
 registerMooseObject("MooseApp", PiecewiseBilinear);
 
+defineLegacyParams(PiecewiseBilinear);
+
 InputParameters
 PiecewiseBilinear::validParams()
 {

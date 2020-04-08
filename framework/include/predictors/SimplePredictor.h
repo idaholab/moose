@@ -11,6 +11,11 @@
 
 #include "Predictor.h"
 
+class SimplePredictor;
+
+template <>
+InputParameters validParams<SimplePredictor>();
+
 /**
  * A SimplePredictor uses an algorithm that will predict the next solution based on
  * previous solutions.  Basically, it works like:
@@ -43,3 +48,4 @@ public:
   virtual bool shouldApply() override;
   virtual void apply(NumericVector<Number> & sln) override;
 };
+

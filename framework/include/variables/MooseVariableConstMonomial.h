@@ -11,6 +11,11 @@
 
 #include "MooseVariableFE.h"
 
+class MooseVariableConstMonomial;
+
+template <>
+InputParameters validParams<MooseVariableConstMonomial>();
+
 class MooseVariableConstMonomial : public MooseVariableFE<Real>
 {
 public:

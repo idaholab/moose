@@ -13,6 +13,10 @@
 #include "ElementLpNormAux.h"
 
 // Forward declarations
+class ElementL2ErrorFunctionAux;
+
+template <>
+InputParameters validParams<ElementL2ErrorFunctionAux>();
 
 /**
  * A class for computing the element-wise L^2 error (actually L^p

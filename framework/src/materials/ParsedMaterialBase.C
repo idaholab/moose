@@ -9,6 +9,8 @@
 
 #include "ParsedMaterialBase.h"
 
+defineLegacyParams(ParsedMaterialBase);
+
 InputParameters
 ParsedMaterialBase::validParams()
 {

@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", SolutionFunction);
 
+defineLegacyParams(SolutionFunction);
+
 InputParameters
 SolutionFunction::validParams()
 {

@@ -26,3 +26,4 @@ public:
   CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                          bool nodal);
 };
+

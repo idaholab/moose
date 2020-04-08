@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", FunctionNeumannBC);
 
+defineLegacyParams(FunctionNeumannBC);
+
 InputParameters
 FunctionNeumannBC::validParams()
 {

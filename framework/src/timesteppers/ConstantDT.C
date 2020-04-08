@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ConstantDT);
 
+defineLegacyParams(ConstantDT);
+
 InputParameters
 ConstantDT::validParams()
 {

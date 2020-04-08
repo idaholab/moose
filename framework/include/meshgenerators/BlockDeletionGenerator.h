@@ -12,6 +12,10 @@
 #include "ElementDeletionGeneratorBase.h"
 
 // Forward declarations
+class BlockDeletionGenerator;
+
+template <>
+InputParameters validParams<BlockDeletionGenerator>();
 
 /**
  * MeshGenerator for
@@ -30,3 +34,4 @@ private:
   ///Defines the block to be removed
   const SubdomainID _block_id;
 };
+

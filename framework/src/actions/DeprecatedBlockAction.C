@@ -11,6 +11,8 @@
 
 registerMooseAction("MooseApp", DeprecatedBlockAction, "deprecated_block");
 
+defineLegacyParams(DeprecatedBlockAction);
+
 InputParameters
 DeprecatedBlockAction::validParams()
 {

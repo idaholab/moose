@@ -16,6 +16,8 @@
 
 registerMooseAction("MooseApp", AddElementalFieldAction, "add_elemental_field_variable");
 
+defineLegacyParams(AddElementalFieldAction);
+
 InputParameters
 AddElementalFieldAction::validParams()
 {

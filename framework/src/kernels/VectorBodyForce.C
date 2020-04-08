@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", VectorBodyForce);
 
+defineLegacyParams(VectorBodyForce);
+
 InputParameters
 VectorBodyForce::validParams()
 {

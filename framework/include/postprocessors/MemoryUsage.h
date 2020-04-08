@@ -13,6 +13,11 @@
 #include "MemoryUsageReporter.h"
 #include "MemoryUtils.h"
 
+class MemoryUsage;
+
+template <>
+InputParameters validParams<MemoryUsage>();
+
 /**
  * Output maximum, average, or total process memory usage
  */
@@ -58,3 +63,4 @@ protected:
   /// report peak value for multiple samples in a time step
   const bool _report_peak_value;
 };
+

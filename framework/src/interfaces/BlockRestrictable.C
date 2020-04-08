@@ -17,6 +17,8 @@
 #include "SystemBase.h"
 #include "Conversion.h"
 
+defineLegacyParams(BlockRestrictable);
+
 InputParameters
 BlockRestrictable::validParams()
 {

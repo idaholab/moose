@@ -11,6 +11,11 @@
 
 #include "Control.h"
 
+class ConditionalEnableControl;
+
+template <>
+InputParameters validParams<ConditionalEnableControl>();
+
 /**
  * Base class for controls that enable/disable object(s) based on some condition
  */

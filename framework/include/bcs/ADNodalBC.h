@@ -51,6 +51,9 @@ using ADNodalBC = ADNodalBCTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue, compute_stage>;
 
+declareADValidParams(ADNodalBC);
+declareADValidParams(ADVectorNodalBC);
+
 #define usingTemplNodalBCMembers(type)                                                             \
   usingMooseObjectMembers;                                                                         \
   usingUserObjectInterfaceMembers;                                                                 \

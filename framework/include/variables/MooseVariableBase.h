@@ -24,6 +24,11 @@ class DofMap;
 class Variable;
 }
 
+class MooseVariableBase;
+
+template <>
+InputParameters validParams<MooseVariableBase>();
+
 class Assembly;
 class SubProblem;
 class SystemBase;

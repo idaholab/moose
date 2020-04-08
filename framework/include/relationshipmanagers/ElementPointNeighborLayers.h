@@ -14,10 +14,14 @@
 #include "libmesh/default_coupling.h"
 
 // Forward declarations
+class ElementPointNeighborLayers;
 namespace libMesh
 {
 class GhostingFunctor;
 }
+
+template <>
+InputParameters validParams<ElementPointNeighborLayers>();
 
 /**
  * ElementPointNeighborLayers is used to increase the halo or stencil depth of each processor's
@@ -40,3 +44,4 @@ protected:
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
 };
+

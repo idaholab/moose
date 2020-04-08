@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "Transient.h"
 
+defineLegacyParams(TimeSequenceStepperBase);
+
 InputParameters
 TimeSequenceStepperBase::validParams()
 {

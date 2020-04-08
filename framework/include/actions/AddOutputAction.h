@@ -13,6 +13,10 @@
 #include "MooseObjectAction.h"
 
 // Forward declerations
+class AddOutputAction;
+
+template <>
+InputParameters validParams<AddOutputAction>();
 
 /**
  * Action for creating output objects
@@ -29,3 +33,4 @@ public:
 
   virtual void act() override;
 };
+

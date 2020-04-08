@@ -28,6 +28,7 @@
 #include "libmesh/vector_value.h"
 
 // forward declaration
+class MooseMesh;
 class Assembly;
 class RelationshipManager;
 
@@ -44,6 +45,9 @@ class BoundingBox;
 
 // Useful typedefs
 typedef StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
+
+template <>
+InputParameters validParams<MooseMesh>();
 
 /**
  * Helper object for holding qp mapping info.

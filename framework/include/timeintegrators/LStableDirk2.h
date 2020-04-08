@@ -11,6 +11,11 @@
 
 #include "TimeIntegrator.h"
 
+class LStableDirk2;
+
+template <>
+InputParameters validParams<LStableDirk2>();
+
 /**
  * Second order diagonally implicit Runge Kutta method (Dirk) with two stages.
  *
@@ -75,3 +80,4 @@ LStableDirk2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 1. / _dt;
 }
+

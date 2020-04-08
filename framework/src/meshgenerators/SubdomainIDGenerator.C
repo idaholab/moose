@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", SubdomainIDGenerator);
 
+defineLegacyParams(SubdomainIDGenerator);
+
 InputParameters
 SubdomainIDGenerator::validParams()
 {

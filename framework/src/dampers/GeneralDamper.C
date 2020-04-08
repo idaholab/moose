@@ -9,6 +9,8 @@
 
 #include "GeneralDamper.h"
 
+defineLegacyParams(GeneralDamper);
+
 InputParameters
 GeneralDamper::validParams()
 {

@@ -14,6 +14,10 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
+class NodalConstraint;
+
+template <>
+InputParameters validParams<NodalConstraint>();
 
 class NodalConstraint : public Constraint,
                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -90,3 +94,4 @@ protected:
   unsigned int _i;
   unsigned int _j;
 };
+

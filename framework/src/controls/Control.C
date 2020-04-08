@@ -11,6 +11,8 @@
 #include "Control.h"
 #include "InputParameterWarehouse.h"
 
+defineLegacyParams(Control);
+
 InputParameters
 Control::validParams()
 {

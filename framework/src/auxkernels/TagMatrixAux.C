@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", TagMatrixAux);
 
+defineLegacyParams(TagMatrixAux);
+
 InputParameters
 TagMatrixAux::validParams()
 {

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", CoupledForceNodalKernel);
 
+defineLegacyParams(CoupledForceNodalKernel);
+
 InputParameters
 CoupledForceNodalKernel::validParams()
 {

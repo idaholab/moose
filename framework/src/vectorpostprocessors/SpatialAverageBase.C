@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(SpatialAverageBase);
+
 InputParameters
 SpatialAverageBase::validParams()
 {

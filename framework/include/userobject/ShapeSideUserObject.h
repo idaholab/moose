@@ -13,6 +13,10 @@
 #include "ShapeUserObject.h"
 
 // Forward Declarations
+class ShapeSideUserObject;
+
+template <>
+InputParameters validParams<ShapeSideUserObject>();
 
 /**
  * SideUserObject class in which the _phi and _grad_phi shape function data
@@ -29,3 +33,4 @@ public:
 
   ShapeSideUserObject(const InputParameters & parameters);
 };
+

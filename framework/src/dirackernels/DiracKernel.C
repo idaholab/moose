@@ -16,6 +16,8 @@
 
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(DiracKernel);
+
 InputParameters
 DiracKernel::validParams()
 {

@@ -17,6 +17,8 @@
 
 #include "libmesh/threads.h"
 
+defineLegacyParams(KernelBase);
+
 InputParameters
 KernelBase::validParams()
 {

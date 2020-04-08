@@ -13,12 +13,16 @@
 #include "TimeStepper.h"
 
 // Forward declarations
+class DT2;
 
 namespace libMesh
 {
 template <typename T>
 class NumericVector;
 }
+
+template <>
+InputParameters validParams<DT2>();
 
 /**
  * An adaptive timestepper that compares the solution obtained from a
@@ -57,3 +61,4 @@ protected:
   /// maximum increase ratio
   Real _max_increase;
 };
+

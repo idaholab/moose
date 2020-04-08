@@ -15,6 +15,10 @@
 #include "LayeredIntegral.h"
 
 // Forward Declarations
+class NearestPointLayeredIntegral;
+
+template <>
+InputParameters validParams<NearestPointLayeredIntegral>();
 
 /**
  * This UserObject computes integrals of a variable storing partial

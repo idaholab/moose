@@ -22,6 +22,8 @@
 
 registerMooseObject("MooseApp", TopResidualDebugOutput);
 
+defineLegacyParams(TopResidualDebugOutput);
+
 InputParameters
 TopResidualDebugOutput::validParams()
 {

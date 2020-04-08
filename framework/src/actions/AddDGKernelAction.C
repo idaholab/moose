@@ -13,6 +13,8 @@
 
 registerMooseAction("MooseApp", AddDGKernelAction, "add_dg_kernel");
 
+defineLegacyParams(AddDGKernelAction);
+
 InputParameters
 AddDGKernelAction::validParams()
 {

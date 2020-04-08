@@ -13,6 +13,11 @@
 
 #define usingPresetNodalBCMembers usingDirichletBCBaseMembers
 
+template <ComputeStage>
+class ADPresetNodalBC;
+
+declareADValidParams(ADPresetNodalBC);
+
 /**
  * Base class for automatic differentiation nodal BCs that (pre)set the solution
  * vector entries.

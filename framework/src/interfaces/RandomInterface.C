@@ -14,6 +14,8 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 
+defineLegacyParams(RandomInterface);
+
 InputParameters
 RandomInterface::validParams()
 {

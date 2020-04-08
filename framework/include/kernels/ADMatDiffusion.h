@@ -24,3 +24,5 @@ public:
 
   ADMatDiffusion(const InputParameters & parameters);
 };
+
+declareADValidParams(ADMatDiffusion);

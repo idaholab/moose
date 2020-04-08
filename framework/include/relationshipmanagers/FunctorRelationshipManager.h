@@ -14,7 +14,11 @@
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
+class FunctorRelationshipManager;
 class MooseMesh;
+
+template <>
+InputParameters validParams<FunctorRelationshipManager>();
 
 /**
  * Intermediate base class for RelationshipManagers that are simply built
@@ -44,3 +48,4 @@ public:
 protected:
   std::unique_ptr<GhostingFunctor> _functor;
 };
+

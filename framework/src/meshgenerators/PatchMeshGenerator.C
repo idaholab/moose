@@ -25,6 +25,8 @@
 
 registerMooseObject("MooseApp", PatchMeshGenerator);
 
+defineLegacyParams(PatchMeshGenerator);
+
 InputParameters
 PatchMeshGenerator::validParams()
 {

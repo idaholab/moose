@@ -30,6 +30,8 @@ ElementQualityChecker::FailureMessageType()
 
 registerMooseObject("MooseApp", ElementQualityChecker);
 
+defineLegacyParams(ElementQualityChecker);
+
 InputParameters
 ElementQualityChecker::validParams()
 {

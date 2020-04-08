@@ -12,6 +12,11 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
+class CompositeFunction;
+
+template <>
+InputParameters validParams<CompositeFunction>();
+
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.

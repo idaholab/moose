@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(ElementIntegralUserObject);
+
 InputParameters
 ElementIntegralUserObject::validParams()
 {

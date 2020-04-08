@@ -13,6 +13,10 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
+class FunctionMaterialBase;
+
+template <>
+InputParameters validParams<FunctionMaterialBase>();
 
 /**
  * %Material base class central for all Materials that provide a Function as a

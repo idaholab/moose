@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class Residual;
+
+template <>
+InputParameters validParams<Residual>();
 
 class Residual : public GeneralPostprocessor
 {
@@ -31,3 +35,4 @@ public:
 protected:
   MooseEnum _residual_type;
 };
+

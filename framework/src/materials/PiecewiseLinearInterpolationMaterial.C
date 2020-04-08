@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", PiecewiseLinearInterpolationMaterial);
 
+defineLegacyParams(PiecewiseLinearInterpolationMaterial);
+
 InputParameters
 PiecewiseLinearInterpolationMaterial::validParams()
 {

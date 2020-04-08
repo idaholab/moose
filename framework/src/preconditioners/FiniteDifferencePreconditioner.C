@@ -18,6 +18,8 @@
 
 registerMooseObjectAliased("MooseApp", FiniteDifferencePreconditioner, "FDP");
 
+defineLegacyParams(FiniteDifferencePreconditioner);
+
 InputParameters
 FiniteDifferencePreconditioner::validParams()
 {

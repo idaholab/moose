@@ -12,6 +12,10 @@
 #include "MeshModifier.h"
 
 // Forward Declaration
+class AddExtraNodeset;
+
+template <>
+InputParameters validParams<AddExtraNodeset>();
 
 class AddExtraNodeset : public MeshModifier
 {
@@ -21,3 +25,4 @@ public:
 protected:
   virtual void modify() override;
 };
+

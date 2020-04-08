@@ -44,3 +44,4 @@ protected:
   /// Reusable storage
   std::vector<dof_id_type> _dof_indices;
 };
+

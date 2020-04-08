@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", PatternedMesh);
 
+defineLegacyParams(PatternedMesh);
+
 InputParameters
 PatternedMesh::validParams()
 {

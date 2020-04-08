@@ -41,3 +41,4 @@ protected:
   ///The graph we're working on
   PerfGraph & _graph;
 };
+

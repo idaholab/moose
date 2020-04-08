@@ -22,6 +22,8 @@
 
 registerMooseObject("MooseApp", Exodus);
 
+defineLegacyParams(Exodus);
+
 InputParameters
 Exodus::validParams()
 {

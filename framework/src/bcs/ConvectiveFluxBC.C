@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ConvectiveFluxBC);
 
+defineLegacyParams(ConvectiveFluxBC);
+
 InputParameters
 ConvectiveFluxBC::validParams()
 {

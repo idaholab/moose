@@ -13,6 +13,10 @@
 #include "AddVariableAction.h"
 
 // Forward declarations
+class AddAuxVariableAction;
+
+template <>
+InputParameters validParams<AddAuxVariableAction>();
 
 /**
  * Action for creating Auxiliary variables

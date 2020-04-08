@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MassEigenKernel);
 
+defineLegacyParams(MassEigenKernel);
+
 InputParameters
 MassEigenKernel::validParams()
 {

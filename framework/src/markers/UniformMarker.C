@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", UniformMarker);
 
+defineLegacyParams(UniformMarker);
+
 InputParameters
 UniformMarker::validParams()
 {

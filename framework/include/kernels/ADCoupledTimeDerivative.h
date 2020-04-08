@@ -12,6 +12,10 @@
 #include "ADKernelValue.h"
 
 // Forward Declaration
+template <ComputeStage>
+class ADCoupledTimeDerivative;
+
+declareADValidParams(ADCoupledTimeDerivative);
 
 /**
  * This calculates the time derivative for a coupled variable
@@ -31,3 +35,4 @@ protected:
 
   usingKernelValueMembers;
 };
+

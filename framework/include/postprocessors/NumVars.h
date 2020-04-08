@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class NumVars;
+
+template <>
+InputParameters validParams<NumVars>();
 
 class NumVars : public GeneralPostprocessor
 {
@@ -39,3 +43,4 @@ protected:
   const System * _system_pointer;
   const EquationSystems * _es_pointer;
 };
+

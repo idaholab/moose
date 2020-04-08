@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredAverage);
 
+defineLegacyParams(NearestPointLayeredAverage);
+
 InputParameters
 NearestPointLayeredAverage::validParams()
 {

@@ -9,6 +9,8 @@
 
 #include "Function.h"
 
+defineLegacyParams(Function);
+
 InputParameters
 Function::validParams()
 {

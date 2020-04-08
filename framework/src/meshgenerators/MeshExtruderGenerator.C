@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", MeshExtruderGenerator);
 
+defineLegacyParams(MeshExtruderGenerator);
+
 InputParameters
 MeshExtruderGenerator::validParams()
 {

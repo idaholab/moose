@@ -11,6 +11,11 @@
 
 #include "MooseObjectAction.h"
 
+class AddMultiAppAction;
+
+template <>
+InputParameters validParams<AddMultiAppAction>();
+
 class AddMultiAppAction : public MooseObjectAction
 {
 public:
@@ -20,3 +25,4 @@ public:
 
   virtual void act() override;
 };
+

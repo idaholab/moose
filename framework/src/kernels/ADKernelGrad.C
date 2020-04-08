@@ -15,6 +15,9 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
+defineADLegacyParams(ADKernelGrad);
+defineADLegacyParams(ADVectorKernelGrad);
+
 template <typename T, ComputeStage compute_stage>
 InputParameters
 ADKernelGradTempl<T, compute_stage>::validParams()

@@ -13,6 +13,10 @@
 #include "ElementDamper.h"
 
 // Forward Declarations
+class MaxIncrement;
+
+template <>
+InputParameters validParams<MaxIncrement>();
 
 /**
  * TODO
@@ -36,3 +40,4 @@ protected:
    */
   const enum class IncrementTypeEnum { absolute, fractional } _increment_type;
 };
+

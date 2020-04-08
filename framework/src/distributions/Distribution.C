@@ -10,6 +10,8 @@
 #include "Distribution.h"
 #include "MooseRandom.h"
 
+defineLegacyParams(Distribution);
+
 InputParameters
 Distribution::validParams()
 {

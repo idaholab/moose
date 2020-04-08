@@ -13,6 +13,10 @@
 #include "BoundaryRestrictable.h"
 
 // Forward declarations
+class BoundaryRestrictableRequired;
+
+template <>
+InputParameters validParams<BoundaryRestrictableRequired>();
 
 /**
  * A class for requiring an object to be boundary restricted.

@@ -12,6 +12,10 @@
 #include "Material.h"
 
 // Forward Declarations
+class GenericFunctionMaterial;
+
+template <>
+InputParameters validParams<GenericFunctionMaterial>();
 
 /**
  * This material automatically declares as material properties whatever is passed to it

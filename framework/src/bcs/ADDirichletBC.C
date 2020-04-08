@@ -11,6 +11,8 @@
 
 registerADMooseObject("MooseApp", ADDirichletBC);
 
+defineADLegacyParams(ADDirichletBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADDirichletBC<compute_stage>::validParams()

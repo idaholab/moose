@@ -18,7 +18,7 @@
  */
 template <typename T>
 class MaterialDerivativeTestKernelBase
-  : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+    : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   static InputParameters validParams();
@@ -74,3 +74,4 @@ MaterialDerivativeTestKernelBase<T>::validParams()
       "derivatives of the original material property)");
   return params;
 }
+

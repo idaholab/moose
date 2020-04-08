@@ -11,6 +11,11 @@
 
 #include "TimeIntegrator.h"
 
+class ExplicitRK2;
+
+template <>
+InputParameters validParams<ExplicitRK2>();
+
 /**
  * Base class for three different explicit second-order Runge-Kutta
  * time integration methods:
@@ -97,3 +102,4 @@ ExplicitRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T3 &
 
   u_dot *= 1. / _dt;
 }
+

@@ -23,6 +23,8 @@
 
 registerMooseObject("MooseApp", MultiAppVariableValueSampleTransfer);
 
+defineLegacyParams(MultiAppVariableValueSampleTransfer);
+
 InputParameters
 MultiAppVariableValueSampleTransfer::validParams()
 {

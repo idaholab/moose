@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ElementsAlongLine);
 
+defineLegacyParams(ElementsAlongLine);
+
 InputParameters
 ElementsAlongLine::validParams()
 {

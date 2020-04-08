@@ -12,6 +12,10 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
+class NodalProxyMaxValue;
+
+template <>
+InputParameters validParams<NodalProxyMaxValue>();
 
 /**
  * Computes the max value at a node and broadcasts it to all
@@ -40,3 +44,4 @@ protected:
   Real _value;
   dof_id_type _node_id;
 };
+

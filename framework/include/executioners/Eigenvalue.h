@@ -12,10 +12,14 @@
 #include "Steady.h"
 
 class InputParameters;
+class Eigenvalue;
 class EigenProblem;
 
 template <typename T>
 InputParameters validParams();
+
+template <>
+InputParameters validParams<Eigenvalue>();
 
 class Eigenvalue : public Steady
 {

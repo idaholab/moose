@@ -30,6 +30,8 @@
 
 registerMooseObjectAliased("MooseApp", PhysicsBasedPreconditioner, "PBP");
 
+defineLegacyParams(PhysicsBasedPreconditioner);
+
 InputParameters
 PhysicsBasedPreconditioner::validParams()
 {

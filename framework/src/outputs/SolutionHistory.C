@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", SolutionHistory);
 
+defineLegacyParams(SolutionHistory);
+
 InputParameters
 SolutionHistory::validParams()
 {

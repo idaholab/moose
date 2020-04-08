@@ -18,6 +18,8 @@
 
 registerMooseObject("MooseApp", MaterialVectorPostprocessor);
 
+defineLegacyParams(MaterialVectorPostprocessor);
+
 InputParameters
 MaterialVectorPostprocessor::validParams()
 {

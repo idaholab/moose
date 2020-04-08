@@ -11,7 +11,11 @@
 
 #include "GeneralVectorPostprocessor.h"
 
+class PiecewiseFunctionTabulate;
 class PiecewiseBase;
+
+template <>
+InputParameters validParams<PiecewiseFunctionTabulate>();
 
 /**
  * Tabulate the function nodes of a piecewise function, such as PiecewiseLinear or

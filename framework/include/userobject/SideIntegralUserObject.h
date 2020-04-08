@@ -13,6 +13,10 @@
 #include "SideUserObject.h"
 
 // Forward Declarations
+class SideIntegralUserObject;
+
+template <>
+InputParameters validParams<SideIntegralUserObject>();
 
 /**
  * This postprocessor computes a side integral of the specified variable over a given boundary.
@@ -43,3 +47,4 @@ protected:
 
   Real _integral_value;
 };
+

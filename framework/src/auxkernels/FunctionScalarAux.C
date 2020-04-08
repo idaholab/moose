@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", FunctionScalarAux);
 
+defineLegacyParams(FunctionScalarAux);
+
 InputParameters
 FunctionScalarAux::validParams()
 {

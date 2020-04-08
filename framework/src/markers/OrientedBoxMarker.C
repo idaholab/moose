@@ -20,6 +20,8 @@
 
 registerMooseObject("MooseApp", OrientedBoxMarker);
 
+defineLegacyParams(OrientedBoxMarker);
+
 InputParameters
 OrientedBoxMarker::validParams()
 {

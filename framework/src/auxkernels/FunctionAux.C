@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", FunctionAux);
 
+defineLegacyParams(FunctionAux);
+
 InputParameters
 FunctionAux::validParams()
 {

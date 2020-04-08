@@ -45,3 +45,4 @@ protected:
   std::vector<std::map<std::string, std::set<SubdomainID>>> _block_ics;
   ///@}
 };
+

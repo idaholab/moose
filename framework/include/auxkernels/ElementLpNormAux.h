@@ -13,6 +13,10 @@
 #include "AuxKernel.h"
 
 // Forward declarations
+class ElementLpNormAux;
+
+template <>
+InputParameters validParams<ElementLpNormAux>();
 
 /**
  * Compute an elemental field variable (single value per element)
@@ -49,3 +53,4 @@ protected:
   /// A reference to the variable to compute the norm of.
   const VariableValue & _coupled_var;
 };
+

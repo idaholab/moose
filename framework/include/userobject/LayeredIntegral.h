@@ -14,6 +14,10 @@
 #include "LayeredBase.h"
 
 // Forward Declarations
+class LayeredIntegral;
+
+template <>
+InputParameters validParams<LayeredIntegral>();
 
 /**
  * This UserObject computes volume integrals of a variable storing partial sums for the specified

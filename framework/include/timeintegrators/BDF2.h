@@ -12,6 +12,11 @@
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
 
+class BDF2;
+
+template <>
+InputParameters validParams<BDF2>();
+
 /**
  * BDF2 time integrator
  */
@@ -63,3 +68,4 @@ BDF2::computeTimeDerivativeHelper(T & u_dot,
     u_dot *= 1. / _dt;
   }
 }
+

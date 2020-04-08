@@ -16,6 +16,10 @@
 #include "libmesh/point.h"
 
 // Forward declerations
+class ParsedAddSideset;
+
+template <>
+InputParameters validParams<ParsedAddSideset>();
 
 /**
  * MeshModifier for defining a Sideset by a parsed expression and
@@ -50,3 +54,4 @@ private:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
+

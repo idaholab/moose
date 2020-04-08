@@ -12,7 +12,11 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
+class Eigenvalues;
 class NonlinearEigenSystem;
+
+template <>
+InputParameters validParams<Eigenvalues>();
 
 class Eigenvalues : public GeneralVectorPostprocessor
 {
@@ -29,3 +33,4 @@ protected:
   VectorPostprocessorValue & _eigen_values_imag;
   NonlinearEigenSystem * _nl_eigen;
 };
+

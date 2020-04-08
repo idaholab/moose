@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", SpiralAnnularMeshGenerator);
 
+defineLegacyParams(SpiralAnnularMeshGenerator);
+
 InputParameters
 SpiralAnnularMeshGenerator::validParams()
 {

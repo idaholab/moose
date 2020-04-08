@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", NodalL2Norm);
 
+defineLegacyParams(NodalL2Norm);
+
 InputParameters
 NodalL2Norm::validParams()
 {

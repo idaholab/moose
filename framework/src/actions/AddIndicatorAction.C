@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddIndicatorAction, "add_indicator");
 
+defineLegacyParams(AddIndicatorAction);
+
 InputParameters
 AddIndicatorAction::validParams()
 {

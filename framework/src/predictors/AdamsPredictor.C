@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", AdamsPredictor);
 
+defineLegacyParams(AdamsPredictor);
+
 InputParameters
 AdamsPredictor::validParams()
 {

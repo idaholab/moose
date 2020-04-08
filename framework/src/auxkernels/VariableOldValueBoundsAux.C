@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", VariableOldValueBoundsAux);
 
+defineLegacyParams(VariableOldValueBoundsAux);
+
 InputParameters
 VariableOldValueBoundsAux::validParams()
 {

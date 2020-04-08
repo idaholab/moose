@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADPresetNodalBC.h"
+defineADLegacyParams(ADPresetNodalBC);
 
 template <ComputeStage compute_stage>
 InputParameters

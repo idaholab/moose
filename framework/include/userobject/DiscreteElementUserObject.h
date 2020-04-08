@@ -13,6 +13,10 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
+class DiscreteElementUserObject;
+
+template <>
+InputParameters validParams<DiscreteElementUserObject>();
 
 class DiscreteElementUserObject : public ElementUserObject
 {
@@ -29,3 +33,4 @@ public:
   virtual void threadJoin(const UserObject &) override final;
   /// @}
 };
+

@@ -14,6 +14,10 @@
 #include "libmesh/point.h"
 
 // Forward declarations
+class SideSetsAroundSubdomainGenerator;
+
+template <>
+InputParameters validParams<SideSetsAroundSubdomainGenerator>();
 
 /**
  * Adds the faces on the boundary of given block
@@ -49,3 +53,4 @@ protected:
   /// if specified, then faces are only added if their normal is close to this
   Point _normal;
 };
+

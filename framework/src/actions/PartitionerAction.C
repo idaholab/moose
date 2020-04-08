@@ -16,6 +16,8 @@
 
 registerMooseAction("MooseApp", PartitionerAction, "add_partitioner");
 
+defineLegacyParams(PartitionerAction);
+
 InputParameters
 PartitionerAction::validParams()
 {

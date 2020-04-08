@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddSamplerAction, "add_sampler");
 
+defineLegacyParams(AddSamplerAction);
+
 InputParameters
 AddSamplerAction::validParams()
 {

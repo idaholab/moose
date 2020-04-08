@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ArrayVariableComponent);
 
+defineLegacyParams(ArrayVariableComponent);
+
 InputParameters
 ArrayVariableComponent::validParams()
 {

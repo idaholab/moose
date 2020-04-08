@@ -18,6 +18,8 @@
 
 registerMooseObject("MooseApp", NodalVariableValue);
 
+defineLegacyParams(NodalVariableValue);
+
 InputParameters
 NodalVariableValue::validParams()
 {

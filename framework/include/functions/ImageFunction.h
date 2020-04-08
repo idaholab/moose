@@ -14,6 +14,10 @@
 #include "ImageSampler.h"
 
 // Forward declarations
+class ImageFunction;
+
+template <>
+InputParameters validParams<ImageFunction>();
 
 /**
  * A function for extracting data from an image or stack of images

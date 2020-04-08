@@ -13,6 +13,11 @@
 
 #include "libmesh/enum_elem_quality.h"
 
+class ElementQualityChecker;
+
+template <>
+InputParameters validParams<ElementQualityChecker>();
+
 class ElementQualityChecker : public ElementUserObject
 {
 public:
@@ -60,3 +65,4 @@ private:
   // the way how check failure should respond: warning or error
   const FailureType _failure_type;
 };
+

@@ -12,6 +12,10 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
+class BoundingBoxIC;
+
+template <>
+InputParameters validParams<BoundingBoxIC>();
 
 /**
  * BoundingBoxIC allows setting the initial condition of a value inside and outside of a specified

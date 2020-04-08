@@ -11,6 +11,11 @@
 
 #include "InternalSideIndicator.h"
 
+class ValueJumpIndicator;
+
+template <>
+InputParameters validParams<ValueJumpIndicator>();
+
 class ValueJumpIndicator : public InternalSideIndicator
 {
 public:

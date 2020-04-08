@@ -14,6 +14,8 @@
 
 registerMooseObjectAliased("MooseApp", VTKOutput, "VTK");
 
+defineLegacyParams(VTKOutput);
+
 InputParameters
 VTKOutput::validParams()
 {

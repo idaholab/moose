@@ -31,3 +31,4 @@ public:
 
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
 };
+

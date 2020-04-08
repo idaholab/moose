@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", RealFunctionControl);
 
+defineLegacyParams(RealFunctionControl);
+
 InputParameters
 RealFunctionControl::validParams()
 {

@@ -11,6 +11,11 @@
 
 #include "ADMortarConstraint.h"
 
+template <ComputeStage>
+class EqualValueConstraint;
+
+declareADValidParams(EqualValueConstraint);
+
 /**
  * Constrain the value of a variable to be the same on both sides of an
  * interface.

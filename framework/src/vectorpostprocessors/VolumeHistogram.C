@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", VolumeHistogram);
 
+defineLegacyParams(VolumeHistogram);
+
 InputParameters
 VolumeHistogram::validParams()
 {

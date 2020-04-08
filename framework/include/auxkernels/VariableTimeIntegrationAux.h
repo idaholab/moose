@@ -12,6 +12,10 @@
 #include "AuxKernel.h"
 
 // forward declarations
+class VariableTimeIntegrationAux;
+
+template <>
+InputParameters validParams<VariableTimeIntegrationAux>();
 
 /**
  * An AuxKernel that can be used to integrate a field variable in time
@@ -34,3 +38,4 @@ protected:
   unsigned int _order;
   std::vector<Real> _integration_coef;
 };
+

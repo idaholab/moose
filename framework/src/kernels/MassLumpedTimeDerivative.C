@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", MassLumpedTimeDerivative);
 
+defineLegacyParams(MassLumpedTimeDerivative);
+
 InputParameters
 MassLumpedTimeDerivative::validParams()
 {

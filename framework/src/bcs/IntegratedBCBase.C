@@ -10,6 +10,8 @@
 #include "IntegratedBCBase.h"
 #include "Assembly.h"
 
+defineLegacyParams(IntegratedBCBase);
+
 InputParameters
 IntegratedBCBase::validParams()
 {

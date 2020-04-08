@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ElementalVariableValue);
 
+defineLegacyParams(ElementalVariableValue);
+
 InputParameters
 ElementalVariableValue::validParams()
 {

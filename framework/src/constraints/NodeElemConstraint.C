@@ -18,6 +18,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+defineLegacyParams(NodeElemConstraint);
+
 InputParameters
 NodeElemConstraint::validParams()
 {

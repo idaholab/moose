@@ -9,6 +9,8 @@
 
 #include "FunctionMaterialBase.h"
 
+defineLegacyParams(FunctionMaterialBase);
+
 InputParameters
 FunctionMaterialBase::validParams()
 {

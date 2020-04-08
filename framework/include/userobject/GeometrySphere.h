@@ -11,6 +11,11 @@
 
 #include "GeometryBase.h"
 
+class GeometrySphere;
+
+template <>
+InputParameters validParams<GeometrySphere>();
+
 /**
  * Snaps the selected nodes to the surface of a sphere (or circular disk in 2D)
  */
@@ -27,3 +32,4 @@ protected:
   const Point _center;
   const Real _radius;
 };
+

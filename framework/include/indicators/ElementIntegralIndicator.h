@@ -11,6 +11,11 @@
 
 #include "ElementIndicator.h"
 
+class ElementIntegralIndicator;
+
+template <>
+InputParameters validParams<ElementIntegralIndicator>();
+
 class ElementIntegralIndicator : public ElementIndicator
 {
 public:

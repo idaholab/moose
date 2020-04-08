@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", PenaltyDirichletNodalKernel);
 
+defineLegacyParams(PenaltyDirichletNodalKernel);
+
 InputParameters
 PenaltyDirichletNodalKernel::validParams()
 {

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MatchedValueBC);
 
+defineLegacyParams(MatchedValueBC);
+
 InputParameters
 MatchedValueBC::validParams()
 {

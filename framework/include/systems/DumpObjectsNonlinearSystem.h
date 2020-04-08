@@ -44,3 +44,4 @@ public:
 protected:
   NumericVector<Number> * _dummy;
 };
+

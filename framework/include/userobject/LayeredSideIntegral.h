@@ -14,6 +14,10 @@
 #include "LayeredBase.h"
 
 // Forward Declarations
+class LayeredSideIntegral;
+
+template <>
+InputParameters validParams<LayeredSideIntegral>();
 
 /**
  * This UserObject computes volume integrals of a variable storing
@@ -39,3 +43,4 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 };
+

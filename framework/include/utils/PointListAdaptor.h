@@ -116,3 +116,4 @@ PointListAdaptor<Point>::getPoint(const Point & item) const
 {
   return item;
 }
+

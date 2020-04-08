@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddMaterialAction, "add_material");
 
+defineLegacyParams(AddMaterialAction);
+
 InputParameters
 AddMaterialAction::validParams()
 {

@@ -13,6 +13,10 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
+class ElementVariablePostprocessor;
+
+template <>
+InputParameters validParams<ElementVariablePostprocessor>();
 
 class ElementVariablePostprocessor : public ElementPostprocessor,
                                      public MooseVariableInterface<Real>
@@ -37,3 +41,4 @@ protected:
   /// The current quadrature point
   unsigned int _qp;
 };
+

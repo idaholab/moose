@@ -14,6 +14,8 @@
 
 registerMooseAction("MooseApp", SetupTimeStepperAction, "setup_time_stepper");
 
+defineLegacyParams(SetupTimeStepperAction);
+
 InputParameters
 SetupTimeStepperAction::validParams()
 {

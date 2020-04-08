@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", GhostingAux);
 
+defineLegacyParams(GhostingAux);
+
 InputParameters
 GhostingAux::validParams()
 {

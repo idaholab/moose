@@ -11,6 +11,11 @@
 
 #include "ArrayNodalBC.h"
 
+class ArrayDirichletBC;
+
+template <>
+InputParameters validParams<ArrayDirichletBC>();
+
 /**
  * Boundary condition of a Dirichlet type
  *

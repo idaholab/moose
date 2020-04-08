@@ -12,6 +12,10 @@
 #include "TimeKernel.h"
 
 // Forward Declaration
+class MassLumpedTimeDerivative;
+
+template <>
+InputParameters validParams<MassLumpedTimeDerivative>();
 
 class MassLumpedTimeDerivative : public TimeKernel
 {
@@ -28,3 +32,4 @@ protected:
 
   const VariableValue & _u_dot_nodal;
 };
+

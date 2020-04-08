@@ -20,6 +20,8 @@ registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
 registerMooseAction("MooseApp", SetupMeshAction, "set_mesh_base");
 registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
 
+defineLegacyParams(SetupMeshAction);
+
 InputParameters
 SetupMeshAction::validParams()
 {

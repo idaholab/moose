@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", BicubicSplineFunction);
 
+defineLegacyParams(BicubicSplineFunction);
+
 InputParameters
 BicubicSplineFunction::validParams()
 {

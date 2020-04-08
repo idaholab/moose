@@ -12,7 +12,11 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
+class PenetrationAux;
 class PenetrationLocator;
+
+template <>
+InputParameters validParams<PenetrationAux>();
 
 class PenetrationAux : public AuxKernel
 {
@@ -64,3 +68,4 @@ protected:
 public:
   static const Real NotPenetrated;
 };
+

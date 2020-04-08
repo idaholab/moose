@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ArrayTimeDerivative);
 
+defineLegacyParams(ArrayTimeDerivative);
+
 InputParameters
 ArrayTimeDerivative::validParams()
 {

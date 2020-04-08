@@ -40,6 +40,7 @@
 // Forward declarations
 class AuxiliarySystem;
 class DisplacedProblem;
+class FEProblemBase;
 class MooseMesh;
 class NonlinearSystemBase;
 class NonlinearSystem;
@@ -84,6 +85,9 @@ namespace libMesh
 class CouplingMatrix;
 class NonlinearImplicitSystem;
 } // namespace libMesh
+
+template <>
+InputParameters validParams<FEProblemBase>();
 
 /// Enumeration for nonlinear convergence reasons
 enum class MooseNonlinearConvergenceReason

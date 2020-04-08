@@ -10,6 +10,8 @@
 #include "Postprocessor.h"
 #include "UserObject.h"
 
+defineLegacyParams(Postprocessor);
+
 InputParameters
 Postprocessor::validParams()
 {

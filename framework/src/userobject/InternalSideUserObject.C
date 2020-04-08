@@ -10,6 +10,8 @@
 #include "InternalSideUserObject.h"
 #include "Assembly.h"
 
+defineLegacyParams(InternalSideUserObject);
+
 InputParameters
 InternalSideUserObject::validParams()
 {

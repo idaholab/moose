@@ -12,6 +12,10 @@
 #include "PiecewiseBase.h"
 
 // Forward declarations
+class PiecewiseConstant;
+
+template <>
+InputParameters validParams<PiecewiseConstant>();
 
 /**
  * Function which provides a piecewise continuous constant interpolation

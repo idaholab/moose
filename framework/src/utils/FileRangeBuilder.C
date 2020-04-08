@@ -15,6 +15,8 @@
 #include "pcrecpp.h"
 #include "tinydir.h"
 
+defineLegacyParams(FileRangeBuilder);
+
 InputParameters
 FileRangeBuilder::validParams()
 {

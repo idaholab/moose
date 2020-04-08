@@ -11,6 +11,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+defineLegacyParams(SetupInterface);
+
 InputParameters
 SetupInterface::validParams()
 {

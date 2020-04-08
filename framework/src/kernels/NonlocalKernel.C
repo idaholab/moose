@@ -18,6 +18,8 @@
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(NonlocalKernel);
+
 InputParameters
 NonlocalKernel::validParams()
 {

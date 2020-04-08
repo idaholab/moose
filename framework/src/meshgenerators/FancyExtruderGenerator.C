@@ -35,6 +35,8 @@
 
 registerMooseObject("MooseApp", FancyExtruderGenerator);
 
+defineLegacyParams(FancyExtruderGenerator);
+
 InputParameters
 FancyExtruderGenerator::validParams()
 {

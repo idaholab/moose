@@ -20,6 +20,8 @@
 
 registerMooseObject("MooseApp", MultiAppPostprocessorTransfer);
 
+defineLegacyParams(MultiAppPostprocessorTransfer);
+
 InputParameters
 MultiAppPostprocessorTransfer::validParams()
 {

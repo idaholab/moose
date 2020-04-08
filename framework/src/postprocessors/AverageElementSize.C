@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", AverageElementSize);
 
+defineLegacyParams(AverageElementSize);
+
 InputParameters
 AverageElementSize::validParams()
 {

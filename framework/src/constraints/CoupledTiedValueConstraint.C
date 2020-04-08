@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", CoupledTiedValueConstraint);
 
+defineLegacyParams(CoupledTiedValueConstraint);
+
 InputParameters
 CoupledTiedValueConstraint::validParams()
 {

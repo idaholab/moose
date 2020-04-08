@@ -17,6 +17,8 @@
 // libmesh includes
 #include "libmesh/threads.h"
 
+defineADLegacyParams(ADDGKernel);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADDGKernel<compute_stage>::validParams()

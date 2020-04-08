@@ -11,7 +11,11 @@
 
 #include "ConditionalEnableControl.h"
 
+class ConditionalFunctionEnableControl;
 class Function;
+
+template <>
+InputParameters validParams<ConditionalFunctionEnableControl>();
 
 /**
  * Control for enabling/disabling objects when a function value is true

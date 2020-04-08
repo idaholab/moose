@@ -11,6 +11,11 @@
 
 #include "ADDirichletBCBase.h"
 
+template <ComputeStage>
+class ADFunctionDirichletBC;
+
+declareADValidParams(ADFunctionDirichletBC);
+
 /**
  * Boundary condition of a Dirichlet type
  *

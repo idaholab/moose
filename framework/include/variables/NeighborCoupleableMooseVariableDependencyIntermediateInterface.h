@@ -33,3 +33,4 @@ public:
       addMooseVariableDependency(coupled_var);
   }
 };
+

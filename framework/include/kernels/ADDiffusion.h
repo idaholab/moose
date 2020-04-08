@@ -11,6 +11,11 @@
 
 #include "ADKernelGrad.h"
 
+template <ComputeStage>
+class ADDiffusion;
+
+declareADValidParams(ADDiffusion);
+
 template <ComputeStage compute_stage>
 class ADDiffusion : public ADKernelGrad<compute_stage>
 {
@@ -24,3 +29,4 @@ protected:
 
   usingKernelGradMembers;
 };
+

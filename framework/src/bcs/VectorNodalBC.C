@@ -14,6 +14,8 @@
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
+defineLegacyParams(VectorNodalBC);
+
 InputParameters
 VectorNodalBC::validParams()
 {

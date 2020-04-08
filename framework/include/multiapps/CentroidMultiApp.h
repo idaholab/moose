@@ -12,6 +12,11 @@
 #include "TransientMultiApp.h"
 #include "BlockRestrictable.h"
 
+class CentroidMultiApp;
+
+template <>
+InputParameters validParams<CentroidMultiApp>();
+
 /**
  * Automatically generates Sub-App positions from centroids of elements in the master mesh.
  */

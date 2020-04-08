@@ -11,6 +11,11 @@
 
 #include "QuadraturePointMarker.h"
 
+class ValueRangeMarker;
+
+template <>
+InputParameters validParams<ValueRangeMarker>();
+
 class ValueRangeMarker : public QuadraturePointMarker
 {
 public:
@@ -28,3 +33,4 @@ protected:
   MarkerValue _inside;
   MarkerValue _outside;
 };
+

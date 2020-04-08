@@ -12,6 +12,10 @@
 #include "SideSetsGeneratorBase.h"
 
 // Forward declarations
+class AllSideSetsByNormalsGenerator;
+
+template <>
+InputParameters validParams<AllSideSetsByNormalsGenerator>();
 
 /**
  * This class will add sidesets to the entire mesh based on unique normals.
@@ -38,3 +42,4 @@ protected:
 
   std::unique_ptr<MeshBase> & _input;
 };
+

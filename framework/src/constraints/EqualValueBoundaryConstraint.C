@@ -48,6 +48,8 @@ struct CompareElemsByLevel
 
 registerMooseObject("MooseApp", EqualValueBoundaryConstraint);
 
+defineLegacyParams(EqualValueBoundaryConstraint);
+
 InputParameters
 EqualValueBoundaryConstraint::validParams()
 {

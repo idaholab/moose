@@ -23,6 +23,9 @@ using ADKernelStabilized = ADKernelStabilizedTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorKernelStabilized = ADKernelStabilizedTempl<RealVectorValue, compute_stage>;
 
+declareADValidParams(ADKernelStabilized);
+declareADValidParams(ADVectorKernelStabilized);
+
 template <typename T, ComputeStage compute_stage>
 class ADKernelStabilizedTempl : public ADKernelTempl<T, compute_stage>
 {
@@ -48,3 +51,4 @@ protected:
 
   usingTemplKernelMembers(T);
 };
+

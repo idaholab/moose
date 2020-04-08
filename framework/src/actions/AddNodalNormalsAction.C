@@ -20,6 +20,8 @@ registerMooseAction("MooseApp", AddNodalNormalsAction, "add_postprocessor");
 
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_user_object");
 
+defineLegacyParams(AddNodalNormalsAction);
+
 InputParameters
 AddNodalNormalsAction::validParams()
 {

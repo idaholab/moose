@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", RandomIC);
 
+defineLegacyParams(RandomIC);
+
 InputParameters
 RandomIC::validParams()
 {

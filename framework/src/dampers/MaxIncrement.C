@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MaxIncrement);
 
+defineLegacyParams(MaxIncrement);
+
 InputParameters
 MaxIncrement::validParams()
 {

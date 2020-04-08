@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class InputParameters;
+class SamplerBase;
 class VectorPostprocessor;
 
 namespace libMesh
@@ -28,6 +29,9 @@ class Communicator;
 
 template <typename T>
 InputParameters validParams();
+
+template <>
+InputParameters validParams<SamplerBase>();
 
 /**
  * Base class for VectorPostprocessors that need to do "sampling" of
@@ -117,3 +121,4 @@ protected:
 
   std::vector<VectorPostprocessorValue *> _values;
 };
+

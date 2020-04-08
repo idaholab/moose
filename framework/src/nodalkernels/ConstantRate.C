@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ConstantRate);
 
+defineLegacyParams(ConstantRate);
+
 InputParameters
 ConstantRate::validParams()
 {

@@ -12,6 +12,7 @@
 registerMooseObject("MooseApp", PostprocessorDirichletBC);
 
 // Used by MOOSEDocs: syntax/Postprocessors/index.md
+defineLegacyParams(PostprocessorDirichletBC);
 
 InputParameters
 PostprocessorDirichletBC::validParams()

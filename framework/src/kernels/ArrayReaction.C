@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ArrayReaction);
 
+defineLegacyParams(ArrayReaction);
+
 InputParameters
 ArrayReaction::validParams()
 {

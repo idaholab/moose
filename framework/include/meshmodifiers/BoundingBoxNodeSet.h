@@ -16,10 +16,14 @@
 #include "libmesh/bounding_box.h"
 
 // Forward Declaration
+class BoundingBoxNodeSet;
 namespace libMesh
 {
 class BoundingBox;
 }
+
+template <>
+InputParameters validParams<BoundingBoxNodeSet>();
 
 /**
  * Selects a set of nodes and assigns a nodeset name to them based on
@@ -41,3 +45,4 @@ private:
   /// Bounding box for testing element centroids against. Note that
   BoundingBox _bounding_box;
 };
+

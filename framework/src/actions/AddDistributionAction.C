@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddDistributionAction, "add_distribution");
 
+defineLegacyParams(AddDistributionAction);
+
 InputParameters
 AddDistributionAction::validParams()
 {

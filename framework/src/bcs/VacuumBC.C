@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", VacuumBC);
 
+defineLegacyParams(VacuumBC);
+
 InputParameters
 VacuumBC::validParams()
 {

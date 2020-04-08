@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ElementIntegralMaterialProperty);
 
+defineLegacyParams(ElementIntegralMaterialProperty);
+
 InputParameters
 ElementIntegralMaterialProperty::validParams()
 {

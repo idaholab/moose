@@ -15,6 +15,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+defineLegacyParams(PointSamplerBase);
+
 InputParameters
 PointSamplerBase::validParams()
 {

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", OneDEqualValueConstraintBC);
 
+defineLegacyParams(OneDEqualValueConstraintBC);
+
 InputParameters
 OneDEqualValueConstraintBC::validParams()
 {

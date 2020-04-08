@@ -10,6 +10,8 @@
 #include "BreakMeshByBlockGeneratorBase.h"
 #include "InputParameters.h"
 
+defineLegacyParams(BreakMeshByBlockGeneratorBase);
+
 InputParameters
 BreakMeshByBlockGeneratorBase::validParams()
 {

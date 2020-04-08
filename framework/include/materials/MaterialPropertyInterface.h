@@ -19,7 +19,11 @@
 
 // Forward declarations
 class InputParameters;
+class MaterialPropertyInterface;
 class MooseObject;
+
+template <>
+InputParameters validParams<MaterialPropertyInterface>();
 
 /**
  * \class MaterialPropertyInterface

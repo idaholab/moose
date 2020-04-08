@@ -17,6 +17,8 @@
 #include "MooseEigenSystem.h"
 #include "UserObject.h"
 
+defineLegacyParams(EigenExecutionerBase);
+
 InputParameters
 EigenExecutionerBase::validParams()
 {

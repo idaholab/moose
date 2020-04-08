@@ -134,3 +134,4 @@ void
 ThreadedNodeLoop<RangeType, IteratorType>::postNode(IteratorType & /*node_it*/)
 {
 }
+

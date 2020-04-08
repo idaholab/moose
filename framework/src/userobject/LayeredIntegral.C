@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", LayeredIntegral);
 
+defineLegacyParams(LayeredIntegral);
+
 InputParameters
 LayeredIntegral::validParams()
 {

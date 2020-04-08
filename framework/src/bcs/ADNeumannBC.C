@@ -11,6 +11,8 @@
 
 registerADMooseObject("MooseApp", ADNeumannBC);
 
+defineADLegacyParams(ADNeumannBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADNeumannBC<compute_stage>::validParams()

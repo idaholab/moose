@@ -13,6 +13,8 @@
 
 registerADMooseObject("MooseApp", ADBodyForce);
 
+defineADLegacyParams(ADBodyForce);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADBodyForce<compute_stage>::validParams()

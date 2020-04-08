@@ -19,6 +19,8 @@
 
 registerMooseObject("MooseApp", MaterialPropertyDebugOutput);
 
+defineLegacyParams(MaterialPropertyDebugOutput);
+
 InputParameters
 MaterialPropertyDebugOutput::validParams()
 {

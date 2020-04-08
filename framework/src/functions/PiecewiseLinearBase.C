@@ -9,6 +9,8 @@
 
 #include "PiecewiseLinearBase.h"
 
+defineLegacyParams(PiecewiseLinearBase);
+
 InputParameters
 PiecewiseLinearBase::validParams()
 {

@@ -23,6 +23,8 @@
 #include "libmesh/libmesh_common.h"
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(DGKernel);
+
 InputParameters
 DGKernel::validParams()
 {

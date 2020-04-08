@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", NumPicardIterations);
 
+defineLegacyParams(NumPicardIterations);
+
 InputParameters
 NumPicardIterations::validParams()
 {

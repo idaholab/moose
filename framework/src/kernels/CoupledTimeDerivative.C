@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", CoupledTimeDerivative);
 
+defineLegacyParams(CoupledTimeDerivative);
+
 InputParameters
 CoupledTimeDerivative::validParams()
 {

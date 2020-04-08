@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", ConditionalFunctionEnableControl);
 
+defineLegacyParams(ConditionalFunctionEnableControl);
+
 InputParameters
 ConditionalFunctionEnableControl::validParams()
 {

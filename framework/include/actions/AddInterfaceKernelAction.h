@@ -11,6 +11,11 @@
 
 #include "MooseObjectAction.h"
 
+class AddInterfaceKernelAction;
+
+template <>
+InputParameters validParams<AddInterfaceKernelAction>();
+
 class AddInterfaceKernelAction : public MooseObjectAction
 {
 public:
@@ -20,3 +25,4 @@ public:
 
   virtual void act() override;
 };
+

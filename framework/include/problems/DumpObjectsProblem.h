@@ -11,7 +11,11 @@
 
 #include "FEProblemBase.h"
 
+class DumpObjectsProblem;
 class DumpObjectsNonlinearSystem;
+
+template <>
+InputParameters validParams<FEProblem>();
 
 /**
  * Specialization of SubProblem for dumping generated objects as input file syntax

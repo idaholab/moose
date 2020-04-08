@@ -11,6 +11,11 @@
 
 #include "IntegratedBC.h"
 
+class PenaltyDirichletBC;
+
+template <>
+InputParameters validParams<PenaltyDirichletBC>();
+
 /**
  * Weakly enforce a Dirichlet BC using a penalty term. This class is
  * an alternative to the DirichletBC that maintains the symmetry (if

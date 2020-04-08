@@ -12,6 +12,8 @@
 
 registerMooseAction("MooseApp", AddNodalKernelAction, "add_nodal_kernel");
 
+defineLegacyParams(AddNodalKernelAction);
+
 InputParameters
 AddNodalKernelAction::validParams()
 {

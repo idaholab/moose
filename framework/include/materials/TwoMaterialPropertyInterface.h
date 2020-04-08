@@ -14,6 +14,10 @@
 
 // Forward Declarations
 class MaterialData;
+class TwoMaterialPropertyInterface;
+
+template <>
+InputParameters validParams<TwoMaterialPropertyInterface>();
 
 class TwoMaterialPropertyInterface : public MaterialPropertyInterface
 {

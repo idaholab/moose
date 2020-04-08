@@ -11,6 +11,11 @@
 
 #include "Action.h"
 
+class CopyNodalVarsAction;
+
+template <>
+InputParameters validParams<CopyNodalVarsAction>();
+
 class CopyNodalVarsAction : public Action
 {
 public:
@@ -20,3 +25,4 @@ public:
 
   virtual void act() override;
 };
+

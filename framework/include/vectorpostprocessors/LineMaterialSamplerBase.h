@@ -24,6 +24,11 @@
 
 // Forward Declarations
 class MooseMesh;
+template <typename T>
+class LineMaterialSamplerBase;
+
+template <>
+InputParameters validParams<LineMaterialSamplerBase<Real>>();
 
 /**
  * This is a base class for sampling material properties for the
@@ -200,3 +205,4 @@ LineMaterialSamplerBase<T>::finalize()
 {
   SamplerBase::finalize();
 }
+

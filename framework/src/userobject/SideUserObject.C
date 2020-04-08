@@ -12,6 +12,8 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
+defineLegacyParams(SideUserObject);
+
 InputParameters
 SideUserObject::validParams()
 {

@@ -12,11 +12,16 @@
 #include "MaterialAuxBase.h"
 #include "RankFourTensor.h"
 
+class MaterialRankFourTensorAux;
+
 /**
  * MaterialRankFourTensorAux is designed to take the data in the RankFourTensor material
  * property, for example stiffness, and output the value for the
  * supplied indices.
  */
+
+template <>
+InputParameters validParams<MaterialRankFourTensorAux>();
 
 class MaterialRankFourTensorAux : public MaterialAuxBase<RankFourTensor>
 {
@@ -35,3 +40,4 @@ protected:
   const unsigned int _l;
   ///@}
 };
+

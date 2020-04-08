@@ -13,6 +13,8 @@
 #include "MooseVariable.h"
 #include "Assembly.h"
 
+defineLegacyParams(MortarConstraint);
+
 InputParameters
 MortarConstraint::validParams()
 {

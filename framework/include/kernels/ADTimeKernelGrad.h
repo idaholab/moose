@@ -35,6 +35,9 @@ using ADTimeKernelGrad = ADTimeKernelGradTempl<Real, compute_stage>;
 template <ComputeStage compute_stage>
 using ADVectorTimeKernelGrad = ADTimeKernelGradTempl<RealVectorValue, compute_stage>;
 
+declareADValidParams(ADTimeKernelGrad);
+declareADValidParams(ADVectorTimeKernelGrad);
+
 #define usingTemplTimeKernelGradMembers(type)                                                      \
   usingTemplKernelMembers(type);                                                                   \
   using ADTimeKernelGradTempl<type, compute_stage>::_u_dot

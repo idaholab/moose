@@ -13,6 +13,11 @@
 
 #include "libmesh/point.h"
 
+class SideSetsAroundSubdomain;
+
+template <>
+InputParameters validParams<SideSetsAroundSubdomain>();
+
 /**
  * Adds the faces on the boundary of given block
  * to the sidesets specified by "boundary"
@@ -43,3 +48,4 @@ protected:
   /// if specified, then faces are only added if their normal is close to this
   Point _normal;
 };
+

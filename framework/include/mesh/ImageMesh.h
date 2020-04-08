@@ -12,6 +12,11 @@
 #include "GeneratedMesh.h"
 #include "FileRangeBuilder.h"
 
+class ImageMesh;
+
+template <>
+InputParameters validParams<ImageMesh>();
+
 /**
  * A 2D GeneratedMesh where xmin, xmax, etc. are determined from an input image file.
  */
@@ -60,3 +65,4 @@ protected:
    */
   const Real & _cells_per_pixel;
 };
+

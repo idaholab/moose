@@ -14,6 +14,10 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
+class GeneralPostprocessor;
+
+template <>
+InputParameters validParams<GeneralPostprocessor>();
 
 /**
  * This class is here to combine the Postprocessor interface and the
@@ -35,3 +39,4 @@ public:
    */
   virtual void finalize() override {}
 };
+

@@ -18,6 +18,8 @@
 
 registerMooseObject("MooseApp", GapValueAux);
 
+defineLegacyParams(GapValueAux);
+
 InputParameters
 GapValueAux::validParams()
 {

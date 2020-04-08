@@ -19,6 +19,8 @@
 registerMooseObject("MooseApp", XDA);
 registerMooseObjectAliased("MooseApp", XDA, "XDR");
 
+defineLegacyParams(XDA);
+
 InputParameters
 XDA::validParams()
 {

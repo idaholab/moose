@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", Ralston);
 
+defineLegacyParams(Ralston);
+
 InputParameters
 Ralston::validParams()
 {

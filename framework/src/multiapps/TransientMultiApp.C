@@ -25,6 +25,8 @@
 
 registerMooseObject("MooseApp", TransientMultiApp);
 
+defineLegacyParams(TransientMultiApp);
+
 InputParameters
 TransientMultiApp::validParams()
 {

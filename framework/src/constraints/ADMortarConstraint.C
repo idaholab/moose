@@ -14,6 +14,8 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 
+defineADLegacyParams(ADMortarConstraint);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADMortarConstraint<compute_stage>::validParams()

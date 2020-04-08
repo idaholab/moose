@@ -47,3 +47,4 @@ protected:
   void buildOutputString(std::ostringstream & output,
                          const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
+

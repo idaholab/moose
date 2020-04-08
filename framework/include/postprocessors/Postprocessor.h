@@ -16,6 +16,10 @@
 #include "libmesh/parallel.h"
 
 // Forward declarations
+class Postprocessor;
+
+template <>
+InputParameters validParams<Postprocessor>();
 
 /**
  * Base class for all Postprocessors.  Defines a name and sets up the
@@ -42,3 +46,4 @@ public:
 protected:
   std::string _pp_name;
 };
+

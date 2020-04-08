@@ -13,6 +13,8 @@
 
 registerADMooseObject("MooseApp", ADFunctionNeumannBC);
 
+defineADLegacyParams(ADFunctionNeumannBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADFunctionNeumannBC<compute_stage>::validParams()

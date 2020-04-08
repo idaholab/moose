@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", GenericConstantMaterial);
 
+defineLegacyParams(GenericConstantMaterial);
+
 InputParameters
 GenericConstantMaterial::validParams()
 {

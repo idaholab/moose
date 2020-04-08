@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", LaplacianJumpIndicator);
 
+defineLegacyParams(LaplacianJumpIndicator);
+
 InputParameters
 LaplacianJumpIndicator::validParams()
 {

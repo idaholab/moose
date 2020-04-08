@@ -68,3 +68,4 @@ protected:
   /// Storage for interface material objects
   MooseObjectWarehouse<MaterialBase> _interface_materials;
 };
+

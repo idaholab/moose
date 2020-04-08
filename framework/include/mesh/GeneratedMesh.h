@@ -11,6 +11,11 @@
 
 #include "MooseMesh.h"
 
+class GeneratedMesh;
+
+template <>
+InputParameters validParams<GeneratedMesh>();
+
 /**
  * Mesh generated from parameters
  */
@@ -59,3 +64,4 @@ protected:
   /// Boolean to indicate that dimensions may have changed
   bool _dims_may_have_changed;
 };
+

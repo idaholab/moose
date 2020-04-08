@@ -33,3 +33,4 @@ public:
 protected:
   bool _dump_mode;
 };
+

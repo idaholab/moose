@@ -59,3 +59,4 @@ public:
 protected:
   GeometricSearchData & _geometric_search_data;
 };
+

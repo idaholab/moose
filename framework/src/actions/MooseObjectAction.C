@@ -15,6 +15,8 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 
+defineLegacyParams(MooseObjectAction);
+
 InputParameters
 MooseObjectAction::validParams()
 {

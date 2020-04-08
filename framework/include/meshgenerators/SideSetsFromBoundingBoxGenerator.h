@@ -14,6 +14,10 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declarations
+class SideSetsFromBoundingBoxGenerator;
+
+template <>
+InputParameters validParams<SideSetsFromBoundingBoxGenerator>();
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of a bounding box
@@ -48,3 +52,4 @@ protected:
   /// Flag to determine if the provided boundaries need to overlap
   const bool _boundary_id_overlap;
 };
+

@@ -117,3 +117,4 @@ protected:
    */
   virtual const typename OutputTools<T>::VariablePhiSecond & neighborSecondPhi();
 };
+

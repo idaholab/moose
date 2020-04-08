@@ -11,6 +11,11 @@
 
 #include "Action.h"
 
+class GlobalParamsAction;
+
+template <>
+InputParameters validParams<GlobalParamsAction>();
+
 class GlobalParamsAction : public Action
 {
 public:

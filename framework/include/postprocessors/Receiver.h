@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class Receiver;
+
+template <>
+InputParameters validParams<Receiver>();
 
 /**
  * A class for storing data, it allows the user to change the value of the
@@ -54,3 +58,4 @@ private:
   /// Reference to the value being stored in the associated PostprocessorData class
   const PostprocessorValue & _my_value;
 };
+

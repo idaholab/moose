@@ -15,6 +15,10 @@
 #include "libmesh/system.h"
 
 // Forward declerations
+class VariableResidualNormsDebugOutput;
+
+template <>
+InputParameters validParams<VariableResidualNormsDebugOutput>();
 
 /**
  * A class for producing various debug related outputs
@@ -41,3 +45,4 @@ protected:
   /// Reference to libMesh system
   System & _sys;
 };
+

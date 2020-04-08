@@ -11,6 +11,11 @@
 
 #include "ExplicitRK2.h"
 
+class ExplicitMidpoint;
+
+template <>
+InputParameters validParams<ExplicitMidpoint>();
+
 /**
  * The explicit midpoint time integration method.
  *
@@ -36,3 +41,4 @@ protected:
   virtual Real b1() const { return 0.; }
   virtual Real b2() const { return 1.; }
 };
+

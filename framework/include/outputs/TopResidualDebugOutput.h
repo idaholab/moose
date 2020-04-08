@@ -15,6 +15,10 @@
 #include "libmesh/system.h"
 
 // Forward declerations
+class TopResidualDebugOutput;
+
+template <>
+InputParameters validParams<TopResidualDebugOutput>();
 
 /**
  * A structure for storing data related to top residuals
@@ -109,3 +113,4 @@ protected:
   /// Reference to libMesh system
   System & _sys;
 };
+

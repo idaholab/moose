@@ -12,6 +12,11 @@
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
 
+class VectorKernel;
+
+template <>
+InputParameters validParams<VectorKernel>();
+
 class VectorKernel : public KernelBase, public MooseVariableInterface<RealVectorValue>
 {
 public:

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", PostprocessorDT);
 
+defineLegacyParams(PostprocessorDT);
+
 InputParameters
 PostprocessorDT::validParams()
 {

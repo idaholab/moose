@@ -52,3 +52,4 @@ void elementsIntersectedByPlane(const Point & p0,
                                 const MeshBase & mesh,
                                 std::vector<const Elem *> & intersected_elems);
 }
+

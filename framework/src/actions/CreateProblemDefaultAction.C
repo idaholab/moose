@@ -19,6 +19,8 @@
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "create_problem_default");
 registerMooseAction("MooseApp", CreateProblemDefaultAction, "determine_system_type");
 
+defineLegacyParams(CreateProblemDefaultAction);
+
 InputParameters
 CreateProblemDefaultAction::validParams()
 {

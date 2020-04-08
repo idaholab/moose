@@ -12,6 +12,10 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
+class SpiralAnnularMeshGenerator;
+
+template <>
+InputParameters validParams<SpiralAnnularMeshGenerator>();
 
 /**
  * Generates a spiral annular mesh given all the parameters
@@ -60,3 +64,4 @@ protected:
   // equilateral
   const Real _initial_delta_r;
 };
+

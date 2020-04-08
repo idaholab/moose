@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ScalarConstantIC);
 
+defineLegacyParams(ScalarConstantIC);
+
 InputParameters
 ScalarConstantIC::validParams()
 {

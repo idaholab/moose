@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
 
+defineLegacyParams(ActuallyExplicitEuler);
+
 InputParameters
 ActuallyExplicitEuler::validParams()
 {

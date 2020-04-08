@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", FunctionValuePostprocessor);
 
+defineLegacyParams(FunctionValuePostprocessor);
+
 InputParameters
 FunctionValuePostprocessor::validParams()
 {

@@ -14,6 +14,7 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
+class NodeElemConstraint;
 
 // libMesh forward declarations
 namespace libMesh
@@ -21,6 +22,9 @@ namespace libMesh
 template <typename T>
 class SparseMatrix;
 }
+
+template <>
+InputParameters validParams<NodeElemConstraint>();
 
 /**
  * A NodeElemConstraint is used when you need to create constraints between
@@ -251,3 +255,4 @@ public:
   /// stiffness matrix holding slave-slave jacobian
   DenseMatrix<Number> _Kee;
 };
+

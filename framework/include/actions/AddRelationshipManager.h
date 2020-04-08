@@ -11,6 +11,11 @@
 
 #include "Action.h"
 
+class AddRelationshipManager;
+
+template <>
+InputParameters validParams<AddRelationshipManager>();
+
 /**
  * This Action retrieves all of the Actions from the MooseAction Warehouse and triggers the
  * addRelationshipManagers() call on each of them. Additionally, it is responsible for triggering
@@ -25,3 +30,4 @@ public:
 
   virtual void act() override;
 };
+

@@ -14,6 +14,8 @@ registerMooseAction("MooseApp", AddScalarKernelAction, "add_scalar_kernel");
 
 registerMooseAction("MooseApp", AddScalarKernelAction, "add_aux_scalar_kernel");
 
+defineLegacyParams(AddScalarKernelAction);
+
 InputParameters
 AddScalarKernelAction::validParams()
 {

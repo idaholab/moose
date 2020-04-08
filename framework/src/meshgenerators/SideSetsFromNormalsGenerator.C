@@ -26,6 +26,8 @@
 
 registerMooseObject("MooseApp", SideSetsFromNormalsGenerator);
 
+defineLegacyParams(SideSetsFromNormalsGenerator);
+
 InputParameters
 SideSetsFromNormalsGenerator::validParams()
 {

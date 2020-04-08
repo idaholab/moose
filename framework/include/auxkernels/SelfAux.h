@@ -12,6 +12,10 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
+class SelfAux;
+
+template <>
+InputParameters validParams<SelfAux>();
 
 /**
  * Self auxiliary value
@@ -30,3 +34,4 @@ public:
 protected:
   virtual Real computeValue() override;
 };
+

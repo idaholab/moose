@@ -11,6 +11,11 @@
 
 #include "BreakMeshByBlockBase.h"
 
+class BreakMeshByBlock;
+
+template <>
+InputParameters validParams<BreakMeshByBlock>();
+
 class BreakMeshByBlock : public BreakMeshByBlockBase
 {
 public:
@@ -27,3 +32,4 @@ private:
            std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map;
 };
+

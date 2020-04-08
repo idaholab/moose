@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ElementL2ErrorFunctionAux);
 
+defineLegacyParams(ElementL2ErrorFunctionAux);
+
 InputParameters
 ElementL2ErrorFunctionAux::validParams()
 {

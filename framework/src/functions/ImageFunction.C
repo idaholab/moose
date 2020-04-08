@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", ImageFunction);
 
+defineLegacyParams(ImageFunction);
+
 InputParameters
 ImageFunction::validParams()
 {

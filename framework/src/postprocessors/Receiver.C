@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", Receiver);
 
+defineLegacyParams(Receiver);
+
 InputParameters
 Receiver::validParams()
 {

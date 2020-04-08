@@ -11,6 +11,8 @@
 
 registerADMooseObject("MooseApp", ADPenaltyDirichletBC);
 
+defineADLegacyParams(ADPenaltyDirichletBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADPenaltyDirichletBC<compute_stage>::validParams()

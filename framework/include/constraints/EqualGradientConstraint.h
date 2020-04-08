@@ -11,6 +11,11 @@
 
 #include "ADMortarConstraint.h"
 
+template <ComputeStage>
+class EqualGradientConstraint;
+
+declareADValidParams(EqualGradientConstraint);
+
 /**
  * Constrain a specified component of the gradient of a variable to be the same
  * on both sides of an interface.

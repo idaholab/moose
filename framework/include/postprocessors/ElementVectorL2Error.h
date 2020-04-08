@@ -14,6 +14,10 @@
 class Function;
 
 // Forward Declarations
+class ElementVectorL2Error;
+
+template <>
+InputParameters validParams<ElementVectorL2Error>();
 
 class ElementVectorL2Error : public ElementIntegralPostprocessor
 {

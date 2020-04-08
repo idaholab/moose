@@ -14,6 +14,7 @@
 #include "ActionWarehouse.h"
 
 // Define input parameters
+defineLegacyParams(OutputInterface);
 
 InputParameters
 OutputInterface::validParams()

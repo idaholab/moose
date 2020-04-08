@@ -13,6 +13,7 @@
 #include "MultiMooseEnum.h"
 
 // Forward declarations
+class ExecFlagEnum;
 
 /**
  * A MultiMooseEnum object to hold "execute_on" flags.

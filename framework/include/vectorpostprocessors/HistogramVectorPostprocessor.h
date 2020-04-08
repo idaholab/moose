@@ -11,6 +11,11 @@
 
 #include "GeneralVectorPostprocessor.h"
 
+class HistogramVectorPostprocessor;
+
+template <>
+InputParameters validParams<HistogramVectorPostprocessor>();
+
 /**
  * Computes a histogram for each column in a given VectorPostprocessor
  *
@@ -65,3 +70,4 @@ protected:
   /// The VPP vectors that will hold the Histogram for each column
   std::map<std::string, HistoData> _histogram_data;
 };
+

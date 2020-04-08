@@ -13,6 +13,11 @@
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 
+class NodalScalarKernel;
+
+template <>
+InputParameters validParams<NodalScalarKernel>();
+
 /**
  *
  */
@@ -34,3 +39,4 @@ protected:
   /// List of node boundary names
   std::vector<BoundaryName> _boundary_names;
 };
+

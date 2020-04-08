@@ -78,6 +78,8 @@ addAdvancedOutputParams(InputParameters & params)
 }
 }
 
+defineLegacyParams(AdvancedOutput);
+
 InputParameters
 AdvancedOutput::validParams()
 {

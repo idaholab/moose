@@ -11,6 +11,11 @@
 
 #include "NodalConstraint.h"
 
+class LinearNodalConstraint;
+
+template <>
+InputParameters validParams<LinearNodalConstraint>();
+
 /**
  * The slave node variable is programmed as a linear combination of
  * the master node variables (i.e, slave_var = a_1*master_var_1+
@@ -45,3 +50,4 @@ protected:
   // Penalty if constraint is not satisfied
   Real _penalty;
 };
+

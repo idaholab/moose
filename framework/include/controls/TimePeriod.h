@@ -13,6 +13,10 @@
 #include "ConditionalEnableControl.h"
 
 // Forward declarations
+class TimePeriod;
+
+template <>
+InputParameters validParams<TimePeriod>();
 
 /**
  * A basic control for disabling objects for a portion of the simulation.
@@ -43,3 +47,4 @@ private:
   /// The time to stop enabling the supplied object tags (defaults to the end of the simulation)
   std::vector<Real> _end_time;
 };
+

@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", FindValueOnLine);
 
+defineLegacyParams(FindValueOnLine);
+
 InputParameters
 FindValueOnLine::validParams()
 {

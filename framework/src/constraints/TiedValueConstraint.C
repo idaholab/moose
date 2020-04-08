@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", TiedValueConstraint);
 
+defineLegacyParams(TiedValueConstraint);
+
 InputParameters
 TiedValueConstraint::validParams()
 {

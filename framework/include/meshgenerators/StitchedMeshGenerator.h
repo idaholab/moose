@@ -14,6 +14,10 @@
 #include "MooseEnum.h"
 
 // Forward declarations
+class StitchedMeshGenerator;
+
+template <>
+InputParameters validParams<StitchedMeshGenerator>();
 
 /**
  * Generates individual elements given a list of nodal positions
@@ -46,3 +50,4 @@ protected:
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
   MooseEnum _algorithm;
 };
+

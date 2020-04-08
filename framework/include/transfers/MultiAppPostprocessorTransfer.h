@@ -12,6 +12,10 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
+class MultiAppPostprocessorTransfer;
+
+template <>
+InputParameters validParams<MultiAppPostprocessorTransfer>();
 
 /**
  * Copies the value of a Postprocessor from the Master to a MultiApp.

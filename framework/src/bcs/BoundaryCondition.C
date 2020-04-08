@@ -12,6 +12,8 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 
+defineLegacyParams(BoundaryCondition);
+
 InputParameters
 BoundaryCondition::validParams()
 {

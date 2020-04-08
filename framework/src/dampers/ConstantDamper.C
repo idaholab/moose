@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ConstantDamper);
 
+defineLegacyParams(ConstantDamper);
+
 InputParameters
 ConstantDamper::validParams()
 {

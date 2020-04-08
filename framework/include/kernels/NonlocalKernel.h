@@ -11,6 +11,11 @@
 
 #include "Kernel.h"
 
+class NonlocalKernel;
+
+template <>
+InputParameters validParams<NonlocalKernel>();
+
 /**
  * NonlocalKernel is used for solving integral terms in integro-differential equations.
  * Integro-differential equations includes spatial integral terms over variables in the domain.
@@ -66,3 +71,4 @@ protected:
 
   unsigned int _k;
 };
+

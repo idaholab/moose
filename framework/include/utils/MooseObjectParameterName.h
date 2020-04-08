@@ -83,3 +83,4 @@ protected:
   /// The name of the input parameter
   std::string _parameter;
 };
+

@@ -13,6 +13,10 @@
 #include "SamplerBase.h"
 
 // Forward Declarations
+class NodalValueSampler;
+
+template <>
+InputParameters validParams<NodalValueSampler>();
 
 /**
  * Samples values of nodal variable(s).
@@ -42,3 +46,4 @@ protected:
   /// Vector of 0 and 1 values which records whether values are present at the current node.
   std::vector<unsigned int> _has_values;
 };
+

@@ -43,3 +43,4 @@ private:
   /// Determine whether or not PFE trapping needs to be toggled off.
   const bool _trapping_enabled;
 };
+

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", CoupledVarNeumannBC);
 
+defineLegacyParams(CoupledVarNeumannBC);
+
 InputParameters
 CoupledVarNeumannBC::validParams()
 {

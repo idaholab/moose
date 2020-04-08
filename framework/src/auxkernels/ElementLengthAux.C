@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ElementLengthAux);
 
+defineLegacyParams(ElementLengthAux);
+
 InputParameters
 ElementLengthAux::validParams()
 {

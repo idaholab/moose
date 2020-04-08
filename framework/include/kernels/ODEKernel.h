@@ -12,6 +12,10 @@
 #include "ScalarKernel.h"
 
 // Forward Declarations
+class ODEKernel;
+
+template <>
+InputParameters validParams<ODEKernel>();
 
 /**
  *
@@ -33,3 +37,4 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
+

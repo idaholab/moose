@@ -13,7 +13,11 @@
 #include "Output.h"
 
 // Forward declerations
+class MaterialPropertyDebugOutput;
 class MaterialBase;
+
+template <>
+InputParameters validParams<MaterialPropertyDebugOutput>();
 
 /**
  * A class for producing various debug related outputs
@@ -51,3 +55,4 @@ protected:
   void printMaterialProperties(std::stringstream & output,
                                const std::vector<std::shared_ptr<MaterialBase>> & materials) const;
 };
+

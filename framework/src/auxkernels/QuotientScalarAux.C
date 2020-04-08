@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", QuotientScalarAux);
 
+defineLegacyParams(QuotientScalarAux);
+
 InputParameters
 QuotientScalarAux::validParams()
 {

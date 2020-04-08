@@ -18,6 +18,8 @@
 
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(NodalDamper);
+
 InputParameters
 NodalDamper::validParams()
 {

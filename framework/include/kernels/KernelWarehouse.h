@@ -13,3 +13,4 @@
 
 /// This is only here for backwards compatibility.  Can be removed anytime after 9/1/2018
 typedef MooseObjectWarehouse<KernelBase> KernelWarehouse;
+

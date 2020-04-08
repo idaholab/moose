@@ -17,6 +17,7 @@
 
 // Forward Declarations
 class InputParameters;
+class LayeredBase;
 class SubProblem;
 class UserObject;
 
@@ -27,6 +28,9 @@ class Point;
 
 template <typename T>
 InputParameters validParams();
+
+template <>
+InputParameters validParams<LayeredBase>();
 
 /**
  * This base class computes volume integrals of a variable storing

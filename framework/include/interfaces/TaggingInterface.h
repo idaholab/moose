@@ -18,11 +18,15 @@
 // Forward declarations
 class InputParameters;
 class MooseObject;
+class TaggingInterface;
 class SubProblem;
 class Assembly;
 
 template <typename T>
 InputParameters validParams();
+
+template <>
+InputParameters validParams<TaggingInterface>();
 
 class TaggingInterface
 {

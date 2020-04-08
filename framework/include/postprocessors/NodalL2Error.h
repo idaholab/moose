@@ -11,6 +11,11 @@
 
 #include "NodalVariablePostprocessor.h"
 
+class NodalL2Error;
+
+template <>
+InputParameters validParams<NodalL2Error>();
+
 /**
  *
  */

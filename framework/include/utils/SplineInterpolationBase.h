@@ -73,3 +73,4 @@ protected:
 
   static const Real _deriv_bound;
 };
+

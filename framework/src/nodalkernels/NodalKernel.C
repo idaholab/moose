@@ -14,6 +14,8 @@
 #include "MooseVariableFE.h"
 #include "Assembly.h"
 
+defineLegacyParams(NodalKernel);
+
 InputParameters
 NodalKernel::validParams()
 {

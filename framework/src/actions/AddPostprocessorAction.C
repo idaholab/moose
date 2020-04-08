@@ -13,6 +13,8 @@
 
 registerMooseAction("MooseApp", AddPostprocessorAction, "add_postprocessor");
 
+defineLegacyParams(AddPostprocessorAction);
+
 InputParameters
 AddPostprocessorAction::validParams()
 {

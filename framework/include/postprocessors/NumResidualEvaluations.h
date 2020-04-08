@@ -12,6 +12,10 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
+class NumResidualEvaluations;
+
+template <>
+InputParameters validParams<NumResidualEvaluations>();
 
 /**
  * Just returns the total number of Residual Evaluations performed.
@@ -28,3 +32,4 @@ public:
 
   virtual Real getValue() override;
 };
+

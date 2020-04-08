@@ -27,6 +27,8 @@
 
 registerMooseObject("MooseApp", AB2PredictorCorrector);
 
+defineLegacyParams(AB2PredictorCorrector);
+
 InputParameters
 AB2PredictorCorrector::validParams()
 {

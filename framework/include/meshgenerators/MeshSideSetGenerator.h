@@ -12,6 +12,10 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
+class MeshSideSetGenerator;
+
+template <>
+InputParameters validParams<MeshSideSetGenerator>();
 
 /**
  * Add lower dimensional elements along the faces contained in a side set
@@ -31,3 +35,4 @@ protected:
   /// Block ID to assign to the region
   const subdomain_id_type _block_id;
 };
+

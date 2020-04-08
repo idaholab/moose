@@ -12,6 +12,8 @@
 
 registerADMooseObject("MooseApp", ADVectorFunctionDirichletBC);
 
+defineADLegacyParams(ADVectorFunctionDirichletBC);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADVectorFunctionDirichletBC<compute_stage>::validParams()

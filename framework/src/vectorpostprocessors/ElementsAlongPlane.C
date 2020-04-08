@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", ElementsAlongPlane);
 
+defineLegacyParams(ElementsAlongPlane);
+
 InputParameters
 ElementsAlongPlane::validParams()
 {

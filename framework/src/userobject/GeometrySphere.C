@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", GeometrySphere);
 
+defineLegacyParams(GeometrySphere);
+
 InputParameters
 GeometrySphere::validParams()
 {

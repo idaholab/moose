@@ -11,6 +11,8 @@
 
 #include "SystemBase.h"
 
+defineLegacyParams(Constraint);
+
 InputParameters
 Constraint::validParams()
 {

@@ -11,11 +11,15 @@
 
 #include "Action.h"
 
+class AddPeriodicBCAction;
 class MooseMesh;
 namespace libMesh
 {
 class PeriodicBoundaryBase;
 }
+
+template <>
+InputParameters validParams<AddPeriodicBCAction>();
 
 /**
  * This Action adds a periodic boundary to the problem. Note that Periodic Boundaries
@@ -43,3 +47,4 @@ protected:
 
   MooseMesh * _mesh;
 };
+

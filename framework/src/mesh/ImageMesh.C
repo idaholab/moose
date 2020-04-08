@@ -19,6 +19,8 @@
 
 registerMooseObject("MooseApp", ImageMesh);
 
+defineLegacyParams(ImageMesh);
+
 InputParameters
 ImageMesh::validParams()
 {

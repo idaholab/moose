@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", ExplicitTVDRK2);
 
+defineLegacyParams(ExplicitTVDRK2);
+
 InputParameters
 ExplicitTVDRK2::validParams()
 {

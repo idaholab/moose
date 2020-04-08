@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", MatDiffusion);
 
+defineLegacyParams(MatDiffusion);
+
 InputParameters
 MatDiffusion::validParams()
 {

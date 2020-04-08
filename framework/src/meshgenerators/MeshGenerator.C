@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 
+defineLegacyParams(MeshGenerator);
+
 InputParameters
 MeshGenerator::validParams()
 {

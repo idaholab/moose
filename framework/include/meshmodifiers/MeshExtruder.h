@@ -12,6 +12,11 @@
 #include "MeshModifier.h"
 #include "libmesh/mesh_generation.h"
 
+class MeshExtruder;
+
+template <>
+InputParameters validParams<MeshExtruder>();
+
 class MeshExtruder : public MeshModifier
 {
 public:
@@ -55,3 +60,4 @@ protected:
 private:
   void changeID(const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
+

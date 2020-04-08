@@ -11,6 +11,8 @@
 
 registerMooseObjectDeprecated("MooseApp", FunctionPresetBC, "06/30/2020 24:00");
 
+defineLegacyParams(FunctionPresetBC);
+
 InputParameters
 FunctionPresetBC::validParams()
 {

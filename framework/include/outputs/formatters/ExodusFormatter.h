@@ -26,3 +26,4 @@ protected:
   std::stringstream _ss;
   std::vector<std::string> _input_file_record;
 };
+

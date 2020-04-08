@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", LeastSquaresFitHistory);
 
+defineLegacyParams(LeastSquaresFitHistory);
+
 InputParameters
 LeastSquaresFitHistory::validParams()
 {

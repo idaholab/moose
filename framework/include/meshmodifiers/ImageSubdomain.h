@@ -14,6 +14,10 @@
 #include "ImageSampler.h"
 
 // Forward declarations
+class ImageSubdomain;
+
+template <>
+InputParameters validParams<ImageSubdomain>();
 
 /**
  * MeshModifier for defining a Subdomains based on Image data.
@@ -30,3 +34,4 @@ public:
 protected:
   virtual void modify() override;
 };
+

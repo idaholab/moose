@@ -11,6 +11,8 @@
 #include "MaterialData.h"
 #include "InputParameters.h"
 
+defineLegacyParams(TwoMaterialPropertyInterface);
+
 InputParameters
 TwoMaterialPropertyInterface::validParams()
 {

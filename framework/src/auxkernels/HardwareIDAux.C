@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", HardwareIDAux);
 
+defineLegacyParams(HardwareIDAux);
+
 InputParameters
 HardwareIDAux::validParams()
 {

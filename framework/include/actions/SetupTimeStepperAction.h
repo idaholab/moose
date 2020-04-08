@@ -11,6 +11,11 @@
 
 #include "MooseObjectAction.h"
 
+class SetupTimeStepperAction;
+
+template <>
+InputParameters validParams<SetupTimeStepperAction>();
+
 /**
  *
  */
@@ -23,3 +28,4 @@ public:
 
   virtual void act() override;
 };
+

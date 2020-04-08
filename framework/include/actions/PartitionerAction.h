@@ -11,6 +11,11 @@
 
 #include "MooseObjectAction.h"
 
+class PartitionerAction;
+
+template <>
+InputParameters validParams<PartitionerAction>();
+
 class PartitionerAction : public MooseObjectAction
 {
 public:
@@ -20,3 +25,4 @@ public:
 
   virtual void act() override;
 };
+

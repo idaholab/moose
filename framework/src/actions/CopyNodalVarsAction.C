@@ -24,6 +24,8 @@ registerMooseAction("MooseApp", CopyNodalVarsAction, "copy_nodal_vars");
 
 registerMooseAction("MooseApp", CopyNodalVarsAction, "copy_nodal_aux_vars");
 
+defineLegacyParams(CopyNodalVarsAction);
+
 InputParameters
 CopyNodalVarsAction::validParams()
 {

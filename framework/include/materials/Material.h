@@ -15,6 +15,10 @@
 #include "MaterialPropertyInterface.h"
 
 // forward declarations
+class Material;
+
+template <>
+InputParameters validParams<Material>();
 
 /**
  * Materials compute MaterialProperties.

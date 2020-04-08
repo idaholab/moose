@@ -13,6 +13,10 @@
 #include "NodalDamper.h"
 
 // Forward Declarations
+class BoundingValueNodalDamper;
+
+template <>
+InputParameters validParams<BoundingValueNodalDamper>();
 
 /**
  * This class implements a damper that limits the value of a variable to be within
@@ -33,3 +37,4 @@ protected:
   /// Compute the damping for the current node
   virtual Real computeQpDamping() override;
 };
+

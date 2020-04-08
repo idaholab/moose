@@ -11,6 +11,8 @@
 
 registerMooseAction("MooseApp", GlobalParamsAction, "set_global_params");
 
+defineLegacyParams(GlobalParamsAction);
+
 InputParameters
 GlobalParamsAction::validParams()
 {

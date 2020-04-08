@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", SimplePredictor);
 
+defineLegacyParams(SimplePredictor);
+
 InputParameters
 SimplePredictor::validParams()
 {

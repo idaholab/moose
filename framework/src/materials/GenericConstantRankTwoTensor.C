@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", GenericConstantRankTwoTensor);
 
+defineLegacyParams(GenericConstantRankTwoTensor);
+
 InputParameters
 GenericConstantRankTwoTensor::validParams()
 {

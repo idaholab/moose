@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", PointValueSampler);
 
+defineLegacyParams(PointValueSampler);
+
 InputParameters
 PointValueSampler::validParams()
 {

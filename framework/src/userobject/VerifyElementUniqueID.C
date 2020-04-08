@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", VerifyElementUniqueID);
 
+defineLegacyParams(VerifyElementUniqueID);
+
 InputParameters
 VerifyElementUniqueID::validParams()
 {

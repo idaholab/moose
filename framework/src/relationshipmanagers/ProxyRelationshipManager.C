@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ProxyRelationshipManager);
 
+defineLegacyParams(ProxyRelationshipManager);
+
 InputParameters
 ProxyRelationshipManager::validParams()
 {

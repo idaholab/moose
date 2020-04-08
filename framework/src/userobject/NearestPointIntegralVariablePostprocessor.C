@@ -12,6 +12,8 @@
 
 registerMooseObject("MooseApp", NearestPointIntegralVariablePostprocessor);
 
+defineLegacyParams(NearestPointIntegralVariablePostprocessor);
+
 InputParameters
 NearestPointIntegralVariablePostprocessor::validParams()
 {

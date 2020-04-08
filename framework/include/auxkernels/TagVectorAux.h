@@ -12,6 +12,10 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
+class TagVectorAux;
+
+template <>
+InputParameters validParams<TagVectorAux>();
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
@@ -30,3 +34,4 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
+

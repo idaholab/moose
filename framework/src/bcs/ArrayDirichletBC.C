@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ArrayDirichletBC);
 
+defineLegacyParams(ArrayDirichletBC);
+
 InputParameters
 ArrayDirichletBC::validParams()
 {

@@ -16,6 +16,8 @@
 
 registerMooseObject("MooseApp", ElementPointNeighborLayers);
 
+defineLegacyParams(ElementPointNeighborLayers);
+
 InputParameters
 ElementPointNeighborLayers::validParams()
 {

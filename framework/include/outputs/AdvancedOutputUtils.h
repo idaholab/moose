@@ -170,3 +170,4 @@ private:
   // True when the input file contains a show/hide list
   bool _has_show_list;
 };
+

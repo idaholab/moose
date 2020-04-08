@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ElementIntegralArrayVariablePostprocessor);
 
+defineLegacyParams(ElementIntegralArrayVariablePostprocessor);
+
 InputParameters
 ElementIntegralArrayVariablePostprocessor::validParams()
 {

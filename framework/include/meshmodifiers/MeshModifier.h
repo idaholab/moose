@@ -13,7 +13,11 @@
 #include "Restartable.h"
 
 // Forward declarations
+class MeshModifier;
 class MooseMesh;
+
+template <>
+InputParameters validParams<MeshModifier>();
 
 /**
  * MeshModifiers are objects that can modify or add to an existing mesh.
@@ -21,8 +25,6 @@ class MooseMesh;
 class MeshModifier : public MooseObject, public Restartable
 {
 public:
-  static InputParameters validParams();
-
   /**
    * Constructor
    *
@@ -72,3 +74,4 @@ private:
   /// Flag to determine if the mesh should be prepared after this modifier is run
   const bool _force_prepare;
 };
+

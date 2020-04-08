@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ScalePostprocessor);
 
+defineLegacyParams(ScalePostprocessor);
+
 InputParameters
 ScalePostprocessor::validParams()
 {

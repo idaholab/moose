@@ -16,6 +16,11 @@
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
 
+class InternalSideUserObject;
+
+template <>
+InputParameters validParams<InternalSideUserObject>();
+
 /**
  *
  */

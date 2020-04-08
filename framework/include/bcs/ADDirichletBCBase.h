@@ -15,6 +15,11 @@
   usingNodalBCMembers;                                                                             \
   using ADDirichletBCBase<compute_stage>::computeQpValue
 
+template <ComputeStage>
+class ADDirichletBCBase;
+
+declareADValidParams(ADDirichletBCBase);
+
 /**
  * Base class for automatic differentiation Dirichlet BCs
  */

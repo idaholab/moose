@@ -14,6 +14,11 @@
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
 
+class SetupQuadratureAction;
+
+template <>
+InputParameters validParams<SetupQuadratureAction>();
+
 /**
  * Sets the quadrature
  */
@@ -32,3 +37,4 @@ protected:
   Order _element_order;
   Order _side_order;
 };
+

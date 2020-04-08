@@ -30,7 +30,11 @@ template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
+class Marker;
 class Adaptivity;
+
+template <>
+InputParameters validParams<Marker>();
 
 class Marker : public MooseObject,
                public BlockRestrictable,
@@ -118,3 +122,4 @@ protected:
   std::set<std::string> _depend;
   std::set<std::string> _supplied;
 };
+

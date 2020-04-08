@@ -63,3 +63,4 @@ protected:
   int _level;
   std::ostringstream _stream;
 };
+

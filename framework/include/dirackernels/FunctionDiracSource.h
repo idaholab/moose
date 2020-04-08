@@ -13,7 +13,11 @@
 #include "DiracKernel.h"
 
 // Forward Declarations
+class FunctionDiracSource;
 class Function;
+
+template <>
+InputParameters validParams<FunctionDiracSource>();
 
 class FunctionDiracSource : public DiracKernel
 {

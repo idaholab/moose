@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", VectorDiffusion);
 
+defineLegacyParams(VectorDiffusion);
+
 InputParameters
 VectorDiffusion::validParams()
 {

@@ -15,6 +15,7 @@
 
 // Forward Declarations
 class InputParameters;
+class RandomICBase;
 namespace libMesh
 {
 class Point;
@@ -22,6 +23,9 @@ class Point;
 
 template <typename T>
 InputParameters validParams();
+
+template <>
+InputParameters validParams<RandomICBase>();
 
 /**
  * Base class for randomly generated initial conditions

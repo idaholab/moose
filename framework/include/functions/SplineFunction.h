@@ -12,6 +12,11 @@
 #include "Function.h"
 #include "SplineInterpolation.h"
 
+class SplineFunction;
+
+template <>
+InputParameters validParams<SplineFunction>();
+
 /**
  * Function that uses spline interpolation
  */

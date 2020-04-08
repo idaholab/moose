@@ -32,6 +32,7 @@ class FunctionParserBase
 
 // Forward declarations
 class Action;
+class InputParameters;
 class MooseApp;
 class MooseEnum;
 class MooseObject;

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ConstantVectorPostprocessor);
 
+defineLegacyParams(ConstantVectorPostprocessor);
+
 InputParameters
 ConstantVectorPostprocessor::validParams()
 {

@@ -11,6 +11,11 @@
 
 #include "DerivativeFunctionMaterialBase.h"
 
+class DerivativeSumMaterial;
+
+template <>
+InputParameters validParams<DerivativeSumMaterial>();
+
 class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
 {
 public:

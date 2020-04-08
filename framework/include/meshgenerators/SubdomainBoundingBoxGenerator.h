@@ -15,6 +15,10 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declarations
+class SubdomainBoundingBoxGenerator;
+
+template <>
+InputParameters validParams<SubdomainBoundingBoxGenerator>();
 
 namespace libMesh
 {

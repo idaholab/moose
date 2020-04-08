@@ -20,6 +20,8 @@
 
 registerMooseObject("MooseApp", VariableResidualNormsDebugOutput);
 
+defineLegacyParams(VariableResidualNormsDebugOutput);
+
 InputParameters
 VariableResidualNormsDebugOutput::validParams()
 {

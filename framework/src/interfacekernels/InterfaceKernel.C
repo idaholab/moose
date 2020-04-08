@@ -16,6 +16,9 @@
 
 #include "libmesh/quadrature.h"
 
+defineLegacyParams(InterfaceKernel);
+defineLegacyParams(VectorInterfaceKernel);
+
 template <typename T>
 InputParameters
 InterfaceKernelTempl<T>::validParams()

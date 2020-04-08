@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredIntegral);
 
+defineLegacyParams(NearestPointLayeredIntegral);
+
 InputParameters
 NearestPointLayeredIntegral::validParams()
 {

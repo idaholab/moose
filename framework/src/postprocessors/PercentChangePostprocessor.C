@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", PercentChangePostprocessor);
 
+defineLegacyParams(PercentChangePostprocessor);
+
 InputParameters
 PercentChangePostprocessor::validParams()
 {

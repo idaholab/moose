@@ -11,6 +11,12 @@
 
 #include "ADDGKernel.h"
 
+// Forward Declarations
+template <ComputeStage>
+class ADDGDiffusion;
+
+declareADValidParams(ADDGDiffusion);
+
 /**
  * DG kernel for diffusion
  *
@@ -39,3 +45,4 @@ protected:
 
   usingDGKernelMembers;
 };
+

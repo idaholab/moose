@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", CrankNicolson);
 
+defineLegacyParams(CrankNicolson);
+
 InputParameters
 CrankNicolson::validParams()
 {

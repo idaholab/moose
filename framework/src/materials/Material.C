@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "Material.h"
 
+defineLegacyParams(Material);
+
 InputParameters
 Material::validParams()
 {

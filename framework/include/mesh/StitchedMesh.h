@@ -12,11 +12,15 @@
 #include "MooseMesh.h"
 
 // Forward declarations
+class StitchedMesh;
 
 namespace libMesh
 {
 class ReplicatedMesh;
 }
+
+template <>
+InputParameters validParams<StitchedMesh>();
 
 /**
  * Reads an arbitrary set of meshes and attempts to "stitch" (join) them
@@ -53,3 +57,4 @@ protected:
   /// The meshes to be stitched together.  The first entry will be the "real" mesh
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 };
+

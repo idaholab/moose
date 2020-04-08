@@ -14,6 +14,10 @@
 #include "OrientedBoxInterface.h"
 
 // Forward declarations
+class OrientedSubdomainBoundingBoxGenerator;
+
+template <>
+InputParameters validParams<OrientedSubdomainBoundingBoxGenerator>();
 
 /**
  * MeshGenerator for defining a Subdomain inside or outside of a bounding box with arbitrary
@@ -37,3 +41,4 @@ protected:
   /// Block ID to assign to the region
   const subdomain_id_type _block_id;
 };
+

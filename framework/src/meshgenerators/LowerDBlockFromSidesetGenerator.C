@@ -21,6 +21,8 @@
 
 registerMooseObject("MooseApp", LowerDBlockFromSidesetGenerator);
 
+defineLegacyParams(LowerDBlockFromSidesetGenerator);
+
 InputParameters
 LowerDBlockFromSidesetGenerator::validParams()
 {

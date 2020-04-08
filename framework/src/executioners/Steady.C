@@ -18,6 +18,8 @@
 
 registerMooseObject("MooseApp", Steady);
 
+defineLegacyParams(Steady);
+
 InputParameters
 Steady::validParams()
 {

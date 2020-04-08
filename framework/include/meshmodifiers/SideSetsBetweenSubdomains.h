@@ -11,6 +11,11 @@
 
 #include "MeshModifier.h"
 
+class SideSetsBetweenSubdomains;
+
+template <>
+InputParameters validParams<SideSetsBetweenSubdomains>();
+
 class SideSetsBetweenSubdomains : public MeshModifier
 {
 public:
@@ -19,3 +24,4 @@ public:
 protected:
   virtual void modify() override;
 };
+

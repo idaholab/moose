@@ -20,10 +20,11 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
+template <>
 InputParameters
-AddSideSetsBase::validParams()
+validParams<AddSideSetsBase>()
 {
-  InputParameters params = MeshModifier::validParams();
+  InputParameters params = validParams<MeshModifier>();
   params.addParam<Real>(
       "variance", 0.10, "The variance [0.0 - 1.0] allowed when comparing normals");
   params.addParam<bool>("fixed_normal",

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ElementAverageSecondTimeDerivative);
 
+defineLegacyParams(ElementAverageSecondTimeDerivative);
+
 InputParameters
 ElementAverageSecondTimeDerivative::validParams()
 {

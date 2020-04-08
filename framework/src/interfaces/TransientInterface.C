@@ -10,6 +10,8 @@
 #include "TransientInterface.h"
 #include "FEProblem.h"
 
+defineLegacyParams(TransientInterface);
+
 InputParameters
 TransientInterface::validParams()
 {

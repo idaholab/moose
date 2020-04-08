@@ -18,6 +18,8 @@
 
 #include "libmesh/point.h"
 
+defineLegacyParams(SamplerBase);
+
 InputParameters
 SamplerBase::validParams()
 {

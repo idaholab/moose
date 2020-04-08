@@ -9,6 +9,8 @@
 
 #include "DiscreteElementUserObject.h"
 
+defineLegacyParams(DiscreteElementUserObject);
+
 InputParameters
 DiscreteElementUserObject::validParams()
 {

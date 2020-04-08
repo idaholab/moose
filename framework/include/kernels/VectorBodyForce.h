@@ -12,7 +12,11 @@
 #include "VectorKernel.h"
 
 // Forward Declarations
+class VectorBodyForce;
 class Function;
+
+template <>
+InputParameters validParams<VectorBodyForce>();
 
 /**
  * This kernel implements a generic functional

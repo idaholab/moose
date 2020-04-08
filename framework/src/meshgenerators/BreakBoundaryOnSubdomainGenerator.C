@@ -17,6 +17,8 @@
 
 registerMooseObject("MooseApp", BreakBoundaryOnSubdomainGenerator);
 
+defineLegacyParams(BreakBoundaryOnSubdomainGenerator);
+
 InputParameters
 BreakBoundaryOnSubdomainGenerator::validParams()
 {

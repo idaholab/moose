@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ExplicitMidpoint);
 
+defineLegacyParams(ExplicitMidpoint);
+
 InputParameters
 ExplicitMidpoint::validParams()
 {

@@ -12,6 +12,10 @@
 #include "ElementW1pError.h"
 
 // Forward Declarations
+class ElementH1Error;
+
+template <>
+InputParameters validParams<ElementH1Error>();
 
 /**
  * This postprocessor will print out the H^1-norm of the difference
@@ -27,3 +31,4 @@ public:
 
   ElementH1Error(const InputParameters & parameters);
 };
+

@@ -19,6 +19,8 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
 
+defineLegacyParams(MultiAppTransfer);
+
 InputParameters
 MultiAppTransfer::validParams()
 {

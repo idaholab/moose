@@ -12,6 +12,10 @@
 #include "Material.h"
 
 // Forward Declarations
+class GenericConstantMaterial;
+
+template <>
+InputParameters validParams<GenericConstantMaterial>();
 
 /**
  * This material automatically declares as material properties whatever is passed to it
@@ -39,3 +43,4 @@ protected:
 
   std::vector<MaterialProperty<Real> *> _properties;
 };
+

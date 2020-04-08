@@ -14,6 +14,7 @@
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward declarations
+class NodalBCBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -21,6 +22,9 @@ namespace libMesh
 template <typename T>
 class NumericVector;
 }
+
+template <>
+InputParameters validParams<NodalBCBase>();
 
 /**
  * Base class for deriving any boundary condition that works at nodes

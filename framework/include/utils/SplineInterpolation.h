@@ -78,3 +78,4 @@ protected:
 
   static int _file_number;
 };
+

@@ -13,6 +13,8 @@
 #include "MooseTypes.h"
 #include "Assembly.h"
 
+defineLegacyParams(NodalUserObject);
+
 InputParameters
 NodalUserObject::validParams()
 {

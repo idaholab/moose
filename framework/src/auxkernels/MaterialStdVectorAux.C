@@ -11,10 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialStdVectorAux);
 
+defineLegacyParams(MaterialStdVectorAux);
+
 InputParameters
 MaterialStdVectorAux::validParams()
 {
-  InputParameters params = MaterialStdVectorAuxBase<Real>::validParams();
+  InputParameters params = MaterialStdVectorAuxBase<>::validParams();
   params.addClassDescription("Extracts a component of a material type std::vector<Real> to an aux "
                              "variable.  If the std::vector is not of sufficient size then zero is "
                              "returned");

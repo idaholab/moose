@@ -10,6 +10,8 @@
 #include "AuxNodalScalarKernel.h"
 #include "SystemBase.h"
 
+defineLegacyParams(AuxNodalScalarKernel);
+
 InputParameters
 AuxNodalScalarKernel::validParams()
 {

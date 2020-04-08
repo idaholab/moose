@@ -35,3 +35,4 @@ protected:
   DisplacedProblem & _displaced_problem;
   MooseMesh & _ref_mesh;
 };
+

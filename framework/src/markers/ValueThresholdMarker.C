@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", ValueThresholdMarker);
 
+defineLegacyParams(ValueThresholdMarker);
+
 InputParameters
 ValueThresholdMarker::validParams()
 {

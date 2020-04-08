@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", CSVTimeSequenceStepper);
 
+defineLegacyParams(CSVTimeSequenceStepper);
+
 InputParameters
 CSVTimeSequenceStepper::validParams()
 {

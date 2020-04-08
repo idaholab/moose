@@ -18,6 +18,8 @@
 
 registerMooseAction("MooseApp", SetupDebugAction, "add_output");
 
+defineLegacyParams(SetupDebugAction);
+
 InputParameters
 SetupDebugAction::validParams()
 {

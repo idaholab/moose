@@ -12,6 +12,10 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
+class VectorOfPostprocessors;
+
+template <>
+InputParameters validParams<VectorOfPostprocessors>();
 
 /**
  *  VectorOfPostprocessors is a type of VectorPostprocessor that outputs the
@@ -25,9 +29,9 @@ public:
   static InputParameters validParams();
 
   /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
+    * Class constructor
+    * @param parameters The input parameters
+    */
   VectorOfPostprocessors(const InputParameters & parameters);
 
   /**
@@ -47,3 +51,4 @@ protected:
   /// The vector of PostprocessorValue objects that are used to get the values of the postprocessors
   std::vector<const PostprocessorValue *> _postprocessor_values;
 };
+

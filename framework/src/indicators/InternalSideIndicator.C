@@ -26,6 +26,8 @@
 
 const BoundaryID InternalSideIndicator::InternalBndId = 12345;
 
+defineLegacyParams(InternalSideIndicator);
+
 InputParameters
 InternalSideIndicator::validParams()
 {

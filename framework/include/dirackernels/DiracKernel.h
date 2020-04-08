@@ -28,8 +28,12 @@
 
 // Forward Declarations
 class Assembly;
+class DiracKernel;
 class SubProblem;
 class MooseMesh;
+
+template <>
+InputParameters validParams<DiracKernel>();
 
 /**
  * A DiracKernel is used when you need to add contributions to the residual by means of
@@ -237,3 +241,4 @@ private:
   /// id != invalid_uint.
   const Elem * addPointWithValidId(Point p, unsigned id);
 };
+

@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", BoxMarker);
 
+defineLegacyParams(BoxMarker);
+
 InputParameters
 BoxMarker::validParams()
 {

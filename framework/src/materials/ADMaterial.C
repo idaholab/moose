@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "ADMaterial.h"
 
+defineADLegacyParams(ADMaterial);
+
 template <ComputeStage compute_stage>
 InputParameters
 ADMaterial<compute_stage>::validParams()

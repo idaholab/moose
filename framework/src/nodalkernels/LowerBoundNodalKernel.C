@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", LowerBoundNodalKernel);
 
+defineLegacyParams(LowerBoundNodalKernel);
+
 InputParameters
 LowerBoundNodalKernel::validParams()
 {

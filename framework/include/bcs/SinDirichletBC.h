@@ -12,6 +12,10 @@
 #include "NodalBC.h"
 
 // Forward Declarations
+class SinDirichletBC;
+
+template <>
+InputParameters validParams<SinDirichletBC>();
 
 /**
  * A spatially-constant, time-varying NodalBC whose imposed value g(t)

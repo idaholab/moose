@@ -11,10 +11,12 @@
 
 registerMooseObject("MooseApp", MaterialRealVectorValueAux);
 
+defineLegacyParams(MaterialRealVectorValueAux);
+
 InputParameters
 MaterialRealVectorValueAux::validParams()
 {
-  InputParameters params = MaterialAuxBase<RealVectorValue>::validParams();
+  InputParameters params = MaterialAuxBase<>::validParams();
   params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
 
   return params;

@@ -12,6 +12,10 @@
 #include "MooseObject.h"
 
 class FEProblem;
+class LineSearch;
+
+template <>
+InputParameters validParams<LineSearch>();
 
 class LineSearch : public MooseObject
 {

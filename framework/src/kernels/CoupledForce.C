@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", CoupledForce);
 
+defineLegacyParams(CoupledForce);
+
 InputParameters
 CoupledForce::validParams()
 {

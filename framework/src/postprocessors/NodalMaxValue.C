@@ -14,6 +14,8 @@
 
 registerMooseObject("MooseApp", NodalMaxValue);
 
+defineLegacyParams(NodalMaxValue);
+
 InputParameters
 NodalMaxValue::validParams()
 {

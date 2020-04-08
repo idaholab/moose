@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", ODETimeDerivative);
 
+defineLegacyParams(ODETimeDerivative);
+
 InputParameters
 ODETimeDerivative::validParams()
 {
