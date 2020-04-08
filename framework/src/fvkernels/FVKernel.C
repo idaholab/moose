@@ -98,13 +98,14 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
-  if (ownLeftElem())
+  auto ft = fi.faceType(_var.name());
+  if (ownLeftElem() && (ft == FaceInfo::VarFaceNeighbors::LEFT || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareVectorTag(_assembly, _var.number());
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if (ownRightElem())
+  if (ownRightElem() && (ft == FaceInfo::VarFaceNeighbors::RIGHT || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareVectorTagNeighbor(_assembly, _var.number());
     _local_re(0) = -r;
@@ -131,7 +132,8 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   unsigned int var_num = _var.number();
   unsigned int nvars = sys.system().n_vars();
 
-  if (ownLeftElem())
+  auto ft = fi.faceType(_var.name());
+  if (ownLeftElem() && (ft == FaceInfo::VarFaceNeighbors::LEFT || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
@@ -142,7 +144,7 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
     accumulateTaggedLocalMatrix();
   }
 
-  if (ownRightElem())
+  if (ownRightElem() && (ft == FaceInfo::VarFaceNeighbors::RIGHT || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
