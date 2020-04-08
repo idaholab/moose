@@ -331,7 +331,6 @@ private:
 
   /// u dot flags
   mutable bool _need_u_dot;
-  mutable bool _need_ad_u_dot;
   mutable bool _need_u_dotdot;
   mutable bool _need_u_dot_old;
   mutable bool _need_u_dotdot_old;
@@ -361,6 +360,7 @@ private:
   /// AD flags
   mutable bool _need_ad;
   mutable bool _need_ad_u;
+  mutable bool _need_ad_u_dot;
   mutable bool _need_ad_grad_u;
   mutable bool _need_ad_second_u;
 

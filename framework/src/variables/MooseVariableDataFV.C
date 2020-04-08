@@ -46,7 +46,6 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_u_older(false),
     _need_u_previous_nl(false),
     _need_u_dot(false),
-    _need_ad_u_dot(false),
     _need_u_dotdot(false),
     _need_u_dot_old(false),
     _need_u_dotdot_old(false),
@@ -64,8 +63,14 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_curl(false),
     _need_curl_old(false),
     _need_curl_older(false),
-    _need_ad(false),
-    _need_ad_u(false),
+    // for FV variables, they use each other's ad_u values to compute ghost cell
+    // values - we don't have any way to propogate these inter-variable-data
+    // dependencies. So if something needs an ad_u value, that need isn't
+    // propogated through to both the element and the neighbor
+    // data structures. So instead just set _need_ad+_need_ad_u values to true always.
+    _need_ad(true),
+    _need_ad_u(true),
+    _need_ad_u_dot(false),
     _need_ad_grad_u(false),
     _need_ad_second_u(false),
     _need_dof_values(false),
@@ -501,7 +506,6 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face)
 {
   initializeSolnVars();
-  auto & u_other = other_face.sln(Moose::Current);
 
   std::vector<FVDirichletBC *> bcs;
 
@@ -518,12 +522,46 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
-  if (bcs.size() == 0)
-    return;
 
-  auto bc = bcs[0];
-  auto u_face = bc->boundaryValue(fi);
-  _u[0] = 2 * u_face - u_other[0];
+
+  // These need to be initialized but we can't use the regular computeAD
+  // routine because that routine accesses the solution which doesn't exist
+  // for this ghost element. So we do it manually here:
+  unsigned int nqp = 1;
+  if (_need_ad_u)
+    _ad_u.resize(nqp);
+  if (_need_ad_grad_u)
+    _ad_grad_u.resize(nqp);
+  if (_need_ad_u_dot)
+    _ad_u_dot.resize(nqp);
+
+  if (bcs.size() > 0)
+  {
+    // extrapolate from the boundary element across the boundary face using
+    // the given BC face value to determine a ghost cell value for u.  Be sure
+    // to propogate AD derivatives through all this.
+
+    auto bc = bcs[0];
+    DualReal u_face = bc->boundaryValue(fi);
+    // This approach has the problem that need_ad_u isn't marked as true until
+    // after the first computeValues has been run - so the AD values haven't
+    // been initialized - causing this call to not work.  However, an ugly
+    // hack has been implemented by initializing _need_ad_u and friends to 'true'
+    // by default.  Consider perhaps a better solution to this problem.
+    DualReal u_other;
+    if (_subproblem.currentlyComputingJacobian())
+      u_other = other_face.adSln<JACOBIAN>()[0];
+    else
+      u_other = other_face.sln(Moose::Current)[0];
+
+    auto u_ghost = 2 * u_face - u_other;
+
+    if (_need_ad_u)
+      _ad_u[0] = u_ghost;
+    _u[0] = u_ghost.value();
+    // TODO: figure out how to set AD u_dot, and other values
+  }
+
   // TODO: what do we do for _grad_u?
 }
 
@@ -539,6 +577,10 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   // method used here?  After reconstruction, we should cache the computed
   // soln/gradients per element so we don't have to recompute them again for
   // other faces that share an element with this face.
+  //
+  // TODO: Also we need to be able to track (AD) derivatives through the
+  // reconstruction process - how will we do that?
+
   computeValues();
 
   // TODO: maybe initialize a separate _grad_u_interface here that is
