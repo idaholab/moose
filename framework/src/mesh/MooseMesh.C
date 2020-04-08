@@ -60,18 +60,32 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
-FaceInfo::FaceInfo(const Elem * elem, const Elem * neighbor)
+FaceInfo::FaceInfo(const Elem * elem,
+                   unsigned int side,
+                   const Elem * neighbor)
 {
   _left = elem;
   _right = neighbor;
 
-  _left_side_id = elem->which_neighbor_am_i(neighbor);
-  _right_side_id = neighbor->which_neighbor_am_i(elem);
+  _left_side_id = side;
   _left_centroid = elem->centroid();
-  _right_centroid = neighbor->centroid();
-
   _left_volume = elem->volume();
-  _right_volume = neighbor->volume();
+
+  // the right info does not exist for domain boundaries
+  if (!_right)
+  {
+    _right_side_id = std::numeric_limits<unsigned int>::max();
+    _right_centroid = Point(std::numeric_limits<Real>::max(),
+                            std::numeric_limits<Real>::max(),
+                            std::numeric_limits<Real>::max());
+    _right_volume = 0;
+  }
+  else
+  {
+    _right_side_id = neighbor->which_neighbor_am_i(elem);
+    _right_centroid = neighbor->centroid();
+    _right_volume = neighbor->volume();
+  }
 
   std::unique_ptr<const Elem> face = elem->build_side_ptr(_left_side_id);
   _face_area = face->volume();
@@ -2938,15 +2952,11 @@ MooseMesh::buildFaceInfo()
       // get the neighbor element
       const Elem * neighbor = elem->neighbor_ptr(side);
 
-      // this is a boundary side
-      if (!neighbor)
-        continue;
-
-      if ((neighbor->active() && (neighbor->level() == elem->level()) &&
+      if (!neighbor ||
+          (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
           (neighbor->level() < elem->level()))
-        _face_info.emplace_back(elem, neighbor);
+        _face_info.emplace_back(elem, side, neighbor);
     }
   }
 }
-
