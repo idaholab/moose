@@ -13,6 +13,7 @@
 #include "MooseError.h" // mooseDeprecated
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "Problem.h"
 #include "SubProblem.h"
 
@@ -54,8 +55,9 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     variable_name = vec[0];
   }
 
-  _variable = &dynamic_cast<MooseVariableFE<T> &>(
-      problem.getVariable(tid, variable_name, expected_var_type, expected_var_field_type));
+  _var = &problem.getVariable(tid, variable_name, expected_var_type, expected_var_field_type);
+  if (!(_variable = dynamic_cast<MooseVariableFE<T> *>(_var)))
+    _fv_variable = dynamic_cast<MooseVariableFV<T> *>(_var);
 
   _mvi_assembly = &problem.assembly(tid);
 }
@@ -63,6 +65,13 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
 template <typename T>
 MooseVariableInterface<T>::~MooseVariableInterface()
 {
+}
+
+template <typename T>
+MooseVariableFV<T> *
+MooseVariableInterface<T>::mooseVariableFV() const
+{
+  return _fv_variable;
 }
 
 template <typename T>

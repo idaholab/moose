@@ -16,6 +16,8 @@ class Assembly;
 class MooseObject;
 template <typename T>
 class MooseVariableFE;
+template <typename T>
+class MooseVariableFV;
 
 /**
  * Interface for objects that need to get values of MooseVariables
@@ -41,7 +43,11 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
+  MooseVariableBase * mooseVariableBase() const { return _var; };
+
   MooseVariableFE<T> * mooseVariable() const;
+
+  MooseVariableFV<T> * mooseVariableFV() const;
 
   virtual ~MooseVariableInterface();
 
@@ -197,7 +203,9 @@ protected:
   bool _nodal;
 
   /// The variable this object is acting on
-  MooseVariableFE<T> * _variable;
+  MooseVariableBase * _var = nullptr;
+  MooseVariableFE<T> * _variable = nullptr;
+  MooseVariableFV<T> * _fv_variable = nullptr;
 
 protected:
   Assembly * _mvi_assembly;
