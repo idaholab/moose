@@ -130,6 +130,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
+  registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);
   registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
   appendMooseObjectTask  ("add_interface_kernel",         VectorInterfaceKernel);
   registerMooseObjectTask("add_constraint",               Constraint,             false);
@@ -239,6 +240,8 @@ addActionTypes(Syntax & syntax)
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("task", "pre_req")
    */
+
+  // clang-format off
   syntax.addDependencySets("(meta_action)"
                            "(dynamic_object_registration)"
                            "(common_output)"
@@ -309,12 +312,13 @@ addActionTypes(Syntax & syntax)
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_interface_kernel,"
+                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
                            "(coupling_functor_check)"
                            "(add_control)"
                            "(check_output)"
                            "(check_integrity)");
+  // clang-format on
 }
 
 /**
@@ -489,6 +493,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddDGKernelAction", "DGKernels/*");
   registerSyntax("AddFVKernelAction", "FVKernels/*");
+  registerSyntax("AddFVBCAction", "FVBCs/*");
 
   registerSyntax("AddInterfaceKernelAction", "InterfaceKernels/*");
 

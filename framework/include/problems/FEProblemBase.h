@@ -658,6 +658,9 @@ public:
                            const std::string & name,
                            InputParameters & parameters);
 
+  virtual void
+  addFVBC(const std::string & fv_bc_name, const std::string & name, InputParameters & parameters);
+
   // Interface /////
   virtual void addInterfaceKernel(const std::string & kernel_name,
                                   const std::string & name,
