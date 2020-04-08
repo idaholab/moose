@@ -182,10 +182,8 @@ private:
   /// a map that provides the information what face type this is for each variable
   std::map<std::string, VarFaceNeighbors> _face_types_by_var;
 
-  /// a map that keeps track of which sideset define a DirichletBC for each variable
-  /// TODO: is/should it permissible to add a face to two sidesets and define Dirichlet BCs
-  /// on both sidesets for the same variable?
-  std::map<std::string, std::set<BoundaryID>> _dirichlet_boundary_ids;
+  /// the set of boundary ids that this face is associated with
+  std::set<BoundaryID> _boundary_ids;
 };
 
 /**
