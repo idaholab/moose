@@ -310,16 +310,20 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
     auto dst = _fe_problem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, _tid);
     auto src = _fe_problem.getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _tid);
 
-    // FIXME/TODO: this needs to be enabled/uncommented, but it currently
-    // fails due to differing number of qp's for props between src and dst.
-    //dst->copyPropsFrom(*src);
+    // FIXME/TODO: This previously failed due to dst and src not being
+    // initialized with same number of qps per property.  I'm not sure if that
+    // should be the case - investigate this further.  If we can fix that
+    // occurence, then the rezie operation inside copyPropsFrom should be
+    // removed.
+    dst->copyPropsFrom(*src);
   }
 
   // this is the swap-back object - don't forget to catch it into local var
-  std::function<void()> fn = [this] {
+  std::function<void()> fn = [this, &fi] {
     _fe_problem.swapBackMaterials(_tid);
     _fe_problem.swapBackMaterialsFace(_tid);
-    _fe_problem.swapBackMaterialsNeighbor(_tid);
+    if (!fi.isBoundary())
+      _fe_problem.swapBackMaterialsNeighbor(_tid);
   };
   return OnScopeExit(fn);
 }

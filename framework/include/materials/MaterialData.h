@@ -177,8 +177,10 @@ public:
         continue;
 
       if (dst->size() != src->size())
-        mooseError("cannot copy properties with differing quadrature point counts between "
-                   "MaterialData objects");
+        // TODO/FIXME: is this really safe to do? It seems necessary for FV
+        // face loop code that uses it to work right.  Investigate this
+        // further.
+        dst->resize(src->size());
 
       for (unsigned int qp = 0; qp < src->size(); qp++)
         dst->qpCopy(qp, src, qp);
