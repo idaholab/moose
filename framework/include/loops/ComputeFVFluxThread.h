@@ -266,7 +266,8 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // this call, however is necessary - particularly for reiniting materials.
   // Figure out a way to only do the minimum required here if we only have FV
   // variables.
-  _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
+  if (!fi.isBoundary())
+    _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -280,14 +281,33 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // need to be able to reinit the subproblems variables using its equivalent
   // face info object.  How?
 
-  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
-
   for (auto var : _needed_fv_vars)
     var->computeFaceValues(fi);
 
+  // TODO: do we really need both reinitMaterials and reinitMaterialsFace - I
+  // think we do need both.
+  _fe_problem.reinitMaterials(fi.leftElem().subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
+
+  if (!fi.isBoundary())
+    _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
+  else
+  {
+    // TODO: verify that this works as expected.
+    // For computing residual contributions for dirichlet boundary conditions,
+    // we use a "ghost" element approach.  To do this we need variables and
+    // material properties to have accessible neighbor element values even
+    // though there is no actual neighbor element along a boundary.  So here,
+    // we copy the just-computed element (face) material properties into the
+    // neighbor (face) material properties data structure.
+    auto dst = _fe_problem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA, _tid);
+    auto src = _fe_problem.getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _tid);
+    dst->copyPropsFrom(*src);
+  }
+
   // this is the swap-back object - don't forget to catch it into local var
   std::function<void()> fn = [this] {
+    _fe_problem.swapBackMaterials(_tid);
     _fe_problem.swapBackMaterialsFace(_tid);
     _fe_problem.swapBackMaterialsNeighbor(_tid);
   };
