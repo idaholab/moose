@@ -117,36 +117,36 @@ public:
   unsigned int rightSideID() const { return _right_side_id; }
   ///@}
 
-  const std::vector<dof_id_type> & leftDofIndices(std::string var_name) const
+  const std::vector<dof_id_type> & leftDofIndices(const std::string & var_name) const
   {
     auto it = _left_dof_indices.find(var_name);
     if (it == _left_dof_indices.end())
       mooseError("Variable ", var_name, " not found in FaceInfo object");
     return it->second;
   }
-  std::vector<dof_id_type> & leftDofIndices(std::string var_name)
+  std::vector<dof_id_type> & leftDofIndices(const std::string & var_name)
   {
     return _left_dof_indices[var_name];
   }
-  const std::vector<dof_id_type> & rightDofIndices(std::string var_name) const
+  const std::vector<dof_id_type> & rightDofIndices(const std::string & var_name) const
   {
     auto it = _right_dof_indices.find(var_name);
     if (it == _right_dof_indices.end())
       mooseError("Variable ", var_name, " not found in FaceInfo object");
     return it->second;
   }
-  std::vector<dof_id_type> & rightDofIndices(std::string var_name)
+  std::vector<dof_id_type> & rightDofIndices(const std::string & var_name)
   {
     return _right_dof_indices[var_name];
   }
-  const VarFaceNeighbors & faceType(std::string var_name) const
+  VarFaceNeighbors faceType(const std::string & var_name) const
   {
     auto it = _face_types_by_var.find(var_name);
     if (it == _face_types_by_var.end())
       mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
     return it->second;
   }
-  VarFaceNeighbors & faceType(std::string var_name) { return _face_types_by_var[var_name]; }
+  VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
   const std::set<BoundaryID> & boundaryIDs() const
   {
     return _boundary_ids;
