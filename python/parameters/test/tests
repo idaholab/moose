@@ -1,0 +1,10 @@
+[Tests]
+  [Parameter]
+    type = PythonUnitTest
+    input = test_Parameter.py
+  []
+  [InputParameters]
+    type = PythonUnitTest
+    input = test_InputParameters.py
+  []
+[]
