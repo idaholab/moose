@@ -15,6 +15,7 @@
 #include "MooseException.h"
 #include "MooseVariableFVBase.h"
 #include "FVKernel.h"
+#include "FVBoundaryCondition.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
 #include "libmesh/libmesh_exceptions.h"
@@ -404,13 +405,14 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
-  std::vector<FVBoundaryCondition *> bcs;
+  std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVBC")
+      .template condition<AttribSystem>("FVBoundaryCondition")
       .template condition<AttribBoundaries>(bnd_id)
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
+      .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;
@@ -423,8 +425,10 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
   for (const auto & bc : bcs)
-    /*TODO: implement FV BCs - so we can bc->computeResidual(); here*/;
-  // TODO: don't forget to add the if(_do_jacobian) logic too!
+    if (_do_jacobian)
+      bc->computeJacobian(fi);
+    else
+      bc->computeResidual(fi);
 }
 
 template <typename RangeType>
