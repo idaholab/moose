@@ -355,6 +355,7 @@ MooseApp::MooseApp(InputParameters parameters)
 
   _the_warehouse = libmesh_make_unique<TheWarehouse>();
   _the_warehouse->registerAttribute<AttribMatrixTags>("matrix_tags", 0);
+  _the_warehouse->registerAttribute<AttribIsADJac>("is_ad_jac", 0);
   _the_warehouse->registerAttribute<AttribVectorTags>("vector_tags", 0);
   _the_warehouse->registerAttribute<AttribExecOns>("exec_ons", 0);
   _the_warehouse->registerAttribute<AttribSubdomains>("subdomains", 0);

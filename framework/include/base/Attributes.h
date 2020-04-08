@@ -214,6 +214,20 @@ private:
   THREAD_ID _val = 0;
 };
 
+class AttribIsADJac : public Attribute
+{
+public:
+  AttribIsADJac(TheWarehouse & w, bool is_ad) : Attribute(w, "is_ad_jac"), _val(is_ad) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribIsADJac);
+
+private:
+  bool _val;
+};
+
 /// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
 class AttribPreIC : public Attribute
 {
