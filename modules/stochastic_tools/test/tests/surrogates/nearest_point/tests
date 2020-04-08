@@ -1,0 +1,27 @@
+[Tests]
+  issues = "#14933"
+  design = "NearestPointTrainer.md NearestPointSurrogate.md"
+  requirement = 'The system shall create a surrogate that evaluates the closes point from training data by '
+  [train]
+    type = CheckFiles
+    input = train.i
+    check_files = 'train_out_train.rd'
+    allow_test_objects = true
+    detail = 'training then '
+  []
+  [load]
+    type = CSVDiff
+    input = evaluate.i
+    allow_test_objects = true
+    csvdiff = 'evaluate_out_results_0002.csv'
+    prereq = train # Creates data files that this test uses
+    detail = 'evaluating and '
+  []
+  [train_and_load]
+    type = CSVDiff
+    input = cartesian.i
+    allow_test_objects = true
+    csvdiff = 'cartesian_out_results_0002.csv'
+    detail = 'training and loading.'
+  []
+[]
