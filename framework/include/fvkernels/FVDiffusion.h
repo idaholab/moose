@@ -14,7 +14,7 @@ protected:
   virtual ADReal computeQpJacobian() override;
 
   const ADMaterialProperty(Real) & _coeff_left;
-  const MaterialProperty<Real> & _coeff_right;
+  const ADMaterialProperty(Real) & _coeff_right;
 
   usingFVFluxKernelMembers;
 };
