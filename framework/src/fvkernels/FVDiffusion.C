@@ -50,3 +50,52 @@ FVDiffusion<compute_stage>::computeQpJacobian()
 {
   return 0;
 }
+
+registerADMooseObject("MooseApp", FVAdvection);
+
+template <ComputeStage compute_stage>
+InputParameters
+FVAdvection<compute_stage>::validParams()
+{
+  InputParameters params = FVFluxKernel<compute_stage>::validParams();
+  params.addRequiredParam<MaterialPropertyName>("vel", "advection velocity");
+  return params;
+}
+
+template <ComputeStage compute_stage>
+FVAdvection<compute_stage>::FVAdvection(const InputParameters & params)
+  : FVFluxKernel<compute_stage>(params),
+    _vel_left(getADMaterialProperty<RealVectorValue>("vel")),
+    _vel_right(getNeighborADMaterialProperty<RealVectorValue>("vel")){};
+
+template <ComputeStage compute_stage>
+ADReal
+FVAdvection<compute_stage>::computeQpResidual()
+{
+  auto v_avg = (_vel_left[_qp] + _vel_right[_qp]) * 0.5;
+  ADReal r = 0;
+  if (v_avg * _normal > 0)
+    r = _normal * v_avg * _u_left[_qp];
+  else
+    r = _normal * v_avg * _u_right[_qp];
+
+  std::cout << "***** computeQpResidual left=" << _face_info->leftElem().id() << ", right=";
+  if (_face_info->rightElemPtr())
+    std::cout << _face_info->rightElem().id();
+  else
+    std::cout << "GHOST";
+  std::cout << "\n";
+  std::cout << "    normal: " << _face_info->normal() << "\n";
+  std::cout << "    face centroid: " << _face_info->faceCentroid() << "\n";
+  std::cout << "    u_left: " << _u_left[0] << "\n";
+  std::cout << "    u_right: " << _u_right[0] << "\n";
+  std::cout << "    residual: " << r << "\n";
+  return r;
+}
+
+template <ComputeStage compute_stage>
+ADReal
+FVAdvection<compute_stage>::computeQpJacobian()
+{
+  return 0;
+}
