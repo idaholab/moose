@@ -31,6 +31,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
   : _var(var),
     _fe_type(_var.feType()),
     _var_num(_var.number()),
+    _var_name(_var.name()),
     _sys(sys),
     _subproblem(_sys.subproblem()),
     _tid(tid),
@@ -517,8 +518,8 @@ MooseVariableDataFV<OutputType>::computeValuesFace(const FaceInfo & fi)
   DoFValue values;
   values.resize(1);
   auto & soln = *_sys.currentSolution();
-  auto uleft = soln(fi.leftDofIndices(_var_num)[0]);
-  auto uright = soln(fi.rightDofIndices(_var_num)[0]);
+  auto uleft = soln(fi.leftDofIndices(_var_name)[0]);
+  auto uright = soln(fi.rightDofIndices(_var_name)[0]);
   _grad_u[0] = fi.normal() * (uright - uleft) / ((fi.rightCentroid() - fi.leftCentroid()).norm());
 
   // TODO: figure out how to store old/older values of reconstructed

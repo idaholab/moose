@@ -278,6 +278,8 @@ private:
 
   const unsigned int _var_num;
 
+  const std::string & _var_name;
+
   const SystemBase & _sys;
 
   const SubProblem & _subproblem;
@@ -521,4 +523,3 @@ const MooseArray<Real> & MooseVariableDataFV<Real>::adDofValues<RESIDUAL>() cons
 template <>
 template <>
 const MooseArray<Real> & MooseVariableDataFV<RealVectorValue>::adDofValues<RESIDUAL>() const;
-
