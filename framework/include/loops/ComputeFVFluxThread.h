@@ -57,7 +57,7 @@ public:
   void join(const ThreadedFaceLoop & /*y*/){};
 
   virtual void onFace(const FaceInfo & fi) = 0;
-  virtual void postFace(const FaceInfo & fi) {}
+  virtual void postFace(const FaceInfo & /*fi*/) {}
   virtual void post() {}
 
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) = 0;
@@ -310,7 +310,7 @@ ComputeFVFluxThread<RangeType>::post()
 
 template <typename RangeType>
 void
-ComputeFVFluxThread<RangeType>::postFace(const FaceInfo & fi)
+ComputeFVFluxThread<RangeType>::postFace(const FaceInfo & /*fi*/)
 {
   _num_cached++;
   if (_do_jacobian)
