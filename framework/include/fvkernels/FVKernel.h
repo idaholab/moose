@@ -83,7 +83,7 @@ protected:
   const ADVariableValue & _u_right;
   const ADVariableGradient & _grad_u_left;
   const ADVariableGradient & _grad_u_right;
-  Point _normal;
+  ADRealVectorValue _normal;
   const FaceInfo * _face_info = nullptr;
 
 private:
