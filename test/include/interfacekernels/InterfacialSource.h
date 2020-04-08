@@ -14,9 +14,6 @@
 // Forward Declarations
 class Function;
 
-template <>
-InputParameters validParams<InterfacialSource>();
-
 /**
  * This kernel implements a generic functional
  * body force term:

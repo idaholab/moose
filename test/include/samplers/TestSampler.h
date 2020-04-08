@@ -10,9 +10,6 @@
 
 #include "Sampler.h"
 
-template <>
-InputParameters validParams<TestSampler>();
-
 class TestSampler : public Sampler
 {
 public:

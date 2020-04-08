@@ -13,11 +13,6 @@
 #include "SamplerInterface.h"
 #include "Sampler.h"
 
-// Forward Declarations
-
-template <>
-InputParameters validParams<SamplerTester>();
-
 /**
  * UserObject for testing Sampler object threaded and parallel behavior, it should be used for
  * anything else, see TestSampler object.
