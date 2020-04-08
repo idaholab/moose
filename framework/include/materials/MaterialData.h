@@ -161,6 +161,30 @@ public:
    */
   bool isOnlyResizeIfSmaller() const { return _resize_only_if_smaller; };
 
+  /**
+   * Copy all property values common between this material data and 'other'
+   * from other into this object.
+   */
+  void copyPropsFrom(MaterialData & other)
+  {
+    for (size_t i = 0; i < other._props.size(); i++)
+    {
+      if (_props.size() <= i)
+        break;
+      auto src = other._props[i];
+      auto dst = _props[i];
+      if (!src || !dst)
+        continue;
+
+      if (dst->size() != src->size())
+        mooseError("cannot copy properties with differing quadrature point counts between "
+                   "MaterialData objects");
+
+      for (unsigned int qp = 0; qp < src->size(); qp++)
+        dst->qpCopy(qp, src, qp);
+    }
+  }
+
 protected:
   /// Reference to the MaterialStorage class
   MaterialPropertyStorage & _storage;
