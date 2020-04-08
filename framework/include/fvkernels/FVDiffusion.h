@@ -2,15 +2,19 @@
 
 #include "FVKernel.h"
 
-class FVDiffusion : public FVFluxKernel
+template <ComputeStage compute_stage>
+class FVDiffusion : public FVFluxKernel<compute_stage>
 {
 public:
   static InputParameters validParams();
   FVDiffusion(const InputParameters & params);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual ADReal computeQpResidual() override;
+  virtual ADReal computeQpJacobian() override;
 
-  const MaterialProperty<Real> & _coeff_left;
+  const ADMaterialProperty(Real) & _coeff_left;
   const MaterialProperty<Real> & _coeff_right;
+
+  usingFVFluxKernelMembers;
 };
