@@ -133,7 +133,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
   // fv source kernels into this loop. Also this check will need to increase
   // in generality if/when other systems and objects besides FV stuff get
   // added to this loop.
-  std::vector<FVFluxKernel *> kernels;
+  std::vector<FVKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVKernels")
@@ -252,7 +252,14 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // be some stuff that happens in assembly::reinit/reinitFE that we need, but
   // most of that is (obviously) FE specific.  Also - we need to fall back to
   // reiniting everything like normal if there is any FV-FE variable coupling.
-  _fe_problem.prepare(fi.leftElem(), _tid);
+  _fe_problem.prepare(&fi.leftElem(), _tid);
+
+  // TODO: this triggers a bunch of FE-specific stuff to occur that we might
+  // not need if only FV variables are active.  Some of the stuff triggered by
+  // this call, however is necessary - particularly for reiniting materials.
+  // Figure out a way to only do the minimum required here if we only have FV
+  // variables.
+  _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -266,17 +273,10 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // need to be able to reinit the subproblems variables using its equivalent
   // face info object.  How?
 
-  // TODO: this triggers a bunch of FE-specific stuff to occur that we might
-  // not need if only FV variables are active.  Some of the stuff triggered by
-  // this call, however is necessary - particularly for reiniting materials.
-  // Figure out a way to only do the minimum required here if we only have FV
-  // variables.
-  _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
-
   _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
   _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
 
-  for (const auto & var : _needed_fv_vars)
+  for (auto var : _needed_fv_vars)
     var->computeFaceValues(fi);
 
   // this is the swap-back object - don't forget to catch it into local var
@@ -284,23 +284,24 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
     _fe_problem.swapBackMaterialsFace(_tid);
     _fe_problem.swapBackMaterialsNeighbor(_tid);
   };
-  OnScopeExit ose(fn);
-  return ose;
+  return OnScopeExit(fn);
 }
 
 template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
-  std::vector<FVFluxKernel *> kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVKernels")
-      .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribVectorTags>(_tags)
-      .template condition<AttribThread>(_tid)
-      .queryInto(kernels);
+  std::vector<FVFluxKernelBase *> kernels;
+  auto q = _fe_problem.theWarehouse()
+               .query()
+               .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
+               .template condition<AttribSubdomains>(_subdomain)
+               .template condition<AttribVectorTags>(_tags)
+               .template condition<AttribThread>(_tid)
+               .template condition<AttribSystem>("FVKernels")
+               .template condition<AttribIsADJac>(_do_jacobian)
+               .queryInto(kernels);
+
   if (kernels.size() == 0)
     return;
 
@@ -318,9 +319,9 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 
   for (const auto k : kernels)
     if (_do_jacobian)
-      k->computeResidual(fi);
-    else
       k->computeJacobian(fi);
+    else
+      k->computeResidual(fi);
 }
 
 template <typename RangeType>
@@ -361,7 +362,7 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   // kernels, etc. - but we don't need to add them for other types of objects
   // like FE or DG kernels because those kernels don't run in this loop. Do we
   // really want to integrate fv source kernels into this loop?
-  std::vector<FVFluxKernel *> kernels;
+  std::vector<FVFluxKernelBase *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVKernels")
