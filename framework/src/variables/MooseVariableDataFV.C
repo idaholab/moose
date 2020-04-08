@@ -530,7 +530,7 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::computeValues(bool force)
 {
-  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  initDofIndices();
 
   unsigned int num_dofs = _dof_indices.size();
 
@@ -626,21 +626,16 @@ MooseVariableDataFV<OutputType>::computeValues(bool force)
     computeAD(num_dofs, nqp);
 }
 
-// TODO: update this func for FV (remove phi usage and such).
 template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
-  /*
   _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
     _ad_u.resize(nqp);
 
   if (_need_ad_grad_u)
     _ad_grad_u.resize(nqp);
-
-  if (_need_ad_second_u)
-    _ad_second_u.resize(nqp);
 
   if (_need_ad_u_dot)
   {
@@ -661,19 +656,6 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
                   (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
       break;
 
-    case Moose::ElementType::Lower:
-      // At the time of writing, this Lower case is only used in mortar applications where we are
-      // re-init'ing on Element, Neighbor, and Lower dimensional elements
-      // simultaneously. Consequently, we make sure here that our offset is greater than the sum of
-      // the element and neighbor dofs. I can imagine a future case in which you're not re-init'ing
-      // on all three simultaneously in which case this offset could be smaller. Also note that the
-      // number of dofs on lower-d elements is guaranteed to be lower than on the higher dimensional
-      // element, but we're not using that knowledge here. In the future we could implement
-      // something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
-      ad_offset = 2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
-                  _var_num * _sys.getMaxVarNDofsPerElem();
-      break;
-
     default:
       mooseError(
           "Unsupported element type ",
@@ -692,20 +674,14 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
                "derivative container.");
 #endif
 
-  for (unsigned int qp = 0; qp < nqp; qp++)
-  {
-    if (_need_ad_u)
-      _ad_u[qp] = _ad_zero;
+  if (_need_ad_u)
+    _ad_u[0] = _ad_zero;
 
-    if (_need_ad_grad_u)
-      _ad_grad_u[qp] = _ad_zero;
+  if (_need_ad_grad_u)
+    _ad_grad_u[0] = _ad_zero;
 
-    if (_need_ad_second_u)
-      _ad_second_u[qp] = _ad_zero;
-
-    if (_need_ad_u_dot)
-      _ad_u_dot[qp] = _ad_zero;
-  }
+  if (_need_ad_u_dot)
+    _ad_u_dot[0] = _ad_zero;
 
   for (unsigned int i = 0; i < num_dofs; i++)
   {
@@ -722,39 +698,17 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
     }
   }
 
-  // Now build up the solution at each quadrature point:
-  for (unsigned int i = 0; i < num_dofs; i++)
-  {
-    for (unsigned int qp = 0; qp < nqp; qp++)
-    {
-      if (_need_ad_u)
-        _ad_u[qp] += _ad_dof_values[i];
+  if (_need_ad_u)
+    _ad_u[0] = _ad_dof_values[0];
 
-      if (_need_ad_grad_u)
-      {
-        // The latter check here is for handling the fact that we have not yet implemented
-        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that situation
-        // we need to default to using the non-ad grad_phi
-        if (_displaced)
-          _ad_grad_u[qp] += _ad_dof_values[i];
-        else
-          _ad_grad_u[qp] += _ad_dof_values[i];
-      }
+  if (_need_ad_grad_u)
+    _ad_grad_u[0] = 0;
 
-      if (_need_ad_second_u)
-        // Note that this will not carry any derivatives with respect to displacements because those
-        // calculations have not yet been implemented in Assembly
-        _ad_second_u[qp] += _ad_dof_values[i];
-
-      if (_need_ad_u_dot && _time_integrator)
-        _ad_u_dot[qp] += _ad_dofs_dot[i];
-    }
-  }
+  if (_need_ad_u_dot && _time_integrator)
+    _ad_u_dot[0] = _ad_dofs_dot[0];
 
   if (_need_ad_u_dot && !_time_integrator)
-    for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
-      _ad_u_dot[qp] = _u_dot[qp];
-*/
+    _ad_u_dot[0] = _u_dot[0];
 }
 
 template <typename OutputType>
@@ -809,6 +763,7 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::insert(NumericVector<Number> & residual)
 {
+  initDofIndices();
   residual.insert(&_dof_values[0], _dof_indices);
 }
 
@@ -816,6 +771,7 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::add(NumericVector<Number> & residual)
 {
+  initDofIndices();
   residual.add_vector(&_dof_values[0], _dof_indices);
 }
 
@@ -824,6 +780,7 @@ void
 MooseVariableDataFV<OutputType>::addSolution(NumericVector<Number> & sol,
                                              const DenseVector<Number> & v) const
 {
+  initDofIndices();
   sol.add_vector(v, _dof_indices);
 }
 
@@ -1084,7 +1041,7 @@ void
 MooseVariableDataFV<OutputType>::prepareIC()
 {
   // TODO: implement this function
-  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  initDofIndices();
   _dof_values.resize(_dof_indices.size());
 
   unsigned int nqp = 1;

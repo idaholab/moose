@@ -193,9 +193,13 @@ public:
   ///////////////////////////// dof indices ///////////////////////////////////////////////
 
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) const;
-  const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
-  unsigned int numberOfDofs() const { return _dof_indices.size(); }
-  void clearDofIndices() { _dof_indices.clear(); }
+  const std::vector<dof_id_type> & dofIndices() const { return initDofIndices(); }
+  unsigned int numberOfDofs() const { return initDofIndices().size(); }
+  void clearDofIndices()
+  {
+    _dof_indices.clear();
+    _prev_elem = nullptr;
+  }
 
   /**
    * Set the current local DOF values to the input vector
@@ -291,7 +295,7 @@ private:
   unsigned int _count;
 
   /// The dof indices for the current element
-  std::vector<dof_id_type> _dof_indices;
+  mutable std::vector<dof_id_type> _dof_indices;
 
   mutable std::vector<bool> _need_vector_tag_dof_u;
   mutable std::vector<bool> _need_matrix_tag_dof_u;
@@ -448,6 +452,18 @@ private:
   /// changing. If we initialized this to point to one elem, then in the next calculation we would
   /// be pointing to the wrong place!
   const Elem * const & _elem;
+  /// used to keep track of when dof indices are out of date
+  mutable const Elem * _prev_elem = nullptr;
+
+  const std::vector<dof_id_type> & initDofIndices() const
+  {
+    if (_prev_elem != _elem)
+    {
+      _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+      _prev_elem = _elem;
+    }
+    return _dof_indices;
+  }
 
   /// Whether this variable is being calculated on a displaced system
   const bool _displaced;
