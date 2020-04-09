@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSMassSpecifiedNormalFlowBC);
 
-defineLegacyParams(NSMassSpecifiedNormalFlowBC);
-
 InputParameters
 NSMassSpecifiedNormalFlowBC::validParams()
 {

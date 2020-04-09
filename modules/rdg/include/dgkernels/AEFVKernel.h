@@ -12,11 +12,6 @@
 #include "DGKernel.h"
 #include "InternalSideFluxBase.h"
 
-class AEFVKernel;
-
-template <>
-InputParameters validParams<AEFVKernel>();
-
 /**
  * A dgkernel for the advection equation
  * using a cell-centered finite volume method
@@ -69,4 +64,3 @@ protected:
   /// flux user object
   const InternalSideFluxBase & _flux;
 };
-

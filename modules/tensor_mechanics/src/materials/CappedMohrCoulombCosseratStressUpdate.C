@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", CappedMohrCoulombCosseratStressUpdate);
 
-defineLegacyParams(CappedMohrCoulombCosseratStressUpdate);
-
 InputParameters
 CappedMohrCoulombCosseratStressUpdate::validParams()
 {

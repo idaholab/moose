@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", StrainEnergyDensity);
 
-defineLegacyParams(StrainEnergyDensity);
-
 InputParameters
 StrainEnergyDensity::validParams()
 {

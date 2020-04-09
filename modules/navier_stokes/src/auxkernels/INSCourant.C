@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSCourant);
 
-defineLegacyParams(INSCourant);
-
 InputParameters
 INSCourant::validParams()
 {

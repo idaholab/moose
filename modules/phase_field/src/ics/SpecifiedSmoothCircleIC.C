@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", SpecifiedSmoothCircleIC);
 
-defineLegacyParams(SpecifiedSmoothCircleIC);
-
 InputParameters
 SpecifiedSmoothCircleIC::validParams()
 {

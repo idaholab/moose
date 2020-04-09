@@ -12,10 +12,6 @@
 #include "NSSUPGBase.h"
 
 // Forward Declarations
-class NSSUPGEnergy;
-
-template <>
-InputParameters validParams<NSSUPGEnergy>();
 
 /**
  * Compute residual and Jacobian terms form the SUPG
@@ -39,4 +35,3 @@ private:
   // variable numbering.
   Real computeJacobianHelper(unsigned var);
 };
-

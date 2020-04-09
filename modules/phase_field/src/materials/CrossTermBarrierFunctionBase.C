@@ -9,8 +9,6 @@
 
 #include "CrossTermBarrierFunctionBase.h"
 
-defineLegacyParams(CrossTermBarrierFunctionBase);
-
 InputParameters
 CrossTermBarrierFunctionBase::validParams()
 {

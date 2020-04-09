@@ -12,8 +12,6 @@
 
 #include <fstream>
 
-defineLegacyParams(GBAnisotropyBase);
-
 InputParameters
 GBAnisotropyBase::validParams()
 {

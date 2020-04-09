@@ -12,10 +12,6 @@
 #include "Function.h"
 
 // Forward Declarations
-class RichardsExcavGeom;
-
-template <>
-InputParameters validParams<RichardsExcavGeom>();
 
 /**
  * Defines excavation geometry.  It is used to enforce

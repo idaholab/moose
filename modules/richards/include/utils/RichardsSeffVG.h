@@ -45,4 +45,3 @@ public:
    */
   static Real d2seff(Real p, Real al, Real m);
 };
-

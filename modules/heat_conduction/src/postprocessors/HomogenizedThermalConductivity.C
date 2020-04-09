@@ -13,8 +13,6 @@
 
 registerMooseObject("HeatConductionApp", HomogenizedThermalConductivity);
 
-defineLegacyParams(HomogenizedThermalConductivity);
-
 InputParameters
 HomogenizedThermalConductivity::validParams()
 {

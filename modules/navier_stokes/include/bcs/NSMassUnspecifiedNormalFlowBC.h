@@ -12,10 +12,6 @@
 #include "NSMassBC.h"
 
 // Forward Declarations
-class NSMassUnspecifiedNormalFlowBC;
-
-template <>
-InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
 
 /**
  * This class implements the mass equation boundary term with
@@ -33,4 +29,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

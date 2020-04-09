@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class HeatConductionTestApp;
-
-template <>
-InputParameters validParams<HeatConductionTestApp>();
-
 class HeatConductionTestApp : public MooseApp
 {
 public:
@@ -28,4 +23,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

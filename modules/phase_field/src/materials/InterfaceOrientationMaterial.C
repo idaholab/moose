@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", InterfaceOrientationMaterial);
 
-defineLegacyParams(InterfaceOrientationMaterial);
-
 InputParameters
 InterfaceOrientationMaterial::validParams()
 {

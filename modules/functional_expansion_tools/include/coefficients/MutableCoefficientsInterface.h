@@ -15,11 +15,7 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 
-class MutableCoefficientsInterface;
 class ConsoleStream;
-
-template <>
-InputParameters validParams<MutableCoefficientsInterface>();
 
 /**
  * This class is designed to provide a uniform interface for any class that uses an array of

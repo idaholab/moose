@@ -12,10 +12,6 @@
 #include "SpecifiedSmoothSuperellipsoidIC.h"
 
 // Forward Declarations
-class BimodalSuperellipsoidsIC;
-
-template <>
-InputParameters validParams<BimodalSuperellipsoidsIC>();
 
 /**
  * BimodalSuperellipsoidsIC takes a specified number of superellipsoids, each with given parameters
@@ -58,4 +54,3 @@ protected:
   Point _top_right;
   Point _range;
 };
-

@@ -12,10 +12,6 @@
 #include "PorousFlowVariableBase.h"
 
 class PorousFlowCapillaryPressure;
-class PorousFlow1PhaseP;
-
-template <>
-InputParameters validParams<PorousFlow1PhaseP>();
 
 /**
  * Base material designed to calculate fluid phase porepressure and saturation
@@ -49,4 +45,3 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
-

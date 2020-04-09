@@ -31,6 +31,3 @@ protected:
 
   const MooseEnum _quantity;
 };
-
-template <>
-InputParameters validParams<CavityPressurePostprocessor>();

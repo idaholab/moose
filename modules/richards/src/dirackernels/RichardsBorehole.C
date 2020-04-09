@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", RichardsBorehole);
 
-defineLegacyParams(RichardsBorehole);
-
 InputParameters
 RichardsBorehole::validParams()
 {
@@ -48,18 +46,15 @@ RichardsBorehole::RichardsBorehole(const InputParameters & parameters)
 
     // in the following, getUserObjectByName returns a reference (an alias) to a RichardsBLAH user
     // object, and the & turns it into a pointer
-    _density_UO(_fully_upwind
-                    ? &getUserObjectByName<RichardsDensity>(
-                          getParam<std::vector<UserObjectName>>("density_UO")[_pvar])
-                    : NULL),
-    _seff_UO(_fully_upwind
-                 ? &getUserObjectByName<RichardsSeff>(
-                       getParam<std::vector<UserObjectName>>("seff_UO")[_pvar])
-                 : NULL),
-    _relperm_UO(_fully_upwind
-                    ? &getUserObjectByName<RichardsRelPerm>(
-                          getParam<std::vector<UserObjectName>>("relperm_UO")[_pvar])
-                    : NULL),
+    _density_UO(_fully_upwind ? &getUserObjectByName<RichardsDensity>(
+                                    getParam<std::vector<UserObjectName>>("density_UO")[_pvar])
+                              : NULL),
+    _seff_UO(_fully_upwind ? &getUserObjectByName<RichardsSeff>(
+                                 getParam<std::vector<UserObjectName>>("seff_UO")[_pvar])
+                           : NULL),
+    _relperm_UO(_fully_upwind ? &getUserObjectByName<RichardsRelPerm>(
+                                    getParam<std::vector<UserObjectName>>("relperm_UO")[_pvar])
+                              : NULL),
 
     _num_nodes(0),
     _mobility(0),

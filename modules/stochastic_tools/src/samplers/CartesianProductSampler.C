@@ -16,8 +16,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             "07/01/2020 00:00",
                             CartesianProduct);
 
-defineLegacyParams(CartesianProductSampler);
-
 InputParameters
 CartesianProductSampler::validParams()
 {

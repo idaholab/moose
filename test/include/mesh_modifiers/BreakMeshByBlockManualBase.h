@@ -11,12 +11,6 @@
 
 #include "BreakMeshByBlockBase.h"
 
-// forward declaration
-class BreakMeshByBlockManualBase;
-
-template <>
-InputParameters validParams<BreakMeshByBlockManualBase>();
-
 class BreakMeshByBlockManualBase : public BreakMeshByBlockBase
 {
 public:
@@ -31,4 +25,3 @@ protected:
   /// method setting the local_node of element_id to global_node
   virtual void setElemNode(dof_id_type element_id, dof_id_type local_node, dof_id_type global_node);
 };
-

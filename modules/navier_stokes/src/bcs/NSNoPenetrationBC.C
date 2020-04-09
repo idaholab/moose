@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSNoPenetrationBC);
 
-defineLegacyParams(NSNoPenetrationBC);
-
 InputParameters
 NSNoPenetrationBC::validParams()
 {

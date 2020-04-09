@@ -17,8 +17,6 @@
 // PETSc includes
 #include <petscblaslapack.h> // LAPACKgesv_
 
-defineLegacyParams(MultiParameterPlasticityStressUpdate);
-
 InputParameters
 MultiParameterPlasticityStressUpdate::validParams()
 {

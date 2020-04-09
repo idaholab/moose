@@ -17,8 +17,6 @@
 
 registerMooseObject("SolidMechanicsApp", AbaqusCreepMaterial);
 
-defineLegacyParams(AbaqusCreepMaterial);
-
 InputParameters
 AbaqusCreepMaterial::validParams()
 {

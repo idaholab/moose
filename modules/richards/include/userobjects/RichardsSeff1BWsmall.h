@@ -11,11 +11,6 @@
 
 #include "RichardsSeff.h"
 
-class RichardsSeff1BWsmall;
-
-template <>
-InputParameters validParams<RichardsSeff1BWsmall>();
-
 /**
  * "Broadbridge-White" form of effective saturation for Kn small
  * as a function of porepressure (not capillary pressure, so
@@ -78,4 +73,3 @@ protected:
   /// BW's lambda_s parameter multiplied by (fluiddensity*gravity)
   Real _las;
 };
-

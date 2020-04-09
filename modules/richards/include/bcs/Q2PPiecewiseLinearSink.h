@@ -16,10 +16,6 @@
 #include "RichardsRelPerm.h"
 
 // Forward Declarations
-class Q2PPiecewiseLinearSink;
-
-template <>
-InputParameters validParams<Q2PPiecewiseLinearSink>();
 
 /**
  * Applies a fully-upwinded flux sink to a boundary

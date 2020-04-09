@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", PFCElementEnergyIntegral);
 
-defineLegacyParams(PFCElementEnergyIntegral);
-
 InputParameters
 PFCElementEnergyIntegral::validParams()
 {

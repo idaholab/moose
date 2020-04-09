@@ -14,10 +14,6 @@
 #include "PenetrationLocator.h"
 
 // Forward Declarations
-class GapHeatPointSourceMaster;
-
-template <>
-InputParameters validParams<GapHeatPointSourceMaster>();
 
 class GapHeatPointSourceMaster : public DiracKernel
 {
@@ -37,4 +33,3 @@ protected:
 
   //  std::vector<Real> _localized_slave_flux;
 };
-

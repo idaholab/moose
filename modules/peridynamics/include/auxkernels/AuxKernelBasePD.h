@@ -11,11 +11,7 @@
 
 #include "AuxKernel.h"
 
-class AuxKernelBasePD;
 class PeridynamicsMesh;
-
-template <>
-InputParameters validParams<AuxKernelBasePD>();
 
 /**
  * Peridynamic Aux Kernel base class

@@ -39,8 +39,6 @@ registerMooseAction("XFEMApp", XFEMAction, "add_kernel");
 
 registerMooseAction("XFEMApp", XFEMAction, "add_bc");
 
-defineLegacyParams(XFEMAction);
-
 InputParameters
 XFEMAction::validParams()
 {

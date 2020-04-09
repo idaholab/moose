@@ -30,8 +30,6 @@ InteractionIntegralSM::sifModeType()
   return MooseEnum("KI KII KIII T", "KI");
 }
 
-defineLegacyParams(InteractionIntegralSM);
-
 InputParameters
 InteractionIntegralSM::validParams()
 {

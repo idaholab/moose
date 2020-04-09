@@ -11,8 +11,6 @@
 
 registerMooseObject("RdgTestApp", TestBoundaryFlux);
 
-defineLegacyParams(TestBoundaryFlux);
-
 InputParameters
 TestBoundaryFlux::validParams()
 {

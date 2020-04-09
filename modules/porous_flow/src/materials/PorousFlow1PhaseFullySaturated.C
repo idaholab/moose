@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlow1PhaseFullySaturated);
 
-defineLegacyParams(PorousFlow1PhaseFullySaturated);
-
 InputParameters
 PorousFlow1PhaseFullySaturated::validParams()
 {

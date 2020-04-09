@@ -12,10 +12,6 @@
 #include "DerivativeFunctionMaterialBase.h"
 
 // Forward Declarations
-class DerivativeMultiPhaseBase;
-
-template <>
-InputParameters validParams<DerivativeMultiPhaseBase>();
 
 /**
  * DerivativeMaterial child class to evaluate a parsed function for the
@@ -86,4 +82,3 @@ protected:
   /// Phase transformation energy barrier
   Real _W;
 };
-

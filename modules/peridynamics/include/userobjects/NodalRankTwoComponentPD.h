@@ -11,11 +11,6 @@
 
 #include "NodalRankTwoUserObjectBasePD.h"
 
-class NodalRankTwoComponentPD;
-
-template <>
-InputParameters validParams<NodalRankTwoComponentPD>();
-
 /**
  * Userobject class to compute the component values for rank two tensor at individual material point
  */

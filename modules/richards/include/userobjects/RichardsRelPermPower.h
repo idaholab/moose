@@ -11,11 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermPower;
-
-template <>
-InputParameters validParams<RichardsRelPermPower>();
-
 /**
  * Power form of relative permeability, usually
  * used for water
@@ -52,4 +47,3 @@ protected:
   /// exponent used in the power relationship
   Real _n;
 };
-

@@ -11,11 +11,6 @@
 
 #include "CappedMohrCoulombStressUpdate.h"
 
-class CappedMohrCoulombCosseratStressUpdate;
-
-template <>
-InputParameters validParams<CappedMohrCoulombCosseratStressUpdate>();
-
 /**
  * CappedMohrCoulombCosseratStressUpdate implements rate-independent nonassociative
  * Mohr-Coulomb plus tensile plus compressive plasticity with hardening/softening

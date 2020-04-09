@@ -11,11 +11,6 @@
 
 #include "DerivativeMultiPhaseBase.h"
 
-class DerivativeMultiPhaseMaterial;
-
-template <>
-InputParameters validParams<DerivativeMultiPhaseMaterial>();
-
 /**
  * Multi phase free energy material that combines an arbitrary number of
  * phase free energies to a global free energy. All switching functions are
@@ -36,4 +31,3 @@ protected:
   /// Function value of the i phase.
   std::vector<const MaterialProperty<Real> *> _dhi, _d2hi, _d3hi;
 };
-

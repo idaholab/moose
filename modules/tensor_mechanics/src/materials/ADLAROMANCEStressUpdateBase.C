@@ -12,8 +12,6 @@
 #include "Function.h"
 #include "MathUtils.h"
 
-defineADLegacyParams(ADLAROMANCEStressUpdateBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADLAROMANCEStressUpdateBase<compute_stage>::validParams()

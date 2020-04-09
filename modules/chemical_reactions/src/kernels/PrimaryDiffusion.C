@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", PrimaryDiffusion);
 
-defineLegacyParams(PrimaryDiffusion);
-
 InputParameters
 PrimaryDiffusion::validParams()
 {

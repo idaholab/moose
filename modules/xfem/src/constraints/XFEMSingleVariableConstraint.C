@@ -21,8 +21,6 @@
 
 registerMooseObject("XFEMApp", XFEMSingleVariableConstraint);
 
-defineLegacyParams(XFEMSingleVariableConstraint);
-
 InputParameters
 XFEMSingleVariableConstraint::validParams()
 {

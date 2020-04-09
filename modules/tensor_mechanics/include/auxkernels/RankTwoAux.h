@@ -12,16 +12,11 @@
 #include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
 
-class RankTwoAux;
-
 /**
  * RankTwoAux is designed to take the data in the RankTwoTensor material
  * property, for example stress or strain, and output the value for the
  * supplied indices.
  */
-
-template <>
-InputParameters validParams<RankTwoAux>();
 
 class RankTwoAux : public NodalPatchRecovery
 {

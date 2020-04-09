@@ -26,8 +26,6 @@ registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_variable"
 
 registerMooseAction("TensorMechanicsApp", GlobalStrainAction, "add_aux_kernel");
 
-defineLegacyParams(GlobalStrainAction);
-
 InputParameters
 GlobalStrainAction::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("HeatConductionApp", HeatConductionTimeDerivative);
 
-defineLegacyParams(HeatConductionTimeDerivative);
-
 InputParameters
 HeatConductionTimeDerivative::validParams()
 {

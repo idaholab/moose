@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", Air);
 
-defineLegacyParams(Air);
-
 InputParameters
 Air::validParams()
 {

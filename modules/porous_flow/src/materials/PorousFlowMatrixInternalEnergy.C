@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowMatrixInternalEnergy);
 
-defineLegacyParams(PorousFlowMatrixInternalEnergy);
-
 InputParameters
 PorousFlowMatrixInternalEnergy::validParams()
 {

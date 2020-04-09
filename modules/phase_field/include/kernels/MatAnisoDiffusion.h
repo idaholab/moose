@@ -23,7 +23,3 @@ public:
 
   MatAnisoDiffusion(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<MatAnisoDiffusion>();
-

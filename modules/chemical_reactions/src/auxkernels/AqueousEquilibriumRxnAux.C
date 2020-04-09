@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", AqueousEquilibriumRxnAux);
 
-defineLegacyParams(AqueousEquilibriumRxnAux);
-
 InputParameters
 AqueousEquilibriumRxnAux::validParams()
 {

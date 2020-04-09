@@ -19,8 +19,6 @@
 
 registerMooseObject("XFEMApp", PointValueAtXFEMInterface);
 
-defineLegacyParams(PointValueAtXFEMInterface);
-
 InputParameters
 PointValueAtXFEMInterface::validParams()
 {

@@ -12,10 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class RndBoundingBoxIC;
-
-template <>
-InputParameters validParams<RndBoundingBoxIC>();
 
 /**
  * RndBoundingBoxIC allows setting the initial condition of a value inside and outside of a
@@ -56,4 +52,3 @@ private:
   const Point _bottom_left;
   const Point _top_right;
 };
-

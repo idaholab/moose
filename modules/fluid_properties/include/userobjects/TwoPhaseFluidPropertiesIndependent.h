@@ -11,11 +11,6 @@
 
 #include "TwoPhaseFluidProperties.h"
 
-class TwoPhaseFluidPropertiesIndependent;
-
-template <>
-InputParameters validParams<TwoPhaseFluidPropertiesIndependent>();
-
 /**
  * 2-phase fluid properties for 2 independent single-phase fluid properties.
  *
@@ -41,4 +36,3 @@ public:
    */
   [[noreturn]] void throwNotImplementedError() const;
 };
-

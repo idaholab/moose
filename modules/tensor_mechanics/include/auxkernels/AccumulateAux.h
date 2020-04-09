@@ -12,10 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class AccumulateAux;
-
-template <>
-InputParameters validParams<AccumulateAux>();
 
 /**
  * Accumulate values from one auxiliary variable into another

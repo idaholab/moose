@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", MultiPhaseStressMaterial);
 
-defineLegacyParams(MultiPhaseStressMaterial);
-
 InputParameters
 MultiPhaseStressMaterial::validParams()
 {

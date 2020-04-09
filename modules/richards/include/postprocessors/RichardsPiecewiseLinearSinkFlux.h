@@ -16,10 +16,6 @@
 class Function;
 
 // Forward Declarations
-class RichardsPiecewiseLinearSinkFlux;
-
-template <>
-InputParameters validParams<RichardsPiecewiseLinearSinkFlux>();
 
 /**
  * This postprocessor computes the fluid flux to a RichardsPiecewiseLinearSink.

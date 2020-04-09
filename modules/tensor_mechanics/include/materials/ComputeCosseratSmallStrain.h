@@ -11,11 +11,6 @@
 
 #include "ComputeStrainBase.h"
 
-class ComputeCosseratSmallStrain;
-
-template <>
-InputParameters validParams<ComputeCosseratSmallStrain>();
-
 /**
  * ComputeCosseratSmallStrain defines Cossserat strain tensor, assuming small strains.
  */

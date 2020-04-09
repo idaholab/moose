@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", EBSDReaderPointDataAux);
 
-defineLegacyParams(EBSDReaderPointDataAux);
-
 InputParameters
 EBSDReaderPointDataAux::validParams()
 {

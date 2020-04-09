@@ -11,11 +11,6 @@
 
 #include "AddUserObjectAction.h"
 
-class AddFluidPropertiesAction;
-
-template <>
-InputParameters validParams<AddFluidPropertiesAction>();
-
 class AddFluidPropertiesAction : public AddUserObjectAction
 {
 public:
@@ -23,4 +18,3 @@ public:
 
   AddFluidPropertiesAction(InputParameters params);
 };
-

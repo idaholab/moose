@@ -12,10 +12,6 @@
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSMassBC;
-
-template <>
-InputParameters validParams<NSMassBC>();
 
 /**
  * This class corresponds to the "natural" boundary condition
@@ -52,4 +48,3 @@ protected:
    */
   Real qpJacobianHelper(unsigned var_number);
 };
-

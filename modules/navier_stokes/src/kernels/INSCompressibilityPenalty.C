@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", INSCompressibilityPenalty);
 
-defineLegacyParams(INSCompressibilityPenalty);
-
 InputParameters
 INSCompressibilityPenalty::validParams()
 {

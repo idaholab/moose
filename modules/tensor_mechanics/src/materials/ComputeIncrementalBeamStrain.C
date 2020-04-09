@@ -19,8 +19,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeIncrementalBeamStrain);
 
-defineLegacyParams(ComputeIncrementalBeamStrain);
-
 InputParameters
 ComputeIncrementalBeamStrain::validParams()
 {

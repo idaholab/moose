@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ReconPhaseVarIC);
 
-defineLegacyParams(ReconPhaseVarIC);
-
 InputParameters
 ReconPhaseVarIC::validParams()
 {

@@ -13,11 +13,7 @@
 #include "Control.h"
 
 // Forward declarations
-class SamplerReceiver;
 class Function;
-
-template <>
-InputParameters validParams<SamplerReceiver>();
 
 /**
  * A Control object for receiving data from a master application Sampler object.

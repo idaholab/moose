@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", MixedModeEquivalentK);
 
-defineLegacyParams(MixedModeEquivalentK);
-
 InputParameters
 MixedModeEquivalentK::validParams()
 {

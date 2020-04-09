@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalRandomICAction, "add_ic");
 
-defineLegacyParams(PolycrystalRandomICAction);
-
 InputParameters
 PolycrystalRandomICAction::validParams()
 {

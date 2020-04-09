@@ -11,11 +11,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class HeliumFluidProperties;
-
-template <>
-InputParameters validParams<HeliumFluidProperties>();
-
 /**
  * Fluid properties for helium \cite petersen \cite harlow
  */

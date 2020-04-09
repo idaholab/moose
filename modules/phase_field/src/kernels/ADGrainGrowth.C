@@ -11,8 +11,6 @@
 
 registerADMooseObject("PhaseFieldApp", ADGrainGrowth);
 
-defineADLegacyParams(ADGrainGrowth);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADGrainGrowth<compute_stage>::validParams()

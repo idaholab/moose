@@ -12,8 +12,6 @@
 
 registerMooseObject("HeatConductionApp", SemiconductorLinearConductivity);
 
-defineLegacyParams(SemiconductorLinearConductivity);
-
 InputParameters
 SemiconductorLinearConductivity::validParams()
 {

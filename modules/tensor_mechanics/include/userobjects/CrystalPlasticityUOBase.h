@@ -11,11 +11,6 @@
 
 #include "DiscreteElementUserObject.h"
 
-class CrystalPlasticityUOBase;
-
-template <>
-InputParameters validParams<CrystalPlasticityUOBase>();
-
 /**
  * Crystal plasticity system userobject base class.
  */

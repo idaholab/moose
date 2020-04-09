@@ -12,11 +12,6 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class SolidMechanicsAction;
-
-template <>
-InputParameters validParams<SolidMechanicsAction>();
-
 class SolidMechanicsAction : public Action
 {
 public:
@@ -35,4 +30,3 @@ private:
   const Real _zeta;
   const Real _alpha;
 };
-

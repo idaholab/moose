@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class TestNewmarkTI;
-
-template <>
-InputParameters validParams<TestNewmarkTI>();
-
 class TestNewmarkTI : public AuxKernel
 {
 public:

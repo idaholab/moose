@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityMaterial);
 
-defineLegacyParams(PorousFlowDarcyVelocityMaterial);
-
 InputParameters
 PorousFlowDarcyVelocityMaterial::validParams()
 {

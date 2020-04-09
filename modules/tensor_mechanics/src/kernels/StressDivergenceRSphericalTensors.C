@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", StressDivergenceRSphericalTensors);
 
-defineLegacyParams(StressDivergenceRSphericalTensors);
-
 InputParameters
 StressDivergenceRSphericalTensors::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVolumetricDeformGrad);
 
-defineLegacyParams(ComputeVolumetricDeformGrad);
-
 InputParameters
 ComputeVolumetricDeformGrad::validParams()
 {

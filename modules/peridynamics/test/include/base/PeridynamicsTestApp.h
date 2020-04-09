@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class PeridynamicsTestApp;
-
-template <>
-InputParameters validParams<PeridynamicsTestApp>();
-
 class PeridynamicsTestApp : public MooseApp
 {
 public:

@@ -10,7 +10,6 @@
 #pragma once
 #include "SolidModel.h"
 
-
 typedef void (*umat_t)(Real STRESS[],
                        Real STATEV[],
                        Real DDSDDE[],
@@ -50,10 +49,6 @@ typedef void (*umat_t)(Real STRESS[],
                        int * KINC);
 
 // Forward Declaration
-class AbaqusUmatMaterial;
-
-template <>
-InputParameters validParams<AbaqusUmatMaterial>();
 
 // AbaqusUmatMateral class define a property
 class AbaqusUmatMaterial : public SolidModel
@@ -104,4 +99,3 @@ protected:
   MaterialProperty<Real> & _plastic_dissipation;
   MaterialProperty<Real> & _creep_dissipation;
 };
-

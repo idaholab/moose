@@ -13,13 +13,9 @@
 #include "StochasticToolsTransfer.h"
 
 // Forward declarations
-class SamplerPostprocessorTransfer;
 class SamplerReceiver;
 class SamplerFullSolveMultiApp;
 class StochasticResults;
-
-template <>
-InputParameters validParams<SamplerPostprocessorTransfer>();
 
 /**
  * Transfer Postprocessor from sub-applications to a VectorPostprocessor on the master application.

@@ -13,11 +13,6 @@
 
 #include "libmesh/vector_value.h"
 
-class AddCoupledEqSpeciesAction;
-
-template <>
-InputParameters validParams<AddCoupledEqSpeciesAction>();
-
 class AddCoupledEqSpeciesAction : public Action
 {
 public:
@@ -63,4 +58,3 @@ protected:
   /// Gravity (default is (0, 0, 0))
   const RealVectorValue _gravity;
 };
-

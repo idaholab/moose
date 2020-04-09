@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class LineElementAction;
-
-template <>
-InputParameters validParams<LineElementAction>();
-
 class LineElementAction : public Action
 {
 public:

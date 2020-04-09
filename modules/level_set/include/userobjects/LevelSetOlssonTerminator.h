@@ -12,7 +12,6 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class LevelSetOlssonTerminator;
 /**
  * Terminates the solve based on the criteria defined in Olsson et. al. (2007).
  */
@@ -36,4 +35,3 @@ protected:
   /// The required minimum number of timesteps
   const int & _min_t_steps;
 };
-

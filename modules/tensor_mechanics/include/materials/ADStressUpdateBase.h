@@ -21,8 +21,6 @@
   using ADStressUpdateBase<compute_stage>::_base_name
 
 // Forward declarations
-template <ComputeStage>
-class ADStressUpdateBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -32,8 +30,6 @@ class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 class InputParameters;
-
-declareADValidParams(ADStressUpdateBase);
 
 /**
  * ADStressUpdateBase is a material that is not called by MOOSE because

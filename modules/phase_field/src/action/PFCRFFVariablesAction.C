@@ -17,8 +17,6 @@
 
 registerMooseAction("PhaseFieldApp", PFCRFFVariablesAction, "add_variable");
 
-defineLegacyParams(PFCRFFVariablesAction);
-
 InputParameters
 PFCRFFVariablesAction::validParams()
 {

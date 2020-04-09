@@ -12,7 +12,6 @@
 #include "ScalarKernel.h"
 
 // Forward Declarations
-class GlobalStrain;
 class GlobalStrainUserObjectInterface;
 template <typename>
 class RankTwoTensorTempl;
@@ -20,9 +19,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-
-template <>
-InputParameters validParams<GlobalStrain>();
 
 class GlobalStrain : public ScalarKernel
 {

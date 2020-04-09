@@ -11,11 +11,6 @@
 
 #include "INSADMaterial.h"
 
-template <ComputeStage>
-class INSADTauMaterial;
-
-declareADValidParams(INSADTauMaterial);
-
 template <ComputeStage compute_stage>
 class INSADTauMaterial : public INSADMaterial<compute_stage>
 {
@@ -36,4 +31,3 @@ protected:
 
   usingINSMaterialMembers;
 };
-

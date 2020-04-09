@@ -12,11 +12,6 @@
 #include "CrystalPlasticityUOBase.h"
 #include "RankTwoTensor.h"
 
-class CrystalPlasticitySlipRate;
-
-template <>
-InputParameters validParams<CrystalPlasticitySlipRate>();
-
 /**
  * Crystal plasticity slip rate userobject class
  * The virtual functions written below must be

@@ -11,13 +11,11 @@
 
 registerADMooseObject("PhaseFieldApp", ADSplitCHWRes);
 
-defineADLegacyParams(ADSplitCHWRes);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADSplitCHWRes<compute_stage>::validParams()
 {
-  InputParameters params = ADSplitCHWResBase<compute_stage>::validParams();
+  InputParameters params = ADSplitCHWResBase<compute_stage, Real>::validParams();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential "
                              "variable with a scalar (isotropic) mobility");
   return params;

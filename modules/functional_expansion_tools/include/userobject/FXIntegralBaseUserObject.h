@@ -29,9 +29,6 @@ public:
   static InputParameters validParams();
 };
 
-template <>
-InputParameters validParams<FXIntegralBaseUserObjectParameters>();
-
 /**
  * This class interacts with a MooseApp through functional expansions. It is templated to allow the
  * inheritance of two dual classes that operate in a volume (FXVolumeUserObject) or on a boundary

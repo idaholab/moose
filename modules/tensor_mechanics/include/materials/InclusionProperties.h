@@ -13,10 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class InclusionProperties;
-
-template <>
-InputParameters validParams<InclusionProperties>();
 
 /**
  * This material calculates the stresses, strains, and elastic energies for an

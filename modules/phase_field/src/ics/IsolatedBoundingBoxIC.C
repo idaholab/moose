@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", IsolatedBoundingBoxIC);
 
-defineLegacyParams(IsolatedBoundingBoxIC);
-
 InputParameters
 IsolatedBoundingBoxIC::validParams()
 {

@@ -13,10 +13,6 @@
 #include "MooseRandom.h"
 
 // Forward Declarations
-class SmoothCircleBaseIC;
-
-template <>
-InputParameters validParams<SmoothCircleBaseIC>();
 
 /**
  * SmoothcircleBaseIC is the base class for all initial conditions that create circles. The circles
@@ -64,4 +60,3 @@ protected:
 
   MooseRandom _random;
 };
-

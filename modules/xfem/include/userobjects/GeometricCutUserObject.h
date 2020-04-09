@@ -98,10 +98,6 @@ struct GeomMarkedElemInfo3D
 } // namespace Xfem
 
 // Forward declarations
-class GeometricCutUserObject;
-
-template <>
-InputParameters validParams<GeometricCutUserObject>();
 
 class GeometricCutUserObject : public CrackFrontPointsProvider
 {

@@ -19,4 +19,3 @@ enum class Guarantee
   CONSTANT_IN_TIME, // applicable to material properties that do not change over time
   UNIFORM_IN_SPACE  // applicable to material properties that have constant values in space
 };
-

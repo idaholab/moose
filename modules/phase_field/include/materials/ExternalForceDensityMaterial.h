@@ -13,11 +13,7 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ExternalForceDensityMaterial;
 class Function;
-
-template <>
-InputParameters validParams<ExternalForceDensityMaterial>();
 
 /**
  * This Material calculates the force density acting on a particle/grain

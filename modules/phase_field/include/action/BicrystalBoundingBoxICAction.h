@@ -28,7 +28,3 @@ private:
   const std::string _var_name_base;
   const unsigned int _op_num;
 };
-
-template <>
-InputParameters validParams<BicrystalBoundingBoxICAction>();
-

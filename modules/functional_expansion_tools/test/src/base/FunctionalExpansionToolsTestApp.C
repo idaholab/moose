@@ -32,7 +32,10 @@ FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters
 }
 
 void
-FunctionalExpansionToolsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+FunctionalExpansionToolsTestApp::registerAll(Factory & f,
+                                             ActionFactory & af,
+                                             Syntax & s,
+                                             bool use_test_objs)
 {
   FunctionalExpansionToolsApp::registerAll(f, af, s);
   if (use_test_objs)

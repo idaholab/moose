@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", Q2PNodalMass);
 
-defineLegacyParams(Q2PNodalMass);
-
 InputParameters
 Q2PNodalMass::validParams()
 {

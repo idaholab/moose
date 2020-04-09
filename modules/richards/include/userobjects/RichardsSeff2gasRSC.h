@@ -22,10 +22,6 @@
  * infiltration: application of a Backlund transformation" Nonlinear Analysis Theory Methods and
  * Applications 7 (1983) 785--799.
  */
-class RichardsSeff2gasRSC;
-
-template <>
-InputParameters validParams<RichardsSeff2gasRSC>();
 
 class RichardsSeff2gasRSC : public RichardsSeff
 {
@@ -76,4 +72,3 @@ protected:
   /// RSC scale
   Real _scale;
 };
-

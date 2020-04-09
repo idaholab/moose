@@ -9,10 +9,6 @@
 #pragma once
 
 #include "Sampler.h"
-class TestSampler;
-
-template <>
-InputParameters validParams<TestSampler>();
 
 class TestSampler : public Sampler
 {

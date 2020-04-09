@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class XFEMApp;
-
-template <>
-InputParameters validParams<XFEMApp>();
-
 class XFEMApp : public MooseApp
 {
 public:
@@ -32,4 +27,3 @@ public:
   static void registerExecFlags(Factory & factory);
   static void associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory);
 };
-

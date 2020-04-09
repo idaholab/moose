@@ -12,11 +12,7 @@
 #include "InitialCondition.h"
 
 class PorousFlowDictator;
-class PorousFlowFluidStateIC;
 class PorousFlowFluidStateMultiComponentBase;
-
-template <>
-InputParameters validParams<PorousFlowFluidStateIC>();
 
 /**
  * PorousFlowFluidStateIC calculates an initial value for
@@ -48,4 +44,3 @@ protected:
   /// FluidState UserObject
   const PorousFlowFluidStateMultiComponentBase & _fs;
 };
-

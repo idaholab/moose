@@ -11,11 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityIdeal;
-
-template <>
-InputParameters validParams<RichardsDensityIdeal>();
-
 /**
  * Fluid density of an ideal gas
  */
@@ -49,4 +44,3 @@ protected:
   /// density = _slope*(p - _p0)
   Real _p0;
 };
-

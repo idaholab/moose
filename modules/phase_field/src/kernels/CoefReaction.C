@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CoefReaction);
 
-defineLegacyParams(CoefReaction);
-
 InputParameters
 CoefReaction::validParams()
 {

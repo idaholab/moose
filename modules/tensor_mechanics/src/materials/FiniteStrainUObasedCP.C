@@ -17,8 +17,6 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainUObasedCP);
 
-defineLegacyParams(FiniteStrainUObasedCP);
-
 InputParameters
 FiniteStrainUObasedCP::validParams()
 {

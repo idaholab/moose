@@ -10,8 +10,6 @@
 #include "SecondDerivativeImplicitEuler.h"
 #include "SubProblem.h"
 
-defineLegacyParams(SecondDerivativeImplicitEuler);
-
 InputParameters
 SecondDerivativeImplicitEuler::validParams()
 {

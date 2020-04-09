@@ -13,10 +13,6 @@
 #include "ConservedUniformNoiseVeneer.h"
 
 // Forward delcarations
-class ConservedMaskedUniformNoise;
-
-template <>
-InputParameters validParams<ConservedMaskedUniformNoise>();
 
 /**
  * Userobject that generates a uniformly distributed random number in the interval [-1:1]

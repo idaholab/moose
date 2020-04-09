@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedHeatAdvection);
 
-defineLegacyParams(PorousFlowFullySaturatedHeatAdvection);
-
 InputParameters
 PorousFlowFullySaturatedHeatAdvection::validParams()
 {

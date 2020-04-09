@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SusceptibilityTimeDerivative);
 
-defineLegacyParams(SusceptibilityTimeDerivative);
-
 InputParameters
 SusceptibilityTimeDerivative::validParams()
 {

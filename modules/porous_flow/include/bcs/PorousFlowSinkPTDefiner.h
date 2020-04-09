@@ -11,11 +11,6 @@
 
 #include "PorousFlowSink.h"
 
-class PorousFlowSinkPTDefiner;
-
-template <>
-InputParameters validParams<PorousFlowSinkPTDefiner>();
-
 /**
  * Provides either a porepressure or a temperature
  * to derived classes, depending on _involves_fluid
@@ -50,4 +45,3 @@ protected:
   /// Provides the d(variable)/(d PorousFlow Variable pvar)
   virtual Real dptVar(unsigned pvar) const;
 };
-

@@ -9,8 +9,6 @@
 
 #include "CrystalPlasticityStateVarRateComponent.h"
 
-defineLegacyParams(CrystalPlasticityStateVarRateComponent);
-
 InputParameters
 CrystalPlasticityStateVarRateComponent::validParams()
 {

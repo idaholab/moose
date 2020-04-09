@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class SpecificInternalEnergyAux;
-
-template <>
-InputParameters validParams<SpecificInternalEnergyAux>();
-
 /**
  * Computes specific internal energy
  */
@@ -35,4 +30,3 @@ protected:
   const VariableValue & _rho_w;
   const VariableValue & _rho_et;
 };
-

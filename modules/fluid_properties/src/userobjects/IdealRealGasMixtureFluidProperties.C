@@ -14,8 +14,6 @@
 
 registerMooseObject("FluidPropertiesApp", IdealRealGasMixtureFluidProperties);
 
-defineLegacyParams(IdealRealGasMixtureFluidProperties);
-
 InputParameters
 IdealRealGasMixtureFluidProperties::validParams()
 {

@@ -13,13 +13,9 @@
 
 // Forward Declarations
 class InputParameters;
-class VolumeWeightedWeibull;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<VolumeWeightedWeibull>();
 
 /**
  * VolumeWeightedWeibull generates a spatially randomized field that follows

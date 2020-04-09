@@ -12,11 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticTensile;
-
-template <>
-InputParameters validParams<TensorMechanicsPlasticTensile>();
-
 /**
  * FiniteStrainTensile implements rate-independent associative tensile failure
  * with hardening/softening in the finite-strain framework.

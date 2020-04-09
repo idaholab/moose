@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", NodalGravity);
 
-defineLegacyParams(NodalGravity);
-
 InputParameters
 NodalGravity::validParams()
 {

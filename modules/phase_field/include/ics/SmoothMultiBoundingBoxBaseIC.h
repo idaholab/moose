@@ -12,10 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class SmoothMultiBoundingBoxBaseIC;
-
-template <>
-InputParameters validParams<SmoothMultiBoundingBoxBaseIC>();
 
 /**
  * SmoothMultiBoundingBoxBaseIC is the base class for IsolatedBoundingBoxIC and NestedBoundingBoxIC.

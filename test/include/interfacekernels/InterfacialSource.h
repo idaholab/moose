@@ -12,11 +12,7 @@
 #include "InterfaceKernel.h"
 
 // Forward Declarations
-class InterfacialSource;
 class Function;
-
-template <>
-InputParameters validParams<InterfacialSource>();
 
 /**
  * This kernel implements a generic functional

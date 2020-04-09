@@ -12,10 +12,6 @@
 #include "ADKernelValue.h"
 
 // Forward Declarations
-template <ComputeStage>
-class INSADMass;
-
-declareADValidParams(INSADMass);
 
 /**
  * This class computes the mass equation residual and Jacobian
@@ -38,4 +34,3 @@ protected:
 
   usingKernelValueMembers;
 };
-

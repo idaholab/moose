@@ -12,10 +12,6 @@
 #include "INSMomentumBase.h"
 
 // Forward Declarations
-class INSMomentumTractionForm;
-
-template <>
-InputParameters validParams<INSMomentumTractionForm>();
 
 /**
  * This class computes momentum equation residual and Jacobian viscous
@@ -35,4 +31,3 @@ protected:
   virtual Real computeQpJacobianViscousPart() override;
   virtual Real computeQpOffDiagJacobianViscousPart(unsigned jvar) override;
 };
-

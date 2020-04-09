@@ -12,8 +12,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FunctionSeriesToAux);
 
-defineLegacyParams(FunctionSeriesToAux);
-
 InputParameters
 FunctionSeriesToAux::validParams()
 {

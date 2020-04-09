@@ -17,10 +17,6 @@
 class MooseMesh;
 
 // Forward Declarations
-class CrackFrontData;
-
-template <>
-InputParameters validParams<CrackFrontData>();
 
 class CrackFrontData : public GeneralPostprocessor
 {

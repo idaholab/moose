@@ -11,21 +11,15 @@
 
 #include "TimeDerivative.h"
 
-// Forward Declaration
-class TestMatTimeDerivative;
-
-template<>
-InputParameters validParams<TestMatTimeDerivative>();
-
 class TestMatTimeDerivative : public TimeDerivative
 {
 public:
+  static InputParameters validParams();
+
   TestMatTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   const MaterialProperty<Real> & _mat_prop_value;
-
 };
-

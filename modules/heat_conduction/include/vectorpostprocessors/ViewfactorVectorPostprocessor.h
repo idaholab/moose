@@ -12,11 +12,7 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class ViewfactorVectorPostprocessor;
 class GrayLambertSurfaceRadiationBase;
-
-template <>
-InputParameters validParams<ViewfactorVectorPostprocessor>();
 
 class ViewfactorVectorPostprocessor : public GeneralVectorPostprocessor
 {

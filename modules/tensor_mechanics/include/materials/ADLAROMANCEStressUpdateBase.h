@@ -18,11 +18,6 @@
   using ADLAROMANCEStressUpdateBase<compute_stage>::getInputLimits;                                \
   using ADLAROMANCEStressUpdateBase<compute_stage>::getCoefs
 
-template <ComputeStage>
-class ADLAROMANCEStressUpdateBase;
-
-declareADValidParams(ADLAROMANCEStressUpdateBase);
-
 enum class ROMInputTransform
 {
   LINEAR,

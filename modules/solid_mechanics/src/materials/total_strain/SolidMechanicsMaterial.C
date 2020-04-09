@@ -12,8 +12,6 @@
 #include "VolumetricModel.h"
 #include "MooseMesh.h"
 
-defineLegacyParams(SolidMechanicsMaterial);
-
 InputParameters
 SolidMechanicsMaterial::validParams()
 {

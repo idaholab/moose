@@ -11,11 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-class EqualGradientLagrangeMultiplier;
-
-template <>
-InputParameters validParams<EqualGradientLagrangeMultiplier>();
-
 /**
  * Lagrange multiplier "FaceKernel" that is used in conjunction with
  * EqualGradientLagrangeInterface.
@@ -46,4 +41,3 @@ protected:
   /// compensate Jacobian fill term from NullKernel
   const Real _jacobian_fill;
 };
-

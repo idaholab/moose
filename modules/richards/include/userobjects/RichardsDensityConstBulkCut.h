@@ -11,11 +11,6 @@
 
 #include "RichardsDensity.h"
 
-class RichardsDensityConstBulkCut;
-
-template <>
-InputParameters validParams<RichardsDensityConstBulkCut>();
-
 /**
  * Fluid density assuming constant bulk modulus, for p>cut_limit
  * Then following a cubic for zero_point <= p <= cut_limit
@@ -63,4 +58,3 @@ protected:
   /// (cut_limit-zero_point)^3
   Real _c3;
 };
-

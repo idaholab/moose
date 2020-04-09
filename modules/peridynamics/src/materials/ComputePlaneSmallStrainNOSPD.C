@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", ComputePlaneSmallStrainNOSPD);
 
-defineLegacyParams(ComputePlaneSmallStrainNOSPD);
-
 InputParameters
 ComputePlaneSmallStrainNOSPD::validParams()
 {

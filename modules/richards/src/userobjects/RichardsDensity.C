@@ -11,8 +11,6 @@
 //
 #include "RichardsDensity.h"
 
-defineLegacyParams(RichardsDensity);
-
 InputParameters
 RichardsDensity::validParams()
 {

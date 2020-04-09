@@ -17,8 +17,6 @@
 
 registerMooseObject("PeridynamicsApp", MeshGeneratorPD);
 
-defineLegacyParams(MeshGeneratorPD);
-
 InputParameters
 MeshGeneratorPD::validParams()
 {

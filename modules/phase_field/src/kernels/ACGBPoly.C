@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", ACGBPoly);
 
-defineLegacyParams(ACGBPoly);
-
 InputParameters
 ACGBPoly::validParams()
 {

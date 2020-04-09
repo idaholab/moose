@@ -21,8 +21,6 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainOffDiag);
 
-defineLegacyParams(GeneralizedPlaneStrainOffDiag);
-
 InputParameters
 GeneralizedPlaneStrainOffDiag::validParams()
 {

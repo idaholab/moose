@@ -11,11 +11,6 @@
 
 #include "BoostDistribution.h"
 
-class BoostWeibullDistribution;
-
-template <>
-InputParameters validParams<BoostWeibullDistribution>();
-
 /**
  * A class used to generate Weibull distribution via Boost
  */
@@ -26,4 +21,3 @@ public:
 
   BoostWeibullDistribution(const InputParameters & parameters);
 };
-

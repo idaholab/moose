@@ -8,20 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 /*************************************************************************
-*
-*  Welcome to HYRAX!
-*  Andrea M. Jokisaari
-*  CASL/MOOSE
-*
-*  18 April 2012
-*
-*************************************************************************/
+ *
+ *  Welcome to HYRAX!
+ *  Andrea M. Jokisaari
+ *  CASL/MOOSE
+ *
+ *  18 April 2012
+ *
+ *************************************************************************/
 
 #include "MaterialSymmElasticityTensorAux.h"
 
 registerMooseObject("SolidMechanicsApp", MaterialSymmElasticityTensorAux);
-
-defineLegacyParams(MaterialSymmElasticityTensorAux);
 
 InputParameters
 MaterialSymmElasticityTensorAux::validParams()

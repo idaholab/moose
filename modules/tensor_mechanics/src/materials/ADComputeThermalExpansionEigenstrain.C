@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeThermalExpansionEigenstrain);
 
-defineADLegacyParams(ADComputeThermalExpansionEigenstrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeThermalExpansionEigenstrain<compute_stage>::validParams()

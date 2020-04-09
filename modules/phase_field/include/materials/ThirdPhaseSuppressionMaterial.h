@@ -13,10 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class ThirdPhaseSuppressionMaterial;
-
-template <>
-InputParameters validParams<ThirdPhaseSuppressionMaterial>();
 
 /**
  * OPInterfaceBarrierMaterial is a Free Energy Penalty contribution
@@ -47,4 +43,3 @@ protected:
   /// Material properties to store the second derivatives.
   std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2g;
 };
-

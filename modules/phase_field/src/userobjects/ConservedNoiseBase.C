@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(ConservedNoiseBase);
-
 InputParameters
 ConservedNoiseBase::validParams()
 {

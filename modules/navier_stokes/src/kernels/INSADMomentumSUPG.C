@@ -11,8 +11,6 @@
 
 registerADMooseObject("NavierStokesApp", INSADMomentumSUPG);
 
-defineADLegacyParams(INSADMomentumSUPG);
-
 template <ComputeStage compute_stage>
 InputParameters
 INSADMomentumSUPG<compute_stage>::validParams()

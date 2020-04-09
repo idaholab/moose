@@ -12,7 +12,6 @@
 #include "ThreadedGeneralUserObject.h"
 
 // Forward Declarations
-class FluidProperties;
 
 // The default DualReal size allows functions of many more variables than
 // common in the FluidProperties module. This makes the computations much
@@ -21,9 +20,6 @@ class FluidProperties;
 // This is useful for the cases where we wish to use AD to compute the derivatives
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPDualReal;
-
-template <>
-InputParameters validParams<FluidProperties>();
 
 class FluidProperties : public ThreadedGeneralUserObject
 {

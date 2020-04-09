@@ -12,10 +12,6 @@
 #include "KKSMultiACBulkBase.h"
 
 // Forward Declarations
-class KKSMultiACBulkC;
-
-template <>
-InputParameters validParams<KKSMultiACBulkC>();
 
 /**
  * KKSACBulkBase child class for the phase concentration term
@@ -48,4 +44,3 @@ protected:
   /// any other coupled variables \f$ \frac {d^2}{dc_1 dv} F_1 \f$
   std::vector<const MaterialProperty<Real> *> _prop_d2F1dc1darg;
 };
-

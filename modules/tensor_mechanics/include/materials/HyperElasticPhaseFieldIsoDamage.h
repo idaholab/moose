@@ -11,11 +11,6 @@
 
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 
-class HyperElasticPhaseFieldIsoDamage;
-
-template <>
-InputParameters validParams<HyperElasticPhaseFieldIsoDamage>();
-
 /**
  * This class solves visco plastic model based on isotropically damaged stress
  * The damage parameter is obtained from phase field fracture kernel

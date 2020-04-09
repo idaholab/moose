@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", MathEBFreeEnergy);
 
-defineLegacyParams(MathEBFreeEnergy);
-
 InputParameters
 MathEBFreeEnergy::validParams()
 {

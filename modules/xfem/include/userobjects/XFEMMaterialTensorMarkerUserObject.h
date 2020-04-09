@@ -12,11 +12,6 @@
 #include "XFEMMaterialStateMarkerBase.h"
 #include "MaterialTensorCalculator.h"
 
-class XFEMMaterialTensorMarkerUserObject;
-
-template <>
-InputParameters validParams<XFEMMaterialTensorMarkerUserObject>();
-
 class XFEMMaterialTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
@@ -34,4 +29,3 @@ protected:
 
   virtual bool doesElementCrack(RealVectorValue & direction);
 };
-

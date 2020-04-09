@@ -13,11 +13,7 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class NSInflowThermalBC;
 class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<NSInflowThermalBC>();
 
 /**
  * This class is used on a boundary where the incoming flow
@@ -49,4 +45,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

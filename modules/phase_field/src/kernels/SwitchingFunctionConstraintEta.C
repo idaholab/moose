@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintEta);
 
-defineLegacyParams(SwitchingFunctionConstraintEta);
-
 InputParameters
 SwitchingFunctionConstraintEta::validParams()
 {

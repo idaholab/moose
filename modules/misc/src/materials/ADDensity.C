@@ -11,8 +11,6 @@
 
 registerADMooseObject("MiscApp", ADDensity);
 
-defineADLegacyParams(ADDensity);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADDensity<compute_stage>::validParams()

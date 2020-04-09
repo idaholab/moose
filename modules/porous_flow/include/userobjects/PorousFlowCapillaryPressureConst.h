@@ -11,11 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureConst;
-
-template <>
-InputParameters validParams<PorousFlowCapillaryPressureConst>();
-
 /**
  * Constant capillary pressure
  */
@@ -38,4 +33,3 @@ protected:
   /// Constant capillary pressure (Pa)
   const Real _pc;
 };
-

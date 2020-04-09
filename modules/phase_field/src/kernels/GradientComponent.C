@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GradientComponent);
 
-defineLegacyParams(GradientComponent);
-
 InputParameters
 GradientComponent::validParams()
 {

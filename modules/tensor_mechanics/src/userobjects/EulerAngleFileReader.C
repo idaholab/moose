@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", EulerAngleFileReader);
 
-defineLegacyParams(EulerAngleFileReader);
-
 InputParameters
 EulerAngleFileReader::validParams()
 {

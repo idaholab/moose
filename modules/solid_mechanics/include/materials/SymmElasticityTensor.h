@@ -204,4 +204,3 @@ void dataStore(std::ostream &, SymmElasticityTensor &, void *);
 
 template <>
 void dataLoad(std::istream &, SymmElasticityTensor &, void *);
-

@@ -12,10 +12,6 @@
 #include "ADKernel.h"
 
 // Forward Declarations
-template <ComputeStage>
-class INSADMomentumPressure;
-
-declareADValidParams(INSADMomentumPressure);
 
 /**
  * This class computes the momentum equation residual and Jacobian
@@ -39,4 +35,3 @@ protected:
 
   usingVectorKernelMembers;
 };
-

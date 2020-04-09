@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", HHPFCRFFSplitKernelAction, "add_kernel");
 
-defineLegacyParams(HHPFCRFFSplitKernelAction);
-
 InputParameters
 HHPFCRFFSplitKernelAction::validParams()
 {

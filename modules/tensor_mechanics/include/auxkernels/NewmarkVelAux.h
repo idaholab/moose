@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class NewmarkVelAux;
-
-template <>
-InputParameters validParams<NewmarkVelAux>();
-
 class NewmarkVelAux : public AuxKernel
 {
 public:

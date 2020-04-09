@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeLinearElasticPFFractureStress);
 
-defineLegacyParams(ComputeLinearElasticPFFractureStress);
-
 InputParameters
 ComputeLinearElasticPFFractureStress::validParams()
 {

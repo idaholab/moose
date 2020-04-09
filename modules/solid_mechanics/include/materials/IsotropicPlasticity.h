@@ -13,11 +13,6 @@
 
 class PiecewiseLinear;
 
-class IsotropicPlasticity;
-
-template <>
-InputParameters validParams<IsotropicPlasticity>();
-
 class IsotropicPlasticity : public ReturnMappingModel
 {
 public:

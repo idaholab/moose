@@ -11,11 +11,6 @@
 
 #include "ComputeStressBase.h"
 
-class ComputeStrainIncrementBasedStress;
-
-template <>
-InputParameters validParams<ComputeStrainIncrementBasedStress>();
-
 /**
  * ComputeStrainIncrementBasedStress computes stress considering list of inelastic strain increments
  */

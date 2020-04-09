@@ -12,10 +12,6 @@
 #include "ViewFactorBase.h"
 
 // Forward Declarations
-class UnobstructedPlanarViewFactor;
-
-template <>
-InputParameters validParams<UnobstructedPlanarViewFactor>();
 
 /**
  * Computes the view factors for planar faces in unobstructed radiative heat transfer

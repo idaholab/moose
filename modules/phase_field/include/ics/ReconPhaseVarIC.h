@@ -14,10 +14,6 @@
 #include "PolycrystalICTools.h"
 
 // Forward Declarations
-class ReconPhaseVarIC;
-
-template <>
-InputParameters validParams<ReconPhaseVarIC>();
 
 /**
  * ReconPhaseVarIC initializes a single order parameter to represent a phase
@@ -43,4 +39,3 @@ private:
 
   const std::map<dof_id_type, std::vector<Real>> & _node_to_phase_weight_map;
 };
-

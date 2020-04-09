@@ -12,8 +12,6 @@
 
 registerMooseObject("SolidMechanicsApp", LinearStrainHardening);
 
-defineLegacyParams(LinearStrainHardening);
-
 InputParameters
 LinearStrainHardening::validParams()
 {

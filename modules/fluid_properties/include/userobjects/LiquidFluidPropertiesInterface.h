@@ -9,8 +9,6 @@
 
 #pragma once
 
-class LiquidFluidPropertiesInterface;
-
 /**
  * Interface class for liquid single phase fluid properties
  */
@@ -25,4 +23,3 @@ public:
    */
   virtual Real sigma_from_p_T(Real p, Real T) const = 0;
 };
-

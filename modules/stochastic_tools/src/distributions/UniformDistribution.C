@@ -12,8 +12,6 @@
 registerMooseObjectAliased("StochasticToolsApp", UniformDistribution, "Uniform");
 registerMooseObjectReplaced("StochasticToolsApp", UniformDistribution, "07/01/2020 00:00", Uniform);
 
-defineLegacyParams(UniformDistribution);
-
 InputParameters
 UniformDistribution::validParams()
 {

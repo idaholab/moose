@@ -9,8 +9,6 @@
 
 #include "ADViscoplasticityStressUpdateBase.h"
 
-defineADLegacyParams(ADViscoplasticityStressUpdateBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADViscoplasticityStressUpdateBase<compute_stage>::validParams()

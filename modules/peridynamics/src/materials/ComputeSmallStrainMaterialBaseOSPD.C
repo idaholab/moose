@@ -9,8 +9,6 @@
 
 #include "ComputeSmallStrainMaterialBaseOSPD.h"
 
-defineLegacyParams(ComputeSmallStrainMaterialBaseOSPD);
-
 InputParameters
 ComputeSmallStrainMaterialBaseOSPD::validParams()
 {

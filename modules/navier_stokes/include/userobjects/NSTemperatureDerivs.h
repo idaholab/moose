@@ -155,4 +155,3 @@ NSTemperatureDerivs<T>::get_hess(unsigned i, unsigned j)
 
   return 0.0;
 }
-

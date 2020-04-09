@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", PrimaryTimeDerivative);
 
-defineLegacyParams(PrimaryTimeDerivative);
-
 InputParameters
 PrimaryTimeDerivative::validParams()
 {

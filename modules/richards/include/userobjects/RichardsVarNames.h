@@ -12,11 +12,6 @@
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
 
-class RichardsVarNames;
-
-template <>
-InputParameters validParams<RichardsVarNames>();
-
 /**
  * This holds maps between pressure_var or pressure_var, sat_var
  * used in RichardsMaterial and kernels, etc, and the
@@ -134,4 +129,3 @@ protected:
   /// moose_grad_var[i] = gradient values of richards variable i
   std::vector<const VariableGradient *> _moose_grad_var;
 };
-

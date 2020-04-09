@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", DiscreteNucleationTimeStep);
 
-defineLegacyParams(DiscreteNucleationTimeStep);
-
 InputParameters
 DiscreteNucleationTimeStep::validParams()
 {

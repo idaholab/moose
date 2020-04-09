@@ -27,11 +27,7 @@
 #include "bitmask_operators.h"
 
 // Forward Declarations
-class FeatureFloodCount;
 class MooseMesh;
-
-template <>
-InputParameters validParams<FeatureFloodCount>();
 
 /**
  * This object will mark nodes or elements of continuous regions all with a unique number for the

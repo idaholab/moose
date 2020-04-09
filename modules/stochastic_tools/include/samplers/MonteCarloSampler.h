@@ -11,10 +11,6 @@
 
 #include "Sampler.h"
 
-class MonteCarloSampler;
-
-template <>
-InputParameters validParams<MonteCarloSampler>();
 /**
  * A class used to perform Monte Carlo Sampling
  */

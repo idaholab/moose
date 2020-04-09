@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CavityPressurePostprocessor);
 
-defineLegacyParams(CavityPressurePostprocessor);
-
 InputParameters
 CavityPressurePostprocessor::validParams()
 {

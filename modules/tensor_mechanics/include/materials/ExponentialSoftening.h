@@ -12,10 +12,6 @@
 #include "SmearedCrackSofteningBase.h"
 
 // Forward declaration
-class ExponentialSoftening;
-
-template <>
-InputParameters validParams<ExponentialSoftening>();
 
 /**
  * ExponentialSoftening is a smeared crack softening model that

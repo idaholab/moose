@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", DomainIntegralQFunction);
 
-defineLegacyParams(DomainIntegralQFunction);
-
 InputParameters
 DomainIntegralQFunction::validParams()
 {

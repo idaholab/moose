@@ -25,8 +25,6 @@
 #include <cmath>
 #include <memory>
 
-defineADLegacyParams(ADSingleVariableReturnMappingSolution);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADSingleVariableReturnMappingSolution<compute_stage>::validParams()

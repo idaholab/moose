@@ -12,10 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class MultiBoundingBoxIC;
-
-template <>
-InputParameters validParams<MultiBoundingBoxIC>();
 
 /**
  * MultiBoundingBoxIC allows setting the initial condition of a value of a field inside and outside
@@ -49,4 +45,3 @@ protected:
   /// values outside the boxes
   const Real _outside;
 };
-

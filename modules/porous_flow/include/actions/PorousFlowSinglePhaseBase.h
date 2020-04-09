@@ -11,11 +11,6 @@
 
 #include "PorousFlowActionBase.h"
 
-class PorousFlowSinglePhaseBase;
-
-template <>
-InputParameters validParams<PorousFlowSinglePhaseBase>();
-
 /**
  * Base class for actions involving a single fluid phase
  */
@@ -66,4 +61,3 @@ protected:
   /// Index of NaCl in list of fluid components
   const unsigned _nacl_index;
 };
-

@@ -12,11 +12,6 @@
 #include "Material.h"
 #include "PeridynamicsMesh.h"
 
-class PeridynamicsMaterialBase;
-
-template <>
-InputParameters validParams<PeridynamicsMaterialBase>();
-
 /**
  * Base class for peridynamics material models
  */

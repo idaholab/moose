@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddNavierStokesBCsAction;
-
-template <>
-InputParameters validParams<AddNavierStokesBCsAction>();
-
 /**
  * This class allows us to have a section of the input file like the
  * following which adds BC objects for each requested boundary condition.
@@ -84,4 +79,3 @@ protected:
   // Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 };
-

@@ -41,7 +41,3 @@ private:
   Real _integral_value;
   const Real _scale;
 };
-
-template <>
-InputParameters validParams<HomogenizedThermalConductivity>();
-

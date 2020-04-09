@@ -17,8 +17,6 @@
 
 registerMooseObject("PhaseFieldApp", AverageGrainVolume);
 
-defineLegacyParams(AverageGrainVolume);
-
 InputParameters
 AverageGrainVolume::validParams()
 {

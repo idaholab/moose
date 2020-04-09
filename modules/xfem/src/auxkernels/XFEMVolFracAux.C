@@ -13,8 +13,6 @@
 
 registerMooseObject("XFEMApp", XFEMVolFracAux);
 
-defineLegacyParams(XFEMVolFracAux);
-
 InputParameters
 XFEMVolFracAux::validParams()
 {

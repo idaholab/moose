@@ -11,8 +11,6 @@
 
 #include "Kernel.h"
 
-class DotCouplingKernel;
-
 /**
  * Kernel that is calling coupledDot
  */
@@ -31,4 +29,3 @@ protected:
   const VariableValue & _v_dot;
   const VariableValue & _dv_dot_dv;
 };
-

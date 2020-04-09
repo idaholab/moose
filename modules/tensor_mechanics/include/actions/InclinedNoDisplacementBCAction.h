@@ -30,6 +30,3 @@ protected:
   /// auxvariables to save residuals
   std::vector<AuxVariableName> _save_in;
 };
-
-template <>
-InputParameters validParams<InclinedNoDisplacementBCAction>();

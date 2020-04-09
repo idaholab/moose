@@ -11,17 +11,12 @@
 
 #include "ComputeMeanThermalExpansionEigenstrainBase.h"
 
-class ComputeMeanThermalExpansionFunctionEigenstrain;
-
-template <>
-InputParameters validParams<ComputeMeanThermalExpansionFunctionEigenstrain>();
-
 /**
  * ComputeMeanThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to a mean thermal expansion function.
  */
 class ComputeMeanThermalExpansionFunctionEigenstrain
-    : public ComputeMeanThermalExpansionEigenstrainBase
+  : public ComputeMeanThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();

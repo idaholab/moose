@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", IsotropicPlasticityStressUpdate);
 
-defineLegacyParams(IsotropicPlasticityStressUpdate);
-
 InputParameters
 IsotropicPlasticityStressUpdate::validParams()
 {

@@ -12,10 +12,6 @@
 #include "TimeDerivative.h"
 
 // Forward Declarations
-class INSMomentumTimeDerivative;
-
-template <>
-InputParameters validParams<INSMomentumTimeDerivative>();
 
 /**
  * This class computes the time derivative for the incompressible
@@ -39,4 +35,3 @@ protected:
   // Parameters
   const MaterialProperty<Real> & _rho;
 };
-

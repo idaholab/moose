@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
 
-defineLegacyParams(TensorMechanicsPlasticDruckerPrager);
-
 InputParameters
 TensorMechanicsPlasticDruckerPrager::validParams()
 {

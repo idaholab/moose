@@ -11,11 +11,7 @@
 
 #include "IntegratedBC.h"
 
-class PenaltyInclinedNoDisplacementBC;
 class Function;
-
-template <>
-InputParameters validParams<PenaltyInclinedNoDisplacementBC>();
 
 /**
  * Weakly enforce an inclined BC (u\dot n = 0) using a penalty method.

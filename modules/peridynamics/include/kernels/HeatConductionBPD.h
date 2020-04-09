@@ -11,11 +11,6 @@
 
 #include "PeridynamicsKernelBase.h"
 
-class HeatConductionBPD;
-
-template <>
-InputParameters validParams<HeatConductionBPD>();
-
 /**
  * Kernel class for peridynamic heat conduction models
  */

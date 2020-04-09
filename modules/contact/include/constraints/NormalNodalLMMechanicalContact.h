@@ -13,10 +13,6 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class NormalNodalLMMechanicalContact;
-
-template <>
-InputParameters validParams<NormalNodalLMMechanicalContact>();
 
 class NormalNodalLMMechanicalContact : public NodeFaceConstraint
 {

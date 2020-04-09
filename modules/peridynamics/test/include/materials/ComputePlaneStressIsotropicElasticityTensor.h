@@ -11,11 +11,6 @@
 
 #include "ComputeIsotropicElasticityTensor.h"
 
-class ComputePlaneStressIsotropicElasticityTensor;
-
-template <>
-InputParameters validParams<ComputePlaneStressIsotropicElasticityTensor>();
-
 /**
  * Material class to define elasticity tensor for conventional plane stress of isotropic material
  */

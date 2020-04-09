@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", INSMassRZ);
 
-defineLegacyParams(INSMassRZ);
-
 InputParameters
 INSMassRZ::validParams()
 {

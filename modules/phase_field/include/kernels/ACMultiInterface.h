@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class ACMultiInterface;
-
-template <>
-InputParameters validParams<ACMultiInterface>();
 
 /**
  * Compute the gradient interface terms for a multiphase system. This includes
@@ -56,4 +52,3 @@ protected:
   /// Mobility
   const MaterialProperty<Real> & _L;
 };
-

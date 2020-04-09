@@ -11,11 +11,6 @@
 
 #include "ComputeCosseratStressBase.h"
 
-class ComputeCosseratLinearElasticStress;
-
-template <>
-InputParameters validParams<ComputeCosseratLinearElasticStress>();
-
 /**
  * ComputeCosseratLinearElasticStress computes the Cosserat stress
  * and couple-stress following linear elasticity theory

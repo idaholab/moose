@@ -15,8 +15,6 @@ registerMooseObjectReplaced("StochasticToolsApp",
                             "07/01/2020 00:00",
                             TruncatedNormal);
 
-defineLegacyParams(TruncatedNormalDistribution);
-
 InputParameters
 TruncatedNormalDistribution::validParams()
 {

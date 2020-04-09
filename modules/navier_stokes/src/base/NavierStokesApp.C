@@ -15,8 +15,6 @@
 #include "FluidPropertiesApp.h"
 #include "HeatConductionApp.h"
 
-defineLegacyParams(NavierStokesApp);
-
 InputParameters
 NavierStokesApp::validParams()
 {

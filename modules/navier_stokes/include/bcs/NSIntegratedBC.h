@@ -12,11 +12,7 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class NSIntegratedBC;
 class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<NSIntegratedBC>();
 
 /**
  * This class couples together all the variables
@@ -68,4 +64,3 @@ protected:
   bool isNSVariable(unsigned var);
   unsigned mapVarNumber(unsigned var);
 };
-

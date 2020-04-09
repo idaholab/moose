@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
 
-defineLegacyParams(PowerLawCreepStressUpdate);
-
 InputParameters
 PowerLawCreepStressUpdate::validParams()
 {

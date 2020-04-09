@@ -12,11 +12,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowFluidMass;
-
-template <>
-InputParameters validParams<PorousFlowFluidMass>();
-
 /**
  * Postprocessor produces the mass of a given fluid component in a region
  */
@@ -50,4 +45,3 @@ protected:
   /// The variable for the corresponding PorousFlowMassTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;
 };
-

@@ -22,8 +22,6 @@
 #include <cmath>
 #include <memory>
 
-defineLegacyParams(SingleVariableReturnMappingSolution);
-
 InputParameters
 SingleVariableReturnMappingSolution::validParams()
 {

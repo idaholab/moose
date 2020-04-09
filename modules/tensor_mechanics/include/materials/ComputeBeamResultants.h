@@ -15,12 +15,6 @@
 /**
  * ComputeBeamResultants computes forces and moments using elasticity
  */
-
-class ComputeBeamResultants;
-
-template <>
-InputParameters validParams<ComputeBeamResultants>();
-
 class ComputeBeamResultants : public Material
 {
 public:

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GBDependentAnisotropicTensor);
 
-defineLegacyParams(GBDependentAnisotropicTensor);
-
 InputParameters
 GBDependentAnisotropicTensor::validParams()
 {

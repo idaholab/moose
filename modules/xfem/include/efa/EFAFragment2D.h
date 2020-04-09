@@ -53,4 +53,3 @@ public:
   EFAElement2D * getHostElement() const;
   std::vector<EFAFragment2D *> split();
 };
-

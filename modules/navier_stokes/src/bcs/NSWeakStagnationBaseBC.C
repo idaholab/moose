@@ -13,7 +13,6 @@
 #include "IdealGasFluidProperties.h"
 
 // Full specialization of the validParams function for this object
-defineLegacyParams(NSWeakStagnationBaseBC);
 
 InputParameters
 NSWeakStagnationBaseBC::validParams()

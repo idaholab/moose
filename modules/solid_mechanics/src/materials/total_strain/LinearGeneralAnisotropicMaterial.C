@@ -21,8 +21,6 @@
 
 registerMooseObject("SolidMechanicsApp", LinearGeneralAnisotropicMaterial);
 
-defineLegacyParams(LinearGeneralAnisotropicMaterial);
-
 InputParameters
 LinearGeneralAnisotropicMaterial::validParams()
 {

@@ -15,12 +15,8 @@
 
 #include "StochasticToolsTypes.h"
 
-class SamplerTransientMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
-
-template <>
-InputParameters validParams<SamplerTransientMultiApp>();
 
 class SamplerTransientMultiApp : public TransientMultiApp, public SamplerInterface
 {

@@ -12,10 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class PFParamsPolyFreeEnergy;
-
-template <>
-InputParameters validParams<PFParamsPolyFreeEnergy>();
 
 /**
  * Calculated properties for a single component phase field model using polynomial free energies
@@ -57,4 +53,3 @@ protected:
   const Real _JtoeV;
   const Real _kb;
 };
-

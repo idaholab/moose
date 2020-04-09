@@ -12,11 +12,7 @@
 #include "GrayLambertSurfaceRadiationBase.h"
 
 // Forward Declarations
-class ConstantViewFactorSurfaceRadiation;
 class Function;
-
-template <>
-InputParameters validParams<ConstantViewFactorSurfaceRadiation>();
 
 /**
  * ConstantViewFactorSurfaceRadiation computes radiative heat transfer between

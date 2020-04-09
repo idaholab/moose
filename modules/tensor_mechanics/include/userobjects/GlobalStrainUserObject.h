@@ -15,11 +15,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class GlobalStrainUserObject;
-
-template <>
-InputParameters validParams<GlobalStrainUserObject>();
-
 class GlobalStrainUserObject : public ElementUserObject, public GlobalStrainUserObjectInterface
 {
 public:

@@ -12,11 +12,6 @@
 #include "Material.h"
 #include "SlopeLimitingBase.h"
 
-class AEFVMaterial;
-
-template <>
-InputParameters validParams<AEFVMaterial>();
-
 /**
  * A material kernel for the advection equation
  * using a cell-centered finite volume method
@@ -60,4 +55,3 @@ protected:
   // derived variables at face center
   MaterialProperty<Real> & _u;
 };
-

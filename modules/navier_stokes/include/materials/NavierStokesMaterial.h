@@ -12,11 +12,7 @@
 #include "Material.h"
 
 // Forward Declarations
-class NavierStokesMaterial;
 class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<NavierStokesMaterial>();
 
 /**
  * This is the base class all materials should use if you are trying
@@ -132,4 +128,3 @@ private:
   // To be called from computeProperties() function to compute the strong residual of each equation.
   void computeStrongResiduals(unsigned int qp);
 };
-

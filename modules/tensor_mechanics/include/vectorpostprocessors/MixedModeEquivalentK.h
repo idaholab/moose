@@ -12,10 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class MixedModeEquivalentK;
-
-template <>
-InputParameters validParams<MixedModeEquivalentK>();
 
 class MixedModeEquivalentK : public GeneralVectorPostprocessor
 {

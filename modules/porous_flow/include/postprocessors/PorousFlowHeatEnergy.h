@@ -12,11 +12,6 @@
 #include "ElementIntegralVariablePostprocessor.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowHeatEnergy;
-
-template <>
-InputParameters validParams<PorousFlowHeatEnergy>();
-
 /**
  * Postprocessor produces the sum of heat energy of the porous skeleton and/or fluid components in a
  * region
@@ -65,4 +60,3 @@ protected:
   /// The variable for the corresponding PorousFlowEnergyTimeDerivative Kernel: this provides test functions
   MooseVariable * const _var;
 };
-

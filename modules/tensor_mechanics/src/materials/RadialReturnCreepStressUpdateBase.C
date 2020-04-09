@@ -9,8 +9,6 @@
 
 #include "RadialReturnCreepStressUpdateBase.h"
 
-defineLegacyParams(RadialReturnCreepStressUpdateBase);
-
 InputParameters
 RadialReturnCreepStressUpdateBase::validParams()
 {

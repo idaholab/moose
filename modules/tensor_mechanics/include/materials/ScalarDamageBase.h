@@ -12,10 +12,6 @@
 #include "DamageBase.h"
 
 // Forward declaration
-class ScalarDamageBase;
-
-template <>
-InputParameters validParams<ScalarDamageBase>();
 
 /**
  * Base class for scalar damage models.

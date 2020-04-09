@@ -12,10 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class PFCRFFMaterial;
-
-template <>
-InputParameters validParams<PFCRFFMaterial>();
 
 class PFCRFFMaterial : public Material
 {
@@ -52,4 +48,3 @@ private:
 
   unsigned int _num_L;
 };
-

@@ -18,8 +18,6 @@
 
 registerMooseObject("FluidPropertiesApp", TabulatedFluidProperties);
 
-defineLegacyParams(TabulatedFluidProperties);
-
 InputParameters
 TabulatedFluidProperties::validParams()
 {

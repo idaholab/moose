@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesApp", SpecificEnthalpyAux);
 
-defineLegacyParams(SpecificEnthalpyAux);
-
 InputParameters
 SpecificEnthalpyAux::validParams()
 {

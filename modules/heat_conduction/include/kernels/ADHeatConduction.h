@@ -11,11 +11,6 @@
 
 #include "ADDiffusion.h"
 
-template <ComputeStage>
-class ADHeatConduction;
-
-declareADValidParams(ADHeatConduction);
-
 template <ComputeStage compute_stage>
 class ADHeatConduction : public ADDiffusion<compute_stage>
 {

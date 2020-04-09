@@ -14,7 +14,6 @@
 #include "BoundaryRestrictable.h"
 #include <set>
 
-class CrackFrontDefinition;
 class AuxiliarySystem;
 template <typename>
 class RankTwoTensorTempl;
@@ -26,8 +25,6 @@ namespace libMesh
 class QBase;
 }
 
-template <>
-InputParameters validParams<CrackFrontDefinition>();
 void addCrackFrontDefinitionParams(InputParameters & params);
 
 /**

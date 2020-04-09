@@ -13,11 +13,7 @@
 #include "XFEMMovingInterfaceVelocityBase.h"
 
 // Forward declarations
-class MovingLineSegmentCutSetUserObject;
 class PointValueAtXFEMInterface;
-
-template <>
-InputParameters validParams<MovingLineSegmentCutSetUserObject>();
 
 class MovingLineSegmentCutSetUserObject : public LineSegmentCutSetUserObject
 
@@ -41,4 +37,3 @@ public:
   /// Pointer to XFEMMovingInterfaceVelocityBase object
   const XFEMMovingInterfaceVelocityBase * _interface_velocity;
 };
-

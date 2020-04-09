@@ -11,8 +11,6 @@
 
 registerADMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
 
-defineADLegacyParams(LevelSetTimeDerivativeSUPG);
-
 template <ComputeStage compute_stage>
 InputParameters
 LevelSetTimeDerivativeSUPG<compute_stage>::validParams()

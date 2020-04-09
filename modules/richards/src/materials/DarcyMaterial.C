@@ -11,8 +11,6 @@
 
 registerMooseObject("RichardsApp", DarcyMaterial);
 
-defineLegacyParams(DarcyMaterial);
-
 InputParameters
 DarcyMaterial::validParams()
 {

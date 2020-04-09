@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensileMulti);
 
-defineLegacyParams(TensorMechanicsPlasticTensileMulti);
-
 InputParameters
 TensorMechanicsPlasticTensileMulti::validParams()
 {

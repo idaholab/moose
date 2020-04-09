@@ -15,11 +15,6 @@
   usingComputeIncrementalStrainBaseMembers;                                                        \
   using ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement
 
-template <ComputeStage>
-class ADComputeIncrementalSmallStrain;
-
-declareADValidParams(ADComputeIncrementalSmallStrain);
-
 /**
  * ADComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
  * strains.

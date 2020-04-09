@@ -11,11 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class Q2PRelPermPowerGas;
-
-template <>
-InputParameters validParams<Q2PRelPermPowerGas>();
-
 /**
  * PowerGas form of relative permeability
  * Define s = seff/(1 - simm).
@@ -54,4 +49,3 @@ protected:
   /// exponent
   Real _n;
 };
-

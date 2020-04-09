@@ -12,11 +12,6 @@
 #include "ComputeStrainBaseNOSPD.h"
 #include "RankTwoTensor.h"
 
-class ComputeSmallStrainNOSPD;
-
-template <>
-InputParameters validParams<ComputeSmallStrainNOSPD>();
-
 /**
  * Material class for horizon-stabilized peridynamic correspondence model for small strain
  */

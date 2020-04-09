@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyThermalFlux);
 
-defineLegacyParams(NSEnergyThermalFlux);
-
 InputParameters
 NSEnergyThermalFlux::validParams()
 {

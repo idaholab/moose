@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class MomentumFreeBC;
-
-template <>
-InputParameters validParams<MomentumFreeBC>();
-
 /**
  *
  */
@@ -36,4 +31,3 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 };
-

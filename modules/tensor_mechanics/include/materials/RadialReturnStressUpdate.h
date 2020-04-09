@@ -13,10 +13,6 @@
 #include "SingleVariableReturnMappingSolution.h"
 
 // Forward declaration
-class RadialReturnStressUpdate;
-
-template <>
-InputParameters validParams<RadialReturnStressUpdate>();
 
 /**
  * RadialReturnStressUpdate computes the radial return stress increment for

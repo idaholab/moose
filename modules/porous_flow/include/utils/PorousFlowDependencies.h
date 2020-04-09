@@ -36,4 +36,3 @@ protected:
    */
   DependencyResolver<std::string> _deps;
 };
-

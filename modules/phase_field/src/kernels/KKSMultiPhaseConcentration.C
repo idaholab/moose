@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSMultiPhaseConcentration);
 
-defineLegacyParams(KKSMultiPhaseConcentration);
-
 InputParameters
 KKSMultiPhaseConcentration::validParams()
 {

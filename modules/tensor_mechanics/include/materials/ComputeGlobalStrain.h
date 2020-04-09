@@ -12,14 +12,10 @@
 #include "Material.h"
 
 // Forward Declarations
-class ComputeGlobalStrain;
 class GlobalStrainUserObjectInterface;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-template <>
-InputParameters validParams<ComputeGlobalStrain>();
 
 /**
  * ComputeGlobalStrain calculates the global strain tensor from the scalar variables

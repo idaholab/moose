@@ -11,8 +11,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADPowerLawCreepStressUpdate);
 
-defineADLegacyParams(ADPowerLawCreepStressUpdate);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADPowerLawCreepStressUpdate<compute_stage>::validParams()

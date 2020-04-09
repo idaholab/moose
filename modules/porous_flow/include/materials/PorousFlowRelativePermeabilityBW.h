@@ -12,11 +12,6 @@
 #include "PorousFlowRelativePermeabilityBase.h"
 #include "PorousFlowBroadbridgeWhite.h"
 
-class PorousFlowRelativePermeabilityBW;
-
-template <>
-InputParameters validParams<PorousFlowRelativePermeabilityBW>();
-
 /**
  * Material that calculates the Broadbridge-White relative permeability
  * P Broadbridge, I White ``Constant rate rainfall
@@ -49,4 +44,3 @@ protected:
   /// BW's C parameter
   const Real _c;
 };
-

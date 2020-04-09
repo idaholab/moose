@@ -13,8 +13,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowFluxLimitedTVDAdvection);
 
-defineLegacyParams(PorousFlowFluxLimitedTVDAdvection);
-
 InputParameters
 PorousFlowFluxLimitedTVDAdvection::validParams()
 {

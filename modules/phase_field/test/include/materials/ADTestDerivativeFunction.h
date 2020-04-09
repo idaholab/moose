@@ -13,10 +13,6 @@
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADTestDerivativeFunction;
-
-declareADValidParams(ADTestDerivativeFunction);
 
 /**
  * Material class that creates the math free energy and its derivatives

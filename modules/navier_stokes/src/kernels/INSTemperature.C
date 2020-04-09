@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSTemperature);
 
-defineLegacyParams(INSTemperature);
-
 InputParameters
 INSTemperature::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionPenalty);
 
-defineLegacyParams(SwitchingFunctionPenalty);
-
 InputParameters
 SwitchingFunctionPenalty::validParams()
 {

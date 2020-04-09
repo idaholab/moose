@@ -13,10 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class OrderParameterFunctionMaterial;
-
-template <>
-InputParameters validParams<OrderParameterFunctionMaterial>();
 
 /**
  * Material base class for materials that provide the switching function
@@ -48,4 +44,3 @@ protected:
   /// Material property to store the second derivative \f$ d^2f(\eta)/d\eta^2 \f$
   MaterialProperty<Real> & _prop_d2f;
 };
-

@@ -11,8 +11,6 @@
 
 registerADMooseObject("MooseApp", TangentialMortarMechanicalContact);
 
-defineADLegacyParams(TangentialMortarMechanicalContact);
-
 template <ComputeStage compute_stage>
 InputParameters
 TangentialMortarMechanicalContact<compute_stage>::validParams()

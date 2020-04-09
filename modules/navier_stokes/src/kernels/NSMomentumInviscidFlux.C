@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumInviscidFlux);
 
-defineLegacyParams(NSMomentumInviscidFlux);
-
 InputParameters
 NSMomentumInviscidFlux::validParams()
 {
@@ -98,9 +96,10 @@ NSMomentumInviscidFlux::computeJacobianHelper(unsigned int m)
       // Kronecker delta
       const Real delta_kl = (_component == m_local ? 1. : 0.);
 
-      return -1.0 * (vel(_component) * _grad_test[_i][_qp](m_local) +
-                     delta_kl * (vel * _grad_test[_i][_qp]) +
-                     (1. - gam) * vel(m_local) * _grad_test[_i][_qp](_component)) *
+      return -1.0 *
+             (vel(_component) * _grad_test[_i][_qp](m_local) +
+              delta_kl * (vel * _grad_test[_i][_qp]) +
+              (1. - gam) * vel(m_local) * _grad_test[_i][_qp](_component)) *
              _phi[_j][_qp];
     }
 

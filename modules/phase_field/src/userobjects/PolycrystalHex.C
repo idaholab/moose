@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalHex);
 
-defineLegacyParams(PolycrystalHex);
-
 InputParameters
 PolycrystalHex::validParams()
 {

@@ -13,11 +13,7 @@
 #include "InputParameters.h"
 
 // Forward Declarations
-class NSInitialCondition;
 class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<NSInitialCondition>();
 
 /**
  * NSInitialCondition sets intial constant values for all variables
@@ -47,4 +43,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

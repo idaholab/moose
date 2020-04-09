@@ -12,11 +12,6 @@
 #include "NodalPatchRecovery.h"
 #include "RankTwoTensor.h"
 
-class RankTwoScalarAux;
-
-template <>
-InputParameters validParams<RankTwoScalarAux>();
-
 /**
  * RankTwoScalarAux uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.

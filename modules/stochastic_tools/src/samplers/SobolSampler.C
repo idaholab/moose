@@ -13,8 +13,6 @@
 registerMooseObjectAliased("StochasticToolsApp", SobolSampler, "Sobol");
 registerMooseObjectReplaced("StochasticToolsApp", SobolSampler, "07/01/2020 00:00", Sobol);
 
-defineLegacyParams(SobolSampler);
-
 InputParameters
 SobolSampler::validParams()
 {

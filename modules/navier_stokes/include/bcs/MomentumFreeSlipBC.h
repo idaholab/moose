@@ -11,11 +11,6 @@
 
 #include "NodalNormalBC.h"
 
-class MomentumFreeSlipBC;
-
-template <>
-InputParameters validParams<MomentumFreeSlipBC>();
-
 /**
  * Boundary condition that applies free slip condition at nodes
  */
@@ -42,4 +37,3 @@ protected:
   /// Momentum in z-direction
   const VariableValue & _rho_w;
 };
-

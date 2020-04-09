@@ -12,11 +12,6 @@
 #include "ElementUserObject.h"
 #include "DiscreteNucleationInserterBase.h"
 
-class DiscreteNucleationMap;
-
-template <>
-InputParameters validParams<DiscreteNucleationMap>();
-
 /**
  * This UserObject maintains a per QP map that indicates if a nucleus is
  * present or not. It effectively performs a spatial hashing of the list maintained
@@ -75,4 +70,3 @@ protected:
   NucleusMap _nucleus_map;
   ///@}
 };
-

@@ -13,8 +13,6 @@
 
 registerMooseObject("SolidMechanicsApp", ElasticModel);
 
-defineLegacyParams(ElasticModel);
-
 InputParameters
 ElasticModel::validParams()
 {

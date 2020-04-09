@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", VanDerWaalsFreeEnergy);
 
-defineLegacyParams(VanDerWaalsFreeEnergy);
-
 InputParameters
 VanDerWaalsFreeEnergy::validParams()
 {

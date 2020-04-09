@@ -12,10 +12,6 @@
 #include "INSMomentumLaplaceForm.h"
 
 // Forward Declarations
-class INSMomentumLaplaceFormRZ;
-
-template <>
-InputParameters validParams<INSMomentumLaplaceFormRZ>();
 
 /**
  * This class computes additional momentum equation residual and
@@ -39,4 +35,3 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
-

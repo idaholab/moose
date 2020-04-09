@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumNoBCBCTractionForm);
 
-defineLegacyParams(INSMomentumNoBCBCTractionForm);
-
 InputParameters
 INSMomentumNoBCBCTractionForm::validParams()
 {
@@ -70,8 +68,9 @@ Real
 INSMomentumNoBCBCTractionForm::computeQpJacobian()
 {
   // The extra contribution comes from the "2" on the diagonal of the viscous stress tensor
-  return -_mu[_qp] * (_grad_phi[_j][_qp] * _normals[_qp] +
-                      _grad_phi[_j][_qp](_component) * _normals[_qp](_component)) *
+  return -_mu[_qp] *
+         (_grad_phi[_j][_qp] * _normals[_qp] +
+          _grad_phi[_j][_qp](_component) * _normals[_qp](_component)) *
          _test[_i][_qp];
 }
 

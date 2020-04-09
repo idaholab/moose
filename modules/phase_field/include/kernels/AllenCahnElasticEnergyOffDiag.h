@@ -14,13 +14,9 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class AllenCahnElasticEnergyOffDiag;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-template <>
-InputParameters validParams<AllenCahnElasticEnergyOffDiag>();
 
 /**
  * This kernel computes the off-diagonal jacobian of elastic energy in AllenCahn respect to

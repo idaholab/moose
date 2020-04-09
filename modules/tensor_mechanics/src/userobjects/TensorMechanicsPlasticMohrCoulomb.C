@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMohrCoulomb);
 
-defineLegacyParams(TensorMechanicsPlasticMohrCoulomb);
-
 InputParameters
 TensorMechanicsPlasticMohrCoulomb::validParams()
 {

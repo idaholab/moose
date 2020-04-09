@@ -12,11 +12,6 @@
 #include "Material.h"
 #include "SinglePhaseFluidProperties.h"
 
-class FluidPropertiesMaterialPT;
-
-template <>
-InputParameters validParams<FluidPropertiesMaterialPT>();
-
 /**
  * Computes fluid properties using (pressure, temperature) formulation
  */
@@ -57,4 +52,3 @@ protected:
   /// Fluid properties UserObject
   const SinglePhaseFluidProperties & _fp;
 };
-

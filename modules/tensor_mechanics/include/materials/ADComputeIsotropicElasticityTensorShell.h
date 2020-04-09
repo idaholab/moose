@@ -13,16 +13,10 @@
 
 #define usingComputeIsotropicElasticityTensorShellMembers usingMaterialMembers
 
-// Forward Declarations
-template <ComputeStage>
-class ADComputeIsotropicElasticityTensorShell;
-
 namespace libMesh
 {
 class QGauss;
 }
-
-declareADValidParams(ADComputeIsotropicElasticityTensorShell);
 
 template <ComputeStage compute_stage>
 class ADComputeIsotropicElasticityTensorShell : public ADMaterial<compute_stage>

@@ -13,11 +13,6 @@
 
 #include "MutableCoefficientsInterface.h"
 
-class MultiAppFXTransfer;
-
-template <>
-InputParameters validParams<MultiAppFXTransfer>();
-
 /**
  * Transfers mutable coefficient arrays between supported object types
  */

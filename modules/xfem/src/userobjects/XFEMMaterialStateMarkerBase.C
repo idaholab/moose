@@ -15,8 +15,6 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel.h"
 
-defineLegacyParams(XFEMMaterialStateMarkerBase);
-
 InputParameters
 XFEMMaterialStateMarkerBase::validParams()
 {

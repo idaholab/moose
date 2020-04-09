@@ -11,12 +11,6 @@
 
 #include "ScalarDamageBase.h"
 
-// Forward declaration
-class CombinedScalarDamage;
-
-template <>
-InputParameters validParams<CombinedScalarDamage>();
-
 /**
  * Scalar damage model computed as the combination of multiple damage models
  */

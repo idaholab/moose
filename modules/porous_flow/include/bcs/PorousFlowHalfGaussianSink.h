@@ -11,11 +11,6 @@
 
 #include "PorousFlowSinkPTDefiner.h"
 
-class PorousFlowHalfGaussianSink;
-
-template <>
-InputParameters validParams<PorousFlowHalfGaussianSink>();
-
 /**
  * Applies a flux sink to a boundary.  The base flux
  * defined by PorousFlowSink is multiplied by a
@@ -46,4 +41,3 @@ protected:
 
   virtual Real dmultiplier_dvar(unsigned int pvar) const override;
 };
-

@@ -17,8 +17,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetReinitializationMultiApp);
 
-defineLegacyParams(LevelSetReinitializationMultiApp);
-
 InputParameters
 LevelSetReinitializationMultiApp::validParams()
 {

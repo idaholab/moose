@@ -13,7 +13,6 @@
 #include "Legendre.h"
 #include "Zernike.h"
 
-
 // Set the global tolerances
 const double tol = 1e-13;
 
@@ -25,4 +24,3 @@ extern MooseEnum single_series_types_1D;
 extern MooseEnum single_series_types_2D;
 extern MooseEnum expansion_type;
 extern MooseEnum generation_type;
-

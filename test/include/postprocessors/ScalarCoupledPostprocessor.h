@@ -13,8 +13,8 @@
 #include "SideIntegralPostprocessor.h"
 
 /**
-* This postprocessor demonstrates coupling a scalar variable to a postprocessor
-*/
+ * This postprocessor demonstrates coupling a scalar variable to a postprocessor
+ */
 class ScalarCoupledPostprocessor : public SideIntegralPostprocessor
 {
 public:

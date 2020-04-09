@@ -18,7 +18,6 @@
 #include <vector>
 #include <unordered_map>
 
-class RANFSNormalMechanicalContact;
 class PenetrationInfo;
 
 namespace libMesh
@@ -26,9 +25,6 @@ namespace libMesh
 template <typename>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<RANFSNormalMechanicalContact>();
 
 class RANFSNormalMechanicalContact : public NodeFaceConstraint
 {

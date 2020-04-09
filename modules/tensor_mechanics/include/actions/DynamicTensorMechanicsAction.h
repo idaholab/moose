@@ -11,11 +11,6 @@
 
 #include "TensorMechanicsAction.h"
 
-class DynamicTensorMechanicsAction;
-
-template <>
-InputParameters validParams<DynamicTensorMechanicsAction>();
-
 class DynamicTensorMechanicsAction : public TensorMechanicsAction
 {
 public:

@@ -16,7 +16,6 @@
 #include <vector>
 #include <unordered_map>
 
-class RANFSTieNode;
 class PenetrationInfo;
 
 namespace libMesh
@@ -24,9 +23,6 @@ namespace libMesh
 template <typename>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<RANFSTieNode>();
 
 class RANFSTieNode : public NodeFaceConstraint
 {

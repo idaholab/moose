@@ -12,11 +12,6 @@
 #include "GeneralUserObjectBasePD.h"
 #include "PeridynamicsMesh.h"
 
-class GhostElemPD;
-
-template <>
-InputParameters validParams<GhostElemPD>();
-
 /**
  * Userobject class to ghost the required element for calculation on current processor from other
  * processors

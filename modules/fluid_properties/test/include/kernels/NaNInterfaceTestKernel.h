@@ -11,11 +11,7 @@
 
 #include "Kernel.h"
 
-class NaNInterfaceTestKernel;
 class NaNInterfaceTestFluidProperties;
-
-template <>
-InputParameters validParams<NaNInterfaceTestKernel>();
 
 /**
  * Kernel to test NaNInterface using NaNInterfaceTestFluidProperties
@@ -33,4 +29,3 @@ protected:
   /// Test fluid properties
   const NaNInterfaceTestFluidProperties & _nan_interface_test_fp;
 };
-

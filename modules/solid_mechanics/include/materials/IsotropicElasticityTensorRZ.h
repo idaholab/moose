@@ -50,4 +50,3 @@ protected:
    */
   void calculateLameCoefficients();
 };
-

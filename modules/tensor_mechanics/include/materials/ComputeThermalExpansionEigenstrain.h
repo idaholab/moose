@@ -12,11 +12,6 @@
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeThermalExpansionEigenstrain;
-
-template <>
-InputParameters validParams<ComputeThermalExpansionEigenstrain>();
-
 /**
  * ComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.

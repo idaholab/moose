@@ -12,11 +12,6 @@
 #include "MutableCoefficientsFunctionInterface.h"
 #include "CompositeSeriesBasisInterface.h"
 
-class FunctionSeries;
-
-template <>
-InputParameters validParams<FunctionSeries>();
-
 /**
  * This class uses implementations of CompositeSeriesBasisInterface to generate a function based on
  * convolved function series. Its inheritance tree includes MutableCoefficientsInterface, which

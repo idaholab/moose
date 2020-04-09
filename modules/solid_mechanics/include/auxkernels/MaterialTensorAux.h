@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 #include "MaterialTensorCalculator.h"
 
-class MaterialTensorAux;
 class SymmTensor;
-
-template <>
-InputParameters validParams<MaterialTensorAux>();
 
 class MaterialTensorAux : public AuxKernel
 {
@@ -36,4 +32,3 @@ protected:
   const bool _has_qp_select;
   const unsigned int _qp_select;
 };
-

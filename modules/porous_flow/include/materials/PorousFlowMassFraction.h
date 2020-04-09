@@ -11,11 +11,6 @@
 
 #include "PorousFlowMaterialVectorBase.h"
 
-class PorousFlowMassFraction;
-
-template <>
-InputParameters validParams<PorousFlowMassFraction>();
-
 /**
  * Material designed to form a std::vector<std::vector>
  * of mass fractions from the individual mass fraction variables
@@ -63,4 +58,3 @@ protected:
   /// The gradient of the mass-fraction variables
   std::vector<const VariableGradient *> _grad_mf_vars;
 };
-

@@ -12,11 +12,6 @@
 #include "ComputeEigenstrainBase.h"
 #include "RankFourTensor.h"
 
-class ComputeEigenstrainFromInitialStress;
-
-template <>
-InputParameters validParams<ComputeEigenstrainFromInitialStress>();
-
 /**
  * ComputeEigenstrain computes an Eigenstrain that results from an initial stress
  * The initial stress is defined in terms of Functions, which may be

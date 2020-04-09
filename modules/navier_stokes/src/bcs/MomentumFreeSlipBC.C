@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", MomentumFreeSlipBC);
 
-defineLegacyParams(MomentumFreeSlipBC);
-
 InputParameters
 MomentumFreeSlipBC::validParams()
 {

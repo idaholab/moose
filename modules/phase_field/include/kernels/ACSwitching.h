@@ -12,10 +12,6 @@
 #include "ACBulk.h"
 
 // Forward Declarations
-class ACSwitching;
-
-template <>
-InputParameters validParams<ACSwitching>();
 
 /**
  * ACSwitching adds terms of the form

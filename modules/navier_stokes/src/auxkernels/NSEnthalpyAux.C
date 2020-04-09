@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnthalpyAux);
 
-defineLegacyParams(NSEnthalpyAux);
-
 InputParameters
 NSEnthalpyAux::validParams()
 {

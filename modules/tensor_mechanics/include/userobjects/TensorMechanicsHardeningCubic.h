@@ -11,11 +11,6 @@
 
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsHardeningCubic;
-
-template <>
-InputParameters validParams<TensorMechanicsHardeningCubic>();
-
 /**
  * Cubic hardening
  * value = _val_0 for p <= _intnl_0

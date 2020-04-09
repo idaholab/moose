@@ -11,11 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureBC;
-
-template <>
-InputParameters validParams<PorousFlowCapillaryPressureBC>();
-
 /**
  * Brooks-Corey effective saturation, capillary pressure and relative
  * permeability functions.
@@ -44,4 +39,3 @@ protected:
   /// Threshold entry pressure
   const Real _pe;
 };
-

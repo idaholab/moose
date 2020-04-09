@@ -12,10 +12,6 @@
 #include "GrainRigidBodyMotionBase.h"
 
 // Forward Declarations
-class SingleGrainRigidBodyMotion;
-
-template <>
-InputParameters validParams<SingleGrainRigidBodyMotion>();
 
 class SingleGrainRigidBodyMotion : public GrainRigidBodyMotionBase
 {
@@ -38,4 +34,3 @@ protected:
   /// Grain number for the kernel to be applied
   unsigned int _op_index;
 };
-

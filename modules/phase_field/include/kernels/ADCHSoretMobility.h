@@ -12,10 +12,6 @@
 #include "ADKernel.h"
 
 // Forward Declaration
-template <ComputeStage>
-class ADCHSoretMobility;
-
-declareADValidParams(ADCHSoretMobility);
 
 /**
  * Adds contribution due to thermo-migration to the Cahn-Hilliard equation

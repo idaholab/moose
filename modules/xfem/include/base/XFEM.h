@@ -399,4 +399,3 @@ private:
    */
   std::vector<dof_id_type> getNodeSolutionDofs(const Node * node, SystemBase & sys) const;
 };
-

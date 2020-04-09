@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeInterfaceStress);
 
-defineLegacyParams(ComputeInterfaceStress);
-
 InputParameters
 ComputeInterfaceStress::validParams()
 {

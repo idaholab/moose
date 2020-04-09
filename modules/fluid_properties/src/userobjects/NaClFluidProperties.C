@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", NaClFluidProperties);
 
-defineLegacyParams(NaClFluidProperties);
-
 InputParameters
 NaClFluidProperties::validParams()
 {

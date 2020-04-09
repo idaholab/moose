@@ -13,11 +13,7 @@
 #include "GrainForceAndTorqueInterface.h"
 
 // Forward Declarations
-class GrainRigidBodyMotionBase;
 class GrainTrackerInterface;
-
-template <>
-InputParameters validParams<GrainRigidBodyMotionBase>();
 
 class GrainRigidBodyMotionBase : public NonlocalKernel
 
@@ -87,4 +83,3 @@ protected:
   /// obtain the active grain ids
   std::vector<unsigned int> _grain_ids;
 };
-

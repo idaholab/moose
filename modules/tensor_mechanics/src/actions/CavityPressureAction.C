@@ -14,8 +14,6 @@
 
 registerMooseAction("TensorMechanicsApp", CavityPressureAction, "add_bc");
 
-defineLegacyParams(CavityPressureAction);
-
 InputParameters
 CavityPressureAction::validParams()
 {

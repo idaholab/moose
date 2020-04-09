@@ -12,11 +12,6 @@
 #include "ComputeThermalExpansionEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeDilatationThermalExpansionEigenstrainBase;
-
-template <>
-InputParameters validParams<ComputeDilatationThermalExpansionEigenstrainBase>();
-
 /**
  * ComputeDilatationThermalExpansionEigenstrainBase computes an eigenstrain for thermal expansion
  * from an dilatation equation.

@@ -12,11 +12,6 @@
 #include "Compute2DFiniteStrain.h"
 #include "SubblockIndexProvider.h"
 
-class ComputePlaneFiniteStrain;
-
-template <>
-InputParameters validParams<ComputePlaneFiniteStrain>();
-
 /**
  * ComputePlaneFiniteStrain defines strain increment and rotation
  * increment for finite strain under 2D planar assumptions.

@@ -12,11 +12,8 @@
 #include "NSIntegratedBC.h"
 
 // Forward Declarations
-class NSWeakStagnationBaseBC;
 
 // Specialization required of all user-level Moose objects
-template <>
-InputParameters validParams<NSWeakStagnationBaseBC>();
 
 /**
  * This is the base class for "weakly-imposed" stagnation boundary
@@ -74,4 +71,3 @@ protected:
   // normal vector
   Real sdotn();
 };
-

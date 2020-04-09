@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class RadialDisplacementSphereAux;
-
-template <>
-InputParameters validParams<RadialDisplacementSphereAux>();
-
 /**
  * Calculates the radial displacement for spherical geometries.
  * Works for 3D, 2D axisymmetric, and 1D geometries

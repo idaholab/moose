@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSTemperature;
-
-template <>
-InputParameters validParams<INSTemperature>();
 
 /**
  * This class computes the residual and Jacobian contributions for the
@@ -50,4 +46,3 @@ protected:
   const MaterialProperty<Real> & _k;
   const MaterialProperty<Real> & _cp;
 };
-

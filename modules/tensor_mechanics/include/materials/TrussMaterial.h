@@ -12,10 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class TrussMaterial;
-
-template <>
-InputParameters validParams<TrussMaterial>();
 
 class TrussMaterial : public Material
 {

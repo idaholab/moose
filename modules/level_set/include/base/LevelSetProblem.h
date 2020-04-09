@@ -24,4 +24,3 @@ public:
   virtual bool adaptMesh() override;
   virtual void computeMarkers() override;
 };
-

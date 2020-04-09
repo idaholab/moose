@@ -11,12 +11,6 @@
 
 #include "ACBulk.h"
 
-// Forward Declarations
-class AllenCahn;
-
-template <>
-InputParameters validParams<AllenCahn>();
-
 /**
  * AllenCahn uses the Free Energy function and derivatives
  * provided by a DerivativeParsedMaterial to computer the

@@ -13,8 +13,6 @@
 #include "MooseSyntax.h"
 #include "LevelSetTypes.h"
 
-defineLegacyParams(LevelSetApp);
-
 InputParameters
 LevelSetApp::validParams()
 {

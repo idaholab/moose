@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSChorinPressurePoisson;
-
-template <>
-InputParameters validParams<INSChorinPressurePoisson>();
 
 /**
  * This class computes the pressure Poisson solve which is part of
@@ -49,4 +45,3 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _rho;
 };
-

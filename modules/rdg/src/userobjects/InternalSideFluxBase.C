@@ -9,8 +9,6 @@
 
 #include "InternalSideFluxBase.h"
 
-defineLegacyParams(InternalSideFluxBase);
-
 InputParameters
 InternalSideFluxBase::validParams()
 {

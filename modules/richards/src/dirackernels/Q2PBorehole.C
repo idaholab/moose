@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", Q2PBorehole);
 
-defineLegacyParams(Q2PBorehole);
-
 InputParameters
 Q2PBorehole::validParams()
 {

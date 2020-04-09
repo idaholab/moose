@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningGaussian);
 
-defineLegacyParams(TensorMechanicsHardeningGaussian);
-
 InputParameters
 TensorMechanicsHardeningGaussian::validParams()
 {

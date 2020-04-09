@@ -12,13 +12,9 @@
 #include "EulerAngleProvider.h"
 
 // Forward declaration
-class EulerAngleUpdater;
 class RotationTensor;
 class GrainTrackerInterface;
 class GrainForceAndTorqueInterface;
-
-template <>
-InputParameters validParams<EulerAngleUpdater>();
 
 /**
  * Update Euler angles of each grains after rigid body rotation
@@ -60,4 +56,3 @@ protected:
   std::vector<EulerAngles> _angles;
   std::vector<EulerAngles> _angles_old;
 };
-

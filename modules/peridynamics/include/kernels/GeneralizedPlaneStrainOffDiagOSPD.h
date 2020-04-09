@@ -11,11 +11,6 @@
 
 #include "MechanicsBasePD.h"
 
-class GeneralizedPlaneStrainOffDiagOSPD;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrainOffDiagOSPD>();
-
 /**
  * Kernel class for coupled off diagonal Jacobian entries of ordinary state-based peridynamic
  * generalized plane strain model

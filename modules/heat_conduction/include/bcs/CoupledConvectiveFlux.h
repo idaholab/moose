@@ -26,7 +26,3 @@ protected:
   const VariableValue & _T_infinity;
   const Real _coefficient;
 };
-
-template <>
-InputParameters validParams<CoupledConvectiveFlux>();
-

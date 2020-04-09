@@ -13,10 +13,6 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class MaskedGrainForceAndTorque;
-
-template <>
-InputParameters validParams<MaskedGrainForceAndTorque>();
 
 /**
  * This class is here to get the force and torque acting on a grain
@@ -56,4 +52,3 @@ protected:
   std::vector<std::vector<Real>> _eta_jacobians;
   ///@}
 };
-

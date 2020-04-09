@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class SplitCHBase;
-
-template <>
-InputParameters validParams<SplitCHBase>();
 
 /// The couple, SplitCHBase and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
 class SplitCHBase : public Kernel
@@ -37,4 +33,3 @@ protected:
   virtual Real computeDFDC(PFFunctionType type);
   virtual Real computeDEDC(PFFunctionType type);
 };
-

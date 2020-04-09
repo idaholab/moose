@@ -11,11 +11,6 @@
 
 #include "PorousFlowSinglePhaseBase.h"
 
-class PorousFlowUnsaturated;
-
-template <>
-InputParameters validParams<PorousFlowUnsaturated>();
-
 /**
  * Action for simulation involving a single phase, partially or fully saturated fluid.
  * The fluid's saturation is found using the van-Genuchten expression, and the
@@ -56,4 +51,3 @@ protected:
   /// Name of the capillary pressure UserObject
   const std::string _capillary_pressure_name;
 };
-

@@ -9,8 +9,6 @@
 
 #include "GasFreeEnergyBase.h"
 
-defineLegacyParams(GasFreeEnergyBase);
-
 InputParameters
 GasFreeEnergyBase::validParams()
 {

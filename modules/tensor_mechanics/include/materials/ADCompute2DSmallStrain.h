@@ -16,11 +16,6 @@
   using ADCompute2DSmallStrain<compute_stage>::_out_of_plane_direction;                            \
   using ADCompute2DSmallStrain<compute_stage>::computeOutOfPlaneStrain
 
-template <ComputeStage>
-class ADCompute2DSmallStrain;
-
-declareADValidParams(ADCompute2DSmallStrain);
-
 /**
  * ADCompute2DSmallStrain defines a strain tensor, assuming small strains,
  * in 2D geometries / simulations.  ComputePlaneSmallStrain acts as a

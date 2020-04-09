@@ -33,8 +33,6 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
         {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
 
-defineLegacyParams(TensorMechanicsActionBase);
-
 InputParameters
 TensorMechanicsActionBase::validParams()
 {

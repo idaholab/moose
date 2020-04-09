@@ -12,10 +12,6 @@
 #include "BodyForce.h"
 
 // Forward Declarations
-class HeatSource;
-
-template <>
-InputParameters validParams<HeatSource>();
 
 class HeatSource : public BodyForce
 {
@@ -24,4 +20,3 @@ public:
 
   HeatSource(const InputParameters & parameters);
 };
-

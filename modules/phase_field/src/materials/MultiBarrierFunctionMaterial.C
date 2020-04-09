@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", MultiBarrierFunctionMaterial);
 
-defineLegacyParams(MultiBarrierFunctionMaterial);
-
 InputParameters
 MultiBarrierFunctionMaterial::validParams()
 {

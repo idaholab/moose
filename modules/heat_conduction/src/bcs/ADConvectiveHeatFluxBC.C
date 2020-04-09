@@ -11,8 +11,6 @@
 
 registerADMooseObject("HeatConductionApp", ADConvectiveHeatFluxBC);
 
-defineADLegacyParams(ADConvectiveHeatFluxBC);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADConvectiveHeatFluxBC<compute_stage>::validParams()

@@ -32,8 +32,6 @@
 #include "LevelSetTestApp.h"
 #include "ExternalPetscSolverApp.h"
 
-defineLegacyParams(CombinedTestApp);
-
 InputParameters
 CombinedTestApp::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeAxisymmetricRZSmallStrain);
 
-defineADLegacyParams(ADComputeAxisymmetricRZSmallStrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeAxisymmetricRZSmallStrain<compute_stage>::validParams()

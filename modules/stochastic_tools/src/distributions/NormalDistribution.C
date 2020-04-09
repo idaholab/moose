@@ -14,8 +14,6 @@
 registerMooseObjectAliased("StochasticToolsApp", NormalDistribution, "Normal");
 registerMooseObjectReplaced("StochasticToolsApp", NormalDistribution, "07/01/2020 00:00", Normal);
 
-defineLegacyParams(NormalDistribution);
-
 const std::array<Real, 6> NormalDistribution::_a = {
     {-0.322232431088, -1.0, -0.342242088547, -0.0204231210245, -0.0000453642210148}};
 

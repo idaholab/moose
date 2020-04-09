@@ -11,11 +11,6 @@
 
 #include "StressDivergenceTensors.h"
 
-class DynamicStressDivergenceTensors;
-
-template <>
-InputParameters validParams<DynamicStressDivergenceTensors>();
-
 /**
  * DynamicStressDivergenceTensors derives from StressDivergenceTensors and adds stress related
  * Rayleigh and HHT time integration terms.

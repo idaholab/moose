@@ -11,11 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class TestDistributionDirectPostprocessor;
 class NormalDistribution;
-
-template <>
-InputParameters validParams<TestDistributionDirectPostprocessor>();
 
 /**
  * Test object for testing distribution capabilities.
@@ -48,4 +44,3 @@ protected:
   /// The distribution method to call
   const MooseEnum & _distribution_method;
 };
-

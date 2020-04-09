@@ -12,11 +12,7 @@
 #include "IntegratedBC.h"
 #include "GapConductance.h"
 
-class GapHeatTransfer;
 class PenetrationInfo;
-
-template <>
-InputParameters validParams<GapHeatTransfer>();
 
 /**
  * Generic gap heat transfer model, with h_gap =  h_conduction + h_contact + h_radiation

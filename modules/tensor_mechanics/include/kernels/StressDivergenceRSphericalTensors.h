@@ -12,10 +12,6 @@
 #include "StressDivergenceTensors.h"
 
 // Forward Declarations
-class StressDivergenceRSphericalTensors;
-
-template <>
-InputParameters validParams<StressDivergenceRSphericalTensors>();
 
 /**
  * StressDivergenceRSphericalTensors is a modification of StressDivergenceTensors

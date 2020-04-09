@@ -21,8 +21,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeShellStress);
 
-defineADLegacyParams(ADComputeShellStress);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeShellStress<compute_stage>::validParams()

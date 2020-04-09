@@ -16,11 +16,6 @@ template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
-class StrainEnergyDensity;
-
-template <>
-InputParameters validParams<StrainEnergyDensity>();
-
 /**
  * StrainEnergyDensity calculates the strain energy density.
  */

@@ -11,11 +11,6 @@
 
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsHardeningExponential;
-
-template <>
-InputParameters validParams<TensorMechanicsHardeningExponential>();
-
 /**
  * Exponential hardening
  * The value = _val_res + (val_0 - val_res)*exp(-rate*internal_parameter)

@@ -12,11 +12,7 @@
 #include "ElementIntegralPostprocessor.h"
 
 // Forward Declarations
-class NSEntropyError;
 class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<NSEntropyError>();
 
 class NSEntropyError : public ElementIntegralPostprocessor
 {
@@ -38,4 +34,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

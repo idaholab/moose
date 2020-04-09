@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", FiniteStrainPlasticMaterial);
 
-defineLegacyParams(FiniteStrainPlasticMaterial);
-
 InputParameters
 FiniteStrainPlasticMaterial::validParams()
 {

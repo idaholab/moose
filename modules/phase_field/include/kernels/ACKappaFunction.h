@@ -18,11 +18,6 @@
  * to calculate the term which includes the derivatives of kappa.
  **/
 
-class ACKappaFunction;
-
-template <>
-InputParameters validParams<ACKappaFunction>();
-
 class ACKappaFunction : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:

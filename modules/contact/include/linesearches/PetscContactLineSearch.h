@@ -20,15 +20,11 @@
 
 using namespace libMesh;
 
-class PetscContactLineSearch;
 namespace libMesh
 {
 template <typename>
 class PetscNonlinearSolver;
 }
-
-template <>
-InputParameters validParams<PetscContactLineSearch>();
 
 /**
  *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)

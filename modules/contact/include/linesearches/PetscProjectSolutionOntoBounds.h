@@ -22,7 +22,6 @@
 
 using namespace libMesh;
 
-class PetscProjectSolutionOntoBounds;
 class GeometricSearchData;
 class PenetrationLocator;
 class NonlinearSystemBase;
@@ -33,9 +32,6 @@ namespace libMesh
 template <typename>
 class PetscNonlinearSolver;
 }
-
-template <>
-InputParameters validParams<PetscProjectSolutionOntoBounds>();
 
 /**
  *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)

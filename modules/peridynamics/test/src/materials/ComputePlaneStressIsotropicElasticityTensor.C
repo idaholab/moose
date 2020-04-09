@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsTestApp", ComputePlaneStressIsotropicElasticityTensor);
 
-defineLegacyParams(ComputePlaneStressIsotropicElasticityTensor);
-
 InputParameters
 ComputePlaneStressIsotropicElasticityTensor::validParams()
 {

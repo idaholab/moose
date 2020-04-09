@@ -22,11 +22,6 @@
   using ADComputeIncrementalStrainBase<compute_stage>::_eigenstrains_old;                          \
   using ADComputeIncrementalStrainBase<compute_stage>::subtractEigenstrainIncrementFromStrain
 
-template <ComputeStage>
-class ADComputeIncrementalStrainBase;
-
-declareADValidParams(ADComputeIncrementalStrainBase);
-
 /**
  * ADComputeIncrementalStrainBase is the base class for strain tensors using incremental
  * formulations

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintLagrange);
 
-defineLegacyParams(SwitchingFunctionConstraintLagrange);
-
 InputParameters
 SwitchingFunctionConstraintLagrange::validParams()
 {

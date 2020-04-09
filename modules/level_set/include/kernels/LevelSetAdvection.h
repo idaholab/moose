@@ -14,10 +14,6 @@
 #include "LevelSetVelocityInterface.h"
 
 // Forward declarations
-template <ComputeStage>
-class LevelSetAdvection;
-
-declareADValidParams(LevelSetAdvection);
 
 /**
  * Advection Kernel for the levelset equation.
@@ -41,4 +37,3 @@ protected:
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::computeQpVelocity;
   using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::_velocity;
 };
-

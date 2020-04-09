@@ -14,8 +14,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADIsotropicPlasticityStressUpdate);
 
-defineADLegacyParams(ADIsotropicPlasticityStressUpdate);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADIsotropicPlasticityStressUpdate<compute_stage>::validParams()

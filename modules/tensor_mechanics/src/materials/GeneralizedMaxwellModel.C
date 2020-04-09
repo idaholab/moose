@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", GeneralizedMaxwellModel);
 
-defineLegacyParams(GeneralizedMaxwellModel);
-
 InputParameters
 GeneralizedMaxwellModel::validParams()
 {

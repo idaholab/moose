@@ -17,11 +17,6 @@
   using ADCompute2DFiniteStrain<compute_stage>::computeOutOfPlaneGradDisp;                         \
   using ADCompute2DFiniteStrain<compute_stage>::computeOutOfPlaneGradDispOld
 
-template <ComputeStage>
-class ADCompute2DFiniteStrain;
-
-declareADValidParams(ADCompute2DFiniteStrain);
-
 /**
  * ADCompute2DFiniteStrain defines a strain increment and a rotation increment
  * for finite strains in 2D geometries, handling the out of plane strains.

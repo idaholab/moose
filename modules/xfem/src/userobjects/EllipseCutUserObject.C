@@ -17,8 +17,6 @@
 
 registerMooseObject("XFEMApp", EllipseCutUserObject);
 
-defineLegacyParams(EllipseCutUserObject);
-
 InputParameters
 EllipseCutUserObject::validParams()
 {

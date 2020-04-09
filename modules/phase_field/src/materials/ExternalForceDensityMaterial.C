@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", ExternalForceDensityMaterial);
 
-defineLegacyParams(ExternalForceDensityMaterial);
-
 InputParameters
 ExternalForceDensityMaterial::validParams()
 {

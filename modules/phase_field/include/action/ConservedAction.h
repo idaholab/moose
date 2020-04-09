@@ -15,10 +15,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declaration
-class ConservedAction;
-
-template <>
-InputParameters validParams<ConservedAction>();
 
 class ConservedAction : public Action
 {
@@ -48,4 +44,3 @@ protected:
   /// Scaling parameter
   const Real _scaling;
 };
-

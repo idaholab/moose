@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeRSphericalFiniteStrain);
 
-defineLegacyParams(ComputeRSphericalFiniteStrain);
-
 InputParameters
 ComputeRSphericalFiniteStrain::validParams()
 {

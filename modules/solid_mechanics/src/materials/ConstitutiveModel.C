@@ -11,8 +11,6 @@
 #include "SolidModel.h"
 #include "Function.h"
 
-defineLegacyParams(ConstitutiveModel);
-
 InputParameters
 ConstitutiveModel::validParams()
 {

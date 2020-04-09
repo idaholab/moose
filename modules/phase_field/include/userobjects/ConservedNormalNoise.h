@@ -13,10 +13,6 @@
 #include "ConservedNormalNoiseVeneer.h"
 
 // Forward delcarations
-class ConservedNormalNoise;
-
-template <>
-InputParameters validParams<ConservedNormalNoise>();
 
 /**
  * Userobject that generates a normaly distributed random number

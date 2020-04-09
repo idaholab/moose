@@ -12,11 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class TestCrackCounter;
 class XFEM;
-
-template <>
-InputParameters validParams<TestCrackCounter>();
 
 class TestCrackCounter : public GeneralPostprocessor
 {
@@ -41,4 +37,3 @@ protected:
 private:
   std::shared_ptr<XFEM> _xfem;
 };
-

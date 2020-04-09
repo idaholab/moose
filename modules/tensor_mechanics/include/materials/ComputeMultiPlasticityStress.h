@@ -12,11 +12,6 @@
 #include "ComputeStressBase.h"
 #include "MultiPlasticityDebugger.h"
 
-class ComputeMultiPlasticityStress;
-
-template <>
-InputParameters validParams<ComputeMultiPlasticityStress>();
-
 /**
  * ComputeMultiPlasticityStress performs the return-map
  * algorithm and associated stress updates for plastic

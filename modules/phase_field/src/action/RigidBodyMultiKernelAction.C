@@ -15,8 +15,6 @@
 
 registerMooseAction("PhaseFieldApp", RigidBodyMultiKernelAction, "add_kernel");
 
-defineLegacyParams(RigidBodyMultiKernelAction);
-
 InputParameters
 RigidBodyMultiKernelAction::validParams()
 {

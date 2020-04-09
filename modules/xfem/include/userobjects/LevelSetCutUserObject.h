@@ -12,10 +12,6 @@
 #include "GeometricCutUserObject.h"
 
 // Forward declarations
-class LevelSetCutUserObject;
-
-template <>
-InputParameters validParams<LevelSetCutUserObject>();
 
 class LevelSetCutUserObject : public GeometricCutUserObject
 {
@@ -52,4 +48,3 @@ protected:
   /// the subproblem solution vector
   const NumericVector<Number> * _solution;
 };
-

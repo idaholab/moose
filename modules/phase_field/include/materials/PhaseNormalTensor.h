@@ -13,11 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensor.h"
 
-class PhaseNormalTensor;
-
-template <>
-InputParameters validParams<PhaseNormalTensor>();
-
 /**
  * Calculate phase normal tensor based on gradient
  */
@@ -35,4 +30,3 @@ protected:
   const VariableGradient & _grad_u;
   MaterialProperty<RankTwoTensor> & _normal_tensor;
 };
-

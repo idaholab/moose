@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class AqueousEquilibriumRxnAux;
-
-template <>
-InputParameters validParams<AqueousEquilibriumRxnAux>();
-
 /**
  * Calculates equilibrium species concentration according to the mass action law
  */
@@ -40,4 +35,3 @@ protected:
   /// Activity coefficient of equilibrium species
   const VariableValue & _gamma_eq;
 };
-

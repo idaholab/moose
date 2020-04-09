@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSChorinCorrector;
-
-template <>
-InputParameters validParams<INSChorinCorrector>();
 
 /**
  * This class computes the "Chorin" Corrector equation in fully-discrete
@@ -55,4 +51,3 @@ protected:
   // Material properties
   const MaterialProperty<Real> & _rho;
 };
-

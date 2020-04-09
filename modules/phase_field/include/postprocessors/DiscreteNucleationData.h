@@ -12,11 +12,6 @@
 #include "GeneralPostprocessor.h"
 #include "DiscreteNucleationInserterBase.h"
 
-class DiscreteNucleationData;
-
-template <>
-InputParameters validParams<DiscreteNucleationData>();
-
 /**
  * Output diagnostic data on a DiscreteNucleationInserter
  */
@@ -49,4 +44,3 @@ protected:
     DELETIONS
   } _value_type;
 };
-

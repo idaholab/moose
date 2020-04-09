@@ -26,14 +26,10 @@
   using ADComputeStrainBase<compute_stage>::_total_strain
 
 // Forward Declarations
-template <ComputeStage>
-class ADComputeStrainBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(ADComputeStrainBase);
 
 /**
  * ADADComputeStrainBase is the base class for strain tensors

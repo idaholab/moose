@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", RankTwoBasedFailureCriteriaNOSPD);
 
-defineLegacyParams(RankTwoBasedFailureCriteriaNOSPD);
-
 InputParameters
 RankTwoBasedFailureCriteriaNOSPD::validParams()
 {

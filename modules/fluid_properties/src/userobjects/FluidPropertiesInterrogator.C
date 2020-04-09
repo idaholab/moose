@@ -16,8 +16,6 @@
 
 registerMooseObject("FluidPropertiesApp", FluidPropertiesInterrogator);
 
-defineLegacyParams(FluidPropertiesInterrogator);
-
 InputParameters
 FluidPropertiesInterrogator::validParams()
 {

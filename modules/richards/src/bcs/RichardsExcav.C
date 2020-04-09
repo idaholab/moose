@@ -14,8 +14,6 @@
 
 registerMooseObject("RichardsApp", RichardsExcav);
 
-defineLegacyParams(RichardsExcav);
-
 InputParameters
 RichardsExcav::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", INSMomentumTractionFormRZ);
 
-defineLegacyParams(INSMomentumTractionFormRZ);
-
 InputParameters
 INSMomentumTractionFormRZ::validParams()
 {

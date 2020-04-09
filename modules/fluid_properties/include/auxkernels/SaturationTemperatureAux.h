@@ -11,11 +11,7 @@
 
 #include "AuxKernel.h"
 
-class SaturationTemperatureAux;
 class TwoPhaseFluidProperties;
-
-template <>
-InputParameters validParams<SaturationTemperatureAux>();
 
 /**
  * Computes saturation temperature from pressure and 2-phase fluid properties object
@@ -35,4 +31,3 @@ protected:
   /// 2-phase fluid properties object
   const TwoPhaseFluidProperties & _fp_2phase;
 };
-

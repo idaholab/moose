@@ -12,10 +12,6 @@
 #include "KKSACBulkBase.h"
 
 // Forward Declarations
-class KKSACBulkF;
-
-template <>
-InputParameters validParams<KKSACBulkF>();
 
 /**
  * KKSACBulkBase child class for the free energy difference term

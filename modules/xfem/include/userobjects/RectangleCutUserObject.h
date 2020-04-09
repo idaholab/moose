@@ -12,10 +12,6 @@
 #include "GeometricCut3DUserObject.h"
 
 // Forward declarations
-class RectangleCutUserObject;
-
-template <>
-InputParameters validParams<RectangleCutUserObject>();
 
 class RectangleCutUserObject : public GeometricCut3DUserObject
 {
@@ -35,4 +31,3 @@ private:
 
   bool isInsideCutPlane(Point p) const override;
 };
-

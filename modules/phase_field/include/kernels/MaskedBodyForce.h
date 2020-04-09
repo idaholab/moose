@@ -14,11 +14,7 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class MaskedBodyForce;
 class Function;
-
-template <>
-InputParameters validParams<MaskedBodyForce>();
 
 /**
  * This kernel creates a body force that is modified by a mask defined

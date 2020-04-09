@@ -13,9 +13,6 @@
 #include "SamplerInterface.h"
 
 class Sampler;
-class StochasticToolsTransfer;
-template <>
-InputParameters validParams<StochasticToolsTransfer>();
 
 /**
  * The class creates an additional API to allow Transfers to work when running the

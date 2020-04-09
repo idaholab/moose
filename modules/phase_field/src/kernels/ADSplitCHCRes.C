@@ -9,8 +9,6 @@
 
 #include "ADSplitCHCRes.h"
 
-defineADLegacyParams(ADSplitCHCRes);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADSplitCHCRes<compute_stage>::validParams()

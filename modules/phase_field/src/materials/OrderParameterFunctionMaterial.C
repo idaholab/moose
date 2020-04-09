@@ -9,8 +9,6 @@
 
 #include "OrderParameterFunctionMaterial.h"
 
-defineLegacyParams(OrderParameterFunctionMaterial);
-
 InputParameters
 OrderParameterFunctionMaterial::validParams()
 {

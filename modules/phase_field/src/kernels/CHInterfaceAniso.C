@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CHInterfaceAniso);
 
-defineLegacyParams(CHInterfaceAniso);
-
 InputParameters
 CHInterfaceAniso::validParams()
 {

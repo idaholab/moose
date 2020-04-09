@@ -18,10 +18,6 @@
  * supplied indices in cylindrical coordinates, where the cylindrical plane axis is
  * along the z-axis and the center point in the x-y plan is defined by by center_point.
  */
-class CylindricalRankTwoAux;
-
-template <>
-InputParameters validParams<CylindricalRankTwoAux>();
 
 class CylindricalRankTwoAux : public AuxKernel
 {

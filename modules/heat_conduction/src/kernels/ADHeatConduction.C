@@ -11,8 +11,6 @@
 
 registerADMooseObject("HeatConductionApp", ADHeatConduction);
 
-defineADLegacyParams(ADHeatConduction);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADHeatConduction<compute_stage>::validParams()

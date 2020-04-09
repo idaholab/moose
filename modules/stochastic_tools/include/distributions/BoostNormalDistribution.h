@@ -11,11 +11,6 @@
 
 #include "BoostDistribution.h"
 
-class BoostNormalDistribution;
-
-template <>
-InputParameters validParams<BoostNormalDistribution>();
-
 /**
  * A class used to generate Normal distribution via Boost
  */

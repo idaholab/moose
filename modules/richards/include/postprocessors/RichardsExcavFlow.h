@@ -14,11 +14,7 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsExcavFlow;
 class Function;
-
-template <>
-InputParameters validParams<RichardsExcavFlow>();
 
 /**
  * Records total mass flow into an excavation defined by a RichardsExcavGeom function

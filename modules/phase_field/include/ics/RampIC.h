@@ -12,10 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class RampIC;
-
-template <>
-InputParameters validParams<RampIC>();
 
 /**
  * Makes initial condition which creates a linear ramp of the given variable
@@ -44,4 +40,3 @@ protected:
   const Real _value_left;
   const Real _value_right;
 };
-

@@ -17,8 +17,6 @@
 
 registerMooseObject("RichardsApp", RichardsMaterial);
 
-defineLegacyParams(RichardsMaterial);
-
 InputParameters
 RichardsMaterial::validParams()
 {

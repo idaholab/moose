@@ -12,11 +12,6 @@
 #include "SinglePhaseFluidProperties.h"
 #include "NaNInterface.h"
 
-class StiffenedGasFluidProperties;
-
-template <>
-InputParameters validParams<StiffenedGasFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

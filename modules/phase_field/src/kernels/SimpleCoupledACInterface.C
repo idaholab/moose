@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SimpleCoupledACInterface);
 
-defineLegacyParams(SimpleCoupledACInterface);
-
 InputParameters
 SimpleCoupledACInterface::validParams()
 {

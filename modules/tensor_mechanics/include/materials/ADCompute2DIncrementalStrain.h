@@ -17,11 +17,6 @@
   using ADCompute2DIncrementalStrain<compute_stage>::computeOutOfPlaneGradDisp;                    \
   using ADCompute2DIncrementalStrain<compute_stage>::computeOutOfPlaneGradDispOld
 
-template <ComputeStage>
-class ADCompute2DIncrementalStrain;
-
-declareADValidParams(ADCompute2DIncrementalStrain);
-
 /**
  * ADCompute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.
