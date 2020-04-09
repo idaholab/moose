@@ -30,6 +30,7 @@
 - [Code Standards](code_standards.md)
 - [MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html)
 - [libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
+- [TIMPI Doxygen](https://mooseframework.org/docs/doxygen/timpi/classes.html)
 !col-end!
 
 !col! small=12 medium=6 large=4

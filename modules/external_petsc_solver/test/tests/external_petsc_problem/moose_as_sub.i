@@ -49,14 +49,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
-  dt = 0.2
-
   solve_type = 'PJFNK'
-
-  picard_max_its = 10
-  picard_rel_tol = 1e-8
-  picard_abs_tol = 1e-9
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-12
 
@@ -72,25 +65,5 @@
   [./picard_its]
     type = NumPicardIterations
     execute_on = 'initial timestep_end'
-  [../]
-[]
-
-[MultiApps]
-  [./sub_app]
-    type = TransientMultiApp
-    sub_cycling = true
-    input_files = 'petsc_problem_transient.i'
-    app_type = ExternalPetscSolverApp
-    library_path = '../../../../external_petsc_solver/lib'
-  [../]
-[]
-
-[Transfers]
-  [./fromsub]
-    type = MultiAppNearestNodeTransfer
-    direction = from_multiapp
-    multi_app = sub_app
-    source_variable = u
-    variable = v
   [../]
 []

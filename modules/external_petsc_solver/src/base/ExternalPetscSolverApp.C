@@ -13,6 +13,8 @@
 #include "MooseSyntax.h"
 #include "PETScDiffusionFDM.h"
 #include "libmesh/petsc_vector.h"
+#include "ExternalPETScProblem.h"
+#include "Executioner.h"
 
 InputParameters
 ExternalPetscSolverApp::validParams()
@@ -27,27 +29,14 @@ ExternalPetscSolverApp::validParams()
 ExternalPetscSolverApp::ExternalPetscSolverApp(InputParameters parameters) : MooseApp(parameters)
 {
   ExternalPetscSolverApp::registerAll(_factory, _action_factory, _syntax);
-
-#if LIBMESH_HAVE_PETSC
+  // Create an external PETSc solver
   PETScExternalSolverCreate(_comm->get(), &_ts);
-  DM da;
-  TSGetDM(_ts, &da);
-
-  DMCreateGlobalVector(da, &_petsc_sol);
-
-  // This is required because libMesh incorrectly treats the PETSc parallel vector as a ghost vector
-  // We should be able to remove this line of code once libMesh is updated
-  VecMPISetGhost(_petsc_sol, 0, nullptr);
-#else
-  mooseError("You need to have PETSc installed to use ExternalPETScApp");
-#endif
 }
 
 ExternalPetscSolverApp::~ExternalPetscSolverApp()
 {
-#if LIBMESH_HAVE_PETSC
+  // Destroy PETSc solver
   PETScExternalSolverDestroy(_ts);
-#endif
 }
 
 void
@@ -64,9 +53,17 @@ ExternalPetscSolverApp::backup()
 {
   auto backup = MooseApp::backup();
 
+  ExternalPETScProblem & external_petsc_problem =
+      static_cast<ExternalPETScProblem &>(_executioner->feProblem());
+
   // Backup current solution
-  PetscVector<Number> petsc_sol(_petsc_sol, comm());
-  dataStore(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
+  dataStore(backup->_system_data, external_petsc_problem.currentSolution(), nullptr);
+
+  // Backup the old solution
+  dataStore(backup->_system_data, external_petsc_problem.solutionOld(), nullptr);
+
+  // Backup Udot
+  dataStore(backup->_system_data, external_petsc_problem.udot(), nullptr);
 
   return backup;
 }
@@ -76,9 +73,17 @@ ExternalPetscSolverApp::restore(std::shared_ptr<Backup> backup, bool for_restart
 {
   MooseApp::restore(backup, for_restart);
 
+  ExternalPETScProblem & external_petsc_problem =
+      static_cast<ExternalPETScProblem &>(_executioner->feProblem());
+
   // Restore previous solution
-  PetscVector<Number> petsc_sol(_petsc_sol, comm());
-  dataLoad(backup->_system_data, static_cast<NumericVector<Number> &>(petsc_sol), nullptr);
+  dataLoad(backup->_system_data, external_petsc_problem.currentSolution(), nullptr);
+
+  // Restore the solution at the previous time step
+  dataLoad(backup->_system_data, external_petsc_problem.solutionOld(), nullptr);
+
+  // Restore udot
+  dataLoad(backup->_system_data, external_petsc_problem.udot(), nullptr);
 }
 
 void

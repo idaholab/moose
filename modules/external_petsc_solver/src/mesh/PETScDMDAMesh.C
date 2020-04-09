@@ -23,9 +23,7 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
-
 #include "ExternalPetscSolverApp.h"
-
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
@@ -38,31 +36,7 @@ PETScDMDAMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
 
-  MooseEnum elem_types("EDGE2  QUAD4  HEX8"); // no default
-
-  MooseEnum dims("1=1 2 3", "2");
-  params.addRequiredParam<MooseEnum>(
-      "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
-
-  params.addParam<dof_id_type>("nx", 11, "Number of elements in the X direction");
-  params.addParam<dof_id_type>("ny", 11, "Number of elements in the Y direction");
-  params.addParam<dof_id_type>("nz", 11, "Number of elements in the Z direction");
-  params.addParam<Real>("xmin", 0.0, "Lower X Coordinate of the generated mesh");
-  params.addParam<Real>("ymin", 0.0, "Lower Y Coordinate of the generated mesh");
-  params.addParam<Real>("zmin", 0.0, "Lower Z Coordinate of the generated mesh");
-  params.addParam<Real>("xmax", 1.0, "Upper X Coordinate of the generated mesh");
-  params.addParam<Real>("ymax", 1.0, "Upper Y Coordinate of the generated mesh");
-  params.addParam<Real>("zmax", 1.0, "Upper Z Coordinate of the generated mesh");
-  params.addParam<MooseEnum>("elem_type",
-                             elem_types,
-                             "The type of element from libMesh to "
-                             "generate (default: linear element for "
-                             "requested dimension)");
-
-  params.addParamNamesToGroup("dim", "Main");
-
-  params.addClassDescription(
-      "Create a line, square, or cube mesh with uniformly spaced memsh using PETSc DMDA.");
+  params.addClassDescription("Create a square mesh from PETSc DMDA.");
 
   // This mesh is always distributed
   params.set<MooseEnum>("parallel_type") = "DISTRIBUTED";
@@ -70,96 +44,13 @@ PETScDMDAMesh::validParams()
   return params;
 }
 
-PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
-    _dim(getParam<MooseEnum>("dim")),
-    _nx(getParam<dof_id_type>("nx")),
-    _ny(getParam<dof_id_type>("ny")),
-    _nz(getParam<dof_id_type>("nz")),
-    _xmin(getParam<Real>("xmin")),
-    _xmax(getParam<Real>("xmax")),
-    _ymin(getParam<Real>("ymin")),
-    _ymax(getParam<Real>("ymax")),
-    _zmin(getParam<Real>("zmin")),
-    _zmax(getParam<Real>("zmax"))
+PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(parameters)
 {
-  // All generated meshes are regular orthogonal meshes
-  _regular_orthogonal_mesh = true;
+  // Get TS from ExternalPetscSolverApp
+  ExternalPetscSolverApp & petsc_app = static_cast<ExternalPetscSolverApp &>(_app);
 
-  // We support 2D mesh only at this point. If you need 3D or 1D
-  // Please contact MOOSE developers
-  if (_dim != 2)
-    mooseError("Support 2 dimensional mesh only");
-
-#if LIBMESH_HAVE_PETSC
-  // If we are going to couple PETSc external solver,
-  // take a DA from PETSc
-  ExternalPetscSolverApp * petsc_app = dynamic_cast<ExternalPetscSolverApp *>(&_app);
-  if (petsc_app)
-  {
-    TS & ts = petsc_app->getExternalPETScTS();
-    // Retrieve mesh from TS
-    TSGetDM(ts, &_dmda);
-    _need_to_destroy_dmda = false;
-  }
-  // This mesh object can be used independently for any MOOSE apps.
-  // We create one from scratch
-  else
-  {
-    DMDACreate2d(_communicator.get(),
-                 DM_BOUNDARY_NONE,
-                 DM_BOUNDARY_NONE,
-                 DMDA_STENCIL_BOX,
-                 _nx,
-                 _ny,
-                 PETSC_DECIDE,
-                 PETSC_DECIDE,
-                 1,
-                 1,
-                 NULL,
-                 NULL,
-                 &_dmda);
-    // Let DMDA take PETSc options
-    DMSetFromOptions(_dmda);
-    // Finalize mesh setup
-    DMSetUp(_dmda);
-    _need_to_destroy_dmda = true;
-  }
-#else
-  mooseError("You need PETSc installed to use PETScDMDAMesh");
-#endif
-}
-
-Real
-PETScDMDAMesh::getMinInDimension(unsigned int component) const
-{
-  switch (component)
-  {
-    case 0:
-      return _xmin;
-    case 1:
-      return _dim > 1 ? _ymin : 0;
-    case 2:
-      return _dim > 2 ? _zmin : 0;
-    default:
-      mooseError("Invalid component");
-  }
-}
-
-Real
-PETScDMDAMesh::getMaxInDimension(unsigned int component) const
-{
-  switch (component)
-  {
-    case 0:
-      return _xmax;
-    case 1:
-      return _dim > 1 ? _ymax : 0;
-    case 2:
-      return _dim > 2 ? _zmax : 0;
-    default:
-      mooseError("Invalid component");
-  }
+  // Retrieve mesh from TS
+  TSGetDM(petsc_app.getPetscTS(), &_dmda);
 }
 
 std::unique_ptr<MooseMesh>
@@ -169,8 +60,7 @@ PETScDMDAMesh::safeClone() const
 }
 
 inline dof_id_type
-node_id_Quad4(const ElemType /*type*/,
-              const dof_id_type nx,
+node_id_Quad4(const dof_id_type nx,
               const dof_id_type /*ny*/,
               const dof_id_type i,
               const dof_id_type j,
@@ -190,12 +80,10 @@ add_element_Quad4(DM da,
                   const dof_id_type j,
                   const dof_id_type elem_id,
                   const processor_id_type pid,
-                  const ElemType type,
                   MeshBase & mesh)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-#if LIBMESH_HAVE_PETSC
   // Mx: number of grid points in x direction for all processors
   // My: number of grid points in y direction for all processors
   // xp: number of processors in x direction
@@ -263,11 +151,11 @@ add_element_Quad4(DM da,
 #else
   DMRestoreWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
 #endif
-#endif
+
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
-                                  node_id_Quad4(type, nx, 0, i, j, 0));
-  node0_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i, j, 0);
+                                  node_id_Quad4(nx, 0, i, j, 0));
+  node0_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j, 0);
   node0_ptr->set_id() = node0_ptr->unique_id();
   // xpid + ypid * xp is the global processor ID
   node0_ptr->processor_id() = xpid + ypid * xp;
@@ -275,24 +163,24 @@ add_element_Quad4(DM da,
   // Bottom Right
   auto node1_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0),
-                     node_id_Quad4(type, nx, 0, i + 1, j, 0));
-  node1_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i + 1, j, 0);
+                     node_id_Quad4(nx, 0, i + 1, j, 0));
+  node1_ptr->set_unique_id() = node_id_Quad4(nx, 0, i + 1, j, 0);
   node1_ptr->set_id() = node1_ptr->unique_id();
   node1_ptr->processor_id() = xpidplus + ypid * xp;
 
   // Top Right
   auto node2_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0),
-                     node_id_Quad4(type, nx, 0, i + 1, j + 1, 0));
-  node2_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i + 1, j + 1, 0);
+                     node_id_Quad4(nx, 0, i + 1, j + 1, 0));
+  node2_ptr->set_unique_id() = node_id_Quad4(nx, 0, i + 1, j + 1, 0);
   node2_ptr->set_id() = node2_ptr->unique_id();
   node2_ptr->processor_id() = xpidplus + ypidplus * xp;
 
   // Top Left
   auto node3_ptr =
       mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0),
-                     node_id_Quad4(type, nx, 0, i, j + 1, 0));
-  node3_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i, j + 1, 0);
+                     node_id_Quad4(nx, 0, i, j + 1, 0));
+  node3_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j + 1, 0);
   node3_ptr->set_id() = node3_ptr->unique_id();
   node3_ptr->processor_id() = xpid + ypidplus * xp;
 
@@ -421,19 +309,17 @@ add_node_Qua4(dof_id_type nx,
               dof_id_type i,
               dof_id_type j,
               processor_id_type pid,
-              ElemType type,
               MeshBase & mesh)
 {
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
-                                  node_id_Quad4(type, nx, 0, i, j, 0));
-  node0_ptr->set_unique_id() = node_id_Quad4(type, nx, 0, i, j, 0);
+                                  node_id_Quad4(nx, 0, i, j, 0));
+  node0_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j, 0);
   node0_ptr->processor_id() = pid;
 }
 
-#if LIBMESH_HAVE_PETSC
 void
-build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
+build_cube_Quad4(UnstructuredMesh & mesh, DM da)
 {
   const auto pid = mesh.comm().rank();
 
@@ -478,7 +364,7 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
 
       dof_id_type ele_id = (i - 1) + (j - 1) * (Mx - 1);
 
-      add_element_Quad4(da, Mx - 1, My - 1, i - 1, j - 1, ele_id, pid, type, mesh);
+      add_element_Quad4(da, Mx - 1, My - 1, i - 1, j - 1, ele_id, pid, mesh);
     }
 
   // If there is no element at the given processor
@@ -486,7 +372,7 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
   if ((ys == 0 && ym == 1) || (xs == 0 && xm == 1))
     for (PetscInt j = ys; j < ys + ym; j++)
       for (PetscInt i = xs; i < xs + xm; i++)
-        add_node_Qua4(Mx, My, i, j, pid, type, mesh);
+        add_node_Qua4(Mx, My, i, j, pid, mesh);
 
   // Need to link up the local elements before we can know what's missing
   mesh.find_neighbors();
@@ -512,7 +398,6 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da, const ElemType type)
   mesh.prepare_for_use(/*skip_renumber (ignored!) = */ false,
                        /*skip_find_neighbors = */ true);
 }
-#endif
 
 void
 PETScDMDAMesh::buildMesh()
@@ -520,36 +405,5 @@ PETScDMDAMesh::buildMesh()
   // Reference to the libmesh mesh
   MeshBase & mesh = getMesh();
 
-  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
-
-  if (!isParamValid("elem_type"))
-  {
-    // Switching on MooseEnum
-    switch (_dim)
-    {
-      case 2:
-        elem_type_enum = "QUAD4";
-        break;
-
-      default:
-        mooseError("Does not support dimension ", _dim, "yet");
-    }
-  }
-
-  _elem_type = Utility::string_to_enum<ElemType>(elem_type_enum);
-
-  mesh.set_mesh_dimension(_dim);
-  mesh.set_spatial_dimension(_dim);
-
-  // Switching on MooseEnum
-  switch (_dim)
-  {
-#if LIBMESH_HAVE_PETSC
-    case 2:
-      build_cube_Quad4(dynamic_cast<UnstructuredMesh &>(getMesh()), _dmda, _elem_type);
-      break;
-#endif
-    default:
-      mooseError("Does not support dimension ", _dim, "yet");
-  }
+  build_cube_Quad4(dynamic_cast<UnstructuredMesh &>(mesh), _dmda);
 }

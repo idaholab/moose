@@ -25,24 +25,40 @@ public:
   static InputParameters validParams();
 
   ExternalPETScProblem(const InputParameters & params);
-#if LIBMESH_HAVE_PETSC
-  ~ExternalPETScProblem() { VecDestroy(&_petsc_sol); }
-#endif
+
+  ~ExternalPETScProblem();
 
   virtual void externalSolve() override;
   virtual void syncSolutions(Direction /*direction*/) override;
 
-  virtual bool converged() override { return true; }
+  virtual bool converged() override { return _petsc_converged; }
+
+  virtual void advanceState() override;
+
+  virtual Real computeResidualL2Norm() override;
+
+  Vec & solutionOld() { return _petsc_sol_old; }
+
+  Vec & currentSolution() { return _petsc_sol; }
+
+  Vec & udot() { return _petsc_udot; }
+
+  TS & getPetscTS() { return _ts; }
 
 private:
   /// The name of the variable to transfer to
   const VariableName & _sync_to_var_name;
-  ExternalPetscSolverApp & _petsc_app;
-
-#if LIBMESH_HAVE_PETSC
+  /// If PETSc solver converged
+  PetscBool _petsc_converged;
+  ExternalPetscSolverApp & _external_petsc_app;
   /// PETSc solver
   TS & _ts;
   /// PETSc solver solution
   Vec & _petsc_sol;
-#endif
+  /// Solution at the previous time step
+  Vec & _petsc_sol_old;
+  /// Udot (u_n-u_{n-1})/dt
+  Vec & _petsc_udot;
+  /// RHS vector
+  Vec _petsc_rhs;
 };

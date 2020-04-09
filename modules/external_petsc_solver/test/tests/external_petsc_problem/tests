@@ -1,15 +1,134 @@
 [Tests]
-  [external_transient]
+  design = "ExternalProblem.md"
+  issues = "#12595"
+
+  [external_petsc]
     type = 'Exodiff'
-    input = 'external_petsc_master.i'
-    exodiff = 'external_petsc_master_out.e external_petsc_master_out_sub_app0.e'
-    max_parallel = 2
-    min_parallel = 2
+    input = 'moose_as_master.i'
+    exodiff = 'moose_as_master_out.e moose_as_master_out_sub_app0.e'
     requirement = "MOOSE shall support an code coupling interface for PETSc external solver."
-    design = "ExternalProblem.md"
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its"'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
   []
+
+  [external_petsc_subcycling]
+    type = 'Exodiff'
+    input = 'moose_as_master.i'
+    exodiff = 'moose_as_master_out.e moose_as_master_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true'
+    allow_warnings = true
+    prereq = 'external_petsc'
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall be able to couple the PETSc external solver with subcycling."
+  []
+
+  [external_petsc_subcycling_multistep]
+    type = 'Exodiff'
+    input = 'moose_as_master.i'
+    exodiff = 'moose_as_master_multistep_out.e moose_as_master_multistep_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" sub_app:Executioner/dtmin=0.05 Outputs/hide="picard_its" Outputs/file_base=moose_as_master_multistep_out MultiApps/sub_app/sub_cycling=true MultiApps/sub_app/output_sub_cycles=true -ts_dt 0.05'
+    allow_warnings = true
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall be able to couple with the PETSc external solver with multistep subcycling."
+  []
+
+  [external_petsc_small_dt]
+    type = 'Exodiff'
+    input = 'moose_as_master.i'
+    exodiff = 'moose_as_master_small_dt_out.e moose_as_master_small_dt_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" Outputs/file_base=moose_as_master_small_dt_out -ts_dt 0.1'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is smaller than master app."
+  []
+
+  [external_petsc_large_dt]
+    type = 'Exodiff'
+    input = 'moose_as_master.i'
+    exodiff = 'moose_as_master_out.e moose_as_master_out_sub_app0.e'
+    cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its" -ts_dt 0.25'
+    allow_warnings = true
+    prereq = 'external_petsc_subcycling'
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    library_mode = 'DYNAMIC'
+    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is larger than master app."
+  []
+
+  [petsc_as_master]
+    type = 'Exodiff'
+    input = 'petsc_transient_as_master.i'
+    exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
+    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+
+    executable_pattern = 'external_petsc_solver*'
+    requirement = "MOOSE shall be able to run the PETSc external solver as master."
+  []
+
+  [petsc_as_master_sub_cycling]
+    type = 'Exodiff'
+    input = 'petsc_transient_as_master.i'
+    exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
+    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    prereq = 'petsc_as_master'
+
+    executable_pattern = 'external_petsc_solver*'
+    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling."
+  []
+
+  [petsc_as_master_large_dt]
+    type = 'Exodiff'
+    input = 'petsc_transient_as_master.i'
+    exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
+    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.5'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    prereq = 'petsc_as_master_sub_cycling'
+
+    executable_pattern = 'external_petsc_solver*'
+    requirement = "MOOSE shall be able to run the PETSc external solver as master with a larger dt in moose subapp."
+  []
+
+  [petsc_as_master_sub_cycling_multistep]
+    type = 'Exodiff'
+    input = 'petsc_transient_as_master.i'
+    exodiff = 'petsc_transient_as_master_multistep_out.e petsc_transient_as_master_multistep_out_sub_app0.e'
+    cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_master_multistep_out --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.05'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    prereq = 'petsc_as_master'
+
+    executable_pattern = 'external_petsc_solver*'
+    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling."
+  []
+
+  [petsc_as_master_small_dt]
+    type = 'Exodiff'
+    input = 'petsc_transient_as_master.i'
+    exodiff = 'petsc_transient_as_master_small_dt_out.e petsc_transient_as_master_small_dt_out_sub_app0.e'
+    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master Outputs/file_base=petsc_transient_as_master_small_dt_out sub_app:Executioner/dt=0.05'
+    allow_warnings = true
+    issues = "#12595"
+    petsc_version = '>=3.8.0'
+    rel_err = 5e-5
+
+    executable_pattern = 'external_petsc_solver*'
+    requirement = "MOOSE shall be able to run the PETSc external solver as master with a smaller dt in moose subapp."
+  []
+
 []

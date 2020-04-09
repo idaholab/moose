@@ -9,7 +9,6 @@
 
 #include <PETScDiffusionFDM.h>
 
-#ifdef LIBMESH_HAVE_PETSC
 /*
    u_t = uxx + uyy
    0 < x < 1, 0 < y < 1;
@@ -76,7 +75,14 @@ PETScExternalSolverCreate(MPI_Comm comm, TS * ts)
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSetIJacobian(*ts, NULL, NULL, FormIJacobian, NULL);
   CHKERRQ(ierr);
-
+  /*
+   * Make it consistent with the original solver
+   * This can be changed during runtime via -ts_dt
+   */
+  ierr = TSSetTimeStep(*ts, 0.2);
+  CHKERRQ(ierr);
+  ierr = TSSetFromOptions(*ts);
+  CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -96,15 +102,24 @@ PETScExternalSolverDestroy(TS ts)
  * to demonstrate how MOOSE interact with an external solver package
  */
 PetscErrorCode
-externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
+externalPETScDiffusionFDMSolve(
+    TS ts, Vec u0, Vec u, PetscReal dt, PetscReal time, PetscBool * converged)
 {
   PetscErrorCode ierr;
+  TSConvergedReason reason;
 #if !PETSC_VERSION_LESS_THAN(3, 8, 0)
   PetscInt current_step;
 #endif
   DM da;
 
   PetscFunctionBeginUser;
+  PetscValidHeaderSpecific(ts, TS_CLASSID, 1);
+  PetscValidType(ts, 1);
+  PetscValidHeaderSpecific(u0, VEC_CLASSID, 2);
+  PetscValidType(u0, 2);
+  PetscValidHeaderSpecific(u, VEC_CLASSID, 3);
+  PetscValidType(u, 3);
+  PetscValidPointer(converged, 6);
 
   ierr = TSGetDM(ts, &da);
   CHKERRQ(ierr);
@@ -121,6 +136,9 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
 
   /*ierr = TSSetMaxTime(ts,1.0);CHKERRQ(ierr);*/
   ierr = TSSetExactFinalTime(ts, TS_EXACTFINALTIME_STEPOVER);
+  CHKERRQ(ierr);
+
+  ierr = VecCopy(u0, u);
   CHKERRQ(ierr);
 
   ierr = TSSetSolution(ts, u);
@@ -142,11 +160,21 @@ externalPETScDiffusionFDMSolve(TS ts, Vec u, PetscReal dt, PetscReal time)
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSetFromOptions(ts);
   CHKERRQ(ierr);
+  /*
+   * Let the passed-in dt take the priority
+   */
+  ierr = TSSetTimeStep(ts, dt);
+  CHKERRQ(ierr);
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Solve nonlinear system
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   ierr = TSSolve(ts, u);
   CHKERRQ(ierr);
+
+  ierr = TSGetConvergedReason(ts, &reason);
+  CHKERRQ(ierr);
+  *converged = reason > 0 ? PETSC_TRUE : PETSC_FALSE;
+
   PetscFunctionReturn(0);
 }
 
@@ -488,5 +516,3 @@ FormInitialSolution(TS ts, Vec U, void * /*ptr*/)
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
-
-#endif
