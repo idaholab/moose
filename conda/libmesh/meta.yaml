@@ -1,0 +1,45 @@
+{% set build = 0 %}
+{% set strbuild = "build_" + build|string %}
+{% set version = "2020.04.06" %}
+
+package:
+  name: moose-libmesh
+  version: {{ version }}
+
+source:
+  git_url: ../../libmesh
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true                                            # [win]
+
+requirements:
+  build:
+    - pkg-config
+    - cctools                                           # [osx]
+    - ld64                                              # [osx]
+    - moose-libmesh-vtk {{ moose_libmesh_vtk }}
+    - moose-petsc {{ moose_petsc }}
+
+  run:
+    - pkg-config
+    - libnetcdf {{ netcdf }}                            # [linux]
+    - moose-libmesh-vtk {{ moose_libmesh_vtk }}
+    - moose-petsc {{ moose_petsc }}
+
+test:
+  commands:
+    - test -f $PREFIX/libmesh/lib/libmesh_opt.dylib     # [osx]
+    - test -f $PREFIX/libmesh/lib/libmesh_opt.so        # [linux]
+    - test -f $PREFIX/libmesh/lib/libmetaphysicl.dylib  # [osx]
+    - test -f $PREFIX/libmesh/lib/libmetaphysicl.so     # [linux]
+
+about:
+  home: http://libmesh.github.io/
+  license: LGPL
+  summary: 'The libMesh library provides a framework for the numerical simulation of partial differential equations using arbitrary unstructured discretizations on serial and parallel platforms'
+
+extra:
+  recipe-maintainers:
+    - milljm

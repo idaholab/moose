@@ -1,0 +1,63 @@
+{% set build = 1 %}
+{% set strbuild = "build_" + build|string %}
+{% set version = "3.3.2" %}
+
+package:
+  name: moose-mpich
+  version: {{ version }}
+
+source:
+  fn: mpich-{{ version }}.tar.gz
+  url: http://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
+  sha256: 4bfaf8837a54771d3e4922c84071ef80ffebddbb6971a006038d91ee7ef959b9
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: True  # [win]
+  run_exports:
+    - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
+
+requirements:
+  build:
+    - gcc_linux-64 {{ gcc }}                 # [linux]
+    - gxx_linux-64 {{ gxx }}                 # [linux]
+    - gfortran_linux-64 {{ fortran }}        # [linux]
+    - gcc_impl_linux-64 {{ gccimpl }}        # [linux]
+    - clang {{ clang }}                      # [osx]
+    - clang_osx-64 {{ clangosx }}            # [osx]
+    - clangxx {{ clangxx }}                  # [osx]
+    - clangxx_osx-64 {{ clangxxosx }}        # [osx]
+    - compiler-rt {{ compilerrt }}           # [osx]
+    - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
+    - libllvm9 {{ libllvm }}                 # [osx]
+    - clang-tools                            # [osx]
+    - llvm-openmp {{ llvmopenmp }}           # [osx]
+    - gfortran_osx-64 {{ osxfortran }}       # [osx]
+    - libclang {{ libclang }}                # [osx]
+    - make  # [unix]
+  host: []
+  run:
+    - moose-compilers {{ moose_compilers }}
+    - mpi 1.0 mpich
+test:
+  script: run_test.sh
+  files:
+    - mpiexec.sh
+    - tests/helloworld.sh
+
+about:
+  home: http://www.mpich.org/
+  license: MPICH
+  license_file: COPYRIGHT
+  license_family: Other
+  summary: 'A high performance widely portable implementation of the MPI standard.'
+  description: |
+    MPICH is a high performance and widely portable implementation of the
+    Message Passing Interface (MPI) standard.
+  doc_url: http://www.mpich.org/documentation/guides
+  dev_url: https://wiki.mpich.org/mpich/index.php/Main_Page
+
+extra:
+  recipe-maintainers:
+    - milljm

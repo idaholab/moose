@@ -1,0 +1,52 @@
+{% set build = 0 %}
+{% set version = "2020.03.31" %}
+
+{% set sha256 = "3a12dc808c116f6593f7c95519ed2410b3e61bde9c3b426a58c07c7f6a6dd4c2" %}
+
+package:
+  name: moose-tools
+  version: {{ version }}
+
+source:
+  url: https://mooseframework.org/source_packages/moose-python-deps.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: {{ build }}
+  skip: true                 # [win]
+
+requirements:
+  build:
+    - python {{ python }}
+    - vtk {{ vtk }}
+  run:
+    - numpy
+    - pyqt
+    - matplotlib
+    - pandas
+    - livereload
+    - yaml
+    - pyyaml
+    - beautifulsoup4
+    - pybtex
+    - mock
+    - lxml
+    - scikit-image
+    - vtk {{ vtk }}
+    - pylatexenc
+    - jinja2
+    - mako
+    - python {{ python }}
+
+test:
+  commands:
+    - test -f $PREFIX/share/moose-tools
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'This superficial module (moose-tools) acts as a top-level module designed to provide all dependencies required in order to run Peacock and MOOSE Documentation.'
+
+extra:
+  recipe-maintainers:
+    - milljm
