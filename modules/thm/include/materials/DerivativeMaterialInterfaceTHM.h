@@ -96,7 +96,7 @@ DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHM(const std::s
   // get the name of the variable which derivative is respect to
   const std::string der_var_name = this->getVar(var_name, i)->name();
 
-  return this->template getMaterialPropertyByNameTempl<U>(
+  return this->template getMaterialPropertyByName<U>(
       this->derivativePropertyNameFirst(prop_name, der_var_name));
 }
 

@@ -14,10 +14,9 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("StiffenedGasTwoPhaseFluidProperties");
     _fe_problem->addUserObject("StiffenedGasTwoPhaseFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObjectTempl<StiffenedGasTwoPhaseFluidProperties>("fp");
-    _fp_liquid =
-        &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>(_fp->getLiquidName());
-    _fp_vapor = &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>(_fp->getVaporName());
+    _fp = &_fe_problem->getUserObject<StiffenedGasTwoPhaseFluidProperties>("fp");
+    _fp_liquid = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(_fp->getLiquidName());
+    _fp_vapor = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(_fp->getVaporName());
   }
 
   const StiffenedGasTwoPhaseFluidProperties * _fp;

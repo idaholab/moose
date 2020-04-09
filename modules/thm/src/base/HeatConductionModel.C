@@ -38,7 +38,7 @@ void
 HeatConductionModel::addVariables()
 {
   const auto & subdomain_names = _hs.getSubdomainNames();
-  const Real & scaling_factor = _sim.getParamTempl<Real>("scaling_factor_temperature");
+  const Real & scaling_factor = _sim.getParam<Real>("scaling_factor_temperature");
 
   _sim.addSimVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
 }
@@ -54,8 +54,8 @@ void
 HeatConductionModel::addMaterials()
 {
   const auto & blocks = _hs.getSubdomainNames();
-  const auto & names = _hs.getParamTempl<std::vector<std::string>>("names");
-  const auto & material_names = _hs.getParamTempl<std::vector<std::string>>("materials");
+  const auto & names = _hs.getParam<std::vector<std::string>>("names");
+  const auto & material_names = _hs.getParam<std::vector<std::string>>("materials");
 
   for (std::size_t i = 0; i < names.size(); i++)
   {

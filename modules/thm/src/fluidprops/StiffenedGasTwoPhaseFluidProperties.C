@@ -82,7 +82,7 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
     params.set<Real>("M") = getParam<Real>("M_liquid");
     _fe_problem.addUserObject(class_name, _liquid_name, params);
   }
-  _fp_liquid = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(_liquid_name, _tid);
+  _fp_liquid = &_fe_problem.getUserObject<SinglePhaseFluidProperties>(_liquid_name, _tid);
 
   if (_tid == 0)
   {
@@ -103,7 +103,7 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
     params.set<Real>("e_c") = getParam<Real>("e_c");
     _fe_problem.addUserObject(class_name, _vapor_name, params);
   }
-  _fp_vapor = &_fe_problem.getUserObjectTempl<SinglePhaseFluidProperties>(_vapor_name, _tid);
+  _fp_vapor = &_fe_problem.getUserObject<SinglePhaseFluidProperties>(_vapor_name, _tid);
 
   // calculate the saturation curve p(T) and store the data in two vectors for re-use
   {
