@@ -35,12 +35,11 @@ public:
   ADInertialForceShell(const InputParameters & parameters);
 
 protected:
+  virtual ADReal computeQpResidual() override { return 0.0; };
 
-  virtual ADReal computeQpResidual() override { return 0.0;};
-
-  virtual void  computeResidual() final;
-  virtual void  computeJacobian() final;
-  virtual void computeADOffDiagJacobian() final;
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeADOffDiagJacobian() override;
 
 private:
   /// Booleans for validity of params
@@ -77,29 +76,20 @@ private:
   std::vector<unsigned int> _rot_accel_num;
 
   /// Mass proportional Rayleigh damping parameter
-  const MaterialProperty<Real> & _eta;
+  // const MaterialProperty<Real> & _eta;
 
   /// HHT time integration parameter
-  const Real _alpha;
+  // const Real _alpha;
 
   /**
    * Rotational transformation from global to initial beam local
    * coordinate system
    **/
-  const MaterialProperty<RankTwoTensor> & _original_local_config;
-
-  /// Initial length of beam
-  const MaterialProperty<Real> & _original_length;
+  RankTwoTensor _original_local_config;
 
   /// Direction along which residual is calculated
   const unsigned int _component;
 
-  /**
-   * Old translational and rotational velocities at the two nodes
-   * of the beam in the global coordinate system
-   **/
-  RealVectorValue _vel_old_0, _vel_old_1, _rot_vel_old_0, _rot_vel_old_1;
-  RealVectorValue _vel_old_2, _vel_old_3, _rot_vel_old_2, _rot_vel_old_3;
   /**
    * Current translational and rotational velocities at the two nodes
    * of the beam in the global coordinate system
@@ -112,12 +102,6 @@ private:
    **/
   RealVectorValue _accel_0, _accel_1, _rot_accel_0, _rot_accel_1;
   RealVectorValue _accel_2, _accel_3, _rot_accel_2, _rot_accel_3;
-  /**
-   * Old translational and rotational velocities at the two nodes
-   * of the beam in the initial beam local coordinate system
-   **/
-  RealVectorValue _local_vel_old_0, _local_vel_old_1, _local_rot_vel_old_0, _local_rot_vel_old_1;
-  RealVectorValue _local_vel_old_2, _local_vel_old_3, _local_rot_vel_old_2, _local_rot_vel_old_3;
   /**
    * Current translational and rotational velocities at the two nodes
    * of the beam in the initial beam local coordinate system
@@ -196,8 +180,20 @@ private:
   /// Node 4 g vector in reference configuration (mass matrix)
   std::vector<RealVectorValue> _0g4_vector;
 
+  /// Mass proportional Rayleigh damping parameter
+  const MaterialProperty<Real> & _eta;
+
+  /// Rotation matrix material property
+  const ADMaterialProperty(RankTwoTensor) & _transformation_matrix;
+
+  /// Rotation matrix material property
+  const ADMaterialProperty(Real) & _J_map;
+
   /// Coupled variable for the shell thickness
-  const VariableValue & _thickness;
+  const Real & _thickness;
+
+  /// Flag to store initial rotation matrix
+  bool _isRotationMatrixComputed;
 
   usingTimeKernelMembers;
 };

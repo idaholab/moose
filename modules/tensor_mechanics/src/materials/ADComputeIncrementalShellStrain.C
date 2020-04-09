@@ -337,6 +337,22 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       gmn(2, 0) = gmn(0, 2);
       gmn(2, 1) = gmn(1, 2);
 
+      double normx = std::sqrt(J(0, 0) * J(0, 0) + J(0, 1) * J(0, 1) + J(0, 2) * J(0, 2));
+      double normy = std::sqrt(J(1, 0) * J(1, 0) + J(1, 1) * J(1, 1) + J(1, 2) * J(1, 2));
+      double normz = std::sqrt(J(2, 0) * J(2, 0) + J(2, 1) * J(2, 1) + J(2, 2) * J(2, 2));
+
+      J(0, 0) /= normx;
+      J(0, 1) /= normx;
+      J(0, 2) /= normx;
+
+      J(1, 0) /= normy;
+      J(1, 1) /= normy;
+      J(1, 2) /= normy;
+
+      J(2, 0) /= normz;
+      J(2, 1) /= normz;
+      J(2, 2) /= normz;
+
       ADRankTwoTensor gmninv_temp = gmn.inverse();
       (*_J_map[j])[i] = std::sqrt(gmn.det());
       (*_rotation_matrix[j])[i] = J;
