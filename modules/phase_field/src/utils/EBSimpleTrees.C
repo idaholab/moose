@@ -31,35 +31,41 @@ getRules()
   ExpressionBuilderToo::EBTerm rest('r');
   ExpressionBuilderToo::EBTerm rest_two('r');
   ExpressionBuilderToo::EBTerm none('n');
+  ExpressionBuilderToo::EBTerm constant('c');
+  ExpressionBuilderToo::EBTerm constant_two('c');
+  ExpressionBuilderToo::EBTerm integer('i');
+  ExpressionBuilderToo::EBTerm even_integer('e');
 
   if (_star_index > temp_index)
     _star_index = _star_index;
   else
     _star_index = temp_index;
-  return SimplificationRules({{pow(cos(a), 2) + pow(sin(a), 2), 1},
-                              {-a, (-1) * a, a != 1},
-                              {a + b * a, (b + 1) * a},
-                              {a + a, 2 * a},
-                              {(a == a) == rest, a == rest},
-                              {(a == a) == none, true},
-                              {0 + a, a},
-                              {0 * a, 0},
-                              {1 * a, a},
-                              {a * a, pow(a, 2)},
-                              {a * pow(a, b), pow(a, b + 1)},
-                              {pow(pow(a, b), c), pow(a, b * c)},
-                              {pow(a, b) * pow(a, c), pow(a, b + c)},
-                              {pow(b, 0), 1},
-                              {pow(a, 1), a},
-                              {log10(a), log(a) / M_LN10},
-                              {log2(a), log(a) / M_LN2},
-                              {log(pow(x, y)), y * log(x)},
-                              {log(a * rest), log(a) + log(rest)},
-                              {exp(log(x)), x},
-                              {exp(log(x) * y), pow(x, y)},
-                              {exp(a), pow(M_E, a)},
-                              {b * rest + c * rest, (b + c) * rest},
-                              {a - b, a + (-1 * b)},
-                              {a / b, a * pow(b, -1)},
-                              {pow(a * rest, b), pow(a, b) * pow(rest, b)}});
+  return SimplificationRules(
+      {{pow(cos(a), 2) + pow(sin(a), 2), 1},
+       {sin(2 * integer * M_PI), 0},
+       {-a, (-1) * a, a != 1},
+       {a + b * a, (b + 1) * a},
+       {a + a, 2 * a},
+       {a == a, 1},
+       {0 + a, a},
+       {0 * a, 0},
+       {1 * a, a},
+       {a * a, pow(a, 2)},
+       {a * pow(a, b), pow(a, b + 1)},
+       {pow(pow(a, b), c), pow(a, b * c)},
+       {pow(a, b) * pow(a, c), pow(a, b + c)},
+       {pow(b, 0), 1},
+       {pow(a, 1), a},
+       {log10(a), log(a) / M_LN10},
+       {log2(a), log(a) / M_LN2},
+       {log(pow(x, y)), y * log(x)},
+       {log(a * rest), log(a) + log(rest)},
+       {exp(log(x)), x},
+       {exp(log(x) * y), pow(x, y)},
+       {exp(a), pow(M_E, a)},
+       {b * rest + c * rest, (b + c) * rest},
+       {a - b, a + (-1 * b)},
+       {a / b, a * pow(b, -1)},
+       {pow(a * rest, b), pow(a, b) * pow(rest, b)},
+       {pow(constant, a) * pow(constant_two, a), pow(constant * constant_two, a)}});
 }

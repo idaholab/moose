@@ -68,16 +68,18 @@ TEST_F(ExpressionBuilderTooSimplificationTest, test)
   b.simplify();
   EXPECT_EQ(std::string(b), "c^7*a^2*d^6");
 
-  b = ((a == a) == c);
-  b.simplify();
-  std::cout << std::string(b) << std::endl;
-
-  b = (pow(4, a) + pow(2, 2 * a)) / pow(2, a);
-  b.simplify();
-
   b = (a == a);
   b.simplify();
   EXPECT_EQ(std::string(b), "1");
+
+  a.setAsInt();
+  b = sin(2 * a * M_PI);
+  b.simplify();
+  EXPECT_EQ(std::string(b), "0");
+
+  b = (pow(4, a) + pow(2, 2 * a)) / pow(2, a);
+  b.simplify();
+  EXPECT_EQ(std::string(b), "2^(a+1)");
 
   std::cout << std::string(b) << std::endl;
   std::cout << std::endl;

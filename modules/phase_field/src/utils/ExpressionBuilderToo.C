@@ -9,6 +9,7 @@
 
 #include "ExpressionBuilderToo.h"
 #include "EBSimpleTrees.h"
+#include "NumberBase.h"
 
 ExpressionBuilderToo::SimpleRules ExpressionBuilderToo::EBTerm::_prep_simplification_rules =
     getPrepRules();
@@ -281,7 +282,7 @@ ExpressionBuilderToo::EBTermNode::checkConditions(std::vector<EBTermNode *> cond
 
     std::vector<EBTermNode *> empty_nodes(0);
     std::vector<unsigned int> empty_ints(0);
-    if (!left_compare->compareRule(
+    if (left_compare->compareRule(
             right_compare, empty_nodes, empty_nodes, empty_ints, empty_ints, true))
       return false;
   }
@@ -352,31 +353,33 @@ ExpressionBuilderToo::EBUnaryFuncTermNode::stringify() const
   return s.str();
 }
 
-Real
-ExpressionBuilderToo::EBUnaryFuncTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBUnaryFuncTermNode::getValue()
 {
+  _subnode = _subnode->getValue();
+  NumberBase * value = NumberBase::getNumber(_subnode);
   switch (_type)
   {
     case SIN:
-      return sin(_subnode->getRealValue());
+      return NumberBase::sin(*value);
     case COS:
-      return cos(_subnode->getRealValue());
+      return NumberBase::cos(*value);
     case TAN:
-      return tan(_subnode->getRealValue());
+      return NumberBase::tan(*value);
     case ABS:
-      return abs(_subnode->getRealValue());
+      return NumberBase::abs(*value);
     case LOG:
-      return log(_subnode->getRealValue());
+      return NumberBase::log(*value);
     case LOG2:
-      return log2(_subnode->getRealValue());
+      return NumberBase::log2(*value);
     case LOG10:
-      return log10(_subnode->getRealValue());
+      return NumberBase::log10(*value);
     case EXP:
-      return exp(_subnode->getRealValue());
+      return NumberBase::exp(*value);
     case SINH:
-      return sinh(_subnode->getRealValue());
+      return NumberBase::sinh(*value);
     case COSH:
-      return cosh(_subnode->getRealValue());
+      return NumberBase::cosh(*value);
     default:
       mooseError("Undefined type");
   }
@@ -490,15 +493,17 @@ ExpressionBuilderToo::EBUnaryOpTermNode::stringify() const
   return s.str();
 }
 
-Real
-ExpressionBuilderToo::EBUnaryOpTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBUnaryOpTermNode::getValue()
 {
+  _subnode = _subnode->getValue();
+  NumberBase * value = NumberBase::getNumber(_subnode);
   switch (_type)
   {
     case NEG:
-      return -_subnode->getRealValue();
+      return -(*value);
     case LOGICNOT:
-      return !_subnode->getRealValue();
+      return !(*value);
     default:
       mooseError("Unknown type");
   }
@@ -567,15 +572,20 @@ ExpressionBuilderToo::EBBinaryFuncTermNode::isCommutative() const
   mooseError("Unknown type.");
 }
 
-Real
-ExpressionBuilderToo::EBBinaryFuncTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBBinaryFuncTermNode::getValue()
 {
+  _left = _left->getValue();
+  NumberBase * left_value = NumberBase::getNumber(_left);
+
+  _right = _right->getValue();
+  NumberBase * right_value = NumberBase::getNumber(_right);
   switch (_type)
   {
     case MIN:
-      return std::min(_left->getRealValue(), _right->getRealValue());
+      return NumberBase::min(*left_value, *right_value);
     case MAX:
-      return std::min(_left->getRealValue(), _right->getRealValue());
+      return NumberBase::min(*left_value, *right_value);
     case ATAN2:
       mooseError("Not Ready Yet");
     case HYPOT:
@@ -685,9 +695,7 @@ ExpressionBuilderToo::EBBinaryOpTermNode::compare(EBTermNode * compare_to,
   EBNNaryOpTermNode * c_to_nnary = dynamic_cast<EBNNaryOpTermNode *>(compare_to);
   if (c_to_nnary != NULL &&
       ((c_to_nnary->_type == EBNNaryOpTermNode::NodeType::MUL && _type == MUL) ||
-       (c_to_nnary->_type == EBNNaryOpTermNode::NodeType::ADD && _type == ADD) ||
-       (c_to_nnary->_type == EBNNaryOpTermNode::NodeType::EQ && _type == EQ) ||
-       (c_to_nnary->_type == EBNNaryOpTermNode::NodeType::NOTEQ && _type == NOTEQ)))
+       (c_to_nnary->_type == EBNNaryOpTermNode::NodeType::ADD && _type == ADD)))
   {
     if (c_to_nnary->childrenSize() == 2)
       return true;
@@ -701,7 +709,7 @@ ExpressionBuilderToo::EBTermNode *
 ExpressionBuilderToo::EBBinaryOpTermNode::toNNary()
 {
   // Possibly change this to add all commutative operators
-  if (_type == MUL || _type == ADD || _type == EQ || _type == NOTEQ)
+  if (_type == MUL || _type == ADD)
   {
     std::vector<EBTermNode *> new_children(2);
     new_children[0] = _right;
@@ -709,10 +717,6 @@ ExpressionBuilderToo::EBBinaryOpTermNode::toNNary()
     EBNNaryOpTermNode * new_node;
     if (_type == ADD)
       new_node = new EBNNaryOpTermNode(new_children, EBNNaryOpTermNode::NodeType::ADD);
-    else if (_type == EQ)
-      new_node = new EBNNaryOpTermNode(new_children, EBNNaryOpTermNode::NodeType::EQ);
-    else if (_type == NOTEQ)
-      new_node = new EBNNaryOpTermNode(new_children, EBNNaryOpTermNode::NodeType::NOTEQ);
     else
       new_node = new EBNNaryOpTermNode(new_children, EBNNaryOpTermNode::NodeType::MUL);
     return new_node->toNNary();
@@ -722,47 +726,41 @@ ExpressionBuilderToo::EBBinaryOpTermNode::toNNary()
   return this;
 }
 
-Real
-ExpressionBuilderToo::EBBinaryOpTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBBinaryOpTermNode::getValue()
 {
+  _left = _left->getValue();
+  NumberBase * left_value = NumberBase::getNumber(_left);
+
+  _right = _right->getValue();
+  NumberBase * right_value = NumberBase::getNumber(_right);
+
   switch (_type)
   {
     case ADD:
-      return _left->getRealValue() + _right->getRealValue();
+      return *left_value + *right_value;
     case SUB:
-      return _left->getRealValue() - _right->getRealValue();
+      return *left_value - *right_value;
     case MUL:
-      return _left->getRealValue() * _right->getRealValue();
+      return *left_value * *right_value;
     case DIV:
-      return _left->getRealValue() / _right->getRealValue();
+      return *left_value / *right_value;
     case MOD:
-      return (int)round(_left->getRealValue()) % (int)round(_right->getRealValue());
+      return *left_value % *right_value;
     case POW:
-      return pow(_left->getRealValue(), _right->getRealValue());
+      return NumberBase::pow(*left_value, *right_value);
     case LESS:
-      if (_left->getRealValue() < _right->getRealValue())
-        return 1;
-      return 0;
+      return *left_value < *right_value;
     case GREATER:
-      if (_left->getRealValue() > _right->getRealValue())
-        return 1;
-      return 0;
+      return *left_value > *right_value;
     case LESSEQ:
-      if (_left->getRealValue() <= _right->getRealValue())
-        return 1;
-      return 0;
+      return *left_value <= *right_value;
     case GREATEREQ:
-      if (_left->getRealValue() >= _right->getRealValue())
-        return 1;
-      return 0;
+      return *left_value >= *right_value;
     case EQ:
-      if (abs(_left->getRealValue() - _right->getRealValue()) == 0)
-        return 1;
-      return 0;
+      return *left_value == *right_value;
     case NOTEQ:
-      if (abs(_left->getRealValue() - _right->getRealValue()) != 0)
-        return 1;
-      return 0;
+      return *left_value != *right_value;
     default:
       mooseError("Unknown type");
   }
@@ -824,7 +822,7 @@ ExpressionBuilderToo::EBBinaryOpTermNode::constantFolding()
   if (_type == POW && _left->isConstant())
   {
     if (_right->isConstant())
-      return new EBNumberNode<Real>(getRealValue());
+      return getValue();
     _right = _right->constantFolding();
     _right->partialPowFolding(_left, _right);
     _left = _left->constantFolding();
@@ -884,15 +882,17 @@ ExpressionBuilderToo::EBTernaryFuncTermNode::stringify() const
   return s.str();
 }
 
-Real
-ExpressionBuilderToo::EBTernaryFuncTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBTernaryFuncTermNode::getValue()
 {
+  _left = _left->getValue();
+  NumberBase * left_value = NumberBase::getNumber(_left);
   switch (_type)
   {
     case CONDITIONAL:
-      if (_left->getRealValue())
-        return _middle->getRealValue();
-      return _right->getRealValue();
+      if (left_value->conditional())
+        return _middle->getValue();
+      return _right->getValue();
     default:
       mooseError("Unknown type");
   }
@@ -948,9 +948,6 @@ ExpressionBuilderToo::EBNNaryOpTermNode::precedence() const
       return 6;
     case MUL:
       return 5;
-    case EQ:
-    case NOTEQ:
-      return 9;
   }
 
   mooseError("Unknown type.");
@@ -991,11 +988,8 @@ ExpressionBuilderToo::EBNNaryOpTermNode::compare(EBTermNode * compare_to,
     }
   }
 
-  if (c_to_bin != NULL &&
-      ((c_to_bin->_type == EBBinaryOpTermNode::NodeType::MUL && _type == MUL) ||
-       (c_to_bin->_type == EBBinaryOpTermNode::NodeType::ADD && _type == ADD) ||
-       (c_to_bin->_type == EBBinaryOpTermNode::NodeType::EQ && _type == EQ) ||
-       (c_to_bin->_type == EBBinaryOpTermNode::NodeType::NOTEQ && _type == NOTEQ)))
+  if (c_to_bin != NULL && ((c_to_bin->_type == EBBinaryOpTermNode::NodeType::MUL && _type == MUL) ||
+                           (c_to_bin->_type == EBBinaryOpTermNode::NodeType::ADD && _type == ADD)))
   {
     if (_children.size() == 2)
       return true;
@@ -1033,9 +1027,7 @@ ExpressionBuilderToo::EBNNaryOpTermNode::simplify(std::pair<EBTermNode *, EBTerm
 
         if (replac_bin != NULL &&
             ((_type == MUL && replac_bin->_type == EBBinaryOpTermNode::NodeType::MUL) ||
-             (_type == ADD && replac_bin->_type == EBBinaryOpTermNode::NodeType::ADD) ||
-             (_type == EQ && replac_bin->_type == EBBinaryOpTermNode::NodeType::EQ) ||
-             (_type == NOTEQ && replac_bin->_type == EBBinaryOpTermNode::NodeType::NOTEQ)))
+             (_type == ADD && replac_bin->_type == EBBinaryOpTermNode::NodeType::ADD)))
         {
           _children.emplace_back(replac_bin->getRight()->replaceRule(stars));
           _children.emplace_back(replac_bin->getLeft()->replaceRule(stars));
@@ -1087,9 +1079,7 @@ ExpressionBuilderToo::EBNNaryOpTermNode::substitute(
 
           if (replac_bin != NULL &&
               ((_type == MUL && replac_bin->_type == EBBinaryOpTermNode::NodeType::MUL) ||
-               (_type == ADD && replac_bin->_type == EBBinaryOpTermNode::NodeType::ADD) ||
-               (_type == EQ && replac_bin->_type == EBBinaryOpTermNode::NodeType::EQ) ||
-               (_type == NOTEQ && replac_bin->_type == EBBinaryOpTermNode::NodeType::NOTEQ)))
+               (_type == ADD && replac_bin->_type == EBBinaryOpTermNode::NodeType::ADD)))
           {
             _children[current_index[0]] = replac_bin->getRight()->replaceRule(empty_nodes);
             _children[current_index[1]] = replac_bin->getLeft()->replaceRule(empty_nodes);
@@ -1166,50 +1156,34 @@ ExpressionBuilderToo::EBNNaryOpTermNode::toNNary()
 ExpressionBuilderToo::EBTermNode *
 ExpressionBuilderToo::EBNNaryOpTermNode::constantFolding()
 {
-  Real new_num;
+  NumberBase * child_value;
   switch (_type)
   {
     case ADD:
-      new_num = 0;
+      child_value = NumberBase::getNumber(0);
       break;
     case MUL:
-    case EQ:
-    case NOTEQ:
-      new_num = 1;
+      child_value = NumberBase::getNumber(1);
       break;
     default:
       mooseError("Unknown type");
   }
 
-  Real * child_value = NULL;
   std::vector<int> changed_indeces;
-  Real temp_val = 0;
   for (unsigned int i = 0; i < _children.size(); ++i)
   {
-
     if (_children[i]->isConstant())
     {
+      _children[i] = _children[i]->getValue();
+      NumberBase * value = NumberBase::getNumber(_children[i]);
+
       switch (_type)
       {
         case ADD:
-          new_num += _children[i]->getRealValue();
+          child_value = NumberBase::getNumber(*child_value + *value);
           break;
         case MUL:
-          new_num *= _children[i]->getRealValue();
-          break;
-        case EQ:
-          temp_val = _children[i]->getRealValue();
-          if (child_value != NULL && *child_value != temp_val)
-            return new EBNumberNode<Real>(0);
-          if (child_value == NULL)
-            *child_value = temp_val;
-          break;
-        case NOTEQ:
-          temp_val = _children[i]->getRealValue();
-          if (child_value != NULL && *child_value == temp_val)
-            return new EBNumberNode<Real>(0);
-          if (child_value == NULL)
-            *child_value = temp_val;
+          child_value = NumberBase::getNumber(*child_value * *value);
           break;
         default:
           mooseError("Unknown type");
@@ -1218,72 +1192,53 @@ ExpressionBuilderToo::EBNNaryOpTermNode::constantFolding()
     }
   }
   if (changed_indeces.size() == _children.size())
-    return new EBNumberNode<Real>(new_num);
+    return *child_value;
   unsigned int vec_size = changed_indeces.size();
   if (vec_size > 0)
     for (unsigned int i = 0; i < vec_size; ++i)
       _children.erase(_children.begin() + changed_indeces[vec_size - i - 1]);
   if (changed_indeces.size() != 0)
-  {
-    if (_type == MUL || _type == ADD)
-      _children.emplace_back(new EBNumberNode<Real>(new_num));
-    else
-      _children.emplace_back(new EBNumberNode<Real>(temp_val));
-  }
+    _children.emplace_back(*child_value);
 
   for (unsigned int i = 0; i < _children.size(); ++i)
     _children[i] = _children[i]->constantFolding();
   return this;
 }
 
-Real
-ExpressionBuilderToo::EBNNaryOpTermNode::getRealValue()
+ExpressionBuilderToo::EBTermNode *
+ExpressionBuilderToo::EBNNaryOpTermNode::getValue()
 {
-  Real new_num;
+  NumberBase * child_value;
   switch (_type)
   {
     case ADD:
-      new_num = 0;
+      child_value = NumberBase::getNumber(0);
       break;
     case MUL:
-    case EQ:
-    case NOTEQ:
-      new_num = 1;
+      child_value = NumberBase::getNumber(1);
       break;
     default:
       mooseError("Unknown type");
   }
-  Real temp_val;
-  Real * child_value = NULL;
+
   for (unsigned int i = 0; i < _children.size(); ++i)
   {
+    _children[i] = _children[i]->getValue();
+    NumberBase * value = NumberBase::getNumber(_children[i]);
+
     switch (_type)
     {
       case ADD:
-        new_num += _children[i]->getRealValue();
+        child_value = NumberBase::getNumber(*child_value + *value);
         break;
       case MUL:
-        new_num *= _children[i]->getRealValue();
-        break;
-      case EQ:
-        temp_val = _children[i]->getRealValue();
-        if (child_value != NULL && *child_value != temp_val)
-          return 0;
-        if (child_value == NULL)
-          *child_value = temp_val;
-        break;
-      case NOTEQ:
-        temp_val = _children[i]->getRealValue();
-        if (child_value != NULL && *child_value == temp_val)
-          return 0;
-        if (child_value == NULL)
-          *child_value = temp_val;
+        child_value = NumberBase::getNumber(*child_value * *value);
         break;
       default:
         mooseError("Unknown type");
     }
   }
-  return new_num;
+  return *child_value;
 }
 
 void
@@ -1330,9 +1285,6 @@ ExpressionBuilderToo::EBNNaryOpTermNode::derivative(const std::string & derivati
       }
       deriv_node = new EBNNaryOpTermNode(new_children, ADD);
       break;
-    case EQ:
-    case NOTEQ:
-      mooseError("Cannot take derivative of logical operator.");
   }
   return deriv_node;
 }
@@ -1363,7 +1315,6 @@ ExpressionBuilderToo::EBTerm::simplify()
     outer = false;
     _root = _root->toNNary();
     _root = _root->constantFolding();
-
     for (unsigned int i = 0; i < _simplification_rules._rules.size(); ++i)
     {
       changed = true;
@@ -1439,25 +1390,25 @@ operator<<(std::ostream & os, const ExpressionBuilderToo::EBTerm & term)
     return os << "[NULL]";
 }
 
-#define UNARY_FUNC_IMPLEMENT(op, OP)                                                               \
+#define UNARY_FUNC_IMPLEMENT_TOO(op, OP)                                                           \
   ExpressionBuilderToo::EBTerm op(const ExpressionBuilderToo::EBTerm & term)                       \
   {                                                                                                \
     mooseAssert(term._root != NULL, "Empty term provided as argument of function " #op "()");      \
     return ExpressionBuilderToo::EBTerm(new ExpressionBuilderToo::EBUnaryFuncTermNode(             \
         term.cloneRoot(), ExpressionBuilderToo::EBUnaryFuncTermNode::OP));                         \
   }
-UNARY_FUNC_IMPLEMENT(sin, SIN)
-UNARY_FUNC_IMPLEMENT(cos, COS)
-UNARY_FUNC_IMPLEMENT(tan, TAN)
-UNARY_FUNC_IMPLEMENT(abs, ABS)
-UNARY_FUNC_IMPLEMENT(log, LOG)
-UNARY_FUNC_IMPLEMENT(log2, LOG2)
-UNARY_FUNC_IMPLEMENT(log10, LOG10)
-UNARY_FUNC_IMPLEMENT(exp, EXP)
-UNARY_FUNC_IMPLEMENT(sinh, SINH)
-UNARY_FUNC_IMPLEMENT(cosh, COSH)
+UNARY_FUNC_IMPLEMENT_TOO(sin, SIN)
+UNARY_FUNC_IMPLEMENT_TOO(cos, COS)
+UNARY_FUNC_IMPLEMENT_TOO(tan, TAN)
+UNARY_FUNC_IMPLEMENT_TOO(abs, ABS)
+UNARY_FUNC_IMPLEMENT_TOO(log, LOG)
+UNARY_FUNC_IMPLEMENT_TOO(log2, LOG2)
+UNARY_FUNC_IMPLEMENT_TOO(log10, LOG10)
+UNARY_FUNC_IMPLEMENT_TOO(exp, EXP)
+UNARY_FUNC_IMPLEMENT_TOO(sinh, SINH)
+UNARY_FUNC_IMPLEMENT_TOO(cosh, COSH)
 
-#define BINARY_FUNC_IMPLEMENT(op, OP)                                                              \
+#define BINARY_FUNC_IMPLEMENT_TOO(op, OP)                                                          \
   ExpressionBuilderToo::EBTerm op(const ExpressionBuilderToo::EBTerm & left,                       \
                                   const ExpressionBuilderToo::EBTerm & right)                      \
   {                                                                                                \
@@ -1468,11 +1419,11 @@ UNARY_FUNC_IMPLEMENT(cosh, COSH)
     return ExpressionBuilderToo::EBTerm(new ExpressionBuilderToo::EBBinaryFuncTermNode(            \
         left.cloneRoot(), right.cloneRoot(), ExpressionBuilderToo::EBBinaryFuncTermNode::OP));     \
   }
-BINARY_FUNC_IMPLEMENT(min, MIN)
-BINARY_FUNC_IMPLEMENT(max, MAX)
-BINARY_FUNC_IMPLEMENT(atan2, ATAN2)
-BINARY_FUNC_IMPLEMENT(hypot, HYPOT)
-BINARY_FUNC_IMPLEMENT(plog, PLOG)
+BINARY_FUNC_IMPLEMENT_TOO(min, MIN)
+BINARY_FUNC_IMPLEMENT_TOO(max, MAX)
+BINARY_FUNC_IMPLEMENT_TOO(atan2, ATAN2)
+BINARY_FUNC_IMPLEMENT_TOO(hypot, HYPOT)
+BINARY_FUNC_IMPLEMENT_TOO(plog, PLOG)
 
 // this is a function in ExpressionBuilderToo (pow) but an operator in FParser (^)
 ExpressionBuilderToo::EBTerm
@@ -1484,7 +1435,7 @@ pow(const ExpressionBuilderToo::EBTerm & left, const ExpressionBuilderToo::EBTer
       left.cloneRoot(), right.cloneRoot(), ExpressionBuilderToo::EBBinaryOpTermNode::POW));
 }
 
-#define TERNARY_FUNC_IMPLEMENT(op, OP)                                                             \
+#define TERNARY_FUNC_IMPLEMENT_TOO(op, OP)                                                         \
   ExpressionBuilderToo::EBTerm op(const ExpressionBuilderToo::EBTerm & left,                       \
                                   const ExpressionBuilderToo::EBTerm & middle,                     \
                                   const ExpressionBuilderToo::EBTerm & right)                      \
@@ -1501,7 +1452,7 @@ pow(const ExpressionBuilderToo::EBTerm & left, const ExpressionBuilderToo::EBTer
         right.cloneRoot(),                                                                         \
         ExpressionBuilderToo::EBTernaryFuncTermNode::OP));                                         \
   }
-TERNARY_FUNC_IMPLEMENT(conditional, CONDITIONAL)
+TERNARY_FUNC_IMPLEMENT_TOO(conditional, CONDITIONAL)
 
 /*******************************
  * End of Term implementations

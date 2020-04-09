@@ -31,6 +31,8 @@ public:
   // forward delcarations
   class EBTerm;
   class EBTermNode;
+  template <typename T>
+  class EBNumberNode;
   struct Comparer;
   struct SimpleRules;
   typedef std::vector<EBTerm> EBTermList;
@@ -40,6 +42,7 @@ public:
   class EBTermNode
   {
   public:
+    EBTermNode() : _tag('\0'){};
     virtual ~EBTermNode(){};
     virtual EBTermNode * clone() const = 0;
 
@@ -87,9 +90,15 @@ public:
     virtual EBTermNode * constantFolding() { return this; };
     virtual void partialPowFolding(EBTermNode *&, EBTermNode *&){};
 
-    virtual Real getRealValue() { mooseError("This has no real value right now"); };
+    virtual EBTermNode * getValue() { mooseError("This has no real value right now"); };
 
     virtual EBTermNode * derivative(const std::string & derivative_comp) = 0;
+
+    virtual void setTag(char tag) { _tag = tag; }
+    char getTag() { return _tag; }
+
+  protected:
+    char _tag;
   };
 
   /// Template class for leaf nodes holding numbers in the expression tree
@@ -105,21 +114,20 @@ public:
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
 
-    T getValue() { return _value; }
+    T getTValue() { return _value; }
 
-    T * getValuePointer()
-    {
-      T * t_point = new T(_value);
-      return t_point;
-    }
+    virtual EBTermNode * getValue() { return this; }
 
     virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool, int &)
     {
-      EBNumberNode<int> * c_to_int = dynamic_cast<EBNumberNode<int> *>(compare_to);
       EBNumberNode<Real> * c_to_real = dynamic_cast<EBNumberNode<Real> *>(compare_to);
-      if (c_to_int != NULL && abs(c_to_int->getValue() - _value) < 0.000001)
+      EBNumberNode<int> * c_to_int = dynamic_cast<EBNumberNode<int> *>(compare_to);
+      EBNumberNode<bool> * c_to_bool = dynamic_cast<EBNumberNode<bool> *>(compare_to);
+      if (c_to_real != NULL && abs(c_to_real->getTValue() - _value) < 0.000001)
         return true;
-      if (c_to_real != NULL && abs(c_to_real->getValue() - _value) < 0.000001)
+      if (c_to_int != NULL && abs(c_to_int->getTValue() - _value) < 0.000001)
+        return true;
+      if (c_to_bool != NULL && abs(c_to_bool->getTValue() - _value) < 0.000001)
         return true;
       return false;
     }
@@ -127,26 +135,12 @@ public:
     virtual bool isConstant() { return true; }
     virtual EBTermNode * constantFolding() { return this; }
 
-    virtual Real getRealValue() { return _value; }
-
     virtual EBTermNode * derivative(const std::string &)
     {
       EBTermNode * deriv = new EBNumberNode<Real>(0);
       return deriv;
     }
-  };
-
-  class EBBoolNode : public EBNumberNode<bool>
-  {
-  public:
-    EBBoolNode(bool value) : EBNumberNode<bool>(value){};
-    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> &, bool, int &)
-    {
-      EBBoolNode * c_to_bool = dynamic_cast<EBBoolNode *>(compare_to);
-      if (c_to_bool != NULL && getValue() == c_to_bool->getValue())
-        return true;
-      return false;
-    }
+    virtual void setTag(char) { mooseError("Can't set tag for a number"); }
   };
 
   /// Template class for leaf nodes holding symbols (i.e. variables) in the expression tree
@@ -156,7 +150,8 @@ public:
 
   public:
     EBSymbolNode(std::string symbol) : _symbol(symbol){};
-    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol); }
+    EBSymbolNode(std::string symbol, char tag) : _symbol(symbol) { _tag = tag; };
+    virtual EBSymbolNode * clone() const { return new EBSymbolNode(_symbol, _tag); }
 
     virtual std::string stringify() const;
     virtual int precedence() const { return 0; }
@@ -212,7 +207,8 @@ public:
 
   public:
     EBTempIDNode(unsigned int id) : _id(id){};
-    virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id); }
+    EBTempIDNode(unsigned int id, char tag) : _id(id) { _tag = tag; };
+    virtual EBTempIDNode * clone() const { return new EBTempIDNode(_id, _tag); }
 
     virtual std::string stringify() const; // returns "[idnumber]"
     virtual int precedence() const { return 0; }
@@ -278,7 +274,7 @@ public:
     virtual EBTermNode * constantFolding()
     {
       if (_subnode->isConstant())
-        return new EBNumberNode<Real>(getRealValue());
+        return getValue();
       _subnode = _subnode->constantFolding();
       return this;
     };
@@ -307,9 +303,14 @@ public:
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
       : EBUnaryTermNode(subnode), _type(type){};
+    EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type, char tag)
+      : EBUnaryTermNode(subnode), _type(type)
+    {
+      _tag = tag;
+    };
     virtual EBUnaryFuncTermNode * clone() const
     {
-      return new EBUnaryFuncTermNode(_subnode->clone(), _type);
+      return new EBUnaryFuncTermNode(_subnode->clone(), _type, _tag);
     };
 
     virtual std::string stringify() const;
@@ -323,7 +324,8 @@ public:
         return true;
       return false;
     }
-    virtual Real getRealValue();
+
+    virtual EBTermNode * getValue();
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
   };
@@ -340,9 +342,14 @@ public:
 
     EBUnaryOpTermNode(EBTermNode * subnode, NodeType type)
       : EBUnaryTermNode(subnode), _type(type){};
+    EBUnaryOpTermNode(EBTermNode * subnode, NodeType type, char tag)
+      : EBUnaryTermNode(subnode), _type(type)
+    {
+      _tag = tag;
+    };
     virtual EBUnaryOpTermNode * clone() const
     {
-      return new EBUnaryOpTermNode(_subnode->clone(), _type);
+      return new EBUnaryOpTermNode(_subnode->clone(), _type, _tag);
     };
 
     virtual std::string stringify() const;
@@ -357,7 +364,7 @@ public:
       return false;
     }
 
-    virtual Real getRealValue();
+    virtual EBTermNode * getValue();
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
   };
@@ -421,7 +428,9 @@ public:
     virtual EBTermNode * constantFolding()
     {
       if (_left->isConstant() && _right->isConstant())
-        return new EBNumberNode<Real>(getRealValue());
+      {
+        return getValue();
+      }
       _left = _left->constantFolding();
       _right = _right->constantFolding();
       return this;
@@ -447,9 +456,14 @@ public:
 
     EBBinaryFuncTermNode(EBTermNode * left, EBTermNode * right, NodeType type)
       : EBBinaryTermNode(left, right), _type(type){};
+    EBBinaryFuncTermNode(EBTermNode * left, EBTermNode * right, NodeType type, char tag)
+      : EBBinaryTermNode(left, right), _type(type)
+    {
+      _tag = tag;
+    };
     virtual EBBinaryFuncTermNode * clone() const
     {
-      return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type);
+      return new EBBinaryFuncTermNode(_left->clone(), _right->clone(), _type, _tag);
     };
 
     virtual std::string stringify() const;
@@ -465,7 +479,7 @@ public:
       return false;
     }
 
-    virtual Real getRealValue();
+    virtual EBTermNode * getValue();
 
     virtual EBTermNode * derivative(const std::string &);
   };
@@ -505,7 +519,7 @@ public:
 
     virtual EBTermNode * toNNary();
 
-    virtual Real getRealValue();
+    virtual EBTermNode * getValue();
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
 
@@ -567,7 +581,7 @@ public:
     virtual EBTermNode * constantFolding()
     {
       if (_left->isConstant() && _middle->isConstant() && _right->isConstant())
-        return new EBNumberNode<Real>(getRealValue());
+        return getValue();
       _left = _left->constantFolding();
       _middle = _middle->constantFolding();
       _right = _right->constantFolding();
@@ -589,9 +603,16 @@ public:
 
     EBTernaryFuncTermNode(EBTermNode * left, EBTermNode * middle, EBTermNode * right, NodeType type)
       : EBTernaryTermNode(left, middle, right), _type(type){};
+    EBTernaryFuncTermNode(
+        EBTermNode * left, EBTermNode * middle, EBTermNode * right, NodeType type, char tag)
+      : EBTernaryTermNode(left, middle, right), _type(type)
+    {
+      _tag = tag;
+    };
     virtual EBTernaryFuncTermNode * clone() const
     {
-      return new EBTernaryFuncTermNode(_left->clone(), _middle->clone(), _right->clone(), _type);
+      return new EBTernaryFuncTermNode(
+          _left->clone(), _middle->clone(), _right->clone(), _type, _tag);
     };
 
     virtual std::string stringify() const;
@@ -606,7 +627,7 @@ public:
       return false;
     }
 
-    virtual Real getRealValue();
+    virtual EBTermNode * getValue();
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
   };
@@ -686,21 +707,24 @@ public:
     enum NodeType
     {
       MUL,
-      ADD,
-      EQ,
-      NOTEQ
+      ADD
     } _type;
 
     EBNNaryOpTermNode(std::vector<EBTermNode *> children, NodeType type)
       : EBNNaryTermNode(children), _type(type)
     {
     }
+    EBNNaryOpTermNode(std::vector<EBTermNode *> children, NodeType type, char tag)
+      : EBNNaryTermNode(children), _type(type)
+    {
+      _tag = tag;
+    }
     virtual EBNNaryOpTermNode * clone() const
     {
       std::vector<EBTermNode *> children(_children.size());
       for (unsigned int i = 0; i < children.size(); ++i)
         children[i] = _children[i]->clone();
-      return new EBNNaryOpTermNode(children, _type);
+      return new EBNNaryOpTermNode(children, _type, _tag);
     }
 
     virtual std::string stringify() const;
@@ -717,7 +741,7 @@ public:
     virtual EBTermNode * toNNary();
 
     virtual EBTermNode * constantFolding();
-    virtual Real getRealValue();
+    virtual EBTermNode * getValue();
     virtual void partialPowFolding(EBTermNode *& parent_left, EBTermNode *& parent_right);
 
     virtual EBTermNode * derivative(const std::string & derivative_comp);
@@ -764,15 +788,14 @@ public:
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
     {
-      EBStarNode * checkStar = dynamic_cast<EBStarNode *>(stars[_index]);
-      if (checkStar == NULL)
-        return stars[_index]->clone();
-      return NULL;
+      return stars[_index]->clone();
     }
 
     virtual bool isConstant() { return false; }
 
     unsigned int getIndex() { return _index; }
+
+    virtual void setTag(char) { mooseError("Can't set tag for a star node"); }
 
   private:
     unsigned int _index;
@@ -808,13 +831,12 @@ public:
 
     virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
     {
-      EBRestNode * checkRest = dynamic_cast<EBRestNode *>(stars[_index]);
-      if (checkRest == NULL)
-        return stars[_index]->clone();
-      return NULL;
+      return stars[_index]->clone();
     }
 
     virtual bool isConstant() { return false; }
+
+    virtual void setTag(char) { mooseError("Can't set tag for a rest node"); }
 
   private:
     unsigned int _index;
@@ -831,7 +853,7 @@ public:
     virtual int precedence() const { return 0; }
     virtual EBTermNode * derivative(const std::string &)
     {
-      mooseError("Star Node should not be present while a derivative is being taken.");
+      mooseError("None Nodes should not be present while a derivative is being taken.");
     }
     virtual bool compare(EBTermNode *, std::vector<EBTermNode *> &, bool, int &) { return false; }
 
@@ -841,6 +863,74 @@ public:
     }
 
     virtual bool isConstant() { return false; }
+
+    virtual void setTag(char) { mooseError("Can't set tag for a none node"); }
+  };
+
+  class EBConditionNode : public EBTermNode
+  {
+  public:
+    EBConditionNode(char cond_type, unsigned int index) : _cond_type(cond_type), _index(index) {}
+
+    virtual EBConditionNode * clone() const { return new EBConditionNode(_cond_type, _index); }
+
+    virtual std::string stringify() const { return std::string(1, _cond_type); }
+    virtual int precedence() const { return 0; }
+    virtual EBTermNode * derivative(const std::string &)
+    {
+      mooseError("Condition Node should not be present while a derivative is being taken.");
+    }
+    virtual bool compare(EBTermNode * compare_to, std::vector<EBTermNode *> & stars, bool, int &)
+    {
+      bool return_status = false;
+      if (compare_to->getTag() == _cond_type)
+        return_status = true;
+      EBNumberNode<Real> * c_to_real = dynamic_cast<EBNumberNode<Real> *>(compare_to);
+      EBNumberNode<int> * c_to_int = dynamic_cast<EBNumberNode<int> *>(compare_to);
+      switch (_cond_type)
+      {
+        case 'c':
+          if (c_to_real != NULL || c_to_int != NULL)
+            return_status = true;
+          break;
+        case 'i':
+          if (c_to_int != NULL || compare_to->getTag() == 'e')
+            return_status = true;
+          break;
+        case 'e':
+          if (c_to_int != NULL && c_to_int->getTValue() % 2 == 0)
+            return_status = true;
+          break;
+        default:
+          mooseError("Unknown condition type");
+      }
+      if (return_status == false)
+        return false;
+      if (stars[_index] == NULL)
+      {
+        stars[_index] = compare_to->clone();
+        return true;
+      }
+      std::vector<EBTermNode *> empty_vec(0);
+      std::vector<unsigned int> empty_int_vec(0);
+      if (compare_to->compareRule(
+              stars[_index], empty_vec, empty_vec, empty_int_vec, empty_int_vec, true))
+        return true;
+      return false;
+    }
+
+    virtual EBTermNode * replaceRule(std::vector<EBTermNode *> stars)
+    {
+      return stars[_index]->clone();
+    }
+
+    virtual bool isConstant() { return false; }
+
+    virtual void setTag(char) { mooseError("Can't set tag for a condition node"); }
+
+  private:
+    char _cond_type;
+    unsigned int _index;
   };
 
   /**
@@ -869,8 +959,8 @@ public:
     // construct from number or string
     EBTerm(int number) : _root(new EBNumberNode<int>(number)) {}
     EBTerm(Real number) : _root(new EBNumberNode<Real>(number)) {}
+    EBTerm(bool number) : _root(new EBNumberNode<bool>(number)) {}
     EBTerm(const char * symbol) : _root(new EBSymbolNode(symbol)) {}
-    EBTerm(bool number) : _root(new EBBoolNode(number)) {}
 
     // These two should only be used by EBSimpleTrees!
     // They are for making EBStarNodes & EBRestNodes
@@ -886,6 +976,15 @@ public:
           break;
         case 'n':
           _root = new EBNoneNode();
+          break;
+        case 'c':
+          _root = new EBConditionNode('c', _star_index++);
+          break;
+        case 'i':
+          _root = new EBConditionNode('i', _star_index++);
+          break;
+        case 'e':
+          _root = new EBConditionNode('e', _star_index++);
           break;
         default:
           mooseError("Unknown type for EBTerm");
@@ -977,6 +1076,10 @@ public:
       return *(new EBTerm(cloneRoot()->derivative(derivative_comp)));
     }
 
+    void setAsConstant() { _root->setTag('c'); };
+    void setAsEvenInt() { _root->setTag('e'); };
+    void setAsInt() { _root->setTag('i'); };
+
     std::string args();
 
   protected:
@@ -1017,7 +1120,7 @@ public:
 /*
  * Binary operators (including number,term operations)
  */
-#define BINARY_OP_IMPLEMENT(op, OP)                                                                \
+#define BINARY_OP_IMPLEMENT_TOO(op, OP)                                                            \
   EBTerm operator op(const EBTerm & term) const                                                    \
   {                                                                                                \
     mooseAssert(_root != NULL, "Empty term provided on left side of operator " #op);               \
@@ -1036,17 +1139,17 @@ public:
     return EBTerm(new EBBinaryOpTermNode(                                                          \
         new EBNumberNode<Real>(left), right.cloneRoot(), EBBinaryOpTermNode::OP));                 \
   }
-    BINARY_OP_IMPLEMENT(+, ADD)
-    BINARY_OP_IMPLEMENT(-, SUB)
-    BINARY_OP_IMPLEMENT(*, MUL)
-    BINARY_OP_IMPLEMENT(/, DIV)
-    BINARY_OP_IMPLEMENT(%, MOD)
-    BINARY_OP_IMPLEMENT(<, LESS)
-    BINARY_OP_IMPLEMENT(>, GREATER)
-    BINARY_OP_IMPLEMENT(<=, LESSEQ)
-    BINARY_OP_IMPLEMENT(>=, GREATEREQ)
-    BINARY_OP_IMPLEMENT(==, EQ)
-    BINARY_OP_IMPLEMENT(!=, NOTEQ)
+    BINARY_OP_IMPLEMENT_TOO(+, ADD)
+    BINARY_OP_IMPLEMENT_TOO(-, SUB)
+    BINARY_OP_IMPLEMENT_TOO(*, MUL)
+    BINARY_OP_IMPLEMENT_TOO(/, DIV)
+    BINARY_OP_IMPLEMENT_TOO(%, MOD)
+    BINARY_OP_IMPLEMENT_TOO(<, LESS)
+    BINARY_OP_IMPLEMENT_TOO(>, GREATER)
+    BINARY_OP_IMPLEMENT_TOO(<=, LESSEQ)
+    BINARY_OP_IMPLEMENT_TOO(>=, GREATEREQ)
+    BINARY_OP_IMPLEMENT_TOO(==, EQ)
+    BINARY_OP_IMPLEMENT_TOO(!=, NOTEQ)
 
 /*
  * Compound assignment operators

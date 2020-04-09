@@ -12,7 +12,8 @@ struct SimplificationRules
       for (unsigned int i = 0; i < rule.size() - 2; ++i)
         conditions[i] = rule[i + 2].cloneRoot();
       _simplification_trees.emplace_back(
-          std::make_pair(rule[0].cloneRoot()->toNNary(), rule[1].cloneRoot()->toNNary()));
+          std::make_pair(rule[0].cloneRoot()->toNNary()->constantFolding(),
+                         rule[1].cloneRoot()->toNNary()->constantFolding()));
       _conditions.emplace_back(conditions);
     }
   }
