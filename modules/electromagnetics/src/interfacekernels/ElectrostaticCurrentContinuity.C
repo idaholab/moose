@@ -7,9 +7,9 @@ ElectrostaticCurrentContinuity::validParams()
 {
   InputParameters params = InterfaceKernel::validParams();
   params.addParam<MaterialPropertyName>(
-      "master_conductivity", "electrical_conductivity", "Resistivity on the master block.");
+      "master_conductivity", "electrical_conductivity", "Conductivity on the master block.");
   params.addParam<MaterialPropertyName>(
-      "neighbor_conductivity", "electrical_conductivity", "Resistivity on the neighbor block.");
+      "neighbor_conductivity", "electrical_conductivity", "Conductivity on the neighbor block.");
   params.addClassDescription(
       "Interface condition that describes the current continuity across a boundary formed between "
       "two dissimilar materials (resulting in a potential discontinuity). Conductivity on each "

@@ -2,9 +2,6 @@
 
 #include "InterfaceKernel.h"
 
-/**
- *
- */
 class ElectrostaticCurrentContinuity : public InterfaceKernel
 {
 public:
