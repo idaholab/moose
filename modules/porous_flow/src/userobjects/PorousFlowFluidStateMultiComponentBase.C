@@ -9,8 +9,6 @@
 
 #include "PorousFlowFluidStateMultiComponentBase.h"
 
-defineLegacyParams(PorousFlowFluidStateMultiComponentBase);
-
 InputParameters
 PorousFlowFluidStateMultiComponentBase::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "FXBoundaryBaseUserObject.h"
 
-defineLegacyParams(FXBoundaryBaseUserObject);
-
 InputParameters
 FXBoundaryBaseUserObject::validParams()
 {

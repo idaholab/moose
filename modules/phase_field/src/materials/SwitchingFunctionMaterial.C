@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SwitchingFunctionMaterial);
 
-defineLegacyParams(SwitchingFunctionMaterial);
-
 InputParameters
 SwitchingFunctionMaterial::validParams()
 {

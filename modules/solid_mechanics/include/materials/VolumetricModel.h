@@ -13,11 +13,6 @@
 
 class SymmTensor;
 
-class VolumetricModel;
-
-template <>
-InputParameters validParams<VolumetricModel>();
-
 class VolumetricModel : public Material
 {
 public:
@@ -39,4 +34,3 @@ public:
 private:
   using Material::_qp;
 };
-

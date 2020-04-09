@@ -29,4 +29,3 @@ public:
   double getParametricCoordinates(unsigned int i);
   void switchNode(EFANode * new_old, EFANode * old_node);
 };
-

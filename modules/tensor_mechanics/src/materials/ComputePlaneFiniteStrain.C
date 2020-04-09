@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneFiniteStrain);
 
-defineLegacyParams(ComputePlaneFiniteStrain);
-
 InputParameters
 ComputePlaneFiniteStrain::validParams()
 {

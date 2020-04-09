@@ -40,4 +40,3 @@ protected:
   const VariableGradient & _grad_disp_r;
 };
 }
-

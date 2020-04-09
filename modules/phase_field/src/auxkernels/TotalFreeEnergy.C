@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", TotalFreeEnergy);
 
-defineLegacyParams(TotalFreeEnergy);
-
 InputParameters
 TotalFreeEnergy::validParams()
 {

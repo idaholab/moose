@@ -16,8 +16,6 @@
 
 registerMooseObject("PhaseFieldApp", PolycrystalCircles);
 
-defineLegacyParams(PolycrystalCircles);
-
 InputParameters
 PolycrystalCircles::validParams()
 {

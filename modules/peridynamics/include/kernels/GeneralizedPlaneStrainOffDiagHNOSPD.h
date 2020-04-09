@@ -11,11 +11,6 @@
 
 #include "MechanicsBaseNOSPD.h"
 
-class GeneralizedPlaneStrainOffDiagHNOSPD;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrainOffDiagHNOSPD>();
-
 /**
  * Kernel class for coupled off diagonal Jacobian entries of horizon stabilized peridynamic
  * generalized plane strain model

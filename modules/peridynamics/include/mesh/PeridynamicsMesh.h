@@ -14,11 +14,6 @@
 
 #include "libmesh/point.h"
 
-class PeridynamicsMesh;
-
-template <>
-InputParameters validParams<PeridynamicsMesh>();
-
 /**
  * Peridynamics mesh class
  */

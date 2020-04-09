@@ -12,10 +12,6 @@
 #include "GeometricCut3DUserObject.h"
 
 // Forward declarations
-class CircleCutUserObject;
-
-template <>
-InputParameters validParams<CircleCutUserObject>();
 
 class CircleCutUserObject : public GeometricCut3DUserObject
 {
@@ -37,4 +33,3 @@ private:
 
   virtual bool isInsideCutPlane(Point p) const override;
 };
-

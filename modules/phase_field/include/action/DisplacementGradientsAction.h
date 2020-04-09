@@ -30,7 +30,3 @@ private:
   std::vector<VariableName> _displacements;
   std::vector<VariableName> _displacement_gradients;
 };
-
-template <>
-InputParameters validParams<DisplacementGradientsAction>();
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ElasticEnergyAux);
 
-defineLegacyParams(ElasticEnergyAux);
-
 InputParameters
 ElasticEnergyAux::validParams()
 {

@@ -17,10 +17,6 @@
 #include "RichardsSat.h"
 
 // Forward Declarations
-class RichardsLumpedMassChange;
-
-template <>
-InputParameters validParams<RichardsLumpedMassChange>();
 
 /**
  * d(fluid mass in porespace)/dt with the fluid mass

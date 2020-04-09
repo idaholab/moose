@@ -12,10 +12,6 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class NodalGravity;
-
-template <>
-InputParameters validParams<NodalGravity>();
 
 /**
  * Calculates the gravitational force proportional to nodal mass

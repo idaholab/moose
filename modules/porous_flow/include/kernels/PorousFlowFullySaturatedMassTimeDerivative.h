@@ -12,11 +12,6 @@
 #include "TimeKernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowFullySaturatedMassTimeDerivative;
-
-template <>
-InputParameters validParams<PorousFlowFullySaturatedMassTimeDerivative>();
-
 /**
  * Time derivative of fluid mass suitable for fully-saturated,
  * single-phase, single-component simulations.
@@ -99,4 +94,3 @@ protected:
   /// Derivative of strain rate wrt the PorousFlow variables
   const MaterialProperty<std::vector<RealGradient>> * const _dstrain_rate_dvar;
 };
-

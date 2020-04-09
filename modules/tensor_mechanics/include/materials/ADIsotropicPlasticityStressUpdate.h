@@ -23,11 +23,6 @@
   using ADIsotropicPlasticityStressUpdate<compute_stage>::_hardening_variable;                     \
   using ADIsotropicPlasticityStressUpdate<compute_stage>::_hardening_variable_old
 
-template <ComputeStage>
-class ADIsotropicPlasticityStressUpdate;
-
-declareADValidParams(ADIsotropicPlasticityStressUpdate);
-
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
  * model.  This class is one of the basic radial return constitutive models;

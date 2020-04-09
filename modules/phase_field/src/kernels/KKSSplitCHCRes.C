@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", KKSSplitCHCRes);
 
-defineLegacyParams(KKSSplitCHCRes);
-
 InputParameters
 KKSSplitCHCRes::validParams()
 {

@@ -13,10 +13,6 @@
 #include "NSPressureDerivs.h"
 
 // Forward Declarations
-class NSMomentumInviscidBC;
-
-template <>
-InputParameters validParams<NSMomentumInviscidBC>();
 
 /**
  * This class corresponds to the inviscid part of the "natural"
@@ -102,4 +98,3 @@ protected:
   // based on the passed-in variable number.
   Real convectiveQpJacobianHelper(unsigned var_number);
 };
-

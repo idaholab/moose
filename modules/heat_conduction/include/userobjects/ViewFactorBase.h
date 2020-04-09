@@ -12,10 +12,6 @@
 #include "SideUserObject.h"
 
 // Forward Declarations
-class ViewFactorBase;
-
-template <>
-InputParameters validParams<ViewFactorBase>();
 
 /**
  * A base class for automatic computation of view factors between sidesets

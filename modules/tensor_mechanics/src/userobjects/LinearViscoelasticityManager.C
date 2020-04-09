@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", LinearViscoelasticityManager);
 
-defineLegacyParams(LinearViscoelasticityManager);
-
 InputParameters
 LinearViscoelasticityManager::validParams()
 {

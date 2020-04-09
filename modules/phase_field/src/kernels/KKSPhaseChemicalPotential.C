@@ -14,8 +14,6 @@ using namespace MathUtils;
 
 registerMooseObject("PhaseFieldApp", KKSPhaseChemicalPotential);
 
-defineLegacyParams(KKSPhaseChemicalPotential);
-
 InputParameters
 KKSPhaseChemicalPotential::validParams()
 {

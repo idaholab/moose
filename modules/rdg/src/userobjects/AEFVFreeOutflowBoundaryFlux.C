@@ -11,8 +11,6 @@
 
 registerMooseObject("RdgApp", AEFVFreeOutflowBoundaryFlux);
 
-defineLegacyParams(AEFVFreeOutflowBoundaryFlux);
-
 InputParameters
 AEFVFreeOutflowBoundaryFlux::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "LinearElasticTruss.h"
 
-class PlasticTruss;
-
-template <>
-InputParameters validParams<PlasticTruss>();
-
 class PlasticTruss : public LinearElasticTruss
 {
 public:

@@ -12,11 +12,6 @@
 #include "DiscreteElementUserObject.h"
 #include "RankTwoTensor.h"
 
-class HEVPStrengthUOBase;
-
-template <>
-InputParameters validParams<HEVPStrengthUOBase>();
-
 /**
  * This user object is a pure virtual base classs
  * Derived classes computes material resistances and derivatives

@@ -16,7 +16,6 @@
 #include "RankTwoTensor.h"
 
 // Forward declaration
-class StressUpdateBase;
 
 /**
  * TangentCalculationMethod is an enum that determines the calculation method for the tangent
@@ -33,9 +32,6 @@ enum class TangentCalculationMethod
   FULL,
   PARTIAL
 };
-
-template <>
-InputParameters validParams<StressUpdateBase>();
 
 /**
  * StressUpdateBase is a material that is not called by MOOSE because

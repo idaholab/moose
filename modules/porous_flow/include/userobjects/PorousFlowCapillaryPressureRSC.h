@@ -11,11 +11,6 @@
 
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowCapillaryPressureRSC;
-
-template <>
-InputParameters validParams<PorousFlowCapillaryPressureRSC>();
-
 /**
  * Rogers-Stallybrass-Clements form of capillary pressure
  */
@@ -44,4 +39,3 @@ protected:
   /// Scale = 0.25 * scale_ratio * oil_viscosity
   const Real _scale;
 };
-

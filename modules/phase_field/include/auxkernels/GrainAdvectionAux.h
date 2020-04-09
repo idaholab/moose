@@ -14,10 +14,6 @@
 #include "GrainForceAndTorqueInterface.h"
 
 // Forward Declarations
-class GrainAdvectionAux;
-
-template <>
-InputParameters validParams<GrainAdvectionAux>();
 
 /**
  * Calculates the advection velocity of grain due to rigid body motion
@@ -57,4 +53,3 @@ private:
   RealGradient _velocity_advection;
   MooseEnum _component;
 };
-

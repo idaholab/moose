@@ -19,10 +19,6 @@
  */
 
 // Forward Declarations
-class CriticalTimeStep;
-
-template <>
-InputParameters validParams<CriticalTimeStep>();
 
 class CriticalTimeStep : public ElementPostprocessor, public GuaranteeConsumer
 {

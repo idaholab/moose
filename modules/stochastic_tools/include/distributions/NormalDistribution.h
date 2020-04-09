@@ -11,11 +11,6 @@
 
 #include "Distribution.h"
 
-class NormalDistribution;
-
-template <>
-InputParameters validParams<NormalDistribution>();
-
 /**
  * A class used to generate a normal distribution
  */

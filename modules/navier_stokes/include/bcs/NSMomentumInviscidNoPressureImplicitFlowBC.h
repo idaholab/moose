@@ -12,10 +12,6 @@
 #include "NSMomentumInviscidBC.h"
 
 // Forward Declarations
-class NSMomentumInviscidNoPressureImplicitFlowBC;
-
-template <>
-InputParameters validParams<NSMomentumInviscidNoPressureImplicitFlowBC>();
 
 /**
  * Momentum equation boundary condition used when pressure *is not*
@@ -35,4 +31,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

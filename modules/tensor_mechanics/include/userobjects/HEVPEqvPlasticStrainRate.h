@@ -11,11 +11,6 @@
 
 #include "HEVPInternalVarRateUOBase.h"
 
-class HEVPEqvPlasticStrainRate;
-
-template <>
-InputParameters validParams<HEVPEqvPlasticStrainRate>();
-
 /**
  * This user object classs
  * Computes equivalent plastic strain rate

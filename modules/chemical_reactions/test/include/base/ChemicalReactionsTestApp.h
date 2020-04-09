@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class ChemicalReactionsTestApp;
-
-template <>
-InputParameters validParams<ChemicalReactionsTestApp>();
-
 class ChemicalReactionsTestApp : public MooseApp
 {
 public:
@@ -31,4 +26,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

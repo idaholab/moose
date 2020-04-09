@@ -16,12 +16,6 @@
  * beam. The small/large strain increments in the current rotated configuration of the beam are also
  * computed.
  */
-
-class ComputeFiniteBeamStrain;
-
-template <>
-InputParameters validParams<ComputeFiniteBeamStrain>();
-
 class ComputeFiniteBeamStrain : public ComputeIncrementalBeamStrain
 {
 public:

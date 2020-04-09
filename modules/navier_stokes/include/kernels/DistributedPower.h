@@ -12,10 +12,7 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class DistributedPower;
 
-template <>
-InputParameters validParams<DistributedPower>();
 /**
  * The DistributedPower kernel computes the kinetic energy contribution of the body force due to
  * total energy in an element. In this kernel, the acceleration of the body force is assumed to be
@@ -43,4 +40,3 @@ protected:
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
 };
-

@@ -36,10 +36,6 @@ enum class ContactFormulation
  * Action class for creating constraints, kernels, and user objects necessary for mechanical
  * contact.
  */
-class ContactAction;
-
-template <>
-InputParameters validParams<ContactAction>();
 
 class ContactAction : public Action
 {

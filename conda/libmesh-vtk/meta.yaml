@@ -1,0 +1,65 @@
+{% set build = 1 %}
+{% set strbuild = "build_" + build|string %}
+
+{% set vtk_version = vtk_version %}
+{% set friendly_version =  friendly_version %}
+{% set sha256 = sha256 %}
+
+package:
+  name: moose-libmesh-vtk
+  version: {{ vtk_version }}
+
+source:
+  url: https://www.vtk.org/files/release/{{ friendly_version }}/VTK-{{ vtk_version }}.tar.gz
+  sha256: {{ sha256 }}
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - moose-mpich {{ moose_mpich }}
+    - cmake
+    - ninja
+    - libglu  {{ libglu }}              # [linux]
+    - mesalib {{ mesalib }}             # [linux]
+    - {{ cdt('libxt-devel') }}          # [linux]
+    - {{ cdt('libsm-devel') }}          # [linux]
+    - {{ cdt('libx11-devel') }}         # [linux]
+    - {{ cdt('libice-devel') }}         # [linux]
+    - {{ cdt('libxext-devel') }}        # [linux]
+    - {{ cdt('mesa-libgl-devel') }}     # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }} # [linux]
+
+  run:
+    - moose-mpich
+    - libglu  {{ libglu }}              # [linux]
+    - mesalib {{ mesalib }}             # [linux]
+    - {{ cdt('libxt-devel') }}          # [linux]
+    - {{ cdt('libsm-devel') }}          # [linux]
+    - {{ cdt('libx11-devel') }}         # [linux]
+    - {{ cdt('libice-devel') }}         # [linux]
+    - {{ cdt('libxext-devel') }}        # [linux]
+    - {{ cdt('mesa-libgl-devel') }}     # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }} # [linux]
+
+test:
+  commands:
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.dylib # [osx]
+    - test -f $PREFIX/libmesh-vtk/lib/libvtkCommonCore-{{ friendly_version }}.so    # [linux]
+
+about:
+  home: http://www.vtk.org/
+  license: BSD 3-Clause
+  license_file: Copyright.txt
+  summary: >
+    The Visualization Toolkit (VTK) is an open-source, freely available software
+    system for 3D computer graphics, modeling, image processing, volume
+    rendering, scientific visualization, and information visualization.
+
+extra:
+  recipe-maintainers:
+    - milljm

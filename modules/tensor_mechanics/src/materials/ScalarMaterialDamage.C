@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ScalarMaterialDamage);
 
-defineLegacyParams(ScalarMaterialDamage);
-
 InputParameters
 ScalarMaterialDamage::validParams()
 {

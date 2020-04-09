@@ -15,8 +15,6 @@
 #include "FluidPropertiesApp.h"
 #include "ChemicalReactionsApp.h"
 
-defineLegacyParams(PorousFlowApp);
-
 InputParameters
 PorousFlowApp::validParams()
 {

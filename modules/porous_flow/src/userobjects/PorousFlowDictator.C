@@ -14,8 +14,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDictator);
 
-defineLegacyParams(PorousFlowDictator);
-
 InputParameters
 PorousFlowDictator::validParams()
 {

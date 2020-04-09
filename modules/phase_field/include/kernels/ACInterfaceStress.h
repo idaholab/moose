@@ -11,7 +11,6 @@
 
 #include "Kernel.h"
 
-class ACInterfaceStress;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -19,9 +18,6 @@ typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankThreeTensorTempl;
 typedef RankThreeTensorTempl<Real> RankThreeTensor;
-
-template <>
-InputParameters validParams<ACInterfaceStress>();
 
 /**
  * Compute the Allen-Cahn interface stress driving force contribution
@@ -56,4 +52,3 @@ protected:
   /// derivative of _dS w.r.t. the finite element coefficients for the Jacobian calculation
   RankThreeTensor _ddS;
 };
-

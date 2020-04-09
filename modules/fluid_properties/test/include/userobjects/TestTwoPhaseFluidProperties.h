@@ -11,11 +11,6 @@
 
 #include "TwoPhaseFluidProperties.h"
 
-class TestTwoPhaseFluidProperties;
-
-template <>
-InputParameters validParams<TestTwoPhaseFluidProperties>();
-
 /**
  * Test 2-phase fluid properties
  *
@@ -36,4 +31,3 @@ public:
   virtual Real dsigma_dT_from_T(Real T) const override;
   virtual bool supportsPhaseChange() const override;
 };
-

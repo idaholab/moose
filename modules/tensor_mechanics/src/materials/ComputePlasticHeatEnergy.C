@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputePlasticHeatEnergy);
 
-defineLegacyParams(ComputePlasticHeatEnergy);
-
 InputParameters
 ComputePlasticHeatEnergy::validParams()
 {

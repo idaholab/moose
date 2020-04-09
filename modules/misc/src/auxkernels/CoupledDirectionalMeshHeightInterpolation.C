@@ -14,8 +14,6 @@
 
 registerMooseObject("MiscApp", CoupledDirectionalMeshHeightInterpolation);
 
-defineLegacyParams(CoupledDirectionalMeshHeightInterpolation);
-
 InputParameters
 CoupledDirectionalMeshHeightInterpolation::validParams()
 {

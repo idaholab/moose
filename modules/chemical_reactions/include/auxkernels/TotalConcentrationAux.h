@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class TotalConcentrationAux;
-
-template <>
-InputParameters validParams<TotalConcentrationAux>();
-
 /**
  * Computes the total concentration of given primary species, including its free
  * concentration and its stoichiometric contribution to all secondary equilibrium
@@ -38,4 +33,3 @@ protected:
   /// Coupled secondary species concentration
   std::vector<const VariableValue *> _secondary_species;
 };
-

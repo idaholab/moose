@@ -11,10 +11,6 @@
 
 #include "GBDependentTensorBase.h"
 
-class GBDependentAnisotropicTensor;
-
-template <>
-InputParameters validParams<GBDependentAnisotropicTensor>();
 /**
  * GB dependent anisotropic tensor Ref. Forest, MSMSE, 2015
  */
@@ -29,4 +25,3 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 };
-

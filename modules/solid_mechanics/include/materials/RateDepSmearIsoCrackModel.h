@@ -11,11 +11,6 @@
 
 #include "RateDepSmearCrackModel.h"
 
-class RateDepSmearIsoCrackModel;
-
-template <>
-InputParameters validParams<RateDepSmearIsoCrackModel>();
-
 /**
  * In this class a rate dependent isotropic damage model is implemented
  */
@@ -55,4 +50,3 @@ protected:
 
 private:
 };
-

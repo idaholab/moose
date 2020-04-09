@@ -11,11 +11,6 @@
 
 #include "PorousFlowDarcyBase.h"
 
-class PorousFlowAdvectiveFlux;
-
-template <>
-InputParameters validParams<PorousFlowAdvectiveFlux>();
-
 /**
  * Convective flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility
@@ -47,4 +42,3 @@ protected:
   /// Index of the fluid component that this kernel acts on
   const unsigned int _fluid_component;
 };
-

@@ -11,11 +11,6 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
-class PorousFlowPermeabilityConstFromVar;
-
-template <>
-InputParameters validParams<PorousFlowPermeabilityConstFromVar>();
-
 /**
  * Material to provide permeability taken from a variable. This material
  * is primarily designed for use with heterogeneous reservoir models
@@ -47,4 +42,3 @@ protected:
   const VariableValue & _perm_zy;
   const VariableValue & _perm_zz;
 };
-

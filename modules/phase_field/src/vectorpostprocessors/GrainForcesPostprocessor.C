@@ -12,8 +12,6 @@
 
 registerMooseObject("PhaseFieldApp", GrainForcesPostprocessor);
 
-defineLegacyParams(GrainForcesPostprocessor);
-
 InputParameters
 GrainForcesPostprocessor::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "TensorMechanicsActionBase.h"
 
-class TensorMechanicsAction;
-
-template <>
-InputParameters validParams<TensorMechanicsAction>();
-
 class TensorMechanicsAction : public TensorMechanicsActionBase
 {
 public:

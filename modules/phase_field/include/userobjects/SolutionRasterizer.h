@@ -12,19 +12,15 @@
 #include "SolutionUserObject.h"
 
 // Forward Declarations
-class SolutionRasterizer;
-
-template <>
-InputParameters validParams<SolutionRasterizer>();
 
 /**
-  * This Userobject is the base class of Userobjects that generate one
-  * random number per timestep and quadrature point in a way that the integral
-  * over all random numbers is zero. This can be used for a concentration fluctuation
-  * kernel such as ConservedLangevinNoise, that keeps the total concenration constant.
-  *
-  * \see ConservedUniformNoise
-  */
+ * This Userobject is the base class of Userobjects that generate one
+ * random number per timestep and quadrature point in a way that the integral
+ * over all random numbers is zero. This can be used for a concentration fluctuation
+ * kernel such as ConservedLangevinNoise, that keeps the total concenration constant.
+ *
+ * \see ConservedUniformNoise
+ */
 class SolutionRasterizer : public SolutionUserObject
 {
 public:
@@ -47,4 +43,3 @@ protected:
 
   Real _threshold;
 };
-

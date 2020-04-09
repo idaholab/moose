@@ -13,10 +13,6 @@
 #include "MooseRandom.h"
 
 // Forward Declarations
-class PolycrystalHex;
-
-template <>
-InputParameters validParams<PolycrystalHex>();
 
 /**
  * PolycrystalHex creates a hexagonal polycrystal initial condition.
@@ -36,4 +32,3 @@ private:
   const Real _perturbation_percent;
   MooseRandom _random;
 };
-

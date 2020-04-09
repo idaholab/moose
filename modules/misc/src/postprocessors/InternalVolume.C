@@ -14,8 +14,6 @@
 
 registerMooseObject("MiscApp", InternalVolume);
 
-defineLegacyParams(InternalVolume);
-
 InputParameters
 InternalVolume::validParams()
 {

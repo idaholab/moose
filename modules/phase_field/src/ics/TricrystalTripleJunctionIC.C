@@ -14,8 +14,6 @@
 
 registerMooseObject("PhaseFieldApp", TricrystalTripleJunctionIC);
 
-defineLegacyParams(TricrystalTripleJunctionIC);
-
 InputParameters
 TricrystalTripleJunctionIC::validParams()
 {

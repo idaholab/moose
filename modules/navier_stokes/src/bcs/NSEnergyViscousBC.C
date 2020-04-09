@@ -13,8 +13,6 @@
 
 registerMooseObject("NavierStokesApp", NSEnergyViscousBC);
 
-defineLegacyParams(NSEnergyViscousBC);
-
 InputParameters
 NSEnergyViscousBC::validParams()
 {

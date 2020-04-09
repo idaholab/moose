@@ -11,8 +11,6 @@
 
 registerMooseObject("MiscApp", Density);
 
-defineLegacyParams(Density);
-
 InputParameters
 Density::validParams()
 {

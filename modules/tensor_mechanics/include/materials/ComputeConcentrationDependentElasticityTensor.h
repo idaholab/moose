@@ -11,11 +11,6 @@
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
-class ComputeConcentrationDependentElasticityTensor;
-
-template <>
-InputParameters validParams<ComputeConcentrationDependentElasticityTensor>();
-
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object as a function of
  * concentration field.

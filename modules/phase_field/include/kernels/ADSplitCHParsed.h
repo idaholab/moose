@@ -12,12 +12,6 @@
 #include "ADSplitCHCRes.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADSplitCHParsed;
-
-declareADValidParams(ADSplitCHParsed);
-
 /**
  * ADSplitCHParsed uses the Free Energy function and derivatives
  * provided by an ADMaterial. Derivatives w.r.t DOFs provided by the MOOSE AD
@@ -43,4 +37,3 @@ protected:
 
   usingSplitCHCResMembers;
 };
-

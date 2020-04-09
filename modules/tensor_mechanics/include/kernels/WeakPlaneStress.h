@@ -12,16 +12,12 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class WeakPlaneStress;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-
-template <>
-InputParameters validParams<WeakPlaneStress>();
 
 class WeakPlaneStress : public DerivativeMaterialInterface<Kernel>
 {

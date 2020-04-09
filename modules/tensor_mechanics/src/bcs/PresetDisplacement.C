@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", PresetDisplacement);
 
-defineLegacyParams(PresetDisplacement);
-
 InputParameters
 PresetDisplacement::validParams()
 {

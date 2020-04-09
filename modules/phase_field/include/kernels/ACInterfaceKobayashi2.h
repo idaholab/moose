@@ -13,11 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-class ACInterfaceKobayashi2;
-
-template <>
-InputParameters validParams<ACInterfaceKobayashi2>();
-
 /**
  * Kernel 2 of 2 for interfacial energy anisotropy in the Allen-Cahn equation as
  * implemented in R. Kobayashi, Physica D, 63, 410-423 (1993).
@@ -48,4 +43,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dLdarg;
   std::vector<const MaterialProperty<Real> *> _depsdarg;
 };
-

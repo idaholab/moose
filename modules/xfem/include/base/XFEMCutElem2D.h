@@ -66,4 +66,3 @@ private:
                           std::vector<std::vector<Real>> & tsg,
                           std::vector<std::vector<Real>> & wsg);
 };
-

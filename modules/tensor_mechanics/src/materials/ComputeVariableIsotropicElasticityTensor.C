@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeVariableIsotropicElasticityTensor);
 
-defineLegacyParams(ComputeVariableIsotropicElasticityTensor);
-
 InputParameters
 ComputeVariableIsotropicElasticityTensor::validParams()
 {

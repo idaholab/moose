@@ -12,11 +12,7 @@
 #include "ElemElemConstraint.h"
 
 // Forward Declarations
-class XFEMEqualValueAtInterface;
 class XFEM;
-
-template <>
-InputParameters validParams<XFEMEqualValueAtInterface>();
 
 class XFEMEqualValueAtInterface : public ElemElemConstraint
 {
@@ -42,4 +38,3 @@ protected:
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
 };
-

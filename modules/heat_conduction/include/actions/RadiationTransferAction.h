@@ -35,6 +35,3 @@ protected:
   /// the number of radiation patches per boundary
   std::vector<unsigned int> _n_patches;
 };
-
-template <>
-InputParameters validParams<RadiationTransferAction>();

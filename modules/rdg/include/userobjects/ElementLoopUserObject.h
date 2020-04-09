@@ -24,16 +24,12 @@
 #include "libmesh/parallel_algebra.h"
 
 // Forward Declarations
-class ElementLoopUserObject;
 
 namespace libMesh
 {
 class Elem;
 class QBase;
 }
-
-template <>
-InputParameters validParams<ElementLoopUserObject>();
 
 /**
  * A base class that loops over elements and do things

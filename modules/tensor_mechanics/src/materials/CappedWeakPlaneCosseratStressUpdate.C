@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", CappedWeakPlaneCosseratStressUpdate);
 
-defineLegacyParams(CappedWeakPlaneCosseratStressUpdate);
-
 InputParameters
 CappedWeakPlaneCosseratStressUpdate::validParams()
 {

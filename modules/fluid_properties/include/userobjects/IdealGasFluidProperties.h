@@ -11,11 +11,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class IdealGasFluidProperties;
-
-template <>
-InputParameters validParams<IdealGasFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

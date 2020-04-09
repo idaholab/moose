@@ -13,11 +13,7 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-class NodalRankTwoPD;
 class PeridynamicsMesh;
-
-template <>
-InputParameters validParams<NodalRankTwoPD>();
 
 /**
  * Aux Kernel class to postprocess and output the strain and stress components and equivalents for

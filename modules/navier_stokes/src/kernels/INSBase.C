@@ -10,8 +10,6 @@
 #include "INSBase.h"
 #include "Assembly.h"
 
-defineLegacyParams(INSBase);
-
 InputParameters
 INSBase::validParams()
 {
@@ -302,9 +300,10 @@ INSBase::dTauDUComp(unsigned comp)
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real h = _current_elem->hmax();
   Real transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
-  return -_alpha / 2. * std::pow(transient_part + (2. * U.norm() / h) * (2. * U.norm() / h) +
-                                     9. * (4. * nu / (h * h)) * (4. * nu / (h * h)),
-                                 -1.5) *
+  return -_alpha / 2. *
+         std::pow(transient_part + (2. * U.norm() / h) * (2. * U.norm() / h) +
+                      9. * (4. * nu / (h * h)) * (4. * nu / (h * h)),
+                  -1.5) *
          2. * (2. * U.norm() / h) * 2. / h * U(comp) * _phi[_j][_qp] /
          (U.norm() + std::numeric_limits<double>::epsilon());
 }

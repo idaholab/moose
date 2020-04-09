@@ -9,8 +9,6 @@
 
 #include "ADComputeDilatationThermalExpansionEigenstrainBase.h"
 
-defineADLegacyParams(ADComputeDilatationThermalExpansionEigenstrainBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::validParams()

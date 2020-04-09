@@ -12,11 +12,6 @@
 #include "Kernel.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowFullySaturatedDarcyBase;
-
-template <>
-InputParameters validParams<PorousFlowFullySaturatedDarcyBase>();
-
 /**
  * Darcy advective flux for a fully-saturated,
  * single phase, single component fluid.

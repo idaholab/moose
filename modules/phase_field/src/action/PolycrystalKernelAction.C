@@ -14,8 +14,6 @@
 
 registerMooseAction("PhaseFieldApp", PolycrystalKernelAction, "add_kernel");
 
-defineLegacyParams(PolycrystalKernelAction);
-
 InputParameters
 PolycrystalKernelAction::validParams()
 {

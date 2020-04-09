@@ -11,18 +11,16 @@
 
 registerMooseObject("TensorMechanicsTestApp", TestSubblockIndexProvider);
 
-defineLegacyParams(TestSubblockIndexProvider);
-
 InputParameters
 TestSubblockIndexProvider::validParams()
 {
   InputParameters params = SubblockIndexProvider::validParams();
-  params.set<ExecFlagEnum>( "execute_on" ) = EXEC_INITIAL;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
 
 TestSubblockIndexProvider::TestSubblockIndexProvider(const InputParameters & parameters)
-: SubblockIndexProvider(parameters)
+  : SubblockIndexProvider(parameters)
 {
 }
 

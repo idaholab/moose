@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", DisplacementAboutAxis);
 
-defineLegacyParams(DisplacementAboutAxis);
-
 InputParameters
 DisplacementAboutAxis::validParams()
 {

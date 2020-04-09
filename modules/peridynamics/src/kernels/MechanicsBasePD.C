@@ -10,8 +10,6 @@
 #include "MechanicsBasePD.h"
 #include "RankTwoTensor.h"
 
-defineLegacyParams(MechanicsBasePD);
-
 InputParameters
 MechanicsBasePD::validParams()
 {

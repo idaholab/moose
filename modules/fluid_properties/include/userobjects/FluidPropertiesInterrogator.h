@@ -12,15 +12,11 @@
 #include "GeneralUserObject.h"
 #include "json/json.h"
 
-class FluidPropertiesInterrogator;
 class FluidProperties;
 class SinglePhaseFluidProperties;
 class VaporMixtureFluidProperties;
 class TwoPhaseFluidProperties;
 class TwoPhaseNCGFluidProperties;
-
-template <>
-InputParameters validParams<FluidPropertiesInterrogator>();
 
 /**
  * User object for querying a single-phase or two-phase fluid properties object

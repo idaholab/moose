@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class INSBase;
-
-template <>
-InputParameters validParams<INSBase>();
 
 /**
  * This class computes strong and weak components of the INS governing
@@ -111,4 +107,3 @@ protected:
   bool _convective_term;
   bool _transient_term;
 };
-

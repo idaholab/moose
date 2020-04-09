@@ -11,11 +11,6 @@
 
 #include "AddVariableAction.h"
 
-class AddPrimarySpeciesAction;
-
-template <>
-InputParameters validParams<AddPrimarySpeciesAction>();
-
 class AddPrimarySpeciesAction : public AddVariableAction
 {
 public:

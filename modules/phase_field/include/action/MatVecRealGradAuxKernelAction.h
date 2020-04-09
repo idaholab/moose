@@ -25,7 +25,3 @@ protected:
   const std::vector<MaterialPropertyName> _prop;
   const MaterialPropertyName _div_prop;
 };
-
-template <>
-InputParameters validParams<MatVecRealGradAuxKernelAction>();
-

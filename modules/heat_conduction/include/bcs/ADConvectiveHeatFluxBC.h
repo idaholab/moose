@@ -11,11 +11,6 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADConvectiveHeatFluxBC;
-
-declareADValidParams(ADConvectiveHeatFluxBC);
-
 /**
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.

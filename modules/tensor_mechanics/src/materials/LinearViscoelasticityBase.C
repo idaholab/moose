@@ -10,8 +10,6 @@
 #include "LinearViscoelasticityBase.h"
 #include "Conversion.h"
 
-defineLegacyParams(LinearViscoelasticityBase);
-
 InputParameters
 LinearViscoelasticityBase::validParams()
 {

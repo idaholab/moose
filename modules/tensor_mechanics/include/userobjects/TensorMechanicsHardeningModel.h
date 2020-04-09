@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class TensorMechanicsHardeningModel;
-
-template <>
-InputParameters validParams<TensorMechanicsHardeningModel>();
-
 /**
  * Hardening Model base class.  The derived classes will provide
  * a value and a derivative of that value with respect to a

@@ -12,8 +12,6 @@
 
 #include <limits>
 
-defineLegacyParams(ViewFactorBase);
-
 InputParameters
 ViewFactorBase::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "SplitCHBase.h"
 
-defineLegacyParams(SplitCHBase);
-
 InputParameters
 SplitCHBase::validParams()
 {

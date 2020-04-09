@@ -24,14 +24,10 @@
   using ADStressDivergenceTensors<compute_stage>::_volumetric_locking_correction
 
 // Forward Declarations
-template <ComputeStage>
-class ADStressDivergenceTensors;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(ADStressDivergenceTensors);
 
 /**
  * ADStressDivergenceTensors is the automatic differentiation version of StressDivergenceTensors

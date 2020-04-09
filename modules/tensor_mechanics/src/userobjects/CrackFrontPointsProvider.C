@@ -9,8 +9,6 @@
 
 #include "CrackFrontPointsProvider.h"
 
-defineLegacyParams(CrackFrontPointsProvider);
-
 InputParameters
 CrackFrontPointsProvider::validParams()
 {

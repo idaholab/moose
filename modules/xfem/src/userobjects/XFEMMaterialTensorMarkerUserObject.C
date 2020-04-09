@@ -13,8 +13,6 @@
 
 registerMooseObject("XFEMApp", XFEMMaterialTensorMarkerUserObject);
 
-defineLegacyParams(XFEMMaterialTensorMarkerUserObject);
-
 InputParameters
 XFEMMaterialTensorMarkerUserObject::validParams()
 {

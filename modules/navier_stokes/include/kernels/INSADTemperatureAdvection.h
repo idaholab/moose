@@ -11,12 +11,6 @@
 
 #include "ADKernelValue.h"
 
-// Forward Declarations
-template <ComputeStage>
-class INSADTemperatureAdvection;
-
-declareADValidParams(INSADTemperatureAdvection);
-
 /**
  * This class computes the residual and Jacobian contributions for
  * temperature advection
@@ -45,8 +39,6 @@ protected:
 template <ComputeStage>
 class INSADTemperatureAdvectionSUPG;
 
-declareADValidParams(INSADTemperatureAdvectionSUPG);
-
 /**
  * This class computes the residual and Jacobian contributions for
  * stabilization of temperature advection
@@ -55,6 +47,8 @@ template <ComputeStage compute_stage>
 class INSADTemperatureAdvectionSUPG : public ADKernelSUPG<compute_stage>
 {
 public:
+  static InputParameters validParams();
+
   INSADTemperatureAdvectionSUPG(const InputParameters & parameters);
 
 protected:
@@ -66,4 +60,3 @@ protected:
 
   usingKernelSUPGMembers;
 };
-

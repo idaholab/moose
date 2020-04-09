@@ -13,10 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class MathEBFreeEnergy;
-
-template <>
-InputParameters validParams<MathEBFreeEnergy>();
 
 /**
  * Material class that creates the math free energy with the expression builder
@@ -34,4 +30,3 @@ protected:
   /// Coupled variable value for the concentration \f$ c \f$.
   EBTerm _c;
 };
-

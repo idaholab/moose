@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeDilatationThermalExpansionFunctionEigenstrain);
 
-defineLegacyParams(ComputeDilatationThermalExpansionFunctionEigenstrain);
-
 InputParameters
 ComputeDilatationThermalExpansionFunctionEigenstrain::validParams()
 {

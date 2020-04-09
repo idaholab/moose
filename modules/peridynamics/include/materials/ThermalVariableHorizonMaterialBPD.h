@@ -11,11 +11,6 @@
 
 #include "ThermalMaterialBaseBPD.h"
 
-class ThermalVariableHorizonMaterialBPD;
-
-template <>
-InputParameters validParams<ThermalVariableHorizonMaterialBPD>();
-
 /**
  * Material class for bond based peridynamic heat conduction model based on irregular spatial
  * discretization

@@ -10,8 +10,6 @@
 #include "PorousFlowMaterialBase.h"
 #include "Conversion.h"
 
-defineLegacyParams(PorousFlowMaterialBase);
-
 InputParameters
 PorousFlowMaterialBase::validParams()
 {

@@ -23,8 +23,6 @@ registerMooseAction("PorousFlowApp", PorousFlowUnsaturated, "add_aux_variable");
 
 registerMooseAction("PorousFlowApp", PorousFlowUnsaturated, "add_aux_kernel");
 
-defineLegacyParams(PorousFlowUnsaturated);
-
 InputParameters
 PorousFlowUnsaturated::validParams()
 {

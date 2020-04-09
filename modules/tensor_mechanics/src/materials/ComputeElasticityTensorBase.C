@@ -10,8 +10,6 @@
 #include "ComputeElasticityTensorBase.h"
 #include "Function.h"
 
-defineLegacyParams(ComputeElasticityTensorBase);
-
 InputParameters
 ComputeElasticityTensorBase::validParams()
 {

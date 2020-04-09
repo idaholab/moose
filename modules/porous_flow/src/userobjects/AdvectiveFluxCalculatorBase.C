@@ -14,8 +14,6 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_sync.h"
 
-defineLegacyParams(AdvectiveFluxCalculatorBase);
-
 InputParameters
 AdvectiveFluxCalculatorBase::validParams()
 {

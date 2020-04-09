@@ -15,10 +15,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declaration
-class GrainGrowthAction;
-
-template <>
-InputParameters validParams<GrainGrowthAction>();
 
 class GrainGrowthAction : public Action
 {

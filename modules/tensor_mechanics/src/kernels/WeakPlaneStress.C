@@ -17,8 +17,6 @@
 
 registerMooseObject("TensorMechanicsApp", WeakPlaneStress);
 
-defineLegacyParams(WeakPlaneStress);
-
 InputParameters
 WeakPlaneStress::validParams()
 {

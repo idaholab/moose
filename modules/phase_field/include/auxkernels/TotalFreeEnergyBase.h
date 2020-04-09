@@ -12,10 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class TotalFreeEnergyBase;
-
-template <>
-InputParameters validParams<TotalFreeEnergyBase>();
 
 /**
  * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined
@@ -43,4 +39,3 @@ protected:
   /// Additional free energy contribution
   const VariableValue & _additional_free_energy;
 };
-

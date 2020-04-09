@@ -13,10 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward Declarations
-class NodalRotationalInertia;
-
-template <>
-InputParameters validParams<NodalRotationalInertia>();
 
 /**
  * Calculates the inertial torque and inertia proportional damping

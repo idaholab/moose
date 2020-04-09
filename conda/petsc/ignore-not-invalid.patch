@@ -1,0 +1,26 @@
+From 96bce458f41125dc3525b3668f8617279af76457 Mon Sep 17 00:00:00 2001
+From: Min RK <benjaminrk@gmail.com>
+Date: Tue, 20 Nov 2018 15:52:22 +0100
+Subject: [PATCH] ignored flags are not invalid
+
+petsc balks at inoccuous ignored-argument flags
+
+---
+ config/BuildSystem/config/setCompilers.py | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/config/BuildSystem/config/setCompilers.py b/config/BuildSystem/config/setCompilers.py
+index a0751ba..a24ceef 100644
+--- a/config/BuildSystem/config/setCompilers.py
++++ b/config/BuildSystem/config/setCompilers.py
+@@ -1003,7 +1003,6 @@ class Configure(config.base.Configure):
+         output.find('unrecognized command line option') >= 0 or output.find('unrecognized option') >= 0 or output.find('unrecognised option') >= 0 or
+         output.find('not recognized') >= 0 or output.find('not recognised') >= 0 or
+         output.find('unknown option') >= 0 or output.find('unknown flag') >= 0 or output.find('Unknown switch') >= 0 or
+-        output.find('ignoring option') >= 0 or output.find('ignored') >= 0 or
+         output.find('argument unused') >= 0 or output.find('not supported') >= 0 or
+         # When checking for the existence of 'attribute'
+         output.find('is unsupported and will be skipped') >= 0 or
+-- 
+2.19.1
+

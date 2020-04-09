@@ -13,11 +13,7 @@
 
 #include "StressUpdateBase.h"
 
-class ComputeMultipleInelasticStress;
 class DamageBase;
-
-template <>
-InputParameters validParams<ComputeMultipleInelasticStress>();
 
 /**
  * ComputeMultipleInelasticStress computes the stress, the consistent tangent

@@ -11,11 +11,6 @@
 
 #include "NSAction.h"
 
-class AddNavierStokesKernelsAction;
-
-template <>
-InputParameters validParams<AddNavierStokesKernelsAction>();
-
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds Kernels and AuxKernels for all
@@ -66,4 +61,3 @@ protected:
   // Name of the FluidProperties object to pass on to Kernels
   UserObjectName _fp_name;
 };
-

@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class EnergyFreeBC;
-
-template <>
-InputParameters validParams<EnergyFreeBC>();
-
 /**
  *
  */
@@ -34,4 +29,3 @@ protected:
   const VariableValue & _rho_v;
   const VariableValue & _rho_w;
 };
-

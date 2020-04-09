@@ -13,8 +13,6 @@
 
 registerMooseObject("FluidPropertiesApp", Water97FluidProperties);
 
-defineLegacyParams(Water97FluidProperties);
-
 InputParameters
 Water97FluidProperties::validParams()
 {

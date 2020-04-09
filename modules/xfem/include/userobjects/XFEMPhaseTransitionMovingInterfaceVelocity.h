@@ -11,11 +11,6 @@
 
 #include "XFEMMovingInterfaceVelocityBase.h"
 
-class XFEMPhaseTransitionMovingInterfaceVelocity;
-
-template <>
-InputParameters validParams<XFEMPhaseTransitionMovingInterfaceVelocity>();
-
 class XFEMPhaseTransitionMovingInterfaceVelocity : public XFEMMovingInterfaceVelocityBase
 {
 public:
@@ -36,4 +31,3 @@ protected:
   /// Jump of the equilibrium concentrations at phase boundary
   Real _equilibrium_concentration_jump;
 };
-

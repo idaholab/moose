@@ -15,11 +15,7 @@
 #include "GrainTrackerInterface.h"
 
 // Forward Declarations
-class EulerAngleProvider2RGBAux;
 class EulerAngleProvider;
-
-template <>
-InputParameters validParams<EulerAngleProvider2RGBAux>();
 
 /**
  * Output euler angles from user object to an AuxVariable.

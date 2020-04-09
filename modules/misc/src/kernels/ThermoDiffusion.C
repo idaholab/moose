@@ -11,8 +11,6 @@
 
 registerMooseObject("MiscApp", ThermoDiffusion);
 
-defineLegacyParams(ThermoDiffusion);
-
 InputParameters
 ThermoDiffusion::validParams()
 {

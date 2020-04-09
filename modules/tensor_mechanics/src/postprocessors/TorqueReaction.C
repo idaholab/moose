@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", TorqueReaction);
 
-defineLegacyParams(TorqueReaction);
-
 InputParameters
 TorqueReaction::validParams()
 {

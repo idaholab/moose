@@ -11,11 +11,6 @@
 
 #include "PorousFlowDarcyBase.h"
 
-class PorousFlowHeatAdvection;
-
-template <>
-InputParameters validParams<PorousFlowHeatAdvection>();
-
 /**
  * Advection of heat via flux of component k in fluid phase alpha.
  * A fully-updwinded version is implemented, where the mobility
@@ -44,4 +39,3 @@ protected:
   /// Derivative of relative permeability of each phase wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _drelative_permeability_dvar;
 };
-

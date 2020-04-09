@@ -12,8 +12,6 @@
 #include "Conversion.h"      // for stringify
 #include "libmesh/utility.h" // for Utility::pow
 
-defineLegacyParams(TwoParameterPlasticityStressUpdate);
-
 InputParameters
 TwoParameterPlasticityStressUpdate::validParams()
 {

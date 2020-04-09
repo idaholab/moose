@@ -13,11 +13,6 @@
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
 
-class StochasticResults;
-
-template <>
-InputParameters validParams<StochasticResults>();
-
 /**
  * Storage helper for managing data being assigned to this VPP by a Transfer object.
  */

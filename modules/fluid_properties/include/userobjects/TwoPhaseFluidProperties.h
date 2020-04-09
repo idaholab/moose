@@ -11,11 +11,7 @@
 
 #include "FluidProperties.h"
 
-class TwoPhaseFluidProperties;
 class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<TwoPhaseFluidProperties>();
 
 /**
  * Base class for fluid properties used with two-phase flow
@@ -102,4 +98,3 @@ protected:
   /// The user object that provides vapor phase fluid properties
   const SinglePhaseFluidProperties * _fp_vapor;
 };
-

@@ -14,8 +14,6 @@
 
 registerMooseObject("SolidMechanicsApp", HomogenizedElasticConstants);
 
-defineLegacyParams(HomogenizedElasticConstants);
-
 InputParameters
 HomogenizedElasticConstants::validParams()
 {

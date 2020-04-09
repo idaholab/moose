@@ -11,11 +11,6 @@
 
 #include "GeneralizedPlaneStrainUserObjectBasePD.h"
 
-class GeneralizedPlaneStrainUserObjectHNOSPD;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrainUserObjectHNOSPD>();
-
 /**
  * UserObject class to compute the residual and diagonal Jacobian components for scalar out-of-plane
  * strain variable of generalized plane strain model based on self-stablized non-ordinary

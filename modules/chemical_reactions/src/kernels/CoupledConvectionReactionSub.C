@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", CoupledConvectionReactionSub);
 
-defineLegacyParams(CoupledConvectionReactionSub);
-
 InputParameters
 CoupledConvectionReactionSub::validParams()
 {

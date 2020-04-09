@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class PorousFlowAddMaterialJoiner;
-
-template <>
-InputParameters validParams<PorousFlowAddMaterialJoiner>();
-
 /**
  * Action to programatically add PorousFlowJoiner materials without having
  * to manually enter them in the input file
@@ -54,4 +49,3 @@ protected:
   /// Vector of already joined materials (to avoid joining them again)
   std::vector<std::string> _already_joined;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityKozenyCarman);
 
-defineLegacyParams(PorousFlowPermeabilityKozenyCarman);
-
 InputParameters
 PorousFlowPermeabilityKozenyCarman::validParams()
 {

@@ -11,11 +11,7 @@
 
 #include "NodalIntegralPostprocessorBasePD.h"
 
-class NodalFunctionsL2NormPD;
 class Function;
-
-template <>
-InputParameters validParams<NodalFunctionsL2NormPD>();
 
 /**
  * Postprocessor class to compute L2 norm of a given function for peridynamic discretization

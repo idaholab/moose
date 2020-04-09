@@ -12,11 +12,6 @@
 #include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
 
-class PorousFlowVariableBase;
-
-template <>
-InputParameters validParams<PorousFlowVariableBase>();
-
 /**
  * Base class for thermophysical variable materials, which assemble materials for
  * primary variables such as porepressure and saturation at the nodes
@@ -72,4 +67,3 @@ protected:
   /// d(grad saturation)/d(PorousFlow variable) at the quadpoints
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrads_qp_dv;
 };
-

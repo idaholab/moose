@@ -11,11 +11,6 @@
 
 #include "ElementUserObject.h"
 
-class DiscreteNucleationInserterBase;
-
-template <>
-InputParameters validParams<DiscreteNucleationInserterBase>();
-
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
  * domain it manages a list of nuclei with their insertion times and their center
@@ -54,4 +49,3 @@ protected:
   /// is a map update required
   bool _update_required;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowConstantThermalExpansionCoefficient);
 
-defineLegacyParams(PorousFlowConstantThermalExpansionCoefficient);
-
 InputParameters
 PorousFlowConstantThermalExpansionCoefficient::validParams()
 {

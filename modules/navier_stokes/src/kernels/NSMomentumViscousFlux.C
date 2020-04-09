@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", NSMomentumViscousFlux);
 
-defineLegacyParams(NSMomentumViscousFlux);
-
 InputParameters
 NSMomentumViscousFlux::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", SpecificVolumeAux);
 
-defineLegacyParams(SpecificVolumeAux);
-
 InputParameters
 SpecificVolumeAux::validParams()
 {

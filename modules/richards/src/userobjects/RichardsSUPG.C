@@ -11,8 +11,6 @@
 //
 #include "RichardsSUPG.h"
 
-defineLegacyParams(RichardsSUPG);
-
 InputParameters
 RichardsSUPG::validParams()
 {

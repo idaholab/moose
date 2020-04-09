@@ -11,8 +11,6 @@
 #include "Conversion.h"
 #include "MooseEnum.h"
 
-defineLegacyParams(NaNInterface);
-
 InputParameters
 NaNInterface::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("RichardsApp", RichardsDensityVDW);
 
-defineLegacyParams(RichardsDensityVDW);
-
 InputParameters
 RichardsDensityVDW::validParams()
 {
@@ -97,8 +95,9 @@ RichardsDensityVDW::ddensity(Real p) const
     Real dy = _b2oa;
     Real sq = std::sqrt(4.0 * Utility::pow<3>(-1.0 + 3.0 * y + 3.0 * _rhs) +
                         Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs));
-    Real dsq = 0.5 / sq * (4.0 * 3.0 * Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy +
-                           2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
+    Real dsq = 0.5 / sq *
+               (4.0 * 3.0 * Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy +
+                2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
     Real cr = std::cbrt(-2.0 + 9.0 * _rhs - 18.0 * y + sq);
     Real dcr =
         1.0 / 3.0 * std::pow(-2.0 + 9.0 * _rhs - 18.0 * y + sq, -2.0 / 3.0) * (-18.0 * dy + dsq);
@@ -120,11 +119,13 @@ RichardsDensityVDW::d2density(Real p) const
     Real dy = _b2oa;
     Real sq = std::sqrt(4.0 * Utility::pow<3>(-1.0 + 3.0 * y + 3.0 * _rhs) +
                         Utility::pow<2>(-2.0 - 18.0 * y + 9.0 * _rhs));
-    Real dsq = 0.5 / sq * (4.0 * 3.0 * Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy +
-                           2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
+    Real dsq = 0.5 / sq *
+               (4.0 * 3.0 * Utility::pow<2>(-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy +
+                2.0 * (-2.0 - 18.0 * y + 9.0 * _rhs) * (-18.0 * dy));
     Real d2sq = -dsq * dsq / sq;
-    d2sq += 0.5 / sq * (4.0 * 3.0 * 2.0 * (-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy * 3.0 * dy +
-                        2.0 * (-18.0 * dy) * (-18.0 * dy));
+    d2sq += 0.5 / sq *
+            (4.0 * 3.0 * 2.0 * (-1.0 + 3.0 * y + 3.0 * _rhs) * 3.0 * dy * 3.0 * dy +
+             2.0 * (-18.0 * dy) * (-18.0 * dy));
     Real cr = std::cbrt(-2.0 + 9.0 * _rhs - 18.0 * y + sq);
     Real dcr =
         1.0 / 3.0 * std::pow(-2.0 + 9.0 * _rhs - 18.0 * y + sq, -2.0 / 3.0) * (-18.0 * dy + dsq);

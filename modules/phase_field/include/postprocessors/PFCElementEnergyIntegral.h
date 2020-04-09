@@ -13,10 +13,6 @@
 #include "MooseVariableInterface.h"
 
 // Forward Declarations
-class PFCElementEnergyIntegral;
-
-template <>
-InputParameters validParams<PFCElementEnergyIntegral>();
 
 /**
  * Compute a volume integral of the specified variable.
@@ -49,4 +45,3 @@ protected:
   /// Temperature
   const Real _temp;
 };
-

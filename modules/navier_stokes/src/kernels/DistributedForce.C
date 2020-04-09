@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", DistributedForce);
 
-defineLegacyParams(DistributedForce);
-
 InputParameters
 DistributedForce::validParams()
 {

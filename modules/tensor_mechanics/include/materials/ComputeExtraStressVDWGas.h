@@ -11,11 +11,6 @@
 
 #include "ComputeExtraStressBase.h"
 
-class ComputeExtraStressVDWGas;
-
-template <>
-InputParameters validParams<ComputeExtraStressVDWGas>();
-
 /**
  * Computes a concentration-dependent ExtraStress bases on the van der Waals
  * equation of state that is added to the stress computed by the constitutive model

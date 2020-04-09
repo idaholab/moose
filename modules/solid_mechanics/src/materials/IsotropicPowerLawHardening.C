@@ -12,16 +12,13 @@
 #include "SymmIsotropicElasticityTensor.h"
 
 /**
-* Isotropic power law hardening material model. Before yield, the stress is youngs modulus * strain.
-* After yielding, the stress is K* pow(strain, n) where K is the strength coefficient,  n is the
-*strain
-* hardening exponent and strain is the total strain.
-* Yield stress is the point of intersection of these two curves.
-**/
+ * Isotropic power law hardening material model. Before yield, the stress is youngs modulus *
+ *strain. After yielding, the stress is K* pow(strain, n) where K is the strength coefficient,  n is
+ *the strain hardening exponent and strain is the total strain. Yield stress is the point of
+ *intersection of these two curves.
+ **/
 
 registerMooseObject("SolidMechanicsApp", IsotropicPowerLawHardening);
-
-defineLegacyParams(IsotropicPowerLawHardening);
 
 InputParameters
 IsotropicPowerLawHardening::validParams()

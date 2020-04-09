@@ -12,10 +12,6 @@
 #include "TimeKernel.h"
 
 // Forward Declarations
-class SecondDerivativeImplicitEuler;
-
-template <>
-InputParameters validParams<SecondDerivativeImplicitEuler>();
 
 class SecondDerivativeImplicitEuler : public TimeKernel
 {
@@ -31,4 +27,3 @@ protected:
   const VariableValue & _u_old;
   const VariableValue & _u_older;
 };
-

@@ -11,11 +11,6 @@
 
 #include "TimeDerivative.h"
 
-class CoupledBEEquilibriumSub;
-
-template <>
-InputParameters validParams<CoupledBEEquilibriumSub>();
-
 /**
  * Time derivative of primary species in given equilibrium species
  */
@@ -63,4 +58,3 @@ private:
   /// Old value of the primary species concentration.
   const VariableValue & _u_old;
 };
-

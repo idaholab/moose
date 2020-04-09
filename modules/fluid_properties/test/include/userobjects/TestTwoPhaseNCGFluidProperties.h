@@ -11,11 +11,6 @@
 
 #include "TwoPhaseNCGFluidProperties.h"
 
-class TestTwoPhaseNCGFluidProperties;
-
-template <>
-InputParameters validParams<TestTwoPhaseNCGFluidProperties>();
-
 /**
  * Test 2-phase NCG fluid properties
  *
@@ -28,4 +23,3 @@ public:
 
   TestTwoPhaseNCGFluidProperties(const InputParameters & parameters);
 };
-

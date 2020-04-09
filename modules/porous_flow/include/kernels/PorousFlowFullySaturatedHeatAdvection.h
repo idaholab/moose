@@ -11,11 +11,6 @@
 
 #include "PorousFlowFullySaturatedDarcyBase.h"
 
-class PorousFlowFullySaturatedHeatAdvection;
-
-template <>
-InputParameters validParams<PorousFlowFullySaturatedHeatAdvection>();
-
 /**
  * Advection of heat via flux via Darcy flow of a single phase
  * fully-saturated fluid.  No upwinding is used.
@@ -37,4 +32,3 @@ protected:
   /// Derivative of the enthalpy wrt PorousFlow variables
   const MaterialProperty<std::vector<std::vector<Real>>> & _denthalpy_dvar;
 };
-

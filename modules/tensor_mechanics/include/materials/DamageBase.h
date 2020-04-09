@@ -14,10 +14,6 @@
 #include "RankTwoTensor.h"
 
 // Forward declaration
-class DamageBase;
-
-template <>
-InputParameters validParams<DamageBase>();
 
 /**
  * DamageBase is a base class for damage models, which modify the stress tensor

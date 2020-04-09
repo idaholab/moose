@@ -12,12 +12,8 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class HomogenizationKernel;
 class SymmElasticityTensor;
 class SymmTensor;
-
-template <>
-InputParameters validParams<HomogenizationKernel>();
 
 class HomogenizationKernel : public Kernel
 {

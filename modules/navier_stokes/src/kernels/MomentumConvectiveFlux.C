@@ -11,8 +11,6 @@
 
 registerMooseObject("NavierStokesApp", MomentumConvectiveFlux);
 
-defineLegacyParams(MomentumConvectiveFlux);
-
 InputParameters
 MomentumConvectiveFlux::validParams()
 {

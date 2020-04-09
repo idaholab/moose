@@ -14,8 +14,6 @@ registerMooseObject("HeatConductionApp", GrayLambertNeumannBC);
 
 Real GrayLambertNeumannBC::_sigma_stefan_boltzmann = 5.670367e-8;
 
-defineLegacyParams(GrayLambertNeumannBC);
-
 InputParameters
 GrayLambertNeumannBC::validParams()
 {

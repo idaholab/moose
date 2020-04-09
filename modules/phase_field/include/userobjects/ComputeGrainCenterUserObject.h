@@ -12,10 +12,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class ComputeGrainCenterUserObject;
-
-template <>
-InputParameters validParams<ComputeGrainCenterUserObject>();
 
 /**
  * This UserObject computes a volumes and centers of grains.
@@ -46,4 +42,3 @@ protected:
   std::vector<Point> _grain_centers;
   ///@}
 };
-

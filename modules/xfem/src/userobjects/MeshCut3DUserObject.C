@@ -21,8 +21,6 @@
 
 registerMooseObject("XFEMApp", MeshCut3DUserObject);
 
-defineLegacyParams(MeshCut3DUserObject);
-
 InputParameters
 MeshCut3DUserObject::validParams()
 {

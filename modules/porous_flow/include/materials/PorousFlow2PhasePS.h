@@ -12,10 +12,6 @@
 #include "PorousFlowVariableBase.h"
 
 class PorousFlowCapillaryPressure;
-class PorousFlow2PhasePS;
-
-template <>
-InputParameters validParams<PorousFlow2PhasePS>();
 
 /**
  * Material designed to calculate fluid-phase porepressures and saturations at nodes
@@ -57,4 +53,3 @@ protected:
   /// Capillary pressure UserObject
   const PorousFlowCapillaryPressure & _pc_uo;
 };
-

@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class NavierStokesApp;
-
-template <>
-InputParameters validParams<NavierStokesApp>();
-
 class NavierStokesApp : public MooseApp
 {
 public:
@@ -32,4 +27,3 @@ public:
   static void registerExecFlags(Factory & factory);
   static void associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory);
 };
-

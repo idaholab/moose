@@ -14,11 +14,7 @@
 #include <set>
 
 // Forward Declarations
-class GeneralizedPlaneStrain;
 class GeneralizedPlaneStrainUserObject;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrain>();
 
 class GeneralizedPlaneStrain : public ScalarKernel
 {

@@ -23,8 +23,6 @@
 
 registerMooseAction("PorousFlowApp", PorousFlowAddMaterialAction, "meta_action");
 
-defineLegacyParams(PorousFlowAddMaterialAction);
-
 InputParameters
 PorousFlowAddMaterialAction::validParams()
 {

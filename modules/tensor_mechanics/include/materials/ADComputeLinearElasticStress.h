@@ -16,11 +16,6 @@
   using ADComputeLinearElasticStress<compute_stage>::_elasticity_tensor;                           \
   using ADComputeLinearElasticStress<compute_stage>::_elasticity_tensor_name;
 
-template <ComputeStage>
-class ADComputeLinearElasticStress;
-
-declareADValidParams(ADComputeLinearElasticStress);
-
 /**
  * ADComputeLinearElasticStress computes the stress following linear elasticity theory (small
  * strains)

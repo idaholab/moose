@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "MeshModifier.h"
 
-// Forward declerations
-class ElemUniqueSubdomains;
-
-template <>
-InputParameters validParams<ElemUniqueSubdomains>();
-
 /**
  * MeshModifier for assigning subdomain IDs of all elements
  */
@@ -29,4 +23,3 @@ public:
 protected:
   virtual void modify() override;
 };
-

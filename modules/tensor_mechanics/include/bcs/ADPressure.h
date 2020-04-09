@@ -13,11 +13,6 @@
 
 class Function;
 
-template <ComputeStage>
-class ADPressure;
-
-declareADValidParams(ADPressure);
-
 /**
  * ADPressure applies a pressure on a given boundary in the direction defined by component
  */

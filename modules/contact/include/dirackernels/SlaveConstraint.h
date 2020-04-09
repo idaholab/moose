@@ -14,12 +14,8 @@
 #include "PenetrationLocator.h"
 
 // Forward Declarations
-class SlaveConstraint;
 enum class ContactModel;
 enum class ContactFormulation;
-
-template <>
-InputParameters validParams<SlaveConstraint>();
 
 class SlaveConstraint : public DiracKernel
 {

@@ -13,10 +13,6 @@
 #include "BoundaryFluxBase.h"
 
 // Forward Declarations
-class AEFVBC;
-
-template <>
-InputParameters validParams<AEFVBC>();
 
 /**
  * A boundary condition object for the advection equation
@@ -67,4 +63,3 @@ protected:
   /// bounadry flux object
   const BoundaryFluxBase & _flux;
 };
-

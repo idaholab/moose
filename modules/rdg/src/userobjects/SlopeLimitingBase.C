@@ -15,8 +15,6 @@
 // Static mutex definition
 Threads::spin_mutex SlopeLimitingBase::_mutex;
 
-defineLegacyParams(SlopeLimitingBase);
-
 InputParameters
 SlopeLimitingBase::validParams()
 {

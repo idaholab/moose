@@ -45,8 +45,6 @@ dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void
 
 registerMooseObject("PhaseFieldApp", GrainTracker);
 
-defineLegacyParams(GrainTracker);
-
 InputParameters
 GrainTracker::validParams()
 {

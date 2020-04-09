@@ -12,10 +12,6 @@
 #include "KKSMultiACBulkBase.h"
 
 // Forward Declarations
-class KKSMultiACBulkF;
-
-template <>
-InputParameters validParams<KKSMultiACBulkF>();
 
 /**
  * KKSMultiACBulkBase child class for the free energy term
@@ -44,4 +40,3 @@ protected:
   /// Second derivative of the double well function \f$ \frac {d^2}{d\eta^2} g(\eta) \f$
   const MaterialProperty<Real> & _prop_d2gi;
 };
-

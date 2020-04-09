@@ -13,10 +13,6 @@
 
 class SinglePhaseFluidProperties;
 class Water97FluidProperties;
-class PorousFlowWaterNCG;
-
-template <>
-InputParameters validParams<PorousFlowWaterNCG>();
 
 /**
  * Specialized class for water and a non-condensable gas (NCG)

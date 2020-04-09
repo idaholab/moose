@@ -11,8 +11,6 @@
 #include "Function.h"
 #include "MathUtils.h"
 
-defineLegacyParams(RadiativeHeatFluxBCBase);
-
 InputParameters
 RadiativeHeatFluxBCBase::validParams()
 {

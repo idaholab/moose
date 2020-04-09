@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", MatAnisoDiffusion);
 
-defineLegacyParams(MatAnisoDiffusion);
-
 InputParameters
 MatAnisoDiffusion::validParams()
 {

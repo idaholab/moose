@@ -12,11 +12,7 @@
 #include "GrainDataTracker.h"
 #include "RankFourTensor.h"
 
-class GrainTrackerElasticity;
 class EulerAngleProvider;
-
-template <>
-InputParameters validParams<GrainTrackerElasticity>();
 
 /**
  * Manage a list of elasticity tensors for the grains
@@ -40,4 +36,3 @@ protected:
   /// object providing the Euler angles
   const EulerAngleProvider & _euler;
 };
-

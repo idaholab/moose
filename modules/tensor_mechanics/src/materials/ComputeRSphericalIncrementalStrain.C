@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeRSphericalIncrementalStrain);
 
-defineLegacyParams(ComputeRSphericalIncrementalStrain);
-
 InputParameters
 ComputeRSphericalIncrementalStrain::validParams()
 {

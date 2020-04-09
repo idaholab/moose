@@ -12,11 +12,6 @@
 #include "StressUpdateBase.h"
 #include "LinearViscoelasticityBase.h"
 
-class LinearViscoelasticStressUpdate;
-
-template <>
-InputParameters validParams<LinearViscoelasticStressUpdate>();
-
 /**
  * This class computes a creep strain increment associated with a linear viscoelastic
  * model contained in a LinearViscoelasticityBase material. The creep strain increment

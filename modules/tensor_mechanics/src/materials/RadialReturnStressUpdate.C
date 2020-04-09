@@ -12,8 +12,6 @@
 #include "MooseMesh.h"
 #include "ElasticityTensorTools.h"
 
-defineLegacyParams(RadialReturnStressUpdate);
-
 InputParameters
 RadialReturnStressUpdate::validParams()
 {

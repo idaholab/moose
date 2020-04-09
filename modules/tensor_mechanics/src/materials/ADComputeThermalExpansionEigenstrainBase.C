@@ -10,8 +10,6 @@
 #include "ADComputeThermalExpansionEigenstrainBase.h"
 #include "RankTwoTensor.h"
 
-defineADLegacyParams(ADComputeThermalExpansionEigenstrainBase);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams()

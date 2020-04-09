@@ -121,6 +121,3 @@ protected:
   Point & _p1;
   Point & _p2;
 };
-
-template <>
-InputParameters validParams<GapConductance>();

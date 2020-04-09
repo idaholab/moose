@@ -11,11 +11,6 @@
 
 #include "PorousFlowSinglePhaseBase.h"
 
-class PorousFlowFullySaturated;
-
-template <>
-InputParameters validParams<PorousFlowFullySaturated>();
-
 /**
  * Action for simulation involving a single phase fully saturated fluid.
  */
@@ -32,4 +27,3 @@ protected:
   virtual void addMaterials() override;
   virtual void addUserObjects() override;
 };
-

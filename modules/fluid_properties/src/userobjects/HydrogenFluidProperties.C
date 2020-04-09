@@ -14,8 +14,6 @@
 
 registerMooseObject("FluidPropertiesApp", HydrogenFluidProperties);
 
-defineLegacyParams(HydrogenFluidProperties);
-
 InputParameters
 HydrogenFluidProperties::validParams()
 {

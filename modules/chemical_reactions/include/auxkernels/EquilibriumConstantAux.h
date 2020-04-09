@@ -13,11 +13,6 @@
 #include "EquilibriumConstantFit.h"
 #include "PolynomialFit.h"
 
-class EquilibriumConstantAux;
-
-template <>
-InputParameters validParams<EquilibriumConstantAux>();
-
 /**
  * Equilibrium constant (in the form log10(Keq)) calculated using a least-squares
  * fit to the data provided (typically taken from a geochemical database).
@@ -59,4 +54,3 @@ protected:
   /// Linear least-squares fit
   std::unique_ptr<PolynomialFit> _linear_logk;
 };
-

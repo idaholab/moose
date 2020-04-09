@@ -12,12 +12,9 @@
 #include "NodalBC.h"
 
 // Forward Declarations
-class NSStagnationBC;
 class IdealGasFluidProperties;
 
 // Specialization required of all user-level Moose objects
-template <>
-InputParameters validParams<NSStagnationBC>();
 
 /**
  * This is the base class for the "imposed stagnation" value boundary
@@ -37,4 +34,3 @@ protected:
   // Fluid properties
   const IdealGasFluidProperties & _fp;
 };
-

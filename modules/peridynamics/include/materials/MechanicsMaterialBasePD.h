@@ -11,11 +11,6 @@
 
 #include "PeridynamicsMaterialBase.h"
 
-class MechanicsMaterialBasePD;
-
-template <>
-InputParameters validParams<MechanicsMaterialBasePD>();
-
 /**
  * Base material class for peridynamic solid mechanics models
  */

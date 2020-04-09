@@ -12,11 +12,6 @@
 #include "SinglePhaseFluidProperties.h"
 #include <array>
 
-class Water97FluidProperties;
-
-template <>
-InputParameters validParams<Water97FluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

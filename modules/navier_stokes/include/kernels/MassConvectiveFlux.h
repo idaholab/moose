@@ -11,11 +11,6 @@
 
 #include "Kernel.h"
 
-class MassConvectiveFlux;
-
-template <>
-InputParameters validParams<MassConvectiveFlux>();
-
 /**
  * Mass convective flux: \f$\rho \vec u \cdot \nabla v\f$
  *
@@ -36,4 +31,3 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 };
-

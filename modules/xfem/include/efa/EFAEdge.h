@@ -61,4 +61,3 @@ public:
   void removeEmbeddedNodes();
   void removeEmbeddedNode(EFANode * node);
 };
-

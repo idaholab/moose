@@ -12,10 +12,6 @@
 #include "ACGrGrBase.h"
 
 // Forward Declarations
-class ACGrGrPoly;
-
-template <>
-InputParameters validParams<ACGrGrPoly>();
 
 /**
  * This kernel calculates the residual for grain growth for a single phase,
@@ -35,4 +31,3 @@ protected:
 
   const MaterialProperty<Real> & _gamma;
 };
-

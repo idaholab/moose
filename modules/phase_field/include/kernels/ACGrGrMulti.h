@@ -12,10 +12,6 @@
 #include "ACGrGrBase.h"
 
 // Forward Declarations
-class ACGrGrMulti;
-
-template <>
-InputParameters validParams<ACGrGrMulti>();
 
 /**
  * This kernel calculates the residual for grain growth for a multi-phase,
@@ -48,4 +44,3 @@ protected:
 private:
   Real computedF0du();
 };
-

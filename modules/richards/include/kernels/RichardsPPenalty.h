@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class RichardsPPenalty;
-
-template <>
-InputParameters validParams<RichardsPPenalty>();
 
 /**
  * Kernel = a*(lower - variable) for variable<lower, and zero otherwise

@@ -12,11 +12,6 @@
 #include "Compute2DIncrementalStrain.h"
 #include "SubblockIndexProvider.h"
 
-class ComputePlaneIncrementalStrain;
-
-template <>
-InputParameters validParams<ComputePlaneIncrementalStrain>();
-
 /**
  * ComputePlaneIncrementalStrain defines strain increment
  * for small strains in a 2D planar simulation.

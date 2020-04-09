@@ -87,4 +87,3 @@ public:
   unsigned int getElemIdByNodes(unsigned int * node_id);
   void clearPotentialIsolatedNodes();
 };
-

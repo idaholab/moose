@@ -11,8 +11,6 @@
 
 registerMooseObject("HeatConductionApp", JouleHeatingSource);
 
-defineLegacyParams(JouleHeatingSource);
-
 InputParameters
 JouleHeatingSource::validParams()
 {

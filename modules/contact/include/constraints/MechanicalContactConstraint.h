@@ -14,13 +14,9 @@
 #include "PenetrationLocator.h"
 
 // Forward Declarations
-class MechanicalContactConstraint;
 class ContactLineSearchBase;
 enum class ContactModel;
 enum class ContactFormulation;
-
-template <>
-InputParameters validParams<MechanicalContactConstraint>();
 
 /**
  * A MechanicalContactConstraint forces the value of a variable to be the same on both sides of an

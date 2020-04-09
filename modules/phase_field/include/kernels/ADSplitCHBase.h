@@ -16,12 +16,6 @@
   using ADSplitCHBase<compute_stage>::computeQpResidual;                                           \
   using ADSplitCHBase<compute_stage>::computeDFDC
 
-// Forward Declarations
-template <ComputeStage>
-class ADSplitCHBase;
-
-declareADValidParams(ADSplitCHBase);
-
 /**
  * The pair, ADSplitCHCRes and ADSplitCHWRes, splits the Cahn-Hilliard equation
  * by replacing chemical potential with 'w'.
@@ -40,4 +34,3 @@ protected:
 
   usingKernelMembers;
 };
-

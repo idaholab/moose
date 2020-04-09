@@ -21,8 +21,6 @@
 
 registerMooseObject("RichardsApp", Q2PPorepressureFlux);
 
-defineLegacyParams(Q2PPorepressureFlux);
-
 InputParameters
 Q2PPorepressureFlux::validParams()
 {

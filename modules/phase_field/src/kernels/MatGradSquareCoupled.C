@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", MatGradSquareCoupled);
 
-defineLegacyParams(MatGradSquareCoupled);
-
 InputParameters
 MatGradSquareCoupled::validParams()
 {

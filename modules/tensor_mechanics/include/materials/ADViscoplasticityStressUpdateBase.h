@@ -25,11 +25,6 @@
   using ADViscoplasticityStressUpdateBase<compute_stage>::_porosity_old;                           \
   using ADViscoplasticityStressUpdateBase<compute_stage>::_max_inelastic_increment
 
-template <ComputeStage>
-class ADViscoplasticityStressUpdateBase;
-
-declareADValidParams(ADViscoplasticityStressUpdateBase);
-
 template <ComputeStage compute_stage>
 class ADViscoplasticityStressUpdateBase : public ADStressUpdateBase<compute_stage>
 {

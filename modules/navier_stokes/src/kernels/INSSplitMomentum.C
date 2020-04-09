@@ -12,8 +12,6 @@
 
 registerMooseObject("NavierStokesApp", INSSplitMomentum);
 
-defineLegacyParams(INSSplitMomentum);
-
 InputParameters
 INSSplitMomentum::validParams()
 {

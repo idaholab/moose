@@ -12,15 +12,11 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class ContactDOFSetSize;
 class MooseVariableFEBase;
 namespace libMesh
 {
 class MeshBase;
 }
-
-template <>
-InputParameters validParams<ContactDOFSetSize>();
 
 class ContactDOFSetSize : public GeneralPostprocessor
 {

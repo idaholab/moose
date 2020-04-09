@@ -39,4 +39,3 @@ ConservedUniformNoiseVeneer<T>::getQpRandom()
 {
   return 2.0 * this->getRandomReal() - 1.0;
 }
-

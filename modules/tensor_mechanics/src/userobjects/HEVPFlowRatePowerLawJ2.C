@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", HEVPFlowRatePowerLawJ2);
 
-defineLegacyParams(HEVPFlowRatePowerLawJ2);
-
 InputParameters
 HEVPFlowRatePowerLawJ2::validParams()
 {

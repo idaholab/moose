@@ -12,11 +12,6 @@
 #include "TimeDerivative.h"
 #include "PorousFlowDictator.h"
 
-class PorousFlowDesorpedMassVolumetricExpansion;
-
-template <>
-InputParameters validParams<PorousFlowDesorpedMassVolumetricExpansion>();
-
 /**
  * Kernel = desorped_mass * d(volumetric_strain)/dt
  * which is not lumped to the nodes
@@ -64,4 +59,3 @@ protected:
    */
   Real computeQpJac(unsigned int jvar) const;
 };
-

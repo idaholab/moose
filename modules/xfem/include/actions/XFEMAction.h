@@ -12,11 +12,6 @@
 #include "Action.h"
 #include "UserObjectInterface.h"
 
-class XFEMAction;
-
-template <>
-InputParameters validParams<XFEMAction>();
-
 class XFEMAction : public Action
 {
 public:
@@ -41,4 +36,3 @@ protected:
   std::vector<BoundaryName> _cut_off_bc;
   Real _cut_off_radius;
 };
-

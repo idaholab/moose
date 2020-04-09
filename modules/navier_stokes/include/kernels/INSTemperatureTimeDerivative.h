@@ -12,10 +12,6 @@
 #include "TimeDerivative.h"
 
 // Forward Declarations
-class INSTemperatureTimeDerivative;
-
-template <>
-InputParameters validParams<INSTemperatureTimeDerivative>();
 
 /**
  * This class computes the time derivative for the incompressible
@@ -40,4 +36,3 @@ protected:
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _cp;
 };
-

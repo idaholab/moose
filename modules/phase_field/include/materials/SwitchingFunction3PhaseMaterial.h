@@ -13,10 +13,6 @@
 #include "ExpressionBuilder.h"
 
 // Forward Declarations
-class SwitchingFunction3PhaseMaterial;
-
-template <>
-InputParameters validParams<SwitchingFunction3PhaseMaterial>();
 
 /**
  * Material class to provide switching functions that prevent formation of a
@@ -37,4 +33,3 @@ protected:
   EBTerm _eta_j;
   EBTerm _eta_k;
 };
-

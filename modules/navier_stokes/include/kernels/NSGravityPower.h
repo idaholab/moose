@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class NSGravityPower;
-
-template <>
-InputParameters validParams<NSGravityPower>();
 
 class NSGravityPower : public Kernel
 {
@@ -34,4 +30,3 @@ protected:
 
   const Real _acceleration;
 };
-

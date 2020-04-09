@@ -14,10 +14,6 @@
 #include "RichardsRelPerm.h"
 
 // Forward Declarations
-class RichardsRelPermPrimePrimeAux;
-
-template <>
-InputParameters validParams<RichardsRelPermPrimePrimeAux>();
 
 /**
  * Relative Permeability as a function of effective saturation
@@ -38,4 +34,3 @@ protected:
   /// userobject that defines relative permeability function
   const RichardsRelPerm & _relperm_UO;
 };
-

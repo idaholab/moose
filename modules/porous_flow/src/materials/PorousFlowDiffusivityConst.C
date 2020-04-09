@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowDiffusivityConst);
 
-defineLegacyParams(PorousFlowDiffusivityConst);
-
 InputParameters
 PorousFlowDiffusivityConst::validParams()
 {

@@ -18,8 +18,6 @@
 
 registerMooseObject("LevelSetApp", LevelSetMeshRefinementTransfer);
 
-defineLegacyParams(LevelSetMeshRefinementTransfer);
-
 InputParameters
 LevelSetMeshRefinementTransfer::validParams()
 {

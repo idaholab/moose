@@ -23,7 +23,3 @@ public:
   std::string _var_name_base;
   bool _implicit;
 };
-
-template <>
-InputParameters validParams<RigidBodyMultiKernelAction>();
-

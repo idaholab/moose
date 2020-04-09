@@ -10,7 +10,6 @@
 #pragma once
 #include "SolidModel.h"
 
-
 typedef void (*creep_t)(Real DECRA[],
                         Real DESWA[],
                         Real STATEV[],
@@ -38,10 +37,6 @@ typedef void (*creep_t)(Real DECRA[],
                         int * KINC);
 
 // Forward Declaration
-class AbaqusCreepMaterial;
-
-template <>
-InputParameters validParams<AbaqusCreepMaterial>();
 
 // class define a property
 // class AbaqusCreepMaterial : public VolumetricModel
@@ -103,4 +98,3 @@ protected:
   MaterialProperty<Real> & _total_swell;
   const MaterialProperty<Real> & _total_swell_old;
 };
-

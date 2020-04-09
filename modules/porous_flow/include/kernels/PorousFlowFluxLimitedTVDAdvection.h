@@ -13,10 +13,6 @@
 #include "PorousFlowAdvectiveFluxCalculatorBase.h"
 
 // Forward Declaration
-class PorousFlowFluxLimitedTVDAdvection;
-
-template <>
-InputParameters validParams<PorousFlowFluxLimitedTVDAdvection>();
 
 /**
  * Advection of a quantity with velocity set in the PorousFlowAdvectiveFluxCalculator
@@ -48,4 +44,3 @@ protected:
   /// The user object that computes Kuzmin and Turek's K_ij, R+ and R-, etc quantities
   const PorousFlowAdvectiveFluxCalculatorBase & _fluo;
 };
-

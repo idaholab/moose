@@ -12,13 +12,9 @@
 #include "ComputeEigenstrainBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeThermalExpansionEigenstrainBase;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-template <>
-InputParameters validParams<ComputeThermalExpansionEigenstrainBase>();
 
 /**
  * ComputeThermalExpansionEigenstrainBase is a base class for all models that

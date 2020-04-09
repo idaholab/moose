@@ -12,8 +12,6 @@
 #include "GeneralUserObject.h"
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowFluidStateBase;
-
 /// Phase state enum
 enum class FluidStatePhaseEnum
 {
@@ -45,9 +43,6 @@ struct FluidStateProperties
   DualReal internal_energy;
   std::vector<DualReal> mass_fraction;
 };
-
-template <>
-InputParameters validParams<PorousFlowFluidStateBase>();
 
 /**
  * Base class for fluid states for miscible multiphase flow in porous media.

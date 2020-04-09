@@ -12,10 +12,6 @@
 #include "NSMassBC.h"
 
 // Forward Declarations
-class NSMassSpecifiedNormalFlowBC;
-
-template <>
-InputParameters validParams<NSMassSpecifiedNormalFlowBC>();
 
 /**
  * This class implements the mass equation boundary term with
@@ -39,4 +35,3 @@ protected:
   // Required parameters
   const Real _rhoun;
 };
-

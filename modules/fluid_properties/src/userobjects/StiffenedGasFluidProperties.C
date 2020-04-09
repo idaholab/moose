@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", StiffenedGasFluidProperties);
 
-defineLegacyParams(StiffenedGasFluidProperties);
-
 InputParameters
 StiffenedGasFluidProperties::validParams()
 {

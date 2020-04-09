@@ -11,11 +11,6 @@
 
 #include "NormalDistribution.h"
 
-class TruncatedNormalDistribution;
-
-template <>
-InputParameters validParams<TruncatedNormalDistribution>();
-
 /**
  * A class used to generate a truncated normal distribution
  */

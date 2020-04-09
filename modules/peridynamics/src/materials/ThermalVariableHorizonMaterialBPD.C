@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", ThermalVariableHorizonMaterialBPD);
 
-defineLegacyParams(ThermalVariableHorizonMaterialBPD);
-
 InputParameters
 ThermalVariableHorizonMaterialBPD::validParams()
 {

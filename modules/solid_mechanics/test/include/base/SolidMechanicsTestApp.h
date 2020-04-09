@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class SolidMechanicsTestApp;
-
-template <>
-InputParameters validParams<SolidMechanicsTestApp>();
-
 class SolidMechanicsTestApp : public MooseApp
 {
 public:
@@ -30,4 +25,3 @@ public:
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void registerExecFlags(Factory & factory);
 };
-

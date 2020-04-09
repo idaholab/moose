@@ -15,11 +15,6 @@
 #include "HEVPInternalVarUOBase.h"
 #include "HEVPInternalVarRateUOBase.h"
 
-class FiniteStrainHyperElasticViscoPlastic;
-
-template <>
-InputParameters validParams<FiniteStrainHyperElasticViscoPlastic>();
-
 /**
  * This class solves the viscoplastic flow rate equations in the total form
  * Involves 4 different types of user objects that calculates:

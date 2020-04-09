@@ -14,8 +14,6 @@
 
 registerMooseObject("RichardsApp", RichardsSeff2gasVG);
 
-defineLegacyParams(RichardsSeff2gasVG);
-
 InputParameters
 RichardsSeff2gasVG::validParams()
 {

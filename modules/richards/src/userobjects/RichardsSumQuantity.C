@@ -11,8 +11,6 @@
 
 registerMooseObject("RichardsApp", RichardsSumQuantity);
 
-defineLegacyParams(RichardsSumQuantity);
-
 InputParameters
 RichardsSumQuantity::validParams()
 {

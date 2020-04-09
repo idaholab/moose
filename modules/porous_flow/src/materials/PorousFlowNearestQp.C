@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowNearestQp);
 
-defineLegacyParams(PorousFlowNearestQp);
-
 InputParameters
 PorousFlowNearestQp::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "PorousFlowDarcyVelocityComponent.h"
 
-class PorousFlowDarcyVelocityComponentLowerDimensional;
-
-template <>
-InputParameters validParams<PorousFlowDarcyVelocityComponentLowerDimensional>();
-
 /**
  * Computes a component of the Darcy velocity:
  * -k_ij * krel /(mu a) (nabla_j P - w_j)
@@ -40,4 +35,3 @@ protected:
   /// Fracture aperture (width)
   const VariableValue & _aperture;
 };
-

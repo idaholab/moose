@@ -15,8 +15,6 @@
 
 registerMooseObject("TensorMechanicsApp", ElementPropertyReadFile);
 
-defineLegacyParams(ElementPropertyReadFile);
-
 InputParameters
 ElementPropertyReadFile::validParams()
 {

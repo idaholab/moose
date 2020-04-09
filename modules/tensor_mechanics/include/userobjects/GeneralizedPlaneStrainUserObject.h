@@ -12,7 +12,6 @@
 #include "ElementUserObject.h"
 #include "SubblockIndexProvider.h"
 
-class GeneralizedPlaneStrainUserObject;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
@@ -20,9 +19,6 @@ template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
 class Function;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrainUserObject>();
 
 class GeneralizedPlaneStrainUserObject : public ElementUserObject
 {

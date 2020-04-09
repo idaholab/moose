@@ -14,10 +14,6 @@
 #include "RichardsDensity.h"
 
 // Forward Declarations
-class Q2PNodalMass;
-
-template <>
-InputParameters validParams<Q2PNodalMass>();
 
 /**
  * fluid_mass/dt lumped to the nodes

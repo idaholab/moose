@@ -12,8 +12,6 @@
 
 registerMooseObject("PeridynamicsApp", ThermalConstantHorizonMaterialBPD);
 
-defineLegacyParams(ThermalConstantHorizonMaterialBPD);
-
 InputParameters
 ThermalConstantHorizonMaterialBPD::validParams()
 {

@@ -478,4 +478,3 @@ void dataStore(std::ostream & stream, const SymmTensor & v, void * /*context*/);
 
 template <>
 void dataLoad(std::istream & stream, SymmTensor & v, void * /*context*/);
-

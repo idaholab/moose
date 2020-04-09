@@ -12,11 +12,6 @@
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 
-class FauxGrainTracker;
-
-template <>
-InputParameters validParams<FauxGrainTracker>();
-
 /**
  * This class is a fake grain tracker object, it will not actually track grains nor remap them
  * but will provide the same interface as the grain tracker and can be used as a lightweight
@@ -79,4 +74,3 @@ private:
   /// The centroid of the feature (average of coordinates from entities participating in the volume calculation)
   std::map<unsigned int, Point> _centroid;
 };
-

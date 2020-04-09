@@ -11,8 +11,6 @@
 
 registerMooseObject("ChemicalReactionsApp", EquilibriumConstantAux);
 
-defineLegacyParams(EquilibriumConstantAux);
-
 InputParameters
 EquilibriumConstantAux::validParams()
 {

@@ -13,10 +13,6 @@
 #include "EBSDReader.h"
 
 // Forward Declarations
-class EBSDReaderPointDataAux;
-
-template <>
-InputParameters validParams<EBSDReaderPointDataAux>();
 
 /**
  * This kernel makes data from the EBSDReader GeneralUserObject available
@@ -44,4 +40,3 @@ protected:
   /// precalculated element value
   Real _value;
 };
-

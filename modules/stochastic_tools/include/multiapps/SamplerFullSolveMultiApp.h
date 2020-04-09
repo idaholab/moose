@@ -15,12 +15,8 @@
 
 #include "StochasticToolsTypes.h"
 
-class SamplerFullSolveMultiApp;
 class Sampler;
 class StochasticToolsTransfer;
-
-template <>
-InputParameters validParams<SamplerFullSolveMultiApp>();
 
 class SamplerFullSolveMultiApp : public FullSolveMultiApp, public SamplerInterface
 {

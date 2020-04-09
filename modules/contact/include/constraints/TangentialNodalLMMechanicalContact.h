@@ -13,10 +13,6 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class TangentialNodalLMMechanicalContact;
-
-template <>
-InputParameters validParams<TangentialNodalLMMechanicalContact>();
 
 class TangentialNodalLMMechanicalContact : public NodeFaceConstraint
 {

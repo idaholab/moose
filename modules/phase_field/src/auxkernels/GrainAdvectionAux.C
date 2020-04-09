@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GrainAdvectionAux);
 
-defineLegacyParams(GrainAdvectionAux);
-
 InputParameters
 GrainAdvectionAux::validParams()
 {

@@ -13,10 +13,6 @@
 #include "CrackFrontDefinition.h"
 
 // Forward Declarations
-class InteractionIntegral;
-
-template <>
-InputParameters validParams<InteractionIntegral>();
 
 /**
  * This vectorpostprocessor computes the Interaction Integral, which is

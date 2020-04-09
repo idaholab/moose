@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", HyperElasticPhaseFieldIsoDamage);
 
-defineLegacyParams(HyperElasticPhaseFieldIsoDamage);
-
 InputParameters
 HyperElasticPhaseFieldIsoDamage::validParams()
 {

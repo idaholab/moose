@@ -12,10 +12,6 @@
 #include "GasFreeEnergyBase.h"
 
 // Forward Declarations
-class VanDerWaalsFreeEnergy;
-
-template <>
-InputParameters validParams<VanDerWaalsFreeEnergy>();
 
 /**
  * Material class that provides the free energy of a Van der Waals gas with the
@@ -53,4 +49,3 @@ protected:
   /// Taylor expansion threshold for the logarithm in the free energy
   const Real _log_tol;
 };
-

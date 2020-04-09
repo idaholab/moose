@@ -12,12 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class SwitchingFunctionPenalty;
-
-template <>
-InputParameters validParams<SwitchingFunctionPenalty>();
-
 /**
  * SwitchingFunctionPenalty is a constraint kernel adds a penalty
  * to each order parameter to
@@ -55,4 +49,3 @@ protected:
   /// Index of the eta this kernel is operating on
   int _a;
 };
-

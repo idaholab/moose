@@ -16,8 +16,6 @@
 
 registerMooseObject("ContactApp", ContactPressureAux);
 
-defineLegacyParams(ContactPressureAux);
-
 InputParameters
 ContactPressureAux::validParams()
 {

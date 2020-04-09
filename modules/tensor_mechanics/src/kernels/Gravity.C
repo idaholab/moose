@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", Gravity);
 
-defineLegacyParams(Gravity);
-
 InputParameters
 Gravity::validParams()
 {

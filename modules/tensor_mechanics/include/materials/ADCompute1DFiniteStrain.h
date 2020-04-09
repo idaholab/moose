@@ -18,11 +18,6 @@
   using ADCompute1DFiniteStrain<compute_stage>::computeGradDispZZ;                                 \
   using ADCompute1DFiniteStrain<compute_stage>::computeGradDispZZOld
 
-template <ComputeStage>
-class ADCompute1DFiniteStrain;
-
-declareADValidParams(ADCompute1DFiniteStrain);
-
 /**
  * ADCompute1DFiniteStrain defines a strain increment for finite strains in 1D problems,
  * handling strains in other two directions. It contains virtual methods to define

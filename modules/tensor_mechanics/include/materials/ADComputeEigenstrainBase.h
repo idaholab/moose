@@ -17,16 +17,10 @@
   using ADComputeEigenstrainBase<compute_stage>::_eigenstrain_name
 
 // Forward Declarations
-template <ComputeStage>
-class ADComputeEigenstrainBase;
-
 template <typename>
 class RankTwoTensorTempl;
-
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-
-declareADValidParams(ADComputeEigenstrainBase);
 
 /**
  * ADComputeEigenstrainBase is the base class for eigenstrain tensors

@@ -11,11 +11,6 @@
 
 #include "FluidProperties.h"
 
-class HEMFluidProperties;
-
-template <>
-InputParameters validParams<HEMFluidProperties>();
-
 /**
  * Base class for fluid properties used with HEM
  */
@@ -251,4 +246,3 @@ public:
    */
   virtual Real triplePointTemperature() const;
 };
-

@@ -14,10 +14,6 @@
 #include "RankFourTensor.h"
 
 // Forward Declarations
-class StressDivergenceTensors;
-
-template <>
-InputParameters validParams<StressDivergenceTensors>();
 
 /**
  * StressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use

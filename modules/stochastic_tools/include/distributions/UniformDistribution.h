@@ -11,10 +11,6 @@
 
 #include "Distribution.h"
 
-class UniformDistribution;
-
-template <>
-InputParameters validParams<UniformDistribution>();
 /**
  * A class used to generate uniform distribution
  */

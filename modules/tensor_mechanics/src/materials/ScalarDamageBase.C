@@ -10,8 +10,6 @@
 #include "ScalarDamageBase.h"
 #include "MooseUtils.h"
 
-defineLegacyParams(ScalarDamageBase);
-
 InputParameters
 ScalarDamageBase::validParams()
 {

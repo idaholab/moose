@@ -12,10 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class FeatureVolumeFraction;
-
-template <>
-InputParameters validParams<FeatureVolumeFraction>();
 
 class FeatureVolumeFraction : public GeneralPostprocessor
 {
@@ -45,4 +41,3 @@ protected:
   Real _equil_fraction;
   Real _avrami_value;
 };
-

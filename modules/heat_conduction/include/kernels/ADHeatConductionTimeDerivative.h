@@ -12,11 +12,6 @@
 #include "ADTimeDerivative.h"
 
 template <ComputeStage compute_stage>
-class ADHeatConductionTimeDerivative;
-
-declareADValidParams(ADHeatConductionTimeDerivative);
-
-template <ComputeStage compute_stage>
 class ADHeatConductionTimeDerivative : public ADTimeDerivative<compute_stage>
 {
 public:
@@ -35,4 +30,3 @@ protected:
 
   usingTimeDerivativeMembers;
 };
-

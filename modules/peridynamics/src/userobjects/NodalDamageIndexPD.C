@@ -13,8 +13,6 @@
 
 registerMooseObject("PeridynamicsApp", NodalDamageIndexPD);
 
-defineLegacyParams(NodalDamageIndexPD);
-
 InputParameters
 NodalDamageIndexPD::validParams()
 {

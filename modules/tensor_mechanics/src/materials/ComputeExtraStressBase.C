@@ -9,8 +9,6 @@
 
 #include "ComputeExtraStressBase.h"
 
-defineLegacyParams(ComputeExtraStressBase);
-
 InputParameters
 ComputeExtraStressBase::validParams()
 {

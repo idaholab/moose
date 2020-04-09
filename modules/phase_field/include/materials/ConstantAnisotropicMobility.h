@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-class ConstantAnisotropicMobility;
-
-template <>
-InputParameters validParams<ConstantAnisotropicMobility>();
-
 /**
  * ConstantAnisotropicMobility provides a simple RealTensorValue type
  * MaterialProperty that can be used as a mobility in a phase field simulation.
@@ -38,4 +33,3 @@ protected:
   MaterialPropertyName _M_name;
   MaterialProperty<RealTensorValue> & _M;
 };
-

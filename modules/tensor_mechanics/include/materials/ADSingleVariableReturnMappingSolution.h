@@ -28,11 +28,7 @@
   using ADSingleVariableReturnMappingSolution<compute_stage>::converged
 
 // Forward declarations
-template <ComputeStage>
-class ADSingleVariableReturnMappingSolution;
 class ConsoleStream;
-
-declareADValidParams(ADSingleVariableReturnMappingSolution);
 
 /**
  * Base class that provides capability for Newton return mapping

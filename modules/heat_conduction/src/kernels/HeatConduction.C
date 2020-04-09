@@ -12,8 +12,6 @@
 
 registerMooseObjectAliased("HeatConductionApp", HeatConductionKernel, "HeatConduction");
 
-defineLegacyParams(HeatConductionKernel);
-
 InputParameters
 HeatConductionKernel::validParams()
 {

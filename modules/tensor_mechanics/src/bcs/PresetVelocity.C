@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", PresetVelocity);
 
-defineLegacyParams(PresetVelocity);
-
 InputParameters
 PresetVelocity::validParams()
 {

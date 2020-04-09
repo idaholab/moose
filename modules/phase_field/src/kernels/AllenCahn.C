@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", AllenCahn);
 
-defineLegacyParams(AllenCahn);
-
 InputParameters
 AllenCahn::validParams()
 {

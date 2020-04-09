@@ -12,10 +12,6 @@
 #include "GrainRigidBodyMotionBase.h"
 
 // Forward Declarations
-class MultiGrainRigidBodyMotion;
-
-template <>
-InputParameters validParams<MultiGrainRigidBodyMotion>();
 
 class MultiGrainRigidBodyMotion : public GrainRigidBodyMotionBase
 {
@@ -35,4 +31,3 @@ protected:
   virtual void calculateAdvectionVelocity();
   virtual void getUserObjectJacobian(unsigned int jvar, dof_id_type dof_index);
 };
-

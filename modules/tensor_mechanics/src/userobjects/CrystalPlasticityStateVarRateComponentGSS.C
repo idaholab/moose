@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentGSS);
 
-defineLegacyParams(CrystalPlasticityStateVarRateComponentGSS);
-
 InputParameters
 CrystalPlasticityStateVarRateComponentGSS::validParams()
 {

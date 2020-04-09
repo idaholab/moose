@@ -16,8 +16,6 @@
 
 registerMooseObject("RichardsApp", RichardsMultiphaseProblem);
 
-defineLegacyParams(RichardsMultiphaseProblem);
-
 InputParameters
 RichardsMultiphaseProblem::validParams()
 {

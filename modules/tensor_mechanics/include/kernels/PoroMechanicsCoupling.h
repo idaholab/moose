@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class PoroMechanicsCoupling;
-
-template <>
-InputParameters validParams<PoroMechanicsCoupling>();
 
 /**
  * PoroMechanicsCoupling computes -coefficient*porepressure*grad_test[component]

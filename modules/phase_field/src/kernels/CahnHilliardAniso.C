@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CahnHilliardAniso);
 
-defineLegacyParams(CahnHilliardAniso);
-
 InputParameters
 CahnHilliardAniso::validParams()
 {

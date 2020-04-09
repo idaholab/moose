@@ -12,10 +12,6 @@
 #include "BimodalSuperellipsoidsIC.h"
 
 // Forward Declarations
-class BimodalInverseSuperellipsoidsIC;
-
-template <>
-InputParameters validParams<BimodalInverseSuperellipsoidsIC>();
 
 /**
  * BimodalInverseSuperellipsoidsIC takes a specified number of superellipsoids, each with given
@@ -39,4 +35,3 @@ public:
   virtual void initialSetup();
   virtual void computeSuperellipsoidCenters();
 };
-

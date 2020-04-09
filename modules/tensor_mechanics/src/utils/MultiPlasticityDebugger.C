@@ -11,8 +11,6 @@
 #include "RankFourTensor.h"
 #include "libmesh/utility.h"
 
-defineLegacyParams(MultiPlasticityDebugger);
-
 InputParameters
 MultiPlasticityDebugger::validParams()
 {

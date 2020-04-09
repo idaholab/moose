@@ -16,10 +16,6 @@
 #include "libmesh/fe_type.h"
 
 // Forward declaration
-class NonconservedAction;
-
-template <>
-InputParameters validParams<NonconservedAction>();
 
 class NonconservedAction : public Action
 {
@@ -36,4 +32,3 @@ protected:
   /// FEType for the variable being created
   const FEType _fe_type;
 };
-

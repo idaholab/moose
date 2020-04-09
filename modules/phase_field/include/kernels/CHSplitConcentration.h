@@ -12,11 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class CHSplitConcentration;
-
-template <>
-InputParameters validParams<CHSplitConcentration>();
-
 /**
  * Solves Cahn-Hilliard equation using
  * chemical potential as non-linear variable
@@ -43,4 +38,3 @@ protected:
   const unsigned int _mu_var;
   const VariableGradient & _grad_mu;
 };
-

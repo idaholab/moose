@@ -12,11 +12,6 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsPlasticMeanCapTC;
-
-template <>
-InputParameters validParams<TensorMechanicsPlasticMeanCapTC>();
-
 /**
  * Rate-independent associative mean-cap tensile AND compressive failure
  * with hardening/softening of the tensile and compressive strength.

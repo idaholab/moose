@@ -14,11 +14,6 @@
 #include "RichardsDensity.h"
 #include "RichardsRelPerm.h"
 
-class Q2PBorehole;
-
-template <>
-InputParameters validParams<Q2PBorehole>();
-
 /**
  * Approximates a borehole by a sequence of Dirac Points.
  * This is for use by a Q2P model.
@@ -117,4 +112,3 @@ protected:
    */
   Real jac(unsigned int jvar);
 };
-

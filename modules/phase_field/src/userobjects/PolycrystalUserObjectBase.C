@@ -18,8 +18,6 @@
 #include <map>
 #include <algorithm>
 
-defineLegacyParams(PolycrystalUserObjectBase);
-
 InputParameters
 PolycrystalUserObjectBase::validParams()
 {

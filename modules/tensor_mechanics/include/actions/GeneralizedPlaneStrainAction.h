@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class GeneralizedPlaneStrainAction;
-
-template <>
-InputParameters validParams<GeneralizedPlaneStrainAction>();
-
 class GeneralizedPlaneStrainAction : public Action
 {
 public:

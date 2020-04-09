@@ -11,13 +11,9 @@
 
 #include "Material.h"
 
-class ComputeSurfaceTensionKKS;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-template <>
-InputParameters validParams<ComputeSurfaceTensionKKS>();
 
 class ComputeSurfaceTensionKKS : public Material
 {

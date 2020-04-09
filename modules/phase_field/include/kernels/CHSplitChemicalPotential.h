@@ -12,11 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class CHSplitChemicalPotential;
-
-template <>
-InputParameters validParams<CHSplitChemicalPotential>();
-
 /**
  * Solves chemical potential in a weak sense (mu-mu_prop=0)
  * Can be coupled to Cahn-Hilliard equation to solve species diffusion
@@ -43,4 +38,3 @@ protected:
   const MaterialProperty<Real> & _dchemical_potential_dc;
   const unsigned int _c_var;
 };
-

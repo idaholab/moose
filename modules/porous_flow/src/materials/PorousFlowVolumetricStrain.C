@@ -14,8 +14,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlowVolumetricStrain);
 
-defineLegacyParams(PorousFlowVolumetricStrain);
-
 InputParameters
 PorousFlowVolumetricStrain::validParams()
 {

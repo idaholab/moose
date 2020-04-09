@@ -10,8 +10,6 @@
 #include "MechanicsMaterialBasePD.h"
 #include "MooseVariable.h"
 
-defineLegacyParams(MechanicsMaterialBasePD);
-
 InputParameters
 MechanicsMaterialBasePD::validParams()
 {

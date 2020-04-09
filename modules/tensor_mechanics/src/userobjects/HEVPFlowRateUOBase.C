@@ -9,8 +9,6 @@
 
 #include "HEVPFlowRateUOBase.h"
 
-defineLegacyParams(HEVPFlowRateUOBase);
-
 InputParameters
 HEVPFlowRateUOBase::validParams()
 {

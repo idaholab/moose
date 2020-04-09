@@ -12,15 +12,12 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class MomentBalancing;
 template <typename>
 class RankTwoTensorTempl;
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 template <typename>
 class RankFourTensorTempl;
 typedef RankFourTensorTempl<Real> RankFourTensor;
-template <>
-InputParameters validParams<MomentBalancing>();
 
 /**
  * This Kernel computes

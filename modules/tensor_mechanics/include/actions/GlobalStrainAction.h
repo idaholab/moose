@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class GlobalStrainAction;
-
-template <>
-InputParameters validParams<GlobalStrainAction>();
-
 class GlobalStrainAction : public Action
 {
 public:

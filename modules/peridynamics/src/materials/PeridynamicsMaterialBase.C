@@ -9,8 +9,6 @@
 
 #include "PeridynamicsMaterialBase.h"
 
-defineLegacyParams(PeridynamicsMaterialBase);
-
 InputParameters
 PeridynamicsMaterialBase::validParams()
 {

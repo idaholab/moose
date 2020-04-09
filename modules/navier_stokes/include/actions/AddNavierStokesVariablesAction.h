@@ -11,11 +11,6 @@
 
 #include "NSAction.h"
 
-class AddNavierStokesVariablesAction;
-
-template <>
-InputParameters validParams<AddNavierStokesVariablesAction>();
-
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds all the required nonlinear
@@ -44,4 +39,3 @@ protected:
   std::vector<Real> _scaling;
   std::vector<SubdomainName> _blocks;
 };
-

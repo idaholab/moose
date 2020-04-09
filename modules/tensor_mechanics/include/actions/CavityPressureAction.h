@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class CavityPressureAction;
-
-template <>
-InputParameters validParams<CavityPressureAction>();
-
 class CavityPressureAction : public Action
 {
 public:

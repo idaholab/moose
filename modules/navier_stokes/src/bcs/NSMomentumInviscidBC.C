@@ -9,8 +9,6 @@
 
 #include "NSMomentumInviscidBC.h"
 
-defineLegacyParams(NSMomentumInviscidBC);
-
 InputParameters
 NSMomentumInviscidBC::validParams()
 {

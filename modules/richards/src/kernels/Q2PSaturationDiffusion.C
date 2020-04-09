@@ -11,8 +11,6 @@
 
 registerMooseObject("RichardsApp", Q2PSaturationDiffusion);
 
-defineLegacyParams(Q2PSaturationDiffusion);
-
 InputParameters
 Q2PSaturationDiffusion::validParams()
 {

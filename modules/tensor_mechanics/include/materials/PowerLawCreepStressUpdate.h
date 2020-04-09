@@ -11,11 +11,6 @@
 
 #include "RadialReturnCreepStressUpdateBase.h"
 
-class PowerLawCreepStressUpdate;
-
-template <>
-InputParameters validParams<PowerLawCreepStressUpdate>();
-
 /**
  * This class uses the stress update material in a radial return isotropic creep
  * model.  This class is one of the basic radial return constitutive models; more complex

@@ -16,8 +16,6 @@
 
 registerMooseObject("NavierStokesApp", NSStagnationTemperatureBC);
 
-defineLegacyParams(NSStagnationTemperatureBC);
-
 InputParameters
 NSStagnationTemperatureBC::validParams()
 {

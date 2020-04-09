@@ -11,8 +11,6 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
-defineLegacyParams(MechanicsBaseNOSPD);
-
 InputParameters
 MechanicsBaseNOSPD::validParams()
 {

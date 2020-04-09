@@ -11,11 +11,6 @@
 
 #include "PorousFlowTotalGravitationalDensityBase.h"
 
-class PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity;
-
-template <>
-InputParameters validParams<PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity>();
-
 /**
  * Material designed to provide the density of the porous medium for the
  * fully-saturated case. Density is calculated as a
@@ -51,4 +46,3 @@ protected:
   /// d(porosity)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real>> & _dporosity_qp_dvar;
 };
-

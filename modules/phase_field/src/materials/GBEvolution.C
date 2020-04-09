@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", GBEvolution);
 
-defineLegacyParams(GBEvolution);
-
 InputParameters
 GBEvolution::validParams()
 {

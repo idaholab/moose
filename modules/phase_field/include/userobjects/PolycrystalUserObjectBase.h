@@ -13,10 +13,6 @@
 #include "FeatureFloodCount.h"
 
 // Forward Declarations
-class PolycrystalUserObjectBase;
-
-template <>
-InputParameters validParams<PolycrystalUserObjectBase>();
 
 /**
  * This object provides the base capability for creating proper polycrystal ICs. It is

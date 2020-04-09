@@ -12,8 +12,6 @@
 
 registerMooseObject("FluidPropertiesApp", StagnationTemperatureAux);
 
-defineLegacyParams(StagnationTemperatureAux);
-
 InputParameters
 StagnationTemperatureAux::validParams()
 {

@@ -11,8 +11,6 @@
 
 #include "RankTwoTensor.h"
 
-defineLegacyParams(ComputeEigenstrainBase);
-
 InputParameters
 ComputeEigenstrainBase::validParams()
 {

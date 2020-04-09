@@ -12,12 +12,8 @@
 #include "Kernel.h"
 
 // Forward Declarations
-class StressDivergenceRZ;
 class SymmElasticityTensor;
 class SymmTensor;
-
-template <>
-InputParameters validParams<StressDivergenceRZ>();
 
 class StressDivergenceRZ : public Kernel
 {

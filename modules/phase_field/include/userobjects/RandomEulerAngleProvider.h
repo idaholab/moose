@@ -13,11 +13,7 @@
 #include "MooseRandom.h"
 
 // Forward declaration
-class RandomEulerAngleProvider;
 class GrainTrackerInterface;
-
-template <>
-InputParameters validParams<RandomEulerAngleProvider>();
 
 /**
  * Assign random Euler angles to each grains
@@ -42,4 +38,3 @@ protected:
 
   MooseRandom _random;
 };
-

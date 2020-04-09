@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", EshelbyTensor);
 
-defineLegacyParams(EshelbyTensor);
-
 InputParameters
 EshelbyTensor::validParams()
 {

@@ -16,8 +16,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeCosseratSmallStrain);
 
-defineLegacyParams(ComputeCosseratSmallStrain);
-
 InputParameters
 ComputeCosseratSmallStrain::validParams()
 {

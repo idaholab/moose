@@ -12,10 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class EnthalpyAux;
-
-template <>
-InputParameters validParams<EnthalpyAux>();
 
 /**
  * Nodal auxiliary variable for enthalpy,
@@ -37,4 +33,3 @@ protected:
   const VariableValue & _rho_et;
   const VariableValue & _pressure;
 };
-

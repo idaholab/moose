@@ -10,8 +10,6 @@
 #include "HEMFluidProperties.h"
 #include "FluidProperties.h"
 
-defineLegacyParams(HEMFluidProperties);
-
 InputParameters
 HEMFluidProperties::validParams()
 {

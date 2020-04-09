@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", CHSplitChemicalPotential);
 
-defineLegacyParams(CHSplitChemicalPotential);
-
 InputParameters
 CHSplitChemicalPotential::validParams()
 {

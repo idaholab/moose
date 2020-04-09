@@ -12,11 +12,7 @@
 #include "Material.h"
 
 // Forward Declarations
-class HeatConductionMaterial;
 class Function;
-
-template <>
-InputParameters validParams<HeatConductionMaterial>();
 
 /**
  * Simple material with constant properties.

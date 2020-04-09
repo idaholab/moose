@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ThirdPhaseSuppressionMaterial);
 
-defineLegacyParams(ThirdPhaseSuppressionMaterial);
-
 InputParameters
 ThirdPhaseSuppressionMaterial::validParams()
 {

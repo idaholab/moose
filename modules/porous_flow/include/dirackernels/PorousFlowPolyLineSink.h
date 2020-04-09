@@ -12,11 +12,6 @@
 #include "PorousFlowLineSink.h"
 #include "LinearInterpolation.h"
 
-class PorousFlowPolyLineSink;
-
-template <>
-InputParameters validParams<PorousFlowPolyLineSink>();
-
 /**
  * Approximates a line sink by a sequence of Dirac Points
  */

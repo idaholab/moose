@@ -160,4 +160,3 @@ CahnHilliardBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 
   return CHBulk<T>::computeQpOffDiagJacobian(jvar) + _M[_qp] * _grad_test[_i][_qp] * J;
 }
-

@@ -10,8 +10,6 @@
 #include "GeneralizedPlaneStrainUserObjectBasePD.h"
 #include "RankFourTensor.h"
 
-defineLegacyParams(GeneralizedPlaneStrainUserObjectBasePD);
-
 InputParameters
 GeneralizedPlaneStrainUserObjectBasePD::validParams()
 {

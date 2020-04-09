@@ -11,11 +11,6 @@
 
 #include "RichardsRelPerm.h"
 
-class RichardsRelPermVG;
-
-template <>
-InputParameters validParams<RichardsRelPermVG>();
-
 /**
  * Van-Genuchten form of relative permeability
  * as a function of effective saturation
@@ -52,4 +47,3 @@ protected:
   /// van Genuchten m parameter
   Real _m;
 };
-

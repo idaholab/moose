@@ -12,10 +12,6 @@
 #include "Material.h"
 
 // Forward Declarations
-class InterfaceOrientationMaterial;
-
-template <>
-InputParameters validParams<InterfaceOrientationMaterial>();
 
 /**
  * Material to compute the angular orientation of order parameter interfaces.
@@ -46,4 +42,3 @@ private:
   const VariableValue & _op;
   const VariableGradient & _grad_op;
 };
-

@@ -12,10 +12,6 @@
 #include "INSMomentumNoBCBCBase.h"
 
 // Forward Declarations
-class INSMomentumNoBCBCLaplaceForm;
-
-template <>
-InputParameters validParams<INSMomentumNoBCBCLaplaceForm>();
 
 /**
  * This class implements the "No BC" boundary condition based on the
@@ -35,4 +31,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-

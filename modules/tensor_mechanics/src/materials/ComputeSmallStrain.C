@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeSmallStrain);
 
-defineLegacyParams(ComputeSmallStrain);
-
 InputParameters
 ComputeSmallStrain::validParams()
 {

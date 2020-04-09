@@ -16,11 +16,6 @@
   using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::referenceTemperature;         \
   using ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::meanThermalExpansionCoefficient
 
-template <ComputeStage>
-class ADComputeMeanThermalExpansionEigenstrainBase;
-
-declareADValidParams(ADComputeMeanThermalExpansionEigenstrainBase);
-
 /**
  * ADComputeMeanThermalExpansionEigenstrainBase is a base class for computing the
  * thermal expansion eigenstrain according to a temperature-dependent mean thermal

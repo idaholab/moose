@@ -12,10 +12,6 @@
 #include "ADKernelSUPG.h"
 
 // Forward Declarations
-template <ComputeStage>
-class INSADMomentumSUPG;
-
-declareADValidParams(INSADMomentumSUPG);
 
 /**
  * This class computes the momentum equation residual and Jacobian
@@ -37,4 +33,3 @@ protected:
 
   usingVectorKernelSUPGMembers;
 };
-

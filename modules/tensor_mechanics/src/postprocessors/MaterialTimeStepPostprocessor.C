@@ -19,8 +19,6 @@
 
 registerMooseObject("TensorMechanicsApp", MaterialTimeStepPostprocessor);
 
-defineLegacyParams(MaterialTimeStepPostprocessor);
-
 InputParameters
 MaterialTimeStepPostprocessor::validParams()
 {

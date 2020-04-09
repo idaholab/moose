@@ -35,7 +35,3 @@ protected:
   const AuxVariableName _gap_value_name;
   const AuxVariableName _gap_conductivity_name;
 };
-
-template <>
-InputParameters validParams<ThermalContactAction>();
-

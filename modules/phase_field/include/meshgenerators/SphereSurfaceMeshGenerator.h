@@ -12,11 +12,6 @@
 #include "MeshGenerator.h"
 #include "libmesh/point.h"
 
-class SphereSurfaceMeshGenerator;
-
-template <>
-InputParameters validParams<SphereSurfaceMeshGenerator>();
-
 /**
  * Create a sphere surface mesh based on the recursive subdivision of the faces
  * of a regular icosahedron.
@@ -40,4 +35,3 @@ protected:
   /// recursion levels for triangle subdivision
   const unsigned int _depth;
 };
-

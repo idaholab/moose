@@ -9,8 +9,6 @@
 
 #include "ComputeDilatationThermalExpansionEigenstrainBase.h"
 
-defineLegacyParams(ComputeDilatationThermalExpansionEigenstrainBase);
-
 InputParameters
 ComputeDilatationThermalExpansionEigenstrainBase::validParams()
 {

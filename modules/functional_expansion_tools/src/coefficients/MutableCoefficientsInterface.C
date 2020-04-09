@@ -14,8 +14,6 @@
 
 #include "MutableCoefficientsInterface.h"
 
-defineLegacyParams(MutableCoefficientsInterface);
-
 InputParameters
 MutableCoefficientsInterface::validParams()
 {

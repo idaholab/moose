@@ -13,11 +13,7 @@
 #include "FeatureFloodCount.h"
 
 // Forward Declarations
-class FeatureFloodCountAux;
 class GrainTrackerInterface;
-
-template <>
-InputParameters validParams<FeatureFloodCountAux>();
 
 /**
  * Function auxiliary value
@@ -51,4 +47,3 @@ protected:
   /// precalculated element value
   Real _value;
 };
-

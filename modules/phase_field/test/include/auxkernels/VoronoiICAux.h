@@ -13,10 +13,6 @@
 #include "PolycrystalUserObjectBase.h"
 
 // Forward Declarations
-class VoronoiICAux;
-
-template <>
-InputParameters validParams<VoronoiICAux>();
 
 /**
  * Visualize the location of grain boundaries in a polycrystalline simulation.
@@ -35,4 +31,3 @@ protected:
 
   std::vector<unsigned int> _grain_ids;
 };
-

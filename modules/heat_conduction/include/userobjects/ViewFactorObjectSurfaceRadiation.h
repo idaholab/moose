@@ -12,11 +12,7 @@
 #include "GrayLambertSurfaceRadiationBase.h"
 
 // Forward Declarations
-class ViewFactorObjectSurfaceRadiation;
 class ViewFactorBase;
-
-template <>
-InputParameters validParams<ViewFactorObjectSurfaceRadiation>();
 
 /**
  * ViewFactorObjectSurfaceRadiation computes radiative heat transfer between

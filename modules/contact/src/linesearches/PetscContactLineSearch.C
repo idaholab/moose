@@ -19,8 +19,6 @@
 
 registerMooseObject("ContactApp", PetscContactLineSearch);
 
-defineLegacyParams(PetscContactLineSearch);
-
 InputParameters
 PetscContactLineSearch::validParams()
 {

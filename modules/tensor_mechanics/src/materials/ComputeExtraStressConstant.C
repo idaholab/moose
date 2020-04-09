@@ -11,8 +11,6 @@
 
 registerMooseObject("TensorMechanicsApp", ComputeExtraStressConstant);
 
-defineLegacyParams(ComputeExtraStressConstant);
-
 InputParameters
 ComputeExtraStressConstant::validParams()
 {

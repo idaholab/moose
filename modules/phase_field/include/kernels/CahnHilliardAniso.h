@@ -22,7 +22,3 @@ public:
 
   CahnHilliardAniso(const InputParameters & parameters);
 };
-
-template <>
-InputParameters validParams<CahnHilliardAniso>();
-

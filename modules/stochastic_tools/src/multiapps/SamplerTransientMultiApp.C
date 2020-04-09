@@ -14,8 +14,6 @@
 
 registerMooseObject("StochasticToolsApp", SamplerTransientMultiApp);
 
-defineLegacyParams(SamplerTransientMultiApp);
-
 InputParameters
 SamplerTransientMultiApp::validParams()
 {

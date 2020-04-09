@@ -12,11 +12,6 @@
 #include "ComputeEigenstrain.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeVariableEigenstrain;
-
-template <>
-InputParameters validParams<ComputeVariableEigenstrain>();
-
 /**
  * ComputeVariableEigenstrain computes an Eigenstrain that is a function of
  * variables defined by a base tensor and a scalar function defined in a Derivative Material.

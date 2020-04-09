@@ -13,10 +13,6 @@
 #include "RankTwoTensor.h"
 
 // Forward declarations
-class ElasticEnergyAux;
-
-template <>
-InputParameters validParams<ElasticEnergyAux>();
 
 class ElasticEnergyAux : public AuxKernel
 {

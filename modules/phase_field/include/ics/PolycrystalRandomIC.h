@@ -12,10 +12,6 @@
 #include "RandomICBase.h"
 
 // Forward Declarations
-class PolycrystalRandomIC;
-
-template <>
-InputParameters validParams<PolycrystalRandomIC>();
 
 /**
  * Random initial condition for a polycrystalline material

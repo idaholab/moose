@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class TensorMechanicsTestApp;
-
-template <>
-InputParameters validParams<TensorMechanicsTestApp>();
-
 class TensorMechanicsTestApp : public MooseApp
 {
 public:

@@ -9,8 +9,6 @@
 
 #include "SplitCHCRes.h"
 
-defineLegacyParams(SplitCHCRes);
-
 InputParameters
 SplitCHCRes::validParams()
 {

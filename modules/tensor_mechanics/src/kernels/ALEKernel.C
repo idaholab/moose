@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
-defineLegacyParams(ALEKernel);
-
 InputParameters
 ALEKernel::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "AdvectiveFluxCalculatorBase.h"
 
-class AdvectiveFluxCalculatorConstantVelocity;
-
-template <>
-InputParameters validParams<AdvectiveFluxCalculatorConstantVelocity>();
-
 /**
  * Computes Advective fluxes for a constant velocity
  */
@@ -43,4 +38,3 @@ protected:
   /// grad(Kuzmin-Turek shape function)
   const VariablePhiGradient & _grad_phi;
 };
-

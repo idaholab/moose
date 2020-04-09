@@ -12,10 +12,6 @@
 #include "NSMomentumInviscidBC.h"
 
 // Forward Declarations
-class NSMomentumInviscidSpecifiedPressureBC;
-
-template <>
-InputParameters validParams<NSMomentumInviscidSpecifiedPressureBC>();
 
 /**
  * Momentum equation boundary condition in which pressure is specified (given)
@@ -39,4 +35,3 @@ protected:
   // pressureQpResidualHelper function.
   Real _specified_pressure;
 };
-

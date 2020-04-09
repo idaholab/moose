@@ -11,11 +11,6 @@
 
 #include "MooseApp.h"
 
-class FunctionalExpansionToolsApp;
-
-template <>
-InputParameters validParams<FunctionalExpansionToolsApp>();
-
 class FunctionalExpansionToolsApp : public MooseApp
 {
 public:

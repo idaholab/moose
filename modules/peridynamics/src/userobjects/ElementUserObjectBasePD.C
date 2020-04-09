@@ -11,8 +11,6 @@
 #include "AuxiliarySystem.h"
 #include "PeridynamicsMesh.h"
 
-defineLegacyParams(ElementUserObjectBasePD);
-
 InputParameters
 ElementUserObjectBasePD::validParams()
 {

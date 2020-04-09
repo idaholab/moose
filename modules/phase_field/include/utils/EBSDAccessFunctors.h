@@ -164,4 +164,3 @@ public:
     const unsigned int _index;
   };
 };
-

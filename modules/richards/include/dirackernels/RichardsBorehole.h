@@ -16,11 +16,6 @@
 #include "RichardsRelPerm.h"
 #include "RichardsSeff.h"
 
-class RichardsBorehole;
-
-template <>
-InputParameters validParams<RichardsBorehole>();
-
 /**
  * Approximates a borehole by a sequence of Dirac Points
  */
@@ -155,4 +150,3 @@ protected:
    */
   Real jac(unsigned int wrt_num);
 };
-

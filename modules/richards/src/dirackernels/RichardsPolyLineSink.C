@@ -13,8 +13,6 @@
 
 registerMooseObject("RichardsApp", RichardsPolyLineSink);
 
-defineLegacyParams(RichardsPolyLineSink);
-
 InputParameters
 RichardsPolyLineSink::validParams()
 {

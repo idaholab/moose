@@ -11,11 +11,6 @@
 
 #include "FluidProperties.h"
 
-class SinglePhaseFluidProperties;
-
-template <>
-InputParameters validParams<SinglePhaseFluidProperties>();
-
 /**
  * Adds AD versions of each fluid property. These functions use the Real versions of these methods
  * to compute the AD variables complete with derivatives. Typically, these do not need to be

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", SmoothSuperellipsoidIC);
 
-defineLegacyParams(SmoothSuperellipsoidIC);
-
 InputParameters
 SmoothSuperellipsoidIC::validParams()
 {

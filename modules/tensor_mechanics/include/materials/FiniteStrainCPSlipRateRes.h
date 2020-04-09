@@ -11,11 +11,6 @@
 
 #include "FiniteStrainCrystalPlasticity.h"
 
-class FiniteStrainCPSlipRateRes;
-
-template <>
-InputParameters validParams<FiniteStrainCPSlipRateRes>();
-
 class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
 {
 public:

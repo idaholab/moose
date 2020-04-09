@@ -13,8 +13,6 @@
 
 registerMooseObject("PhaseFieldApp", OutputEulerAngles);
 
-defineLegacyParams(OutputEulerAngles);
-
 InputParameters
 OutputEulerAngles::validParams()
 {

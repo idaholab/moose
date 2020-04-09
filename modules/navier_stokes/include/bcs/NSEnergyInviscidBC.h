@@ -13,10 +13,6 @@
 #include "NSPressureDerivs.h"
 
 // Forward Declarations
-class NSEnergyInviscidBC;
-
-template <>
-InputParameters validParams<NSEnergyInviscidBC>();
 
 /**
  * This class corresponds to the inviscid part of the "natural"
@@ -100,4 +96,3 @@ protected:
   // rho*|u|^2*d(u.n)/dX)
   // (3) d/dX (p*(u.n)) = d(p)/dx*(u.n) + p*d(u.n)/dX
 };
-

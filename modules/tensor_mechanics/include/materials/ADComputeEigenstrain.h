@@ -13,11 +13,6 @@
 
 #define usingADComputeEigenstrainMembers usingComputeEigenstrainBaseMembers
 
-template <ComputeStage>
-class ADComputeEigenstrain;
-
-declareADValidParams(ADComputeEigenstrain);
-
 /**
  * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a
  * base tensor and a scalar function defined in a Derivative Material.

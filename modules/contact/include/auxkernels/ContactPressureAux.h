@@ -35,6 +35,3 @@ protected:
   /// Reference to the PenetrationLocator object
   const PenetrationLocator & _penetration_locator;
 };
-
-template <>
-InputParameters validParams<ContactPressureAux>();

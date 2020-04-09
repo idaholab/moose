@@ -12,10 +12,6 @@
 #include "SmoothCircleBaseIC.h"
 
 // Forward Declarations
-class SpecifiedSmoothCircleIC;
-
-template <>
-InputParameters validParams<SpecifiedSmoothCircleIC>();
 
 /**
  * SpecifiedsmoothCircleIC creates multiple SmoothCircles (number = size of x_positions) that are
@@ -39,4 +35,3 @@ protected:
   std::vector<Real> _z_positions;
   std::vector<Real> _input_radii;
 };
-

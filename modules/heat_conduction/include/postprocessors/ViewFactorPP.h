@@ -11,11 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class ViewFactorPP;
 class ViewFactorBase;
-
-template <>
-InputParameters validParams<ViewFactorPP>();
 
 /**
  * This postprocessor allows to extract view factors from ViewFactor userobjects

@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(ComputeGrainCenterUserObject);
-
 InputParameters
 ComputeGrainCenterUserObject::validParams()
 {

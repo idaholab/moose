@@ -11,8 +11,6 @@
 
 registerMooseObject("PeridynamicsApp", PenaltyDirichletOldValuePD);
 
-defineLegacyParams(PenaltyDirichletOldValuePD);
-
 InputParameters
 PenaltyDirichletOldValuePD::validParams()
 {

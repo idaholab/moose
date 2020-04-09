@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", InclusionProperties);
 
-defineLegacyParams(InclusionProperties);
-
 InputParameters
 InclusionProperties::validParams()
 {
@@ -70,9 +68,8 @@ InclusionProperties::computeQpProperties()
   {
     // Outside the inclusion
     Real l = 0.5 * (x * x + y * y - _a * _a - _b * _b // Parameter l called lambda in the paper
-                    +
-                    std::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
-                              4 * (_a * _a - _b * _b) * y * y));
+                    + std::sqrt(Utility::pow<2>((x * x + y * y - _a * _a + _b * _b)) +
+                                4 * (_a * _a - _b * _b) * y * y));
     Real rho_a = _a / sqrt(_a * _a + l);
     Real rho_b = _b / sqrt(_b * _b + l);
     Real m_x = x / (_a * _a + l);
@@ -82,13 +79,15 @@ InclusionProperties::computeQpProperties()
     Real T_6 = rho_a * rho_a + rho_b * rho_b - 4 * rho_a * rho_a * n_x * n_x -
                4 * rho_b * rho_b * n_y * n_y - 4;
 
-    Real H11 = rho_a * _b * (_a * rho_b + _b * rho_a + 2 * _a * rho_a * rho_a * rho_b +
-                             _b * Utility::pow<3>(rho_a)) /
+    Real H11 = rho_a * _b *
+                   (_a * rho_b + _b * rho_a + 2 * _a * rho_a * rho_a * rho_b +
+                    _b * Utility::pow<3>(rho_a)) /
                    Utility::pow<2>((_a * rho_b + _b * rho_a)) +
                n_x * n_x * (2 - 6 * rho_a * rho_a + (8 * rho_a * rho_a + T_6) * n_x * n_x);
 
-    Real H22 = rho_b * _a * (_a * rho_b + _b * rho_a + 2 * _b * rho_a * rho_b * rho_b +
-                             _a * Utility::pow<3>(rho_b)) /
+    Real H22 = rho_b * _a *
+                   (_a * rho_b + _b * rho_a + 2 * _b * rho_a * rho_b * rho_b +
+                    _a * Utility::pow<3>(rho_b)) /
                    Utility::pow<2>((_a * rho_b + _b * rho_a)) +
                n_y * n_y * (2 - 6 * rho_b * rho_b + (8 * rho_b * rho_b + T_6) * n_y * n_y);
 

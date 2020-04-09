@@ -79,4 +79,3 @@ private:
                                      double xi_1d,
                                      std::vector<double> & xi_2d) const;
 };
-

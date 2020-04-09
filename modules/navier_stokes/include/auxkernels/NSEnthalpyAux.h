@@ -13,10 +13,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class NSEnthalpyAux;
-
-template <>
-InputParameters validParams<NSEnthalpyAux>();
 
 /**
  * Nodal auxiliary variable, for computing enthalpy at the nodes.
@@ -42,4 +38,3 @@ protected:
   const VariableValue & _rhoE;
   const VariableValue & _pressure;
 };
-

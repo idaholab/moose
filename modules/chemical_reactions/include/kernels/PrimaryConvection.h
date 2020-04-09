@@ -12,11 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class PrimaryConvection;
-
-template <>
-InputParameters validParams<PrimaryConvection>();
-
 /**
  * Define the Kernel for a PrimaryConvection operator that looks like:
  * cond * grad_pressure * grad_u
@@ -48,4 +43,3 @@ protected:
   /// Pressure variable number
   const unsigned int _pvar;
 };
-

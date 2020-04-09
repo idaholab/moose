@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", DynamicStressDivergenceTensors);
 
-defineLegacyParams(DynamicStressDivergenceTensors);
-
 InputParameters
 DynamicStressDivergenceTensors::validParams()
 {

@@ -9,8 +9,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-defineLegacyParams(SinglePhaseFluidProperties);
-
 InputParameters
 SinglePhaseFluidProperties::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCapTC);
 
-defineLegacyParams(TensorMechanicsPlasticMeanCapTC);
-
 InputParameters
 TensorMechanicsPlasticMeanCapTC::validParams()
 {

@@ -23,6 +23,3 @@ public:
 
   ADSplitCHWRes(const InputParameters & parameters);
 };
-
-declareADValidParams(ADSplitCHWRes);
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", ConstantGrainForceAndTorque);
 
-defineLegacyParams(ConstantGrainForceAndTorque);
-
 InputParameters
 ConstantGrainForceAndTorque::validParams()
 {

@@ -13,10 +13,7 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class SemiconductorLinearConductivity;
 
-template <>
-InputParameters validParams<SemiconductorLinearConductivity>();
 /**
  * Calculates resistivity and electrical conductivity as a function of temperature.
  * For semiconductor, Steinhart-Hart equation describes the temperature dependence
@@ -46,4 +43,3 @@ private:
   MaterialProperty<Real> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
 };
-

@@ -11,11 +11,6 @@
 
 #include "PorousFlowPorosityBase.h"
 
-class PorousFlowPorosityConst;
-
-template <>
-InputParameters validParams<PorousFlowPorosityConst>();
-
 /**
  * Material to provide a constant value of porosity. This can be specified
  * by either a constant value in the input file, or taken from an aux variable.
@@ -36,4 +31,3 @@ protected:
   /// Constant porosity
   const VariableValue & _input_porosity;
 };
-

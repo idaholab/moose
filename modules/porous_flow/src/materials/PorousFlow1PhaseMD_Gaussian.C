@@ -11,8 +11,6 @@
 
 registerMooseObject("PorousFlowApp", PorousFlow1PhaseMD_Gaussian);
 
-defineLegacyParams(PorousFlow1PhaseMD_Gaussian);
-
 InputParameters
 PorousFlow1PhaseMD_Gaussian::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentVoce);
 
-defineLegacyParams(CrystalPlasticityStateVarRateComponentVoce);
-
 InputParameters
 CrystalPlasticityStateVarRateComponentVoce::validParams()
 {

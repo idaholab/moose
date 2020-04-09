@@ -16,8 +16,6 @@
 
 registerMooseObject("SolidMechanicsApp", AbaqusUmatMaterial);
 
-defineLegacyParams(AbaqusUmatMaterial);
-
 InputParameters
 AbaqusUmatMaterial::validParams()
 {

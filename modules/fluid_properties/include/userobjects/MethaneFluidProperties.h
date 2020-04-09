@@ -12,11 +12,6 @@
 #include "HelmholtzFluidProperties.h"
 #include <array>
 
-class MethaneFluidProperties;
-
-template <>
-InputParameters validParams<MethaneFluidProperties>();
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 

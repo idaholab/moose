@@ -11,12 +11,6 @@
 
 #include "BreakMeshByBlockManualBase.h"
 
-// forward declaration
-class BreakMeshByBlockManual_3Blocks;
-
-template <>
-InputParameters validParams<BreakMeshByBlockManual_3Blocks>();
-
 class BreakMeshByBlockManual_3Blocks : public BreakMeshByBlockManualBase
 {
 public:
@@ -28,4 +22,3 @@ private:
   void updateElements();
   void addInterfaceBoundary();
 };
-

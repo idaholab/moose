@@ -13,12 +13,8 @@
 #include "PolycrystalICTools.h"
 
 // Forward Declarations
-class PolycrystalColoringIC;
 class GrainTrackerInterface;
 class PolycrystalUserObjectBase;
-
-template <>
-InputParameters validParams<PolycrystalColoringIC>();
 
 /**
  * PolycrystalColoringIC creates a polycrystal initial condition.
@@ -41,4 +37,3 @@ protected:
   unsigned int _phase;
   const PolycrystalUserObjectBase & _poly_ic_uo;
 };
-

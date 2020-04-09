@@ -12,10 +12,6 @@
 #include "LineSearch.h"
 
 class FEProblem;
-class ContactLineSearchBase;
-
-template <>
-InputParameters validParams<ContactLineSearchBase>();
 
 /**
  * This class implements a custom line search for use with

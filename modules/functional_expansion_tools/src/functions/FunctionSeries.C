@@ -16,8 +16,6 @@
 
 registerMooseObject("FunctionalExpansionToolsApp", FunctionSeries);
 
-defineLegacyParams(FunctionSeries);
-
 InputParameters
 FunctionSeries::validParams()
 {

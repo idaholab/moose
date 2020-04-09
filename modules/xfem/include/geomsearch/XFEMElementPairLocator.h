@@ -25,4 +25,3 @@ protected:
   std::shared_ptr<XFEM> _xfem;
   bool _use_displaced_mesh;
 };
-

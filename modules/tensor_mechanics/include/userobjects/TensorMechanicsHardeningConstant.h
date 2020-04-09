@@ -11,11 +11,6 @@
 
 #include "TensorMechanicsHardeningModel.h"
 
-class TensorMechanicsHardeningConstant;
-
-template <>
-InputParameters validParams<TensorMechanicsHardeningConstant>();
-
 /**
  * No hardening - the parameter assumes the value _val
  * for all internal parameters

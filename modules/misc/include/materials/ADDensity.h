@@ -12,10 +12,6 @@
 #include "ADMaterial.h"
 
 // Forward Declarations
-template <ComputeStage>
-class ADDensity;
-
-declareADValidParams(ADDensity);
 
 template <ComputeStage compute_stage>
 class ADDensity : public ADMaterial<compute_stage>
@@ -39,4 +35,3 @@ private:
 
   usingMaterialMembers;
 };
-

@@ -23,6 +23,3 @@ public:
 
   ADSplitCHWResAniso(const InputParameters & parameters);
 };
-
-declareADValidParams(ADSplitCHWResAniso);
-

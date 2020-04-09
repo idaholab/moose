@@ -12,8 +12,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeVariableIsotropicElasticityTensor);
 
-defineADLegacyParams(ADComputeVariableIsotropicElasticityTensor);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeVariableIsotropicElasticityTensor<compute_stage>::validParams()

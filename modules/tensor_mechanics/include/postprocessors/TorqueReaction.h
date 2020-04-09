@@ -12,11 +12,7 @@
 #include "NodalPostprocessor.h"
 
 // Forward Declarations
-class TorqueReaction;
 class AuxiliarySystem;
-
-template <>
-InputParameters validParams<TorqueReaction>();
 
 /*
  * TorqueReaction calculates the torque in 2D and 3D about a user-specified

@@ -9,8 +9,6 @@
 
 #include "EulerAngleProvider.h"
 
-defineLegacyParams(EulerAngleProvider);
-
 InputParameters
 EulerAngleProvider::validParams()
 {

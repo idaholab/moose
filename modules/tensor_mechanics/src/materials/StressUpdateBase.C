@@ -11,8 +11,6 @@
 
 #include "MooseMesh.h"
 
-defineLegacyParams(StressUpdateBase);
-
 InputParameters
 StressUpdateBase::validParams()
 {

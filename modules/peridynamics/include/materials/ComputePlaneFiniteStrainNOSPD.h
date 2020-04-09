@@ -11,11 +11,6 @@
 
 #include "ComputeFiniteStrainNOSPD.h"
 
-class ComputePlaneFiniteStrainNOSPD;
-
-template <>
-InputParameters validParams<ComputePlaneFiniteStrainNOSPD>();
-
 /**
  * Material class for 2D correspondence material model for finite strain: plane strain, generalized
  * plane strain, weak plane stress

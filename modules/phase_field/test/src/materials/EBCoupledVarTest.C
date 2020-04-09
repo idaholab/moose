@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", EBCoupledVarTest);
 
-defineLegacyParams(EBCoupledVarTest);
-
 InputParameters
 EBCoupledVarTest::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "SinglePhaseFluidProperties.h"
 
-class FlibeFluidProperties;
-
-template <>
-InputParameters validParams<FlibeFluidProperties>();
-
 /**
  * Fluid properties for 2LiF-BeF2 (flibe) \cite richard.
  */

@@ -1,0 +1,35 @@
+{% set build = pr_num %}
+{% set strbuild = "build_" + build|string %}
+{% set version = "2020.03.17" %}
+
+package:
+  name: moose-opt
+  version: {{ version }}
+
+source:
+  path: ../../moose
+
+build:
+  number: {{ build }}  # [linux,osx]
+  string: {{ strbuild }}
+  skip: true # [win]
+
+requirements:
+  build:
+    - moose-libmesh
+
+  run:
+    - moose-libmesh
+
+test:
+  commands:
+    - test -f $PREFIX/moose/moose_test-opt
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element, multiphysics framework primarily developed by Idaho National Laboratory. This superficial module (moose) if a future placeholder for binary releases of MOOSE.'
+
+extra:
+  recipe-maintainers:
+    - milljm

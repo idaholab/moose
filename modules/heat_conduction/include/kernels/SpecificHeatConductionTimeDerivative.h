@@ -15,10 +15,6 @@
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class SpecificHeatConductionTimeDerivative;
-
-template <>
-InputParameters validParams<SpecificHeatConductionTimeDerivative>();
 
 /**
  * A class for defining the time derivative of the heat equation.
@@ -29,7 +25,7 @@ InputParameters validParams<SpecificHeatConductionTimeDerivative>();
  * "specific_heat", respectively.
  */
 class SpecificHeatConductionTimeDerivative
-    : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
+  : public DerivativeMaterialInterface<JvarMapKernelInterface<TimeDerivative>>
 {
 public:
   static InputParameters validParams();
@@ -53,4 +49,3 @@ protected:
   std::vector<const MaterialProperty<Real> *> _d_density_dargs;
   ///@}
 };
-

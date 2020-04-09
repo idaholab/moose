@@ -14,10 +14,6 @@
 #include "RichardsSeff.h"
 
 // Forward Declarations
-class RichardsSeffAux;
-
-template <>
-InputParameters validParams<RichardsSeffAux>();
 
 /**
  * Calculates effective saturation for a specified variable
@@ -46,4 +42,3 @@ protected:
    */
   std::vector<const VariableValue *> _pressure_vals;
 };
-

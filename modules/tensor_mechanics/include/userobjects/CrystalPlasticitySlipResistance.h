@@ -11,11 +11,6 @@
 
 #include "CrystalPlasticityUOBase.h"
 
-class CrystalPlasticitySlipResistance;
-
-template <>
-InputParameters validParams<CrystalPlasticitySlipResistance>();
-
 /**
  * Crystal plasticity slip resistance userobject class.
  * The virtual functions written below must be

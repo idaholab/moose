@@ -11,11 +11,6 @@
 
 #include "NodalAuxVariableUserObjectBasePD.h"
 
-class NodalNumIntactBondsPD;
-
-template <>
-InputParameters validParams<NodalNumIntactBondsPD>();
-
 /**
  * UserObject class to compute the number of intact bonds for each material point in PD fracture
  * modeling and simulation

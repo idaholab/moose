@@ -13,10 +13,6 @@
 #include "RichardsVarNames.h"
 
 // Forward Declarations
-class RichardsMassChange;
-
-template <>
-InputParameters validParams<RichardsMassChange>();
 
 /**
  * Kernel = (mass - mass_old)/dt

@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class PorousFlowHeatMassTransfer;
-
-template <>
-InputParameters validParams<PorousFlowHeatMassTransfer>();
 
 /**
  * Calculate heat or mass transfer from a coupled variable to u.

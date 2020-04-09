@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class RichardsSeff;
-
-template <>
-InputParameters validParams<RichardsSeff>();
-
 /**
  * Base class for effective saturation as a function of porepressure(s)
  * The functions seff, dseff and d2seff must be over-ridden in the derived class
@@ -65,4 +60,3 @@ public:
                       unsigned int qp,
                       std::vector<std::vector<Real>> & result) const = 0;
 };
-

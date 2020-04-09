@@ -12,11 +12,7 @@
 #include "PorousFlowVariableBase.h"
 #include "PorousFlowFluidStateSingleComponentBase.h"
 
-class PorousFlowFluidStateSingleComponent;
 class PorousFlowCapillaryPressure;
-
-template <>
-InputParameters validParams<PorousFlowFluidStateSingleComponent>();
 
 /**
  * Fluid state class using a persistent set of primary variables for

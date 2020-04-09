@@ -14,8 +14,6 @@
 
 registerMooseObject("NavierStokesApp", NSInflowThermalBC);
 
-defineLegacyParams(NSInflowThermalBC);
-
 InputParameters
 NSInflowThermalBC::validParams()
 {

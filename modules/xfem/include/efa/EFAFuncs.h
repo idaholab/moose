@@ -83,4 +83,3 @@ double linearHexShape3D(unsigned int node_id, std::vector<double> & xi_3d);
 double linearTetShape3D(unsigned int node_id, std::vector<double> & xi_3d);
 
 } // namespace Efa
-

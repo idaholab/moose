@@ -12,10 +12,6 @@
 #include "NSKernel.h"
 
 // Forward Declarations
-class NSMassInviscidFlux;
-
-template <>
-InputParameters validParams<NSMassInviscidFlux>();
 
 class NSMassInviscidFlux : public NSKernel
 {
@@ -29,4 +25,3 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-

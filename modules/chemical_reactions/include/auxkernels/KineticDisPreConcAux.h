@@ -11,11 +11,6 @@
 
 #include "KineticDisPreRateAux.h"
 
-class KineticDisPreConcAux;
-
-template <>
-InputParameters validParams<KineticDisPreConcAux>();
-
 /**
  * Calculate the kinetic mineral species concentrations according to
  * transient state theory rate law.
@@ -32,4 +27,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-

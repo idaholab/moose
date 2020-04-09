@@ -13,8 +13,6 @@
 
 registerADMooseObject("TensorMechanicsApp", ADComputeMeanThermalExpansionFunctionEigenstrain);
 
-defineADLegacyParams(ADComputeMeanThermalExpansionFunctionEigenstrain);
-
 template <ComputeStage compute_stage>
 InputParameters
 ADComputeMeanThermalExpansionFunctionEigenstrain<compute_stage>::validParams()

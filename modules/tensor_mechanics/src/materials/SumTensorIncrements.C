@@ -12,8 +12,6 @@
 
 registerMooseObject("TensorMechanicsApp", SumTensorIncrements);
 
-defineLegacyParams(SumTensorIncrements);
-
 InputParameters
 SumTensorIncrements::validParams()
 {

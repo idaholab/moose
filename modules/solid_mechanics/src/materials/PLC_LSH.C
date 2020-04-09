@@ -13,8 +13,6 @@
 
 registerMooseObject("SolidMechanicsApp", PLC_LSH);
 
-defineLegacyParams(PLC_LSH);
-
 InputParameters
 PLC_LSH::validParams()
 {

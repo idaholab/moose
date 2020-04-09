@@ -10,8 +10,6 @@
 #include "PorousFlowLineSink.h"
 #include "libmesh/utility.h"
 
-defineLegacyParams(PorousFlowLineSink);
-
 InputParameters
 PorousFlowLineSink::validParams()
 {

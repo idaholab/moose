@@ -12,10 +12,6 @@
 #include "SmoothSuperellipsoidBaseIC.h"
 
 // Forward Declarations
-class MultiSmoothSuperellipsoidIC;
-
-template <>
-InputParameters validParams<MultiSmoothSuperellipsoidIC>();
 
 /**
  * MultismoothSuperellipsoidIC creates multiple SmoothSuperellipsoid (number = numbub) that are
@@ -61,4 +57,3 @@ protected:
   std::vector<Real> _semiaxis_b_variation;
   std::vector<Real> _semiaxis_c_variation;
 };
-

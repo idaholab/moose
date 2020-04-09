@@ -12,10 +12,6 @@
 #include "Action.h"
 
 // Forward Declarations
-class CHPFCRFFSplitKernelAction;
-
-template <>
-InputParameters validParams<CHPFCRFFSplitKernelAction>();
 
 /**
  * \todo Needs documentation.
@@ -34,4 +30,3 @@ private:
   const std::string _L_name_base;
   const NonlinearVariableName _n_name;
 };
-

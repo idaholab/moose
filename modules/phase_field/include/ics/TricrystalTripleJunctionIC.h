@@ -12,10 +12,6 @@
 #include "InitialCondition.h"
 
 // Forward Declarations
-class TricrystalTripleJunctionIC;
-
-template <>
-InputParameters validParams<TricrystalTripleJunctionIC>();
 
 /**
  * TricrystalTripleJunctionIC creates a 3-grain structure with a triple junction
@@ -54,4 +50,3 @@ protected:
   ///tangent of the second angle after a shift of pi/2
   Real _tan_theta2;
 };
-

@@ -9,8 +9,6 @@
 
 #include "BoundaryFluxBase.h"
 
-defineLegacyParams(BoundaryFluxBase);
-
 InputParameters
 BoundaryFluxBase::validParams()
 {

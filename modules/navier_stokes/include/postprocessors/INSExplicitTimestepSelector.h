@@ -11,11 +11,6 @@
 
 #include "ElementPostprocessor.h"
 
-class INSExplicitTimestepSelector;
-
-template <>
-InputParameters validParams<INSExplicitTimestepSelector>();
-
 /**
  * Postprocessor that computes the minimum value of h_min/|u|,
  * where |u| is coupled in as an aux variable.
@@ -52,4 +47,3 @@ protected:
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _rho;
 };
-

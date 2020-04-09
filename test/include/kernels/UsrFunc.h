@@ -68,4 +68,3 @@ ManSol4ADR2exd(const Point & p, const Parameters &, const std::string &, const s
 
 Number ManSolzeroV(const Point & p, const Parameters &, const std::string &, const std::string &);
 Gradient ManSolzeroG(const Point & p, const Parameters &, const std::string &, const std::string &);
-

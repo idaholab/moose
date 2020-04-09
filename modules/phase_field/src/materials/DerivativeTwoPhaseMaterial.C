@@ -11,8 +11,6 @@
 
 registerMooseObject("PhaseFieldApp", DerivativeTwoPhaseMaterial);
 
-defineLegacyParams(DerivativeTwoPhaseMaterial);
-
 InputParameters
 DerivativeTwoPhaseMaterial::validParams()
 {

@@ -13,11 +13,6 @@
 
 #include <array>
 
-class EBSDMesh;
-
-template <>
-InputParameters validParams<EBSDMesh>();
-
 /**
  * Mesh generated from parameters
  */
@@ -57,4 +52,3 @@ protected:
   /// EBSD data file mesh information
   EBSDMeshGeometry _geometry;
 };
-

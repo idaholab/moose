@@ -13,11 +13,6 @@
 
 #include "RankTwoTensor.h"
 
-class ComputeVariableBaseEigenStrain;
-
-template <>
-InputParameters validParams<ComputeVariableBaseEigenStrain>();
-
 /**
  * ComputeVariableBaseEigenstrain computes an Eigenstrain based on a real tensor value material
  * property base (a),

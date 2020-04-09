@@ -20,8 +20,6 @@ registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "validate_coordin
 
 registerMooseAction("TensorMechanicsApp", PoroMechanicsAction, "add_kernel");
 
-defineLegacyParams(PoroMechanicsAction);
-
 InputParameters
 PoroMechanicsAction::validParams()
 {

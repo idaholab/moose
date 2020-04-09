@@ -11,11 +11,6 @@
 
 #include "ComputeSmallStrainMaterialBaseOSPD.h"
 
-class ComputeSmallStrainConstantHorizonMaterialOSPD;
-
-template <>
-InputParameters validParams<ComputeSmallStrainConstantHorizonMaterialOSPD>();
-
 /**
  * Material class for ordinary state based peridynamic solid mechanics model based on regular
  * spatial discretization

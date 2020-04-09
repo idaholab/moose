@@ -14,8 +14,6 @@
 
 registerMooseObject("TensorMechanicsApp", NodalRotationalInertia);
 
-defineLegacyParams(NodalRotationalInertia);
-
 InputParameters
 NodalRotationalInertia::validParams()
 {

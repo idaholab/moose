@@ -14,14 +14,10 @@
 #include "MooseMesh.h"
 
 // Forward Declarations
-class XFEMSingleVariableConstraint;
 
 class XFEM;
 
 class Function;
-
-template <>
-InputParameters validParams<XFEMSingleVariableConstraint>();
 
 class XFEMSingleVariableConstraint : public ElemElemConstraint
 {

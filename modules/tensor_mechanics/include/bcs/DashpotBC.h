@@ -12,10 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class DashpotBC;
-
-template <>
-InputParameters validParams<DashpotBC>();
 
 /**
  * Implements a simple constant Dashpot BC where grad(u)=value on the boundary.

@@ -11,8 +11,6 @@
 
 registerMooseObject("FluidPropertiesApp", SodiumProperties);
 
-defineLegacyParams(SodiumProperties);
-
 InputParameters
 SodiumProperties::validParams()
 {

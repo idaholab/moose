@@ -11,11 +11,6 @@
 
 #include "FunctionAux.h"
 
-class FunctionSeriesToAux;
-
-template <>
-InputParameters validParams<FunctionSeriesToAux>();
-
 /**
  * Specialization of FunctionAux that is designed to work specifically with FXs, namely that it is
  * always processed at timestep_begin
