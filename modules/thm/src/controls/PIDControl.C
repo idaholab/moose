@@ -25,7 +25,8 @@ PIDControl::PIDControl(const InputParameters & parameters)
     _K_d(getParam<Real>("K_d")),
     _output(declareComponentControlData<Real>("output")),
     _integral(declareRestartableData<Real>("integral", getParam<Real>("initial_value"))),
-    _error_old(0.)
+    _error(declareComponentControlData<Real>("error")),
+    _error_old(getComponentControlDataOld<Real>("error"))
 {
   if (_K_d > 0)
     mooseWarning("You are trying to use the derivative term in your PID controller. That will have "
@@ -36,10 +37,7 @@ PIDControl::PIDControl(const InputParameters & parameters)
 void
 PIDControl::execute()
 {
-  Real error = _set_point - _value;
-  _integral = _integral + _K_i * (error * _dt);
-  _output = _K_p * error + _integral + _K_d * (error - _error_old) / _dt;
-  // FIXME: if time step solve fails, _error_old will be wrong. This needs to happen only on a
-  // successful solve.
-  _error_old = error;
+  _error = _set_point - _value;
+  _integral = _integral + _K_i * (_error * _dt);
+  _output = _K_p * _error + _integral + _K_d * (_error - _error_old) / _dt;
 }

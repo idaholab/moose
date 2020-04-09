@@ -2,7 +2,7 @@
 # long pipe and adjusts the inlet stagnation temperature using a PID controller with
 # set point at 340 K.  The pipe is filled with water at T = 350 K. The purpose is to
 # make sure that the channel fills with colder liquid and levels at the set point
-# value. In steady state that should be a flat temperature profile at ~340 K.
+# value. In steady state there should be a flat temperature profile at ~340 K.
 
 [GlobalParams]
   initial_p = 100.e3
@@ -98,7 +98,7 @@
 
 [Executioner]
   type = Transient
-  dt = 1
+  dt = 5
   abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
@@ -111,9 +111,18 @@
   l_max_its = 5
 
   start_time = 0.0
-  end_time = 100.0
+  end_time = 300.0
 []
 
 [Outputs]
-  csv = true
+  [./out]
+    type = CSV
+    execute_on = 'final'
+  [../]
+
+  [./console]
+    type = Console
+    max_rows = 1
+  [../]
+  print_linear_residuals = false
 []
