@@ -298,7 +298,8 @@ public:
       LOG10,
       EXP,
       SINH,
-      COSH
+      COSH,
+      SQRT
     } _type;
 
     EBUnaryFuncTermNode(EBTermNode * subnode, NodeType type)
@@ -1116,6 +1117,7 @@ public:
     friend EBTerm exp(const EBTerm &);
     friend EBTerm sinh(const EBTerm &);
     friend EBTerm cosh(const EBTerm &);
+    friend EBTerm sqrt(const EBTerm &);
 
 /*
  * Binary operators (including number,term operations)

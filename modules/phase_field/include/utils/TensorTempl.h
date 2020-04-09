@@ -2,6 +2,7 @@
 
 #include "MooseError.h"
 
+using std::sqrt;
 // nested initializer list
 
 template <typename T, std::size_t depth>
@@ -97,6 +98,14 @@ public:
   void setAccessor();
 
   void applyFunction(void (*function)(T & t));
+
+  virtual T norm()
+  {
+    T result = 0;
+    for (unsigned int i = 0; i < _data.size(); ++i)
+      result += _data[i] * _data[i];
+    return sqrt(result);
+  }
 
 protected:
   std::vector<T> _data;

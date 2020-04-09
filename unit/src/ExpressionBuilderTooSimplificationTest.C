@@ -81,6 +81,11 @@ TEST_F(ExpressionBuilderTooSimplificationTest, test)
   b.simplify();
   EXPECT_EQ(std::string(b), "2^(a+1)");
 
+  EBTensor s = {{1, 2, 3}, {1, 2, 3}};
+  std::cout << s << std::endl;
+
+  std::cout << s.norm() << std::endl;
+
   std::cout << std::string(b) << std::endl;
   std::cout << std::endl;
   std::cout << std::endl;

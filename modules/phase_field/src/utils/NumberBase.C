@@ -268,6 +268,14 @@ NumberBase::cosh(NumberBase & rhs)
 }
 
 NumberBase &
+NumberBase::sqrt(NumberBase & rhs)
+{
+  Real rhs_num = rhs.getRealNumber();
+  NumberBase * new_num = getNumber(std::sqrt(rhs_num));
+  return *new_num;
+}
+
+NumberBase &
 NumberBase::min(NumberBase & lhs, NumberBase & rhs)
 {
   Real rhs_num = rhs.getRealNumber();

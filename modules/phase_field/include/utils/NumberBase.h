@@ -44,6 +44,7 @@ public:
   static NumberBase & exp(NumberBase & rhs);
   static NumberBase & sinh(NumberBase & rhs);
   static NumberBase & cosh(NumberBase & rhs);
+  static NumberBase & sqrt(NumberBase & rhs);
 
   static NumberBase & min(NumberBase & lhs, NumberBase & rhs);
   static NumberBase & max(NumberBase & lhs, NumberBase & rhs);

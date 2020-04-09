@@ -347,7 +347,8 @@ ExpressionBuilderToo::EBUnaryTermNode::substitute(
 std::string
 ExpressionBuilderToo::EBUnaryFuncTermNode::stringify() const
 {
-  const char * name[] = {"sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh"};
+  const char * name[] = {
+      "sin", "cos", "tan", "abs", "log", "log2", "log10", "exp", "sinh", "cosh", "sqrt"};
   std::ostringstream s;
   s << name[_type] << '(' << *_subnode << ')';
   return s.str();
@@ -380,6 +381,8 @@ ExpressionBuilderToo::EBUnaryFuncTermNode::getValue()
       return NumberBase::sinh(*value);
     case COSH:
       return NumberBase::cosh(*value);
+    case SQRT:
+      return NumberBase::sqrt(*value);
     default:
       mooseError("Undefined type");
   }
@@ -469,6 +472,10 @@ ExpressionBuilderToo::EBUnaryFuncTermNode::derivative(const std::string & deriva
       new_right = _subnode->derivative(derivative_comp);
       deriv_node = new EBBinaryOpTermNode(new_left, new_right, EBBinaryOpTermNode::NodeType::MUL);
       break;
+    case SQRT:
+      pow_left = new EBBinaryOpTermNode(
+          _subnode, new EBNumberNode<Real>(0.5), EBBinaryOpTermNode::NodeType::POW);
+      deriv_node = pow_left->derivative(derivative_comp);
   }
   return deriv_node;
 }
@@ -1407,6 +1414,7 @@ UNARY_FUNC_IMPLEMENT_TOO(log10, LOG10)
 UNARY_FUNC_IMPLEMENT_TOO(exp, EXP)
 UNARY_FUNC_IMPLEMENT_TOO(sinh, SINH)
 UNARY_FUNC_IMPLEMENT_TOO(cosh, COSH)
+UNARY_FUNC_IMPLEMENT_TOO(sqrt, SQRT)
 
 #define BINARY_FUNC_IMPLEMENT_TOO(op, OP)                                                          \
   ExpressionBuilderToo::EBTerm op(const ExpressionBuilderToo::EBTerm & left,                       \
