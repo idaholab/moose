@@ -1,0 +1,115 @@
+
+# Finite Volumes in MOOSE
+
+MOOSE has traditionally been a finite element (FE) framework.  It is built on
+and takes heavy advantage of the libMesh FE library.  Traditionally, the
+finite volume (FV) method doesn't really have shape-functions to describe
+continuous solutions within mesh cells.  Instead it uses a constant solution
+within each mesh element/cell. Because of this, much of MOOSE's use of libMesh
+for FE is not relevant for FV.  This document gives an overview of how FV is
+similar and different from FE with respect to implementation in MOOSE
+explaining why FV is designed and implemented in its current form.  In order
+to fully enable taking advantage of perfomance opportunities and to simplify
+the FV method implementation in MOOSE, a new set of FV-specific systems was
+built along-side the MOOSE FE infrastructure.
+
+## Variables
+
+FV-specific (dependent) variable classes were create along side the
+FE-specific ones sharing common base functionality.  This is responsible for
+caculating and providing FV cell/face solution values to objects that need
+them.  Higher-order reconstruction will also be plumbed into here eventually.
+Ghost cells for boundary conditions and other important functionality is
+handled automatically at this level so kernel and boundary condition code can
+be written nearly like the FE equivalents.
+
+## FV Kernels
+
+Flux Kernels: 
+
+Elemental Kernels: The FV method does have some element-based
+calculations from source and time terms that are just handled through the
+normal FE elemental residual and jacobian mesh loops.
+
+## Shape Functions and Integration
+
+Because some basic aspects of FV are "simpler" than FE, there is opportunity
+to operate with a lower computational cost per element than with the FE
+method.  The FV implementation does the following differently than FE:
+
+* skips initialization/storage of shape-function data structures
+
+* skips calculation of dependent variable values at quadrature-points - the
+  coefficients (degrees of freedom) from the solution vector(s) can be
+  directly used. FV only needs that one value per cell.
+
+* skips element integration routines/loops not needed for FV's
+  cell-constant solution.
+
+Taking full advantage of these and other opportunities will take significant
+work and FV performance can be expected to improve over time.  Some quadrature
+point concepts have been retained for FV in MOOSE. This allows for future
+expansion to higher-order cell solution variable representations in addition
+to preserving similarity of APIs for users already familiar with MOOSE's other
+objects and systems.
+
+## Looping over Faces
+
+Significant portions of the FV method are naturally cell-face oriented.
+libMesh does not provide facilities for looping over and working with faces.
+FV-specific data structures were created to facilitate looping over mesh faces
+to compute residual contributions from numerical fluxes.
+
+A face loop was implemented along side existing element, node, etc. loops used
+for FE.  This is used for calculating numerical flux contributions from FV
+kernels and boundary conditions.  The face info metadata needed for FV is
+gathered up front (and recomputed whenever the mesh changes) and cached in
+MOOSE's mesh data structure.  Needs with respect to Dirichlet boundary
+conditions among other things influenced the decision to have a face info data
+structure become a hub for objects to retrieve relevant information for
+calculating residual contributions - more discussion about this is done in the
+Boundary Conditions section.
+
+## Boundary Conditions
+
+TODO: discuss ghost elements and dirichlet BCs.
+
+Many objects in MOOSE get information about the current mesh location by
+directly accessing their own and inherited member variables.  This becomes
+somewhat tricky to handle for FV because of the nature of ghost elements.
+Traditionally, if an object needed the cell volume, it would access an element
+pointer and use libMesh APIs.  This doesn't work for elements that don't
+exist, yet we still need to provide this information for calculating Dirichlet
+BC residual contributions.  We need to be able to provide information that
+doesn't exist and we need to make sure code doesn't try to access irrelevant
+or wrong information directly from the assembly, FEProblem, or other classes.
+For this reason, for FV objects, the convention has been established that
+objects should retrieve needed information from a face info object that is
+passed around.  If everyone gets needed information from this one place - it
+is easy to monitor when code may be doing the wrong thing.  It also becomes a
+simple matter to provide volumes for non-existing cells and add features that
+require intercepting and modifying any face information objects need.
+
+## Known Limitations/Issues
+
+* FE <---> FV variable-coupling will not work right.  Particularly, if FE
+  variables try to couple to an FV variable, they will segfault when trying to
+  access quadrature points at any index higher than zero.  Also, FV variables
+  coupling to FE variables should ideally get a cell-averaged value - but
+  currently, they will just get the value of the solution at the cell's
+  0-index quadrature point.
+
+* Not sure about mesh-adaptivity correctness yet - has not been tested.
+
+* Currently there is no automated handling of cross-diffusion correction
+  factors for non-orthogonal meshes.
+
+* FV functionality does NOT work with mesh displacements yet.
+
+* off-diagonal jacobians (i.e. with dependent variable coupling or nonlinear
+  problems) have not been implemented yet.
+
+* Higher order solution reconstruction is not supportet yet.
+
+* Have not tested vector-FV varaibles - they almost certainly don't work (yet).
+
