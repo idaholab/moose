@@ -56,3 +56,10 @@ THMProblem::THMProblem(const InputParameters & parameters)
   : FEProblem(parameters), Simulation(*this, parameters)
 {
 }
+
+void
+THMProblem::advanceState()
+{
+  FEProblem::advanceState();
+  Simulation::advanceState();
+}

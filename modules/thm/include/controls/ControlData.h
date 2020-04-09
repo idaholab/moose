@@ -55,6 +55,11 @@ public:
    */
   bool getDeclared() { return _declared; }
 
+  /**
+   * Copy the current value into old (i.e. shift it "back in time")
+   */
+  virtual void copyValuesBack() = 0;
+
 protected:
   /// The full (unique) name of this particular piece of data.
   const std::string _name;
@@ -76,14 +81,28 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  ControlData(std::string name) : ControlDataValue(name) { _value_ptr = new T; }
+  ControlData(std::string name) : ControlDataValue(name)
+  {
+    _value_ptr = new T;
+    _value_old_ptr = new T;
+    *_value_old_ptr = 0;
+  }
 
-  virtual ~ControlData() { delete _value_ptr; }
+  virtual ~ControlData()
+  {
+    delete _value_ptr;
+    delete _value_old_ptr;
+  }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
   const T & get() const { return *_value_ptr; }
+
+  /**
+   * @returns a read-only reference to the old value.
+   */
+  const T & getOld() const { return *_value_old_ptr; }
 
   /**
    * @returns a writable reference to the parameter value.
@@ -95,9 +114,13 @@ public:
    */
   virtual std::string type() override;
 
+  virtual void copyValuesBack() override;
+
 private:
   /// Stored value.
   T * _value_ptr;
+  /// Stored old value.
+  T * _value_old_ptr;
 };
 
 // ------------------------------------------------------------
@@ -107,4 +130,11 @@ inline std::string
 ControlData<T>::type()
 {
   return typeid(T).name();
+}
+
+template <typename T>
+inline void
+ControlData<T>::copyValuesBack()
+{
+  *_value_old_ptr = *_value_ptr;
 }
