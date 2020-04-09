@@ -60,12 +60,20 @@ public:
    * @param[out] dofs_i          Vector in which to store corresponding DoF rows
    * @param[out] dofs_j          Vector in which to store corresponding DoF columns
    */
-  void getScalarEquationJacobianData(const unsigned int & equation_index,
-                                     DenseMatrix<Real> & jacobian_block,
-                                     std::vector<dof_id_type> & dofs_i,
-                                     std::vector<dof_id_type> & dofs_j) const;
+  virtual void getScalarEquationJacobianData(const unsigned int & equation_index,
+                                             DenseMatrix<Real> & jacobian_block,
+                                             std::vector<dof_id_type> & dofs_i,
+                                             std::vector<dof_id_type> & dofs_j) const;
 
 protected:
+  /**
+   * Stores data (connection index, face shape functions, DoFs associated with flow channel
+   * variables) related to a connection
+   *
+   * Should be called in execute()
+   */
+  virtual void storeConnectionData();
+
   /**
    * Computes and stores the fluxes, the scalar residuals, and their Jacobians.
    *
