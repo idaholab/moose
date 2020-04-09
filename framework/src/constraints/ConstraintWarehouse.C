@@ -56,8 +56,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     bool displaced = mc->getParam<bool>("use_displaced_mesh");
 
     auto slave_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("slave_boundary"));
-    auto master_boundary_id =
-        mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
+    auto master_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
     auto key = std::make_pair(master_boundary_id, slave_boundary_id);
 
     if (displaced)

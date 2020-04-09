@@ -45,12 +45,10 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _blk_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _blk_mesh(moose_object->isParamValid("_mesh")
-                  ? moose_object->getParam<MooseMesh *>("_mesh")
-                  : NULL),
+    _blk_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _boundary_ids(_empty_boundary_ids),
-    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid")
-                                                : 0),
+    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->getParam<std::string>("_object_name"))
 {
   if (initialize)
@@ -64,12 +62,10 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
     _blk_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _blk_mesh(moose_object->isParamValid("_mesh")
-                  ? moose_object->getParam<MooseMesh *>("_mesh")
-                  : NULL),
+    _blk_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _boundary_ids(boundary_ids),
-    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid")
-                                                : 0),
+    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->getParam<std::string>("_object_name"))
 {
   initializeBlockRestrictable(moose_object);

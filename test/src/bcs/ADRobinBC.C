@@ -18,10 +18,7 @@ ADRobinBC::validParams()
   return params;
 }
 
-ADRobinBC::ADRobinBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters)
-{
-}
+ADRobinBC::ADRobinBC(const InputParameters & parameters) : ADIntegratedBC(parameters) {}
 
 ADReal
 ADRobinBC::computeQpResidual()

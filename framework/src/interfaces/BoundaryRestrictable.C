@@ -39,13 +39,11 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, boo
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _bnd_mesh(moose_object->isParamValid("_mesh")
-                  ? moose_object->getParam<MooseMesh *>("_mesh")
-                  : NULL),
+    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
     _block_ids(_empty_block_ids),
-    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid")
-                                                : 0),
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
     _bnd_nodal(nodal)
 {
@@ -59,13 +57,11 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _bnd_mesh(moose_object->isParamValid("_mesh")
-                  ? moose_object->getParam<MooseMesh *>("_mesh")
-                  : NULL),
+    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
     _block_ids(block_ids),
-    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid")
-                                                : 0),
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
     _bnd_nodal(nodal)
 {

@@ -18,10 +18,7 @@ ADValueTest::validParams()
   return params;
 }
 
-ADValueTest::ADValueTest(const InputParameters & parameters)
-  : ADKernel(parameters)
-{
-}
+ADValueTest::ADValueTest(const InputParameters & parameters) : ADKernel(parameters) {}
 
 ADReal
 ADValueTest::computeQpResidual()

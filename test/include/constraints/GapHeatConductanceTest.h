@@ -23,5 +23,4 @@ protected:
 
   const ADMaterialProperty<Real> & _slave_gap_conductance;
   const ADMaterialProperty<Real> & _master_gap_conductance;
-
 };

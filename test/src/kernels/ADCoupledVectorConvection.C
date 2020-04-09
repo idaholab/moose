@@ -20,8 +20,7 @@ ADCoupledVectorConvection::validParams()
   return params;
 }
 
-ADCoupledVectorConvection::ADCoupledVectorConvection(
-    const InputParameters & parameters)
+ADCoupledVectorConvection::ADCoupledVectorConvection(const InputParameters & parameters)
   : ADKernel(parameters),
     _use_grad(getParam<bool>("use_grad_row")),
     _velocity_vector(adCoupledVectorValue("velocity_vector")),

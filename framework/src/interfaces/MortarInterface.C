@@ -44,8 +44,7 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
     _moi_mesh(_moi_problem.mesh()),
     _mortar_data(_moi_problem.mortarData()),
     _slave_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("slave_boundary"))),
-    _master_id(
-        _moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("master_boundary"))),
+    _master_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("master_boundary"))),
     _slave_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("slave_subdomain"))),
     _master_subdomain_id(
