@@ -184,6 +184,12 @@ public:
   virtual void integrityCheck() const;
 
   /**
+   * Advance all of the state holding vectors / datastructures so that we can move to the next
+   * timestep.
+   */
+  virtual void advanceState();
+
+  /**
    * Check the integrity of the control data
    */
   virtual void controlDataIntegrityCheck();

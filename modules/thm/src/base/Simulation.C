@@ -850,3 +850,10 @@ Simulation::hasInitialConditionsFromFile()
 {
   return _pars.isParamValid("initial_from_file");
 }
+
+void
+Simulation::advanceState()
+{
+  for (auto && i : _control_data)
+    i.second->copyValuesBack();
+}

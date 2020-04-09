@@ -42,12 +42,38 @@ protected:
   const T & getControlData(const std::string & param_name);
 
   /**
+   * Get a reference to control data value from a previous time step that is specified in the input
+   * parameter 'param_name'
+   *
+   * @param param_name The parameter name that contains the name of the control data
+   */
+  template <typename T>
+  const T & getControlDataOld(const std::string & param_name);
+
+  /**
    * Get a reference to control data that are specified by 'data_name' name
    *
    * @param data_name The name of the control data
    */
   template <typename T>
   const T & getControlDataByName(const std::string & data_name);
+
+  /**
+   * Get a reference to control data value from previous time step that is specified by 'data_name'
+   * name
+   *
+   * @param data_name The name of the control data
+   */
+  template <typename T>
+  const T & getControlDataOldByName(const std::string & data_name);
+
+  /**
+   * Get a reference to a component control data value from previous time step
+   *
+   * @param data_name The name of the control data
+   */
+  template <typename T>
+  const T & getComponentControlDataOld(const std::string & data_name);
 
   THMProblem * _sim;
 
@@ -85,6 +111,14 @@ THMControl::getControlData(const std::string & param_name)
 
 template <typename T>
 const T &
+THMControl::getControlDataOld(const std::string & param_name)
+{
+  std::string data_name = getParam<std::string>(param_name);
+  return getControlDataOldByName<T>(data_name);
+}
+
+template <typename T>
+const T &
 THMControl::getControlDataByName(const std::string & data_name)
 {
   ControlData<T> * data_ptr = _sim->getControlData<T>(data_name);
@@ -100,4 +134,25 @@ THMControl::getControlDataByName(const std::string & data_name)
     deps.push_back(data_name);
 
   return data_ptr->get();
+}
+
+template <typename T>
+const T &
+THMControl::getControlDataOldByName(const std::string & data_name)
+{
+  ControlData<T> * data_ptr = _sim->getControlData<T>(data_name);
+  if (data_ptr == nullptr)
+    mooseError("Trying to get control data '",
+               data_name,
+               "', but it does not exist in the system. Check your spelling.");
+
+  return data_ptr->getOld();
+}
+
+template <typename T>
+const T &
+THMControl::getComponentControlDataOld(const std::string & data_name)
+{
+  std::string full_name = name() + ":" + data_name;
+  return getControlDataOldByName<T>(full_name);
 }

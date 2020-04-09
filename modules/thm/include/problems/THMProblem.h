@@ -11,6 +11,8 @@ class THMProblem : public FEProblem, public Simulation
 public:
   THMProblem(const InputParameters & parameters);
 
+  virtual void advanceState() override;
+
 public:
   static InputParameters validParams();
 };

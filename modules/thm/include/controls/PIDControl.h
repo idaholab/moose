@@ -30,8 +30,10 @@ protected:
   Real & _output;
   /// The integral value accumulated over time
   Real & _integral;
+  /// The current value of the error
+  Real & _error;
   /// The old value of the error
-  Real _error_old;
+  const Real & _error_old;
 
 public:
   static InputParameters validParams();
