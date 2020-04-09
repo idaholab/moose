@@ -27,34 +27,82 @@ ExternalPETScProblem::validParams()
 ExternalPETScProblem::ExternalPETScProblem(const InputParameters & params)
   : ExternalProblem(params),
     _sync_to_var_name(getParam<VariableName>("sync_variable")),
-    // ExternalPETScProblem always requires ExternalPetscSolverApp
-    _petsc_app(static_cast<ExternalPetscSolverApp &>(_app))
-#if LIBMESH_HAVE_PETSC
-    ,
-    _ts(_petsc_app.getExternalPETScTS()),
-    _petsc_sol(_petsc_app.getExternalPETScTSSolution())
+    // Require ExternalPetscSolverApp
+    _external_petsc_app(static_cast<ExternalPetscSolverApp &>(_app)),
+    _ts(_external_petsc_app.getPetscTS()),
+    // RestartableData is required for recovering when PETSc solver runs as a master app
+    _petsc_sol(declareRestartableData<Vec>("petsc_sol")),
+    _petsc_sol_old(declareRestartableData<Vec>("petsc_sol_old")),
+    _petsc_udot(declareRestartableData<Vec>("petsc_udot"))
 {
+  DM da;
+  TSGetDM(_ts, &da);
+  // Create a global solution vector
+  DMCreateGlobalVector(da, &_petsc_sol);
+  // This is required because libMesh incorrectly treats the PETSc parallel vector as a ghost vector
+  // We should be able to remove this line of code once libMesh is updated
+  VecMPISetGhost(_petsc_sol, 0, nullptr);
+  // The solution at the previous time step
+  VecDuplicate(_petsc_sol, &_petsc_sol_old);
+  // Udot
+  VecDuplicate(_petsc_sol, &_petsc_udot);
+  // RHS
+  VecDuplicate(_petsc_sol, &_petsc_rhs);
+  // Form an initial condition
   FormInitialSolution(_ts, _petsc_sol, NULL);
+  VecCopy(_petsc_sol, _petsc_sol_old);
+  VecSet(_petsc_udot, 0);
 }
-#else
+
+ExternalPETScProblem::~ExternalPETScProblem()
 {
-  mooseError("You need to have PETSc installed to use ExternalPETScProblem");
+  // Destroy all handles of external Petsc solver
+  VecDestroy(&_petsc_sol);
+  VecDestroy(&_petsc_sol_old);
+  VecDestroy(&_petsc_udot);
+  VecDestroy(&_petsc_rhs);
 }
-#endif
 
 void
 ExternalPETScProblem::externalSolve()
 {
-#if LIBMESH_HAVE_PETSC
   _console << "PETSc External Solve!" << std::endl;
-  externalPETScDiffusionFDMSolve(_ts, _petsc_sol, dt(), time());
-#endif
+  // "_petsc_sol_old" is the solution of the current time step, and "_petsc_sol" will be updated
+  // to store the solution of the next time step after this call.
+  // This call advances a time step so that there is an opportunity to
+  // exchange information with MOOSE simulations.
+  externalPETScDiffusionFDMSolve(_ts, _petsc_sol_old, _petsc_sol, dt(), time(), &_petsc_converged);
+}
+
+// This function is called when MOOSE time stepper actually moves to the next time step
+// "PostTimeStep" may not be called for certain cases (e.g., auto_advance=false)
+void
+ExternalPETScProblem::advanceState()
+{
+  FEProblemBase::advanceState();
+  // Compute udot using a backward Euler method
+  // If the external code uses a different method,
+  // udot should be retrieved from the external solver
+  VecCopy(_petsc_sol, _petsc_udot);
+  VecAXPY(_petsc_udot, -1., _petsc_sol_old);
+  VecScale(_petsc_udot, 1. / dt());
+  // Save current solution because we are moving to the next time step
+  VecCopy(_petsc_sol, _petsc_sol_old);
+}
+
+Real
+ExternalPETScProblem::computeResidualL2Norm()
+{
+  TSComputeIFunction(_ts, time(), _petsc_sol, _petsc_udot, _petsc_rhs, PETSC_FALSE);
+  PetscReal norm;
+  VecNorm(_petsc_rhs, NORM_2, &norm);
+
+  return norm;
 }
 
 void
 ExternalPETScProblem::syncSolutions(Direction direction)
 {
-#if LIBMESH_HAVE_PETSC
   if (direction == Direction::FROM_EXTERNAL_APP)
   {
     _console << "syncSolutions from external petsc App" << std::endl;
@@ -95,6 +143,10 @@ ExternalPETScProblem::syncSolutions(Direction direction)
       for (i = xs; i < xs + xm; i++)
       {
         Node * to_node = to_mesh.node_ptr(i + j * Mx);
+        // For the current example, we need to update only one variable.
+        // This line of code is used to make sure users won't make a mistake in the demo input file.
+        // If multiple variables need to be transfered for some use cases, users should
+        // loop over variables and copy necessary data.
         if (to_node->n_comp(sync_to_var.sys().number(), sync_to_var.number()) > 1)
           mooseError("Does not support multiple components");
 
@@ -106,11 +158,13 @@ ExternalPETScProblem::syncSolutions(Direction direction)
     sync_to_var.sys().solution().close();
 
     DMDAVecRestoreArray(da, _petsc_sol, &_petsc_sol_array);
+
+    // Make the solution and the current local solution consistent
+    sync_to_var.sys().update();
   }
   else if (direction == Direction::TO_EXTERNAL_APP)
   {
     _console << "syncSolutions to external petsc App " << std::endl;
     // We could the similar thing to sync the solution back to PETSc.
   }
-#endif
 }

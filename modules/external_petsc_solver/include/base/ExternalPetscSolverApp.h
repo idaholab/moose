@@ -31,18 +31,8 @@ public:
   virtual std::shared_ptr<Backup> backup() override;
   virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false) override;
 
-#if LIBMESH_HAVE_PETSC
-  /**
-   * Return a time-stepping (TS) component that holds all the ingredients of applicaiton
-   */
-  TS & getExternalPETScTS() { return _ts; }
-
-  Vec & getExternalPETScTSSolution() { return _petsc_sol; }
+  TS & getPetscTS() { return _ts; }
 
 private:
-  /// Time-stepping (TS) object
   TS _ts;
-  /// PETSc solver solution
-  Vec _petsc_sol;
-#endif
 };

@@ -605,3 +605,31 @@ dataLoad(std::istream & stream, libMesh::Parameters & p, void * context)
 #undef loadscalar
   }
 }
+
+template <>
+void
+dataLoad(std::istream & stream, Vec & v, void * context)
+{
+  PetscInt local_size;
+  VecGetLocalSize(v, &local_size);
+  PetscScalar * array;
+  VecGetArray(v, &array);
+  for (PetscInt i = 0; i < local_size; i++)
+    dataLoad(stream, array[i], context);
+
+  VecRestoreArray(v, &array);
+}
+
+template <>
+void
+dataStore(std::ostream & stream, Vec & v, void * context)
+{
+  PetscInt local_size;
+  VecGetLocalSize(v, &local_size);
+  PetscScalar * array;
+  VecGetArray(v, &array);
+  for (PetscInt i = 0; i < local_size; i++)
+    dataStore(stream, array[i], context);
+
+  VecRestoreArray(v, &array);
+}
