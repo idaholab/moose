@@ -16,12 +16,8 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declarations
-class MultiAppTransfer;
 class MooseMesh;
 class MultiApp;
-
-template <>
-InputParameters validParams<MultiAppTransfer>();
 
 /**
  * Base class for all MultiAppTransfer objects.

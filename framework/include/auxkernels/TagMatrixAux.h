@@ -12,10 +12,6 @@
 #include "TagVectorAux.h"
 
 // Forward Declarations
-class TagMatrixAux;
-
-template <>
-InputParameters validParams<TagMatrixAux>();
 
 /**
  * For visualization or other purposes, the diagnal of the matrix of a tag
@@ -34,4 +30,3 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
-

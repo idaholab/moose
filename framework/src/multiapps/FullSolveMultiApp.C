@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", FullSolveMultiApp);
 
-defineLegacyParams(FullSolveMultiApp);
-
 InputParameters
 FullSolveMultiApp::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class CreateExecutionerAction;
-
-template <>
-InputParameters validParams<CreateExecutionerAction>();
-
 class CreateExecutionerAction : public MooseObjectAction
 {
 public:

@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class GapValueAux;
 class PenetrationLocator;
-
-template <>
-InputParameters validParams<GapValueAux>();
 
 class GapValueAux : public AuxKernel
 {
@@ -38,4 +34,3 @@ protected:
 
   const bool _warnings;
 };
-

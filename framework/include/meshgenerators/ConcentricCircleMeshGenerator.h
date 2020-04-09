@@ -12,11 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class ConcentricCircleMeshGenerator;
-
-template <>
-InputParameters validParams<ConcentricCircleMeshGenerator>();
-
 /**
  * Generates a mesh based on concentric circles, given all the parameters
  */
@@ -52,4 +47,3 @@ protected:
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
 };
-

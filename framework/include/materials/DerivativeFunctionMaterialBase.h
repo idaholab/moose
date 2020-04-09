@@ -12,10 +12,6 @@
 #include "FunctionMaterialBase.h"
 
 // Forward Declarations
-class DerivativeFunctionMaterialBase;
-
-template <>
-InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
  * Material base class to compute a function and its derivatives.
@@ -101,4 +97,3 @@ protected:
   /// Material properties to store the third derivatives.
   std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _prop_d3F;
 };
-

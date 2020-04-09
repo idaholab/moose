@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", BlockWeightedPartitioner);
 
-defineLegacyParams(BlockWeightedPartitioner);
-
 InputParameters
 BlockWeightedPartitioner::validParams()
 {

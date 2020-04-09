@@ -13,10 +13,6 @@
 #include "LayeredSideIntegral.h"
 
 // Forward Declarations
-class LayeredSideAverage;
-
-template <>
-InputParameters validParams<LayeredSideAverage>();
 
 /**
  * This UserObject computes side averages of a variable storing partial sums for the specified
@@ -38,4 +34,3 @@ protected:
   /// Value of the volume for each layer
   std::vector<Real> _layer_volumes;
 };
-

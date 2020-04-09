@@ -13,10 +13,6 @@
 #include "ShapeUserObject.h"
 
 // Forward Declarations
-class ShapeElementUserObject;
-
-template <>
-InputParameters validParams<ShapeElementUserObject>();
 
 /**
  * ElementUserObject class in which the _phi and _grad_phi shape function data
@@ -33,4 +29,3 @@ public:
 
   ShapeElementUserObject(const InputParameters & parameters);
 };
-

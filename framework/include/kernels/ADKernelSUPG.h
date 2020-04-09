@@ -11,12 +11,6 @@
 
 #include "ADKernelStabilized.h"
 
-template <typename>
-class ADKernelSUPGTempl;
-
-using ADKernelSUPG = ADKernelSUPGTempl<Real>;
-using ADVectorKernelSUPG = ADKernelSUPGTempl<RealVectorValue>;
-
 template <typename T>
 class ADKernelSUPGTempl : public ADKernelStabilizedTempl<T>
 {
@@ -33,3 +27,6 @@ protected:
 
   using ADKernelStabilizedTempl<T>::_qp;
 };
+
+using ADKernelSUPG = ADKernelSUPGTempl<Real>;
+using ADVectorKernelSUPG = ADKernelSUPGTempl<RealVectorValue>;

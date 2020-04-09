@@ -19,8 +19,6 @@
 
 registerMooseObject("MooseApp", ConcentricCircleMesh);
 
-defineLegacyParams(ConcentricCircleMesh);
-
 InputParameters
 ConcentricCircleMesh::validParams()
 {

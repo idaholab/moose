@@ -12,11 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class RelativeSolutionDifferenceNorm;
 class Transient;
-
-template <>
-InputParameters validParams<RelativeSolutionDifferenceNorm>();
 
 /**
  * Gets the relative solution norm from the transient executioner
@@ -50,4 +46,3 @@ protected:
   /// Transient executioner
   Transient * _trex;
 };
-

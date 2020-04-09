@@ -12,10 +12,6 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class ConstantAux;
-
-template <>
-InputParameters validParams<ConstantAux>();
 
 /**
  * Constant auxiliary value
@@ -33,4 +29,3 @@ protected:
   /// The value being set for the current node/element
   const Real & _value;
 };
-

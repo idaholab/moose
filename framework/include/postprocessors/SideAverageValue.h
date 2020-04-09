@@ -12,10 +12,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class SideAverageValue;
-
-template <>
-InputParameters validParams<SideAverageValue>();
 
 /**
  * This postprocessor computes a volume integral of the specified variable.
@@ -39,4 +35,3 @@ protected:
   virtual Real volume();
   Real _volume;
 };
-

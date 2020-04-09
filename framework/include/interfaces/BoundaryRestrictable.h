@@ -14,11 +14,7 @@
 #include "MaterialData.h"
 
 // Forward declarations
-class BoundaryRestrictable;
 class MooseMesh;
-
-template <>
-InputParameters validParams<BoundaryRestrictable>();
 
 /**
  * /class BoundaryRestrictable

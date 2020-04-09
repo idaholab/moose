@@ -11,11 +11,6 @@
 
 #include "MeshModifier.h"
 
-class ElementDeleterBase;
-
-template <>
-InputParameters validParams<ElementDeleterBase>();
-
 /**
  * This class deletes elements from the mesh data structure
  * after it has been generated or read but before any FEM
@@ -26,6 +21,8 @@ InputParameters validParams<ElementDeleterBase>();
 class ElementDeleterBase : public MeshModifier
 {
 public:
+  static InputParameters validParams();
+
   ElementDeleterBase(const InputParameters & parameters);
 
 protected:
@@ -43,4 +40,3 @@ protected:
   /// Name of the boundary name to assign to the cut surface
   const BoundaryName _boundary_name;
 };
-

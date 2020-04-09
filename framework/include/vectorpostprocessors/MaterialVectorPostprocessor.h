@@ -11,11 +11,6 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class MaterialVectorPostprocessor;
-
-template <>
-InputParameters validParams<MaterialVectorPostprocessor>();
-
 /// This postprocessor records all scalar material properties of the specified
 /// material object on specified elements at the indicated execution points
 /// (e.g. initial, timestep_begin, etc.).  Non-scalar properties are ignored
@@ -58,4 +53,3 @@ private:
   /// properties are scalar or not.
   std::vector<std::string> _prop_names;
 };
-

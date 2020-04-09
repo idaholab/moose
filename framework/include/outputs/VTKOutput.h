@@ -13,10 +13,6 @@
 #include "OversampleOutput.h"
 
 // Forward declerations
-class VTKOutput;
-
-template <>
-InputParameters validParams<VTKOutput>();
 
 /**
  *
@@ -47,4 +43,3 @@ private:
   /// Flag for using binary compression
   bool _binary;
 };
-

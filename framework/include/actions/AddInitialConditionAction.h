@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddInitialConditionAction;
-
-template <>
-InputParameters validParams<AddInitialConditionAction>();
-
 class AddInitialConditionAction : public MooseObjectAction
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

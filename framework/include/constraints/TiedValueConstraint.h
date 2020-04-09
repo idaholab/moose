@@ -13,10 +13,6 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class TiedValueConstraint;
-
-template <>
-InputParameters validParams<TiedValueConstraint>();
 
 /**
  * A TiedValueConstraint forces the value of a variable to be the same on both sides of an
@@ -38,4 +34,3 @@ protected:
   const Real _scaling;
   NumericVector<Number> & _residual_copy;
 };
-

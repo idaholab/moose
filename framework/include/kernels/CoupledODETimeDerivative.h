@@ -12,10 +12,6 @@
 #include "ODETimeKernel.h"
 
 // Forward Declaration
-class CoupledODETimeDerivative;
-
-template <>
-InputParameters validParams<CoupledODETimeDerivative>();
 
 class CoupledODETimeDerivative : public ODETimeKernel
 {
@@ -31,4 +27,3 @@ protected:
   VariableValue & _v_dot;
   VariableValue & _dv_dot_dv;
 };
-

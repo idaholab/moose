@@ -13,7 +13,6 @@
 
 /**
  * All AD time kernels should inherit from this class
- *
  */
 template <typename T>
 class ADTimeKernelTempl : public ADKernelTempl<T>

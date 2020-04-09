@@ -12,10 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class RenameBlockGenerator;
-
-template <>
-InputParameters validParams<RenameBlockGenerator>();
 
 /**
  * MeshGenerator for re-numbering or re-naming blocks
@@ -90,4 +86,3 @@ protected:
    */
   SubdomainID newBlockID(const SubdomainName & new_block_name);
 };
-

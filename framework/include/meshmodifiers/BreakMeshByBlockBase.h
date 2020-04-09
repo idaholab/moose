@@ -11,15 +11,11 @@
 
 #include "MeshModifier.h"
 
-// forward declaration
-class BreakMeshByBlockBase;
-
-template <>
-InputParameters validParams<BreakMeshByBlockBase>();
-
 class BreakMeshByBlockBase : public MeshModifier
 {
 public:
+  static InputParameters validParams();
+
   BreakMeshByBlockBase(const InputParameters & parameters);
 
   // method to override to implement other mesh splitting algorithms
@@ -61,4 +57,3 @@ private:
   void mapBoundaryIdAndBoundaryName(BoundaryID & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };
-

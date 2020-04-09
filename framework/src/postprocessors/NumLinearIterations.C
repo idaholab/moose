@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NumLinearIterations);
 
-defineLegacyParams(NumLinearIterations);
-
 InputParameters
 NumLinearIterations::validParams()
 {

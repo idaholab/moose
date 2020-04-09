@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddMaterialAction;
-
-template <>
-InputParameters validParams<AddMaterialAction>();
-
 class AddMaterialAction : public MooseObjectAction
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

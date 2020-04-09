@@ -12,11 +12,7 @@
 #include "NodalKernel.h"
 
 // Forward Declarations
-class UserForcingFunctionNodalKernel;
 class Function;
-
-template <>
-InputParameters validParams<UserForcingFunctionNodalKernel>();
 
 /**
  * Represents the rate in a simple ODE of du/dt = f

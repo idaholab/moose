@@ -16,10 +16,6 @@
 #include "libmesh/fparser_ad.hh"
 
 // forward declatration
-class ParsedMaterialHelper;
-
-template <>
-InputParameters validParams<ParsedMaterialHelper>();
 
 /**
  * Helper class to perform the parsing and optimization of the
@@ -82,4 +78,3 @@ protected:
    */
   const VariableNameMappingMode _map_mode;
 };
-

@@ -11,11 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class Heun;
-
-template <>
-InputParameters validParams<Heun>();
-
 /**
  * Heun's (aka improved Euler) time integration method.
  *
@@ -40,4 +35,3 @@ protected:
   virtual Real b1() const { return .5; }
   virtual Real b2() const { return .5; }
 };
-

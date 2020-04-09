@@ -14,10 +14,6 @@
 #include "ParsedMaterialBase.h"
 
 // Forward Declarations
-class ParsedMaterial;
-
-template <>
-InputParameters validParams<ParsedMaterial>();
 
 /**
  * FunctionMaterialBase child class to evaluate a parsed function. The function
@@ -30,4 +26,3 @@ public:
 
   ParsedMaterial(const InputParameters & parameters);
 };
-

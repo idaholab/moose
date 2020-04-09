@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddFunctionAction;
-
-template <>
-InputParameters validParams<AddFunctionAction>();
-
 /**
  * This class parses functions in the [Functions] block and creates them.
  */
@@ -28,4 +23,3 @@ public:
 
   virtual void act() override;
 };
-

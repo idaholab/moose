@@ -20,9 +20,6 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(AuxKernel);
-defineLegacyParams(VectorAuxKernel);
-
 template <typename ComputeValueType>
 InputParameters
 AuxKernelTempl<ComputeValueType>::validParams()

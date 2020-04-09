@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class CouplingFunctorCheckAction;
-
-template <>
-InputParameters validParams<CouplingFunctorCheckAction>();
-
 /**
  * Checks whether there are any Kernels or BoundaryConditions in the warehouses and if so adds a
  * default coupling functor to ensure correct sparsity

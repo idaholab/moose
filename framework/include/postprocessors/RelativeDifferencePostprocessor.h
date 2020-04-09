@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class RelativeDifferencePostprocessor;
-
-template <>
-InputParameters validParams<RelativeDifferencePostprocessor>();
-
 /**
  * Computes the absolute value of the relative difference between 2
  * post-processor values.
@@ -50,4 +45,3 @@ protected:
   /// second post-processor value, used as base in relative difference
   const PostprocessorValue & _value2;
 };
-

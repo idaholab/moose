@@ -12,10 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class VariableResidual;
-
-template <>
-InputParameters validParams<VariableResidual>();
 
 class VariableResidual : public GeneralPostprocessor
 {
@@ -35,4 +31,3 @@ protected:
   /// The residual of the variable
   Real _var_residual;
 };
-

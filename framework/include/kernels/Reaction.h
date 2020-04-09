@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class Reaction;
-
-template <>
-InputParameters validParams<Reaction>();
 
 class Reaction : public Kernel
 {

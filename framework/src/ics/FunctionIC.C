@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", FunctionIC);
 
-defineLegacyParams(FunctionIC);
-
 InputParameters
 FunctionIC::validParams()
 {

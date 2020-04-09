@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddICAction;
-
-template <>
-InputParameters validParams<AddICAction>();
-
 class AddICAction : public MooseObjectAction
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

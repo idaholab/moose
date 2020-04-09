@@ -12,11 +12,6 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 
-class MeshGeneratorMesh;
-
-template <>
-InputParameters validParams<MeshGeneratorMesh>();
-
 /**
  * Mesh generated from parameters
  */
@@ -35,4 +30,3 @@ public:
 
   virtual void buildMesh() override;
 };
-

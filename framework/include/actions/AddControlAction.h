@@ -13,10 +13,6 @@
 #include "MooseObjectAction.h"
 
 // Forward declarations
-class AddControlAction;
-
-template <>
-InputParameters validParams<AddControlAction>();
 
 /**
  * Action for creating Control objects
@@ -37,4 +33,3 @@ public:
 
   virtual void act() override;
 };
-

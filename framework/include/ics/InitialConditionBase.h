@@ -21,16 +21,12 @@
 #include "ElementIDInterface.h"
 
 // forward declarations
-class InitialConditionBase;
 class SystemBase;
 class MooseVariableFEBase;
 namespace libMesh
 {
 class Point;
 }
-
-template <>
-InputParameters validParams<InitialConditionBase>();
 
 /**
  * InitialConditionBase serves as the abstract base class for InitialConditions and

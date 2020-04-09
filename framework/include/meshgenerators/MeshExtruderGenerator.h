@@ -14,10 +14,6 @@
 #include "libmesh/mesh_generation.h"
 
 // Forward declarations
-class MeshExtruderGenerator;
-
-template <>
-InputParameters validParams<MeshExtruderGenerator>();
 
 /**
  * Extrude a 1D or 2D mesh to a 2D or 3D mesh respectively
@@ -67,4 +63,3 @@ protected:
 private:
   void changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
-

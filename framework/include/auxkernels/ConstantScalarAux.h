@@ -11,11 +11,6 @@
 
 #include "AuxScalarKernel.h"
 
-class ConstantScalarAux;
-
-template <>
-InputParameters validParams<ConstantScalarAux>();
-
 /**
  * Sets a constant value on a scalar variable
  */
@@ -31,4 +26,3 @@ protected:
 
   const Real & _value;
 };
-

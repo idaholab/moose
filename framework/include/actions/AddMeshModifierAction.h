@@ -12,10 +12,6 @@
 #include "MooseObjectAction.h"
 
 // Forward Declaration
-class AddMeshModifierAction;
-
-template <>
-InputParameters validParams<AddMeshModifierAction>();
 
 class AddMeshModifierAction : public MooseObjectAction
 {
@@ -26,4 +22,3 @@ public:
 
   virtual void act() override;
 };
-

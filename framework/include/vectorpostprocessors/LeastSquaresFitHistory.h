@@ -12,10 +12,6 @@
 #include "GeneralVectorPostprocessor.h"
 
 // Forward Declarations
-class LeastSquaresFitHistory;
-
-template <>
-InputParameters validParams<LeastSquaresFitHistory>();
 
 /**
  *  LeastSquaresFitHistory is a VectorPostprocessor that performs a least squares
@@ -78,4 +74,3 @@ protected:
   /// coefficient.
   std::vector<VectorPostprocessorValue *> _coeffs;
 };
-

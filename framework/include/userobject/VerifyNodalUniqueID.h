@@ -13,10 +13,6 @@
 #include "NodalUserObject.h"
 
 // Forward Declarations
-class VerifyNodalUniqueID;
-
-template <>
-InputParameters validParams<VerifyNodalUniqueID>();
 
 class VerifyNodalUniqueID : public NodalUserObject
 {
@@ -33,4 +29,3 @@ public:
 protected:
   std::vector<dof_id_type> _all_ids;
 };
-

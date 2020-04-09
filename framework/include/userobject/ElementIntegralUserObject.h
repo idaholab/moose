@@ -13,10 +13,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class ElementIntegralUserObject;
-
-template <>
-InputParameters validParams<ElementIntegralUserObject>();
 
 /**
  * This postprocessor computes a volume integral of the specified
@@ -48,4 +44,3 @@ protected:
 
   Real _integral_value;
 };
-

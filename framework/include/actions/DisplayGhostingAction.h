@@ -13,11 +13,6 @@
 
 #include "libmesh/fe_base.h"
 
-class DisplayGhostingAction;
-
-template <>
-InputParameters validParams<DisplayGhostingAction>();
-
 /**
  * Class to setup multiple AuxVariables and AuxKernels to display the ghosting when running in
  * parallel.
@@ -36,4 +31,3 @@ private:
   bool _display_ghosting;
   bool _include_local;
 };
-

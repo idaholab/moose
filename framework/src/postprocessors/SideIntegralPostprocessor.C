@@ -11,8 +11,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(SideIntegralPostprocessor);
-
 InputParameters
 SideIntegralPostprocessor::validParams()
 {

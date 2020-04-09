@@ -14,10 +14,6 @@
 #include "MooseParsedFunctionBase.h"
 
 // Forward decleratrions
-class MooseParsedVectorFunction;
-
-template <>
-InputParameters validParams<MooseParsedVectorFunction>();
 
 /**
  * This class is similar to ParsedFunction except it returns a vector function

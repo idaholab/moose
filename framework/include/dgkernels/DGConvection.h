@@ -11,11 +11,6 @@
 
 #include "DGKernel.h"
 
-class DGConvection;
-
-template <>
-InputParameters validParams<DGConvection>();
-
 class DGConvection : public DGKernel
 {
 public:
@@ -29,4 +24,3 @@ protected:
 
   RealVectorValue _velocity;
 };
-

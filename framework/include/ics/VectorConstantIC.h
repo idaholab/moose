@@ -15,16 +15,12 @@
 #include <string>
 
 // Forward Declarations
-class VectorConstantIC;
 class InputParameters;
 
 namespace libMesh
 {
 class Point;
 }
-
-template <>
-InputParameters validParams<VectorConstantIC>();
 
 /**
  * VectorConstantIC just returns a constant value.

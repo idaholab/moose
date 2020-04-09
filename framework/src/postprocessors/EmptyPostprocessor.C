@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", EmptyPostprocessor);
 
-defineLegacyParams(EmptyPostprocessor);
-
 InputParameters
 EmptyPostprocessor::validParams()
 {

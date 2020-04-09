@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", OldEqualValueConstraint);
 
-defineLegacyParams(OldEqualValueConstraint);
-
 InputParameters
 OldEqualValueConstraint::validParams()
 {

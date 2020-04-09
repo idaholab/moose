@@ -12,10 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class LowerDBlockFromSidesetGenerator;
-
-template <>
-InputParameters validParams<LowerDBlockFromSidesetGenerator>();
 
 /**
  * Creates lower-dimensional elements on the specified sidesets

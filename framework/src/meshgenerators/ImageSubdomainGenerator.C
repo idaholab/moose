@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ImageSubdomainGenerator);
 
-defineLegacyParams(ImageSubdomainGenerator);
-
 InputParameters
 ImageSubdomainGenerator::validParams()
 {

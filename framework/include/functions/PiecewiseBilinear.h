@@ -11,14 +11,10 @@
 
 #include "Function.h"
 
-class PiecewiseBilinear;
 template <typename>
 class ColumnMajorMatrixTempl;
 typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 class BilinearInterpolation;
-
-template <>
-InputParameters validParams<PiecewiseBilinear>();
 
 /**
  * PiecewiseBilinear reads from a file the information necessary to build the vectors x and y and

@@ -14,10 +14,6 @@
 #include "libmesh/replicated_mesh.h"
 
 // Forward declarations
-class ImageMeshGenerator;
-
-template <>
-InputParameters validParams<ImageMeshGenerator>();
 
 /**
  * A 2D GeneratedMesh where xmin, xmax, etc. are determined from an input image file.
@@ -65,4 +61,3 @@ protected:
    */
   const Real & _cells_per_pixel;
 };
-

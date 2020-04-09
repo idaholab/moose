@@ -11,11 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ImplicitMidpoint;
-
-template <>
-InputParameters validParams<ImplicitMidpoint>();
-
 /**
  * Second-order Runge-Kutta (implicit midpoint) time integration.
  *
@@ -77,4 +72,3 @@ ImplicitMidpoint::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 1. / _dt;
 }
-

@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddScalarKernelAction;
-
-template <>
-InputParameters validParams<AddScalarKernelAction>();
-
 class AddScalarKernelAction : public MooseObjectAction
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

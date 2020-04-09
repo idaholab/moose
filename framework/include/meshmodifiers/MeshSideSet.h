@@ -11,11 +11,6 @@
 
 #include "MeshModifier.h"
 
-class MeshSideSet;
-
-template <>
-InputParameters validParams<MeshSideSet>();
-
 /**
  * Add lower dimensional elements along the faces contained in a side set
  */
@@ -30,4 +25,3 @@ protected:
   /// Block ID to assign to the region
   const SubdomainID _block_id;
 };
-

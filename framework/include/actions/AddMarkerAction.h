@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddMarkerAction;
-
-template <>
-InputParameters validParams<AddMarkerAction>();
-
 class AddMarkerAction : public MooseObjectAction
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

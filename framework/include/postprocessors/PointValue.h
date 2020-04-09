@@ -12,10 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class PointValue;
-
-template <>
-InputParameters validParams<PointValue>();
 
 /**
  * Compute the value of a variable at a specified location.
@@ -48,4 +44,3 @@ protected:
   /// The value of the variable at the desired location
   Real _value;
 };
-

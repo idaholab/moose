@@ -12,10 +12,6 @@
 #include "FunctionDirichletBC.h"
 
 // Forward Declarations
-class FunctionPresetBC;
-
-template <>
-InputParameters validParams<FunctionPresetBC>();
 
 /**
  * Defines a boundary condition that forces the value to be a user specified

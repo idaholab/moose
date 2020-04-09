@@ -13,10 +13,6 @@
 #include "ElementUserObject.h"
 
 // Forward Declarations
-class VerifyElementUniqueID;
-
-template <>
-InputParameters validParams<VerifyElementUniqueID>();
 
 class VerifyElementUniqueID : public ElementUserObject
 {
@@ -33,4 +29,3 @@ public:
 protected:
   std::vector<dof_id_type> _all_ids;
 };
-

@@ -11,11 +11,7 @@
 
 #include "Action.h"
 
-class CreateDisplacedProblemAction;
 class SystemBase;
-
-template <>
-InputParameters validParams<CreateDisplacedProblemAction>();
 
 /**
  *

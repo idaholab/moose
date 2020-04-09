@@ -12,20 +12,11 @@
 #include "MaterialAuxBase.h"
 #include "RankTwoTensor.h"
 
-template <bool>
-class MaterialRankTwoTensorAuxTempl;
-typedef MaterialRankTwoTensorAuxTempl<false> MaterialRankTwoTensorAux;
-typedef MaterialRankTwoTensorAuxTempl<true> ADMaterialRankTwoTensorAux;
-
 /**
  * MaterialRankTwoTensorAux is designed to take the data in the RankTwoTensor material
  * property, for example stress or strain, and output the value for the
  * supplied indices.
  */
-
-template <>
-InputParameters validParams<MaterialRankTwoTensorAux>();
-
 template <bool is_ad>
 class MaterialRankTwoTensorAuxTempl : public MaterialAuxBaseTempl<RankTwoTensor, is_ad>
 {

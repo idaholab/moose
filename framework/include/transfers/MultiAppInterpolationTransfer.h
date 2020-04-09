@@ -15,10 +15,6 @@
 #include "libmesh/mesh_base.h"
 
 // Forward declarations
-class MultiAppInterpolationTransfer;
-
-template <>
-InputParameters validParams<MultiAppInterpolationTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.

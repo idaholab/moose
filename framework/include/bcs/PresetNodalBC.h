@@ -11,11 +11,6 @@
 
 #include "DirichletBCBase.h"
 
-class PresetNodalBC;
-
-template <>
-InputParameters validParams<PresetNodalBC>();
-
 /**
  * Base class for nodal BCs that (pre)set the solution vector entries.
  *

@@ -14,15 +14,11 @@
 #include <string>
 
 // Forward Declarations
-class FunctionIC;
 class Function;
 class InputParameters;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<FunctionIC>();
 
 /**
  * Defines a boundary condition that forces the value to be a user specified

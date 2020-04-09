@@ -12,10 +12,6 @@
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class MultiAppVariableValueSamplePostprocessorTransfer;
-
-template <>
-InputParameters validParams<MultiAppVariableValueSamplePostprocessorTransfer>();
 
 /**
  * Samples a variable's value in the Master domain at the point where

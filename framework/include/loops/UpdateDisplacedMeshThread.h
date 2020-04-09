@@ -15,7 +15,6 @@
 
 // Forward declarations
 class DisplacedProblem;
-class UpdateDisplacedMeshThread;
 
 // libMesh forward declarations
 namespace libMesh
@@ -62,4 +61,3 @@ private:
   unsigned int _nonlinear_system_number;
   unsigned int _aux_system_number;
 };
-

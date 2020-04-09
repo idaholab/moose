@@ -13,11 +13,6 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 
-class QuadraturePointMarker;
-
-template <>
-InputParameters validParams<QuadraturePointMarker>();
-
 class QuadraturePointMarker : public Marker,
                               public MooseVariableInterface<Real>,
                               public MaterialPropertyInterface
@@ -55,4 +50,3 @@ protected:
   /// The behavior to use when "in-between" other states (what to do on the fringe)
   MarkerValue _third_state;
 };
-

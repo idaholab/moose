@@ -14,10 +14,6 @@
 #include "MooseVariableScalar.h"
 
 // Forward declarations
-class ArrayIntegratedBC;
-
-template <>
-InputParameters validParams<ArrayIntegratedBC>();
 
 /**
  * Base class for deriving any boundary condition of a integrated type

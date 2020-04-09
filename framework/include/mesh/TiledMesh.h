@@ -11,11 +11,6 @@
 
 #include "MooseMesh.h"
 
-class TiledMesh;
-
-template <>
-InputParameters validParams<TiledMesh>();
-
 class TiledMesh : public MooseMesh
 {
 public:
@@ -35,4 +30,3 @@ protected:
   const Real _y_width;
   const Real _z_width;
 };
-

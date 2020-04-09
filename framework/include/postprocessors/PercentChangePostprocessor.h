@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class PercentChangePostprocessor;
-
-template <>
-InputParameters validParams<PercentChangePostprocessor>();
-
 /**
  * This postprocessor displays the change in the postprocessor between
  * adjacent timesteps
@@ -34,4 +29,3 @@ public:
 protected:
   const PostprocessorValue &_postprocessor, &_postprocessor_old;
 };
-

@@ -12,10 +12,6 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class MatCoupledForce;
-
-template <>
-InputParameters validParams<MatCoupledForce>();
 
 /**
  * Represents a right hand side force term of the form

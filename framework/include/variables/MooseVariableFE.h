@@ -29,13 +29,6 @@ typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 
-template <>
-InputParameters validParams<MooseVariable>();
-template <>
-InputParameters validParams<VectorMooseVariable>();
-template <>
-InputParameters validParams<ArrayMooseVariable>();
-
 /**
  * Class for stuff related to variables
  *

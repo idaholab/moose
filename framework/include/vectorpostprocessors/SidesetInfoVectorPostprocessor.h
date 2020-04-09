@@ -12,10 +12,6 @@
 #include "SideVectorPostprocessor.h"
 
 // Forward Declarations
-class SidesetInfoVectorPostprocessor;
-
-template <>
-InputParameters validParams<SidesetInfoVectorPostprocessor>();
 
 class SidesetInfoVectorPostprocessor : public SideVectorPostprocessor
 {

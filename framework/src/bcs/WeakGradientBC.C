@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", WeakGradientBC);
 
-defineLegacyParams(WeakGradientBC);
-
 InputParameters
 WeakGradientBC::validParams()
 {

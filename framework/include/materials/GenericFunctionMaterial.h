@@ -11,12 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-template <bool>
-class GenericFunctionMaterialTempl;
-typedef GenericFunctionMaterialTempl<false> GenericFunctionMaterial;
-typedef GenericFunctionMaterialTempl<true> ADGenericFunctionMaterial;
-
 template <>
 InputParameters validParams<GenericFunctionMaterial>();
 
@@ -59,3 +53,6 @@ private:
   /// Flag for calling declareProperyOld/Older
   bool _enable_stateful;
 };
+
+typedef GenericFunctionMaterialTempl<false> GenericFunctionMaterial;
+typedef GenericFunctionMaterialTempl<true> ADGenericFunctionMaterial;

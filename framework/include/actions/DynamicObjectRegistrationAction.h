@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class DynamicObjectRegistrationAction;
-
-template <>
-InputParameters validParams<DynamicObjectRegistrationAction>();
-
 class DynamicObjectRegistrationAction : public Action
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

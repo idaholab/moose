@@ -12,11 +12,6 @@
 #include "Action.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-class MaterialDerivativeTestAction;
-
-template <>
-InputParameters validParams<MaterialDerivativeTestAction>();
-
 /**
  * Sets up variables and Kernels to test the derivatives of material properties via
  * the Jacobian checker

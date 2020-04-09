@@ -14,11 +14,6 @@
 // System includes
 #include <string>
 
-class PicardSolve;
-
-template <>
-InputParameters validParams<PicardSolve>();
-
 class PicardSolve : public SolveObject
 {
 public:

@@ -30,4 +30,3 @@ struct BndElement
   /// boundary id for the node
   BoundaryID _bnd_id;
 };
-

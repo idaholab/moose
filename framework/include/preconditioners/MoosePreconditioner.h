@@ -16,7 +16,6 @@
 
 // Forward declarations
 class FEProblemBase;
-class MoosePreconditioner;
 
 namespace libMesh
 {
@@ -24,9 +23,6 @@ class MeshBase;
 template <typename T>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<MoosePreconditioner>();
 
 /**
  * Base class for MOOSE preconditioners.

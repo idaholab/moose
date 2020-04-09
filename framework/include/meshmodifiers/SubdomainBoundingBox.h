@@ -16,10 +16,6 @@
 #include "libmesh/bounding_box.h"
 
 // Forward declerations
-class SubdomainBoundingBox;
-
-template <>
-InputParameters validParams<SubdomainBoundingBox>();
 
 namespace libMesh
 {
@@ -50,4 +46,3 @@ private:
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;
 };
-

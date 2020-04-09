@@ -14,12 +14,8 @@
 #include "MaterialData.h"
 
 // Forward declarations
-class MaterialOutputAction;
 class MooseObjectAction;
 class MaterialBase;
-
-template <>
-InputParameters validParams<MaterialOutputAction>();
 
 /**
  * Creates AuxVariables and AuxKernels for automatic output of material properties

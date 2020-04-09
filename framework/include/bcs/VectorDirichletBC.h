@@ -11,11 +11,6 @@
 
 #include "VectorNodalBC.h"
 
-class VectorDirichletBC;
-
-template <>
-InputParameters validParams<VectorDirichletBC>();
-
 /**
  * Boundary condition of a Dirichlet type
  *

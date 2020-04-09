@@ -16,8 +16,6 @@
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
 
-defineLegacyParams(MooseParsedFunction);
-
 InputParameters
 MooseParsedFunction::validParams()
 {

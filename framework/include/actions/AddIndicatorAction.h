@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddIndicatorAction;
-
-template <>
-InputParameters validParams<AddIndicatorAction>();
-
 class AddIndicatorAction : public MooseObjectAction
 {
 public:
@@ -27,4 +22,3 @@ public:
 
 private:
 };
-

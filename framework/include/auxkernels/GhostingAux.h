@@ -13,11 +13,7 @@
 
 #include "libmesh/ghosting_functor.h"
 
-class GhostingAux;
 class GhostingUserObject;
-
-template <>
-InputParameters validParams<GhostingAux>();
 
 class GhostingAux : public AuxKernel
 {
@@ -48,4 +44,3 @@ protected:
   /// Ghosted elems
   libMesh::GhostingFunctor::map_type _ghosted_elems;
 };
-

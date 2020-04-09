@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", IterationAdaptiveDT);
 
-defineLegacyParams(IterationAdaptiveDT);
-
 InputParameters
 IterationAdaptiveDT::validParams()
 {
@@ -93,7 +91,7 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _adaptive_timestepping(false),
     _pps_value(isParamValid("timestep_limiting_postprocessor")
                    ? &getPostprocessorValue("timestep_limiting_postprocessor")
-                         : nullptr),
+                   : nullptr),
     _timestep_limiting_function(nullptr),
     _piecewise_timestep_limiting_function(nullptr),
     _piecewise_linear_timestep_limiting_function(nullptr),

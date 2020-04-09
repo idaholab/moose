@@ -11,11 +11,6 @@
 
 #include "ArrayIntegratedBC.h"
 
-class ArrayVacuumBC;
-
-template <>
-InputParameters validParams<ArrayVacuumBC>();
-
 class ArrayVacuumBC : public ArrayIntegratedBC
 {
 public:

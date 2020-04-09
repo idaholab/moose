@@ -14,12 +14,8 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
-class ElemElemConstraint;
 class ElementPairInfo;
 class FEProblemBase;
-
-template <>
-InputParameters validParams<ElemElemConstraint>();
 
 class ElemElemConstraint : public Constraint,
                            public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -133,4 +129,3 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
 };
-

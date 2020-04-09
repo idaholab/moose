@@ -12,14 +12,10 @@
 #include "ArrayInitialCondition.h"
 
 // Forward Declarations
-class ArrayConstantIC;
 namespace libMesh
 {
 class Point;
 }
-
-template <>
-InputParameters validParams<ArrayConstantIC>();
 
 class ArrayConstantIC : public ArrayInitialCondition
 {

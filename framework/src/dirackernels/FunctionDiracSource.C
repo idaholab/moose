@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", FunctionDiracSource);
 
-defineLegacyParams(FunctionDiracSource);
-
 InputParameters
 FunctionDiracSource::validParams()
 {

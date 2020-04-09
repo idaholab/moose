@@ -21,16 +21,12 @@
 #include "TaggingInterface.h"
 
 // Forward declarations
-class ScalarKernel;
 class MooseMesh;
 class Problem;
 class SubProblem;
 class Assembly;
 class MooseVariableScalar;
 class SubProblem;
-
-template <>
-InputParameters validParams<ScalarKernel>();
 
 class ScalarKernel : public MooseObject,
                      public ScalarCoupleable,
@@ -85,4 +81,3 @@ protected:
   /// Old value(s) of the scalar variable
   VariableValue & _u_old;
 };
-

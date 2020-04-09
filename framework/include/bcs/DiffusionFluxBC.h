@@ -11,11 +11,6 @@
 
 #include "FluxBC.h"
 
-class DiffusionFluxBC;
-
-template <>
-InputParameters validParams<DiffusionFluxBC>();
-
 /**
  * A FluxBC which is consistent with the boundary terms arising from
  * the Diffusion Kernel. The flux vector in this case is simply

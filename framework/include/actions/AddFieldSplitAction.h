@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddFieldSplitAction;
-
-template <>
-InputParameters validParams<AddFieldSplitAction>();
-
 class AddFieldSplitAction : public MooseObjectAction
 {
 public:
@@ -26,4 +21,3 @@ public:
   // prepare PETSc options
   void act();
 };
-

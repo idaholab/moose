@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupPredictorAction;
-
-template <>
-InputParameters validParams<SetupPredictorAction>();
-
 /**
  * Sets the predictor
  */
@@ -28,4 +23,3 @@ public:
 
   virtual void act() override;
 };
-

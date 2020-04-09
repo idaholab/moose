@@ -13,10 +13,6 @@
 #include "ParsedMaterialBase.h"
 
 // Forward Declarations
-class DerivativeParsedMaterial;
-
-template <>
-InputParameters validParams<DerivativeParsedMaterial>();
 
 /**
  * DerivativeFunctionMaterialBase child class to evaluate a parsed function (for
@@ -29,4 +25,3 @@ public:
 
   DerivativeParsedMaterial(const InputParameters & parameters);
 };
-

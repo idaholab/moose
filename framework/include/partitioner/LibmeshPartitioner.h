@@ -13,16 +13,12 @@
 #include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
-class LibmeshPartitioner;
 class MooseMesh;
 
 namespace libMesh
 {
 class SubdomainPartitioner;
 }
-
-template <>
-InputParameters validParams<LibmeshPartitioner>();
 
 class LibmeshPartitioner : public MoosePartitioner
 {

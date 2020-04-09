@@ -17,8 +17,6 @@
 #include "NearestPointIntegralVariablePostprocessor.h"
 #include "SystemBase.h"
 
-defineLegacyParams(MultiAppConservativeTransfer);
-
 InputParameters
 MultiAppConservativeTransfer::validParams()
 {

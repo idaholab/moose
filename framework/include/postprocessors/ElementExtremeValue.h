@@ -12,11 +12,8 @@
 #include "ElementVariablePostprocessor.h"
 
 // Forward Declarations
-class ElementExtremeValue;
 
 // Input parameters
-template <>
-InputParameters validParams<ElementExtremeValue>();
 
 /// A postprocessor for collecting the nodal min or max value
 class ElementExtremeValue : public ElementVariablePostprocessor
@@ -51,4 +48,3 @@ protected:
   /// The extreme value
   Real _value;
 };
-

@@ -12,11 +12,8 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class TimeExtremeValue;
 
 // Input parameters
-template <>
-InputParameters validParams<TimeExtremeValue>();
 
 /// A postprocessor for reporting the max/min value of another postprocessor over time
 class TimeExtremeValue : public GeneralPostprocessor
@@ -51,4 +48,3 @@ protected:
   /// The extreme value
   Real & _value;
 };
-

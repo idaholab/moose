@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", RenameBlockGenerator);
 
-defineLegacyParams(RenameBlockGenerator);
-
 InputParameters
 RenameBlockGenerator::validParams()
 {

@@ -27,4 +27,3 @@ protected:
   int _argc;
   char ** _argv;
 };
-

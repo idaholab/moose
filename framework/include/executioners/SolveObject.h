@@ -12,7 +12,6 @@
 #include "MooseObject.h"
 #include "PerfGraphInterface.h"
 
-class SolveObject;
 class Executioner;
 class FEProblemBase;
 class DisplacedProblem;

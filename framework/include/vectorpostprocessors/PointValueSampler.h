@@ -13,10 +13,6 @@
 #include "PointSamplerBase.h"
 
 // Forward Declarations
-class PointValueSampler;
-
-template <>
-InputParameters validParams<PointValueSampler>();
 
 class PointValueSampler : public PointSamplerBase
 {
@@ -27,4 +23,3 @@ public:
 
   virtual void initialize() override;
 };
-

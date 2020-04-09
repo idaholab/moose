@@ -28,7 +28,7 @@ protected:
   /// this objects rank
   processor_id_type _my_rank;
 
-  /// number of ranks in teh object's communicator
+  /// number of ranks in the object's communicator
   processor_id_type _nrank;
 
   /// hardware IDs for each MPI rank (valid on rank zero only)
@@ -47,4 +47,3 @@ private:
   /// Identify hardware by MPI processor name
   void sharedMemoryRanksByProcessorname();
 };
-

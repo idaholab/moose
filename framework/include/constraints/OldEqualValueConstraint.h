@@ -11,11 +11,6 @@
 
 #include "MortarConstraint.h"
 
-class OldEqualValueConstraint;
-
-template <>
-InputParameters validParams<OldEqualValueConstraint>();
-
 /**
  * Constrain the value of a variable to be the same on both sides of an
  * interface.

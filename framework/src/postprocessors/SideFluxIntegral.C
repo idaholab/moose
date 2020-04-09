@@ -14,8 +14,6 @@
 registerMooseObject("MooseApp", SideFluxIntegral);
 registerMooseObject("MooseApp", ADSideFluxIntegral);
 
-defineLegacyParams(SideFluxIntegral);
-
 template <bool is_ad>
 InputParameters
 SideFluxIntegralTempl<is_ad>::validParams()

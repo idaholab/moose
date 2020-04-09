@@ -11,11 +11,6 @@
 
 #include "AddSideSetsBase.h"
 
-class SideSetsFromNormals;
-
-template <>
-InputParameters validParams<SideSetsFromNormals>();
-
 class SideSetsFromNormals : public AddSideSetsBase
 {
 public:
@@ -28,4 +23,3 @@ protected:
 
   std::vector<Point> _normals;
 };
-

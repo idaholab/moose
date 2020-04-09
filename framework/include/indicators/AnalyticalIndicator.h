@@ -11,11 +11,6 @@
 
 #include "ElementIntegralIndicator.h"
 
-class AnalyticalIndicator;
-
-template <>
-InputParameters validParams<AnalyticalIndicator>();
-
 class AnalyticalIndicator : public ElementIntegralIndicator
 {
 public:

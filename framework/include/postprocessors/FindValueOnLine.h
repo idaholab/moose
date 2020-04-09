@@ -12,11 +12,6 @@
 #include "GeneralPostprocessor.h"
 #include "Coupleable.h"
 
-class FindValueOnLine;
-
-template <>
-InputParameters validParams<FindValueOnLine>();
-
 /**
  * Find a specific target value along a sampling line. The variable values along
  * the line should change monotonically. The target value is searched using a
@@ -69,4 +64,3 @@ protected:
   /// helper object to locate elements containing points
   std::unique_ptr<PointLocatorBase> _pl;
 };
-

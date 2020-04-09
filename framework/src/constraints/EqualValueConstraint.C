@@ -42,3 +42,5 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
       return 0;
   }
 }
+
+adBaseClass(EqualValueConstraint);

@@ -13,16 +13,12 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class ElementalVariableValue;
 class MooseMesh;
 
 namespace libMesh
 {
 class Elem;
 }
-
-template <>
-InputParameters validParams<ElementalVariableValue>();
 
 class ElementalVariableValue : public GeneralPostprocessor
 {
@@ -40,4 +36,3 @@ protected:
   std::string _var_name;
   Elem * _element;
 };
-

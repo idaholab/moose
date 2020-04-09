@@ -13,8 +13,6 @@
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 
-defineLegacyParams(ElementDeletionGeneratorBase);
-
 InputParameters
 ElementDeletionGeneratorBase::validParams()
 {

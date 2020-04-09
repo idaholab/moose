@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class DifferencePostprocessor;
-
-template <>
-InputParameters validParams<DifferencePostprocessor>();
-
 /**
  * Computes the difference between two postprocessors
  *
@@ -36,4 +31,3 @@ protected:
   const PostprocessorValue & _value1;
   const PostprocessorValue & _value2;
 };
-

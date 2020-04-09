@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", BoundingBoxIC);
 
-defineLegacyParams(BoundingBoxIC);
-
 InputParameters
 BoundingBoxIC::validParams()
 {

@@ -14,8 +14,6 @@
 registerMooseObject("MooseApp", MaterialRealVectorValueAux);
 registerMooseObject("MooseApp", ADMaterialRealVectorValueAux);
 
-defineLegacyParams(MaterialRealVectorValueAux);
-
 template <bool is_ad>
 InputParameters
 MaterialRealVectorValueAuxTempl<is_ad>::validParams()

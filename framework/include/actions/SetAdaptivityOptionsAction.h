@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class SetAdaptivityOptionsAction;
-
-template <>
-InputParameters validParams<SetAdaptivityOptionsAction>();
-
 class SetAdaptivityOptionsAction : public Action
 {
 public:
@@ -25,4 +20,3 @@ public:
 
   virtual void act() override;
 };
-

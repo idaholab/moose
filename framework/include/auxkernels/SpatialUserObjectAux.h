@@ -12,11 +12,7 @@
 #include "AuxKernel.h"
 
 // Forward Declarations
-class SpatialUserObjectAux;
 class UserObject;
-
-template <>
-InputParameters validParams<SpatialUserObjectAux>();
 
 /**
  * Function auxiliary value
@@ -38,4 +34,3 @@ protected:
   /// UserObject to be queried for a value
   const UserObject & _user_object;
 };
-

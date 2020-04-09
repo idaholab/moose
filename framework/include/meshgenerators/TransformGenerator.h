@@ -13,10 +13,6 @@
 #include "MooseEnum.h"
 
 // Forward declarations
-class TransformGenerator;
-
-template <>
-InputParameters validParams<TransformGenerator>();
 
 class TransformGenerator : public MeshGenerator
 {
@@ -33,4 +29,3 @@ protected:
   MooseEnum _transform;
   RealVectorValue _vector_value;
 };
-

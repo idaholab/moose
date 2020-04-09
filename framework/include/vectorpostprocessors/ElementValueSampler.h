@@ -12,11 +12,6 @@
 #include "ElementVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
 
-class ElementValueSampler;
-
-template <>
-InputParameters validParams<ElementValueSampler>();
-
 /**
  * Samples values of elemental variable(s).
  */
@@ -42,4 +37,3 @@ protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
 };
-

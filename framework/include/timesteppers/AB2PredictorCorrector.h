@@ -16,16 +16,12 @@
 #include <fstream>
 
 // Forward Declarations
-class AB2PredictorCorrector;
 
 namespace libMesh
 {
 template <typename T>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<AB2PredictorCorrector>();
 
 /**
  * A TimeStepper based on the AB2 method.  Increases the timestep if
@@ -78,4 +74,3 @@ protected:
   Real _scaling_parameter;
   std::ofstream myfile;
 };
-

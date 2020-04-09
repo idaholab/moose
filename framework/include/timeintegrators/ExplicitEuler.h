@@ -11,11 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ExplicitEuler;
-
-template <>
-InputParameters validParams<ExplicitEuler>();
-
 /**
  * Explicit Euler time integrator
  */
@@ -47,4 +42,3 @@ ExplicitEuler::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old) const
   u_dot -= u_old;
   u_dot *= 1. / _dt;
 }
-

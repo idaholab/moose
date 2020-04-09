@@ -14,10 +14,6 @@
 class Function;
 
 // Forward Declarations
-class ElementH1SemiError;
-
-template <>
-InputParameters validParams<ElementH1SemiError>();
 
 /**
  * This postprocessor will print out the h1 seminorm between the computed

@@ -20,10 +20,6 @@ class NumericVector;
 class Point;
 }
 
-class MooseVariableFEBase;
-template <>
-InputParameters validParams<MooseVariableFEBase>();
-
 class MooseVariableFEBase : public MooseVariableBase
 {
 public:

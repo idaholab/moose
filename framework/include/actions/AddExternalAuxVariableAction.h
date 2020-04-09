@@ -13,10 +13,6 @@
 #include "Action.h"
 
 // Forward declarations
-class AddExternalAuxVariableAction;
-
-template <>
-InputParameters validParams<AddExternalAuxVariableAction>();
 
 /**
  * Action for creating Auxiliary variables
@@ -33,4 +29,3 @@ public:
 
   virtual void act() override;
 };
-

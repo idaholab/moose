@@ -34,7 +34,6 @@
 
 // Forward declarations
 class Executioner;
-class MooseApp;
 class Backup;
 class FEProblemBase;
 class MeshModifier;
@@ -43,9 +42,6 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 class RelationshipManager;
-
-template <>
-InputParameters validParams<MooseApp>();
 
 /**
  * Base class for MOOSE-based applications

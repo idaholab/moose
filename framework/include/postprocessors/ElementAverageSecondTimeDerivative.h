@@ -12,10 +12,6 @@
 #include "ElementAverageValue.h"
 
 // Forward Declarations
-class ElementAverageSecondTimeDerivative;
-
-template <>
-InputParameters validParams<ElementAverageSecondTimeDerivative>();
 
 /**
  * This postprocessor computes a volume integral of the second time derivative of a given variable.
@@ -33,4 +29,3 @@ protected:
   /// Holds the solution second derivative wrt time at the current quadrature points
   const VariableValue & _u_dotdot;
 };
-

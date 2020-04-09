@@ -17,7 +17,6 @@
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
 
-class MultiApp;
 class UserObject;
 class FEProblemBase;
 class FEProblem;
@@ -36,9 +35,6 @@ class BoundingBox;
 template <typename T>
 class NumericVector;
 } // namespace libMesh
-
-template <>
-InputParameters validParams<MultiApp>();
 
 /**
  * Helper class for holding Sub-app backups

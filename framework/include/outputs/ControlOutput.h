@@ -13,10 +13,6 @@
 #include "Output.h"
 
 // Forward declarations
-class ControlOutput;
-
-template <>
-InputParameters validParams<ControlOutput>();
 
 /**
  * Class for output information regarding Controls to the screen
@@ -59,4 +55,3 @@ private:
   /// Flag for showing active objects
   bool _show_active_objects;
 };
-

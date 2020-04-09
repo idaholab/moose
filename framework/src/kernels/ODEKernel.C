@@ -14,8 +14,6 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
-defineLegacyParams(ODEKernel);
-
 InputParameters
 ODEKernel::validParams()
 {

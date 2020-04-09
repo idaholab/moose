@@ -20,16 +20,12 @@
 #include "ElementIDInterface.h"
 
 // Forward Declarations
-class ElementUserObject;
 
 namespace libMesh
 {
 class Elem;
 class QBase;
 }
-
-template <>
-InputParameters validParams<ElementUserObject>();
 
 class ElementUserObject : public UserObject,
                           public BlockRestrictable,

@@ -13,16 +13,12 @@
 #include "OversampleOutput.h"
 
 // Forward declarations
-class Exodus;
 
 // libMesh forward declarations
 namespace libMesh
 {
 class ExodusII_IO;
 }
-
-template <>
-InputParameters validParams<Exodus>();
 
 /**
  * Class for output data to the ExodusII format

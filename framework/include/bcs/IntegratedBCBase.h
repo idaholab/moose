@@ -15,14 +15,10 @@
 #include "MaterialPropertyInterface.h"
 
 // Forward declarations
-class IntegratedBCBase;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-
-template <>
-InputParameters validParams<IntegratedBCBase>();
 
 /**
  * Base class for deriving any boundary condition of a integrated type

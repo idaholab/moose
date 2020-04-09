@@ -12,10 +12,6 @@
 #include "MooseMesh.h"
 
 // forward declaration
-class FileMesh;
-
-template <>
-InputParameters validParams<FileMesh>();
 
 class FileMesh : public MooseMesh
 {
@@ -51,4 +47,3 @@ protected:
   /// Timers
   const PerfID _read_mesh_timer;
 };
-

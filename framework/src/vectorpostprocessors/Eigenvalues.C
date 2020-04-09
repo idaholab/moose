@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", Eigenvalues);
 
-defineLegacyParams(Eigenvalues);
-
 InputParameters
 Eigenvalues::validParams()
 {

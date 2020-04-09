@@ -22,16 +22,12 @@
 #include "libmesh/vector_value.h"
 
 // Forward declarations
-class Function;
 
 // libMesh forward declarations
 namespace libMesh
 {
 class Point;
 }
-
-template <>
-InputParameters validParams<Function>();
 
 /**
  * Base class for function objects.  Functions override value to supply a

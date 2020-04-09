@@ -38,8 +38,6 @@
 
 registerMooseObject("MooseApp", Transient);
 
-defineLegacyParams(Transient);
-
 InputParameters
 Transient::validParams()
 {

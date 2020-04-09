@@ -12,15 +12,6 @@
 // MOOSE includes
 #include "SideIntegralVariablePostprocessor.h"
 
-// Forward Declarations
-template <bool>
-class SideFluxIntegralTempl;
-typedef SideFluxIntegralTempl<false> SideFluxIntegral;
-typedef SideFluxIntegralTempl<true> ADSideFluxIntegral;
-
-template <>
-InputParameters validParams<SideFluxIntegral>();
-
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
@@ -38,3 +29,6 @@ protected:
   MaterialPropertyName _diffusivity;
   const GenericMaterialProperty<Real, is_ad> & _diffusion_coef;
 };
+
+typedef SideFluxIntegralTempl<false> SideFluxIntegral;
+typedef SideFluxIntegralTempl<true> ADSideFluxIntegral;

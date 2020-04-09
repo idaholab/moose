@@ -22,16 +22,12 @@
 
 // Forward Declarations
 class Assembly;
-class Constraint;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class SubProblem;
 class MooseMesh;
-
-template <>
-InputParameters validParams<Constraint>();
 
 /**
  * Base class for all Constraint types

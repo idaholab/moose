@@ -13,11 +13,7 @@
 #include "MooseEnum.h"
 #include "PetscExternalPartitioner.h"
 
-class BlockWeightedPartitioner;
 class MooseMesh;
-
-template <>
-InputParameters validParams<BlockWeightedPartitioner>();
 
 /**
  * Partition a mesh by weighting blocks. The motivation is that differenct

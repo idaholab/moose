@@ -11,8 +11,6 @@
 
 #include "ElementPostprocessor.h"
 
-class ElementExtremeMaterialProperty;
-
 /// Determines the minimum or maximum of a material property over a volume.
 class ElementExtremeMaterialProperty : public ElementPostprocessor
 {

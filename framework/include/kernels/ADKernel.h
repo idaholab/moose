@@ -13,13 +13,6 @@
 
 #include "DualRealOps.h"
 
-// forward declarations
-template <typename>
-class ADKernelTempl;
-
-using ADKernel = ADKernelTempl<Real>;
-using ADVectorKernel = ADKernelTempl<RealVectorValue>;
-
 template <typename T>
 class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
 {
@@ -99,3 +92,6 @@ protected:
 private:
   const Elem * _my_elem;
 };
+
+using ADKernel = ADKernelTempl<Real>;
+using ADVectorKernel = ADKernelTempl<RealVectorValue>;

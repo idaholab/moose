@@ -28,15 +28,11 @@
 
 class MooseMesh;
 class SubProblem;
-class KernelBase;
 class Assembly;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-
-template <>
-InputParameters validParams<KernelBase>();
 
 /**
  * This is the common base class for the three main

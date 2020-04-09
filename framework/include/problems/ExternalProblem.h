@@ -11,11 +11,6 @@
 
 #include "FEProblemBase.h"
 
-class ExternalProblem;
-
-template <>
-InputParameters validParams<ExternalProblem>();
-
 class ExternalProblem : public FEProblemBase
 {
 public:
@@ -58,4 +53,3 @@ public:
    */
   virtual void addExternalVariables() {}
 };
-

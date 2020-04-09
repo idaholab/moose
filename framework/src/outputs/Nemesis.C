@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", Nemesis);
 
-defineLegacyParams(Nemesis);
-
 InputParameters
 Nemesis::validParams()
 {

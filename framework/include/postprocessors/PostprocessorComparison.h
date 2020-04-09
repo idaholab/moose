@@ -11,11 +11,6 @@
 
 #include "ComparisonPostprocessor.h"
 
-class PostprocessorComparison;
-
-template <>
-InputParameters validParams<PostprocessorComparison>();
-
 /**
  * Compares two post-processors and produces a boolean value
  *
@@ -52,4 +47,3 @@ protected:
   /// The comparison value; 1 for true and 0 for false
   PostprocessorValue _comparison_value;
 };
-

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", LayeredSideIntegral);
 
-defineLegacyParams(LayeredSideIntegral);
-
 InputParameters
 LayeredSideIntegral::validParams()
 {

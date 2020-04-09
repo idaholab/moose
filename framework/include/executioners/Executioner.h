@@ -21,10 +21,6 @@
 #include <string>
 
 class Problem;
-class Executioner;
-
-template <>
-InputParameters validParams<Executioner>();
 
 /**
  * Executioners are objects that do the actual work of solving your problem.

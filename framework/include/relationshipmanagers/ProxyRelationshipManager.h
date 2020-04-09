@@ -14,15 +14,11 @@
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
-class ProxyRelationshipManager;
 class MooseMesh;
 namespace libMesh
 {
 class System;
 }
-
-template <>
-InputParameters validParams<ProxyRelationshipManager>();
 
 /**
  * Intermediate base class for RelationshipManagers that are simply built
@@ -52,4 +48,3 @@ protected:
 
   System * _other_system;
 };
-

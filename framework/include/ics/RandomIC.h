@@ -14,7 +14,6 @@
 
 // Forward Declarations
 class InputParameters;
-class RandomIC;
 class Distribution;
 namespace libMesh
 {
@@ -23,9 +22,6 @@ class Point;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<RandomIC>();
 
 /**
  * RandomIC just returns a Random value.

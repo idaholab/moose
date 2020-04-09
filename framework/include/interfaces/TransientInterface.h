@@ -21,13 +21,9 @@
 class FEProblemBase;
 class InputParameters;
 class MooseObject;
-class TransientInterface;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<TransientInterface>();
 
 /**
  * Interface for objects that needs transient capabilities

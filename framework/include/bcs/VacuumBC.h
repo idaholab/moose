@@ -12,10 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class VacuumBC;
-
-template <>
-InputParameters validParams<VacuumBC>();
 
 /**
  * Implements a simple Vacuum BC for neutron diffusion on the boundary.

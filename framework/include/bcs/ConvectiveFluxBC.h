@@ -12,10 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class ConvectiveFluxBC;
-
-template <>
-InputParameters validParams<ConvectiveFluxBC>();
 
 class ConvectiveFluxBC : public IntegratedBC
 {

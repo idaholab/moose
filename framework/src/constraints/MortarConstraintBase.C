@@ -12,8 +12,6 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 
-defineLegacyParams(MortarConstraintBase);
-
 InputParameters
 MortarConstraintBase::validParams()
 {

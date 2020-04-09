@@ -11,11 +11,6 @@
 
 #include "IndicatorMarker.h"
 
-class ErrorFractionMarker;
-
-template <>
-InputParameters validParams<ErrorFractionMarker>();
-
 class ErrorFractionMarker : public IndicatorMarker
 {
 public:
@@ -38,4 +33,3 @@ protected:
   Real _refine_cutoff;
   Real _coarsen_cutoff;
 };
-

@@ -18,8 +18,6 @@
 #include <unistd.h>
 #include <ctime>
 
-defineLegacyParams(FileOutput);
-
 InputParameters
 FileOutput::validParams()
 {

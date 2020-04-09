@@ -12,10 +12,6 @@
 #include "IntegratedBC.h"
 
 // Forward Declarations
-class DGFunctionDiffusionDirichletBC;
-
-template <>
-InputParameters validParams<DGFunctionDiffusionDirichletBC>();
 
 /**
  * Implements a simple BC for DG

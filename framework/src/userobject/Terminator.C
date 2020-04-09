@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", Terminator);
 
-defineLegacyParams(Terminator);
-
 InputParameters
 Terminator::validParams()
 {

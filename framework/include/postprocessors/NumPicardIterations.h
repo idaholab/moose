@@ -13,11 +13,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumPicardIterations;
 class Transient;
-
-template <>
-InputParameters validParams<NumPicardIterations>();
 
 /**
  * Returns the number of Picard iterations taken by the underlying
@@ -38,4 +34,3 @@ public:
 protected:
   Transient * _transient_executioner;
 };
-

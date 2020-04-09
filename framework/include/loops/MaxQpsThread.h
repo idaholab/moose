@@ -55,4 +55,3 @@ protected:
   /// Maximum number of shape functions encountered
   unsigned int _max_shape_funcs;
 };
-

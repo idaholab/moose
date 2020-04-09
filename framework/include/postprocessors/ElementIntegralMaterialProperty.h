@@ -11,14 +11,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-template <bool>
-class ElementIntegralMaterialPropertyTempl;
-typedef ElementIntegralMaterialPropertyTempl<false> ElementIntegralMaterialProperty;
-typedef ElementIntegralMaterialPropertyTempl<true> ADElementIntegralMaterialProperty;
-
-template <>
-InputParameters validParams<ElementIntegralMaterialProperty>();
-
 template <bool is_ad>
 class ElementIntegralMaterialPropertyTempl : public ElementIntegralPostprocessor
 {
@@ -32,3 +24,6 @@ protected:
 
   const GenericMaterialProperty<Real, is_ad> & _scalar;
 };
+
+typedef ElementIntegralMaterialPropertyTempl<false> ElementIntegralMaterialProperty;
+typedef ElementIntegralMaterialPropertyTempl<true> ADElementIntegralMaterialProperty;

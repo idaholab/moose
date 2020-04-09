@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class CumulativeValuePostprocessor;
-
-template <>
-InputParameters validParams<CumulativeValuePostprocessor>();
-
 /**
  * Creates a cumulative sum of a post-processor value over a transient.
  *
@@ -43,4 +38,3 @@ protected:
   /// current post-processor value to be added to the cumulative sum
   const PostprocessorValue & _pps_value;
 };
-

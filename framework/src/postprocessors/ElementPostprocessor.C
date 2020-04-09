@@ -9,8 +9,6 @@
 
 #include "ElementPostprocessor.h"
 
-defineLegacyParams(ElementPostprocessor);
-
 InputParameters
 ElementPostprocessor::validParams()
 {

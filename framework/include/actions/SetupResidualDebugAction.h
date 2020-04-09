@@ -12,11 +12,6 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class SetupResidualDebugAction;
-
-template <>
-InputParameters validParams<SetupResidualDebugAction>();
-
 /**
  *
  */
@@ -32,4 +27,3 @@ public:
 protected:
   std::vector<NonlinearVariableName> _show_var_residual;
 };
-

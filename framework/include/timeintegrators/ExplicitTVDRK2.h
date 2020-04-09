@@ -11,11 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ExplicitTVDRK2;
-
-template <>
-InputParameters validParams<ExplicitTVDRK2>();
-
 /**
  * Explicit TVD (total-variation-diminishing)
  * second-order Runge-Kutta time integration methods:
@@ -92,4 +87,3 @@ ExplicitTVDRK2::computeTimeDerivativeHelper(T & u_dot, const T2 & u_old, const T
     u_dot *= 0.5 / _dt;
   }
 }
-

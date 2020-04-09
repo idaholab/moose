@@ -12,10 +12,6 @@
 #include "MeshGenerator.h"
 
 // Forward declarations
-class RinglebMeshGenerator;
-
-template <>
-InputParameters validParams<RinglebMeshGenerator>();
 
 /**
  * Generates a mesh given all the parameters
@@ -71,4 +67,3 @@ protected:
   /// This parameter, if true, allows to split the quadrilateral elements into triangular elements.
   const bool & _triangles;
 };
-

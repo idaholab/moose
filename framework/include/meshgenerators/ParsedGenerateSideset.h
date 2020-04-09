@@ -14,10 +14,6 @@
 #include "libmesh/point.h"
 
 // Forward declarations
-class ParsedGenerateSideset;
-
-template <>
-InputParameters validParams<ParsedGenerateSideset>();
 
 /**
  * MeshGenerator for defining a Sideset by a parsed expression and
@@ -57,4 +53,3 @@ protected:
   /// function parser object describing the combinatorial geometry
   ADFunctionPtr _func_F;
 };
-

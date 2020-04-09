@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialDerivativeTestKernel);
 
-defineLegacyParams(MaterialDerivativeTestKernel);
-
 InputParameters
 MaterialDerivativeTestKernel::validParams()
 {

@@ -11,12 +11,6 @@
 
 #include "ADKernel.h"
 
-template <typename>
-class ADKernelGradTempl;
-
-using ADKernelGrad = ADKernelGradTempl<Real>;
-using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue>;
-
 template <typename T>
 class ADKernelGradTempl : public ADKernelTempl<T>
 {
@@ -64,3 +58,6 @@ protected:
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
 };
+
+using ADKernelGrad = ADKernelGradTempl<Real>;
+using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue>;

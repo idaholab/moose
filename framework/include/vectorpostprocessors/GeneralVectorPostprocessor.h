@@ -14,10 +14,6 @@
 #include "GeneralUserObject.h"
 
 // Forward Declarations
-class GeneralVectorPostprocessor;
-
-template <>
-InputParameters validParams<GeneralVectorPostprocessor>();
 
 /**
  * This class is here to combine the VectorPostprocessor interface and
@@ -38,4 +34,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

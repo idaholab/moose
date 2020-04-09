@@ -11,12 +11,10 @@
 
 registerMooseObject("MooseApp", MaterialRankFourTensorAux);
 
-defineLegacyParams(MaterialRankFourTensorAux);
-
 InputParameters
 MaterialRankFourTensorAux::validParams()
 {
-  InputParameters params = MaterialAuxBase<>::validParams();
+  InputParameters params = MaterialAuxBase<RankFourTensor>::validParams();
   params.addClassDescription(
       "Access a component of a RankFourTensor for automatic material property output");
   params.addRequiredParam<unsigned int>("i", "The index i of ijkl for the tensor to output");

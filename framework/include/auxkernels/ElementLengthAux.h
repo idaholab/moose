@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ElementLengthAux;
-
-template <>
-InputParameters validParams<ElementLengthAux>();
-
 /**
  * Computes the min or max of element length.
  */
@@ -37,4 +31,3 @@ protected:
   /// The type of calculation to perform min or max
   const bool _use_min;
 };
-

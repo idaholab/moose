@@ -12,14 +12,11 @@
 #include "Kernel.h"
 
 // Forward Declaration
-class ConservativeAdvection;
 
 /**
  * Advection of the variable by the velocity provided by the user.
  * Options for numerical stabilization are: none; full upwinding
  */
-template <>
-InputParameters validParams<ConservativeAdvection>();
 
 class ConservativeAdvection : public Kernel
 {
@@ -62,4 +59,3 @@ protected:
   /// Calculates the fully-upwind Residual and Jacobian (depending on res_or_jac)
   void fullUpwind(JacRes res_or_jac);
 };
-

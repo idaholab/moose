@@ -12,10 +12,6 @@
 #include "ElementVectorPostprocessor.h"
 
 // Forward Declarations
-class ElementVariablesDifferenceMax;
-
-template <>
-InputParameters validParams<ElementVariablesDifferenceMax>();
 
 /**
  * \brief     Finds the largest difference between two variable fields
@@ -74,4 +70,3 @@ protected:
    */
   std::vector<Real> _all;
 };
-

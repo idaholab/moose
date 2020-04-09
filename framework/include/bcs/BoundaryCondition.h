@@ -34,11 +34,7 @@ class MooseMesh;
 class Problem;
 class SubProblem;
 class SystemBase;
-class BoundaryCondition;
 class Assembly;
-
-template <>
-InputParameters validParams<BoundaryCondition>();
 
 /**
  * Base class for creating new types of boundary conditions.

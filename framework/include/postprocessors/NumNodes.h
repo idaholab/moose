@@ -12,10 +12,6 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class NumNodes;
-
-template <>
-InputParameters validParams<NumNodes>();
 
 class NumNodes : public GeneralPostprocessor
 {
@@ -35,4 +31,3 @@ public:
 private:
   const MeshBase & _mesh;
 };
-

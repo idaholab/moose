@@ -16,7 +16,6 @@
 
 // Forward declarations
 class InputParameters;
-class SyntaxTree;
 
 class SyntaxTree : public SyntaxFormatterInterface
 {
@@ -77,4 +76,3 @@ protected:
 private:
   std::set<std::string> _params_printed;
 };
-

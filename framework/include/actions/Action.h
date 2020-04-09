@@ -20,7 +20,6 @@
 #include <string>
 #include <ostream>
 
-class Action;
 class ActionWarehouse;
 class ActionFactory;
 class MooseMesh;
@@ -28,9 +27,6 @@ class FEProblemBase;
 class Executioner;
 class MooseApp;
 class Factory;
-
-template <>
-InputParameters validParams<Action>();
 
 /**
  * Base class for actions.

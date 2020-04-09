@@ -13,10 +13,6 @@
 #include "MeshModifier.h"
 
 // Forward declerations
-class RenameBlock;
-
-template <>
-InputParameters validParams<RenameBlock>();
 
 /**
  * MeshModifier for re-numbering or re-naming blocks
@@ -91,4 +87,3 @@ private:
    */
   SubdomainID newBlockID(const SubdomainName & new_block_name);
 };
-

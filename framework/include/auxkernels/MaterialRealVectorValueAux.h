@@ -13,6 +13,7 @@
 #include "MaterialAuxBase.h"
 
 // Forward declarations
+<<<<<<< HEAD
 template <bool>
 class MaterialRealVectorValueAuxTempl;
 typedef MaterialRealVectorValueAuxTempl<false> MaterialRealVectorValueAux;
@@ -20,6 +21,8 @@ typedef MaterialRealVectorValueAuxTempl<true> ADMaterialRealVectorValueAux;
 
 template <>
 InputParameters validParams<MaterialRealVectorValueAux>();
+=======
+>>>>>>> 53cea21418... Update framework (#14135)
 
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable

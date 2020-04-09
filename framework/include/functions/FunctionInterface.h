@@ -18,16 +18,12 @@
 // Forward declarations
 class Function;
 class FEProblemBase;
-class FunctionInterface;
 class Function;
 class InputParameters;
 class MooseObject;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<FunctionInterface>();
 
 /**
  * Interface for objects that need to use functions

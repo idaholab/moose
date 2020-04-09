@@ -12,15 +12,11 @@
 #include "MooseMesh.h"
 
 // Forward declarations
-class PatternedMesh;
 
 namespace libMesh
 {
 class ReplicatedMesh;
 }
-
-template <>
-InputParameters validParams<PatternedMesh>();
 
 /**
  * Reads one or more 2D mesh files and stitches them together based on
@@ -65,4 +61,3 @@ protected:
   const Real _y_width;
   const Real _z_width;
 };
-

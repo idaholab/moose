@@ -17,11 +17,6 @@ namespace libMesh
 class LinearImplicitSystem;
 }
 
-class MultiAppProjectionTransfer;
-
-template <>
-InputParameters validParams<MultiAppProjectionTransfer>();
-
 /**
  * Project values from one domain to another
  */

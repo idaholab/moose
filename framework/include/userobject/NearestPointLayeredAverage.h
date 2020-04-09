@@ -15,10 +15,6 @@
 #include "LayeredAverage.h"
 
 // Forward Declarations
-class NearestPointLayeredAverage;
-
-template <>
-InputParameters validParams<NearestPointLayeredAverage>();
 
 /**
  * This UserObject computes averages of a variable storing partial
@@ -35,4 +31,3 @@ public:
 
   NearestPointLayeredAverage(const InputParameters & parameters);
 };
-

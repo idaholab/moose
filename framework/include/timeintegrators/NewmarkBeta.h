@@ -12,11 +12,6 @@
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
 
-class NewmarkBeta;
-
-template <>
-InputParameters validParams<NewmarkBeta>();
-
 /**
  * Newmark-Beta time integration method
  */
@@ -75,4 +70,3 @@ NewmarkBeta::computeTimeDerivativeHelper(
   MathUtils::addScaled((1.0 - _gamma) * _dt, u_dotdot_old, u_dot);
   MathUtils::addScaled(_gamma * _dt, u_dotdot, u_dot);
 }
-

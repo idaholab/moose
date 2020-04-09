@@ -16,11 +16,7 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/numeric_vector.h"
 
-class ExplicitTimeIntegrator;
 class LumpedPreconditioner;
-
-template <>
-InputParameters validParams<ExplicitTimeIntegrator>();
 
 /**
  * Base class for explicit time integrators that are implemented without using

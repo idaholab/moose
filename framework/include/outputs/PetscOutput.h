@@ -13,10 +13,6 @@
 #include "Output.h"
 
 // Forward declerations
-class PetscOutput;
-
-template <>
-InputParameters validParams<PetscOutput>();
 
 /**
  * Adds the ability to output on every nonlinear and/or linear residual

@@ -9,8 +9,6 @@
 
 #include "PresetNodalBC.h"
 
-defineLegacyParams(PresetNodalBC);
-
 InputParameters
 PresetNodalBC::validParams()
 {

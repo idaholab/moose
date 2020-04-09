@@ -12,10 +12,6 @@
 #include "LayeredIntegral.h"
 
 // Forward Declarations
-class LayeredAverage;
-
-template <>
-InputParameters validParams<LayeredAverage>();
 
 /**
  * This UserObject computes averages of a variable storing partial
@@ -37,4 +33,3 @@ protected:
   /// Value of the volume for each layer
   std::vector<Real> _layer_volumes;
 };
-

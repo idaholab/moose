@@ -9,8 +9,6 @@
 
 #include "InternalSidePostprocessor.h"
 
-defineLegacyParams(InternalSidePostprocessor);
-
 InputParameters
 InternalSidePostprocessor::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", RelativeSolutionDifferenceNorm);
 
-defineLegacyParams(RelativeSolutionDifferenceNorm);
-
 InputParameters
 RelativeSolutionDifferenceNorm::validParams()
 {

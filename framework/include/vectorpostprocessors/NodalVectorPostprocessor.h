@@ -14,10 +14,6 @@
 #include "VectorPostprocessor.h"
 
 // Forward Declarations
-class NodalVectorPostprocessor;
-
-template <>
-InputParameters validParams<NodalVectorPostprocessor>();
 
 class NodalVectorPostprocessor : public NodalUserObject, public VectorPostprocessor
 {
@@ -32,4 +28,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

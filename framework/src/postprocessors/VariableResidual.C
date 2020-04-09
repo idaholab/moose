@@ -18,8 +18,6 @@
 
 registerMooseObject("MooseApp", VariableResidual);
 
-defineLegacyParams(VariableResidual);
-
 InputParameters
 VariableResidual::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "ElementDeleterBase.h"
 
-class BlockDeleter;
-
-template <>
-InputParameters validParams<BlockDeleter>();
-
 class BlockDeleter : public ElementDeleterBase
 {
 public:
@@ -28,4 +23,3 @@ private:
   ///Defines the block to be removed
   const SubdomainID _block_id;
 };
-

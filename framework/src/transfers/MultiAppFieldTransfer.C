@@ -18,8 +18,6 @@
 #include "libmesh/id_types.h"
 #include "libmesh/string_to_enum.h"
 
-defineLegacyParams(MultiAppFieldTransfer);
-
 InputParameters
 MultiAppFieldTransfer::validParams()
 {

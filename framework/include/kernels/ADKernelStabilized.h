@@ -11,12 +11,6 @@
 
 #include "ADKernel.h"
 
-template <typename>
-class ADKernelStabilizedTempl;
-
-using ADKernelStabilized = ADKernelStabilizedTempl<Real>;
-using ADVectorKernelStabilized = ADKernelStabilizedTempl<RealVectorValue>;
-
 template <typename T>
 class ADKernelStabilizedTempl : public ADKernelTempl<T>
 {
@@ -66,3 +60,6 @@ protected:
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
 };
+
+using ADKernelStabilized = ADKernelStabilizedTempl<Real>;
+using ADVectorKernelStabilized = ADKernelStabilizedTempl<RealVectorValue>;

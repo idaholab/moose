@@ -12,13 +12,6 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward declarations
-template <typename T = Real, bool is_ad = false>
-class MaterialAuxBaseTempl;
-
-template <>
-InputParameters validParams<MaterialAuxBaseTempl<>>();
-
 /**
  * A base class for the various Material related AuxKernal objects
  */
@@ -79,6 +72,9 @@ MaterialAuxBaseTempl<T, is_ad>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
+<<<<<<< HEAD
 
 template <typename T = Real>
 using MaterialAuxBase = MaterialAuxBaseTempl<T, false>;
+=======
+>>>>>>> 53cea21418... Update framework (#14135)

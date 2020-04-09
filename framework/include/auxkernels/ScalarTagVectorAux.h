@@ -12,10 +12,6 @@
 #include "AuxScalarKernel.h"
 
 // Forward Declarations
-class ScalarTagVectorAux;
-
-template <>
-InputParameters validParams<AuxScalarKernel>();
 
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
@@ -34,4 +30,3 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
-

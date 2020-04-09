@@ -11,11 +11,6 @@
 
 #include "ArrayKernel.h"
 
-class ArrayReaction;
-
-template <>
-InputParameters validParams<ArrayReaction>();
-
 class ArrayReaction : public ArrayKernel
 {
 public:

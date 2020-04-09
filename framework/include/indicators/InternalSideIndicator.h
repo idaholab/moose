@@ -16,14 +16,10 @@
 #include "NeighborMooseVariableInterface.h"
 
 // Forward Declarations
-class InternalSideIndicator;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-
-template <>
-InputParameters validParams<InternalSideIndicator>();
 
 /**
  * The InternalSideIndicator class is responsible for calculating the residuals for various

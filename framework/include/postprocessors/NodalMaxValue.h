@@ -12,10 +12,6 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalMaxValue;
-
-template <>
-InputParameters validParams<NodalMaxValue>();
 
 /**
  * This class computes a maximum (over all the nodal values) of the
@@ -36,4 +32,3 @@ public:
 protected:
   Real _value;
 };
-

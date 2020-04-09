@@ -31,4 +31,3 @@ protected:
   FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 };
-

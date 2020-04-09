@@ -13,10 +13,6 @@
 #include "NodeFaceConstraint.h"
 
 // Forward Declarations
-class CoupledTiedValueConstraint;
-
-template <>
-InputParameters validParams<CoupledTiedValueConstraint>();
 
 /**
  * A CoupledTiedValueConstraint forces the value of a variable to be the same on both sides of an
@@ -41,4 +37,3 @@ protected:
   const Real _scaling;
   NumericVector<Number> & _residual_copy;
 };
-

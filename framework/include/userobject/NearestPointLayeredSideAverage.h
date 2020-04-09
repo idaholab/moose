@@ -15,10 +15,6 @@
 #include "LayeredSideAverage.h"
 
 // Forward Declarations
-class NearestPointLayeredSideAverage;
-
-template <>
-InputParameters validParams<NearestPointLayeredSideAverage>();
 
 /**
  * This UserObject computes averages of a variable storing partial

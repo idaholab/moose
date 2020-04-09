@@ -14,10 +14,6 @@
 #include "libmesh/enum_elem_quality.h"
 
 // Forward Declarations
-class ElementQualityAux;
-
-template <>
-InputParameters validParams<ElementQualityAux>();
 
 /**
  * Calculates element quality for each element
@@ -35,4 +31,3 @@ protected:
   /// The metric type to use
   ElemQuality _metric_type;
 };
-

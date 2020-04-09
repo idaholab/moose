@@ -14,7 +14,6 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
 // Forward Declarations
-class NodeFaceConstraint;
 
 // libMesh forward declarations
 namespace libMesh
@@ -22,9 +21,6 @@ namespace libMesh
 template <typename T>
 class SparseMatrix;
 }
-
-template <>
-InputParameters validParams<NodeFaceConstraint>();
 
 /**
  * A NodeFaceConstraint is used when you need to create constraints between
