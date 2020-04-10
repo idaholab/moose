@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2020.04.09" %}
+{% set version = "2020.04.10" %}
 
 package:
   name: moose-libmesh
