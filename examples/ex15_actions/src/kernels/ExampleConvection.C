@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleConvection>()
 {
-  InputParameters params = validParams<Kernel>();
+  auto params = Kernel::validParams();
 
   params.addRequiredCoupledVar(
       "some_variable", "The gradient of this variable will be used as the velocity vector.");

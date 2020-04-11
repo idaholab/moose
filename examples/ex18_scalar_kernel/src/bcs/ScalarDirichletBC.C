@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ScalarDirichletBC>()
 {
-  InputParameters params = validParams<NodalBC>();
+  auto params = NodalBC::validParams();
   // Here we are adding a parameter that will be extracted from the input file by the Parser
   params.addRequiredCoupledVar("scalar_var", "Value of the scalar variable");
   return params;

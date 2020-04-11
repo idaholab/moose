@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<RadiationTransferAction>()
 {
-  InputParameters params = validParams<Action>();
+  auto params = Action::validParams();
   params.addClassDescription(
       "This action sets up the net radiation calculation between specified sidesets.");
 

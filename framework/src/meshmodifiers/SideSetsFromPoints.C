@@ -30,7 +30,7 @@ template <>
 InputParameters
 validParams<SideSetsFromPoints>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  auto params = AddSideSetsBase::validParams();
   params.addClassDescription("Adds a new sideset starting at the specified point containing all "
                              "connected element faces with the same normal.");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",

@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<SideSetsAroundSubdomain>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  auto params = AddSideSetsBase::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>(
       "new_boundary", "The list of boundary IDs to create on the supplied subdomain");
   params.addRequiredParam<std::vector<SubdomainName>>("block",

@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleConvection>()
 {
-  InputParameters params = validParams<Kernel>();
+  auto params = Kernel::validParams();
   return params;
 }
 

@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<ExampleTimeDerivative>()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  auto params = TimeDerivative::validParams();
   params.addParam<Real>("time_coefficient", 1.0, "Time Coefficient");
   return params;
 }

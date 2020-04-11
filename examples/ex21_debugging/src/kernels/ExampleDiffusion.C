@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<ExampleDiffusion>()
 {
-  InputParameters params = validParams<Diffusion>();
+  auto params = Diffusion::validParams();
   params.addRequiredCoupledVar(
       "coupled_coef", "The value of this variable will be used as the diffusion coefficient.");
 

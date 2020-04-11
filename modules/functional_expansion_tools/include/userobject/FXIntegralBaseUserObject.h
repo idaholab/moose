@@ -20,9 +20,6 @@
 #include "FunctionSeries.h"
 #include "MutableCoefficientsInterface.h"
 
-/**
- * Class declaration for parameters - we cannot use templated types in validParams<>()
- */
 class FXIntegralBaseUserObjectParameters
 {
 public:

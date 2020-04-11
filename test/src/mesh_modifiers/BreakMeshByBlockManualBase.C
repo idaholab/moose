@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<BreakMeshByBlockManualBase>()
 {
-  InputParameters params = validParams<BreakMeshByBlockBase>();
+  auto params = BreakMeshByBlockBase::validParams();
   params.addClassDescription("This is the base class used to manually split a "
                              "monolitick mesh and produce an exodus file to  "
                              "comapre the resutl of a mesh split algorithm");

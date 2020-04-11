@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<ExampleConvection>()
 {
-  InputParameters params = validParams<Kernel>();
+  auto params = Kernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }

@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ElemExtraIDAux;
-
-template <>
-InputParameters validParams<ElemExtraIDAux>();
-
 class ElemExtraIDAux : public AuxKernel
 {
 public:

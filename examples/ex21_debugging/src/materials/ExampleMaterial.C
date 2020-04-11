@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  auto params = Material::validParams();
 
   // Vectors for Linear Interpolation
   params.addRequiredParam<std::vector<Real>>(

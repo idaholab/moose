@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<FunctionalExpansionToolsTestApp>()
 {
-  InputParameters params = validParams<FunctionalExpansionToolsApp>();
+  auto params = FunctionalExpansionToolsApp::validParams();
   return params;
 }
 

@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<ExampleConvection>()
 {
-  InputParameters params = validParams<Kernel>();
+  auto params = Kernel::validParams();
 
   // Here we specify a new parameter for our kernel allowing users to indicate which other
   // variable they want to be coupled into this kernel from an input file.

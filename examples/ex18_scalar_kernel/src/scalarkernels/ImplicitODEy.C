@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<ImplicitODEy>()
 {
-  InputParameters params = validParams<ODEKernel>();
+  auto params = ODEKernel::validParams();
   params.addCoupledVar("x", "variable X coupled into this kernel");
   return params;
 }

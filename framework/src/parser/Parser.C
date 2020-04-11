@@ -419,7 +419,7 @@ void
 Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * n)
 {
   InputParameters active_list_params = validParams<Action>();
-  InputParameters params = validParams<EmptyAction>();
+  auto params = EmptyAction::validParams();
 
   std::string section_name = n->fullpath();
   std::string curr_identifier = n->fullpath();

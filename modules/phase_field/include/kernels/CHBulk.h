@@ -74,7 +74,7 @@ template <typename T>
 InputParameters
 CHBulk<T>::validParams()
 {
-  InputParameters params = ::validParams<KernelGrad>();
+  InputParameters params = KernelGrad::validParams();
   params.addClassDescription("Cahn-Hilliard base Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addCoupledVar("args", "Vector of arguments of the mobility");

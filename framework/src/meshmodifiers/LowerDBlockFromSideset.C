@@ -26,7 +26,7 @@ template <>
 InputParameters
 validParams<LowerDBlockFromSideset>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addRequiredParam<SubdomainID>("new_block_id", "The lower dimensional block id to create");
   params.addParam<SubdomainName>("new_block_name",
                                  "The lower dimensional block name to create (optional)");

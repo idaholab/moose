@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<RenameBlock>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addParam<std::vector<SubdomainID>>(
       "old_block_id",
       "Elements with this block number will be given the new_block_number or "

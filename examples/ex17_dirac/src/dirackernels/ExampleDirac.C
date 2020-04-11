@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleDirac>()
 {
-  InputParameters params = validParams<DiracKernel>();
+  auto params = DiracKernel::validParams();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
   return params;

@@ -19,8 +19,6 @@
 #include "RandomInterface.h"
 #include "ElementIDInterface.h"
 
-// Forward Declarations
-
 namespace libMesh
 {
 class Elem;

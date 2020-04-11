@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ElemExtraIDAux);
 
-defineLegacyParams(ElemExtraIDAux);
-
 InputParameters
 ElemExtraIDAux::validParams()
 {

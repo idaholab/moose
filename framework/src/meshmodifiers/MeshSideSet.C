@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<MeshSideSet>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Add lower dimensional elements along the faces contained in a side "
                              "set to set up mixed dimensional problems");
   params.addRequiredParam<std::vector<BoundaryName>>("boundaries",

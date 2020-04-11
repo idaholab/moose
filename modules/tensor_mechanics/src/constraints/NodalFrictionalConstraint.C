@@ -28,7 +28,7 @@ template <>
 InputParameters
 validParams<NodalFrictionalConstraint>()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  auto params = NodalConstraint::validParams();
   params.addClassDescription("Frictional nodal constraint for contact");
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
   params.addRequiredParam<BoundaryName>("slave", "The slave boundary");

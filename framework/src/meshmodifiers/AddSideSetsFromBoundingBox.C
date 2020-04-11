@@ -23,7 +23,7 @@ template <>
 InputParameters
 validParams<AddSideSetsFromBoundingBox>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Find sidesets with given boundary ids in bounding box and add new "
                              "boundary id. This can be done by finding all required boundary "
                              "and adding the new boundary id to those sidesets. Alternatively, "

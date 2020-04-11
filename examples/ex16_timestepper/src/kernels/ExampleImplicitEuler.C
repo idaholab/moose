@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<ExampleImplicitEuler>()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  auto params = TimeDerivative::validParams();
   return params;
 }
 

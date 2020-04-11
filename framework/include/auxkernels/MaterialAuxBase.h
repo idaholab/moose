@@ -72,9 +72,6 @@ MaterialAuxBaseTempl<T, is_ad>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
-<<<<<<< HEAD
 
 template <typename T = Real>
 using MaterialAuxBase = MaterialAuxBaseTempl<T, false>;
-=======
->>>>>>> 53cea21418... Update framework (#14135)

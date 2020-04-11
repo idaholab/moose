@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<BlockDeleter>()
 {
-  InputParameters params = validParams<ElementDeleterBase>();
+  auto params = ElementDeleterBase::validParams();
   params.addClassDescription(
       "Mesh modifier which removes elements with the specified subdomain ID");
   params.addRequiredParam<SubdomainID>("block_id", "The block to be deleted");

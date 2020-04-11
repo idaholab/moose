@@ -11,24 +11,8 @@
 
 #include "ADKernel.h"
 
-template <typename>
-class ADKernelValueTempl;
-
-<<<<<<< HEAD
-using ADKernelValue = ADKernelValueTempl<Real>;
-using ADVectorKernelValue = ADKernelValueTempl<RealVectorValue>;
-
 template <typename T>
 class ADKernelValueTempl : public ADKernelTempl<T>
-=======
-template <ComputeStage compute_stage>
-using ADKernelValue = ADKernelValueTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorKernelValue = ADKernelValueTempl<RealVectorValue, compute_stage>;
-
-template <typename T, ComputeStage compute_stage>
-class ADKernelValueTempl : public ADKernelTempl<T, compute_stage>
->>>>>>> 53cea21418... Update framework (#14135)
 {
 public:
   static InputParameters validParams();
@@ -76,3 +60,6 @@ protected:
   using ADKernelTempl<T>::prepareMatrixTag;
   using ADKernelTempl<T>::_test;
 };
+
+using ADKernelValue = ADKernelValueTempl<Real>;
+using ADVectorKernelValue = ADKernelValueTempl<RealVectorValue>;

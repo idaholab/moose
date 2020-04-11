@@ -29,7 +29,7 @@ template <>
 InputParameters
 validParams<SideSetsFromNormals>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  auto params = AddSideSetsBase::validParams();
   params.addClassDescription(
       "Adds a new named sideset to the mesh for all faces matching the specified normal.");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",

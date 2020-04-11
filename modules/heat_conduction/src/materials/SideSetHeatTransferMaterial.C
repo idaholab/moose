@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<SideSetHeatTransferMaterial>()
 {
-  InputParameters params = validParams<InterfaceMaterial>();
+  auto params = InterfaceMaterial::validParams();
   params.addClassDescription("This material constructs the necessary coefficients and properties "
                              "for SideSetHeatTransferKernel.");
   params.addParam<FunctionName>("conductivity", 0.0, "Heat conductivity in W/m/K.");

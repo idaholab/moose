@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<TransientHalf>()
 {
-  InputParameters params = validParams<TimeStepper>();
+  auto params = TimeStepper::validParams();
   params.addParam<Real>("dt", 1., "The initial time step size.");
   params.addParam<Real>("ratio", 0.5, "The ratio used to calculate the next timestep");
   params.addParam<Real>("min_dt", 0.01, "The smallest timestep we will allow");

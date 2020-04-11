@@ -39,7 +39,7 @@ protected:
       oss << name << "_" << i;
 
       // generate input parameter set
-      InputParameters params = validParams<EBSDMesh>();
+      InputParameters params = EBSDMesh::validParams();
       params.addPrivateParam("_moose_app", _app.get());
       params.set<std::string>("_object_name") = oss.str();
       params.set<std::string>("_type") = "EBSDMesh";
@@ -71,4 +71,3 @@ protected:
   std::shared_ptr<MooseApp> _app;
   Factory * _factory;
 };
-

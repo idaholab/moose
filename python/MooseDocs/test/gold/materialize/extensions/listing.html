@@ -6,8 +6,6 @@ void anotherFunction();
 
 registerMooseObject(&quot;MooseApp&quot;, Diffusion);
 
-defineLegacyParams(Diffusion);
-
 InputParameters
 Diffusion::validParams()
 {
@@ -35,8 +33,6 @@ Diffusion::computeQpJacobian()
 
 registerMooseObject(&quot;MooseApp&quot;, Diffusion);
 
-defineLegacyParams(Diffusion);
-
 InputParameters
 </code></pre><a href="#XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" class="modal-trigger">(framework/src/kernels/Diffusion.C)</a><div class="modal moose-modal" id="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"><div class="modal-content"><h4>${MOOSE_DIR}/framework/src/kernels/Diffusion.C</h4><pre class="moose-pre"><code class="language-cpp">// This file is part of the MOOSE framework
 // https://www.mooseframework.org
@@ -50,8 +46,6 @@ InputParameters
 #include &quot;Diffusion.h&quot;
 
 registerMooseObject(&quot;MooseApp&quot;, Diffusion);
-
-defineLegacyParams(Diffusion);
 
 InputParameters
 Diffusion::validParams()

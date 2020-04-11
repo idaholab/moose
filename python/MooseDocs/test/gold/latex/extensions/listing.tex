@@ -65,8 +65,6 @@ void function();
 
 registerMooseObject("MooseApp", Diffusion);
 
-defineLegacyParams(Diffusion);
-
 InputParameters
 Diffusion::validParams()
 {
@@ -96,8 +94,6 @@ Diffusion::computeQpJacobian()
 
 registerMooseObject("MooseApp", Diffusion);
 
-defineLegacyParams(Diffusion);
-
 InputParameters
 Diffusion::validParams()
 {
@@ -126,8 +122,6 @@ Diffusion::computeQpJacobian()
 #include "Diffusion.h"
 
 registerMooseObject("MooseApp", Diffusion);
-
-defineLegacyParams(Diffusion);
 
 InputParameters
 \end{verbatim}

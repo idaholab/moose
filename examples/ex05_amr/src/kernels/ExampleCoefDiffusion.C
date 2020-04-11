@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleCoefDiffusion>()
 {
-  InputParameters params = validParams<Kernel>();
+  auto params = Kernel::validParams();
   params.set<Real>("coef") = 0.0;
   return params;
 }

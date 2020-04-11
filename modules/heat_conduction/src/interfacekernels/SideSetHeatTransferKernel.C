@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<SideSetHeatTransferKernel>()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  auto params = InterfaceKernel::validParams();
   params.addClassDescription(
       "Modeling conduction, convection, and radiation across internal side set.");
   params.addParam<MaterialPropertyName>("conductance",

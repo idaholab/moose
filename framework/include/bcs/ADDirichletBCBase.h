@@ -11,13 +11,6 @@
 
 #include "ADNodalBC.h"
 
-<<<<<<< HEAD
-=======
-#define usingDirichletBCBaseMembers                                                                \
-  usingNodalBCMembers;                                                                             \
-  using ADDirichletBCBase<compute_stage>::computeQpValue
-
->>>>>>> 53cea21418... Update framework (#14135)
 /**
  * Base class for automatic differentiation Dirichlet BCs
  */

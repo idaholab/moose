@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<AddExtraNodeset>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
                                                      "The name of the boundary to create");
 

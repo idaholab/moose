@@ -86,7 +86,7 @@ template <>
 InputParameters
 validParams<ModulesApp>()
 {
-  InputParameters params = validParams<MooseApp>();
+  auto params = MooseApp::validParams();
   return params;
 }
 

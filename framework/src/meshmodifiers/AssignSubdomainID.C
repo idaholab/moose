@@ -21,7 +21,7 @@ template <>
 InputParameters
 validParams<AssignSubdomainID>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addRequiredParam<SubdomainID>("subdomain_id", "New subdomain IDs of all elements");
   return params;
 }

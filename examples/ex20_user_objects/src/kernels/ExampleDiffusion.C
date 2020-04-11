@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<ExampleDiffusion>()
 {
-  InputParameters params = validParams<Diffusion>();
+  auto params = Diffusion::validParams();
   return params;
 }
 

@@ -20,7 +20,7 @@ validParams<Transform>()
 {
   MooseEnum transforms("TRANSLATE=1 ROTATE=2 SCALE=3");
 
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Applies a linear transform to the entire mesh.");
   params.addRequiredParam<MooseEnum>(
       "transform", transforms, "The type of transformation to perform (TRANSLATE, ROTATE, SCALE)");

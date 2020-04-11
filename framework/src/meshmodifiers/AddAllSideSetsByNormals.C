@@ -29,7 +29,7 @@ template <>
 InputParameters
 validParams<AddAllSideSetsByNormals>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  auto params = AddSideSetsBase::validParams();
 
   params.addClassDescription("Adds sidesets to the entire mesh based on unique normals");
 

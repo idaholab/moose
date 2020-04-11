@@ -21,7 +21,7 @@ template <>
 InputParameters
 validParams<MeshExtruder>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Takes a 1D or 2D mesh and extrudes the entire structure along the "
                              "specified axis increasing the dimensionality of the mesh.");
   params.addRequiredParam<RealVectorValue>("extrusion_vector",

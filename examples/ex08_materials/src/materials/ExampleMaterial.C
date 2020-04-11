@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  auto params = Material::validParams();
 
   // Allow users to specify vectors defining the points of a piecewise function formed via linear
   // interpolation.

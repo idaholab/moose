@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<HeatConductionTestApp>()
 {
-  InputParameters params = validParams<HeatConductionApp>();
+  auto params = HeatConductionApp::validParams();
   return params;
 }
 

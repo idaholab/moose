@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<CoupledDirichletBC>()
 {
-  InputParameters params = validParams<NodalBC>();
+  auto params = NodalBC::validParams();
 
   // Specify input parameters that we want users to be able to set:
   params.addParam<Real>("alpha", 1.0, "Value multiplied by the coupled value on the boundary");

@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleDiffusion>()
 {
-  InputParameters params = validParams<Diffusion>();
+  auto params = Diffusion::validParams();
   // Here we will look for a parameter from the input file
   params.addParam<Real>("diffusivity", 1.0, "Diffusivity Coefficient");
   return params;

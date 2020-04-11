@@ -21,7 +21,7 @@ template <>
 InputParameters
 validParams<OrientedSubdomainBoundingBox>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params += validParams<OrientedBoxInterface>();
 
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");

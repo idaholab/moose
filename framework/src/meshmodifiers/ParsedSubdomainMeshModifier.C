@@ -24,7 +24,7 @@ template <>
 InputParameters
 validParams<ParsedSubdomainMeshModifier>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params += validParams<FunctionParserUtils>();
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");

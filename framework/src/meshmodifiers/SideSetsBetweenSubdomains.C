@@ -23,7 +23,7 @@ template <>
 InputParameters
 validParams<SideSetsBetweenSubdomains>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addRequiredParam<std::vector<SubdomainName>>(
       "master_block", "The master set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<SubdomainName>>(

@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<ImageSubdomain>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Samples an image at the coordinates of each element centroid using "
                              "the resulting value as each element's subdomain ID");
   params += validParams<ImageSampler>();

@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  auto params = Material::validParams();
   params.addParam<Real>("initial_diffusivity", 1.0, "The Initial Diffusivity");
   return params;
 }

@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleFunction>()
 {
-  InputParameters params = validParams<Function>();
+  auto params = Function::validParams();
   params.addParam<Real>("alpha", 1.0, "The value of alpha");
   return params;
 }

@@ -33,3 +33,6 @@ protected:
   const unsigned int _j;
   ///@}
 };
+
+typedef MaterialRankTwoTensorAuxTempl<false> MaterialRankTwoTensorAux;
+typedef MaterialRankTwoTensorAuxTempl<true> ADMaterialRankTwoTensorAux;

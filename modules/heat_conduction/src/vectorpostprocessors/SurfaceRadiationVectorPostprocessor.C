@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<SurfaceRadiationVectorPostprocessor>()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  auto params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "VectorPostprocessor for accessing information stored in surface radiation user object");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",

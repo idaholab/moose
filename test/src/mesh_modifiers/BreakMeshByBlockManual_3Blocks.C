@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<BreakMeshByBlockManual_3Blocks>()
 {
-  InputParameters params = validParams<BreakMeshByBlockManualBase>();
+  auto params = BreakMeshByBlockManualBase::validParams();
   params.addClassDescription("Manually split the mesh in coh3D_3blocks.e");
   return params;
 }

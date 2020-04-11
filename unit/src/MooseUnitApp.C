@@ -11,11 +11,10 @@
 #include "Moose.h"
 #include "ModulesApp.h"
 
-template <>
 InputParameters
-validParams<MooseUnitApp>()
+MooseUnitApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  auto params = MooseApp::validParams();
   return params;
 }
 

@@ -21,7 +21,7 @@ template <>
 InputParameters
 validParams<BreakMeshByBlock>()
 {
-  InputParameters params = validParams<BreakMeshByBlockBase>();
+  auto params = BreakMeshByBlockBase::validParams();
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are "
                              "attached. Naming convention for the new boundaries will be the old "
                              "boundary name plus \"_to_\" plus the subdomain name. At the moment"

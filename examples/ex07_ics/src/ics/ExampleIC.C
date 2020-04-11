@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<ExampleIC>()
 {
-  InputParameters params = validParams<InitialCondition>();
+  auto params = InitialCondition::validParams();
   params.addRequiredParam<Real>("coefficient", "The value of the initial condition");
   return params;
 }

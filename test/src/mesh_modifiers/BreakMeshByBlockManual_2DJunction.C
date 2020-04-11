@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<BreakMeshByBlockManual_2DJunction>()
 {
-  InputParameters params = validParams<BreakMeshByBlockManualBase>();
+  auto params = BreakMeshByBlockManualBase::validParams();
   params.addClassDescription("Manually split the mesh in 4ElementJunction.e."
                              "only works with REPLCIATED mesh");
   return params;

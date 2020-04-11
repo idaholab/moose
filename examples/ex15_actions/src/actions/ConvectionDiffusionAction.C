@@ -18,7 +18,7 @@ template <>
 InputParameters
 validParams<ConvectionDiffusionAction>()
 {
-  InputParameters params = validParams<Action>();
+  auto params = Action::validParams();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "variables", "The names of the convection and diffusion variables in the simulation");
 

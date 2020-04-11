@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<ParsedAddSideset>()
 {
-  InputParameters params = validParams<AddSideSetsBase>();
+  auto params = AddSideSetsBase::validParams();
   params += validParams<FunctionParserUtils>();
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");

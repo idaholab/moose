@@ -23,7 +23,7 @@ template <>
 InputParameters
 validParams<BreakBoundaryOnSubdomain>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are "
                              "attached. Naming convention for the new boundaries will be the old "
                              "boundary name plus \"_to_\" plus the subdomain name");

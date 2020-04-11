@@ -18,9 +18,6 @@ class SurrogateModel;
 class SurrogateTrainer;
 class SurrogateModelInterface;
 
-template <>
-InputParameters validParams<SurrogateModelInterface>();
-
 /**
  * Interface for objects that need to use samplers.
  *

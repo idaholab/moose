@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<ExampleApp>()
 {
-  InputParameters params = validParams<MooseApp>();
+  auto params = MooseApp::validParams();
   params.set<bool>("automatic_automatic_scaling") = false;
   return params;
 }

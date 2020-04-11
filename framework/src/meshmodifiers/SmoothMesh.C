@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<SmoothMesh>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  auto params = MeshModifier::validParams();
 
   params.addClassDescription("Utilizes a simple Laplacian based smoother to attempt to improve "
                              "mesh quality.  Will not move boundary nodes or nodes along "
