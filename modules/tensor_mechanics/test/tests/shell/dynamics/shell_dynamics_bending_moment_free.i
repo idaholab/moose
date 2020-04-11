@@ -34,12 +34,12 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 1
-  ny = 4
+  nx = 1 # 1
+  ny = 4# 4
   xmin = 0.0
   xmax = 1.0
   ymin = 0.0
-  ymax = 10.0
+  ymax = 1.5
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -141,14 +141,14 @@
   variable = accel_x
   displacement = disp_x
   velocity = vel_x
-  beta = 0.4225
+  beta = 0.25
   execute_on = timestep_end
 [../]
 [./vel_x]
   type = NewmarkVelAux
   variable = vel_x
   acceleration = accel_x
-  gamma = 0.8
+  gamma = 0.5
   execute_on = timestep_end
 [../]
 [./accel_y]
@@ -156,14 +156,14 @@
   variable = accel_y
   displacement = disp_y
   velocity = vel_y
-  beta = 0.4225
+  beta = 0.25
   execute_on = timestep_end
 [../]
 [./vel_y]
   type = NewmarkVelAux
   variable = vel_y
   acceleration = accel_y
-  gamma = 0.8
+  gamma = 0.5
   execute_on = timestep_end
 [../]
 [./accel_z]
@@ -171,14 +171,14 @@
   variable = accel_z
   displacement = disp_z
   velocity = vel_z
-  beta = 0.4225
+  beta = 0.25
   execute_on = timestep_end
 [../]
 [./vel_z]
   type = NewmarkVelAux
   variable = vel_z
   acceleration = accel_z
-  gamma = 0.8
+  gamma = 0.5
   execute_on = timestep_end
 [../]
 [./rot_accel_x]
@@ -186,14 +186,14 @@
   variable = rot_accel_x
   displacement = rot_x
   velocity = rot_vel_x
-  beta = 0.4225
+  beta = 0.25
   execute_on = timestep_end
 [../]
 [./rot_vel_x]
   type = NewmarkVelAux
   variable = rot_vel_x
   acceleration = rot_accel_x
-  gamma = 0.8
+  gamma = 0.5
   execute_on = timestep_end
 [../]
 [./rot_accel_y]
@@ -201,14 +201,14 @@
   variable = rot_accel_y
   displacement = rot_y
   velocity = rot_vel_y
-  beta = 0.4225
+  beta = 0.25
   execute_on = timestep_end
 [../]
 [./rot_vel_y]
   type = NewmarkVelAux
   variable = rot_vel_y
   acceleration = rot_accel_y
-  gamma = 0.8
+  gamma = 0.5
   execute_on = timestep_end
 [../]
 []
@@ -249,8 +249,8 @@
 [Functions]
   [./force_function]
     type = PiecewiseLinear
-    x = '0.0 0.1 0.15 10.0'
-    y = '0.0 0.5 0.0 0.0'
+    x = '0.0 0.01 0.15 10.0'
+    y = '0.0 0.01 0.0 0.0'
   [../]
 []
 [NodalKernels]
@@ -301,6 +301,7 @@
   [./inertial_force_x]
     type = ADInertialForceShell
     use_displaced_mesh = true
+    eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
@@ -310,12 +311,13 @@
     rotational_accelerations = 'rot_accel_x rot_accel_y'
     component = 0
     variable = disp_x
-    thickness = 0.1
+    thickness = 1
   [../]
 
   [./inertial_force_y]
     type = ADInertialForceShell
     use_displaced_mesh = true
+    eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
@@ -325,12 +327,14 @@
     rotational_accelerations = 'rot_accel_x rot_accel_y'
     component = 1
     variable = disp_y
-    thickness = 0.1
+    thickness = 1
+
   [../]
 
   [./inertial_force_z]
     type = ADInertialForceShell
     use_displaced_mesh = true
+    eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
@@ -340,12 +344,14 @@
     rotational_accelerations = 'rot_accel_x rot_accel_y'
     component = 2
     variable = disp_z
-    thickness = 0.1
+    thickness = 1
+
   [../]
 
   [./inertial_force_rot_x]
     type = ADInertialForceShell
     use_displaced_mesh = true
+    eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
@@ -355,12 +361,13 @@
     rotational_accelerations = 'rot_accel_x rot_accel_y'
     component = 3
     variable = rot_x
-    thickness = 0.1
+    thickness = 1
   [../]
 
   [./inertial_force_rot_y]
     type = ADInertialForceShell
     use_displaced_mesh = true
+    eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
@@ -370,7 +377,7 @@
     rotational_accelerations = 'rot_accel_x rot_accel_y'
     component = 4
     variable = rot_y
-    thickness = 0.1
+    thickness = 1
   [../]
 []
 
@@ -378,7 +385,7 @@
   [./elasticity]
     type = ADComputeIsotropicElasticityTensorShell
     youngs_modulus = 2100000
-    poissons_ratio = 0.0
+    poissons_ratio = 0.3
     block = 0
     through_thickness_order = SECOND
   [../]
@@ -387,7 +394,7 @@
     block = '0'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
-    thickness = 0.1
+    thickness = 0.025
     through_thickness_order = SECOND
   [../]
   [./stress]
@@ -406,12 +413,12 @@
 [Postprocessors]
   [./disp_z_tip]
     type = PointValue
-    point = '1.0 10.0 0.0'
+    point = '1.0 1.0 0.0'
     variable = disp_z
   [../]
   [./rot_x_tip]
     type = PointValue
-    point = '0.0 10.0 0.0'
+    point = '0.0 1.0 0.0'
     variable = rot_x
   [../]
   [./stress_yy_el_0]
@@ -456,33 +463,35 @@
   [../]
 []
 
-#[Preconditioning]
-#  [./smp]
-#    type = SMP
-#    full = true
-#  [../]
-#[]
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
 
 [Executioner]
   type = Transient
   solve_type = PJFNK
   nl_max_its = 20
-  nl_rel_tol = 1e-07
-  nl_abs_tol = 5e-2
-  l_tol = 1e-03 ## TOO LOOSE
+  nl_rel_tol = 1e-09
+  nl_abs_tol = 5e-9
+  # l_tol = 1e-03 ## TOO LOOSE
   l_max_its = 20
-  dt = 0.02
-  dtmin = 0.005
-  end_time = 1.0
+  dt = 0.005
+  dtmin = 0.002
+  timestep_tolerance = 2e-13
+  end_time = 2.0 # 2.0 for t =0.1
 
   [./TimeIntegrator]
     type = NewmarkBeta
-    beta = 0.4225
-    gamma = 0.8
+    beta = 0.25
+    gamma = 0.5
   [../]
 
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []
