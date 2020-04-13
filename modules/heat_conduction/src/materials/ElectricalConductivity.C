@@ -28,6 +28,8 @@ ElectricalConductivity::validParams()
       0.0045,
       "Temperature coefficient for calculating dependence of resistivity on temp.");
   params.addParam<Real>("ref_temp", 300.0, "Reference temperature for Electrical resistivity in K");
+  params.addClassDescription(
+      "Calculates resistivity and electrical conductivity as a function of temperature.");
   return params;
 }
 
