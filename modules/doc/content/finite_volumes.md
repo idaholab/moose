@@ -1,5 +1,5 @@
 
-# Finite Volumes in MOOSE
+# Finite Volume Design Decisions in MOOSE
 
 MOOSE has traditionally been a finite element (FE) framework.  It is built on
 and takes heavy advantage of the libMesh FE library.  Traditionally, the
@@ -22,6 +22,17 @@ them.  Higher-order reconstruction will also be plumbed into here eventually.
 Ghost cells for boundary conditions and other important functionality is
 handled automatically at this level so kernel and boundary condition code can
 be written nearly like the FE equivalents.
+
+Previously, the variable class heirarchy did not have a
+field-variable-specific intermediate class.  FV variables, however are field
+variables that need to be included in some field-variable operations performed
+in MOOSE.  This was not previously possible because FV variables would have to
+have shared their entire interface/API with FE variables - which would be a
+poor choice because of so many non-overlapping API needs between the two (e.g.
+no shape and test function related functions are needed for FV variables).  So
+a new field-variable intermediate class was introduced to the variable class
+heirarchy to facilitate appropriately separate APIs while allowing common
+operations to be performed on all field variables.
 
 ## FV Kernels
 
@@ -131,9 +142,13 @@ it is easy to monitor when code may be doing the wrong thing.  It also becomes
 a simple matter to provide volumes for non-existing cells and add features
 that require intercepting and modifying any face information objects need.
 
+## Reconstruction
+
+TODO: implement reconstruction and discuss design decisions here.
+
 ## Known Limitations/Issues
 
-* FE <---> FV variable-coupling will not work right.  Particularly, if FE
+* FE <---> FV variable-coupling does not work.  Particularly, if FE
   variables try to couple to an FV variable, they will segfault when trying to
   access quadrature points at any index higher than zero.  Also, FV variables
   coupling to FE variables should ideally get a cell-averaged value - but
@@ -150,7 +165,7 @@ that require intercepting and modifying any face information objects need.
 * off-diagonal jacobians (i.e. with dependent variable coupling or nonlinear
   problems) have not been implemented yet.
 
-* Higher order solution reconstruction is not supportet yet.
+* Higher order solution reconstruction is not supported yet.
 
 * Have not tested vector-FV varaibles - they almost certainly don't work (yet).
 
