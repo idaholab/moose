@@ -28,10 +28,6 @@ PIDControl::PIDControl(const InputParameters & parameters)
     _error(declareComponentControlData<Real>("error")),
     _error_old(getComponentControlDataOld<Real>("error"))
 {
-  if (_K_d > 0)
-    mooseWarning("You are trying to use the derivative term in your PID controller. That will have "
-                 "issues if your solve fails to converge, because the proper recover from failed "
-                 "solves has not been implemented yet.");
 }
 
 void
