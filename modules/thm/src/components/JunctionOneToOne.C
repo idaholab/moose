@@ -87,7 +87,6 @@ JunctionOneToOne::addMooseObjects1Phase() const
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // Add user object for computing and storing the fluxes
-  const std::string junction_uo_name = genName(name(), "junction_uo");
   {
     const std::string class_name = "JunctionOneToOne1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -102,7 +101,7 @@ JunctionOneToOne::addMooseObjects1Phase() const
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::string>("junction_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, junction_uo_name, params);
+    _sim.addUserObject(class_name, _junction_uo_name, params);
   }
 
   const std::vector<NonlinearVariableName> var_names = {
@@ -117,7 +116,7 @@ JunctionOneToOne::addMooseObjects1Phase() const
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
       params.set<NonlinearVariableName>("variable") = var_names[j];
-      params.set<UserObjectName>("junction_uo") = junction_uo_name;
+      params.set<UserObjectName>("junction_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
@@ -144,7 +143,6 @@ JunctionOneToOne::addMooseObjects2Phase() const
   }
 
   // Add user object for computing and storing the fluxes
-  const std::string junction_uo_name = genName(name(), "junction_uo");
   {
     const std::string class_name = "JunctionOneToOne2PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -167,7 +165,7 @@ JunctionOneToOne::addMooseObjects2Phase() const
       params.set<std::vector<VariableName>>("aXrhoA_vapor") = ncg_vars;
     params.set<std::string>("junction_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, junction_uo_name, params);
+    _sim.addUserObject(class_name, _junction_uo_name, params);
   }
 
   std::vector<NonlinearVariableName> var_names{FlowModelTwoPhase::BETA,
@@ -189,7 +187,7 @@ JunctionOneToOne::addMooseObjects2Phase() const
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
       params.set<NonlinearVariableName>("variable") = var_names[j];
-      params.set<UserObjectName>("junction_uo") = junction_uo_name;
+      params.set<UserObjectName>("junction_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
