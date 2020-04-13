@@ -34,7 +34,8 @@ requirements:
     - llvm-openmp {{ llvmopenmp }}           # [osx]
     - gfortran_osx-64 {{ osxfortran }}       # [osx]
     - libclang {{ libclang }}                # [osx]
-    - libpng {{ libpng }}
+    - libcxx {{ libcxx }}                    # [osx]
+    - make                                   # [unix]
 
 test:
   commands:

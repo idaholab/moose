@@ -35,10 +35,26 @@ requirements:
     - llvm-openmp {{ llvmopenmp }}           # [osx]
     - gfortran_osx-64 {{ osxfortran }}       # [osx]
     - libclang {{ libclang }}                # [osx]
+    - libcxx {{ libcxx }}                    # [osx]
     - make  # [unix]
   host: []
   run:
-    - moose-compilers {{ moose_compilers }}
+    - gcc_linux-64 {{ gcc }}                 # [linux]
+    - gxx_linux-64 {{ gxx }}                 # [linux]
+    - gfortran_linux-64 {{ fortran }}        # [linux]
+    - gcc_impl_linux-64 {{ gccimpl }}        # [linux]
+    - clang {{ clang }}                      # [osx]
+    - clang_osx-64 {{ clangosx }}            # [osx]
+    - clangxx {{ clangxx }}                  # [osx]
+    - clangxx_osx-64 {{ clangxxosx }}        # [osx]
+    - compiler-rt {{ compilerrt }}           # [osx]
+    - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
+    - libllvm9 {{ libllvm }}                 # [osx]
+    - clang-tools                            # [osx]
+    - llvm-openmp {{ llvmopenmp }}           # [osx]
+    - gfortran_osx-64 {{ osxfortran }}       # [osx]
+    - libclang {{ libclang }}                # [osx]
+    - libcxx {{ libcxx }}                    # [osx]
     - mpi 1.0 mpich
 test:
   script: run_test.sh
