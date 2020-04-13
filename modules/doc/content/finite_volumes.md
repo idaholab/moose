@@ -8,7 +8,7 @@ continuous solutions within mesh cells.  Instead it uses a constant solution
 within each mesh element/cell. Because of this, much of MOOSE's use of libMesh
 for FE is not relevant for FV.  This document gives an overview of how FV is
 similar and different from FE with respect to implementation in MOOSE
-explaining why FV is designed and implemented in its current form.  In order
+and explains why FV is designed and implemented in its current form.  In order
 to fully enable taking advantage of perfomance opportunities and to simplify
 the FV method implementation in MOOSE, a new set of FV-specific systems was
 built along-side the MOOSE FE infrastructure.
@@ -25,11 +25,28 @@ be written nearly like the FE equivalents.
 
 ## FV Kernels
 
-Flux Kernels: 
+Flux Kernels:
 
-Elemental Kernels: The FV method does have some element-based
-calculations from source and time terms that are just handled through the
-normal FE elemental residual and jacobian mesh loops.
+The FV method uses the Guass-divergence theorem to convert
+volume integrals with a divergence operator into surface integrals
+representing flux of various quantities through faces between mesh cells.
+Unlike FE kernels, no test/weight function is needed.  Coupling between cells
+occurs from this numerical flux calculation on a face contributing to the mesh
+cells on both sides of it (with opposing directional sign).  Calculating these
+numerical fluxes requires access to variable values and properties on both
+sides of each face.  FE kernels, on the other hand, require only the one set
+of volumetric/elemental values for the cell of interest.  FV kernels also need
+to deal with things such as normal face vectors, cross-diffusion correction
+factors for non-orthogonal meshes, etc.  All these differences make it
+impractical and messy to try to integrate them both into the same MOOSE kernel
+system and motivated the decision to create a separate FV kernel system.
+
+Elemental Kernels:
+
+The FV method does have some element-based calculations
+from source and time terms that are just handled/called through the normal FE
+elemental residual and jacobian mesh loops.  Time derivative kernels and
+source terms fall in this category.
 
 ## Shape Functions and Integration
 
@@ -72,7 +89,30 @@ Boundary Conditions section.
 
 ## Boundary Conditions
 
-TODO: discuss ghost elements and dirichlet BCs.
+Similar reasoning to decisions about the FV kernel system motivated the
+creation of a separate FV boundary condition system as well.  While FV
+flux/integrated boundary conditions are somewhat similar to FE integrated BCs,
+they still lack test/weight functions.  FV Dirichlet BCs, however must be
+implemented completedly differently than in FE and strongly motivate the
+creation of a separate FV BC system.
+
+Dirichlet boundary conditions (BCs) in an FV method cannot be created by
+directly setting degrees of freedom like in an FE method because the FV
+degrees of freedom do not exist on the mesh boundary.  There are various
+approaches for dealing with this in FV.  A ghost-element approach was selected
+due to its popularity and robustness.  In this approach, Dirichlet BCs are
+implemented as a weak BC.  To do this, the normal flux kernel terms are
+applied at the mesh boundary faces.  Since flux kernels are calculated using
+information from cells on both sides of the face, we use the desired Dirichlet
+BC value to extrapolate a "ghost" cell value for the side of the face that has
+no actuall mesh cell.  Other necessary cell properties are also
+reflected/mirrored from the existing cell.  A design was chosen that allows
+handling ghost-element creation and use by existing flux kernels automatically
+for enforcement of Dirichlet BCs.  This procedure results in the Dirichlet BC
+objects not actually being respondible for calculating residual contributions.
+They instead inform the ghost-element initialization while the normal flux BCs
+are used to calculate boundary residual contributions.  This and other
+differences motivated the creation of a separate FV BC system.
 
 Many objects in MOOSE get information about the current mesh location by
 directly accessing their own and inherited member variables.  This becomes
@@ -83,12 +123,13 @@ exist, yet we still need to provide this information for calculating Dirichlet
 BC residual contributions.  We need to be able to provide information that
 doesn't exist and we need to make sure code doesn't try to access irrelevant
 or wrong information directly from the assembly, FEProblem, or other classes.
-For this reason, for FV objects, the convention has been established that
-objects should retrieve needed information from a face info object that is
-passed around.  If everyone gets needed information from this one place - it
-is easy to monitor when code may be doing the wrong thing.  It also becomes a
-simple matter to provide volumes for non-existing cells and add features that
-require intercepting and modifying any face information objects need.
+For this reason, among others, for FV objects the convention has been
+established for objects to retrieve needed information from a face info object
+that is passed around rather than retrieving binding references to the usual
+mesh-related data.  If everyone gets needed information from this one place -
+it is easy to monitor when code may be doing the wrong thing.  It also becomes
+a simple matter to provide volumes for non-existing cells and add features
+that require intercepting and modifying any face information objects need.
 
 ## Known Limitations/Issues
 

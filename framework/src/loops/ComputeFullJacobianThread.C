@@ -38,6 +38,9 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 void
 ComputeFullJacobianThread::computeJacobian()
 {
+  // TODO: add support for calling calculating FV elemental kernel jacobian
+  // contributions here.
+
   auto & ce = _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
