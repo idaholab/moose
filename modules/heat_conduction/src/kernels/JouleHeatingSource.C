@@ -14,7 +14,8 @@ registerMooseObject("HeatConductionApp", JouleHeatingSource);
 InputParameters
 JouleHeatingSource::validParams()
 {
-  InputParameters params = DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>::validParams();
+  InputParameters params =
+      DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>::validParams();
   params.addCoupledVar("elec", "Electric potential for joule heating.");
   params.addParam<MaterialPropertyName>(
       "electrical_conductivity",
