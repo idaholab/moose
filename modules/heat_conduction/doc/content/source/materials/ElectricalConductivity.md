@@ -25,6 +25,10 @@ Electrical conductivity can then be calculated via
   \sigma_{elec} = \frac{1}{\rho_{elec}}
 \end{equation}
 
+!alert note title=Default parameter values
+The defaults used for the parameters in this object are taken from published
+values for Tungsten.
+
 ## Example Input File Syntax
 
 An example of how to use `ElectricalConductivity` can be found in the
