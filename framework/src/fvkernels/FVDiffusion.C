@@ -24,10 +24,8 @@ FVDiffusion<compute_stage>::computeQpResidual()
 {
   ADReal dudn = (_u_right[_qp] - _u_left[_qp]) /
                 (_face_info->rightCentroid() - _face_info->leftCentroid()).norm();
-  ADRealVectorValue grad_u_interface = _normal * dudn;
   ADReal k = (_coeff_left[_qp] + _coeff_right[_qp]) / 2;
-  ADReal r = _normal * -1 * k * grad_u_interface;
-  return r;
+  return -1 * k * dudn;
 }
 
 registerADMooseObject("MooseApp", FVMatAdvection);
