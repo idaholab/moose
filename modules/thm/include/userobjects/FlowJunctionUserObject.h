@@ -13,6 +13,13 @@ public:
   virtual void finalize() override;
 
   /**
+   * Gets the flux vector for a connection
+   *
+   * @param[in] connection_index   Index for the connection
+   */
+  virtual const std::vector<Real> & getFlux(const unsigned int & connection_index) const = 0;
+
+  /**
    * Gets the number of connected flow channels.
    */
   unsigned int getNumberOfConnections() const { return _n_connections; }
