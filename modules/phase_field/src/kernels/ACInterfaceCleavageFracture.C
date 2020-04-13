@@ -31,13 +31,8 @@ ACInterfaceCleavageFracture::ACInterfaceCleavageFracture(const InputParameters &
 Real
 ACInterfaceCleavageFracture::betaNablaPsi()
 {
-  Real ngradc;
-  ngradc = _grad_u[_qp] * _cleavage_plane_normal;
-
-  Real ngradpsi;
-  ngradpsi = _grad_test[_i][_qp] * _cleavage_plane_normal;
-
-  return _beta_penalty * _L[_qp] * _kappa[_qp] * ngradc * ngradpsi;
+  return _beta_penalty * _L[_qp] * _kappa[_qp] * (_grad_u[_qp] * _cleavage_plane_normal) *
+         (_grad_test[_i][_qp] * _cleavage_plane_normal);
 }
 
 Real
@@ -66,12 +61,7 @@ ACInterfaceCleavageFracture::computeQpJacobian()
     dsum += (_kappa[_qp] * dgradL + _dkappadop[_qp] * _phi[_j][_qp] * gradL()) * _test[_i][_qp];
   }
 
-  Real ngradc;
-  ngradc = _grad_u[_qp] * _cleavage_plane_normal;
-
-  Real ngradphi;
-  ngradphi = _grad_phi[_j][_qp] * _cleavage_plane_normal;
-
   return (1 + _beta_penalty) * _grad_phi[_j][_qp] * kappaNablaLPsi() + _grad_u[_qp] * dsum -
-         _beta_penalty * _L[_qp] * _kappa[_qp] * ngradc * ngradphi;
+         _beta_penalty * _L[_qp] * _kappa[_qp] * (_grad_u[_qp] * _cleavage_plane_normal) *
+             (_grad_phi[_j][_qp] * _cleavage_plane_normal);
 }
