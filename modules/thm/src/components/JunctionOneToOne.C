@@ -132,9 +132,6 @@ JunctionOneToOne::addMooseObjects1Phase() const
 void
 JunctionOneToOne::addMooseObjects2Phase() const
 {
-  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
-  execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
   std::vector<VariableName> ncg_vars;
   if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
   {
@@ -143,30 +140,7 @@ JunctionOneToOne::addMooseObjects2Phase() const
   }
 
   // Add user object for computing and storing the fluxes
-  {
-    const std::string class_name = "JunctionOneToOne2PhaseUserObject";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
-    params.set<std::vector<Real>>("normals") = _normals;
-    // It is assumed that each channel should have the same numerical flux, so
-    // just use the first one.
-    params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
-    params.set<std::vector<VariableName>>("arhoA_liquid") = {FlowModelTwoPhase::ALPHA_RHO_A_LIQUID};
-    params.set<std::vector<VariableName>>("arhouA_liquid") = {
-        FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID};
-    params.set<std::vector<VariableName>>("arhoEA_liquid") = {
-        FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID};
-    params.set<std::vector<VariableName>>("arhoA_vapor") = {FlowModelTwoPhase::ALPHA_RHO_A_VAPOR};
-    params.set<std::vector<VariableName>>("arhouA_vapor") = {FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR};
-    params.set<std::vector<VariableName>>("arhoEA_vapor") = {FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
-    if (ncg_vars.size() > 0)
-      params.set<std::vector<VariableName>>("aXrhoA_vapor") = ncg_vars;
-    params.set<std::string>("junction_name") = name();
-    params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, _junction_uo_name, params);
-  }
+  addJunctionUserObject2Phase();
 
   std::vector<NonlinearVariableName> var_names{FlowModelTwoPhase::BETA,
                                                FlowModelTwoPhase::ALPHA_RHO_A_LIQUID,
@@ -209,4 +183,43 @@ JunctionOneToOne::addMooseObjects2Phase() const
       _sim.addBoundaryCondition(
           class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
     }
+}
+
+void
+JunctionOneToOne::addJunctionUserObject2Phase() const
+{
+  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
+  execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+
+  std::vector<VariableName> ncg_vars;
+  if (_flow_model_id == THM::FM_TWO_PHASE_NCG)
+  {
+    const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
+    ncg_vars = fm.getNCGSolutionVars();
+  }
+
+  {
+    const std::string class_name = "JunctionOneToOne2PhaseUserObject";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
+    params.set<std::vector<Real>>("normals") = _normals;
+    // It is assumed that each channel should have the same numerical flux, so
+    // just use the first one.
+    params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    params.set<std::vector<VariableName>>("beta") = {FlowModelTwoPhase::BETA};
+    params.set<std::vector<VariableName>>("arhoA_liquid") = {FlowModelTwoPhase::ALPHA_RHO_A_LIQUID};
+    params.set<std::vector<VariableName>>("arhouA_liquid") = {
+        FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID};
+    params.set<std::vector<VariableName>>("arhoEA_liquid") = {
+        FlowModelTwoPhase::ALPHA_RHOE_A_LIQUID};
+    params.set<std::vector<VariableName>>("arhoA_vapor") = {FlowModelTwoPhase::ALPHA_RHO_A_VAPOR};
+    params.set<std::vector<VariableName>>("arhouA_vapor") = {FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR};
+    params.set<std::vector<VariableName>>("arhoEA_vapor") = {FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
+    if (ncg_vars.size() > 0)
+      params.set<std::vector<VariableName>>("aXrhoA_vapor") = ncg_vars;
+    params.set<std::string>("junction_name") = name();
+    params.set<ExecFlagEnum>("execute_on") = execute_on;
+    _sim.addUserObject(class_name, _junction_uo_name, params);
+  }
 }
