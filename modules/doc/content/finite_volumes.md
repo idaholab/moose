@@ -17,13 +17,13 @@ built along-side the MOOSE FE infrastructure.
 
 FV-specific (dependent) variable classes were create along side the
 FE-specific ones sharing common base functionality.  This is responsible for
-caculating and providing FV cell/face solution values to objects that need
+calculating and providing FV cell/face solution values to objects that need
 them.  Higher-order reconstruction will also be plumbed into here eventually.
 Ghost cells for boundary conditions and other important functionality is
 handled automatically at this level so kernel and boundary condition code can
 be written nearly like the FE equivalents.
 
-Previously, the variable class heirarchy did not have a
+Previously, the variable class hierarchy did not have a
 field-variable-specific intermediate class.  FV variables, however are field
 variables that need to be included in some field-variable operations performed
 in MOOSE.  This was not previously possible because FV variables would have to
@@ -38,7 +38,7 @@ operations to be performed on all field variables.
 
 Flux Kernels:
 
-The FV method uses the Guass-divergence theorem to convert
+The FV method uses the Gauss-divergence theorem to convert
 volume integrals with a divergence operator into surface integrals
 representing flux of various quantities through faces between mesh cells.
 Unlike FE kernels, no test/weight function is needed.  Coupling between cells
@@ -168,4 +168,3 @@ TODO: implement reconstruction and discuss design decisions here.
 * Higher order solution reconstruction is not supported yet.
 
 * Have not tested vector-FV varaibles - they almost certainly don't work (yet).
-
