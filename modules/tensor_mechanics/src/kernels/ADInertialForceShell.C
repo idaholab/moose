@@ -84,7 +84,7 @@ ADInertialForceShell<compute_stage>::ADInertialForceShell(const InputParameters 
     _v2(4),
     _node_normal(4),
     _eta(getADMaterialProperty<Real>("eta")),
-    _transformation_matrix(getADMaterialProperty<RankTwoTensor>("rotation_t_points_0")),
+    _transformation_matrix(getADMaterialProperty<RankTwoTensor>("transformation_matrix_element")),
     _J_map(getADMaterialProperty<Real>("J_mapping_t_points_0")),
     _thickness(getParam<Real>("thickness")),
     _density(getADMaterialProperty<Real>("density"))
@@ -493,6 +493,7 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
   {
     ADReal factor_qxy = _ad_coord[qp_xy] * _ad_JxW[qp_xy] * _density[qp_xy];
 
+    // Account for inertia on displacement degrees of freedom
     for (unsigned int dim = 0; dim < 3; dim++)
     {
       _local_force[0](dim) +=
@@ -547,6 +548,7 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
                           _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_vel[3](dim));
     }
 
+    // Account for inertia on rotational degrees of freedom
     ADReal rot_thickness = _thickness * _thickness * _thickness / 48.0;
 
     ADDenseVector momentInertia(3);

@@ -164,6 +164,9 @@ protected:
   /// Total strain in global coordinate system
   std::vector<MaterialProperty<RankTwoTensor> *> _total_global_strain;
 
+  /// Rotation matrix material property
+  ADMaterialProperty(RankTwoTensor) * _transformation_matrix;
+
   /// simulation variables
   ADRealVectorValue _x2;
   ADRealVectorValue _x3;

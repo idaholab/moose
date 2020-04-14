@@ -125,6 +125,9 @@ ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputPara
   _dxyz_dzeta_old.resize(_t_points.size());
   _rotation_matrix.resize(_t_points.size());
   _total_global_strain.resize(_t_points.size());
+
+  _transformation_matrix = &declareADProperty<RankTwoTensor>("transformation_matrix_element");
+
   for (unsigned int i = 0; i < _t_points.size(); ++i)
   {
     _strain_increment[i] =
@@ -337,6 +340,10 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       gmn(2, 0) = gmn(0, 2);
       gmn(2, 1) = gmn(1, 2);
 
+      ADRankTwoTensor gmninv_temp = gmn.inverse();
+      (*_J_map[j])[i] = std::sqrt(gmn.det());
+      (*_rotation_matrix[j])[i] = J;
+
       double normx = std::sqrt(J(0, 0) * J(0, 0) + J(0, 1) * J(0, 1) + J(0, 2) * J(0, 2));
       double normy = std::sqrt(J(1, 0) * J(1, 0) + J(1, 1) * J(1, 1) + J(1, 2) * J(1, 2));
       double normz = std::sqrt(J(2, 0) * J(2, 0) + J(2, 1) * J(2, 1) + J(2, 2) * J(2, 2));
@@ -353,9 +360,7 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       J(2, 1) /= normz;
       J(2, 2) /= normz;
 
-      ADRankTwoTensor gmninv_temp = gmn.inverse();
-      (*_J_map[j])[i] = std::sqrt(gmn.det());
-      (*_rotation_matrix[j])[i] = J;
+      (*_transformation_matrix)[i] = J;
 
       // calculate ge
       ADRealVectorValue e3 = (*_dxyz_dzeta[j])[i] / (*_dxyz_dzeta[j])[i].norm();
