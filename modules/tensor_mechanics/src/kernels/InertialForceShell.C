@@ -201,8 +201,8 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
     const MooseArray<ADReal> & _ad_coord,
     const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW)
 {
-    // Loosely following notation in: "On finite element nonlinear analysis of general shell
-    // structures", PhD thesis by Said Bolourchi (1975).
+  // Loosely following notation in: "On finite element nonlinear analysis of general shell
+  // structures", PhD thesis by Said Bolourchi (1975).
 
   _original_local_config = _transformation_matrix[0];
 
