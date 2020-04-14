@@ -34,6 +34,14 @@ CavityPressureUserObject::validParams()
   params.addRequiredParam<std::vector<PostprocessorName>>(
       "volume",
       "The name of the postprocessor(s) that holds the value of the internal volume in the cavity");
+
+  params.addParam<std::vector<PostprocessorName>>(
+      "additional_volumes",
+      "The name of the postprocessor(s) that hold additional volumes that are connected to the "
+      "cavity but not meshed.");
+  params.addParam<std::vector<PostprocessorName>>(
+      "temperature_of_additional_volumes",
+      "The name of the postprocessor(s) that hold the temperatures of the additional volumes.");
   params.addParam<Real>(
       "startup_time",
       0.0,
@@ -56,6 +64,14 @@ CavityPressureUserObject::CavityPressureUserObject(const InputParameters & param
     _init_temp(_init_temp_given ? getParam<Real>("initial_temperature") : 0.0),
     _startup_time(getParam<Real>("startup_time")),
     _initialized(declareRestartableData<bool>("initialized", false)),
+    _additional_volumes(
+        isParamValid("additional_volumes")
+            ? params.get<std::vector<PostprocessorName>>("additional_volumes").size()
+            : zero),
+    _temperature_of_additional_volumes(
+        isParamValid("temperature_of_additional_volumes")
+            ? params.get<std::vector<PostprocessorName>>("temperature_of_additional_volumes").size()
+            : zero),
     _start_time(0.0)
 {
   auto material_names = params.get<std::vector<PostprocessorName>>("material_input");
@@ -65,6 +81,23 @@ CavityPressureUserObject::CavityPressureUserObject(const InputParameters & param
   auto volume_names = params.get<std::vector<PostprocessorName>>("volume");
   for (unsigned int i = 0; i < volume_names.size(); ++i)
     _volume[i] = &getPostprocessorValueByName(volume_names[i]);
+
+  if (isParamValid("additional_volumes") != isParamValid("temperature_of_additional_volumes"))
+    mooseError("Both additional volumes and their corresponding temperatures must be specified");
+
+  if (_additional_volumes.size() != _temperature_of_additional_volumes.size())
+    mooseError(
+        "The number of additional volumes and temperatures of additional volumes musts be equal.");
+
+  auto additional_volume_names = params.get<std::vector<PostprocessorName>>("additional_volumes");
+  for (unsigned int i = 0; i < _additional_volumes.size(); ++i)
+    _additional_volumes[i] = &getPostprocessorValueByName(additional_volume_names[i]);
+
+  auto temperature_of_additional_volume_names =
+      params.get<std::vector<PostprocessorName>>("temperature_of_additional_volumes");
+  for (unsigned int i = 0; i < _temperature_of_additional_volumes.size(); ++i)
+    _temperature_of_additional_volumes[i] =
+        &getPostprocessorValueByName(temperature_of_additional_volume_names[i]);
 }
 
 Real
@@ -91,9 +124,10 @@ CavityPressureUserObject::getValue(const MooseEnum & quantity) const
 void
 CavityPressureUserObject::initialize()
 {
+  const Real cavity_volume = computeCavityVolume();
+
   if (!_initialized)
   {
-    const Real volume = computeCavityVolume();
     Real init_temp = _temperature;
     if (_init_temp_given)
       init_temp = _init_temp;
@@ -102,7 +136,13 @@ CavityPressureUserObject::initialize()
       mooseError("Cannot have initial temperature of zero when initializing cavity pressure. "
                  "Does the supplied Postprocessor for temperature execute at initial?");
 
-    _n0 = _initial_pressure * volume / (_R * init_temp);
+    Real volume_temp_ratio = cavity_volume / init_temp;
+
+    for (unsigned int i = 0; i < _additional_volumes.size(); ++i)
+      volume_temp_ratio += *_additional_volumes[i] / *_temperature_of_additional_volumes[i];
+
+    _n0 = _initial_pressure * volume_temp_ratio / _R;
+
     _start_time = _t - _dt;
     const Real factor =
         _t >= _start_time + _startup_time ? 1.0 : (_t - _start_time) / _startup_time;
@@ -114,13 +154,19 @@ CavityPressureUserObject::initialize()
 void
 CavityPressureUserObject::execute()
 {
-  const Real volume = computeCavityVolume();
+  const Real cavity_volume = computeCavityVolume();
+
   Real mat = 0;
 
   for (unsigned int i = 0; i < _material_input.size(); ++i)
     mat += *_material_input[i];
 
-  const Real pressure = (_n0 + mat) * _R * _temperature / volume;
+  Real volume_temp_ratio = cavity_volume / _temperature;
+
+  for (unsigned int i = 0; i < _additional_volumes.size(); ++i)
+    volume_temp_ratio += *_additional_volumes[i] / *_temperature_of_additional_volumes[i];
+
+  const Real pressure = (_n0 + mat) * _R / volume_temp_ratio;
   const Real factor = _t >= _start_time + _startup_time ? 1.0 : (_t - _start_time) / _startup_time;
   _cavity_pressure = factor * pressure;
 }
