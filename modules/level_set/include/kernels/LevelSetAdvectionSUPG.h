@@ -13,13 +13,10 @@
 #include "ADKernelGrad.h"
 #include "LevelSetVelocityInterface.h"
 
-// Forward declarations
-
 /**
  * SUPG stabilization for the advection portion of the level set equation.
  */
-template <ComputeStage compute_stage>
-class LevelSetAdvectionSUPG : public LevelSetVelocityInterface<ADKernelGrad<compute_stage>>
+class LevelSetAdvectionSUPG : public LevelSetVelocityInterface<ADKernelGrad>
 {
 public:
   static InputParameters validParams();
@@ -29,7 +26,6 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  usingKernelGradMembers;
-  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::computeQpVelocity;
-  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_velocity;
+  using LevelSetVelocityInterface<ADKernelGrad>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADKernelGrad>::_velocity;
 };

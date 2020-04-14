@@ -9,29 +9,26 @@
 
 #include "INSADMomentumForces.h"
 
-registerADMooseObject("NavierStokesApp", INSADMomentumForces);
+registerMooseObject("NavierStokesApp", INSADMomentumForces);
 
-template <ComputeStage compute_stage>
 InputParameters
-INSADMomentumForces<compute_stage>::validParams()
+INSADMomentumForces::validParams()
 {
-  InputParameters params = ADVectorKernelValue<compute_stage>::validParams();
+  InputParameters params = ADVectorKernelValue::validParams();
   params.addClassDescription("Adds body forces to the INS momentum equation");
   return params;
 }
 
-template <ComputeStage compute_stage>
-INSADMomentumForces<compute_stage>::INSADMomentumForces(const InputParameters & parameters)
-  : ADVectorKernelValue<compute_stage>(parameters),
+INSADMomentumForces::INSADMomentumForces(const InputParameters & parameters)
+  : ADVectorKernelValue(parameters),
     _gravity_strong_residual(getADMaterialProperty<RealVectorValue>("gravity_strong_residual")),
     _mms_function_strong_residual(
         getADMaterialProperty<RealVectorValue>("mms_function_strong_residual"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-INSADMomentumForces<compute_stage>::precomputeQpResidual()
+INSADMomentumForces::precomputeQpResidual()
 {
   return _gravity_strong_residual[_qp] + _mms_function_strong_residual[_qp];
 }

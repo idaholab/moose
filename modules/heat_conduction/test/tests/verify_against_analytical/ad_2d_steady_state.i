@@ -43,7 +43,7 @@
 
 [Materials]
   [./properties]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity specific_heat density'
     prop_values = '1 1 1'
   [../]

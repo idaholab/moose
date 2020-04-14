@@ -10,9 +10,11 @@
 #include "ConstantAnisotropicMobility.h"
 
 registerMooseObject("PhaseFieldApp", ConstantAnisotropicMobility);
+registerMooseObject("PhaseFieldApp", ADConstantAnisotropicMobility);
 
+template <bool is_ad>
 InputParameters
-ConstantAnisotropicMobility::validParams()
+ConstantAnisotropicMobilityTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Provide a constant mobility tensor value");
@@ -23,16 +25,19 @@ ConstantAnisotropicMobility::validParams()
   return params;
 }
 
-ConstantAnisotropicMobility::ConstantAnisotropicMobility(const InputParameters & parameters)
+template <bool is_ad>
+ConstantAnisotropicMobilityTempl<is_ad>::ConstantAnisotropicMobilityTempl(
+    const InputParameters & parameters)
   : Material(parameters),
     _M_values(getParam<std::vector<Real>>("tensor")),
     _M_name(getParam<MaterialPropertyName>("M_name")),
-    _M(declareProperty<RealTensorValue>(_M_name))
+    _M(declareGenericProperty<RealTensorValue, is_ad>(_M_name))
 {
 }
 
+template <bool is_ad>
 void
-ConstantAnisotropicMobility::initialSetup()
+ConstantAnisotropicMobilityTempl<is_ad>::initialSetup()
 {
   _M.resize(_fe_problem.getMaxQps());
   for (unsigned int qp = 0; qp < _M.size(); ++qp)
@@ -40,3 +45,6 @@ ConstantAnisotropicMobility::initialSetup()
       for (unsigned int b = 0; b < LIBMESH_DIM; ++b)
         _M[qp](a, b) = _M_values[a * 3 + b];
 }
+
+template class ConstantAnisotropicMobilityTempl<false>;
+template class ConstantAnisotropicMobilityTempl<true>;

@@ -45,6 +45,14 @@ private:
   template <typename T>
   bool hasProperty(const std::string & property_name);
 
+  /*
+   * Helper method for testing if the material exists as a block or boundary material
+   * @tparam T The AD property type (e.g., Real)
+   * @param property_name The name of the AD property to test
+   */
+  template <typename T>
+  bool hasADProperty(const std::string & property_name);
+
   /**
    * Template method for creating the necessary objects for the various material property types
    * @tparam T The type of material property that automatic output is being performed
@@ -116,3 +124,13 @@ MaterialOutputAction::hasProperty(const std::string & property_name)
     return false;
 }
 
+template <typename T>
+bool
+MaterialOutputAction::hasADProperty(const std::string & property_name)
+{
+  if (_block_material_data->haveADProperty<T>(property_name) ||
+      _boundary_material_data->haveADProperty<T>(property_name))
+    return true;
+  else
+    return false;
+}

@@ -160,12 +160,8 @@ void
 TensorMechanicsAction::act()
 {
   std::string ad_prepend = "";
-  std::string ad_append = "";
   if (_use_ad)
-  {
     ad_prepend = "AD";
-    ad_append = "<RESIDUAL>";
-  }
 
   //
   // Consistency checks across subdomains
@@ -298,7 +294,7 @@ TensorMechanicsAction::act()
       mooseError("Unsupported planar formulation");
 
     // set material parameters
-    auto params = _factory.getValidParams(ad_prepend + type + ad_append);
+    auto params = _factory.getValidParams(ad_prepend + type);
     params.applyParameters(parameters(),
                            {"displacements",
                             "use_displaced_mesh",
@@ -319,16 +315,7 @@ TensorMechanicsAction::act()
       params.set<std::vector<VariableName>>("out_of_plane_strain") = {
           getParam<VariableName>("out_of_plane_strain")};
 
-    if (_use_ad)
-    {
-      _problem->addADResidualMaterial(
-          ad_prepend + type + "<RESIDUAL>", name() + "_strain" + "_residual", params);
-      _problem->addADJacobianMaterial(
-          ad_prepend + type + "<JACOBIAN>", name() + "_strain" + "_jacobian", params);
-      _problem->haveADObjects(true);
-    }
-    else
-      _problem->addMaterial(type, name() + "_strain", params);
+    _problem->addMaterial(ad_prepend + type, name() + "_strain", params);
   }
 
   //
@@ -339,7 +326,7 @@ TensorMechanicsAction::act()
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
       auto tensor_kernel_type = getKernelType();
-      auto params = getKernelParameters(ad_prepend + tensor_kernel_type + ad_append);
+      auto params = getKernelParameters(ad_prepend + tensor_kernel_type);
 
       std::string kernel_name = "TM_" + name() + Moose::stringify(i);
 
@@ -362,34 +349,16 @@ TensorMechanicsAction::act()
         params.set<std::vector<VariableName>>("out_of_plane_strain") = {
             getParam<VariableName>("out_of_plane_strain")};
 
-      if (_use_ad)
-      {
-        _problem->addKernel(
-            ad_prepend + tensor_kernel_type + "<RESIDUAL>", kernel_name + "_residual", params);
-        _problem->addKernel(
-            ad_prepend + tensor_kernel_type + "<JACOBIAN>", kernel_name + "_jacobian", params);
-        _problem->haveADObjects(true);
-      }
-      else
-        _problem->addKernel(tensor_kernel_type, kernel_name, params);
+      _problem->addKernel(ad_prepend + tensor_kernel_type, kernel_name, params);
     }
 
     if (_planar_formulation == PlanarFormulation::WeakPlaneStress)
     {
-      auto params = getKernelParameters(ad_prepend + "WeakPlaneStress" + ad_append);
+      auto params = getKernelParameters(ad_prepend + "WeakPlaneStress");
       std::string wps_kernel_name = "TM_WPS_" + name();
       params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
 
-      if (_use_ad)
-      {
-        _problem->addKernel(
-            ad_prepend + "WeakPlaneStress" + "<RESIDUAL>", wps_kernel_name + "_residual", params);
-        _problem->addKernel(
-            ad_prepend + "WeakPlaneStress" + "<JACOBIAN>", wps_kernel_name + "_jacobian", params);
-        _problem->haveADObjects(true);
-      }
-      else
-        _problem->addKernel("WeakPlaneStress", wps_kernel_name, params);
+      _problem->addKernel(ad_prepend + "WeakPlaneStress", wps_kernel_name, params);
     }
   }
 }
@@ -442,6 +411,7 @@ TensorMechanicsAction::actSubdomainChecks()
 void
 TensorMechanicsAction::actOutputGeneration()
 {
+  std::string ad_prepend = _use_ad ? "AD" : "";
   //
   // Add variables (optional)
   //
@@ -475,7 +445,7 @@ TensorMechanicsAction::actOutputGeneration()
           for (unsigned int b = 0; b < 3; ++b)
             if (r2a.first + '_' + _component_table[a] + _component_table[b] == out)
             {
-              type = "RankTwoAux";
+              type = ad_prepend + "RankTwoAux";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a.second;
               params.set<unsigned int>("index_i") = a;
@@ -490,7 +460,7 @@ TensorMechanicsAction::actOutputGeneration()
             const auto r2a = _ranktwoaux_table.find(t);
             if (r2a != _ranktwoaux_table.end())
             {
-              type = "RankTwoScalarAux";
+              type = ad_prepend + "RankTwoScalarAux";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2a->second;
               params.set<MooseEnum>("scalar_type") = r2sa.second.first;

@@ -11,13 +11,12 @@
 #include "Function.h"
 #include "MooseError.h"
 
-registerADMooseObject("TensorMechanicsApp", ADPressure);
+registerMooseObject("TensorMechanicsApp", ADPressure);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADPressure<compute_stage>::validParams()
+ADPressure::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription("Applies a pressure on a given boundary in a given direction");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component", "component <= 2", "The component for the pressure");
@@ -30,9 +29,8 @@ ADPressure<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADPressure<compute_stage>::ADPressure(const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters),
+ADPressure::ADPressure(const InputParameters & parameters)
+  : ADIntegratedBC(parameters),
     _component(getParam<unsigned int>("component")),
     _constant(getParam<Real>("constant")),
     _function(isParamValid("function") ? &this->getFunction("function") : nullptr),
@@ -42,9 +40,8 @@ ADPressure<compute_stage>::ADPressure(const InputParameters & parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADPressure<compute_stage>::computeQpResidual()
+ADPressure::computeQpResidual()
 {
   ADReal factor = _constant;
 

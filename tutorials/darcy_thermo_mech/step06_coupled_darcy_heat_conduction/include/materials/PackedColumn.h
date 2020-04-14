@@ -20,8 +20,7 @@
  * use by other objects in the calculation such as Kernels and
  * BoundaryConditions.
  */
-template <ComputeStage compute_stage>
-class PackedColumn : public ADMaterial<compute_stage>
+class PackedColumn : public ADMaterial
 {
 public:
   static InputParameters validParams();
@@ -88,23 +87,20 @@ protected:
   ADLinearInterpolation _solid_cp_interpolation;
 
   /// The permeability (K)
-  MaterialProperty<Real> & _permeability;
+  ADMaterialProperty<Real> & _permeability;
 
   /// The porosity (eps)
-  MaterialProperty<Real> & _porosity;
+  ADMaterialProperty<Real> & _porosity;
 
   /// The viscosity of the fluid (mu)
-  ADMaterialProperty(Real) & _viscosity;
+  ADMaterialProperty<Real> & _viscosity;
 
   /// The bulk thermal conductivity
-  ADMaterialProperty(Real) & _thermal_conductivity;
+  ADMaterialProperty<Real> & _thermal_conductivity;
 
   /// The bulk heat capacity
-  ADMaterialProperty(Real) & _specific_heat;
+  ADMaterialProperty<Real> & _specific_heat;
 
   /// The bulk density
-  ADMaterialProperty(Real) & _density;
-
-  usingMaterialMembers;
-  using ADMaterial<compute_stage>::_communicator;
+  ADMaterialProperty<Real> & _density;
 };

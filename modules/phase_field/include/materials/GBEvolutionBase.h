@@ -12,14 +12,13 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-
-class GBEvolutionBase : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class GBEvolutionBaseTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  GBEvolutionBase(const InputParameters & parameters);
+  GBEvolutionBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -35,18 +34,21 @@ protected:
 
   const VariableValue & _T;
 
-  MaterialProperty<Real> & _sigma;
-  MaterialProperty<Real> & _M_GB;
-  MaterialProperty<Real> & _kappa;
-  MaterialProperty<Real> & _gamma;
-  MaterialProperty<Real> & _L;
+  GenericMaterialProperty<Real, is_ad> & _sigma;
+  GenericMaterialProperty<Real, is_ad> & _M_GB;
+  GenericMaterialProperty<Real, is_ad> & _kappa;
+  GenericMaterialProperty<Real, is_ad> & _gamma;
+  GenericMaterialProperty<Real, is_ad> & _L;
   MaterialProperty<Real> * _dLdT;
-  MaterialProperty<Real> & _l_GB;
-  MaterialProperty<Real> & _mu;
-  MaterialProperty<Real> & _entropy_diff;
-  MaterialProperty<Real> & _molar_volume;
-  MaterialProperty<Real> & _act_wGB;
+  GenericMaterialProperty<Real, is_ad> & _l_GB;
+  GenericMaterialProperty<Real, is_ad> & _mu;
+  GenericMaterialProperty<Real, is_ad> & _entropy_diff;
+  GenericMaterialProperty<Real, is_ad> & _molar_volume;
+  GenericMaterialProperty<Real, is_ad> & _act_wGB;
 
   const Real _kb;
   const Real _JtoeV;
 };
+
+typedef GBEvolutionBaseTempl<false> GBEvolutionBase;
+typedef GBEvolutionBaseTempl<true> ADGBEvolutionBase;

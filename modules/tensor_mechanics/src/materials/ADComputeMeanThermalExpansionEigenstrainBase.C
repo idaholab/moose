@@ -9,27 +9,23 @@
 
 #include "ADComputeMeanThermalExpansionEigenstrainBase.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::validParams()
+ADComputeMeanThermalExpansionEigenstrainBase::validParams()
 {
-  InputParameters params = ADComputeThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Base class for models that compute eigenstrain due to mean"
                              "thermal expansion as a function of temperature using AD");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeMeanThermalExpansionEigenstrainBase<
-    compute_stage>::ADComputeMeanThermalExpansionEigenstrainBase(const InputParameters & parameters)
-  : ADComputeThermalExpansionEigenstrainBase<compute_stage>(parameters)
+ADComputeMeanThermalExpansionEigenstrainBase::ADComputeMeanThermalExpansionEigenstrainBase(
+    const InputParameters & parameters)
+  : ADComputeThermalExpansionEigenstrainBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrain(
-    ADReal & thermal_strain)
+ADComputeMeanThermalExpansionEigenstrainBase::computeThermalStrain(ADReal & thermal_strain)
 {
   const Real reference_temperature = referenceTemperature();
   const ADReal & current_temp = _temperature[_qp];
@@ -56,5 +52,3 @@ ADComputeMeanThermalExpansionEigenstrainBase<compute_stage>::computeThermalStrai
   thermal_strain =
       (thexp_current_temp - thexp_stress_free_temperature) / (1.0 + thexp_stress_free_temperature);
 }
-
-adBaseClass(ADComputeMeanThermalExpansionEigenstrainBase);

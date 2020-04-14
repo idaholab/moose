@@ -54,7 +54,7 @@ template <>
 SurrogateTrainer &
 SurrogateModelInterface::getSurrogateTrainerByName(const UserObjectName & name) const
 {
-  return _smi_feproblem.getUserObjectTempl<SurrogateTrainer>(name);
+  return _smi_feproblem.getUserObject<SurrogateTrainer>(name);
 }
 
 template <>

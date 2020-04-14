@@ -13,7 +13,10 @@
 #include "SideIntegralVariablePostprocessor.h"
 
 // Forward Declarations
-class SideFluxIntegral;
+template <bool>
+class SideFluxIntegralTempl;
+typedef SideFluxIntegralTempl<false> SideFluxIntegral;
+typedef SideFluxIntegralTempl<true> ADSideFluxIntegral;
 
 template <>
 InputParameters validParams<SideFluxIntegral>();
@@ -21,17 +24,17 @@ InputParameters validParams<SideFluxIntegral>();
 /**
  * This postprocessor computes a side integral of the mass flux.
  */
-class SideFluxIntegral : public SideIntegralVariablePostprocessor
+template <bool is_ad>
+class SideFluxIntegralTempl : public SideIntegralVariablePostprocessor
 {
 public:
   static InputParameters validParams();
 
-  SideFluxIntegral(const InputParameters & parameters);
+  SideFluxIntegralTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
 
   MaterialPropertyName _diffusivity;
-  const MaterialProperty<Real> & _diffusion_coef;
+  const GenericMaterialProperty<Real, is_ad> & _diffusion_coef;
 };
-

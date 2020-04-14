@@ -39,7 +39,7 @@ ProjectMaterialProperties::ProjectMaterialProperties(
     _bnd_material_props(bnd_material_props),
     _assembly(assembly),
     _need_internal_side_material(false),
-    _materials(_fe_problem.getResidualMaterialsWarehouse()),
+    _materials(_fe_problem.getRegularMaterialsWarehouse()),
     _discrete_materials(_fe_problem.getDiscreteMaterialWarehouse())
 {
 }

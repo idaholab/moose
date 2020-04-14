@@ -11,13 +11,12 @@
 #include "RankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStressDivergenceTensors<compute_stage>::validParams()
+ADStressDivergenceTensors::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
                              "Cartesian coordinate system");
   params.addRequiredParam<unsigned int>("component",
@@ -37,10 +36,8 @@ ADStressDivergenceTensors<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
-    const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADStressDivergenceTensors::ADStressDivergenceTensors(const InputParameters & parameters)
+  : ADKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _component(getParam<unsigned int>("component")),
@@ -62,18 +59,16 @@ ADStressDivergenceTensors<compute_stage>::ADStressDivergenceTensors(
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressDivergenceTensors<compute_stage>::initialSetup()
+ADStressDivergenceTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError(
         "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADStressDivergenceTensors<compute_stage>::computeQpResidual()
+ADStressDivergenceTensors::computeQpResidual()
 {
   ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
@@ -90,9 +85,8 @@ ADStressDivergenceTensors<compute_stage>::computeQpResidual()
   return residual;
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressDivergenceTensors<compute_stage>::precalculateResidual()
+ADStressDivergenceTensors::precalculateResidual()
 {
   if (!_volumetric_locking_correction)
     return;
@@ -112,6 +106,3 @@ ADStressDivergenceTensors<compute_stage>::precalculateResidual()
     _avg_grad_test[_i] /= ad_current_elem_volume;
   }
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADStressDivergenceTensors);

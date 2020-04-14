@@ -9,15 +9,12 @@
 
 #include "ADPenaltyDirichletBC.h"
 
-registerADMooseObject("MooseApp", ADPenaltyDirichletBC);
+registerMooseObject("MooseApp", ADPenaltyDirichletBC);
 
-defineADLegacyParams(ADPenaltyDirichletBC);
-
-template <ComputeStage compute_stage>
 InputParameters
-ADPenaltyDirichletBC<compute_stage>::validParams()
+ADPenaltyDirichletBC::validParams()
 {
-  InputParameters params = ADIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<Real>("penalty", "Penalty scalar");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
   params.declareControllable("value");
@@ -27,17 +24,13 @@ ADPenaltyDirichletBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADPenaltyDirichletBC<compute_stage>::ADPenaltyDirichletBC(const InputParameters & parameters)
-  : ADIntegratedBC<compute_stage>(parameters),
-    _p(getParam<Real>("penalty")),
-    _v(getParam<Real>("value"))
+ADPenaltyDirichletBC::ADPenaltyDirichletBC(const InputParameters & parameters)
+  : ADIntegratedBC(parameters), _p(getParam<Real>("penalty")), _v(getParam<Real>("value"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADPenaltyDirichletBC<compute_stage>::computeQpResidual()
+ADPenaltyDirichletBC::computeQpResidual()
 {
   return _p * _test[_i][_qp] * (-_v + _u[_qp]);
 }

@@ -98,6 +98,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
+#include "metaphysicl/dualnumber.h"
+
 // Anonymous namespace for helper function
 namespace
 {
@@ -334,6 +336,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
 {
+  //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
+  //  things that we setup early in the simulation actually get their derivative vectors initalized.
+  //  We will toggle this to false when doing residual evaluations
+  ADReal::do_derivatives = true;
+
   _time = 0.0;
   _time_old = 0.0;
   _t_step = 0;
@@ -606,7 +613,7 @@ FEProblemBase::initialSetup()
 
   // Execute this here in case we want to print out the required derivative size in
   // OutputWarehouse::initialSetup
-  if (haveADObjects())
+  if (haveADObjects() || (_displaced_problem && _displaced_problem->haveADObjects()))
   {
     CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 
@@ -774,8 +781,7 @@ FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
-      _residual_materials.sort(tid);
-      _jacobian_materials.sort(tid);
+      _materials.sort(tid);
 
       // Call initialSetup on both Material and Material objects
       _all_materials.initialSetup(tid);
@@ -2186,25 +2192,6 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 }
 
 void
-FEProblemBase::addADKernel(const std::string & kernel_name,
-                           const std::string & name,
-                           InputParameters & parameters)
-{
-  addKernel(kernel_name + "<RESIDUAL>", name + "_residual", parameters);
-  addKernel(kernel_name + "<JACOBIAN>", name + "_jacobian", parameters);
-  haveADObjects(true);
-
-  // alias parameters of the two instances to the name without the suffix
-  const std::string & base = parameters.get<std::string>("_moose_base");
-  MooseObjectName the_name(base, name);
-  MooseObjectName res_name(base, name + "_residual");
-  MooseObjectName jac_name(base, name + "_jacobian");
-
-  _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, res_name);
-  _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, jac_name);
-}
-
-void
 FEProblemBase::addNodalKernel(const std::string & kernel_name,
                               const std::string & name,
                               InputParameters & parameters)
@@ -2293,28 +2280,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   }
 
   _nl->addBoundaryCondition(bc_name, name, parameters);
-}
-
-void
-FEProblemBase::addADBoundaryCondition(const std::string & bc_name,
-                                      const std::string & name,
-                                      InputParameters & parameters)
-{
-  addBoundaryCondition(bc_name + "<RESIDUAL>", name + "_residual", parameters);
-  addBoundaryCondition(bc_name + "<JACOBIAN>", name + "_jacobian", parameters);
-  haveADObjects(true);
-
-  // alias parameters of the two instances to the name without the suffix
-  std::vector<std::string> prefix = {parameters.get<std::string>("_moose_base"), "BCs"};
-  for (const auto & base : prefix)
-  {
-    MooseObjectParameterName the_name(MooseObjectName(base, name), "*");
-    MooseObjectParameterName res_name(MooseObjectName(base, name + "_residual"), "*");
-    MooseObjectParameterName jac_name(MooseObjectName(base, name + "_jacobian"), "*");
-
-    _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, res_name);
-    _app.getInputParameterWarehouse().addControllableObjectAlias(the_name, jac_name);
-  }
 }
 
 void
@@ -2801,7 +2766,7 @@ FEProblemBase::getMaterial(std::string name,
   }
 
   std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParamTempl<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
                  "), but its compute flag is set to true. This indicates that MOOSE is "
@@ -2827,7 +2792,7 @@ FEProblemBase::getInterfaceMaterial(std::string name,
   }
 
   std::shared_ptr<MaterialBase> material = _all_materials[type].getActiveObject(name, tid);
-  if (!no_warn && material->getParamTempl<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
+  if (!no_warn && material->getParam<bool>("compute") && type == Moose::BLOCK_MATERIAL_DATA)
     mooseWarning("You are retrieving a Material object (",
                  material->name(),
                  "), but its compute flag is set to true. This indicates that MOOSE is "
@@ -2863,23 +2828,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  addMaterialHelper({&_residual_materials, &_jacobian_materials}, mat_name, name, parameters);
-}
-
-void
-FEProblemBase::addADResidualMaterial(const std::string & mat_name,
-                                     const std::string & name,
-                                     InputParameters & parameters)
-{
-  addMaterialHelper({&_residual_materials}, mat_name, name, parameters);
-}
-
-void
-FEProblemBase::addADJacobianMaterial(const std::string & mat_name,
-                                     const std::string & name,
-                                     InputParameters & parameters)
-{
-  addMaterialHelper({&_jacobian_materials}, mat_name, name, parameters);
+  addMaterialHelper({&_materials}, mat_name, name, parameters);
 }
 
 void
@@ -2887,24 +2836,7 @@ FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-  addMaterialHelper(
-      {&_residual_interface_materials, &_jacobian_interface_materials}, mat_name, name, parameters);
-}
-
-void
-FEProblemBase::addADResidualInterfaceMaterial(const std::string & mat_name,
-                                              const std::string & name,
-                                              InputParameters & parameters)
-{
-  addMaterialHelper({&_residual_interface_materials}, mat_name, name, parameters);
-}
-
-void
-FEProblemBase::addADJacobianInterfaceMaterial(const std::string & mat_name,
-                                              const std::string & name,
-                                              InputParameters & parameters)
-{
-  addMaterialHelper({&_jacobian_interface_materials}, mat_name, name, parameters);
+  addMaterialHelper({&_interface_materials}, mat_name, name, parameters);
 }
 
 void
@@ -2939,7 +2871,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     std::shared_ptr<MaterialBase> material =
         _factory.create<MaterialBase>(mat_name, name, parameters, tid);
 
-    bool discrete = !material->getParamTempl<bool>("compute");
+    bool discrete = !material->getParam<bool>("compute");
 
     // If the object is boundary restricted do not create the neighbor and face objects
     if (material->boundaryRestricted())
@@ -3015,16 +2947,8 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
   const std::set<BoundaryID> & ids = _mesh.getSubdomainBoundaryIds(blk_id);
   for (const auto & id : ids)
   {
-    if (_currently_computing_jacobian)
-    {
-      _jacobian_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
-      _jacobian_materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
-    }
-    else
-    {
-      _residual_materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
-      _residual_materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
-    }
+    _materials.updateBoundaryVariableDependency(id, needed_moose_vars, tid);
+    _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
   }
 
   const std::set<MooseVariableFEBase *> & current_active_elemental_moose_variables =
@@ -3057,11 +2981,8 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
     if (_discrete_materials.hasActiveBlockObjects(blk_id, tid))
       _material_data[tid]->reset(_discrete_materials.getActiveBlockObjects(blk_id, tid));
 
-    if (_jacobian_materials.hasActiveBlockObjects(blk_id, tid) && _currently_computing_jacobian)
-      _material_data[tid]->reinit(_jacobian_materials.getActiveBlockObjects(blk_id, tid));
-
-    if (_residual_materials.hasActiveBlockObjects(blk_id, tid) && !_currently_computing_jacobian)
-      _material_data[tid]->reinit(_residual_materials.getActiveBlockObjects(blk_id, tid));
+    if (_materials.hasActiveBlockObjects(blk_id, tid))
+      _material_data[tid]->reinit(_materials.getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3083,15 +3004,9 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_jacobian_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        _currently_computing_jacobian)
+    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
-          _jacobian_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_residual_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        !_currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _residual_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3114,15 +3029,9 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        _currently_computing_jacobian)
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
-          _jacobian_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
-
-    if (_residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid) &&
-        !_currently_computing_jacobian)
-      _neighbor_material_data[tid]->reinit(
-          _residual_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3143,15 +3052,8 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
       _bnd_material_data[tid]->reset(
           _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
 
-    if (_jacobian_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        _currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _jacobian_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    if (_residual_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        !_currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _residual_materials.getActiveBoundaryObjects(boundary_id, tid));
+    if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -3168,15 +3070,9 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, b
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
       _bnd_material_data[tid]->swap(*elem, side);
 
-    if (_jacobian_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        _currently_computing_jacobian)
+    if (_interface_materials.hasActiveBoundaryObjects(boundary_id, tid))
       _bnd_material_data[tid]->reinit(
-          _jacobian_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
-
-    if (_residual_interface_materials.hasActiveBoundaryObjects(boundary_id, tid) &&
-        !_currently_computing_jacobian)
-      _bnd_material_data[tid]->reinit(
-          _residual_interface_materials.getActiveBoundaryObjects(boundary_id, tid));
+          _interface_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -3848,8 +3744,7 @@ FEProblemBase::updateActiveObjects()
     _internal_side_indicators.updateActive(tid);
     _markers.updateActive(tid);
     _all_materials.updateActive(tid);
-    _residual_materials.updateActive(tid);
-    _jacobian_materials.updateActive(tid);
+    _materials.updateActive(tid);
     _discrete_materials.updateActive(tid);
   }
 
@@ -4301,7 +4196,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   {
     ExecFlagEnum & exec_enum = parameters.set<ExecFlagEnum>("execute_on", true);
     std::shared_ptr<MultiApp> multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
-    exec_enum = multiapp->getParamTempl<ExecFlagEnum>("execute_on");
+    exec_enum = multiapp->getParam<ExecFlagEnum>("execute_on");
   }
 
   // Create the Transfer objects
@@ -4562,9 +4457,9 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _zero[tid].resize(max_qpts, 0);
     _ad_zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
-    _ad_grad_zero[tid].resize(max_qpts, DualRealGradient(0));
+    _ad_grad_zero[tid].resize(max_qpts, ADRealGradient(0));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
-    _ad_second_zero[tid].resize(max_qpts, DualRealTensorValue(0));
+    _ad_second_zero[tid].resize(max_qpts, ADRealTensorValue(0));
     _second_phi_zero[tid].resize(max_qpts,
                                  std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
     _vector_zero[tid].resize(max_qpts, RealGradient(0.));
@@ -5018,7 +4913,11 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
 {
   TIME_SECTION(_compute_residual_sys_timer);
 
+  ADReal::do_derivatives = false;
+
   computeResidual(soln, residual);
+
+  ADReal::do_derivatives = true;
 }
 
 void
@@ -6504,7 +6403,7 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
                  .condition<AttribBoundaries>(bnd_id)
                  .count() > 0)
       _interface_mat_side_cache[tid][bnd_id] = true;
-    else if (_residual_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
+    else if (_interface_materials.hasActiveBoundaryObjects(bnd_id, tid))
       _interface_mat_side_cache[tid][bnd_id] = true;
   }
   return _interface_mat_side_cache[tid][bnd_id];
@@ -6582,7 +6481,7 @@ FEProblemBase::addOutput(const std::string & object_type,
     exclude.push_back("execute_on");
 
     // --show-input should enable the display of the input file on the screen
-    if (_app.getParamTempl<bool>("show_input") && parameters.get<bool>("output_screen"))
+    if (_app.getParam<bool>("show_input") && parameters.get<bool>("output_screen"))
       parameters.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
   }
 

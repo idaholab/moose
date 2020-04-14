@@ -11,17 +11,10 @@
 
 #include "ADKernelValue.h"
 
-// Forward Declaration
-template <ComputeStage>
-class ADCoupledTimeDerivative;
-
-declareADValidParams(ADCoupledTimeDerivative);
-
 /**
  * This calculates the time derivative for a coupled variable
  **/
-template <ComputeStage compute_stage>
-class ADCoupledTimeDerivative : public ADKernelValue<compute_stage>
+class ADCoupledTimeDerivative : public ADKernelValue
 {
 public:
   static InputParameters validParams();
@@ -32,7 +25,4 @@ protected:
   virtual ADReal precomputeQpResidual() override;
 
   const ADVariableValue & _v_dot;
-
-  usingKernelValueMembers;
 };
-

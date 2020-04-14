@@ -13,13 +13,10 @@
 #include "ADKernelGrad.h"
 #include "LevelSetVelocityInterface.h"
 
-// Forward declarations
-
 /**
  * SUPG stabilization term for a forcing function.
  */
-template <ComputeStage compute_stage>
-class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<ADKernelGrad<compute_stage>>
+class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<ADKernelGrad>
 {
 public:
   static InputParameters validParams();
@@ -32,8 +29,7 @@ protected:
   /// Function value
   const Function & _function;
 
-  usingKernelGradMembers;
-  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::computeQpVelocity;
-  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_velocity;
-  using LevelSetVelocityInterface<ADKernelGrad<compute_stage>>::_q_point;
+  using LevelSetVelocityInterface<ADKernelGrad>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADKernelGrad>::_velocity;
+  using LevelSetVelocityInterface<ADKernelGrad>::_q_point;
 };

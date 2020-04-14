@@ -16,8 +16,7 @@
  * conduction equation, and provides coupling with the Darcy pressure
  * equation.
  */
-template <ComputeStage compute_stage>
-class DarcyAdvection : public ADKernelValue<compute_stage>
+class DarcyAdvection : public ADKernelValue
 {
 public:
   static InputParameters validParams();
@@ -33,11 +32,9 @@ protected:
 
   /// These references will be set by the initialization list so that
   /// values can be pulled from the Material system.
-  const ADMaterialProperty(Real) & _permeability;
-  const ADMaterialProperty(Real) & _porosity;
-  const ADMaterialProperty(Real) & _viscosity;
-  const ADMaterialProperty(Real) & _density;
-  const ADMaterialProperty(Real) & _specific_heat;
-
-  usingKernelValueMembers;
+  const ADMaterialProperty<Real> & _permeability;
+  const ADMaterialProperty<Real> & _porosity;
+  const ADMaterialProperty<Real> & _viscosity;
+  const ADMaterialProperty<Real> & _density;
+  const ADMaterialProperty<Real> & _specific_heat;
 };

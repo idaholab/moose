@@ -18,7 +18,7 @@
 #include "RankTwoTensor.h"
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
-#include "MooseADWrapper.h"
+#include "ColumnMajorMatrix.h"
 
 #include "libmesh/auto_ptr.h" // libmesh_make_unique
 #include "libmesh/parallel.h"
@@ -36,11 +36,6 @@
 #include <map>
 #include <unordered_map>
 #include <memory>
-
-// Forward declarations
-template <typename>
-class ColumnMajorMatrixTempl;
-typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
 
 namespace libMesh
 {
@@ -349,8 +344,6 @@ void dataStore(std::ostream & stream, Real & v, void * context);
 template <>
 void dataStore(std::ostream & stream, std::string & v, void * context);
 template <>
-void dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * context);
-template <>
 void dataStore(std::ostream & stream, const Elem *& e, void * context);
 template <>
 void dataStore(std::ostream & stream, const Node *& n, void * context);
@@ -441,21 +434,10 @@ dataStore(std::ostream & stream, RankFourTensorTempl<T> & rft, void * context)
 }
 
 template <typename T>
-inline void
-dataStore(std::ostream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
+void
+dataStore(std::ostream & stream, ColumnMajorMatrixTempl<T> & cmm, void * context)
 {
-  dataStore(stream, dn_wrapper.value(), context);
-  if (dn_wrapper._dual_number)
-  {
-    unsigned int m = 1;
-    stream.write((char *)&m, sizeof(m));
-    dataStore(stream, *dn_wrapper._dual_number, context);
-  }
-  else
-  {
-    unsigned int m = 0;
-    stream.write((char *)&m, sizeof(m));
-  }
+  dataStore(stream, cmm._values, context);
 }
 
 // DO NOT MODIFY THE NEXT LINE - It is used by MOOSEDocs
@@ -628,8 +610,6 @@ void dataLoad(std::istream & stream, Real & v, void * /*context*/);
 template <>
 void dataLoad(std::istream & stream, std::string & v, void * /*context*/);
 template <>
-void dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/);
-template <>
 void dataLoad(std::istream & stream, const Elem *& e, void * context);
 template <>
 void dataLoad(std::istream & stream, const Node *& e, void * context);
@@ -721,17 +701,10 @@ dataLoad(std::istream & stream, RankFourTensorTempl<T> & rft, void * context)
 }
 
 template <typename T>
-inline void
-dataLoad(std::istream & stream, MooseADWrapper<T> & dn_wrapper, void * context)
+void
+dataLoad(std::istream & stream, ColumnMajorMatrixTempl<T> & cmm, void * context)
 {
-  dataLoad(stream, dn_wrapper.value(), context);
-  unsigned int n = 0;
-  stream.read((char *)&n, sizeof(n));
-  if (n)
-  {
-    dn_wrapper._dual_number = libmesh_make_unique<typename MooseADWrapper<T>::DNType>();
-    dataLoad(stream, *dn_wrapper._dual_number, context);
-  }
+  dataLoad(stream, cmm._values, context);
 }
 
 // Scalar Helper Function

@@ -77,31 +77,31 @@ SetupDarcySimulation::act()
     // Pressure
     if (_compute_pressure && !is_pressure_aux)
     {
-      InputParameters params = _factory.getADValidParams("DarcyPressure");
+      InputParameters params = _factory.getValidParams("DarcyPressure");
       params.set<NonlinearVariableName>("variable") = pressure;
-      _problem->addADKernel("DarcyPressure", "darcy_pressure", params);
+      _problem->addKernel("DarcyPressure", "darcy_pressure", params);
     }
 
     // Temperature
     if (_compute_temperature && !is_temperature_aux)
     {
       {
-        InputParameters params = _factory.getADValidParams("ADHeatConduction");
+        InputParameters params = _factory.getValidParams("ADHeatConduction");
         params.set<NonlinearVariableName>("variable") = temperature;
-        _problem->addADKernel("ADHeatConduction", "heat_conduction", params);
+        _problem->addKernel("ADHeatConduction", "heat_conduction", params);
       }
 
       {
-        InputParameters params = _factory.getADValidParams("ADHeatConductionTimeDerivative");
+        InputParameters params = _factory.getValidParams("ADHeatConductionTimeDerivative");
         params.set<NonlinearVariableName>("variable") = temperature;
-        _problem->addADKernel("ADHeatConductionTimeDerivative", "heat_conduction_time", params);
+        _problem->addKernel("ADHeatConductionTimeDerivative", "heat_conduction_time", params);
       }
 
       {
-        InputParameters params = _factory.getADValidParams("DarcyAdvection");
+        InputParameters params = _factory.getValidParams("DarcyAdvection");
         params.set<NonlinearVariableName>("variable") = temperature;
         params.set<std::vector<VariableName>>("pressure") = {pressure};
-        _problem->addADKernel("DarcyAdvection", "heat_advection", params);
+        _problem->addKernel("DarcyAdvection", "heat_advection", params);
       }
     }
   }

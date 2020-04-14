@@ -33,7 +33,6 @@ class GeometricSearchData;
 class IntegratedBCBase;
 class NodalBCBase;
 class DirichletBCBase;
-template <ComputeStage>
 class ADDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
@@ -564,10 +563,6 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  MooseObjectTagWarehouse<KernelBase> & getADJacobianKernelWarehouse()
-  {
-    return _ad_jacobian_kernels;
-  }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
@@ -719,14 +714,9 @@ protected:
   void enforceNodalConstraintsJacobian();
 
   /**
-   * Do mortar constraint residual computation
+   * Do mortar constraint residual/jacobian computations
    */
-  void mortarResidualConstraints(bool displaced);
-
-  /**
-   * Do mortar constraint jacobian computation
-   */
-  void mortarJacobianConstraints(bool displaced);
+  void mortarConstraints(bool displaced);
 
 protected:
   /// solution vector from nonlinear solver
@@ -787,7 +777,6 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectTagWarehouse<KernelBase> _ad_jacobian_kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
@@ -799,7 +788,7 @@ protected:
   MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
-  MooseObjectWarehouse<ADDirichletBCBase<RESIDUAL>> _ad_preset_nodal_bcs;
+  MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
@@ -930,25 +919,13 @@ protected:
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
 private:
-  /// Functors for computing residuals from undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _undisplaced_mortar_residual_functors;
+  /// Functors for computing undisplaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+      _undisplaced_mortar_functors;
 
-  /// Functors for computing jacobians from undisplaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _undisplaced_mortar_jacobian_functors;
-
-  /// Functors for computing residuals from displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::RESIDUAL>>
-      _displaced_mortar_residual_functors;
-
-  /// Functors for computing jacobians from displaced mortar constraints
-  std::unordered_map<std::pair<BoundaryID, BoundaryID>,
-                     ComputeMortarFunctor<ComputeStage::JACOBIAN>>
-      _displaced_mortar_jacobian_functors;
+  /// Functors for computing displaced mortar constraints
+  std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
+      _displaced_mortar_functors;
 
 #ifndef MOOSE_SPARSE_AD
   /// The required size of the derivative storage array

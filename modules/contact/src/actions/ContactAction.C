@@ -382,8 +382,7 @@ ContactAction::addMortarContact()
     // Add the tangential Lagrange multiplier constraint on the slave boundary.
     if (_model == "coulomb")
     {
-      InputParameters params =
-          _factory.getValidParams("TangentialMortarLMMechanicalContact<RESIDUAL>");
+      InputParameters params = _factory.getValidParams("TangentialMortarLMMechanicalContact");
 
       params.set<BoundaryName>("master_boundary") = _master;
       params.set<BoundaryName>("slave_boundary") = _slave;
@@ -402,12 +401,8 @@ ContactAction::addMortarContact()
         params.set<NonlinearVariableName>("slave_disp_y") = displacements[1];
       // slave_disp_z is not implemented for tangential (yet).
 
-      _problem->addConstraint("TangentialMortarLMMechanicalContact<RESIDUAL>",
-                              action_name + "_tangential_lm_residual",
-                              params);
-      _problem->addConstraint("TangentialMortarLMMechanicalContact<JACOBIAN>",
-                              action_name + "_tangential_lm_jacobian",
-                              params);
+      _problem->addConstraint(
+          "TangentialMortarLMMechanicalContact", action_name + "_tangential_lm", params);
     }
 
     const auto addMechanicalContactConstraints =
@@ -416,7 +411,7 @@ ContactAction::addMortarContact()
             const std::string & constraint_prefix,
             const std::string & constraint_type) //
     {
-      InputParameters params = _factory.getValidParams(constraint_type + "<RESIDUAL>");
+      InputParameters params = _factory.getValidParams(constraint_type);
 
       params.set<BoundaryName>("master_boundary") = _master;
       params.set<BoundaryName>("slave_boundary") = _slave;
@@ -433,10 +428,7 @@ ContactAction::addMortarContact()
         params.set<VariableName>("slave_variable") = displacements[i];
         params.set<MooseEnum>("component") = i;
 
-        _problem->addConstraint(
-            constraint_type + "<RESIDUAL>", constraint_name + "_residual", params);
-        _problem->addConstraint(
-            constraint_type + "<JACOBIAN>", constraint_name + "_jacobian", params);
+        _problem->addConstraint(constraint_type, constraint_name, params);
       }
       _problem->haveADObjects(true);
     };

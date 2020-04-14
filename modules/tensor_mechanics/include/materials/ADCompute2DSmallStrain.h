@@ -11,19 +11,13 @@
 
 #include "ADComputeSmallStrain.h"
 
-#define usingCompute2DSmallStrainMembers                                                           \
-  usingComputeSmallStrainMembers;                                                                  \
-  using ADCompute2DSmallStrain<compute_stage>::_out_of_plane_direction;                            \
-  using ADCompute2DSmallStrain<compute_stage>::computeOutOfPlaneStrain
-
 /**
  * ADCompute2DSmallStrain defines a strain tensor, assuming small strains,
  * in 2D geometries / simulations.  ComputePlaneSmallStrain acts as a
  * base class for ComputePlaneSmallStrain and ComputeAxisymmetricRZSmallStrain
  * through the computeOutOfPlaneStrain method.
  */
-template <ComputeStage compute_stage>
-class ADCompute2DSmallStrain : public ADComputeSmallStrain<compute_stage>
+class ADCompute2DSmallStrain : public ADComputeSmallStrain
 {
 public:
   static InputParameters validParams();
@@ -38,6 +32,4 @@ protected:
   virtual ADReal computeOutOfPlaneStrain() = 0;
 
   const unsigned int _out_of_plane_direction;
-
-  usingComputeSmallStrainMembers;
 };

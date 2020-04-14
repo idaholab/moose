@@ -12,23 +12,11 @@
 #include "ADKernel.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-#define usingACInterfaceMembers                                                                    \
-  usingKernelMembers;                                                                              \
-  using ADACInterface<compute_stage>::_prop_L;                                                     \
-  using ADACInterface<compute_stage>::_name_L;                                                     \
-  using ADACInterface<compute_stage>::_kappa;                                                      \
-  using ADACInterface<compute_stage>::_variable_L;                                                 \
-  using ADACInterface<compute_stage>::_dLdop;                                                      \
-  using ADACInterface<compute_stage>::_nvar;                                                       \
-  using ADACInterface<compute_stage>::_dLdarg;                                                     \
-  using ADACInterface<compute_stage>::_gradarg
-
 /**
  * Compute the Allen-Cahn interface term with the weak form residual
  * \f$ \left( \kappa_i \nabla\eta_i, \nabla (L_i \psi) \right) \f$
  */
-template <ComputeStage compute_stage>
-class ADACInterface : public ADKernel<compute_stage>, public DerivativeMaterialPropertyNameInterface
+class ADACInterface : public ADKernel, public DerivativeMaterialPropertyNameInterface
 {
 public:
   static InputParameters validParams();
@@ -39,27 +27,25 @@ protected:
   virtual ADReal computeQpResidual();
 
   /// Mobility
-  const ADMaterialProperty(Real) & _prop_L;
+  const ADMaterialProperty<Real> & _prop_L;
   /// Mobility property name
   const MaterialPropertyName & _name_L;
 
   /// Interfacial parameter
-  const ADMaterialProperty(Real) & _kappa;
+  const ADMaterialProperty<Real> & _kappa;
 
   /// flag set if L is a function of non-linear variables in args
   const bool _variable_L;
 
   /// Mobility derivative w.r.t. order parameter
-  const ADMaterialProperty(Real) * _dLdop;
+  const ADMaterialProperty<Real> * _dLdop;
 
   /// number of coupled variables
   const unsigned int _nvar;
 
   /// Mobility derivative w.r.t. other coupled variables
-  std::vector<const ADMaterialProperty(Real) *> _dLdarg;
+  std::vector<const ADMaterialProperty<Real> *> _dLdarg;
 
   /// Gradients for all coupled variables
   std::vector<const ADVariableGradient *> _gradarg;
-
-  usingKernelMembers;
 };

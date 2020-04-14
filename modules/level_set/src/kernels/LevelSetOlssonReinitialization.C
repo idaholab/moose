@@ -10,13 +10,12 @@
 // MOOSE includes
 #include "LevelSetOlssonReinitialization.h"
 
-registerADMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
+registerMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
 
-template <ComputeStage compute_stage>
 InputParameters
-LevelSetOlssonReinitialization<compute_stage>::validParams()
+LevelSetOlssonReinitialization::validParams()
 {
-  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription("The re-initialization equation defined by Olsson et. al. (2007).");
   params.addRequiredCoupledVar(
       "phi_0", "The level set variable to be reinitialized as signed distance function.");
@@ -29,10 +28,8 @@ LevelSetOlssonReinitialization<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-LevelSetOlssonReinitialization<compute_stage>::LevelSetOlssonReinitialization(
-    const InputParameters & parameters)
-  : ADKernelGrad<compute_stage>(parameters),
+LevelSetOlssonReinitialization::LevelSetOlssonReinitialization(const InputParameters & parameters)
+  : ADKernelGrad(parameters),
     _grad_levelset_0(adCoupledGradient("phi_0")),
     _epsilon(getPostprocessorValue("epsilon")),
     _use_modified_reinitilization_formulation(
@@ -40,9 +37,8 @@ LevelSetOlssonReinitialization<compute_stage>::LevelSetOlssonReinitialization(
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-LevelSetOlssonReinitialization<compute_stage>::precomputeQpResidual()
+LevelSetOlssonReinitialization::precomputeQpResidual()
 {
   ADReal s = _grad_levelset_0[_qp].norm() + std::numeric_limits<ADReal>::epsilon();
   ADRealVectorValue n_hat = _grad_levelset_0[_qp] / s;

@@ -16,13 +16,10 @@
  * Real. All logic is implemnted in the ADMatDiffusionBase class
  * template.
  */
-template <ComputeStage compute_stage>
-class ADMatDiffusion : public ADMatDiffusionBase<compute_stage, Real>
+class ADMatDiffusion : public ADMatDiffusionBase<Real>
 {
 public:
   static InputParameters validParams();
 
   ADMatDiffusion(const InputParameters & parameters);
 };
-
-declareADValidParams(ADMatDiffusion);

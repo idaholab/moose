@@ -62,7 +62,7 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1.0
     poissons_ratio = 0.3
   [../]
@@ -81,7 +81,7 @@
   [../]
 
   [./heat]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     specific_heat = 1.0
     thermal_conductivity = 1.0
   [../]

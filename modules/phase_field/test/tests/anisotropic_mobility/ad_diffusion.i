@@ -33,7 +33,7 @@
 
 [Materials]
   [./D]
-    type = ConstantAnisotropicMobility
+    type = ADConstantAnisotropicMobility
     tensor = '0.1 0 0
               0   1 0
               0   0 0'

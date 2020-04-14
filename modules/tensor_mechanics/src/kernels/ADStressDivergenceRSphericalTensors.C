@@ -13,40 +13,36 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceRSphericalTensors);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStressDivergenceRSphericalTensors<compute_stage>::validParams()
+ADStressDivergenceRSphericalTensors::validParams()
 {
-  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  InputParameters params = ADStressDivergenceTensors::validParams();
   params.addClassDescription(
       "Calculate stress divergence for a spherically symmetric 1D problem in polar coordinates.");
   params.set<unsigned int>("component") = 0;
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStressDivergenceRSphericalTensors<compute_stage>::ADStressDivergenceRSphericalTensors(
+ADStressDivergenceRSphericalTensors::ADStressDivergenceRSphericalTensors(
     const InputParameters & parameters)
-  : ADStressDivergenceTensors<compute_stage>(parameters)
+  : ADStressDivergenceTensors(parameters)
 {
   if (_component != 0)
     mooseError("Invalid component for this 1D RSpherical problem.");
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressDivergenceRSphericalTensors<compute_stage>::initialSetup()
+ADStressDivergenceRSphericalTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RSPHERICAL)
     mooseError("The coordinate system in the Problem block must be set to RSPHERICAL for 1D "
                "spherically symmetric geometries.");
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADStressDivergenceRSphericalTensors<compute_stage>::computeQpResidual()
+ADStressDivergenceRSphericalTensors::computeQpResidual()
 {
   return _grad_test[_i][_qp](0) * _stress[_qp](0, 0) +                 // stress_{rr} part 1
          (_test[_i][_qp] / _ad_q_point[_qp](0)) * _stress[_qp](1, 1) + // stress_{\theta \theta}

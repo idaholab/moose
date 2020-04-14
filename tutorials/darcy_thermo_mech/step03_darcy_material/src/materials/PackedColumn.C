@@ -38,8 +38,8 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
     _input_viscosity(getParam<Real>("viscosity")),
 
     // Declare two material properties by getting a reference from the MOOSE Material system
-    _permeability(declareProperty<Real>("permeability")),
-    _viscosity(declareProperty<Real>("viscosity"))
+    _permeability(declareADProperty<Real>("permeability")),
+    _viscosity(declareADProperty<Real>("viscosity"))
 {
   // From the paper: Table 1
   std::vector<Real> sphere_sizes = {1, 3};

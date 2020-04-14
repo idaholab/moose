@@ -9,25 +9,36 @@
 
 #include "ElementIntegralMaterialProperty.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("MooseApp", ElementIntegralMaterialProperty);
+registerMooseObject("MooseApp", ADElementIntegralMaterialProperty);
 
 defineLegacyParams(ElementIntegralMaterialProperty);
 
+template <bool is_ad>
 InputParameters
-ElementIntegralMaterialProperty::validParams()
+ElementIntegralMaterialPropertyTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
   return params;
 }
 
-ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const InputParameters & parameters)
-  : ElementIntegralPostprocessor(parameters), _scalar(getMaterialProperty<Real>("mat_prop"))
+template <bool is_ad>
+ElementIntegralMaterialPropertyTempl<is_ad>::ElementIntegralMaterialPropertyTempl(
+    const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
+    _scalar(getGenericMaterialProperty<Real, is_ad>("mat_prop"))
 {
 }
 
+template <bool is_ad>
 Real
-ElementIntegralMaterialProperty::computeQpIntegral()
+ElementIntegralMaterialPropertyTempl<is_ad>::computeQpIntegral()
 {
-  return _scalar[_qp];
+  return MetaPhysicL::raw_value(_scalar[_qp]);
 }
+
+template class ElementIntegralMaterialPropertyTempl<false>;
+template class ElementIntegralMaterialPropertyTempl<true>;

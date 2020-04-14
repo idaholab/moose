@@ -245,7 +245,7 @@ AttribBoundaries::isEqual(const Attribute & other) const
 void
 AttribThread::initFrom(const MooseObject * obj)
 {
-  _val = obj->getParamTempl<THREAD_ID>("_tid");
+  _val = obj->getParam<THREAD_ID>("_tid");
 }
 bool
 AttribThread::isMatch(const Attribute & other) const
@@ -317,7 +317,7 @@ AttribSystem::initFrom(const MooseObject * obj)
   if (!obj->isParamValid("_moose_warehouse_system_name"))
     mooseError("The base objects supplied to the TheWarehouse must call "
                "'registerSystemAttributeName' method in the validParams function.");
-  _val = obj->getParamTempl<std::string>("_moose_warehouse_system_name");
+  _val = obj->getParam<std::string>("_moose_warehouse_system_name");
 }
 bool
 AttribSystem::isMatch(const Attribute & other) const

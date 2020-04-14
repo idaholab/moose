@@ -146,7 +146,7 @@
 
 [Materials]
   [./const]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'rho mu cp k'
     prop_values = '1  1  1  .01'
   [../]

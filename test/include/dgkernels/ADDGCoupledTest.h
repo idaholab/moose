@@ -15,8 +15,7 @@
  * This class is only currently used to test whether we can request neighbor AD calculations and not
  * have anything go horribly wrong
  */
-template <ComputeStage compute_stage>
-class ADDGCoupledTest : public ADDGKernel<compute_stage>
+class ADDGCoupledTest : public ADDGKernel
 {
 public:
   static InputParameters validParams();
@@ -30,5 +29,4 @@ protected:
   const ADVariableValue & _v;
   const ADVariableValue & _v_neighbor;
 
-  usingDGKernelMembers;
 };

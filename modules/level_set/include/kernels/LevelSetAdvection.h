@@ -13,8 +13,6 @@
 #include "ADKernelValue.h"
 #include "LevelSetVelocityInterface.h"
 
-// Forward declarations
-
 /**
  * Advection Kernel for the levelset equation.
  *
@@ -22,8 +20,7 @@
  * where \vec{v} is the interface velocity that is a set of
  * coupled variables.
  */
-template <ComputeStage compute_stage>
-class LevelSetAdvection : public LevelSetVelocityInterface<ADKernelValue<compute_stage>>
+class LevelSetAdvection : public LevelSetVelocityInterface<ADKernelValue>
 {
 public:
   static InputParameters validParams();
@@ -33,7 +30,6 @@ public:
 protected:
   virtual ADReal precomputeQpResidual() override;
 
-  usingKernelValueMembers;
-  using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::computeQpVelocity;
-  using LevelSetVelocityInterface<ADKernelValue<compute_stage>>::_velocity;
+  using LevelSetVelocityInterface<ADKernelValue>::computeQpVelocity;
+  using LevelSetVelocityInterface<ADKernelValue>::_velocity;
 };

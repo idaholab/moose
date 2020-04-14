@@ -196,12 +196,12 @@ CommonOutputAction::act()
   if (getParam<bool>("dofmap"))
     create("DOFMap");
 
-  if (getParam<bool>("controls") || _app.getParamTempl<bool>("show_controls"))
+  if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
 
-  if (!_app.getParamTempl<bool>("no_timing") &&
+  if (!_app.getParam<bool>("no_timing") &&
       (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
-       _app.getParamTempl<bool>("timing")))
+       _app.getParam<bool>("timing")))
     create("PerfGraphOutput");
 
   if (!getParam<bool>("color"))

@@ -11,12 +11,6 @@
 
 #include "ADComputeIncrementalSmallStrain.h"
 
-#define usingCompute2DIncrementalStrainMembers                                                     \
-  usingComputeIncrementalSmallStrainMembers;                                                       \
-  using ADCompute2DIncrementalStrain<compute_stage>::_out_of_plane_direction;                      \
-  using ADCompute2DIncrementalStrain<compute_stage>::computeOutOfPlaneGradDisp;                    \
-  using ADCompute2DIncrementalStrain<compute_stage>::computeOutOfPlaneGradDispOld
-
 /**
  * ADCompute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.
@@ -24,8 +18,7 @@
  * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
  * and ComputeAxisymmetricRZIncrementalStrain.
  */
-template <ComputeStage compute_stage>
-class ADCompute2DIncrementalStrain : public ADComputeIncrementalSmallStrain<compute_stage>
+class ADCompute2DIncrementalStrain : public ADComputeIncrementalSmallStrain
 {
 public:
   static InputParameters validParams();
@@ -57,6 +50,4 @@ protected:
   virtual Real computeOutOfPlaneGradDispOld() = 0;
 
   const unsigned int _out_of_plane_direction;
-
-  usingComputeIncrementalSmallStrainMembers;
 };

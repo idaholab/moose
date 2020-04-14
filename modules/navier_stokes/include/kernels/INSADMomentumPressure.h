@@ -11,15 +11,12 @@
 
 #include "ADKernel.h"
 
-// Forward Declarations
-
 /**
  * This class computes the momentum equation residual and Jacobian
  * contributions for the pressure term of the incompressible Navier-Stokes momentum
  * equation.
  */
-template <ComputeStage compute_stage>
-class INSADMomentumPressure : public ADVectorKernel<compute_stage>
+class INSADMomentumPressure : public ADVectorKernel
 {
 public:
   static InputParameters validParams();
@@ -32,6 +29,4 @@ protected:
   const bool _integrate_p_by_parts;
   const ADVariableValue & _p;
   const ADVariableGradient & _grad_p;
-
-  usingVectorKernelMembers;
 };

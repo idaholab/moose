@@ -101,11 +101,23 @@ public:
    * Declare the property named "name"
    */
   template <typename T>
-  MaterialProperty<T> & declarePropertyTempl(const std::string & prop_name);
+  MaterialProperty<T> & declareProperty(const std::string & prop_name);
   template <typename T>
-  MaterialProperty<T> & declarePropertyOldTempl(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
   template <typename T>
-  MaterialProperty<T> & declarePropertyOlderTempl(const std::string & prop_name);
+  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
+  template <typename T>
+  ADMaterialProperty<T> & declareADProperty(const std::string & prop_name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  ADMaterialProperty<T> & declareGenericProperty(const std::string & prop_name)
+  {
+    return declareADProperty<T>(prop_name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  MaterialProperty<T> & declareGenericProperty(const std::string & prop_name)
+  {
+    return declareProperty<T>(prop_name);
+  }
   ///@}
 
   /**
@@ -154,8 +166,6 @@ public:
   virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
 
 protected:
-  void copyDualNumbersToValues();
-
   /**
    * Evaluate material properties on subdomain
    */
@@ -231,10 +241,6 @@ protected:
   /// If False MOOSE does not compute this property
   const bool _compute;
 
-  std::set<unsigned int> _supplied_regular_prop_ids;
-
-  std::set<unsigned int> _supplied_ad_prop_ids;
-
   enum QP_Data_Type
   {
     CURR,
@@ -250,10 +256,7 @@ protected:
   std::map<std::string, int> _props_to_flags;
 
   /// Small helper function to call store{Subdomain,Boundary}MatPropName
-  void registerPropName(std::string prop_name,
-                        bool is_get,
-                        Prop_State state,
-                        bool is_declared_ad = false);
+  void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
   /// Check and throw an error if the execution has progerssed past the construction stage
   void checkExecutionStage();
@@ -268,15 +271,15 @@ protected:
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyTempl(const std::string & prop_name)
+MaterialBase::declareProperty(const std::string & prop_name)
 {
   registerPropName(prop_name, false, MaterialBase::CURRENT);
-  return materialData().declarePropertyTempl<T>(prop_name);
+  return materialData().declareProperty<T>(prop_name);
 }
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyOldTempl(const std::string & prop_name)
+MaterialBase::declarePropertyOld(const std::string & prop_name)
 {
   mooseDoOnce(
       mooseDeprecated("declarePropertyOld is deprecated and not needed anymore.\nUse "
@@ -287,7 +290,7 @@ MaterialBase::declarePropertyOldTempl(const std::string & prop_name)
 
 template <typename T>
 MaterialProperty<T> &
-MaterialBase::declarePropertyOlderTempl(const std::string & prop_name)
+MaterialBase::declarePropertyOlder(const std::string & prop_name)
 {
   mooseDoOnce(
       mooseDeprecated("declarePropertyOlder is deprecated and not needed anymore.  Use "
@@ -324,4 +327,13 @@ MaterialBase::getZeroMaterialProperty(const std::string & prop_name)
     MathUtils::mooseSetToZero<T>(preload_with_zero[qp]);
 
   return preload_with_zero;
+}
+
+template <typename T>
+ADMaterialProperty<T> &
+MaterialBase::declareADProperty(const std::string & prop_name)
+{
+  _fe_problem.usingADMatProps(true);
+  registerPropName(prop_name, false, MaterialBase::CURRENT);
+  return materialData().declareADProperty<T>(prop_name);
 }

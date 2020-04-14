@@ -17,13 +17,14 @@
 /**
  * ComputeElasticityTensorBase the base class for computing elasticity tensors
  */
-class ComputeElasticityTensorBase : public DerivativeMaterialInterface<Material>,
-                                    public GuaranteeProvider
+template <bool is_ad>
+class ComputeElasticityTensorBaseTempl : public DerivativeMaterialInterface<Material>,
+                                         public GuaranteeProvider
 {
 public:
   static InputParameters validParams();
 
-  ComputeElasticityTensorBase(const InputParameters & parameters);
+  ComputeElasticityTensorBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -34,9 +35,12 @@ protected:
 
   std::string _elasticity_tensor_name;
 
-  MaterialProperty<RankFourTensor> & _elasticity_tensor;
-  MaterialProperty<Real> & _effective_stiffness;
+  GenericMaterialProperty<RankFourTensor, is_ad> & _elasticity_tensor;
+  GenericMaterialProperty<Real, is_ad> & _effective_stiffness;
 
   /// prefactor function to multiply the elasticity tensor with
   const Function * const _prefactor_function;
 };
+
+typedef ComputeElasticityTensorBaseTempl<false> ComputeElasticityTensorBase;
+typedef ComputeElasticityTensorBaseTempl<true> ADComputeElasticityTensorBase;

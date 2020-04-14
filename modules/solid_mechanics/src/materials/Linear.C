@@ -20,13 +20,13 @@ Linear::Linear(SolidModel & solid_model,
                const std::string & name,
                const InputParameters & parameters)
   : Element(solid_model, name, parameters),
-    _large_strain(solid_model.getParamTempl<bool>("large_strain")),
+    _large_strain(solid_model.getParam<bool>("large_strain")),
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),
     _grad_disp_z(parameters.get<SubProblem *>("_subproblem")->mesh().dimension() == 3
                      ? coupledGradient("disp_z")
                      : _grad_zero),
-    _volumetric_locking_correction(solid_model.getParamTempl<bool>("volumetric_locking_correction"))
+    _volumetric_locking_correction(solid_model.getParam<bool>("volumetric_locking_correction"))
 {
 }
 

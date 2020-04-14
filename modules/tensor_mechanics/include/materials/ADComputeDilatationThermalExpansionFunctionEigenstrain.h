@@ -16,9 +16,8 @@
  * ADComputeDilatationThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion from an dilatation function.
  */
-template <ComputeStage compute_stage>
 class ADComputeDilatationThermalExpansionFunctionEigenstrain
-  : public ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>
+  : public ADComputeDilatationThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();
@@ -35,6 +34,4 @@ protected:
 
   /// Dilatation function
   const Function & _dilatation_function;
-
-  usingComputeDilatationThermalExpansionEigenstrainBaseMembers;
 };

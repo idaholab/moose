@@ -16,9 +16,8 @@
  * ADComputeInstantaneousThermalExpansionFunctionEigenstrain computes an eigenstrain for thermal
  * expansion according to an instantaneous thermal expansion function.
  */
-template <ComputeStage compute_stage>
 class ADComputeInstantaneousThermalExpansionFunctionEigenstrain
-  : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
+  : public ADComputeThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();
@@ -34,12 +33,10 @@ protected:
 
   /// Stores the thermal strain as a scalar for use in computing an incremental update to this.
   //@{
-  ADMaterialProperty(Real) & _thermal_strain;
+  ADMaterialProperty<Real> & _thermal_strain;
   const MaterialProperty<Real> & _thermal_strain_old;
   //@}
 
   /// Indicates whether we are on the first step, avoiding false positives when restarting
   bool & _step_one;
-
-  usingComputeThermalExpansionEigenstrainBaseMembers;
 };

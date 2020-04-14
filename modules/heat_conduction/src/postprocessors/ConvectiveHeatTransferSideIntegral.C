@@ -1,12 +1,15 @@
 #include "ConvectiveHeatTransferSideIntegral.h"
 
-registerMooseObject("HeatConductionApp", ConvectiveHeatTransferSideIntegral);
+#include "metaphysicl/raw_type.h"
 
-template <>
+registerMooseObject("HeatConductionApp", ConvectiveHeatTransferSideIntegral);
+registerMooseObject("HeatConductionApp", ADConvectiveHeatTransferSideIntegral);
+
+template <bool is_ad>
 InputParameters
-validParams<ConvectiveHeatTransferSideIntegral>()
+ConvectiveHeatTransferSideIntegralTempl<is_ad>::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription("Computes the total convective heat transfer across a boundary.");
 
   params.addRequiredCoupledVar("T_solid", "The solid temperature.");
@@ -18,14 +21,16 @@ validParams<ConvectiveHeatTransferSideIntegral>()
   return params;
 }
 
-ConvectiveHeatTransferSideIntegral::ConvectiveHeatTransferSideIntegral(
+template <bool is_ad>
+ConvectiveHeatTransferSideIntegralTempl<is_ad>::ConvectiveHeatTransferSideIntegralTempl(
     const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
     _T_wall(coupledValue("T_solid")),
     _T_fluid(isCoupled("T_fluid_var") ? &coupledValue("T_fluid_var") : nullptr),
-    _T_fluid_mat(isParamValid("T_fluid") ? &getMaterialProperty<Real>("T_fluid") : nullptr),
+    _T_fluid_mat(isParamValid("T_fluid") ? &getGenericMaterialProperty<Real, is_ad>("T_fluid")
+                                         : nullptr),
     _hw(isCoupled("htc_var") ? &coupledValue("htc_var") : nullptr),
-    _hw_mat(isParamValid("htc") ? &getMaterialProperty<Real>("htc") : nullptr)
+    _hw_mat(isParamValid("htc") ? &getGenericMaterialProperty<Real, is_ad>("htc") : nullptr)
 {
   if (isCoupled("htc_var") == isParamValid("htc"))
     paramError("htc", "Either htc_var OR htc must be provided (exactly one, not both).");
@@ -39,20 +44,24 @@ ConvectiveHeatTransferSideIntegral::ConvectiveHeatTransferSideIntegral(
                " must be provided (exactly one, not both).");
 }
 
+template <bool is_ad>
 Real
-ConvectiveHeatTransferSideIntegral::computeQpIntegral()
+ConvectiveHeatTransferSideIntegralTempl<is_ad>::computeQpIntegral()
 {
   Real hw;
   if (_hw)
     hw = (*_hw)[_qp];
   else
-    hw = (*_hw_mat)[_qp];
+    hw = MetaPhysicL::raw_value((*_hw_mat)[_qp]);
 
   Real Tf;
   if (_T_fluid)
     Tf = (*_T_fluid)[_qp];
   else
-    Tf = (*_T_fluid_mat)[_qp];
+    Tf = MetaPhysicL::raw_value((*_T_fluid_mat)[_qp]);
 
   return hw * (_T_wall[_qp] - Tf);
 }
+
+template class ConvectiveHeatTransferSideIntegralTempl<false>;
+template class ConvectiveHeatTransferSideIntegralTempl<true>;

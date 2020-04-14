@@ -16,30 +16,15 @@
 
 #include <vector>
 
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 class MyMat
 {
 public:
-  ADMaterialProperty(T) prop;
+  ADMaterialProperty<T> prop;
 };
-
-#define testType(simpleT, dualT)                                                                   \
-  {                                                                                                \
-    MyMat<simpleT, RESIDUAL> mr;                                                                   \
-    auto & vals = mr.prop;                                                                         \
-    vals.resize(1);                                                                                \
-    EXPECT_EQ(typeid(vals[0]).name(), typeid(simpleT).name());                                     \
-                                                                                                   \
-    MyMat<simpleT, JACOBIAN> mj;                                                                   \
-    auto & valsjac = mj.prop;                                                                      \
-    valsjac.resize(1);                                                                             \
-    EXPECT_EQ(typeid(valsjac[0]).name(), typeid(dualT).name());                                    \
-  }
 
 TEST(ADTypesTest, vector_DenseMatrix_Real)
 {
-  testType(std::vector<DenseMatrix<Real>>, std::vector<DenseMatrix<DualReal>>);
-
   std::vector<DenseMatrix<DualReal>> vm(2);
   auto & m1 = vm[0];
   auto & m2 = vm[1];
@@ -59,8 +44,6 @@ TEST(ADTypesTest, vector_DenseMatrix_Real)
 
 TEST(ADTypesTest, vector_DenseVector_Real)
 {
-  testType(std::vector<DenseVector<Real>>, std::vector<DenseVector<DualReal>>);
-
   std::vector<DenseVector<DualReal>> vv(2);
   auto & v1 = vv[0];
   auto & v2 = vv[1];

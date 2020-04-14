@@ -23,6 +23,7 @@ Gravity::validParams()
   params.addParam<FunctionName>(
       "function", "1", "A function that describes the gravitational force");
   params.addParam<Real>("alpha", 0.0, "alpha parameter required for HHT time integration scheme");
+  params.addParam<MaterialPropertyName>("density", "density", "The density");
   return params;
 }
 

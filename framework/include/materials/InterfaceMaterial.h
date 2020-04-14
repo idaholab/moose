@@ -41,11 +41,11 @@ public:
    * to getting it by name
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   ///@}
 
   ///@{
@@ -53,11 +53,11 @@ public:
    * Retrieve the property named "name"
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyByNameTempl(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOldByName(const std::string & prop_name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderByNameTempl(const std::string & prop_name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
   ///@{
@@ -66,7 +66,7 @@ public:
    * to getting it by name
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -78,7 +78,7 @@ public:
    * Retrieve the neighbor property named "name"
    */
   template <typename T>
-  const MaterialProperty<T> & getNeighborMaterialPropertyByNameTempl(const std::string & prop_name);
+  const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
   ///@}
 
   using MaterialBase::getZeroMaterialProperty;
@@ -113,7 +113,7 @@ protected:
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyTempl(const std::string & name)
+InterfaceMaterial::getMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -128,7 +128,7 @@ InterfaceMaterial::getMaterialPropertyTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOldTempl(const std::string & name)
+InterfaceMaterial::getMaterialPropertyOld(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -143,7 +143,7 @@ InterfaceMaterial::getMaterialPropertyOldTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlderTempl(const std::string & name)
+InterfaceMaterial::getMaterialPropertyOlder(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -158,37 +158,37 @@ InterfaceMaterial::getMaterialPropertyOlderTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyByNameTempl(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyByName(const std::string & prop_name)
 {
   MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, MaterialBase::CURRENT);
-  return TwoMaterialPropertyInterface::getMaterialPropertyByNameTempl<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOldByNameTempl(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyOldByName(const std::string & prop_name)
 {
   registerPropName(prop_name, true, MaterialBase::OLD);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOldByNameTempl<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyOldByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getMaterialPropertyOlderByNameTempl(const std::string & prop_name)
+InterfaceMaterial::getMaterialPropertyOlderByName(const std::string & prop_name)
 {
   registerPropName(prop_name, true, MaterialBase::OLDER);
-  return TwoMaterialPropertyInterface::getMaterialPropertyOlderByNameTempl<T>(prop_name);
+  return TwoMaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name);
 }
 
 // Neighbor material properties
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialPropertyTempl(const std::string & name)
+InterfaceMaterial::getNeighborMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid imput parameter key
   std::string prop_name = deducePropertyName(name);
@@ -198,19 +198,19 @@ InterfaceMaterial::getNeighborMaterialPropertyTempl(const std::string & name)
   if (default_property)
     return *default_property;
 
-  return getNeighborMaterialPropertyByNameTempl<T>(prop_name);
+  return getNeighborMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>
 const MaterialProperty<T> &
-InterfaceMaterial::getNeighborMaterialPropertyByNameTempl(const std::string & prop_name)
+InterfaceMaterial::getNeighborMaterialPropertyByName(const std::string & prop_name)
 {
   MaterialBase::checkExecutionStage();
   // The property may not exist yet, so declare it (declare/getMaterialProperty are referencing the
   // same memory)
   _requested_props.insert(prop_name);
   registerPropName(prop_name, true, MaterialBase::CURRENT);
-  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByNameTempl<T>(prop_name);
+  return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName<T>(prop_name);
 }
 
 template <typename T>

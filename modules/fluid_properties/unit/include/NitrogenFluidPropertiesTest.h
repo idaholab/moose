@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("NitrogenFluidProperties");
     _fe_problem->addUserObject("NitrogenFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObjectTempl<NitrogenFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<NitrogenFluidProperties>("fp");
   }
 
   const NitrogenFluidProperties * _fp;

@@ -11,8 +11,7 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
-class ADThermoDiffusion : public ADKernel<compute_stage>
+class ADThermoDiffusion : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -23,7 +22,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADVariableGradient & _grad_temp;
-  const ADMaterialProperty(Real) & _soret_coeff;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _soret_coeff;
 };

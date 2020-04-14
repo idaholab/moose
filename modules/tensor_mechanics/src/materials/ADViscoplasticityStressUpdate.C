@@ -11,14 +11,13 @@
 
 #include "libmesh/utility.h"
 
-registerADMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", ADViscoplasticityStressUpdate);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADViscoplasticityStressUpdate<compute_stage>::validParams()
+ADViscoplasticityStressUpdate::validParams()
 {
-  InputParameters params = ADViscoplasticityStressUpdateBase<compute_stage>::validParams();
-  params += ADSingleVariableReturnMappingSolution<RESIDUAL>::validParams();
+  InputParameters params = ADViscoplasticityStressUpdateBase::validParams();
+  params += ADSingleVariableReturnMappingSolution::validParams();
   params.addClassDescription(
       "This material computes the non-linear homogenized gauge stress in order to compute the "
       "viscoplastic responce due to creep in porous materials. This material must be used in "
@@ -51,17 +50,15 @@ ADViscoplasticityStressUpdate<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
-    const InputParameters & parameters)
-  : ADViscoplasticityStressUpdateBase<compute_stage>(parameters),
-    ADSingleVariableReturnMappingSolution<compute_stage>(parameters),
+ADViscoplasticityStressUpdate::ADViscoplasticityStressUpdate(const InputParameters & parameters)
+  : ADViscoplasticityStressUpdateBase(parameters),
+    ADSingleVariableReturnMappingSolution(parameters),
     _model(parameters.get<MooseEnum>("viscoplasticity_model").getEnum<ViscoplasticityModel>()),
     _pore_shape(parameters.get<MooseEnum>("pore_shape_model").getEnum<PoreShapeModel>()),
     _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
     _power(getParam<Real>("power")),
     _power_factor(_model == ViscoplasticityModel::LPS ? (_power - 1.0) / (_power + 1.0) : 1.0),
-    _coefficient(getADMaterialProperty<Real>("coefficient")),
+    _coefficient(getMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
     _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
     _minimum_equivalent_stress(getParam<Real>("minimum_equivalent_stress")),
@@ -74,16 +71,14 @@ ADViscoplasticityStressUpdate<compute_stage>::ADViscoplasticityStressUpdate(
   _check_range = true;
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdate<compute_stage>::updateState(
-    ADRankTwoTensor & elastic_strain_increment,
-    ADRankTwoTensor & inelastic_strain_increment,
-    const ADRankTwoTensor & /*rotation_increment*/,
-    ADRankTwoTensor & stress,
-    const RankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & elasticity_tensor,
-    const RankTwoTensor & elastic_strain_old)
+ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_increment,
+                                           ADRankTwoTensor & inelastic_strain_increment,
+                                           const ADRankTwoTensor & /*rotation_increment*/,
+                                           ADRankTwoTensor & stress,
+                                           const RankTwoTensor & /*stress_old*/,
+                                           const ADRankFourTensor & elasticity_tensor,
+                                           const RankTwoTensor & elastic_strain_old)
 {
   // Compute initial hydrostatic stress and porosity
   if (_pore_shape == PoreShapeModel::CYLINDRICAL)
@@ -157,33 +152,27 @@ ADViscoplasticityStressUpdate<compute_stage>::updateState(
   computeStressFinalize(inelastic_strain_increment);
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADViscoplasticityStressUpdate<compute_stage>::initialGuess(const ADReal & effective_trial_stress)
+ADViscoplasticityStressUpdate::initialGuess(const ADReal & effective_trial_stress)
 {
   return effective_trial_stress;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADViscoplasticityStressUpdate<compute_stage>::maximumPermissibleValue(
-    const ADReal & effective_trial_stress) const
+ADViscoplasticityStressUpdate::maximumPermissibleValue(const ADReal & effective_trial_stress) const
 {
   return effective_trial_stress * _maximum_gauge_ratio;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADViscoplasticityStressUpdate<compute_stage>::minimumPermissibleValue(
-    const ADReal & effective_trial_stress) const
+ADViscoplasticityStressUpdate::minimumPermissibleValue(const ADReal & effective_trial_stress) const
 {
   return effective_trial_stress;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADViscoplasticityStressUpdate<compute_stage>::computeResidual(const ADReal & equiv_stress,
-                                                              const ADReal & trial_gauge)
+ADViscoplasticityStressUpdate::computeResidual(const ADReal & equiv_stress,
+                                               const ADReal & trial_gauge)
 {
   const ADReal M = std::abs(_hydro_stress) / trial_gauge;
   const ADReal dM_dtrial_gauge = -M / trial_gauge;
@@ -230,11 +219,8 @@ ADViscoplasticityStressUpdate<compute_stage>::computeResidual(const ADReal & equ
   return residual;
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADViscoplasticityStressUpdate<compute_stage>::computeH(const Real n,
-                                                       const ADReal & M,
-                                                       const bool derivative)
+ADViscoplasticityStressUpdate::computeH(const Real n, const ADReal & M, const bool derivative)
 {
   const ADReal mod = std::pow(M * _pore_shape_factor, (n + 1.0) / n);
 
@@ -248,13 +234,11 @@ ADViscoplasticityStressUpdate<compute_stage>::computeH(const Real n,
   return std::pow(1.0 + mod / n, n);
 }
 
-template <ComputeStage compute_stage>
 ADRankTwoTensor
-ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
-    const ADReal & gauge_stress,
-    const ADReal & equiv_stress,
-    const ADRankTwoTensor & dev_stress,
-    const ADRankTwoTensor & stress)
+ADViscoplasticityStressUpdate::computeDGaugeDSigma(const ADReal & gauge_stress,
+                                                   const ADReal & equiv_stress,
+                                                   const ADRankTwoTensor & dev_stress,
+                                                   const ADRankTwoTensor & stress)
 {
   // Compute the derivative of the gauge stress with respect to the equilvalent and hydrostatic
   // stress components
@@ -299,9 +283,8 @@ ADViscoplasticityStressUpdate<compute_stage>::computeDGaugeDSigma(
   return dgauge_dsigma;
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
+ADViscoplasticityStressUpdate::computeInelasticStrainIncrement(
     ADReal & gauge_stress,
     ADReal & dpsi_dgauge,
     ADRankTwoTensor & inelastic_strain_increment,
@@ -331,24 +314,21 @@ ADViscoplasticityStressUpdate<compute_stage>::computeInelasticStrainIncrement(
       _dt * dpsi_dgauge * computeDGaugeDSigma(gauge_stress, equiv_stress, dev_stress, stress);
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdate<compute_stage>::outputIterationSummary(
-    std::stringstream * iter_output, const unsigned int total_it)
+ADViscoplasticityStressUpdate::outputIterationSummary(std::stringstream * iter_output,
+                                                      const unsigned int total_it)
 {
   if (iter_output)
   {
     *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
                  << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
   }
-  ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary(iter_output,
-                                                                               total_it);
+  ADSingleVariableReturnMappingSolution::outputIterationSummary(iter_output, total_it);
 }
 
-template <ComputeStage compute_stage>
 Real
-ADViscoplasticityStressUpdate<compute_stage>::computeReferenceResidual(
-    const ADReal & /*effective_trial_stress*/, const ADReal & gauge_stress)
+ADViscoplasticityStressUpdate::computeReferenceResidual(const ADReal & /*effective_trial_stress*/,
+                                                        const ADReal & gauge_stress)
 {
   // Use gauge stress for relative tolerance criteria, defined as:
   // std::abs(residual / gauge_stress) <= _relative_tolerance

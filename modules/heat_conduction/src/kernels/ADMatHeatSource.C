@@ -9,30 +9,27 @@
 
 #include "ADMatHeatSource.h"
 
-registerADMooseObject("HeatConductionApp", ADMatHeatSource);
+registerMooseObject("HeatConductionApp", ADMatHeatSource);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADMatHeatSource<compute_stage>::validParams()
+ADMatHeatSource::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
   params.addParam<MaterialPropertyName>(
       "material_property", 1.0, "Material property describing the body force");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADMatHeatSource<compute_stage>::ADMatHeatSource(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADMatHeatSource::ADMatHeatSource(const InputParameters & parameters)
+  : ADKernel(parameters),
     _scalar(getParam<Real>("scalar")),
     _material_property(getADMaterialProperty<Real>("material_property"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADMatHeatSource<compute_stage>::computeQpResidual()
+ADMatHeatSource::computeQpResidual()
 {
   return -_scalar * _material_property[_qp] * _test[_i][_qp];
 }

@@ -11,13 +11,10 @@
 
 #include "ADKernel.h"
 
-// Forward Declaration
-
 /**
  * Adds contribution due to thermo-migration to the Cahn-Hilliard equation
  **/
-template <ComputeStage compute_stage>
-class ADCHSoretMobility : public ADKernel<compute_stage>
+class ADCHSoretMobility : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -34,7 +31,5 @@ protected:
   const ADVariableGradient & _grad_T;
 
   // Mobility property name
-  const ADMaterialProperty(Real) & _mobility;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _mobility;
 };

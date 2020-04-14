@@ -1345,67 +1345,11 @@ Coupleable::validateExecutionerType(const std::string & name, const std::string 
                "only in transient simulations.");
 }
 
-template <>
-VariableValue *
-Coupleable::getADDefaultValue<RESIDUAL>(const std::string & var_name)
+template <typename T>
+const typename Moose::ADType<T>::type &
+Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
 {
-  return getDefaultValue(var_name, 0);
-}
-
-template <>
-VectorVariableValue *
-Coupleable::getADDefaultVectorValue<RESIDUAL>(const std::string & var_name)
-{
-  return getDefaultVectorValue(var_name);
-}
-
-template <>
-VariableGradient &
-Coupleable::getADDefaultGradient<RESIDUAL>()
-{
-  return _default_gradient;
-}
-
-template <>
-VectorVariableGradient &
-Coupleable::getADDefaultVectorGradient<RESIDUAL>()
-{
-  return _default_vector_gradient;
-}
-
-template <>
-VariableSecond &
-Coupleable::getADDefaultSecond<RESIDUAL>()
-{
-  return _default_second;
-}
-
-template <>
-const VariableValue &
-Coupleable::adZeroValueTemplate<RESIDUAL>()
-{
-  return _zero;
-}
-
-template <>
-const VariableGradient &
-Coupleable::adZeroGradientTemplate<RESIDUAL>()
-{
-  return _grad_zero;
-}
-
-template <>
-const VariableSecond &
-Coupleable::adZeroSecondTemplate<RESIDUAL>()
-{
-  return _second_zero;
-}
-
-template <typename T, ComputeStage compute_stage>
-const typename Moose::ValueType<T, compute_stage>::type &
-Coupleable::adCoupledNodalValueTemplate(const std::string & var_name, unsigned int comp)
-{
-  static const typename Moose::ValueType<T, compute_stage>::type zero = 0;
+  static const typename Moose::ADType<T>::type zero = 0;
   if (!isCoupled(var_name))
     return zero;
 
@@ -1422,7 +1366,198 @@ Coupleable::adCoupledNodalValueTemplate(const std::string & var_name, unsigned i
   coupledCallback(var_name, false);
   MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
 
-  return var->template adNodalValue<compute_stage>();
+  return var->adNodalValue();
+}
+
+const ADVariableValue &
+Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSln();
+  return var->adSlnNeighbor();
+}
+
+const ADVariableGradient &
+Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return getADDefaultGradient();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adGradSln();
+  return var->adGradSlnNeighbor();
+}
+
+const ADVariableSecond &
+Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return getADDefaultSecond();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSecondSln();
+  else
+    return var->adSecondSlnNeighbor();
+}
+
+const ADVectorVariableSecond &
+adCoupledVectorSecond(const std::string & /*var_name*/, unsigned int /*comp = 0*/)
+{
+  mooseError(
+      "Automatic differentiation using second derivatives of vector variables is not implemented.");
+}
+
+const ADVariableValue &
+Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp)
+{
+  MooseVariable * var = getVar(var_name, comp);
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDot();
+  return var->adUDotNeighbor();
+}
+
+const ADVectorVariableValue &
+Coupleable::adCoupledVectorDot(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return *getADDefaultVectorValue(var_name);
+  checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adUDot();
+  return var->adUDotNeighbor();
+}
+
+const ADVectorVariableValue &
+Coupleable::adCoupledVectorValue(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return *getADDefaultVectorValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSln();
+  return var->adSlnNeighbor();
+}
+
+const ADVectorVariableGradient &
+Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int comp)
+{
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (!var)
+    return getADDefaultVectorGradient();
+  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adGradSln();
+  return var->adGradSlnNeighbor();
+}
+
+ADVariableValue *
+Coupleable::getADDefaultValue(const std::string & var_name)
+{
+  auto default_value_it = _ad_default_value.find(var_name);
+  if (default_value_it == _ad_default_value.end())
+  {
+    auto value = libmesh_make_unique<ADVariableValue>(_coupleable_max_qps,
+                                                      _c_parameters.defaultCoupledValue(var_name));
+    default_value_it = _ad_default_value.insert(std::make_pair(var_name, std::move(value))).first;
+  }
+
+  return default_value_it->second.get();
+}
+
+ADVectorVariableValue *
+Coupleable::getADDefaultVectorValue(const std::string & var_name)
+{
+  auto default_value_it = _ad_default_vector_value.find(var_name);
+  if (default_value_it == _ad_default_vector_value.end())
+  {
+    RealVectorValue default_vec;
+    for (unsigned int i = 0; i < _c_parameters.numberDefaultCoupledValues(var_name); ++i)
+      default_vec(i) = _c_parameters.defaultCoupledValue(var_name, i);
+    auto value = libmesh_make_unique<ADVectorVariableValue>(_coupleable_max_qps, default_vec);
+    default_value_it =
+        _ad_default_vector_value.insert(std::make_pair(var_name, std::move(value))).first;
+  }
+
+  return default_value_it->second.get();
+}
+
+ADVariableGradient &
+Coupleable::getADDefaultGradient()
+{
+  return _ad_default_gradient;
+}
+
+ADVectorVariableGradient &
+Coupleable::getADDefaultVectorGradient()
+{
+  return _ad_default_vector_gradient;
+}
+
+ADVariableSecond &
+Coupleable::getADDefaultSecond()
+{
+  return _ad_default_second;
+}
+
+const ADVariableValue &
+Coupleable::adZeroValue()
+{
+  return _ad_zero;
+}
+
+const ADVariableGradient &
+Coupleable::adZeroGradient()
+{
+  return _ad_grad_zero;
+}
+
+const ADVariableSecond &
+Coupleable::adZeroSecond()
+{
+  return _ad_second_zero;
 }
 
 // Explicit instantiations
@@ -1438,6 +1573,11 @@ Coupleable::getVarHelper<RealVectorValue>(const std::string & var_name, unsigned
 
 template const Real & Coupleable::coupledNodalValue<Real>(const std::string & var_name,
                                                           unsigned int comp);
+template const ADReal & Coupleable::adCoupledNodalValue<Real>(const std::string & var_name,
+                                                              unsigned int comp);
+template const ADRealVectorValue &
+Coupleable::adCoupledNodalValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
+
 template const RealVectorValue &
 Coupleable::coupledNodalValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
 template const Real & Coupleable::coupledNodalValueOld<Real>(const std::string & var_name,
@@ -1458,16 +1598,3 @@ template const Real & Coupleable::coupledNodalDot<Real>(const std::string & var_
                                                         unsigned int comp);
 template const RealVectorValue &
 Coupleable::coupledNodalDot<RealVectorValue>(const std::string & var_name, unsigned int comp);
-
-template const Real &
-Coupleable::adCoupledNodalValueTemplate<Real, RESIDUAL>(const std::string & var_name,
-                                                        unsigned int comp);
-template const RealVectorValue &
-Coupleable::adCoupledNodalValueTemplate<RealVectorValue, RESIDUAL>(const std::string & var_name,
-                                                                   unsigned int comp);
-template const DualReal &
-Coupleable::adCoupledNodalValueTemplate<Real, JACOBIAN>(const std::string & var_name,
-                                                        unsigned int comp);
-template const libMesh::VectorValue<DualReal> &
-Coupleable::adCoupledNodalValueTemplate<RealVectorValue, JACOBIAN>(const std::string & var_name,
-                                                                   unsigned int comp);

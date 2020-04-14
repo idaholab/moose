@@ -16,8 +16,7 @@
  *
  * grad_some_var dot u'
  */
-template <ComputeStage compute_stage>
-class ADCoupledConvection : public ADKernel<compute_stage>
+class ADCoupledConvection : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -27,7 +26,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  usingKernelMembers;
 
 private:
   const ADVariableGradient & _velocity_vector;

@@ -16,9 +16,7 @@
  * strains and internal parameters) using an iterative process. A porosity material property
  * is defined and is calcuated from the trace of inelastic strain increment.
  */
-template <ComputeStage compute_stage>
-class ADComputeMultiplePorousInelasticStress
-  : public ADComputeMultipleInelasticStress<compute_stage>
+class ADComputeMultiplePorousInelasticStress : public ADComputeMultipleInelasticStress
 {
 public:
   static InputParameters validParams();
@@ -30,12 +28,10 @@ protected:
   virtual void computeQpProperties() override;
 
   ///@{ Material property for porosity
-  ADMaterialProperty(Real) & _porosity;
+  ADMaterialProperty<Real> & _porosity;
   const MaterialProperty<Real> & _porosity_old;
   ///@}
 
   /// Initial porosity value. Must be greater than zero.
   const Real _initial_porosity;
-
-  usingComputeMultipleInelasticStressMembers;
 };

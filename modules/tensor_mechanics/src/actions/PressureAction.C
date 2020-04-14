@@ -62,13 +62,9 @@ PressureAction::PressureAction(const InputParameters & params)
 void
 PressureAction::act()
 {
-  std::string ad_append = "";
   std::string ad_prepend = "";
   if (_use_ad)
-  {
-    ad_append = "<RESIDUAL>";
     ad_prepend = "AD";
-  }
 
   std::string kernel_name = ad_prepend + "Pressure";
 
@@ -96,7 +92,7 @@ PressureAction::act()
     // Create unique kernel name for each of the components
     std::string unique_kernel_name = kernel_name + "_" + _name + "_" + Moose::stringify(i);
 
-    InputParameters params = _factory.getValidParams(kernel_name + ad_append);
+    InputParameters params = _factory.getValidParams(kernel_name);
     params.applyParameters(parameters(), {"factor"});
     params.set<bool>("use_displaced_mesh") = true;
     params.set<unsigned int>("component") = i;
@@ -106,18 +102,9 @@ PressureAction::act()
       params.set<std::vector<AuxVariableName>>("save_in") = _save_in_vars[i];
 
     if (_use_ad)
-    {
       params.set<Real>("constant") = getParam<Real>("factor");
-      _problem->addBoundaryCondition(
-          kernel_name + ad_append, unique_kernel_name + "_residual", params);
-      _problem->addBoundaryCondition(
-          kernel_name + "<JACOBIAN>", unique_kernel_name + "_jacobian", params);
-      _problem->haveADObjects(true);
-    }
     else
-    {
       params.set<Real>("factor") = getParam<Real>("factor");
-      _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
-    }
+    _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
   }
 }

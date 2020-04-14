@@ -9,32 +9,27 @@
 
 #include "ADAllenCahn.h"
 
-registerADMooseObject("PhaseFieldApp", ADAllenCahn);
+registerMooseObject("PhaseFieldApp", ADAllenCahn);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADAllenCahn<compute_stage>::validParams()
+ADAllenCahn::validParams()
 {
-  InputParameters params = ADAllenCahnBase<compute_stage, Real>::validParams();
+  InputParameters params = ADAllenCahnBase<Real>::validParams();
   params.addClassDescription("Allen-Cahn Kernel that uses a DerivativeMaterial Free Energy");
   params.addRequiredParam<MaterialPropertyName>(
       "f_name", "Base name of the free energy function F defined in a DerivativeParsedMaterial");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADAllenCahn<compute_stage>::ADAllenCahn(const InputParameters & parameters)
-  : ADAllenCahnBase<compute_stage, Real>(parameters),
+ADAllenCahn::ADAllenCahn(const InputParameters & parameters)
+  : ADAllenCahnBase<Real>(parameters),
     _f_name(getParam<MaterialPropertyName>("f_name")),
     _dFdEta(getADMaterialProperty<Real>(this->derivativePropertyNameFirst(_f_name, _var.name())))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADAllenCahn<compute_stage>::computeDFDOP()
+ADAllenCahn::computeDFDOP()
 {
   return _dFdEta[_qp];
 }
-
-adBaseClass(ADAllenCahn);

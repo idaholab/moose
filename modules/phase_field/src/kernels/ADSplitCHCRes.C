@@ -9,36 +9,30 @@
 
 #include "ADSplitCHCRes.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADSplitCHCRes<compute_stage>::validParams()
+ADSplitCHCRes::validParams()
 {
-  InputParameters params = ADSplitCHBase<compute_stage>::validParams();
+  InputParameters params = ADSplitCHBase::validParams();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel");
   params.addRequiredCoupledVar("w", "Chemical potential variable");
   params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADSplitCHCRes<compute_stage>::ADSplitCHCRes(const InputParameters & parameters)
-  : ADSplitCHBase<compute_stage>(parameters),
+ADSplitCHCRes::ADSplitCHCRes(const InputParameters & parameters)
+  : ADSplitCHBase(parameters),
     _kappa(getADMaterialProperty<Real>("kappa_name")),
     _w(adCoupledValue("w"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADSplitCHCRes<compute_stage>::computeQpResidual()
+ADSplitCHCRes::computeQpResidual()
 {
-  auto residual = ADSplitCHBase<compute_stage>::computeQpResidual();
+  auto residual = ADSplitCHBase::computeQpResidual();
 
   residual += -_w[_qp] * _test[_i][_qp];
   residual += _kappa[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 
   return residual;
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADSplitCHCRes);

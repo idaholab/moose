@@ -32,18 +32,18 @@ makePolynomial(const Distribution * dist)
 {
   const UniformDistribution * u_dist = dynamic_cast<const UniformDistribution *>(dist);
   if (u_dist)
-    return libmesh_make_unique<const Legendre>(dist->getParamTempl<Real>("lower_bound"),
-                                               dist->getParamTempl<Real>("upper_bound"));
+    return libmesh_make_unique<const Legendre>(dist->getParam<Real>("lower_bound"),
+                                               dist->getParam<Real>("upper_bound"));
 
   const NormalDistribution * n_dist = dynamic_cast<const NormalDistribution *>(dist);
   if (n_dist)
-    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
-                                              dist->getParamTempl<Real>("standard_deviation"));
+    return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
+                                              dist->getParam<Real>("standard_deviation"));
 
   const BoostNormalDistribution * bn_dist = dynamic_cast<const BoostNormalDistribution *>(dist);
   if (bn_dist)
-    return libmesh_make_unique<const Hermite>(dist->getParamTempl<Real>("mean"),
-                                              dist->getParamTempl<Real>("standard_deviation"));
+    return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
+                                              dist->getParam<Real>("standard_deviation"));
 
   ::mooseError("Polynomials for '", dist->type(), "' distributions have not been implemented.");
   return nullptr;

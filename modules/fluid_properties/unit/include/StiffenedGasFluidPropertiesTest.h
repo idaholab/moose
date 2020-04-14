@@ -28,7 +28,7 @@ protected:
     eos_pars.set<Real>("cv") = 1816;
     eos_pars.set<std::string>("_object_name") = "name3";
     _fe_problem->addUserObject("StiffenedGasFluidProperties", "fp", eos_pars);
-    _fp = &_fe_problem->getUserObjectTempl<StiffenedGasFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<StiffenedGasFluidProperties>("fp");
   }
 
   const StiffenedGasFluidProperties * _fp;

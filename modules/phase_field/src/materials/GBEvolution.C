@@ -10,25 +10,32 @@
 #include "GBEvolution.h"
 
 registerMooseObject("PhaseFieldApp", GBEvolution);
+registerMooseObject("PhaseFieldApp", ADGBEvolution);
 
+template <bool is_ad>
 InputParameters
-GBEvolution::validParams()
+GBEvolutionTempl<is_ad>::validParams()
 {
-  InputParameters params = GBEvolutionBase::validParams();
+  InputParameters params = GBEvolutionBaseTempl<is_ad>::validParams();
   params.addRequiredParam<Real>("GBenergy", "Grain boundary energy in J/m^2");
   return params;
 }
 
-GBEvolution::GBEvolution(const InputParameters & parameters)
-  : GBEvolutionBase(parameters), _GBEnergy(getParam<Real>("GBenergy"))
+template <bool is_ad>
+GBEvolutionTempl<is_ad>::GBEvolutionTempl(const InputParameters & parameters)
+  : GBEvolutionBaseTempl<is_ad>(parameters), _GBEnergy(this->template getParam<Real>("GBenergy"))
 {
 }
 
+template <bool is_ad>
 void
-GBEvolution::computeQpProperties()
+GBEvolutionTempl<is_ad>::computeQpProperties()
 {
   // eV/nm^2
-  _sigma[_qp] = _GBEnergy * _JtoeV * (_length_scale * _length_scale);
+  this->_sigma[this->_qp] = _GBEnergy * this->_JtoeV * (this->_length_scale * this->_length_scale);
 
-  GBEvolutionBase::computeQpProperties();
+  GBEvolutionBaseTempl<is_ad>::computeQpProperties();
 }
+
+template class GBEvolutionTempl<false>;
+template class GBEvolutionTempl<true>;

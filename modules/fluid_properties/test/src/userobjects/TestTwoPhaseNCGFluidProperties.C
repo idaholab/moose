@@ -57,7 +57,7 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
     params.set<UserObjectName>("fp_vapor") = "test_fp_vapor";
     _fe_problem.addUserObject(class_name, _2phase_name, params);
   }
-  _fp_2phase = &_fe_problem.getUserObjectTempl<TwoPhaseFluidProperties>(_2phase_name);
+  _fp_2phase = &_fe_problem.getUserObject<TwoPhaseFluidProperties>(_2phase_name);
 
   // create vapor mixture fluid properties
   if (_tid == 0)
@@ -70,5 +70,5 @@ TestTwoPhaseNCGFluidProperties::TestTwoPhaseNCGFluidProperties(const InputParame
     _fe_problem.addUserObject(class_name, _vapor_mixture_name, params);
   }
   _fp_vapor_mixture =
-      &_fe_problem.getUserObjectTempl<VaporMixtureFluidProperties>(_vapor_mixture_name);
+      &_fe_problem.getUserObject<VaporMixtureFluidProperties>(_vapor_mixture_name);
 }

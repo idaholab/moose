@@ -10,7 +10,7 @@ values are often lagged when being used in another calculation.
 
 Most objects in MOOSE will retrieve UserObjects through special macro functions found here:
 
-!listing MemberTemplateMacros.h start=doco-user-object-interface-begin end=doco-user-object-interface-end include-start=false
+!listing /UserObjectInterface.h start=doco-user-object-interface-begin end=doco-user-object-interface-end include-start=false
 
 Typical usage looks like this:
 

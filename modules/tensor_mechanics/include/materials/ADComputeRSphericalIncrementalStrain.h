@@ -17,8 +17,7 @@
  * polar and azimuthal directions are functions of the radial displacement.
 
  */
-template <ComputeStage compute_stage>
-class ADComputeRSphericalIncrementalStrain : public ADComputeIncrementalSmallStrain<compute_stage>
+class ADComputeRSphericalIncrementalStrain : public ADComputeIncrementalSmallStrain
 {
 public:
   static InputParameters validParams();
@@ -34,6 +33,4 @@ protected:
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
-
-  usingComputeIncrementalSmallStrainMembers;
 };

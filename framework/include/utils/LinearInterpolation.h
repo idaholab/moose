@@ -78,18 +78,6 @@ private:
   static int _file_number;
 };
 
-#define ADLinearInterpolation typename LinearInterpolationType<compute_stage>::type
-
 typedef LinearInterpolationTempl<Real> LinearInterpolation;
 typedef LinearInterpolationTempl<DualReal> DualLinearInterpolation;
-
-template <ComputeStage compute_stage>
-struct LinearInterpolationType
-{
-  typedef LinearInterpolation type;
-};
-template <>
-struct LinearInterpolationType<JACOBIAN>
-{
-  typedef DualLinearInterpolation type;
-};
+typedef DualLinearInterpolation ADLinearInterpolation;

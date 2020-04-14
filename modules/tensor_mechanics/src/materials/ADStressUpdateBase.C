@@ -12,11 +12,10 @@
 #include "InputParameters.h"
 #include "Conversion.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStressUpdateBase<compute_stage>::validParams()
+ADStressUpdateBase::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Calculates an admissible state (stress that lies on or within the "
                              "yield surface, plastic strains, internal parameters, etc).  This "
                              "class is intended to be a parent class for classes with specific "
@@ -33,34 +32,27 @@ ADStressUpdateBase<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStressUpdateBase<compute_stage>::ADStressUpdateBase(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADStressUpdateBase::ADStressUpdateBase(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressUpdateBase<compute_stage>::setQp(unsigned int qp)
+ADStressUpdateBase::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressUpdateBase<compute_stage>::propagateQpStatefulProperties()
+ADStressUpdateBase::propagateQpStatefulProperties()
 {
   mooseError(
       "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }
 
-template <ComputeStage compute_stage>
 Real
-ADStressUpdateBase<compute_stage>::computeTimeStepLimit()
+ADStressUpdateBase::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADStressUpdateBase);

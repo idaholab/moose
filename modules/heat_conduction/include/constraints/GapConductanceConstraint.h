@@ -46,8 +46,7 @@
  * variable. Likewise, the term "primal variable" refers to the
  * temperature variable.
  */
-template <ComputeStage compute_stage>
-class GapConductanceConstraint : public ADMortarConstraint<compute_stage>
+class GapConductanceConstraint : public ADMortarConstraint
 {
 public:
   static InputParameters validParams();
@@ -62,6 +61,4 @@ protected:
 
   /// Thermal conductivity of the gap medium (e.g. air).
   const Real _k;
-
-  usingMortarConstraintMembers;
 };

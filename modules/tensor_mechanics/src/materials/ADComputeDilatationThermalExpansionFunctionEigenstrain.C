@@ -11,14 +11,12 @@
 
 #include "Function.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeDilatationThermalExpansionFunctionEigenstrain);
+registerMooseObject("TensorMechanicsApp", ADComputeDilatationThermalExpansionFunctionEigenstrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeDilatationThermalExpansionFunctionEigenstrain<compute_stage>::validParams()
+ADComputeDilatationThermalExpansionFunctionEigenstrain::validParams()
 {
-  InputParameters params =
-      ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeDilatationThermalExpansionEigenstrainBase::validParams();
   params.addClassDescription("Computes eigenstrain due to thermal expansion using a function that "
                              "describes the total dilatation as a function of temperature");
   params.addRequiredParam<FunctionName>(
@@ -27,17 +25,15 @@ ADComputeDilatationThermalExpansionFunctionEigenstrain<compute_stage>::validPara
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeDilatationThermalExpansionFunctionEigenstrain<compute_stage>::
+ADComputeDilatationThermalExpansionFunctionEigenstrain::
     ADComputeDilatationThermalExpansionFunctionEigenstrain(const InputParameters & parameters)
-  : ADComputeDilatationThermalExpansionEigenstrainBase<compute_stage>(parameters),
+  : ADComputeDilatationThermalExpansionEigenstrainBase(parameters),
     _dilatation_function(getFunction("dilatation_function"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputeDilatationThermalExpansionFunctionEigenstrain<compute_stage>::computeDilatation(
+ADComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatation(
     const ADReal & temperature)
 {
   // Note: All dual number information will be lost until functions can handle AD points!

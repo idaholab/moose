@@ -11,17 +11,12 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADFunctionNeumannBC;
 class Function;
-
-declareADValidParams(ADFunctionNeumannBC);
 
 /**
  * Boundary condition of a Neumann style whose value is computed by a user-defined function
  */
-template <ComputeStage compute_stage>
-class ADFunctionNeumannBC : public ADIntegratedBC<compute_stage>
+class ADFunctionNeumannBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -33,6 +28,4 @@ protected:
 
   /// The function being used for setting the value
   const Function & _func;
-
-  usingIntegratedBCMembers;
 };

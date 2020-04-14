@@ -9,13 +9,12 @@
 
 #include "ADDensity.h"
 
-registerADMooseObject("MiscApp", ADDensity);
+registerMooseObject("MiscApp", ADDensity);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADDensity<compute_stage>::validParams()
+ADDensity::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Creates density AD material property");
   params.addRequiredCoupledVar(
       "displacements",
@@ -24,9 +23,8 @@ ADDensity<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADDensity::ADDensity(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _coord_system(getBlockCoordSystem()),
     _disp_r(adCoupledValue("displacements", 0)),
     _initial_density(getParam<Real>("density")),
@@ -42,16 +40,14 @@ ADDensity<compute_stage>::ADDensity(const InputParameters & parameters)
   _grad_disp.resize(3, &adZeroGradient());
 }
 
-template <ComputeStage compute_stage>
 void
-ADDensity<compute_stage>::initQpStatefulProperties()
+ADDensity::initQpStatefulProperties()
 {
   _density[_qp] = _initial_density;
 }
 
-template <ComputeStage compute_stage>
 void
-ADDensity<compute_stage>::computeQpProperties()
+ADDensity::computeQpProperties()
 {
   // rho * V = rho0 * V0
   // rho = rho0 * V0 / V

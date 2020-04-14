@@ -164,14 +164,14 @@
     execute_on = timestep_end
   [../]
   [./stress_yy]
-     type = RankTwoAux
+     type = ADRankTwoAux
      variable = stress_yy
      rank_two_tensor = stress
      index_i = 1
      index_j = 1
   [../]
   [./strain_yy]
-     type = RankTwoAux
+     type = ADRankTwoAux
      variable = strain_yy
      rank_two_tensor = total_strain
      index_i = 1
@@ -272,17 +272,17 @@
 
 [Materials]
   [./elastic]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = '0'
     youngs_modulus = 210e+09
     poissons_ratio = 0
   [../]
   [./elastic_strain]
-    type= ComputeFiniteStrain
+    type= ADComputeFiniteStrain
     block = '0'
   [../]
   [./elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = '0'
   [../]
   [./density]

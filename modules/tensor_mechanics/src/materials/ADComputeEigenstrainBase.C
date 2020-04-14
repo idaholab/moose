@@ -11,11 +11,10 @@
 
 #include "RankTwoTensor.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeEigenstrainBase<compute_stage>::validParams()
+ADComputeEigenstrainBase::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
@@ -27,10 +26,8 @@ ADComputeEigenstrainBase<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeEigenstrainBase<compute_stage>::ADComputeEigenstrainBase(
-    const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+ADComputeEigenstrainBase::ADComputeEigenstrainBase(const InputParameters & parameters)
+  : ADMaterial(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
     _eigenstrain(declareADProperty<RankTwoTensor>(_eigenstrain_name)),
@@ -38,18 +35,16 @@ ADComputeEigenstrainBase<compute_stage>::ADComputeEigenstrainBase(
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeEigenstrainBase<compute_stage>::initQpStatefulProperties()
+ADComputeEigenstrainBase::initQpStatefulProperties()
 {
   // This property can be promoted to be stateful by other models that use it,
   // so it needs to be initalized.
   _eigenstrain[_qp].zero();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeEigenstrainBase<compute_stage>::computeQpProperties()
+ADComputeEigenstrainBase::computeQpProperties()
 {
   if (_t_step >= 1)
     _step_zero = false;
@@ -61,10 +56,8 @@ ADComputeEigenstrainBase<compute_stage>::computeQpProperties()
     computeQpEigenstrain();
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADComputeEigenstrainBase<compute_stage>::computeVolumetricStrainComponent(
-    const ADReal volumetric_strain) const
+ADComputeEigenstrainBase::computeVolumetricStrainComponent(const ADReal volumetric_strain) const
 {
   // The engineering strain in a given direction is:
   // epsilon_eng = cbrt(volumetric_strain + 1.0) - 1.0
@@ -80,5 +73,3 @@ ADComputeEigenstrainBase<compute_stage>::computeVolumetricStrainComponent(
 
   return std::log(volumetric_strain + 1.0) / 3.0;
 }
-
-adBaseClass(ADComputeEigenstrainBase);

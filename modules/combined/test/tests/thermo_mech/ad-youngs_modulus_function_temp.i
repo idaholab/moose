@@ -85,7 +85,7 @@
 
 [AuxKernels]
   [./stress_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     variable = stress_xx
     index_i = 0
@@ -93,7 +93,7 @@
   [../]
 
  [./elastic_strain_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = elastic_strain
     variable = elastic_strain_xx
     index_i = 0

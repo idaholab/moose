@@ -87,7 +87,7 @@
 
 [AuxKernels]
   [./eigenstrain_yy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_yy
     index_i = 1
@@ -95,7 +95,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./eigenstrain_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_xx
     index_i = 0
@@ -103,7 +103,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./eigenstrain_zz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = eigenstrain
     variable = eigenstrain_zz
     index_i = 2
@@ -111,7 +111,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./total_strain_yy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_yy
     index_i = 1
@@ -119,7 +119,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./total_strain_xx]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_xx
     index_i = 0
@@ -127,7 +127,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./total_strain_zz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = total_strain
     variable = total_strain_zz
     index_i = 2
@@ -165,7 +165,7 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]

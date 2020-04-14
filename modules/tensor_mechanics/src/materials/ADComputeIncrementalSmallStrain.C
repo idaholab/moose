@@ -10,28 +10,24 @@
 #include "ADComputeIncrementalSmallStrain.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeIncrementalSmallStrain<compute_stage>::validParams()
+ADComputeIncrementalSmallStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalStrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for small strains.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeIncrementalSmallStrain<compute_stage>::ADComputeIncrementalSmallStrain(
-    const InputParameters & parameters)
-  : ADComputeIncrementalStrainBase<compute_stage>(parameters)
+ADComputeIncrementalSmallStrain::ADComputeIncrementalSmallStrain(const InputParameters & parameters)
+  : ADComputeIncrementalStrainBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
+ADComputeIncrementalSmallStrain::computeProperties()
 {
   ADReal volumetric_strain = 0.0;
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -75,13 +71,10 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeProperties()
     // incremental small strain does not include rotation
     _rotation_increment[_qp].setToIdentity();
   }
-
-  copyDualNumbersToValues();
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
+ADComputeIncrementalSmallStrain::computeTotalStrainIncrement(
     ADRankTwoTensor & total_strain_increment)
 {
   // Deformation gradient
@@ -95,6 +88,3 @@ ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement(
 
   total_strain_increment = 0.5 * (A + A.transpose());
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeIncrementalSmallStrain);

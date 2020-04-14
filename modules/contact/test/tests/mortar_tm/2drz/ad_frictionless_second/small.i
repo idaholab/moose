@@ -147,13 +147,13 @@ name = 'small'
 
 [Materials]
   [./plank]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 'plank'
     poissons_ratio = 0.3
     youngs_modulus = ${E_plank}
   [../]
   [./block]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 'block'
     poissons_ratio = 0.3
     youngs_modulus = ${E_block}

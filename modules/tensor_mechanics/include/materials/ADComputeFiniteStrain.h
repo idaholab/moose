@@ -11,17 +11,10 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
-#define usingComputeFiniteStrainMembers                                                            \
-  usingComputeIncrementalStrainBaseMembers;                                                        \
-  using ADComputeFiniteStrain<compute_stage>::_Fhat;                                               \
-  using ADComputeFiniteStrain<compute_stage>::computeQpStrain;                                     \
-  using ADComputeFiniteStrain<compute_stage>::computeQpIncrements
-
 /**
  * ADComputeFiniteStrain defines a strain increment and rotation increment, for finite strains.
  */
-template <ComputeStage compute_stage>
-class ADComputeFiniteStrain : public ADComputeIncrementalStrainBase<compute_stage>
+class ADComputeFiniteStrain : public ADComputeIncrementalStrainBase
 {
 public:
   static InputParameters validParams();
@@ -48,5 +41,4 @@ private:
   const DecompMethod _decomposition_method;
 
 protected:
-  usingComputeIncrementalStrainBaseMembers;
 };

@@ -9,13 +9,12 @@
 
 #include "ADCHSplitConcentration.h"
 
-registerADMooseObject("PhaseFieldApp", ADCHSplitConcentration);
+registerMooseObject("PhaseFieldApp", ADCHSplitConcentration);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCHSplitConcentration<compute_stage>::validParams()
+ADCHSplitConcentration::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Concentration kernel in Split Cahn-Hilliard that solves chemical "
                              "potential in a weak form");
   params.addRequiredCoupledVar("chemical_potential_var", "Chemical potential variable");
@@ -23,19 +22,15 @@ ADCHSplitConcentration<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCHSplitConcentration<compute_stage>::ADCHSplitConcentration(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADCHSplitConcentration::ADCHSplitConcentration(const InputParameters & parameters)
+  : ADKernel(parameters),
     _grad_mu(adCoupledGradient("chemical_potential_var")),
     _mobility(getADMaterialProperty<Real>("mobility"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCHSplitConcentration<compute_stage>::computeQpResidual()
+ADCHSplitConcentration::computeQpResidual()
 {
   return _mobility[_qp] * _grad_mu[_qp] * _grad_test[_i][_qp];
 }
-
-adBaseClass(ADCHSplitConcentration);

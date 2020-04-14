@@ -11,23 +11,14 @@
 
 #include "ADKernel.h"
 
-#define usingTemplKernelGradMembers(T) usingTemplKernelMembers(T)
-#define usingKernelGradMembers usingTemplKernelGradMembers(Real)
-#define usingVectorKernelGradMembers usingTemplKernelMembers(RealVectorValue)
-
-template <typename, ComputeStage>
+template <typename>
 class ADKernelGradTempl;
 
-template <ComputeStage compute_stage>
-using ADKernelGrad = ADKernelGradTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue, compute_stage>;
+using ADKernelGrad = ADKernelGradTempl<Real>;
+using ADVectorKernelGrad = ADKernelGradTempl<RealVectorValue>;
 
-declareADValidParams(ADKernelGrad);
-declareADValidParams(ADVectorKernelGrad);
-
-template <typename T, ComputeStage compute_stage>
-class ADKernelGradTempl : public ADKernelTempl<T, compute_stage>
+template <typename T>
+class ADKernelGradTempl : public ADKernelTempl<T>
 {
 public:
   static InputParameters validParams();
@@ -42,11 +33,34 @@ protected:
   /**
    * Called before forming the residual for an element
    */
-  virtual typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::OutputGradient
+  virtual typename OutputTools<typename Moose::ADType<T>::type>::OutputGradient
   precomputeQpResidual() = 0;
 
   virtual ADReal computeQpResidual() override final;
 
-  usingTemplKernelMembers(T);
+  using ADKernelTempl<T>::_assembly;
+  using ADKernelTempl<T>::_var;
+  using ADKernelTempl<T>::precalculateResidual;
+  using ADKernelTempl<T>::_grad_test;
+  using ADKernelTempl<T>::_use_displaced_mesh;
+  using ADKernelTempl<T>::_qp;
+  using ADKernelTempl<T>::_qrule;
+  using ADKernelTempl<T>::_ad_JxW;
+  using ADKernelTempl<T>::_ad_coord;
+  using ADKernelTempl<T>::_i;
+  using ADKernelTempl<T>::_JxW;
+  using ADKernelTempl<T>::_coord;
+  using ADKernelTempl<T>::_regular_grad_test;
+  using ADKernelTempl<T>::accumulateTaggedLocalResidual;
+  using ADKernelTempl<T>::_has_save_in;
+  using ADKernelTempl<T>::_save_in;
+  using ADKernelTempl<T>::_sys;
+  using ADKernelTempl<T>::_j;
+  using ADKernelTempl<T>::accumulateTaggedLocalMatrix;
+  using ADKernelTempl<T>::prepareVectorTag;
+  using ADKernelTempl<T>::_local_re;
+  using ADKernelTempl<T>::_local_ke;
+  using ADKernelTempl<T>::_diag_save_in;
+  using ADKernelTempl<T>::_has_diag_save_in;
+  using ADKernelTempl<T>::prepareMatrixTag;
 };
-

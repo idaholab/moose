@@ -28,12 +28,7 @@ void
 AddKernelAction::act()
 {
   if (_current_task == "add_kernel")
-  {
-    if (Registry::isADObj(_type + "<RESIDUAL>"))
-      _problem->addADKernel(_type, _name, _moose_object_pars);
-    else
-      _problem->addKernel(_type, _name, _moose_object_pars);
-  }
+    _problem->addKernel(_type, _name, _moose_object_pars);
   else
   {
     if (getAllTasks().find("add_aux_bc") != getAllTasks().end())

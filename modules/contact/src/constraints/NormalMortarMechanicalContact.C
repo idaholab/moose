@@ -9,13 +9,12 @@
 
 #include "NormalMortarMechanicalContact.h"
 
-registerADMooseObject("MooseApp", NormalMortarMechanicalContact);
+registerMooseObject("MooseApp", NormalMortarMechanicalContact);
 
-template <ComputeStage compute_stage>
 InputParameters
-NormalMortarMechanicalContact<compute_stage>::validParams()
+NormalMortarMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint<compute_stage>::validParams();
+  InputParameters params = ADMortarConstraint::validParams();
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -26,16 +25,13 @@ NormalMortarMechanicalContact<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-NormalMortarMechanicalContact<compute_stage>::NormalMortarMechanicalContact(
-    const InputParameters & parameters)
-  : ADMortarConstraint<compute_stage>(parameters), _component(getParam<MooseEnum>("component"))
+NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
+  : ADMortarConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-NormalMortarMechanicalContact<compute_stage>::computeQpResidual(Moose::MortarType type)
+NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {

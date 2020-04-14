@@ -49,17 +49,13 @@ CavityPressureAction::act()
     mooseError("Number of save_in variables should equal to the number of displacement variables ",
                ndisp);
 
-  std::string ad_append = "";
   std::string ad_prepend = "";
   if (_use_ad)
-  {
-    ad_append = "<RESIDUAL>";
     ad_prepend = "AD";
-  }
 
   std::string kernel_name = ad_prepend + "Pressure";
 
-  InputParameters params = _factory.getValidParams(kernel_name + ad_append);
+  InputParameters params = _factory.getValidParams(kernel_name);
   params.applyParameters(parameters());
 
   params.set<PostprocessorName>("postprocessor") =
@@ -73,17 +69,6 @@ CavityPressureAction::act()
       params.set<std::vector<AuxVariableName>>("save_in") = {save_in[i]};
     std::string unique_kernel_name = _name + "_" + Moose::stringify(i);
 
-    if (_use_ad)
-    {
-      _problem->addBoundaryCondition(
-          kernel_name + ad_append, unique_kernel_name + "_residual", params);
-      _problem->addBoundaryCondition(
-          kernel_name + "<JACOBIAN>", unique_kernel_name + "_jacobian", params);
-      _problem->haveADObjects(true);
-    }
-    else
-    {
-      _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
-    }
+    _problem->addBoundaryCondition(kernel_name, unique_kernel_name, params);
   }
 }

@@ -22,7 +22,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("NaClFluidProperties");
     _fe_problem->addUserObject("NaClFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObjectTempl<NaClFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<NaClFluidProperties>("fp");
   }
 
   const NaClFluidProperties * _fp;

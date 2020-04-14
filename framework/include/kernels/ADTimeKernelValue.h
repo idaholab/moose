@@ -15,8 +15,8 @@
  * AD time kernels should inherit from this class when the time portion of the weak residual is
  * multiplied by the test function
  */
-template <typename T, ComputeStage compute_stage>
-class ADTimeKernelValueTempl : public ADKernelValueTempl<T, compute_stage>
+template <typename T>
+class ADTimeKernelValueTempl : public ADKernelValueTempl<T>
 {
 public:
   static InputParameters validParams();
@@ -25,22 +25,10 @@ public:
 
 protected:
   /// Holds the time derivatives at the quadrature points
-  const ADTemplateVariableValue & _u_dot;
+  const ADTemplateVariableValue<T> & _u_dot;
 
-  usingTemplKernelValueMembers(T);
+  using ADKernelTempl<T>::_var;
 };
 
-template <ComputeStage compute_stage>
-using ADTimeKernelValue = ADTimeKernelValueTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorTimeKernelValue = ADTimeKernelValueTempl<RealVectorValue, compute_stage>;
-
-declareADValidParams(ADTimeKernelValue);
-declareADValidParams(ADVectorTimeKernelValue);
-
-#define usingTemplTimeKernelValueMembers(type)                                                     \
-  usingTemplKernelMembers(type);                                                                   \
-  using ADTimeKernelValueTempl<type, compute_stage>::_u_dot
-
-#define usingTimeKernelValueMembers usingTemplTimeKernelValueMembers(Real)
-#define usingVectorTimeKernelValueMembers usingTemplTimeKernelValueMembers(RealVectorValue)
+using ADTimeKernelValue = ADTimeKernelValueTempl<Real>;
+using ADVectorTimeKernelValue = ADTimeKernelValueTempl<RealVectorValue>;

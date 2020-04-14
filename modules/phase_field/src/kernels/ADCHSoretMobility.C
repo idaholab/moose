@@ -9,13 +9,12 @@
 
 #include "ADCHSoretMobility.h"
 
-registerADMooseObject("PhaseFieldApp", ADCHSoretMobility);
+registerMooseObject("PhaseFieldApp", ADCHSoretMobility);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADCHSoretMobility<compute_stage>::validParams()
+ADCHSoretMobility::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Adds contribution due to thermo-migration to the Cahn-Hilliard "
                              "equation using a concentration 'u', temperature 'T', and thermal "
                              "mobility 'mobility' (in units of length squared per time).");
@@ -24,20 +23,16 @@ ADCHSoretMobility<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADCHSoretMobility<compute_stage>::ADCHSoretMobility(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADCHSoretMobility::ADCHSoretMobility(const InputParameters & parameters)
+  : ADKernel(parameters),
     _T(adCoupledValue("T")),
     _grad_T(adCoupledGradient("T")),
     _mobility(getADMaterialProperty<Real>("mobility"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADCHSoretMobility<compute_stage>::computeQpResidual()
+ADCHSoretMobility::computeQpResidual()
 {
   return _mobility[_qp] * _grad_T[_qp] / _T[_qp] * _grad_test[_i][_qp];
 }
-
-adBaseClass(ADCHSoretMobility);

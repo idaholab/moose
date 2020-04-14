@@ -9,13 +9,12 @@
 
 #include "SS316HLAROMANCEStressUpdateTest.h"
 
-registerADMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
+registerMooseObject("TensorMechanicsTestApp", SS316HLAROMANCEStressUpdateTest);
 
-template <ComputeStage compute_stage>
 InputParameters
-SS316HLAROMANCEStressUpdateTest<compute_stage>::validParams()
+SS316HLAROMANCEStressUpdateTest::validParams()
 {
-  InputParameters params = ADLAROMANCEStressUpdateBase<compute_stage>::validParams();
+  InputParameters params = ADLAROMANCEStressUpdateBase::validParams();
   params.addClassDescription("LAROMANCE creep update model for SS316H");
 
   // Override defaults for material specific parameters below
@@ -42,16 +41,13 @@ SS316HLAROMANCEStressUpdateTest<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-SS316HLAROMANCEStressUpdateTest<compute_stage>::SS316HLAROMANCEStressUpdateTest(
-    const InputParameters & parameters)
-  : ADLAROMANCEStressUpdateBase<compute_stage>(parameters)
+SS316HLAROMANCEStressUpdateTest::SS316HLAROMANCEStressUpdateTest(const InputParameters & parameters)
+  : ADLAROMANCEStressUpdateBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 std::vector<std::vector<ROMInputTransform>>
-SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransform()
+SS316HLAROMANCEStressUpdateTest::getTransform()
 {
   return {{ROMInputTransform::LOG,
            ROMInputTransform::LOG,
@@ -70,17 +66,15 @@ SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransform()
            ROMInputTransform::LINEAR}};
 }
 
-template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316HLAROMANCEStressUpdateTest<compute_stage>::getTransformCoefs()
+SS316HLAROMANCEStressUpdateTest::getTransformCoefs()
 {
   return {
       {1.0, 1.0, 1.0e1, 4.0e-5, 0.0}, {1.0e13, 1.0, 1.0e1, 0.0, 1.0}, {0.0, 1.0, 5.0, 1.0e-4, 0.0}};
 }
 
-template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316HLAROMANCEStressUpdateTest<compute_stage>::getInputLimits()
+SS316HLAROMANCEStressUpdateTest::getInputLimits()
 {
   return {{1.32776E+12, 9.99959E+12},
           {2.93039E+11, 9.99798E+11},
@@ -89,9 +83,8 @@ SS316HLAROMANCEStressUpdateTest<compute_stage>::getInputLimits()
           {800.0160634, 949.9873586}};
 }
 
-template <ComputeStage compute_stage>
 std::vector<std::vector<Real>>
-SS316HLAROMANCEStressUpdateTest<compute_stage>::getCoefs()
+SS316HLAROMANCEStressUpdateTest::getCoefs()
 {
   return {
       {-16.438661699503427,    4.591731583001092,     0.6746168063837104,     0.24145810486515984,

@@ -59,7 +59,7 @@
 
 [Materials]
   [./elasticity]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 1e10
   [../]

@@ -125,6 +125,12 @@ public:
    */
   virtual unsigned int getNumLinearIterations() const { return _n_linear_iterations; }
 
+  /**
+   * Returns the time step size
+   * @return The time step size
+   */
+  const Real & dt() const { return _dt; }
+
 protected:
   /**
    * Gets the number of nonlinear iterations in the most recent solve.

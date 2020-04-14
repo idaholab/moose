@@ -11,15 +11,12 @@
 
 #include "ADKernelSUPG.h"
 
-// Forward Declarations
-
 /**
  * This class computes the momentum equation residual and Jacobian
  * contributions for SUPG stabilization terms of the incompressible Navier-Stokes momentum
  * equation.
  */
-template <ComputeStage compute_stage>
-class INSADMomentumSUPG : public ADVectorKernelSUPG<compute_stage>
+class INSADMomentumSUPG : public ADVectorKernelSUPG
 {
 public:
   static InputParameters validParams();
@@ -29,7 +26,5 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpStrongResidual() override;
 
-  const ADMaterialProperty(RealVectorValue) & _momentum_strong_residual;
-
-  usingVectorKernelSUPGMembers;
+  const ADMaterialProperty<RealVectorValue> & _momentum_strong_residual;
 };

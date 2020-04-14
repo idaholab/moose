@@ -9,10 +9,8 @@
 
 #include "DenseMatrix.h"
 #include "MooseConfig.h"
-#include "MooseADWrapper.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
-#include "ColumnMajorMatrix.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
@@ -42,18 +40,6 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
-dataStore(std::ostream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = v(i, j);
-      stream.write((char *)&r, sizeof(r));
-    }
-}
-
-template <>
-void
 dataStore(std::ostream & stream, RankTwoTensor & rtt, void * context)
 {
   dataStore(stream, rtt._coords, context);
@@ -79,17 +65,20 @@ dataStore(std::ostream & stream, DualReal & dn, void * context)
 {
   dataStore(stream, dn.value(), context);
 
-  auto & derivatives = dn.derivatives();
-  std::size_t size = derivatives.size();
-  dataStore(stream, size, context);
-  for (MooseIndex(size) i = 0; i < size; ++i)
+  if (DualReal::do_derivatives)
   {
+    auto & derivatives = dn.derivatives();
+    std::size_t size = derivatives.size();
+    dataStore(stream, size, context);
+    for (MooseIndex(size) i = 0; i < size; ++i)
+    {
 #ifdef MOOSE_SPARSE_AD
-    dataStore(stream, derivatives.raw_index(i), context);
-    dataStore(stream, derivatives.raw_at(i), context);
+      dataStore(stream, derivatives.raw_index(i), context);
+      dataStore(stream, derivatives.raw_at(i), context);
 #else
-    dataStore(stream, derivatives[i], context);
+      dataStore(stream, derivatives[i], context);
 #endif
+    }
   }
 }
 
@@ -332,38 +321,28 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
-dataLoad(std::istream & stream, ColumnMajorMatrix & v, void * /*context*/)
-{
-  for (unsigned int i = 0; i < v.m(); i++)
-    for (unsigned int j = 0; j < v.n(); j++)
-    {
-      Real r = 0;
-      stream.read((char *)&r, sizeof(r));
-      v(i, j) = r;
-    }
-}
-
-template <>
-void
 dataLoad(std::istream & stream, DualReal & dn, void * context)
 {
   dataLoad(stream, dn.value(), context);
 
-  auto & derivatives = dn.derivatives();
-  std::size_t size = 0;
-  stream.read((char *)&size, sizeof(size));
+  if (DualReal::do_derivatives)
+  {
+    auto & derivatives = dn.derivatives();
+    std::size_t size = 0;
+    stream.read((char *)&size, sizeof(size));
 #ifdef MOOSE_SPARSE_AD
-  derivatives.resize(size);
+    derivatives.resize(size);
 #endif
 
-  for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
-  {
+    for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
+    {
 #ifdef MOOSE_SPARSE_AD
-    dataLoad(stream, derivatives.raw_index(i), context);
-    dataLoad(stream, derivatives.raw_at(i), context);
+      dataLoad(stream, derivatives.raw_index(i), context);
+      dataLoad(stream, derivatives.raw_at(i), context);
 #else
-    dataLoad(stream, derivatives[i], context);
+      dataLoad(stream, derivatives[i], context);
 #endif
+    }
   }
 }
 

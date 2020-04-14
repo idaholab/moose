@@ -10,31 +10,15 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "DualRealOps.h"
 #include "InputParameters.h"
 
-#define usingSingleVariableReturnMappingSolutionMembers                                            \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::returnMappingSolve;                  \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::minimumPermissibleValue;             \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::maximumPermissibleValue;             \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::initialGuess;                        \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::computeResidual;                     \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::computeDerivative;                   \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::computeReferenceResidual;            \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::iterationFinalize;                   \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::outputIterationSummary;              \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::_check_range;                        \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::_line_search;                        \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::_bracket_solution;                   \
-  using ADSingleVariableReturnMappingSolution<compute_stage>::converged
-
-// Forward declarations
 class ConsoleStream;
 
 /**
  * Base class that provides capability for Newton return mapping
  * iterations on a single variable
  */
-template <ComputeStage compute_stage>
 class ADSingleVariableReturnMappingSolution
 {
 public:

@@ -102,7 +102,7 @@
 
 [Materials]
   [./Elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ADComputeElasticityTensor
     block = 1
     fill_method = symmetric_isotropic
     C_ijkl = '0 0.5e6'

@@ -11,11 +11,7 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADFunctionPenaltyDirichletBC;
 class Function;
-
-declareADValidParams(ADFunctionPenaltyDirichletBC);
 
 /**
  * A different approach to applying Dirichlet BCs
@@ -23,8 +19,7 @@ declareADValidParams(ADFunctionPenaltyDirichletBC);
  * uses \f$ \int(p u \cdot \phi)=\int(p f \cdot \phi)\f$ on \f$d\omega\f$
  *
  */
-template <ComputeStage compute_stage>
-class ADFunctionPenaltyDirichletBC : public ADIntegratedBC<compute_stage>
+class ADFunctionPenaltyDirichletBC : public ADIntegratedBC
 {
 public:
   /**
@@ -44,6 +39,4 @@ protected:
 private:
   /// Penalty value
   const Real _p;
-
-  usingIntegratedBCMembers;
 };
