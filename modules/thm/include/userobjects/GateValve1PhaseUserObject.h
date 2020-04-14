@@ -18,12 +18,7 @@ public:
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
 
-  /**
-   * Gets the flux vector for a connection
-   *
-   * @param[in] connection_index   Index for the connection
-   */
-  const std::vector<Real> & getFlux(const unsigned int & connection_index) const;
+  const std::vector<Real> & getFlux(const unsigned int & connection_index) const override;
 
   /**
    * Gets the Jacobian entries for an equation w.r.t. to another equation
