@@ -7,11 +7,15 @@ finite volume (FV) method doesn't really have shape-functions to describe
 continuous solutions within mesh cells.  Instead it uses a constant solution
 within each mesh element/cell. Because of this, much of MOOSE's use of libMesh
 for FE is not relevant for FV.  This document gives an overview of how FV is
-similar and different from FE with respect to implementation in MOOSE
-and explains why FV is designed and implemented in its current form.  In order
-to fully enable taking advantage of perfomance opportunities and to simplify
-the FV method implementation in MOOSE, a new set of FV-specific systems was
-built along-side the MOOSE FE infrastructure.
+similar and different from FE with respect to implementation in MOOSE and
+explains why FV is designed and implemented in its current form.  In order to
+fully enable taking advantage of perfomance opportunities and to simplify the
+FV method implementation in MOOSE, a new set of FV-specific systems was built
+along-side the MOOSE FE infrastructure.  As a new set of systems being created
+after MOOSE has received powerful automatic differentiation (AD) support, the
+FV systems (at least initially) are only being created with AD support in
+mind, and non-AD (manual jacobian) versions will only be supported if a
+pressing need arises.
 
 ## Variables
 
