@@ -19,11 +19,15 @@ SHORT_VTK_NAME:
 netcdf:
  - 4.6.2
 
+libpng:
+  - 1.6.37 h2573ce8_0 # [osx]
+  - 1.6.37 hed695b0_0 # [linux]
+
 moose_petsc:
  - 3.12.5 build_0
 
 moose_libmesh_vtk:
- - 6.3.0 build_1
+ - 6.3.0 build_2
 
 pin_run_as_build:
   moose_petsc: x.x.x
