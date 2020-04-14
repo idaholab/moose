@@ -302,8 +302,6 @@
 - /ScalarKernels/ODECoefTimeDerivative
 - /ScalarKernels/VolumeJunction2PhaseVolumeFractionTimeDerivative
 
-- /UserObjects/BoundaryFlux3EqnGhostVelocityTemperature
-- /UserObjects/BoundaryFlux7EqnGhostVelocityTemperature
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/BoundaryFlux7EqnNCGGhostDensityVelocity
 - /UserObjects/BoundaryFlux7EqnNCGGhostMassFlowRateTemperature
