@@ -10,6 +10,7 @@
       input = 'shell_dynamics_bending_moment_free.i'
       csvdiff = 'shell_dynamics_bending_moment_free_out.csv'
       detail = "the surface is on the XY plane."
+      heavy = true
     [../]
 
     [./shell_dynamics_bending_moment_free_orientation_inclined]
@@ -17,6 +18,7 @@
       input = 'shell_dynamics_bending_moment_free_orientation_inclined.i'
       csvdiff = 'shell_dynamics_bending_moment_free_orientation_inclined_out.csv'
       detail = "the surface is at a 45 deg. angle w.r.t. the Y axis."
+      heavy = true
     [../]
   []
 []
