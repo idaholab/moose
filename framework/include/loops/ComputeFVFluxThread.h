@@ -27,6 +27,25 @@
 class FVBoundaryCondition;
 class MooseVariableFVBase;
 
+/// This works like the Sentinel helper classes in MOOSE, except it is more
+/// flexible and concise to use.  You just initialize it with a lambda and can
+/// return it from within another function scope.  So a function that has other
+/// cleanup functions associated with it can just wrap those cleanup funcs in
+/// an OnScopeExit object and return it.  The caller of the function needing
+/// cleanup simply catches its return value and voila - the cleanup function
+/// are called at the end of the calling functions scope. Like this:
+///
+///   OnScopeExit doSomethingSpecial()
+///   {
+///     ...
+///     return OnScopeExit([]{cleanupSomethingSpecial();});
+///   }
+///   void cleanupSomethingSpecial() {...}
+///
+///   void main()
+///   {
+///     auto cleaner_uper = doSomethingSpecial();
+///   }
 struct OnScopeExit
 {
   std::function<void()> _f;
@@ -44,6 +63,11 @@ struct OnScopeExit
   }
 };
 
+/**
+ * This loops over a set of mesh faces (i.e. FaceInfo objects).  Callback
+ * routines are provided for visiting each face, for visiting boundary faces,
+ * for sudomain changes, and pre/post many of these events.
+ */
 template <typename RangeType>
 class ThreadedFaceLoop
 {
@@ -59,31 +83,25 @@ public:
   void join(const ThreadedFaceLoop & /*y*/){};
 
   virtual void onFace(const FaceInfo & fi) = 0;
+  /// This is called once for each face after all face and boundary callbacks have been
+  /// finished for that face.
   virtual void postFace(const FaceInfo & /*fi*/) {}
+  /// This is called once after all face-looping is finished.
   virtual void post() {}
 
+  /// This is called once for every face that is on a boundary *after* onFace
+  /// is called for the face.
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) = 0;
 
-  /**
-   * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
-   * is not the same as the subdomain of the last element).  Beware of over-using this!
-   * You might think that you can do some expensive stuff in here and get away with it...
-   * but there are applications that have TONS of subdomains....
-   */
+  /// Called every time the current subdomain changes (i.e. the subdomain of *this* face's left element
+  /// is not the same as the subdomain of the last face's left element).
   virtual void subdomainChanged(){};
 
-  /**
-   * Called every time the neighbor subdomain changes (i.e. the subdomain of _this_ neighbor
-   * is not the same as the subdomain of the last neighbor).  Beware of over-using this!
-   * You might think that you can do some expensive stuff in here and get away with it...
-   * but there are applications that have TONS of subdomains....
-   */
+  /// Called every time the neighbor subdomain changes (i.e. the subdomain of *this* face's right element
+  /// is not the same as the subdomain of the last face's right element).
   virtual void neighborSubdomainChanged(){};
 
-  /**
-   * Called if a MooseException is caught anywhere during the computation.
-   * The single input parameter taken is a MooseException object.
-   */
+  /// Called if a MooseException is caught anywhere during the computation.
   virtual void caughtMooseException(MooseException &){};
 
 protected:
@@ -287,7 +305,7 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // problem's face info down to the sub-problem -- centroids are different,
   // volumes are different, etc.  To support displaced meshes correctly, we
   // need to be able to reinit the subproblems variables using its equivalent
-  // face info object.  How?
+  // face info object.  How?  See https://github.com/idaholab/moose/issues/15064
 
   for (auto var : _needed_fv_vars)
     var->computeFaceValues(fi);
@@ -424,6 +442,7 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::post()
 {
+  // make sure we add any remaining cached residuals/jacobians to add/record
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   if (_do_jacobian)
     _fe_problem.addCachedJacobian(_tid);
@@ -438,6 +457,9 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::subdomainChanged()
 {
+  // With a subdomain change, the set of needed material properties and
+  // variables may have changed, so we recompute them here.
+
   _needed_fv_vars.clear();
   std::set<unsigned int> needed_mat_props;
 
@@ -458,6 +480,10 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   std::set<MooseVariableFEBase *> needed_fe_vars;
   for (auto k : kernels)
   {
+    // TODO: we need a better way to do this - especially when FE objects begin to
+    // couple to FV vars.  This code shoud be refactored out into one place
+    // where it is easy for users to say initialize all materials and
+    // variables needed by these objects for me.
     const auto & deps = k->getMooseVariableDependencies();
     for (auto var : deps)
       if (var->isFV())
