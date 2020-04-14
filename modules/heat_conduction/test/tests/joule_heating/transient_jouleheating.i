@@ -79,7 +79,6 @@
   [./sigma] #copper is default material
     type = ElectricalConductivity
     temperature = T
-    length_scale = 1 #m
   [../]
 []
 

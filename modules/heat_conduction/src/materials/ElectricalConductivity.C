@@ -18,11 +18,10 @@ ElectricalConductivity::validParams()
   InputParameters params = Material::validParams();
   params.addCoupledVar("temperature", 293.0, "Coupled variable for temperature.");
   params.addParam<std::string>("base_name", "Material property base name.");
-  params.addParam<Real>("length_scale", 1.0e-9, "Length scale of model.");
   params.addParam<Real>("reference_resistivity",
                         1.68e-8,
-                        "Electrical resistivity of the material at reference temperature in ohm-m "
-                        "(with copper as the default material).");
+                        "Electrical resistivity of the material at reference temperature "
+                        "(default is copper resistivity in ohm-m).");
   params.addParam<Real>("temperature_coefficient",
                         0.00386,
                         "Coefficient for calculating dependence of resistivity on temperature "
@@ -37,7 +36,6 @@ ElectricalConductivity::validParams()
 
 ElectricalConductivity::ElectricalConductivity(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-    _length_scale(getParam<Real>("length_scale")),
     _ref_resis(getParam<Real>("reference_resistivity")),
     _temp_coeff(getParam<Real>("temperature_coefficient")),
     _ref_temp(getParam<Real>("reference_temperature")),
@@ -52,9 +50,8 @@ ElectricalConductivity::ElectricalConductivity(const InputParameters & parameter
 void
 ElectricalConductivity::computeQpProperties()
 {
-  const Real ref_resis = _ref_resis / _length_scale;
-  const Real resistivity = ref_resis * (1.0 + _temp_coeff * (_T[_qp] - _ref_temp));
-  const Real dresistivity_dT = ref_resis * _temp_coeff;
+  const Real resistivity = _ref_resis * (1.0 + _temp_coeff * (_T[_qp] - _ref_temp));
+  const Real dresistivity_dT = _ref_resis * _temp_coeff;
   _electric_conductivity[_qp] = 1.0 / resistivity;
   _delectric_conductivity_dT[_qp] = -1.0 / (resistivity * resistivity) * dresistivity_dT;
 }

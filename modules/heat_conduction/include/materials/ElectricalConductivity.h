@@ -29,7 +29,6 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  const Real _length_scale;
   const Real _ref_resis;
   const Real _temp_coeff;
   const Real _ref_temp;
