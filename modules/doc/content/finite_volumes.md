@@ -153,18 +153,23 @@ TODO: implement reconstruction and discuss design decisions here.
   access quadrature points at any index higher than zero.  Also, FV variables
   coupling to FE variables should ideally get a cell-averaged value - but
   currently, they will just get the value of the solution at the cell's
-  0-index quadrature point.
-
-* Not sure about mesh-adaptivity correctness yet - has not been tested.
+  0-index quadrature point. See
+  [idaholab/moose#15062](https://github.com/idaholab/moose/issues/15062)
 
 * Currently there is no automated handling of cross-diffusion correction
-  factors for non-orthogonal meshes.
+  factors for non-orthogonal meshes. See
+  [idaholab/moose#15063](https://github.com/idaholab/moose/issues/15063)
 
-* FV functionality does NOT work with mesh displacements yet.
+* FV functionality does NOT work with mesh displacements yet. See
+  [idaholab/moose#15064](https://github.com/idaholab/moose/issues/15064)
 
 * off-diagonal jacobians (i.e. with dependent variable coupling or nonlinear
-  problems) have not been implemented yet.
+  problems) have not been implemented yet. See
+  [idaholab/moose#15065](https://github.com/idaholab/moose/issues/15065)
 
-* Higher order solution reconstruction is not supported yet.
+* Higher order solution reconstruction is not supported yet. See
+  [idaholab/moose#15066](https://github.com/idaholab/moose/issues/15066)
+
+* Not sure about mesh-adaptivity correctness yet - has not been tested.
 
 * Have not tested vector-FV varaibles - they almost certainly don't work (yet).
