@@ -1,5 +1,5 @@
-#* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
+#* This file is part of the MOOSE framework
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,6 +28,7 @@ def make_extension(**kwargs):
     return GraphExtension(**kwargs)
 
 ScatterToken = tokens.newToken('ScatterToken', data=[], layout=dict())
+HistogramToken = tokens.newToken('HistogramToken', data=[], layout=dict())
 
 class GraphExtension(command.CommandExtension):
     """
@@ -44,7 +45,10 @@ class GraphExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command, floats)
         self.addCommand(reader, GraphScatter())
+        self.addCommand(reader, GraphHistogram())
+
         renderer.add('ScatterToken', RenderScatter())
+        renderer.add('HistogramToken', RenderHistogram())
 
         if isinstance(renderer, renderers.HTMLRenderer):
             renderer.addJavaScript('plotly', "contrib/plotly/plotly.min.js", head=True)
@@ -113,6 +117,109 @@ class GraphScatter(command.CommandComponent):
 
         return parent
 
+class GraphHistogram(command.CommandComponent):
+    """
+    Histogram plot.
+    """
+    COMMAND = 'plot'
+    SUBCOMMAND = 'histogram'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['data'] = (None, "Directly supply a list of dict items (i.e., JSON data) to the "
+                                  "plotly plot command, see "
+                                  "https://plot.ly/javascript/line-and-scatter"
+                                  "for additional details.")
+        settings['layout'] = (None, "Plotly layout settings for the chart, refer to "
+                                        "https://plot.ly/javascript/reference/#layout "
+                                        "for available options.")
+        settings['filename'] = (None, "The name of a CSV file for extracting data, when used the "
+                                "'x' and 'y' fields of the 'data' setting should be replaced by "
+                                "column names or numbers.")
+        settings['vectors'] = (None, "Name of postprocessor vector names to plot, default is all.")
+        settings['names'] = (None, "Name to show on legend, default is no legend.")
+        settings['probability'] = (True, "True to plot with probability density normalization.")
+        settings['bins'] = (None, "Maximum number of bins to use.")
+        settings['alpha'] = (1.0, "Set chart opacity alpha setting.")
+        settings['title'] = ('', "Plot title")
+        settings['xlabel'] = ('Value', "x-axis label")
+        settings['ylabel'] = ('Probability', "y-axis label")
+        settings.update(floats.caption_settings())
+        settings['prefix'] = ('Figure', settings['prefix'][1])
+        return settings
+
+    def createToken(self, parent, info, page):
+
+        # Build the JSON data for plotting
+        data = self.settings['data']
+        layout = self.settings['layout']
+
+        # Use Postprocessor file for data
+        filename = self.settings['filename']
+        if filename is None:
+            raise common.exceptions.MooseDocsException("The 'filename' setting is required.")
+        filename = common.check_filenames(filename)
+        reader = mooseutils.PostprocessorReader(filename)
+
+        show_legend = True
+
+        if data is None:
+            vectors = reader.variables()
+            if not self.settings['vectors'] is None:
+                vectors = self.settings['vectors'].split(' ')
+
+            names = []
+            if not self.settings['names'] is None:
+                names = self.settings['names'].split(' ')
+                if not len(vectors) == len(names):
+                    raise common.exceptions.MooseDocsException("Number of names must equal number of vectors.")
+
+            data = [dict() for i in range(len(vectors))];
+            for i in range(len(vectors)):
+                if not vectors[i] in reader.variables():
+                    str = "The vector " + vectors[i] + " is not in " + filename
+                    raise common.exceptions.MooseDocsException(str)
+                data[i]['type'] = 'histogram'
+                data[i]['x'] = reader[vectors[i]].tolist()
+                data[i]['nbinsx'] = self.settings['bins']
+                data[i]['opacity'] = self.settings['alpha']
+                if self.settings['probability']:
+                    data[i]['histnorm'] = 'probability'
+                if len(names) > 0:
+                    data[i]['name'] = names[i]
+
+        else:
+            data = eval(data)
+            for i, line in enumerate(data):
+                data[i]['x'] = reader[line['x']].tolist()
+                data[i]['type'] = 'histogram'
+
+        if layout is None:
+            xaxis = dict()
+            xaxis['title'] = self.settings['xlabel']
+
+            yaxis = dict()
+            yaxis['title'] = self.settings['ylabel']
+
+            layout = dict()
+            layout['xaxis'] = xaxis
+            layout['yaxis'] = yaxis
+            layout['showlegend'] = 'True'
+            layout['title'] = self.settings['title']
+
+        else:
+            layout = eval(layout)
+
+        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+                                  bottom=True)
+        histogram = HistogramToken(flt, data=data, layout=layout)
+
+        if flt is parent:
+            histogram.attributes.update(**self.attributes)
+
+        return parent
+
 class GraphTemplate(object):
     """
     Helper for loading plotly javascript templates.
@@ -175,6 +282,48 @@ class RenderScatter(components.RenderComponent):
             fig = plotly.graph_objs.Figure(layout=layout)
             for data in token['data']:
                 fig.add_scatter(**data)
+
+            _, loc = tempfile.mkstemp(suffix='.pdf', dir=os.path.dirname(page.destination))
+            plotly.io.write_image(fig, loc)
+
+        args = [latex.create_settings(*args, width='\\textwidth')]
+        latex.Command(parent, 'par', start='\n')
+        latex.Command(parent, 'includegraphics', args=args, string=loc, start='\n', escape=False)
+
+class RenderHistogram(components.RenderComponent):
+    """Render a plotly histogram plot."""
+
+    # Shares loaded template content across all instances
+    HTML_TEMPLATE = GraphTemplate('scatter.js')
+
+    def createHTML(self, parent, token, page):
+        plot_id = str(uuid.uuid4())
+        content = self.HTML_TEMPLATE(id_=plot_id,
+                                     data=repr(token['data']),
+                                     layout=repr(token['layout']))
+        html.Tag(parent, 'div', id_=plot_id)
+        html.Tag(parent, 'script', string=content)
+
+
+    def createLatex(self, parent, token, page):
+
+        args = []
+        if self.extension['draft']:
+            args.append('draft')
+            loc = 'draft.pdf'
+        else:
+            layout = token['layout']
+            layout.setdefault('font', dict(family='Computer Modern', size=12, color='#000000'))
+            layout.setdefault('xaxis', dict())
+            layout['xaxis'].setdefault('linewidth', 1)
+            layout.setdefault('yaxis', dict())
+            layout['yaxis'].setdefault('linewidth', 1)
+
+
+            layout = plotly.graph_objs.Layout(**layout)
+            fig = plotly.graph_objs.Figure(layout=layout)
+            for data in token['data']:
+                fig.add_trace(plotly.graph_objs.Histogram(**data))
 
             _, loc = tempfile.mkstemp(suffix='.pdf', dir=os.path.dirname(page.destination))
             plotly.io.write_image(fig, loc)
