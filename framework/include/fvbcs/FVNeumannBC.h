@@ -24,7 +24,6 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  // virtual ADReal computeQpJacobian() override { return 0; }
 
   const Real _value;
 
