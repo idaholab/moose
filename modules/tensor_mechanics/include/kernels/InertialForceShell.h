@@ -40,6 +40,10 @@ protected:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeADOffDiagJacobian() override;
+  virtual void computeShellInertialForces(
+      const MooseArray<ADReal> & _ad_coord,
+      const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW);
+  virtual void computeResidualForJacobian(ADDenseVector & residual);
 
 private:
   /// Booleans for validity of params
@@ -47,9 +51,6 @@ private:
   const bool _has_rot_velocities;
   const bool _has_accelerations;
   const bool _has_rot_accelerations;
-
-  /// Density of the beam
-  const MaterialProperty<Real> & _density;
 
   /// Number of coupled rotational variables
   unsigned int _nrot;
@@ -75,17 +76,11 @@ private:
   /// Variable numbers corresponding to rotational acceleration aux variables
   std::vector<unsigned int> _rot_accel_num;
 
-  /// Mass proportional Rayleigh damping parameter
-  // const MaterialProperty<Real> & _eta;
-
-  /// HHT time integration parameter
-  // const Real _alpha;
-
   /**
    * Rotational transformation from global to initial beam local
    * coordinate system
    **/
-  RankTwoTensor _original_local_config;
+  ADRankTwoTensor _original_local_config;
 
   /// Direction along which residual is calculated
   const unsigned int _component;
@@ -94,26 +89,26 @@ private:
    * Current translational and rotational velocities at the two nodes
    * of the beam in the global coordinate system
    **/
-  RealVectorValue _vel_0, _vel_1, _rot_vel_0, _rot_vel_1;
-  RealVectorValue _vel_2, _vel_3, _rot_vel_2, _rot_vel_3;
+  ADRealVectorValue _vel_0, _vel_1, _rot_vel_0, _rot_vel_1;
+  ADRealVectorValue _vel_2, _vel_3, _rot_vel_2, _rot_vel_3;
   /**
    * Current translational and rotational accelerations at the two nodes
    * of the beam in the global coordinate system
    **/
-  RealVectorValue _accel_0, _accel_1, _rot_accel_0, _rot_accel_1;
-  RealVectorValue _accel_2, _accel_3, _rot_accel_2, _rot_accel_3;
+  ADRealVectorValue _accel_0, _accel_1, _rot_accel_0, _rot_accel_1;
+  ADRealVectorValue _accel_2, _accel_3, _rot_accel_2, _rot_accel_3;
   /**
    * Current translational and rotational velocities at the two nodes
    * of the beam in the initial beam local coordinate system
    **/
-  RealVectorValue _local_vel_0, _local_vel_1, _local_rot_vel_0, _local_rot_vel_1;
-  RealVectorValue _local_vel_2, _local_vel_3, _local_rot_vel_2, _local_rot_vel_3;
+  ADRealVectorValue _local_vel_0, _local_vel_1, _local_rot_vel_0, _local_rot_vel_1;
+  ADRealVectorValue _local_vel_2, _local_vel_3, _local_rot_vel_2, _local_rot_vel_3;
   /**
    * Current translational and rotational accelerations at the two nodes
    * of the beam in the initial beam local coordinate system
    **/
-  RealVectorValue _local_accel_0, _local_accel_1, _local_rot_accel_0, _local_rot_accel_1;
-  RealVectorValue _local_accel_2, _local_accel_3, _local_rot_accel_2, _local_rot_accel_3;
+  ADRealVectorValue _local_accel_0, _local_accel_1, _local_rot_accel_0, _local_rot_accel_1;
+  ADRealVectorValue _local_accel_2, _local_accel_3, _local_rot_accel_2, _local_rot_accel_3;
   /**
    * Forces and moments at the two end nodes of the beam in the initial
    * beam local configuration
@@ -144,7 +139,7 @@ private:
   std::vector<Point> _t_points;
 
   /// Quadrature weights in the out of plane direction in isoparametric coordinate system
-  std::vector<Real> _t_weights;
+  std::vector<ADReal> _t_weights;
 
   /// Vector storing pointers to the nodes of the shell element
   std::vector<const Node *> _nodes;
@@ -153,35 +148,35 @@ private:
   std::vector<Point> _2d_points;
 
   /// Quadrature weights
-  std::vector<Real> _2d_weights;
+  std::vector<ADReal> _2d_weights;
 
   /// First tangential vectors at nodes
-  std::vector<RealVectorValue> _v1;
+  std::vector<ADRealVectorValue> _v1;
 
   /// Second tangential vectors at nodes
-  std::vector<RealVectorValue> _v2;
+  std::vector<ADRealVectorValue> _v2;
 
   /// Helper vectors
-  RealVectorValue _x2;
-  RealVectorValue _x3;
+  ADRealVectorValue _x2;
+  ADRealVectorValue _x3;
 
   /// Material property storing the normal to the element at the 4 nodes. Stored as a material property for convinience.
-  std::vector<RealVectorValue> _node_normal;
+  std::vector<ADRealVectorValue> _node_normal;
 
   /// Node 1 g vector in reference configuration (mass matrix)
-  std::vector<RealVectorValue> _0g1_vector;
+  std::vector<ADRealVectorValue> _0g1_vector;
 
   /// Node 2 g vector in reference configuration (mass matrix)
-  std::vector<RealVectorValue> _0g2_vector;
+  std::vector<ADRealVectorValue> _0g2_vector;
 
   /// Node 3 g vector in reference configuration (mass matrix)
-  std::vector<RealVectorValue> _0g3_vector;
+  std::vector<ADRealVectorValue> _0g3_vector;
 
   /// Node 4 g vector in reference configuration (mass matrix)
-  std::vector<RealVectorValue> _0g4_vector;
+  std::vector<ADRealVectorValue> _0g4_vector;
 
   /// Mass proportional Rayleigh damping parameter
-  const MaterialProperty<Real> & _eta;
+  const ADMaterialProperty(Real) & _eta;
 
   /// Rotation matrix material property
   const ADMaterialProperty(RankTwoTensor) & _transformation_matrix;
@@ -192,8 +187,8 @@ private:
   /// Coupled variable for the shell thickness
   const Real & _thickness;
 
-  /// Flag to store initial rotation matrix
-  bool _isRotationMatrixComputed;
+  /// Shell material density
+  const ADMaterialProperty(Real) & _density;
 
   usingTimeKernelMembers;
 };

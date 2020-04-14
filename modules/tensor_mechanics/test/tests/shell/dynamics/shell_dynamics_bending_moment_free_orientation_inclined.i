@@ -14,15 +14,12 @@
 
 # This test uses one single element for speed reasons.
 
+# Here, the shell, instead of being on the XY plane, is oriented at a 45 deg. angle
+# with respect to the Y axis.
+
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 1 # 1
-  ny = 1# 4
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 1.5
+  type = FileMesh
+  file = shell_inclined.e
   displacements = 'disp_x disp_y disp_z'
 []
 
@@ -200,31 +197,31 @@
   [./fixy1]
     type = DirichletBC
     variable = disp_y
-    boundary = 'bottom'
+    boundary = '2'
     value = 0.0
   [../]
   [./fixz1]
     type = DirichletBC
     variable = disp_z
-    boundary = 'bottom'
+    boundary = '2'
     value = 0.0
   [../]
   [./fixr1]
     type = DirichletBC
     variable = rot_x
-    boundary = 'bottom'
+    boundary = '2'
     value = 0.0
   [../]
   [./fixr2]
     type = DirichletBC
     variable = rot_y
-    boundary = 'bottom'
+    boundary = '2'
     value = 0.0
   [../]
   [./fixx1]
     type = DirichletBC
     variable = disp_x
-    boundary = 'bottom'
+    boundary = '2'
     value = 0.0
   [../]
 []
@@ -237,10 +234,10 @@
   [../]
 []
 [NodalKernels]
-  [./force_z2]
+  [./force_y2]
     type = UserForcingFunctionNodalKernel
     variable = disp_z
-    boundary = 'top'
+    boundary = '0'
     function = force_function
   [../]
 []
@@ -283,7 +280,7 @@
 
   [./inertial_force_x]
     type = ADInertialForceShell
-    # use_displaced_mesh = true
+    use_displaced_mesh = true
     eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -299,6 +296,7 @@
 
   [./inertial_force_y]
     type = ADInertialForceShell
+    use_displaced_mesh = true
     eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -315,6 +313,7 @@
 
   [./inertial_force_z]
     type = ADInertialForceShell
+    use_displaced_mesh = true
     eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -331,6 +330,7 @@
 
   [./inertial_force_rot_x]
     type = ADInertialForceShell
+    use_displaced_mesh = true
     eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -346,6 +346,7 @@
 
   [./inertial_force_rot_y]
     type = ADInertialForceShell
+    use_displaced_mesh = true
     eta = 0.0
     block = 0
     displacements = 'disp_x disp_y disp_z'
@@ -392,12 +393,12 @@
 [Postprocessors]
   [./disp_z_tip]
     type = PointValue
-    point = '1.0 1.0 0.0'
+    point = '0.0 1.06 1.06'
     variable = disp_z
   [../]
   [./rot_x_tip]
     type = PointValue
-    point = '0.0 1.0 0.0'
+    point = '0.0 1.06 1.06'
     variable = rot_x
   [../]
   [./stress_yy_el_0]
@@ -467,6 +468,7 @@
     beta = 0.25
     gamma = 0.5
   [../]
+
 []
 
 [Outputs]
