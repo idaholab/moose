@@ -68,11 +68,24 @@ public:
   Real _distance;
 };
 
+/// This data structure is used to store geometric and variable related
+/// metadata about each cell face in the mesh.  This info is used by face loops
+/// (e.g. for finite volumes method numerical flux loop).  These objects can be
+/// created and cached up front.  Since it only stores information that changes
+/// when the mesh is modified it only needs an update whenever the mesh
+/// changes.
 class FaceInfo
 {
 public:
   FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor);
 
+  /// This enum is used to indicate which side(s) of a face a particular
+  /// variable is defined on.  This is important for certain BC-related finite
+  /// volume calculations. Because of the way side-sets and variable
+  /// block-restriction work in MOOSE, there may be boundary conditions applied
+  /// to internal faces on the mesh where a variable is only active on one or
+  /// even zero sides of the face.  For such faces, FV needs to know which
+  /// sides (if any) to add BC residual contributions to.
   enum class VarFaceNeighbors
   {
     BOTH,
@@ -81,21 +94,22 @@ public:
     RIGHT
   };
 
-  ///@{ returns the face area of face id
+  /// Returns the face area of face id
   Real faceArea() const { return _face_area; }
-  ///@}
 
-  ///@{ returns the face area of face id
+  /// Returns the unit normal vector for the face oriented outward from the face's left element.
   const Point & normal() const { return _normal; }
-  ///@}
 
+  /// Returns true if this face resides on the mesh boundary.
   bool isBoundary() const { return (_right == nullptr); }
 
-  ///@{ returns the face centroid
+  /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
-  ///@}
 
-  ///@{ returns the left and right adjacent elements
+  ///@{
+  /// Returns the left and right elements adjacent to the face.
+  /// If a face is on a mesh boundary, the rightElemPtr
+  /// will return nullptr - the left will never be null.
   const Elem & leftElem() const { return *_left; }
   const Elem * rightElemPtr() const { return _right; }
   const Elem & rightElem() const
@@ -107,16 +121,26 @@ public:
   }
   ///@}
 
-  ///@{ returns the left and right centroids
+  /// Returns the element centroids of the elements on the left and right sides of the face.
+  /// If no right face is defined, a "ghost" right centroid is calculated by
+  /// reflecting/extrapolating from the left centroid through the face centroid
+  /// - i.e. the vector from the left element centroid to the face centroid is
+  /// doubled in length.  The tip of this new vector is the right centroid.
+  /// This is important for FV dirichlet BCs.
   const Point & leftCentroid() const { return _left_centroid; }
   const Point & rightCentroid() const { return _right_centroid; }
   ///@}
 
-  ///@{ returns the left and right centroids
+  ///@{
+  /// Returns the left and right centroids. If no right element exists, then
+  /// the maximum unsigned int is returned for the right side ID.
   unsigned int leftSideID() const { return _left_side_id; }
   unsigned int rightSideID() const { return _right_side_id; }
   ///@}
 
+  ///@{
+  /// This is just a convenient cache of DOF indices (into the solution
+  /// vector) associated with each variable on this face.
   const std::vector<dof_id_type> & leftDofIndices(const std::string & var_name) const
   {
     auto it = _left_dof_indices.find(var_name);
@@ -139,6 +163,9 @@ public:
   {
     return _right_dof_indices[var_name];
   }
+  ///@}
+
+  /// Returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors faceType(const std::string & var_name) const
   {
     auto it = _face_types_by_var.find(var_name);
@@ -146,11 +173,14 @@ public:
       mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
     return it->second;
   }
+  /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
   const std::set<BoundaryID> & boundaryIDs() const
   {
     return _boundary_ids;
   }
+
+  /// Returns the set of boundary ids for all boundaries that include this face.
   std::set<BoundaryID> & boundaryIDs()
   {
     return _boundary_ids;
@@ -1034,7 +1064,8 @@ public:
    */
   bool hasMeshBase() const { return _mesh.get() != nullptr; }
 
-  /// builds the face info vector
+  /// Builds the face info vector that stores meta-data needed for looping
+  /// over and doing calculations based on mesh faces.
   void buildFaceInfo();
 
   ///@{ accessors for the FaceInfo objects
