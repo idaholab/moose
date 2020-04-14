@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2020.04.06" %}
+{% set version = "2020.04.13" %}
 
 package:
   name: moose-libmesh
@@ -27,6 +27,7 @@ requirements:
     - libnetcdf {{ netcdf }}                            # [linux]
     - moose-libmesh-vtk {{ moose_libmesh_vtk }}
     - moose-petsc {{ moose_petsc }}
+    - libpng {{ libpng }}
 
 test:
   commands:

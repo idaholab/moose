@@ -12,9 +12,6 @@ source:
   fn: petsc-{{ version }}.tar.gz
   url: http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-{{ version }}.tar.gz
   sha256: {{ sha256 }}
-  patches:
-    - ignore-not-invalid.patch
-    - no-cppflags-in-pkgconfig-cflags.patch
 
 build:
   number: {{ build }}

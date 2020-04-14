@@ -10,12 +10,6 @@ macos_machine:                 # [osx]
 MACOSX_DEPLOYMENT_TARGET:      # [osx]
   - 10.9                       # [osx]
 
-moose_compilers:
-  - 2020.04.03
-
-pin_run_as_build:
-  moose_compilers: x.x.x
-
 libllvm:
   - 9.0.1 ha1b3eb9_0
 
@@ -57,3 +51,9 @@ fortran:
 
 gccimpl:
   - 7.3.0 hd420e75_5
+
+libcxx:
+  - 9.0.1 2
+
+moose_compilers:
+  - 2020.04.13
