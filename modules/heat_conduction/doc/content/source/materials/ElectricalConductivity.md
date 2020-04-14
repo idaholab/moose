@@ -27,7 +27,7 @@ Electrical conductivity can then be calculated via
 
 !alert note title=Default parameter values
 The defaults used for the parameters in this object are taken from published
-values for Tungsten.
+values for Copper.
 
 ## Example Input File Syntax
 

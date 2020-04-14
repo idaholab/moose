@@ -76,13 +76,10 @@
     prop_values = '8920.0' #copper in kg/(m^3)
     block = 0
   [../]
-  [./sigma]
+  [./sigma] #copper is default material
     type = ElectricalConductivity
-    temp = T
-    ref_temp = 293.0          #in K
-    ref_resistivity = 1.68e-8 #copper in ohm-m
-    temp_coeff = 0.00386      #copper in 1/K
-    length_scale = 1          #m
+    temperature = T
+    length_scale = 1 #m
   [../]
 []
 
