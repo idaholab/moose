@@ -7,7 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "InertialForceShell.h"
+#include "ADInertialForceShell.h"
+
 #include "SubProblem.h"
 #include "libmesh/utility.h"
 #include "MooseVariable.h"
