@@ -11,19 +11,17 @@ defineADValidParams(
                                "a coefficient function.");
     params.addRequiredParam<FunctionName>("coefficient", "Coefficient function."););
 
-template <ComputeStage compute_stage>
-CoeffADVectorTimeDerivative<compute_stage>::CoeffADVectorTimeDerivative(
+CoeffADVectorTimeDerivative::CoeffADVectorTimeDerivative(
     const InputParameters & parameters)
-  : ADVectorTimeDerivative<compute_stage>(parameters), _coefficient(getFunction("coefficient"))
+  : ADVectorTimeDerivative(parameters), _coefficient(getFunction("coefficient"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-CoeffADVectorTimeDerivative<compute_stage>::precomputeQpResidual()
+CoeffADVectorTimeDerivative::precomputeQpResidual()
 {
   return _coefficient.value(_t, _q_point[_qp]) *
-         ADVectorTimeDerivative<compute_stage>::precomputeQpResidual();
+         ADVectorTimeDerivative::precomputeQpResidual();
 }
 
-adBaseClass(CoeffADVectorTimeDerivative);
+
