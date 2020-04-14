@@ -1212,8 +1212,6 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 void
 SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
 {
-  using Keytype = std::pair<const Elem *, unsigned short int>;
-
   // prepare a vector of MooseVariables from names
   std::vector<MooseVariableBase *> moose_vars;
   for (auto & v : vars)
@@ -1228,21 +1226,6 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
     moose_vars.push_back(&getVariable(0, v));
   }
 
-  // get a map from elem/side to boundary ids
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
-      _mesh.buildSideList();
-  std::map<Keytype, std::set<boundary_id_type>> side_map;
-  for (auto & e : side_list)
-  {
-    const Elem * elem = _mesh.getMesh().elem_ptr(std::get<0>(e));
-    Keytype key(elem, std::get<1>(e));
-    auto it = side_map.find(key);
-    if (it == side_map.end())
-      side_map[key] = {std::get<2>(e)};
-    else
-      side_map[key].insert(std::get<2>(e));
-  }
-
   // loop over all faces
   for (auto & p : mesh().faceInfo())
   {
@@ -1253,21 +1236,6 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
     SubdomainID right_subdomain_id = Elem::invalid_subdomain_id;
     if (right_elem)
       right_subdomain_id = right_elem->subdomain_id();
-
-    // get all the sidesets that this face is contained in
-    std::set<boundary_id_type> & boundary_ids = p.boundaryIDs();
-    boundary_ids.clear();
-
-    auto lit = side_map.find(Keytype(&left_elem, p.leftSideID()));
-    if (lit != side_map.end())
-      boundary_ids.insert(lit->second.begin(), lit->second.end());
-
-    if (right_elem)
-    {
-      auto rit = side_map.find(Keytype(right_elem, p.rightSideID()));
-      if (rit != side_map.end())
-        boundary_ids.insert(rit->second.begin(), rit->second.end());
-    }
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)

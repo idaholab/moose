@@ -2936,7 +2936,22 @@ MooseMesh::getPointLocator() const
 void
 MooseMesh::buildFaceInfo()
 {
-  // clear data structures
+  using Keytype = std::pair<const Elem *, unsigned short int>;
+
+  // create a map from elem/side --> boundary ids
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list = buildSideList();
+  std::map<Keytype, std::set<boundary_id_type>> side_map;
+  for (auto & e : side_list)
+  {
+    const Elem * elem = _mesh->elem_ptr(std::get<0>(e));
+    Keytype key(elem, std::get<1>(e));
+    auto it = side_map.find(key);
+    if (it == side_map.end())
+      side_map[key] = {std::get<2>(e)};
+    else
+      side_map[key].insert(std::get<2>(e));
+  }
+
   _face_info.clear();
 
   // loop over all active, local elements
@@ -2955,7 +2970,26 @@ MooseMesh::buildFaceInfo()
           (neighbor->active() && (neighbor->level() == elem->level()) &&
            (elem_id < neighbor->id())) ||
           (neighbor->level() < elem->level()))
+      {
         _face_info.emplace_back(elem, side, neighbor);
+        auto & fi = _face_info.back();
+
+        // get all the sidesets that this face is contained in and cache them
+        // in the face info.
+        std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
+        boundary_ids.clear();
+
+        auto lit = side_map.find(Keytype(&fi.leftElem(), fi.leftSideID()));
+        if (lit != side_map.end())
+          boundary_ids.insert(lit->second.begin(), lit->second.end());
+
+        if (fi.rightElemPtr())
+        {
+          auto rit = side_map.find(Keytype(fi.rightElemPtr(), fi.rightSideID()));
+          if (rit != side_map.end())
+            boundary_ids.insert(rit->second.begin(), rit->second.end());
+        }
+      }
     }
   }
 }
