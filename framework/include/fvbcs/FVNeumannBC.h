@@ -14,8 +14,7 @@
 /**
  * Neumann boundary (== fixed inflow) condition for finite volume scheme
  */
-template <ComputeStage compute_stage>
-class FVNeumannBC : public FVFluxBC<compute_stage>
+class FVNeumannBC : public FVFluxBC
 {
 public:
   FVNeumannBC(const InputParameters & parameters);
@@ -26,6 +25,4 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const Real _value;
-
-  usingFVFluxBCMembers;
 };

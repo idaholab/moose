@@ -351,7 +351,7 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
 {
-  std::vector<FVFluxKernelBase *> kernels;
+  std::vector<FVFluxKernel *> kernels;
   auto q = _fe_problem.theWarehouse()
                .query()
                .template condition<AttribSystem>("FVKernel")
@@ -359,7 +359,6 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
                .template condition<AttribSubdomains>(_subdomain)
                .template condition<AttribVectorTags>(_tags)
                .template condition<AttribThread>(_tid)
-               .template condition<AttribIsADJac>(_do_jacobian)
                .queryInto(kernels);
 
   if (kernels.size() == 0)
@@ -378,7 +377,7 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_id)
 {
-  std::vector<FVFluxBCBase *> bcs;
+  std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVBoundaryCondition")
@@ -386,7 +385,6 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
       .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
-      .template condition<AttribIsADJac>(_do_jacobian)
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;
@@ -467,7 +465,7 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   // kernels, etc. - but we don't need to add them for other types of objects
   // like FE or DG kernels because those kernels don't run in this loop. Do we
   // really want to integrate fv source kernels into this loop?
-  std::vector<FVFluxKernelBase *> kernels;
+  std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVKernel")

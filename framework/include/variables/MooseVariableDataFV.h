@@ -135,31 +135,35 @@ public:
    */
   const FieldVariableCurl & curlSln(Moose::SolutionState state) const;
 
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSln() const
+  const ADTemplateVariableValue<OutputType> & adSln() const
   {
     _need_ad = _need_ad_u = true;
     return _ad_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln() const
+  const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     _need_ad = _need_ad_grad_u = true;
     return _ad_grad_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableSecondType<OutputType, compute_stage>::type & adSecondSln() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
     _need_ad = _need_ad_second_u = true;
     return _ad_second_u;
   }
 
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDot() const
+  const ADTemplateVariableValue<OutputType> & adUDot() const
   {
     _need_ad = _need_ad_u_dot = true;
+
+    if (!_time_integrator)
+      // If we don't have a time integrator (this will be the case for variables that are a part of
+      // the AuxiliarySystem) then we have no way to calculate _ad_u_dot and we are just going to
+      // copy the values from _u_dot. Of course in order to be able to do that we need to calculate
+      // _u_dot
+      _need_u_dot = true;
+
     return _ad_u_dot;
   }
 
@@ -233,8 +237,7 @@ public:
   /**
    * Return the AD dof values
    */
-  template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adDofValues() const;
+  const MooseArray<ADReal> & adDofValues() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -426,12 +429,12 @@ private:
   FieldVariableCurl _curl_u_older;
 
   /// AD u
-  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u;
-  typename VariableGradientType<OutputShape, JACOBIAN>::type _ad_grad_u;
-  typename VariableSecondType<OutputShape, JACOBIAN>::type _ad_second_u;
+  ADTemplateVariableValue<OutputShape> _ad_u;
+  ADTemplateVariableGradient<OutputShape> _ad_grad_u;
+  ADTemplateVariableSecond<OutputShape> _ad_second_u;
   MooseArray<DualReal> _ad_dof_values;
   MooseArray<DualReal> _ad_dofs_dot;
-  typename VariableValueType<OutputShape, JACOBIAN>::type _ad_u_dot;
+  ADTemplateVariableValue<OutputShape> _ad_u_dot;
 
   // time derivatives
 
@@ -483,52 +486,10 @@ private:
 /////////////////////// General template definitions //////////////////////////////////////
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-const MooseArray<typename Moose::RealType<compute_stage>::type> &
+const MooseArray<ADReal> &
 MooseVariableDataFV<OutputType>::adDofValues() const
 {
   _need_ad = true;
   return _ad_dof_values;
 }
 
-////////////////////////// Forward declaration of fully specialized templates //////////////////
-
-template <>
-template <>
-const VariableValue & MooseVariableDataFV<Real>::adSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableGradient & MooseVariableDataFV<Real>::adGradSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableSecond & MooseVariableDataFV<Real>::adSecondSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VariableValue & MooseVariableDataFV<Real>::adUDot<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableValue & MooseVariableDataFV<RealVectorValue>::adSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableGradient & MooseVariableDataFV<RealVectorValue>::adGradSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableSecond & MooseVariableDataFV<RealVectorValue>::adSecondSln<RESIDUAL>() const;
-
-template <>
-template <>
-const VectorVariableValue & MooseVariableDataFV<RealVectorValue>::adUDot<RESIDUAL>() const;
-
-template <>
-template <>
-const MooseArray<Real> & MooseVariableDataFV<Real>::adDofValues<RESIDUAL>() const;
-
-template <>
-template <>
-const MooseArray<Real> & MooseVariableDataFV<RealVectorValue>::adDofValues<RESIDUAL>() const;

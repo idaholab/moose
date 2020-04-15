@@ -13,9 +13,6 @@
 
 class AddFVKernelAction;
 
-template <>
-InputParameters validParams<AddFVKernelAction>();
-
 class AddFVKernelAction : public MooseObjectAction
 {
 public:

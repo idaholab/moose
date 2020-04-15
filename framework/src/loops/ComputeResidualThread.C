@@ -128,7 +128,6 @@ ComputeResidualThread::onElement(const Elem * elem)
              .template condition<AttribSubdomains>(_subdomain)
              .template condition<AttribThread>(_tid)
              .template condition<AttribVectorTags>(_tags)
-             .template condition<AttribIsADJac>(false)
              .queryInto(kernels);
 
   for (auto kernel : kernels)

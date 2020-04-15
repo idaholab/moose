@@ -9,26 +9,23 @@
 
 #include "FVConstantScalarOutflowBC.h"
 
-registerADMooseObject("MooseApp", FVConstantScalarOutflowBC);
+registerMooseObject("MooseApp", FVConstantScalarOutflowBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVConstantScalarOutflowBC<compute_stage>::validParams()
+FVConstantScalarOutflowBC::validParams()
 {
-  InputParameters params = FVFluxBC<compute_stage>::validParams();
+  InputParameters params = FVFluxBC::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVConstantScalarOutflowBC<compute_stage>::FVConstantScalarOutflowBC(const InputParameters & parameters)
-  : FVFluxBC<compute_stage>(parameters), _velocity(getParam<RealVectorValue>("velocity"))
+FVConstantScalarOutflowBC::FVConstantScalarOutflowBC(const InputParameters & parameters)
+  : FVFluxBC(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-FVConstantScalarOutflowBC<compute_stage>::computeQpResidual()
+FVConstantScalarOutflowBC::computeQpResidual()
 {
   return _normal * _velocity * _u[_qp];
 }

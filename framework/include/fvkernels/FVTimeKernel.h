@@ -27,7 +27,6 @@ protected:
   const unsigned int _qp = 0;
 };
 
-template <ComputeStage compute_stage>
 class FVTimeKernel : public FVElementalKernel
 {
 public:

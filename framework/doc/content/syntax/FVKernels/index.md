@@ -140,7 +140,7 @@ strategy that approximates the value of a variable on a face by taking the
 value from the upwind element (i.e. the element where the flow originates from).
 
 !listing framework/src/fvkernels/FVDiffusion.C
-         start=FVMatAdvection<compute_stage>
+         start=FVMatAdvection::
          end=" "
          id=fv_mat_advection_code
          caption=Example source code for a finite volume kernel discretizing advection of a passive scalar.
@@ -182,7 +182,7 @@ This example demonstrates source code for an `FVElementalKernel`. `FVElementalKe
 are volumetric terms. In this case, the kernel is `FVTimeKernel`.
 
 !listing framework/src/fvkernels/FVTimeKernel.C
-         start=FVTimeKernel<compute_stage>::computeQpResidual()
+         start=FVTimeKernel::computeQpResidual()
          end=template <>
          id=fv_time_code
          caption=Example source code for the finite volume time kernel.

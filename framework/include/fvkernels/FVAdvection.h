@@ -2,8 +2,7 @@
 
 #include "FVKernel.h"
 
-template <ComputeStage compute_stage>
-class FVAdvection : public FVFluxKernel<compute_stage>
+class FVAdvection : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -13,6 +12,4 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   ADRealVectorValue _velocity;
-
-  usingFVFluxKernelMembers;
 };

@@ -13,8 +13,6 @@
 
 registerMooseAction("MooseApp", AddFVKernelAction, "add_fv_kernel");
 
-defineLegacyParams(AddFVKernelAction);
-
 InputParameters
 AddFVKernelAction::validParams()
 {
@@ -27,14 +25,5 @@ void
 AddFVKernelAction::act()
 {
   if (_current_task == "add_fv_kernel")
-  {
-    if (Registry::isADObj(_type + "<RESIDUAL>"))
-    {
-      _problem->addFVKernel(_type + "<RESIDUAL>", _name + "_residual", _moose_object_pars);
-      _problem->addFVKernel(_type + "<JACOBIAN>", _name + "_jacobian", _moose_object_pars);
-      _problem->haveADObjects(true);
-    }
-    else
-      _problem->addFVKernel(_type, _name, _moose_object_pars);
-  }
+    _problem->addFVKernel(_type, _name, _moose_object_pars);
 }

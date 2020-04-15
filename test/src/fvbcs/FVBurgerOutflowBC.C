@@ -9,25 +9,22 @@
 
 #include "FVBurgerOutflowBC.h"
 
-registerADMooseObject("MooseTestApp", FVBurgerOutflowBC);
+registerMooseObject("MooseTestApp", FVBurgerOutflowBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVBurgerOutflowBC<compute_stage>::validParams()
+FVBurgerOutflowBC::validParams()
 {
-  InputParameters params = FVFluxBC<compute_stage>::validParams();
+  InputParameters params = FVFluxBC::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVBurgerOutflowBC<compute_stage>::FVBurgerOutflowBC(const InputParameters & parameters)
-  : FVFluxBC<compute_stage>(parameters)
+FVBurgerOutflowBC::FVBurgerOutflowBC(const InputParameters & parameters)
+  : FVFluxBC(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-FVBurgerOutflowBC<compute_stage>::computeQpResidual()
+FVBurgerOutflowBC::computeQpResidual()
 {
   mooseAssert(_face_info->leftElem().dim() == 1, "FVBurgerOutflowBC works only in 1D");
 

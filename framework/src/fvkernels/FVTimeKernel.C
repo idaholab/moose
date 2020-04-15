@@ -27,9 +27,8 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
 
 registerADMooseObject("MooseApp", FVTimeKernel);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVTimeKernel<compute_stage>::validParams()
+FVTimeKernel::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.set<MultiMooseEnum>("vector_tags") = "time";
@@ -37,37 +36,27 @@ FVTimeKernel<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVTimeKernel<compute_stage>::FVTimeKernel(const InputParameters & parameters)
-  : FVElementalKernel(parameters), _u_dot(_var.adUDot<compute_stage>())
+FVTimeKernel::FVTimeKernel(const InputParameters & parameters)
+  : FVElementalKernel(parameters), _u_dot(_var.adUDot())
 {
 }
 
-template <ComputeStage compute_stage>
 void
-FVTimeKernel<compute_stage>::computeResidual()
+FVTimeKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
   _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elem()->volume());
   accumulateTaggedLocalResidual();
 }
 
-template <ComputeStage compute_stage>
 ADReal
-FVTimeKernel<compute_stage>::computeQpResidual()
+FVTimeKernel::computeQpResidual()
 {
   return _u_dot[_qp];
 }
 
-template <>
 void
-FVTimeKernel<RESIDUAL>::computeJacobian()
-{
-}
-
-template <ComputeStage compute_stage>
-void
-FVTimeKernel<compute_stage>::computeJacobian()
+FVTimeKernel::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
@@ -78,4 +67,3 @@ FVTimeKernel<compute_stage>::computeJacobian()
   accumulateTaggedLocalMatrix();
 }
 
-adBaseClass(FVTimeKernel);

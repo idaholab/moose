@@ -11,34 +11,19 @@
 #include "MooseVariableFV.h"
 
 InputParameters
-FVFluxBCBase::validParams()
+FVFluxBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
   return params;
 }
 
-FVFluxBCBase::FVFluxBCBase(const InputParameters & params)
-  : FVBoundaryCondition(params)
+FVFluxBC::FVFluxBC(const InputParameters & parameters)
+  : FVBoundaryCondition(parameters), _u(_var.adSln())
 {
 }
 
-template <ComputeStage compute_stage>
-InputParameters
-FVFluxBC<compute_stage>::validParams()
-{
-  InputParameters params = FVFluxBCBase::validParams();
-  return params;
-}
-
-template <ComputeStage compute_stage>
-FVFluxBC<compute_stage>::FVFluxBC(const InputParameters & parameters)
-  : FVFluxBCBase(parameters), _u(_var.adSln<compute_stage>())
-{
-}
-
-template <ComputeStage compute_stage>
 void
-FVFluxBC<compute_stage>::computeResidual(const FaceInfo & fi)
+FVFluxBC::computeResidual(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -71,15 +56,8 @@ FVFluxBC<compute_stage>::computeResidual(const FaceInfo & fi)
   accumulateTaggedLocalResidual();
 }
 
-template <>
 void
-FVFluxBC<RESIDUAL>::computeJacobian(const FaceInfo & /*fi*/)
-{
-}
-
-template <ComputeStage compute_stage>
-void
-FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
+FVFluxBC::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -134,4 +112,3 @@ FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
     mooseError("should never get here");
 }
 
-adBaseClass(FVFluxBC);

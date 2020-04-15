@@ -3,24 +3,21 @@
 
 registerADMooseObject("MooseApp", FVAdvection);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVAdvection<compute_stage>::validParams()
+FVAdvection::validParams()
 {
-  InputParameters params = FVFluxKernel<compute_stage>::validParams();
+  InputParameters params = FVFluxKernel::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVAdvection<compute_stage>::FVAdvection(const InputParameters & params)
-  : FVFluxKernel<compute_stage>(params),
+FVAdvection::FVAdvection(const InputParameters & params)
+  : FVFluxKernel(params),
     _velocity(getParam<RealVectorValue>("velocity"))
 {};
 
-template <ComputeStage compute_stage>
 ADReal
-FVAdvection<compute_stage>::computeQpResidual()
+FVAdvection::computeQpResidual()
 {
   ADReal r = 0;
   if (_velocity * _normal > 0)

@@ -65,5 +65,6 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid)),
     _mesh(_subproblem.mesh())
 {
+  _subproblem.haveADObjects(true);
   addMooseVariableDependency(&_var);
 }

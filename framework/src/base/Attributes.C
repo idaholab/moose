@@ -267,25 +267,6 @@ AttribThread::isEqual(const Attribute & other) const
 }
 
 void
-AttribIsADJac::initFrom(const MooseObject * obj)
-{
-  std::string suffix = "_jacobian";
-  auto s = obj->name();
-  _val = s.rfind(suffix) == (s.size() - suffix.size());
-}
-bool
-AttribIsADJac::isMatch(const Attribute & other) const
-{
-  auto a = dynamic_cast<const AttribIsADJac *>(&other);
-  return a && (a->_val == _val);
-}
-bool
-AttribIsADJac::isEqual(const Attribute & other) const
-{
-  return isMatch(other);
-}
-
-void
 AttribPreIC::initFrom(const MooseObject * /*obj*/)
 {
 }
@@ -395,9 +376,9 @@ AttribInterfaces::initFrom(const MooseObject * obj)
   _val |= (unsigned int)Interfaces::ShapeSideUserObject       * (dynamic_cast<const ShapeSideUserObject *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::Postprocessor             * (dynamic_cast<const Postprocessor *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::VectorPostprocessor       * (dynamic_cast<const VectorPostprocessor *>(obj) != nullptr);
-  _val |= (unsigned int)Interfaces::FVFluxKernel              * (dynamic_cast<const FVFluxKernelBase *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVFluxKernel              * (dynamic_cast<const FVFluxKernel *>(obj) != nullptr);
   _val |= (unsigned int)Interfaces::FVDirichletBC             * (dynamic_cast<const FVDirichletBC *>(obj) != nullptr);
-  _val |= (unsigned int)Interfaces::FVFluxBC                  * (dynamic_cast<const FVFluxBCBase *>(obj) != nullptr);
+  _val |= (unsigned int)Interfaces::FVFluxBC                  * (dynamic_cast<const FVFluxBC *>(obj) != nullptr);
   // clang-format on
 }
 

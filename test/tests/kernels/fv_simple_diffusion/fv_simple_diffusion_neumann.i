@@ -47,7 +47,7 @@
 
 [Materials]
   [diff]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'coeff'
     prop_values = '1'
   []

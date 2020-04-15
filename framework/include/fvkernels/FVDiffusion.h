@@ -2,8 +2,7 @@
 
 #include "FVKernel.h"
 
-template <ComputeStage compute_stage>
-class FVDiffusion : public FVFluxKernel<compute_stage>
+class FVDiffusion : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -12,14 +11,11 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(Real) & _coeff_left;
-  const ADMaterialProperty(Real) & _coeff_right;
-
-  usingFVFluxKernelMembers;
+  const ADMaterialProperty<Real> & _coeff_left;
+  const ADMaterialProperty<Real> & _coeff_right;
 };
 
-template <ComputeStage compute_stage>
-class FVMatAdvection : public FVFluxKernel<compute_stage>
+class FVMatAdvection : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
@@ -28,8 +24,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty(RealVectorValue) & _vel_left;
-  const ADMaterialProperty(RealVectorValue) & _vel_right;
-
-  usingFVFluxKernelMembers;
+  const ADMaterialProperty<RealVectorValue> & _vel_left;
+  const ADMaterialProperty<RealVectorValue> & _vel_right;
 };

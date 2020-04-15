@@ -28,43 +28,17 @@ protected:
 
 };
 
-#define usingFVFluxKernelMembers                                                                   \
-  using FVFluxKernel<compute_stage>::_qp;                                                          \
-  using FVFluxKernel<compute_stage>::_u_left;                                                      \
-  using FVFluxKernel<compute_stage>::_u_right;                                                     \
-  using FVFluxKernel<compute_stage>::_grad_u_left;                                                 \
-  using FVFluxKernel<compute_stage>::_grad_u_right;                                                \
-  using FVFluxKernel<compute_stage>::_assembly;                                                    \
-  using FVFluxKernel<compute_stage>::_tid;                                                         \
-  using FVFluxKernel<compute_stage>::_var;                                                         \
-  using FVFluxKernel<compute_stage>::_normal;                                                      \
-  using FVFluxKernel<compute_stage>::_face_info
-
-/// this intermediate class exists so we can call computeResidual/Jacobian on
-/// flux kernels without knowing their AD compute_stage template type
-/// parameter.
-class FVFluxKernelBase : public FVKernel,
-                         public TwoMaterialPropertyInterface,
-                         public NeighborMooseVariableInterface<Real>,
-                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface
-{
-public:
-  static InputParameters validParams();
-  FVFluxKernelBase(const InputParameters & params);
-
-  virtual void computeResidual(const FaceInfo & fi) = 0;
-  virtual void computeJacobian(const FaceInfo & fi) = 0;
-};
-
-template <ComputeStage compute_stage>
-class FVFluxKernel : public FVFluxKernelBase
+class FVFluxKernel : public FVKernel,
+                     public TwoMaterialPropertyInterface,
+                     public NeighborMooseVariableInterface<Real>,
+                     public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   static InputParameters validParams();
   FVFluxKernel(const InputParameters & params);
 
-  virtual void computeResidual(const FaceInfo & fi) override;
-  virtual void computeJacobian(const FaceInfo & fi) override;
+  virtual void computeResidual(const FaceInfo & fi);
+  virtual void computeJacobian(const FaceInfo & fi);
 
 protected:
   // material properties will be initialized on the face.  Reconstructed

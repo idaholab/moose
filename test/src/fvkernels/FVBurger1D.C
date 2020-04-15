@@ -1,25 +1,22 @@
 
 #include "FVBurger1D.h"
 
-registerADMooseObject("MooseTestApp", FVBurger1D);
+registerMooseObject("MooseTestApp", FVBurger1D);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVBurger1D<compute_stage>::validParams()
+FVBurger1D::validParams()
 {
-  InputParameters params = FVFluxKernel<compute_stage>::validParams();
+  InputParameters params = FVFluxKernel::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVBurger1D<compute_stage>::FVBurger1D(const InputParameters & params)
-  : FVFluxKernel<compute_stage>(params)
+FVBurger1D::FVBurger1D(const InputParameters & params)
+  : FVFluxKernel(params)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-FVBurger1D<compute_stage>::computeQpResidual()
+FVBurger1D::computeQpResidual()
 {
   mooseAssert(_face_info->leftElem().dim() == 1, "FVBurger1D works only in 1D");
   ADReal r = 0;

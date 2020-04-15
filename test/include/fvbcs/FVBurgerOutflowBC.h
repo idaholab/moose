@@ -14,8 +14,7 @@
 /**
  * Constant velocity scalar advection boundary conditions
  */
-template <ComputeStage compute_stage>
-class FVBurgerOutflowBC : public FVFluxBC<compute_stage>
+class FVBurgerOutflowBC : public FVFluxBC
 {
 public:
   FVBurgerOutflowBC(const InputParameters & parameters);
@@ -24,6 +23,4 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-
-  usingFVFluxBCMembers;
 };

@@ -551,7 +551,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     // by default.  Consider perhaps a better solution to this problem.
     DualReal u_other;
     if (_subproblem.currentlyComputingJacobian())
-      u_other = other_face.adSln<JACOBIAN>()[0];
+      u_other = other_face.adSln()[0];
     else
       u_other = other_face.sln(Moose::Current)[0];
 
@@ -572,7 +572,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     // the same sideset
     DualReal u_other;
     if (_subproblem.currentlyComputingJacobian())
-      u_other = other_face.adSln<JACOBIAN>()[0];
+      u_other = other_face.adSln()[0];
     else
       u_other = other_face.sln(Moose::Current)[0];
 
@@ -711,7 +711,7 @@ MooseVariableDataFV<OutputType>::computeValues()
     _grad_u_previous_nl[0] = _dof_values_previous_nl[0];
 
   // Automatic differentiation
-  if (_need_ad && _subproblem.currentlyComputingJacobian())
+  if (_need_ad)
     computeAD(num_dofs, nqp);
 }
 
@@ -780,7 +780,7 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
     if (_var.kind() == Moose::VAR_NONLINEAR)
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
 
-    if (_need_ad_u_dot && _time_integrator)
+    if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
       _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
@@ -1135,89 +1135,6 @@ MooseVariableDataFV<OutputType>::prepareIC()
 
   unsigned int nqp = 1;
   _u.resize(nqp);
-}
-
-template <>
-template <>
-const VariableValue &
-MooseVariableDataFV<Real>::adSln<RESIDUAL>() const
-{
-  return _u;
-}
-
-template <>
-template <>
-const VectorVariableValue &
-MooseVariableDataFV<RealVectorValue>::adSln<RESIDUAL>() const
-{
-  return _u;
-}
-
-template <>
-template <>
-const VariableGradient &
-MooseVariableDataFV<Real>::adGradSln<RESIDUAL>() const
-{
-  return _grad_u;
-}
-
-template <>
-template <>
-const VectorVariableGradient &
-MooseVariableDataFV<RealVectorValue>::adGradSln<RESIDUAL>() const
-{
-  return _grad_u;
-}
-
-template <>
-template <>
-const VariableSecond &
-MooseVariableDataFV<Real>::adSecondSln<RESIDUAL>() const
-{
-  _need_second = true;
-  return _second_u;
-}
-
-template <>
-template <>
-const VectorVariableSecond &
-MooseVariableDataFV<RealVectorValue>::adSecondSln<RESIDUAL>() const
-{
-  _need_second = true;
-  return _second_u;
-}
-
-template <>
-template <>
-const VariableValue &
-MooseVariableDataFV<Real>::adUDot<RESIDUAL>() const
-{
-
-  return uDot();
-}
-
-template <>
-template <>
-const VectorVariableValue &
-MooseVariableDataFV<RealVectorValue>::adUDot<RESIDUAL>() const
-{
-  return uDot();
-}
-
-template <>
-template <>
-const MooseArray<Real> &
-MooseVariableDataFV<Real>::adDofValues<RESIDUAL>() const
-{
-  return _dof_values;
-}
-
-template <>
-template <>
-const MooseArray<Real> &
-MooseVariableDataFV<RealVectorValue>::adDofValues<RESIDUAL>() const
-{
-  return _dof_values;
 }
 
 template class MooseVariableDataFV<Real>;

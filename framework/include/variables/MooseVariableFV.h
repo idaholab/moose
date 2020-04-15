@@ -236,37 +236,31 @@ public:
   const VariableValue & duDotDotDuNeighbor() const { return _neighbor_data->duDotDotDu(); }
 
   /// AD
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSln() const
+  const ADTemplateVariableValue<OutputType> & adSln() const
   {
-    return _element_data->template adSln<compute_stage>();
+    return _element_data->adSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSln() const
+  const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
-    return _element_data->template adGradSln<compute_stage>();
+    return _element_data->adGradSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDot() const
+  const ADTemplateVariableValue<OutputType> & adUDot() const
   {
-    return _element_data->template adUDot<compute_stage>();
+    return _element_data->adUDot();
   }
 
   /// neighbor AD
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adSlnNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const
   {
-    return _neighbor_data->template adSln<compute_stage>();
+    return _neighbor_data->adSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableGradientType<OutputType, compute_stage>::type & adGradSlnNeighbor() const
+  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const
   {
-    return _neighbor_data->template adGradSln<compute_stage>();
+    return _neighbor_data->adGradSln();
   }
-  template <ComputeStage compute_stage>
-  const typename VariableValueType<OutputType, compute_stage>::type & adUDotNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const
   {
-    return _neighbor_data->template adUDot<compute_stage>();
+    return _neighbor_data->adUDot();
   }
 
   ///////////////// TODO: END of soln funcs to rewrite ////////////////////
@@ -342,8 +336,7 @@ public:
   /**
    * Return the AD dof values
    */
-  template <ComputeStage compute_stage>
-  const MooseArray<typename Moose::RealType<compute_stage>::type> & adDofValues();
+  const MooseArray<ADReal> & adDofValues();
 
   /**
    * Note: const monomial is always the case - higher order solns are
@@ -373,9 +366,8 @@ protected:
 };
 
 template <typename OutputType>
-template <ComputeStage compute_stage>
-inline const MooseArray<typename Moose::RealType<compute_stage>::type> &
+inline const MooseArray<ADReal> &
 MooseVariableFV<OutputType>::adDofValues()
 {
-  return _element_data->template adDofValues<compute_stage>();
+  return _element_data->adDofValues();
 }

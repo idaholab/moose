@@ -11,41 +11,18 @@
 
 #include "FVBoundaryCondition.h"
 
-// this intermediate class exists so we can call computeResidual/Jacobian on
-// flux bcs without knowing their AD compute_stage template type
-// parameter.
-class FVFluxBCBase : public FVBoundaryCondition
-{
-public:
-  static InputParameters validParams();
-  FVFluxBCBase(const InputParameters & params);
-
-  virtual void computeResidual(const FaceInfo & fi) = 0;
-  virtual void computeJacobian(const FaceInfo & fi) = 0;
-};
-
-#define usingFVFluxBCMembers                                                                   \
-  using FVFluxBC<compute_stage>::_qp;                                                          \
-  using FVFluxBC<compute_stage>::_u;                                                           \
-  using FVFluxBC<compute_stage>::_assembly;                                                    \
-  using FVFluxBC<compute_stage>::_tid;                                                         \
-  using FVFluxBC<compute_stage>::_var;                                                         \
-  using FVFluxBC<compute_stage>::_normal;                                                      \
-  using FVFluxBC<compute_stage>::_face_info
-
 /**
  * Base class for Finite Volume Flux BCs
  */
-template <ComputeStage compute_stage>
-class FVFluxBC : public FVFluxBCBase
+class FVFluxBC : public FVBoundaryCondition
 {
 public:
   FVFluxBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  virtual void computeResidual(const FaceInfo & fi) override;
-  virtual void computeJacobian(const FaceInfo & fi) override;
+  virtual void computeResidual(const FaceInfo & fi);
+  virtual void computeJacobian(const FaceInfo & fi);
 
 protected:
   virtual ADReal computeQpResidual() = 0;

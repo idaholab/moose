@@ -13,9 +13,6 @@
 
 class AddFVBCAction;
 
-template <>
-InputParameters validParams<AddFVBCAction>();
-
 class AddFVBCAction : public MooseObjectAction
 {
 public:

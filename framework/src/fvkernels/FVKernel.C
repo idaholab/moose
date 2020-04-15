@@ -48,50 +48,36 @@ FVKernel::FVKernel(const InputParameters & params)
     _tid(params.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid))
 {
+  _subproblem.haveADObjects(true);
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV kernels do not yet support displaced mesh");
 }
 
 InputParameters
-FVFluxKernelBase::validParams()
+FVFluxKernel::validParams()
 {
   InputParameters params = FVKernel::validParams();
   params += TwoMaterialPropertyInterface::validParams();
   return params;
 }
 
-FVFluxKernelBase::FVFluxKernelBase(const InputParameters & params)
+FVFluxKernel::FVFluxKernel(const InputParameters & params)
   : FVKernel(params),
     TwoMaterialPropertyInterface(this, blockIDs(), {}),
     NeighborMooseVariableInterface(
         this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false)
-{
-}
-
-template <ComputeStage compute_stage>
-InputParameters
-FVFluxKernel<compute_stage>::validParams()
-{
-  InputParameters params = FVFluxKernelBase::validParams();
-  return params;
-}
-
-template <ComputeStage compute_stage>
-FVFluxKernel<compute_stage>::FVFluxKernel(const InputParameters & params)
-  : FVFluxKernelBase(params),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     _var(*mooseVariableFV()),
-    _u_left(_var.adSln<compute_stage>()),
-    _u_right(_var.adSlnNeighbor<compute_stage>()),
-    _grad_u_left(_var.adGradSln<compute_stage>()),
-    _grad_u_right(_var.adGradSlnNeighbor<compute_stage>())
+    _u_left(_var.adSln()),
+    _u_right(_var.adSlnNeighbor()),
+    _grad_u_left(_var.adGradSln()),
+    _grad_u_right(_var.adGradSlnNeighbor())
 {
   addMooseVariableDependency(&_var);
 }
 
-template <ComputeStage compute_stage>
 void
-FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
+FVFluxKernel::computeResidual(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -130,15 +116,8 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   }
 }
 
-template <>
 void
-FVFluxKernel<RESIDUAL>::computeJacobian(const FaceInfo & /*fi*/)
-{
-}
-
-template <ComputeStage compute_stage>
-void
-FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
+FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -186,4 +165,3 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   }
 }
 
-adBaseClass(FVFluxKernel);

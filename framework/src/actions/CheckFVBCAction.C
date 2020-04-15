@@ -14,7 +14,6 @@
 #include "FVDirichletBC.h"
 
 registerMooseAction("MooseApp", CheckFVBCAction, "check_integrity");
-defineLegacyParams(CheckFVBCAction);
 
 InputParameters
 CheckFVBCAction::validParams()
@@ -44,20 +43,18 @@ CheckFVBCAction::act()
         continue;
 
       unsigned int var_num = var->number();
-      std::vector<FVFluxBCBase *> flux_bcs;
+      std::vector<FVFluxBC *> flux_bcs;
       std::vector<FVDirichletBC *> dirichlet_bcs;
       the_warehouse.query()
           .template condition<AttribSystem>("FVBoundaryCondition")
           .template condition<AttribVar>(var_num)
           .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
-          .template condition<AttribIsADJac>(false)
           .queryInto(flux_bcs);
 
       the_warehouse.query()
           .template condition<AttribSystem>("FVBoundaryCondition")
           .template condition<AttribVar>(var_num)
           .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
-          .template condition<AttribIsADJac>(false)
           .queryInto(dirichlet_bcs);
 
       std::set<BoundaryID> all_flux_side_ids;

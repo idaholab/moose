@@ -9,26 +9,23 @@
 
 #include "FVNeumannBC.h"
 
-registerADMooseObject("MooseApp", FVNeumannBC);
+registerMooseObject("MooseApp", FVNeumannBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-FVNeumannBC<compute_stage>::validParams()
+FVNeumannBC::validParams()
 {
-  InputParameters params = FVFluxBC<compute_stage>::validParams();
+  InputParameters params = FVFluxBC::validParams();
   params.addParam<Real>("value", 0.0, "The value of the flux crossing the boundary.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-FVNeumannBC<compute_stage>::FVNeumannBC(const InputParameters & parameters)
-  : FVFluxBC<compute_stage>(parameters), _value(getParam<Real>("value"))
+FVNeumannBC::FVNeumannBC(const InputParameters & parameters)
+  : FVFluxBC(parameters), _value(getParam<Real>("value"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-FVNeumannBC<compute_stage>::computeQpResidual()
+FVNeumannBC::computeQpResidual()
 {
   return -_value;
 }
