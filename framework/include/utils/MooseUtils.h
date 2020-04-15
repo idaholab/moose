@@ -753,6 +753,11 @@ processor_id_type
 linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type item_id);
 
 /**
+ * Wrapper around PetscGetRealPath, which is a cross-platform replacement for realpath
+ */
+std::string realpath(const std::string & path);
+
+/**
  * Custom type trait that has a ::value of true for types that cam be use interchangably
  * with Real. Most notably it is false for complex numbers, which do not have a
  * strict ordering (and therefore no <,>,<=,>= operators).

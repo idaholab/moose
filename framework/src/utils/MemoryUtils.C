@@ -24,7 +24,10 @@
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 #elif defined(__WIN32__)
-// we don't have a solution for windows yet
+#include <windows.h>
+#include <psapi.h>
+#include <processthreadsapi.h>
+#include <sysinfoapi.h>
 #else
 #include <sys/sysinfo.h>
 #endif
@@ -61,7 +64,9 @@ getTotalRAM()
   if (0 <= sysctlbyname("hw.memsize", &hwmem_size, &length, NULL, 0))
     return hwmem_size;
 #elif defined(__WIN32__)
-  return 0;
+  ULONGLONG mem_kb;
+  if (GetPhysicallyInstalledSystemMemory(&mem_kb))
+    return mem_kb * 1024;
 #else
   struct sysinfo si_data;
   if (!sysinfo(&si_data))
@@ -92,15 +97,30 @@ getMemoryStats(Stats & stats)
     for (unsigned int i = 0; i < num; ++i)
       stat_stream >> val[i];
 
-    // resident size is reported as number of pages in /proc
+      // resident size is reported as number of pages in /proc
 #ifndef __WIN32__
     val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
 #endif
   }
   else
   {
+#ifdef __WIN32__
+    auto pid = GetCurrentProcessId();
+    auto hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (NULL == hProcess || !GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
+      val.fill(0);
+    else
+    {
+      val[index_page_faults] = pmc.PageFaultCount;
+      val[index_virtual_size] = pmc.WorkingSetSize + pmc.PagefileUsage;
+      val[index_resident_size] = pmc.WorkingSetSize;
+    }
+#else
     // set all data entries to zero (if all else should fail)
     val.fill(0);
+#endif
 
 // obtain mach task info on mac OS
 #if defined(__APPLE__)
