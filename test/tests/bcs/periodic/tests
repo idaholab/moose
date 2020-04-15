@@ -41,6 +41,9 @@
     group = 'periodic'
     valgrind = 'HEAVY'
     abs_zero = 1e-6
+    # This test is very sensitive to partitioner (parmetis).
+    # GridPartitioner is robust and beautiful
+    cli_args = 'Mesh/Partitioner/type=GridPartitioner'
     requirement = "MOOSE shall support periodic boundary conditions with transforms that are computed automatically in the 'x', 'y', and 'z' directions."
   [../]
 
