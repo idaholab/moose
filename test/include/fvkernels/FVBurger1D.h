@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FVKernel.h"
+#include "FVFluxKernel.h"
 
 class FVBurger1D : public FVFluxKernel
 {

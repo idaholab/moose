@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FVKernel.h"
+#include "FVFluxKernel.h"
 
 class FVAdvection : public FVFluxKernel
 {

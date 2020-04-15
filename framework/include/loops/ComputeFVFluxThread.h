@@ -14,7 +14,7 @@
 #include "MooseTypes.h"
 #include "MooseException.h"
 #include "MooseVariableFieldBase.h"
-#include "FVKernel.h"
+#include "FVFluxKernel.h"
 #include "FVBoundaryCondition.h"
 #include "FVFluxBC.h"
 #include "FEProblem.h"

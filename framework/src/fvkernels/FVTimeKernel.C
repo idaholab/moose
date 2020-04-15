@@ -9,22 +9,6 @@
 
 #include "FVTimeKernel.h"
 
-InputParameters
-FVElementalKernel::validParams()
-{
-  InputParameters params = FVKernel::validParams();
-  params.registerSystemAttributeName("FVElementalKernel");
-  return params;
-}
-
-FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
-  : FVKernel(parameters),
-    MooseVariableInterface(this, false, "variable", Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    _var(*mooseVariableFV())
-{
-}
-
 registerADMooseObject("MooseApp", FVTimeKernel);
 
 InputParameters

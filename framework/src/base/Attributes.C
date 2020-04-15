@@ -25,7 +25,7 @@
 #include "ShapeUserObject.h"
 #include "ShapeSideUserObject.h"
 #include "ShapeElementUserObject.h"
-#include "FVKernel.h"
+#include "FVFluxKernel.h"
 #include "FVDirichletBC.h"
 #include "FVFluxBC.h"
 
