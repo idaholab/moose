@@ -97,21 +97,33 @@ FVFluxKernel<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
 
+  // residual contributions for a flux kernel go to both neighboring faces.
+  // They are equal in magnitude but opposite in direction due to the outward
+  // facing unit normals of the face for each neighboring elements being
+  // oriented oppositely.  We calculate the residual contribution once using
+  // the left-elem-oriented _normal and just use the resulting residual's
+  // negative for the contribution to the right element.
+
   // The fancy face type if condition checks here are because we might
   // currently be running on a face for which this kernel's variable is only
   // defined on one side. If this is the case, we need to only calculate+add
   // the residual contribution if there is a dirichlet bc for the active
   // face+variable.  We always need to add the residual contribution when the
-  // variable is defined on both sides of the face.
+  // variable is defined on both sides of the face.  If the variable is only
+  // defined on one side and there is NOT a dirichlet BC, then there is either
+  // a flux BC or a natural BC - in either of those cases we don't want to add
+  // any residual contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
   if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
+    // residual contribution of this kernel to the left element
     prepareVectorTag(_assembly, _var.number());
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
   if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
+    // residual contribution of this kernel to the right element
     prepareVectorTagNeighbor(_assembly, _var.number());
     _local_re(0) = -r;
     accumulateTaggedLocalResidual();
@@ -140,16 +152,21 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
   // The fancy face type if condition checks here are because we might
   // currently be running on a face for which this kernel's variable is only
   // defined on one side. If this is the case, we need to only calculate+add
-  // the residual contribution if there is a dirichlet bc for the active
-  // face+variable.  We always need to add the residual contribution when the
-  // variable is defined on both sides of the face.
+  // the jacobian contribution if there is a dirichlet bc for the active
+  // face+variable.  We always need to add the jacobian contribution when the
+  // variable is defined on both sides of the face.  If the variable is only
+  // defined on one side and there is NOT a dirichlet BC, then there is either
+  // a flux BC or a natural BC - in either of those cases we don't want to add
+  // any jacobian contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
   if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
+    // jacobian contribution of the residual for the left element to the left element's DOF: d/d_left (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
+    // jacobian contribution of the residual for the left element to the right element's DOF: d/d_right (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
@@ -157,10 +174,12 @@ FVFluxKernel<compute_stage>::computeJacobian(const FaceInfo & fi)
 
   if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) || ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
+    // jacobian contribution of the residual for the right element to the left element's DOF: d/d_left (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
+    // jacobian contribution of the residual for the right element to the right element's DOF: d/d_right (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
     _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();

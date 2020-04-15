@@ -44,9 +44,13 @@ FVFluxBC<compute_stage>::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto ft = fi.faceType(_var.name());
 
-  // We always want the normal to point outward on boundaries so we flip it if
-  // this variable is defined on the right side of the face (instead of left)
-  // since the FaceInfo normal polarity is always left-elem oriented.
+  // For FV flux kernels, the normal is always oriented outward from the left
+  // element's perspective.  But for BCs, there is only a residual
+  // contribution to one element (one side of the face).  Because of this, we
+  // make an exception and orient the normal to point outward from whichever
+  // side of the face the BC's variable is defined on; we flip it if this
+  // variable is defined on the right side of the face (instead of left) since
+  // the FaceInfo normal polarity is always left-elem oriented.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
 
@@ -81,9 +85,13 @@ FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
   _normal = fi.normal();
   auto ft = fi.faceType(_var.name());
 
-  // We always want the normal to point outward on boundaries so we flip it if
-  // this variable is defined on the right side of the face (instead of left)
-  // since the FaceInfo normal polarity is always left-elem oriented.
+  // For FV flux kernels, the normal is always oriented outward from the left
+  // element's perspective.  But for BCs, there is only a residual
+  // contribution to one element (one side of the face).  Because of this, we
+  // make an exception and orient the normal to point outward from whichever
+  // side of the face the BC's variable is defined on; we flip it if this
+  // variable is defined on the right side of the face (instead of left) since
+  // the FaceInfo normal polarity is always left-elem oriented.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
 
@@ -96,24 +104,28 @@ FVFluxBC<compute_stage>::computeJacobian(const FaceInfo & fi)
 
   // This could be an "internal" boundary - one created by variable block
   // restriction where the var is only defined on one side of the face.  We
-  // need to make sure that we add the residual contribution to the correct
+  // need to make sure that we add the residual contribution to only the correct
   // side - the one where the variable is defined.
   if (ft == FaceInfo::VarFaceNeighbors::LEFT)
   {
+    // jacobian contribution of the residual for the left element to the left element's DOF: d/d_left (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
+    // jacobian contribution of the residual for the left element to the right element's DOF: d/d_right (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
   }
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
   {
+    // jacobian contribution of the residual for the right element to the left element's DOF: d/d_left (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
+    // jacobian contribution of the residual for the right element to the right element's DOF: d/d_right (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();

@@ -40,9 +40,9 @@ protected:
   using FVFluxKernel<compute_stage>::_normal;                                                      \
   using FVFluxKernel<compute_stage>::_face_info
 
-// this intermediate class exists so we can call computeResidual/Jacobian on
-// flux kernels without knowing their AD compute_stage template type
-// parameter.
+/// this intermediate class exists so we can call computeResidual/Jacobian on
+/// flux kernels without knowing their AD compute_stage template type
+/// parameter.
 class FVFluxKernelBase : public FVKernel,
                          public TwoMaterialPropertyInterface,
                          public NeighborMooseVariableInterface<Real>,
