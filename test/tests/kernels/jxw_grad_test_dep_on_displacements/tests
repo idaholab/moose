@@ -29,6 +29,7 @@
     ratio_tol = 7e-7
     difference_tol = 4e-4
     run_sim = True
+    cli_args = '-snes_test_err 1e-9'
     petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a cylindrical geometry"
     max_parallel = 2
@@ -40,7 +41,7 @@
     difference_tol = 1e-5
     run_sim = True
     petsc_version = '>=3.9'
-    cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
+    cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4 -snes_test_err 1e-9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a cylindrical geometry"
     max_parallel = 2
     prereq = 'jxw_jacobian_cylindrical'
