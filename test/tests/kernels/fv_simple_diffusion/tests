@@ -1,17 +1,23 @@
 [Tests]
-  [./test]
+  [./dirichlet]
     type = 'Exodiff'
-    input = 'fv_simple_diffusion.i'
-    exodiff = 'fv_simple_diffusion_out.e'
+    input = 'dirichlet.i'
+    exodiff = 'dirichlet_out.e'
 
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
   [../]
 
-  [./fv_simple_diffusion_neumann]
+  [./neumann]
     type = 'Exodiff'
-    input = 'fv_simple_diffusion_neumann.i'
-    exodiff = 'fv_simple_diffusion_neumann_out.e'
-
+    input = 'neumann.i'
+    exodiff = 'neumann_out.e'
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Neumann and Dirichlet boundary conditions on a regular mesh.'
+  [../]
+
+  [./transient]
+    type = 'Exodiff'
+    input = 'transient.i'
+    exodiff = 'transient_out.e'
+    requirement = 'The system shall run a simple 2D transient linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
   [../]
 []
