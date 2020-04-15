@@ -37,7 +37,7 @@ FlowChannel1Phase::init()
 {
   FlowChannelBase::init();
 
-  const UserObject & fp = _sim.getUserObjectTempl<UserObject>(_fp_name);
+  const UserObject & fp = _sim.getUserObject<UserObject>(_fp_name);
   if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) == nullptr)
     logError("Supplied fluid properties must be for 1-phase fluids.");
 }

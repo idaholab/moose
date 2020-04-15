@@ -23,7 +23,7 @@ protected:
     eos_pars.set<Real>("k") = 0.89;
     eos_pars.set<Real>("Pr") = 0.76;
     _fe_problem->addUserObject("LinearFluidProperties", "fp", eos_pars);
-    _fp = &_fe_problem->getUserObjectTempl<LinearFluidProperties>("fp");
+    _fp = &_fe_problem->getUserObject<LinearFluidProperties>("fp");
   }
 
   const LinearFluidProperties * _fp;
