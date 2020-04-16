@@ -12,7 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 namespace libMesh
 {
 class MeshBase;
@@ -32,7 +32,7 @@ public:
 
 private:
   /// MOOSE variable we compute the contact set from
-  const MooseVariableFEBase & _var;
+  const MooseVariableFieldBase & _var;
 
   /// The libmesh mesh
   const MeshBase & _mesh;
