@@ -173,3 +173,12 @@
    fun:dmumps_numvolsndrcv_
    ...
 }
+{
+   Conda_OpenMP_false_positive
+   Memcheck:Param
+   sched_setaffinity(mask)
+   ...
+   fun:syscall
+   obj:*/lib/libomp.so
+   ...
+}
