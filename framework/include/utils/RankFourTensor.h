@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADRealForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
@@ -444,6 +444,7 @@ struct RawType<RankFourTensorTempl<T>>
 
 typedef RankFourTensorTempl<Real> RankFourTensor;
 typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
+typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
 
 template <typename T1, typename T2>
 inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
