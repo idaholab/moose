@@ -140,26 +140,6 @@ VariableWarehouse::getFieldVariable(unsigned int var_number)
   return _regular_vars_by_number.at(var_number);
 }
 
-template <typename T>
-MooseVariableField<T> *
-VariableWarehouse::getActualFieldVariable(const std::string & var_name)
-{
-  auto it = _regular_vars_by_name.find(var_name);
-  if (it != _regular_vars_by_name.end())
-    return it->second;
-  return _fv_vars_by_name.at(var_name);
-}
-
-template <typename T>
-MooseVariableField<T> *
-VariableWarehouse::getActualFieldVariable(unsigned int var_number)
-{
-  auto it = _regular_vars_by_number.find(var_number);
-  if (it != _regular_vars_by_number.end())
-    return it->second;
-  return _fv_vars_by_number.at(var_number);
-}
-
 template <>
 VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
@@ -197,6 +177,59 @@ VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number)
 template MooseVariableFE<Real> *
 VariableWarehouse::getFieldVariable<Real>(const std::string & var_name);
 template MooseVariableFE<Real> * VariableWarehouse::getFieldVariable<Real>(unsigned int var_number);
+
+template <typename T>
+MooseVariableField<T> *
+VariableWarehouse::getActualFieldVariable(const std::string & var_name)
+{
+  auto it = _regular_vars_by_name.find(var_name);
+  if (it != _regular_vars_by_name.end())
+    return it->second;
+  return _fv_vars_by_name.at(var_name);
+}
+
+template <typename T>
+MooseVariableField<T> *
+VariableWarehouse::getActualFieldVariable(unsigned int var_number)
+{
+  auto it = _regular_vars_by_number.find(var_number);
+  if (it != _regular_vars_by_number.end())
+    return it->second;
+  return _fv_vars_by_number.at(var_number);
+}
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getActualFieldVariable<RealVectorValue>(const std::string & var_name)
+{
+  // TODO: when necessary, add the if check to see if we have an FV vector var
+  // before just returning nothing as found in FE vars list.
+  return getFieldVariable<RealVectorValue>(var_name);
+}
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getActualFieldVariable<RealVectorValue>(unsigned int var_number)
+{
+  // TODO: when necessary, add the if check to see if we have an FV vector var
+  // before just returning nothing as found in FE vars list.
+  return getFieldVariable<RealVectorValue>(var_number);
+}
+
+template <>
+MooseVariableField<RealEigenVector> *
+VariableWarehouse::getActualFieldVariable<RealEigenVector>(const std::string & var_name)
+{
+  return getFieldVariable<RealEigenVector>(var_name);
+}
+
+template <>
+MooseVariableField<RealEigenVector> *
+VariableWarehouse::getActualFieldVariable<RealEigenVector>(unsigned int var_number)
+{
+  return getFieldVariable<RealEigenVector>(var_number);
+}
+
 template MooseVariableField<Real> *
 VariableWarehouse::getActualFieldVariable<Real>(const std::string & var_name);
 template MooseVariableField<Real> *
