@@ -10,10 +10,7 @@ FVBurger1D::validParams()
   return params;
 }
 
-FVBurger1D::FVBurger1D(const InputParameters & params)
-  : FVFluxKernel(params)
-{
-}
+FVBurger1D::FVBurger1D(const InputParameters & params) : FVFluxKernel(params) {}
 
 ADReal
 FVBurger1D::computeQpResidual()

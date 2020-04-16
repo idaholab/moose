@@ -79,16 +79,20 @@ public:
   using OutputShapeDivergence = typename MooseVariableField<OutputType>::OutputShapeDivergence;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
-  using FieldVariablePhiGradient = typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
+  using FieldVariablePhiGradient =
+      typename MooseVariableField<OutputType>::FieldVariablePhiGradient;
   using FieldVariablePhiSecond = typename MooseVariableField<OutputType>::FieldVariablePhiSecond;
   using FieldVariablePhiCurl = typename MooseVariableField<OutputType>::FieldVariablePhiCurl;
-  using FieldVariablePhiDivergence = typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
+  using FieldVariablePhiDivergence =
+      typename MooseVariableField<OutputType>::FieldVariablePhiDivergence;
 
   using FieldVariableTestValue = typename MooseVariableField<OutputType>::FieldVariableTestValue;
-  using FieldVariableTestGradient = typename MooseVariableField<OutputType>::FieldVariableTestGradient;
+  using FieldVariableTestGradient =
+      typename MooseVariableField<OutputType>::FieldVariableTestGradient;
   using FieldVariableTestSecond = typename MooseVariableField<OutputType>::FieldVariableTestSecond;
   using FieldVariableTestCurl = typename MooseVariableField<OutputType>::FieldVariableTestCurl;
-  using FieldVariableTestDivergence = typename MooseVariableField<OutputType>::FieldVariableTestDivergence;
+  using FieldVariableTestDivergence =
+      typename MooseVariableField<OutputType>::FieldVariableTestDivergence;
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;

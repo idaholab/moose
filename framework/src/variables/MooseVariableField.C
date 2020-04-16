@@ -21,4 +21,3 @@ MooseVariableField<OutputType>::MooseVariableField(const InputParameters & param
   : MooseVariableFieldBase(parameters)
 {
 }
-

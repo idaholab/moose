@@ -236,18 +236,12 @@ public:
   const VariableValue & duDotDotDuNeighbor() const { return _neighbor_data->duDotDotDu(); }
 
   /// AD
-  const ADTemplateVariableValue<OutputType> & adSln() const
-  {
-    return _element_data->adSln();
-  }
+  const ADTemplateVariableValue<OutputType> & adSln() const { return _element_data->adSln(); }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     return _element_data->adGradSln();
   }
-  const ADTemplateVariableValue<OutputType> & adUDot() const
-  {
-    return _element_data->adUDot();
-  }
+  const ADTemplateVariableValue<OutputType> & adUDot() const { return _element_data->adUDot(); }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const
@@ -353,7 +347,10 @@ public:
   typename OutputTools<OutputType>::OutputGradient getGradient(const Elem * elem) const;
 
   /// checks if a Dirichlet BC exists on this face
-  bool hasDirichletBC() const { return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC(); }
+  bool hasDirichletBC() const
+  {
+    return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC();
+  }
 
 protected:
   usingMooseVariableBaseMembers;

@@ -492,4 +492,3 @@ MooseVariableDataFV<OutputType>::adDofValues() const
   _need_ad = true;
   return _ad_dof_values;
 }
-

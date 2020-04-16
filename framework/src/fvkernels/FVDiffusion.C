@@ -23,4 +23,3 @@ FVDiffusion::computeQpResidual()
   ADReal k = (_coeff_left[_qp] + _coeff_right[_qp]) / 2;
   return -1 * k * dudn;
 }
-

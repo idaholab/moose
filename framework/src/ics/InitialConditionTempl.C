@@ -29,7 +29,7 @@ InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & paramete
     _t(_fe_problem.time()),
     _coord_sys(_assembly.coordSystem()),
     _var(_sys.getActualFieldVariable<T>(parameters.get<THREAD_ID>("_tid"),
-                                  parameters.get<VariableName>("variable"))),
+                                        parameters.get<VariableName>("variable"))),
     _fe_var(dynamic_cast<MooseVariableFE<T> *>(&_var)),
     _current_elem(_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),

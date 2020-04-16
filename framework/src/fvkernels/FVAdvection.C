@@ -12,9 +12,7 @@ FVAdvection::validParams()
 }
 
 FVAdvection::FVAdvection(const InputParameters & params)
-  : FVFluxKernel(params),
-    _velocity(getParam<RealVectorValue>("velocity"))
-{};
+  : FVFluxKernel(params), _velocity(getParam<RealVectorValue>("velocity")){};
 
 ADReal
 FVAdvection::computeQpResidual()

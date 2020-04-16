@@ -87,24 +87,28 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   // side - the one where the variable is defined.
   if (ft == FaceInfo::VarFaceNeighbors::LEFT)
   {
-    // jacobian contribution of the residual for the left element to the left element's DOF: d/d_left (residual_left)
+    // jacobian contribution of the residual for the left element to the left element's DOF:
+    // d/d_left (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    // jacobian contribution of the residual for the left element to the right element's DOF: d/d_right (residual_left)
+    // jacobian contribution of the residual for the left element to the right element's DOF:
+    // d/d_right (residual_left)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
   }
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
   {
-    // jacobian contribution of the residual for the right element to the left element's DOF: d/d_left (residual_right)
+    // jacobian contribution of the residual for the right element to the left element's DOF:
+    // d/d_left (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    // jacobian contribution of the residual for the right element to the right element's DOF: d/d_right (residual_right)
+    // jacobian contribution of the residual for the right element to the right element's DOF:
+    // d/d_right (residual_right)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
@@ -112,4 +116,3 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   else
     mooseError("should never get here");
 }
-

@@ -25,4 +25,3 @@ protected:
 
   const ADVariableValue & _u_dot;
 };
-

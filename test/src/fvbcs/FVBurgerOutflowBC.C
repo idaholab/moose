@@ -18,10 +18,7 @@ FVBurgerOutflowBC::validParams()
   return params;
 }
 
-FVBurgerOutflowBC::FVBurgerOutflowBC(const InputParameters & parameters)
-  : FVFluxBC(parameters)
-{
-}
+FVBurgerOutflowBC::FVBurgerOutflowBC(const InputParameters & parameters) : FVFluxBC(parameters) {}
 
 ADReal
 FVBurgerOutflowBC::computeQpResidual()

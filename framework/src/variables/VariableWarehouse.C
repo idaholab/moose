@@ -194,7 +194,10 @@ VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number)
   return _array_vars_by_number.at(var_number);
 }
 
-template MooseVariableFE<Real> * VariableWarehouse::getFieldVariable<Real>(const std::string & var_name);
+template MooseVariableFE<Real> *
+VariableWarehouse::getFieldVariable<Real>(const std::string & var_name);
 template MooseVariableFE<Real> * VariableWarehouse::getFieldVariable<Real>(unsigned int var_number);
-template MooseVariableField<Real> * VariableWarehouse::getActualFieldVariable<Real>(const std::string & var_name);
-template MooseVariableField<Real> * VariableWarehouse::getActualFieldVariable<Real>(unsigned int var_number);
+template MooseVariableField<Real> *
+VariableWarehouse::getActualFieldVariable<Real>(const std::string & var_name);
+template MooseVariableField<Real> *
+VariableWarehouse::getActualFieldVariable<Real>(unsigned int var_number);

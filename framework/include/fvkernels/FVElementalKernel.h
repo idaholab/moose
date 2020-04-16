@@ -14,7 +14,9 @@
 #include "MooseVariableInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-class FVElementalKernel : public FVKernel, public MooseVariableInterface<Real>, public CoupleableMooseVariableDependencyIntermediateInterface
+class FVElementalKernel : public FVKernel,
+                          public MooseVariableInterface<Real>,
+                          public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   static InputParameters validParams();
@@ -22,8 +24,8 @@ public:
 
   virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;
+
 protected:
   MooseVariableFV<Real> & _var;
   const unsigned int _qp = 0;
 };
-

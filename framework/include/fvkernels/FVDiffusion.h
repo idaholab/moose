@@ -14,4 +14,3 @@ protected:
   const ADMaterialProperty<Real> & _coeff_left;
   const ADMaterialProperty<Real> & _coeff_right;
 };
-

@@ -19,9 +19,12 @@ FVElementalKernel::validParams()
 
 FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
   : FVKernel(parameters),
-    MooseVariableInterface(this, false, "variable", Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    MooseVariableInterface(this,
+                           false,
+                           "variable",
+                           Moose::VarKindType::VAR_NONLINEAR,
+                           Moose::VarFieldType::VAR_FIELD_STANDARD),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     _var(*mooseVariableFV())
 {
 }
-

@@ -73,9 +73,9 @@ public:
    * @param boundary_ids The boundary ids where this variable is defined
    * @param vars A map of variables
    */
-  void
-  addBoundaryVars(const std::set<BoundaryID> & boundary_ids,
-                  const std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> & vars);
+  void addBoundaryVars(
+      const std::set<BoundaryID> & boundary_ids,
+      const std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> & vars);
 
   /**
    * Get a variable from the warehouse

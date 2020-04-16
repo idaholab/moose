@@ -123,12 +123,12 @@ ComputeResidualThread::onElement(const Elem * elem)
 
   std::vector<FVElementalKernel *> kernels;
   _fe_problem.theWarehouse()
-             .query()
-             .template condition<AttribSystem>("FVElementalKernel")
-             .template condition<AttribSubdomains>(_subdomain)
-             .template condition<AttribThread>(_tid)
-             .template condition<AttribVectorTags>(_tags)
-             .queryInto(kernels);
+      .query()
+      .template condition<AttribSystem>("FVElementalKernel")
+      .template condition<AttribSubdomains>(_subdomain)
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_tags)
+      .queryInto(kernels);
 
   for (auto kernel : kernels)
     kernel->computeResidual();

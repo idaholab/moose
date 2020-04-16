@@ -20,6 +20,4 @@ protected:
   SubProblem & _subproblem;
   THREAD_ID _tid;
   Assembly & _assembly;
-
 };
-

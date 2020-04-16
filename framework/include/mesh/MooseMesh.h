@@ -175,16 +175,10 @@ public:
   }
   /// Mutably returns which side(s) the given variable is defined on for this face.
   VarFaceNeighbors & faceType(const std::string & var_name) { return _face_types_by_var[var_name]; }
-  const std::set<BoundaryID> & boundaryIDs() const
-  {
-    return _boundary_ids;
-  }
+  const std::set<BoundaryID> & boundaryIDs() const { return _boundary_ids; }
 
   /// Returns the set of boundary ids for all boundaries that include this face.
-  std::set<BoundaryID> & boundaryIDs()
-  {
-    return _boundary_ids;
-  }
+  std::set<BoundaryID> & boundaryIDs() { return _boundary_ids; }
 
 private:
   Real _face_area;

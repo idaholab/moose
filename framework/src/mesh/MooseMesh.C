@@ -60,9 +60,7 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
-FaceInfo::FaceInfo(const Elem * elem,
-                   unsigned int side,
-                   const Elem * neighbor)
+FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
 {
   _left = elem;
   _right = neighbor;
@@ -114,7 +112,6 @@ FaceInfo::FaceInfo(const Elem * elem,
     _right_centroid = neighbor->centroid();
     _right_volume = neighbor->volume();
   }
-
 }
 
 defineLegacyParams(MooseMesh);
@@ -2939,7 +2936,8 @@ MooseMesh::buildFaceInfo()
   using Keytype = std::pair<const Elem *, unsigned short int>;
 
   // create a map from elem/side --> boundary ids
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list = buildSideList();
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
+      buildSideList();
   std::map<Keytype, std::set<boundary_id_type>> side_map;
   for (auto & e : side_list)
   {

@@ -883,7 +883,8 @@ public:
   {
     return _cm_ff_entry;
   }
-  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> & nonlocalCouplingEntries()
+  std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> &
+  nonlocalCouplingEntries()
   {
     return _cm_nonlocal_entry;
   }

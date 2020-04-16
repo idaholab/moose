@@ -215,8 +215,9 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
-                                                THREAD_ID tid);
+  virtual void
+  setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
+                                   THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
@@ -675,11 +676,11 @@ protected:
    * checking whether Variables of the requested type are available.
    */
   MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
-                                          const std::string & var_name,
-                                          Moose::VarKindType expected_var_type,
-                                          Moose::VarFieldType expected_var_field_type,
-                                          SystemBase & nl,
-                                          SystemBase & aux);
+                                             const std::string & var_name,
+                                             Moose::VarKindType expected_var_type,
+                                             Moose::VarFieldType expected_var_field_type,
+                                             SystemBase & nl,
+                                             SystemBase & aux);
 
   /// The currently declared tags
   std::map<TagName, TagID> _vector_tag_name_to_tag_id;
