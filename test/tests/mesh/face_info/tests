@@ -2,6 +2,7 @@
   [./face_info_quad]
     type = 'CSVDiff'
     input = 'face_info_quads.i'
+    max_parallel = 1
     csvdiff = 'face_info_quads_out_face_info_0001.csv'
     recover = false
 
@@ -13,6 +14,7 @@
   [./face_info_tri]
     type = 'CSVDiff'
     input = 'face_info_tri.i'
+    max_parallel = 1
     csvdiff = 'face_info_tri_out_face_info_0001.csv'
     recover = false
 
@@ -24,6 +26,7 @@
   [./face_info_two_region_quads]
     type = 'CSVDiff'
     input = 'face_info_two_region_quads.i'
+    max_parallel = 1
     csvdiff = 'face_info_two_region_quads_out_face_info_1_0001.csv
                face_info_two_region_quads_out_face_info_2_0001.csv
                face_info_two_region_quads_out_face_info_3_0001.csv'
