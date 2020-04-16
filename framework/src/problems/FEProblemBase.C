@@ -104,8 +104,6 @@
 
 #include "metaphysicl/dualnumber.h"
 
-class FaceInfo;
-
 // Anonymous namespace for helper function
 namespace
 {

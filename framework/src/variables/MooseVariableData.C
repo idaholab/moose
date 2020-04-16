@@ -12,7 +12,7 @@
 #include "MooseError.h"
 #include "DisplacedSystem.h"
 #include "TimeIntegrator.h"
-#include "MooseVariableFV.h"
+#include "MooseVariableFE.h"
 #include "MooseTypes.h"
 
 #include "libmesh/quadrature.h"
