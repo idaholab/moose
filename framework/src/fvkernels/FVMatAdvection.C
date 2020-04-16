@@ -14,7 +14,9 @@ FVMatAdvection::validParams()
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _vel_left(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_right(getNeighborADMaterialProperty<RealVectorValue>("vel")){};
+    _vel_right(getNeighborADMaterialProperty<RealVectorValue>("vel"))
+{
+}
 
 ADReal
 FVMatAdvection::computeQpResidual()

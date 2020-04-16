@@ -14,7 +14,9 @@ FVDiffusion::validParams()
 FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _coeff_left(getADMaterialProperty<Real>("coeff")),
-    _coeff_right(getNeighborADMaterialProperty<Real>("coeff")){};
+    _coeff_right(getNeighborADMaterialProperty<Real>("coeff"))
+{
+}
 
 ADReal
 FVDiffusion::computeQpResidual()
