@@ -34,12 +34,7 @@ public:
    */
   const std::vector<Real> & getResidual() const;
 
-  /**
-   * Returns the flux vector associated with a connection
-   *
-   * @param[in] connection_index   Connection index
-   */
-  const std::vector<Real> & getFlux(const unsigned int & connection_index) const;
+  const std::vector<Real> & getFlux(const unsigned int & connection_index) const override;
 
   /**
    * Returns the Jacobian matrix of a connection's flux vector w.r.t. the scalar variables

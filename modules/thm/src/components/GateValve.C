@@ -89,7 +89,6 @@ GateValve::addMooseObjects1Phase() const
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // Add user object for computing and storing the fluxes
-  const std::string uo_name = genName(name(), "uo");
   {
     const std::string class_name = "GateValve1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -105,9 +104,9 @@ GateValve::addMooseObjects1Phase() const
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::string>("component_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, uo_name, params);
+    _sim.addUserObject(class_name, _junction_uo_name, params);
 
-    connectObject(params, uo_name, "open_area_fraction");
+    connectObject(params, _junction_uo_name, "open_area_fraction");
   }
 
   const std::vector<NonlinearVariableName> var_names = {
@@ -122,7 +121,7 @@ GateValve::addMooseObjects1Phase() const
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
       params.set<NonlinearVariableName>("variable") = var_names[j];
-      params.set<UserObjectName>("gate_valve_uo") = uo_name;
+      params.set<UserObjectName>("gate_valve_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
@@ -142,7 +141,6 @@ GateValve::addMooseObjects2Phase() const
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // Add user object for computing and storing the fluxes
-  const std::string junction_uo_name = genName(name(), "junction_uo");
   {
     const std::string class_name = "GateValve2PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -164,9 +162,9 @@ GateValve::addMooseObjects2Phase() const
     params.set<std::vector<VariableName>>("arhoEA_vapor") = {FlowModelTwoPhase::ALPHA_RHOE_A_VAPOR};
     params.set<std::string>("component_name") = name();
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, junction_uo_name, params);
+    _sim.addUserObject(class_name, _junction_uo_name, params);
 
-    connectObject(params, junction_uo_name, "open_area_fraction");
+    connectObject(params, _junction_uo_name, "open_area_fraction");
   }
 
   std::vector<NonlinearVariableName> var_names{FlowModelTwoPhase::BETA,
@@ -186,7 +184,7 @@ GateValve::addMooseObjects2Phase() const
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
       params.set<NonlinearVariableName>("variable") = var_names[j];
-      params.set<UserObjectName>("junction_uo") = junction_uo_name;
+      params.set<UserObjectName>("junction_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};

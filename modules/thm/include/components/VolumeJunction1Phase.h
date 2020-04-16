@@ -31,7 +31,7 @@ protected:
   /**
    * Builds user object for computing and storing the fluxes
    */
-  virtual const UserObjectName buildVolumeJunctionUserObject();
+  virtual void buildVolumeJunctionUserObject();
 
   /// Scaling factor for rho*V
   const Real & _scaling_factor_rhoV;

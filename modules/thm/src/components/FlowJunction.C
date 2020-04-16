@@ -11,7 +11,10 @@ FlowJunction::validParams()
   return params;
 }
 
-FlowJunction::FlowJunction(const InputParameters & params) : FlowConnection(params)
+FlowJunction::FlowJunction(const InputParameters & params)
+  : FlowConnection(params),
+
+    _junction_uo_name(genName(name(), "junction_uo"))
 {
   const std::vector<BoundaryName> & connections =
       getParam<std::vector<BoundaryName>>("connections");

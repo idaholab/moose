@@ -31,7 +31,7 @@ protected:
     params.set<Real>("gamma") = 1.4;
     params.set<Real>("molar_mass") = 11.640243719999999;
     _fe_problem->addUserObject(class_name, _fp_name, params);
-    return _fe_problem->getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
+    return _fe_problem->getUserObject<SinglePhaseFluidProperties>(_fp_name);
   }
 
   /**

@@ -132,7 +132,7 @@ VolumeJunction1Phase::addVariables()
     const Real initial_vel_z = initial_vel_z_fn.value(0, _position);
 
     const SinglePhaseFluidProperties & fp =
-        _sim.getUserObjectTempl<SinglePhaseFluidProperties>(_fp_name);
+        _sim.getUserObject<SinglePhaseFluidProperties>(_fp_name);
     const Real initial_rho = fp.rho_from_p_T(initial_p, initial_T);
     const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
     const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
@@ -149,13 +149,12 @@ VolumeJunction1Phase::addVariables()
   }
 }
 
-const UserObjectName
+void
 VolumeJunction1Phase::buildVolumeJunctionUserObject()
 {
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-  const std::string volume_junction_uo_name = genName(name(), "volume_junction_uo");
   {
     const std::string class_name = "VolumeJunction1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
@@ -176,15 +175,14 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, volume_junction_uo_name, params);
+    _sim.addUserObject(class_name, _junction_uo_name, params);
   }
-  return volume_junction_uo_name;
 }
 
 void
 VolumeJunction1Phase::addMooseObjects()
 {
-  const std::string volume_junction_uo_name = buildVolumeJunctionUserObject();
+  buildVolumeJunctionUserObject();
 
   // Add BC to each of the connected flow channels
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
@@ -198,7 +196,7 @@ VolumeJunction1Phase::addMooseObjects()
       params.set<std::vector<BoundaryName>>("boundary") = {_boundary_names[i]};
       params.set<Real>("normal") = _normals[i];
       params.set<NonlinearVariableName>("variable") = var_names[j];
-      params.set<UserObjectName>("volume_junction_uo") = volume_junction_uo_name;
+      params.set<UserObjectName>("volume_junction_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
       params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
       params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
@@ -235,7 +233,7 @@ VolumeJunction1Phase::addMooseObjects()
       const std::string class_name = "VolumeJunctionAdvectionScalarKernel";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<NonlinearVariableName>("variable") = var_names[i];
-      params.set<UserObjectName>("volume_junction_uo") = volume_junction_uo_name;
+      params.set<UserObjectName>("volume_junction_uo") = _junction_uo_name;
       params.set<unsigned int>("equation_index") = i;
       _sim.addScalarKernel(class_name, genName(name(), var_names[i], "vja_sk"), params);
     }

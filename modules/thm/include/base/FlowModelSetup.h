@@ -51,7 +51,7 @@ protected:
    * @return value of the parameter
    */
   template <typename T>
-  const T & getParamTempl(const std::string & name) const;
+  const T & getParam(const std::string & name) const;
 
   InputParameters _this_params;
   MooseApp & _this_app;
@@ -70,7 +70,7 @@ public:
 
 template <typename T>
 const T &
-FlowModelSetup::getParamTempl(const std::string & name) const
+FlowModelSetup::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _this_params, static_cast<T *>(0));
 }

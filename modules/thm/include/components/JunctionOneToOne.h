@@ -21,6 +21,7 @@ protected:
   virtual void setupMesh() override;
   virtual void addMooseObjects1Phase() const;
   virtual void addMooseObjects2Phase() const;
+  virtual void addJunctionUserObject2Phase() const;
 
 public:
   static InputParameters validParams();
