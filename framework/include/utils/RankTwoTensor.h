@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADRealForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
@@ -581,6 +581,7 @@ struct RawType<RankTwoTensorTempl<T>>
 
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
 template <typename T>
 template <typename T2>

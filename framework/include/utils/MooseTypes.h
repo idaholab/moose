@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -174,7 +174,6 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 /**
  * various MOOSE typedefs
  */
-typedef DualReal ADReal;
 typedef Real PostprocessorValue;
 typedef std::vector<Real> VectorPostprocessorValue;
 typedef Real ScatterVectorPostprocessorValue;
@@ -331,8 +330,6 @@ typedef libMesh::VectorValue<ADReal> ADRealVectorValue;
 typedef ADRealVectorValue ADRealGradient;
 typedef libMesh::VectorValue<ADReal> ADPoint;
 typedef libMesh::TensorValue<ADReal> ADRealTensorValue;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
-typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
 typedef libMesh::DenseMatrix<ADReal> ADDenseMatrix;
 typedef libMesh::DenseVector<ADReal> ADDenseVector;
 typedef MooseArray<ADReal> ADVariableValue;
