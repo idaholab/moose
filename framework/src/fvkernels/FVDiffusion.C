@@ -19,8 +19,7 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
 ADReal
 FVDiffusion::computeQpResidual()
 {
-  ADReal dudn = (_u_right[_qp] - _u_left[_qp]) /
-                (_face_info->rightCentroid() - _face_info->leftCentroid()).norm();
+  auto dudn = gradUDotNormal();
   ADReal k = (_coeff_left[_qp] + _coeff_right[_qp]) / 2;
   return -1 * k * dudn;
 }

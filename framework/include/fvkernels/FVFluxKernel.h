@@ -26,8 +26,12 @@ protected:
   // variables and _u, _grad_u, etc. will have their reconstructed values
   // extrapolated to/at the face.  Material properties will also have been
   // computed on the face using the face-reconstructed variable values.
-  //
   virtual ADReal computeQpResidual() = 0;
+
+  /// Calculates and returns "_grad_u dot _normal" used for diffusive terms.
+  /// If using any cross-diffusion corrections, etc. all those calculations
+  /// will be handled for appropriately by this function.
+  virtual ADReal gradUDotNormal();
 
   MooseVariableFV<Real> & _var;
 

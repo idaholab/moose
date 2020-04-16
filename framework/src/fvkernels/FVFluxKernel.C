@@ -117,3 +117,20 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   }
 }
 
+ADReal
+FVFluxKernel::gradUDotNormal()
+{
+  // We compute "grad_u dot _normal" by assuming the mesh is orthogonal, and
+  // recognizing that it is equivalent to delta u between the two cell
+  // centroids but for one unit in the normal direction.  We know delta u for
+  // the length between cell centroids (u_right - u_left) and then we just
+  // divide that by the distance between the centroids to convert it to delta
+  // u for one unit in the normal direction.  Because the _normal vector is
+  // defined to be outward from the left element, u_right-u_left gives delta u
+  // when moving in the positive normal direction.  So we divide by the
+  // (positive) distance between centroids because one unit in the normal
+  // direction is always positive movement.
+  ADReal dudn = (_u_right[_qp] - _u_left[_qp]) /
+                (_face_info->rightCentroid() - _face_info->leftCentroid()).norm();
+  return dudn;
+}
