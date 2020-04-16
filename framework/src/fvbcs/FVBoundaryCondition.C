@@ -67,4 +67,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
 {
   _subproblem.haveADObjects(true);
   addMooseVariableDependency(&_var);
+
+  if (getParam<bool>("use_displaced_mesh"))
+    paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");
 }
