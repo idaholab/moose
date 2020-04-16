@@ -69,7 +69,7 @@
     superlu = true
     min_parallel = 4
     abs_zero = 1e-5
-    rel_err = 1e-5
+    rel_err = 1e-4
     max_time = 800
     requirement = 'MOOSE shall support mechanics frictional contact problems. Legacy Solid Mechanics.'
   [../]
