@@ -61,6 +61,9 @@ std::ostream & operator<<(std::ostream & os, Interfaces & iface);
     return h;                                                                                      \
   }
 
+/// AttribTagBase tracks all (vector or matrix) tags associated with an object.
+/// When running queries, an object matches true if it has at least one tag in
+/// common with the tags in the query attribute.
 class AttribTagBase : public Attribute
 {
 public:
@@ -178,6 +181,9 @@ private:
   std::vector<SubdomainID> _vals;
 };
 
+/// AttribBoundaries tracks all boundary IDs associated with an object.
+/// When running queries, an object matches true if it has at least one
+/// boundary id in common with the boundary IDs in the query attribute.
 class AttribBoundaries : public Attribute
 {
 public:

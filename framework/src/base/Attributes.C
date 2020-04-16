@@ -70,7 +70,7 @@ AttribTagBase::isMatch(const Attribute & other) const
   if (a->_vals.size() == 0)
     return true; // the condition is empty tags - which we take to mean any tag should match
 
-  // return true if a single tag matches between the two attribute objects
+  // return true if any single tag matches between the two attribute objects
   for (auto val : _vals)
     if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
       return true;
