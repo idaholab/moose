@@ -516,11 +516,10 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
   _subproblem.getMooseApp()
       .theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVBoundaryCondition")
+      .template condition<AttribSystem>("FVDirichletBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttribBoundaries>(fi.boundaryIDs())
       .template condition<AttribVar>(_var_num)
-      .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
   _has_dirichlet_bc = bcs.size() > 0;

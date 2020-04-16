@@ -34,7 +34,6 @@ FVBoundaryCondition::validParams()
   params.addCoupledVar("displacements", "The displacements");
   params.declareControllable("enable");
   params.registerBase("FVBoundaryCondition");
-  params.registerSystemAttributeName("FVBoundaryCondition");
   return params;
 }
 

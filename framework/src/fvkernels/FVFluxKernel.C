@@ -10,6 +10,7 @@ FVFluxKernel::validParams()
 {
   InputParameters params = FVKernel::validParams();
   params += TwoMaterialPropertyInterface::validParams();
+  params.registerSystemAttributeName("FVFluxKernel");
   return params;
 }
 

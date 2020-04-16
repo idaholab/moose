@@ -30,13 +30,6 @@ enum class Interfaces
   Postprocessor = 1 << 10,
   VectorPostprocessor = 1 << 11,
   InterfaceUserObject = 1 << 12,
-  // TODO: andrew added support for custom setting a class's system attribute
-  // in the validParams function.  And then he modified the warehouse to grab
-  // this automatically rather than have the system specified manually when
-  // adding objects to the warehouse.  Remove these in favor of that approach.
-  FVFluxKernel = 1 << 13,
-  FVDirichletBC = 1 << 14,
-  FVFluxBC = 1 << 15,
 };
 
 template <>

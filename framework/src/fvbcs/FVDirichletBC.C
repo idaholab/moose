@@ -16,6 +16,7 @@ FVDirichletBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
   params.addRequiredParam<Real>("value", "value to enforce at the boundary face");
+  params.registerSystemAttributeName("FVDirichletBC");
   return params;
 }
 

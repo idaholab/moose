@@ -14,6 +14,7 @@ InputParameters
 FVFluxBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
+  params.registerSystemAttributeName("FVFluxBC");
   return params;
 }
 

@@ -46,15 +46,13 @@ CheckFVBCAction::act()
       std::vector<FVFluxBC *> flux_bcs;
       std::vector<FVDirichletBC *> dirichlet_bcs;
       the_warehouse.query()
-          .template condition<AttribSystem>("FVBoundaryCondition")
+          .template condition<AttribSystem>("FVFluxBC")
           .template condition<AttribVar>(var_num)
-          .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
           .queryInto(flux_bcs);
 
       the_warehouse.query()
-          .template condition<AttribSystem>("FVBoundaryCondition")
+          .template condition<AttribSystem>("FVDirichletBC")
           .template condition<AttribVar>(var_num)
-          .template condition<AttribInterfaces>(Interfaces::FVDirichletBC)
           .queryInto(dirichlet_bcs);
 
       std::set<BoundaryID> all_flux_side_ids;

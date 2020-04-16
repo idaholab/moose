@@ -15,7 +15,6 @@
 #include "MooseException.h"
 #include "MooseVariableFieldBase.h"
 #include "FVFluxKernel.h"
-#include "FVBoundaryCondition.h"
 #include "FVFluxBC.h"
 #include "FEProblem.h"
 #include "SwapBackSentinel.h"
@@ -24,7 +23,6 @@
 
 #include <set>
 
-class FVBoundaryCondition;
 class MooseVariableFVBase;
 
 /// This works like the Sentinel helper classes in MOOSE, except it is more
@@ -158,7 +156,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
   std::vector<FVKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVKernel")
+      .template condition<AttribSystem>("FVFluxKernel")
       .queryInto(kernels);
   if (kernels.size() == 0)
     return;
@@ -354,8 +352,7 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
   std::vector<FVFluxKernel *> kernels;
   auto q = _fe_problem.theWarehouse()
                .query()
-               .template condition<AttribSystem>("FVKernel")
-               .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
+               .template condition<AttribSystem>("FVFluxKernel")
                .template condition<AttribSubdomains>(_subdomain)
                .template condition<AttribVectorTags>(_tags)
                .template condition<AttribThread>(_tid)
@@ -380,11 +377,10 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVBoundaryCondition")
+      .template condition<AttribSystem>("FVFluxBC")
       .template condition<AttribBoundaries>(bnd_id)
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
-      .template condition<AttribInterfaces>(Interfaces::FVFluxBC)
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;
@@ -468,9 +464,8 @@ ComputeFVFluxThread<RangeType>::subdomainChanged()
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
-      .template condition<AttribSystem>("FVKernel")
+      .template condition<AttribSystem>("FVFluxKernel")
       .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribInterfaces>(Interfaces::FVFluxKernel)
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
       .queryInto(kernels);

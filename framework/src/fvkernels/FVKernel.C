@@ -30,7 +30,6 @@ FVKernel::validParams()
                                     Moose::RelationshipManagerType::COUPLING);
 
   params.registerBase("FVKernel");
-  params.registerSystemAttributeName("FVKernel");
   return params;
 }
 
