@@ -54,7 +54,8 @@ public:
   /**
    * determine the variable type given an FEType and number of components
    */
-  static std::string determineType(const FEType & fe_type, unsigned int components, bool is_fv);
+  static std::string
+  determineType(const FEType & fe_type, unsigned int components, bool is_fv = false);
 
 protected:
   /**
