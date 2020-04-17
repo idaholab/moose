@@ -22,8 +22,10 @@ public:
   static InputParameters validParams();
   FVElementalKernel(const InputParameters & parameters);
 
-  virtual void computeResidual() = 0;
-  virtual void computeJacobian() = 0;
+  virtual void computeResidual();
+  virtual void computeJacobian();
+  virtual void computeOffDiagJacobian();
+  virtual ADReal computeQpResidual() = 0;
 
 protected:
   MooseVariableFV<Real> & _var;

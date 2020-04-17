@@ -27,28 +27,8 @@ FVTimeKernel::FVTimeKernel(const InputParameters & parameters)
 {
 }
 
-void
-FVTimeKernel::computeResidual()
-{
-  prepareVectorTag(_assembly, _var.number());
-  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elem()->volume());
-  accumulateTaggedLocalResidual();
-}
-
 ADReal
 FVTimeKernel::computeQpResidual()
 {
   return _u_dot[_qp];
-}
-
-void
-FVTimeKernel::computeJacobian()
-{
-  prepareMatrixTag(_assembly, _var.number(), _var.number());
-  auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
-  size_t ad_offset = _var.number() * dofs_per_elem;
-  auto vol = _assembly.elem()->volume();
-  const auto r = computeQpResidual() * vol;
-  _local_ke(0, 0) += r.derivatives()[ad_offset];
-  accumulateTaggedLocalMatrix();
 }

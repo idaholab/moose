@@ -17,11 +17,8 @@ public:
   static InputParameters validParams();
   FVTimeKernel(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-
 protected:
-  virtual ADReal computeQpResidual();
+  ADReal computeQpResidual() override;
 
   const ADVariableValue & _u_dot;
 };
