@@ -318,3 +318,24 @@ TEST(MooseUtils, join)
   str = {"foo", "bar", "foobar", "", ""};
   EXPECT_EQ(MooseUtils::join(str, ";"), "foo;bar;foobar;;");
 }
+
+TEST(MooseUtils, hostname)
+{
+  // ok as long mooseError is not triggered
+  MooseUtils::hostname();
+}
+
+TEST(MooseUtils, symlink)
+{
+  // ok as long mooseError is not triggered
+  MooseUtils::createSymlink("data/example_file", "testlink");
+  MooseUtils::clearSymlink("testlink");
+}
+
+TEST(MooseUtils, fileSize) { EXPECT_EQ(MooseUtils::fileSize("data/example_file"), 92); }
+
+TEST(MooseUtils, realpath)
+{
+  // ok as long mooseError is not triggered
+  MooseUtils::realpath("data/example_file");
+}
