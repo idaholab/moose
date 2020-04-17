@@ -489,6 +489,10 @@ MooseMesh::update()
   buildBndElemList();
   cacheInfo();
 
+  // TODO: be smarter about when we actually need to rebuild face list.
+  // If, for example we don't have any FV variables, then we don't need to be
+  // doing this.  But variables aren't created until after the mesh.  So mabe
+  // we need to somehow lazily trigger this construction only if asked/needed.
   if (_needs_face_info)
     buildFaceInfo();
 }
