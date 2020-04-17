@@ -9,6 +9,7 @@
 
 import os
 import glob
+import platform
 
 def recursiveFindFile(current_path, glob_pattern, problems_dir="problems"):
     """
@@ -58,7 +59,10 @@ def searchForExe(start_dir=None, methods=None):
             methods = [method]
 
     for method in methods:
-        glob_pattern = "*-%s" % method
+        if platform.system() == 'Windows':
+            glob_pattern = "*-%s.exe" % method
+        else:
+            glob_pattern = "*-%s" % method
 
         if not start_dir:
             start_dir = os.getcwd()
