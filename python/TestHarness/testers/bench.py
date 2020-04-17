@@ -16,7 +16,6 @@ import shutil
 import csv
 import tempfile
 import threading
-import resource
 
 from TestHarness.testers.Tester import Tester
 
@@ -134,6 +133,13 @@ class SpeedTest(Tester):
 
     # override
     def checkRunnable(self, options):
+        # check if resource is available
+        try:
+            import resource
+        except Exception:
+            self.addCaveats('skipped (no resource)')
+            return False
+
         # if user is not explicitly running benchmarks, we only run moose once and just check
         # input - to make sure the benchmark isn't broken.
         if 'speedtests' not in options.runtags:
