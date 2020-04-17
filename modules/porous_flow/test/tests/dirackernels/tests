@@ -8,6 +8,15 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowSquarePulsePointSource'
     issues = '#6990'
   [../]
+  [./frompps]
+    type = 'CSVDiff'
+    input = 'frompps.i'
+    csvdiff = 'frompps.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall provide a mass point source/sink computed by a postprocessor'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPointSourceFromPostprocessor'
+    issues = '#15132'
+  [../]
   [./theis1]
     type = 'CSVDiff'
     input = 'theis1.i'
