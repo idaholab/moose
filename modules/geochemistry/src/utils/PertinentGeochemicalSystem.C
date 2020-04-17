@@ -567,9 +567,8 @@ PertinentGeochemicalSystem::createModel()
   }
 }
 
-ModelGeochemicalDatabase
-PertinentGeochemicalSystem::modelGeochemicalDatabaseCopy() const
+const ModelGeochemicalDatabase &
+PertinentGeochemicalSystem::modelGeochemicalDatabase() const
 {
-  ModelGeochemicalDatabase mgd = _model;
-  return mgd;
+  return _model;
 }

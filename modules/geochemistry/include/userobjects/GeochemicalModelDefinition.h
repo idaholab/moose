@@ -32,8 +32,8 @@ public:
   virtual void execute() override final;
   virtual void finalize() override final;
 
-  /// provides a copy of the pertinent geochemical database held by this object
-  ModelGeochemicalDatabase getDatabase() const;
+  /// provides a reference to the pertinent geochemical database held by this object
+  const ModelGeochemicalDatabase & getDatabase() const;
 
 private:
   const PertinentGeochemicalSystem _model;

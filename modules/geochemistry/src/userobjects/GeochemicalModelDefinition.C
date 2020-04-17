@@ -94,8 +94,8 @@ GeochemicalModelDefinition::finalize()
 {
 }
 
-ModelGeochemicalDatabase
+const ModelGeochemicalDatabase &
 GeochemicalModelDefinition::getDatabase() const
 {
-  return _model.modelGeochemicalDatabaseCopy();
+  return _model.modelGeochemicalDatabase();
 }

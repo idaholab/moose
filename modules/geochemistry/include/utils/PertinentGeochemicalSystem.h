@@ -238,8 +238,8 @@ public:
                              const std::vector<std::string> & kinetic_redox,
                              const std::vector<std::string> & kinetic_surface_species);
 
-  /// Return a copy of the ModelGeochemicalDatabase structure
-  ModelGeochemicalDatabase modelGeochemicalDatabaseCopy() const;
+  /// Return a reference to the ModelGeochemicalDatabase structure
+  const ModelGeochemicalDatabase & modelGeochemicalDatabase() const;
 
 private:
   /// The database

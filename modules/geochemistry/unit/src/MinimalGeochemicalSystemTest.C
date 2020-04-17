@@ -484,7 +484,7 @@ TEST(PertinentGeochemicalSystemTest, temperatures)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.temperatures, database.getTemperatures());
 }
@@ -507,7 +507,7 @@ TEST(PertinentGeochemicalSystemTest, names1)
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
                                    {">(s)FeOCa+"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
   for (const auto & sp : mgd.basis_species_index)
@@ -539,7 +539,7 @@ TEST(PertinentGeochemicalSystemTest, names2)
                                    {"Calcite_asdf", "Calcite"},
                                    {"CH4(aq)"},
                                    {">(s)FeOCa+", ">(s)FeO-"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
   for (const auto & sp : mgd.basis_species_index)
@@ -568,7 +568,7 @@ TEST(PertinentGeochemicalSystemTest, charge)
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
                                    {">(s)FeOCa+"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> charge_gold;
   charge_gold["H2O"] = 0.0;
@@ -611,7 +611,7 @@ TEST(PertinentGeochemicalSystemTest, radius)
                                    {},
                                    {"CH4(aq)"},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> radius_gold;
   radius_gold["H2O"] = 0.0;
@@ -650,7 +650,7 @@ TEST(PertinentGeochemicalSystemTest, molecular_weight)
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
                                    {">(s)FeOCa+"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> molecular_weight_gold;
   molecular_weight_gold["H2O"] = 18.0152;
@@ -694,7 +694,7 @@ TEST(PertinentGeochemicalSystemTest, molecular_volume)
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
                                    {">(s)FeOCa+"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> molecular_volume_gold;
   molecular_volume_gold["H2O"] = 0.0;
@@ -738,7 +738,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {},
                                     {"CH4(aq)"},
                                     {});
-  ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd1.surface_complexation_info.size(), 0);
 
@@ -751,7 +751,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {},
                                     {},
                                     {});
-  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd2.surface_complexation_info.count("Fe(OH)3(ppd)"), 1);
   ASSERT_EQ(mgd2.surface_complexation_info["Fe(OH)3(ppd)"].surface_area, 600.0);
@@ -767,7 +767,7 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {"Goethite"},
                                     {},
                                     {});
-  ModelGeochemicalDatabase mgd3 = model3.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd3 = model3.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd3.surface_complexation_info.count("Goethite"), 1);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].surface_area, 60.0);
@@ -789,13 +789,13 @@ TEST(PertinentGeochemicalSystemTest, GasChi)
                                     {},
                                     {"CH4(aq)"},
                                     {});
-  ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd1.gas_chi.size(), 0);
 
   PertinentGeochemicalSystem model2(
       database, {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
-  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd2.gas_chi.count("CH4(g)"), 1);
   ASSERT_EQ(mgd2.gas_chi["CH4(g)"][0], -537.779);
@@ -821,7 +821,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
                                    {">(s)FeO-", ">(s)FeOCa+"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 8);
   for (const auto & sp :
@@ -907,7 +907,7 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
                                    {},
                                    {"CH4(aq)"},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570);
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 1), -6.3660);
@@ -946,7 +946,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                                    {"Fe(OH)3(ppd)"},
                                    {},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 10);
   for (const auto & sp : {"CO2(aq)",
@@ -1047,7 +1047,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                                    {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
                                    {"(O-phth)--"},
                                    {">(s)FeO-"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 7);
   for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
@@ -1136,7 +1136,7 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
                                    {},
                                    {},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CO3--"], 0), 10.6169, eps);
@@ -1213,7 +1213,7 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
       {},
       {"CH4(aq)"},
       {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 9);
   for (const auto & sp :
@@ -1235,7 +1235,7 @@ TEST(PertinentGeochemicalSystemTest, isMineral)
                                    {},
                                    {},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -1253,7 +1253,7 @@ TEST(PertinentGeochemicalSystemTest, isMineral)
       {"Fe(OH)3(ppd)fake"},
       {"(O-phth)--"},
       {">(s)FeO-"});
-  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   for (const auto & species : mgd2.basis_species_index)
     ASSERT_EQ(mgd2.basis_species_mineral[species.second], false);
@@ -1280,7 +1280,7 @@ TEST(PertinentGeochemicalSystemTest, isGas)
                                    {},
                                    {},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_gas[species.second], false);

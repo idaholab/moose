@@ -29,7 +29,7 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
                                    {},
                                    {},
                                    {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   try
@@ -159,7 +159,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
   PertinentGeochemicalSystem model(
       database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
@@ -439,7 +439,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   // eqm species are: OH-, CO2(aq), CO3--, StoiCheckRedox, StoiCheckGas
   PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "H+", "HCO3-"}, {}, {"StoiCheckGas"}, {}, {}, {});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
@@ -717,7 +717,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
                                    {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
                                    {"(O-phth)--"},
                                    {">(s)FeO-"});
-  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabaseCopy();
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   ASSERT_EQ(mgd.basis_species_index.size(), 7);
