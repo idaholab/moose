@@ -1,4 +1,6 @@
 [Tests]
+  design = 'finite_volumes.md'
+  issues = '#14549'
   [./dirichlet]
     type = 'Exodiff'
     input = 'dirichlet.i'

@@ -5,5 +5,7 @@
     exodiff = 'fv_burger_out.e'
 
     requirement = 'The system shall be able to solve the Burgers equation in 1D using the FV method'
+    design = 'finite_volumes.md'
+    issues = '#14549'
   [../]
 []
