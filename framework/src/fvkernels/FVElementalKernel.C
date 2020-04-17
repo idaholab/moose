@@ -33,7 +33,8 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
                            Moose::VarKindType::VAR_NONLINEAR,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    _var(*mooseVariableFV())
+    _var(*mooseVariableFV()),
+    _u(_var.adSln())
 {
 }
 
