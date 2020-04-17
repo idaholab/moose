@@ -16,7 +16,7 @@ classes will be added.
 
 FVM boundary conditions are added to simulation input files in the `FVBCs` as in the example below.   
 
-!listing test/tests/kernels/fv_simple_diffusion/fv_simple_diffusion_neumann.i
+!listing test/tests/kernels/fv_simple_diffusion/neumann.i
          block=FVBCs
          id=first_fv_bc_example
          caption=Example of the FVBCs block in a [MOOSE] input file.

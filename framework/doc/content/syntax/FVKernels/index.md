@@ -26,7 +26,7 @@ defined by the equation:
 The time derivative term corresponds to the kernel named `time`, while
 the diffusion term is represented by the kernel named `diff`.
 
-!listing test/tests/kernels/fv_simple_diffusion/fv_transient_diffusion.i
+!listing test/tests/kernels/fv_simple_diffusion/transient.i
          block=FVKernels
          id=first_fv_kernel_example
          caption=Example of the FVKernels block in a [MOOSE] input file.
