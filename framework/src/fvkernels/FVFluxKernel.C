@@ -102,21 +102,39 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    // jacobian contribution of the residual for the left element to the right element's DOF:
-    // d/d_right (residual_left)
-    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
-    _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
-    accumulateTaggedLocalMatrix();
+    mooseAssert((ft == FaceInfo::VarFaceNeighbors::LEFT) == (_var.dofIndicesNeighbor().size() == 0),
+                "If the variable is only defined on the left hand side of the face, then that "
+                "means it should have no dof indices on the neighbor/right element. Conversely if "
+                "the variable is defined on both sides of the face, then it should have a non-zero "
+                "number of degrees of freedom on the neighbor/right element");
+
+    if (ft != FaceInfo::VarFaceNeighbors::LEFT)
+    {
+      // jacobian contribution of the residual for the left element to the right element's DOF:
+      // d/d_right (residual_left)
+      prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
+      _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
+      accumulateTaggedLocalMatrix();
+    }
   }
 
   if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
                          ft == FaceInfo::VarFaceNeighbors::BOTH))
   {
-    // jacobian contribution of the residual for the right element to the left element's DOF:
-    // d/d_left (residual_right)
-    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
-    _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
-    accumulateTaggedLocalMatrix();
+    mooseAssert((ft == FaceInfo::VarFaceNeighbors::RIGHT) == (_var.dofIndices().size() == 0),
+                "If the variable is only defined on the right hand side of the face, then that "
+                "means it should have no dof indices on the left element. Conversely if "
+                "the variable is defined on both sides of the face, then it should have a non-zero "
+                "number of degrees of freedom on the left element");
+
+    if (ft != FaceInfo::VarFaceNeighbors::RIGHT)
+    {
+      // jacobian contribution of the residual for the right element to the left element's DOF:
+      // d/d_left (residual_right)
+      prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
+      _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
+      accumulateTaggedLocalMatrix();
+    }
 
     // jacobian contribution of the residual for the right element to the right element's DOF:
     // d/d_right (residual_right)
