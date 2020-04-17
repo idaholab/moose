@@ -17,7 +17,9 @@
 #include <iterator>
 
 // Used for terminal width
+#ifndef __WIN32__
 #include <sys/ioctl.h>
+#endif
 #include <cstdlib>
 
 const unsigned short FormattedTable::_column_width = 15;
@@ -580,7 +582,14 @@ FormattedTable::clear()
 unsigned short
 FormattedTable::getTermWidth(bool use_environment) const
 {
+#ifndef __WIN32__
   struct winsize w;
+#else
+  struct
+  {
+    unsigned short ws_col;
+  } w;
+#endif
   /**
    * Initialize the value we intend to populate just in case
    * the system call fails
@@ -598,11 +607,13 @@ FormattedTable::getTermWidth(bool use_environment) const
   }
   else
   {
+#ifndef __WIN32__
     try
     {
       ioctl(0, TIOCGWINSZ, &w);
     }
     catch (...)
+#endif
     {
       // Something bad happened, make sure we have a sane value
       w.ws_col = std::numeric_limits<unsigned short>::max();

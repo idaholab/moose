@@ -292,7 +292,11 @@ const std::string FileInfo::basename() const
 
 const std::string FileInfo::realpath() const
 {
+#ifndef __WIN32__
   char * path = ::realpath(filename_.c_str(), nullptr);
+#else
+  char * path = filename_.c_str();
+#endif
   if (path != nullptr)
   {
     std::string temp(path);

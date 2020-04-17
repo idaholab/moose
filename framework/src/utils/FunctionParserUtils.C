@@ -70,7 +70,7 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
     _enable_auto_optimize(parameters.get<bool>("enable_auto_optimize") && !_disable_fpoptimizer),
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _evalerror_behavior(parameters.get<MooseEnum>("evalerror_behavior").getEnum<FailureMethod>()),
-    _nan(std::numeric_limits<Real>::quiet_NaN())
+    _quiet_nan(std::numeric_limits<Real>::quiet_NaN())
 {
 #ifndef LIBMESH_HAVE_FPARSER_JIT
   if (_enable_jit)
@@ -115,13 +115,13 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
   switch (_evalerror_behavior)
   {
     case FailureMethod::nan:
-      return _nan;
+      return _quiet_nan;
     case FailureMethod::nan_warning:
       mooseWarning("In ",
                    name,
                    ": DerivativeParsedMaterial function evaluation encountered an error: ",
                    _eval_error_msg[(error_code < 0 || error_code > 5) ? 0 : error_code]);
-      return _nan;
+      return _quiet_nan;
     case FailureMethod::error:
       mooseError("In ",
                  name,
@@ -135,7 +135,7 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
                      "\n Cutting timestep");
   }
 
-  return _nan;
+  return _quiet_nan;
 }
 
 void

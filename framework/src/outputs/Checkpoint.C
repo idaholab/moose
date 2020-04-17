@@ -21,6 +21,7 @@
 
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
+#include "libmesh/utility.h"
 
 registerMooseObject("MooseApp", Checkpoint);
 
@@ -78,7 +79,7 @@ Checkpoint::output(const ExecFlagType & /*type*/)
 {
   // Create the output directory
   std::string cp_dir = directory();
-  mkdir(cp_dir.c_str(), S_IRWXU | S_IRGRP);
+  Utility::mkdir(cp_dir.c_str());
 
   // Create the output filename
   std::string current_file = filename();

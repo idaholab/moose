@@ -18,6 +18,8 @@
 #include <unistd.h>
 #include <ctime>
 
+#include "libmesh/utility.h"
+
 defineLegacyParams(FileOutput);
 
 InputParameters
@@ -95,7 +97,7 @@ FileOutput::FileOutput(const InputParameters & parameters)
     {
       inc_path += '/' + path_names[i];
       if (access(inc_path.c_str(), W_OK) == -1)
-        if (mkdir(inc_path.c_str(), S_IRWXU | S_IRGRP) == -1)
+        if (Utility::mkdir(inc_path.c_str()) == -1)
           mooseError("Could not create directory: " + inc_path + " for file base: " + _file_base);
     }
   }

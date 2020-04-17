@@ -600,10 +600,14 @@ Parser::parse(const std::string & input_filename)
       std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
   {
+#ifndef __WIN32__
     char abspath[PATH_MAX + 1];
     if (!realpath(input_filename.c_str(), abspath))
       mooseError("Failed to resolve input file path '", input_filename, "'.");
     _input_filename = std::string(abspath);
+#else
+    _input_filename = input_filename;
+#endif
   }
 
   // vector for initializing active blocks

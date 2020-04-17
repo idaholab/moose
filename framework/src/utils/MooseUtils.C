@@ -390,12 +390,16 @@ hostname()
   char hostname[1024];
   hostname[1023] = '\0';
 
+#ifndef __WIN32__
   auto failure = gethostname(hostname, 1023);
 
   if (failure)
     mooseError("Failed to retrieve hostname!");
 
   return hostname;
+#else
+  return "Unknown";
+#endif
 }
 
 void
@@ -785,14 +789,19 @@ void
 createSymlink(const std::string & target, const std::string & link)
 {
   clearSymlink(link);
+#ifndef __WIN32__
   int err = symlink(target.c_str(), link.c_str());
   if (err != 0)
     mooseError("Failed to create symbolic link (via 'symlink') from ", target, " to ", link);
+#else
+  // TODO
+#endif
 }
 
 void
 clearSymlink(const std::string & link)
 {
+#ifndef __WIN32__
   struct stat sbuf;
   if (lstat(link.c_str(), &sbuf) == 0)
   {
@@ -800,6 +809,9 @@ clearSymlink(const std::string & link)
     if (err != 0)
       mooseError("Failed to remove symbolic link (via 'unlink') to ", link);
   }
+#else
+  // TODO
+#endif
 }
 
 std::size_t

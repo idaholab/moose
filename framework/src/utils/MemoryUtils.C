@@ -15,7 +15,7 @@
 #include <fstream>
 #include <array>
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #include <mach/task.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
@@ -23,6 +23,8 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
+#elif defined(__WIN32__)
+// we don't have a solution for windows yet
 #else
 #include <sys/sysinfo.h>
 #endif
@@ -53,11 +55,13 @@ getMemUnitsEnum()
 std::size_t
 getTotalRAM()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__)
   uint64_t hwmem_size;
   size_t length = sizeof(hwmem_size);
   if (0 <= sysctlbyname("hw.memsize", &hwmem_size, &length, NULL, 0))
     return hwmem_size;
+#elif defined(__WIN32__)
+  return 0;
 #else
   struct sysinfo si_data;
   if (!sysinfo(&si_data))
@@ -89,7 +93,9 @@ getMemoryStats(Stats & stats)
       stat_stream >> val[i];
 
     // resident size is reported as number of pages in /proc
+#ifndef __WIN32__
     val[index_resident_size] *= sysconf(_SC_PAGE_SIZE);
+#endif
   }
   else
   {
@@ -97,7 +103,7 @@ getMemoryStats(Stats & stats)
     val.fill(0);
 
 // obtain mach task info on mac OS
-#ifdef __APPLE__
+#if defined(__APPLE__)
     struct task_basic_info t_info;
     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
     if (KERN_SUCCESS == task_info(mach_task_self(),

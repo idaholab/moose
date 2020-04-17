@@ -36,7 +36,9 @@
 #include <algorithm>
 
 // Call to "uname"
+#ifdef LIBMESH_HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
+#endif
 
 defineLegacyParams(MultiApp);
 
@@ -784,10 +786,13 @@ MultiApp::buildComm()
   ierr = MPI_Comm_rank(_communicator.get(), &_orig_rank);
   mooseCheckMPIErr(ierr);
 
+#ifdef LIBMESH_HAVE_SYS_UTSNAME_H
   struct utsname sysInfo;
   uname(&sysInfo);
-
   _node_name = sysInfo.nodename;
+#else
+  _node_name = "Unknown";
+#endif
 
   // If we have more apps than processors then we're just going to divide up the work
   if (_total_num_apps >= (unsigned)_orig_num_procs)
