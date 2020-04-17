@@ -394,34 +394,28 @@ SymmAnisotropicElasticityTensor::calculateEntries(unsigned int /*qp*/)
 void
 SymmAnisotropicElasticityTensor::show_dt_matrix()
 {
-  printf("\nSymmAnisotropicElasticityTensor::show_dt_matrix()\n");
+  Moose::out << "\nSymmAnisotropicElasticityTensor::show_dt_matrix()\n";
 
   for (int j = 0; j < 6; ++j)
   {
-    printf("  ");
+    Moose::out << "  ";
     for (int i = 0; i < 6; ++i)
-    {
-      printf("%12.4f  ", _dt(i, j));
-    }
-    printf("\n");
+      Moose::out << _dt(i, j);
+    Moose::out << '\n';
   }
 }
 
 void
 SymmAnisotropicElasticityTensor::show_r_matrix()
 {
-  printf("\nSymmAnisotropicElasticityTensor::show_r_matrix()  Euler angles are (%f, %f, %f)\n",
-         _euler_angle[0],
-         _euler_angle[1],
-         _euler_angle[2]);
+  Moose::out << "\nSymmAnisotropicElasticityTensor::show_r_matrix()  Euler angles are ("
+             << _euler_angle[0] << ", " << _euler_angle[1] << ", " << _euler_angle[2] << ")\n";
 
   for (int j = 0; j < 3; ++j)
   {
-    printf("  ");
+    Moose::out << "  ";
     for (int i = 0; i < 3; ++i)
-    {
-      printf("%8.4f  ", _r(i, j));
-    }
-    printf("\n");
+      Moose::out << _r(i, j);
+    Moose::out << '\n';
   }
 }
