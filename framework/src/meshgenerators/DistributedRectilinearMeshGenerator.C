@@ -1028,6 +1028,10 @@ DistributedRectilinearMeshGenerator::generate()
   mesh->set_mesh_dimension(_dim);
   mesh->set_spatial_dimension(_dim);
 
+  // Let the mesh know that it's not serialized; the libMesh idiom
+  // here "deletes" 0 elements.
+  mesh->delete_remote_elements();
+
   // Switching on MooseEnum
   switch (_dim)
   {
