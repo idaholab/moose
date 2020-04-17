@@ -34,8 +34,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
+#ifndef __WIN32__
 #include <sys/utsname.h>
 #include <sys/times.h>
+#endif
 #include <time.h>
 
 #ifndef __USE_XOPEN
@@ -52,7 +54,6 @@ void add_to_log(const char *my_name, double)
   char log_string[LEN];
 
   double u_time, s_time;
-  struct utsname sys_info;
 
   /* Don't log information if this environment variable is set */
   if (getenv("SEACAS_NO_LOGGING") != NULL) {
@@ -70,10 +71,13 @@ void add_to_log(const char *my_name, double)
       FILE *audit = fopen(filename, "a");
       if (audit != NULL) {
 
-	char *username = getlogin();
-	if (username == NULL) {
+  char *username;
+#ifndef __WIN32__
+	username = getlogin();
+	if (username == NULL)
+#endif
 	  username = getenv("LOGNAME");
-	}
+
 
 	const char *codename = strrchr (my_name, '/');
 	if (codename == NULL)
@@ -89,17 +93,28 @@ void add_to_log(const char *my_name, double)
 
 	{
 	  int ticks_per_second;
+  #ifndef __WIN32__
 	  struct tms time_buf;
 	  times(&time_buf);
 	  ticks_per_second = sysconf(_SC_CLK_TCK);
 	  u_time = (double)(time_buf.tms_utime + time_buf.tms_cutime) / ticks_per_second;
 	  s_time = (double)(time_buf.tms_stime + time_buf.tms_cstime) / ticks_per_second;
+  #else
+    u_time = 0;
+    s_time = 0;
+  #endif
 	}
 
+#ifndef __WIN32__
+  struct utsname sys_info;
 	uname(&sys_info);
+  const char * nodename = sys_info.nodename;
+#else
+  const char * nodename = "Unknown";
+#endif
 
 	sprintf(log_string, "%s %s %s %.3fu %.3fs 0:00.00 0.0%% 0+0k 0+0io 0pf+0w %s\n",
-		my_name, username, time_string, u_time, s_time, sys_info.nodename);
+		my_name, username, time_string, u_time, s_time, nodename);
 
 	fprintf(audit, "%s", log_string);
 	fclose(audit);

@@ -146,6 +146,7 @@ FileInfo::is_dir() const
 bool
 FileInfo::is_symlink() const
 {
+#ifndef __WIN32__
   struct stat s
   {
   };
@@ -153,6 +154,7 @@ FileInfo::is_symlink() const
   {
     return S_ISLNK(s.st_mode);
   }
+#endif
 
   return false;
 }
@@ -294,15 +296,13 @@ const std::string FileInfo::realpath() const
 {
 #ifndef __WIN32__
   char * path = ::realpath(filename_.c_str(), nullptr);
-#else
-  char * path = filename_.c_str();
-#endif
   if (path != nullptr)
   {
     std::string temp(path);
     free(path);
     return temp;
   }
+#endif
   {
     return filename_;
   }
