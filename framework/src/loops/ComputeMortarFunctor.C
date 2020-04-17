@@ -87,22 +87,20 @@ ComputeMortarFunctor::operator()()
     // Get a reference to the MortarSegmentInfo for this Elem.
     const MortarSegmentInfo & msinfo = _amg.msm_elem_to_info.at(msm_elem);
 
-    // There may be no contribution from the master side if it is not "in contact".
-    bool has_slave = msinfo.slave_elem ? true : false;
-    _has_master = msinfo.has_master();
-
-    if (!has_slave)
-      mooseError("Error, mortar segment has no slave element associated with it!");
-
-    // Pointer to the interior parent.
-    const Elem * slave_ip = msinfo.slave_elem->interior_parent();
-
-    // Look up which side of the interior parent we are.
-    unsigned int slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
-
     // The lower-dimensional slave side element associated with this
     // mortar segment is simply msinfo.slave_elem.
     const Elem * slave_face_elem = msinfo.slave_elem;
+    if (!slave_face_elem)
+      mooseError("Error, mortar segment has no slave element associated with it!");
+
+    // There may be no contribution from the master side if it is not "in contact".
+    _has_master = msinfo.has_master();
+
+    // Pointer to the interior parent.
+    const Elem * slave_ip = slave_face_elem->interior_parent();
+
+    // Look up which side of the interior parent we are.
+    unsigned int slave_side_id = slave_ip->which_side_am_i(slave_face_elem);
 
     // These only get initialized if there is a master Elem associated to this segment.
     const Elem * master_ip = libmesh_nullptr;
@@ -140,14 +138,6 @@ ComputeMortarFunctor::operator()()
     _fe_problem.reinitElemFaceRef(
         reinit_slave_elem, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
 
-    // reinit higher-dimensional element face materials
-    {
-      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-      // still remember to swap back during stack unwinding.
-      SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, /*tid=*/0);
-      _fe_problem.reinitMaterialsFace(slave_ip->subdomain_id(), /*tid=*/0);
-    }
-
     if (_has_master)
     {
       //  Compute custom integration points for the master side
@@ -182,6 +172,15 @@ ComputeMortarFunctor::operator()()
     // the slave face. This must be done last after the dof indices have been prepared for the
     // slave (element) and master (neighbor)
     _subproblem.reinitLowerDElemRef(slave_face_elem, &custom_xi1_pts);
+
+    // reinit higher-dimensional element face materials. Do this after we reinit lower-d variables
+    // in case we want to pull the lower-d variable values into the slave face materials
+    {
+      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+      // still remember to swap back during stack unwinding.
+      SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, /*tid=*/0);
+      _fe_problem.reinitMaterialsFace(slave_ip->subdomain_id(), /*tid=*/0);
+    }
 
     if (!_fe_problem.currentlyComputingJacobian())
     {
