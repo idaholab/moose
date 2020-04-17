@@ -21,3 +21,7 @@ MooseVariableField<OutputType>::MooseVariableField(const InputParameters & param
   : MooseVariableFieldBase(parameters)
 {
 }
+
+template class MooseVariableField<Real>;
+template class MooseVariableField<RealVectorValue>;
+template class MooseVariableField<RealEigenVector>;

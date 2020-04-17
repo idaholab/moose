@@ -9,6 +9,7 @@
 
 #include "FVFluxBC.h"
 #include "MooseVariableFV.h"
+#include "SystemBase.h"
 
 InputParameters
 FVFluxBC::validParams()

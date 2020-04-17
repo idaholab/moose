@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FVKernel.h"
-
+#include "MooseVariableFV.h"
 #include "MooseVariableInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 

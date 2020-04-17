@@ -13,6 +13,7 @@
 #include "MooseVariableFEBase.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "MooseVariableField.h"
 #include "MooseVariableData.h"
 
 #include "libmesh/numeric_vector.h"

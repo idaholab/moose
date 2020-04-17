@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseVariableData.h"
 #include "MooseArray.h"
 #include "MooseTypes.h"
 
@@ -20,11 +19,15 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/dof_map.h"
 #include "DualRealOps.h"
+#include "SubProblem.h"
 
 #include <functional>
 #include <vector>
 
 class FaceInfo;
+class SystemBase;
+class TimeIntegrator;
+class Assembly;
 
 template <typename>
 class MooseVariableFV;
@@ -33,23 +36,29 @@ template <typename OutputType>
 class MooseVariableDataFV
 {
 public:
-  using OutputGradient = typename MooseVariableData<OutputType>::OutputGradient;
-  using OutputSecond = typename MooseVariableData<OutputType>::OutputSecond;
-  using OutputDivergence = typename MooseVariableData<OutputType>::OutputDivergence;
+  // type for gradient, second and divergence of template class OutputType
+  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
-  using FieldVariableValue = typename MooseVariableData<OutputType>::FieldVariableValue;
-  using FieldVariableGradient = typename MooseVariableData<OutputType>::FieldVariableGradient;
-  using FieldVariableSecond = typename MooseVariableData<OutputType>::FieldVariableSecond;
-  using FieldVariableCurl = typename MooseVariableData<OutputType>::FieldVariableCurl;
-  using FieldVariableDivergence = typename MooseVariableData<OutputType>::FieldVariableDivergence;
+  // shortcut for types storing values on quadrature points
+  typedef MooseArray<OutputType> FieldVariableValue;
+  typedef MooseArray<OutputGradient> FieldVariableGradient;
+  typedef MooseArray<OutputSecond> FieldVariableSecond;
+  typedef MooseArray<OutputType> FieldVariableCurl;
+  typedef MooseArray<OutputDivergence> FieldVariableDivergence;
 
-  using OutputShape = typename MooseVariableData<OutputType>::OutputShape;
-  using OutputShapeGradient = typename MooseVariableData<OutputType>::OutputShapeGradient;
-  using OutputShapeSecond = typename MooseVariableData<OutputType>::OutputShapeSecond;
-  using OutputShapeDivergence = typename MooseVariableData<OutputType>::OutputShapeDivergence;
+  // shape function type for the template class OutputType
+  typedef typename Moose::ShapeType<OutputType>::type OutputShape;
 
-  using OutputData = typename MooseVariableData<OutputType>::OutputData;
-  using DoFValue = typename MooseVariableData<OutputType>::DoFValue;
+  // type for gradient, second and divergence of shape functions of template class OutputType
+  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+
+  // DoF value type for the template class OutputType
+  typedef typename Moose::DOFType<OutputType>::type OutputData;
+  typedef MooseArray<OutputData> DoFValue;
 
   MooseVariableDataFV(const MooseVariableFV<OutputType> & var,
                       const SystemBase & sys,

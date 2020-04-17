@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableDataFV.h"
+#include "MooseVariableField.h"
 #include "Assembly.h"
 #include "MooseError.h"
 #include "DisplacedSystem.h"
@@ -17,6 +18,7 @@
 #include "MooseMesh.h"
 #include "Attributes.h"
 #include "FVDirichletBC.h"
+#include "SubProblem.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"

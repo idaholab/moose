@@ -4,6 +4,7 @@
 #include "TaggingInterface.h"
 #include "TransientInterface.h"
 #include "BlockRestrictable.h"
+#include "Assembly.h"
 
 class SubProblem;
 

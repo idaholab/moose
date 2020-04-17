@@ -9,6 +9,8 @@
 
 #include "FVTimeKernel.h"
 
+#include "SystemBase.h"
+
 registerADMooseObject("MooseApp", FVTimeKernel);
 
 InputParameters
