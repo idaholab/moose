@@ -201,15 +201,10 @@ NodalFrictionalConstraint::updateConstrainedNodes()
         }
       }
     }
-    /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
-    {
-        printf("in here \n");
-        mooseError("No master node located at the same elevation as the slave node.");
-    }*/
   }
-  printf("total slave nodes, master nodes: %lu, %lu \n",
-         _master_conn.size(),
-         _master_node_vector.size());
+
+  _console << "total slave nodes, master nodes: " << _master_conn.size() << ", "
+           << _master_node_vector.size() << '\n';
 }
 
 void

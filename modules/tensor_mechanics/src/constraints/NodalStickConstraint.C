@@ -182,11 +182,6 @@ NodalStickConstraint::updateConstrainedNodes()
         }
       }
     }
-    /*if (_master_conn[j] == std::numeric_limits<unsigned int>::max())
-    {
-        printf("in here \n");
-        mooseError("No master node located at the same elevation as the slave node.");
-    }*/
   }
 }
 
