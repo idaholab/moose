@@ -8,6 +8,15 @@
 
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
   [../]
+  [./dirichlet_full_jac]
+    type = 'Exodiff'
+    input = 'dirichlet.i'
+    exodiff = 'dirichlet_out.e'
+    prereq = 'dirichlet'
+    cli_args = 'Executioner/solve_type=NEWTON'
+
+    requirement = 'The system shall be able to compute a full Jacobian matrix when performing finite volume computations'
+  [../]
 
   [./neumann]
     type = 'Exodiff'
