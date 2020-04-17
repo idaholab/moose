@@ -28,16 +28,16 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters)
 {
   _element_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
-      *this, _sys, _tid, Moose::ElementType::Element, _assembly.elem());
+      *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
-      *this, _sys, _tid, Moose::ElementType::Neighbor, _assembly.neighbor());
+      *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 }
 
 template <typename OutputType>
 const std::set<SubdomainID> &
 MooseVariableFV<OutputType>::activeSubdomains() const
 {
-  return _sys.system().variable(_var_num).active_subdomains();
+  return this->_sys.system().variable(_var_num).active_subdomains();
 }
 
 template <typename OutputType>
@@ -58,7 +58,7 @@ template <typename OutputType>
 bool
 MooseVariableFV<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
 {
-  return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
+  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
 
 template <typename OutputType>
@@ -107,14 +107,14 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::addSolution(const DenseVector<Number> & v)
 {
-  _element_data->addSolution(_sys.solution(), v);
+  _element_data->addSolution(this->_sys.solution(), v);
 }
 
 template <typename OutputType>
 void
 MooseVariableFV<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
 {
-  _neighbor_data->addSolution(_sys.solution(), v);
+  _neighbor_data->addSolution(this->_sys.solution(), v);
 }
 
 template <typename OutputType>
@@ -306,9 +306,9 @@ OutputType
 MooseVariableFV<OutputType>::getValue(const Elem * elem) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
   mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-  OutputType value = (*_sys.currentSolution())(dof_indices[0]);
+  OutputType value = (*this->_sys.currentSolution())(dof_indices[0]);
   return value;
 }
 

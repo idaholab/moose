@@ -23,35 +23,35 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
                                                                      _sys,
                                                                      _tid,
                                                                      Moose::ElementType::Element,
-                                                                     _assembly.qRule(),
-                                                                     _assembly.qRuleFace(),
-                                                                     _assembly.node(),
-                                                                     _assembly.elem());
-  _neighbor_data =
-      libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                         _sys,
-                                                         _tid,
-                                                         Moose::ElementType::Neighbor,
-                                                         _assembly.qRuleNeighbor(), // Place holder
-                                                         _assembly.qRuleNeighbor(),
-                                                         _assembly.nodeNeighbor(),
-                                                         _assembly.neighbor());
-  _lower_data =
-      libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                         _sys,
-                                                         _tid,
-                                                         Moose::ElementType::Lower,
-                                                         _assembly.qRuleFace(),
-                                                         _assembly.qRuleFace(), // Place holder
-                                                         _assembly.node(),      // Place holder
-                                                         _assembly.lowerDElem());
+                                                                     this->_assembly.qRule(),
+                                                                     this->_assembly.qRuleFace(),
+                                                                     this->_assembly.node(),
+                                                                     this->_assembly.elem());
+  _neighbor_data = libmesh_make_unique<MooseVariableData<OutputType>>(
+      *this,
+      _sys,
+      _tid,
+      Moose::ElementType::Neighbor,
+      this->_assembly.qRuleNeighbor(), // Place holder
+      this->_assembly.qRuleNeighbor(),
+      this->_assembly.nodeNeighbor(),
+      this->_assembly.neighbor());
+  _lower_data = libmesh_make_unique<MooseVariableData<OutputType>>(
+      *this,
+      _sys,
+      _tid,
+      Moose::ElementType::Lower,
+      this->_assembly.qRuleFace(),
+      this->_assembly.qRuleFace(), // Place holder
+      this->_assembly.node(),      // Place holder
+      this->_assembly.lowerDElem());
 }
 
 template <typename OutputType>
 const std::set<SubdomainID> &
 MooseVariableFE<OutputType>::activeSubdomains() const
 {
-  return _sys.system().variable(_var_num).active_subdomains();
+  return this->_sys.system().variable(_var_num).active_subdomains();
 }
 
 template <typename OutputType>
@@ -72,7 +72,7 @@ template <typename OutputType>
 bool
 MooseVariableFE<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
 {
-  return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
+  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
 
 template <typename OutputType>
@@ -215,14 +215,14 @@ template <typename OutputType>
 void
 MooseVariableFE<OutputType>::addSolution(const DenseVector<Number> & v)
 {
-  _element_data->addSolution(_sys.solution(), v);
+  _element_data->addSolution(this->_sys.solution(), v);
 }
 
 template <typename OutputType>
 void
 MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
 {
-  _neighbor_data->addSolution(_sys.solution(), v);
+  _neighbor_data->addSolution(this->_sys.solution(), v);
 }
 
 template <typename OutputType>
@@ -440,7 +440,7 @@ MooseVariableFE<OutputType>::getValue(const Elem * elem,
                                       const std::vector<std::vector<OutputShape>> & phi) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
   OutputType value = 0;
   if (isNodal())
@@ -451,13 +451,13 @@ MooseVariableFE<OutputType>::getValue(const Elem * elem,
     for (unsigned int i = 0; i < dof_indices.size(); ++i)
     {
       // The zero index is because we only have one point that the phis are evaluated at
-      value += phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);
+      value += phi[i][0] * (*this->_sys.currentSolution())(dof_indices[i]);
     }
   }
   else
   {
     mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-    value = (*_sys.currentSolution())(dof_indices[0]);
+    value = (*this->_sys.currentSolution())(dof_indices[0]);
   }
 
   return value;
@@ -469,7 +469,7 @@ MooseVariableFE<RealEigenVector>::getValue(const Elem * elem,
                                            const std::vector<std::vector<Real>> & phi) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
   RealEigenVector value(_count);
   if (isNodal())
@@ -478,7 +478,7 @@ MooseVariableFE<RealEigenVector>::getValue(const Elem * elem,
       for (unsigned int j = 0; j < _count; j++)
       {
         // The zero index is because we only have one point that the phis are evaluated at
-        value(j) += phi[i][0] * (*_sys.currentSolution())(dof_indices[i] + j);
+        value(j) += phi[i][0] * (*this->_sys.currentSolution())(dof_indices[i] + j);
       }
   }
   else
@@ -487,8 +487,8 @@ MooseVariableFE<RealEigenVector>::getValue(const Elem * elem,
     unsigned int n = 0;
     for (unsigned int j = 0; j < _count; j++)
     {
-      value(j) = (*_sys.currentSolution())(dof_indices[0] + n);
-      n += _dof_indices.size();
+      value(j) = (*this->_sys.currentSolution())(dof_indices[0] + n);
+      n += this->_dof_indices.size();
     }
   }
 
@@ -503,7 +503,7 @@ MooseVariableFE<OutputType>::getGradient(
         grad_phi) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
   typename OutputTools<OutputType>::OutputGradient value;
   if (isNodal())
@@ -511,7 +511,7 @@ MooseVariableFE<OutputType>::getGradient(
     for (unsigned int i = 0; i < dof_indices.size(); ++i)
     {
       // The zero index is because we only have one point that the phis are evaluated at
-      value += grad_phi[i][0] * (*_sys.currentSolution())(dof_indices[i]);
+      value += grad_phi[i][0] * (*this->_sys.currentSolution())(dof_indices[i]);
     }
   }
   else
@@ -529,7 +529,7 @@ MooseVariableFE<RealEigenVector>::getGradient(
     const Elem * elem, const std::vector<std::vector<RealVectorValue>> & grad_phi) const
 {
   std::vector<dof_id_type> dof_indices;
-  _dof_map.dof_indices(elem, dof_indices, _var_num);
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
 
   RealVectorArrayValue value(_count, LIBMESH_DIM);
   if (isNodal())
@@ -539,7 +539,7 @@ MooseVariableFE<RealEigenVector>::getGradient(
         for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
         {
           // The zero index is because we only have one point that the phis are evaluated at
-          value(j, k) += grad_phi[i][0](k) * (*_sys.currentSolution())(dof_indices[i] + j);
+          value(j, k) += grad_phi[i][0](k) * (*this->_sys.currentSolution())(dof_indices[i] + j);
         }
   }
   else
