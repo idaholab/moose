@@ -76,6 +76,10 @@ MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properti
 ################################################################################
 GEN_REVISION  := no
 
+# The ordering of the following is important! This is processed from the top down,
+# therefore any modules with dependencies must have their dependent module's
+# application(s) defined first.
+
 ifeq ($(CHEMICAL_REACTIONS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
   APPLICATION_NAME   := chemical_reactions
