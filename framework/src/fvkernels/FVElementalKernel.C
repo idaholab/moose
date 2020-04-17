@@ -69,6 +69,10 @@ FVElementalKernel::computeOffDiagJacobian()
     MooseVariableFieldBase & ivariable = *(it.first);
     MooseVariableFieldBase & jvariable = *(it.second);
 
+    // We currently only support coupling to other FV variables
+    if (!jvariable.isFV())
+      continue;
+
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
 
