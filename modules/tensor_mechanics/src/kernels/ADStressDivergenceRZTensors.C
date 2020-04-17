@@ -13,13 +13,12 @@
 #include "ElasticityTensorTools.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceRZTensors);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStressDivergenceRZTensors<compute_stage>::validParams()
+ADStressDivergenceRZTensors::validParams()
 {
-  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  InputParameters params = ADStressDivergenceTensors::validParams();
   params.addClassDescription(
       "Calculate stress divergence for an axisymmetric problem in cylindrical coordinates.");
   params.addRequiredRangeCheckedParam<unsigned int>(
@@ -31,25 +30,21 @@ ADStressDivergenceRZTensors<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStressDivergenceRZTensors<compute_stage>::ADStressDivergenceRZTensors(
-    const InputParameters & parameters)
-  : ADStressDivergenceTensors<compute_stage>(parameters)
+ADStressDivergenceRZTensors::ADStressDivergenceRZTensors(const InputParameters & parameters)
+  : ADStressDivergenceTensors(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressDivergenceRZTensors<compute_stage>::initialSetup()
+ADStressDivergenceRZTensors::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system in the Problem block must be set to RZ for axisymmetric "
                "geometries.");
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADStressDivergenceRZTensors<compute_stage>::computeQpResidual()
+ADStressDivergenceRZTensors::computeQpResidual()
 {
   ADReal div = 0.0;
   if (_component == 0)
@@ -78,9 +73,8 @@ ADStressDivergenceRZTensors<compute_stage>::computeQpResidual()
   return div;
 }
 
-template <ComputeStage compute_stage>
 void
-ADStressDivergenceRZTensors<compute_stage>::precalculateResidual()
+ADStressDivergenceRZTensors::precalculateResidual()
 {
   if (!_volumetric_locking_correction)
     return;

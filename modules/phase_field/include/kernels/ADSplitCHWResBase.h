@@ -12,18 +12,13 @@
 #include "ADKernelGrad.h"
 #include "DerivativeMaterialInterface.h"
 
-#define usingSplitCHWResBase(T)                                                                    \
-  usingKernelGradMembers;                                                                          \
-  using ADSplitCHWResBase<compute_stage, T>::_mob_name;                                            \
-  using ADSplitCHWResBase<compute_stage, T>::_mob
-
 /**
  * ADSplitCHWResBase implements the residual for the chemical potential in the
  * split form of the Cahn-Hilliard equation in a general way that can be templated
  * to a scalar or tensor mobility.
  */
-template <ComputeStage compute_stage, typename T>
-class ADSplitCHWResBase : public ADKernelGrad<compute_stage>
+template <typename T>
+class ADSplitCHWResBase : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
@@ -34,31 +29,29 @@ protected:
   virtual ADRealVectorValue precomputeQpResidual();
 
   const MaterialPropertyName _mob_name;
-  const ADMaterialProperty(T) & _mob;
-
-  usingKernelGradMembers;
+  const ADMaterialProperty<T> & _mob;
 };
 
-template <ComputeStage compute_stage, typename T>
-ADSplitCHWResBase<compute_stage, T>::ADSplitCHWResBase(const InputParameters & parameters)
-  : ADKernelGrad<compute_stage>(parameters),
+template <typename T>
+ADSplitCHWResBase<T>::ADSplitCHWResBase(const InputParameters & parameters)
+  : ADKernelGrad(parameters),
     _mob_name(getParam<MaterialPropertyName>("mob_name")),
     _mob(getADMaterialProperty<T>("mob_name"))
 {
 }
 
-template <ComputeStage compute_stage, typename T>
+template <typename T>
 ADRealVectorValue
-ADSplitCHWResBase<compute_stage, T>::precomputeQpResidual()
+ADSplitCHWResBase<T>::precomputeQpResidual()
 {
   return _mob[_qp] * _grad_u[_qp];
 }
 
-template <ComputeStage compute_stage, typename T>
+template <typename T>
 InputParameters
-ADSplitCHWResBase<compute_stage, T>::validParams()
+ADSplitCHWResBase<T>::validParams()
 {
-  InputParameters params = ADKernelGrad<compute_stage>::validParams();
+  InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription(
       "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
   params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");

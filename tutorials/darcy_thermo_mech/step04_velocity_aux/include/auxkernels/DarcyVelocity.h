@@ -34,6 +34,6 @@ protected:
   const VariableGradient & _pressure_gradient;
 
   /// Holds the permeability and viscosity from the material system
-  const MaterialProperty<Real> & _permeability;
-  const MaterialProperty<Real> & _viscosity;
+  const ADMaterialProperty<Real> & _permeability;
+  const ADMaterialProperty<Real> & _viscosity;
 };

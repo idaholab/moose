@@ -11,20 +11,10 @@
 
 #include "ADNodalBC.h"
 
-#define usingDirichletBCBaseMembers                                                                \
-  usingNodalBCMembers;                                                                             \
-  using ADDirichletBCBase<compute_stage>::computeQpValue
-
-template <ComputeStage>
-class ADDirichletBCBase;
-
-declareADValidParams(ADDirichletBCBase);
-
 /**
  * Base class for automatic differentiation Dirichlet BCs
  */
-template <ComputeStage compute_stage>
-class ADDirichletBCBase : public ADNodalBC<compute_stage>
+class ADDirichletBCBase : public ADNodalBC
 {
 public:
   ADDirichletBCBase(const InputParameters & parameters);
@@ -48,6 +38,4 @@ protected:
 
   /// Whether or not the value is to be preset
   const bool _preset;
-
-  usingNodalBCMembers;
 };

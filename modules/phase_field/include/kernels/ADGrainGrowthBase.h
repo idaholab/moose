@@ -11,20 +11,13 @@
 
 #include "ADAllenCahnBase.h"
 
-#define usingGrainGrowthBaseMembers                                                                \
-  usingAllenCahnBaseMembers(Real);                                                                 \
-  using ADGrainGrowthBase<compute_stage>::_op_num;                                                 \
-  using ADGrainGrowthBase<compute_stage>::_vals;                                                   \
-  using ADGrainGrowthBase<compute_stage>::_mu
-
 /**
  * This is the base class for kernels that calculate the residual for grain growth.
  * It calculates the residual of the ith order parameter, and the values of
  * all other order parameters are coupled variables and are stored in vals.
  * This is the AD equivalent of the ADGrainGrowthBase class.
  */
-template <ComputeStage compute_stage>
-class ADGrainGrowthBase : public ADAllenCahnBase<compute_stage, Real>
+class ADGrainGrowthBase : public ADAllenCahnBase<Real>
 {
 public:
   static InputParameters validParams();
@@ -34,7 +27,5 @@ public:
 protected:
   const unsigned int _op_num;
   std::vector<const ADVariableValue *> _vals;
-  const ADMaterialProperty(Real) & _mu;
-
-  usingAllenCahnBaseMembers(Real);
+  const ADMaterialProperty<Real> & _mu;
 };

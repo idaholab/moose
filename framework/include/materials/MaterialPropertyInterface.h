@@ -14,7 +14,6 @@
 #include "FEProblemBase.h"
 #include "MooseTypes.h"
 #include "MaterialData.h"
-#include "MemberTemplateMacros.h"
 #include "MathUtils.h"
 
 // Forward declarations
@@ -54,13 +53,23 @@ public:
    * @return Reference to the desired material property
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
   template <typename T>
-  const ADMaterialPropertyObject<T> & getADMaterialPropertyTempl(const std::string & name);
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
+  {
+    return getADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
+  {
+    return getMaterialProperty<T>(name);
+  }
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlderTempl(const std::string & name);
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   ///@}
 
   ///@{
@@ -71,15 +80,13 @@ public:
    * @return Reference to the material property with the name 'name'
    */
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyByNameTempl(const MaterialPropertyName & name);
+  const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
-  const ADMaterialPropertyObject<T> &
-  getADMaterialPropertyByNameTempl(const MaterialPropertyName & name);
+  const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOldByNameTempl(const MaterialPropertyName & name);
+  const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
-  const MaterialProperty<T> &
-  getMaterialPropertyOlderByNameTempl(const MaterialPropertyName & name);
+  const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
   ///@}
 
   /**
@@ -148,10 +155,6 @@ public:
    */
   MaterialBase & getMaterial(const std::string & name);
   MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
-  template <ComputeStage>
-  MaterialBase & getMaterial(const std::string & name);
-  template <ComputeStage>
-  MaterialBase & getMaterialByName(const std::string & name, bool no_warn = false);
   ///@}
 
   ///@{
@@ -161,9 +164,9 @@ public:
    * @return true if the property exists, otherwise false
    */
   template <typename T>
-  bool hasMaterialPropertyTempl(const std::string & name);
+  bool hasMaterialProperty(const std::string & name);
   template <typename T>
-  bool hasMaterialPropertyByNameTempl(const std::string & name);
+  bool hasMaterialPropertyByName(const std::string & name);
   ///@}
 
   /**
@@ -237,7 +240,7 @@ protected:
    * as a specialization for supported types and returns NULL in all other cases.
    */
   template <typename T>
-  const ADMaterialPropertyObject<T> * defaultADMaterialProperty(const std::string & name);
+  const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
 
   /**
    * Check and throw an error if the execution has progressed past the construction stage
@@ -259,10 +262,10 @@ protected:
 
   /// Storage vector for MaterialProperty<Real> default objects
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
-  /// Storage vector for ADMaterialPropertyObject<Real> default objects
-  std::vector<std::unique_ptr<ADMaterialPropertyObject<Real>>> _default_ad_real_properties;
-  /// Storage vector for ADMaterialPropertyObject<RealVectorValue> default objects
-  std::vector<std::unique_ptr<ADMaterialPropertyObject<RealVectorValue>>>
+  /// Storage vector for ADMaterialProperty<Real> default objects
+  std::vector<std::unique_ptr<ADMaterialProperty<Real>>> _default_ad_real_properties;
+  /// Storage vector for ADMaterialProperty<RealVectorValue> default objects
+  std::vector<std::unique_ptr<ADMaterialProperty<RealVectorValue>>>
       _default_ad_real_vector_properties;
 
   /// The set of material properties (as given by their IDs) that _this_ object depends on
@@ -281,7 +284,7 @@ private:
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyTempl(const std::string & name)
+MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -295,14 +298,14 @@ MaterialPropertyInterface::getMaterialPropertyTempl(const std::string & name)
 }
 
 template <typename T>
-const ADMaterialPropertyObject<T> &
-MaterialPropertyInterface::getADMaterialPropertyTempl(const std::string & name)
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getADMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
   // Check if it's just a constant
-  const ADMaterialPropertyObject<T> * default_property = defaultADMaterialProperty<T>(prop_name);
+  const ADMaterialProperty<T> * default_property = defaultADMaterialProperty<T>(prop_name);
   if (default_property)
     return *default_property;
 
@@ -311,7 +314,7 @@ MaterialPropertyInterface::getADMaterialPropertyTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOldTempl(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -332,7 +335,7 @@ MaterialPropertyInterface::getMaterialPropertyOldTempl(const std::string & name)
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlderTempl(const std::string & name)
+MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -361,7 +364,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 
 // General version for types that do not accept default values
 template <typename T>
-const ADMaterialPropertyObject<T> *
+const ADMaterialProperty<T> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
 {
   return NULL;
@@ -373,16 +376,16 @@ const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
 
 template <>
-const ADMaterialPropertyObject<Real> *
+const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty<Real>(const std::string & name);
 
 template <>
-const ADMaterialPropertyObject<RealVectorValue> *
+const ADMaterialProperty<RealVectorValue> *
 MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyByNameTempl(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
 {
   checkExecutionStage();
   checkMaterialProperty(name);
@@ -399,8 +402,8 @@ MaterialPropertyInterface::getMaterialPropertyByNameTempl(const MaterialProperty
 }
 
 template <typename T>
-const ADMaterialPropertyObject<T> &
-MaterialPropertyInterface::getADMaterialPropertyByNameTempl(const MaterialPropertyName & name)
+const ADMaterialProperty<T> &
+MaterialPropertyInterface::getADMaterialPropertyByName(const MaterialPropertyName & name)
 {
   _mi_feproblem.usingADMatProps(true);
 
@@ -420,7 +423,7 @@ MaterialPropertyInterface::getADMaterialPropertyByNameTempl(const MaterialProper
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOldByNameTempl(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -438,7 +441,7 @@ MaterialPropertyInterface::getMaterialPropertyOldByNameTempl(const MaterialPrope
 
 template <typename T>
 const MaterialProperty<T> &
-MaterialPropertyInterface::getMaterialPropertyOlderByNameTempl(const MaterialPropertyName & name)
+MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."
@@ -473,7 +476,7 @@ MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName &
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasMaterialPropertyTempl(const std::string & name)
+MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
@@ -482,7 +485,7 @@ MaterialPropertyInterface::hasMaterialPropertyTempl(const std::string & name)
 
 template <typename T>
 bool
-MaterialPropertyInterface::hasMaterialPropertyByNameTempl(const std::string & name)
+MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
 {
   return _material_data->haveProperty<T>(name);
 }

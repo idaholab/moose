@@ -15,9 +15,7 @@
  * ADComputeThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.
  */
-template <ComputeStage compute_stage>
-class ADComputeThermalExpansionEigenstrain
-  : public ADComputeThermalExpansionEigenstrainBase<compute_stage>
+class ADComputeThermalExpansionEigenstrain : public ADComputeThermalExpansionEigenstrainBase
 {
 public:
   static InputParameters validParams();
@@ -28,6 +26,4 @@ protected:
   virtual void computeThermalStrain(ADReal & thermal_strain) override;
 
   const Real & _thermal_expansion_coeff;
-
-  usingComputeThermalExpansionEigenstrainBaseMembers;
 };

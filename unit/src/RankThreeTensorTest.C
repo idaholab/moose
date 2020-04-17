@@ -15,6 +15,9 @@
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 #include "MooseEnum.h"
+#include "ADReal.h"
+
+#include "metaphysicl/raw_type.h"
 
 TEST(RankThreeTensor, constructors)
 {
@@ -395,4 +398,13 @@ TEST(RankThreeTensor, doubleContraction)
 
     EXPECT_EQ(c(i), value);
   }
+}
+
+TEST(RankThreeTensor, ADConversion)
+{
+  RankThreeTensor reg;
+  ADRankThreeTensor ad;
+
+  ad = reg;
+  reg = MetaPhysicL::raw_value(ad);
 }

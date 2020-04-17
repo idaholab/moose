@@ -111,7 +111,7 @@
     issues = '#13539'
     design = 'action/GrainGrowthAction.md'
     requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
-    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true'
+    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution'
     prereq = 'grain_growth'
   [../]
   [./ad_grain_growth-jac]
@@ -124,7 +124,7 @@
     difference_tol = 5e-5
     run_sim = True
     requirement = 'The action to set up grain growth problems shall be able to set up an AD version of the problem which yields the same results as the non-AD version'
-    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
+    cli_args = 'Modules/PhaseField/GrainGrowth/use_automatic_differentiation=true Materials/Copper/type=ADGBEvolution Executioner/num_steps=1 Mesh/nx=10 Mesh/ny=10'
     prereq = 'ad_grain_growth'
   [../]
   [./grain_growth_with_c]

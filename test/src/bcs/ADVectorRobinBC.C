@@ -9,25 +9,22 @@
 
 #include "ADVectorRobinBC.h"
 
-registerADMooseObject("MooseTestApp", ADVectorRobinBC);
+registerMooseObject("MooseTestApp", ADVectorRobinBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADVectorRobinBC<compute_stage>::validParams()
+ADVectorRobinBC::validParams()
 {
-  InputParameters params = ADVectorIntegratedBC<compute_stage>::validParams();
+  InputParameters params = ADVectorIntegratedBC::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADVectorRobinBC<compute_stage>::ADVectorRobinBC(const InputParameters & parameters)
-  : ADVectorIntegratedBC<compute_stage>(parameters)
+ADVectorRobinBC::ADVectorRobinBC(const InputParameters & parameters)
+  : ADVectorIntegratedBC(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADVectorRobinBC<compute_stage>::computeQpResidual()
+ADVectorRobinBC::computeQpResidual()
 {
   return _test[_i][_qp] * 2. * _u[_qp];
 }

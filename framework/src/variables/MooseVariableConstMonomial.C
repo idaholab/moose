@@ -40,7 +40,7 @@ MooseVariableConstMonomial::computeElemValues()
 
   // We have not optimized AD calculations for const monomials yet, so we fall back on the
   // non-optimized routine
-  if (_element_data->needsAD() && _subproblem.currentlyComputingJacobian())
+  if (_element_data->needsAD())
     _element_data->computeValues();
   else
     _element_data->computeMonomialValues();
@@ -53,7 +53,7 @@ MooseVariableConstMonomial::computeElemValuesFace()
 
   // We have not optimized AD calculations for const monomials yet, so we fall back on the
   // non-optimized routine
-  if (_element_data->needsAD() && _subproblem.currentlyComputingJacobian())
+  if (_element_data->needsAD())
     _element_data->computeValues();
   else
     _element_data->computeMonomialValues();
@@ -66,7 +66,7 @@ MooseVariableConstMonomial::computeNeighborValues()
 
   // We have not optimized AD calculations for const monomials yet, so we fall back on the
   // non-optimized routine
-  if (_neighbor_data->needsAD() && _subproblem.currentlyComputingJacobian())
+  if (_neighbor_data->needsAD())
     _neighbor_data->computeValues();
   else
     _neighbor_data->computeMonomialValues();
@@ -79,7 +79,7 @@ MooseVariableConstMonomial::computeNeighborValuesFace()
 
   // We have not optimized AD calculations for const monomials yet, so we fall back on the
   // non-optimized routine
-  if (_neighbor_data->needsAD() && _subproblem.currentlyComputingJacobian())
+  if (_neighbor_data->needsAD())
     _neighbor_data->computeValues();
   else
     _neighbor_data->computeMonomialValues();

@@ -87,7 +87,7 @@
 
 [Materials]
   [constant]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'gap_conductance'
     prop_values = '.03'
     block = '1 2'

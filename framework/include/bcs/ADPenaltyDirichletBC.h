@@ -11,11 +11,6 @@
 
 #include "ADIntegratedBC.h"
 
-template <ComputeStage>
-class ADPenaltyDirichletBC;
-
-declareADValidParams(ADPenaltyDirichletBC);
-
 /**
  * Weakly enforce a Dirichlet BC using a penalty term. This class is
  * an alternative to the DirichletBC that maintains the symmetry (if
@@ -36,8 +31,7 @@ declareADValidParams(ADPenaltyDirichletBC);
  * g = Dirichlet data (given)
  * Gamma = the part of the boundary where the penalty BC is applied.
  */
-template <ComputeStage compute_stage>
-class ADPenaltyDirichletBC : public ADIntegratedBC<compute_stage>
+class ADPenaltyDirichletBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -53,6 +47,4 @@ private:
 
   /// Value of u on the boundary
   const Real & _v;
-
-  usingIntegratedBCMembers;
 };

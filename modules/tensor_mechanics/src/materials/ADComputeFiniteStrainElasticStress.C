@@ -9,21 +9,19 @@
 
 #include "ADComputeFiniteStrainElasticStress.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
+registerMooseObject("TensorMechanicsApp", ADComputeFiniteStrainElasticStress);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeFiniteStrainElasticStress<compute_stage>::validParams()
+ADComputeFiniteStrainElasticStress::validParams()
 {
-  InputParameters params = ADComputeStressBase<compute_stage>::validParams();
+  InputParameters params = ADComputeStressBase::validParams();
   params.addClassDescription("Compute stress using elasticity for finite strains");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeFiniteStrainElasticStress<compute_stage>::ADComputeFiniteStrainElasticStress(
+ADComputeFiniteStrainElasticStress::ADComputeFiniteStrainElasticStress(
     const InputParameters & parameters)
-  : ADComputeStressBase<compute_stage>(parameters),
+  : ADComputeStressBase(parameters),
     GuaranteeConsumer(this),
     _elasticity_tensor_name(_base_name + "elasticity_tensor"),
     _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
@@ -35,9 +33,8 @@ ADComputeFiniteStrainElasticStress<compute_stage>::ADComputeFiniteStrainElasticS
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeFiniteStrainElasticStress<compute_stage>::initialSetup()
+ADComputeFiniteStrainElasticStress::initialSetup()
 {
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError(
@@ -45,9 +42,8 @@ ADComputeFiniteStrainElasticStress<compute_stage>::initialSetup()
         "that guarantee isotropic tensors.");
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeFiniteStrainElasticStress<compute_stage>::computeQpStress()
+ADComputeFiniteStrainElasticStress::computeQpStress()
 {
   // Calculate the stress in the intermediate configuration
   ADRankTwoTensor intermediate_stress;
@@ -62,6 +58,3 @@ ADComputeFiniteStrainElasticStress<compute_stage>::computeQpStress()
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeFiniteStrainElasticStress);

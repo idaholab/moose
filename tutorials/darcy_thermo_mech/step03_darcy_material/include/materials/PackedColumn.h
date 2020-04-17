@@ -41,8 +41,8 @@ protected:
   LinearInterpolation _permeability_interpolation;
 
   /// The permeability (K)
-  MaterialProperty<Real> & _permeability;
+  ADMaterialProperty<Real> & _permeability;
 
   /// The viscosity of the fluid (mu)
-  MaterialProperty<Real> & _viscosity;
+  ADMaterialProperty<Real> & _viscosity;
 };

@@ -31,7 +31,6 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
     _kernels(_nl.getKernelWarehouse()),
-    _ad_jacobian_kernels(_nl.getADJacobianKernelWarehouse()),
     _tags(tags)
 {
 }
@@ -46,7 +45,6 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     _interface_kernels(x._interface_kernels),
     _kernels(x._kernels),
     _warehouse(x._warehouse),
-    _ad_jacobian_kernels(x._ad_jacobian_kernels),
     _tags(x._tags)
 {
 }
@@ -73,13 +71,6 @@ ComputeJacobianThread::computeJacobian()
             kernel->computeNonlocalJacobian();
         }
       }
-  }
-  if (_adjk_warehouse->hasActiveBlockObjects(_subdomain, _tid))
-  {
-    auto & kernels = _adjk_warehouse->getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & kernel : kernels)
-      if (kernel->isImplicit())
-        kernel->computeJacobian();
   }
 }
 
@@ -140,7 +131,6 @@ ComputeJacobianThread::subdomainChanged()
   // Update variable Dependencies
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-  _ad_jacobian_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
@@ -148,7 +138,6 @@ ComputeJacobianThread::subdomainChanged()
   // Update material dependencies
   std::set<unsigned int> needed_mat_props;
   _kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
-  _ad_jacobian_kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _integrated_bcs.updateBoundaryMatPropDependency(needed_mat_props, _tid);
   _dg_kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _interface_kernels.updateBoundaryMatPropDependency(needed_mat_props, _tid);
@@ -162,7 +151,6 @@ ComputeJacobianThread::subdomainChanged()
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
   {
     _warehouse = &_kernels;
-    _adjk_warehouse = &_ad_jacobian_kernels;
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
     _ik_warehouse = &_interface_kernels;
@@ -172,7 +160,6 @@ ComputeJacobianThread::subdomainChanged()
   else if (_tags.size() == 1)
   {
     _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
-    _adjk_warehouse = &(_ad_jacobian_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
@@ -181,7 +168,6 @@ ComputeJacobianThread::subdomainChanged()
   else
   {
     _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
-    _adjk_warehouse = &(_ad_jacobian_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));

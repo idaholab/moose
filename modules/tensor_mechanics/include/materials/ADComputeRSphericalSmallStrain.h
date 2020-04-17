@@ -17,8 +17,7 @@
  * strains are functions of the radial displacement and radial position in this
  * 1D problem.
  */
-template <ComputeStage compute_stage>
-class ADComputeRSphericalSmallStrain : public ADComputeSmallStrain<compute_stage>
+class ADComputeRSphericalSmallStrain : public ADComputeSmallStrain
 {
 public:
   static InputParameters validParams();
@@ -26,6 +25,4 @@ public:
   ADComputeRSphericalSmallStrain(const InputParameters & parameters);
 
   virtual void computeProperties() override;
-
-  usingComputeSmallStrainMembers;
 };

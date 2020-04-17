@@ -15,8 +15,7 @@
  * This kernel adds to the residual a contribution of \f$ -L*v \f$ where \f$ L \f$ is a material
  * property and \f$ v \f$ is a variable (nonlinear or coupled).
  */
-template <ComputeStage compute_stage>
-class ADMatReaction : public ADKernel<compute_stage>
+class ADMatReaction : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -34,7 +33,5 @@ protected:
   const ADVariableValue & _v;
 
   /// Reaction rate
-  const ADMaterialProperty(Real) & _mob;
-
-  usingKernelMembers;
+  const ADMaterialProperty<Real> & _mob;
 };

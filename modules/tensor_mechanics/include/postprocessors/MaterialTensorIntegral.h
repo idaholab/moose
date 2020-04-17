@@ -12,24 +12,26 @@
 #include "ElementIntegralPostprocessor.h"
 #include "RankTwoTensor.h"
 
-// Forward Declarations
-
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor as specified by the user-supplied indices.
  */
-class MaterialTensorIntegral : public ElementIntegralPostprocessor
+template <bool is_ad>
+class MaterialTensorIntegralTempl : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  MaterialTensorIntegral(const InputParameters & parameters);
+  MaterialTensorIntegralTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral();
 
 private:
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
   const unsigned int _i;
   const unsigned int _j;
 };
+
+typedef MaterialTensorIntegralTempl<false> MaterialTensorIntegral;
+typedef MaterialTensorIntegralTempl<true> ADMaterialTensorIntegral;

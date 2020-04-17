@@ -9,22 +9,18 @@
 
 #include "ADSplitCHWRes.h"
 
-registerADMooseObject("PhaseFieldApp", ADSplitCHWRes);
+registerMooseObject("PhaseFieldApp", ADSplitCHWRes);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADSplitCHWRes<compute_stage>::validParams()
+ADSplitCHWRes::validParams()
 {
-  InputParameters params = ADSplitCHWResBase<compute_stage, Real>::validParams();
+  InputParameters params = ADSplitCHWResBase<Real>::validParams();
   params.addClassDescription("Split formulation Cahn-Hilliard Kernel for the chemical potential "
                              "variable with a scalar (isotropic) mobility");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADSplitCHWRes<compute_stage>::ADSplitCHWRes(const InputParameters & parameters)
-  : ADSplitCHWResBase<compute_stage, Real>(parameters)
+ADSplitCHWRes::ADSplitCHWRes(const InputParameters & parameters)
+  : ADSplitCHWResBase<Real>(parameters)
 {
 }
-
-adBaseClass(ADSplitCHWRes);

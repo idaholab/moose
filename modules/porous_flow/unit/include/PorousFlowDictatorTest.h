@@ -49,7 +49,7 @@ protected:
     params.set<unsigned int>("number_aqueous_kinetic") = 6;
     params.set<unsigned int>("aqueous_phase_number") = 1;
     _fe_problem->addUserObject("PorousFlowDictator", "dictator_name", params);
-    _dictator = &_fe_problem->getUserObjectTempl<PorousFlowDictator>("dictator_name");
+    _dictator = &_fe_problem->getUserObject<PorousFlowDictator>("dictator_name");
 
     InputParameters params_no_fetype = _factory.getValidParams("PorousFlowDictator");
     params_no_fetype.set<std::vector<VariableName>>("porous_flow_vars") =
@@ -58,7 +58,7 @@ protected:
     params_no_fetype.set<unsigned>("number_fluid_components") = 3;
     _fe_problem->addUserObject("PorousFlowDictator", "dictator_no_fetype", params_no_fetype);
     _dictator_no_fetype =
-        &_fe_problem->getUserObjectTempl<PorousFlowDictator>("dictator_no_fetype");
+        &_fe_problem->getUserObject<PorousFlowDictator>("dictator_no_fetype");
   }
 
   const PorousFlowDictator * _dictator;

@@ -92,6 +92,18 @@
     issues = '#8810'
   [../]
 
+  [./faux_voronoi]
+    type = 'Exodiff'
+    input = 'voronoi.i'
+    exodiff = 'voronoi_out.e'
+    prereq = 'voronoi'
+    requirement = 'The system shall support a faux voronoi tesselation grain structure IC without using FeatureFloodCount when
+                  the number of grains equal to the number of order parameters'
+    design = 'FauxPolycrystalVoronoi.md'
+    cli_args ='UserObjects/voronoi/type=PolycrystalVoronoi'
+    issues = '#14697'
+  [../]
+
   [./voronoi_columnar_3D]
     type = 'Exodiff'
     input = 'voronoi_columnar_3D.i'

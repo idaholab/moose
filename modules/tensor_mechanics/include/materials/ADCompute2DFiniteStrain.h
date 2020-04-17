@@ -11,12 +11,6 @@
 
 #include "ADComputeFiniteStrain.h"
 
-#define usingCompute2DFiniteStrainMembers                                                          \
-  usingComputeFiniteStrainMembers;                                                                 \
-  using ADCompute2DFiniteStrain<compute_stage>::_out_of_plane_direction;                           \
-  using ADCompute2DFiniteStrain<compute_stage>::computeOutOfPlaneGradDisp;                         \
-  using ADCompute2DFiniteStrain<compute_stage>::computeOutOfPlaneGradDispOld
-
 /**
  * ADCompute2DFiniteStrain defines a strain increment and a rotation increment
  * for finite strains in 2D geometries, handling the out of plane strains.
@@ -24,8 +18,7 @@
  * as a general nonzero value in the inherited classes ComputePlaneFiniteStrain
  * and ComputeAxisymmetricRZFiniteStrain.
  */
-template <ComputeStage compute_stage>
-class ADCompute2DFiniteStrain : public ADComputeFiniteStrain<compute_stage>
+class ADCompute2DFiniteStrain : public ADComputeFiniteStrain
 {
 public:
   static InputParameters validParams();
@@ -52,6 +45,4 @@ protected:
   virtual Real computeOutOfPlaneGradDispOld() = 0;
 
   const unsigned int _out_of_plane_direction;
-
-  usingComputeFiniteStrainMembers;
 };

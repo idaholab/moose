@@ -13,18 +13,11 @@
 #include "LinearInterpolation.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-// Forward Declarations
-template <ComputeStage>
-class ADPiecewiseLinearInterpolationMaterial;
-
-declareADValidParams(ADPiecewiseLinearInterpolationMaterial);
-
 /**
  * This material uses a LinearInterpolation object to define the dependence
  * of the material's value on a variable.
  */
-template <ComputeStage compute_stage>
-class ADPiecewiseLinearInterpolationMaterial : public ADMaterial<compute_stage>,
+class ADPiecewiseLinearInterpolationMaterial : public ADMaterial,
                                                public DerivativeMaterialPropertyNameInterface
 {
 public:
@@ -45,10 +38,8 @@ protected:
   const Real _scale_factor;
 
   /// Material property to be calculated
-  ADMaterialProperty(Real) & _property;
+  ADMaterialProperty<Real> & _property;
 
   /// LinearInterpolation object
   std::unique_ptr<LinearInterpolation> _linear_interp;
-
-  usingMaterialMembers;
 };

@@ -14,7 +14,6 @@
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
-#include "MemberTemplateMacros.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -128,7 +127,7 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParamTempl(const std::string & name) const;
+  const T & getParam(const std::string & name) const;
   ///@}
 
   /**
@@ -251,7 +250,7 @@ protected:
 
 template <typename T>
 const T &
-Action::getParamTempl(const std::string & name) const
+Action::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }

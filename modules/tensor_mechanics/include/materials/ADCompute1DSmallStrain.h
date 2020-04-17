@@ -11,19 +11,13 @@
 
 #include "ADComputeSmallStrain.h"
 
-#define usingCompute1DSmallStrainMembers                                                           \
-  usingComputeSmallStrainMembers;                                                                  \
-  using ADCompute1DSmallStrain<compute_stage>::computeStrainYY;                                    \
-  using ADCompute1DSmallStrain<compute_stage>::computeStrainZZ
-
 /**
  * ADCompute1DSmallStrain defines a strain tensor, assuming small strains,
  * in 1D problems, handling strains in other two directions.
  * ADCompute1DSmallStrain contains virtual methods to define the strain_yy and strain_zz
  * as a general nonzero value.
  */
-template <ComputeStage compute_stage>
-class ADCompute1DSmallStrain : public ADComputeSmallStrain<compute_stage>
+class ADCompute1DSmallStrain : public ADComputeSmallStrain
 {
 public:
   static InputParameters validParams();
@@ -40,6 +34,4 @@ protected:
   /// Computes the strain_zz; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual ADReal computeStrainZZ() = 0;
-
-  usingComputeSmallStrainMembers;
 };

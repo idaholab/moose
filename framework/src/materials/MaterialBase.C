@@ -132,20 +132,13 @@ MaterialBase::checkStatefulSanity() const
 }
 
 void
-MaterialBase::registerPropName(std::string prop_name,
-                               bool is_get,
-                               Prop_State state,
-                               bool is_declared_ad)
+MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State state)
 {
   if (!is_get)
   {
     _supplied_props.insert(prop_name);
     const auto & property_id = materialData().getPropertyId(prop_name);
     _supplied_prop_ids.insert(property_id);
-    if (is_declared_ad)
-      _supplied_ad_prop_ids.insert(property_id);
-    else
-      _supplied_regular_prop_ids.insert(property_id);
 
     _props_to_flags[prop_name] |= static_cast<int>(state);
     if (static_cast<int>(state) % 2 == 0)
@@ -224,16 +217,4 @@ MaterialBase::checkExecutionStage()
   if (_fe_problem.startedInitialSetup())
     mooseError("Material properties must be retrieved during material object construction to "
                "ensure correct dependency resolution.");
-}
-
-void
-MaterialBase::copyDualNumbersToValues()
-{
-  if (!_fe_problem.currentlyComputingJacobian() || !_fe_problem.usingADMatProps())
-    return;
-
-  MaterialProperties & props = materialData().props();
-  for (_qp = 0; _qp < qRule().n_points(); ++_qp)
-    for (const auto & prop_id : _supplied_ad_prop_ids)
-      props[prop_id]->copyDualNumberToValue(_qp);
 }

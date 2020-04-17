@@ -50,11 +50,4 @@
     issues = '#8265'
     input = 'derivatives.i'
   [../]
-  [./ad-derivatives]
-    type = 'AnalyzeJacobian'
-    input = 'ad-derivatives.i'
-    requirement = 'ADComputeVariableIsotropicElasticityTensor shall calculate a good jacobian'
-    design = "jacobian_definition.md"
-    issues = "#12633"
-  [../]
 []

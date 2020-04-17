@@ -60,7 +60,7 @@
 
 [AuxKernels]
   [./stress_theta]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -68,7 +68,7 @@
     execute_on = timestep_end
   [../]
   [./strain_theta]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = total_strain
     index_i = 2
     index_j = 2
@@ -79,7 +79,7 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
   [../]

@@ -16,8 +16,7 @@
  * for finite strains in 1D spherical symmetry geometries.  The strains in the
  * polar and azimuthal directions are functions of the radial displacement.
  */
-template <ComputeStage compute_stage>
-class ADComputeRSphericalFiniteStrain : public ADComputeFiniteStrain<compute_stage>
+class ADComputeRSphericalFiniteStrain : public ADComputeFiniteStrain
 {
 public:
   static InputParameters validParams();
@@ -33,6 +32,4 @@ public:
 protected:
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
-
-  usingComputeFiniteStrainMembers;
 };

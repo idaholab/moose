@@ -104,9 +104,15 @@
       petsc_version = '>=3.9.4'
       detail = 'when given a set of internal volumes to sum and calculate a perfect Jacobian'
     [../]
+    [./additional_volume]
+      type = 'Exodiff'
+      input = 'additional_volume.i'
+      exodiff = 'additional_volume_out.e'
+      detail = 'when including an additional volume that communicates with the cavity.'
+    [../]
   []
 
-  [errorr]
+  [error]
     requirement = 'The system shall report an error using the AD formuation if'
     [./negative_volume]
       type = RunException

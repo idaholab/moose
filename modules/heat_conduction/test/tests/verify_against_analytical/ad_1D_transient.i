@@ -47,17 +47,17 @@
 
 [Materials]
   [./k]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '0.95' #copper in cal/(cm sec C)
   [../]
   [./cp]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '0.092' #copper in cal/(g C)
   [../]
   [./rho]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '8.92' #copper in g/(cm^3)
   [../]

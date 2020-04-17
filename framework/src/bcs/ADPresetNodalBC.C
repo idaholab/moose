@@ -8,13 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADPresetNodalBC.h"
-defineADLegacyParams(ADPresetNodalBC);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADPresetNodalBC<compute_stage>::validParams()
+ADPresetNodalBC::validParams()
 {
-  InputParameters params = ADNodalBC<compute_stage>::validParams();
+  InputParameters params = ADNodalBC::validParams();
 
   params.addClassDescription(
       "Nodal boundary condition base class with preset solution vector values.");
@@ -26,9 +24,7 @@ ADPresetNodalBC<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADPresetNodalBC<compute_stage>::ADPresetNodalBC(const InputParameters & parameters)
-  : ADDirichletBCBase<compute_stage>(parameters)
+ADPresetNodalBC::ADPresetNodalBC(const InputParameters & parameters) : ADDirichletBCBase(parameters)
 {
   mooseDeprecated("Inherit from ADDirichletBCBase with preset = true instead of ADPresetNodalBC");
 }

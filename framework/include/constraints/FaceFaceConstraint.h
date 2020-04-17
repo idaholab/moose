@@ -11,19 +11,13 @@
 
 #include "ADMortarConstraint.h"
 
-template <ComputeStage>
-class FaceFaceConstraint;
-
-declareADValidParams(FaceFaceConstraint);
-
 /**
  * This is a deprecated object!  Use MortarConstraint instead!
  */
-template <ComputeStage compute_stage>
-class FaceFaceConstraint : public ADMortarConstraint<compute_stage>
+class FaceFaceConstraint : public ADMortarConstraint
 {
 public:
-  FaceFaceConstraint(const InputParameters & params) : ADMortarConstraint<compute_stage>(params)
+  FaceFaceConstraint(const InputParameters & params) : ADMortarConstraint(params)
   {
     mooseDeprecated("FaceFaceConstraint is deprecated!  Use MortarConstraint instead!");
   }

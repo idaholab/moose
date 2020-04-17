@@ -9,28 +9,25 @@
 
 #include "INSADMomentumAdvection.h"
 
-registerADMooseObject("NavierStokesApp", INSADMomentumAdvection);
+registerMooseObject("NavierStokesApp", INSADMomentumAdvection);
 
-template <ComputeStage compute_stage>
 InputParameters
-INSADMomentumAdvection<compute_stage>::validParams()
+INSADMomentumAdvection::validParams()
 {
-  InputParameters params = ADVectorKernelValue<compute_stage>::validParams();
+  InputParameters params = ADVectorKernelValue::validParams();
   params.addClassDescription("Adds the convective term to the INS momentum equation");
   return params;
 }
 
-template <ComputeStage compute_stage>
-INSADMomentumAdvection<compute_stage>::INSADMomentumAdvection(const InputParameters & parameters)
-  : ADVectorKernelValue<compute_stage>(parameters),
+INSADMomentumAdvection::INSADMomentumAdvection(const InputParameters & parameters)
+  : ADVectorKernelValue(parameters),
     _convective_strong_residual(
         getADMaterialProperty<RealVectorValue>("convective_strong_residual"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-INSADMomentumAdvection<compute_stage>::precomputeQpResidual()
+INSADMomentumAdvection::precomputeQpResidual()
 {
   return _convective_strong_residual[_qp];
 }

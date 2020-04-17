@@ -14,8 +14,7 @@
 /**
  * Stateful material class that defines a few properties.
  */
-template <ComputeStage compute_stage>
-class ADStatefulMaterial : public ADMaterial<compute_stage>
+class ADStatefulMaterial : public ADMaterial
 {
 public:
   static InputParameters validParams();
@@ -33,9 +32,8 @@ private:
    * Create two MooseArray Refs to hold the current
    * and previous material properties respectively
    */
-  ADMaterialProperty(Real) & _diffusivity;
+  ADMaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
   const ADVariableValue & _u;
 
-  usingMaterialMembers;
 };

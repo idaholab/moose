@@ -13,9 +13,12 @@
 #include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
 #include "DualReal.h"
+#include "MooseTypes.h"
 
 #include "libmesh/type_tensor.h"
 #include "libmesh/dense_vector.h"
+
+#include "metaphysicl/raw_type.h"
 
 // C++ includes
 #include <iomanip>
@@ -227,7 +230,13 @@ public:
    * Sets the values in _this_ tensor to the values on the RHS
    * Will also reshape this tensor if necessary.
    */
-  ColumnMajorMatrixTempl<T> & operator=(const ColumnMajorMatrixTempl<T> & rhs);
+  template <typename T2>
+  ColumnMajorMatrixTempl<T> & operator=(const ColumnMajorMatrixTempl<T2> & rhs);
+
+  /**
+   * defaulted operator=
+   */
+  ColumnMajorMatrixTempl<T> & operator=(const ColumnMajorMatrixTempl<T> & rhs) = default;
 
   /**
    * Scalar multiplication of the ColumnMajorMatrixTempl
@@ -320,6 +329,11 @@ public:
 protected:
   unsigned int _n_rows, _n_cols, _n_entries;
   std::vector<T> _values;
+
+  template <typename T2>
+  friend void dataStore(std::ostream &, ColumnMajorMatrixTempl<T2> &, void *);
+  template <typename T2>
+  friend void dataLoad(std::istream &, ColumnMajorMatrixTempl<T2> &, void *);
 };
 
 template <typename T>
@@ -590,17 +604,15 @@ ColumnMajorMatrixTempl<T>::operator=(const TypeTensor<T> & rhs)
 }
 
 template <typename T>
+template <typename T2>
 inline ColumnMajorMatrixTempl<T> &
-ColumnMajorMatrixTempl<T>::operator=(const ColumnMajorMatrixTempl<T> & rhs)
+ColumnMajorMatrixTempl<T>::operator=(const ColumnMajorMatrixTempl<T2> & rhs)
 {
-  _n_rows = rhs._n_rows;
-  _n_cols = rhs._n_cols;
-  _n_entries = rhs._n_entries;
+  this->reshape(rhs.m(), rhs.n());
 
-  _values.resize(_n_entries);
-
-  for (unsigned int i = 0; i < _n_entries; i++)
-    _values[i] = rhs._values[i];
+  for (MooseIndex(rhs.m()) i = 0; i < rhs.m(); ++i)
+    for (MooseIndex(rhs.n()) j = 0; j < rhs.n(); ++j)
+      (*this)(i, j) = rhs(i, j);
 
   return *this;
 }
@@ -791,3 +803,22 @@ ColumnMajorMatrixTempl<T>::operator!=(const ColumnMajorMatrixTempl<T> & rhs) con
 }
 
 typedef ColumnMajorMatrixTempl<Real> ColumnMajorMatrix;
+
+namespace MetaPhysicL
+{
+template <typename T>
+struct RawType<ColumnMajorMatrixTempl<T>>
+{
+  typedef ColumnMajorMatrixTempl<typename RawType<T>::value_type> value_type;
+
+  static value_type value(const ColumnMajorMatrixTempl<T> & in)
+  {
+    value_type ret(in.m(), in.n());
+    for (MooseIndex(in.m()) i = 0; i < in.m(); ++i)
+      for (MooseIndex(in.n()) j = 0; j < in.n(); ++j)
+        ret(i, j) = raw_value(in(i, j));
+
+    return ret;
+  }
+};
+}

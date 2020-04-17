@@ -9,29 +9,25 @@
 
 #include "LevelSetTimeDerivativeSUPG.h"
 
-registerADMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
+registerMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
 
-template <ComputeStage compute_stage>
 InputParameters
-LevelSetTimeDerivativeSUPG<compute_stage>::validParams()
+LevelSetTimeDerivativeSUPG::validParams()
 {
-  InputParameters params = ADTimeKernelGrad<compute_stage>::validParams();
+  InputParameters params = ADTimeKernelGrad::validParams();
   params.addClassDescription(
       "SUPG stablization terms for the time derivative of the level set equation.");
-  params += LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>::validParams();
+  params += LevelSetVelocityInterface<ADTimeKernelGrad>::validParams();
   return params;
 }
 
-template <ComputeStage compute_stage>
-LevelSetTimeDerivativeSUPG<compute_stage>::LevelSetTimeDerivativeSUPG(
-    const InputParameters & parameters)
-  : LevelSetVelocityInterface<ADTimeKernelGrad<compute_stage>>(parameters)
+LevelSetTimeDerivativeSUPG::LevelSetTimeDerivativeSUPG(const InputParameters & parameters)
+  : LevelSetVelocityInterface<ADTimeKernelGrad>(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 ADRealVectorValue
-LevelSetTimeDerivativeSUPG<compute_stage>::precomputeQpResidual()
+LevelSetTimeDerivativeSUPG::precomputeQpResidual()
 {
   computeQpVelocity();
   Real tau = _current_elem->hmin() / (2 * _velocity.norm());

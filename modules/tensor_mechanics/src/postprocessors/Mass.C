@@ -13,23 +13,33 @@
 //
 #include "Mass.h"
 
-registerMooseObject("TensorMechanicsApp", Mass);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("TensorMechanicsApp", Mass);
+registerMooseObject("TensorMechanicsApp", ADMass);
+
+template <bool is_ad>
 InputParameters
-Mass::validParams()
+MassTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
-Mass::Mass(const InputParameters & parameters)
-  : ElementIntegralVariablePostprocessor(parameters), _density(getMaterialProperty<Real>("density"))
+template <bool is_ad>
+MassTempl<is_ad>::MassTempl(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters),
+    _density(getGenericMaterialProperty<Real, is_ad>("density"))
 {
 }
 
+template <bool is_ad>
 Real
-Mass::computeQpIntegral()
+MassTempl<is_ad>::computeQpIntegral()
 {
-  return _density[_qp];
+  return MetaPhysicL::raw_value(_density[_qp]);
 }
+
+template class MassTempl<false>;
+template class MassTempl<true>;

@@ -17,13 +17,12 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensorShell);
+registerMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensorShell);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeIsotropicElasticityTensorShell<compute_stage>::validParams()
+ADComputeIsotropicElasticityTensorShell::validParams()
 {
-  InputParameters params = ADMaterial<compute_stage>::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Compute a plane stress isotropic elasticity tensor.");
   params.addRequiredRangeCheckedParam<Real>("poissons_ratio",
                                             "poissons_ratio >= -1.0 & poissons_ratio < 0.5",
@@ -35,10 +34,9 @@ ADComputeIsotropicElasticityTensorShell<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeIsotropicElasticityTensorShell<compute_stage>::ADComputeIsotropicElasticityTensorShell(
+ADComputeIsotropicElasticityTensorShell::ADComputeIsotropicElasticityTensorShell(
     const InputParameters & parameters)
-  : ADMaterial<compute_stage>(parameters),
+  : ADMaterial(parameters),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus"))
 {
@@ -69,9 +67,8 @@ ADComputeIsotropicElasticityTensorShell<compute_stage>::ADComputeIsotropicElasti
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeIsotropicElasticityTensorShell<compute_stage>::computeQpProperties()
+ADComputeIsotropicElasticityTensorShell::computeQpProperties()
 {
   for (unsigned int t = 0; t < _t_points.size(); ++t)
   {

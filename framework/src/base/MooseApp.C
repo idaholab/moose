@@ -829,7 +829,7 @@ MooseApp::setupOptions()
       // If file_base is set in CommonOutputAction through parsing input, obtain the file_base
       if (common->isParamValid("file_base"))
       {
-        _output_file_base = common->getParamTempl<std::string>("file_base");
+        _output_file_base = common->getParam<std::string>("file_base");
         _file_base_set_by_user = true;
       }
       else if (isUltimateMaster())
@@ -1097,7 +1097,7 @@ MooseApp::getCheckpointDirectories() const
       continue;
 
     const InputParameters & params = moose_object_action->getObjectParams();
-    if (moose_object_action->getParamTempl<std::string>("type") == "Checkpoint")
+    if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
       checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
 

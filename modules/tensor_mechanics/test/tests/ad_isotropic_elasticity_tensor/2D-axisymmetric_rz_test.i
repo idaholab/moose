@@ -29,7 +29,7 @@
 
 [AuxKernels]
   [./stress_theta]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 2
     index_j = 2
@@ -41,7 +41,7 @@
 [Materials]
   [./elasticity_tensor]
     #Material constants selected to match isotropic lambda and shear modulus case
-    type = ComputeElasticityTensor
+    type = ADComputeElasticityTensor
     C_ijkl = '1022726 113636 113636 1022726 454545'
     fill_method = axisymmetric_rz
   [../]

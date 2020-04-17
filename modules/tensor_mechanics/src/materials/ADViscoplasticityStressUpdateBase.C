@@ -9,11 +9,10 @@
 
 #include "ADViscoplasticityStressUpdateBase.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADViscoplasticityStressUpdateBase<compute_stage>::validParams()
+ADViscoplasticityStressUpdateBase::validParams()
 {
-  InputParameters params = ADStressUpdateBase<compute_stage>::validParams();
+  InputParameters params = ADStressUpdateBase::validParams();
   params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
                              "ADComputeMultiplePorousInelasticStress");
   params.addParam<Real>("max_inelastic_increment",
@@ -32,10 +31,9 @@ ADViscoplasticityStressUpdateBase<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADViscoplasticityStressUpdateBase<compute_stage>::ADViscoplasticityStressUpdateBase(
+ADViscoplasticityStressUpdateBase::ADViscoplasticityStressUpdateBase(
     const InputParameters & parameters)
-  : ADStressUpdateBase<compute_stage>(parameters),
+  : ADStressUpdateBase(parameters),
     _total_strain_base_name(isParamValid("total_strain_base_name")
                                 ? getParam<std::string>("total_strain_base_name") + "_"
                                 : ""),
@@ -56,25 +54,22 @@ ADViscoplasticityStressUpdateBase<compute_stage>::ADViscoplasticityStressUpdateB
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdateBase<compute_stage>::initQpStatefulProperties()
+ADViscoplasticityStressUpdateBase::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
   _inelastic_strain[_qp].zero();
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdateBase<compute_stage>::propagateQpStatefulProperties()
+ADViscoplasticityStressUpdateBase::propagateQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
 }
 
-template <ComputeStage compute_stage>
 Real
-ADViscoplasticityStressUpdateBase<compute_stage>::computeTimeStepLimit()
+ADViscoplasticityStressUpdateBase::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
       MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
@@ -86,9 +81,8 @@ ADViscoplasticityStressUpdateBase<compute_stage>::computeTimeStepLimit()
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }
 
-template <ComputeStage compute_stage>
 void
-ADViscoplasticityStressUpdateBase<compute_stage>::updateIntermediatePorosity(
+ADViscoplasticityStressUpdateBase::updateIntermediatePorosity(
     const ADRankTwoTensor & elastic_strain_increment)
 {
   // Subtract elastic strain from strain increment to find all inelastic strain increments
@@ -101,6 +95,3 @@ ADViscoplasticityStressUpdateBase<compute_stage>::updateIntermediatePorosity(
   _intermediate_porosity =
       (1.0 - _porosity_old[_qp]) * inelastic_volumetric_increment.trace() + _porosity_old[_qp];
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADViscoplasticityStressUpdateBase);

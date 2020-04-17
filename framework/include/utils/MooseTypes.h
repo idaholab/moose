@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -121,7 +121,7 @@ typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 template <typename>
 class MaterialProperty;
 template <typename>
-class ADMaterialPropertyObject;
+class ADMaterialProperty;
 class InputParameters;
 
 namespace libMesh
@@ -172,19 +172,7 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, LIBMESH_DIM>>
 }
 
 /**
- * Convenience macros for automatic dual/non-dual typing
- */
-#define ADReal typename Moose::RealType<compute_stage>::type
-#define ADRealVectorValue typename RealVectorValueType<compute_stage>::type
-#define ADPoint typename PointType<compute_stage>::type
-#define ADRealTensorValue typename RealTensorValueType<compute_stage>::type
-#define ADRankTwoTensor typename RankTwoTensorType<compute_stage>::type
-#define ADRankFourTensor typename RankFourTensorType<compute_stage>::type
-#define ADDenseMatrix typename DenseMatrixType<compute_stage>::type
-#define ADDenseVector typename DenseVectorType<compute_stage>::type
-
-/**
- * MOOSE typedefs
+ * various MOOSE typedefs
  */
 typedef Real PostprocessorValue;
 typedef std::vector<Real> VectorPostprocessorValue;
@@ -198,46 +186,41 @@ typedef unsigned int TagID;
 typedef unsigned int PerfID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
-typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
-typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
-
-enum ComputeStage
-{
-  RESIDUAL,
-  JACOBIAN
-};
-
-namespace Moose
-{
-template <ComputeStage compute_stage>
-struct RealType
+template <bool is_ad>
+struct GenericRealStruct
 {
   typedef Real type;
 };
 template <>
-struct RealType<JACOBIAN>
+struct GenericRealStruct<true>
 {
-  typedef DualReal type;
+  typedef ADReal type;
 };
+template <bool is_ad>
+using GenericReal = typename GenericRealStruct<is_ad>::type;
 
-template <typename T, ComputeStage compute_stage>
-struct ValueType
+typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
+typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
+
+namespace Moose
 {
-  typedef typename RealType<compute_stage>::type type;
-};
-
-template <ComputeStage compute_stage>
-struct ValueType<Real, compute_stage>
+template <typename T>
+struct ADType;
+template <>
+struct ADType<Real>
 {
-  typedef typename RealType<compute_stage>::type type;
+  typedef ADReal type;
 };
-
-template <ComputeStage compute_stage, template <typename> class W>
-struct ValueType<W<Real>, compute_stage>
+template <template <typename> class W>
+struct ADType<W<Real>>
 {
-  typedef W<typename RealType<compute_stage>::type> type;
+  typedef W<ADReal> type;
 };
-
+template <>
+struct ADType<RealEigenVector>
+{
+  typedef RealEigenVector type;
+};
 template <typename OutputType>
 struct ShapeType
 {
@@ -340,149 +323,38 @@ typedef typename OutputTools<RealEigenVector>::VariableTestGradient ArrayVariabl
 typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableTestSecond;
 typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
 
-template <template <class> class W>
-using TemplateDN = W<DualReal>;
+/**
+ * AD typedefs
+ */
+typedef libMesh::VectorValue<ADReal> ADRealVectorValue;
+typedef ADRealVectorValue ADRealGradient;
+typedef libMesh::VectorValue<ADReal> ADPoint;
+typedef libMesh::TensorValue<ADReal> ADRealTensorValue;
+typedef libMesh::DenseMatrix<ADReal> ADDenseMatrix;
+typedef libMesh::DenseVector<ADReal> ADDenseVector;
+typedef MooseArray<ADReal> ADVariableValue;
+typedef MooseArray<ADRealVectorValue> ADVariableGradient;
+typedef MooseArray<ADRealTensorValue> ADVariableSecond;
+typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
+typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
+typedef MooseArray<libMesh::TypeNTensor<3, DualReal>> ADVectorVariableSecond;
 
-typedef TemplateDN<VectorValue> DualRealVectorValue;
-typedef TemplateDN<TensorValue> DualRealTensorValue;
+/**
+ * some AD typedefs for backwards compatability
+ */
+typedef ADRealVectorValue DualRealVectorValue;
+typedef ADRealTensorValue DualRealTensorValue;
+typedef ADRealGradient DualRealGradient;
 
-typedef DualRealVectorValue DualRealGradient;
-typedef DualRealTensorValue ADRealTensor;
-
-template <typename T, ComputeStage compute_stage>
-struct VariableValueType
-{
-  typedef
-      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableValue type;
-};
-typedef typename VariableValueType<Real, ComputeStage::JACOBIAN>::type DualVariableValue;
-
-template <typename T, ComputeStage compute_stage>
-struct VariableGradientType
-{
-  typedef typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableGradient
-      type;
-};
-template <typename T, ComputeStage compute_stage>
-struct VariableTestGradientType
-{
-  typedef
-      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableTestGradient
-          type;
-};
-template <typename T, ComputeStage compute_stage>
-struct VariableSecondType
-{
-  typedef
-      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariableSecond type;
-};
-template <typename T, ComputeStage compute_stage>
-struct VariablePhiGradientType
-{
-  typedef
-      typename OutputTools<typename Moose::ValueType<T, compute_stage>::type>::VariablePhiGradient
-          type;
-};
-
-template <ComputeStage compute_stage>
-struct RealVectorValueType
-{
-  typedef RealVectorValue type;
-};
-template <>
-struct RealVectorValueType<JACOBIAN>
-{
-  typedef DualRealVectorValue type;
-};
-template <ComputeStage compute_stage>
-struct RealTensorValueType
-{
-  typedef RealTensorValue type;
-};
-template <>
-struct RealTensorValueType<JACOBIAN>
-{
-  typedef DualRealTensorValue type;
-};
-template <ComputeStage compute_stage>
-struct RankTwoTensorType
-{
-  typedef RankTwoTensor type;
-};
-template <>
-struct RankTwoTensorType<JACOBIAN>
-{
-  typedef DualRankTwoTensor type;
-};
-template <ComputeStage compute_stage>
-struct RankFourTensorType
-{
-  typedef RankFourTensor type;
-};
-template <>
-struct RankFourTensorType<JACOBIAN>
-{
-  typedef DualRankFourTensor type;
-};
-template <ComputeStage compute_stage>
-struct DenseMatrixType
-{
-  typedef DenseMatrix<Real> type;
-};
-template <>
-struct DenseMatrixType<JACOBIAN>
-{
-  typedef DenseMatrix<DualReal> type;
-};
-template <ComputeStage compute_stage>
-struct DenseVectorType
-{
-  typedef DenseVector<Real> type;
-};
-template <>
-struct DenseVectorType<JACOBIAN>
-{
-  typedef DenseVector<DualReal> type;
-};
-
-template <typename mat_prop_type, ComputeStage compute_stage>
-struct MaterialPropertyType
-{
-  typedef MaterialProperty<mat_prop_type> type;
-};
-template <typename mat_prop_type>
-struct MaterialPropertyType<mat_prop_type, JACOBIAN>
-{
-  typedef ADMaterialPropertyObject<mat_prop_type> type;
-};
-
-template <ComputeStage compute_stage>
-struct PointType
-{
-  typedef MooseArray<Point> type;
-};
-template <>
-struct PointType<JACOBIAN>
-{
-  typedef MooseArray<VectorValue<DualReal>> type;
-};
-
-#define ADVariableValue typename VariableValueType<Real, compute_stage>::type
-#define ADVariableGradient typename VariableGradientType<Real, compute_stage>::type
-#define ADVariableSecond typename VariableSecondType<Real, compute_stage>::type
-
-#define ADVectorVariableValue typename VariableValueType<RealVectorValue, compute_stage>::type
-#define ADVectorVariableGradient typename VariableGradientType<RealVectorValue, compute_stage>::type
-#define ADVectorVariableSecond typename VariableSecondType<RealVectorValue, compute_stage>::type
-
-#define ADTemplateVariableValue typename VariableValueType<T, compute_stage>::type
-#define ADTemplateVariableGradient typename VariableGradientType<T, compute_stage>::type
-#define ADTemplateVariableSecond typename VariableSecondType<T, compute_stage>::type
-
-#define ADTemplateVariablePhiGradient typename VariablePhiGradientType<T, compute_stage>::type
-#define ADVariablePhiGradient typename VariablePhiGradientType<Real, compute_stage>::type
-
-#define ADMaterialProperty(Type) typename MaterialPropertyType<Type, compute_stage>::type
+template <typename T>
+using ADTemplateVariableValue =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableValue;
+template <typename T>
+using ADTemplateVariableGradient =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableGradient;
+template <typename T>
+using ADTemplateVariableSecond =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableSecond;
 
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;
@@ -490,28 +362,38 @@ typedef VariableTestSecond ADVariableTestSecond;
 typedef VectorVariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
-#define ADTemplateVariableTestValue typename OutputTools<T>::VariableTestValue
-#define ADTemplateVariableTestSecond typename OutputTools<T>::VariableTestSecond
-#define ADTemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
+
+// We can  use the non-ad version for test values because these don't depend on the mesh
+// displacements  (unless the location of the quadrature points depend on the mesh displacements...)
+template <typename T>
+using ADTemplateVariableTestValue = typename OutputTools<T>::VariableTestValue;
+template <typename T>
+using ADTemplateVariablePhiValue = typename OutputTools<T>::VariablePhiValue;
+
+// We need to use the AD version for test gradients and seconds because these *do* depend on the
+// mesh displacements
+template <typename T>
+using ADTemplateVariableTestGradient =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableTestGradient;
+template <typename T>
+using ADTemplateVariableTestSecond =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariableTestSecond;
+template <typename T>
+using ADTemplateVariablePhiGradient =
+    typename OutputTools<typename Moose::ADType<T>::type>::VariablePhiGradient;
+using ADVariablePhiGradient = ADTemplateVariablePhiGradient<Real>;
 
 #define declareADValidParams(ADObjectType)                                                         \
   template <>                                                                                      \
-  InputParameters validParams<ADObjectType<RESIDUAL>>();                                           \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType<JACOBIAN>>()
+  InputParameters validParams<ADObjectType>()
 
 #define defineADValidParams(ADObjectType, ADBaseObjectType, addedParamCode)                        \
   template <>                                                                                      \
-  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  InputParameters validParams<ADObjectType>()                                                      \
   {                                                                                                \
-    InputParameters params = validParams<ADBaseObjectType<RESIDUAL>>();                            \
+    InputParameters params = validParams<ADBaseObjectType>();                                      \
     addedParamCode;                                                                                \
     return params;                                                                                 \
-  }                                                                                                \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
-  {                                                                                                \
-    return validParams<ADObjectType<RESIDUAL>>();                                                  \
   }                                                                                                \
   void mooseClangFormatFunction()
 
@@ -525,44 +407,29 @@ typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 
 #define defineADLegacyParams(ADObjectType)                                                         \
   template <>                                                                                      \
-  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  InputParameters validParams<ADObjectType>()                                                      \
   {                                                                                                \
-    return ADObjectType<RESIDUAL>::validParams();                                                  \
-  }                                                                                                \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
-  {                                                                                                \
-    return ADObjectType<JACOBIAN>::validParams();                                                  \
+    return ADObjectType::validParams();                                                            \
   }                                                                                                \
   void mooseClangFormatFunction()
 
 #define defineADBaseValidParams(ADObjectType, BaseObjectType, addedParamCode)                      \
   template <>                                                                                      \
-  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  InputParameters validParams<ADObjectType>()                                                      \
   {                                                                                                \
     InputParameters params = validParams<BaseObjectType>();                                        \
     addedParamCode;                                                                                \
     return params;                                                                                 \
   }                                                                                                \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
-  {                                                                                                \
-    return validParams<ADObjectType<RESIDUAL>>();                                                  \
-  }                                                                                                \
   void mooseClangFormatFunction()
 
 #define defineADValidParamsFromEmpty(ADObjectType, addedParamCode)                                 \
   template <>                                                                                      \
-  InputParameters validParams<ADObjectType<RESIDUAL>>()                                            \
+  InputParameters validParams<ADObjectType>()                                                      \
   {                                                                                                \
     InputParameters params = emptyInputParameters();                                               \
     addedParamCode;                                                                                \
     return params;                                                                                 \
-  }                                                                                                \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType<JACOBIAN>>()                                            \
-  {                                                                                                \
-    return validParams<ADObjectType<RESIDUAL>>();                                                  \
   }                                                                                                \
   void mooseClangFormatFunction()
 

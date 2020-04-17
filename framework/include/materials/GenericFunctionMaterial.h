@@ -12,7 +12,10 @@
 #include "Material.h"
 
 // Forward Declarations
-class GenericFunctionMaterial;
+template <bool>
+class GenericFunctionMaterialTempl;
+typedef GenericFunctionMaterialTempl<false> GenericFunctionMaterial;
+typedef GenericFunctionMaterialTempl<true> ADGenericFunctionMaterial;
 
 template <>
 InputParameters validParams<GenericFunctionMaterial>();
@@ -25,12 +28,13 @@ InputParameters validParams<GenericFunctionMaterial>();
  * This is not meant to be used in a production capacity... and instead is meant to be used
  * during development phases for ultimate flexibility.
  */
-class GenericFunctionMaterial : public Material
+template <bool is_ad>
+class GenericFunctionMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericFunctionMaterial(const InputParameters & parameters);
+  GenericFunctionMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -41,7 +45,7 @@ protected:
 
   unsigned int _num_props;
 
-  std::vector<MaterialProperty<Real> *> _properties;
+  std::vector<GenericMaterialProperty<Real, is_ad> *> _properties;
   std::vector<const MaterialProperty<Real> *> _properties_old;
   std::vector<const MaterialProperty<Real> *> _properties_older;
   std::vector<const Function *> _functions;

@@ -58,7 +58,7 @@
 
 [AuxKernels]
   [./conductance]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     property = density
     variable = density_aux
     boundary = inner_surface
@@ -100,13 +100,13 @@
 
 [Materials]
   [./density]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '1'
   [../]
 
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e11
     poissons_ratio = 0.3
   [../]

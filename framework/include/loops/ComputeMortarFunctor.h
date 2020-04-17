@@ -28,7 +28,6 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-template <ComputeStage compute_stage>
 class ComputeMortarFunctor
 {
 public:

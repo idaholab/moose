@@ -67,18 +67,18 @@
 
 [Materials]
   [./volumetric_heat]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = 'volumetric_heat'
     prop_values = 't'
   [../]
   [./thermal_3]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     block = 3
     thermal_conductivity = 5
     specific_heat = 12
   [../]
   [./thermal_1]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     block = 1
     thermal_conductivity = 16.0
     specific_heat = 330.0
@@ -131,7 +131,7 @@
     execute_on = 'initial timestep_end'
   [../]
   [./flux_from_clad]
-    type = SideFluxIntegral
+    type = ADSideFluxIntegral
     variable = temp
     boundary = 5
     diffusivity = thermal_conductivity

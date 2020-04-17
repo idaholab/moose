@@ -34,9 +34,7 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
     _moose_object_pars(!params.have_parameter<bool>("skip_param_construction") ||
                                (params.have_parameter<bool>("skip_param_construction") &&
                                 !params.get<bool>("skip_param_construction"))
-                           ? (Registry::isADObj(_type + "<RESIDUAL>")
-                                  ? _factory.getValidParams(_type + "<RESIDUAL>")
-                                  : _factory.getValidParams(_type))
+                           ? _factory.getValidParams(_type)
                            : MooseObject::validParams())
 {
   _moose_object_pars.blockFullpath() = params.blockFullpath();

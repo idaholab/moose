@@ -11,16 +11,11 @@
 
 #include "ADComputeIncrementalStrainBase.h"
 
-#define usingComputeIncrementalSmallStrainMembers                                                  \
-  usingComputeIncrementalStrainBaseMembers;                                                        \
-  using ADComputeIncrementalSmallStrain<compute_stage>::computeTotalStrainIncrement
-
 /**
  * ADComputeIncrementalSmallStrain defines a strain increment and rotation increment (=1), for small
  * strains.
  */
-template <ComputeStage compute_stage>
-class ADComputeIncrementalSmallStrain : public ADComputeIncrementalStrainBase<compute_stage>
+class ADComputeIncrementalSmallStrain : public ADComputeIncrementalStrainBase
 {
 public:
   static InputParameters validParams();
@@ -35,6 +30,4 @@ protected:
    * total strain increment tensor.
    */
   virtual void computeTotalStrainIncrement(ADRankTwoTensor & total_strain_increment);
-
-  usingComputeIncrementalStrainBaseMembers;
 };

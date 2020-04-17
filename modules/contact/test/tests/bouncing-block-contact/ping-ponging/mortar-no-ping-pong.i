@@ -38,7 +38,7 @@ offset = 1e-2
 
 [Materials]
   [elasticity]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e0
     poissons_ratio = 0.3
   []

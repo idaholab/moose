@@ -10,12 +10,14 @@
 #pragma once
 
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADRealForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
+
+#include "metaphysicl/raw_type.h"
 
 #include <petscsys.h>
 #include <vector>
@@ -558,8 +560,28 @@ private:
   friend class RankThreeTensorTempl;
 };
 
+namespace MetaPhysicL
+{
+template <typename T>
+struct RawType<RankTwoTensorTempl<T>>
+{
+  typedef RankTwoTensorTempl<typename RawType<T>::value_type> value_type;
+
+  static value_type value(const RankTwoTensorTempl<T> & in)
+  {
+    value_type ret;
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+        ret(i, j) = raw_value(in(i, j));
+
+    return ret;
+  }
+};
+}
+
 typedef RankTwoTensorTempl<Real> RankTwoTensor;
 typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
 
 template <typename T>
 template <typename T2>

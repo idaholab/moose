@@ -90,7 +90,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 }
 
 template <>
-const ADMaterialPropertyObject<Real> *
+const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
@@ -99,8 +99,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_ad_real_properties.emplace_back(
-        libmesh_make_unique<ADMaterialPropertyObject<Real>>(true));
+    _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialProperty<Real>>());
     auto & default_property = _default_ad_real_properties.back();
 
     // resize to accomodate maximum number obf qpoints
@@ -124,7 +123,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 }
 
 template <>
-const ADMaterialPropertyObject<RealVectorValue> *
+const ADMaterialProperty<RealVectorValue> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
@@ -134,7 +133,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   if (ss >> real_value && ss.eof())
   {
     _default_ad_real_vector_properties.emplace_back(
-        libmesh_make_unique<ADMaterialPropertyObject<RealVectorValue>>());
+        libmesh_make_unique<ADMaterialProperty<RealVectorValue>>());
     auto & default_property = _default_ad_real_vector_properties.back();
 
     // resize to accomodate maximum number obf qpoints
@@ -259,32 +258,6 @@ MaterialPropertyInterface::getMaterialByName(const std::string & name, bool no_w
   checkBlockAndBoundaryCompatibility(discrete);
   return *discrete;
 }
-
-template <ComputeStage compute_stage>
-MaterialBase &
-MaterialPropertyInterface::getMaterial(const std::string & name)
-{
-  return getMaterialByName<compute_stage>(_mi_params.get<MaterialName>(name));
-}
-
-template <>
-MaterialBase &
-MaterialPropertyInterface::getMaterialByName<RESIDUAL>(const std::string & name, bool no_warn)
-{
-  const std::string new_name = name + "_residual";
-  return getMaterialByName(new_name, no_warn);
-}
-
-template <>
-MaterialBase &
-MaterialPropertyInterface::getMaterialByName<JACOBIAN>(const std::string & name, bool no_warn)
-{
-  const std::string new_name = name + "_jacobian";
-  return getMaterialByName(new_name, no_warn);
-}
-
-template MaterialBase & MaterialPropertyInterface::getMaterial<RESIDUAL>(const std::string &);
-template MaterialBase & MaterialPropertyInterface::getMaterial<JACOBIAN>(const std::string &);
 
 void
 MaterialPropertyInterface::checkExecutionStage()

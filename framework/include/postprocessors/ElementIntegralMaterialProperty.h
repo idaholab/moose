@@ -11,21 +11,24 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-class ElementIntegralMaterialProperty;
+template <bool>
+class ElementIntegralMaterialPropertyTempl;
+typedef ElementIntegralMaterialPropertyTempl<false> ElementIntegralMaterialProperty;
+typedef ElementIntegralMaterialPropertyTempl<true> ADElementIntegralMaterialProperty;
 
 template <>
 InputParameters validParams<ElementIntegralMaterialProperty>();
 
-class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
+template <bool is_ad>
+class ElementIntegralMaterialPropertyTempl : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  ElementIntegralMaterialProperty(const InputParameters & parameters);
+  ElementIntegralMaterialPropertyTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
 
-  const MaterialProperty<Real> & _scalar;
+  const GenericMaterialProperty<Real, is_ad> & _scalar;
 };
-

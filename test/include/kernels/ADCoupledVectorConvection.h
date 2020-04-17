@@ -11,8 +11,7 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
-class ADCoupledVectorConvection : public ADKernel<compute_stage>
+class ADCoupledVectorConvection : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -22,7 +21,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  usingKernelMembers;
 
 private:
   const bool & _use_grad;

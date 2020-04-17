@@ -11,16 +11,13 @@
 
 #include "ADStressDivergenceTensors.h"
 
-// Forward Declarations
-
 /**
  * ADDynamicStressDivergenceTensors is the automatic
  * differentiation version of DynamicStressDivergenceTensors.
  * This kernel derives from ADStressDivergenceTensors and
  * adds stress related Rayleigh and HHT time integration terms.
  */
-template <ComputeStage compute_stage>
-class ADDynamicStressDivergenceTensors : public ADStressDivergenceTensors<compute_stage>
+class ADDynamicStressDivergenceTensors : public ADStressDivergenceTensors
 {
 public:
   static InputParameters validParams();
@@ -39,6 +36,4 @@ protected:
   const MaterialProperty<Real> & _zeta;
   const Real _alpha;
   const bool _static_initialization;
-
-  usingStressDivergenceTensorsMembers;
 };

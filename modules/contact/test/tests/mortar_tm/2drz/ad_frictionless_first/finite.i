@@ -144,13 +144,13 @@ name = 'finite'
 
 [Materials]
   [./plank]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 'plank'
     poissons_ratio = 0.3
     youngs_modulus = ${E_plank}
   [../]
   [./block]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 'block'
     poissons_ratio = 0.3
     youngs_modulus = ${E_block}
@@ -167,7 +167,7 @@ name = 'finite'
     prefactor = swell_mat
   [../]
   [./swell_mat]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = 'swell_mat'
     prop_values = '7e-2*(1-cos(4*t))'
     block = 'plank'

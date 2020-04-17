@@ -10,13 +10,12 @@
 #include "ADDynamicStressDivergenceTensors.h"
 #include "ElasticityTensorTools.h"
 
-registerADMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADDynamicStressDivergenceTensors);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADDynamicStressDivergenceTensors<compute_stage>::validParams()
+ADDynamicStressDivergenceTensors::validParams()
 {
-  InputParameters params = ADStressDivergenceTensors<compute_stage>::validParams();
+  InputParameters params = ADStressDivergenceTensors::validParams();
   params.addClassDescription(
       "Residual due to stress related Rayleigh damping and HHT time integration terms");
   params.addParam<MaterialPropertyName>("zeta",
@@ -34,10 +33,9 @@ ADDynamicStressDivergenceTensors<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADDynamicStressDivergenceTensors<compute_stage>::ADDynamicStressDivergenceTensors(
+ADDynamicStressDivergenceTensors::ADDynamicStressDivergenceTensors(
     const InputParameters & parameters)
-  : ADStressDivergenceTensors<compute_stage>(parameters),
+  : ADStressDivergenceTensors(parameters),
     _stress_older(getMaterialPropertyOlder<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _zeta(getMaterialProperty<Real>("zeta")),
@@ -46,9 +44,8 @@ ADDynamicStressDivergenceTensors<compute_stage>::ADDynamicStressDivergenceTensor
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADDynamicStressDivergenceTensors<compute_stage>::computeQpResidual()
+ADDynamicStressDivergenceTensors::computeQpResidual()
 {
   /**
    *This kernel needs to be used only if either Rayleigh damping or numerical damping through HHT

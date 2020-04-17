@@ -49,11 +49,6 @@ InterfaceMaterial::InterfaceMaterial(const InputParameters & parameters)
 void
 InterfaceMaterial::computeProperties()
 {
-
-  // Reference to *all* the MaterialProperties in the MaterialData object, not
-  // just the ones for this Material.
-
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpProperties();
-  copyDualNumbersToValues();
 }

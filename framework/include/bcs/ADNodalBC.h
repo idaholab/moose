@@ -15,7 +15,7 @@
 /**
  * Base class for deriving any automatic differentiation boundary condition of a integrated type
  */
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 class ADNodalBCTempl : public NodalBCBase, public MooseVariableInterface<T>
 {
 public:
@@ -34,7 +34,7 @@ protected:
   /**
    * Compute this NodalBC's contribution to the residual at the current quadrature point
    */
-  virtual typename Moose::ValueType<T, compute_stage>::type computeQpResidual() = 0;
+  virtual typename Moose::ADType<T>::type computeQpResidual() = 0;
 
   /// The variable that this NodalBC operates on
   MooseVariableFE<T> & _var;
@@ -43,29 +43,8 @@ protected:
   const Node * const & _current_node;
 
   /// Value of the unknown variable this BC is acting on
-  const typename Moose::ValueType<T, compute_stage>::type & _u;
+  const typename Moose::ADType<T>::type & _u;
 };
 
-template <ComputeStage compute_stage>
-using ADNodalBC = ADNodalBCTempl<Real, compute_stage>;
-template <ComputeStage compute_stage>
-using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue, compute_stage>;
-
-declareADValidParams(ADNodalBC);
-declareADValidParams(ADVectorNodalBC);
-
-#define usingTemplNodalBCMembers(type)                                                             \
-  usingMooseObjectMembers;                                                                         \
-  usingUserObjectInterfaceMembers;                                                                 \
-  using ADNodalBCTempl<type, compute_stage>::_u;                                                   \
-  using ADNodalBCTempl<type, compute_stage>::_var;                                                 \
-  using ADNodalBCTempl<type, compute_stage>::_current_node;                                        \
-  using ADNodalBCTempl<type, compute_stage>::_t;                                                   \
-  using ADNodalBCTempl<type, compute_stage>::computeResidual;                                      \
-  using ADNodalBCTempl<type, compute_stage>::computeJacobian;                                      \
-  using ADNodalBCTempl<type, compute_stage>::computeOffDiagJacobian;                               \
-  using ADNodalBCTempl<type, compute_stage>::getFunction;                                          \
-  using ADNodalBCTempl<type, compute_stage>::variable
-
-#define usingNodalBCMembers usingTemplNodalBCMembers(Real)
-#define usingVectorNodalBCMembers usingTemplNodalBCMembers(RealVectorValue)
+using ADNodalBC = ADNodalBCTempl<Real>;
+using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue>;

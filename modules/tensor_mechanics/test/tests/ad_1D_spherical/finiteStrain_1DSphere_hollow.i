@@ -61,7 +61,7 @@
 
 [AuxKernels]
   [./stress_rr]
-    type = RankTwoAux
+    type = ADRankTwoAux
     rank_two_tensor = stress
     index_i = 0
     index_j = 0
@@ -88,7 +88,7 @@
 
 [Materials]
   [./Elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
   [../]

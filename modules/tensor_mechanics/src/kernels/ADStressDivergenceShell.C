@@ -22,13 +22,12 @@
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/string_to_enum.h"
 
-registerADMooseObject("TensorMechanicsApp", ADStressDivergenceShell);
+registerMooseObject("TensorMechanicsApp", ADStressDivergenceShell);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADStressDivergenceShell<compute_stage>::validParams()
+ADStressDivergenceShell::validParams()
 {
-  InputParameters params = ADKernel<compute_stage>::validParams();
+  InputParameters params = ADKernel::validParams();
   params.addClassDescription("Quasi-static stress divergence kernel for Shell element");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
@@ -44,9 +43,8 @@ ADStressDivergenceShell<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADStressDivergenceShell<compute_stage>::ADStressDivergenceShell(const InputParameters & parameters)
-  : ADKernel<compute_stage>(parameters),
+ADStressDivergenceShell::ADStressDivergenceShell(const InputParameters & parameters)
+  : ADKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _large_strain(getParam<bool>("large_strain"))
 {
@@ -74,9 +72,8 @@ ADStressDivergenceShell<compute_stage>::ADStressDivergenceShell(const InputParam
   }
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADStressDivergenceShell<compute_stage>::computeQpResidual()
+ADStressDivergenceShell::computeQpResidual()
 {
   _q_weights = _qrule->get_weights();
   ADReal residual = 0.0;

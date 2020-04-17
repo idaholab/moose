@@ -12,14 +12,12 @@
 #include "DenseMatrix.h"
 #include "ADComputeIncrementalShellStrain.h"
 
-#define usingComputeFiniteShellStrainMembers usingComputeIncrementalShellStrainMembers
-
 /**
  * ADComputeFiniteShellStrain computes the strain increment term for shell elements under finite
  * displacement/rotation scenarios.
- */
-template <ComputeStage compute_stage>
-class ADComputeFiniteShellStrain : public ADComputeIncrementalShellStrain<compute_stage>
+ **/
+
+class ADComputeFiniteShellStrain : public ADComputeIncrementalShellStrain
 {
 public:
   static InputParameters validParams();
@@ -37,7 +35,5 @@ protected:
   virtual void computeBNLMatrix();
 
   /// Material property to store the B_nl matrix at each quadrature point
-  std::vector<ADMaterialProperty(DenseMatrix<Real>) *> _B_nl;
-
-  usingComputeIncrementalShellStrainMembers;
+  std::vector<ADMaterialProperty<DenseMatrix<Real>> *> _B_nl;
 };

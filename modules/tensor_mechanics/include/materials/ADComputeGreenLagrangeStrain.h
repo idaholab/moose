@@ -14,8 +14,7 @@
 /**
  * ADComputeGreenLagrangeStrain defines a non-linear Green-Lagrange strain tensor
  */
-template <ComputeStage compute_stage>
-class ADComputeGreenLagrangeStrain : public ADComputeStrainBase<compute_stage>
+class ADComputeGreenLagrangeStrain : public ADComputeStrainBase
 {
 public:
   static InputParameters validParams();
@@ -24,6 +23,4 @@ public:
 
 protected:
   virtual void computeProperties() override;
-
-  usingComputeStrainBaseMembers;
 };

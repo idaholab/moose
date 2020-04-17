@@ -16,26 +16,21 @@
 
 #include "libmesh/quadrature.h"
 
-defineADLegacyParams(ADTimeKernelGrad);
-defineADLegacyParams(ADVectorTimeKernelGrad);
-
-template <typename T, ComputeStage compute_stage>
+template <typename T>
 InputParameters
-ADTimeKernelGradTempl<T, compute_stage>::validParams()
+ADTimeKernelGradTempl<T>::validParams()
 {
-  InputParameters params = ADKernelGradTempl<T, compute_stage>::validParams();
+  InputParameters params = ADKernelGradTempl<T>::validParams();
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
 }
 
-template <typename T, ComputeStage compute_stage>
-ADTimeKernelGradTempl<T, compute_stage>::ADTimeKernelGradTempl(const InputParameters & parameters)
-  : ADKernelGradTempl<T, compute_stage>(parameters), _u_dot(_var.template adUDot<compute_stage>())
+template <typename T>
+ADTimeKernelGradTempl<T>::ADTimeKernelGradTempl(const InputParameters & parameters)
+  : ADKernelGradTempl<T>(parameters), _u_dot(_var.adUDot())
 {
 }
 
-template class ADTimeKernelGradTempl<Real, RESIDUAL>;
-template class ADTimeKernelGradTempl<Real, JACOBIAN>;
-template class ADTimeKernelGradTempl<RealVectorValue, RESIDUAL>;
-template class ADTimeKernelGradTempl<RealVectorValue, JACOBIAN>;
+template class ADTimeKernelGradTempl<Real>;
+template class ADTimeKernelGradTempl<RealVectorValue>;

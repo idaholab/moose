@@ -11,22 +11,12 @@
 
 #include "ADDirichletBCBase.h"
 
-#define usingDirichletBCMembers                                                                    \
-  usingDirichletBCBaseMembers;                                                                     \
-  using ADDirichletBC<compute_stage>::computeQpValue
-
-template <ComputeStage>
-class ADDirichletBC;
-
-declareADValidParams(ADDirichletBC);
-
 /**
  * Boundary condition of a Dirichlet type
  *
  * Sets the values of a nodal variable at nodes
  */
-template <ComputeStage compute_stage>
-class ADDirichletBC : public ADDirichletBCBase<compute_stage>
+class ADDirichletBC : public ADDirichletBCBase
 {
 public:
   static InputParameters validParams();
@@ -38,6 +28,4 @@ protected:
 
   /// The value for this BC
   const Real & _value;
-
-  usingDirichletBCBaseMembers;
 };

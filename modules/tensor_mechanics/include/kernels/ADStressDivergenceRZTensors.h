@@ -11,16 +11,13 @@
 
 #include "ADStressDivergenceTensors.h"
 
-// Forward Declarations
-
 /**
  * ADStressDivergenceRZTensors is the automatic differentiation version of
  * StressDivergenceRZTensors. Within this kernel the first component of the displacements refers to
  * displacement in the radial direction and the second component refers to displacement in the
  * axial direction. The COORD_TYPE in the Problem block must be set to RZ.
  */
-template <ComputeStage compute_stage>
-class ADStressDivergenceRZTensors : public ADStressDivergenceTensors<compute_stage>
+class ADStressDivergenceRZTensors : public ADStressDivergenceTensors
 {
 public:
   static InputParameters validParams();
@@ -32,6 +29,4 @@ protected:
 
   ADReal computeQpResidual() override;
   void precalculateResidual() override;
-
-  usingStressDivergenceTensorsMembers;
 };

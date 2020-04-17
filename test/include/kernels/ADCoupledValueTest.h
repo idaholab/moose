@@ -11,8 +11,7 @@
 
 #include "ADKernel.h"
 
-template <ComputeStage compute_stage>
-class ADCoupledValueTest : public ADKernel<compute_stage>
+class ADCoupledValueTest : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -24,5 +23,4 @@ protected:
 
   const ADVariableValue & _v;
 
-  usingKernelMembers;
 };

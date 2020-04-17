@@ -9,13 +9,12 @@
 
 #include "ADWeakPlaneStress.h"
 
-registerADMooseObject("TensorMechanicsApp", ADWeakPlaneStress);
+registerMooseObject("TensorMechanicsApp", ADWeakPlaneStress);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADWeakPlaneStress<compute_stage>::validParams()
+ADWeakPlaneStress::validParams()
 {
-  InputParameters params = ADKernelValue<compute_stage>::validParams();
+  InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Plane stress kernel to provide out-of-plane strain contribution.");
   params.addParam<std::string>("base_name", "Material property base name");
   MooseEnum direction("x y z", "z");
@@ -27,18 +26,16 @@ ADWeakPlaneStress<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADWeakPlaneStress<compute_stage>::ADWeakPlaneStress(const InputParameters & parameters)
-  : ADKernelValue<compute_stage>(parameters),
+ADWeakPlaneStress::ADWeakPlaneStress(const InputParameters & parameters)
+  : ADKernelValue(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _direction(getParam<MooseEnum>("out_of_plane_strain_direction"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-ADWeakPlaneStress<compute_stage>::precomputeQpResidual()
+ADWeakPlaneStress::precomputeQpResidual()
 {
   return _stress[_qp](_direction, _direction);
 }

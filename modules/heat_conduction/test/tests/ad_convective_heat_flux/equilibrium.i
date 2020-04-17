@@ -29,7 +29,6 @@
     boundary = 'right'
     T_infinity = 100.0
     heat_transfer_coefficient = 1
-    heat_transfer_coefficient_dT = 0
   [../]
 []
 

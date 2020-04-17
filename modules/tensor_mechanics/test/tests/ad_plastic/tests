@@ -69,6 +69,7 @@
     requirement = "The AD multiple inelastic stress calculator shall provide a correct jacobian for the linear combination of two power law creep models"
     petsc_version = '>=3.9.4'
     design = 'ADComputeMultipleInelasticStress.md'
+    valgrind = 'none' # too slow especially after #14547
   [../]
   [./powerlaw_cycle_jacobian]
     type = 'PetscJacobianTester'

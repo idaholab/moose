@@ -104,12 +104,12 @@
     density = 100
   [../]
   [./temp]
-    type = HeatConductionMaterial
+    type = ADHeatConductionMaterial
     thermal_conductivity = 1e5
     specific_heat = 620.0
   [../]
   [./Elasticity_tensor]
-    type = ComputeElasticityTensor
+    type = ADComputeElasticityTensor
     fill_method = symmetric_isotropic
     C_ijkl = '0.3 0.5e8'
   [../]

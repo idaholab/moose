@@ -54,7 +54,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [por_var]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     variable = por_var
     property = porosity
     execute_on = 'INITIAL TIMESTEP_END'

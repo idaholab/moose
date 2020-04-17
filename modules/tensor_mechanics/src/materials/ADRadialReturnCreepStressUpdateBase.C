@@ -10,49 +10,41 @@
 #include "ADRadialReturnCreepStressUpdateBase.h"
 #include "RankTwoTensor.h"
 
-template <ComputeStage compute_stage>
 InputParameters
-ADRadialReturnCreepStressUpdateBase<compute_stage>::validParams()
+ADRadialReturnCreepStressUpdateBase::validParams()
 {
-  InputParameters params = ADRadialReturnStressUpdate<compute_stage>::validParams();
+  InputParameters params = ADRadialReturnStressUpdate::validParams();
   params.set<std::string>("effective_inelastic_strain_name") = "effective_creep_strain";
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADRadialReturnCreepStressUpdateBase<compute_stage>::ADRadialReturnCreepStressUpdateBase(
+ADRadialReturnCreepStressUpdateBase::ADRadialReturnCreepStressUpdateBase(
     const InputParameters & parameters)
-  : ADRadialReturnStressUpdate<compute_stage>(parameters),
+  : ADRadialReturnStressUpdate(parameters),
     _creep_strain(declareADProperty<RankTwoTensor>(_base_name + "creep_strain")),
     _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain"))
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADRadialReturnCreepStressUpdateBase<compute_stage>::initQpStatefulProperties()
+ADRadialReturnCreepStressUpdateBase::initQpStatefulProperties()
 {
   _creep_strain[_qp].zero();
 
-  ADRadialReturnStressUpdate<compute_stage>::initQpStatefulProperties();
+  ADRadialReturnStressUpdate::initQpStatefulProperties();
 }
 
-template <ComputeStage compute_stage>
 void
-ADRadialReturnCreepStressUpdateBase<compute_stage>::propagateQpStatefulProperties()
+ADRadialReturnCreepStressUpdateBase::propagateQpStatefulProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 
   propagateQpStatefulPropertiesRadialReturn();
 }
 
-template <ComputeStage compute_stage>
 void
-ADRadialReturnCreepStressUpdateBase<compute_stage>::computeStressFinalize(
+ADRadialReturnCreepStressUpdateBase::computeStressFinalize(
     const ADRankTwoTensor & plastic_strain_increment)
 {
   _creep_strain[_qp] = _creep_strain_old[_qp] + plastic_strain_increment;
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADRadialReturnCreepStressUpdateBase);

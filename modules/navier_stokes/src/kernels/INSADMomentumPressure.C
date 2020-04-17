@@ -9,13 +9,12 @@
 
 #include "INSADMomentumPressure.h"
 
-registerADMooseObject("NavierStokesApp", INSADMomentumPressure);
+registerMooseObject("NavierStokesApp", INSADMomentumPressure);
 
-template <ComputeStage compute_stage>
 InputParameters
-INSADMomentumPressure<compute_stage>::validParams()
+INSADMomentumPressure::validParams()
 {
-  InputParameters params = ADVectorKernel<compute_stage>::validParams();
+  InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription("Adds the pressure term to the INS momentum equation");
   params.addRequiredCoupledVar("p", "The pressure");
   params.addParam<bool>(
@@ -23,18 +22,16 @@ INSADMomentumPressure<compute_stage>::validParams()
   return params;
 }
 
-template <ComputeStage compute_stage>
-INSADMomentumPressure<compute_stage>::INSADMomentumPressure(const InputParameters & parameters)
-  : ADVectorKernel<compute_stage>(parameters),
+INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
+  : ADVectorKernel(parameters),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
     _p(adCoupledValue("p")),
     _grad_p(adCoupledGradient("p"))
 {
 }
 
-template <ComputeStage compute_stage>
 ADReal
-INSADMomentumPressure<compute_stage>::computeQpResidual()
+INSADMomentumPressure::computeQpResidual()
 {
   if (_integrate_p_by_parts)
     return -_p[_qp] * _grad_test[_i][_qp].tr();

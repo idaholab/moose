@@ -25,8 +25,7 @@
  * boundary condition.", International Journal for Numerical Methods
  * in Fluids, vol. 24, no. 4, 1997, pp. 393-411.
  */
-template <ComputeStage compute_stage>
-class HeatConductionOutflow : public ADIntegratedBC<compute_stage>
+class HeatConductionOutflow : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -40,7 +39,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   /// Thermal conductivity of the material
-  const MaterialProperty<Real> & _thermal_conductivity;
-
-  usingIntegratedBCMembers;
+  const ADMaterialProperty<Real> & _thermal_conductivity;
 };

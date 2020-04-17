@@ -12,27 +12,23 @@
 
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeRSphericalSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeRSphericalSmallStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeRSphericalSmallStrain<compute_stage>::validParams()
+ADComputeRSphericalSmallStrain::validParams()
 {
-  InputParameters params = ADComputeSmallStrain<compute_stage>::validParams();
+  InputParameters params = ADComputeSmallStrain::validParams();
   params.addClassDescription("Compute a small strain 1D spherical symmetry case.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeRSphericalSmallStrain<compute_stage>::ADComputeRSphericalSmallStrain(
-    const InputParameters & parameters)
-  : ADComputeSmallStrain<compute_stage>(parameters)
+ADComputeRSphericalSmallStrain::ADComputeRSphericalSmallStrain(const InputParameters & parameters)
+  : ADComputeSmallStrain(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeRSphericalSmallStrain<compute_stage>::computeProperties()
+ADComputeRSphericalSmallStrain::computeProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {

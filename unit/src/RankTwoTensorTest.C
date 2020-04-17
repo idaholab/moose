@@ -10,8 +10,11 @@
 #include "RankTwoTensorTest.h"
 #include "RankTwoScalarTools.h"
 #include "RankFourTensor.h"
+#include "ADReal.h"
 
 #include "libmesh/point.h"
+
+#include "metaphysicl/raw_type.h"
 
 TEST_F(RankTwoTensorTest, L2norm)
 {
@@ -574,4 +577,13 @@ TEST_F(RankTwoTensorTest, QRFactorization)
   EXPECT_NEAR(4.9029, std::abs(R(0, 2)), 0.0001);
   EXPECT_NEAR(4.4748, std::abs(R(1, 2)), 0.0001);
   EXPECT_NEAR(1.392, std::abs(R(2, 2)), 0.0001);
+}
+
+TEST_F(RankTwoTensorTest, ADConversion)
+{
+  RankTwoTensor reg;
+  ADRankTwoTensor ad;
+
+  ad = reg;
+  reg = MetaPhysicL::raw_value(ad);
 }

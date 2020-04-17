@@ -21,7 +21,6 @@
 #include "PerfGraph.h"
 #include "TheWarehouse.h"
 #include "RankMap.h"
-#include "MemberTemplateMacros.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -116,10 +115,10 @@ public:
    * @return The value of the parameter
    */
   template <typename T>
-  const T & getParamTempl(const std::string & name);
+  const T & getParam(const std::string & name);
 
   template <typename T>
-  const T & getParamTempl(const std::string & name) const;
+  const T & getParam(const std::string & name) const;
   ///@}
 
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
@@ -1068,14 +1067,14 @@ private:
 
 template <typename T>
 const T &
-MooseApp::getParamTempl(const std::string & name)
+MooseApp::getParam(const std::string & name)
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }
 
 template <typename T>
 const T &
-MooseApp::getParamTempl(const std::string & name) const
+MooseApp::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
 }

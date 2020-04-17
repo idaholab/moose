@@ -11,8 +11,7 @@
 
 #include "ADKernelValue.h"
 
-template <ComputeStage compute_stage>
-class ADConvectionPrecompute : public ADKernelValue<compute_stage>
+class ADConvectionPrecompute : public ADKernelValue
 {
 public:
   static InputParameters validParams();
@@ -25,5 +24,4 @@ protected:
 private:
   RealVectorValue _velocity;
 
-  usingKernelValueMembers;
 };

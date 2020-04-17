@@ -98,10 +98,10 @@ groupUserObjects(TheWarehouse & w,
   for (const auto obj : objs)
   {
     if (ic_deps.count(obj->name()) > 0 ||
-        (obj->isParamValid("force_preic") && obj->template getParamTempl<bool>("force_preic")))
+        (obj->isParamValid("force_preic") && obj->template getParam<bool>("force_preic")))
       w.update(obj, AttribPreIC(w, true));
 
-    if ((obj->isParamValid("force_preaux") && obj->template getParamTempl<bool>("force_preaux")) ||
+    if ((obj->isParamValid("force_preaux") && obj->template getParam<bool>("force_preaux")) ||
         aux_deps.count(obj->name()) > 0 || ic_deps.count(obj->name()) > 0)
       w.update(obj, AttribPreAux(w, true));
     else

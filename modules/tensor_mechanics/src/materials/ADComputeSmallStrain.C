@@ -10,26 +10,23 @@
 #include "ADComputeSmallStrain.h"
 #include "libmesh/quadrature.h"
 
-registerADMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADComputeSmallStrain);
 
-template <ComputeStage compute_stage>
 InputParameters
-ADComputeSmallStrain<compute_stage>::validParams()
+ADComputeSmallStrain::validParams()
 {
-  InputParameters params = ADComputeStrainBase<compute_stage>::validParams();
+  InputParameters params = ADComputeStrainBase::validParams();
   params.addClassDescription("Compute a small strain.");
   return params;
 }
 
-template <ComputeStage compute_stage>
-ADComputeSmallStrain<compute_stage>::ADComputeSmallStrain(const InputParameters & parameters)
-  : ADComputeStrainBase<compute_stage>(parameters)
+ADComputeSmallStrain::ADComputeSmallStrain(const InputParameters & parameters)
+  : ADComputeStrainBase(parameters)
 {
 }
 
-template <ComputeStage compute_stage>
 void
-ADComputeSmallStrain<compute_stage>::computeProperties()
+ADComputeSmallStrain::computeProperties()
 {
   ADReal volumetric_strain = 0.0;
 
@@ -67,9 +64,4 @@ ADComputeSmallStrain<compute_stage>::computeProperties()
     for (auto es : _eigenstrains)
       _mechanical_strain[_qp] -= (*es)[_qp];
   }
-
-  copyDualNumbersToValues();
 }
-
-// explicit instantiation is required for AD base classes
-adBaseClass(ADComputeSmallStrain);

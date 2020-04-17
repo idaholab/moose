@@ -131,16 +131,16 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
   {
     case Moose::ElementType::Element:
     {
-      _phi_assembly_method = &Assembly::fePhi<OutputType>;
-      _phi_face_assembly_method = &Assembly::fePhiFace<OutputType>;
-      _grad_phi_assembly_method = &Assembly::feGradPhi<OutputType>;
-      _grad_phi_face_assembly_method = &Assembly::feGradPhiFace<OutputType>;
-      _second_phi_assembly_method = &Assembly::feSecondPhi<OutputType>;
-      _second_phi_face_assembly_method = &Assembly::feSecondPhiFace<OutputType>;
-      _curl_phi_assembly_method = &Assembly::feCurlPhi<OutputType>;
-      _curl_phi_face_assembly_method = &Assembly::feCurlPhiFace<OutputType>;
-      _ad_grad_phi_assembly_method = &Assembly::feADGradPhi<OutputType>;
-      _ad_grad_phi_face_assembly_method = &Assembly::feADGradPhiFace<OutputType>;
+      _phi_assembly_method = &Assembly::fePhi<OutputShape>;
+      _phi_face_assembly_method = &Assembly::fePhiFace<OutputShape>;
+      _grad_phi_assembly_method = &Assembly::feGradPhi<OutputShape>;
+      _grad_phi_face_assembly_method = &Assembly::feGradPhiFace<OutputShape>;
+      _second_phi_assembly_method = &Assembly::feSecondPhi<OutputShape>;
+      _second_phi_face_assembly_method = &Assembly::feSecondPhiFace<OutputShape>;
+      _curl_phi_assembly_method = &Assembly::feCurlPhi<OutputShape>;
+      _curl_phi_face_assembly_method = &Assembly::feCurlPhiFace<OutputShape>;
+      _ad_grad_phi_assembly_method = &Assembly::feADGradPhi<OutputShape>;
+      _ad_grad_phi_face_assembly_method = &Assembly::feADGradPhiFace<OutputShape>;
 
       _ad_grad_phi = &_ad_grad_phi_assembly_method(_assembly, _fe_type);
       _ad_grad_phi_face = &_ad_grad_phi_face_assembly_method(_assembly, _fe_type);
@@ -148,14 +148,14 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     }
     case Moose::ElementType::Neighbor:
     {
-      _phi_assembly_method = &Assembly::fePhiNeighbor<OutputType>;
-      _phi_face_assembly_method = &Assembly::fePhiFaceNeighbor<OutputType>;
-      _grad_phi_assembly_method = &Assembly::feGradPhiNeighbor<OutputType>;
-      _grad_phi_face_assembly_method = &Assembly::feGradPhiFaceNeighbor<OutputType>;
-      _second_phi_assembly_method = &Assembly::feSecondPhiNeighbor<OutputType>;
-      _second_phi_face_assembly_method = &Assembly::feSecondPhiFaceNeighbor<OutputType>;
-      _curl_phi_assembly_method = &Assembly::feCurlPhiNeighbor<OutputType>;
-      _curl_phi_face_assembly_method = &Assembly::feCurlPhiFaceNeighbor<OutputType>;
+      _phi_assembly_method = &Assembly::fePhiNeighbor<OutputShape>;
+      _phi_face_assembly_method = &Assembly::fePhiFaceNeighbor<OutputShape>;
+      _grad_phi_assembly_method = &Assembly::feGradPhiNeighbor<OutputShape>;
+      _grad_phi_face_assembly_method = &Assembly::feGradPhiFaceNeighbor<OutputShape>;
+      _second_phi_assembly_method = &Assembly::feSecondPhiNeighbor<OutputShape>;
+      _second_phi_face_assembly_method = &Assembly::feSecondPhiFaceNeighbor<OutputShape>;
+      _curl_phi_assembly_method = &Assembly::feCurlPhiNeighbor<OutputShape>;
+      _curl_phi_face_assembly_method = &Assembly::feCurlPhiFaceNeighbor<OutputShape>;
 
       _ad_grad_phi = nullptr;
       _ad_grad_phi_face = nullptr;
@@ -741,7 +741,7 @@ MooseVariableData<OutputType>::computeValues()
   }
 
   // Automatic differentiation
-  if (_need_ad && _subproblem.currentlyComputingJacobian())
+  if (_need_ad)
     computeAD(num_dofs, nqp);
 }
 
@@ -1281,6 +1281,10 @@ template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
+  // Have to do this because upon construction this won't initialize any of the derivatives (because
+  // DualNumber::do_derivatives is false at that time).
+  _ad_zero = 0;
+
   _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
     _ad_u.resize(nqp);
@@ -1361,10 +1365,10 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    if (_var.kind() == Moose::VAR_NONLINEAR)
+    if (_var.kind() == Moose::VAR_NONLINEAR && _subproblem.currentlyComputingJacobian())
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
 
-    if (_need_ad_u_dot && _time_integrator)
+    if (_need_ad_u_dot && _time_integrator && _time_integrator->dt())
     {
       _ad_dofs_dot[i] = _ad_dof_values[i];
       _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i], _dof_indices[i]);
@@ -2088,7 +2092,7 @@ MooseVariableData<OutputType>::computeNodalValues()
     fetchDoFValues();
     assignNodalValue();
 
-    if (_need_ad && _subproblem.currentlyComputingJacobian())
+    if (_need_ad)
       fetchADDoFValues();
   }
   else
@@ -2349,7 +2353,7 @@ MooseVariableData<OutputType>::fetchADDoFValues()
   for (decltype(n) i = 0; i < n; ++i)
   {
     _ad_dof_values[i] = _dof_values[i];
-    if (_var.kind() == Moose::VAR_NONLINEAR)
+    if (_var.kind() == Moose::VAR_NONLINEAR && _subproblem.currentlyComputingJacobian())
       Moose::derivInsert(_ad_dof_values[i].derivatives(), ad_offset + i, 1.);
     assignADNodalValue(_ad_dof_values[i], i);
   }
@@ -2610,109 +2614,6 @@ MooseVariableData<OutputType>::reinitNodes(const std::vector<dof_id_type> & node
     _has_dof_indices = true;
   else
     _has_dof_indices = false;
-}
-
-template <>
-template <>
-const VariableValue &
-MooseVariableData<Real>::adSln<RESIDUAL>() const
-{
-  return _u;
-}
-
-template <>
-template <>
-const VectorVariableValue &
-MooseVariableData<RealVectorValue>::adSln<RESIDUAL>() const
-{
-  return _u;
-}
-
-template <>
-template <>
-const VariableGradient &
-MooseVariableData<Real>::adGradSln<RESIDUAL>() const
-{
-  return _grad_u;
-}
-
-template <>
-template <>
-const VectorVariableGradient &
-MooseVariableData<RealVectorValue>::adGradSln<RESIDUAL>() const
-{
-  return _grad_u;
-}
-
-template <>
-template <>
-const VariableSecond &
-MooseVariableData<Real>::adSecondSln<RESIDUAL>() const
-{
-  _need_second = true;
-  secondPhi();
-  secondPhiFace();
-  return _second_u;
-}
-
-template <>
-template <>
-const VectorVariableSecond &
-MooseVariableData<RealVectorValue>::adSecondSln<RESIDUAL>() const
-{
-  _need_second = true;
-  secondPhi();
-  secondPhiFace();
-  return _second_u;
-}
-
-template <>
-template <>
-const VariableValue &
-MooseVariableData<Real>::adUDot<RESIDUAL>() const
-{
-
-  return uDot();
-}
-
-template <>
-template <>
-const VectorVariableValue &
-MooseVariableData<RealVectorValue>::adUDot<RESIDUAL>() const
-{
-  return uDot();
-}
-
-template <>
-template <>
-const MooseArray<Real> &
-MooseVariableData<Real>::adDofValues<RESIDUAL>() const
-{
-  return _dof_values;
-}
-
-template <>
-template <>
-const MooseArray<Real> &
-MooseVariableData<RealVectorValue>::adDofValues<RESIDUAL>() const
-{
-  return _dof_values;
-}
-
-template <>
-template <>
-const Real &
-MooseVariableData<Real>::adNodalValue<RESIDUAL>() const
-{
-  return _nodal_value;
-}
-
-template <>
-template <>
-const RealVectorValue &
-MooseVariableData<RealVectorValue>::adNodalValue<RESIDUAL>() const
-{
-  return _nodal_value;
 }
 
 template class MooseVariableData<Real>;

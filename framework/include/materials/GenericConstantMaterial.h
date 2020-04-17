@@ -11,12 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class GenericConstantMaterial;
-
-template <>
-InputParameters validParams<GenericConstantMaterial>();
-
 /**
  * This material automatically declares as material properties whatever is passed to it
  * through the parameters 'prop_names' and uses the values from 'prop_values' as the values
@@ -25,12 +19,13 @@ InputParameters validParams<GenericConstantMaterial>();
  * This is not meant to be used in a production capacity... and instead is meant to be used
  * during development phases for ultimate flexibility.
  */
-class GenericConstantMaterial : public Material
+template <bool is_ad>
+class GenericConstantMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericConstantMaterial(const InputParameters & parameters);
+  GenericConstantMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -41,6 +36,8 @@ protected:
 
   unsigned int _num_props;
 
-  std::vector<MaterialProperty<Real> *> _properties;
+  std::vector<GenericMaterialProperty<Real, is_ad> *> _properties;
 };
 
+typedef GenericConstantMaterialTempl<false> GenericConstantMaterial;
+typedef GenericConstantMaterialTempl<true> ADGenericConstantMaterial;

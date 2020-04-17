@@ -9,29 +9,40 @@
 
 #include "MaterialRealVectorValueAux.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("MooseApp", MaterialRealVectorValueAux);
+registerMooseObject("MooseApp", ADMaterialRealVectorValueAux);
 
 defineLegacyParams(MaterialRealVectorValueAux);
 
+template <bool is_ad>
 InputParameters
-MaterialRealVectorValueAux::validParams()
+MaterialRealVectorValueAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialAuxBase<>::validParams();
+  InputParameters params = MaterialAuxBaseTempl<RealVectorValue, is_ad>::validParams();
   params.addParam<unsigned int>("component", 0, "The vector component to consider for this kernel");
 
   return params;
 }
 
-MaterialRealVectorValueAux::MaterialRealVectorValueAux(const InputParameters & parameters)
-  : MaterialAuxBase<RealVectorValue>(parameters), _component(getParam<unsigned int>("component"))
+template <bool is_ad>
+MaterialRealVectorValueAuxTempl<is_ad>::MaterialRealVectorValueAuxTempl(
+    const InputParameters & parameters)
+  : MaterialAuxBaseTempl<RealVectorValue, is_ad>(parameters),
+    _component(this->template getParam<unsigned int>("component"))
 {
   if (_component > LIBMESH_DIM)
-    mooseError(
+    this->mooseError(
         "The component ", _component, " does not exist for ", LIBMESH_DIM, " dimensional problems");
 }
 
+template <bool is_ad>
 Real
-MaterialRealVectorValueAux::getRealValue()
+MaterialRealVectorValueAuxTempl<is_ad>::getRealValue()
 {
-  return _prop[_qp](_component);
+  return MetaPhysicL::raw_value(this->_prop[this->_qp](_component));
 }
+
+template class MaterialRealVectorValueAuxTempl<false>;
+template class MaterialRealVectorValueAuxTempl<true>;

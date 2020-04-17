@@ -9,6 +9,8 @@
 
 #include "DarcyVelocity.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("DarcyThermoMechApp", DarcyVelocity);
 
 InputParameters
@@ -30,11 +32,11 @@ DarcyVelocity::DarcyVelocity(const InputParameters & parameters)
 
     // Set reference to the permeability MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
-    _permeability(getMaterialProperty<Real>("permeability")),
+    _permeability(getADMaterialProperty<Real>("permeability")),
 
     // Set reference to the viscosity MaterialProperty.
     // Only AuxKernels operating on Elemental Auxiliary Variables can do this
-    _viscosity(getMaterialProperty<Real>("viscosity"))
+    _viscosity(getADMaterialProperty<Real>("viscosity"))
 {
 }
 
@@ -44,5 +46,5 @@ DarcyVelocity::computeValue()
   // Access the gradient of the pressure at this quadrature point, then pull out the "component" of
   // it requested (x, y or z). Note, that getting a particular component of a gradient is done using
   // the parenthesis operator.
-  return -(_permeability[_qp] / _viscosity[_qp]) * _pressure_gradient[_qp];
+  return -MetaPhysicL::raw_value(_permeability[_qp] / _viscosity[_qp]) * _pressure_gradient[_qp];
 }

@@ -26,6 +26,10 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<Real>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADReal>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealVectorValue>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
@@ -35,6 +39,10 @@ std::vector<std::string> MaterialOutputAction::materialOutputHelper<RealTensorVa
 
 template <>
 std::vector<std::string> MaterialOutputAction::materialOutputHelper<RankTwoTensor>(
+    const std::string & material_name, const MaterialBase & material, bool get_names_only);
+
+template <>
+std::vector<std::string> MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(
     const std::string & material_name, const MaterialBase & material, bool get_names_only);
 
 template <>
@@ -117,7 +125,7 @@ MaterialOutputAction::act()
 
     // Extract the property names that will actually be output
     std::vector<std::string> output_properties =
-        mat->getParamTempl<std::vector<std::string>>("output_properties");
+        mat->getParam<std::vector<std::string>>("output_properties");
 
     // Append the properties listed in the Outputs block
     if (outputs_has_properties)
@@ -155,6 +163,12 @@ MaterialOutputAction::act()
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
+          else if (hasADProperty<Real>(name))
+          {
+            curr_material_names = materialOutputHelper<ADReal>(name, *mat, get_names_only);
+            material_names.insert(curr_material_names.begin(), curr_material_names.end());
+          }
+
           else if (hasProperty<RealVectorValue>(name))
           {
             curr_material_names = materialOutputHelper<RealVectorValue>(name, *mat, get_names_only);
@@ -170,6 +184,12 @@ MaterialOutputAction::act()
           else if (hasProperty<RankTwoTensor>(name))
           {
             curr_material_names = materialOutputHelper<RankTwoTensor>(name, *mat, get_names_only);
+            material_names.insert(curr_material_names.begin(), curr_material_names.end());
+          }
+
+          else if (hasADProperty<RankTwoTensor>(name))
+          {
+            curr_material_names = materialOutputHelper<ADRankTwoTensor>(name, *mat, get_names_only);
             material_names.insert(curr_material_names.begin(), curr_material_names.end());
           }
 
@@ -267,6 +287,22 @@ MaterialOutputAction::materialOutputHelper<Real>(const std::string & property_na
 
 template <>
 std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADReal>(const std::string & property_name,
+                                                   const MaterialBase & material,
+                                                   bool get_names_only)
+{
+  std::vector<std::string> names = {property_name};
+  if (!get_names_only)
+  {
+    auto params = getParams("ADMaterialRealAux", property_name, property_name, material);
+    _problem->addAuxKernel("ADMaterialRealAux", material.name() + property_name, params);
+  }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
 MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & property_name,
                                                             const MaterialBase & material,
                                                             bool get_names_only)
@@ -338,6 +374,33 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
         params.set<unsigned int>("i") = i;
         params.set<unsigned int>("j") = j;
         _problem->addAuxKernel("MaterialRankTwoTensorAux", material.name() + oss.str(), params);
+      }
+    }
+
+  return names;
+}
+
+template <>
+std::vector<std::string>
+MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(const std::string & property_name,
+                                                            const MaterialBase & material,
+                                                            bool get_names_only)
+{
+  std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
+
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    {
+      std::ostringstream oss;
+      oss << property_name << "_" << i << j;
+      names[i * LIBMESH_DIM + j] = oss.str();
+
+      if (!get_names_only)
+      {
+        auto params = getParams("ADMaterialRankTwoTensorAux", property_name, oss.str(), material);
+        params.set<unsigned int>("i") = i;
+        params.set<unsigned int>("j") = j;
+        _problem->addAuxKernel("ADMaterialRankTwoTensorAux", material.name() + oss.str(), params);
       }
     }
 

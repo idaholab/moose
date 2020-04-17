@@ -11,17 +11,11 @@
 
 #include "ADKernel.h"
 
-#define usingSplitCHBaseMembers                                                                    \
-  usingKernelMembers;                                                                              \
-  using ADSplitCHBase<compute_stage>::computeQpResidual;                                           \
-  using ADSplitCHBase<compute_stage>::computeDFDC
-
 /**
  * The pair, ADSplitCHCRes and ADSplitCHWRes, splits the Cahn-Hilliard equation
  * by replacing chemical potential with 'w'.
  */
-template <ComputeStage compute_stage>
-class ADSplitCHBase : public ADKernel<compute_stage>
+class ADSplitCHBase : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -31,6 +25,4 @@ public:
 protected:
   virtual ADReal computeQpResidual();
   virtual ADReal computeDFDC();
-
-  usingKernelMembers;
 };

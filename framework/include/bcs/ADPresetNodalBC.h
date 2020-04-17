@@ -11,13 +11,6 @@
 
 #include "ADDirichletBCBase.h"
 
-#define usingPresetNodalBCMembers usingDirichletBCBaseMembers
-
-template <ComputeStage>
-class ADPresetNodalBC;
-
-declareADValidParams(ADPresetNodalBC);
-
 /**
  * Base class for automatic differentiation nodal BCs that (pre)set the solution
  * vector entries.
@@ -25,14 +18,10 @@ declareADValidParams(ADPresetNodalBC);
  * Depcreated: inherit from ADDirichletBCBase instead and set the parameter
  * preset = true for the same behavior.
  */
-template <ComputeStage compute_stage>
-class ADPresetNodalBC : public ADDirichletBCBase<compute_stage>
+class ADPresetNodalBC : public ADDirichletBCBase
 {
 public:
   ADPresetNodalBC(const InputParameters & parameters);
 
   static InputParameters validParams();
-
-protected:
-  usingDirichletBCBaseMembers;
 };

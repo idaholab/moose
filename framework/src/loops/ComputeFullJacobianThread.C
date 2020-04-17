@@ -62,14 +62,6 @@ ComputeFullJacobianThread::computeJacobian()
     }
   }
 
-  if (_adjk_warehouse->hasActiveBlockObjects(_subdomain, _tid))
-  {
-    auto & kernels = _adjk_warehouse->getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & kernel : kernels)
-      if (kernel->isImplicit())
-        kernel->computeADOffDiagJacobian();
-  }
-
   /// done only when nonlocal kernels exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {

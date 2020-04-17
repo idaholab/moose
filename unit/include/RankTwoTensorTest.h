@@ -34,4 +34,3 @@ protected:
   RankTwoTensor _unsymmetric0;
   RankTwoTensor _unsymmetric1;
 };
-

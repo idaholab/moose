@@ -10,6 +10,9 @@
 #include "gtest/gtest.h"
 
 #include "RankFourTensor.h"
+#include "ADReal.h"
+
+#include "metaphysicl/raw_type.h"
 
 RankFourTensor iSymmetric = RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
 
@@ -68,4 +71,13 @@ TEST(RankFourTensor, invSymm2)
   a(1, 2, 2, 2) = a(2, 1, 2, 2) = 0.1;
 
   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
+}
+
+TEST(RankFourTensor, ADConversion)
+{
+  RankFourTensor reg;
+  ADRankFourTensor ad;
+
+  ad = reg;
+  reg = MetaPhysicL::raw_value(ad);
 }
