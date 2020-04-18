@@ -197,7 +197,6 @@
 - /Kernels/OneD3EqnMomentumFormLoss
 - /Kernels/OneD3EqnMomentumGravity
 - /Kernels/OneD3EqnEnergyFlux
-- /Kernels/OneD3EqnEnergyFriction
 - /Kernels/OneD3EqnEnergyGravity
 - /Kernels/OneD3EqnEnergyHeatSource
 - /Kernels/OneD7EqnEnergyHeatFlux
