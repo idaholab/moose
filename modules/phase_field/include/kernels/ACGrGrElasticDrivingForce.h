@@ -10,8 +10,8 @@
 #pragma once
 
 #include "ACBulk.h"
-#include "ADRankTwoTensorForward.h"
-#include "ADRankFourTensorForward.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * Calculates the porton of the Allen-Cahn equation that results from the deformation energy.

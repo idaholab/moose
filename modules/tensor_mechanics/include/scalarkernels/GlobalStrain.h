@@ -10,8 +10,8 @@
 #pragma once
 
 #include "ScalarKernel.h"
-#include "ADRankTwoTensorForward.h"
-#include "ADRankFourTensorForward.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 // Forward Declarations
 class GlobalStrainUserObjectInterface;

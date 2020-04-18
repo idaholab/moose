@@ -10,8 +10,8 @@
 #pragma once
 
 #include "Kernel.h"
-#include "ADRankTwoTensorForward.h"
-#include "ADRankFourTensorForward.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * Compute the Allen-Cahn interface stress driving force contribution

@@ -482,6 +482,3 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
     result._vals[i] = _vals[i] / b;
   return result;
 }
-
-typedef RankFourTensor RankFourTensor;
-typedef ADRankFourTensor DualRankFourTensor;

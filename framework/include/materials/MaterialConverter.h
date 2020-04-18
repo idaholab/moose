@@ -10,8 +10,8 @@
 #pragma once
 
 #include "Material.h"
-#include "ADRankTwoTensorForward.h"
-#include "ADRankFourTensorForward.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * This material converts regular material properties to AD properties and AD properties to regular
