@@ -11,16 +11,12 @@
 
 #include "DenseMatrix.h"
 #include "ADMaterial.h"
+#include "ADRankTwoTensorForward.h"
 
 namespace libMesh
 {
 class QGauss;
 }
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
 
 class ADComputeIncrementalShellStrain : public ADMaterial
 {

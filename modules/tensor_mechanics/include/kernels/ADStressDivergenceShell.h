@@ -11,15 +11,8 @@
 
 #include "ADKernel.h"
 #include "libmesh/quadrature_gauss.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 namespace libMesh
 {

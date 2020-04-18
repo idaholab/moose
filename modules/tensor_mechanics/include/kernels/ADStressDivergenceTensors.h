@@ -10,11 +10,7 @@
 #pragma once
 
 #include "ADKernel.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+#include "ADRankTwoTensorForward.h"
 
 /**
  * ADStressDivergenceTensors is the automatic differentiation version of StressDivergenceTensors

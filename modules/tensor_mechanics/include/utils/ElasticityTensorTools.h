@@ -9,9 +9,8 @@
 
 #pragma once
 
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
+#include "RankFourTensorForward.h"
+
 namespace libMesh
 {
 template <typename>

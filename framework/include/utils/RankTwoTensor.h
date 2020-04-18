@@ -10,7 +10,8 @@
 #pragma once
 
 #include "Moose.h"
-#include "ADRealForward.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
@@ -23,10 +24,6 @@
 #include <vector>
 
 // Forward declarations
-template <typename>
-class RankTwoTensorTempl;
-template <typename>
-class RankFourTensorTempl;
 class MooseEnum;
 template <typename T>
 class MooseArray;
@@ -53,14 +50,14 @@ void mooseSetToZero(T & v);
  * Needed by DerivativeMaterialInterface
  */
 template <>
-void mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v);
+void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
 
 /**
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
  */
 template <>
-void mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v);
+void mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v);
 }
 
 /**
@@ -579,10 +576,6 @@ struct RawType<RankTwoTensorTempl<T>>
 };
 }
 
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-typedef RankTwoTensorTempl<ADReal> ADRankTwoTensor;
-
 template <typename T>
 template <typename T2>
 RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
@@ -601,24 +594,24 @@ RankTwoTensorTempl<T>::operator-(const TypeTensor<T2> & b) const
 
 template <typename T>
 template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const T2 & b) const
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const T2 & b) const
 {
   return TensorValue<T>::operator*(b);
 }
 
 template <typename T>
 template <typename T2>
-TypeVector<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const TypeVector<T2> & b) const
+TypeVector<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const TypeVector<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }
 
 template <typename T>
 template <typename T2>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const TypeTensor<T2> & b) const
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const TypeTensor<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }

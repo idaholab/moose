@@ -11,10 +11,7 @@
 
 #include "ADComputeEigenstrainBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 /**
  * ADComputeThermalExpansionEigenstrainBase is a base class for all models that

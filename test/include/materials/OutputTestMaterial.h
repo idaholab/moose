@@ -11,14 +11,8 @@
 
 // MOOSE includes
 #include "Material.h"
-
-// Forward declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 class OutputTestMaterial : public Material
 {

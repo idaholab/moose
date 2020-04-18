@@ -11,18 +11,10 @@
 
 #include "ADMaterial.h"
 #include "ADComputeIsotropicElasticityTensorShell.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 #define usingComputeShellStressMembers usingMaterialMembers
-
-// Forward Declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 namespace libMesh
 {

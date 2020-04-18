@@ -10,13 +10,8 @@
 #pragma once
 
 #include "Material.h"
-
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 /**
  * This material converts regular material properties to AD properties and AD properties to regular

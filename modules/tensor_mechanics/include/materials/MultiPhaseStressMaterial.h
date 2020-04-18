@@ -10,14 +10,8 @@
 #pragma once
 
 #include "Material.h"
-
-// Forward Declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * Construct a global strain from the phase strains in a manner that is consistent

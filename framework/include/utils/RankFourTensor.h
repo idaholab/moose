@@ -10,7 +10,8 @@
 #pragma once
 
 #include "Moose.h"
-#include "ADRealForward.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
@@ -33,10 +34,6 @@ class VectorValue;
 
 // Forward declarations
 class MooseEnum;
-template <typename>
-class RankTwoTensorTempl;
-template <typename>
-class RankFourTensorTempl;
 
 namespace MathUtils
 {
@@ -48,9 +45,9 @@ void mooseSetToZero(T & v);
  * Needed by DerivativeMaterialInterface
  */
 template <>
-void mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v);
+void mooseSetToZero<RankFourTensor>(RankFourTensor & v);
 template <>
-void mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v);
+void mooseSetToZero<ADRankFourTensor>(ADRankFourTensor & v);
 }
 
 /**
@@ -442,10 +439,6 @@ struct RawType<RankFourTensorTempl<T>>
 };
 }
 
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
-typedef RankFourTensorTempl<ADReal> ADRankFourTensor;
-
 template <typename T1, typename T2>
 inline auto operator*(const T1 & a, const RankFourTensorTempl<T2> & b) ->
     typename std::enable_if<ScalarTraits<T1>::value,
@@ -490,5 +483,5 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
   return result;
 }
 
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
+typedef RankFourTensor RankFourTensor;
+typedef ADRankFourTensor DualRankFourTensor;
