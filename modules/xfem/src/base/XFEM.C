@@ -977,8 +977,7 @@ XFEM::healMesh()
             {
               Node * e1node_displaced = elem1_displaced->node_ptr(in);
               Node * e2node_displaced = elem2_displaced->node_ptr(in);
-              if (!xfce->isPointPhysical(*e1node_displaced) &&
-                  e1node_displaced != e2node_displaced) // This would happen at the crack tip
+              if (!xfce->isPointPhysical(*elem1->node_ptr(in)))
               {
                 elem1_displaced->set_node(in) = e2node_displaced;
                 nodes_to_delete_displaced.insert(e1node_displaced);
@@ -1026,9 +1025,9 @@ XFEM::healMesh()
   {
     for (auto & sit : nodes_to_delete_displaced)
     {
-      Node * node_to_delete = sit;
-      _displaced_mesh->boundary_info->remove(node_to_delete);
-      _displaced_mesh->delete_node(node_to_delete);
+      Node * node_to_delete_displaced = sit;
+      _displaced_mesh->boundary_info->remove(node_to_delete_displaced);
+      _displaced_mesh->delete_node(node_to_delete_displaced);
     }
   }
 
