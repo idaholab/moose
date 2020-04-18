@@ -22,6 +22,7 @@ FVElementalKernel::validParams()
 {
   InputParameters params = FVKernel::validParams();
   params.registerSystemAttributeName("FVElementalKernel");
+  params += MaterialPropertyInterface::validParams();
   return params;
 }
 
@@ -33,9 +34,11 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
                            Moose::VarKindType::VAR_NONLINEAR,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _var(*mooseVariableFV()),
     _u(_var.adSln())
 {
+  addMooseVariableDependency(&_var);
 }
 
 void

@@ -13,10 +13,12 @@
 #include "MooseVariableFV.h"
 #include "MooseVariableInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MaterialPropertyInterface.h"
 
 class FVElementalKernel : public FVKernel,
                           public MooseVariableInterface<Real>,
-                          public CoupleableMooseVariableDependencyIntermediateInterface
+                          public CoupleableMooseVariableDependencyIntermediateInterface,
+                          public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
