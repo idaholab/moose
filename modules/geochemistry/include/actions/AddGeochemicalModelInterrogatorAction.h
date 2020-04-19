@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class AddGeochemicalModelInterrogatorAction;
-
-template <>
-InputParameters validParams<AddGeochemicalModelInterrogatorAction>();
-
 /**
  * Action that sets up the geochemical model interrogator
  */

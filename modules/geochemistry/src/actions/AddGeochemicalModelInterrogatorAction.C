@@ -17,8 +17,6 @@ registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "c
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "setup_executioner");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "add_output");
 
-defineLegacyParams(AddGeochemicalModelInterrogatorAction);
-
 InputParameters
 AddGeochemicalModelInterrogatorAction::validParams()
 {

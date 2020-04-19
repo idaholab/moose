@@ -12,8 +12,6 @@
 
 registerMooseObject("GeochemistryApp", GeochemicalModelInterrogator);
 
-defineLegacyParams(GeochemicalModelInterrogator);
-
 InputParameters
 GeochemicalModelInterrogator::validParams()
 {
@@ -96,8 +94,10 @@ GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters
 }
 
 void
-GeochemicalModelInterrogator::output(const ExecFlagType & /*type*/)
+GeochemicalModelInterrogator::output(const ExecFlagType & type)
 {
+  if (!shouldOutput(type))
+    return;
   for (const auto & sp : eqmSpeciesOfInterest())
   {
     switch (_interrogation)

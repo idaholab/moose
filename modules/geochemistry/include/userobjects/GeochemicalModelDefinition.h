@@ -12,11 +12,6 @@
 #include "GeneralUserObject.h"
 #include "PertinentGeochemicalSystem.h"
 
-class GeochemicalModelDefinition;
-
-template <>
-InputParameters validParams<GeochemicalModelDefinition>();
-
 /**
  * User object that parses a geochemical database file, and only retains information relevant to the
  * current geochemical model

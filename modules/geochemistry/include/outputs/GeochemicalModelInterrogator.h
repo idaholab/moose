@@ -14,11 +14,6 @@
 #include "Output.h"
 #include "UserObjectInterface.h"
 
-class GeochemicalModelInterrogator;
-
-template <>
-InputParameters validParams<GeochemicalModelInterrogator>();
-
 /**
  * Queries and performs simple manipulations on a geochemical model
  */

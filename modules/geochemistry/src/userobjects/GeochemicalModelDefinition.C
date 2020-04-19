@@ -11,8 +11,6 @@
 
 registerMooseObject("GeochemistryApp", GeochemicalModelDefinition);
 
-defineLegacyParams(GeochemicalModelDefinition);
-
 InputParameters
 GeochemicalModelDefinition::validParams()
 {
