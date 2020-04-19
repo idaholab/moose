@@ -17,6 +17,7 @@
 #include "ContactApp.h"
 #include "FluidPropertiesApp.h"
 #include "FunctionalExpansionToolsApp.h"
+#include "GeochemistryApp.h"
 #include "HeatConductionApp.h"
 #include "LevelSetApp.h"
 #include "MiscApp.h"
@@ -31,6 +32,8 @@
 #include "TensorMechanicsApp.h"
 #include "XFEMApp.h"
 #include "ExternalPetscSolverApp.h"
+
+defineLegacyParams(CombinedApp);
 
 InputParameters
 CombinedApp::validParams()
@@ -70,6 +73,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ContactApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   FunctionalExpansionToolsApp::registerAll(f, af, s);
+  GeochemistryApp::registerAll(f, af, s);
   HeatConductionApp::registerAll(f, af, s);
   LevelSetApp::registerAll(f, af, s);
   MiscApp::registerAll(f, af, s);

@@ -601,6 +601,7 @@ def readDatabase(dblist):
     db.elements = elements
     db.basis_species = basis_species
     db.secondary_species = secondary_species
+    db.free_electron = free_electron
     db.mineral_species = mineral_species
     db.sorbing_minerals = sorbing_minerals
     db.gas_species = gas_species
