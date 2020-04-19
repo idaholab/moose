@@ -10,7 +10,8 @@ ElectrostaticContactResistance::validParams()
       "master_conductivity", "electrical_conductivity", "Conductivity on the master block.");
   params.addParam<MaterialPropertyName>(
       "neighbor_conductivity", "electrical_conductivity", "Conductivity on the neighbor block.");
-  params.addRequiredParam<Real>("contact_resistance", "Contact resistance coefficient.");
+  params.addRequiredParam<Real>("electrical_contact_resistance",
+                                "Electrical contact resistance coefficient.");
   params.addClassDescription(
       "Interface condition that describes the current continuity and contact resistance across a "
       "boundary formed between two dissimilar materials (resulting in a potential discontinuity), "
@@ -23,7 +24,7 @@ ElectrostaticContactResistance::ElectrostaticContactResistance(const InputParame
   : InterfaceKernel(parameters),
     _conductivity_master(getMaterialProperty<Real>("master_conductivity")),
     _conductivity_neighbor(getNeighborMaterialProperty<Real>("neighbor_conductivity")),
-    _contact_resistance(getParam<Real>("contact_resistance"))
+    _contact_resistance(getParam<Real>("electrical_contact_resistance"))
 {
 }
 

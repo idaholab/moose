@@ -19,4 +19,9 @@
     input = 'combined_props.i'
     exodiff = 'combined_props_out.e'
   [../]
+  [./electrostatic_contact_resistance]
+    type = Exodiff
+    input = 'contact_resistance.i'
+    exodiff = 'contact_resistance_out.e'
+  [../]
 []
