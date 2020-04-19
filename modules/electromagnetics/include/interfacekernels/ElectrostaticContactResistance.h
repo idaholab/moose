@@ -2,12 +2,12 @@
 
 #include "InterfaceKernel.h"
 
-class ElectrostaticCurrentContinuity : public InterfaceKernel
+class ElectrostaticContactResistance : public InterfaceKernel
 {
 public:
   static InputParameters validParams();
 
-  ElectrostaticCurrentContinuity(const InputParameters & parameters);
+  ElectrostaticContactResistance(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
@@ -15,4 +15,5 @@ protected:
 
   const MaterialProperty<Real> & _conductivity_master;
   const MaterialProperty<Real> & _conductivity_neighbor;
+  Real _contact_resistance;
 };
