@@ -79,7 +79,7 @@
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
     boundary = ssg_interface
-    electrical_contact_resistance = 1.47e5 # as described in Cincotti et al (DOI: 10.1002/aic)
+    electrical_contact_resistance = 1.47e5 # as described in Cincotti et al (https://doi.org/10.1002/aic.11102)
   [../]
 []
 

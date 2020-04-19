@@ -15,8 +15,8 @@ ElectrostaticContactResistance::validParams()
   params.addClassDescription(
       "Interface condition that describes the current continuity and contact resistance across a "
       "boundary formed between two dissimilar materials (resulting in a potential discontinuity), "
-      "as described in Cincotti, et al (DOI: 10.1002/aic). Conductivity on each side of the "
-      "boundary is defined via the material peoperties system.");
+      "as described in Cincotti, et al (https://doi.org/10.1002/aic.11102). Conductivity on each "
+      "side of the boundary is defined via the material peoperties system.");
   return params;
 }
 
