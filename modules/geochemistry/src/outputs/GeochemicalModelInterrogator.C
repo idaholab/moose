@@ -17,7 +17,7 @@ defineLegacyParams(GeochemicalModelInterrogator);
 InputParameters
 GeochemicalModelInterrogator::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = Output::validParams();
   params.addRequiredParam<UserObjectName>("model_definition",
                                           "The name of the GeochemicalModelDefinition user object");
   params.addParam<std::vector<std::string>>(
@@ -68,14 +68,16 @@ GeochemicalModelInterrogator::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
-  params.addClassDescription("User object for performing simple manipulations of and querying a "
+  params.addClassDescription("Performing simple manipulations of and querying a "
                              "geochemical model");
 
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
   return params;
 }
 
 GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
+  : Output(parameters),
+    UserObjectInterface(this),
     _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
     _swapper(_mgd.basis_species_index.size(), getParam<Real>("stoichiometry_tolerance")),
     _swap_out(getParam<std::vector<std::string>>("swap_out_of_basis")),
@@ -93,13 +95,9 @@ GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters
     paramError("activity_species must have same length as activity_values");
 }
 
-void
-GeochemicalModelInterrogator::initialize()
-{
-}
 
 void
-GeochemicalModelInterrogator::execute()
+GeochemicalModelInterrogator::output(const ExecFlagType & /*type*/)
 {
   for (const auto & sp : eqmSpeciesOfInterest())
   {
@@ -143,11 +141,6 @@ GeochemicalModelInterrogator::execute()
       }
     }
   }
-}
-
-void
-GeochemicalModelInterrogator::finalize()
-{
 }
 
 std::vector<std::string>

@@ -27,10 +27,4 @@ public:
   AddGeochemicalModelInterrogatorAction(InputParameters parameters);
 
   virtual void act() override;
-
-protected:
-  /**
-   * Adds the GeochemicalModelInterrogator user object
-   */
-  void addGeochemicalModelInterrogatorObject() const;
 };

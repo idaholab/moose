@@ -14,19 +14,8 @@
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "setup_mesh");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "init_mesh");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "create_problem");
-registerMooseAction(
-    "GeochemistryApp",
-    AddGeochemicalModelInterrogatorAction,
-    "add_distribution"); // During add_distribution, the GeochemicalModelInterroagor UserObject is
-                         // added.  Since add_distribution occurs after add_userobject (see Moose.C
-                         // addDependencySets) then the model_definition UserObject will have been
-                         // added, so getParam<UserObjectName>("model_definition") will work
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "setup_executioner");
 registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "add_output");
-registerMooseAction("GeochemistryApp", AddGeochemicalModelInterrogatorAction, "common_output");
-registerMooseAction("GeochemistryApp",
-                    AddGeochemicalModelInterrogatorAction,
-                    "add_output_aux_variables");
 
 defineLegacyParams(AddGeochemicalModelInterrogatorAction);
 
@@ -90,15 +79,6 @@ AddGeochemicalModelInterrogatorAction::validParams()
 AddGeochemicalModelInterrogatorAction::AddGeochemicalModelInterrogatorAction(InputParameters params)
   : Action(params)
 {
-  // Currently these parameters are required by the constructor of Console, which
-  // assumes that the action satisfying task "add_output" has these parameters.
-  // However, these parameters are not meant to be seen by the user, so they
-  // are added here, instead of in validParams(), with the help of const_cast.
-  InputParameters & pars = const_cast<InputParameters &>(parameters());
-  ExecFlagEnum exec_enum = Output::getDefaultExecFlagEnum();
-  exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-  pars.addParam<ExecFlagEnum>("execute_on", exec_enum, "(Does not need to be set)");
-  pars.addParam<bool>("print_perf_log", false, "(Does not need to be set)");
 }
 
 void
@@ -128,11 +108,6 @@ AddGeochemicalModelInterrogatorAction::act()
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
     _problem->setKernelCoverageCheck(false);
   }
-  // Add the geochemical model interrogator user object
-  else if (_current_task == "add_distribution")
-  {
-    addGeochemicalModelInterrogatorObject();
-  }
   // Set up an arbitrary steady executioner
   else if (_current_task == "setup_executioner")
   {
@@ -147,36 +122,8 @@ AddGeochemicalModelInterrogatorAction::act()
   // Create a console that executes only on FINAL and does not print system info
   else if (_current_task == "add_output")
   {
-    const std::string class_name = "Console";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
-    params.set<std::string>("file_base") = _app.getOutputFileBase();
-    params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
-    params.set<MultiMooseEnum>("system_info") = "";
-    std::shared_ptr<Output> output = _factory.create<Output>(class_name, "Console", params);
-    OutputWarehouse & output_warehouse = _app.getOutputWarehouse();
-    output_warehouse.addOutput(output);
-  }
-  else if (_current_task == "common_output")
-  {
-    // This action must satisfy this task to prevent CommonOutputAction from
-    // acting, which performs a static cast that assumes that the action
-    // satisfying the task "add_output" is derived from MooseObjectAction,
-    // which is now false.
-  }
-  else if (_current_task == "add_output_aux_variables")
-  {
-    // This action must satisfy this task to prevent MaterialOutputAction from
-    // acting, which assumes that the action satisfying "add_output" can be
-    // dynamic_cast-ed to type "AddOutputAction", which is now false.
-  }
-}
-
-void
-AddGeochemicalModelInterrogatorAction::addGeochemicalModelInterrogatorObject() const
-{
   const std::string class_name = "GeochemicalModelInterrogator";
-  InputParameters params = _factory.getValidParams(class_name);
+  auto params = _factory.getValidParams(class_name);
   params.set<UserObjectName>("model_definition") = getParam<UserObjectName>("model_definition");
   // Only pass parameters that were supplied to this action
   if (isParamValid("swap_out_of_basis"))
@@ -196,5 +143,6 @@ AddGeochemicalModelInterrogatorAction::addGeochemicalModelInterrogatorObject() c
   params.set<MooseEnum>("interrogation") = getParam<MooseEnum>("interrogation");
   params.set<Real>("temperature") = getParam<Real>("temperature");
   params.set<Real>("stoichiometry_tolerance") = getParam<Real>("stoichiometry_tolerance");
-  _problem->addUserObject(class_name, "geochemical_model_interrogator", params);
+  _problem->addOutput(class_name, "geochemical_model_interrogator", params);
+  }
 }

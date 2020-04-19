@@ -11,6 +11,8 @@
 
 #include "GeochemicalModelDefinition.h"
 #include "GeochemistrySpeciesSwapper.h"
+#include "Output.h"
+#include "UserObjectInterface.h"
 
 class GeochemicalModelInterrogator;
 
@@ -18,20 +20,19 @@ template <>
 InputParameters validParams<GeochemicalModelInterrogator>();
 
 /**
- * User object for querying and performing simple manipulations on a geochemical model
+ * Queries and performs simple manipulations on a geochemical model
  */
-class GeochemicalModelInterrogator : public GeneralUserObject
+class GeochemicalModelInterrogator : public Output,
+            public UserObjectInterface
 {
 public:
   static InputParameters validParams();
 
   GeochemicalModelInterrogator(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
+  protected:
+  virtual void output(const ExecFlagType & type) override;
 
-protected:
   ModelGeochemicalDatabase _mgd;
   GeochemistrySpeciesSwapper _swapper;
   const std::vector<std::string> _swap_out;
