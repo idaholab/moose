@@ -13,7 +13,9 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 #include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "InputParameters.h"
+#include "HasMembers.h"
 
 // Forward declarations
 class MooseVariableScalar;
@@ -136,10 +138,28 @@ protected:
    * Returns value of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue for the coupled variable
-   * @see Kernel::value
+   * @return Reference to a ADVariableValue for the coupled variable
    */
   const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled finite volume variable for use in Automatic Differentiation
+   * @param var_name Name of coupled finite volume variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a ADVariableValue for the coupled variable
+   */
+  const ADVariableValue & adCoupledFVValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled variable for use in Automatic Differentiation
+   * @tparam T The type of the moose variable
+   * @param moose_var The coupled moose variable
+   * @param var_name The name of the \p moose_var. Used to retrieve default values if no coupled is
+   * actually found
+   * @return Reference to a ADVariableValue for the coupled variable
+   */
+  template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type = 0>
+  const ADVariableValue & adCoupledValue(const T * moose_var, const std::string & var_name);
 
   /**
    * Returns value of a coupled vector variable for use in Automatic Differentiation
@@ -828,6 +848,9 @@ protected:
   /// Vector of array coupled variables
   std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
 
+  /// Vector of standard finite volume oupled variables
+  std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
+
   /// True if we provide coupling to nodal values
   bool _c_nodal;
 
@@ -943,17 +966,36 @@ private:
 
 protected:
   /**
-   * Extract pointer to a base finite element coupled variable
+   * Deprecated method. Use \p getFieldVar instead
+   * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
+   * element variable
    * @param var_name Name of parameter desired
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableFEBase * getFEVar(const std::string & var_name, unsigned int comp);
+  MooseVariableFieldBase * getFEVar(const std::string & var_name, unsigned int comp);
+
+  /*
+   * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
+   * element variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp);
 
   /**
-   * Helper that segues off to either getVar of getVectorVar depending on template paramter
+   * Helper that that be used to retrieve a variable of arbitrary type \p T
    */
-  template <typename T>
+  template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type = 0>
+  T * getVarHelper(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Reverse compatibility helper that can be used to retried a variable of type \p
+   * MooseVariableFE<T>
+   */
+  template <typename T,
+            typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type = 0>
   MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp);
 
   /**
@@ -1079,3 +1121,60 @@ private:
 private:
   const MooseObject * _obj;
 };
+
+template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
+const ADVariableValue &
+Coupleable::adCoupledValue(const T * moose_var, const std::string & var_name)
+{
+  if (!moose_var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return moose_var->adSln();
+  return moose_var->adSlnNeighbor();
+}
+
+template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
+T *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
+{
+  if (!checkVar(var_name, comp, 0))
+    return nullptr;
+
+  if (auto * coupled_var = dynamic_cast<T *>(_coupled_vars[var_name][comp]))
+    return coupled_var;
+  else
+  {
+    for (auto & var : _coupled_standard_moose_vars)
+      if (var->name() == var_name)
+        mooseError("The named variable is a standard variable, try a "
+                   "'coupled[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_vector_moose_vars)
+      if (var->name() == var_name)
+        mooseError("The named variable is a vector variable, try a "
+                   "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_array_moose_vars)
+      if (var->name() == var_name)
+        mooseError("The named variable is an array variable, try a "
+                   "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
+    for (auto & var : _coupled_standard_fv_moose_vars)
+      if (var->name() == var_name)
+        mooseError("The named variable is an FV variable, try a "
+                   "'coupledFV[Value/Gradient/Dot/etc]...' function instead");
+    mooseError(
+        "Variable '", var_name, "' is of a different C++ type than you tried to fetch it as.");
+  }
+}
+
+template <typename T, typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type>
+MooseVariableFE<T> *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
+{
+  return getVarHelper<MooseVariableFE<T>>(var_name, comp);
+}
