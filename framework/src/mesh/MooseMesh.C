@@ -16,6 +16,8 @@
 #include "RelationshipManager.h"
 #include "PointListAdaptor.h"
 #include "TimedPrint.h"
+#include "Executioner.h"
+#include "NonlinearSystemBase.h"
 
 #include <utility>
 
@@ -489,12 +491,7 @@ MooseMesh::update()
   buildBndElemList();
   cacheInfo();
 
-  // TODO: be smarter about when we actually need to rebuild face list.
-  // If, for example we don't have any FV variables, then we don't need to be
-  // doing this.  But variables aren't created until after the mesh.  So mabe
-  // we need to somehow lazily trigger this construction only if asked/needed.
-  if (_needs_face_info)
-    buildFaceInfo();
+  _face_info_dirty = true;
 }
 
 const Node &
@@ -2937,6 +2934,10 @@ MooseMesh::getPointLocator() const
 void
 MooseMesh::buildFaceInfo()
 {
+  if (!_face_info_dirty)
+    return;
+  _face_info_dirty = false;
+
   using Keytype = std::pair<const Elem *, unsigned short int>;
 
   // create a map from elem/side --> boundary ids

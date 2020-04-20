@@ -1212,6 +1212,9 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
 void
 SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
 {
+  if (!_subproblem.haveFV())
+    return;
+
   // prepare a vector of MooseVariables from names
   std::vector<MooseVariableBase *> moose_vars;
   for (auto & v : vars)
@@ -1227,7 +1230,8 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   }
 
   // loop over all faces
-  for (auto & p : mesh().faceInfo())
+  auto & faces = mesh().faceInfo();
+  for (auto & p : faces)
   {
     // get left & right elements, and set subdomain ids
     const Elem & left_elem = p.leftElem();

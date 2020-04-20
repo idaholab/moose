@@ -82,6 +82,12 @@ public:
 
   virtual bool isTransient() const = 0;
 
+  /// marks this problem as including/needing finite volume functionality.
+  void needFV() { _have_fv = true; }
+
+  /// returns true if this problem includes/needs finite volume functionality.
+  bool haveFV() const { return _have_fv; }
+
   /**
    * Whether or not the user has requested default ghosting ot be on.
    */
@@ -773,6 +779,8 @@ protected:
   bool _have_ad_objects;
 
 private:
+  bool _have_fv = false;
+
   ///@{ Helper functions for checking MaterialProperties
   std::string restrictionSubdomainCheckName(SubdomainID check_id);
   std::string restrictionBoundaryCheckName(BoundaryID check_id);

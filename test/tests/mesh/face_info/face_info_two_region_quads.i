@@ -29,6 +29,12 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
+
+  [_trigger_fv_on]
+    fv = true
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
 
 [VectorPostprocessors]

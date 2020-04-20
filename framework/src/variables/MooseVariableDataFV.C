@@ -19,6 +19,7 @@
 #include "Attributes.h"
 #include "FVDirichletBC.h"
 #include "SubProblem.h"
+#include "FVKernel.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -720,6 +721,27 @@ template <typename OutputType>
 void
 MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
+  // This query and if check prevent running this code when we have FV
+  // variables, but no kernels.  When this happens, maxVarNDofsPerElem is
+  // not computed (because no kernels) and is zero giving nonsense offsets for
+  // AD stuff.  So we just skip all this when that is the case.  Maybe there
+  // is a better way to do this - like just checking if getMaxVarNDofsPerElem
+  // returns zero?
+  std::vector<FVKernel *> ks1;
+  std::vector<FVKernel *> ks2;
+  _subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVElementalKernel")
+      .queryInto(ks1);
+  _subproblem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVFluxKernel")
+      .queryInto(ks2);
+  if (ks1.size() == 0 && ks2.size() == 0)
+    return;
+
   _ad_dof_values.resize(num_dofs);
   if (_need_ad_u)
     _ad_u.resize(nqp);

@@ -1,5 +1,5 @@
 [Mesh]
-  [./generated]
+  [generated]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -8,7 +8,7 @@
     ymin = -2
     ymax = 3
     ny = 5
-  [../]
+  []
 []
 
 [Problem]
@@ -16,22 +16,27 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
+  [trigger_fv_on]
+    fv = true
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
 
 [AuxVariables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [VectorPostprocessors]
-  [./face_info]
+  [face_info]
     type = TestFaceInfo
     vars = 'u v'
-  [../]
+  []
 []
 
 [Executioner]

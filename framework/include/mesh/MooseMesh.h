@@ -1058,14 +1058,13 @@ public:
    */
   bool hasMeshBase() const { return _mesh.get() != nullptr; }
 
-  /// Builds the face info vector that stores meta-data needed for looping
-  /// over and doing calculations based on mesh faces.
-  void buildFaceInfo();
-
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
-  const std::vector<FaceInfo> & faceInfo() const { return _face_info; }
-  std::vector<FaceInfo> & faceInfo() { return _face_info; }
+  std::vector<FaceInfo> & faceInfo()
+  {
+    buildFaceInfo();
+    return _face_info;
+  }
   // const
   ///@}
 
@@ -1236,9 +1235,6 @@ protected:
   /// A vector holding the paired boundaries for a regular orthogonal mesh
   std::vector<std::pair<BoundaryID, BoundaryID>> _paired_boundary;
 
-  /// Boolean indicating if the FaceInfo object needs to be built
-  bool _needs_face_info = true;
-
   /// FaceInfo object storing information for face based loops
   std::vector<FaceInfo> _face_info;
 
@@ -1248,6 +1244,13 @@ protected:
   void setPartitionerHelper();
 
 private:
+  // true if the _face_info member needs to be rebuilt/updated.
+  bool _face_info_dirty = true;
+
+  /// Builds the face info vector that stores meta-data needed for looping
+  /// over and doing calculations based on mesh faces.
+  void buildFaceInfo();
+
   /**
    * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
    * the specified variable numbers.  This data structure is populated by addPeriodicVariable.
