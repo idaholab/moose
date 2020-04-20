@@ -9,7 +9,7 @@
 
 [Variables]
   [./T]
-    initial_condition = 20.0
+    initial_condition = 293.0 #in K
   [../]
   [./elec]
   [../]
@@ -41,13 +41,13 @@
     type = DirichletBC
     boundary = left
     variable = T
-    value = 20
+    value = 293 #in K
   [../]
   [./elec_left]
     type = DirichletBC
     variable = elec
     boundary = left
-    value = 1
+    value = 1 #in V
   [../]
   [./elec_right]
     type = DirichletBC
@@ -61,28 +61,24 @@
   [./k]
     type = GenericConstantMaterial
     prop_names = 'thermal_conductivity'
-    prop_values = '0.95' #copper in cal/(cm sec C)
+    prop_values = '397.48' #copper in W/(m K)
     block = 0
   [../]
   [./cp]
     type = GenericConstantMaterial
     prop_names = 'specific_heat'
-    prop_values = '0.092' #copper in cal/(g C)
+    prop_values = '385.0' #copper in J/(kg K)
     block = 0
   [../]
   [./rho]
     type = GenericConstantMaterial
     prop_names = 'density'
-    prop_values = '8.92' #copper in g/(cm^3)
+    prop_values = '8920.0' #copper in kg/(m^3)
     block = 0
   [../]
-  [./sigma]
+  [./sigma] #copper is default material
     type = ElectricalConductivity
-    temp = T
-    ref_temp = 20
-    ref_resistivity = 0.0168
-    temp_coeff = 0.00386
-    length_scale = 1e-02
+    temperature = T
   [../]
 []
 
@@ -104,6 +100,7 @@
   l_tol = 1e-4
   dt = 1
   end_time = 5
+  automatic_scaling = true
 []
 
 [Outputs]
