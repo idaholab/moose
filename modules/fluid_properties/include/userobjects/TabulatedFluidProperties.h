@@ -109,6 +109,10 @@ public:
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
+  virtual Real e_from_p_rho(Real p, Real rho) const override;
+  virtual void
+  e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+
   virtual Real h_from_p_T(Real p, Real T) const override;
 
   virtual void
@@ -181,11 +185,16 @@ protected:
   std::vector<Real> _pressure;
   /// Temperature vector
   std::vector<Real> _temperature;
+  /// Density vector
+  std::vector<Real> _densities;
   /// Tabulated fluid properties
   std::vector<std::vector<Real>> _properties;
 
   /// Interpolated fluid property
   std::vector<std::unique_ptr<BicubicInterpolation>> _property_ipol;
+
+  /// Interpolation table for T_p_rho
+  std::unique_ptr<BicubicInterpolation> _T_from_p_rho;
 
   /// Minimum temperature in tabulated data
   Real _temperature_min;
@@ -195,10 +204,16 @@ protected:
   Real _pressure_min;
   /// Maximum pressure in tabulated data
   Real _pressure_max;
+  /// Minimum density in tabulated data
+  Real _rho_min;
+  /// Maximum density in tabulated data
+  Real _rho_max;
   /// Number of temperature points in the tabulated data
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
+  /// Number of density points in the tabulated data
+  unsigned int _num_rho;
   /// Whether to save a generated fluid properties file to disk
   const bool _save_file;
 
@@ -223,6 +238,7 @@ protected:
   bool _interpolate_cp;
   bool _interpolate_cv;
   bool _interpolate_entropy;
+  bool _interpolate_T_p_rho;
 
   /// Index of each property
   unsigned int _density_idx;

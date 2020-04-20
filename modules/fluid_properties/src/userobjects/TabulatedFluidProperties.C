@@ -9,12 +9,14 @@
 
 #include "TabulatedFluidProperties.h"
 #include "BicubicInterpolation.h"
+#include "MonotoneCubicInterpolation.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
 
 // C++ includes
 #include <fstream>
 #include <ctime>
+#include <limits>
 
 registerMooseObject("FluidPropertiesApp", TabulatedFluidProperties);
 
@@ -44,6 +46,12 @@ TabulatedFluidProperties::validParams()
       "num_T", 100, "num_T > 0", "Number of points to divide temperature range. Default is 100");
   params.addRangeCheckedParam<unsigned int>(
       "num_p", 100, "num_p > 0", "Number of points to divide pressure range. Default is 100");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_rho", 100, "num_rho > 1", "Number of points to divide density range. Default is 100");
+  params.addParam<bool>("enable_T_from_p_rho",
+                        false,
+                        "Sets up an inverse interpolation that computes T as a function of "
+                        "pressure and density. This allows evaluating e_from_p_rho.");
   params.addRequiredParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
   MultiMooseEnum properties("density enthalpy internal_energy viscosity k cv cp entropy",
                             "density enthalpy internal_energy viscosity");
@@ -65,6 +73,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
+    _num_rho(getParam<unsigned int>("num_rho")),
     _save_file(getParam<bool>("save_file")),
     _fp(getUserObject<SinglePhaseFluidProperties>("fp")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
@@ -77,6 +86,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _interpolate_cp(false),
     _interpolate_cv(false),
     _interpolate_entropy(false),
+    _interpolate_T_p_rho(getParam<bool>("enable_T_from_p_rho")),
     _density_idx(0),
     _enthalpy_idx(0),
     _internal_energy_idx(0),
@@ -297,6 +307,85 @@ TabulatedFluidProperties::initialSetup()
     _property_ipol[i] =
         libmesh_make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
   }
+
+  // TabulatedFluidProperties can optionally compute an inverse interpolation
+  // T(p, rho) for evaluating e_from_p_rho; the computation is triggered by
+  // setting the parameter "enable_T_from_p_rho" to true.
+  if (_interpolate_T_p_rho)
+  {
+    // A (p, T, rho) array exists unless !_interpolate_density
+    // This is required so we error out if no density entry is
+    // provided
+    if (!_interpolate_density)
+      mooseError("enable_T_from_p_rho is true but no density entry is found in fluid property "
+                 "table. A density entry is required for using this option");
+
+    /**
+     * Fill _T_from_p_rho
+     * 1. Determine min and max values of density
+     * 2. Compute a list of rho base points
+     * 3. Loop through all pressures and construct a T(rho) function using
+     *    using the original p, T, rho table
+     * 4. Resample at the base points for rho computed in 2.
+     * 5. Store list for all pressures and compute bicubic interpolator
+     */
+
+    // Item 1.
+    _rho_min = std::numeric_limits<Real>::max();
+    _rho_max = 0;
+
+    // find min and max rho
+    for (auto & value : _properties[_density_idx])
+    {
+      if (value > _rho_max)
+        _rho_max = value;
+      if (value < _rho_min)
+        _rho_min = value;
+    }
+
+    // Item 2.
+    _densities.resize(_num_rho);
+    Real drho = (_rho_max - _rho_min) / (_num_rho - 1);
+    for (std::size_t i = 0; i < _num_rho; ++i)
+      _densities[i] = _rho_min + i * drho;
+
+    // Item 3.
+    std::vector<Real> resampled_T(_num_rho * _num_p);
+    size_t index = 0;
+    for (std::size_t i = 0; i < _num_p; ++i)
+    {
+      // collect all densities and temperatures for this pressure
+      std::vector<std::pair<Real, Real>> T_rho(_num_T);
+      for (std::size_t j = 0; j < _num_T; ++j)
+        T_rho[j] =
+            std::pair<Real, Real>(_temperature[j], _properties[_density_idx][j + i * _num_p]);
+
+      // sort both _temperature and densities in ascending densities order
+      std::sort(T_rho.begin(), T_rho.end(), [](auto const & a, auto const & b) {
+        return a.second < b.second;
+      });
+
+      // Item 4: resample values for rho on the rho_point locations
+      std::vector<Real> temp_rho(_num_T);
+      std::vector<Real> temp_T(_num_T);
+      for (std::size_t j = 0; j < _num_T; ++j)
+      {
+        temp_T[j] = T_rho[j].first;
+        temp_rho[j] = T_rho[j].second;
+      }
+
+      MonotoneCubicInterpolation interp_1D(temp_rho, temp_T);
+      for (std::size_t j = 0; j < _num_rho; ++j)
+      {
+        resampled_T[index] = interp_1D.sample(_densities[j]);
+        ++index;
+      }
+    }
+
+    // Item 5.
+    reshapeData2D(_num_p, _num_rho, resampled_T, data_matrix);
+    _T_from_p_rho = libmesh_make_unique<BicubicInterpolation>(_pressure, _densities, data_matrix);
+  }
 }
 
 std::string
@@ -361,6 +450,38 @@ TabulatedFluidProperties::e_from_p_T(
   }
   else
     _fp.e_from_p_T(pressure, temperature, e, de_dp, de_dT);
+}
+
+Real
+TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
+{
+  if (_interpolate_T_p_rho)
+  {
+    Real temperature = _T_from_p_rho->sample(pressure, rho);
+    checkInputVariables(pressure, temperature);
+    return e_from_p_T(pressure, temperature);
+  }
+  else
+    return _fp.e_from_p_rho(pressure, rho);
+}
+
+void
+TabulatedFluidProperties::e_from_p_rho(
+    Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  if (_interpolate_T_p_rho)
+  {
+    Real temperature;
+    Real dT_dp;
+    Real dT_drho;
+    Real de_dT;
+    _T_from_p_rho->sampleValueAndDerivatives(pressure, rho, temperature, dT_dp, dT_drho);
+    checkInputVariables(pressure, temperature);
+    e_from_p_T(pressure, temperature, e, de_dp, de_dT);
+    de_drho = de_dT * dT_drho;
+  }
+  else
+    _fp.e_from_p_rho(pressure, rho, e, de_dp, de_drho);
 }
 
 Real
