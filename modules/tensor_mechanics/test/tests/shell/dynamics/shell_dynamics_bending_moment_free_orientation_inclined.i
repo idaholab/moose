@@ -197,31 +197,31 @@
   [./fixy1]
     type = DirichletBC
     variable = disp_y
-    boundary = '2'
+    boundary = '0'
     value = 0.0
   [../]
   [./fixz1]
     type = DirichletBC
     variable = disp_z
-    boundary = '2'
+    boundary = '0'
     value = 0.0
   [../]
   [./fixr1]
     type = DirichletBC
     variable = rot_x
-    boundary = '2'
+    boundary = '0'
     value = 0.0
   [../]
   [./fixr2]
     type = DirichletBC
     variable = rot_y
-    boundary = '2'
+    boundary = '0'
     value = 0.0
   [../]
   [./fixx1]
     type = DirichletBC
     variable = disp_x
-    boundary = '2'
+    boundary = '0'
     value = 0.0
   [../]
 []
@@ -237,7 +237,7 @@
   [./force_y2]
     type = UserForcingFunctionNodalKernel
     variable = disp_z
-    boundary = '0'
+    boundary = '2'
     function = force_function
   [../]
 []
