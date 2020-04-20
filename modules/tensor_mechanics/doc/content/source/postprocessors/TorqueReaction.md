@@ -34,21 +34,21 @@ $d$ is the axis of rotation direction vector.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_tm.i
+!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=Postprocessors/torque
 
 A list of the AuxVariables which save the reaction forces must be provided to the `TorqueReaction` block.
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_tm.i
+!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=AuxVariables/saved_x
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_tm.i
+!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=AuxVariables/saved_y
 
 The reaction force AuxVariables must also be connected to the stress divergence kernel through the
 `save_in` parameter
 
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_tm.i
+!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction.i
          block=Kernels/TensorMechanics
 
 !syntax parameters /Postprocessors/TorqueReaction

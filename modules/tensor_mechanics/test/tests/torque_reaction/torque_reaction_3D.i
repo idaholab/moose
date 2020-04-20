@@ -23,32 +23,11 @@
   nz = 1
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
 [GlobalParams]
   volumetric_locking_correction=true
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./saved_x]
   [../]
   [./saved_y]
@@ -57,37 +36,13 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Modules/TensorMechanics/Master]
+  [master]
+    strain = SMALL
+    generate_output = 'stress_xx stress_yy stress_zz'
+    add_variables = true
     save_in = 'saved_x saved_y saved_z'
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end     # for efficiency, only compute at the end of a timestep
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
@@ -126,17 +81,11 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 0
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./small_strain]
-    type = ComputeFiniteStrain
-    block = 0
-  [../]
   [./elastic_stress]
-    type = ComputeFiniteStrainElasticStress
-    block = 0
+    type = ComputeLinearElasticStress
   [../]
 []
 
