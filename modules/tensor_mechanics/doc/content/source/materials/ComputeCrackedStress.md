@@ -84,12 +84,16 @@ where $\boldsymbol{\mathcal{M}}$ is the Jacobian_mult that was calculated by the
 ## Evolution Equation and History Variable
 
 To avoid crack healing, a history variable $H$ is defined that is the maximum energy density over the
-time interval $t=[0,t_0]$, where $t_0$ is the current time step, i.e.
+time interval $t=[0,t_0]$, where $t$ is the time and $t_0$ is the current time step, i.e.
 \begin{equation}
 H = \max_t (\Psi^{+})
 \end{equation}
+By default, the model is applied under the assumption that the material is undamaged at $t = 0$ (the history variable is initialized at zero, regardless of the initial condition on $c$). However, options are available to stabilize pre-existing cracks. When pre-existing cracks are desired, a threshold and initialization factor $H_{factor}$ can be specified. When the initial condition on $c$ exceeds the threshold, the history variable is then initialized using
+\begin{equation}
+H = \frac{H_{factor} g_c}{2 l}.
+\end{equation}
 
-Now, the total free energy is redefined as:
+Now, the total free energy is redefined as
 \begin{equation}
 \begin{aligned}
 F =& \left[ (1-c)^2(1-k) + k \right] H +\Psi^{-} + \frac{g_c}{2l}c^2 + \frac{g_c l}{2} {|{\nabla c}|}^2 \\

@@ -20,9 +20,27 @@ ComputeCrackedStress::validParams()
   params.addParam<Real>("kdamage", 1e-9, "Stiffness of damaged matrix");
   params.addParam<bool>("finite_strain_model", false, "The model is using finite strain");
   params.addParam<bool>(
-      "use_current_history_variable", false, "Use the current value of the history variable.");
+      "use_current_history_variable", false, "Use the current value of the history variable");
   params.addParam<MaterialPropertyName>(
       "F_name", "E_el", "Name of material property storing the elastic energy");
+  params.addParam<bool>(
+      "precracked",
+      false,
+      "Use the initial condition of the damage order parameter to initialize the history variable");
+  params.addRangeCheckedParam<Real>(
+      "hist_init_factor",
+      100.0,
+      "hist_init_factor>0.0",
+      "Positive, nonzero value used to initialize the history variable when the material includes "
+      "pre-existing cracks (precracked = true)");
+  params.addRangeCheckedParam<Real>(
+      "c_threshold",
+      0.99,
+      "c_threshold>=0.0 & c_threshold<=1.0",
+      "If the material contains pre-existing cracks (precracked = true) and the initial condition "
+      "of the damage order parameter is greater than this threshold, the history variable will be "
+      "initialized at hist_init_factor * gc_prop / 2 / l to stabilize pre-existing cracks.  The "
+      "threshold should be within the interval [0, 1]");
   params.addParam<MaterialPropertyName>(
       "kappa_name",
       "kappa_op",
@@ -63,6 +81,9 @@ ComputeCrackedStress::ComputeCrackedStress(const InputParameters & parameters)
     _dstress_dc(declarePropertyDerivative<RankTwoTensor>("stress", getVar("c", 0)->name())),
     _hist(declareProperty<Real>("hist")),
     _hist_old(getMaterialPropertyOld<Real>("hist")),
+    _precracked(getParam<bool>("precracked")),
+    _hist_init_factor(getParam<Real>("hist_init_factor")),
+    _c_threshold(getParam<Real>("c_threshold")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _kappa(declareProperty<Real>(getParam<MaterialPropertyName>("kappa_name"))),
     _L(declareProperty<Real>(getParam<MaterialPropertyName>("mobility_name")))
@@ -73,7 +94,10 @@ void
 ComputeCrackedStress::initQpStatefulProperties()
 {
   _stress[_qp].zero();
-  _hist[_qp] = 0.0;
+  if (_precracked && (_c[_qp] > _c_threshold))
+    _hist[_qp] = _hist_init_factor * _gc_prop[_qp] / 2.0 / _l[_qp];
+  else
+    _hist[_qp] = 0.0;
 }
 
 void

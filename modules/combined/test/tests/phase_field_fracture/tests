@@ -109,4 +109,12 @@
     issues = '#14946'
     requirement = "The phase-field fracture model shall predict damage evolution using PETSc's SNES variational inequalities solver."
   [../]
+  [./crack2d_computeCrackedStress_smallstrain_precracked]
+    type = 'Exodiff'
+    input = 'crack2d_computeCrackedStress_smallstrain_precracked.i'
+    exodiff = 'crack2d_computeCrackedStress_smallstrain_precracked_out.e'
+    design = 'ComputeCrackedStress.md'
+    issues = '#15100'
+    requirement = 'The phase-field fracture model shall accept an initial state for the history variable and use it to stabilize a pre-existing crack.'
+  [../]
 [../]

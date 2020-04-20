@@ -74,11 +74,20 @@ protected:
   MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
   MaterialProperty<RankTwoTensor> & _dstress_dc;
 
-  /// history variable storing the maximum positive deformation energy
+  /// History variable storing the maximum positive deformation energy
   MaterialProperty<Real> & _hist;
   const MaterialProperty<Real> & _hist_old;
 
-  /// derivative of stress w.r.t. strain (_dstress_dstrain)
+  /// Use the initial condition of the phase field damage parameter to initialize the history variable
+  bool _precracked;
+
+  /// Factor used to initialize the history variable when the material includes pre-existing cracks
+  Real _hist_init_factor;
+
+  /// Threshold applied to the initial condition of the phase field damage parameter to stabilize pre-existing cracks
+  Real _c_threshold;
+
+  /// Derivative of stress w.r.t. strain (_dstress_dstrain)
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   /// Property where the value for kappa will be defined
