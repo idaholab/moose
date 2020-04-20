@@ -170,7 +170,7 @@ name = 'finite'
     prefactor = swell_mat
   [../]
   [./swell_mat]
-    type = GenericFunctionMaterial
+    type = ADGenericFunctionMaterial
     prop_names = 'swell_mat'
     prop_values = '7e-2*(1-cos(4*t))'
     block = 'plank'

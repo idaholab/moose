@@ -25,6 +25,7 @@ class ThermoDB(object):
         self._elements = None
         self._basis_species = None
         self._secondary_species = None
+        self._free_electron = None
         self._mineral_species = None
         self._gas_species = None
         self._redox_couples = None
@@ -116,6 +117,15 @@ class ThermoDB(object):
     @secondary_species.setter
     def secondary_species(self, secondary_species):
         self._secondary_species = secondary_species
+
+    # Free electron data
+    @property
+    def free_electron(self):
+        return self._free_electron
+
+    @free_electron.setter
+    def free_electron(self, free_electron):
+        self._free_electron = free_electron
 
     # Mineral species data
     @property
