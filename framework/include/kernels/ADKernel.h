@@ -13,7 +13,6 @@
 
 #include "DualRealOps.h"
 
-
 // forward declarations
 template <typename>
 class ADKernelTempl;
