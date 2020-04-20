@@ -15,5 +15,5 @@ protected:
 
   const MaterialProperty<Real> & _conductivity_master;
   const MaterialProperty<Real> & _conductivity_neighbor;
-  Real _contact_resistance;
+  const Real & _contact_resistance;
 };
