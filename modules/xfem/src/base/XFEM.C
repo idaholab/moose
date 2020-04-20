@@ -127,10 +127,8 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigne
   std::map<const Elem *, unsigned int>::iterator mit;
   mit = _state_marked_elem_sides.find(elem);
   if (mit != _state_marked_elem_sides.end())
-  {
     mooseError(" ERROR: side of element ", elem->id(), " already marked for crack initiation.");
-    exit(1);
-  }
+
   _state_marked_elem_sides[elem] = marked_side;
 }
 
@@ -142,11 +140,9 @@ XFEM::addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal)
   std::set<const Elem *>::iterator mit;
   mit = _state_marked_frags.find(elem);
   if (mit != _state_marked_frags.end())
-  {
     mooseError(
         " ERROR: element ", elem->id(), " already marked for fragment-secondary crack initiation.");
-    exit(1);
-  }
+
   _state_marked_frags.insert(elem);
 }
 
