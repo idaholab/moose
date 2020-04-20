@@ -179,6 +179,5 @@
 []
 
 [Outputs]
-  file_base = torque_reaction_3D_tm_out
   exodus = true
 []
