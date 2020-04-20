@@ -146,8 +146,14 @@ them both to 0; an emulation function will be used. */
 /* #undef HAVE_STRTOLL */
 
 /* Define to 1 if you have `strtoq'. */
+#ifndef __WIN32__
 #ifndef HAVE_STRTOQ
 #define HAVE_STRTOQ 1
+#endif
+#else
+#ifndef HAVE_STRTOLL
+#define HAVE_STRTOLL 1
+#endif
 #endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */

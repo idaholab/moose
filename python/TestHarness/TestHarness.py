@@ -9,6 +9,7 @@
 
 import sys
 import itertools
+import platform
 import os, re, inspect, errno, copy, json
 import shlex
 from . import RaceChecker
@@ -245,6 +246,8 @@ class TestHarness:
                             # in this testroot file unless it is overridden.
                             app_name, args, root_params = readTestRoot(os.path.join(dirpath, file))
                             full_app_name = app_name + "-" + self.options.method
+                            if platform.system() == 'Windows':
+                                full_app_name += '.exe'
                             testroot_params["executable"] = os.path.join(dirpath, full_app_name)
                             testroot_params["testroot_dir"] = dirpath
                             caveats = [full_app_name]
@@ -702,6 +705,8 @@ class TestHarness:
 
         ## Save executable-under-test name to self.executable
         self.executable = os.getcwd() + '/' + app_name + '-' + self.options.method
+        if platform.system() == 'Windows':
+            self.executable += '.exe'
 
         # Save the output dir since the current working directory changes during tests
         self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)

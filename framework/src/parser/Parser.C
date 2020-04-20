@@ -599,12 +599,7 @@ Parser::parse(const std::string & input_filename)
   std::string use_rel_paths_str =
       std::getenv("MOOSE_RELATIVE_FILEPATHS") ? std::getenv("MOOSE_RELATIVE_FILEPATHS") : "false";
   if (use_rel_paths_str == "0" || use_rel_paths_str == "false")
-  {
-    char abspath[PATH_MAX + 1];
-    if (!realpath(input_filename.c_str(), abspath))
-      mooseError("Failed to resolve input file path '", input_filename, "'.");
-    _input_filename = std::string(abspath);
-  }
+    _input_filename = MooseUtils::realpath(_input_filename);
 
   // vector for initializing active blocks
   std::vector<std::string> all = {"__all__"};

@@ -31,6 +31,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "iqsort.h"
+#include <cstdint>
 
 namespace {
 template <typename INT>

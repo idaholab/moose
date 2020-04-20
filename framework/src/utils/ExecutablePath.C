@@ -26,12 +26,14 @@ getExecutablePath()
   std::string exec_path;
   char path[1024];
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
   uint32_t size = sizeof(path);
   if (_NSGetExecutablePath(path, &size) == 0)
     exec_path = path;
   else
     mooseError("Unable to retrieve executable path");
+#elif defined(__WIN32__)
+  return "./";
 #else // Linux with Proc
   std::ostringstream oss;
   oss << "/proc/" << getpid() << "/exe";

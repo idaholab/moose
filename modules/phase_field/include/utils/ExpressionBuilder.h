@@ -362,7 +362,7 @@ public:
     // the default constructor assigns a temporary id node to root we use the address of the
     // current EBTerm object as the ID. This could be problematic if we create and destroy terms,
     // but then we should not expect the substitution to do sane things anyways.
-    EBTerm() : _root(new EBTempIDNode(reinterpret_cast<unsigned long>(this))){};
+    EBTerm() : _root(new EBTempIDNode(reinterpret_cast<unsigned long long>(this))){};
 
     EBTerm(const EBTerm & term) : _root(term.cloneRoot()){};
     ~EBTerm() { delete _root; };

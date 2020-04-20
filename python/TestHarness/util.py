@@ -172,7 +172,7 @@ LIBMESH_OPTIONS = {
 def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
-    p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
+    p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
     output = p.communicate()[0].decode('utf-8')
     if (p.returncode != 0):
         output = 'ERROR: ' + output
@@ -560,13 +560,29 @@ def getSharedOption(libmesh_dir):
     # We need to detect this condition
     shared_option = set(['ALL'])
 
-    result = runExecutable(libmesh_dir, "contrib/bin", "libtool", "--config | grep build_libtool_libs | cut -d'=' -f2")
+    libtool = os.path.join(libmesh_dir, "contrib", "bin", "libtool")
+    f = open(libtool, "r")
 
-    if re.search('yes', result) != None:
-        shared_option.add('DYNAMIC')
-    elif re.search('no', result) != None:
-        shared_option.add('STATIC')
-    else:
+    found = False
+    for line in f:
+        try:
+            (key, value) = line.rstrip().split("=", 2)
+        except Exception as e:
+            continue
+
+        if key == 'build_libtool_libs':
+            if value == 'yes':
+                shared_option.add('DYNAMIC')
+                found = True
+                break
+            if value == 'no':
+                shared_option.add('STATIC')
+                found = True
+                break
+
+    f.close()
+
+    if not found:
         # Neither no nor yes?  Not possible!
         print("Error! Could not determine whether shared libraries were built.")
         exit(1)
