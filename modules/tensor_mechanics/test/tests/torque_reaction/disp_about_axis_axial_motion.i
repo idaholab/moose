@@ -29,6 +29,9 @@
     value = 0.0
   [../]
 
+# Because rotation is prescribed about the z axis, the
+# DisplacementAboutAxis BC is only needed for the x and y
+# displacements.
   [./top_x]
     type = DisplacementAboutAxis
     boundary = top
@@ -104,8 +107,8 @@
   l_tol = 1e-8
 
   start_time = 0.0
-  dt = 1
-  dtmin = 1 # die instead of cutting the timestep
+  dt = 2
+  dtmin = 2 # die instead of cutting the timestep
 
   end_time = 90
 []
