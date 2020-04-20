@@ -80,6 +80,13 @@ protected:
         "TabulatedFluidProperties", "missing_data_fp", missing_data_uo_params);
     _missing_data_fp =
         &_fe_problem->getUserObject<TabulatedFluidProperties>("missing_data_fp");
+
+    InputParameters e_from_p_rho_uo_params = _factory.getValidParams("TabulatedFluidProperties");
+    e_from_p_rho_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    e_from_p_rho_uo_params.set<FileName>("fluid_property_file") = "data/csv/fluid_props.csv";
+    e_from_p_rho_uo_params.set<bool>("enable_T_from_p_rho") = true;
+    _fe_problem->addUserObject("TabulatedFluidProperties", "e_from_p_rho_uo", e_from_p_rho_uo_params);
+    _e_from_p_rho = &_fe_problem->getUserObject<TabulatedFluidProperties>("e_from_p_rho_uo");
   }
 
   void TearDown()
@@ -97,4 +104,5 @@ protected:
   const TabulatedFluidProperties * _missing_col_fp;
   const TabulatedFluidProperties * _unknown_col_fp;
   const TabulatedFluidProperties * _missing_data_fp;
+  const TabulatedFluidProperties * _e_from_p_rho;
 };

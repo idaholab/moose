@@ -199,6 +199,16 @@ TEST_F(TabulatedFluidPropertiesTest, passthrough)
   ABS_TEST(_tab_fp->vaporPressure(T), _co2_fp->vaporPressure(T), tol);
 }
 
+TEST_F(TabulatedFluidPropertiesTest, e_from_p_rho)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+  const Real tol = REL_TOL_SAVED_VALUE;
+  Real rho = _e_from_p_rho->rho_from_p_T(p, T);
+  Real e_from_p_T = _e_from_p_rho->e_from_p_T(p, T);
+  ABS_TEST(e_from_p_T, _e_from_p_rho->e_from_p_rho(p, rho), tol);
+}
+
 /**
  * Test that the fluid name is correctly returned
  */
