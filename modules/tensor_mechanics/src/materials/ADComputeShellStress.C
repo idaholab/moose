@@ -57,7 +57,7 @@ ADComputeShellStress::ADComputeShellStress(const InputParameters & parameters)
     _rotation_matrix[t] =
         &getMaterialProperty<RankTwoTensor>("rotation_t_points_" + std::to_string(t));
     _global_stress[t] =
-        &declareADProperty<RankTwoTensor>("global_stress_t_points_" + std::to_string(t));
+        &declareProperty<RankTwoTensor>("global_stress_t_points_" + std::to_string(t));
   }
 }
 

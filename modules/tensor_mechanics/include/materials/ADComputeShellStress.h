@@ -51,7 +51,7 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _rotation_matrix;
 
   /// Global stress tensor material property
-  std::vector<ADMaterialProperty<RankTwoTensor> *> _global_stress;
+  std::vector<MaterialProperty<RankTwoTensor> *> _global_stress;
 
   /// Real value of stress in the local coordinate system
   RankTwoTensor _unrotated_stress;
