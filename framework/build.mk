@@ -94,10 +94,6 @@ unity_files:
 #
 # C++ rules
 #
-pcre%.$(obj-suffix) : pcre%.cc
-	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cc
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
@@ -137,11 +133,6 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 #
 # C rules
 #
-
-pcre%.$(obj-suffix) : pcre%.c
-	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."

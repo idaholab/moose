@@ -13,11 +13,9 @@
 #include "MooseUtils.h"
 #include "InputParameters.h"
 
-// Contrib RE
-#include "pcrecpp.h"
-
 // C++ includes
 #include <iomanip>
+#include <regex>
 
 CommandLine::CommandLine(int argc, char * argv[]) { addArguments(argc, argv); }
 
@@ -66,7 +64,13 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
   // Get the name and number for the current sub-application
   std::string sub_name;
   int sub_num = std::numeric_limits<int>::min(); // this initial value should never be used
-  pcrecpp::RE("(\\S*?)(\\d*)").FullMatch(subapp_full_name, &sub_name, &sub_num);
+  const std::regex re("(\\S*?)(\\d*)", std::regex::optimize);
+  std::smatch matches;
+  if (std::regex_match(subapp_full_name, matches, re))
+  {
+    sub_name = matches.str(1);
+    sub_num = std::stoi(matches.str(2));
+  }
 
   if (sub_num == std::numeric_limits<int>::min())
     mooseError("The sub-application name '", subapp_full_name, "' must contain a number.");
@@ -80,7 +84,13 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
         // match fails and the argument is retained.
         std::string arg_sub_name;
         int arg_sub_num = -1;
-        pcrecpp::RE("(\\S*?)(\\d*):").PartialMatch(arg, &arg_sub_name, &arg_sub_num);
+        const std::regex re_subapp("(\\S*?)(\\d*):", std::regex::optimize);
+        std::smatch re_subapp_match;
+        if (std::regex_search(arg, re_subapp_match, re_subapp))
+        {
+          arg_sub_name = re_subapp_match.str(1);
+          arg_sub_num = re_subapp_match.str(2).empty() ? -1 : std::stoi(re_subapp_match.str(2));
+        }
         if (!arg_sub_name.empty())
         {
           // The argument should be retained if names match and the current argument doesn't have

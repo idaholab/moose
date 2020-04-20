@@ -20,18 +20,6 @@ moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
 
 #
-# pcre
-#
-pcre_DIR       := $(FRAMEWORK_DIR)/contrib/pcre
-pcre_srcfiles  := $(shell find $(pcre_DIR) -name "*.cc")
-pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
-pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
-pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
-pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
-# dependency files
-pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
-
-#
 # hit (new getpot parser)
 #
 hit_DIR       := $(FRAMEWORK_DIR)/contrib/hit
@@ -161,7 +149,7 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
-moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
+moose_LIBS := $(moose_LIB) $(hit_LIB)
 
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
@@ -289,12 +277,6 @@ moose: $(moose_LIB)
 
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
-$(pcre_LIB): $(pcre_objects)
-	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
-	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(pcre_LIB) $(pcre_DIR)
-
 $(gtest_LIB): $(gtest_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
@@ -307,10 +289,10 @@ $(hit_LIB): $(hit_objects)
 	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hit_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(hit_DIR)
 
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+$(moose_LIB): $(moose_objects) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
+	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(png_LIB) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
@@ -331,7 +313,6 @@ sa: $(moose_analyzer)
 
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/mtwist/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/jsoncpp/src/*.d)
--include $(wildcard $(FRAMEWORK_DIR)/contrib/pcre/src/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/hit/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
@@ -395,9 +376,9 @@ install_make_dir:
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
-app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
-app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
+app_LIB  := $(moose_LIBS) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
+app_objects := $(moose_objects) $(exodiff_objects) $(gtest_objects) $(hit_objects)
+app_deps := $(moose_deps) $(exodiff_deps) $(gtest_deps) $(hit_deps)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:

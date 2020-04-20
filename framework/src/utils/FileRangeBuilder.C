@@ -12,8 +12,10 @@
 // MOOSE includes
 #include "InputParameters.h"
 
-#include "pcrecpp.h"
 #include "tinydir.h"
+
+// C++ Includes
+#include <regex>
 
 defineLegacyParams(FileRangeBuilder);
 
@@ -124,10 +126,11 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) : _status(0)
     tinydir_dir dir;
     tinydir_open_sorted(&dir, split_file.first.c_str());
 
-    // This regex will capture the file_base and any number of digits when used with FullMatch()
+    // This regex will capture the file_base and any number of digits.
     std::ostringstream oss;
     oss << "(" << split_file.second << ".*?(\\d+))\\..*";
-    pcrecpp::RE file_base_and_num_regex(oss.str());
+    const std::regex re(oss.str(), std::regex::optimize);
+    std::smatch matches;
 
     // Loop through the files in the directory
     for (int i = 0; i < dir.n_files; i++)
@@ -141,7 +144,12 @@ FileRangeBuilder::FileRangeBuilder(const InputParameters & params) : _status(0)
       {
         std::string the_base;
         unsigned int file_num = 0;
-        file_base_and_num_regex.FullMatch(file.name, &the_base, &file_num);
+        std::string file_name(file.name);
+        if (std::regex_search(file_name, matches, re))
+        {
+          the_base = matches.str(1);
+          file_num = std::stoul(matches.str(2));
+        }
 
         if (!the_base.empty() && file_num >= file_range[0] && file_num <= file_range[1])
           _filenames.push_back(split_file.first + "/" + file.name);

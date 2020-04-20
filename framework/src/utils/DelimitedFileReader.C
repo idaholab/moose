@@ -11,12 +11,12 @@
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <regex>
 
 // MOOSE includes
 #include "DelimitedFileReader.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
-#include "pcrecpp.h"
 
 namespace MooseUtils
 {

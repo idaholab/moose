@@ -19,7 +19,6 @@
 #include "libmesh/elem.h"
 
 // External includes
-#include "pcrecpp.h"
 #include "tinydir.h"
 
 // C++ includes
@@ -28,6 +27,7 @@
 #include <istream>
 #include <iterator>
 #include <ctime>
+#include <regex>
 
 // System includes
 #include <sys/stat.h>
@@ -281,14 +281,17 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
   std::string file_ext;
   if (strip_exodus_ext)
   {
-    pcrecpp::RE re(
-        ".*\\.([^\\.]*?)(?:-s\\d+)?\\s*$"); // capture the complete extension, ignoring -s*
-    re.FullMatch(filename, &file_ext);
+    const std::regex re(".*\\.([^\\.]*?)(?:-s\\d+)?\\s*$", std::regex::optimize);
+    std::smatch matches;
+    if (std::regex_match(filename, matches, re))
+      file_ext = matches.str(1);
   }
   else
   {
-    pcrecpp::RE re(".*\\.([^\\.]*?)\\s*$"); // capture the complete extension
-    re.FullMatch(filename, &file_ext);
+    const std::regex re(".*\\.([^\\.]*?)\\s*$", std::regex::optimize);
+    std::smatch matches;
+    if (std::regex_match(filename, matches, re))
+      file_ext = matches.str(1);
   }
 
   // Perform the comparision
@@ -341,25 +344,37 @@ std::string
 camelCaseToUnderscore(const std::string & camel_case_name)
 {
   std::string replaced = camel_case_name;
-  // Put underscores in front of each contiguous set of capital letters
-  pcrecpp::RE("(?!^)(?<![A-Z_])([A-Z]+)").GlobalReplace("_\\1", &replaced);
+  std::string str(1, tolower(replaced[0]));
+
+  // C++ ECMAS doesn't support negative lookbehinds
+  // so instead of a regexp like, (?!^)(?<![A-Z_])([A-Z]+), use an iterator
+  // to put underscores in front of each contiguous set of capital letters.
+  for (auto it = replaced.begin() + 1; it != replaced.end(); ++it)
+  {
+    if (isupper(*it) && *(it - 1) != '_' && islower(*(it - 1)))
+      str += "_";
+    str += *it;
+  }
 
   // Convert all capital letters to lower case
-  std::transform(replaced.begin(), replaced.end(), replaced.begin(), ::tolower);
-  return replaced;
+  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+  return str;
 }
 
 std::string
 underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_case)
 {
-  pcrecpp::StringPiece input(underscore_name);
-  pcrecpp::RE re("([^_]*)(_|$)");
+  std::string input(underscore_name);
+  const std::regex re("([^_]*)(_|$)", std::regex::optimize);
+  std::smatch sm;
 
   std::string result;
   std::string us, not_us;
   bool make_upper = leading_upper_case;
-  while (re.Consume(&input, &not_us, &us))
+  while (std::regex_search(input, sm, re))
   {
+    not_us = sm.str(1);
+    us = sm.str(2);
     if (not_us.length() > 0)
     {
       if (make_upper)
@@ -376,6 +391,7 @@ underscoreToCamelCase(const std::string & underscore_name, bool leading_upper_ca
 
     // Toggle flag so next match is upper cased
     make_upper = true;
+    input = sm.suffix().str();
   }
 
   return result;
@@ -445,8 +461,7 @@ MaterialPropertyStorageDump(
 std::string &
 removeColor(std::string & msg)
 {
-  pcrecpp::RE re("(\\33\\[3[0-7]m))", pcrecpp::DOTALL());
-  re.GlobalReplace(std::string(""), &msg);
+  msg = std::regex_replace(msg, std::regex("(\\\\33\\[\\d+m).*"), std::string(""));
   return msg;
 }
 
@@ -462,16 +477,23 @@ indentMessage(const std::string & prefix,
   // each colored multiline chunk one at a time with the right codes.
   std::string colored_message;
   std::string curr_color = COLOR_DEFAULT; // tracks last color code before newline
-  std::string line, color_code;
+  std::string line;
+  std::string color_code;
 
   bool ends_in_newline = message.empty() ? true : message.back() == '\n';
 
   std::istringstream iss(message);
+  const std::regex match_color(".*(\\\\33\\[\\d+m)((?!\\\\33\\[\\d+)[^\n])*", std::regex::optimize);
+  std::smatch sm;
   for (std::string line; std::getline(iss, line);) // loop over each line
   {
-    const static pcrecpp::RE match_color(".*(\\33\\[3\\dm)((?!\\33\\[3\\d)[^\n])*");
-    pcrecpp::StringPiece line_piece(line);
-    match_color.FindAndConsume(&line_piece, &color_code);
+    std::string line_piece(line);
+    while (std::regex_search(line_piece, sm, match_color))
+    {
+      color_code = sm.str(1);
+      line_piece = sm.suffix().str();
+    }
+
     colored_message += color + prefix + ": " + curr_color + line;
 
     // Only add a newline to the last line if it had one to begin with!
@@ -965,7 +987,8 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
   std::string max_base;
   std::string max_file;
 
-  pcrecpp::RE re_file_num(".*?(\\d+)(?:_mesh)?$"); // Pull out the embedded number from the file
+  const std::regex re_file_num(".*?(\\d+)(?:_mesh)?$", std::regex::optimize);
+  std::smatch sm;
 
   // Now, out of the newest files find the one with the largest number in it
   for (const auto & res_file : newest_restart_files)
@@ -974,7 +997,8 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
     auto the_base = res_file.substr(0, dot_pos);
     int file_num = 0;
 
-    re_file_num.FullMatch(the_base, &file_num);
+    if (std::regex_match(the_base, sm, re_file_num))
+      file_num = std::stoi(sm.str(1));
 
     if (file_num > max_file_num)
     {

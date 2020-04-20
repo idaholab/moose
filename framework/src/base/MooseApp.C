@@ -46,9 +46,6 @@
 #include "Attributes.h"
 #include "MooseApp.h"
 
-// Regular expression includes
-#include "pcrecpp.h"
-
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
@@ -69,6 +66,7 @@
 #include <cstdlib> // for system()
 #include <chrono>
 #include <thread>
+#include <regex>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -1159,7 +1157,10 @@ MooseApp::libNameToAppName(const std::string & library_name) const
   std::string app_name(library_name);
 
   // Strip off the leading "lib" and trailing ".la"
-  if (pcrecpp::RE("lib(.+?)(?:-\\w+)?\\.la").Replace("\\1", &app_name) == 0)
+  const std::regex re("lib(.+?)(?:-\\w+)?\\.la");
+  if (std::regex_search(app_name, re))
+    app_name = std::regex_replace(app_name, re, "$1");
+  else
     mooseError("Invalid library name: ", app_name);
 
   return MooseUtils::underscoreToCamelCase(app_name, true);
@@ -1318,7 +1319,8 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
 
   // This RE looks for absolute path libtool filenames (i.e. begins with a slash and ends with a
   // .la)
-  pcrecpp::RE re_deps("(/\\S*\\.la)");
+  const std::regex re_deps("(/\\S*\\.la)", std::regex::optimize);
+  std::smatch sm;
 
   std::ifstream handle(library_filename.c_str());
   if (handle.is_open())
@@ -1333,11 +1335,12 @@ MooseApp::loadLibraryAndDependencies(const std::string & library_filename,
 
       if (line.find("dependency_libs=") != std::string::npos)
       {
-        pcrecpp::StringPiece input(line);
-        pcrecpp::StringPiece depend_library;
-        while (re_deps.FindAndConsume(&input, &depend_library))
-          // Recurse here to load dependent libraries in depth-first order
-          loadLibraryAndDependencies(depend_library.as_string(), params);
+        std::string input(line);
+        while (std::regex_search(input, sm, re_deps))
+        {
+          loadLibraryAndDependencies(sm.str(1), params);
+          input = sm.suffix().str();
+        }
 
         // There's only one line in the .la file containing the dependency libs so break after
         // finding it

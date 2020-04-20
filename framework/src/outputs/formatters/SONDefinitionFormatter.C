@@ -9,7 +9,9 @@
 
 #include "SONDefinitionFormatter.h"
 #include "MooseUtils.h"
-#include "pcrecpp.h"
+
+// C++ Includes
+#include <regex>
 
 SONDefinitionFormatter::SONDefinitionFormatter() : _spaces(2), _level(0) {}
 
@@ -30,12 +32,19 @@ SONDefinitionFormatter::toString(const JsonVal & root)
       {"/parameters/", "/"},
       {"/subblocks/", "/"}};
 
+  // Create vector of regexps outside of nested loop to avoid repeated
+  // construction
+  std::vector<std::pair<std::regex, std::string>> _regex_list;
+  for (const auto & map_iter : json_path_regex_replacement_map)
+    _regex_list.push_back(std::pair<std::regex, std::string>(
+        std::regex(map_iter.first, std::regex::optimize), map_iter.second));
+
   for (const auto & type : root["global"]["associated_types"].getMemberNames())
     for (const auto & path_iter : root["global"]["associated_types"][type])
     {
       std::string path = path_iter.asString();
-      for (const auto & map_iter : json_path_regex_replacement_map)
-        pcrecpp::RE(map_iter.first).GlobalReplace(map_iter.second, &path);
+      for (const auto & r : _regex_list)
+        path = std::regex_replace(path, r.first, r.second);
       _assoc_types_map[type].push_back(path);
     }
 
@@ -100,8 +109,8 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 
   // add Description of block if it exists
   std::string description = block["description"].asString();
-  pcrecpp::RE("\"").GlobalReplace("'", &description);
-  pcrecpp::RE("[\r\n]").GlobalReplace(" ", &description);
+  description = std::regex_replace(description, std::regex("\""), "'");
+  description = std::regex_replace(description, std::regex("[\r\n]"), " ");
   if (!description.empty())
     addLine("Description=\"" + description + "\"");
 
@@ -228,6 +237,12 @@ SONDefinitionFormatter::addBlock(const std::string & block_name,
 void
 SONDefinitionFormatter::addParameters(const JsonVal & params)
 {
+  // Construct regexps outside of loop for better effciency.
+  const auto re_type_first = std::regex(".+<([A-Za-z0-9_' ':]*)>.*", std::regex::optimize);
+  const auto re_type_next = std::regex("(Array:)*(.*)", std::regex::optimize);
+  const auto re_desc_first = std::regex("\"", std::regex::optimize);
+  const auto re_desc_next = std::regex("[\r\n]", std::regex::optimize);
+  const auto re_options = std::regex("\\s", std::regex::optimize);
 
   for (const auto & name : params.getMemberNames())
   {
@@ -249,8 +264,8 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
     if (cpp_type == "FunctionExpression" || cpp_type == "FunctionName" ||
         basic_type.compare(0, 6, "Array:") == 0)
       is_array = true;
-    pcrecpp::RE(".+<([A-Za-z0-9_' ':]*)>.*").GlobalReplace("\\1", &cpp_type);
-    pcrecpp::RE("(Array:)*(.*)").GlobalReplace("\\2", &basic_type);
+    cpp_type = std::regex_replace(cpp_type, re_type_first, "$1");
+    cpp_type = std::regex_replace(cpp_type, re_type_next, "$2");
 
     // *** ChildAtLeastOne of parameter
     // if parameter is required and no default exists then outside its level specify
@@ -279,8 +294,9 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
 
     // *** Description of parameter
     std::string description = param["description"].asString();
-    pcrecpp::RE("\"").GlobalReplace("'", &description);
-    pcrecpp::RE("[\r\n]").GlobalReplace(" ", &description);
+    description = std::regex_replace(description, re_desc_first, "'");
+    description = std::regex_replace(description, re_desc_next, " ");
+
     if (!description.empty())
       addLine("Description=\"" + description + "\"");
 
@@ -312,7 +328,7 @@ SONDefinitionFormatter::addParameters(const JsonVal & params)
       std::string options = param["options"].asString();
       if (!options.empty())
       {
-        pcrecpp::RE(" ").GlobalReplace("\" \"", &options);
+        options = std::regex_replace(options, re_options, "\" \"");
         if (!param["out_of_range_allowed"].asBool())
           addLine("ValEnums=[ \"" + options + "\" ]");
         else

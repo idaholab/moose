@@ -38,9 +38,6 @@
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
 
-// Regular expression includes
-#include "pcrecpp.h"
-
 // C++ includes
 #include <string>
 #include <map>
@@ -48,6 +45,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <regex>
 
 std::string
 FuncParseEvaler::eval(hit::Field * n, const std::list<std::string> & args, hit::BraceExpander & exp)
@@ -507,6 +505,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 {
   std::string hit_text;
   bool afterDoubleDash = false;
+  const std::regex re("(\\S*?)(\\d*)", std::regex::optimize);
   for (std::size_t i = 1; i < argv.size(); i++)
   {
     std::string arg(argv[i]);
@@ -541,10 +540,13 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
     {
       std::string name;
       std::string num;
-      pcrecpp::RE("(.*?)"  // Match the multiapp name
-                  "(\\d+)" // math the multiapp number
-                  )
-          .FullMatch(appname, &name, &num);
+      std::smatch matches;
+      if (std::regex_match(appname, matches, re))
+      {
+        name = matches.str(1);
+        num = matches.str(2);
+      }
+
       auto pos = arg.find(":", 0);
       if (pos == 0)
         ; // cli param is ":" prefixed meaning global for all main+subapps

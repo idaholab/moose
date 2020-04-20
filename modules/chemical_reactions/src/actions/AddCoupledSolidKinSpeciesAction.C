@@ -14,9 +14,7 @@
 #include "MooseError.h"
 #include "Parser.h"
 #include <algorithm>
-
-// Regular expression includes
-#include "pcrecpp.h"
+#include <regex>
 
 registerMooseAction("ChemicalReactionsApp", AddCoupledSolidKinSpeciesAction, "add_kernel");
 
@@ -81,24 +79,21 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
                "See #9972 for details");
 
   // Parse the kinetic reactions
-  pcrecpp::RE re_reactions("(.+?)" // A single reaction (any character until the comma delimiter)
-                           "(?:,\\s*|$)" // comma or end of string
-                           ,
-                           pcrecpp::RE_Options().set_extended(true));
+  const std::regex re_reactions("(.+?)(?:,\\s*|$)", std::regex::optimize);
+  const std::regex re_terms("(\\S+)", std::regex::optimize);
+  const std::regex re_coeff_and_species("(?:\\(?(.*?)\\)?)([A-Za-z].*)", std::regex::optimize);
+  std::smatch re_reaction_match;
 
-  pcrecpp::RE re_terms("(\\S+)");
-  pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )" // match the leading coefficent
-                                   "([A-Za-z].*)"          // match the species
-                                   ,
-                                   pcrecpp::RE_Options().set_extended(true));
-
-  pcrecpp::StringPiece input(_input_reactions);
-  pcrecpp::StringPiece single_reaction, term;
-  std::string single_reaction_str;
+  std::string input(_input_reactions);
+  std::string single_reaction;
+  std::string term;
 
   // Parse reaction network to extract each individual reaction
-  while (re_reactions.FindAndConsume(&input, &single_reaction_str))
-    _reactions.push_back(single_reaction_str);
+  while (std::regex_search(input, re_reaction_match, re_reactions))
+  {
+    _reactions.push_back(re_reaction_match.str(1));
+    input = re_reaction_match.suffix().str();
+  }
 
   _num_reactions = _reactions.size();
 
@@ -119,12 +114,18 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
     std::vector<Real> local_stos;
     std::vector<VariableName> local_species_list;
 
+    std::smatch re_terms_match;
+    std::smatch re_coeff_and_species_match;
+
     // Find every single term in this reaction (species and operators)
-    while (re_terms.FindAndConsume(&single_reaction, &term))
+    while (std::regex_search(single_reaction, re_terms_match, re_terms))
     {
+      term = re_terms_match.str(1);
       // Separating the stoichiometric coefficients from species
-      if (re_coeff_and_species.PartialMatch(term, &coeff_str, &species))
+      if (std::regex_search(term, re_coeff_and_species_match, re_coeff_and_species))
       {
+        coeff_str = re_coeff_and_species_match.str(1);
+        species = re_coeff_and_species_match.str(2);
         if (coeff_str.length())
           coeff = std::stod(coeff_str);
         else
@@ -140,7 +141,6 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
           local_species_list.push_back(species);
         }
       }
-      // Finding the operators and assign value of -1.0 to "-" sign
       else if (term == "+" || term == "=" || term == "-")
       {
         if (term == "-")
@@ -153,9 +153,10 @@ AddCoupledSolidKinSpeciesAction::AddCoupledSolidKinSpeciesAction(const InputPara
           secondary = true;
       }
       else
-        mooseError("Error parsing term: ", term.as_string());
-    }
+        mooseError("Error parsing term: ", term);
 
+      single_reaction = re_terms_match.suffix();
+    }
     _stos.push_back(local_stos);
     _primary_species_involved.push_back(local_species_list);
   }

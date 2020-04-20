@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ImageMeshGenerator.h"
-#include "pcrecpp.h"
 #include "MooseApp.h"
 #include "CastUniquePointer.h"
 
@@ -20,6 +19,7 @@
 
 #include <cstdlib> // std::system, mkstemp
 #include <fstream>
+#include <regex>
 
 registerMooseObject("MooseApp", ImageMeshGenerator);
 
@@ -184,6 +184,8 @@ ImageMeshGenerator::GetPixelInfo(std::string filename, int & xpixels, int & ypix
   // A template for creating a temporary file.
   char temp_file[] = "file_command_output.XXXXXX";
 
+  const std::regex re("(\\d+) x (\\d+)", std::regex::optimize);
+
   // Use a do-loop so we can break out under various error conditions
   // while still cleaning up temporary files.  Basically use goto
   // statements without actually using them.
@@ -227,16 +229,22 @@ ImageMeshGenerator::GetPixelInfo(std::string filename, int & xpixels, int & ypix
     // Here's an example string:
     // sixteenth_image001_cropped3_closing_298.png: PNG image data, 115 x 99, 16-bit/color RGB,
     // non-interlaced
-    xpixels = 0, ypixels = 0;
-    pcrecpp::RE re("(\\d+) x (\\d+)");
-    re.PartialMatch(command_result, &xpixels, &ypixels);
+    xpixels = 0;
+    ypixels = 0;
+    std::smatch matches;
 
-    // Detect failure of the regex
-    if ((xpixels == 0) || (ypixels == 0))
+    if (std::regex_search(command_result, matches, re))
+    {
+      // Set x & y pixels to captured integers upon successful match
+      xpixels = std::stoi(matches.str(1));
+      ypixels = std::stoi(matches.str(2));
+    }
+    else
     {
       error_message = "Regex failed to find a match in " + command_result;
       break;
     }
+
   } while (false);
 
   // Remove the temporary file.  This will still work even if the file was never created...

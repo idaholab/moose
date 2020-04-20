@@ -18,11 +18,13 @@
 
 // Extrnal includes
 #include "tinydir.h"
-#include "pcrecpp.h"
 #include <libgen.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+// regex in C++11
+#include <regex>
 
 registerMooseAction("MooseApp", CommonOutputAction, "common_output");
 

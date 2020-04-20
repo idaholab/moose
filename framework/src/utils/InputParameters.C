@@ -16,9 +16,8 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 
-#include "pcrecpp.h"
-
 #include <cmath>
+#include <regex>
 
 InputParameters
 emptyInputParameters()
@@ -1157,8 +1156,8 @@ InputParameters::reservedValues(const std::string & name) const
 void
 InputParameters::checkParamName(const std::string & name) const
 {
-  const static pcrecpp::RE valid("[\\w:/]+");
-  if (!valid.FullMatch(name))
+  const std::regex valid("[\\w:/]+", std::regex::optimize);
+  if (!std::regex_match(name, valid))
     mooseError("Invalid parameter name: '", name, "'");
 }
 

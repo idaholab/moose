@@ -1,4 +1,3 @@
-
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -1050,8 +1049,8 @@ matches(const std::string & s, const std::string & regex, bool full = true)
   try
   {
     if (full)
-      return std::regex_match(s, std::regex(regex));
-    return std::regex_search(s, std::regex(regex));
+      return std::regex_match(s, std::regex(regex, std::regex::optimize));
+    return std::regex_search(s, std::regex(regex, std::regex::optimize));
   }
   catch (...)
   {

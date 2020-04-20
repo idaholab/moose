@@ -14,7 +14,6 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "Parser.h"
-#include "pcrecpp.h"
 #include "Action.h"
 #include "AppFactory.h"
 #include "Registry.h"
@@ -24,6 +23,7 @@
 // C++ includes
 #include <algorithm>
 #include <cctype>
+#include <regex>
 
 JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(search_string)
 {
@@ -347,9 +347,11 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
       cpp_type.find("libMesh::TensorValue") != std::string::npos)
   {
     // Get the template type and use its basic type for the array type
-    pcrecpp::RE r("^[^<]+<\\s*(.*)\\s*>$");
     std::string t;
-    r.FullMatch(cpp_type, &t);
+    const std::regex re("^[^<]+<\\s*([[:print:]]*)\\s*>$", std::regex::optimize);
+    std::smatch matches;
+    if (std::regex_match(cpp_type, matches, re))
+      t = matches.str(1);
     s = "Array:" + basicCppType(t);
   }
   else if (cpp_type.find("MultiMooseEnum") != std::string::npos ||
@@ -375,16 +377,27 @@ JsonSyntaxTree::prettyCppType(const std::string & cpp_type)
 {
   // On mac many of the std:: classes are inline namespaced with __1
   // On linux std::string can be inline namespaced with __cxx11
-  std::string s = cpp_type;
-  pcrecpp::RE("std::__\\w+::").GlobalReplace("std::", &s);
+  std::string s(cpp_type);
+  const auto re_inline = std::regex("std::__\\w+::", std::regex::optimize);
+
   // It would be nice if std::string actually looked normal
-  pcrecpp::RE("\\s*std::basic_string<char, std::char_traits<char>, std::allocator<char> >\\s*")
-      .GlobalReplace("std::string", &s);
+  const auto re_string = std::regex("\\s*std::basic_string<char"
+                                    ", std::char_traits<char>"
+                                    ", std::allocator<char> >\\s*",
+                                    std::regex::optimize);
+
   // It would be nice if std::vector looked normal
-  pcrecpp::RE r("std::vector<([[:print:]]+),\\s?std::allocator<\\s?\\1\\s?>\\s?>");
-  r.GlobalReplace("std::vector<\\1>", &s);
+  const auto re_vector = std::regex("std::vector<"
+                                    "([[:print:]]+)"
+                                    "(?:,\\s?std::allocator<\\s?[[:print:]]+\\s?>\\s?>)",
+                                    std::regex::optimize);
+
+  s = std::regex_replace(s, re_inline, "std::");
+  s = std::regex_replace(s, re_string, "std::string");
+  s = std::regex_replace(s, re_vector, "std::vector<$1>");
   // Do it again for nested vectors
-  r.GlobalReplace("std::vector<\\1>", &s);
+  s = std::regex_replace(s, re_vector, "std::vector<$1>");
+
   return s;
 }
 

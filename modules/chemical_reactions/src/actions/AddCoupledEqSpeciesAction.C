@@ -15,8 +15,8 @@
 
 #include "libmesh/string_to_enum.h"
 
-// Regular expression includes
-#include "pcrecpp.h"
+// C++ Includes
+#include <regex>
 
 registerMooseAction("ChemicalReactionsApp", AddCoupledEqSpeciesAction, "add_kernel");
 
@@ -52,7 +52,7 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
     _gravity(getParam<RealVectorValue>("gravity"))
 {
   // Parse the aqueous equilibrium reactions
-  pcrecpp::RE re_reaction(
+  const std::regex re_reaction(
       "(.+?)" // single reaction (any character until the equilibrium coefficient appears)
       "\\s"   // word boundary
       "("     // start capture
@@ -60,27 +60,29 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
       "\\d+(?:\\.\\d*)?" // digits followed by optional decimal and more digits
       ")"                // end capture
       "\\b"              // word boundary
-      "(?:,?\\s*|$)"     // optional comma or end of string
-      ,
-      pcrecpp::RE_Options().set_extended(true));
+      "(?:,?\\s*|$)",    // optional comma or end of string
+      std::regex::optimize);
+  const std::regex re_terms("(\\S+)", std::regex::optimize);
+  const std::regex re_coeff_and_species("(?:\\(?(.*?)\\)?)" // match the leading coefficent
+                                        "([A-Za-z].*)",     // match the species
+                                        std::regex::optimize);
 
-  pcrecpp::RE re_terms("(\\S+)");
-  pcrecpp::RE re_coeff_and_species("(?: \\(? (.*?) \\)? )" // match the leading coefficent
-                                   "([A-Za-z].*)"          // match the species
-                                   ,
-                                   pcrecpp::RE_Options().set_extended(true));
-
-  pcrecpp::StringPiece input(_input_reactions);
-
-  pcrecpp::StringPiece single_reaction, term;
+  std::string input(_input_reactions);
+  std::string single_reaction, term;
   std::string single_reaction_str;
+  std::smatch re_reaction_match;
   Real eq_coeff;
 
   // Parse reaction network to extract each individual reaction
-  while (re_reaction.FindAndConsume(&input, &single_reaction_str, &eq_coeff))
+  while (std::regex_search(input, re_reaction_match, re_reaction))
   {
+    single_reaction_str = re_reaction_match.str(1);
+    eq_coeff = std::stod(re_reaction_match.str(2));
+
     _reactions.push_back(single_reaction_str);
     _eq_const.push_back(eq_coeff);
+
+    input = re_reaction_match.suffix();
   }
 
   _num_reactions = _reactions.size();
@@ -106,12 +108,18 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
     std::vector<Real> local_stos;
     std::vector<VariableName> local_species_list;
 
+    std::smatch re_terms_match;
+    std::smatch re_coeff_and_species_match;
+
     // Find every single term in this reaction (species and operators)
-    while (re_terms.FindAndConsume(&single_reaction, &term))
+    while (std::regex_search(single_reaction, re_terms_match, re_terms))
     {
-      // Separating the stoichiometric coefficients from species
-      if (re_coeff_and_species.PartialMatch(term, &coeff_str, &species))
+      term = re_terms_match.str();
+      if (std::regex_search(term, re_coeff_and_species_match, re_coeff_and_species))
       {
+        coeff_str = re_coeff_and_species_match.str(1);
+        species = re_coeff_and_species_match.str(2);
+
         if (coeff_str.length())
           coeff = std::stod(coeff_str);
         else
@@ -142,7 +150,9 @@ AddCoupledEqSpeciesAction::AddCoupledEqSpeciesAction(const InputParameters & par
           secondary = true;
       }
       else
-        mooseError("Error parsing term: ", term.as_string());
+        mooseError("Error parsing term: ", term);
+
+      single_reaction = re_terms_match.suffix();
     }
 
     _stos.push_back(local_stos);
