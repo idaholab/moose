@@ -104,14 +104,14 @@
 
 [AuxKernels]
   [./stress_yy]
-    type = RankTwoAux
+    type = ADRankTwoAux
     variable = stress_yy
     rank_two_tensor = global_stress_t_points_0
     index_i = 1
     index_j = 1
   [../]
   [./stress_yz]
-    type = RankTwoAux
+    type = ADRankTwoAux
     variable = stress_yz
     rank_two_tensor = global_stress_t_points_0
     index_i = 1

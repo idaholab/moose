@@ -24,46 +24,50 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature_gauss.h"
+#include "MooseVariable.h"
 
-registerADMooseObject("TensorMechanicsApp", ADInertialForceShell);
+registerMooseObject("TensorMechanicsApp", ADInertialForceShell);
 
-defineADValidParams(
-    ADInertialForceShell,
-    ADTimeKernel,
-    params.addClassDescription("Calculates the residual for the inertial force/moment and the "
-                               "contribution of mass dependent Rayleigh damping and HHT time "
-                               "integration scheme.");
-    params.set<bool>("use_displaced_mesh") = true;
-    params.addRequiredCoupledVar(
-        "rotations",
-        "The rotational variables appropriate for the simulation geometry and coordinate system");
-    params.addRequiredCoupledVar(
-        "displacements",
-        "The displacement variables appropriate for the simulation geometry and coordinate system");
-    params.addCoupledVar("velocities", "Translational velocity variables");
-    params.addCoupledVar("accelerations", "Translational acceleration variables");
-    params.addCoupledVar("rotational_velocities", "Rotational velocity variables");
-    params.addCoupledVar("rotational_accelerations", "Rotational acceleration variables");
-    params.addParam<MaterialPropertyName>(
-        "density",
-        "density",
-        "Name of Material Property  or a constant real number defining the density of the beam.");
-    params.addRequiredRangeCheckedParam<unsigned int>(
-        "component",
-        "component<5",
-        "An integer corresponding to the direction "
-        "the variable this kernel acts in. (0 for disp_x, "
-        "1 for disp_y, 2 for disp_z, 3 for alpha, and 4 for beta)");
-    params.addRequiredParam<Real>("thickness", "Generic thickness --to be upgraded");
-    params.addParam<MaterialPropertyName>("eta",
-                                          0.0,
-                                          "Name of material property or a constant real "
-                                          "number defining the eta parameter for the "
-                                          "Rayleigh damping."););
+InputParameters
+ADInertialForceShell::validParams()
+{
+  InputParameters params = ADTimeKernel::validParams();
 
-template <ComputeStage compute_stage>
-ADInertialForceShell<compute_stage>::ADInertialForceShell(const InputParameters & parameters)
-  : ADTimeKernel<compute_stage>(parameters),
+  params.addClassDescription("Calculates the residual for the inertial force/moment and the "
+                             "contribution of mass dependent Rayleigh damping and HHT time "
+                             "integration scheme.");
+  params.set<bool>("use_displaced_mesh") = true;
+  params.addRequiredCoupledVar(
+      "rotations",
+      "The rotational variables appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacement variables appropriate for the simulation geometry and coordinate system");
+  params.addCoupledVar("velocities", "Translational velocity variables");
+  params.addCoupledVar("accelerations", "Translational acceleration variables");
+  params.addCoupledVar("rotational_velocities", "Rotational velocity variables");
+  params.addCoupledVar("rotational_accelerations", "Rotational acceleration variables");
+  params.addParam<MaterialPropertyName>(
+      "density",
+      "density",
+      "Name of Material Property  or a constant real number defining the density of the beam.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component<5",
+      "An integer corresponding to the direction "
+      "the variable this kernel acts in. (0 for disp_x, "
+      "1 for disp_y, 2 for disp_z, 3 for alpha, and 4 for beta)");
+  params.addRequiredParam<Real>("thickness", "Generic thickness --to be upgraded");
+  params.addParam<MaterialPropertyName>("eta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the eta parameter for the "
+                                        "Rayleigh damping.");
+  return params;
+}
+
+ADInertialForceShell::ADInertialForceShell(const InputParameters & parameters)
+  : ADTimeKernel(parameters),
     _has_velocities(isParamValid("velocities")),
     _has_rot_velocities(isParamValid("rotational_velocities")),
     _has_accelerations(isParamValid("accelerations")),
@@ -83,11 +87,11 @@ ADInertialForceShell<compute_stage>::ADInertialForceShell(const InputParameters 
     _v1(4),
     _v2(4),
     _node_normal(4),
-    _eta(getADMaterialProperty<Real>("eta")),
+    _eta(getMaterialProperty<Real>("eta")),
     _transformation_matrix(getADMaterialProperty<RankTwoTensor>("transformation_matrix_element")),
     _J_map(getADMaterialProperty<Real>("J_mapping_t_points_0")),
     _thickness(getParam<Real>("thickness")),
-    _density(getADMaterialProperty<Real>("density"))
+    _density(getMaterialProperty<Real>("density"))
 
 {
   // Checking for consistency between the length of the provided rotations and displacements vector
@@ -111,9 +115,8 @@ ADInertialForceShell<compute_stage>::ADInertialForceShell(const InputParameters 
   _x3(2) = 1;
 }
 
-template <>
 void
-ADInertialForceShell<RESIDUAL>::computeResidual()
+ADInertialForceShell::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
@@ -132,10 +135,10 @@ ADInertialForceShell<RESIDUAL>::computeResidual()
       _global_force_2 = _thickness * _original_local_config.transpose() * _local_force[2];
       _global_force_3 = _thickness * _original_local_config.transpose() * _local_force[3];
 
-      _local_re(0) = _global_force_0(_component);
-      _local_re(1) = _global_force_1(_component);
-      _local_re(2) = _global_force_2(_component);
-      _local_re(3) = _global_force_3(_component);
+      _local_re(0) = raw_value(_global_force_0(_component));
+      _local_re(1) = raw_value(_global_force_1(_component));
+      _local_re(2) = raw_value(_global_force_2(_component));
+      _local_re(3) = raw_value(_global_force_3(_component));
     }
     else
     {
@@ -144,10 +147,10 @@ ADInertialForceShell<RESIDUAL>::computeResidual()
       _global_moment_2 = _original_local_config.transpose() * _local_moment[2];
       _global_moment_3 = _original_local_config.transpose() * _local_moment[3];
 
-      _local_re(0) = _global_moment_0(_component - 3);
-      _local_re(1) = _global_moment_1(_component - 3);
-      _local_re(2) = _global_moment_2(_component - 3);
-      _local_re(3) = _global_moment_3(_component - 3);
+      _local_re(0) = raw_value(_global_moment_0(_component - 3));
+      _local_re(1) = raw_value(_global_moment_1(_component - 3));
+      _local_re(2) = raw_value(_global_moment_2(_component - 3));
+      _local_re(3) = raw_value(_global_moment_3(_component - 3));
     }
   }
 
@@ -161,9 +164,8 @@ ADInertialForceShell<RESIDUAL>::computeResidual()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADInertialForceShell<compute_stage>::computeResidualForJacobian(ADDenseVector & residual)
+ADInertialForceShell::computeResidualForJacobian(ADDenseVector & residual)
 {
   if (_dt != 0.0)
   {
@@ -196,11 +198,9 @@ ADInertialForceShell<compute_stage>::computeResidualForJacobian(ADDenseVector & 
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADInertialForceShell<compute_stage>::computeShellInertialForces(
-    const MooseArray<ADReal> & _ad_coord,
-    const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW)
+ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_coord,
+                                                 const MooseArray<ADReal> & _ad_JxW)
 {
   // Loosely following notation in: "On finite element nonlinear analysis of general shell
   // structures", PhD thesis by Said Bolourchi (1975).
@@ -212,9 +212,9 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
   _nodes[2] = _current_elem->node_ptr(2);
   _nodes[3] = _current_elem->node_ptr(3);
 
-  RealVectorValue x = (*_nodes[1] - *_nodes[0]);
-  RealVectorValue y = (*_nodes[3] - *_nodes[0]);
-  RealVectorValue normal = x.cross(y);
+  ADRealVectorValue x = (*_nodes[1] - *_nodes[0]);
+  ADRealVectorValue y = (*_nodes[3] - *_nodes[0]);
+  ADRealVectorValue normal = x.cross(y);
   normal /= normal.norm();
 
   _node_normal[0] = normal;
@@ -314,7 +314,7 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
   _local_rot_accel_2 = _original_local_config * _rot_accel_2;
   _local_rot_accel_3 = _original_local_config * _rot_accel_3;
 
-  // Conversions to DenseVector from RealVectorValue: Make a method out of this.
+  // Conversions to ADDenseVector from ADRealVectorValue: Make a method out of this.
   ADDenseVector local_accel_dv_0(3);
   ADDenseVector local_accel_dv_1(3);
   ADDenseVector local_accel_dv_2(3);
@@ -601,9 +601,8 @@ ADInertialForceShell<compute_stage>::computeShellInertialForces(
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADInertialForceShell<compute_stage>::computeJacobian()
+ADInertialForceShell::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
@@ -637,9 +636,8 @@ ADInertialForceShell<compute_stage>::computeJacobian()
   }
 }
 
-template <ComputeStage compute_stage>
 void
-ADInertialForceShell<compute_stage>::computeADOffDiagJacobian()
+ADInertialForceShell::computeADOffDiagJacobian()
 {
   if (_residuals.size() != _test.size())
     _residuals.resize(_test.size(), 0);
@@ -686,17 +684,3 @@ ADInertialForceShell<compute_stage>::computeADOffDiagJacobian()
     accumulateTaggedLocalMatrix();
   }
 }
-
-template <>
-void
-ADInertialForceShell<JACOBIAN>::computeResidual()
-{
-}
-
-template <>
-void
-ADInertialForceShell<RESIDUAL>::computeJacobian()
-{
-}
-
-adBaseClass(ADInertialForceShell);

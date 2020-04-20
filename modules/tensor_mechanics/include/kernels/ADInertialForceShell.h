@@ -12,11 +12,9 @@
 #include "ADTimeKernel.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
-
-#define ADInertialForceShellMembers usingTimeKernelMembers
+#include "libmesh/dense_vector.h"
 
 // Forward Declarations
-template <ComputeStage compute_stage>
 class ADInertialForceShell;
 
 namespace libMesh
@@ -24,10 +22,7 @@ namespace libMesh
 class QGauss;
 }
 
-declareADValidParams(ADInertialForceShell);
-
-template <ComputeStage compute_stage>
-class ADInertialForceShell : public ADTimeKernel<compute_stage>
+class ADInertialForceShell : public ADTimeKernel
 {
 public:
   static InputParameters validParams();
@@ -40,9 +35,8 @@ protected:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeADOffDiagJacobian() override;
-  virtual void computeShellInertialForces(
-      const MooseArray<ADReal> & _ad_coord,
-      const MooseArray<typename Moose::RealType<compute_stage>::type> & _ad_JxW);
+  virtual void computeShellInertialForces(const MooseArray<ADReal> & _ad_coord,
+                                          const MooseArray<ADReal> & _ad_JxW);
   virtual void computeResidualForJacobian(ADDenseVector & residual);
 
 private:
@@ -176,19 +170,17 @@ private:
   std::vector<ADRealVectorValue> _0g4_vector;
 
   /// Mass proportional Rayleigh damping parameter
-  const ADMaterialProperty(Real) & _eta;
+  const MaterialProperty<Real> & _eta;
 
   /// Rotation matrix material property
-  const ADMaterialProperty(RankTwoTensor) & _transformation_matrix;
+  const ADMaterialProperty<RankTwoTensor> & _transformation_matrix;
 
   /// Rotation matrix material property
-  const ADMaterialProperty(Real) & _J_map;
+  const ADMaterialProperty<Real> & _J_map;
 
   /// Coupled variable for the shell thickness
-  const Real & _thickness;
+  const ADReal _thickness;
 
   /// Shell material density
-  const ADMaterialProperty(Real) & _density;
-
-  usingTimeKernelMembers;
+  const MaterialProperty<Real> & _density;
 };
