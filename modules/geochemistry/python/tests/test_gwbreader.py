@@ -137,6 +137,18 @@ class TestGWBReader(unittest.TestCase):
 
         self.assertDictEqual(self.db.secondary_species, gold)
 
+    def testFreeElectron(self):
+        """
+        Test that the free electron is correctly parsed
+        """
+        self.readDatabase()
+        gold = {'e-': {'charge': '-1', 'radius': '0.0', 'molecular weight': '0.0000',
+                         'species': {'H2O': '.500', 'O2(g)': '-.250', 'H+': '-1.000'},
+                         'logk': ['22.76135', '20.7757', '18.513025', '16.4658',
+                                  '14.473225', '12.92125', '11.68165', '10.67105']}}
+
+        self.assertDictEqual(self.db.free_electron, gold)
+
     def testMineralSpecies(self):
         """
         Test that the mineral species are correctly parsed

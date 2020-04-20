@@ -132,3 +132,16 @@ Cu2O
        -2.000 H+              2.000 Cu+             1.000 H2O
 
 -end-
+
+   1 free electron
+
+e-
+     charge= -1      ion size=  0.0 A      mole wt.=    0.0000 g
+     3 species in reaction
+         .500 H2O             -.250 O2(g)          -1.000 H+
+       22.76135     20.7757   18.513025     16.4658
+      14.473225    12.92125    11.68165    10.67105
+
+-end-
+
+
