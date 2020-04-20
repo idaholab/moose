@@ -86,6 +86,12 @@ private:
   ADRealVectorValue _vel_0, _vel_1, _rot_vel_0, _rot_vel_1;
   ADRealVectorValue _vel_2, _vel_3, _rot_vel_2, _rot_vel_3;
   /**
+   * Current translational and rotational velocities at the two nodes
+   * of the beam in the global coordinate system
+   **/
+  ADRealVectorValue _old_vel_0, _old_vel_1, _old_rot_vel_0, _old_rot_vel_1;
+  ADRealVectorValue _old_vel_2, _old_vel_3, _old_rot_vel_2, _old_rot_vel_3;
+  /**
    * Current translational and rotational accelerations at the two nodes
    * of the beam in the global coordinate system
    **/
@@ -97,6 +103,12 @@ private:
    **/
   ADRealVectorValue _local_vel_0, _local_vel_1, _local_rot_vel_0, _local_rot_vel_1;
   ADRealVectorValue _local_vel_2, _local_vel_3, _local_rot_vel_2, _local_rot_vel_3;
+  /**
+   * Current translational and rotational velocities at the two nodes
+   * of the beam in the initial beam local coordinate system
+   **/
+  ADRealVectorValue _local_old_vel_0, _local_old_vel_1, _local_old_rot_vel_0, _local_old_rot_vel_1;
+  ADRealVectorValue _local_old_vel_2, _local_old_vel_3, _local_old_rot_vel_2, _local_old_rot_vel_3;
   /**
    * Current translational and rotational accelerations at the two nodes
    * of the beam in the initial beam local coordinate system
@@ -183,4 +195,7 @@ private:
 
   /// Shell material density
   const MaterialProperty<Real> & _density;
+
+  /// HHT time integration parameter
+  const Real _alpha;
 };

@@ -63,6 +63,12 @@ ADInertialForceShell::validParams()
                                         "Name of material property or a constant real "
                                         "number defining the eta parameter for the "
                                         "Rayleigh damping.");
+  params.addRangeCheckedParam<Real>("alpha",
+                                    0.0,
+                                    "alpha >= -0.3333 & alpha <= 0.0",
+                                    "Alpha parameter for mass dependent numerical damping induced "
+                                    "by HHT time integration scheme");
+
   return params;
 }
 
@@ -91,7 +97,8 @@ ADInertialForceShell::ADInertialForceShell(const InputParameters & parameters)
     _transformation_matrix(getADMaterialProperty<RankTwoTensor>("transformation_matrix_element")),
     _J_map(getADMaterialProperty<Real>("J_mapping_t_points_0")),
     _thickness(getParam<Real>("thickness")),
-    _density(getMaterialProperty<Real>("density"))
+    _density(getMaterialProperty<Real>("density")),
+    _alpha(getParam<Real>("alpha"))
 
 {
   // Checking for consistency between the length of the provided rotations and displacements vector
@@ -252,7 +259,7 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
                "requesting `u_dotdot`.");
 
   const NumericVector<Number> & vel = *nonlinear_sys.solutionUDot();
-  //    const NumericVector<Number> & vel_old = *nonlinear_sys.solutionUDotOld();
+  const NumericVector<Number> & old_vel = *nonlinear_sys.solutionUDotOld();
   const NumericVector<Number> & accel = *nonlinear_sys.solutionUDotDot();
 
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -267,6 +274,11 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     _vel_1(i) = vel(dof_index_1);
     _vel_2(i) = vel(dof_index_2);
     _vel_3(i) = vel(dof_index_3);
+
+    _old_vel_0(i) = old_vel(dof_index_0);
+    _old_vel_1(i) = old_vel(dof_index_1);
+    _old_vel_2(i) = old_vel(dof_index_2);
+    _old_vel_3(i) = old_vel(dof_index_3);
 
     _accel_0(i) = accel(dof_index_0);
     _accel_1(i) = accel(dof_index_1);
@@ -287,6 +299,11 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     _rot_vel_2(i) = vel(dof_index_2);
     _rot_vel_3(i) = vel(dof_index_3);
 
+    _old_rot_vel_0(i) = old_vel(dof_index_0);
+    _old_rot_vel_1(i) = old_vel(dof_index_1);
+    _old_rot_vel_2(i) = old_vel(dof_index_2);
+    _old_rot_vel_3(i) = old_vel(dof_index_3);
+
     _rot_accel_0(i) = accel(dof_index_0);
     _rot_accel_1(i) = accel(dof_index_1);
     _rot_accel_2(i) = accel(dof_index_2);
@@ -299,6 +316,11 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   _local_vel_2 = _original_local_config * _vel_2;
   _local_vel_3 = _original_local_config * _vel_3;
 
+  _local_old_vel_0 = _original_local_config * _old_vel_0;
+  _local_old_vel_1 = _original_local_config * _old_vel_1;
+  _local_old_vel_2 = _original_local_config * _old_vel_2;
+  _local_old_vel_3 = _original_local_config * _old_vel_3;
+
   _local_accel_0 = _original_local_config * _accel_0;
   _local_accel_1 = _original_local_config * _accel_1;
   _local_accel_2 = _original_local_config * _accel_2;
@@ -308,6 +330,11 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   _local_rot_vel_1 = _original_local_config * _rot_vel_1;
   _local_rot_vel_2 = _original_local_config * _rot_vel_2;
   _local_rot_vel_3 = _original_local_config * _rot_vel_3;
+
+  _local_old_rot_vel_0 = _original_local_config * _old_rot_vel_0;
+  _local_old_rot_vel_1 = _original_local_config * _old_rot_vel_1;
+  _local_old_rot_vel_2 = _original_local_config * _old_rot_vel_2;
+  _local_old_rot_vel_3 = _original_local_config * _old_rot_vel_3;
 
   _local_rot_accel_0 = _original_local_config * _rot_accel_0;
   _local_rot_accel_1 = _original_local_config * _rot_accel_1;
@@ -335,6 +362,16 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   ADDenseVector local_rot_vel_dv_2(3);
   ADDenseVector local_rot_vel_dv_3(3);
 
+  ADDenseVector local_old_vel_dv_0(3);
+  ADDenseVector local_old_vel_dv_1(3);
+  ADDenseVector local_old_vel_dv_2(3);
+  ADDenseVector local_old_vel_dv_3(3);
+
+  ADDenseVector local_old_rot_vel_dv_0(3);
+  ADDenseVector local_old_rot_vel_dv_1(3);
+  ADDenseVector local_old_rot_vel_dv_2(3);
+  ADDenseVector local_old_rot_vel_dv_3(3);
+
   for (unsigned int i = 0; i < 3; i++)
   {
     local_accel_dv_0(i) = _local_accel_0(i);
@@ -356,6 +393,16 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     local_rot_vel_dv_1(i) = _local_rot_vel_1(i);
     local_rot_vel_dv_2(i) = _local_rot_vel_2(i);
     local_rot_vel_dv_3(i) = _local_rot_vel_3(i);
+
+    local_old_vel_dv_0(i) = _local_old_vel_0(i);
+    local_old_vel_dv_1(i) = _local_old_vel_1(i);
+    local_old_vel_dv_2(i) = _local_old_vel_2(i);
+    local_old_vel_dv_3(i) = _local_old_vel_3(i);
+
+    local_old_rot_vel_dv_0(i) = _local_old_rot_vel_0(i);
+    local_old_rot_vel_dv_1(i) = _local_old_rot_vel_1(i);
+    local_old_rot_vel_dv_2(i) = _local_old_rot_vel_2(i);
+    local_old_rot_vel_dv_3(i) = _local_old_rot_vel_3(i);
   }
   unsigned int dim = _current_elem->dim();
 
@@ -442,13 +489,28 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   local_rot_acc[2] = local_rot_accel_dv_2;
   local_rot_acc[3] = local_rot_accel_dv_3;
 
-  // Velocity for Rayleigh damping
+  // Velocity for Rayleigh damping, including HHT_alpha parameter
+  // {
   std::vector<ADDenseVector> local_vel;
   local_vel.resize(4);
   local_vel[0].resize(3);
   local_vel[1].resize(3);
   local_vel[2].resize(3);
   local_vel[3].resize(3);
+
+  local_vel_dv_0.scale(1 + _alpha);
+  local_old_vel_dv_0.scale(_alpha);
+  local_vel_dv_1.scale(1 + _alpha);
+  local_old_vel_dv_1.scale(_alpha);
+  local_vel_dv_2.scale(1 + _alpha);
+  local_old_vel_dv_2.scale(_alpha);
+  local_vel_dv_3.scale(1 + _alpha);
+  local_old_vel_dv_3.scale(_alpha);
+
+  local_vel_dv_0.add(1.0, local_old_vel_dv_0);
+  local_vel_dv_1.add(1.0, local_old_vel_dv_1);
+  local_vel_dv_2.add(1.0, local_old_vel_dv_2);
+  local_vel_dv_3.add(1.0, local_old_vel_dv_3);
 
   local_vel[0] = local_vel_dv_0;
   local_vel[1] = local_vel_dv_1;
@@ -462,10 +524,25 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
   local_rot_vel[2].resize(3);
   local_rot_vel[3].resize(3);
 
+  local_rot_vel_dv_0.scale(1 + _alpha);
+  local_old_rot_vel_dv_0.scale(_alpha);
+  local_rot_vel_dv_1.scale(1 + _alpha);
+  local_old_rot_vel_dv_1.scale(_alpha);
+  local_rot_vel_dv_2.scale(1 + _alpha);
+  local_old_rot_vel_dv_2.scale(_alpha);
+  local_rot_vel_dv_3.scale(1 + _alpha);
+  local_old_rot_vel_dv_3.scale(_alpha);
+
+  local_rot_vel_dv_0.add(1.0, local_old_rot_vel_dv_0);
+  local_rot_vel_dv_1.add(1.0, local_old_rot_vel_dv_1);
+  local_rot_vel_dv_2.add(1.0, local_old_rot_vel_dv_2);
+  local_rot_vel_dv_3.add(1.0, local_old_rot_vel_dv_3);
+
   local_rot_vel[0] = local_rot_vel_dv_0;
   local_rot_vel[1] = local_rot_vel_dv_1;
   local_rot_vel[2] = local_rot_vel_dv_2;
   local_rot_vel[3] = local_rot_vel_dv_3;
+  // }
 
   FEType fe_type(Utility::string_to_enum<Order>("First"),
                  Utility::string_to_enum<FEFamily>("LAGRANGE"));
@@ -541,31 +618,43 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
                         _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_acc[3](dim));
 
       if (_eta[0] > TOLERANCE * TOLERANCE)
-        _local_force[3](dim) +=
-            factor_qxy * (_phi_map[3][qp_xy] * _phi_map[0][qp_xy] * local_vel[0](dim) +
-                          _phi_map[3][qp_xy] * _phi_map[1][qp_xy] * local_vel[1](dim) +
-                          _phi_map[3][qp_xy] * _phi_map[2][qp_xy] * local_vel[2](dim) +
-                          _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_vel[3](dim));
+        _local_force[3](dim) += factor_qxy * _eta[0] *
+                                (_phi_map[3][qp_xy] * _phi_map[0][qp_xy] * local_vel[0](dim) +
+                                 _phi_map[3][qp_xy] * _phi_map[1][qp_xy] * local_vel[1](dim) +
+                                 _phi_map[3][qp_xy] * _phi_map[2][qp_xy] * local_vel[2](dim) +
+                                 _phi_map[3][qp_xy] * _phi_map[3][qp_xy] * local_vel[3](dim));
     }
 
     // Account for inertia on rotational degrees of freedom
     ADReal rot_thickness = _thickness * _thickness * _thickness / 48.0;
 
     ADDenseVector momentInertia(3);
-    momentInertia(0) = (G1(0, 0) * local_rot_acc[0](0) + G1(0, 1) * local_rot_acc[0](1) +
-                        G2(0, 0) * local_rot_acc[1](0) + G2(0, 1) * local_rot_acc[1](1) +
-                        G3(0, 0) * local_rot_acc[2](0) + G3(0, 1) * local_rot_acc[2](1) +
-                        G4(0, 0) * local_rot_acc[3](0) + G4(0, 1) * local_rot_acc[3](1));
+    momentInertia(0) = (G1(0, 0) * (local_rot_acc[0](0) + _eta[0] * local_rot_vel[0](0)) +
+                        G1(0, 1) * (local_rot_acc[0](1) + _eta[0] * local_rot_vel[0](1)) +
+                        G2(0, 0) * (local_rot_acc[1](0) + _eta[0] * local_rot_vel[1](0)) +
+                        G2(0, 1) * (local_rot_acc[1](1) + _eta[0] * local_rot_vel[1](1)) +
+                        G3(0, 0) * (local_rot_acc[2](0) + _eta[0] * local_rot_vel[2](0)) +
+                        G3(0, 1) * (local_rot_acc[2](1) + _eta[0] * local_rot_vel[2](1)) +
+                        G4(0, 0) * (local_rot_acc[3](0) + _eta[0] * local_rot_vel[3](0)) +
+                        G4(0, 1) * (local_rot_acc[3](1) + _eta[0] * local_rot_vel[3](1)));
 
-    momentInertia(1) = (G1(1, 0) * local_rot_acc[0](0) + G1(1, 1) * local_rot_acc[0](1) +
-                        G2(1, 0) * local_rot_acc[1](0) + G2(1, 1) * local_rot_acc[1](1) +
-                        G3(1, 0) * local_rot_acc[2](0) + G3(1, 1) * local_rot_acc[2](1) +
-                        G4(1, 0) * local_rot_acc[3](0) + G4(1, 1) * local_rot_acc[3](1));
+    momentInertia(1) = (G1(1, 0) * (local_rot_acc[0](0) + _eta[0] * local_rot_vel[0](0)) +
+                        G1(1, 1) * (local_rot_acc[0](1) + _eta[0] * local_rot_vel[0](1)) +
+                        G2(1, 0) * (local_rot_acc[1](0) + _eta[0] * local_rot_vel[1](0)) +
+                        G2(1, 1) * (local_rot_acc[1](1) + _eta[0] * local_rot_vel[1](1)) +
+                        G3(1, 0) * (local_rot_acc[2](0) + _eta[0] * local_rot_vel[2](0)) +
+                        G3(1, 1) * (local_rot_acc[2](1) + _eta[0] * local_rot_vel[2](1)) +
+                        G4(1, 0) * (local_rot_acc[3](0) + _eta[0] * local_rot_vel[3](0)) +
+                        G4(1, 1) * (local_rot_acc[3](1) + _eta[0] * local_rot_vel[3](1)));
 
-    momentInertia(2) = (G1(2, 0) * local_rot_acc[0](0) + G1(2, 1) * local_rot_acc[0](1) +
-                        G2(2, 0) * local_rot_acc[1](0) + G2(2, 1) * local_rot_acc[1](1) +
-                        G3(2, 0) * local_rot_acc[2](0) + G3(2, 1) * local_rot_acc[2](1) +
-                        G4(2, 0) * local_rot_acc[3](0) + G4(2, 1) * local_rot_acc[3](1));
+    momentInertia(2) = (G1(2, 0) * (local_rot_acc[0](0) + _eta[0] * local_rot_vel[0](0)) +
+                        G1(2, 1) * (local_rot_acc[0](1) + _eta[0] * local_rot_vel[0](1)) +
+                        G2(2, 0) * (local_rot_acc[1](0) + _eta[0] * local_rot_vel[1](0)) +
+                        G2(2, 1) * (local_rot_acc[1](1) + _eta[0] * local_rot_vel[1](1)) +
+                        G3(2, 0) * (local_rot_acc[2](0) + _eta[0] * local_rot_vel[2](0)) +
+                        G3(2, 1) * (local_rot_acc[2](1) + _eta[0] * local_rot_vel[2](1)) +
+                        G4(2, 0) * (local_rot_acc[3](0) + _eta[0] * local_rot_vel[3](0)) +
+                        G4(2, 1) * (local_rot_acc[3](1) + _eta[0] * local_rot_vel[3](1)));
 
     _local_moment[0](0) += factor_qxy * rot_thickness *
                            (G1T(0, 0) * momentInertia(0) + G1T(0, 1) * momentInertia(1) +
