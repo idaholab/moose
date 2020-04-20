@@ -1,0 +1,10 @@
+[Tests]
+  [./tabulated_e_from_p_rho]
+    type = CSVDiff
+    input = 'tabulated_e_from_p_rho.i'
+    csvdiff = 'tabulated_out.csv'
+    design = '/TabulatedFluidProperties.md'
+    issues = '#15085'
+    requirement = 'The system shall be able to use tabulated fluid properties for computing internal energy from pressure and density.'
+  [../]
+[]
