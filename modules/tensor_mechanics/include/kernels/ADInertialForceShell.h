@@ -40,12 +40,6 @@ protected:
   virtual void computeResidualForJacobian(ADDenseVector & residual);
 
 private:
-  /// Booleans for validity of params
-  const bool _has_velocities;
-  const bool _has_rot_velocities;
-  const bool _has_accelerations;
-  const bool _has_rot_accelerations;
-
   /// Number of coupled rotational variables
   unsigned int _nrot;
 
@@ -138,15 +132,6 @@ private:
   /// Shape function value
   std::vector<std::vector<Real>> _phi_map;
 
-  /// Quadrature rule in the out of plane direction
-  std::unique_ptr<QGauss> _t_qrule;
-
-  /// Quadrature points in the out of plane direction in isoparametric coordinate system
-  std::vector<Point> _t_points;
-
-  /// Quadrature weights in the out of plane direction in isoparametric coordinate system
-  std::vector<ADReal> _t_weights;
-
   /// Vector storing pointers to the nodes of the shell element
   std::vector<const Node *> _nodes;
 
@@ -166,7 +151,7 @@ private:
   ADRealVectorValue _x2;
   ADRealVectorValue _x3;
 
-  /// Material property storing the normal to the element at the 4 nodes. Stored as a material property for convinience.
+  /// Normal to the element at the 4 nodes.
   std::vector<ADRealVectorValue> _node_normal;
 
   /// Node 1 g vector in reference configuration (mass matrix)

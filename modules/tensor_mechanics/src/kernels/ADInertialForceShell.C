@@ -57,7 +57,7 @@ ADInertialForceShell::validParams()
       "An integer corresponding to the direction "
       "the variable this kernel acts in. (0 for disp_x, "
       "1 for disp_y, 2 for disp_z, 3 for alpha, and 4 for beta)");
-  params.addRequiredParam<Real>("thickness", "Generic thickness --to be upgraded");
+  params.addRequiredParam<Real>("thickness", "The kernel's thickness");
   params.addParam<MaterialPropertyName>("eta",
                                         0.0,
                                         "Name of material property or a constant real "
@@ -74,10 +74,6 @@ ADInertialForceShell::validParams()
 
 ADInertialForceShell::ADInertialForceShell(const InputParameters & parameters)
   : ADTimeKernel(parameters),
-    _has_velocities(isParamValid("velocities")),
-    _has_rot_velocities(isParamValid("rotational_velocities")),
-    _has_accelerations(isParamValid("accelerations")),
-    _has_rot_accelerations(isParamValid("rotational_accelerations")),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
     _rot_num(_nrot),
@@ -99,7 +95,6 @@ ADInertialForceShell::ADInertialForceShell(const InputParameters & parameters)
     _thickness(getParam<Real>("thickness")),
     _density(getMaterialProperty<Real>("density")),
     _alpha(getParam<Real>("alpha"))
-
 {
   // Checking for consistency between the length of the provided rotations and displacements vector
   if (_ndisp != 3 || _nrot != 2)
