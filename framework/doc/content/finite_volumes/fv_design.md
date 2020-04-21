@@ -167,13 +167,7 @@ TODO: implement reconstruction and discuss design decisions here.
 * FV functionality does NOT work with mesh displacements yet. See
   [idaholab/moose#15064](https://github.com/idaholab/moose/issues/15064)
 
-* off-diagonal jacobians (i.e. with dependent variable coupling or nonlinear
-  problems) have not been implemented yet. See
-  [idaholab/moose#15065](https://github.com/idaholab/moose/issues/15065)
-
 * Higher order solution reconstruction is not supported yet. See
   [idaholab/moose#15066](https://github.com/idaholab/moose/issues/15066)
-
-* Not sure about mesh-adaptivity correctness yet - has not been tested.
 
 * Have not tested vector-FV varaibles - they almost certainly don't work (yet).
