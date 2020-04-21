@@ -1,9 +1,10 @@
-
 #include "FVFluxKernel.h"
 
 #include "MooseVariableFV.h"
 #include "SystemBase.h"
 #include "FVDirichletBC.h"
+#include "MooseMesh.h"
+#include "libmesh/elem.h"
 
 InputParameters
 FVFluxKernel::validParams()
@@ -53,16 +54,16 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any residual contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
-                        ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
+      ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the left element
     prepareVectorTag(_assembly, _var.number());
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
-                         ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
+      ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the right element
     prepareVectorTagNeighbor(_assembly, _var.number());
@@ -93,8 +94,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any jacobian contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if (ownLeftElem() && ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
-                        ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
+      ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // jacobian contribution of the residual for the left element to the left element's DOF:
     // d/d_left (residual_left)
@@ -118,8 +119,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     }
   }
 
-  if (ownRightElem() && ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
-                         ft == FaceInfo::VarFaceNeighbors::BOTH))
+  if ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
+      ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert((ft == FaceInfo::VarFaceNeighbors::RIGHT) == (_var.dofIndices().size() == 0),
                 "If the variable is only defined on the right hand side of the face, then that "

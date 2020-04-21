@@ -42,18 +42,4 @@ protected:
   const ADVariableGradient & _grad_u_right;
   ADRealVectorValue _normal;
   const FaceInfo * _face_info = nullptr;
-
-private:
-  bool ownLeftElem()
-  {
-    // returns true if this processor owns the (left) element.
-    // TODO: implement this
-    return true;
-  }
-  bool ownRightElem()
-  {
-    // returns true if this processor owns the (right) neighbor.
-    // TODO: implement this
-    return true;
-  }
 };
