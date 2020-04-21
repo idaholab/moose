@@ -25,7 +25,7 @@
       type = 'CSVDiff'
       input = 'shell_dynamics_bending_moment_free_orientation_inclined_hht.i'
       csvdiff = 'shell_dynamics_bending_moment_free_orientation_inclined_hht_out.csv'
-      requirement = "Zero Rayleigh damping and HHT-alpha must reproduce Newmark beta results"
+      detail = "the surface is at a 45 deg. angle w.r.t. the Y axis and HHT input is provided"
       heavy = true
     [../]
   []
