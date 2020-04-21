@@ -72,7 +72,7 @@
       enable_T_from_p_rho = true
       # increasing num_rho leads to a smaller difference
       # in e and e_from_p_rho. With num_rho -> infinty, the
-      # difference goes to zero  
+      # difference goes to zero
       num_rho = 250
     [../]
   []
