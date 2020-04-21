@@ -4,6 +4,8 @@
 #include "TaggingInterface.h"
 #include "TransientInterface.h"
 #include "BlockRestrictable.h"
+#include "FunctionInterface.h"
+#include "PostprocessorInterface.h"
 #include "Assembly.h"
 
 class SubProblem;
@@ -11,7 +13,9 @@ class SubProblem;
 class FVKernel : public MooseObject,
                  public TaggingInterface,
                  public TransientInterface,
-                 public BlockRestrictable
+                 public BlockRestrictable,
+                 public FunctionInterface,
+                 public PostprocessorInterface
 {
 public:
   static InputParameters validParams();

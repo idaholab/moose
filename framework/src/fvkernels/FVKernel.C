@@ -38,6 +38,8 @@ FVKernel::FVKernel(const InputParameters & params)
     TaggingInterface(this),
     TransientInterface(this),
     BlockRestrictable(this),
+    FunctionInterface(this),
+    PostprocessorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _tid(params.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid))

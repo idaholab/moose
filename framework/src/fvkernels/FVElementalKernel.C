@@ -36,7 +36,8 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _var(*mooseVariableFV()),
-    _u(_var.adSln())
+    _u(_var.adSln()),
+    _current_elem(_assembly.elem())
 {
   addMooseVariableDependency(&_var);
 }
