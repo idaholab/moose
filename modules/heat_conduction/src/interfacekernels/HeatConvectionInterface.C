@@ -6,10 +6,10 @@ using MetaPhysicL::raw_value;
 
 registerMooseObject("HeatConductionApp", HeatConvectionInterface);
 
-template <>
-InputParameters validParams<HeatConvectionInterface>()
+InputParameters
+HeatConvectionInterface::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<MaterialPropertyName>("htc", "heat transfer coefficient");
   return params;
 }
@@ -18,9 +18,6 @@ HeatConvectionInterface::HeatConvectionInterface(const InputParameters & paramet
   : InterfaceKernel(parameters),
     _h(getADMaterialPropertyByName<Real>(this->template getParam<MaterialPropertyName>("htc")))
 {
-  if (!parameters.isParamValid("boundary"))
-    mooseError("In order to use the HeatConvectionInterface dgkernel, you must "
-      "specify a boundary where it will live.");
 }
 
 Real
@@ -51,10 +48,10 @@ HeatConvectionInterface::computeQpJacobian(Moose::DGJacobianType type)
       return raw_value(_h[_qp]) * _phi_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
 
     case Moose::NeighborElement:
-      return raw_value(_h[_qp]) * - _phi[_j][_qp] * _test_neighbor[_i][_qp];
+      return raw_value(_h[_qp]) * -_phi[_j][_qp] * _test_neighbor[_i][_qp];
 
     case Moose::ElementNeighbor:
-      return raw_value(_h[_qp]) * - _phi_neighbor[_j][_qp] * _test[_i][_qp];
+      return raw_value(_h[_qp]) * -_phi_neighbor[_j][_qp] * _test[_i][_qp];
 
     default:
       return 0.0;

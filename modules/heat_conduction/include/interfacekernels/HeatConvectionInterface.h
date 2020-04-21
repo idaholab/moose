@@ -2,9 +2,6 @@
 
 class HeatConvectionInterface;
 
-template <>
-InputParameters validParams<HeatConvectionInterface>();
-
 /**
  * Interface kernel for coupling two variables with convective heat transfer
  * such that the heat flux \f$h(u_1-u_2)\f$ matches in both domains, where
@@ -26,6 +23,8 @@ InputParameters validParams<HeatConvectionInterface>();
 class HeatConvectionInterface : public InterfaceKernel
 {
 public:
+  static InputParameters validParams();
+
   HeatConvectionInterface(const InputParameters & parameters);
 
 protected:
