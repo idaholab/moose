@@ -209,5 +209,7 @@ protected:
 
 protected:
   Assembly * _mvi_assembly;
-};
 
+private:
+  const MooseObject & _moose_object;
+};

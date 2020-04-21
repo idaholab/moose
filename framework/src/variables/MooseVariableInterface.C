@@ -23,9 +23,9 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
                                                   std::string var_param_name,
                                                   Moose::VarKindType expected_var_type,
                                                   Moose::VarFieldType expected_var_field_type)
-  : _nodal(nodal)
+  : _nodal(nodal), _moose_object(*moose_object)
 {
-  const InputParameters & parameters = moose_object->parameters();
+  const InputParameters & parameters = _moose_object.parameters();
 
   SubProblem & problem = *parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
@@ -43,7 +43,7 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     // wrong with dollar bracket expression expansion.
     if (vec.empty())
       mooseError("Error constructing object '",
-                 moose_object->name(),
+                 _moose_object.name(),
                  "' while retrieving value for '",
                  var_param_name,
                  "' parameter! Did you set ",
@@ -71,6 +71,10 @@ template <typename T>
 MooseVariableFV<T> *
 MooseVariableInterface<T>::mooseVariableFV() const
 {
+  if (!_fv_variable)
+    mooseError("_fv_variable is null in ",
+               _moose_object.name(),
+               ". Did you forget to set fv = true in the Variables block?");
   return _fv_variable;
 }
 
