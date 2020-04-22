@@ -16,24 +16,18 @@ protected:
 
   /**
    * Creates the boundary condition objects for 1-phase flow
-   *
-   * @param[in] boundary_flux_name   name of the boundary flux user object
    */
-  void addWeakBC3Eqn(const std::string & boundary_flux_name);
+  void addWeakBC3Eqn();
 
   /**
    * Creates the boundary condition objects for 2-phase flow
-   *
-   * @param[in] boundary_flux_name   name of the boundary flux user object
    */
-  void addWeakBC7Eqn(const std::string & boundary_flux_name);
+  void addWeakBC7Eqn();
 
   /**
    * Creates the boundary condition objects for 2-phase flow with NCG
-   *
-   * @param[in] boundary_flux_name   name of the boundary flux user object
    */
-  void addWeakBC7EqnNCG(const std::string & boundary_flux_name);
+  void addWeakBC7EqnNCG();
 
   /// The name of the connect flow channel
   std::string _connected_flow_channel_name;
@@ -51,6 +45,8 @@ protected:
   UserObjectName _numerical_flux_name;
   /// rDG interfacial variables user object name
   UserObjectName _rdg_int_var_uo_name;
+  /// Name of boundary user object name
+  const UserObjectName _boundary_uo_name;
 
 public:
   static InputParameters validParams();

@@ -99,11 +99,9 @@ p_out = 7e6
 
 [Postprocessors]
   [./inlet_in_m_dot]
-    type = BoundaryFluxPostprocessor
-    boundary = 'inlet:in'
-    boundary_flux_uo = 'inlet_bc:boundary_flux'
-    flux_index = 0
-    variables = 'rhoA rhouA rhoEA'
+    type = FlowBoundaryFlux1Phase
+    boundary = 'inlet_bc'
+    equation = mass
   [../]
   [./inlet_out_m_dot]
     type = FlowJunctionFlux1Phase
@@ -151,11 +149,9 @@ p_out = 7e6
     equation = mass
   [../]
   [./outlet_out_m_dot]
-    type = BoundaryFluxPostprocessor
-    boundary = 'outlet:out'
-    boundary_flux_uo = 'outlet_bc:boundary_flux'
-    flux_index = 0
-    variables = 'rhoA rhouA rhoEA'
+    type = FlowBoundaryFlux1Phase
+    boundary = 'outlet_bc'
+    equation = mass
   [../]
 
   [./net_mass_flow_rate_domain]

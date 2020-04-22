@@ -92,7 +92,6 @@ InletDensityVelocity1Phase::setupRDG()
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // boundary flux user object
-  const std::string boundary_flux_name = genName(name(), "boundary_flux");
   {
     const std::string class_name = "BoundaryFlux3EqnGhostDensityVelocity";
     InputParameters params = _factory.getValidParams(class_name);
@@ -103,14 +102,14 @@ InletDensityVelocity1Phase::setupRDG()
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, boundary_flux_name, params);
+    _sim.addUserObject(class_name, _boundary_uo_name, params);
 
-    connectObject(params, boundary_flux_name, "rho");
-    connectObject(params, boundary_flux_name, "vel");
+    connectObject(params, _boundary_uo_name, "rho");
+    connectObject(params, _boundary_uo_name, "vel");
   }
 
   // BCs
-  addWeakBC3Eqn(boundary_flux_name);
+  addWeakBC3Eqn();
 }
 
 void
