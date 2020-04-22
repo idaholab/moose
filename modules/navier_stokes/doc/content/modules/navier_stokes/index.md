@@ -29,4 +29,33 @@ created; these objects are currently not as performant as their hand-coded
 peers, but they can be used seamlessly in simulations with mesh deformation and
 are guaranteed to generate correct Jacobians.
 
+Known limitations of AD INS implementation (these limitations are not present
+with the hand-coded INS implementation):
+
+- Stabilization methods will be inconsistent if a second order `LAGRANGE_VEC` basis is used
+  for the velocity variable. This is because second derivatives are not
+  implemented in libMesh for vector `FE` types, and consequently we cannot add in the contribution
+  from the viscous term which includes a Laplacian operation
+- Only the Laplace form of the viscous term is implemented, e.g. there is
+  currently no support for the traction form.
+
+Notes regarding INS RZ equations derivation:
+
+- Two additional terms are introduced into the r-component of the strong
+  representation of the momentum equation viscous term
+- One additional term is introduced into the r-component of the weak
+  representation of the momentum equation viscous term
+- One additional term is introduced into the z-component of the strong
+  representation of the momentum equation viscous term
+- Zero additional terms are introduced into the z-component of the weak
+  representation of the momentum equation viscous term
+- An additional pressure term will enter the weak form of the r-component of the
+  momentum equation if the pressure term was integrated by parts. No additional
+  terms appear in the strong form if the term is integrated by parts
+  (integration by parts is a part of forming the weak form)
+- An additional term is introduced into the mass balance equation
+
+The derivation is given in a document prepared by John Peterson, to be linked to
+from here soon.
+
 !syntax complete groups=NavierStokesApp
