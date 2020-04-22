@@ -398,7 +398,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsCreate(&_petsc_option_data_base);
+  // Master app should hold the default database to handle system petsc options
+  if (!_app.isUltimateMaster())
+    PetscOptionsCreate(&_petsc_option_data_base);
 #endif
 }
 
@@ -492,7 +494,8 @@ FEProblemBase::~FEProblemBase()
   }
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsDestroy(&_petsc_option_data_base);
+  if (!_app.isUltimateMaster())
+    PetscOptionsDestroy(&_petsc_option_data_base);
 #endif
 }
 
@@ -4638,7 +4641,8 @@ FEProblemBase::solve()
 #else
   // Now this database will be the default
   // Each app should have only one database
-  PetscOptionsPush(_petsc_option_data_base);
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_petsc_option_data_base);
   // We did not add petsc options to database yet
   if (!_is_petsc_options_inserted)
   {
@@ -4676,7 +4680,8 @@ FEProblemBase::solve()
     _displaced_problem->syncSolutions();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsPop();
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
 #endif
 }
 
