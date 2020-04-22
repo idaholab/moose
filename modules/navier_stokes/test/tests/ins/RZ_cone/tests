@@ -158,4 +158,13 @@
     issues = '#14901'
     requirement = 'The system shall be able to solve the steady incompressible Navier-Stokes equationswith SUPG and PSPG stabilization and a second order velocity basis using a hand-coded Jacobian, standard variable implementation in an RZ coordinate system while by integrating the pressure term by parts and applying a natural outflow boundary condition.'
   []
+  [ad_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_rz_cone_stab_jac_test.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+    run_sim = True
+    issues = '#14901'
+    requirement = 'The system shall compute an accurate Jacobian using automatic differentiation when solving the incompressible Navier Stokes equations in an axisymmetric coordinate system with SUPG and PSPG stabilization'
+  [../]
 []
