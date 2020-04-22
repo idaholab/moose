@@ -145,17 +145,16 @@ FreeBoundary::addMooseObjectsBoundaryFlux3Eqn()
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // boundary flux user object
-  const std::string boundary_flux_name = genName(name(), "boundary_flux");
   {
     const std::string class_name = "BoundaryFlux3EqnFreeOutflow";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, boundary_flux_name, params);
+    _sim.addUserObject(class_name, _boundary_uo_name, params);
   }
 
   // BCs
-  addWeakBC3Eqn(boundary_flux_name);
+  addWeakBC3Eqn();
 }
 
 void
@@ -165,16 +164,15 @@ FreeBoundary::addMooseObjectsBoundaryFlux7Eqn()
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // boundary flux user object
-  const std::string boundary_flux_name = genName(name(), "boundary_flux");
   {
     const std::string class_name = "BoundaryFlux7EqnGhostFreeOutflow";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<Real>("normal") = _normal;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, boundary_flux_name, params);
+    _sim.addUserObject(class_name, _boundary_uo_name, params);
   }
 
   // BCs
-  addWeakBC7Eqn(boundary_flux_name);
+  addWeakBC7Eqn();
 }

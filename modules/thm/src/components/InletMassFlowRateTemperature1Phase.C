@@ -89,7 +89,6 @@ InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // boundary flux user object
-  const std::string boundary_flux_name = genName(name(), "boundary_flux");
   {
     const std::string class_name = "BoundaryFlux3EqnGhostMassFlowRateTemperature";
     InputParameters params = _factory.getValidParams(class_name);
@@ -100,13 +99,13 @@ InletMassFlowRateTemperature1Phase::setup1PhaseRDG()
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<UserObjectName>("fluid_properties") = _fp_name;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, boundary_flux_name, params);
-    connectObject(params, boundary_flux_name, "m_dot", "mass_flow_rate");
-    connectObject(params, boundary_flux_name, "T");
+    _sim.addUserObject(class_name, _boundary_uo_name, params);
+    connectObject(params, _boundary_uo_name, "m_dot", "mass_flow_rate");
+    connectObject(params, _boundary_uo_name, "T");
   }
 
   // BCs
-  addWeakBC3Eqn(boundary_flux_name);
+  addWeakBC3Eqn();
 }
 
 void
