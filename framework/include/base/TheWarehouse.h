@@ -262,13 +262,19 @@ public:
     {
       std::lock_guard<std::mutex> lock(_cache_mutex);
       setKeysInner<0, KeyType<Attribs>...>(args...);
-      // if (_cache.count(_key_tup) == 0)
-      //{
-      setAttribsInner<0, KeyType<Attribs>...>(args...);
-      _cache[_key_tup] = _w->queryID(_attribs);
-      //}
-      // return _w->queryInto(_cache[_key_tup], results);
-      return _w->queryInto(_attribs, results);
+
+      size_t query_id;
+      const auto entry = _cache.find(_key_tup);
+      if (entry == _cache.end())
+      {
+        setAttribsInner<0, KeyType<Attribs>...>(args...);
+        query_id = _w->queryID(_attribs);
+        _cache[_key_tup] = query_id;
+      }
+      else
+        query_id = entry->second;
+
+      return _w->queryInto(query_id, results);
     }
 
   private:
@@ -417,8 +423,7 @@ private:
   /// vector is being used.
   const std::vector<MooseObject *> & query(int query_id);
 
-  void readAttribs(const MooseObject * obj,
-                   std::vector<std::unique_ptr<Attribute>> & attribs);
+  void readAttribs(const MooseObject * obj, std::vector<std::unique_ptr<Attribute>> & attribs);
 
   std::unique_ptr<Storage> _store;
   std::vector<std::shared_ptr<MooseObject>> _objects;
