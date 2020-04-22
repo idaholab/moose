@@ -466,7 +466,7 @@ ElementFragmentAlgorithm::sanityCheck()
   {
     _ostream << "_temp_nodes size > 0.  size=" << _temp_nodes.size() << std::endl;
     printMesh();
-    exit(1);
+    throw std::runtime_error("_temp_nodes size > 0");
   }
 }
 

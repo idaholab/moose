@@ -12,6 +12,9 @@
 #include "MooseUtils.h"
 #include "ElementFragmentAlgorithm.h"
 
+// set this global to true to enable a lot of mesh data output to the console
+const bool debug_print_mesh = false;
+
 void
 CheckNodes(std::map<unsigned int, EFANode *> & nodes, std::vector<unsigned int> & gold)
 {
@@ -146,7 +149,8 @@ TEST(ElementFragmentAlgorithm, test1b)
 
   MyMesh.updateTopology();
 
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -231,7 +235,8 @@ TEST(ElementFragmentAlgorithm, test2a)
   case2Mesh(MyMesh);
   case2Intersections(MyMesh);
   MyMesh.updateTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -269,7 +274,8 @@ TEST(ElementFragmentAlgorithm, test2b)
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   {
     // Test permanent nodes
@@ -301,13 +307,15 @@ TEST(ElementFragmentAlgorithm, test2b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   MyMesh.addElemEdgeIntersection((unsigned int)1, 1, 0.5);
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   {
     // Test permanent nodes
@@ -339,13 +347,15 @@ TEST(ElementFragmentAlgorithm, test2b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   MyMesh.addElemEdgeIntersection((unsigned int)6, 2, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology(false);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   {
     // Test permanent nodes
@@ -377,7 +387,8 @@ TEST(ElementFragmentAlgorithm, test2b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
   {
     // Test permanent nodes
     std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -457,7 +468,8 @@ TEST(ElementFragmentAlgorithm, test3)
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
 
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -581,7 +593,8 @@ TEST(ElementFragmentAlgorithm, test4)
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
 
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -668,7 +681,8 @@ TEST(ElementFragmentAlgorithm, test5a)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -705,7 +719,8 @@ TEST(ElementFragmentAlgorithm, test5a)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes2 = MyMesh.getPermanentNodes();
@@ -741,7 +756,8 @@ TEST(ElementFragmentAlgorithm, test5a)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes3 = MyMesh.getPermanentNodes();
@@ -796,7 +812,8 @@ TEST(ElementFragmentAlgorithm, test5b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -833,7 +850,8 @@ TEST(ElementFragmentAlgorithm, test5b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes2 = MyMesh.getPermanentNodes();
@@ -869,7 +887,8 @@ TEST(ElementFragmentAlgorithm, test5b)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes3 = MyMesh.getPermanentNodes();
@@ -926,7 +945,8 @@ TEST(ElementFragmentAlgorithm, test5c)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -1011,7 +1031,8 @@ TEST(ElementFragmentAlgorithm, test6a)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1038,7 +1059,8 @@ TEST(ElementFragmentAlgorithm, test6a)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1176,7 +1198,8 @@ TEST(ElementFragmentAlgorithm, test6b)
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -1273,7 +1296,8 @@ TEST(ElementFragmentAlgorithm, test6c)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1294,7 +1318,8 @@ TEST(ElementFragmentAlgorithm, test6c)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1357,7 +1382,8 @@ TEST(ElementFragmentAlgorithm, test6d)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1377,7 +1403,8 @@ TEST(ElementFragmentAlgorithm, test6d)
   MyMesh.clearAncestry();
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1440,7 +1467,8 @@ TEST(ElementFragmentAlgorithm, test6e)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1466,7 +1494,8 @@ TEST(ElementFragmentAlgorithm, test6e)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1529,7 +1558,8 @@ TEST(ElementFragmentAlgorithm, test6f)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1563,7 +1593,8 @@ TEST(ElementFragmentAlgorithm, test6f)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1627,7 +1658,8 @@ TEST(ElementFragmentAlgorithm, test6g)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1671,7 +1703,8 @@ TEST(ElementFragmentAlgorithm, test6g)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1735,7 +1768,8 @@ TEST(ElementFragmentAlgorithm, test6h)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1765,7 +1799,8 @@ TEST(ElementFragmentAlgorithm, test6h)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1829,7 +1864,8 @@ TEST(ElementFragmentAlgorithm, test6i)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1864,7 +1900,8 @@ TEST(ElementFragmentAlgorithm, test6i)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -1922,7 +1959,8 @@ TEST(ElementFragmentAlgorithm, test6j)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -1973,12 +2011,14 @@ TEST(ElementFragmentAlgorithm, test6j)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // Test permanent nodes
   std::map<unsigned int, EFANode *> permanent_nodes = MyMesh.getPermanentNodes();
@@ -2034,7 +2074,8 @@ TEST(ElementFragmentAlgorithm, test6k)
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2068,7 +2109,8 @@ TEST(ElementFragmentAlgorithm, test6k)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2132,7 +2174,8 @@ TEST(ElementFragmentAlgorithm, test6l)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2166,7 +2209,8 @@ TEST(ElementFragmentAlgorithm, test6l)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2224,7 +2268,8 @@ TEST(ElementFragmentAlgorithm, test6m)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2245,7 +2290,8 @@ TEST(ElementFragmentAlgorithm, test6m)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2310,7 +2356,8 @@ TEST(ElementFragmentAlgorithm, test6n)
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2361,7 +2408,8 @@ TEST(ElementFragmentAlgorithm, test6n)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2426,7 +2474,8 @@ TEST(ElementFragmentAlgorithm, test6o)
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2494,7 +2543,8 @@ TEST(ElementFragmentAlgorithm, test6o)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2553,7 +2603,8 @@ TEST(ElementFragmentAlgorithm, test6p)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2574,7 +2625,8 @@ TEST(ElementFragmentAlgorithm, test6p)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2632,7 +2684,8 @@ TEST(ElementFragmentAlgorithm, test6q)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2668,7 +2721,8 @@ TEST(ElementFragmentAlgorithm, test6q)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2726,7 +2780,8 @@ TEST(ElementFragmentAlgorithm, test6r)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2777,7 +2832,8 @@ TEST(ElementFragmentAlgorithm, test6r)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2835,7 +2891,8 @@ TEST(ElementFragmentAlgorithm, test6s)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -2903,7 +2960,8 @@ TEST(ElementFragmentAlgorithm, test6s)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -2962,7 +3020,8 @@ TEST(ElementFragmentAlgorithm, test6t)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -3019,7 +3078,8 @@ TEST(ElementFragmentAlgorithm, test6t)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -3078,7 +3138,8 @@ TEST(ElementFragmentAlgorithm, test6u)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case6Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -3127,7 +3188,8 @@ TEST(ElementFragmentAlgorithm, test6u)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
@@ -3252,7 +3314,8 @@ TEST(ElementFragmentAlgorithm, test7a)
 {
   ElementFragmentAlgorithm MyMesh(Moose::out);
   case7Mesh(MyMesh);
-  //  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   std::vector<unsigned int> cut_edge_id(2, 0);
   std::vector<double> cut_position(2, 0.5);
@@ -3283,7 +3346,8 @@ TEST(ElementFragmentAlgorithm, test7a)
   MyMesh.updateEdgeNeighbors();
   MyMesh.initCrackTipTopology();
 
-  MyMesh.printMesh();
+  if (debug_print_mesh)
+    MyMesh.printMesh();
 
   // print crack tip elems
   std::set<EFAElement *> crack_tip_elem = MyMesh.getCrackTipElements();
