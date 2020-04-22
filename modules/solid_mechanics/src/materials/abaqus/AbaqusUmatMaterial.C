@@ -11,7 +11,9 @@
 #include "Factory.h"
 #include "MooseMesh.h"
 
+#ifdef LIBMESH_HAVE_DLOPEN
 #include <dlfcn.h>
+#endif
 #define QUOTE(macro) stringifyName(macro)
 
 registerMooseObject("SolidMechanicsApp", AbaqusUmatMaterial);
@@ -123,6 +125,7 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
   _NPROPS = _num_props;
 
   // Open the library
+#ifdef LIBMESH_HAVE_DLOPEN
   _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
 
   if (!_handle)
@@ -150,6 +153,9 @@ AbaqusUmatMaterial::AbaqusUmatMaterial(const InputParameters & parameters)
     error << "Cannot load symbol 'umat_': " << dlsym_error << '\n';
     mooseError(error.str());
   }
+#else
+  mooseError("AbaqusUmatMaterial is not supported on Windows.");
+#endif
 }
 
 AbaqusUmatMaterial::~AbaqusUmatMaterial()
@@ -165,7 +171,9 @@ AbaqusUmatMaterial::~AbaqusUmatMaterial()
   delete _DSTRAN;
   delete _PROPS;
 
+#ifdef LIBMESH_HAVE_DLOPEN
   dlclose(_handle);
+#endif
 }
 
 void

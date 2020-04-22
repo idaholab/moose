@@ -16,6 +16,8 @@
 LockFile::LockFile(const std::string & filename, bool do_lock)
   : _do_lock(do_lock), _fd(-1), _filename(filename)
 {
+// for now just do not do any locking on Windows
+#ifndef __WIN32__
   if (_do_lock)
   {
     _fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
@@ -24,14 +26,17 @@ LockFile::LockFile(const std::string & filename, bool do_lock)
     if (flock(_fd, LOCK_EX) != 0)
       mooseWarning("Failed to lock file ", filename);
   }
+#endif
 }
 
 LockFile::~LockFile()
 {
+#ifndef __WIN32__
   if (_do_lock)
   {
     if (flock(_fd, LOCK_UN) != 0)
       mooseWarning("Failed to unlock file ", _filename);
     close(_fd);
   }
+#endif
 }

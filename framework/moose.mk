@@ -37,7 +37,6 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit python bindings
 #
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
-pyhit_LIB       := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
 
 # some systems have python2/3 but no python2/3-config command - fall back to python-config for them
 pyconfig := python3-config
@@ -52,9 +51,25 @@ else
 	DYNAMIC_LOOKUP :=
 endif
 
+# windows (msys2) specific settings (we need to cut the version number off)
+UNAME10 := $(shell uname | cut -c-10)
+ifeq ($(UNAME10), MINGW64_NT)
+	# disable unity build and header symlinking
+	MOOSE_HEADER_SYMLINKS := false
+	MOOSE_UNITY           := false
+
+	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
+	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
+else
+	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.so
+	pyhit_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
+endif
+
+
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` $(DYNAMIC_LOOKUP) $^ -o $(pyhit_LIB))'
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+
 #
 # gtest
 #

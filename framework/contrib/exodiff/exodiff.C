@@ -284,7 +284,9 @@ void output_summary(ExoII_Read<INT> & file1,
 #endif
 #endif
 
+#ifndef __WIN32__
 struct sigaction sigact; // the signal handler & blocked signals
+#endif
 bool checking_invalid = false;
 bool invalid_data = false;
 extern "C" {
@@ -423,12 +425,14 @@ main(int argc, char * argv[])
   checking_invalid = false;
   invalid_data = false;
 
+#ifndef __WIN32__
   sigfillset(&(sigact.sa_mask));
   sigact.sa_handler = floating_point_exception_handler;
   if (sigaction(SIGFPE, &sigact, nullptr) == -1)
   {
     perror("sigaction failed");
   }
+#endif
 #if defined(LINUX) && defined(GNU)
   // for GNU, this seems to be needed to turn on trapping
   feenableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_INVALID);

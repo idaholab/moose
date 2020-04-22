@@ -56,8 +56,10 @@
 #include "libmesh/mesh_base.h"
 
 // System include for dynamic library methods
+#ifdef LIBMESH_HAVE_DLOPEN
 #include <dlfcn.h>
 #include <sys/utsname.h> // utsname
+#endif
 
 // C++ includes
 #include <numeric> // std::accumulate

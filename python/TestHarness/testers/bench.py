@@ -10,13 +10,19 @@
 
 import subprocess
 import time
+import sys
 import os
 import gc
 import shutil
 import csv
 import tempfile
 import threading
-import resource
+
+# try to import the resource module. We check further down if it failed
+try:
+    import resource
+except:
+    pass
 
 from TestHarness.testers.Tester import Tester
 
@@ -134,6 +140,10 @@ class SpeedTest(Tester):
 
     # override
     def checkRunnable(self, options):
+        # check if resource is available
+        if 'resource' not in sys.modules:
+            return False
+
         # if user is not explicitly running benchmarks, we only run moose once and just check
         # input - to make sure the benchmark isn't broken.
         if 'speedtests' not in options.runtags:

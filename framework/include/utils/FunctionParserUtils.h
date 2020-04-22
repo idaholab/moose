@@ -63,7 +63,7 @@ protected:
   const enum class FailureMethod { nan, nan_warning, error, exception } _evalerror_behavior;
 
   /// appropriate not a number value to return
-  const Real _nan;
+  const Real _quiet_nan;
 
   /// table of FParser eval error codes
   static const char * _eval_error_msg[];
