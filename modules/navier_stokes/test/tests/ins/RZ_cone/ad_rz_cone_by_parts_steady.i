@@ -1,3 +1,7 @@
+[GlobalParams]
+  integrate_p_by_parts = true
+[]
+
 [Mesh]
   file = '2d_cone.msh'
 []
@@ -44,6 +48,10 @@
     type = INSADMass
     variable = p
   [../]
+  [./momentum_convection]
+    type = INSADMomentumAdvection
+    variable = velocity
+  [../]
 
   [./momentum_viscous]
     type = INSADMomentumViscous
@@ -54,17 +62,10 @@
     type = INSADMomentumPressure
     variable = velocity
     p = p
-    integrate_p_by_parts = false
   [../]
 []
 
 [BCs]
-  [p_corner]
-    type = DirichletBC
-    boundary = top_right
-    value = 0
-    variable = p
-  []
   [inlet]
     type = VectorFunctionDirichletBC
     variable = velocity
@@ -106,7 +107,6 @@
     velocity = velocity
     pressure = p
     transient_term = false
-    integrate_p_by_parts = true
   []
 []
 
@@ -121,9 +121,6 @@
 [Executioner]
   type = Steady
 
-  # Block Jacobi works well for this problem, as does "-pc_type asm
-  # -pc_asm_overlap 2", but an overlap of 1 does not work for some
-  # reason?
   petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_levels'
   petsc_options_value = 'bjacobi  ilu          4'
 

@@ -39,6 +39,8 @@ with the hand-coded INS implementation):
 - Only the Laplace form of the viscous term is implemented, e.g. there is
   currently no support for the traction form.
 
+## Notes on INS RZ
+
 Notes regarding INS RZ equations derivation:
 
 - Two additional terms are introduced into the r-component of the strong
@@ -57,5 +59,31 @@ Notes regarding INS RZ equations derivation:
 
 The derivation is given in a document prepared by John Peterson, to be linked to
 from here soon.
+
+### RZ INS tests
+
+For a sufficiently long channel, flow should be fully developed at the channel
+exit and `grad_u * normals` should be equal to zero. If that premise is true,
+*and* if the pressure is integrated by parts *and* a natural boundary condition
+is "imposed" on the outflow boundary, *then* the pressure at the outflow should
+also be zero.
+
+In the RZ channel tests, for a steady simulation the volumetric inflow rate
+should be equal to the volumetric outflow rate. The inflow is equal to
+.3926991. Here is a summary of the outflow numbers for different INS
+formulations:
+
+| Formulation | Outflow |
+| ----------- | ------- |
+| Not integrated by parts, natural BC | .3926991 |
+| Integrated by parts, natural BC | .3926991 |
+| Not integrated by parts, NoBCBC | .3926993 |
+| Integrated by parts, NoBCBC | .3926993 |
+
+For the NoBCBC cases, if `Mesh/uniform_refine=2` is applied, then the outflow
+converges to the correct solution of .3926991. Note that the results in the above table are achieved
+whether using the standard variable, hand-coded Jacobian INS implementation or
+the vector variable, AD Jacobian INS implementation. In fact the steady tests
+for all of the four cases use the same gold files between the two implementations.
 
 !syntax complete groups=NavierStokesApp
