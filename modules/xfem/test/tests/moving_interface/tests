@@ -61,7 +61,7 @@
     unique_id = true
     requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems where a moving material interface is defined by an XFEM surface, which is defined by a prescribed level set field.'
     design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md XFEMSingleVariableConstraint.md'
-    issues = '#11259'
+    issues = '#11259 #15096'
   [../]
   [./moving_diffusion]
     type = Exodiff
