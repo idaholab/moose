@@ -608,7 +608,7 @@ class Tester(MooseObject):
         if self.specs['working_directory']:
             if self.specs['working_directory'][:1] == os.path.sep:
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
-            elif not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['working_directory'])):
+            elif not os.path.exists(self.getTestDir()):
                 self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
 
         ##### The below must be performed last to register all above caveats #####
