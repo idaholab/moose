@@ -70,7 +70,10 @@ also be zero.
 
 In the RZ channel tests, for a steady simulation the volumetric inflow rate
 should be equal to the volumetric outflow rate. The inflow is equal to
-.3926991. Here is a summary of the outflow numbers for different INS
+.3926991, which corresponds to the exact integral of
+$2 * pi * \int (-4 * r^2 + 1) r \mathrm{d}r$
+where $(-4 * r^2 + 1)$ represents the inlet function for the normal velocity
+component at the inlet. Below is a summary of the voluemtric outflow for different INS
 formulations:
 
 | Formulation | Outflow |
@@ -84,6 +87,52 @@ For the NoBCBC cases, if `Mesh/uniform_refine=2` is applied, then the outflow
 converges to the correct solution of .3926991. Note that the results in the above table are achieved
 whether using the standard variable, hand-coded Jacobian INS implementation or
 the vector variable, AD Jacobian INS implementation. In fact the steady tests
-for all of the four cases use the same gold files between the two implementations.
+for all of the four cases use the same gold files between the two
+implementations.
+
+### Stabilized RZ INS tests
+
+Below is a summary of different stabilized INS RZ tests. A natural boundary
+condition is used on the outflow in all cases. Note that while a second order
+basis is capable of exactly capturing the quadratic character of the inlet flow
+function, a first order basis is not. Order in the below table refers to the
+velocity order.
+
+| Formulation | Inflow | Outflow |
+| ----------- | ------ | ------- |
+| AD, Not integrated by parts, first order, SUPG and PSPG | .3599742 | .3384178 |
+| Hand-coded, Not integrated by parts, first order, SUPG and PSPG | .3599742 | .3384178 |
+| AD, Integrated by parts, first order, SUPG and PSPG | .3599742 | .3599742 |
+| Hand-coded, Integrated by parts, first order, SUPG and PSPG | .3599742 | .3599742 |
+| AD, Not integrated by parts, second order, SUPG and PSPG | .3926991 | .3756223 |
+| Hand-coded, Not integrated by parts, second order, SUPG and PSPG | .3926991 | .3926991 |
+| AD, Integrated by parts, second order, SUPG and PSPG | .3926991 | .3926991 |
+| Hand-coded, Integrated by parts, second order, SUPG and PSPG | .3926991 | .3926991 |
+
+Notes on the above table:
+- All cases which have the incorrect result for the outflow approach the correct solution with mesh
+  refinement
+- While the second order hand-coded cases achieve the correct result at the base level of mesh
+  refinement, the equivalent AD cases do not. (Yes the global outflow variable for the integrated by parts
+  case is accurate to the comparison tolerance, but an exodiff executed between the AD and
+  hand-coded cases shows the files are different.) Given that the first order cases are identical (we
+  just symlink between hand-coded and AD first-order cases in the gold directory), the
+  difference has to be due to the inability to calculate second derivatives for vector variables,
+  which leads to an inability to include the Laplacian of the velocity in the strong form of the
+  momentum residual. For a first order basis, the inability to include the Laplacian terms induces
+  no error. However, for the second order basis it does.
+
+### INS Recommendations
+
+- It not computing on a displaced mesh, use the hand-coded INS implementation because it is slightly
+  faster and it includes the Laplacian terms in SUPG and PSPG stabilization methods, meaning it is
+  completely consistent and will exhibit less error in the finite element solution
+- If computing on a dispalced mesh, use the AD implementation because it will include derivatives
+  with respect to displacements in the Jacobian and the nonlinear solve will be more efficient.
+- If using the AD implementation, either run unstabilized with second order basis for the velocity
+  and first order basis for the pressure, or if desiring stabilization use a first order basis for
+  the velocity variable as it will not introduce any inconsistency. (Recall from above that the
+  vector variable, AD implementation cannot currently include Laplacian terms. For a first order
+  basis this incurs no error, but for a second order basis it does)
 
 !syntax complete groups=NavierStokesApp
