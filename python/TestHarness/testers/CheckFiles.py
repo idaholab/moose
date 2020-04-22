@@ -42,11 +42,11 @@ class CheckFiles(FileTester):
             reason = ''
             # if still no errors, check other files (just for existence)
             for file in self.specs['check_files']:
-                if not os.path.isfile(os.path.join(self.specs['test_dir'], file)):
+                if not os.path.isfile(os.path.join(self.getTestDir(), file)):
                     reason = 'MISSING FILES'
                     break
             for file in self.specs['check_not_exists']:
-                if os.path.isfile(os.path.join(self.specs['test_dir'], file)):
+                if os.path.isfile(os.path.join(self.getTestDir(), file)):
                     reason = 'UNEXPECTED FILES'
                     break
 
@@ -54,7 +54,7 @@ class CheckFiles(FileTester):
             if reason == '':
                 if self.specs.isValid('file_expect_out'):
                     for file in self.specs['check_files']:
-                        fid = open(os.path.join(self.specs['test_dir'], file), 'r')
+                        fid = open(os.path.join(self.getTestDir(), file), 'r')
                         contents = fid.read()
                         fid.close()
                         if not util.checkOutputForPattern(contents, self.specs['file_expect_out']):

@@ -98,7 +98,8 @@ class Tester(MooseObject):
         params.addParam("detail", None, "Details of SQA requirement for use within sub-blocks.")
         params.addParam("validation", False, "Set to True to mark test as a validation problem.")
         params.addParam("verification", False, "Set to True to mark test as a verification problem.")
-        params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.");
+        params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
+        params.addParam("working_directory", None, "When set, TestHarness will enter this directory before running test")
         return params
 
     # This is what will be checked for when we look for valid testers
@@ -202,6 +203,8 @@ class Tester(MooseObject):
 
     def getTestDir(self):
         """ return directory in which this tester is located """
+        if self.specs['working_directory']:
+            return os.path.join(self.specs['test_dir'], self.specs['working_directory'])
         return self.specs['test_dir']
 
     def getMinReportTime(self):
@@ -601,6 +604,14 @@ class Tester(MooseObject):
             if missing:
                 reasons['requires'] = ', '.join(['no {}'.format(p) for p in missing])
 
+        # Verify working_directory is relative and available
+        if self.specs['working_directory']:
+            if self.specs['working_directory'][:1] == os.path.sep:
+                self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
+            elif not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['working_directory'])):
+                self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
+
+        ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
         caveat_list = set()
@@ -622,6 +633,8 @@ class Tester(MooseObject):
                     self.setStatus(self.deleted)
                 else:
                     self.setStatus(self.silent)
+            elif self.getStatus() == self.fail:
+                return False
             else:
                 self.setStatus(self.skip)
             return False

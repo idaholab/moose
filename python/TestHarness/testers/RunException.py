@@ -42,7 +42,7 @@ class RunException(RunApp):
             file_paths = []
             for processor_id in range(self.getProcs(options)):
                 file_paths.append(self.name() + '.processor.{}'.format(processor_id))
-            util.deleteFilesAndFolders(self.specs['test_dir'], file_paths, False)
+            util.deleteFilesAndFolders(self.getTestDir(), file_paths, False)
 
     def processResults(self, moose_dir, options, output):
         # Exceptions are written to stderr, which can be interleaved so we normally redirect these

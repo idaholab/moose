@@ -47,16 +47,16 @@ class ImageDiff(FileTester):
         for filename in specs['imagediff']:
 
             # Error if gold file does not exist
-            if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], filename)):
-                output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], filename)
+            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], filename)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], filename)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
             # Perform diff
             else:
                 output = 'Running ImageDiffer.py'
-                gold = os.path.join(specs['test_dir'], specs['gold_dir'], filename)
-                test = os.path.join(specs['test_dir'], filename)
+                gold = os.path.join(self.getTestDir(), specs['gold_dir'], filename)
+                test = os.path.join(self.getTestDir(), filename)
 
                 if sys.platform in ['linux', 'linux2']:
                     name = 'allowed_linux'

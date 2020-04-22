@@ -1,0 +1,1 @@
+../../gold/good_exodiff_out.e
