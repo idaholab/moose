@@ -78,15 +78,17 @@
 
 [InterfaceKernels]
   [./left_center_wrt_center]
-    type = HeatConvectionInterface
+    type = ConjugateHeatTransfer
     variable = temp_fluid
+    T_fluid = temp_fluid
     neighbor_var = 'temp_wall'
     boundary = 'left_center_wrt_center'
     htc = 'alpha_wall'
   [../]
   [./right_center_wrt_center]
-    type = HeatConvectionInterface
+    type = ConjugateHeatTransfer
     variable = temp_fluid
+    T_fluid = temp_fluid
     neighbor_var = 'temp_wall'
     boundary = 'right_center_wrt_center'
     htc = 'alpha_wall'
