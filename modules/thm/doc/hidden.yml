@@ -287,6 +287,8 @@
 - /Problem/THMProblem
 
 - /Postprocessors/BoolControlDataValuePostprocessor
+- /Postprocessors/FlowBoundaryFlux1Phase
+- /Postprocessors/FlowBoundaryFlux2Phase
 - /Postprocessors/CFLTimeStepSize1Phase
 - /Postprocessors/CFLTimeStepSize2Phase
 - /Postprocessors/EnergyFluxIntegral
