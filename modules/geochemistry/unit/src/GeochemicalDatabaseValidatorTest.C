@@ -37,7 +37,7 @@ testExceptionMessage(const FileName filename, const std::string msg)
 TEST(GeochemicalDatabaseValidatorTest, validateTestDB)
 {
   // Read the JSON database
-  FileName filename = "data/moose_testdb.json";
+  FileName filename = "database/moose_testdb.json";
   std::ifstream jsondata(filename);
   moosecontrib::Json::Value root;
   jsondata >> root;
@@ -50,7 +50,7 @@ TEST(GeochemicalDatabaseValidatorTest, validateTestDB)
 
 TEST(GeochemicalDatabaseValidatorTest, missingHeader)
 {
-  const FileName filename = "data/faultydbs/missing_header.json";
+  const FileName filename = "database/faultydbs/missing_header.json";
   const std::string msg =
       "The MOOSE database " + filename + " does not have a required \"Header\" field";
   testExceptionMessage(filename, msg);
@@ -58,7 +58,7 @@ TEST(GeochemicalDatabaseValidatorTest, missingHeader)
 
 TEST(GeochemicalDatabaseValidatorTest, missingTemperature)
 {
-  const FileName filename = "data/faultydbs/missing_temperature.json";
+  const FileName filename = "database/faultydbs/missing_temperature.json";
   const std::string msg =
       "The MOOSE database " + filename + " does not have a required \"Header:temperatures\" field";
   testExceptionMessage(filename, msg);
@@ -66,7 +66,7 @@ TEST(GeochemicalDatabaseValidatorTest, missingTemperature)
 
 TEST(GeochemicalDatabaseValidatorTest, missingActivityModel)
 {
-  const FileName filename = "data/faultydbs/missing_activity.json";
+  const FileName filename = "database/faultydbs/missing_activity.json";
   const std::string msg = "The MOOSE database " + filename +
                           " does not have a required \"Header:activity model\" field";
   testExceptionMessage(filename, msg);
@@ -74,7 +74,7 @@ TEST(GeochemicalDatabaseValidatorTest, missingActivityModel)
 
 TEST(GeochemicalDatabaseValidatorTest, missingLogKValue)
 {
-  const FileName filename = "data/faultydbs/missing_value.json";
+  const FileName filename = "database/faultydbs/missing_value.json";
   const std::string msg =
       "The number of values in the logk field of secondary species CO2(aq) in " + filename +
       " is not equal to the number of temperature values";
@@ -83,7 +83,7 @@ TEST(GeochemicalDatabaseValidatorTest, missingLogKValue)
 
 TEST(GeochemicalDatabaseValidatorTest, nonRealValue)
 {
-  const FileName filename = "data/faultydbs/nonreal_value.json";
+  const FileName filename = "database/faultydbs/nonreal_value.json";
   const std::string msg = "radius value 4.5x of the secondary species CO3-- in " + filename +
                           " cannot be converted to Real";
   testExceptionMessage(filename, msg);
@@ -91,7 +91,7 @@ TEST(GeochemicalDatabaseValidatorTest, nonRealValue)
 
 TEST(GeochemicalDatabaseValidatorTest, nonReaArraylValue)
 {
-  const FileName filename = "data/faultydbs/nonreal_arrayvalue.json";
+  const FileName filename = "database/faultydbs/nonreal_arrayvalue.json";
   const std::string msg = "Array value abcd in the logk field of mineral species Calcite in " +
                           filename + " cannot be converted to Real";
   testExceptionMessage(filename, msg);
@@ -99,7 +99,7 @@ TEST(GeochemicalDatabaseValidatorTest, nonReaArraylValue)
 
 TEST(GeochemicalDatabaseValidatorTest, nonReaWeight)
 {
-  const FileName filename = "data/faultydbs/nonreal_weight.json";
+  const FileName filename = "database/faultydbs/nonreal_weight.json";
   const std::string msg =
       "Weight value 1.xyz of constituent HCO3- of the secondary species CO3-- in " + filename +
       " cannot be converted to Real";
@@ -108,7 +108,7 @@ TEST(GeochemicalDatabaseValidatorTest, nonReaWeight)
 
 TEST(GeochemicalDatabaseValidatorTest, nonReaNeutralSpeciesArray)
 {
-  const FileName filename = "data/faultydbs/nonreal_neutralspecies.json";
+  const FileName filename = "database/faultydbs/nonreal_neutralspecies.json";
   const std::string msg = "Array value .1967cg in the Header:nutral species:co2:a field of " +
                           filename + " cannot be converted to Real";
   testExceptionMessage(filename, msg);
