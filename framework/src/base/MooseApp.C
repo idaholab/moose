@@ -1573,128 +1573,174 @@ MooseApp::getMeshGeneratorOutput(const std::string & name)
 }
 
 void
-MooseApp::executeMeshGenerators()
+MooseApp::createMeshGeneratorOrder()
 {
-  if (!_mesh_generators.empty())
+  // we only need to create the order once
+  if (_ordered_generators.size() > 0)
+    return;
+
+  TIME_SECTION(_execute_mesh_generators_timer);
+
+  DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
+
+  // Add all of the dependencies into the resolver and sort them
+  for (const auto & it : _mesh_generators)
   {
-    TIME_SECTION(_execute_mesh_generators_timer);
+    // Make sure an item with no dependencies comes out too!
+    resolver.addItem(it.second);
 
-    DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
-
-    // Add all of the dependencies into the resolver and sort them
-    for (const auto & it : _mesh_generators)
+    std::vector<std::string> & generators = it.second->getDependencies();
+    for (const auto & depend_name : generators)
     {
-      // Make sure an item with no dependencies comes out too!
-      resolver.addItem(it.second);
+      auto depend_it = _mesh_generators.find(depend_name);
 
-      std::vector<std::string> & generators = it.second->getDependencies();
-      for (const auto & depend_name : generators)
+      if (depend_it == _mesh_generators.end())
+        mooseError("The MeshGenerator \"",
+                   depend_name,
+                   "\" was not created, did you make a "
+                   "spelling mistake or forget to include it "
+                   "in your input file?");
+
+      resolver.insertDependency(it.second, depend_it->second);
+    }
+  }
+
+  _ordered_generators = resolver.getSortedValuesSets();
+
+  if (_ordered_generators.size())
+  {
+    auto & final_generators = _ordered_generators.back();
+
+    if (_final_generator_name.empty())
+    {
+      // If the _final_generated_mesh wasn't set from MeshGeneratorMesh, set it now
+      _final_generator_name = final_generators.back()->name();
+
+      // See if we have multiple independent trees of generators
+      const auto ancestor_list = resolver.getAncestors(final_generators.back());
+      if (ancestor_list.size() != resolver.size())
       {
-        auto depend_it = _mesh_generators.find(depend_name);
+        // Need to remove duplicates and possibly perform a difference so we'll import out list
+        // into a set for these operations.
+        std::set<std::shared_ptr<MeshGenerator>> ancestors(ancestor_list.begin(),
+                                                           ancestor_list.end());
+        // Get all of the items from the resolver so we can compare against the tree from the
+        // final generator we just pulled.
+        const auto & allValues = resolver.getSortedValues();
+        decltype(ancestors) all(allValues.begin(), allValues.end());
 
-        if (depend_it == _mesh_generators.end())
-          mooseError("The MeshGenerator \"",
-                     depend_name,
-                     "\" was not created, did you make a "
-                     "spelling mistake or forget to include it "
-                     "in your input file?");
+        decltype(ancestors) ind_tree;
+        std::set_difference(all.begin(),
+                            all.end(),
+                            ancestors.begin(),
+                            ancestors.end(),
+                            std::inserter(ind_tree, ind_tree.end()));
 
-        resolver.insertDependency(it.second, depend_it->second);
+        std::ostringstream oss;
+        oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
+            << _final_generator_name
+            << " and one or more of the following from an independent set: \"";
+        bool first = true;
+        for (const auto & gen : ind_tree)
+        {
+          if (!first)
+            oss << ", ";
+          else
+            first = false;
+
+          oss << gen->name();
+        }
+        oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
+               "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
+               "parameter or add additional dependencies to remove the ambiguity.";
+        mooseError(oss.str());
       }
     }
+  }
+}
 
-    const auto & ordered_generators = resolver.getSortedValuesSets();
+void
+MooseApp::appendMeshGenerator(const std::string & generator_name,
+                              const std::string & name,
+                              InputParameters parameters)
+{
+  if (_mesh_generators.empty())
+    mooseError("Cannot append a mesh generator because no mesh generators exist");
 
-    if (ordered_generators.size())
+  if (!parameters.have_parameter<MeshGeneratorName>("input"))
+    mooseError("Cannot append a mesh generator that does not take input mesh generators");
+
+  createMeshGeneratorOrder();
+
+  auto & final_generators = _ordered_generators.back();
+
+  // set the final generator as the input
+  if (_final_generator_name.empty())
+    parameters.set<MeshGeneratorName>("input") = final_generators.back()->name();
+  else
+  {
+    parameters.set<MeshGeneratorName>("input") = _final_generator_name;
+    _final_generator_name = name;
+  }
+
+  std::shared_ptr<MeshGenerator> mesh_generator =
+      _factory.create<MeshGenerator>(generator_name, name, parameters);
+
+  final_generators.push_back(mesh_generator);
+}
+
+void
+MooseApp::executeMeshGenerators()
+{
+  // we do not need to do this when there are no mesh generators
+  if (_mesh_generators.empty())
+    return;
+
+  createMeshGeneratorOrder();
+
+  // set the final generator name
+  auto & final_generators = _ordered_generators.back();
+  if (_final_generator_name.empty())
+    _final_generator_name = final_generators.back()->name();
+
+  // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
+  _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
+
+  // Need to grab two if we're going to be making a displaced mesh
+  if (_action_warehouse.displacedMesh())
+    _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
+
+  // Run the MeshGenerators in the proper order
+  for (const auto & generator_set : _ordered_generators)
+  {
+    for (const auto & generator : generator_set)
     {
-      auto & final_generators = ordered_generators.back();
+      auto name = generator->name();
 
-      if (_final_generator_name.empty())
+      auto current_mesh = generator->generate();
+
+      // Now we need to possibly give this mesh to downstream generators
+      auto & outputs = _mesh_generator_outputs[name];
+
+      if (outputs.size())
       {
-        // If the _final_generated_mesh wasn't set from MeshGeneratorMesh, set it now
-        _final_generator_name = final_generators.back()->name();
+        auto & first_output = *outputs.begin();
 
-        // See if we have multiple independent trees of generators
-        const auto ancestor_list = resolver.getAncestors(final_generators.back());
-        if (ancestor_list.size() != resolver.size())
-        {
-          // Need to remove duplicates and possibly perform a difference so we'll import out list
-          // into a set for these operations.
-          std::set<std::shared_ptr<MeshGenerator>> ancestors(ancestor_list.begin(),
-                                                             ancestor_list.end());
-          // Get all of the items from the resolver so we can compare against the tree from the
-          // final generator we just pulled.
-          const auto & allValues = resolver.getSortedValues();
-          decltype(ancestors) all(allValues.begin(), allValues.end());
+        first_output = std::move(current_mesh);
 
-          decltype(ancestors) ind_tree;
-          std::set_difference(all.begin(),
-                              all.end(),
-                              ancestors.begin(),
-                              ancestors.end(),
-                              std::inserter(ind_tree, ind_tree.end()));
+        const auto & copy_from = *first_output;
 
-          std::ostringstream oss;
-          oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
-              << _final_generator_name
-              << " and one or more of the following from an independent set: \"";
-          bool first = true;
-          for (const auto & gen : ind_tree)
-          {
-            if (!first)
-              oss << ", ";
-            else
-              first = false;
+        auto output_it = ++outputs.begin();
 
-            oss << gen->name();
-          }
-          oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
-                 "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
-                 "parameter or add additional dependencies to remove the ambiguity.";
-          mooseError(oss.str());
-        }
+        // For all of the rest we need to make a copy
+        for (; output_it != outputs.end(); ++output_it)
+          (*output_it) = copy_from.clone();
       }
 
-      // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
-      _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
-
-      // Need to grab two if we're going to be making a displaced mesh
-      if (_action_warehouse.displacedMesh())
-        _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
-
-      // Run the MeshGenerators in the proper order
-      for (const auto & generator_set : ordered_generators)
-      {
-        for (const auto & generator : generator_set)
-        {
-          auto name = generator->name();
-
-          auto current_mesh = generator->generate();
-
-          // Now we need to possibly give this mesh to downstream generators
-          auto & outputs = _mesh_generator_outputs[name];
-
-          if (outputs.size())
-          {
-            auto & first_output = *outputs.begin();
-
-            first_output = std::move(current_mesh);
-
-            const auto & copy_from = *first_output;
-
-            auto output_it = ++outputs.begin();
-
-            // For all of the rest we need to make a copy
-            for (; output_it != outputs.end(); ++output_it)
-              (*output_it) = copy_from.clone();
-          }
-
-          // Once we hit the generator we want, we'll terminate the loops (this might be the last
-          // iteration anyway)
-          if (_final_generator_name == name)
-            return;
-        }
-      }
+      // Once we hit the generator we want, we'll terminate the loops (this might be the last
+      // iteration anyway)
+      if (_final_generator_name == name)
+        return;
     }
   }
 }
@@ -1708,6 +1754,7 @@ MooseApp::setFinalMeshGeneratorName(const std::string & generator_name)
 void
 MooseApp::clearMeshGenerators()
 {
+  _ordered_generators.clear();
   _mesh_generators.clear();
 }
 

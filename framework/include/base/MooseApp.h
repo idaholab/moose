@@ -648,9 +648,22 @@ public:
   std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const std::string & name);
 
   /**
+   * Append a mesh generator that will act on the final mesh generator in the system
+   * Note: This function must be called after add_mesh_generator task.
+   */
+  void appendMeshGenerator(const std::string & generator_name,
+                           const std::string & name,
+                           InputParameters parameters);
+
+  /**
    * Clear all mesh modifers
    */
   void clearMeshGenerators();
+
+  /**
+   * Get the current final mesh generator regardless what users set in the input
+   */
+  std::string getCurrentFinalMeshGenerator() const;
 
   /**
    * Execute and clear the Mesh Generators data structure
@@ -981,6 +994,11 @@ private:
    */
   void createMinimalApp();
 
+  /**
+   * Create the ordered mesh generators from all mesh generators
+   */
+  void createMeshGeneratorOrder();
+
   /// Where the restartable data is held (indexed on tid)
   RestartableDataMaps _restartable_data;
 
@@ -1019,8 +1037,11 @@ private:
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
 
-  /// Holds the mesh generators until they have completed, then this structure is cleared
+  /// Holds the mesh generators until until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
+
+  /// Holds the ordered mesh generators until they have completed, then this structure is cleared
+  std::vector<std::vector<std::shared_ptr<MeshGenerator>>> _ordered_generators;
 
   /// Holds the output for each mesh generator - including duplicates needed downstream
   std::map<std::string, std::list<std::unique_ptr<MeshBase>>> _mesh_generator_outputs;

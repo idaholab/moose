@@ -82,6 +82,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntax("CreateSpecialProblemAction", "TestProblem");
     registerSyntax("AddDGDiffusion", "DGDiffusionAction");
     registerSyntax("MeshMetaDataDependenceAction", "AutoLineSamplerTest");
+    registerSyntax("AppendMeshGeneratorAction", "ModifyMesh/*");
   }
 }
 

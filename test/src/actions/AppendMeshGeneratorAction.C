@@ -1,0 +1,39 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "AppendMeshGeneratorAction.h"
+#include "MooseMesh.h"
+#include "MeshGenerator.h"
+#include "Factory.h"
+#include "MooseApp.h"
+
+registerMooseAction("MooseApp", AppendMeshGeneratorAction, "append_mesh_generator");
+
+defineLegacyParams(AppendMeshGeneratorAction);
+
+InputParameters
+AppendMeshGeneratorAction::validParams()
+{
+  InputParameters params = MooseObjectAction::validParams();
+  return params;
+}
+
+AppendMeshGeneratorAction::AppendMeshGeneratorAction(InputParameters params)
+  : MooseObjectAction(params)
+{
+}
+
+void
+AppendMeshGeneratorAction::act()
+{
+  if (!_mesh)
+    mooseError("No mesh file was supplied and no generation block was provided");
+
+  _app.appendMeshGenerator(_type, _name, _moose_object_pars);
+}
