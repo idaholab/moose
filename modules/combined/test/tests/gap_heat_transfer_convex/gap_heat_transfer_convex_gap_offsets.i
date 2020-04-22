@@ -72,6 +72,8 @@
     variable = temp
     master = 2
     slave = 3
+    emissivity_master = 0
+    emissivity_slave = 0
     slave_gap_offset = slave_gap_offset
     mapped_master_gap_offset = mapped_master_gap_offset
   [../]

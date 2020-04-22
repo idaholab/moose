@@ -10,8 +10,6 @@
 []
 
 [AuxVariables]
-  [./penetration]
-  [../]
   [./inc_slip_x]
   [../]
   [./inc_slip_y]
@@ -69,14 +67,6 @@
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
   [../]
-  [./penetration]
-    type = PenetrationAux
-    variable = penetration
-    boundary = 3
-    paired_boundary = 2
-    slave_gap_offset = slave_gap_offset
-    mapped_master_gap_offset = mapped_master_gap_offset
-  [../]
   [./master_gap_offset]
     type = ConstantAux
     variable = master_gap_offset
@@ -112,13 +102,13 @@
     value = 0.0
   [../]
   [./right_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 4
     value = -0.02
   [../]
   [./right_y]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
     variable = disp_y
     boundary = 4
     function = vertical_movement
@@ -184,7 +174,6 @@
 
 [Contact]
   [./leftright]
-    system = Constraint
     master = 2
     slave = 3
     model = frictionless

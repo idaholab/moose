@@ -169,6 +169,18 @@ ContactAction::ContactAction(const InputParameters & params)
     if (getParam<bool>("ping_pong_protection"))
       paramError("ping_pong_protection",
                  "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
+
+  if (_formulation == "ranfs")
+  {
+    if (isParamValid("slave_gap_offset"))
+      paramError(
+          "slave_gap_offset",
+          "The 'slave_gap_offset' option can only be used with the 'MechanicalContactConstraint'");
+    if (isParamValid("mapped_master_gap_offset"))
+      paramError("mapped_master_gap_offset",
+                 "The 'mapped_master_gap_offset' option can only be used with the "
+                 "'MechanicalContactConstraint'");
+  }
 }
 
 void
@@ -487,6 +499,8 @@ ContactAction::addNodeFaceContact()
 
   std::vector<VariableName> displacements = getDisplacementVarNames();
   const unsigned int ndisp = displacements.size();
+
+  std::string constraint_type;
 
   if (_formulation == "ranfs")
     constraint_type = "RANFSNormalMechanicalContact";
