@@ -1,0 +1,12 @@
+[Tests]
+  design = 'FEProblem.md'
+  issues = '#15129'
+
+  [test_options_not_left]
+    type = RunApp
+    input = '2d_diffusion_petsc_option.i'
+    absent_out = "Option left.*value.*hypre"
+
+    requirement = "PETSc option database shall work properly"
+  []
+[]
