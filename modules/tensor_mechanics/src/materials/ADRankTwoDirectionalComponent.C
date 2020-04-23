@@ -7,15 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RankTwoDirectionalComponent.h"
+#include "ADRankTwoDirectionalComponent.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoDirectionalComponent);
+#include "metaphysicl/raw_type.h"
+
+registerMooseObject("TensorMechanicsApp", ADRankTwoDirectionalComponent);
 
 InputParameters
-RankTwoDirectionalComponent::validParams()
+ADRankTwoDirectionalComponent::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Compute a Direction scalar property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
@@ -27,25 +29,26 @@ RankTwoDirectionalComponent::validParams()
   return params;
 }
 
-RankTwoDirectionalComponent::RankTwoDirectionalComponent(const InputParameters & parameters)
-  : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
-    _invariant(getParam<MooseEnum>("invariant")),
-    _direction(getParam<Point>("direction"))
+ADRankTwoDirectionalComponent::ADRankTwoDirectionalComponent(const InputParameters & parameters)
+  : ADMaterial(parameters),
+    _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property(declareADProperty<Real>(_property_name)),
+    _invariant(this->template getParam<MooseEnum>("invariant")),
+    _direction(this->template getParam<Point>("direction"))
 {
 }
 
 void
-RankTwoDirectionalComponent::initQpStatefulProperties()
+ADRankTwoDirectionalComponent::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
 void
-RankTwoDirectionalComponent::computeQpProperties()
+ADRankTwoDirectionalComponent::computeQpProperties()
 {
-  _property[_qp] =
-      RankTwoScalarTools::getDirectionalComponent(_tensor[_qp], _invariant, _direction);
+  _property[_qp] = RankTwoScalarTools::getDirectionalComponent(
+      MetaPhysicL::raw_value(_tensor[_qp]), _invariant, _direction);
 }

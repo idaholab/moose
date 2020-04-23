@@ -9,38 +9,38 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
 /**
- * RankTwoDirectionalComponent uses the namespace RankTwoScalarTools to compute scalar
+ * RankTwoInvariant uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-class RankTwoDirectionalComponent : public Material
+class ADRankTwoInvariant : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  RankTwoDirectionalComponent(const InputParameters & parameters);
+  ADRankTwoInvariant(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const ADMaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  ADMaterialProperty<Real> & _property;
 
   /**
    * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace
+   * RankTwoScalarTools namespace, e.g., max_principle , mid_principle, etc.
    */
   MooseEnum _invariant;
 
   /// The direction vector in which the scalar stress value is calculated
-  const Point _direction;
+  Point _direction;
 };

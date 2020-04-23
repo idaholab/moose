@@ -10,52 +10,46 @@
 #include "RankTwoCartesianComponent.h"
 #include "RankTwoScalarTools.h"
 
-#include "metaphysicl/raw_type.h"
-
 registerMooseObject("TensorMechanicsApp", RankTwoCartesianComponent);
-registerMooseObject("TensorMechanicsApp", ADRankTwoCartesianComponent);
 
-template <bool is_ad>
 InputParameters
-RankTwoCartesianComponentTempl<is_ad>::validParams()
+RankTwoCartesianComponent::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Compute a scalar property of a RankTwoTensor");
+  params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
   params.addRequiredParam<std::string>("property_name",
                                        "Name of the material property computed by this model");
-  params.addParam<MooseEnum>(
-      "invariant", RankTwoScalarTools::cartesianOptions(), "Type of scalar output");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_i",
+      "index_i >= 0 & index_i <= 2",
+      "The index i of ij for the tensor to output (0, 1, 2)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "index_j",
+      "index_j >= 0 & index_j <= 2",
+      "The index j of ij for the tensor to output (0, 1, 2)");
   return params;
 }
 
-template <bool is_ad>
-RankTwoCartesianComponentTempl<is_ad>::RankTwoCartesianComponentTempl(
-    const InputParameters & parameters)
+RankTwoCartesianComponent::RankTwoCartesianComponent(const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
-    _property(declareGenericProperty<Real, is_ad>(_property_name)),
-    _invariant(this->template getParam<MooseEnum>("invariant"))
+    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
+    _property(declareProperty<Real>(_property_name)),
+    _i(getParam<unsigned int>("index_i")),
+    _j(getParam<unsigned int>("index_j"))
 {
 }
 
-template <bool is_ad>
 void
-RankTwoCartesianComponentTempl<is_ad>::initQpStatefulProperties()
+RankTwoCartesianComponent::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
-template <bool is_ad>
 void
-RankTwoCartesianComponentTempl<is_ad>::computeQpProperties()
+RankTwoCartesianComponent::computeQpProperties()
 {
-  _property[_qp] =
-      RankTwoScalarTools::getCartesianComponent(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
+  _property[_qp] = RankTwoScalarTools::component(_tensor[_qp], _i, _j);
 }
-
-template class RankTwoCartesianComponentTempl<false>;
-template class RankTwoCartesianComponentTempl<true>;

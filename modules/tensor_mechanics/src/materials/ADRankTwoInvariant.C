@@ -7,15 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RankTwoInvariant.h"
+#include "ADRankTwoInvariant.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoInvariant);
+#include "metaphysicl/raw_type.h"
+
+registerMooseObject("TensorMechanicsApp", ADRankTwoInvariant);
 
 InputParameters
-RankTwoInvariant::validParams()
+ADRankTwoInvariant::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Compute a invariant property of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
@@ -23,34 +25,34 @@ RankTwoInvariant::validParams()
                                        "Name of the material property computed by this model");
   params.addParam<MooseEnum>(
       "invariant", RankTwoScalarTools::invariantComponentOptions(), "Type of scalar output");
-
   return params;
 }
 
-RankTwoInvariant::RankTwoInvariant(const InputParameters & parameters)
-  : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+ADRankTwoInvariant::ADRankTwoInvariant(const InputParameters & parameters)
+  : ADMaterial(parameters),
+    _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
+    _property(declareADProperty<Real>(_property_name)),
     _invariant(getParam<MooseEnum>("invariant")),
     _direction(Point(0, 0, 0))
 {
 }
 
 void
-RankTwoInvariant::initQpStatefulProperties()
+ADRankTwoInvariant::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
 void
-RankTwoInvariant::computeQpProperties()
+ADRankTwoInvariant::computeQpProperties()
 {
   if (_property_name == "max_principal_stress" || _property_name == "mid_principal_stress" ||
       _property_name == "min_principal_stress")
-    _property[_qp] =
-        RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, _direction);
+    _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
+        MetaPhysicL::raw_value(_tensor[_qp]), _invariant, _direction);
   if (_property_name != "max_principal_stress" && _property_name != "mid_principal_stress" &&
       _property_name != "min_principal_stress")
-    _property[_qp] = RankTwoScalarTools::getCartesianComponent(_tensor[_qp], _invariant);
+    _property[_qp] =
+        RankTwoScalarTools::getCartesianComponent(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
 }

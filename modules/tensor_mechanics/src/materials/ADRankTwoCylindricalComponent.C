@@ -7,15 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RankTwoCylindricalComponent.h"
+#include "ADRankTwoCylindricalComponent.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoCylindricalComponent);
+#include "metaphysicl/raw_type.h"
+
+registerMooseObject("TensorMechanicsApp", ADRankTwoCylindricalComponent);
 
 InputParameters
-RankTwoCylindricalComponent::validParams()
+ADRankTwoCylindricalComponent::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription(
       "Compute components of a rank-2 tensor in a cylindrical coordinate system");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
@@ -33,11 +35,12 @@ RankTwoCylindricalComponent::validParams()
   return params;
 }
 
-RankTwoCylindricalComponent::RankTwoCylindricalComponent(const InputParameters & parameters)
-  : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
+ADRankTwoCylindricalComponent::ADRankTwoCylindricalComponent(const InputParameters & parameters)
+  : ADMaterial(parameters),
+    _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
+    _property(declareADProperty<Real>(_property_name)),
     _cylindrical_component(getParam<MooseEnum>("cylindrical_component")),
     _cylindrical_axis_point1(isParamValid("cylindrical_axis_point1")
                                  ? getParam<Point>("cylindrical_axis_point1")
@@ -49,17 +52,18 @@ RankTwoCylindricalComponent::RankTwoCylindricalComponent(const InputParameters &
 }
 
 void
-RankTwoCylindricalComponent::initQpStatefulProperties()
+ADRankTwoCylindricalComponent::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
+
 void
-RankTwoCylindricalComponent::computeQpProperties()
+ADRankTwoCylindricalComponent::computeQpProperties()
 {
   Point dummy_direction;
 
-  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(_tensor[_qp],
+  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(MetaPhysicL::raw_value(_tensor[_qp]),
                                                                _cylindrical_component,
                                                                _cylindrical_axis_point1,
                                                                _cylindrical_axis_point2,

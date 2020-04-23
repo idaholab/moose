@@ -1,4 +1,4 @@
-# Rank Two Cartesian Component
+# Rank Two Tensor Component
 
 !syntax description /Materials/RankTwoCartesianComponent
 
@@ -10,16 +10,22 @@ system used by the model.
 
 This Material model is used by
 [TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)
-automatically, but can also be called directly by the user.  This class provides
-the ability to compute vonMises, effective, hydrostatic, L2norm, volumetric,
-invariant, triaxiality, shear, and intensity ($\boldsymbol{\sigma}$) and strain
-($\boldsymbol{\epsilon}$)quantities for a Rank-2 tensor, as described in
-[RankTwoScalarTools](RankTwoScalarTools.md).
+automatically, but can also be called directly by the user. This class provides
+methods to calculate several different scalar stress ($\boldsymbol{\sigma}$) and
+strain ($\boldsymbol{\epsilon}$)quantities for a Rank-2 tensor, as described in
+[RankTwoScalarTools](RankTwoScalarTools.md).  
 
-The component of the rank-2 tensor extracted is stored as a scalar material
-property, which allows for it to be more accurately represented in calculations
-that use this quantity at quadrature points than would be possible using the
-related [RankTwoScalarAux](RankTwoScalarAux.md)
+The `RankTwoCartesianComponent` takes as arguments the values of the
+`index_i` and the `index_j` for the single tensor component to save into an
+MaterialProperty.  [eq:rank2tensor_component_indices] shows the index values
+for each Rank-2 tensor component.
+
+!equation id=eq:rank2tensor_component_indices
+\sigma_{ij} \implies \begin{bmatrix}
+                      \sigma_{00} & \sigma_{01} & \sigma_{02} \\
+                      \sigma_{10} & \sigma_{11} & \sigma_{12} \\
+                      \sigma_{20} & \sigma_{21} & \sigma_{22}
+                      \end{bmatrix}
 
 !syntax parameters /Materials/RankTwoCartesianComponent
 

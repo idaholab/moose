@@ -458,45 +458,26 @@ TensorMechanicsAction::actOutputMatProp()
       std::string type = "";
       InputParameters params = emptyInputParameters();
 
-      // RankTwoTensorComponent
-      for (const auto & r2q : _rank_two_tensor_component_table)
+      // RankTwoCartesianComponent
+      for (const auto & r2q : _rank_two_cartesian_component_table)
         for (unsigned int a = 0; a < 3; ++a)
           for (unsigned int b = 0; b < 3; ++b)
             if (r2q.first + '_' + _component_table[a] + _component_table[b] == out)
             {
-              type = ad_prepend + "RankTwoTensorComponent";
+              type = ad_prepend + "RankTwoCartesianComponent";
               params = _factory.getValidParams(type);
               params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q.second;
               params.set<unsigned int>("index_i") = a;
               params.set<unsigned int>("index_j") = b;
             }
 
-      // RankTwoCartesianComponent
-      for (const auto & r2sq : _rank_two_cartesian_component_table)
-        for (const auto & t : r2sq.second.second)
-          if (r2sq.first + '_' + t == out)
-          {
-            const auto r2q = _rank_two_tensor_component_table.find(t);
-            if (r2q != _rank_two_tensor_component_table.end())
-            {
-              type = ad_prepend + "RankTwoCartesianComponent";
-              params = _factory.getValidParams(type);
-              params.set<MaterialPropertyName>("rank_two_tensor") = _base_name + r2q->second;
-              params.set<MooseEnum>("invariant") = r2sq.second.first;
-            }
-            else
-              mooseWarning("Internal error. The permitted tensor shortcuts in "
-                           "'_rank_two_cartesian_component_table' must be keys in the "
-                           "'_rank_two_tensor_component_table'.");
-          }
-
       // RankTwoDirectionalComponent
       for (const auto & r2sdq : _rank_two_directional_component_table)
         for (const auto & t : r2sdq.second.second)
           if (r2sdq.first + '_' + t == out)
           {
-            const auto r2q = _rank_two_tensor_component_table.find(t);
-            if (r2q != _rank_two_tensor_component_table.end())
+            const auto r2q = _rank_two_cartesian_component_table.find(t);
+            if (r2q != _rank_two_cartesian_component_table.end())
             {
               type = ad_prepend + "RankTwoDirectionalComponent";
               params = _factory.getValidParams(type);
@@ -506,7 +487,7 @@ TensorMechanicsAction::actOutputMatProp()
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
                          "'_rank_two_directional_component_table' must be keys in the "
-                         "'_rank_two_tensor_component_table'.");
+                         "'_rank_two_cartesian_component_table'.");
           }
 
       // RankTwoInvariant
@@ -514,8 +495,8 @@ TensorMechanicsAction::actOutputMatProp()
         for (const auto & t : r2i.second.second)
           if (r2i.first + '_' + t == out)
           {
-            const auto r2q = _rank_two_tensor_component_table.find(t);
-            if (r2q != _rank_two_tensor_component_table.end())
+            const auto r2q = _rank_two_cartesian_component_table.find(t);
+            if (r2q != _rank_two_cartesian_component_table.end())
             {
               type = ad_prepend + "RankTwoInvariant";
               params = _factory.getValidParams(type);
@@ -525,7 +506,7 @@ TensorMechanicsAction::actOutputMatProp()
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
                          "'_rank_two_invariant_table' must be keys in the "
-                         "'_rank_two_tensor_component_table'.");
+                         "'_rank_two_cartesian_component_table'.");
           }
 
       // RankTwoCylindricalComponent
@@ -533,8 +514,8 @@ TensorMechanicsAction::actOutputMatProp()
         for (const auto & t : r2sdq.second.second)
           if (r2sdq.first + '_' + t == out)
           {
-            const auto r2q = _rank_two_tensor_component_table.find(t);
-            if (r2q != _rank_two_tensor_component_table.end() &&
+            const auto r2q = _rank_two_cartesian_component_table.find(t);
+            if (r2q != _rank_two_cartesian_component_table.end() &&
                 _coord_system != Moose::COORD_RSPHERICAL)
             {
 
@@ -546,7 +527,7 @@ TensorMechanicsAction::actOutputMatProp()
             else
               mooseError("Internal error. The permitted tensor shortcuts in "
                          "'_rank_two_cylindrical_component_table' must be keys in the "
-                         "'_rank_two_tensor_component_table'.");
+                         "'_rank_two_cartesian_component_table'.");
           }
 
       // This material property is already created by creep or plasticity models

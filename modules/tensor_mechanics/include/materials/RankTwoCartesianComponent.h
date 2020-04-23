@@ -13,35 +13,31 @@
 #include "RankTwoTensor.h"
 
 /**
- * MaterialRankTwoScalar uses the namespace RankTwoScalarTools to compute scalar
- * values from Rank-2 tensors.
+ * RankTwoCartesianComponent is designed to take the data in the RankTwoTensor material
+ * property, for example VonMises stress or strain, and output the value for the
+ * supplied indices.
  */
-template <bool is_ad>
-class RankTwoCartesianComponentTempl : public Material
+class RankTwoCartesianComponent : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoCartesianComponentTempl(const InputParameters & parameters);
+  RankTwoCartesianComponent(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
+private:
+  const MaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  GenericMaterialProperty<Real, is_ad> & _property;
+  MaterialProperty<Real> & _property;
 
-  /**
-   * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace, e.g., vonMisesStress, L2norm, etc.
-   */
-  MooseEnum _invariant;
+  /// Tensor components
+  const unsigned int _i;
+  const unsigned int _j;
 };
-
-typedef RankTwoCartesianComponentTempl<false> RankTwoCartesianComponent;
-typedef RankTwoCartesianComponentTempl<true> ADRankTwoCartesianComponent;

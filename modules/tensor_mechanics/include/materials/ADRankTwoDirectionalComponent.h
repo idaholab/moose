@@ -9,31 +9,32 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
 /**
  * RankTwoDirectionalComponent uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-class RankTwoDirectionalComponent : public Material
+
+class ADRankTwoDirectionalComponent : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  RankTwoDirectionalComponent(const InputParameters & parameters);
+  ADRankTwoDirectionalComponent(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const ADMaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  ADMaterialProperty<Real> & _property;
 
   /**
    * Determines the information to be extracted from the tensor by using the

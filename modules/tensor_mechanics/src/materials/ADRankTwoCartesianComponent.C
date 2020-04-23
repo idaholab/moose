@@ -7,19 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RankTwoTensorComponent.h"
+#include "ADRankTwoCartesianComponent.h"
 #include "RankTwoScalarTools.h"
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoTensorComponent);
-registerMooseObject("TensorMechanicsApp", ADRankTwoTensorComponent);
+registerMooseObject("TensorMechanicsApp", ADRankTwoCartesianComponent);
 
-template <bool is_ad>
 InputParameters
-RankTwoTensorComponentTempl<is_ad>::validParams()
+ADRankTwoCartesianComponent::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
@@ -36,31 +34,25 @@ RankTwoTensorComponentTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-RankTwoTensorComponentTempl<is_ad>::RankTwoTensorComponentTempl(const InputParameters & parameters)
-  : Material(parameters),
-    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+ADRankTwoCartesianComponent::ADRankTwoCartesianComponent(const InputParameters & parameters)
+  : ADMaterial(parameters),
+    _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _property_name(
         isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
-    _property(declareGenericProperty<Real, is_ad>(_property_name)),
+    _property(declareADProperty<Real>(_property_name)),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))
 {
 }
 
-template <bool is_ad>
 void
-RankTwoTensorComponentTempl<is_ad>::initQpStatefulProperties()
+ADRankTwoCartesianComponent::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
-template <bool is_ad>
 void
-RankTwoTensorComponentTempl<is_ad>::computeQpProperties()
+ADRankTwoCartesianComponent::computeQpProperties()
 {
   _property[_qp] = RankTwoScalarTools::component(MetaPhysicL::raw_value(_tensor[_qp]), _i, _j);
 }
-
-template class RankTwoTensorComponentTempl<false>;
-template class RankTwoTensorComponentTempl<true>;

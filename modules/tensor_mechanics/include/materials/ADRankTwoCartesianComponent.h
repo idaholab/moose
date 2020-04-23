@@ -9,39 +9,36 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
 /**
- * RankTwoTensorComponent is designed to take the data in the RankTwoTensor material
- * property, for example stress or strain, and output the value for the
+ * ADRankTwoCartesianComponent is designed to take the data in the RankTwoTensor material
+ * property, for example Vonmises stress or strain, and output the value for the
  * supplied indices.
  */
-template <bool is_ad>
-class RankTwoTensorComponentTempl : public Material
+
+class ADRankTwoCartesianComponent : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  RankTwoTensorComponentTempl(const InputParameters & parameters);
+  ADRankTwoCartesianComponent(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
 private:
-  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
+  const ADMaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  GenericMaterialProperty<Real, is_ad> & _property;
+  ADMaterialProperty<Real> & _property;
 
   /// Tensor components
   const unsigned int _i;
   const unsigned int _j;
 };
-
-typedef RankTwoTensorComponentTempl<false> RankTwoTensorComponent;
-typedef RankTwoTensorComponentTempl<true> ADRankTwoTensorComponent;

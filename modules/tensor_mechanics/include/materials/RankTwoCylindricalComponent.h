@@ -16,25 +16,24 @@
  * MaterialRankTwoCylindricalComponent uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-template <bool is_ad>
-class RankTwoCylindricalComponentTempl : public Material
+class RankTwoCylindricalComponent : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoCylindricalComponentTempl(const InputParameters & parameters);
+  RankTwoCylindricalComponent(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
+  const MaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  GenericMaterialProperty<Real, is_ad> & _property;
+  MaterialProperty<Real> & _property;
 
   /**
    * Determines the information to be extracted from the tensor by using the
@@ -49,6 +48,3 @@ protected:
   /// The direction vector in which the scalar stress value is calculated
   Point _direction;
 };
-
-typedef RankTwoCylindricalComponentTempl<false> RankTwoCylindricalComponent;
-typedef RankTwoCylindricalComponentTempl<true> ADRankTwoCylindricalComponent;

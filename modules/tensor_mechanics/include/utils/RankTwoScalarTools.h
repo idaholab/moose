@@ -26,6 +26,7 @@ MooseEnum cylindricalOptions();
 MooseEnum cartesianOptions();
 MooseEnum principalComponentOptions();
 MooseEnum directionOption();
+MooseEnum invariantComponentOptions();
 
 /*
  * Extracts the value of the tensor component at the specified indices

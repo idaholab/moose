@@ -9,38 +9,42 @@
 
 #pragma once
 
-#include "Material.h"
+#include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
 /**
- * RankTwoDirectionalComponent uses the namespace RankTwoScalarTools to compute scalar
+ * MaterialRankTwoCylindricalComponent uses the namespace RankTwoScalarTools to compute scalar
  * values from Rank-2 tensors.
  */
-class RankTwoDirectionalComponent : public Material
+class ADRankTwoCylindricalComponent : public ADMaterial
 {
 public:
   static InputParameters validParams();
 
-  RankTwoDirectionalComponent(const InputParameters & parameters);
+  ADRankTwoCylindricalComponent(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const ADMaterialProperty<RankTwoTensor> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  ADMaterialProperty<Real> & _property;
 
   /**
    * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace
+   * RankTwoScalarTools namespace, e.g., hoop strain, axial strain, etc.
    */
-  MooseEnum _invariant;
+  MooseEnum _cylindrical_component;
+
+  /// Points used to determine the axis of rotation
+  const Point _cylindrical_axis_point1;
+  const Point _cylindrical_axis_point2;
 
   /// The direction vector in which the scalar stress value is calculated
-  const Point _direction;
+  Point _direction;
 };

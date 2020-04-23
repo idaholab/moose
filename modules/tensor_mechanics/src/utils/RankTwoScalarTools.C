@@ -49,6 +49,15 @@ directionOption()
   return MooseEnum("Direction");
 }
 
+MooseEnum
+invariantComponentOptions()
+{
+  return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain "
+                   "FirstInvariant SecondInvariant "
+                   "ThirdInvariant TriaxialityStress MaxShear StressIntensity MaxPrincipal "
+                   "MidPrincipal MinPrincipal");
+}
+
 void
 normalPositionVector(const Point & point1,
                      const Point & point2,
