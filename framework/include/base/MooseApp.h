@@ -1037,7 +1037,7 @@ private:
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
 
-  /// Holds the mesh generators until until they have completed, then this structure is cleared
+  /// Holds the mesh generators until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
 
   /// Holds the ordered mesh generators until they have completed, then this structure is cleared
