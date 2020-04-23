@@ -96,11 +96,12 @@ class FParserPrinter(CodePrinter):
 
     def _print_BaseScalar(self, expr):
         """
-        Print x,y,z instead of R.x, R.y, or R.z.
+        Print simple variable names instead of R.variable_name
 
         see sympy/sympy/vector/scalar.py
         """
-        return 'xyz'[expr._id[0]]
+        index, system = expr._id
+        return system._variable_names[index]
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)

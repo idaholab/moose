@@ -18,6 +18,8 @@ def evaluate(pde, soln, variable='u',
              functions=set(),
              vectorfunctions=set(),
              negative=False,
+             transformation='cartesian',
+             coordinate_names=("x", "y", "z"),
              **kwargs):
     """
     Function to evaluate PDEs for the method of manufactured solutions forcing functions.
@@ -45,11 +47,30 @@ def evaluate(pde, soln, variable='u',
         mms.print_fparser(f)
     """
 
+    if len(coordinate_names) != 3:
+        raise SyntaxError('The coordinate_names argument must be of length 3')
+
+    if transformation != 'cartesian' and transformation != 'cylindrical':
+        raise SyntaxError('transformation must be either cartesian or cylindrical')
+
     # Define the standard symbols
-    R = CoordSys3D('R')
-    x = R.x
-    y = R.y
-    z = R.z
+    R = CoordSys3D('R', transformation=transformation, variable_names=coordinate_names)
+
+    # string names of variables
+    sx1 = coordinate_names[0]
+    sx2 = coordinate_names[1]
+    sx3 = coordinate_names[2]
+
+    # symbols with short names for use in code below
+    x1 = getattr(R, coordinate_names[0])
+    x2 = getattr(R, coordinate_names[1])
+    x3  = getattr(R, coordinate_names[2])
+
+    # necessary declaration of names needed when running `eval`
+    locals()[coordinate_names[0]] = x1
+    locals()[coordinate_names[1]] = x2
+    locals()[coordinate_names[2]] = x3
+
     t = Symbol('t')
     e_i = R.i
     e_j = R.j
@@ -58,12 +79,12 @@ def evaluate(pde, soln, variable='u',
     # Define extra vectors, use _v_ in order to not collide with vector=['v']
     for _v_ in vectors:
         _check_reserved(_v_)
-        for _c_ in 'xyz':
+        for _c_ in [sx1, sx2, sx3]:
             _s_ = '{}_{}'.format(_v_, _c_)
             locals()[_s_] = Symbol(_s_)
-        locals()[_v_] = locals()['{}_x'.format(_v_)]*R.i + \
-                        locals()['{}_y'.format(_v_)]*R.j + \
-                        locals()['{}_z'.format(_v_)]*R.k
+        locals()[_v_] = locals()['{}_{}'.format(_v_,sx1)]*R.i + \
+                        locals()['{}_{}'.format(_v_,sx2)]*R.j + \
+                        locals()['{}_{}'.format(_v_,sx3)]*R.k
 
     # Define extra scalars
     for _s_ in scalars:
@@ -73,26 +94,26 @@ def evaluate(pde, soln, variable='u',
     # Define extra functions
     for _f_ in functions:
         _check_reserved(_f_)
-        locals()[_f_] = Function(_f_)(x, y, z, t)
+        locals()[_f_] = Function(_f_)(x1, x2, x3, t)
 
     # Define extra vector functions
     for _vf_ in vectorfunctions:
         _check_reserved(_vf_)
-        for _c_ in 'xyz':
+        for _c_ in [sx1, sx2, sx3]:
             _s_ = '{}_{}'.format(_vf_, _c_)
-            locals()[_s_] = Function(_s_)(x, y, z, t)
-        locals()[_vf_] = locals()['{}_x'.format(_vf_)]*R.i + \
-                         locals()['{}_y'.format(_vf_)]*R.j + \
-                         locals()['{}_z'.format(_vf_)]*R.k
+            locals()[_s_] = Function(_s_)(x1, x2, x3, t)
+        locals()[_vf_] = locals()['{}_{}'.format(_vf_,sx1)]*R.i + \
+                         locals()['{}_{}'.format(_vf_,sx2)]*R.j + \
+                         locals()['{}_{}'.format(_vf_,sx3)]*R.k
 
     # Define known functions
     for _f_, _v_ in kwargs.items():
         _check_reserved(_f_)
         locals()[_f_] = eval(_v_)
         if isinstance(locals()[_f_], Vector):
-            locals()['{}_x'.format(_f_)] = locals()[_f_].components.get(R.i, 0)
-            locals()['{}_y'.format(_f_)] = locals()[_f_].components.get(R.j, 0)
-            locals()['{}_z'.format(_f_)] = locals()[_f_].components.get(R.k, 0)
+            locals()['{}_{}'.format(_f_,sx1)] = locals()[_f_].components.get(R.i, 0)
+            locals()['{}_{}'.format(_f_,sx2)] = locals()[_f_].components.get(R.j, 0)
+            locals()['{}_{}'.format(_f_,sx3)] = locals()[_f_].components.get(R.k, 0)
 
     # Evaluate the supplied solution
     _exact_ = eval(soln)
