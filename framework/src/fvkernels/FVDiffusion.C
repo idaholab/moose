@@ -22,6 +22,12 @@ ADReal
 FVDiffusion::computeQpResidual()
 {
   auto dudn = gradUDotNormal();
-  ADReal k = (_coeff_left[_qp] + _coeff_right[_qp]) / 2;
+
+  // Eventually, it will be nice to offer automatic-switching triggered by
+  // input parameters to change between different interpolation methods for
+  // this.
+  ADReal k;
+  interpolate(InterpMethod::Average, k, _coeff_left[_qp], _coeff_right[_qp]);
+
   return -1 * k * dudn;
 }

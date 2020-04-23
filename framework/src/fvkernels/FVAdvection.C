@@ -19,10 +19,7 @@ FVAdvection::FVAdvection(const InputParameters & params)
 ADReal
 FVAdvection::computeQpResidual()
 {
-  ADReal r = 0;
-  if (_velocity * _normal > 0)
-    r = _normal * _velocity * _u_left[_qp];
-  else
-    r = _normal * _velocity * _u_right[_qp];
-  return r;
+  ADReal u_interface;
+  interpolate(InterpMethod::Upwind, u_interface, _u_left[_qp], _u_right[_qp], _velocity);
+  return _normal * _velocity * u_interface;
 }

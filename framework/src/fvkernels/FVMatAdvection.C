@@ -21,11 +21,9 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
 ADReal
 FVMatAdvection::computeQpResidual()
 {
-  auto v_avg = (_vel_left[_qp] + _vel_right[_qp]) * 0.5;
-  ADReal r = 0;
-  if (v_avg * _normal > 0)
-    r = _normal * v_avg * _u_left[_qp];
-  else
-    r = _normal * v_avg * _u_right[_qp];
-  return r;
+  ADRealVectorValue v;
+  ADReal u_interface;
+  interpolate(InterpMethod::Average, v, _vel_left[_qp], _vel_right[_qp]);
+  interpolate(InterpMethod::Upwind, u_interface, _u_left[_qp], _u_right[_qp]);
+  return _normal * v * u_interface;
 }
