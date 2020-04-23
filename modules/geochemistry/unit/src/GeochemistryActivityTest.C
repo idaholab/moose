@@ -22,8 +22,6 @@ const Real atilde = 1.5551;
 const Real btilde = 0.036478;
 const Real ctilde = 0.0064366;
 const Real dtilde = -0.0007132;
-Real moles_per_kg_water = 55.51;
-Real logten = 2.30258509299404;
 
 TEST(GeochemistryActivityTest, log10ActCoeffDHBdot)
 {
@@ -35,6 +33,8 @@ TEST(GeochemistryActivityTest, log10ActCoeffDHBdot)
                   charge, ionic_rad, std::sqrt(ionic_str), A, B, Bdot),
               log10gold,
               1E-9);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdot(charge, ionic_rad, 0.0, A, B, Bdot), 0.0);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdot(charge, ionic_rad, -1.0, A, B, Bdot), 0.0);
 }
 
 TEST(GeochemistryActivityTest, log10ActCoeffDavies)
@@ -44,6 +44,8 @@ TEST(GeochemistryActivityTest, log10ActCoeffDavies)
   const Real log10gold = -0.489368197345647;
   ASSERT_NEAR(
       GeochemistryActivity::log10ActCoeffDavies(charge, std::sqrt(ionic_str), A), log10gold, 1E-9);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDavies(charge, 0.0, A), 0.0);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDavies(charge, -1.0, A), 0.0);
 }
 
 TEST(GeochemistryActivityTest, log10ActCoeffDHBdotAlternative)
@@ -52,6 +54,8 @@ TEST(GeochemistryActivityTest, log10ActCoeffDHBdotAlternative)
   const Real log10gold = 0.00348;
   ASSERT_NEAR(
       GeochemistryActivity::log10ActCoeffDHBdotAlternative(ionic_str, Bdot), log10gold, 1E-9);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdotAlternative(0.0, Bdot), 0.0);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdotAlternative(-1.0, Bdot), 0.0);
 }
 
 TEST(GeochemistryActivityTest, log10ActCoeffDHBdotNeutral)
@@ -60,6 +64,8 @@ TEST(GeochemistryActivityTest, log10ActCoeffDHBdotNeutral)
   const Real log10gold = 0.0242961312;
   ASSERT_NEAR(
       GeochemistryActivity::log10ActCoeffDHBdotNeutral(ionic_str, a, b, c, d), log10gold, 1E-9);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdotNeutral(0.0, a, b, c, d), 0.0);
+  ASSERT_EQ(GeochemistryActivity::log10ActCoeffDHBdotNeutral(-1.0, a, b, c, d), 0.0);
 }
 
 TEST(GeochemistryActivityTest, lnActivityDHBdotWater)
@@ -70,4 +76,8 @@ TEST(GeochemistryActivityTest, lnActivityDHBdotWater)
       GeochemistryActivity::lnActivityDHBdotWater(ionic_str, A, atilde, btilde, ctilde, dtilde),
       loggold,
       1E-9);
+  ASSERT_EQ(GeochemistryActivity::lnActivityDHBdotWater(0.0, A, atilde, btilde, ctilde, dtilde),
+            0.0);
+  ASSERT_EQ(GeochemistryActivity::lnActivityDHBdotWater(-1.0, A, atilde, btilde, ctilde, dtilde),
+            0.0);
 }
