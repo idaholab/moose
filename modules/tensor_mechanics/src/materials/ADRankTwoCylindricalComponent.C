@@ -38,8 +38,7 @@ ADRankTwoCylindricalComponent::validParams()
 ADRankTwoCylindricalComponent::ADRankTwoCylindricalComponent(const InputParameters & parameters)
   : ADMaterial(parameters),
     _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
+    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
     _property(declareADProperty<Real>(_property_name)),
     _cylindrical_component(getParam<MooseEnum>("cylindrical_component")),
     _cylindrical_axis_point1(isParamValid("cylindrical_axis_point1")
@@ -56,7 +55,6 @@ ADRankTwoCylindricalComponent::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
-
 
 void
 ADRankTwoCylindricalComponent::computeQpProperties()

@@ -12,10 +12,7 @@
 #include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
-/**
- * MaterialRankTwoCylindricalComponent uses the namespace RankTwoScalarTools to compute scalar
- * values from Rank-2 tensors.
- */
+/// ADRankTwoCylindricalComponent computes cylindrical scalar values from Rank-2 tensors.
 class ADRankTwoCylindricalComponent : public ADMaterial
 {
 public:
@@ -35,16 +32,10 @@ protected:
   /// Stress/strain value returned from calculation
   ADMaterialProperty<Real> & _property;
 
-  /**
-   * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace, e.g., hoop strain, axial strain, etc.
-   */
   MooseEnum _cylindrical_component;
 
-  /// Points used to determine the axis of rotation
+  /// Point 1 used to determine the axis of rotation
   const Point _cylindrical_axis_point1;
+  /// Point 2 used to determine the axis of rotation
   const Point _cylindrical_axis_point2;
-
-  /// The direction vector in which the scalar stress value is calculated
-  Point _direction;
 };

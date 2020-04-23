@@ -22,7 +22,7 @@ RankTwoInvariant::validParams()
   params.addRequiredParam<std::string>("property_name",
                                        "Name of the material property computed by this model");
   params.addParam<MooseEnum>(
-      "invariant", RankTwoScalarTools::invariantComponentOptions(), "Type of scalar output");
+      "invariant", RankTwoScalarTools::mixedInvariantComponentOptions(), "Type of scalar output");
 
   return params;
 }
@@ -32,8 +32,7 @@ RankTwoInvariant::RankTwoInvariant(const InputParameters & parameters)
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
     _property(declareProperty<Real>(_property_name)),
-    _invariant(getParam<MooseEnum>("invariant")),
-    _direction(Point(0, 0, 0))
+    _invariant(getParam<MooseEnum>("invariant"))
 {
 }
 
@@ -48,9 +47,12 @@ RankTwoInvariant::computeQpProperties()
 {
   if (_property_name == "max_principal_stress" || _property_name == "mid_principal_stress" ||
       _property_name == "min_principal_stress")
+  {
+    Point dummy_direction;
     _property[_qp] =
-        RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, _direction);
+        RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, dummy_direction);
+  }
   if (_property_name != "max_principal_stress" && _property_name != "mid_principal_stress" &&
       _property_name != "min_principal_stress")
-    _property[_qp] = RankTwoScalarTools::getCartesianComponent(_tensor[_qp], _invariant);
+    _property[_qp] = RankTwoScalarTools::getInvariantComponent(_tensor[_qp], _invariant);
 }

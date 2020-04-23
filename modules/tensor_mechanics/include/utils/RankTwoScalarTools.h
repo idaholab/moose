@@ -23,10 +23,9 @@ namespace RankTwoScalarTools
  */
 MooseEnum scalarOptions();
 MooseEnum cylindricalOptions();
-MooseEnum cartesianOptions();
+MooseEnum invariantOptions();
 MooseEnum principalComponentOptions();
-MooseEnum directionOption();
-MooseEnum invariantComponentOptions();
+MooseEnum mixedInvariantComponentOptions();
 
 /*
  * Extracts the value of the tensor component at the specified indices
@@ -513,20 +512,14 @@ getPrincipalComponent(const RankTwoTensorTempl<T> & tensor,
 
 template <typename T>
 T
-getDirectionalComponent(const RankTwoTensorTempl<T> & tensor,
-                        const MooseEnum & scalar_type,
-                        const Point & direction)
+getDirectionalComponent(const RankTwoTensorTempl<T> & tensor, const Point & direction)
 {
-  if (scalar_type == "Direction")
-    return directionValueTensor(tensor, direction);
-  else
-    mooseError("RankTwoDirectionalComponent Error: Pass valid invariant - " +
-               directionOption().getRawNames());
+  return directionValueTensor(tensor, direction);
 }
 
 template <typename T>
 T
-getCartesianComponent(const RankTwoTensorTempl<T> & tensor, const MooseEnum & scalar_type)
+getInvariantComponent(const RankTwoTensorTempl<T> & tensor, const MooseEnum & scalar_type)
 {
   if (scalar_type == "VonMisesStress")
     return vonMisesStress(tensor);
@@ -552,6 +545,6 @@ getCartesianComponent(const RankTwoTensorTempl<T> & tensor, const MooseEnum & sc
     return stressIntensity(tensor);
   else
     mooseError("RankTwoCartesianComponent Error: Pass valid invariant - " +
-               cartesianOptions().getRawNames());
+               invariantOptions().getRawNames());
 }
 }

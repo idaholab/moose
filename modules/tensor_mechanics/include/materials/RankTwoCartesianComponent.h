@@ -12,11 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 
-/**
- * RankTwoCartesianComponent is designed to take the data in the RankTwoTensor material
- * property, for example VonMises stress or strain, and output the value for the
- * supplied indices.
- */
+/// ADRankTwoCartesianComponent computes selected components from a Rank-2 tensors.
 class RankTwoCartesianComponent : public Material
 {
 public:
@@ -37,7 +33,8 @@ private:
   /// Stress/strain value returned from calculation
   MaterialProperty<Real> & _property;
 
-  /// Tensor components
+  /// Tensor component
   const unsigned int _i;
+  /// Tensor component
   const unsigned int _j;
 };

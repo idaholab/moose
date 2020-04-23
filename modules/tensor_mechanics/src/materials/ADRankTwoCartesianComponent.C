@@ -37,8 +37,7 @@ ADRankTwoCartesianComponent::validParams()
 ADRankTwoCartesianComponent::ADRankTwoCartesianComponent(const InputParameters & parameters)
   : ADMaterial(parameters),
     _tensor(getADMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(
-        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
     _property(declareADProperty<Real>(_property_name)),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))

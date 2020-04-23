@@ -8,12 +8,12 @@ This is an ADMaterial model used to extract components of a rank-2 tensor in a
 Cartesian coordinate system based on an input direction. This can be used
 regardless of the coordinate system used by the model.
 
-This ADMaterial model is used by
-[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md)
-automatically, but can also be called directly by the user. This class
-calculates the scalar value of a Rank-2 tensor, $T$, in the direction selected
-by the user as shown by, as described in
-[RankTwoScalarTools](RankTwoScalarTools.md).  
+This ADMaterial model is set up by
+[TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md) automatically
+when stress components are requested in the generate_output parameter, but can
+also be set up directly by the user. This class calculates the component of a
+Rank-2 tensor, $T$, in the direction selected by the user as shown by, as
+described in [RankTwoScalarTools](RankTwoScalarTools.md).  
 
 
 The component of the rank-2 tensor extracted is stored as a scalar material

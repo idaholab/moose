@@ -12,11 +12,7 @@
 #include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
-/**
- * RankTwoDirectionalComponent uses the namespace RankTwoScalarTools to compute scalar
- * values from Rank-2 tensors.
- */
-
+/// ADRankTwoDirectionalComponent computes the component of a rank-2 tensor in specified direction
 class ADRankTwoDirectionalComponent : public ADMaterial
 {
 public:
@@ -35,12 +31,6 @@ protected:
 
   /// Stress/strain value returned from calculation
   ADMaterialProperty<Real> & _property;
-
-  /**
-   * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace
-   */
-  MooseEnum _invariant;
 
   /// The direction vector in which the scalar stress value is calculated
   const Point _direction;

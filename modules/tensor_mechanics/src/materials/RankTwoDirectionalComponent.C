@@ -21,8 +21,6 @@ RankTwoDirectionalComponent::validParams()
                                                 "The rank two material tensor name");
   params.addRequiredParam<std::string>("property_name",
                                        "Name of the material property computed by this model");
-  params.addParam<MooseEnum>(
-      "invariant", RankTwoScalarTools::directionOption(), "Type of scalar output");
   params.addRequiredParam<Point>("direction", "Direction to calculate component in.");
   return params;
 }
@@ -32,7 +30,6 @@ RankTwoDirectionalComponent::RankTwoDirectionalComponent(const InputParameters &
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
     _property(declareProperty<Real>(_property_name)),
-    _invariant(getParam<MooseEnum>("invariant")),
     _direction(getParam<Point>("direction"))
 {
 }
@@ -46,6 +43,5 @@ RankTwoDirectionalComponent::initQpStatefulProperties()
 void
 RankTwoDirectionalComponent::computeQpProperties()
 {
-  _property[_qp] =
-      RankTwoScalarTools::getDirectionalComponent(_tensor[_qp], _invariant, _direction);
+  _property[_qp] = RankTwoScalarTools::getDirectionalComponent(_tensor[_qp], _direction);
 }

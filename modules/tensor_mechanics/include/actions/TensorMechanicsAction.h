@@ -99,6 +99,11 @@ protected:
   /// output materials to generate scalar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
 
+  /// booleans used to determine if cylindrical axis points are passed
+  bool _cylindrical_axis_point1_valid;
+  bool _cylindrical_axis_point2_valid;
+  bool _direction_valid;
+
   /// points used to determine axis of rotation for cyclindrical stress/strain quantities
   Point _cylindrical_axis_point1;
   Point _cylindrical_axis_point2;

@@ -12,10 +12,7 @@
 #include "ADMaterial.h"
 #include "RankTwoTensor.h"
 
-/**
- * RankTwoInvariant uses the namespace RankTwoScalarTools to compute scalar
- * values from Rank-2 tensors.
- */
+/// ADRankTwoInvariant computes invariant scalar values from Rank-2 tensors.
 class ADRankTwoInvariant : public ADMaterial
 {
 public:
@@ -35,12 +32,5 @@ protected:
   /// Stress/strain value returned from calculation
   ADMaterialProperty<Real> & _property;
 
-  /**
-   * Determines the information to be extracted from the tensor by using the
-   * RankTwoScalarTools namespace, e.g., max_principle , mid_principle, etc.
-   */
   MooseEnum _invariant;
-
-  /// The direction vector in which the scalar stress value is calculated
-  Point _direction;
 };

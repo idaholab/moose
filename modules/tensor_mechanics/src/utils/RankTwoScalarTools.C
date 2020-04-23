@@ -30,7 +30,7 @@ cylindricalOptions()
 }
 
 MooseEnum
-cartesianOptions()
+invariantOptions()
 {
   return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain "
                    "FirstInvariant SecondInvariant "
@@ -44,13 +44,7 @@ principalComponentOptions()
 }
 
 MooseEnum
-directionOption()
-{
-  return MooseEnum("Direction");
-}
-
-MooseEnum
-invariantComponentOptions()
+mixedInvariantComponentOptions()
 {
   return MooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain "
                    "FirstInvariant SecondInvariant "
