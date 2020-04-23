@@ -160,5 +160,8 @@ FVFluxKernel::gradUDotNormal()
   // direction is always positive movement.
   ADReal dudn = (_u_right[_qp] - _u_left[_qp]) /
                 (_face_info->rightCentroid() - _face_info->leftCentroid()).norm();
+  // TODO: need to apply cross-diffusion correction factor here.  This
+  // currently is only correct if the vector between the left-right cell
+  // centroids is parallel to the normal vector.
   return dudn;
 }
