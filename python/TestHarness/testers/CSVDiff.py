@@ -48,7 +48,7 @@ class CSVDiff(FileTester):
             csvdiff = [os.path.join(moose_dir, 'python', 'mooseutils', 'csvdiff.py')]
 
             # Due to required positional nargs with the ability to support custom positional args (--argument), we need to specify the required ones first
-            csvdiff.append(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
+            csvdiff.append(os.path.join(self.getTestDir(), self.specs['gold_dir'], file) + ' ' + os.path.join(self.getTestDir(), file))
 
             if self.specs.isValid('rel_err'):
                 csvdiff.append('--relative-tolerance %s' % (self.specs['rel_err']))
@@ -57,7 +57,7 @@ class CSVDiff(FileTester):
                 csvdiff.append('--abs-zero %s' % (self.specs['abs_zero']))
 
             if self.specs.isValid('comparison_file'):
-                comparison_file = os.path.join(self.specs['test_dir'], self.specs['comparison_file'])
+                comparison_file = os.path.join(self.getTestDir(), self.specs['comparison_file'])
                 if os.path.exists(comparison_file):
                     csvdiff.append('--comparison-file %s' % (comparison_file))
                 else:
@@ -89,8 +89,8 @@ class CSVDiff(FileTester):
 
         # Make sure that all of the Exodiff files are actually available
         for file in self.specs['csvdiff']:
-            if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
+            if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 

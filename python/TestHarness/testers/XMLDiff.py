@@ -30,7 +30,7 @@ class XMLDiff(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.specs['test_dir'], self.specs['xmldiff'])
+            util.deleteFilesAndFolders(self.getTestDir(), self.specs['xmldiff'])
 
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
@@ -50,16 +50,16 @@ class XMLDiff(RunApp):
         for file in specs['xmldiff']:
 
             # Error if gold file does not exist
-            if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
+            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], file)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
             # Perform diff
             else:
                 for file in self.specs['xmldiff']:
-                    gold = os.path.join(specs['test_dir'], specs['gold_dir'], file)
-                    test = os.path.join(specs['test_dir'], file)
+                    gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
+                    test = os.path.join(self.getTestDir(), file)
 
                     # We always ignore the header_type attribute, since it was
                     # introduced in VTK 7 and doesn't seem to be important as

@@ -42,7 +42,7 @@ class Exodiff(FileTester):
             custom_cmp = ''
             old_floor = ''
             if self.specs.isValid('custom_cmp'):
-                custom_cmp = ' -f ' + os.path.join(self.specs['test_dir'], self.specs['custom_cmp'])
+                custom_cmp = ' -f ' + os.path.join(self.getTestDir(), self.specs['custom_cmp'])
             if self.specs['use_old_floor']:
                 old_floor = ' -use_old_floor'
 
@@ -58,7 +58,7 @@ class Exodiff(FileTester):
 
             commands.append(os.path.join(moose_dir, 'framework', 'contrib', 'exodiff', 'exodiff') + map_option + partial_option + custom_cmp + ' -F' + ' ' + str(self.specs['abs_zero']) \
                             + old_floor + ' -t ' + str(self.specs['rel_err']) + ' ' + ' '.join(self.specs['exodiff_opts']) + ' ' \
-                            + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file) + ' ' + os.path.join(self.specs['test_dir'], file))
+                            + os.path.join(self.getTestDir(), self.specs['gold_dir'], file) + ' ' + os.path.join(self.getTestDir(), file))
 
 
         return commands
@@ -75,8 +75,8 @@ class Exodiff(FileTester):
 
         # Make sure that all of the Exodiff files are actually available
         for file in self.specs['exodiff']:
-            if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
+            if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 

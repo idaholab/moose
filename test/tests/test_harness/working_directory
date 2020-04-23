@@ -1,0 +1,39 @@
+[Tests]
+  [./relative_and_available]
+    type = RunApp
+    input = sub_good.i
+    working_directory = sub_directory
+  [../]
+  [./absolute_path]
+    type = RunApp
+    input = sub_good.i
+    working_directory = /sub_directory
+  [../]
+  [./non_existent]
+    type = RunApp
+    input = sub_good.i
+    working_directory = no_directory_here
+  [../]
+  [./exodiff]
+    type = Exodiff
+    input = sub_exodiff.i
+    exodiff = sub_exodiff_out.e
+    working_directory = sub_directory
+  [../]
+  [./csvdiff]
+    type = CSVDiff
+    input = sub_csvdiff.i
+    csvdiff = sub_csvdiff_out.csv
+    override_columns = 'abc xyz'
+    override_rel_err = '1e-2'
+    override_abs_zero = '1e-9'
+    working_directory = sub_directory
+  [../]
+  [./runexception]
+    type = RunException
+    input = sub_bad_kernel.i
+    expect_err = 'Wrong Error \w+'
+    working_directory = sub_directory
+  [../]
+
+[]
