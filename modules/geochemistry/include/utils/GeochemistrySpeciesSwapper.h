@@ -92,6 +92,44 @@ public:
                    unsigned basis_index_to_replace,
                    unsigned eqm_index_to_insert);
 
+  /**
+   * Check that replacing the named basis species with the named equilibrium species is valid, and
+   * then perform this swap by altering the mgd data structure, and calculate the bulk composition
+   * of the new system.
+   * A mooseError or mooseException will result if the swap is invalid
+   * @param mgd The ModelGeochemicalDatabase that holds all information regarding basis
+   * components, equilibrium species, stoichiometries, etc
+   * @param[in/out] bulk_composition Upon entry, the bulk composition in the original basis.  Upon
+   * exit, the bulk composition in the basis after the swap
+   * @param replace_this The basis component that will be removed from the basis and added to the
+   * equilibrium species list
+   * @param with_this The equilibrium species that will be removed from the equilibrium species list
+   * and added to the basis component list
+   */
+  void performSwap(ModelGeochemicalDatabase & mgd,
+                   DenseVector<Real> & bulk_composition,
+                   const std::string & replace_this,
+                   const std::string & with_this);
+
+  /**
+   * Check that replacing the indexed basis species with the indexed equilibrium species is valid,
+   * and then perform this swap by altering the mgd data structure, and calculate the bulk
+   * composition of the new system.
+   * A mooseError or mooseException will result if the swap is invalid
+   * @param mgd The ModelGeochemicalDatabase that holds all information regarding basis
+   * components, equilibrium species, stoichiometries, etc
+   * @param[in/out] bulk_composition Upon entry, the bulk composition in the original basis.  Upon
+   * exit, the bulk composition in the basis after the swap
+   * @param basis_index_to_replace The index of the basis component that will be removed from the
+   * basis and added to the equilibrium species list
+   * @param eqm_index_to_insert The index of the equilibrium species that will be removed from the
+   * equilibrium species list and added to the basis component list
+   */
+  void performSwap(ModelGeochemicalDatabase & mgd,
+                   DenseVector<Real> & bulk_composition,
+                   unsigned basis_index_to_replace,
+                   unsigned eqm_index_to_insert);
+
 private:
   /**
    * Construct the swap matrix, and its inverse, that describes the swap between the indexed basis
@@ -122,6 +160,15 @@ private:
   void alterMGD(ModelGeochemicalDatabase & mgd,
                 unsigned basis_index_to_replace,
                 unsigned eqm_index_to_insert);
+
+  /**
+   * Calculate the bulk composition in the new basis based on the bulk composition in the original
+   * basis
+   * @param basis_size Size of basis, which is only used for error checking
+   * @param[in/out] bulk_composition Upon entry, the bulk composition in the original basis.  Upon
+   * exit, the bulk composition in the basis after the swap
+   */
+  void alterBulkComposition(unsigned basis_size, DenseVector<Real> & bulk_composition) const;
 
   /// tolerance for matrix inversion and stoichiometric coefficients
   Real _stoi_tol;
