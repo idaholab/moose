@@ -57,8 +57,7 @@ Notes regarding INS RZ equations derivation:
   (integration by parts is a part of forming the weak form)
 - An additional term is introduced into the mass balance equation
 
-The derivation is given in a document prepared by John Peterson, to be linked to
-from here soon.
+The derivation for the RZ weak form can be inspected [here](../../media/jw-peterson-rz-derivation.pdf).
 
 ### RZ INS tests
 
@@ -71,7 +70,11 @@ also be zero.
 In the RZ channel tests, for a steady simulation the volumetric inflow rate
 should be equal to the volumetric outflow rate. The inflow is equal to
 .3926991, which corresponds to the exact integral of
-$2 * pi * \int (-4 * r^2 + 1) r \mathrm{d}r$
+
+\begin{equation}
+2 * \pi * \int_0^{0.5} (-4 * r^2 + 1) r \mathrm{d}r
+\end{equation}
+
 where $(-4 * r^2 + 1)$ represents the inlet function for the normal velocity
 component at the inlet. Below is a summary of the voluemtric outflow for different INS
 formulations:
@@ -110,6 +113,7 @@ velocity order.
 | Hand-coded, Integrated by parts, second order, SUPG and PSPG | .3926991 | .3926991 |
 
 Notes on the above table:
+
 - All cases which have the incorrect result for the outflow approach the correct solution with mesh
   refinement
 - While the second order hand-coded cases achieve the correct result at the base level of mesh
@@ -124,10 +128,10 @@ Notes on the above table:
 
 ### INS Recommendations
 
-- It not computing on a displaced mesh, use the hand-coded INS implementation because it is slightly
+- If not computing on a displaced mesh, use the hand-coded INS implementation because it is slightly
   faster and it includes the Laplacian terms in SUPG and PSPG stabilization methods, meaning it is
   completely consistent and will exhibit less error in the finite element solution
-- If computing on a dispalced mesh, use the AD implementation because it will include derivatives
+- If computing on a displaced mesh, use the AD implementation because it will include derivatives
   with respect to displacements in the Jacobian and the nonlinear solve will be more efficient.
 - If using the AD implementation, either run unstabilized with second order basis for the velocity
   and first order basis for the pressure, or if desiring stabilization use a first order basis for
