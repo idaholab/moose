@@ -4,7 +4,7 @@
     input = 'append_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'append_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to allow actions to append mesh generators.'
+    requirement = 'The system shall support the ability to add additional mesh generators from a user accessible programmatic interface.'
     design = 'actions/Action.md'
     issues = '#15121'
     mesh_mode = 'REPLICATED'
