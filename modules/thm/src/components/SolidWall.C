@@ -21,18 +21,17 @@ SolidWall::addMooseObjects1Phase()
   userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
   // boundary flux user object
-  const std::string boundary_flux_name = genName(name(), "boundary_flux");
   {
     const std::string class_name = "BoundaryFlux3EqnGhostWall";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<Real>("normal") = _normal;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, boundary_flux_name, params);
+    _sim.addUserObject(class_name, _boundary_uo_name, params);
   }
 
   // BCs
-  addWeakBC3Eqn(boundary_flux_name);
+  addWeakBC3Eqn();
 
   // Strongly impose zero velocity for CG
   if (_spatial_discretization == FlowModel::CG)
@@ -71,19 +70,17 @@ SolidWall::addMooseObjects2Phase()
     userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
     // boundary flux user object
-    const std::string boundary_flux_name = genName(name(), "boundary_flux");
-
     {
       const std::string class_name = "BoundaryFlux7EqnGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
       params.set<Real>("normal") = _normal;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-      _sim.addUserObject(class_name, boundary_flux_name, params);
+      _sim.addUserObject(class_name, _boundary_uo_name, params);
     }
 
     // BCs
-    addWeakBC7Eqn(boundary_flux_name);
+    addWeakBC7Eqn();
   }
 }
 
@@ -112,8 +109,6 @@ SolidWall::addMooseObjects2PhaseNCG()
     ExecFlagEnum userobject_execute_on(MooseUtils::getDefaultExecFlagEnum());
     userobject_execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-    const std::string boundary_flux_name = genName(name(), "boundary_flux");
-
     {
       const std::string class_name = "BoundaryFlux7EqnNCGGhostWall";
       InputParameters params = _factory.getValidParams(class_name);
@@ -123,11 +118,11 @@ SolidWall::addMooseObjects2PhaseNCG()
       const FlowModelTwoPhaseNCG & fm = dynamic_cast<const FlowModelTwoPhaseNCG &>(*_flow_model);
       const std::vector<VariableName> & vars = fm.getNCGSolutionVars();
       params.set<std::vector<VariableName>>("aXrhoA_vapor") = vars;
-      _sim.addUserObject(class_name, boundary_flux_name, params);
+      _sim.addUserObject(class_name, _boundary_uo_name, params);
     }
 
     // BCs
-    addWeakBC7EqnNCG(boundary_flux_name);
+    addWeakBC7EqnNCG();
   }
 }
 
