@@ -42,6 +42,11 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
   addMooseVariableDependency(&_var);
 }
 
+// Note the lack of quadrature point loops in the residual/jacobian compute
+// functions. This is because finite volumes currently only works with
+// constant monomial elements. We only have one quadrature point regardless of
+// problem dimension and just multiply by the element volume.
+
 void
 FVElementalKernel::computeResidual()
 {

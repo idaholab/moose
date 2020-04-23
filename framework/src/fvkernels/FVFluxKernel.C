@@ -30,6 +30,11 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
   addMooseVariableDependency(&_var);
 }
 
+// Note the lack of quadrature point loops in the residual/jacobian compute
+// functions. This is because finite volumes currently only works with
+// constant monomial elements. We only have one quadrature point regardless of
+// problem dimension and just multiply by the face area.
+
 void
 FVFluxKernel::computeResidual(const FaceInfo & fi)
 {
@@ -109,7 +114,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
                 "the variable is defined on both sides of the face, then it should have a non-zero "
                 "number of degrees of freedom on the neighbor/right element");
 
-    if (ft != FaceInfo::VarFaceNeighbors::LEFT)
+    // only add residual to right if the variable is defined there.
+    if (ft == FaceInfo::VarFaceNeighbors::BOTH)
     {
       // jacobian contribution of the residual for the left element to the right element's DOF:
       // d/d_right (residual_left)
@@ -128,7 +134,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
                 "the variable is defined on both sides of the face, then it should have a non-zero "
                 "number of degrees of freedom on the left element");
 
-    if (ft != FaceInfo::VarFaceNeighbors::RIGHT)
+    // only add residual to left if the variable is defined there.
+    if (ft == FaceInfo::VarFaceNeighbors::BOTH)
     {
       // jacobian contribution of the residual for the right element to the left element's DOF:
       // d/d_left (residual_right)

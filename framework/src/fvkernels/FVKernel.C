@@ -11,7 +11,7 @@ FVKernel::validParams()
   params += BlockRestrictable::validParams();
   params += TaggingInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
-      "variable", "The name of the variable that this kernel condition applies to");
+      "variable", "The name of the finite volume variable this kernel applies to");
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -23,7 +23,10 @@ FVKernel::validParams()
 
   params.declareControllable("enable");
 
-  // FV Kernels always need one layer of ghosting.
+  // FV Kernels always need one layer of ghosting because when looping over
+  // faces to compute fluxes, the elements on each side of the face may be on
+  // different MPI ranks, but we still need to access them as a pair to
+  // compute the numerical face flux.
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
