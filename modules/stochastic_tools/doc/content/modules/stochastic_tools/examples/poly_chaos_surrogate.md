@@ -113,33 +113,11 @@ In this section, we show the results of training and evaluation of the surrogate
 
 ### Evaluation Results
 
-[avg_uniform]--[max_normal] show the resulting probability distributions from sampling each surrogate with 100,000 points.
+[samp_uniform] and [samp_normal] show the resulting probability distributions from sampling each surrogate with 100,000 points.
 
-!row!
-!col small=12 medium=6 large=6
-!plot histogram id=avg_uniform caption=Average temperature distribution with uniform parameter distribution
-      filename=examples/surrogates/gold/poly_chaos_uniform_out_samp_avg_0001.csv
-      bins=100
-      xlabel=Average Temperature
+!media poly_chaos_uniform_hist.svg id=samp_uniform caption=Temperature distributions with uniform parameter distribution
 
-!col small=12 medium=6 large=6
-!plot histogram id=max_uniform caption=Maximum temperature distribution with uniform parameter distribution
-      filename=examples/surrogates/gold/poly_chaos_uniform_out_samp_max_0001.csv
-      bins=100
-      xlabel=Maximum Temperature
-
-!col small=12 medium=6 large=6
-!plot histogram id=avg_normal caption=Average temperature distribution with normal parameter distribution
-      filename=examples/surrogates/gold/poly_chaos_normal_out_samp_avg_0001.csv
-      bins=100
-      xlabel=Average Temperature
-
-!col small=12 medium=6 large=6
-!plot histogram id=max_normal caption=Maximum temperature distribution with normal parameter distribution
-      filename=examples/surrogates/gold/poly_chaos_normal_out_samp_max_0001.csv
-      bins=100
-      xlabel=Maximum Temperature
-!row-end!
+!media poly_chaos_normal_hist.svg id=samp_normal caption=Temperature distribution with normal parameter distribution
 
 ### Local Sensitivity Results
 
@@ -162,8 +140,6 @@ where $u$ is either $\bar{T}$ or $T_{\max}$, $\xi_p$ is $k$, $q$, $L$, or $T_{\i
 
 [sobol_stats] shows the results of computing sobol statistics for average temperature and uniform paramter distributions (the other surrogates produced very similar statistics). In the plot, the x axis represents the first index subscript and the y axis represents the second. As can be seen, the statistics are symmetric, i.e. it does not matter the order of the index subscripts.
 
-!row!
-!col
 !plot scatter id=sobol_stats caption=Average temperature Sobol statistics results uniform parameter distribution
   data=[{
         'type': 'heatmap',
@@ -176,14 +152,11 @@ where $u$ is either $\bar{T}$ or $T_{\max}$, $\xi_p$ is $k$, $q$, $L$, or $T_{\i
         'colorbar': {'tickvals': [-16,-13,-10,-7,-4,-1],
                      'ticktext': ['10<sup>-16</sup>', '10<sup>-13</sup>', '10<sup>-10</sup>', '10<sup>-7</sup>', '10<sup>-4</sup>', '10<sup>-1</sup>']}
         }]
-!row-end!
 
 ### Sampling Analysis
 
 Here we show the effect of various sampling techniques on the training of a polynomial chaos surrogate. Three different types of samplers were used: Monte Carlo, tensor quadrature, and Smolyak sparse quadrature. Monte Carlo was run with increasing number of samples and the quadrature was run with increasing order. Not that the polynomial expansion order was set constant. The performance metric is the error in the mean and standard deviation versus the number of total training points. [samp_avg_uniform]-[samp_max_normal] show the results of this study for each quantity of interest and each parameter distribution. It should be noted that the uniform distributions ([samp_avg_uniform] and [samp_max_uniform]) have an analytical mean and standard deviation, which is why there is nice convergence. However, the normal distributions ([samp_avg_normal] and [samp_max_normal]) use numerical integration to compute the reference mean and standard deviation, which is why there is a more spurious convergence at low errors.
 
-!row!
-!col
 !plot scatter id=samp_avg_uniform caption=Sample convergence for moments of average temperature with uniform parameter distributions
   filename=examples/surrogates/gold/poly_chaos_avg_uniform_results.csv
   data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
@@ -195,7 +168,6 @@ Here we show the effect of various sampling techniques on the training of a poly
   layout={'xaxis':{'type':'log','title':'Number of Training Points'},
           'yaxis':{'type':'log','title':'Relative Moment Error'}}
 
-!col
 !plot scatter id=samp_max_uniform caption=Sample convergence for moments of maximum temperature with uniform parameter distributions
   filename=examples/surrogates/gold/poly_chaos_max_uniform_results.csv
   data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
@@ -207,7 +179,6 @@ Here we show the effect of various sampling techniques on the training of a poly
   layout={'xaxis':{'type':'log','title':'Number of Training Points'},
           'yaxis':{'type':'log','title':'Relative Moment Error'}}
 
-!col
 !plot scatter id=samp_avg_normal caption=Sample convergence for moments of average temperature with normal parameter distributions
   filename=examples/surrogates/gold/poly_chaos_avg_normal_results.csv
   data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
@@ -219,7 +190,6 @@ Here we show the effect of various sampling techniques on the training of a poly
   layout={'xaxis':{'type':'log','title':'Number of Training Points'},
           'yaxis':{'type':'log','title':'Relative Moment Error'}}
 
-!col
 !plot scatter id=samp_max_normal caption=Sample convergence for moments of maximum temperature with normal parameter distributions
   filename=examples/surrogates/gold/poly_chaos_max_normal_results.csv
   data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
@@ -230,7 +200,6 @@ Here we show the effect of various sampling techniques on the training of a poly
         {'x':'smolyak_points', 'y':'smolyak_sig', 'name':'Smolyak &#963; error'}]
   layout={'xaxis':{'type':'log','title':'Number of Training Points'},
           'yaxis':{'type':'log','title':'Relative Moment Error'}}
-!row-end!
 
 ### Polynomial Order Analysis
 

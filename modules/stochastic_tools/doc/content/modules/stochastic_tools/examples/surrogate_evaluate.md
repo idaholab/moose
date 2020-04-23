@@ -42,24 +42,8 @@ The results of evaluating the surrogate can then be used to compute statistics l
 
 ### Results
 
-The results of the of inputs from the previous sections produce csv files of the evaluation data. These files can then be used to produce probability distributions like in [avg_uniform]--[max_normal]. Even for this simple model problem, evaluating the surrogate was orders of magnitude faster with significantly less memory consumption.
+The results of the of inputs from the previous sections produce csv files of the evaluation data. These files can then be used to produce probability distributions like in [uniform] and [normal]. Even for this simple model problem, evaluating the surrogate was orders of magnitude faster with significantly less memory consumption.
 
-!plot histogram id=avg_uniform caption=Average temperature distribution with uniform parameter distribution
-      filename=examples/surrogates/gold/nearest_point_uniform_out_samp_avg_0001.csv
-      bins=20
-      xlabel=Average Temperature
+!media nearest_point_uniform_hist.svg id=uniform caption=Temperature distributions with uniform parameter distribution
 
-!plot histogram id=max_uniform caption=Maximum temperature distribution with uniform parameter distribution
-      filename=examples/surrogates/gold/nearest_point_uniform_out_samp_max_0001.csv
-      bins=20
-      xlabel=Maximum Temperature
-
-!plot histogram id=avg_normal caption=Average temperature distribution with normal parameter distribution
-      filename=examples/surrogates/gold/nearest_point_normal_out_samp_avg_0001.csv
-      bins=20
-      xlabel=Average Temperature
-
-!plot histogram id=max_normal caption=Maximum temperature distribution with normal parameter distribution
-      filename=examples/surrogates/gold/nearest_point_normal_out_samp_max_0001.csv
-      bins=20
-      xlabel=Maximum Temperature
+!media nearest_point_normal_hist.svg id=normal caption=Temperature distributions with normal parameter distribution
