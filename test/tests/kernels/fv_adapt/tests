@@ -1,5 +1,5 @@
 [Tests]
-  design = 'finite_volumes.md'
+  design = 'fv_design.md'
   issues = '#14549'
   [var_except]
     type = RunException
