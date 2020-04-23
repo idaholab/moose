@@ -80,5 +80,4 @@ if __name__ == '__main__':
     if opt.output is None:
         fig.show()
     else:
-        plotly.io.orca.config.executable = '/home/zachmprince/libs/miniconda3/bin/orca'
         plotly.io.write_image(fig, os.path.abspath(opt.output))
