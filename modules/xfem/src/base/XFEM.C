@@ -127,10 +127,8 @@ XFEM::addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigne
   std::map<const Elem *, unsigned int>::iterator mit;
   mit = _state_marked_elem_sides.find(elem);
   if (mit != _state_marked_elem_sides.end())
-  {
     mooseError(" ERROR: side of element ", elem->id(), " already marked for crack initiation.");
-    exit(1);
-  }
+
   _state_marked_elem_sides[elem] = marked_side;
 }
 
@@ -142,11 +140,9 @@ XFEM::addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal)
   std::set<const Elem *>::iterator mit;
   mit = _state_marked_frags.find(elem);
   if (mit != _state_marked_frags.end())
-  {
     mooseError(
         " ERROR: element ", elem->id(), " already marked for fragment-secondary crack initiation.");
-    exit(1);
-  }
+
   _state_marked_frags.insert(elem);
 }
 
@@ -977,8 +973,7 @@ XFEM::healMesh()
             {
               Node * e1node_displaced = elem1_displaced->node_ptr(in);
               Node * e2node_displaced = elem2_displaced->node_ptr(in);
-              if (!xfce->isPointPhysical(*e1node_displaced) &&
-                  e1node_displaced != e2node_displaced) // This would happen at the crack tip
+              if (!xfce->isPointPhysical(*elem1->node_ptr(in)))
               {
                 elem1_displaced->set_node(in) = e2node_displaced;
                 nodes_to_delete_displaced.insert(e1node_displaced);
@@ -1026,9 +1021,9 @@ XFEM::healMesh()
   {
     for (auto & sit : nodes_to_delete_displaced)
     {
-      Node * node_to_delete = sit;
-      _displaced_mesh->boundary_info->remove(node_to_delete);
-      _displaced_mesh->delete_node(node_to_delete);
+      Node * node_to_delete_displaced = sit;
+      _displaced_mesh->boundary_info->remove(node_to_delete_displaced);
+      _displaced_mesh->delete_node(node_to_delete_displaced);
     }
   }
 

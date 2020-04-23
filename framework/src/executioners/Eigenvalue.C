@@ -70,11 +70,18 @@ Eigenvalue::execute()
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
 #else
+  // Options need to be setup once only
   if (!_eigen_problem.petscOptionsInserted())
   {
-    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+    // Master app has the default data base
+    if (!_app.isUltimateMaster())
+      PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+
     Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
-    PetscOptionsPop();
+
+    if (!_app.isUltimateMaster())
+      PetscOptionsPop();
+
     _eigen_problem.petscOptionsInserted() = true;
   }
 #endif

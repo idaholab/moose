@@ -280,7 +280,9 @@ void
 EigenProblem::solve()
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsPush(_petsc_option_data_base);
+  // Master has the default database
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_petsc_option_data_base);
 #endif
 
   if (_solve)
@@ -296,7 +298,8 @@ EigenProblem::solve()
     _displaced_problem->syncSolutions();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  PetscOptionsPop();
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
 #endif
 }
 
