@@ -24,6 +24,10 @@
   ny = 1
 []
 
+[Problem]
+  extra_tag_vectors = 'ref'
+[]
+
 [AuxVariables]
   [./saved_x]
   [../]
@@ -31,12 +35,27 @@
   [../]
 []
 
+[AuxKernels]
+  [saved_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'saved_x'
+  []
+  [saved_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'saved_y'
+  []
+[]
+
 [Modules/TensorMechanics/Master]
   [master]
     strain = SMALL
     generate_output = 'stress_xx stress_yy'
     add_variables = true
-    save_in = 'saved_x saved_y'
+    extra_vector_tags = 'ref'
   []
 []
 

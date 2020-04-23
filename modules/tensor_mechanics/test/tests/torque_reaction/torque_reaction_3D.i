@@ -23,6 +23,10 @@
   nz = 1
 []
 
+[Problem]
+  extra_tag_vectors = 'ref'
+[]
+
 [GlobalParams]
   volumetric_locking_correction=true
 []
@@ -36,12 +40,33 @@
   [../]
 []
 
+[AuxKernels]
+  [saved_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'saved_x'
+  []
+  [saved_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'saved_y'
+  []
+  [saved_z]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_z'
+    variable = 'saved_z'
+  []
+[]
+
 [Modules/TensorMechanics/Master]
   [master]
     strain = SMALL
     generate_output = 'stress_xx stress_yy stress_zz'
     add_variables = true
-    save_in = 'saved_x saved_y saved_z'
+    extra_vector_tags = 'ref'
   []
 []
 
