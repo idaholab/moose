@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ADKernelGrad.h"
+#include "ADKernel.h"
 
 /**
  * This class computes the momentum equation residual and Jacobian
  * contributions for the viscous term of the incompressible Navier-Stokes momentum
  * equation.
  */
-class INSADMomentumViscous : public ADVectorKernelGrad
+class INSADMomentumViscous : public ADVectorKernel
 {
 public:
   static InputParameters validParams();
@@ -24,7 +24,23 @@ public:
   INSADMomentumViscous(const InputParameters & parameters);
 
 protected:
-  virtual ADRealTensorValue precomputeQpResidual() override;
+  void computeResidual() override;
+  void computeJacobian() override;
+  void computeADOffDiagJacobian() override;
+  ADReal computeQpResidual() override;
+
+  /**
+   * Computes the cartesian coordinate system viscous term
+   */
+  ADRealTensorValue qpViscousTerm();
+
+  /**
+   * Computes an additional contribution to the viscous term present of RZ coordinate systems
+   * (assumes axisymmetric)
+   */
+  ADRealVectorValue qpAdditionalRZTerm();
 
   const ADMaterialProperty<Real> & _mu;
+
+  const Moose::CoordinateSystemType & _coord_sys;
 };

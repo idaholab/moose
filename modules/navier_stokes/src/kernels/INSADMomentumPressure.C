@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSADMomentumPressure.h"
+#include "Assembly.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumPressure);
 
@@ -26,7 +27,8 @@ INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
     _p(adCoupledValue("p")),
-    _grad_p(adCoupledGradient("p"))
+    _grad_p(adCoupledGradient("p")),
+    _coord_sys(_assembly.coordSystem())
 {
 }
 
@@ -34,7 +36,13 @@ ADReal
 INSADMomentumPressure::computeQpResidual()
 {
   if (_integrate_p_by_parts)
-    return -_p[_qp] * _grad_test[_i][_qp].tr();
+  {
+    ADReal residual = -_p[_qp] * _grad_test[_i][_qp].tr();
+    if (_coord_sys == Moose::COORD_RZ)
+      // The additional term only comes into the r-component of the momentum equation
+      residual += ADRealVectorValue(-_p[_qp] / _ad_q_point[_qp](0), 0, 0) * _test[_i][_qp];
+    return residual;
+  }
   else
     return _test[_i][_qp] * _grad_p[_qp];
 }

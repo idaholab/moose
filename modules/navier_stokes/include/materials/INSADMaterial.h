@@ -45,11 +45,6 @@ protected:
   /// Whether to integrate the pressure term in the momentum equations by parts
   const bool _integrate_p_by_parts;
 
-  /// Whether to include the strong form of the viscous term in the momentum equation strong residual.
-  /// The method is more consistent if set to true, but it incurs quite a bit more computational
-  /// expense. Note that at present we don't actually support the `true` value of this member!
-  const bool _include_viscous_term_in_strong_form;
-
   /// Whether the user set a gravity vector. If none is set, we assume there is no gravity term in the simulation
   bool _gravity_set;
 
@@ -61,6 +56,10 @@ protected:
 
   /// Strong residual corresponding to the momentum convective term
   ADMaterialProperty<RealVectorValue> & _convective_strong_residual;
+
+  /// Strong residual corresponding to the momentum viscous term. This is only used by stabilization
+  /// kernels
+  ADMaterialProperty<RealVectorValue> & _viscous_strong_residual;
 
   /// Strong residual corresponding to the momentum transient term
   ADMaterialProperty<RealVectorValue> & _td_strong_residual;
@@ -82,4 +81,11 @@ protected:
 
   /// The z velocity mms forcing function
   const Function & _z_vel_fn;
+
+  /// Whether we are on the displaced mesh
+  const bool _use_displaced_mesh;
+
+  /// The quadrature points with potential partial derivatives with respect to displacement degrees
+  /// of freedom
+  const MooseArray<ADPoint> & _ad_q_point;
 };

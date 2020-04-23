@@ -29,4 +29,6 @@ protected:
   const bool _integrate_p_by_parts;
   const ADVariableValue & _p;
   const ADVariableGradient & _grad_p;
+
+  const Moose::CoordinateSystemType & _coord_sys;
 };
