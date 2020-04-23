@@ -1470,6 +1470,9 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   }
   ierr = PetscObjectCompose((PetscObject)*x, "DM", (PetscObject)dm);
   CHKERRQ(ierr);
+
+  ierr = VecSetDM(*x, dm);
+  CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
