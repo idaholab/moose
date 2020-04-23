@@ -23,8 +23,7 @@ ConjugateHeatTransfer::validParams()
 
 ConjugateHeatTransfer::ConjugateHeatTransfer(const InputParameters & parameters)
   : InterfaceKernel(parameters),
-    _h(getADMaterialPropertyByName<Real>(this->template getParam<MaterialPropertyName>("htc"))),
-    _T_fluid(coupledValue("T_fluid")),
+    _h(getADMaterialProperty<Real>("htc")) _T_fluid(coupledValue("T_fluid")),
     _apply_element_jacobian(_var.name() == getParam<std::vector<VariableName>>("T_fluid")[0])
 {
 }

@@ -1,7 +1,5 @@
 #include "InterfaceKernel.h"
 
-class ConjugateHeatTransfer;
-
 /**
  * InterfaceKernel for modeling conjugate heat transfer.
  * The fluid block must be the master block that owns
@@ -21,8 +19,8 @@ public:
   ConjugateHeatTransfer(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(Moose::DGResidualType type);
-  virtual Real computeQpJacobian(Moose::DGJacobianType type);
+  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   /// Convective heat transfer coefficient
   const ADMaterialProperty<Real> & _h;
@@ -31,5 +29,5 @@ protected:
   const VariableValue & _T_fluid;
 
   /// Element Jacobian is only applied if variable = T_fluid
-  bool _apply_element_jacobian;
+  const bool _apply_element_jacobian;
 };
