@@ -2,6 +2,7 @@
 
 #include "NumericalFlux3EqnBase.h"
 #include "SinglePhaseFluidProperties.h"
+#include "NaNInterface.h"
 
 /**
  * Computes internal side flux for the 1-D, 1-phase, variable-area Euler equations using
@@ -14,7 +15,7 @@
  * Average-state Jacobians and implicit methods for compressible viscous and turbulent flows.
  * Journal of computational physics, 137(1), 38-78.
  */
-class NumericalFlux3EqnHLLC : public NumericalFlux3EqnBase
+class NumericalFlux3EqnHLLC : public NumericalFlux3EqnBase, public NaNInterface
 {
 public:
   NumericalFlux3EqnHLLC(const InputParameters & parameters);
