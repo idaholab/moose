@@ -267,6 +267,36 @@ private:
   bool _val = false;
 };
 
+/// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
+///
+/// this attribute was added to ensure that UOs are uniquely assigned a single group to
+/// prevent multiple executions when it is queried in FEProblemBase::computeUserObjectsInternal()
+/// for a given exec flag time.
+///
+/// By default, this attribute is set to true for all UOs by computeUserObjectsThread::groupUserObjects(),
+/// and thus all UOs would be executed with the Moose::POST_AUX group.
+///
+/// However, if either AttribPreIC or AttribPreAux is set to true, then this attribute is set
+/// to false, which prevents a UO from being, unnecesarily, executed along with more than one AuxGroup.
+///
+class AttribPostAux : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(Key k) { _val = k; }
+
+  AttribPostAux(TheWarehouse & w) : Attribute(w, "post_aux") {}
+  AttribPostAux(TheWarehouse & w, bool post_aux) : Attribute(w, "post_aux"), _val(post_aux) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribPostAux);
+
+private:
+  bool _val = false;
+};
+
 class AttribName : public Attribute
 {
 public:
