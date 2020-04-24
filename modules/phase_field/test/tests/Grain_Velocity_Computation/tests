@@ -1,0 +1,11 @@
+[Tests]
+  [./GrainBoundaryVelocityTest]
+    type = 'Exodiff'
+    input = 'GrainBoundaryVelocityTest.i'
+    exodiff = 'GrainBoundaryVelocityTest_out.e'
+
+    issues = '#14887'
+    design = 'GrainBoundaryVelocity.md'
+    requirement = 'The system shall be able to provide a velocity vector field indicating grain boundary movement for visualization purposes.'
+  [../]
+[]

@@ -121,8 +121,8 @@ class CSVValidationTester(FileTester):
         output = ""
         # Make sure that all of the Exodiff files are actually available
         for file in self.specs['csvdiff']:
-            if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
+            if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
@@ -134,8 +134,8 @@ class CSVValidationTester(FileTester):
 
             ok = True
             for file in self.specs['csvdiff']:
-                gold_file = os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
-                out_file = os.path.join(self.specs['test_dir'], file)
+                gold_file = os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
+                out_file = os.path.join(self.getTestDir(), file)
                 (mean, std) = diff_files(gold_file, out_file, self.specs['err_type'])
 
                 computed = ""

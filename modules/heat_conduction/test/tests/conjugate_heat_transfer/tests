@@ -1,0 +1,11 @@
+[Tests]
+  [./convection]
+    type = Exodiff
+    input = conjugate_heat_transfer.i
+    exodiff = conjugate_heat_transfer_out.e
+    abs_zero = 1e-8
+    requirement = "The system shall correctly model convection heat transfer across internal sidesets aka conjugate heat transfer."
+    issues = '#15114'
+    design = 'ConjugateHeatTransfer.md'
+  [../]
+[]

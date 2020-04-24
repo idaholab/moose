@@ -208,4 +208,10 @@
     requirement = "TestHarness shall be able to compare computed values against measured data using mean value and std. deviation"
     issues = '#14511'
   [../]
+  [./working_directory]
+    type = PythonUnitTest
+    input = test_WorkingDirectory.py
+    requirement = "TestHarness shall be able to run tests in relative path directories supplied by the spec file"
+    issues = '#14962'
+  [../]
 []
