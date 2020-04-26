@@ -11,4 +11,5 @@
 
 template <typename>
 class RankTwoTensorTempl;
+
 typedef RankTwoTensorTempl<Real> RankTwoTensor;

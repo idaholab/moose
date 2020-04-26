@@ -10,9 +10,9 @@
 #pragma once
 
 #include "ADRealForward.h"
+#include "RankThreeTensorForward.h"
 
-template <typename>
-class RankThreeTensorTempl;
-
-typedef RankThreeTensorTempl<Real> RankThreeTensor;
 typedef RankThreeTensorTempl<ADReal> ADRankThreeTensor;
+
+// for backward compatibility
+typedef RankThreeTensorTempl<DualReal> DualRankThreeTensor;

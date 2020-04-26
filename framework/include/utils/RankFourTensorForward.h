@@ -11,4 +11,5 @@
 
 template <typename>
 class RankFourTensorTempl;
+
 typedef RankFourTensorTempl<Real> RankFourTensor;
