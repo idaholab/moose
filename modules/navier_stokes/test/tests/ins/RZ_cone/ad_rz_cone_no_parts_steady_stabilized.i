@@ -130,7 +130,6 @@
     type = INSADTauMaterial
     velocity = velocity
     pressure = p
-    transient_term = false
   []
 []
 

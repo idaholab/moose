@@ -10,6 +10,7 @@
 // Navier-Stokes includes
 #include "INSADTauMaterial.h"
 #include "NonlinearSystemBase.h"
+#include "INSADObjectTracker.h"
 
 registerMooseObject("NavierStokesApp", INSADTauMaterial);
 
@@ -74,7 +75,7 @@ INSADTauMaterial::computeQpProperties()
   INSADMaterial::computeQpProperties();
 
   auto && nu = _mu[_qp] / _rho[_qp];
-  auto && transient_part = _transient_term ? 4. / (_dt * _dt) : 0.;
+  auto && transient_part = _object_tracker->hasTransient() ? 4. / (_dt * _dt) : 0.;
   _tau[_qp] = _alpha / std::sqrt(transient_part +
                                  (2. * _velocity[_qp].norm() / _hmax) *
                                      (2. * _velocity[_qp].norm() / _hmax) +
