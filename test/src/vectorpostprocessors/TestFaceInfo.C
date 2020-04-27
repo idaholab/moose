@@ -108,7 +108,7 @@ TestFaceInfo::execute()
         case FaceInfo::VarFaceNeighbors::BOTH:
           x = 1;
           break;
-        case FaceInfo::VarFaceNeighbors::LEFT:
+        case FaceInfo::VarFaceNeighbors::ELEM:
           x = 2;
           break;
         case FaceInfo::VarFaceNeighbors::RIGHT:

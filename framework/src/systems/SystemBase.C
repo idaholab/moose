@@ -1292,7 +1292,7 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
       {
         // this is a boundary face for this variable, set elem or neighbor
         if (var_defined_elem)
-          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::LEFT;
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
         else if (var_defined_neighbor)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::RIGHT;
         else

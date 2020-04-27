@@ -90,7 +90,7 @@ public:
   {
     BOTH,
     NEITHER,
-    LEFT,
+    ELEM,
     RIGHT
   };
 

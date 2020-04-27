@@ -59,7 +59,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any residual contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::ELEM && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the elem element
@@ -99,7 +99,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   // a flux BC or a natural BC - in either of those cases we don't want to add
   // any jacobian contributions from regular flux kernels.
   auto ft = fi.faceType(_var.name());
-  if ((ft == FaceInfo::VarFaceNeighbors::LEFT && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::ELEM && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // jacobian contribution of the residual for the elem element to the elem element's DOF:
@@ -109,7 +109,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     accumulateTaggedLocalMatrix();
 
     mooseAssert(
-        (ft == FaceInfo::VarFaceNeighbors::LEFT) == (_var.dofIndicesNeighbor().size() == 0),
+        (ft == FaceInfo::VarFaceNeighbors::ELEM) == (_var.dofIndicesNeighbor().size() == 0),
         "If the variable is only defined on the elem hand side of the face, then that "
         "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
         "the variable is defined on both sides of the face, then it should have a non-zero "

@@ -47,7 +47,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   // restriction where the var is only defined on one side of the face.  We
   // need to make sure that we add the residual contribution to the correct
   // side - the one where the variable is defined.
-  if (ft == FaceInfo::VarFaceNeighbors::LEFT)
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
     prepareVectorTag(_assembly, _var.number());
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     prepareVectorTagNeighbor(_assembly, _var.number());
@@ -86,7 +86,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   // restriction where the var is only defined on one side of the face.  We
   // need to make sure that we add the residual contribution to only the correct
   // side - the one where the variable is defined.
-  if (ft == FaceInfo::VarFaceNeighbors::LEFT)
+  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
   {
     // jacobian contribution of the residual for the elem element to the elem element's DOF:
     // d/d_elem (residual_elem)
