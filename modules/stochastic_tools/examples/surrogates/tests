@@ -1,0 +1,126 @@
+[Tests]
+  design = 'Surrogates/index.md'
+  issues = '#14933'
+
+  [train]
+    requirement = "The sytem shall train surrogate models for a heat conduction problem using "
+    [nearest_point]
+      type = CheckFiles
+      input = nearest_point_training.i
+      check_files = 'nearest_point_training_out_nearest_point_avg.rd nearest_point_training_out_nearest_point_max.rd'
+
+      # Test can be quite slow
+      heavy = true
+      method = opt
+      min_parallel = 4
+
+      detail = "nearest point surrogate, "
+    []
+    [poly_chaos_uniform_mc]
+      type = CheckFiles
+      input = poly_chaos_uniform_mc.i
+      cli_args = 'Outputs/file_base=uniform_mc'
+      check_files = 'uniform_mc_poly_chaos_avg.rd uniform_mc_poly_chaos_max.rd'
+
+      # Test can be quite slow
+      heavy = true
+      method = opt
+      min_parallel = 4
+
+      detail = "polynomial chaos with uniform parameter distribution and Monte Carlo sampling, "
+    []
+    [poly_chaos_uniform_quad]
+      type = CheckFiles
+      input = poly_chaos_uniform_quad.i
+      cli_args = 'Outputs/file_base=uniform_quad'
+      check_files = 'uniform_quad_poly_chaos_avg.rd uniform_quad_poly_chaos_max.rd'
+
+      # Test can be quite slow
+      heavy = true
+      method = opt
+      min_parallel = 4
+
+      detail = "polynomial chaos with uniform parameter distribution and quadrature sampling, "
+    []
+    [poly_chaos_normal_mc]
+      type = CheckFiles
+      input = poly_chaos_normal_mc.i
+      cli_args = 'Outputs/file_base=normal_mc'
+      check_files = 'normal_mc_poly_chaos_avg.rd normal_mc_poly_chaos_max.rd'
+
+      # Test can be quite slow
+      heavy = true
+      method = opt
+      min_parallel = 4
+
+      detail = "polynomial chaos with normal parameter distribution and Monte Carlo sampling, "
+    []
+    [poly_chaos_normal_quad]
+      type = CheckFiles
+      input = poly_chaos_normal_quad.i
+      cli_args = 'Outputs/file_base=normal_quad'
+      check_files = 'normal_quad_poly_chaos_avg.rd normal_quad_poly_chaos_max.rd'
+
+      # Test can be quite slow
+      heavy = true
+      method = opt
+      min_parallel = 4
+
+      detail = "and polynomial chaos with normal parameter distribution and quadrature sampling."
+    []
+  []
+  [evaluate_uniform]
+    requirement = "The sytem shall evaluate surrogate models with uniform distribution for a heat conduction problem using "
+    [nearest_point]
+      type = CSVDiff
+      input = nearest_point_uniform.i
+      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'"
+      csvdiff = 'nearest_point_uniform_out_stats_avg_0001.csv nearest_point_uniform_out_stats_max_0001.csv'
+      prereq = train/nearest_point
+      heavy = true
+      method = opt
+      detail = "nearest point surrogate and "
+    []
+    [poly_chaos]
+      type = CSVDiff
+      input = poly_chaos_uniform.i
+      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'
+                  Surrogates/poly_chaos_avg/filename=uniform_quad_poly_chaos_avg.rd
+                  Surrogates/poly_chaos_max/filename=uniform_quad_poly_chaos_max.rd"
+      csvdiff = 'poly_chaos_uniform_out_sense_avg_0001.csv poly_chaos_uniform_out_sobol_avg_0001.csv
+                 poly_chaos_uniform_out_stats_avg_0001.csv poly_chaos_uniform_out_sense_max_0001.csv
+                 poly_chaos_uniform_out_sobol_max_0001.csv poly_chaos_uniform_out_stats_max_0001.csv'
+      prereq = train/poly_chaos_uniform_quad
+      heavy = true
+      method = opt
+      detail = "polynomial chaos."
+    []
+  []
+  [evaluate_normal]
+    requirement = "The sytem shall evaluate surrogate models with normal distribution for a heat conduction problem using "
+    [nearest_point]
+      type = CSVDiff
+      input = nearest_point_normal.i
+      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'"
+      csvdiff = 'nearest_point_normal_out_stats_avg_0001.csv nearest_point_normal_out_stats_max_0001.csv'
+      prereq = train/nearest_point
+      heavy = true
+      method = opt
+      detail = "nearest point surrogate and "
+    []
+    [poly_chaos]
+      type = CSVDiff
+      input = poly_chaos_normal.i
+      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'
+                  Surrogates/poly_chaos_avg/filename=normal_quad_poly_chaos_avg.rd
+                  Surrogates/poly_chaos_max/filename=normal_quad_poly_chaos_max.rd"
+      csvdiff = 'poly_chaos_normal_out_sense_avg_0001.csv poly_chaos_normal_out_sobol_avg_0001.csv
+                 poly_chaos_normal_out_stats_avg_0001.csv poly_chaos_normal_out_sense_max_0001.csv
+                 poly_chaos_normal_out_sobol_max_0001.csv poly_chaos_normal_out_stats_max_0001.csv'
+      prereq = train/poly_chaos_normal_quad
+      heavy = true
+      method = opt
+      detail = "polynomial chaos."
+    []
+  []
+[]

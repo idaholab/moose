@@ -7,6 +7,11 @@ used independently or in combination to meet the needs of the application develo
 ## Examples
 
 - [Example 1: Monte Carlo](/examples/monte_carlo.md)
+- [Example 2: Computing statistics from perturbed simulations](/examples/statistics.md)
+- [Example 3: Creating a surrogate model](/examples/surrogate_creation.md)
+- [Example 4: Training a surrogate model](/examples/surrogate_training.md)
+- [Example 5: Evaluating a surrogate model](/examples/surrogate_evaluate.md)
+- [Example 6: Polynomial chaos surrogate](/examples/poly_chaos_surrogate.md)
 
 ## Performance
 
