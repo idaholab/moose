@@ -1,6 +1,6 @@
 # Conda MOOSE Environment
 
-Our preferred method for obtaining libraries necessary for MOOSE based Application development, is through Conda. Follow these instructions to create an environment on your machine using Conda. At this time, a Conda install via Windows is not supported.
+Our preferred method for obtaining libraries necessary for MOOSE based Application development, is via Conda's myriad array of libraries. Follow these instructions to create an environment on your machine using Conda. At this time, Windows is not supported. Effort is being made towards this direction. But it is some time out.
 
 !include sqa/minimum_requirements.md
 
@@ -8,36 +8,57 @@ Our preferred method for obtaining libraries necessary for MOOSE based Applicati
 
 !include installation/remove_moose_environment.md
 
-## Install Conda id=installconda
+## Install Miniconda id=installconda
 
-- [Install Miniconda3 or Anaconda for Python 3.x](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (we recommend Miniconda)
+!alert note title= Anaconda also works
+You may choose to use Anaconda if you so desire: [Anaconda for Python 3.x](https://www.anaconda.com/distribution/)
 
-  - +Catalina Users:+ It is recommended you +do not+ choose the pkg installation technique. Please download the 'bash' or 'command line' variant, as there appears to be issues installing the pkg version on Zsh enabled machines.
+You may follow Miniconda's instructions: [Install Miniconda3](https://docs.conda.io/en/latest/miniconda.html), however we continuously receive reports of difficulty doing so (especially from our MacOS users). With that said, please use our instructions to install Miniconda instead:
 
-- Configure Conda to work with conda-forge, and our Idaholab channel:
-
-  ```bash
-  conda config --add channels conda-forge
-  conda config --add channels https://mooseframework.org/conda/moose
-  ```
-
-- Install the moose-libmesh and moose-tools package from mooseframework.org, and name your environment 'moose':
+- +Linux:+
 
   ```bash
-  conda create --name moose moose-libmesh moose-tools
+  curl -L -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  bash Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3
   ```
 
-- Activate the moose environment +(do this for any new terminal opened)+:
+- +Macintosh:+
 
   ```bash
-  conda activate moose
+  curl -L -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+  bash Miniconda3-latest-MacOSX-x86_64.sh -b -p ~/miniconda3
   ```
 
-  Some folks may receive additional instructions when attempting to activate a profile. Follow those instructions, and try to activate the moose environment again.
+With Miniconda installed to your home directory, export PATH, so that it may be used:
 
-  You will have successfully activated the moose environment when you see 'moose' within your prompt.
+```bash
+export PATH=$HOME/miniconda3/bin:$PATH
+```
 
-If you close, and re-open this terminal window, know that you will need to `conda activate moose` again. You will need to do this for each terminal you open. If you wish to make this automatic, you may append `conda activate moose` within your bash or zsh profile.
+Configure Conda to work with conda-forge, and our mooseframework.org channel:
+
+```bash
+conda config --add channels conda-forge
+conda config --add channels https://mooseframework.org/conda/moose
+```
+
+Install the moose-libmesh and moose-tools package from mooseframework.org, and name your environment 'moose':
+
+```bash
+conda create --name moose moose-libmesh moose-tools
+```
+
+Activate the moose environment +(do this for any new terminal opened)+:
+
+```bash
+conda activate moose
+```
+
+Some folks may receive additional instructions when attempting to activate a profile. Follow those instructions, and try to activate the moose environment again.
+
+You will have successfully activated the moose environment when you see 'moose' within your prompt.
+
+If you close, and re-open this terminal window, know that you will need to `conda activate moose` again. You will need to do this for each terminal you open. If you wish to make this automatic, you may append `conda activate moose` to your bash or zsh profiles.
 
 The MOOSE team will make periodic updates to the conda packages. To stay up-to-date, activate the moose environment, and perform an update:
 
