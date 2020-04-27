@@ -28,7 +28,13 @@ class MaterialProperty;
 class INSADObjectTracker : public GeneralUserObject
 {
 public:
-  static InputParameters validParams() { return GeneralUserObject::validParams(); }
+  static InputParameters validParams()
+  {
+    InputParameters params = GeneralUserObject::validParams();
+    params.addClassDescription("User object used to track the kernels added to an INS simulation "
+                               "and determine what properties to calculate in INSADMaterial");
+    return params;
+  }
 
   INSADObjectTracker(const InputParameters & parameters) : GeneralUserObject(parameters) {}
 
