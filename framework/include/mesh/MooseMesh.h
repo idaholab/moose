@@ -108,14 +108,14 @@ public:
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
-  /// If a face is on a mesh boundary, the neighborElemPtr
+  /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
   const Elem & elem() const { return *_elem; }
-  const Elem * neighborElemPtr() const { return _neighbor; }
-  const Elem & neighborElem() const
+  const Elem * neighborPtr() const { return _neighbor; }
+  const Elem & neighbor() const
   {
     if (!_neighbor)
-      mooseError("FaceInfo object 'const Elem & neighborElem()' is called but neighbor element pointer "
+      mooseError("FaceInfo object 'const Elem & neighbor()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
     return *_neighbor;
   }

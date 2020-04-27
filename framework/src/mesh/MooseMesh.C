@@ -3021,9 +3021,9 @@ MooseMesh::buildFaceInfo()
         if (lit != side_map.end())
           boundary_ids.insert(lit->second.begin(), lit->second.end());
 
-        if (fi.neighborElemPtr())
+        if (fi.neighborPtr())
         {
-          auto rit = side_map.find(Keytype(fi.neighborElemPtr(), fi.neighborSideID()));
+          auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
           if (rit != side_map.end())
             boundary_ids.insert(rit->second.begin(), rit->second.end());
         }

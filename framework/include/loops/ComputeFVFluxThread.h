@@ -183,8 +183,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         _neighbor_subdomain = Elem::invalid_subdomain_id;
-        if (faceinfo->neighborElemPtr())
-          _neighbor_subdomain = faceinfo->neighborElem().subdomain_id();
+        if (faceinfo->neighborPtr())
+          _neighbor_subdomain = faceinfo->neighbor().subdomain_id();
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
@@ -314,7 +314,7 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   _fe_problem.reinitMaterialsFace(fi.elem().subdomain_id(), _tid);
 
   if (!fi.isBoundary())
-    _fe_problem.reinitMaterialsNeighbor(fi.neighborElem().subdomain_id(), _tid);
+    _fe_problem.reinitMaterialsNeighbor(fi.neighbor().subdomain_id(), _tid);
   else
   {
     // TODO: verify that this works as expected.

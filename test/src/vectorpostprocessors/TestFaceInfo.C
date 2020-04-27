@@ -71,10 +71,10 @@ TestFaceInfo::execute()
     _elem_element_id.push_back(p.elem().id());
     _elem_element_side.push_back(p.elemSideID());
     // the neighbor element might be a nullptr
-    if (!p.neighborElemPtr())
+    if (!p.neighborPtr())
       _neighbor_element_id.push_back(Elem::invalid_id);
     else
-      _neighbor_element_id.push_back(p.neighborElem().id());
+      _neighbor_element_id.push_back(p.neighbor().id());
 
     Point normal = p.normal();
     _nx.push_back(normal(0));
