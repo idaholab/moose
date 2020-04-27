@@ -13,6 +13,15 @@ Note: Currently, the `FVElementalKernel` category only contains kernels
 (subclasses) representing time derivatives. Kernels representing externally
 imposed sources or reaction terms will be added in the near future.
 
+!alert note
+In the documentation that follows, we will use '-' and '+' to represent
+different sides of a face. This is purely notation. In the MOOSE code base, the
+'-' side is represented with an `_elem` suffix and the '+' side is represented
+with a `_neighbor` suffix. We could just as well have chosen `_left` and
+`_right`, or `_1` and `_2`, or `_minus` and `_plus`, but for consistency with previous MOOSE framework
+code such as discontinuous Galerkin kernels and node-face constraints, we have
+elected to go with the `_elem` and `_neighbor` suffixes.
+
 ## FVKernels block
 
 FVM kernels are added to simulation input files in the `FVKernels` block.  The
@@ -92,7 +101,7 @@ Integrating over the extend of an element and using Gauss' theorem leads to:
 The term in parenthesis in the surface integral on the right hand side must be
 implemented in the `FVKernel`. However, there is one more step before we can
 implement the kernel. We must determine how the values of $D$ and $\nabla v$
-depend on the values of $D$ and $v$ on the right and left side of the face
+depend on the values of $D$ and $v$ on the '+' and '-' side of the face
 $\partial \Omega$.  In this example, the following approximation is used:
 
 \begin{equation}
@@ -105,12 +114,12 @@ diffusion terms.
 Now, the implementation of this numerical flux into `FVDiffusion::computeQpResidual`
 is discussed.
 
-* the kernel provides the left and right values of the variable $v$ as `_u_left[_qp]` and `_u_right[_qp]`
+* the kernel provides the '-' and '+' values of the variable $v$ as `_u_elem[_qp]` and `_u_neighbor[_qp]`
 
-* the values of the material properties on the left is obtained by `_coeff_left(getADMaterialProperty<Real>("coeff"))` while
-the right value is obtained by calling `getNeighborADMaterialProperty<Real>("coeff")`.
+* the values of the material properties on the '-' side of the face is obtained by `_coeff_elem(getADMaterialProperty<Real>("coeff"))` while
+the '+' side value is obtained by calling `getNeighborADMaterialProperty<Real>("coeff")`.
 
-* geometric information about the left and right adjacent elements is available from the `face_info` object.
+* geometric information about the '-' and '+' adjacent elements is available from the `face_info` object.
 
 The implementation is then straight forward. The first line of the code computes `dudn` which corresponds to the term:
 
@@ -124,7 +133,7 @@ while the second line computes `k` corresponding to:
   \text{k} = \frac{D(v_L,\vec{r}_L) + D(v_R,\vec{r}_R)}{2} .
 \end{equation}
 
-The minus sign originates from the minus sign in the original expression. Flow from left to right is defined to be positive.
+The minus sign originates from the minus sign in the original expression. Flow from '-' to '+ is defined to be positive.
 
 ## FVKernel source code: FVMatAdvection example
 
@@ -167,14 +176,14 @@ where
 \end{equation}
 
 and  $\tilde{v} = v_L$ if $\tilde{\vec{u}} \cdot \vec{n} > 0$ and $\tilde{v} = v_R$ otherwise.
-By convention, the normal $\vec{n}$ points from the left side to the right side.
+By convention, the normal $\vec{n}$ points from the '-' side to the '+' side.
 
-The implementation is straight forward. In the constructor the left and right
+The implementation is straight forward. In the constructor the '-' and '+'
 velocities are obtained as `RealVectorValue` material properties. The average
 is computed and stored in variable `v_avg`. The direction of the flow is
 determined using the inner product of `v_avg * _normal` and the residual is
-then computed using either the left value of $v$ given by `_u_left[_qp]` or
-the right value given by `_u_right[_qp]`.
+then computed using either the '-' value of $v$ given by `_u_elem[_qp]` or
+the '+' value given by `_u_neighbor [_qp]`.
 
 ## FVKernel source code: FVTimeKernel
 
@@ -195,4 +204,3 @@ This kernel implements the term:
 
 The implementation is identical to the implementation of FEM kernels except that
 the FVM does not require multiplication by the test function.
-
