@@ -103,10 +103,10 @@ AddLotsOfDiffusion::act()
 
       _problem->addBoundaryCondition("DirichletBC", var_name + "_left", params);
 
-      params.set<std::vector<BoundaryName>>("boundary")[0] = "neighbor";
+      params.set<std::vector<BoundaryName>>("boundary")[0] = "right";
       params.set<Real>("value") = 1;
 
-      _problem->addBoundaryCondition("DirichletBC", var_name + "_neighbor", params);
+      _problem->addBoundaryCondition("DirichletBC", var_name + "_right", params);
     }
   }
 }

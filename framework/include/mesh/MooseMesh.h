@@ -101,41 +101,41 @@ public:
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
-  bool isBoundary() const { return (_right == nullptr); }
+  bool isBoundary() const { return (_neighbor == nullptr); }
 
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
   ///@{
-  /// Returns the elem and right elements adjacent to the face.
-  /// If a face is on a mesh boundary, the rightElemPtr
+  /// Returns the elem and neighbor elements adjacent to the face.
+  /// If a face is on a mesh boundary, the neighborElemPtr
   /// will return nullptr - the elem will never be null.
   const Elem & elemElem() const { return *_elem; }
-  const Elem * rightElemPtr() const { return _right; }
-  const Elem & rightElem() const
+  const Elem * neighborElemPtr() const { return _neighbor; }
+  const Elem & neighborElem() const
   {
-    if (!_right)
-      mooseError("FaceInfo object 'const Elem & rightElem()' is called but right element pointer "
+    if (!_neighbor)
+      mooseError("FaceInfo object 'const Elem & neighborElem()' is called but neighbor element pointer "
                  "is null. This occurs for faces at the domain boundary");
-    return *_right;
+    return *_neighbor;
   }
   ///@}
 
-  /// Returns the element centroids of the elements on the elem and right sides of the face.
-  /// If no right face is defined, a "ghost" right centroid is calculated by
+  /// Returns the element centroids of the elements on the elem and neighbor sides of the face.
+  /// If no neighbor face is defined, a "ghost" neighbor centroid is calculated by
   /// reflecting/extrapolating from the elem centroid through the face centroid
   /// - i.e. the vector from the elem element centroid to the face centroid is
-  /// doubled in length.  The tip of this new vector is the right centroid.
+  /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
   const Point & elemCentroid() const { return _elem_centroid; }
-  const Point & rightCentroid() const { return _right_centroid; }
+  const Point & neighborCentroid() const { return _neighbor_centroid; }
   ///@}
 
   ///@{
-  /// Returns the elem and right centroids. If no right element exists, then
-  /// the maximum unsigned int is returned for the right side ID.
+  /// Returns the elem and neighbor centroids. If no neighbor element exists, then
+  /// the maximum unsigned int is returned for the neighbor side ID.
   unsigned int elemSideID() const { return _elem_side_id; }
-  unsigned int rightSideID() const { return _right_side_id; }
+  unsigned int neighborSideID() const { return _neighbor_side_id; }
   ///@}
 
   ///@{
@@ -152,16 +152,16 @@ public:
   {
     return _elem_dof_indices[var_name];
   }
-  const std::vector<dof_id_type> & rightDofIndices(const std::string & var_name) const
+  const std::vector<dof_id_type> & neighborDofIndices(const std::string & var_name) const
   {
-    auto it = _right_dof_indices.find(var_name);
-    if (it == _right_dof_indices.end())
+    auto it = _neighbor_dof_indices.find(var_name);
+    if (it == _neighbor_dof_indices.end())
       mooseError("Variable ", var_name, " not found in FaceInfo object");
     return it->second;
   }
-  std::vector<dof_id_type> & rightDofIndices(const std::string & var_name)
+  std::vector<dof_id_type> & neighborDofIndices(const std::string & var_name)
   {
-    return _right_dof_indices[var_name];
+    return _neighbor_dof_indices[var_name];
   }
   ///@}
 
@@ -183,25 +183,25 @@ public:
 private:
   Real _face_area;
   Real _elem_volume;
-  Real _right_volume;
+  Real _neighbor_volume;
   Point _normal;
 
-  /// the elem and right elems
+  /// the elem and neighbor elems
   const Elem * _elem;
-  const Elem * _right;
+  const Elem * _neighbor;
 
-  /// the elem and right local side ids
+  /// the elem and neighbor local side ids
   unsigned int _elem_side_id;
-  unsigned int _right_side_id;
+  unsigned int _neighbor_side_id;
 
   Point _elem_centroid;
-  Point _right_centroid;
+  Point _neighbor_centroid;
   Point _face_centroid;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible
   std::map<std::string, std::vector<dof_id_type>> _elem_dof_indices;
-  std::map<std::string, std::vector<dof_id_type>> _right_dof_indices;
+  std::map<std::string, std::vector<dof_id_type>> _neighbor_dof_indices;
 
   /// a map that provides the information what face type this is for each variable
   std::map<std::string, VarFaceNeighbors> _face_types_by_var;

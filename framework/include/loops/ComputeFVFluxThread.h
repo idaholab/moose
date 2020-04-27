@@ -95,8 +95,8 @@ public:
   /// is not the same as the subdomain of the last face's elem element).
   virtual void subdomainChanged(){};
 
-  /// Called every time the neighbor subdomain changes (i.e. the subdomain of *this* face's right element
-  /// is not the same as the subdomain of the last face's right element).
+  /// Called every time the neighbor subdomain changes (i.e. the subdomain of *this* face's neighbor element
+  /// is not the same as the subdomain of the last face's neighbor element).
   virtual void neighborSubdomainChanged(){};
 
   /// Called if a MooseException is caught anywhere during the computation.
@@ -183,8 +183,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
 
         _old_neighbor_subdomain = _neighbor_subdomain;
         _neighbor_subdomain = Elem::invalid_subdomain_id;
-        if (faceinfo->rightElemPtr())
-          _neighbor_subdomain = faceinfo->rightElem().subdomain_id();
+        if (faceinfo->neighborElemPtr())
+          _neighbor_subdomain = faceinfo->neighborElem().subdomain_id();
 
         if (_neighbor_subdomain != _old_neighbor_subdomain)
           neighborSubdomainChanged();
@@ -314,7 +314,7 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   _fe_problem.reinitMaterialsFace(fi.elemElem().subdomain_id(), _tid);
 
   if (!fi.isBoundary())
-    _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
+    _fe_problem.reinitMaterialsNeighbor(fi.neighborElem().subdomain_id(), _tid);
   else
   {
     // TODO: verify that this works as expected.

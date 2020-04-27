@@ -23,9 +23,9 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     _var(*mooseVariableFV()),
     _u_elem(_var.adSln()),
-    _u_right(_var.adSlnNeighbor()),
+    _u_neighbor(_var.adSlnNeighbor()),
     _grad_u_elem(_var.adGradSln()),
-    _grad_u_right(_var.adGradSlnNeighbor())
+    _grad_u_neighbor(_var.adGradSlnNeighbor())
 {
   addMooseVariableDependency(&_var);
 }
@@ -47,7 +47,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // facing unit normals of the face for each neighboring elements being
   // oriented oppositely.  We calculate the residual contribution once using
   // the elem-elem-oriented _normal and just use the resulting residual's
-  // negative for the contribution to the right element.
+  // negative for the contribution to the neighbor element.
 
   // The fancy face type if condition checks here are because we might
   // currently be running on a face for which this kernel's variable is only
@@ -70,7 +70,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   if ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
-    // residual contribution of this kernel to the right element
+    // residual contribution of this kernel to the neighbor element
     prepareVectorTagNeighbor(_assembly, _var.number());
     _local_re(0) = -r;
     accumulateTaggedLocalResidual();
@@ -110,15 +110,15 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 
     mooseAssert((ft == FaceInfo::VarFaceNeighbors::LEFT) == (_var.dofIndicesNeighbor().size() == 0),
                 "If the variable is only defined on the elem hand side of the face, then that "
-                "means it should have no dof indices on the neighbor/right element. Conversely if "
+                "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
                 "the variable is defined on both sides of the face, then it should have a non-zero "
-                "number of degrees of freedom on the neighbor/right element");
+                "number of degrees of freedom on the neighbor/neighbor element");
 
-    // only add residual to right if the variable is defined there.
+    // only add residual to neighbor if the variable is defined there.
     if (ft == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      // jacobian contribution of the residual for the elem element to the right element's DOF:
-      // d/d_right (residual_elem)
+      // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
+      // d/d_neighbor (residual_elem)
       prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
       _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
       accumulateTaggedLocalMatrix();
@@ -129,7 +129,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     mooseAssert((ft == FaceInfo::VarFaceNeighbors::RIGHT) == (_var.dofIndices().size() == 0),
-                "If the variable is only defined on the right hand side of the face, then that "
+                "If the variable is only defined on the neighbor hand side of the face, then that "
                 "means it should have no dof indices on the elem element. Conversely if "
                 "the variable is defined on both sides of the face, then it should have a non-zero "
                 "number of degrees of freedom on the elem element");
@@ -137,15 +137,15 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     // only add residual to elem if the variable is defined there.
     if (ft == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      // jacobian contribution of the residual for the right element to the elem element's DOF:
-      // d/d_elem (residual_right)
+      // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
+      // d/d_elem (residual_neighbor)
       prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
       _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
       accumulateTaggedLocalMatrix();
     }
 
-    // jacobian contribution of the residual for the right element to the right element's DOF:
-    // d/d_right (residual_right)
+    // jacobian contribution of the residual for the neighbor element to the neighbor element's DOF:
+    // d/d_neighbor (residual_neighbor)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
     _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
@@ -158,17 +158,17 @@ FVFluxKernel::gradUDotNormal()
   // We compute "grad_u dot _normal" by assuming the mesh is orthogonal, and
   // recognizing that it is equivalent to delta u between the two cell
   // centroids but for one unit in the normal direction.  We know delta u for
-  // the length between cell centroids (u_right - u_elem) and then we just
+  // the length between cell centroids (u_neighbor - u_elem) and then we just
   // divide that by the distance between the centroids to convert it to delta
   // u for one unit in the normal direction.  Because the _normal vector is
-  // defined to be outward from the elem element, u_right-u_elem gives delta u
+  // defined to be outward from the elem element, u_neighbor-u_elem gives delta u
   // when moving in the positive normal direction.  So we divide by the
   // (positive) distance between centroids because one unit in the normal
   // direction is always positive movement.
-  ADReal dudn = (_u_right[_qp] - _u_elem[_qp]) /
-                (_face_info->rightCentroid() - _face_info->elemCentroid()).norm();
+  ADReal dudn = (_u_neighbor[_qp] - _u_elem[_qp]) /
+                (_face_info->neighborCentroid() - _face_info->elemCentroid()).norm();
   // TODO: need to apply cross-diffusion correction factor here.  This
-  // currently is only correct if the vector between the elem-right cell
+  // currently is only correct if the vector between the elem-neighbor cell
   // centroids is parallel to the normal vector.
   return dudn;
 }

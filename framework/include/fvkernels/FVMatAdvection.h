@@ -12,5 +12,5 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_right;
+  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
 };

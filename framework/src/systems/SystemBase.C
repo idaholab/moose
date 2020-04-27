@@ -1233,13 +1233,13 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   auto & faces = mesh().faceInfo();
   for (auto & p : faces)
   {
-    // get elem & right elements, and set subdomain ids
+    // get elem & neighbor elements, and set subdomain ids
     const Elem & elem_elem = p.elemElem();
-    const Elem * right_elem = p.rightElemPtr();
+    const Elem * neighbor_elem = p.neighborElemPtr();
     SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
-    SubdomainID right_subdomain_id = Elem::invalid_subdomain_id;
-    if (right_elem)
-      right_subdomain_id = right_elem->subdomain_id();
+    SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
+    if (neighbor_elem)
+      neighbor_subdomain_id = neighbor_elem->subdomain_id();
 
     // loop through vars
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
@@ -1255,7 +1255,7 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
         var_subdomains = _mesh.meshSubdomains();
 
       // first stash away DoF information; this is more difficult than you would
-      // think because var can be defined on the elem subdomain, the right subdomain
+      // think because var can be defined on the elem subdomain, the neighbor subdomain
       // or both subdomains
       // elem
       std::vector<dof_id_type> elem_dof_indices;
@@ -1264,35 +1264,36 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
       else
         elem_dof_indices = {libMesh::DofObject::invalid_id};
       p.elemDofIndices(var_name) = elem_dof_indices;
-      // right
-      std::vector<dof_id_type> right_dof_indices;
-      if (right_elem && var_subdomains.find(right_subdomain_id) != var_subdomains.end())
-        var->getDofIndices(right_elem, right_dof_indices);
+      // neighbor
+      std::vector<dof_id_type> neighbor_dof_indices;
+      if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(neighbor_elem, neighbor_dof_indices);
       else
-        right_dof_indices = {libMesh::DofObject::invalid_id};
-      p.rightDofIndices(var_name) = right_dof_indices;
+        neighbor_dof_indices = {libMesh::DofObject::invalid_id};
+      p.neighborDofIndices(var_name) = neighbor_dof_indices;
 
       /**
        * The following paragraph of code assigns the VarFaceNeighbors
        * 1. The face is an internal face of this variable if it is defined on
-       *    the elem and right subdomains
+       *    the elem and neighbor subdomains
        * 2. The face is an invalid face of this variable if it is neither defined
-       *    on the elem nor the right subdomains
+       *    on the elem nor the neighbor subdomains
        * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
        *    applies
        */
       bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
-      bool var_defined_right = var_subdomains.find(right_subdomain_id) != var_subdomains.end();
-      if (var_defined_elem && var_defined_right)
+      bool var_defined_neighbor =
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
+      if (var_defined_elem && var_defined_neighbor)
         p.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
-      else if (!var_defined_elem && !var_defined_right)
+      else if (!var_defined_elem && !var_defined_neighbor)
         p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
       else
       {
-        // this is a boundary face for this variable, set elem or right
+        // this is a boundary face for this variable, set elem or neighbor
         if (var_defined_elem)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::LEFT;
-        else if (var_defined_right)
+        else if (var_defined_neighbor)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::RIGHT;
         else
           mooseError("Should never get here");

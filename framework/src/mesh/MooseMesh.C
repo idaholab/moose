@@ -65,7 +65,7 @@ static const int GRAIN_SIZE =
 FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
 {
   _elem = elem;
-  _right = neighbor;
+  _neighbor = neighbor;
 
   _elem_side_id = side;
   _elem_centroid = elem->centroid();
@@ -101,18 +101,18 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   _normal = average_normal;
   _face_centroid = face_centroid;
 
-  // the right info does not exist for domain boundaries
-  if (!_right)
+  // the neighbor info does not exist for domain boundaries
+  if (!_neighbor)
   {
-    _right_side_id = std::numeric_limits<unsigned int>::max();
-    _right_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
-    _right_volume = _elem_volume;
+    _neighbor_side_id = std::numeric_limits<unsigned int>::max();
+    _neighbor_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
+    _neighbor_volume = _elem_volume;
   }
   else
   {
-    _right_side_id = neighbor->which_neighbor_am_i(elem);
-    _right_centroid = neighbor->centroid();
-    _right_volume = neighbor->volume();
+    _neighbor_side_id = neighbor->which_neighbor_am_i(elem);
+    _neighbor_centroid = neighbor->centroid();
+    _neighbor_volume = neighbor->volume();
   }
 }
 
@@ -3021,9 +3021,9 @@ MooseMesh::buildFaceInfo()
         if (lit != side_map.end())
           boundary_ids.insert(lit->second.begin(), lit->second.end());
 
-        if (fi.rightElemPtr())
+        if (fi.neighborElemPtr())
         {
-          auto rit = side_map.find(Keytype(fi.rightElemPtr(), fi.rightSideID()));
+          auto rit = side_map.find(Keytype(fi.neighborElemPtr(), fi.neighborSideID()));
           if (rit != side_map.end())
             boundary_ids.insert(rit->second.begin(), rit->second.end());
         }

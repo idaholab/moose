@@ -33,9 +33,9 @@ protected:
   VectorPostprocessorValue & _face_id;
   VectorPostprocessorValue & _face_area;
   VectorPostprocessorValue & _elem_element_id;
-  VectorPostprocessorValue & _right_element_id;
+  VectorPostprocessorValue & _neighbor_element_id;
   VectorPostprocessorValue & _elem_element_side;
-  VectorPostprocessorValue & _right_element_side;
+  VectorPostprocessorValue & _neighbor_element_side;
   VectorPostprocessorValue & _nx;
   VectorPostprocessorValue & _ny;
   VectorPostprocessorValue & _nz;
@@ -45,14 +45,14 @@ protected:
   VectorPostprocessorValue & _elem_cx;
   VectorPostprocessorValue & _elem_cy;
   VectorPostprocessorValue & _elem_cz;
-  VectorPostprocessorValue & _right_cx;
-  VectorPostprocessorValue & _right_cy;
-  VectorPostprocessorValue & _right_cz;
+  VectorPostprocessorValue & _neighbor_cx;
+  VectorPostprocessorValue & _neighbor_cy;
+  VectorPostprocessorValue & _neighbor_cz;
 
   std::vector<VariableName> _vars;
   std::vector<VectorPostprocessorValue *> _var_elem_dof;
-  std::vector<VectorPostprocessorValue *> _var_right_dof;
+  std::vector<VectorPostprocessorValue *> _var_neighbor_dof;
   std::vector<VectorPostprocessorValue *> _var_elem_dof_size;
-  std::vector<VectorPostprocessorValue *> _var_right_dof_size;
+  std::vector<VectorPostprocessorValue *> _var_neighbor_dof_size;
   std::vector<VectorPostprocessorValue *> _var_face_type;
 };

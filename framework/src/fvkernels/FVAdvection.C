@@ -20,6 +20,6 @@ ADReal
 FVAdvection::computeQpResidual()
 {
   ADReal u_interface;
-  interpolate(InterpMethod::Upwind, u_interface, _u_elem[_qp], _u_right[_qp], _velocity);
+  interpolate(InterpMethod::Upwind, u_interface, _u_elem[_qp], _u_neighbor[_qp], _velocity);
   return _normal * _velocity * u_interface;
 }

@@ -30,9 +30,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     _face_id(declareVector("id")),
     _face_area(declareVector("area")),
     _elem_element_id(declareVector("elem_elem")),
-    _right_element_id(declareVector("right_elem")),
+    _neighbor_element_id(declareVector("neighbor_elem")),
     _elem_element_side(declareVector("elem_side")),
-    _right_element_side(declareVector("right_side")),
+    _neighbor_element_side(declareVector("neighbor_side")),
     _nx(declareVector("nx")),
     _ny(declareVector("ny")),
     _nz(declareVector("nz")),
@@ -42,9 +42,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     _elem_cx(declareVector("elem_cx")),
     _elem_cy(declareVector("elem_cy")),
     _elem_cz(declareVector("elem_cz")),
-    _right_cx(declareVector("right_cx")),
-    _right_cy(declareVector("right_cy")),
-    _right_cz(declareVector("right_cz"))
+    _neighbor_cx(declareVector("neighbor_cx")),
+    _neighbor_cy(declareVector("neighbor_cy")),
+    _neighbor_cz(declareVector("neighbor_cz"))
 {
   if (isParamValid("vars"))
   {
@@ -52,9 +52,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     for (auto & v : _vars)
     {
       _var_elem_dof.push_back(&declareVector(v + "_elem"));
-      _var_right_dof.push_back(&declareVector(v + "_right"));
+      _var_neighbor_dof.push_back(&declareVector(v + "_neighbor"));
       _var_elem_dof_size.push_back(&declareVector(v + "_size_elem"));
-      _var_right_dof_size.push_back(&declareVector(v + "_size_right"));
+      _var_neighbor_dof_size.push_back(&declareVector(v + "_size_neighbor"));
       _var_face_type.push_back(&declareVector(v + "_face_type"));
     }
   }
@@ -70,11 +70,11 @@ TestFaceInfo::execute()
     _face_area.push_back(p.faceArea());
     _elem_element_id.push_back(p.elemElem().id());
     _elem_element_side.push_back(p.elemSideID());
-    // the right element might be a nullptr
-    if (!p.rightElemPtr())
-      _right_element_id.push_back(Elem::invalid_id);
+    // the neighbor element might be a nullptr
+    if (!p.neighborElemPtr())
+      _neighbor_element_id.push_back(Elem::invalid_id);
     else
-      _right_element_id.push_back(p.rightElem().id());
+      _neighbor_element_id.push_back(p.neighborElem().id());
 
     Point normal = p.normal();
     _nx.push_back(normal(0));
@@ -88,19 +88,19 @@ TestFaceInfo::execute()
     _elem_cx.push_back(lc(0));
     _elem_cy.push_back(lc(1));
     _elem_cz.push_back(lc(2));
-    Point rc = p.rightCentroid();
-    _right_cx.push_back(rc(0));
-    _right_cy.push_back(rc(1));
-    _right_cz.push_back(rc(2));
+    Point rc = p.neighborCentroid();
+    _neighbor_cx.push_back(rc(0));
+    _neighbor_cy.push_back(rc(1));
+    _neighbor_cz.push_back(rc(2));
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {
       auto & dofs = p.elemDofIndices(_vars[l]);
       _var_elem_dof[l]->push_back(dofs[0]);
       _var_elem_dof_size[l]->push_back(dofs.size());
-      dofs = p.rightDofIndices(_vars[l]);
-      _var_right_dof[l]->push_back(dofs[0]);
-      _var_right_dof_size[l]->push_back(dofs.size());
+      dofs = p.neighborDofIndices(_vars[l]);
+      _var_neighbor_dof[l]->push_back(dofs[0]);
+      _var_neighbor_dof_size[l]->push_back(dofs.size());
       FaceInfo::VarFaceNeighbors vfn = p.faceType(_vars[l]);
       Real x = 0;
       switch (vfn)

@@ -36,7 +36,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   // contribution to one element (one side of the face).  Because of this, we
   // make an exception and orient the normal to point outward from whichever
   // side of the face the BC's variable is defined on; we flip it if this
-  // variable is defined on the right side of the face (instead of elem) since
+  // variable is defined on the neighbor side of the face (instead of elem) since
   // the FaceInfo normal polarity is always elem-elem oriented.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
@@ -70,7 +70,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   // contribution to one element (one side of the face).  Because of this, we
   // make an exception and orient the normal to point outward from whichever
   // side of the face the BC's variable is defined on; we flip it if this
-  // variable is defined on the right side of the face (instead of elem) since
+  // variable is defined on the neighbor side of the face (instead of elem) since
   // the FaceInfo normal polarity is always elem-elem oriented.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
@@ -94,22 +94,22 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    // jacobian contribution of the residual for the elem element to the right element's DOF:
-    // d/d_right (residual_elem)
+    // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
+    // d/d_neighbor (residual_elem)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
   }
   else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
   {
-    // jacobian contribution of the residual for the right element to the elem element's DOF:
-    // d/d_elem (residual_right)
+    // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
+    // d/d_elem (residual_neighbor)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    // jacobian contribution of the residual for the right element to the right element's DOF:
-    // d/d_right (residual_right)
+    // jacobian contribution of the residual for the neighbor element to the neighbor element's DOF:
+    // d/d_neighbor (residual_neighbor)
     prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
