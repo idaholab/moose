@@ -4,14 +4,11 @@
 
 #include "ACInterface.h"
 
-class ACInterfaceCleavageFracture;
-
-template <>
-InputParameters validParams<ACInterfaceCleavageFracture>();
-
 class ACInterfaceCleavageFracture : public ACInterface
 {
 public:
+  static InputParameters validParams();
+
   ACInterfaceCleavageFracture(const InputParameters & parameters);
 
 protected:

@@ -1,17 +1,17 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 40
-  ny = 20
-  ymax = 0.5
-[]
-
-[MeshModifiers]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 40
+    ny = 20
+    ymax = 0.5
+  []
   [./noncrack]
-    type = BoundingBoxNodeSet
+    type = BoundingBoxNodeSetGenerator
     new_boundary = noncrack
     bottom_left = '0.5 0 0'
     top_right = '1 0 0'
+    input = gen
   [../]
 []
 
@@ -77,19 +77,22 @@
 
 [BCs]
   [./ydisp]
-    type = FunctionPresetBC
+    type = FunctionDirichletBC
+    preset = true
     variable = disp_y
     boundary = top
     function = 't'
   [../]
   [./yfix]
-    type = PresetBC
+    type = DirichletBC
+    preset = true
     variable = disp_y
     boundary = noncrack
     value = 0
   [../]
   [./xfix]
-    type = PresetBC
+  type = DirichletBC
+  preset = true
     variable = disp_x
     boundary = right
     value = 0
@@ -129,7 +132,6 @@
     D_name = 'degradation'
     F_name = 'local_fracture_energy'
     decomposition_type = stress_spectral
-    use_current_history_variable = true
   [../]
   [./degradation]
     type = DerivativeParsedMaterial
@@ -189,7 +191,7 @@
   nl_max_its = 10
 
   dt = 5e-5
-  num_steps = 2
+  num_steps = 5
 []
 
 [Outputs]

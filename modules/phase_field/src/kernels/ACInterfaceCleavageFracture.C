@@ -4,18 +4,16 @@
 
 registerMooseObject("PhaseFieldApp", ACInterfaceCleavageFracture);
 
-template <>
 InputParameters
-validParams<ACInterfaceCleavageFracture>()
+ACInterfaceCleavageFracture::validParams()
 {
-  InputParameters params = validParams<ACInterface>();
-  params.addClassDescription("Gradient energy Allen-Cahn Kernel where crack propagation along weak "
+  InputParameters params = ACInterface::validParams();
+  params.addClassDescription("Gradient energy Allen-Cahn Kernel where crack propagation along weak"
                              "cleavage plane is preferred");
   params.addRequiredParam<Real>(
       "beta_penalty",
-      "penalty to penalize fracture on planes not normal to one cleavage plane "
-      "normal which is normal to weak cleavage plane. Setting beta=0 results "
-      "in isotropic damage.");
+      "penalty to penalize fracture on planes not normal to one cleavage plane normal which is "
+      "normal to weak cleavage plane. Setting beta=0 results in isotropic damage.");
   params.addRequiredParam<RealVectorValue>("cleavage_plane_normal",
                                            "Normal to the weak cleavage plane");
   return params;
