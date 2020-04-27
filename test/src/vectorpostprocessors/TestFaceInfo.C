@@ -68,7 +68,7 @@ TestFaceInfo::execute()
   {
     _face_id.push_back(j);
     _face_area.push_back(p.faceArea());
-    _elem_element_id.push_back(p.elemElem().id());
+    _elem_element_id.push_back(p.elem().id());
     _elem_element_side.push_back(p.elemSideID());
     // the neighbor element might be a nullptr
     if (!p.neighborElemPtr())

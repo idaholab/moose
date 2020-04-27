@@ -3017,7 +3017,7 @@ MooseMesh::buildFaceInfo()
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        auto lit = side_map.find(Keytype(&fi.elemElem(), fi.elemSideID()));
+        auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())
           boundary_ids.insert(lit->second.begin(), lit->second.end());
 

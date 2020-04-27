@@ -1234,7 +1234,7 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   for (auto & p : faces)
   {
     // get elem & neighbor elements, and set subdomain ids
-    const Elem & elem_elem = p.elemElem();
+    const Elem & elem_elem = p.elem();
     const Elem * neighbor_elem = p.neighborElemPtr();
     SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
     SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;

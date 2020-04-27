@@ -110,7 +110,7 @@ public:
   /// Returns the elem and neighbor elements adjacent to the face.
   /// If a face is on a mesh boundary, the neighborElemPtr
   /// will return nullptr - the elem will never be null.
-  const Elem & elemElem() const { return *_elem; }
+  const Elem & elem() const { return *_elem; }
   const Elem * neighborElemPtr() const { return _neighbor; }
   const Elem & neighborElem() const
   {

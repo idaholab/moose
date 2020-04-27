@@ -23,7 +23,7 @@ FVBurgerOutflowBC::FVBurgerOutflowBC(const InputParameters & parameters) : FVFlu
 ADReal
 FVBurgerOutflowBC::computeQpResidual()
 {
-  mooseAssert(_face_info->elemElem().dim() == 1, "FVBurgerOutflowBC works only in 1D");
+  mooseAssert(_face_info->elem().dim() == 1, "FVBurgerOutflowBC works only in 1D");
 
   ADReal r = 0;
   // only add this on outflow faces
