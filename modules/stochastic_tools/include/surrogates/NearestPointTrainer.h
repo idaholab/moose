@@ -1,5 +1,4 @@
 //* This file is part of the MOOSE framework
-
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -27,14 +26,12 @@ protected:
   std::vector<std::vector<Real>> & _sample_points;
 
 private:
-  // TODO: Move as much of these to constructor initialization
-
   /// Sampler from which the parameters were perturbed
-  Sampler * _sampler;
+  Sampler * _sampler = nullptr;
 
   /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue * _values_ptr = nullptr;
 
   /// True when _sampler data is distributed
-  bool _values_distributed;
+  bool _values_distributed = false; // default to false; set in initialSetup
 };

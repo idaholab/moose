@@ -4,7 +4,7 @@ This example goes over how to train a surrogate model using the [Trainers](Train
 
 ## Overview
 
-In general, a [Trainer](Trainers/index.md) object takes in input and output data from a full-order model to create reduced-order model that is later evaluated in a [Surrogate](Surrogates/index.md) object to quickly emulate the full-order model outputs. The advantage is that creating a reduced-order generally requires a minimal amount of samples, so taking a large set of samples for statistical quantities is much faster in the end when using the surrogate system. To demonstrate the training process, we use a heat conduction model as the full-order model with maximum and average temperatures as the quantities of interest. The reduced-order model uses [NearestPointTrainer](NearestPointTrainer.md).
+In general, a [SurrogateTrainer](Trainers/index.md) object takes in input and output data from a full-order model to create reduced-order model that is later evaluated by a [SurrogateModel](Surrogates/index.md) object to quickly emulate the full-order model outputs. The advantage is that creating a reduced-order generally requires a minimal amount of samples, so taking a large set of samples for statistical quantities is much faster in the end when using the surrogate system. To demonstrate the training process, we use a heat conduction model as the full-order model with maximum and average temperatures as the quantities of interest. The reduced-order model uses [NearestPointTrainer](NearestPointTrainer.md).
 
 !! heat_conduction_model_begin
 

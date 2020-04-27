@@ -1,16 +1,20 @@
 # Polynomial Chaos Surrogate
 
-This example goes over how to train and utilize a [PolynomialChaos](PolynomialChaos.md) surrogate model. For detailed information on the polynomial chaos method including the mathematics and implementation see [PolynomialChaos](PolynomialChaos.md) and [QuadratureSampler](QuadratureSampler.md). For general information on training and evaluating a surrogate model see [Training a surrogate model](/examples/surrogate_training.md) and [Evaluating a surrogate model](/examples/surrogate_evaluate.md).
+This example explains how to train and utilize a [PolynomialChaos](PolynomialChaos.md) surrogate model. For detailed information on the polynomial chaos method including the mathematics and implementation see [PolynomialChaos](PolynomialChaos.md) and [QuadratureSampler](QuadratureSampler.md). For general information on training and evaluating a surrogate model see [Training a surrogate model](/examples/surrogate_training.md) and [Evaluating a surrogate model](/examples/surrogate_evaluate.md).
 
 ## Overview
 
-Polynomial chaos (PC) is a stochastic element method. Its formulation is quite similar to finite element method, but instead of discretizing spatial dimensions, PC discretizes random variables, i.e. uncertain parameters. Within the training phase, PC creates a functional of a quantity of interest (QoI) that is dependent on these random variables. This function consists of a finite sum of orthogonal polynomials with coefficients, these coefficients are what the training phase is attempting to compute. Another difference from finite elements is that these polynomials do not necessarily have compact support and increasing the terms in the sum increases the polynomial order. Please see [PolynomialChaos.md] for more details of the polynomial chaos method.
+Polynomial chaos (PC) is a stochastic element method. Its formulation is similar to finite element method, but instead of discretizing spatial dimensions, PC discretizes random variables, i.e. uncertain parameters. Within the training phase, PC creates a functional of a quantity of interest (QoI) that is dependent on the random variables. This function consists of a finite sum of orthogonal polynomials with coefficients, these coefficients are what the training phase is attempting to compute. Another difference from finite elements is that these polynomials do not necessarily have compact support and increasing the terms in the sum increases the polynomial order. Please see [PolynomialChaos.md] for more details of the polynomial chaos method.
 
 !include surrogate_training.md start=heat_conduction_model_begin end=heat_conduction_model_finish
 
 ## Training
 
-This section describes how to set up an input for a [PolynomialChaosTrainer](PolynomialChaosTrainer.md). There are three things aspects that need to be known before setting up the input file. First, a sub app needs to be built, defining the physics of the problem, this example uses a [heat conduction model](examples/surrogates/sub.i) described in the previous section. Second, uncertain parameters need to be identified with a defined probability distribution. Finally, quantities of interest need to be defined, for now, these come in the form of postprocessors from the sub app.
+This section describes how to set up an input for a [PolynomialChaosTrainer](PolynomialChaosTrainer.md). There are three aspects that need to be known before setting up the input file.
+
+1. A sub app needs to be built, defining the physics of the problem, this example uses a [heat conduction model](examples/surrogates/sub.i) described in the previous section.
+2. Uncertain parameters need to be identified with a defined probability distribution.
+3. Quantities of interest need to be defined, for now, these come in the form of postprocessors from the sub app.
 
 !include surrogate_training.md start=omitting_solve_begin end=omitting_solve_finish replace=['nearest_point_training', 'poly_chaos_uniform_mc']
 
@@ -24,7 +28,7 @@ A required aspect of the polynomial chaos method is a definition of the probabil
 
 ### Training Sampler
 
-Non-intrusive polynomial chaos training relies on sampling the full-order model (i.e. sub app) at a number of sample points. There are two general types of sampling technques for PC: Monte Carlo and numerical quadrature.
+Non-intrusive polynomial chaos training relies on sampling the full-order model (i.e. sub app) at a number of sample points. There are two general types of sampling techniques for PC: Monte Carlo and numerical quadrature.
 
 #### Monte Carlo Sampling
 
@@ -34,7 +38,7 @@ Monte Carlo sampling is the most intuitive type of sampling and can be done usin
 
 #### Quadrature Sampling
 
-Because PC expansion uses very specific types of polynomials, using numerical quadrature is typically a more precise approach to training a PC model. The [QuadratureSampler](QuadratureSampler.md) implements numerical quadrature for uniform and normal distributions. There are three different techniques for bulding a multidimensional quadrature grid: Cartesian grid, Smolyak sparse grid, and Clenshaw-Curtis sparse grid. These grids are specified by the [!param](/Samplers/Quadrature/sparse_grid) parameter: `none`, `smolyak`, and `clenshaw-curtis`. Using sparse grids can significantly reduce the number of training points while retaining accuracy, see [QuadratureSampler](QuadratureSampler.md) for more details. The number of sample points is ultimately defined by the [!param](/Samplers/Quadrature/order) parameter. It is generally advisable that this parameter be set to the same value as the [!param](/Trainers/PolynomialChaosTrainer/order) parameter in [PolynomialChaosTrainer](PolynomialChaosTrainer.md).
+Because PC expansion uses very specific types of polynomials, using numerical quadrature is typically a more precise approach to training a PC model. The [QuadratureSampler](QuadratureSampler.md) implements numerical quadrature for uniform and normal distributions. There are three different techniques for building a multidimensional quadrature grid: Cartesian grid, Smolyak sparse grid, and Clenshaw-Curtis sparse grid. These grids are specified by the [!param](/Samplers/Quadrature/sparse_grid) parameter: `none`, `smolyak`, and `clenshaw-curtis`. Using sparse grids can significantly reduce the number of training points while retaining accuracy, see [QuadratureSampler](QuadratureSampler.md) for more details. The number of sample points is ultimately defined by the [!param](/Samplers/Quadrature/order) parameter. It is generally advisable that this parameter be set to the same value as the [!param](/Trainers/PolynomialChaosTrainer/order) parameter in [PolynomialChaosTrainer](PolynomialChaosTrainer.md).
 
 !listing examples/surrogates/poly_chaos_uniform_quad.i block=Samplers
 
@@ -47,7 +51,13 @@ Running the sub app and transferring data back and forth for PC is exactly the s
 
 ### Trainers
 
-The PC training object is defined within the [Trainers](Trainers/index.md) block. The required parameters for a PC trainer are [!param](/Trainers/PolynomialChaosTrainer/distributions), [!param](/Trainers/PolynomialChaosTrainer/sampler), [!param](/Trainers/PolynomialChaosTrainer/results_vpp), [!param](/Trainers/PolynomialChaosTrainer/results_vector), and [!param](/Trainers/PolynomialChaosTrainer/order). [!param](/Trainers/PolynomialChaosTrainer/distributions) are gathered to specify the type of polynomials to use for the expansion, it is very import that these distributions match the distributions given to the sampler. [!param](/Trainers/PolynomialChaosTrainer/sampler) is used to gather the sample points that were given to the sub app during execution. [!param](/Trainers/PolynomialChaosTrainer/results_vpp) and [!param](/Trainers/PolynomialChaosTrainer/results_vector) specify the results from perturbing the sub app with the given sampler. Finally, [!param](/Trainers/PolynomialChaosTrainer/order) defines the maximum order of the PC expansion, this parameter ultimately defines the accuracy and complexity of the surrogate model.
+The PC training object is defined within the [Trainers](Trainers/index.md) block. The required parameters for a PC trainer are:
+
+- [!param](/Trainers/PolynomialChaosTrainer/distributions) specify the type of polynomials to use for the expansion, it is very import that these distributions match the distributions given to the sampler.
+- [!param](/Trainers/PolynomialChaosTrainer/sampler) is the object to that will provide sample points that were given to the sub app during execution.
+- [!param](/Trainers/PolynomialChaosTrainer/results_vpp) specifies the result object for storing the computed values.
+- [!param](/Trainers/PolynomialChaosTrainer/results_vector) specifies the result vector, within the result object, for storing the computed values.
+- [!param](/Trainers/PolynomialChaosTrainer/order) defines the maximum order of the PC expansion, this parameter ultimately defines the accuracy and complexity of the surrogate model.
 
 !listing examples/surrogates/poly_chaos_uniform_mc.i block=Trainers
 
@@ -66,7 +76,7 @@ Outputting the data after training a PC trainer is exactly the same as outputtin
 
 ## Evaluation and Statistics
 
-This section will go over how to set up an input file to evaluate and perform statistical analysis on a trained [polynomial chaos surrogate](PolynomialChaos.md). The polynomial chaos surrogate is unique in that it is able to compute statistical moments and sensitivities analytically. So specific postprocessors are available to compute these quantities without the need for sampling.
+This section will go over how to set up an input file to evaluate and perform statistical analysis on a trained [polynomial chaos surrogate](PolynomialChaos.md). The polynomial chaos surrogate is unique in that it is able to compute statistical moments and sensitivities analytically. Specific postprocessors are available to compute these quantities without the need for sampling.
 
 !include surrogate_training.md start=omitting_solve_begin end=omitting_solve_finish replace=['nearest_point_training', 'poly_chaos_uniform']
 
@@ -109,7 +119,7 @@ Sobol statistics are a metric of the global sensitivity of each parameter, or a 
 
 ## Results and Analysis
 
-In this section, we show the results of training and evaluation of the surrogate model as described in the previous sections. We also show a convergence study of the polynomial chaos training, including analysis of sampling and polynomial order.
+In this section, the results of training and evaluation of the surrogate model as described in the previous sections is shown. A convergence study of the polynomial chaos training, including analysis of sampling and polynomial order, is also provided.
 
 ### Evaluation Results
 
@@ -138,7 +148,7 @@ where $u$ is either $\bar{T}$ or $T_{\max}$, $\xi_p$ is $k$, $q$, $L$, or $T_{\i
 
 ### Sobol Statistics Results
 
-[sobol_stats] shows the results of computing sobol statistics for average temperature and uniform paramter distributions (the other surrogates produced very similar statistics). In the plot, the x axis represents the first index subscript and the y axis represents the second. As can be seen, the statistics are symmetric, i.e. it does not matter the order of the index subscripts.
+[sobol_stats] shows the results of computing Sobol statistics for average temperature and uniform parameter distributions (the other surrogates produced very similar statistics). In the plot, the x axis represents the first index subscript and the y axis represents the second. As can be seen, the statistics are symmetric, i.e. it does not matter the order of the index subscripts.
 
 !plot scatter id=sobol_stats caption=Average temperature Sobol statistics results uniform parameter distribution
   data=[{
@@ -155,7 +165,7 @@ where $u$ is either $\bar{T}$ or $T_{\max}$, $\xi_p$ is $k$, $q$, $L$, or $T_{\i
 
 ### Sampling Analysis
 
-Here we show the effect of various sampling techniques on the training of a polynomial chaos surrogate. Three different types of samplers were used: Monte Carlo, tensor quadrature, and Smolyak sparse quadrature. Monte Carlo was run with increasing number of samples and the quadrature was run with increasing order. Not that the polynomial expansion order was set constant. The performance metric is the error in the mean and standard deviation versus the number of total training points. [samp_avg_uniform]-[samp_max_normal] show the results of this study for each quantity of interest and each parameter distribution. It should be noted that the uniform distributions ([samp_avg_uniform] and [samp_max_uniform]) have an analytical mean and standard deviation, which is why there is nice convergence. However, the normal distributions ([samp_avg_normal] and [samp_max_normal]) use numerical integration to compute the reference mean and standard deviation, which is why there is a more spurious convergence at low errors.
+Here the effect of various sampling techniques on the training of a polynomial chaos surrogate is shown. Three different types of samplers were used: Monte Carlo, tensor quadrature, and Smolyak sparse quadrature. Monte Carlo was run with increasing number of samples and the quadrature was run with increasing order. Note, the polynomial expansion order was set constant. The performance metric is the error in the mean and standard deviation versus the number of total training points. [samp_avg_uniform]-[samp_max_normal] show the results of this study for each quantity of interest and each parameter distribution. The uniform distributions ([samp_avg_uniform] and [samp_max_uniform]) have an analytical mean and standard deviation, which is why there is nice convergence. However, the normal distributions ([samp_avg_normal] and [samp_max_normal]) use numerical integration to compute the reference mean and standard deviation, which is why there is a more spurious convergence at low errors.
 
 !plot scatter id=samp_avg_uniform caption=Sample convergence for moments of average temperature with uniform parameter distributions
   filename=examples/surrogates/gold/poly_chaos_avg_uniform_results.csv
@@ -203,7 +213,7 @@ Here we show the effect of various sampling techniques on the training of a poly
 
 ### Polynomial Order Analysis
 
-Here we present the effect of polynomial expansion order on the accuracy of the surrogate model. Again, our performance metric is the error in the mean and standard deviation versus the number of total training points. We range the maximum polynomial order from 3 to 9, where the tensor quadrature sampler order matches (which is generally advisable in any case). [ord_uniform] shows the result of the convergence study with a uniform distribution. Normal distribution was omitted since there is no analytical reference.
+The effect of polynomial expansion order on the accuracy of the surrogate model is shown here. Again, the performance metric is the error in the mean and standard deviation versus the number of total training points. The maximum polynomial order is ranged from 3 to 9, where the tensor quadrature sampler order matches (which is generally advisable in any case). [ord_uniform] shows the result of the convergence study with a uniform distribution. Normal distribution was omitted since there is no analytical reference.
 
 !plot scatter id=ord_uniform caption=Polynomial order convergence for moments of maximum and average temperature with uniform parameter distributions
   filename=examples/surrogates/gold/poly_chaos_order_uniform_results.csv

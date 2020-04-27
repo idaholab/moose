@@ -1,10 +1,10 @@
 # Creating a Surrogate Model
 
-This example goes through the process of creating a custom surrogate model. As an example, this go through the creation of [NearestPointSurrogate.md].
+This example goes through the process of creating a custom surrogate model, in his case the creation of [NearestPointSurrogate.md].
 
 ## Overview
 
-Building a surrogate model requires the creation of two objects: SurrogateTrainer and Surrogate. The SurrogateTrainer uses information from samplers and results to construct variables to be saved into a `.rd` at the conclusion of the training run. The Surrogate object loads the data from the `.rd` and contains a function called `evaluate` that evaluates the surrogate model at a given input. The SurrogateTrainer and Surrogate are heavily tied together where each have the same member variables, the difference being one saves the data and the other loads it. It might be beneficial to have an interface class that contains common functions for training and evaluating, to avoid duplicate code. This example will not go into the creation of this interface class.
+Building a surrogate model requires the creation of two objects: SurrogateTrainer and SurrogateModel. The SurrogateTrainer uses information from samplers and results to construct variables to be saved into a `.rd` file at the conclusion of the training run. The SurrogateMode object loads the data from the `.rd` and contains a function called `evaluate` that evaluates the surrogate model at a given input. The SurrogateTrainer and Surrogate are heavily tied together where each have the same member variables, the difference being one saves the data and the other loads it. It might be beneficial to have an interface class that contains common functions for training and evaluating, to avoid duplicate code. This example will not go into the creation of this interface class.
 
 ## Creating a Trainer
 
@@ -18,11 +18,11 @@ Typically, the trainer requires the input of a sampler, so that it understands w
 
 ### Constructor
 
-All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data. All the data meant to be saved is defined in the contructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variable `_sample_points` is declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data:
+All trainers are based on SurrogateTrainer, which provides the necessary interface for saving the surrogate model data. All the data meant to be saved is defined in the constructor of the training object. In [NearestPointTrainer](NearestPointTrainer.md), the variable `_sample_points` is declared as the necessary surrogate data, see [Trainers](Trainers/index.md) for more information on declaring model data:
 
 !listing NearestPointTrainer.C re=NearestPointTrainer::NearestPointTrainer.*?^}
 
-The definition of `_sample_points` is defined in the header file:
+The member variable `_sample_points` is defined in the header file:
 
 !listing NearestPointTrainer.h start=_sample_points end=_sample_points include-end=true
 
@@ -38,7 +38,7 @@ Since [UserObjects](UserObjects/index.md) are constructed before [Samplers](Samp
 
 ### initialize
 
-`initialize` is called before `execute` is called for all [UserObjects](UserObjects/index.md). For [NearestPointTrainer.md], we've chosen to check the size of the sampler and vector postprocessor and resize `_sample_points` appropriately:
+`initialize` is called before `execute` is called for all [UserObjects](UserObjects/index.md). For [NearestPointTrainer.md], a check of the size of the sampler is performed and vector postprocessor and resize `_sample_points` appropriately:
 
 !listing NearestPointTrainer.C re=void\sNearestPointTrainer::initialize.*?^}
 
@@ -46,11 +46,11 @@ Note that `getNumberOfRows()` is used to size the array, this is so that each pr
 
 ### execute
 
-`execute` is where the actual training occurs. Here, we loop through the local processor's samples and gather the parameter data and the results:
+`execute` is where the actual training occurs. Here, a loop through the local processor's samples is performed to gather the parameter data and results:
 
 !listing NearestPointTrainer.C re=void\sNearestPointTrainer::execute.*?^}
 
-Note that the `offset` variable is defined by whether or not the vector postprocessor values are distributed. Also, the `ind` variable defines the offset for saving the distributed samples.
+The `offset` variable is defined by whether or not the vector postprocessor values are distributed. Also, the `ind` variable defines the offset for saving the distributed samples.
 
 ### finalize
 
@@ -60,7 +60,7 @@ Note that the `offset` variable is defined by whether or not the vector postproc
 
 ## Creating a Surrogate
 
-This example will go over the creation of [NearestPointSurrogate](NearestPointSurrogate.md). [Surrogates](Surrogates/index.md) are a specialized version of a [GeneralUserObject.md] who must have the `evaluate` public member function. The `validParams` for a surrogate will generally define how the surrogate is evaluated. [NearestPointSurrogate.md] does not have any options for the method of evaluation.
+This example will go over the creation of [NearestPointSurrogate](NearestPointSurrogate.md). [Surrogates](Surrogates/index.md) are a specialized version of a [GeneralUserObject.md] that must have the `evaluate` public member function. The `validParams` for a surrogate will generally define how the surrogate is evaluated. [NearestPointSurrogate.md] does not have any options for the method of evaluation.
 
 ### Constructor
 
@@ -68,7 +68,7 @@ In the constructor, the references for the model data are defined, taken from th
 
 !listing NearestPointSurrogate.C re=NearestPointSurrogate::NearestPointSurrogate.*?^}
 
-See [Surrogates](Surrogates/index.md) for more information on the `getModelData` function. `_sample_points` in the surrogate is a const reference, since we do not want to modify the training data during evaluation:
+See [Surrogates](Surrogates/index.md) for more information on the `getModelData` function. `_sample_points` in the surrogate is a `const` reference, since we do not want to modify the training data during evaluation:
 
 !listing NearestPointSurrogate.h start=/// Array end=sample_points include-end=true
 
