@@ -1,0 +1,19 @@
+[Tests]
+  design = 'INSADBoussinesqBodyForce.md'
+  issues = '#15099'
+  [exo]
+    type = Exodiff
+    input = boussinesq_square.i
+    exodiff = boussinesq_square_out.e
+    requirement = 'The system shall be able to simulate natural convection by adding the Boussinesq approximation to the incompressible Navier-Stokes equations.'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = boussinesq_square.i
+    run_sim = True
+    difference_tol = 1e-6
+    ratio_tol = 1e-7
+    cli_args = 'Mesh/gen/nx=4 Mesh/gen/ny=4'
+    requirement = 'The system shall have an accurate Jacobian provided by automatic differentiation when computing the Boussinesq approximation.'
+  []
+[]
