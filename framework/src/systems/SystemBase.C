@@ -1233,10 +1233,10 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
   auto & faces = mesh().faceInfo();
   for (auto & p : faces)
   {
-    // get left & right elements, and set subdomain ids
-    const Elem & left_elem = p.leftElem();
+    // get elem & right elements, and set subdomain ids
+    const Elem & elem_elem = p.elemElem();
     const Elem * right_elem = p.rightElemPtr();
-    SubdomainID left_subdomain_id = left_elem.subdomain_id();
+    SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
     SubdomainID right_subdomain_id = Elem::invalid_subdomain_id;
     if (right_elem)
       right_subdomain_id = right_elem->subdomain_id();
@@ -1255,15 +1255,15 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
         var_subdomains = _mesh.meshSubdomains();
 
       // first stash away DoF information; this is more difficult than you would
-      // think because var can be defined on the left subdomain, the right subdomain
+      // think because var can be defined on the elem subdomain, the right subdomain
       // or both subdomains
-      // left
-      std::vector<dof_id_type> left_dof_indices;
-      if (var_subdomains.find(left_subdomain_id) != var_subdomains.end())
-        var->getDofIndices(&left_elem, left_dof_indices);
+      // elem
+      std::vector<dof_id_type> elem_dof_indices;
+      if (var_subdomains.find(elem_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(&elem_elem, elem_dof_indices);
       else
-        left_dof_indices = {libMesh::DofObject::invalid_id};
-      p.leftDofIndices(var_name) = left_dof_indices;
+        elem_dof_indices = {libMesh::DofObject::invalid_id};
+      p.elemDofIndices(var_name) = elem_dof_indices;
       // right
       std::vector<dof_id_type> right_dof_indices;
       if (right_elem && var_subdomains.find(right_subdomain_id) != var_subdomains.end())
@@ -1275,22 +1275,22 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
       /**
        * The following paragraph of code assigns the VarFaceNeighbors
        * 1. The face is an internal face of this variable if it is defined on
-       *    the left and right subdomains
+       *    the elem and right subdomains
        * 2. The face is an invalid face of this variable if it is neither defined
-       *    on the left nor the right subdomains
+       *    on the elem nor the right subdomains
        * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
        *    applies
        */
-      bool var_defined_left = var_subdomains.find(left_subdomain_id) != var_subdomains.end();
+      bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
       bool var_defined_right = var_subdomains.find(right_subdomain_id) != var_subdomains.end();
-      if (var_defined_left && var_defined_right)
+      if (var_defined_elem && var_defined_right)
         p.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
-      else if (!var_defined_left && !var_defined_right)
+      else if (!var_defined_elem && !var_defined_right)
         p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
       else
       {
-        // this is a boundary face for this variable, set left or right
-        if (var_defined_left)
+        // this is a boundary face for this variable, set elem or right
+        if (var_defined_elem)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::LEFT;
         else if (var_defined_right)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::RIGHT;

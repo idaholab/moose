@@ -29,9 +29,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     Coupleable(this, false),
     _face_id(declareVector("id")),
     _face_area(declareVector("area")),
-    _left_element_id(declareVector("left_elem")),
+    _elem_element_id(declareVector("elem_elem")),
     _right_element_id(declareVector("right_elem")),
-    _left_element_side(declareVector("left_side")),
+    _elem_element_side(declareVector("elem_side")),
     _right_element_side(declareVector("right_side")),
     _nx(declareVector("nx")),
     _ny(declareVector("ny")),
@@ -39,9 +39,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     _face_cx(declareVector("face_cx")),
     _face_cy(declareVector("face_cy")),
     _face_cz(declareVector("face_cz")),
-    _left_cx(declareVector("left_cx")),
-    _left_cy(declareVector("left_cy")),
-    _left_cz(declareVector("left_cz")),
+    _elem_cx(declareVector("elem_cx")),
+    _elem_cy(declareVector("elem_cy")),
+    _elem_cz(declareVector("elem_cz")),
     _right_cx(declareVector("right_cx")),
     _right_cy(declareVector("right_cy")),
     _right_cz(declareVector("right_cz"))
@@ -51,9 +51,9 @@ TestFaceInfo::TestFaceInfo(const InputParameters & parameters)
     _vars = getParam<std::vector<VariableName>>("vars");
     for (auto & v : _vars)
     {
-      _var_left_dof.push_back(&declareVector(v + "_left"));
+      _var_elem_dof.push_back(&declareVector(v + "_elem"));
       _var_right_dof.push_back(&declareVector(v + "_right"));
-      _var_left_dof_size.push_back(&declareVector(v + "_size_left"));
+      _var_elem_dof_size.push_back(&declareVector(v + "_size_elem"));
       _var_right_dof_size.push_back(&declareVector(v + "_size_right"));
       _var_face_type.push_back(&declareVector(v + "_face_type"));
     }
@@ -68,8 +68,8 @@ TestFaceInfo::execute()
   {
     _face_id.push_back(j);
     _face_area.push_back(p.faceArea());
-    _left_element_id.push_back(p.leftElem().id());
-    _left_element_side.push_back(p.leftSideID());
+    _elem_element_id.push_back(p.elemElem().id());
+    _elem_element_side.push_back(p.elemSideID());
     // the right element might be a nullptr
     if (!p.rightElemPtr())
       _right_element_id.push_back(Elem::invalid_id);
@@ -84,10 +84,10 @@ TestFaceInfo::execute()
     _face_cx.push_back(fc(0));
     _face_cy.push_back(fc(1));
     _face_cz.push_back(fc(2));
-    Point lc = p.leftCentroid();
-    _left_cx.push_back(lc(0));
-    _left_cy.push_back(lc(1));
-    _left_cz.push_back(lc(2));
+    Point lc = p.elemCentroid();
+    _elem_cx.push_back(lc(0));
+    _elem_cy.push_back(lc(1));
+    _elem_cz.push_back(lc(2));
     Point rc = p.rightCentroid();
     _right_cx.push_back(rc(0));
     _right_cy.push_back(rc(1));
@@ -95,9 +95,9 @@ TestFaceInfo::execute()
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {
-      auto & dofs = p.leftDofIndices(_vars[l]);
-      _var_left_dof[l]->push_back(dofs[0]);
-      _var_left_dof_size[l]->push_back(dofs.size());
+      auto & dofs = p.elemDofIndices(_vars[l]);
+      _var_elem_dof[l]->push_back(dofs[0]);
+      _var_elem_dof_size[l]->push_back(dofs.size());
       dofs = p.rightDofIndices(_vars[l]);
       _var_right_dof[l]->push_back(dofs[0]);
       _var_right_dof_size[l]->push_back(dofs.size());

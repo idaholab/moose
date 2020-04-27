@@ -32,9 +32,9 @@ public:
 protected:
   VectorPostprocessorValue & _face_id;
   VectorPostprocessorValue & _face_area;
-  VectorPostprocessorValue & _left_element_id;
+  VectorPostprocessorValue & _elem_element_id;
   VectorPostprocessorValue & _right_element_id;
-  VectorPostprocessorValue & _left_element_side;
+  VectorPostprocessorValue & _elem_element_side;
   VectorPostprocessorValue & _right_element_side;
   VectorPostprocessorValue & _nx;
   VectorPostprocessorValue & _ny;
@@ -42,17 +42,17 @@ protected:
   VectorPostprocessorValue & _face_cx;
   VectorPostprocessorValue & _face_cy;
   VectorPostprocessorValue & _face_cz;
-  VectorPostprocessorValue & _left_cx;
-  VectorPostprocessorValue & _left_cy;
-  VectorPostprocessorValue & _left_cz;
+  VectorPostprocessorValue & _elem_cx;
+  VectorPostprocessorValue & _elem_cy;
+  VectorPostprocessorValue & _elem_cz;
   VectorPostprocessorValue & _right_cx;
   VectorPostprocessorValue & _right_cy;
   VectorPostprocessorValue & _right_cz;
 
   std::vector<VariableName> _vars;
-  std::vector<VectorPostprocessorValue *> _var_left_dof;
+  std::vector<VectorPostprocessorValue *> _var_elem_dof;
   std::vector<VectorPostprocessorValue *> _var_right_dof;
-  std::vector<VectorPostprocessorValue *> _var_left_dof_size;
+  std::vector<VectorPostprocessorValue *> _var_elem_dof_size;
   std::vector<VectorPostprocessorValue *> _var_right_dof_size;
   std::vector<VectorPostprocessorValue *> _var_face_type;
 };

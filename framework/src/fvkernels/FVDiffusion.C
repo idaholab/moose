@@ -13,7 +13,7 @@ FVDiffusion::validParams()
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _coeff_left(getADMaterialProperty<Real>("coeff")),
+    _coeff_elem(getADMaterialProperty<Real>("coeff")),
     _coeff_right(getNeighborADMaterialProperty<Real>("coeff"))
 {
 }
@@ -27,7 +27,7 @@ FVDiffusion::computeQpResidual()
   // input parameters to change between different interpolation methods for
   // this.
   ADReal k;
-  interpolate(InterpMethod::Average, k, _coeff_left[_qp], _coeff_right[_qp]);
+  interpolate(InterpMethod::Average, k, _coeff_elem[_qp], _coeff_right[_qp]);
 
   return -1 * k * dudn;
 }

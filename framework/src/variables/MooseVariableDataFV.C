@@ -569,7 +569,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     // in this case, we are on a boundary for this variable where a
     // flux boundary condition may be applied; in the FVFluxBC class
     // switching between _u and _u_neighbor is tedious so it's best
-    // to make the value on left and right the same
+    // to make the value on elem and right the same
     // TODO: make sure DirichletBC and FluxBC are _not_ defined on
     // the same sideset
     DualReal u_other;

@@ -64,14 +64,14 @@ static const int GRAIN_SIZE =
 
 FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
 {
-  _left = elem;
+  _elem = elem;
   _right = neighbor;
 
-  _left_side_id = side;
-  _left_centroid = elem->centroid();
-  _left_volume = elem->volume();
+  _elem_side_id = side;
+  _elem_centroid = elem->centroid();
+  _elem_volume = elem->volume();
 
-  std::unique_ptr<const Elem> face = elem->build_side_ptr(_left_side_id);
+  std::unique_ptr<const Elem> face = elem->build_side_ptr(_elem_side_id);
   _face_area = face->volume();
 
   // 1. compute face centroid
@@ -87,7 +87,7 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   const std::vector<Point> & normals = fe->get_normals();
   const std::vector<Point> & xyz = fe->get_xyz();
 
-  fe->reinit(elem, _left_side_id);
+  fe->reinit(elem, _elem_side_id);
   Point average_normal;
   Point face_centroid;
   for (unsigned int j = 0; j < JxW.size(); ++j)
@@ -105,8 +105,8 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   if (!_right)
   {
     _right_side_id = std::numeric_limits<unsigned int>::max();
-    _right_centroid = 2 * (_face_centroid - _left_centroid) + _left_centroid;
-    _right_volume = _left_volume;
+    _right_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
+    _right_volume = _elem_volume;
   }
   else
   {
@@ -3017,7 +3017,7 @@ MooseMesh::buildFaceInfo()
         std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
         boundary_ids.clear();
 
-        auto lit = side_map.find(Keytype(&fi.leftElem(), fi.leftSideID()));
+        auto lit = side_map.find(Keytype(&fi.elemElem(), fi.elemSideID()));
         if (lit != side_map.end())
           boundary_ids.insert(lit->second.begin(), lit->second.end());
 

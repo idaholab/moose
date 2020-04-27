@@ -97,7 +97,7 @@ public:
   /// Returns the face area of face id
   Real faceArea() const { return _face_area; }
 
-  /// Returns the unit normal vector for the face oriented outward from the face's left element.
+  /// Returns the unit normal vector for the face oriented outward from the face's elem element.
   const Point & normal() const { return _normal; }
 
   /// Returns true if this face resides on the mesh boundary.
@@ -107,10 +107,10 @@ public:
   const Point & faceCentroid() const { return _face_centroid; }
 
   ///@{
-  /// Returns the left and right elements adjacent to the face.
+  /// Returns the elem and right elements adjacent to the face.
   /// If a face is on a mesh boundary, the rightElemPtr
-  /// will return nullptr - the left will never be null.
-  const Elem & leftElem() const { return *_left; }
+  /// will return nullptr - the elem will never be null.
+  const Elem & elemElem() const { return *_elem; }
   const Elem * rightElemPtr() const { return _right; }
   const Elem & rightElem() const
   {
@@ -121,36 +121,36 @@ public:
   }
   ///@}
 
-  /// Returns the element centroids of the elements on the left and right sides of the face.
+  /// Returns the element centroids of the elements on the elem and right sides of the face.
   /// If no right face is defined, a "ghost" right centroid is calculated by
-  /// reflecting/extrapolating from the left centroid through the face centroid
-  /// - i.e. the vector from the left element centroid to the face centroid is
+  /// reflecting/extrapolating from the elem centroid through the face centroid
+  /// - i.e. the vector from the elem element centroid to the face centroid is
   /// doubled in length.  The tip of this new vector is the right centroid.
   /// This is important for FV dirichlet BCs.
-  const Point & leftCentroid() const { return _left_centroid; }
+  const Point & elemCentroid() const { return _elem_centroid; }
   const Point & rightCentroid() const { return _right_centroid; }
   ///@}
 
   ///@{
-  /// Returns the left and right centroids. If no right element exists, then
+  /// Returns the elem and right centroids. If no right element exists, then
   /// the maximum unsigned int is returned for the right side ID.
-  unsigned int leftSideID() const { return _left_side_id; }
+  unsigned int elemSideID() const { return _elem_side_id; }
   unsigned int rightSideID() const { return _right_side_id; }
   ///@}
 
   ///@{
   /// This is just a convenient cache of DOF indices (into the solution
   /// vector) associated with each variable on this face.
-  const std::vector<dof_id_type> & leftDofIndices(const std::string & var_name) const
+  const std::vector<dof_id_type> & elemDofIndices(const std::string & var_name) const
   {
-    auto it = _left_dof_indices.find(var_name);
-    if (it == _left_dof_indices.end())
+    auto it = _elem_dof_indices.find(var_name);
+    if (it == _elem_dof_indices.end())
       mooseError("Variable ", var_name, " not found in FaceInfo object");
     return it->second;
   }
-  std::vector<dof_id_type> & leftDofIndices(const std::string & var_name)
+  std::vector<dof_id_type> & elemDofIndices(const std::string & var_name)
   {
-    return _left_dof_indices[var_name];
+    return _elem_dof_indices[var_name];
   }
   const std::vector<dof_id_type> & rightDofIndices(const std::string & var_name) const
   {
@@ -182,25 +182,25 @@ public:
 
 private:
   Real _face_area;
-  Real _left_volume;
+  Real _elem_volume;
   Real _right_volume;
   Point _normal;
 
-  /// the left and right elems
-  const Elem * _left;
+  /// the elem and right elems
+  const Elem * _elem;
   const Elem * _right;
 
-  /// the left and right local side ids
-  unsigned int _left_side_id;
+  /// the elem and right local side ids
+  unsigned int _elem_side_id;
   unsigned int _right_side_id;
 
-  Point _left_centroid;
+  Point _elem_centroid;
   Point _right_centroid;
   Point _face_centroid;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible
-  std::map<std::string, std::vector<dof_id_type>> _left_dof_indices;
+  std::map<std::string, std::vector<dof_id_type>> _elem_dof_indices;
   std::map<std::string, std::vector<dof_id_type>> _right_dof_indices;
 
   /// a map that provides the information what face type this is for each variable

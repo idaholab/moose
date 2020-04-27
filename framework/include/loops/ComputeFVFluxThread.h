@@ -91,8 +91,8 @@ public:
   /// is called for the face.
   virtual void onBoundary(const FaceInfo & fi, BoundaryID boundary) = 0;
 
-  /// Called every time the current subdomain changes (i.e. the subdomain of *this* face's left element
-  /// is not the same as the subdomain of the last face's left element).
+  /// Called every time the current subdomain changes (i.e. the subdomain of *this* face's elem element
+  /// is not the same as the subdomain of the last face's elem element).
   virtual void subdomainChanged(){};
 
   /// Called every time the neighbor subdomain changes (i.e. the subdomain of *this* face's right element
@@ -174,7 +174,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       typename RangeType::const_iterator faceinfo = range.begin();
       for (faceinfo = range.begin(); faceinfo != range.end(); ++faceinfo)
       {
-        const Elem & elem = faceinfo->leftElem();
+        const Elem & elem = faceinfo->elemElem();
 
         _old_subdomain = _subdomain;
         _subdomain = elem.subdomain_id();
@@ -278,12 +278,12 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // be some stuff that happens in assembly::reinit/reinitFE that we need, but
   // most of that is (obviously) FE specific.  Also - we need to fall back to
   // reiniting everything like normal if there is any FV-FE variable coupling.
-  _fe_problem.prepare(&fi.leftElem(), _tid);
-  //_fe_problem.reinitElem(&fi.leftElem(), _tid);
+  _fe_problem.prepare(&fi.elemElem(), _tid);
+  //_fe_problem.reinitElem(&fi.elemElem(), _tid);
 
   // I'm not sure of any other way to get the qRuleFace to be initialized
   // other than this direct call.  How does it work for DG?
-  _fe_problem.assembly(_tid).reinit(&fi.leftElem(), fi.leftSideID());
+  _fe_problem.assembly(_tid).reinit(&fi.elemElem(), fi.elemSideID());
 
   // TODO: this triggers a bunch of FE-specific stuff to occur that we might
   // not need if only FV variables are active.  Some of the stuff triggered by
@@ -291,7 +291,7 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   // Figure out a way to only do the minimum required here if we only have FV
   // variables.
   if (!fi.isBoundary())
-    _fe_problem.reinitNeighbor(&fi.leftElem(), fi.leftSideID(), _tid);
+    _fe_problem.reinitNeighbor(&fi.elemElem(), fi.elemSideID(), _tid);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -310,8 +310,8 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 
   // TODO: do we really need both reinitMaterials and reinitMaterialsFace? - I
   // think we do need both.
-  _fe_problem.reinitMaterials(fi.leftElem().subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
+  _fe_problem.reinitMaterials(fi.elemElem().subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsFace(fi.elemElem().subdomain_id(), _tid);
 
   if (!fi.isBoundary())
     _fe_problem.reinitMaterialsNeighbor(fi.rightElem().subdomain_id(), _tid);
@@ -391,7 +391,7 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
 
   // boundary faces only border one element and so only contribute to one element's residual
   // and we only need to reinit the one side.
-  _fe_problem.reinitMaterialsFace(fi.leftElem().subdomain_id(), _tid);
+  _fe_problem.reinitMaterialsFace(fi.elemElem().subdomain_id(), _tid);
   _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
   for (const auto & bc : bcs)
