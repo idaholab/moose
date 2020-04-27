@@ -1,4 +1,4 @@
-id,area,left_elem,right_elem,left_side,right_side,nx,ny,nz,face_cx,face_cy,face_cz,left_cx,left_cy,left_cz,right_cx,right_cy,right_cz,u_left,u_right,u_size_left,u_size_right,u_face_type
+id,area,elem_elem,neighbor_elem,elem_side,neighbor_side,nx,ny,nz,face_cx,face_cy,face_cz,elem_cx,elem_cy,elem_cz,neighbor_cx,neighbor_cy,neighbor_cz,u_elem,u_neighbor,u_size_elem,u_size_neighbor,u_face_type
 0,1,0,4294967295,0,0,0,-1,0,0.5,0,0,0.5,0.5,0,0.5,-0.5,0,0,4294967295,1,1,2
 1,1,0,1,1,0,1,0,0,1,0.5,0,0.5,0.5,0,1.5,0.5,0,0,4294967295,1,1,2
 2,1,0,2,2,0,0,1,0,0.5,1,0,0.5,0.5,0,0.5,1.5,0,0,4294967295,1,1,2
