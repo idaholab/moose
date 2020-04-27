@@ -10,14 +10,8 @@
 #pragma once
 
 #include "DerivativeFunctionMaterialBase.h"
-
-// Forward Declaration
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 /**
  * Material class to compute the elastic free energy and its derivatives

@@ -11,6 +11,8 @@
 
 #include "Moose.h"
 #include "ADReal.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -110,14 +112,6 @@ _MooseIndex(T, double) = delete;
  */
 template <typename>
 class MooseArray;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 template <typename>
 class MaterialProperty;
 template <typename>

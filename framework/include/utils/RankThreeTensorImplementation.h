@@ -29,9 +29,9 @@
 namespace MathUtils
 {
 template <>
-void mooseSetToZero<RankThreeTensorTempl<Real>>(RankThreeTensorTempl<Real> & v);
+void mooseSetToZero<RankThreeTensor>(RankThreeTensor & v);
 template <>
-void mooseSetToZero<RankThreeTensorTempl<DualReal>>(RankThreeTensorTempl<DualReal> & v);
+void mooseSetToZero<ADRankThreeTensor>(ADRankThreeTensor & v);
 }
 
 template <typename T>

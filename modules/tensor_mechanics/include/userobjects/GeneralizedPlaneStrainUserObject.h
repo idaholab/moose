@@ -11,13 +11,9 @@
 
 #include "ElementUserObject.h"
 #include "SubblockIndexProvider.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
 class Function;
 
 class GeneralizedPlaneStrainUserObject : public ElementUserObject

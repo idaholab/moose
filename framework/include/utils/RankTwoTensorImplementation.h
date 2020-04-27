@@ -37,9 +37,9 @@ constexpr Real RankTwoTensorTempl<T>::identityCoords[];
 namespace MathUtils
 {
 template <>
-void mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v);
+void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
 template <>
-void mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v);
+void mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v);
 }
 
 template <typename T>
@@ -717,16 +717,16 @@ RankTwoTensorTempl<T>::print(std::ostream & stm) const
 
 template <>
 void
-RankTwoTensorTempl<Real>::printReal(std::ostream & stm) const
+RankTwoTensor::printReal(std::ostream & stm) const
 {
   this->print(stm);
 }
 
 template <>
 void
-RankTwoTensorTempl<DualReal>::printReal(std::ostream & stm) const
+ADRankTwoTensor::printReal(std::ostream & stm) const
 {
-  const RankTwoTensorTempl<DualReal> & a = *this;
+  const ADRankTwoTensor & a = *this;
   for (unsigned int i = 0; i < N; ++i)
   {
     for (unsigned int j = 0; j < N; ++j)
@@ -737,9 +737,9 @@ RankTwoTensorTempl<DualReal>::printReal(std::ostream & stm) const
 
 template <>
 void
-RankTwoTensorTempl<DualReal>::printDualReal(unsigned int nDual, std::ostream & stm) const
+ADRankTwoTensor::printDualReal(unsigned int nDual, std::ostream & stm) const
 {
-  const RankTwoTensorTempl<DualReal> & a = *this;
+  const ADRankTwoTensor & a = *this;
   for (unsigned int i = 0; i < N; ++i)
   {
     for (unsigned int j = 0; j < N; ++j)
@@ -801,9 +801,9 @@ RankTwoTensorTempl<T>::syev(const char *, std::vector<T> &, std::vector<T> &) co
 
 template <>
 void
-RankTwoTensorTempl<Real>::syev(const char * calculation_type,
-                               std::vector<Real> & eigvals,
-                               std::vector<Real> & a) const
+RankTwoTensor::syev(const char * calculation_type,
+                    std::vector<Real> & eigvals,
+                    std::vector<Real> & a) const
 {
   eigvals.resize(N);
   a.resize(N * N);
@@ -842,7 +842,7 @@ RankTwoTensorTempl<T>::symmetricEigenvalues(std::vector<T> & eigvals) const
 
 template <>
 void
-RankTwoTensorTempl<Real>::symmetricEigenvalues(std::vector<Real> & eigvals) const
+RankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
 {
   std::vector<Real> a;
   syev("N", eigvals, a);
@@ -859,8 +859,8 @@ RankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> &,
 
 template <>
 void
-RankTwoTensorTempl<Real>::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
-                                                           RankTwoTensorTempl<Real> & eigvecs) const
+RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
+                                                RankTwoTensor & eigvecs) const
 {
   std::vector<Real> a;
   syev("V", eigvals, a);
@@ -872,13 +872,13 @@ RankTwoTensorTempl<Real>::symmetricEigenvaluesEigenvectors(std::vector<Real> & e
 
 template <>
 void
-RankTwoTensorTempl<DualReal>::symmetricEigenvaluesEigenvectors(
-    std::vector<DualReal> & eigvals, RankTwoTensorTempl<DualReal> & eigvecs) const
+ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigvals,
+                                                  ADRankTwoTensor & eigvecs) const
 {
   const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
 
   eigvals.resize(N);
-  RankTwoTensorTempl<DualReal> D, Q, R;
+  ADRankTwoTensor D, Q, R;
   this->hessenberg(D, eigvecs);
 
   unsigned int iter = 0;
@@ -989,9 +989,7 @@ RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q,
 
 template <>
 void
-RankTwoTensorTempl<Real>::QR(RankTwoTensorTempl<Real> & Q,
-                             RankTwoTensorTempl<Real> & R,
-                             unsigned int dim) const
+RankTwoTensor::QR(RankTwoTensor & Q, RankTwoTensor & R, unsigned int dim) const
 {
   R = *this;
   Q.zero();
@@ -1001,7 +999,7 @@ RankTwoTensorTempl<Real>::QR(RankTwoTensorTempl<Real> & Q,
     for (unsigned int b = dim - 1; b > i; b--)
     {
       unsigned int a = b - 1;
-      RankTwoTensorTempl<Real> CS = R.givensRotation(a, b, i);
+      RankTwoTensor CS = R.givensRotation(a, b, i);
       R = CS * R;
       Q = Q * CS.transpose();
     }
@@ -1092,10 +1090,10 @@ RankTwoTensorTempl<T>::getRUDecompositionRotation(RankTwoTensorTempl<T> &) const
 
 template <>
 void
-RankTwoTensorTempl<Real>::getRUDecompositionRotation(RankTwoTensorTempl<Real> & rot) const
+RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
 {
-  const RankTwoTensorTempl<Real> & a = *this;
-  RankTwoTensorTempl<Real> c, diag, evec;
+  const RankTwoTensor & a = *this;
+  RankTwoTensor c, diag, evec;
   PetscScalar cmat[N][N], work[10];
   PetscReal w[N];
 

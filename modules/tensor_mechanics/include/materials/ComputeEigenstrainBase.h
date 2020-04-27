@@ -10,10 +10,7 @@
 #pragma once
 
 #include "Material.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 /**
  * ComputeEigenstrainBase is the base class for eigenstrain tensors

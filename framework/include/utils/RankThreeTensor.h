@@ -10,7 +10,9 @@
 #pragma once
 
 #include "Moose.h"
-#include "ADRealForward.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankThreeTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 #include "libmesh/libmesh.h"
 
@@ -29,14 +31,6 @@ class VectorValue;
 
 // Forward declarations
 class MooseEnum;
-template <typename>
-class RankThreeTensorTempl;
-
-template <typename>
-class RankTwoTensorTempl;
-
-template <typename>
-class RankFourTensorTempl;
 
 namespace MathUtils
 {
@@ -249,10 +243,6 @@ struct RawType<RankThreeTensorTempl<T>>
   }
 };
 }
-
-typedef RankThreeTensorTempl<Real> RankThreeTensor;
-typedef RankThreeTensorTempl<DualReal> DualRankThreeTensor;
-typedef RankThreeTensorTempl<ADReal> ADRankThreeTensor;
 
 template <typename T>
 template <typename T2>

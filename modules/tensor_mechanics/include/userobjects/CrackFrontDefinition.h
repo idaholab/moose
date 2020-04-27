@@ -13,11 +13,9 @@
 #include "CrackFrontPointsProvider.h"
 #include "BoundaryRestrictable.h"
 #include <set>
+#include "ADRankTwoTensorForward.h"
 
 class AuxiliarySystem;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 // libMesh forward declarations
 namespace libMesh

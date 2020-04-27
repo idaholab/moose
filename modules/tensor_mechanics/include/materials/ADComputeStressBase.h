@@ -11,15 +11,8 @@
 
 #include "ADMaterial.h"
 #include "Function.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 /**
  * ADComputeStressBase is the base class for stress tensors

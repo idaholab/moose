@@ -10,12 +10,10 @@
 #pragma once
 
 #include "Material.h"
+#include "RankTwoTensorForward.h"
 
 // Forward Declarations
 class GlobalStrainUserObjectInterface;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 /**
  * ComputeGlobalStrain calculates the global strain tensor from the scalar variables

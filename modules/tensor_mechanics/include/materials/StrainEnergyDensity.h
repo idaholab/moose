@@ -11,10 +11,7 @@
 
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 /**
  * StrainEnergyDensity calculates the strain energy density.
