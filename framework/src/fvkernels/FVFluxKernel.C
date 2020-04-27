@@ -46,7 +46,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
   // They are equal in magnitude but opposite in direction due to the outward
   // facing unit normals of the face for each neighboring elements being
   // oriented oppositely.  We calculate the residual contribution once using
-  // the elem-elem-oriented _normal and just use the resulting residual's
+  // the lower-id-elem-oriented _normal and just use the resulting residual's
   // negative for the contribution to the neighbor element.
 
   // The fancy face type if condition checks here are because we might
@@ -108,11 +108,12 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
     accumulateTaggedLocalMatrix();
 
-    mooseAssert((ft == FaceInfo::VarFaceNeighbors::LEFT) == (_var.dofIndicesNeighbor().size() == 0),
-                "If the variable is only defined on the elem hand side of the face, then that "
-                "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
-                "the variable is defined on both sides of the face, then it should have a non-zero "
-                "number of degrees of freedom on the neighbor/neighbor element");
+    mooseAssert(
+        (ft == FaceInfo::VarFaceNeighbors::LEFT) == (_var.dofIndicesNeighbor().size() == 0),
+        "If the variable is only defined on the elem hand side of the face, then that "
+        "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
+        "the variable is defined on both sides of the face, then it should have a non-zero "
+        "number of degrees of freedom on the neighbor/neighbor element");
 
     // only add residual to neighbor if the variable is defined there.
     if (ft == FaceInfo::VarFaceNeighbors::BOTH)

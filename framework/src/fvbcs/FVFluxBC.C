@@ -31,13 +31,13 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   _normal = fi.normal();
   auto ft = fi.faceType(_var.name());
 
-  // For FV flux kernels, the normal is always oriented outward from the elem
+  // For FV flux kernels, the normal is always oriented outward from the lower-id
   // element's perspective.  But for BCs, there is only a residual
   // contribution to one element (one side of the face).  Because of this, we
   // make an exception and orient the normal to point outward from whichever
   // side of the face the BC's variable is defined on; we flip it if this
   // variable is defined on the neighbor side of the face (instead of elem) since
-  // the FaceInfo normal polarity is always elem-elem oriented.
+  // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
 
@@ -65,13 +65,13 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   _normal = fi.normal();
   auto ft = fi.faceType(_var.name());
 
-  // For FV flux kernels, the normal is always oriented outward from the elem
-  // element's perspective.  But for BCs, there is only a residual
+  // For FV flux kernels, the normal is always oriented outward from the lower-id
+  // element's perspective.  But for BCs, there is only a Jacobian
   // contribution to one element (one side of the face).  Because of this, we
   // make an exception and orient the normal to point outward from whichever
   // side of the face the BC's variable is defined on; we flip it if this
   // variable is defined on the neighbor side of the face (instead of elem) since
-  // the FaceInfo normal polarity is always elem-elem oriented.
+  // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
   if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
     _normal = -_normal;
 
