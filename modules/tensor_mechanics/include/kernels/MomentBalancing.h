@@ -10,14 +10,8 @@
 #pragma once
 
 #include "Kernel.h"
-
-// Forward Declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * This Kernel computes

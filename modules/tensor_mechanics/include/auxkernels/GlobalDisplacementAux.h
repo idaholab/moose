@@ -10,12 +10,10 @@
 #pragma once
 
 #include "AuxKernel.h"
+#include "ADRankTwoTensorForward.h"
 
 // Forward Declarations
 class GlobalStrainUserObjectInterface;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 class GlobalDisplacementAux : public AuxKernel
 {

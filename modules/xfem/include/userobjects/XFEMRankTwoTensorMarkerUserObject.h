@@ -10,10 +10,7 @@
 #pragma once
 
 #include "XFEMMaterialStateMarkerBase.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 class XFEMRankTwoTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {

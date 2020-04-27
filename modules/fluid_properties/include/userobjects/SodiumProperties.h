@@ -31,6 +31,9 @@ public:
   template <typename T>
   T k(T temperature) const
   {
+    if (_k)
+      return _k;
+
     const T temperature2 = temperature * temperature;
     const T temperature3 = temperature2 * temperature;
     return 124.67 - 0.11381 * temperature + 5.5226e-5 * temperature2 - 1.1842e-8 * temperature3;
@@ -62,6 +65,9 @@ public:
   template <typename T>
   T heatCapacity(T temperature) const
   {
+    if (_cp)
+      return _cp;
+
     const T temperature2 = temperature * temperature;
 
     // Converted from kJ/kg-K to J/kg-K.
@@ -138,4 +144,11 @@ public:
     const T temperature = this->temperature(enthalpy);
     return drho_dT(temperature) / heatCapacity(temperature);
   }
+
+private:
+  /// Optional thermal conductivity from input parameters.
+  const Real _k;
+
+  /// Optional specific heat from input parameters.
+  const Real _cp;
 };

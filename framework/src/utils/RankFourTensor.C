@@ -17,55 +17,39 @@ namespace MathUtils
 {
 template <>
 void
-mooseSetToZero<RankFourTensorTempl<Real>>(RankFourTensorTempl<Real> & v)
+mooseSetToZero<RankFourTensor>(RankFourTensor & v)
 {
   v.zero();
 }
 template <>
 void
-mooseSetToZero<RankFourTensorTempl<DualReal>>(RankFourTensorTempl<DualReal> & v)
+mooseSetToZero<ADRankFourTensor>(ADRankFourTensor & v)
 {
   v.zero();
 }
 }
 
 #define RankTwoTensorMultInstantiate(TemplateClass)                                                \
-  template RankTwoTensorTempl<Real> RankFourTensorTempl<Real>::operator*(                          \
-      const TemplateClass<Real> & a) const;                                                        \
-  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<DualReal>::operator*(                  \
-      const TemplateClass<Real> & a) const;                                                        \
-  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<Real>::operator*(                      \
-      const TemplateClass<DualReal> & a) const;                                                    \
-  template RankTwoTensorTempl<DualReal> RankFourTensorTempl<DualReal>::operator*(                  \
-      const TemplateClass<DualReal> & a) const
+  template RankTwoTensor RankFourTensor::operator*(const TemplateClass<Real> & a) const;           \
+  template ADRankTwoTensor ADRankFourTensor::operator*(const TemplateClass<Real> & a) const;       \
+  template ADRankTwoTensor RankFourTensor::operator*(const TemplateClass<DualReal> & a) const;     \
+  template ADRankTwoTensor ADRankFourTensor::operator*(const TemplateClass<DualReal> & a) const
 
 RankTwoTensorMultInstantiate(RankTwoTensorTempl);
 RankTwoTensorMultInstantiate(TensorValue);
 RankTwoTensorMultInstantiate(TypeTensor);
 
-template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
-operator+(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator+(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
-operator+(const RankFourTensorTempl<DualReal> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator+(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensor RankFourTensor::operator+(const RankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator+(const RankFourTensor & a) const;
+template ADRankFourTensor RankFourTensor::operator+(const ADRankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator+(const ADRankFourTensor & a) const;
 
-template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
-operator-(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator-(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
-operator-(const RankFourTensorTempl<DualReal> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator-(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensor RankFourTensor::operator-(const RankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator-(const RankFourTensor & a) const;
+template ADRankFourTensor RankFourTensor::operator-(const ADRankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator-(const ADRankFourTensor & a) const;
 
-template RankFourTensorTempl<Real> RankFourTensorTempl<Real>::
-operator*(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator*(const RankFourTensorTempl<Real> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<Real>::
-operator*(const RankFourTensorTempl<DualReal> & a) const;
-template RankFourTensorTempl<DualReal> RankFourTensorTempl<DualReal>::
-operator*(const RankFourTensorTempl<DualReal> & a) const;
+template RankFourTensor RankFourTensor::operator*(const RankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator*(const RankFourTensor & a) const;
+template ADRankFourTensor RankFourTensor::operator*(const ADRankFourTensor & a) const;
+template ADRankFourTensor ADRankFourTensor::operator*(const ADRankFourTensor & a) const;

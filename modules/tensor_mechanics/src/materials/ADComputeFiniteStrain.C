@@ -126,7 +126,7 @@ ADComputeFiniteStrain::computeQpIncrements(ADRankTwoTensor & total_strain_increm
       const ADRankTwoTensor invFhat = _Fhat[_qp].inverse();
 
       // A = I - _Fhat^-1
-      ADRankTwoTensor A(RankTwoTensorTempl<ADReal>::initIdentity);
+      ADRankTwoTensor A(ADRankTwoTensor::initIdentity);
       A -= invFhat;
 
       // Cinv - I = A A^T - A - A^T;

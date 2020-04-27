@@ -10,16 +10,10 @@
 #pragma once
 
 #include "ADComputeFiniteStrainElasticStress.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
 class ADStressUpdateBase;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 
 /**
  * ADComputeMultipleInelasticStress computes the stress and a decomposition of the strain

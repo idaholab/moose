@@ -32,9 +32,9 @@
         EXPECT_NEAR(std::abs(eigvecs_expect(i, j)), std::abs(eigvecs(i, j)), 0.0001);              \
     }                                                                                              \
                                                                                                    \
-    DualRankTwoTensor m_ad(a11, a22, a33, a23, a13, a12);                                          \
+    ADRankTwoTensor m_ad(a11, a22, a33, a23, a13, a12);                                            \
     std::vector<DualReal> eigvals_ad;                                                              \
-    DualRankTwoTensor eigvecs_ad;                                                                  \
+    ADRankTwoTensor eigvecs_ad;                                                                    \
                                                                                                    \
     m_ad.symmetricEigenvaluesEigenvectors(eigvals_ad, eigvecs_ad);                                 \
     for (unsigned int j = 0; j < 3; j++)                                                           \
@@ -161,14 +161,14 @@ TEST(RankTwoEigenRoutines, symmetricEigenvaluesEigenvectors_dual_number_consiste
   Moose::derivInsert(da12_dx, 2, 4);
   DualReal a12(96.7902, da12_dx);
 
-  DualRankTwoTensor m(a11, a22, a33, a23, a13, a12);
-  DualRankTwoTensor eigvecs;
+  ADRankTwoTensor m(a11, a22, a33, a23, a13, a12);
+  ADRankTwoTensor eigvecs;
   std::vector<DualReal> eigvals;
 
   m.symmetricEigenvaluesEigenvectors(eigvals, eigvecs);
-  DualRankTwoTensor D_ad;
+  ADRankTwoTensor D_ad;
   D_ad.fillFromInputVector(eigvals);
-  DualRankTwoTensor m_ad = eigvecs * D_ad * eigvecs.transpose();
+  ADRankTwoTensor m_ad = eigvecs * D_ad * eigvecs.transpose();
 
   // m_ad should be equal to m in values and dual numbers!
   for (unsigned i = 0; i < 3; i++)

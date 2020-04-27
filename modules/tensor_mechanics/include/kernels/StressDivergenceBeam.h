@@ -10,11 +10,7 @@
 #pragma once
 
 #include "Kernel.h"
-
-// Forward Declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 class StressDivergenceBeam : public Kernel
 {

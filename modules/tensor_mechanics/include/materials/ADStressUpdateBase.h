@@ -10,16 +10,9 @@
 #pragma once
 
 #include "ADMaterial.h"
+#include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 
-// Forward declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
-typedef RankFourTensorTempl<DualReal> DualRankFourTensor;
 class InputParameters;
 
 /**

@@ -12,11 +12,7 @@
 #include "DerivativeMaterialInterface.h"
 #include "JvarMapInterface.h"
 #include "Kernel.h"
-
-// Forward Declarations
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 /**
  * This kernel computes the off-diagonal jacobian of elastic energy in AllenCahn respect to

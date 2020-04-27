@@ -35,6 +35,13 @@ class TestMMS(unittest.TestCase):
                             '- std::pow(p(1), 2)*_r*std::pow(t, 2)*std::cos(p(0)*p(1)*t) - ' \
                             'p(1)*t*_u(0)*std::sin(p(0)*p(1)*t)')
 
+    def testCylindricalEvaluate(self):
+        f,_ = mms.evaluate('div(u)', 'r*phi*z*(e_i+e_j+e_k)', transformation='cylindrical',
+                           coordinate_names=('r','phi','z'))
+        s = mms.fparser(f)
+
+        self.assertEqual(s, 'phi*r + 2*phi*z + z')
+
     def testEvaluateWithScalarFunction(self):
         f, _ = mms.evaluate('diff(h*u, t)', 'cos(x*t)', functions=['h'])
         s = mms.fparser(f)

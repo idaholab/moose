@@ -10,14 +10,8 @@
 #pragma once
 
 #include "Kernel.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-
-template <typename>
-class RankThreeTensorTempl;
-typedef RankThreeTensorTempl<Real> RankThreeTensor;
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 /**
  * Compute the Allen-Cahn interface stress driving force contribution

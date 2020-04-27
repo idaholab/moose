@@ -10,10 +10,7 @@
 #pragma once
 
 #include "Material.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+#include "RankTwoTensorForward.h"
 
 /**
  * Calculates an Extra-Stress tensor that lies in the plane of an interface

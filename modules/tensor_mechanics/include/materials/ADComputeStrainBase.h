@@ -10,11 +10,7 @@
 #pragma once
 
 #include "ADMaterial.h"
-
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-typedef RankTwoTensorTempl<DualReal> DualRankTwoTensor;
+#include "ADRankTwoTensorForward.h"
 
 /**
  * ADADComputeStrainBase is the base class for strain tensors

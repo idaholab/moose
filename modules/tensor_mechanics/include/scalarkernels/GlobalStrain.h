@@ -10,15 +10,11 @@
 #pragma once
 
 #include "ScalarKernel.h"
+#include "RankTwoTensorForward.h"
+#include "RankFourTensorForward.h"
 
 // Forward Declarations
 class GlobalStrainUserObjectInterface;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
-template <typename>
-class RankFourTensorTempl;
-typedef RankFourTensorTempl<Real> RankFourTensor;
 
 class GlobalStrain : public ScalarKernel
 {

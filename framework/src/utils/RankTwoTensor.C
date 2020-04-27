@@ -17,14 +17,14 @@ namespace MathUtils
 {
 template <>
 void
-mooseSetToZero<RankTwoTensorTempl<Real>>(RankTwoTensorTempl<Real> & v)
+mooseSetToZero<RankTwoTensor>(RankTwoTensor & v)
 {
   v.zero();
 }
 
 template <>
 void
-mooseSetToZero<RankTwoTensorTempl<DualReal>>(RankTwoTensorTempl<DualReal> & v)
+mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v)
 {
   v.zero();
 }
