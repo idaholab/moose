@@ -661,11 +661,6 @@ public:
   void clearMeshGenerators();
 
   /**
-   * Get the current final mesh generator regardless what users set in the input
-   */
-  std::string getCurrentFinalMeshGenerator() const;
-
-  /**
    * Execute and clear the Mesh Generators data structure
    */
   void executeMeshGenerators();
