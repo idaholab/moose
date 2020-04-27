@@ -1294,7 +1294,7 @@ SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
         if (var_defined_elem)
           p.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
         else if (var_defined_neighbor)
-          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::RIGHT;
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
         else
           mooseError("Should never get here");
       }

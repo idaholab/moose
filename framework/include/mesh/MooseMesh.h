@@ -91,7 +91,7 @@ public:
     BOTH,
     NEITHER,
     ELEM,
-    RIGHT
+    NEIGHBOR
   };
 
   /// Returns the face area of face id

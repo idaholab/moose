@@ -67,7 +67,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
     _local_re(0) = r;
     accumulateTaggedLocalResidual();
   }
-  if ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
     // residual contribution of this kernel to the neighbor element
@@ -126,10 +126,10 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     }
   }
 
-  if ((ft == FaceInfo::VarFaceNeighbors::RIGHT && _var.hasDirichletBC()) ||
+  if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
-    mooseAssert((ft == FaceInfo::VarFaceNeighbors::RIGHT) == (_var.dofIndices().size() == 0),
+    mooseAssert((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR) == (_var.dofIndices().size() == 0),
                 "If the variable is only defined on the neighbor hand side of the face, then that "
                 "means it should have no dof indices on the elem element. Conversely if "
                 "the variable is defined on both sides of the face, then it should have a non-zero "

@@ -292,7 +292,7 @@ MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
     _element_data->computeValuesFace(fi);
     _neighbor_data->computeGhostValuesFace(fi, *_element_data);
   }
-  else if (facetype == FaceInfo::VarFaceNeighbors::RIGHT)
+  else if (facetype == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
     _neighbor_data->computeValuesFace(fi);
     _element_data->computeGhostValuesFace(fi, *_neighbor_data);

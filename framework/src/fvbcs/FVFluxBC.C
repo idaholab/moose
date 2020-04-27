@@ -38,7 +38,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   // side of the face the BC's variable is defined on; we flip it if this
   // variable is defined on the neighbor side of the face (instead of elem) since
   // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
-  if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
+  if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
   auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
@@ -49,7 +49,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   // side - the one where the variable is defined.
   if (ft == FaceInfo::VarFaceNeighbors::ELEM)
     prepareVectorTag(_assembly, _var.number());
-  else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
+  else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     prepareVectorTagNeighbor(_assembly, _var.number());
   else
     mooseError("should never get here");
@@ -72,7 +72,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   // side of the face the BC's variable is defined on; we flip it if this
   // variable is defined on the neighbor side of the face (instead of elem) since
   // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
-  if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
+  if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
   DualReal r = fi.faceArea() * computeQpResidual();
@@ -100,7 +100,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
     _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
     accumulateTaggedLocalMatrix();
   }
-  else if (ft == FaceInfo::VarFaceNeighbors::RIGHT)
+  else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
     // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
     // d/d_elem (residual_neighbor)
