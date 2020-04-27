@@ -111,7 +111,7 @@ GeochemistrySpeciesSwapper::performSwap(ModelGeochemicalDatabase & mgd,
   checkSwap(mgd, replace_this, with_this);
 
   // perform the swap inside the MGD datastructure
-  alterMGD(mgd, mgd.basis_species_index[replace_this], mgd.eqm_species_index[with_this]);
+  alterMGD(mgd, mgd.basis_species_index.at(replace_this), mgd.eqm_species_index.at(with_this));
 }
 
 void
@@ -125,6 +125,28 @@ GeochemistrySpeciesSwapper::performSwap(ModelGeochemicalDatabase & mgd,
 
   // perform the swap inside the MGD datastructure
   alterMGD(mgd, basis_index_to_replace, eqm_index_to_insert);
+}
+
+void
+GeochemistrySpeciesSwapper::performSwap(ModelGeochemicalDatabase & mgd,
+                                        DenseVector<Real> & bulk_composition,
+                                        const std::string & replace_this,
+                                        const std::string & with_this)
+{
+  performSwap(mgd, replace_this, with_this);
+  // compute the bulk composition expressed in the new basis
+  alterBulkComposition(mgd.basis_species_index.size(), bulk_composition);
+}
+
+void
+GeochemistrySpeciesSwapper::performSwap(ModelGeochemicalDatabase & mgd,
+                                        DenseVector<Real> & bulk_composition,
+                                        unsigned basis_index_to_replace,
+                                        unsigned eqm_index_to_insert)
+{
+  performSwap(mgd, basis_index_to_replace, eqm_index_to_insert);
+  // compute the bulk composition expressed in the new basis
+  alterBulkComposition(mgd.basis_species_index.size(), bulk_composition);
 }
 
 void
@@ -210,4 +232,17 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
     for (unsigned j = 0; j < num_cols; ++j)
       if (std::abs(mgd.kin_stoichiometry(i, j)) < _stoi_tol)
         mgd.kin_stoichiometry(i, j) = 0.0;
+}
+
+void
+GeochemistrySpeciesSwapper::alterBulkComposition(unsigned basis_size,
+                                                 DenseVector<Real> & bulk_composition) const
+{
+  if (bulk_composition.size() != basis_size)
+    mooseError("GeochemistrySpeciesSwapper: bulk_composition has size ",
+               bulk_composition.size(),
+               " which differs from the basis size");
+  DenseVector<Real> result;
+  _inv_swap_matrix.vector_mult_transpose(result, bulk_composition);
+  bulk_composition = result;
 }
