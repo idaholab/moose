@@ -87,6 +87,12 @@ GeochemicalDatabaseReader::getFugacityModel() const
   return _root["Header"]["fugacity model"].asString();
 }
 
+std::string
+GeochemicalDatabaseReader::getLogKModel() const
+{
+  return _root["Header"]["logk model"].asString();
+}
+
 std::vector<Real>
 GeochemicalDatabaseReader::getTemperatures()
 {

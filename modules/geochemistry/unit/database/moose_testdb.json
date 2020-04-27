@@ -6,6 +6,7 @@
     "original format": "gwb",
     "activity model": "debye-huckel",
     "fugacity model": "tsonopoulos",
+    "logk model": "fourth-order",
     "temperatures": [
       "0.0000",
       "25.0000",

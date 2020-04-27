@@ -33,6 +33,13 @@ TEST(GeochemicalDatabaseReaderTest, getFugacityModel)
   EXPECT_EQ(database.getFugacityModel(), "tsonopoulos");
 }
 
+TEST(GeochemicalDatabaseReaderTest, getLogKModel)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  EXPECT_EQ(database.getLogKModel(), "fourth-order");
+}
+
 TEST(GeochemicalDatabaseReaderTest, getTemperatures)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
