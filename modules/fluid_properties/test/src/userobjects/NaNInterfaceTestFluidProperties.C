@@ -33,3 +33,9 @@ void
 NaNInterfaceTestFluidProperties::p_from_v_e(Real, Real, Real &, Real &, Real &) const
 {
 }
+
+std::vector<Real>
+NaNInterfaceTestFluidProperties::returnNaNVector() const
+{
+  return getNaNVector(2);
+}

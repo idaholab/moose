@@ -19,6 +19,7 @@ NaNInterfaceTestKernel::validParams()
 
   params.addRequiredParam<UserObjectName>("nan_interface_test_fp",
                                           "NaNInterfaceTestFluidProperties user object name");
+  params.addParam<bool>("test_vector_version", false, "Test getNaNVector? Else, test getNaN");
 
   params.addClassDescription("Kernel to test NaNInterface using NaNInterfaceTestFluidProperties");
 
@@ -34,5 +35,11 @@ NaNInterfaceTestKernel::NaNInterfaceTestKernel(const InputParameters & parameter
 Real
 NaNInterfaceTestKernel::computeQpResidual()
 {
-  return _nan_interface_test_fp.p_from_v_e(0, 0);
+  if (getParam<bool>("test_vector_version"))
+  {
+    const std::vector<Real> nan_vector = _nan_interface_test_fp.returnNaNVector();
+    return nan_vector[0];
+  }
+  else
+    return _nan_interface_test_fp.p_from_v_e(0, 0);
 }
