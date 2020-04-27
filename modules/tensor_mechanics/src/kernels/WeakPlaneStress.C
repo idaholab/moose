@@ -28,11 +28,6 @@ WeakPlaneStress::validParams()
                        "The name of the temperature variable used in the "
                        "ComputeThermalExpansionEigenstrain.  (Not required for "
                        "simulations without temperature coupling.)");
-  params.addDeprecatedParam<MaterialPropertyName>(
-      "thermal_eigenstrain_name",
-      "thermal_eigenstrain",
-      "The eigenstrain_name used in the ComputeThermalExpansionEigenstrain.",
-      "Please provide a list of all eigenstrains in 'eigenstrain_names' instead");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
       "List of eigenstrains used in the strain calculation. Used for computing their derivaties "
@@ -77,20 +72,6 @@ WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters)
     for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
       _deigenstrain_dT.push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
           eigenstrain_name, getVar("temperature", 0)->name()));
-
-    // Handle the deprecated 'thermal_eigenstrain_name' parameter: delete this code when removed
-    if (_deigenstrain_dT.size() == 0)
-    {
-      const auto thermal_eigenstrain_name =
-          getParam<MaterialPropertyName>("thermal_eigenstrain_name");
-      _deigenstrain_dT.push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
-          thermal_eigenstrain_name, getVar("temperature", 0)->name()));
-    }
-    else
-    {
-      if (parameters.isParamSetByUser("thermal_eigenstrain_name"))
-        mooseError("Cannot specify both 'thermal_eigenstrain_name' and 'eigenstrain_names'");
-    }
   }
 
   if (parameters.isParamSetByUser("direction") &&
