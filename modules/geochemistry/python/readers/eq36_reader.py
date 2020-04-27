@@ -18,6 +18,7 @@ def readDatabase(dblist):
     dataset = []
     activity_model = None
     fugacity_model = None
+    logk_model = None
     temperatures = []
     pressures = []
     adh = []
@@ -444,6 +445,7 @@ def readDatabase(dblist):
         db.bdh = bdh
         db.bdot = bdot
     db.fugacity_model = fugacity_model
+    db.logk_model = 'maier-kelly'
     db.temperatures = temperatures
     db.pressures = pressures
     db.neutral_species = neutral_species

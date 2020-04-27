@@ -65,6 +65,8 @@ def main():
         database['Header']['activity model'] = db.activity_model
     if db.fugacity_model:
         database['Header']['fugacity model'] = db.fugacity_model
+    if db.logk_model:
+        database['Header']['logk model'] = db.logk_model
     database['Header']['temperatures'] = db.temperatures
     database['Header']['pressures'] = db.pressures
 

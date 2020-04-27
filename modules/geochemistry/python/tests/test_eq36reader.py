@@ -80,6 +80,15 @@ class TestGWBReader(unittest.TestCase):
 
         self.assertEqual(self.db.fugacity_model, gold)
 
+    def testLogkModel(self):
+        """
+        Test that the equilibrium constant model is set correctly
+        """
+        self.readDatabase()
+        gold = 'maier-kelly'
+
+        self.assertEqual(self.db.logk_model, gold)
+
     def testNeutralSpecies(self):
         """
         Test that the neutral species coefficients are correctly parsed
