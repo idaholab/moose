@@ -35,11 +35,6 @@ WeakPlaneStress::validParams()
   params.addParam<std::string>("base_name", "Material property base name");
 
   MooseEnum direction("x y z", "z");
-  params.addDeprecatedParam<MooseEnum>(
-      "direction",
-      direction,
-      "The direction of the out-of-plane strain variable",
-      "Use the new parameter name 'out_of_plane_strain_direction'");
   params.addParam<MooseEnum>("out_of_plane_strain_direction",
                              direction,
                              "The direction of the out-of-plane strain variable");
@@ -54,9 +49,7 @@ WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters)
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _Jacobian_mult(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
-    _direction(parameters.isParamSetByUser("direction")
-                   ? getParam<MooseEnum>("direction")
-                   : getParam<MooseEnum>("out_of_plane_strain_direction")),
+    _direction(getParam<MooseEnum>("out_of_plane_strain_direction")),
     _disp_coupled(isCoupled("displacements")),
     _ndisp(_disp_coupled ? coupledComponents("displacements") : 0),
     _disp_var(_ndisp),
@@ -73,11 +66,6 @@ WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters)
       _deigenstrain_dT.push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
           eigenstrain_name, getVar("temperature", 0)->name()));
   }
-
-  if (parameters.isParamSetByUser("direction") &&
-      parameters.isParamSetByUser("out_of_plane_strain_direction"))
-    mooseError("Cannot specify both 'direction' and 'out_of_plane_strain_direction'! Use "
-               "'out_of_plane_strain_direction'.");
 
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_disp_coupled && _ndisp != _mesh.dimension())
