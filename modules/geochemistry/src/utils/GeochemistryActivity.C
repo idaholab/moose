@@ -59,11 +59,12 @@ lnActivityDHBdotWater(
   const Real bhat = 1.0 + atilde * std::sqrt(stoichiometric_ionic_strength);
   const Real inner = bhat - 2.0 * std::log(bhat) - 1.0 / bhat;
   const Real outer = 1.0 -
-                     A * LOGTEN / Utility::pow<3>(atilde) / stoichiometric_ionic_strength * inner +
+                     A * GeochemistryConstants::LOGTEN / Utility::pow<3>(atilde) /
+                         stoichiometric_ionic_strength * inner +
                      0.5 * btilde * stoichiometric_ionic_strength +
                      2.0 * ctilde * Utility::pow<2>(stoichiometric_ionic_strength) / 3.0 +
                      0.75 * dtilde * Utility::pow<3>(stoichiometric_ionic_strength);
-  return -2.0 * stoichiometric_ionic_strength * outer / MOLES_PER_KG_WATER;
+  return -2.0 * stoichiometric_ionic_strength * outer / GeochemistryConstants::MOLES_PER_KG_WATER;
 }
 
 } // namespace GeochemistryActivity
