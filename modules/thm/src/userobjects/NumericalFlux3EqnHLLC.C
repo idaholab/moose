@@ -2,14 +2,13 @@
 #include "THMIndices3Eqn.h"
 #include "Numerics.h"
 
-#define SHOW(var) ss << #var << " = " << var << "\n"
-
 registerMooseObject("THMApp", NumericalFlux3EqnHLLC);
 
 InputParameters
 NumericalFlux3EqnHLLC::validParams()
 {
   InputParameters params = NumericalFlux3EqnBase::validParams();
+  params += NaNInterface::validParams();
 
   params.addClassDescription("Computes internal side flux for the 1-D, 1-phase, variable-area "
                              "Euler equations using the HLLC approximate Riemann solver.");
@@ -25,6 +24,7 @@ NumericalFlux3EqnHLLC::validParams()
 
 NumericalFlux3EqnHLLC::NumericalFlux3EqnHLLC(const InputParameters & parameters)
   : NumericalFlux3EqnBase(parameters),
+    NaNInterface(this),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties")),
     _use_approximate_jacobian(getParam<bool>("use_approximate_jacobian"))
@@ -152,27 +152,7 @@ NumericalFlux3EqnHLLC::calcFlux(const std::vector<Real> & U1,
   }
   else
   {
-    std::stringstream ss;
-    ss << "Sampling error occurred in " << name() << ": " << __FUNCTION__ << ":\n";
-    SHOW(rho1);
-    SHOW(u1);
-    SHOW(E1);
-    SHOW(p1);
-    SHOW(c1);
-    SHOW(rho2);
-    SHOW(u2);
-    SHOW(E2);
-    SHOW(p2);
-    SHOW(c2);
-    SHOW(q1);
-    SHOW(q2);
-    SHOW(q_roe);
-    SHOW(c_roe);
-    SHOW(s1);
-    SHOW(s2);
-    SHOW(sm);
-    SHOW(ps);
-    mooseException(ss.str());
+    FL = getNaNVector(THM3Eqn::N_EQ);
   }
 
   FR = FL;

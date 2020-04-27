@@ -166,6 +166,7 @@ FlowModelSinglePhase::addMooseObjects()
     const std::string class_name = "NumericalFlux3EqnHLLC";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<UserObjectName>("fluid_properties") = _fp_name;
+    params.set<MooseEnum>("emit_on_nan") = "none";
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, _numerical_flux_name, params);
   }
