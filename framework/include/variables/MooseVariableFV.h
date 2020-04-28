@@ -28,9 +28,13 @@ class MooseVariableFV;
 typedef MooseVariableFV<Real> MooseVariableFVReal;
 
 /**
- * Class for stuff related to variables
- *
- * Each variable can compute nodal or elemental (at QPs) values.
+ * This class provides variable solution values for other classes/objects to
+ * bind to when looping over faces or elements.  It provides both
+ * elem and neighbor values when accessed in flux/face object calculations.
+ * The templating is to enable support for both vector and scalar variables.
+ * Gradient reconstruction (when enabled) occurs transparently within this
+ * class and kernels coupling to these values will naturally "see" according
+ * to the selected reconstruction methods.
  *
  * OutputType          OutputShape           OutputData
  * ----------------------------------------------------
@@ -66,6 +70,12 @@ public:
   MooseVariableFV(const InputParameters & parameters);
 
   virtual bool isFV() const override { return true; }
+
+  // TODO: many of these functions are not relevant to FV variables but are
+  // still called at various points from existing moose codepaths.  Ideally we
+  // would figure out how to remove calls to these functions and then allow
+  // throwing mooseError's from them instead of silently doing nothing (e.g.
+  // reinitNodes, reinitAux, prepareLowerD, etc.).
 
   virtual void prepare() override final
   {
@@ -217,9 +227,6 @@ public:
     return _neighbor_data->matrixTagValue(tag);
   }
 
-  ///////////////// TODO: START of soln funcs to rewrite ////////////////////
-  //
-
   const FieldVariableValue & uDot() const { return _element_data->uDot(); }
   const FieldVariableValue & sln() const { return _element_data->sln(Moose::Current); }
   const FieldVariableGradient & gradSln() const { return _element_data->gradSln(Moose::Current); }
@@ -257,10 +264,19 @@ public:
     return _neighbor_data->adUDot();
   }
 
-  ///////////////// TODO: END of soln funcs to rewrite ////////////////////
-
-  /// Actually compute variable values from the solution vectors
+  /// Initializes/computes variable values from the solution vectors for the
+  /// current element being operated on in assembly. This
+  /// must be called every time the current element (as defined by the assembly
+  /// data structure changes in order for objects that bind to sln, adSln,
+  /// uDot, etc. to be updated/correct.
   virtual void computeElemValues() override;
+  /// Initializes/computes variable values from the solution vectors for the
+  /// face represented by fi.  This includes initializing data for elements on
+  /// both sides of the face (elem and neighbor) and handles the case where
+  /// there is no element on one side of the face gracefully - i.e. you call
+  /// this uniformly for every face regardless of whether you are on a boundary
+  /// or not - or whether the variable is only defined on one side of the face
+  /// or not.
   virtual void computeFaceValues(const FaceInfo & fi) override;
 
   /**

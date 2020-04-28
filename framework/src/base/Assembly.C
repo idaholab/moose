@@ -1556,6 +1556,7 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
                                       Coords & coord,
                                       SubdomainID sub_id)
 {
+
   mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
   auto n_points = qrule->n_points();
   mooseAssert(n_points == q_points.size(),
