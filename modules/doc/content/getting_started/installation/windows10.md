@@ -59,7 +59,7 @@ echo "export DISPLAY=localhost:0" >> ~/.bashrc
 
 ## Close the WSL terminal
 
-With the above complete, close the WSL terminal, and re-open it. Then proceed to our [Ubuntu](getting_started/installation/ubuntu.md) instructions.
+With the above complete, close the WSL terminal, and re-open it. Then proceed to our [Conda Install Instructions](getting_started/installation/conda.md).
 
 !alert! note
 Your Download's folder, while using WSL, is located at: `/mnt/c/Users/<Your User Name>/Downloads`
