@@ -41,8 +41,6 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
-      method = 'OPT'
-      petsc_version = '>=3.9.4'
       detail = 'using the small strain formulation and calculate a perfect Jacobian.'
     [../]
     [./finite-jac]
@@ -54,8 +52,6 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
-      method = 'OPT'
-      petsc_version = '>=3.9.4'
       detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
     [../]
   [../]

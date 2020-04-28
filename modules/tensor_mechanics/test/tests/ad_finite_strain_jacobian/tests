@@ -46,7 +46,6 @@
     prereq = 'bending'
     ratio_tol = 5e-8
     difference_tol = 1
-    petsc_version = '>=3.9.4'
     issues = '#12650 #13260'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    bar bending simulation in 2D using AD and calculate perfect Jacobians'
@@ -59,7 +58,6 @@
     prereq = 'bending_Bbar'
     ratio_tol = 5e-8
     difference_tol = 1
-    petsc_version = '>=3.9.4'
     issues = '#12650 #13260'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    bar bending simulation in 2D using a volumetric locking correction using AD and
@@ -72,7 +70,6 @@
     run_sim = 'True'
     ratio_tol = 5e-8
     difference_tol = 1
-    petsc_version = '>=3.9.4'
     issues = '#12650 #13260'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    tensile test simulation in 3D using AD and calculate perfect Jacobians'
@@ -87,7 +84,6 @@
     run_sim = 'True'
     ratio_tol = 5e-8
     difference_tol = 1
-    petsc_version = '>=3.9.4'
     issues = '#12650 #13260'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    tensile test simulation in 3D using a volumetric locking correction using AD and
