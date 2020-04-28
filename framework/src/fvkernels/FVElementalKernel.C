@@ -51,7 +51,7 @@ void
 FVElementalKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
-  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elem()->volume());
+  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elemVolume());
   accumulateTaggedLocalResidual();
 }
 
@@ -61,8 +61,7 @@ FVElementalKernel::computeJacobian()
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
   size_t ad_offset = _var.number() * dofs_per_elem;
-  auto vol = _assembly.elem()->volume();
-  const auto r = computeQpResidual() * vol;
+  const auto r = computeQpResidual() * _assembly.elemVolume();
   _local_ke(0, 0) += r.derivatives()[ad_offset];
   accumulateTaggedLocalMatrix();
 }
@@ -70,7 +69,7 @@ FVElementalKernel::computeJacobian()
 void
 FVElementalKernel::computeOffDiagJacobian()
 {
-  const auto r = computeQpResidual() * _assembly.elem()->volume();
+  const auto r = computeQpResidual() * _assembly.elemVolume();
 
   auto & ce = _assembly.couplingEntries();
   for (const auto & it : ce)

@@ -97,6 +97,11 @@ public:
   /// Returns the face area of face id
   Real faceArea() const { return _face_area; }
 
+  /// Sets/gets the coordinate transformation factor (for e.g. rz, spherical
+  /// coords) to be used for integration over faces.
+  Real & faceCoord() { return _face_coord; }
+  Real faceCoord() const { return _face_coord; }
+
   /// Returns the unit normal vector for the face oriented outward from the face's elem element.
   const Point & normal() const { return _normal; }
 
@@ -182,6 +187,7 @@ public:
 
 private:
   Real _face_area;
+  Real _face_coord = 0;
   Real _elem_volume;
   Real _neighbor_volume;
   Point _normal;

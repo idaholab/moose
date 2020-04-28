@@ -41,7 +41,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
+  auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   // This could be an "internal" boundary - one created by variable block
   // restriction where the var is only defined on one side of the face.  We
@@ -75,7 +75,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  DualReal r = fi.faceArea() * computeQpResidual();
+  DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   auto & sys = _subproblem.systemBaseNonlinear();
   unsigned int dofs_per_elem = sys.getMaxVarNDofsPerElem();

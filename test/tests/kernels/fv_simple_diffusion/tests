@@ -8,6 +8,12 @@
 
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
   [../]
+  [./dirichlet_rz]
+    type = 'Exodiff'
+    input = 'dirichlet_rz.i'
+    exodiff = 'dirichlet_rz_out.e'
+    requirement = 'The system shall run a simple 2D linear diffusion problem in RZ coordinates using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
+  [../]
   [./dirichlet_full_jac]
     type = 'Exodiff'
     input = 'dirichlet.i'

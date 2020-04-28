@@ -57,6 +57,17 @@ class XFEMInterface;
 class SubProblem;
 class NodeFaceConstraint;
 
+/// Computes a conversion multiplier for use when computing integraals for the
+/// current coordinate system type.  This allows us to handle cases where we use RZ,
+/// spherical, or other non-cartesian coordinate systems. The factor returned
+/// by this function should generally be multiplied against all integration
+/// terms.  Note that the computed factor is particular to a specific point on
+/// the mesh.  The result is stored in the factor argument.  point is the point
+/// at which to compute the factor.  point and factor can be either Point and
+/// Real or ADPoint and ADReal.
+template <typename P, typename C>
+void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor);
+
 /**
  * Keeps track of stuff related to assembling
  *

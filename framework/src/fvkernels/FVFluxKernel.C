@@ -49,7 +49,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  auto r = MetaPhysicL::raw_value(fi.faceArea() * computeQpResidual());
+  auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
 
   // residual contributions for a flux kernel go to both neighboring faces.
   // They are equal in magnitude but opposite in direction due to the outward
@@ -91,7 +91,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  DualReal r = fi.faceArea() * computeQpResidual();
+  DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   auto & sys = _subproblem.systemBaseNonlinear();
   unsigned int dofs_per_elem = sys.getMaxVarNDofsPerElem();
