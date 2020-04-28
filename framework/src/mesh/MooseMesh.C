@@ -73,33 +73,19 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
 
   std::unique_ptr<const Elem> face = elem->build_side_ptr(_elem_side_id);
   _face_area = face->volume();
+  _face_centroid = face->centroid();
 
   // 1. compute face centroid
-  // 2. compute an averaged normal (av. normal is identical to all qp normals for 1st order
+  // 2. compute an centroid face normal by using 1-point quadrature
   //    meshes)
-  Order order = elem->default_order();
   unsigned int dim = elem->dim();
-  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(order)));
-  QGauss qface(dim - 1, FEType(order).default_quadrature_order());
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(elem->default_order())));
+  QGauss qface(dim - 1, CONSTANT);
   fe->attach_quadrature_rule(&qface);
-
-  const std::vector<Real> & JxW = fe->get_JxW();
   const std::vector<Point> & normals = fe->get_normals();
-  const std::vector<Point> & xyz = fe->get_xyz();
-
   fe->reinit(elem, _elem_side_id);
-  Point average_normal;
-  Point face_centroid;
-  for (unsigned int j = 0; j < JxW.size(); ++j)
-  {
-    average_normal += JxW[j] * normals[j];
-    face_centroid += JxW[j] * xyz[j];
-  }
-  average_normal /= _face_area;
-  face_centroid /= _face_area;
-
-  _normal = average_normal;
-  _face_centroid = face_centroid;
+  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
+  _normal = normals[0];
 
   // the neighbor info does not exist for domain boundaries
   if (!_neighbor)
