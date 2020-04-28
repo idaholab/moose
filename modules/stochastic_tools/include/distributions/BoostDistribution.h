@@ -14,7 +14,7 @@
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
 #include "libmesh/ignore_warnings.h"
 #pragma GCC diagnostic ignored "-Wparentheses"
-#pragma clang diagnostic ignored "-Wpedantic"
+#pragma clang diagnostic ignored "-Wall"
 #include <boost/math/distributions.hpp>
 #include "libmesh/restore_warnings.h"
 #else
