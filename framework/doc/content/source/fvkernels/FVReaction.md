@@ -14,7 +14,7 @@ equations.
 The syntax for `FVReaction` is simple, only taking the `type` and `variable`
 parameters. An example block is shown below for a diffusion-reaction equation:
 
-!listing test/tests/kernels/fv_coupled_var/coupled.i block=FVKernels
+!listing test/tests/fvkernels/fv_coupled_var/coupled.i block=FVKernels
 
 !syntax parameters /FVKernels/FVReaction
 

@@ -13,7 +13,7 @@ the value $\sigma$ can be regarded as a reaction rate coefficient.
 
 ## Example Syntax
 
-!listing test/tests/kernels/fv_coupled_var/coupled.i block=FVKernels
+!listing test/tests/fvkernels/fv_coupled_var/coupled.i block=FVKernels
 
 !syntax parameters /FVKernels/FVCoupledForce
 

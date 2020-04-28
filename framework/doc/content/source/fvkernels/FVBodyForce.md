@@ -30,7 +30,7 @@ parameter is equivalent to setting its value to unity.
 The case below demonstrates the use of `FVBodyForce` where the force term is
 supplied based upon a function form:
 
-!listing test/tests/kernels/fv_adapt/transient-adapt.i block=FVKernels
+!listing test/tests/fvkernels/fv_adapt/transient-adapt.i block=FVKernels
 
 !syntax parameters /FVKernels/FVBodyForce
 

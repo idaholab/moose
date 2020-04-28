@@ -14,9 +14,9 @@ classes will be added.
 
 ## FVBCs block
 
-FVM boundary conditions are added to simulation input files in the `FVBCs` as in the example below.   
+FVM boundary conditions are added to simulation input files in the `FVBCs` as in the example below.
 
-!listing test/tests/kernels/fv_simple_diffusion/neumann.i
+!listing test/tests/fvkernels/fv_simple_diffusion/neumann.i
          block=FVBCs
          id=first_fv_bc_example
          caption=Example of the FVBCs block in a [MOOSE] input file.
@@ -46,7 +46,7 @@ over the extent of an element adjacent to the left boundary and Gauss' theorem i
 \begin{equation}
   -\int_{\Omega} \nabla \cdot D \nabla v dV =
   -\int_{\partial \Omega_l} \nabla \cdot D \nabla v dV
-  -\int_{\partial \Omega \setminus \partial \Omega_l} \nabla \cdot D \nabla v dV  
+  -\int_{\partial \Omega \setminus \partial \Omega_l} \nabla \cdot D \nabla v dV
   = 5 A_{\partial \Omega_l}
   -\int_{\partial \Omega \setminus \partial \Omega_l} \nabla \cdot D \nabla v dV=0,
 \end{equation}

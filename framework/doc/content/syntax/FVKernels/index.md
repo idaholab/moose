@@ -35,7 +35,7 @@ defined by the equation:
 The time derivative term corresponds to the kernel named `time`, while
 the diffusion term is represented by the kernel named `diff`.
 
-!listing test/tests/kernels/fv_simple_diffusion/transient.i
+!listing test/tests/fvkernels/fv_simple_diffusion/transient.i
          block=FVKernels
          id=first_fv_kernel_example
          caption=Example of the FVKernels block in a [MOOSE] input file.
@@ -58,7 +58,7 @@ Burgers' equation. The Burgers' equation for speed `v` is given by:
   \frac{\partial v}{\partial t} + \frac{1}{2}\frac{\partial }{\partial x} v^2 = 0.
 \end{equation}
 
-!listing test/tests/kernels/fv_burger/fv_burger.i
+!listing test/tests/fvkernels/fv_burger/fv_burger.i
          block=FVKernels
          id=first_fv_kernel_example
          caption=Example of the FVKernels block in a [MOOSE] input file for solving one-dimensional Burgers' equation.
