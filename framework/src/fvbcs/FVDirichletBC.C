@@ -20,12 +20,13 @@ FVDirichletBC::validParams()
   return params;
 }
 
-FVDirichletBC::FVDirichletBC(const InputParameters & parameters) : FVBoundaryCondition(parameters)
+FVDirichletBC::FVDirichletBC(const InputParameters & parameters)
+  : FVBoundaryCondition(parameters), _val(getParam<Real>("value"))
 {
 }
 
 Real
 FVDirichletBC::boundaryValue(const FaceInfo & /*fi*/)
 {
-  return getParam<Real>("value");
+  return _val;
 }
