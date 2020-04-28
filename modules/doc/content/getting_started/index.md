@@ -4,20 +4,7 @@
 First you need to install the MOOSE framework. To do this, click the link below corresponding to
 your operating system/platform and follow the instructions:
 
-- +MacOS+:
-
-  - [Catalina](getting_started/installation/macos_catalina.md)
-  - [Mojave](getting_started/installation/macos_mojave.md)
-  - [High Sierra](getting_started/installation/macos_other.md)
-
-- +Linux+:
-
-  - [getting_started/installation/ubuntu.md]
-  - [getting_started/installation/mint.md]
-  - [getting_started/installation/fedora.md]
-  - [getting_started/installation/opensuse.md]
-  - [getting_started/installation/centos.md]
-
+- [Linux and MacOS](getting_started/installation/conda.md)
 - [getting_started/installation/windows10.md]
 - [getting_started/installation/docker.md]
 - Advanced Instructions:
