@@ -160,6 +160,55 @@
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/doc/tests/sinks.tex'
   [../]
+  [./s11]
+    type = Exodiff
+    input = s11.i
+    exodiff = s11.e
+    threading = '!pthreads'
+    cli_args = 'BCs/left_T/fluid_phase=0'
+    requirement = 'PorousFlow shall be able to inject fluid at user specified temperature.'
+    design = 'PorousFlowEnthalpySink.md'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md'
+  [../]
+  [./s11_overspecified_pressure]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    cli_args = 'AuxVariables/press/initial_condition=3 BCs/left_T/porepressure_var=press BCs/left_T/fluid_phase=0'
+    expect_err = "Cannot specify both pressure and pore pressure."
+    requirement = 'PorousFlow shall report an error when both external and pore pressures are specified.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_underspecified_pressure]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    expect_err = "You have to specify either 'pressure' or 'fluid_phase'."
+    requirement = 'PorousFlow shall report an error when neither external and pore pressures are specified.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s11_incorrect_fluid_phase]
+    type = RunException
+    input = s11.i
+    threading = '!pthreads'
+    cli_args = "BCs/left_T/fluid_phase=2"
+    expect_err = "Specified 'fluid_phase' is larger than the number of phases available in the simulation \(1\)."
+    requirement = 'PorousFlow shall report an error when incorrect fluid phase is specified in a BC for injecting fluid at user specified temperature.'
+    issues = '#15742'
+    design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
+  [../]
+  [./s12]
+    type = CSVDiff
+    input = s12.i
+    csvdiff = s12.csv
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall be able to inject fluid at user specified pressure and temperature.'
+    design = 'PorousFlowEnthalpySink.md'
+    issues = '#15742'
+  [../]
   [./injection_production_eg]
     type = 'CSVDiff'
     input = 'injection_production_eg.i'
