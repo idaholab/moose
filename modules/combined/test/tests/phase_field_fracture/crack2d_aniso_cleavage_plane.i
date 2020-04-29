@@ -1,0 +1,199 @@
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 40
+    ny = 20
+    ymax = 0.5
+  []
+  [./noncrack]
+    type = BoundingBoxNodeSetGenerator
+    new_boundary = noncrack
+    bottom_left = '0.5 0 0'
+    top_right = '1 0 0'
+    input = gen
+  [../]
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Variables]
+  [./c]
+    family = LAGRANGE
+    order = FIRST
+  [../]
+[]
+
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./All]
+        add_variables = true
+        strain = SMALL
+        additional_generate_output = 'strain_yy stress_yy'
+        planar_formulation = PLANE_STRAIN
+      [../]
+    [../]
+  [../]
+[]
+
+[Kernels]
+  [./ACbulk]
+    type = AllenCahn
+    variable = c
+    f_name = F
+  [../]
+  [./ACInterfaceCleavageFracture]
+    type = ACInterfaceCleavageFracture
+    variable = c
+    beta_penalty = 1
+    cleavage_plane_normal = '-0.707 0.707 0.0'
+  [../]
+  [./dcdt]
+    type = TimeDerivative
+    variable = c
+  [../]
+  [./solid_x]
+    type = PhaseFieldFractureMechanicsOffDiag
+    variable = disp_x
+    component = 0
+    c = c
+  [../]
+  [./solid_y]
+    type = PhaseFieldFractureMechanicsOffDiag
+    variable = disp_y
+    component = 1
+    c = c
+  [../]
+  [./off_disp]
+    type = AllenCahnElasticEnergyOffDiag
+    variable = c
+    displacements = 'disp_x disp_y'
+    mob_name = L
+  [../]
+[]
+
+[BCs]
+  [./ydisp]
+    type = FunctionDirichletBC
+    preset = true
+    variable = disp_y
+    boundary = top
+    function = 't'
+  [../]
+  [./yfix]
+    type = DirichletBC
+    preset = true
+    variable = disp_y
+    boundary = noncrack
+    value = 0
+  [../]
+  [./xfix]
+  type = DirichletBC
+  preset = true
+    variable = disp_x
+    boundary = right
+    value = 0
+  [../]
+[]
+
+[Materials]
+  [./pfbulkmat]
+    type = GenericConstantMaterial
+    prop_names = 'gc_prop l visco'
+    prop_values = '1e-3 0.05 1e-6'
+  [../]
+  [./elasticity_tensor]
+    type = ComputeElasticityTensor
+    C_ijkl = '127.0 70.8 70.8 127.0 70.8 127.0 73.55 73.55 73.55'
+    fill_method = symmetric9
+    euler_angle_1 = 30
+    euler_angle_2 = 0
+    euler_angle_3 = 0
+  [../]
+  [./define_mobility]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop visco'
+    f_name = L
+    function = '1.0/(gc_prop * visco)'
+  [../]
+  [./define_kappa]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop l'
+    f_name = kappa_op
+    function = 'gc_prop * l'
+  [../]
+  [./damage_stress]
+    type = ComputeLinearElasticPFFractureStress
+    c = c
+    E_name = 'elastic_energy'
+    D_name = 'degradation'
+    F_name = 'local_fracture_energy'
+    decomposition_type = stress_spectral
+  [../]
+  [./degradation]
+    type = DerivativeParsedMaterial
+    f_name = degradation
+    args = 'c'
+    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    constant_names       = 'eta'
+    constant_expressions = '1.0e-6'
+    derivative_order = 2
+  [../]
+  [./local_fracture_energy]
+    type = DerivativeParsedMaterial
+    f_name = local_fracture_energy
+    args = 'c'
+    material_property_names = 'gc_prop l'
+    function = 'c^2 * gc_prop / 2 / l'
+    derivative_order = 2
+  [../]
+  [./fracture_driving_energy]
+    type = DerivativeSumMaterial
+    args = c
+    sum_materials = 'elastic_energy local_fracture_energy'
+    derivative_order = 2
+    f_name = F
+  [../]
+[]
+
+[Postprocessors]
+  [./av_stress_yy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./av_strain_yy]
+    type = SideAverageValue
+    variable = disp_y
+    boundary = top
+  [../]
+[]
+
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_factor_mat_solving_package'
+  petsc_options_value = 'lu superlu_dist'
+
+  nl_rel_tol = 1e-8
+  l_tol = 1e-4
+  l_max_its = 100
+  nl_max_its = 10
+
+  dt = 5e-5
+  num_steps = 5
+[]
+
+[Outputs]
+  exodus = true
+[]
