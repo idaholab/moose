@@ -298,7 +298,10 @@ public:
   const FieldVariableCurl & curlSlnOlder() const { return _element_data->curlSln(Moose::Older); }
 
   /// AD
-  const ADTemplateVariableValue<OutputType> & adSln() const { return _element_data->adSln(); }
+  const ADTemplateVariableValue<OutputType> & adSln() const override
+  {
+    return _element_data->adSln();
+  }
   const ADTemplateVariableGradient<OutputType> & adGradSln() const
   {
     return _element_data->adGradSln();
@@ -310,7 +313,7 @@ public:
   const ADTemplateVariableValue<OutputType> & adUDot() const { return _element_data->adUDot(); }
 
   /// neighbor AD
-  const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
   {
     return _neighbor_data->adSln();
   }

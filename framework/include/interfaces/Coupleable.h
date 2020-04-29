@@ -38,14 +38,15 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
+   * @param is_fv Whether the \p MooseObject is a finite volume object
    */
-  Coupleable(const MooseObject * moose_object, bool nodal);
+  Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv = false);
 
   /**
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> & getCoupledVars()
+  const std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> & getCoupledVars()
   {
     return _coupled_vars;
   }
@@ -54,7 +55,7 @@ public:
    * Get the list of all coupled variables
    * @return The list of all coupled variables
    */
-  const std::vector<MooseVariableFEBase *> & getCoupledMooseVars() const
+  const std::vector<MooseVariableFieldBase *> & getCoupledMooseVars() const
   {
     return _coupled_moose_vars;
   }
@@ -141,14 +142,6 @@ protected:
    * @return Reference to a ADVariableValue for the coupled variable
    */
   const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
-
-  /**
-   * Returns value of a coupled finite volume variable for use in Automatic Differentiation
-   * @param var_name Name of coupled finite volume variable
-   * @param comp Component number for vector of coupled variables
-   * @return Reference to a ADVariableValue for the coupled variable
-   */
-  const ADVariableValue & adCoupledFVValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns value of a coupled variable for use in Automatic Differentiation
@@ -834,10 +827,10 @@ protected:
   FEProblemBase & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> _coupled_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> _coupled_vars;
 
   /// Vector of all coupled variables
-  std::vector<MooseVariableFEBase *> _coupled_moose_vars;
+  std::vector<MooseVariableFieldBase *> _coupled_moose_vars;
 
   /// Vector of standard coupled variables
   std::vector<MooseVariable *> _coupled_standard_moose_vars;
@@ -1118,6 +1111,9 @@ private:
 
   std::set<TagID> _fe_coupleable_matrix_tags;
 
+  /// Whether the MooseObject is a finite volume object
+  const bool _is_fv;
+
 private:
   const MooseObject * _obj;
 };
@@ -1163,10 +1159,6 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
       if (var->name() == var_name)
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
-    for (auto & var : _coupled_standard_fv_moose_vars)
-      if (var->name() == var_name)
-        mooseError("The named variable is an FV variable, try a "
-                   "'coupledFV[Value/Gradient/Dot/etc]...' function instead");
     mooseError(
         "Variable '", var_name, "' is of a different C++ type than you tried to fetch it as.");
   }

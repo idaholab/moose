@@ -16,7 +16,7 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -38,6 +38,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
                              ? _c_parameters.get<bool>("_neighbor")
                              : false),
     _coupleable_max_qps(_c_fe_problem.getMaxQps()),
+    _is_fv(is_fv),
     _obj(moose_object)
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
@@ -195,6 +196,29 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
 
   auto bound = comp_bound ? comp_bound : _coupled_vars[var_name].size();
   checkComponent(_obj, comp, bound, var_name);
+
+  // We should know we have a variable now
+  MooseVariableFieldBase * var = _coupled_vars[var_name][comp];
+  if (!var)
+    mooseError(
+        _c_name,
+        ": We did all our checks for the existence of a var, yet we still don't have a var!?");
+
+  // Are we attempting to couple to an FV var in a non-FV object?
+  if (var->isFV() && !_is_fv)
+    mooseError("Attempting to couple FV variable ",
+               var->name(),
+               " into a non-FV object ",
+               _c_name,
+               ". This is not currently supported");
+
+  // Are we attempting to couple to a non-FV var in an FV object?
+  if (!var->isFV() && _is_fv)
+    mooseError("Attempting to couple non-FV variable ",
+               var->name(),
+               " into an FV object ",
+               _c_name,
+               ". This is not currently supported");
 
   if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
@@ -1354,15 +1378,7 @@ Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
 const ADVariableValue &
 Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVarHelper<MooseVariable>(var_name, comp);
-
-  return adCoupledValue(var, var_name);
-}
-
-const ADVariableValue &
-Coupleable::adCoupledFVValue(const std::string & var_name, unsigned int comp)
-{
-  MooseVariableFV<Real> * var = getVarHelper<MooseVariableFV<Real>>(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   return adCoupledValue(var, var_name);
 }

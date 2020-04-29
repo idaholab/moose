@@ -84,4 +84,14 @@ public:
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) = 0;
 
   virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
+
+  /**
+   * AD solution getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adSln() const = 0;
+
+  /**
+   * AD neighbor solution getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const = 0;
 };
