@@ -143,7 +143,9 @@ ADKernelValueTempl<T>::computeADOffDiagJacobian()
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
 
-    if (ivar != _var.number())
+    // If ivar isn't this->_var, then continue
+    // Also we don't currently support coupling with FV variables
+    if (ivar != _var.number() || jvariable.isFV())
       continue;
 
     size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
