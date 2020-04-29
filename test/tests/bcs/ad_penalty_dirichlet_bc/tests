@@ -15,7 +15,6 @@
       prereq = 'ad/penalty_dirichlet_bc_test'
       run_sim = False
       difference_tol = 1e-7
-      method = 'opt'
       detail = 'with a constant value on the boundary and shall be able to produce the exact Jacobian.'
     [../]
 
@@ -35,7 +34,6 @@
       run_sim = False
       ratio_tol = 1e-7
       difference_tol = 0.1
-      method = 'opt'
       detail = 'with a value on the boundary set by a function and shall be able to produce the exact Jacobian.'
     [../]
   [../]

@@ -48,7 +48,6 @@
     difference_tol = 1e6
     cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
     run_sim = True
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
@@ -62,7 +61,6 @@
     difference_tol = 1e6
     cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-9'
     run_sim = True
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
@@ -75,7 +73,6 @@
     difference_tol = 1e6
     cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-11'
     run_sim = True
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
     requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law

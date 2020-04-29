@@ -11,11 +11,12 @@
   [../]
   [./testdirichlet-jac]
     type = 'PetscJacobianTester'
-    input = '2d_diffusion_bodyforce_test.i'
+    input = '2d_diffusion_test.i'
     scale_refine = 5
+    difference_tol = 1e-7
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a volumetric source term using AD and compute a perfect jacobian.'
     issues = '#13260'
-    design = '/ADBodyForce.md'
+    design = '/DirichletBC.md'
   [../]
 
   [./testneumann]
@@ -34,7 +35,7 @@
     difference_tol = 1e-7
     requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem using AD with Neumann boundary conditions and compute a perfect jacobian.'
     issues = '#13260'
-    design = '/ADBodyForce.md'
+    design = '/ADNeumannBC.md'
   [../]
 
   [./testbodyforce]

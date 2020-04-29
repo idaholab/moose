@@ -23,8 +23,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
     cli_args = 'Executioner/num_steps=5'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     issues = "#5658 #12633"
@@ -52,8 +50,6 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9.4'
-    method = 'OPT'
     requirement = 'AD heat conduction and the Jacobian shall be beautiful'
     issues = "#5658 #12633"
   [../]

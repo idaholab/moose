@@ -12,7 +12,6 @@
     type = 'PetscJacobianTester'
     input = 'linear_elastic_material.i'
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = linear_elastic_material
@@ -31,7 +30,6 @@
     type = 'PetscJacobianTester'
     input = 'extra_stresses.i'
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = extra_stresses
@@ -50,7 +48,6 @@
     type = 'PetscJacobianTester'
     input = 'applied_strain.i'
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e-1
     prereq = applied_strain
@@ -70,7 +67,6 @@
     type = 'PetscJacobianTester'
     input = 'tensor.i'
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = tensor
@@ -89,7 +85,6 @@
     type = 'PetscJacobianTester'
     input = 'thermal_expansion.i'
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e-4
     prereq = thermal_expansion

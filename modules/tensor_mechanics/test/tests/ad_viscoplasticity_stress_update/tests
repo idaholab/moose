@@ -14,7 +14,6 @@
     input = 'creep.i'
     cli_args = "Materials/active='elasticity_tensor regular_stress porosity creep' -snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e8
     prereq = regular_creep
@@ -34,7 +33,6 @@
     input = 'creep.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e4
     prereq = porous_creep
@@ -52,7 +50,6 @@
     input = 'exact.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e4
     prereq = exact_spherical
@@ -72,7 +69,6 @@
     input = 'exact.i'
     cli_args = "-snes_test_err 1e-11 GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 1e-7
     difference_tol = 1e4
     prereq = exact_cylindrical
@@ -90,7 +86,6 @@
     input = 'lps_single.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_single
@@ -108,7 +103,6 @@
     input = 'lps_single_split.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_single_split
@@ -126,7 +120,6 @@
     input = 'lps_dual.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = lps_dual
@@ -144,7 +137,6 @@
     input = 'gtn_single.i'
     cli_args = "-snes_test_err 1e-11"
     run_sim = 'True'
-    petsc_version = '>=3.9.4'
     ratio_tol = 3e-7
     difference_tol = 1e8
     prereq = gtn_single
