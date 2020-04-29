@@ -28,6 +28,7 @@ public:
   NodalSum(const InputParameters & parameters);
 
   virtual void initialize() override;
+  virtual void finalize() override;
   virtual void execute() override;
   virtual Real getValue() override;
 
@@ -36,4 +37,3 @@ public:
 protected:
   Real _sum;
 };
-

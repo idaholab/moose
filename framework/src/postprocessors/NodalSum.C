@@ -47,9 +47,13 @@ NodalSum::execute()
 Real
 NodalSum::getValue()
 {
-  gatherSum(_sum);
-
   return _sum;
+}
+
+void
+NodalSum::finalize()
+{
+  gatherSum(_sum);
 }
 
 void
