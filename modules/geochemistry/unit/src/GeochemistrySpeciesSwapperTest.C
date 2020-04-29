@@ -14,6 +14,39 @@
 const Real eps =
     1E-12; // accounts for precision loss when substituting reactions and inverting the swap matrix
 
+/// Check bulk_composition exception
+TEST(GeochemistrySpeciesSwapperTest, bulkCompositionException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  // The following system has secondary species: CO2(aq), CO3--, OH-,
+  // (O-phth)--, CH4(aq), Fe+++,
+  // >(s)FeO-
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"CH4(g)fake"},
+                                   {},
+                                   {},
+                                   {});
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+
+  try
+  {
+    DenseVector<Real> bulk_composition(8);
+    swapper.performSwap(mgd, bulk_composition, "H+", "(O-phth)--");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("GeochemistrySpeciesSwapper: bulk_composition has size 8 which differs "
+                         "from the basis size") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
 /// Check all sorts of illegal swaps throw mooseError or mooseException
 TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 {
@@ -161,6 +194,11 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
       database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {});
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+  DenseVector<Real> bulk_composition(4);
+  bulk_composition(0) = 0.5;
+  bulk_composition(1) = 1.0;
+  bulk_composition(2) = 2.5;
+  bulk_composition(3) = 3.0;
 
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
   for (const auto & sp : mgd.basis_species_index)
@@ -296,7 +334,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   const unsigned ca_posn = mgd.basis_species_index["Ca++"];
   const unsigned calcite_posn = mgd.eqm_species_index["Calcite"];
 
-  swapper.performSwap(mgd, "Ca++", "Calcite");
+  swapper.performSwap(mgd, bulk_composition, "Ca++", "Calcite");
 
   // check names are swapped correctly
   ASSERT_EQ(mgd.basis_species_index.size(), 4);
@@ -429,6 +467,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 5), 0 - 1 * (-0.5349), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 6), 0 - 1 * (-1.2301), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 7), 0 - 1 * (-2.2107), eps);
+
+  // check bulk composition
+  ASSERT_NEAR(bulk_composition(0), 0.5, eps);
+  ASSERT_NEAR(bulk_composition(1), 1.0, eps);
+  ASSERT_NEAR(bulk_composition(2), 1.5, eps);
+  ASSERT_NEAR(bulk_composition(3), 4.0, eps);
 }
 
 /// Check a complicated swap involving redox and complicated stoichiometric coefficients

@@ -14,13 +14,8 @@
   file = cylinder.e
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+[Problem]
+  extra_tag_vectors = 'ref'
 []
 
 [GlobalParams]
@@ -28,10 +23,6 @@
 []
 
 [AuxVariables]
-  [./stress_xx]      # stress aux variables are defined for output; this is a way to get integration point variables to the output file
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./saved_x]
   [../]
   [./saved_y]
@@ -40,31 +31,34 @@
   [../]
 []
 
-[Functions]
-  [./rampConstantAngle]
-    type = PiecewiseLinear
-    x = '0. 1.'
-    y = '0. 1.'
-    scale_factor = 0.1
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-    save_in = 'saved_x saved_y saved_z'
-    use_displaced_mesh = true
-  [../]
-[]
-
 [AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  [../]
+  [saved_x]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_x'
+    variable = 'saved_x'
+  []
+  [saved_y]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_y'
+    variable = 'saved_y'
+  []
+  [saved_z]
+    type = TagVectorAux
+    vector_tag = 'ref'
+    v = 'disp_z'
+    variable = 'saved_z'
+  []
+[]
+
+[Modules/TensorMechanics/Master]
+  [master]
+    strain = FINITE
+    generate_output = 'stress_xx'
+    add_variables = true
+    extra_vector_tags = 'ref'
+  []
 []
 
 [BCs]
@@ -89,7 +83,7 @@
   [./top_x]
     type = DisplacementAboutAxis
     boundary = 2
-    function = rampConstantAngle
+    function = '0.1*t'
     angle_units = degrees
     axis_origin = '10. 10. 10.'
     axis_direction = '0 -1.0 1.0'
@@ -99,7 +93,7 @@
   [./top_y]
     type = DisplacementAboutAxis
     boundary = 2
-    function = rampConstantAngle
+    function = '0.1*t'
     angle_units = degrees
     axis_origin = '10. 10. 10.'
     axis_direction = '0 -1.0 1.0'
@@ -109,36 +103,29 @@
   [./top_z]
     type = DisplacementAboutAxis
     boundary = 2
-    function = rampConstantAngle
+    function = '0.1*t'
     angle_units = degrees
     axis_origin = '10. 10. 10.'
     axis_direction = '0 -1.0 1.0'
     component = 2
     variable = disp_z
   [../]
-[] # BCs
+[]
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 1
     youngs_modulus = 207000
     poissons_ratio = 0.3
   [../]
-  [./strain]
-    type = ComputeFiniteStrain
-    block = 1
-  [../]
   [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
-    block = 1
   [../]
 []
 
 [Executioner]
 
   type = Transient
-  #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
@@ -170,6 +157,5 @@
 []
 
 [Outputs]
-  file_base = torque_reaction_cylinder_out
   exodus = true
 []

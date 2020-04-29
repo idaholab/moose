@@ -58,13 +58,6 @@ PorousFlowActionBase::validParams()
       "displacements",
       "The name of the displacement variables (relevant only for "
       "mechanically-coupled simulations)");
-  params.addDeprecatedParam<MaterialPropertyName>(
-      "thermal_eigenstrain_name",
-      "thermal_eigenstrain",
-      "The eigenstrain_name used in the "
-      "ComputeThermalExpansionEigenstrain.  Only needed for "
-      "thermally-coupled simulations with thermal expansion.",
-      "Please use 'eigenstrain_names' instead.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names",
       "List of all eigenstrain models used in mechanics calculations. "

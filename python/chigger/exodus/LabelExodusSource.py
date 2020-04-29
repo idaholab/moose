@@ -33,6 +33,8 @@ class LabelExodusSource(base.ChiggerSource2D):
                 allow=['point', 'cell', 'variable'])
         opt.setDefault('justification', 'center')
         opt.setDefault('vertical_justification', 'middle')
+        opt.setDefault('italic', True)
+        opt.setDefault('bold', True)
         return opt
 
     def __init__(self, exodus_source, **kwargs):

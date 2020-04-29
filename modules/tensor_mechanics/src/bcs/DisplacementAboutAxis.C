@@ -20,7 +20,7 @@ DisplacementAboutAxis::validParams()
                              "displacement around an axis on a boundary");
   addDisplacementAboutAxisParams(params);
   params.addRequiredParam<int>("component", "The component for the rotational displacement");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("use_displaced_mesh") = false;
   params.set<bool>("preset") = true;
   return params;
 }

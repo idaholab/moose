@@ -25,11 +25,9 @@ $\hat{x}$, $\hat{y}$, and $\hat{z}$ coordinate system axes, respectively.
          block=BCs/top_x
 
 A Function is required to prescribe the rate of the `DisplacementAboutAxis` boundary condition
-application to the mesh. Note that the name of the Function is used as the argument for the
-`function` input parameter in the `DisplacementAboutAxis` block.
-
-!listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_cylinder.i
-         block=Functions/rampConstantAngle
+application to the mesh. Either the name of another function defined elsewhere or a parsed
+function is used as the argument for the `function` input parameter in the `DisplacementAboutAxis`
+block. In this example, a parsed function is used.
 
 !syntax parameters /BCs/DisplacementAboutAxis
 

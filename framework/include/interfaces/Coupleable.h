@@ -79,7 +79,7 @@ public:
    * Get the list of array coupled variables
    * @return The list of array coupled variables
    */
-  const std::vector<ArrayMooseVariable *> & getCoupledArratMooseVars() const
+  const std::vector<ArrayMooseVariable *> & getCoupledArrayMooseVars() const
   {
     return _coupled_array_moose_vars;
   }

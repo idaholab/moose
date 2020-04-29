@@ -420,4 +420,3 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
     }
   }
 }
-

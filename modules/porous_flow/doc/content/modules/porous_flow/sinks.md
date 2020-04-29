@@ -8,13 +8,26 @@ A number of sources/sinks are available in Porous Flow, implemented as `DiracKer
 implements a constant mass point source that adds (removes) fluid at a constant
 mass flux rate (kg.s$^{-1}$) for times between the specified start and end times. If
 no start and end times are specified, the source (sink) starts at the
-start of the simulation and continues to act indefinitely. 
+start of the simulation and continues to act indefinitely.
 For instance:
 
 !listing modules/porous_flow/test/tests/dirackernels/squarepulse1.i block=DiracKernels
 
 Note that the parameter ```mass_flux``` is positive for a source and negative
 for a sink, which is dissimilar to the conventions used below for line-sink strength $s$ and flux $f$.
+
+## Point source from postprocessor
+
+A mass point source can be specified via a value computed by a postprocessor using [`PorousFlowPointSourceFromPostprocessor`](/PorousFlowPointSourceFromPostprocessor.md) Dirac kernel.
+Users have to make sure that the postprocessor is evaluated at ```timestep_begin``` so that the correct value is used within the timestep.
+
+Such example is shown here:
+
+!listing modules/porous_flow/test/tests/dirackernels/frompps.i block=DiracKernels
+
+!listing modules/porous_flow/test/tests/dirackernels/frompps.i block=Postprocessors
+
+Note that the parameter ```mass_flux``` is positive for a source and negative for a sink.
 
 ## PorousFlow polyline sinks in general
 
