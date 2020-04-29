@@ -32,6 +32,18 @@ FVMatAdvection::computeQpResidual()
   ADRealVectorValue v;
   ADReal u_interface;
   interpolate(InterpMethod::Average, v, _vel_elem[_qp], _vel_neighbor[_qp]);
-  interpolate(InterpMethod::Upwind, u_interface, _u_elem[_qp], _u_neighbor[_qp]);
+  interpolate(InterpMethod::Upwind, u_interface, advQuantity(), advQuantityNeighbor(), v);
   return _normal * v * u_interface;
+}
+
+const ADReal &
+FVMatAdvection::advQuantity()
+{
+  return _u_elem[_qp];
+}
+
+const ADReal &
+FVMatAdvection::advQuantityNeighbor()
+{
+  return _u_neighbor[_qp];
 }

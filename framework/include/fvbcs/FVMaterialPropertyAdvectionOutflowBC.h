@@ -9,19 +9,16 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVMatAdvectionOutflowBC.h"
 
-class FVMatAdvection : public FVFluxKernel
+class FVMaterialPropertyAdvectionOutflowBC : public FVMatAdvectionOutflowBC
 {
 public:
   static InputParameters validParams();
-  FVMatAdvection(const InputParameters & params);
+  FVMaterialPropertyAdvectionOutflowBC(const InputParameters & params);
 
 protected:
-  virtual ADReal computeQpResidual() override;
-  virtual const ADReal & advQuantity();
-  virtual const ADReal & advQuantityNeighbor();
+  const ADReal & advQuantity() override;
 
-  const ADMaterialProperty<RealVectorValue> & _vel_elem;
-  const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
+  const ADMaterialProperty<Real> & _adv_quant;
 };

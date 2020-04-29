@@ -11,53 +11,90 @@
 []
 
 [Variables]
-  [u]
+  # we have to impose non-zero initial conditions in order to avoid an initially
+  # singular matrix
+  [fv_vel]
     order = CONSTANT
     family = MONOMIAL
     fv = true
+    initial_condition = 2
+  []
+  [fv_rho]
+    order = CONSTANT
+    family = MONOMIAL
+    fv = true
+    initial_condition = 2
   []
 []
 
 [FVKernels]
-  # A "friction" term
-  [rxn]
-    type = FVReaction
-    variable = u
+  # del * rho * velocity * velocity
+  [adv_rho_u]
+    type = FVMaterialPropertyAdvection
+    variable = fv_vel
+    vel = 'fv_velocity'
+    advected_quantity = 'rho_u'
   []
-  [adv]
+
+  # del * rho * velocity
+  [adv_rho]
     type = FVMatAdvection
-    variable = u
-    vel = 'velocity'
-  []
-  [diff]
-    type = FVDiffusion
-    variable = u
-    coeff = coeff
+    variable = fv_rho
+    vel = 'fv_velocity'
   []
 []
 
+
 [FVBCs]
-  [left]
+  [left_vel]
     type = FVDirichletBC
-    variable = u
+    variable = fv_vel
     value = 1
     boundary = 'left'
+  []
+  [left_rho]
+    type = FVDirichletBC
+    variable = fv_rho
+    value = 1
+    boundary = 'left'
+  []
+
+  # del * rho * velocity * velocity
+  [right_vel]
+    type = FVMaterialPropertyAdvectionOutflowBC
+    variable = fv_vel
+    vel = 'fv_velocity'
+    advected_quantity = 'rho_u'
+    boundary = 'right'
+  []
+
+  # del * rho * velocity
+  [adv_rho]
+    type = FVMatAdvectionOutflowBC
+    variable = fv_rho
+    vel = 'fv_velocity'
+    boundary = 'right'
   []
 []
 
 [Materials]
-  [velocity]
+  [euler_material]
     type = ADCoupledVelocityMaterial
-    vel_x = u
-  []
-  [diff]
-    type = ADGenericConstantMaterial
-    prop_names = 'coeff'
-    prop_values = '1'
+    vel_x = fv_vel
+    rho = fv_rho
+    velocity = 'fv_velocity'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  line_search = 'none'
+[]
+
+[Outputs]
+  [out]
+    type = Exodus
+    execute_on = 'final'
+  []
 []

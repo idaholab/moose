@@ -1,0 +1,19 @@
+[Tests]
+  design = 'fv_design.md'
+  issues = '#14549'
+  [exo]
+    type = Exodiff
+    input = 'fv_euler.i'
+    exodiff = 'fv_euler_out.e'
+    requirement = 'The system shall be able to couple variables at faces when using the finite volume method.'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = 'fv_euler.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    run_sim = True
+    cli_args = "Outputs/active=''"
+    requirement = 'The system shall have an accurate Jacobian when coupling variables at faces and using the finite volume method.'
+  []
+[]

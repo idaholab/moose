@@ -10,11 +10,12 @@
 #pragma once
 
 #include "FVBoundaryCondition.h"
+#include "MaterialPropertyInterface.h"
 
 /**
  * Base class for Finite Volume Flux BCs
  */
-class FVFluxBC : public FVBoundaryCondition
+class FVFluxBC : public FVBoundaryCondition, public MaterialPropertyInterface
 {
 public:
   FVFluxBC(const InputParameters & parameters);

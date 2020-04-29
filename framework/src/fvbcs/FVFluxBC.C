@@ -15,12 +15,15 @@ InputParameters
 FVFluxBC::validParams()
 {
   InputParameters params = FVBoundaryCondition::validParams();
+  params += MaterialPropertyInterface::validParams();
   params.registerSystemAttributeName("FVFluxBC");
   return params;
 }
 
 FVFluxBC::FVFluxBC(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters), _u(_var.adSln())
+  : FVBoundaryCondition(parameters),
+    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+    _u(_var.adSln())
 {
 }
 

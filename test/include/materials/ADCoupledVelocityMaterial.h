@@ -22,8 +22,12 @@ protected:
   virtual void computeQpProperties() override;
 
   ADMaterialProperty<RealVectorValue> & _velocity;
+  ADMaterialProperty<Real> & _rho_u;
+  ADMaterialProperty<Real> & _rho_v;
+  ADMaterialProperty<Real> & _rho_w;
 
   const ADVariableValue & _vel_x;
   const ADVariableValue * _vel_y;
   const ADVariableValue * _vel_z;
+  const ADVariableValue & _rho;
 };
