@@ -9,6 +9,8 @@
 
 #include "INSADMomentumPressure.h"
 #include "Assembly.h"
+#include "INSADObjectTracker.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumPressure);
 
@@ -30,6 +32,11 @@ INSADMomentumPressure::INSADMomentumPressure(const InputParameters & parameters)
     _grad_p(adCoupledGradient("p")),
     _coord_sys(_assembly.coordSystem())
 {
+  // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
+  // don't need
+  auto & obj_tracker = const_cast<INSADObjectTracker &>(
+      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+  obj_tracker.setIntegratePByParts(_integrate_p_by_parts);
 }
 
 ADReal

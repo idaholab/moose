@@ -23,10 +23,8 @@ public:
 
   INSADMomentumTimeDerivative(const InputParameters & parameters);
 
-  virtual ~INSADMomentumTimeDerivative() {}
-
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _rho;
+  const ADMaterialProperty<RealVectorValue> & _td_strong_residual;
 };

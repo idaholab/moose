@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSADMomentumTimeDerivative.h"
+#include "INSADObjectTracker.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumTimeDerivative);
 
@@ -21,17 +23,22 @@ INSADMomentumTimeDerivative::validParams()
                        "The temperature on which material properties may depend. If properties "
                        "do depend on temperature, this variable must be coupled in in order to "
                        "correctly resize the element matrix");
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "density name");
   return params;
 }
 
 INSADMomentumTimeDerivative::INSADMomentumTimeDerivative(const InputParameters & parameters)
-  : ADVectorTimeKernelValue(parameters), _rho(getADMaterialProperty<Real>("rho_name"))
+  : ADVectorTimeKernelValue(parameters),
+    _td_strong_residual(getADMaterialProperty<RealVectorValue>("td_strong_residual"))
 {
+  // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
+  // don't need
+  auto & obj_tracker = const_cast<INSADObjectTracker &>(
+      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+  obj_tracker.setHasTransient(true);
 }
 
 ADRealVectorValue
 INSADMomentumTimeDerivative::precomputeQpResidual()
 {
-  return _rho[_qp] * _u_dot[_qp];
+  return _td_strong_residual[_qp];
 }

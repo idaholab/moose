@@ -122,8 +122,6 @@
     type = INSADTauMaterial
     velocity = velocity
     pressure = p
-    transient_term = false
-    integrate_p_by_parts = true
     alpha = .1
   []
 []
