@@ -27,7 +27,7 @@ FVMaterialPropertyAdvection::FVMaterialPropertyAdvection(const InputParameters &
 }
 
 const ADReal &
-FVMaterialPropertyAdvection::advQuantity()
+FVMaterialPropertyAdvection::advQuantityElem()
 {
   return _adv_quant_elem[_qp];
 }

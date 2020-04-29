@@ -18,7 +18,7 @@ public:
   FVMaterialPropertyAdvection(const InputParameters & params);
 
 protected:
-  const ADReal & advQuantity() override;
+  const ADReal & advQuantityElem() override;
   const ADReal & advQuantityNeighbor() override;
 
   /// The advected material property on the elem
