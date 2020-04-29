@@ -3087,6 +3087,35 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 }
 
 void
+FEProblemBase::reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+{
+  if (hasActiveMaterialProperties(tid))
+  {
+    // NOTE: this will not work with h-adaptivity
+    // The neighbor element doesn't exist, so use elem element as a stand-in.
+    auto && neighbor = _assembly[tid]->elem();
+
+    // The neighbor element doesn't actually exist - so use the current side
+    // elem side as a stand-in.
+    unsigned int neighbor_side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    _neighbor_material_data[tid]->resize(n_points);
+
+    // Only swap if requested
+    if (swap_stateful)
+      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+
+    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reset(
+          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reinit(
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  }
+}
+
+void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
@@ -3165,6 +3194,17 @@ FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
   auto && elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
+}
+
+void
+FEProblemBase::swapBackMaterialsNeighborGhost(THREAD_ID tid)
+{
+  // NOTE: this will not work with h-adaptivity
+  // Since neighbor element doesn't actually exist, use elem element info
+  // instead.
+  auto && neighbor = _assembly[tid]->elem();
+  unsigned int neighbor_side = _assembly[tid]->side();
+  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 
 void
