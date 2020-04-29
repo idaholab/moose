@@ -204,21 +204,26 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
         _c_name,
         ": We did all our checks for the existence of a var, yet we still don't have a var!?");
 
-  // Are we attempting to couple to an FV var in a non-FV object?
-  if (var->isFV() && !_is_fv)
-    mooseError("Attempting to couple FV variable ",
-               var->name(),
-               " into a non-FV object ",
-               _c_name,
-               ". This is not currently supported");
+  // Only perform the following checks for objects that feed into residuals/Jacobians, e.g. objects
+  // that inherit from the TaggingInterface
+  if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
+  {
+    // Are we attempting to couple to an FV var in a non-FV object?
+    if (var->isFV() && !_is_fv)
+      mooseError("Attempting to couple FV variable ",
+                 var->name(),
+                 " into a non-FV object ",
+                 _c_name,
+                 ". This is not currently supported");
 
-  // Are we attempting to couple to a non-FV var in an FV object?
-  if (!var->isFV() && _is_fv)
-    mooseError("Attempting to couple non-FV variable ",
-               var->name(),
-               " into an FV object ",
-               _c_name,
-               ". This is not currently supported");
+    // Are we attempting to couple to a non-FV var in an FV object?
+    if (!var->isFV() && _is_fv)
+      mooseError("Attempting to couple non-FV variable ",
+                 var->name(),
+                 " into an FV object ",
+                 _c_name,
+                 ". This is not currently supported");
+  }
 
   if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
