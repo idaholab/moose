@@ -98,23 +98,9 @@ MooseVariableFV<OutputType>::insert(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableFV<OutputType>::add(NumericVector<Number> & residual)
+MooseVariableFV<OutputType>::add(NumericVector<Number> & /*residual*/)
 {
-  _element_data->add(residual);
-}
-
-template <typename OutputType>
-void
-MooseVariableFV<OutputType>::addSolution(const DenseVector<Number> & v)
-{
-  _element_data->addSolution(this->_sys.solution(), v);
-}
-
-template <typename OutputType>
-void
-MooseVariableFV<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
-{
-  _neighbor_data->addSolution(this->_sys.solution(), v);
+  mooseError("add not supported for FV variables");
 }
 
 template <typename OutputType>

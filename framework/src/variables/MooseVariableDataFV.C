@@ -880,23 +880,6 @@ MooseVariableDataFV<OutputType>::insert(NumericVector<Number> & residual)
 }
 
 template <typename OutputType>
-void
-MooseVariableDataFV<OutputType>::add(NumericVector<Number> & residual)
-{
-  initDofIndices();
-  residual.add_vector(&_dof_values[0], _dof_indices);
-}
-
-template <typename OutputType>
-void
-MooseVariableDataFV<OutputType>::addSolution(NumericVector<Number> & sol,
-                                             const DenseVector<Number> & v) const
-{
-  initDofIndices();
-  sol.add_vector(v, _dof_indices);
-}
-
-template <typename OutputType>
 const typename MooseVariableDataFV<OutputType>::DoFValue &
 MooseVariableDataFV<OutputType>::dofValues() const
 {

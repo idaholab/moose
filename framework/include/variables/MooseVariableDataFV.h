@@ -221,14 +221,6 @@ public:
    * Set the current local DOF values to the input vector
    */
   void insert(NumericVector<Number> & residual);
-  /**
-   * Add the current local DOF values to the input vector
-   */
-  void add(NumericVector<Number> & residual);
-  /**
-   * Add passed in local DOF values to a solution vector
-   */
-  void addSolution(NumericVector<Number> & sol, const DenseVector<Number> & v) const;
 
   /////////////////////////// DoF value getters /////////////////////////////////////
 

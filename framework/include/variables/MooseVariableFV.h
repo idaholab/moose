@@ -27,22 +27,19 @@ class MooseVariableFV;
 
 typedef MooseVariableFV<Real> MooseVariableFVReal;
 
-/**
- * This class provides variable solution values for other classes/objects to
- * bind to when looping over faces or elements.  It provides both
- * elem and neighbor values when accessed in flux/face object calculations.
- * The templating is to enable support for both vector and scalar variables.
- * Gradient reconstruction (when enabled) occurs transparently within this
- * class and kernels coupling to these values will naturally "see" according
- * to the selected reconstruction methods.
- *
- * OutputType          OutputShape           OutputData
- * ----------------------------------------------------
- * Real                Real                  Real
- * RealVectorValue     RealVectorValue       Real
- * RealEigenVector      Real                  RealEigenVector
- *
- */
+/// This class provides variable solution values for other classes/objects to
+/// bind to when looping over faces or elements.  It provides both
+/// elem and neighbor values when accessed in flux/face object calculations.
+/// The templating is to enable support for both vector and scalar variables.
+/// Gradient reconstruction (when enabled) occurs transparently within this
+/// class and kernels coupling to these values will naturally "see" according
+/// to the selected reconstruction methods.
+///
+/// OutputType          OutputShape           OutputData
+/// ----------------------------------------------------
+/// Real                Real                  Real
+/// RealVectorValue     RealVectorValue       Real
+/// RealEigenVector      Real                  RealEigenVector
 template <typename OutputType>
 class MooseVariableFV : public MooseVariableField<OutputType>
 {
@@ -287,43 +284,24 @@ public:
    */
   void setDofValues(const DenseVector<OutputData> & values);
 
-  /**
-   * Get the current value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
+  /// Get the current value of this variable on an element
+  /// @param[in] elem   Element at which to get value
+  /// @param[in] idx    Local index of this variable's element DoFs
+  /// @return Variable value
   OutputData getElementalValue(const Elem * elem, unsigned int idx = 0) const;
-  /**
-   * Get the old value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
+  /// Get the old value of this variable on an element
+  /// @param[in] elem   Element at which to get value
+  /// @param[in] idx    Local index of this variable's element DoFs
+  /// @return Variable value
   OutputData getElementalValueOld(const Elem * elem, unsigned int idx = 0) const;
-  /**
-   * Get the older value of this variable on an element
-   * @param[in] elem   Element at which to get value
-   * @param[in] idx    Local index of this variable's element DoFs
-   * @return Variable value
-   */
+  /// Get the older value of this variable on an element
+  /// @param[in] elem   Element at which to get value
+  /// @param[in] idx    Local index of this variable's element DoFs
+  /// @return Variable value
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
-  /**
-   * Set the current local DOF values to the input vector
-   */
+
   virtual void insert(NumericVector<Number> & residual) override;
-  /**
-   * Add the current local DOF values to the input vector
-   */
   virtual void add(NumericVector<Number> & residual) override;
-  /**
-   * Add passed in local DOF values onto the current solution
-   */
-  void addSolution(const DenseVector<Number> & v);
-  /**
-   * Add passed in local neighbor DOF values onto the current solution
-   */
-  void addSolutionNeighbor(const DenseVector<Number> & v);
 
   const DoFValue & dofValues();
   const DoFValue & dofValuesOld();
@@ -346,26 +324,23 @@ public:
   const MooseArray<Number> & dofValuesDuDotDotDu();
   const MooseArray<Number> & dofValuesDuDotDotDuNeighbor();
 
-  /**
-   * Return the AD dof values
-   */
+  /// Returns the AD dof values.
   const MooseArray<ADReal> & adDofValues();
 
-  /**
-   * Note: const monomial is always the case - higher order solns are
-   * reconstructed - so this is simpler func than FE equivalent.
-   */
+  /// Note: const monomial is always the case - higher order solns are
+  /// reconstructed - so this is simpler func than FE equivalent.
   OutputType getValue(const Elem * elem) const;
 
-  /**
-   * Compute the variable gradient value at a point on an element
-   * @param elem The element we are computing on
-   * @param phi Evaluated shape functions at a point
-   * @return The variable gradient value
-   */
+  /// Compute the variable gradient value at a point on an element
+  /// @param elem The element we are computing on
+  /// @param phi Evaluated shape functions at a point
+  /// @return The variable gradient value
   typename OutputTools<OutputType>::OutputGradient getGradient(const Elem * elem) const;
 
-  /// checks if a Dirichlet BC exists on this face
+  /// Returns true if a Dirichlet BC exists on the current face.  This only
+  /// works if the variable has been initialized on a face with
+  /// computeFaceValues.  Its return value is nonsense if initialized on a
+  /// single element via computeElemValues.
   bool hasDirichletBC() const
   {
     return _element_data->hasDirichletBC() || _neighbor_data->hasDirichletBC();
