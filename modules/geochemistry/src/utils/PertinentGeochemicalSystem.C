@@ -16,7 +16,9 @@ PertinentGeochemicalSystem::PertinentGeochemicalSystem(
     const std::vector<std::string> & gases,
     const std::vector<std::string> & kinetic_minerals,
     const std::vector<std::string> & kinetic_redox,
-    const std::vector<std::string> & kinetic_surface_species)
+    const std::vector<std::string> & kinetic_surface_species,
+    const std::string & redox_ox,
+    const std::string & redox_e)
   : _db(db),
     _basis_index(),
     _basis_info(),
@@ -32,6 +34,8 @@ PertinentGeochemicalSystem::PertinentGeochemicalSystem(
     _kinetic_surface_info(),
     _secondary_index(),
     _secondary_info(),
+    _redox_ox(redox_ox),
+    _redox_e(redox_e),
     _model()
 {
   // Use the constructor info to build the "index" and "info" structures
@@ -476,6 +480,79 @@ PertinentGeochemicalSystem::createModel()
                    "erroneous!");
     }
   }
+
+  // Build the redox information, if any.  Here we express any O2(aq) in the redox equations in
+  // terms of redox_e (which is usually e-)
+  _model.redox_lhs = _redox_e;
+  std::vector<Real> redox_stoi;
+  std::vector<Real> redox_log10K;
+  if (_model.basis_species_index.count(_redox_ox) == 1 &&
+      _model.eqm_species_index.count(_redox_e) == 1)
+  {
+    const unsigned o2_index = _model.basis_species_index.at(_redox_ox);
+    const unsigned free_el_index = _model.eqm_species_index.at(_redox_e);
+    // the electron reaction is
+    // e- = nuw_i * basis_i + beta * O2(aq), where we've pulled out the O2(aq) because it's special
+    const Real beta = _model.eqm_stoichiometry(free_el_index, o2_index);
+    if (beta != 0.0)
+    {
+      for (const auto & bs : _model.basis_species_index)
+        if (_db.isRedoxSpecies(bs.first))
+        {
+          // this basis species is a redox couple in disequilibrium
+          const GeochemistryRedoxSpecies rs = _db.getRedoxSpecies({bs.first})[bs.first];
+          // check that its reaction involves only basis species, and record the stoichiometry in
+          // the current basis
+          std::vector<Real> stoi(num_cols, 0.0);
+          bool only_involves_basis_species = true;
+          for (const auto & name_stoi : rs.basis_species)
+          {
+            if (_model.basis_species_index.count(name_stoi.first) == 1)
+              stoi[_model.basis_species_index.at(name_stoi.first)] = name_stoi.second;
+            else
+            {
+              only_involves_basis_species = false;
+              break;
+            }
+          }
+          if (!only_involves_basis_species)
+            continue;
+          // Reaction is now
+          // redox = nu_i * basis_i + alpha * O2(aq), where we've pulled the O2(aq) out because it's
+          // special. Now pull the redox couple to the RHS of the reaction, so we have
+          // 0 = -redox + nu_i * basis_i + alpha * O2(aq)
+          stoi[bs.second] = -1.0;
+          // check that the stoichiometry involves O2(aq)
+          const Real alpha = stoi[o2_index];
+          if (alpha == 0.0)
+            continue;
+          // multiply equation -beta/alpha so it reads
+          // 0 = -beta/alpha * (-redox + nu_i * basis_i) - beta * O2(aq)
+          for (unsigned basis_i = 0; basis_i < num_cols; ++basis_i)
+            stoi[basis_i] *= -beta / alpha;
+          // add the equation to e- = nuw_i * basis_i + beta * O2(aq)
+          for (unsigned basis_i = 0; basis_i < num_cols; ++basis_i)
+            stoi[basis_i] += _model.eqm_stoichiometry(free_el_index, basis_i);
+          // now the reation is e- = nuw_i * basis_i - beta/alpha * (-redox + nu_i * basis_i)
+          redox_stoi.insert(redox_stoi.end(), stoi.begin(), stoi.end());
+
+          // record the equilibrium constants
+          for (unsigned temp = 0; temp < num_temperatures; ++temp)
+            redox_log10K.push_back((-beta / alpha) * rs.equilibrium_const[temp] +
+                                   _model.eqm_log10K(free_el_index, temp));
+        }
+    }
+  }
+  // record the above in the model.redox_stoichiometry and model.redox_log10K DenseMatrices
+  const unsigned num_redox = redox_stoi.size() / num_cols;
+  _model.redox_stoichiometry.resize(num_redox, num_cols);
+  for (unsigned red = 0; red < num_redox; ++red)
+    for (unsigned basis_i = 0; basis_i < num_cols; ++basis_i)
+      _model.redox_stoichiometry(red, basis_i) = redox_stoi[red * num_cols + basis_i];
+  _model.redox_log10K.resize(num_redox, num_temperatures);
+  for (unsigned red = 0; red < num_redox; ++red)
+    for (unsigned temp = 0; temp < num_temperatures; ++temp)
+      _model.redox_log10K(red, temp) = redox_log10K[red * num_temperatures + temp];
 
   // To build the kin_species_index, kin_species_name, etc, let's build an "overlap", similar to
   // above

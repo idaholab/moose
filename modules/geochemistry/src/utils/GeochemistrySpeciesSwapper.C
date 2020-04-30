@@ -156,6 +156,8 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
 {
   const unsigned num_cols = mgd.basis_species_index.size();
   const unsigned num_rows = mgd.eqm_species_index.size();
+  const unsigned num_temperatures = mgd.eqm_log10K.n();
+  const unsigned num_redox = mgd.redox_stoichiometry.m();
 
   // change names
   const std::string basis_name = mgd.basis_species_name[basis_index_to_replace];
@@ -166,6 +168,29 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
   mgd.eqm_species_name[eqm_index_to_insert] = basis_name;
   mgd.eqm_species_index.erase(eqm_name);
   mgd.eqm_species_index[basis_name] = eqm_index_to_insert;
+
+  // flag indicating whether the redox_lhs is the equilibrium species that is being put into the
+  // basis
+  const bool redox_lhs_going_to_basis = (eqm_name == mgd.redox_lhs);
+  if (redox_lhs_going_to_basis)
+  {
+    // need to make the redox_lhs equal to the species that is being taken from the basis
+    mgd.redox_lhs = basis_name;
+    for (unsigned red = 0; red < num_redox; ++red)
+    {
+      const Real alpha = mgd.eqm_stoichiometry(
+          eqm_index_to_insert, basis_index_to_replace); // must be nonzero due to valid swap
+      const Real alpha_r = mgd.redox_stoichiometry(red, basis_index_to_replace);
+      const Real coef = 1.0 / (alpha - alpha_r);
+      for (unsigned i = 0; i < num_cols; ++i)
+        mgd.redox_stoichiometry(red, i) = coef * (mgd.redox_stoichiometry(red, i) -
+                                                  mgd.eqm_stoichiometry(eqm_index_to_insert, i));
+      mgd.redox_stoichiometry(red, basis_index_to_replace) = 0.0;
+      for (unsigned t = 0; t < num_temperatures; ++t)
+        mgd.redox_log10K(red, t) =
+            coef * (mgd.redox_log10K(red, t) - mgd.eqm_log10K(eqm_index_to_insert, t));
+    }
+  }
 
   // express stoichiometry in new basis
   for (unsigned i = 0; i < num_cols; ++i)
@@ -178,8 +203,15 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
       if (std::abs(mgd.eqm_stoichiometry(i, j)) < _stoi_tol)
         mgd.eqm_stoichiometry(i, j) = 0.0;
 
+  // if the redox_lhs is not changed by the swap, alter the redox stoichiometry
+  if (!redox_lhs_going_to_basis)
+    mgd.redox_stoichiometry.right_multiply(_inv_swap_matrix);
+  for (unsigned red = 0; red < num_redox; ++red)
+    for (unsigned j = 0; j < num_cols; ++j)
+      if (std::abs(mgd.redox_stoichiometry(red, j)) < _stoi_tol)
+        mgd.redox_stoichiometry(red, j) = 0.0;
+
   // alter equilibrium constants for each temperature point
-  const unsigned num_temperatures = mgd.eqm_log10K.n();
   for (unsigned t = 0; t < num_temperatures; ++t)
   {
     const Real log10k_eqm_species = mgd.eqm_log10K(eqm_index_to_insert, t);
@@ -188,6 +220,12 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
     for (unsigned row = 0; row < num_rows; ++row)
       mgd.eqm_log10K(row, t) -=
           mgd.eqm_stoichiometry(row, basis_index_to_replace) * log10k_eqm_species;
+
+    // similar for the redox equations
+    if (!redox_lhs_going_to_basis)
+      for (unsigned red = 0; red < num_redox; ++red)
+        mgd.redox_log10K(red, t) -=
+            mgd.redox_stoichiometry(red, basis_index_to_replace) * log10k_eqm_species;
   }
 
   // swap the "is mineral" information
