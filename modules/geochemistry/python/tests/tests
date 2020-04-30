@@ -20,4 +20,11 @@
     issues = "#14897"
     design = "database.md"
   []
+  [readerutils]
+    type = PythonUnitTest
+    input = test_readerutils.py
+    requirement = "The geochemistry module shall provide a python utility to fill missing values in a MOOSE thermodynamic database"
+    issues = "#15145"
+    design = "database.md"
+  []
 []
