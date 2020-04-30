@@ -30,7 +30,7 @@
 [FVKernels]
   # del * rho * velocity * velocity
   [adv_rho_u]
-    type = FVMaterialPropertyAdvection
+    type = FVMatAdvection
     variable = fv_vel
     vel = 'fv_velocity'
     advected_quantity = 'rho_u'
@@ -61,7 +61,7 @@
 
   # del * rho * velocity * velocity
   [right_vel]
-    type = FVMaterialPropertyAdvectionOutflowBC
+    type = FVMatAdvectionOutflowBC
     variable = fv_vel
     vel = 'fv_velocity'
     advected_quantity = 'rho_u'

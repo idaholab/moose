@@ -19,9 +19,13 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override;
-  virtual const ADReal & advQuantityElem();
-  virtual const ADReal & advQuantityNeighbor();
 
   const ADMaterialProperty<RealVectorValue> & _vel_elem;
   const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
+
+  /// The advected quantity on the elem
+  const MooseArray<ADReal> * _adv_quant_elem;
+
+  /// The advected quantity on the neighbor
+  const MooseArray<ADReal> * _adv_quant_neighbor;
 };
