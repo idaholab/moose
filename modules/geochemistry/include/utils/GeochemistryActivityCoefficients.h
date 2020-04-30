@@ -12,9 +12,39 @@
 #include "PertinentGeochemicalSystem.h"
 #include "GeochemistryIonicStrength.h"
 
+struct DebyeHuckelParameters
+{
+  Real A;
+  Real B;
+  Real Bdot;
+  Real a_water;
+  Real b_water;
+  Real c_water;
+  Real d_water;
+  Real a_neutral;
+  Real b_neutral;
+  Real c_neutral;
+  Real d_neutral;
+
+  DebyeHuckelParameters()
+    : A(0.5092),
+      B(0.3283),
+      Bdot(0.035),
+      a_water(1.45397),
+      b_water(0.022357),
+      c_water(0.0093804),
+      d_water(-0.0005262),
+      a_neutral(0.1127),
+      b_neutral(-0.01049),
+      c_neutral(0.001545),
+      d_neutral(0.0)
+  {
+  }
+};
+
 /**
- * Computes activity coefficients for non-minerals and non-gases (since these are meaningless). Also
- * computes the activity of water.
+ * Computes activity coefficients for non-minerals and non-gases (since these species do not have
+ * activity coefficients). Also computes the activity of water.
  */
 class GeochemistryActivityCoefficients
 {
@@ -27,11 +57,7 @@ public:
 
   /**
    * @param method Method used by this class to compute activity coefficients and activity of water
-   * @param max_ionic_strength maximum value of ionic strength (used if method=DEBYE_HUCKEL)
-   * @param max_stoichiometric_ionic_strength maximum value of stoichiometric ionic strength (used
-   * if method=DEBYE_HUCKEL)
-   * @param use_only_basis_molality If true, use only the basis molalities in the ionic strength and
-   * stoichiometric ionic strength calculations (used if method=DEBYE_HUCKEL)
+   * @param is_calculator Calculates ionic strengths
    */
   GeochemistryActivityCoefficients(ActivityCoefficientMethodEnum method,
                                    const GeochemistryIonicStrength & is_calculator);
@@ -45,7 +71,6 @@ public:
    * @param basis_species_molality Molalities of the basis species in mgd
    * @param eqm_species_molality Molalities of the equilibrium species in mgd
    * @param kin_species_molality Molalities of the kinetic species
-   * @return the ionic strength of the aqueous solution
    */
   void setInternalParameters(Real temperature,
                              const ModelGeochemicalDatabase & mgd,
@@ -65,21 +90,22 @@ public:
    * Note:
    * - you will probably want to call setInternalParameters prior to calling this method
    * - the activity coefficient for water (basis species = 0) is not computed since it is
-   * meaningless: get getWaterActivity() instead
-   * - the activity coefficient for any mineral is not computed since it is meaningless
-   * - the activity coefficient for any gas is not computed since it is meaningless
-   * Hence, the elements in basis_activity_coef and eqm_activity_coef corresponding to these
-   * species will be undefined after this method returns
+   * meaningless: use getWaterActivity() instead
+   * - the activity coefficient for any mineral is not computed since minerals do not have activity
+   * coefficients
+   * - the activity coefficient for any gas is not computed since gases do not have activity
+   * coefficients
+   *  Hence, the elements in basis_activity_coef and eqm_activity_coef corresponding to
+   * these species will be undefined after this method returns
    */
   void buildActivityCoefficients(const ModelGeochemicalDatabase & mgd,
                                  std::vector<Real> & basis_activity_coef,
                                  std::vector<Real> & eqm_activity_coef) const;
 
   /**
-   * @return the vector {A, B, Bdot, a(water), b(water), c(water), d(water), a(neutral), b(neutral),
-   * c(neutral), d(neutral)} used in the DebyeHuckel model
+   * @return the Debye-Huckel parameters
    */
-  std::vector<Real> getDebyeHuckel() const;
+  const DebyeHuckelParameters & getDebyeHuckel() const;
 
   /// Return the current value of ionic strength
   Real getIonicStrength() const;
@@ -109,26 +135,6 @@ private:
   /// number of equilibrium species
   unsigned _num_eqm;
 
-  /// Debye-Huckel parameter
-  Real _dhA;
-  /// Debye-Huckel parameter
-  Real _dhB;
-  /// Debye-Huckel parameter
-  Real _dhBdot;
-  /// Debye-Huckel parameter
-  Real _dha;
-  /// Debye-Huckel parameter
-  Real _dhb;
-  /// Debye-Huckel parameter
-  Real _dhc;
-  /// Debye-Huckel parameter
-  Real _dhd;
-  /// Debye-Huckel parameter
-  Real _dhatilde;
-  /// Debye-Huckel parameter
-  Real _dhbtilde;
-  /// Debye-Huckel parameter
-  Real _dhctilde;
-  /// Debye-Huckel parameter
-  Real _dhdtilde;
+  /// Debye-Huckel parameters
+  DebyeHuckelParameters _dh;
 };

@@ -18,7 +18,7 @@ namespace GeochemistryFormattedOutput
 /**
  * Returns a nicely formatted string corresponding to the reaction defined by the given row of the
  * stoichiometric matrix. For instance, if stoi(row, :) = (1, 2, 1E-5, -0.333333333333) and names =
- * ["H2O", "H+", "HCO3-", "O2(aq)"] then this function will return "H2O + 2*H+ - 0.333O2(aq)" if
+ * ["H2O", "H+", "HCO3-", "O2(aq)"] then this function will return "H2O + 2*H+ - 0.333*O2(aq)" if
  * stoi_tol=1E-4 and precision = 3
  * @param stoi matrix stoichiometric coefficients
  * @param row row of stoi which defines the reaction of interest
@@ -31,6 +31,6 @@ namespace GeochemistryFormattedOutput
 std::string reaction(const DenseMatrix<Real> & stoi,
                      unsigned row,
                      const std::vector<std::string> & names,
-                     Real stoi_tol,
-                     int precision);
+                     Real stoi_tol = 1.0E-6,
+                     int precision = 4);
 }

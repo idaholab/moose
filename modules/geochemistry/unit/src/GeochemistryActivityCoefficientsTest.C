@@ -65,23 +65,19 @@ TEST(GeochemistryActivityCoefficientsTest, getDebyeHuckel)
       GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
-  std::vector<Real> dh = ac.getDebyeHuckel();
+  const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
-  const std::vector<Real> dh_gold = {0.5092,
-                                     0.3283,
-                                     0.035,
-                                     1.45397,
-                                     0.022357,
-                                     0.0093804,
-                                     -0.0005262,
-                                     0.1127,
-                                     -0.01049,
-                                     0.001545,
-                                     0.0};
-
-  EXPECT_EQ(dh.size(), dh_gold.size());
-  for (unsigned i = 0; i < dh_gold.size(); ++i)
-    EXPECT_EQ(dh[i], dh_gold[i]);
+  EXPECT_EQ(dh.A, 0.5092);
+  EXPECT_EQ(dh.B, 0.3283);
+  EXPECT_EQ(dh.Bdot, 0.035);
+  EXPECT_EQ(dh.a_water, 1.45397);
+  EXPECT_EQ(dh.b_water, 0.022357);
+  EXPECT_EQ(dh.c_water, 0.0093804);
+  EXPECT_EQ(dh.d_water, -0.0005262);
+  EXPECT_EQ(dh.a_neutral, 0.1127);
+  EXPECT_EQ(dh.b_neutral, -0.01049);
+  EXPECT_EQ(dh.c_neutral, 0.001545);
+  EXPECT_EQ(dh.d_neutral, 0.0);
 }
 
 /// Test calculate activity coefficients for method=DebyeHuckel
@@ -102,7 +98,7 @@ TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
   EXPECT_EQ(basis_ac.size(), 6);
   EXPECT_EQ(eqm_ac.size(), 9);
 
-  std::vector<Real> dh = ac.getDebyeHuckel();
+  const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
   // Note that GeochemistryActivity has been tested elsewhere: here we're just checking the slots
   // get filled correctly
@@ -112,7 +108,7 @@ TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
     if (i == 3) // O2(aq)
       gold = std::pow(10.0,
                       GeochemistryActivityCalculators::log10ActCoeffDHBdotNeutral(
-                          ionic_str, dh[7], dh[8], dh[9], dh[10]));
+                          ionic_str, dh.a_neutral, dh.b_neutral, dh.c_neutral, dh.d_neutral));
     else if (i == 5) // >(s)FeOH
       gold = 1.0;
     else
@@ -121,9 +117,9 @@ TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
                    GeochemistryActivityCalculators::log10ActCoeffDHBdot(mgd.basis_species_charge[i],
                                                                         mgd.basis_species_radius[i],
                                                                         std::sqrt(ionic_str),
-                                                                        dh[0],
-                                                                        dh[1],
-                                                                        dh[2]));
+                                                                        dh.A,
+                                                                        dh.B,
+                                                                        dh.Bdot));
     ASSERT_NEAR(basis_ac[i], gold, 1.0E-8);
   }
 
@@ -138,9 +134,9 @@ TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
                    GeochemistryActivityCalculators::log10ActCoeffDHBdot(mgd.eqm_species_charge[j],
                                                                         mgd.eqm_species_radius[j],
                                                                         std::sqrt(ionic_str),
-                                                                        dh[0],
-                                                                        dh[1],
-                                                                        dh[2]));
+                                                                        dh.A,
+                                                                        dh.B,
+                                                                        dh.Bdot));
     ASSERT_NEAR(eqm_ac[j], gold, 1.0E-8);
   }
 }
@@ -154,13 +150,13 @@ TEST(GeochemistryActivityCoefficientsTest, waterActivity)
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 
-  std::vector<Real> dh = ac.getDebyeHuckel();
+  const DebyeHuckelParameters dh = ac.getDebyeHuckel();
   const Real stoi_ionic_str = ac.getStoichiometricIonicStrength();
 
   // note that GeochemistryActivityCalculators::lnActivityDHBdotWater has been tested elsewhere:
   // this is just testing the information gets passed through to GeochemistryActivityCoefficients
   EXPECT_NEAR(ac.waterActivity(),
               std::exp(GeochemistryActivityCalculators::lnActivityDHBdotWater(
-                  stoi_ionic_str, dh[0], dh[3], dh[4], dh[5], dh[6])),
+                  stoi_ionic_str, dh.A, dh.a_water, dh.b_water, dh.c_water, dh.d_water)),
               1.0E-8);
 }

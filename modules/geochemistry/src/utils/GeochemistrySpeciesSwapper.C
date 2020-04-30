@@ -181,6 +181,10 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
       const Real alpha = mgd.eqm_stoichiometry(
           eqm_index_to_insert, basis_index_to_replace); // must be nonzero due to valid swap
       const Real alpha_r = mgd.redox_stoichiometry(red, basis_index_to_replace);
+      mooseAssert(alpha != alpha_r,
+                  "Cannot swap equilibrium species "
+                      << eqm_name << " with basis species " << basis_name
+                      << " because a redox reaction would result in 0 <-> 1");
       const Real coef = 1.0 / (alpha - alpha_r);
       for (unsigned i = 0; i < num_cols; ++i)
         mgd.redox_stoichiometry(red, i) = coef * (mgd.redox_stoichiometry(red, i) -

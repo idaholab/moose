@@ -19,17 +19,7 @@ GeochemistryActivityCoefficients::GeochemistryActivityCoefficients(
     _stoichiometric_ionic_strength(1.0),
     _num_basis(0),
     _num_eqm(0),
-    _dhA(0.0),
-    _dhB(0.0),
-    _dhBdot(0.0),
-    _dha(0.0),
-    _dhb(0.0),
-    _dhc(0.0),
-    _dhd(0.0),
-    _dhatilde(0.0),
-    _dhbtilde(0.0),
-    _dhctilde(0.0),
-    _dhdtilde(0.0)
+    _dh()
 {
 }
 
@@ -50,25 +40,25 @@ GeochemistryActivityCoefficients::setInternalParameters(
   _num_eqm = mgd.eqm_species_index.size();
   // when temperature least-squares is completed the following lines will be changed
   // charged species Debye-Huckel at 25degC
-  _dhA = 0.5092;
-  _dhB = 0.3283;
-  _dhBdot = 0.035;
+  _dh.A = 0.5092;
+  _dh.B = 0.3283;
+  _dh.Bdot = 0.035;
   // water Debye-Huckel at 25degC
-  _dhatilde = 1.45397;
-  _dhbtilde = 0.022357;
-  _dhctilde = 0.0093804;
-  _dhdtilde = -0.0005262;
+  _dh.a_water = 1.45397;
+  _dh.b_water = 0.022357;
+  _dh.c_water = 0.0093804;
+  _dh.d_water = -0.0005262;
   // neutral species Debye-Huckel at 25degC
-  _dha = 0.1127;
-  _dhb = -0.01049;
-  _dhc = 0.001545;
-  _dhd = 0.0;
+  _dh.a_neutral = 0.1127;
+  _dh.b_neutral = -0.01049;
+  _dh.c_neutral = 0.001545;
+  _dh.d_neutral = 0.0;
 }
 
-std::vector<Real>
+const DebyeHuckelParameters &
 GeochemistryActivityCoefficients::getDebyeHuckel() const
 {
-  return {_dhA, _dhB, _dhBdot, _dhatilde, _dhbtilde, _dhctilde, _dhdtilde, _dha, _dhb, _dhc, _dhd};
+  return _dh;
 }
 
 Real
@@ -77,8 +67,13 @@ GeochemistryActivityCoefficients::waterActivity() const
   switch (_method)
   {
     case ActivityCoefficientMethodEnum::DEBYE_HUCKEL:
-      return std::exp(GeochemistryActivityCalculators::lnActivityDHBdotWater(
-          _stoichiometric_ionic_strength, _dhA, _dhatilde, _dhbtilde, _dhctilde, _dhdtilde));
+      return std::exp(
+          GeochemistryActivityCalculators::lnActivityDHBdotWater(_stoichiometric_ionic_strength,
+                                                                 _dh.A,
+                                                                 _dh.a_water,
+                                                                 _dh.b_water,
+                                                                 _dh.c_water,
+                                                                 _dh.d_water));
   }
   return 1.0;
 }
@@ -101,17 +96,17 @@ GeochemistryActivityCoefficients::buildActivityCoefficients(
           continue; // these should never be used
         else if (mgd.basis_species_radius[basis_i] == -0.5)
         {
-          basis_activity_coef[basis_i] =
-              std::pow(10.0,
-                       GeochemistryActivityCalculators::log10ActCoeffDHBdotNeutral(
-                           _ionic_strength, _dha, _dhb, _dhc, _dhd));
+          basis_activity_coef[basis_i] = std::pow(
+              10.0,
+              GeochemistryActivityCalculators::log10ActCoeffDHBdotNeutral(
+                  _ionic_strength, _dh.a_neutral, _dh.b_neutral, _dh.c_neutral, _dh.d_neutral));
         }
         else if (mgd.basis_species_radius[basis_i] == -1.0)
         {
           basis_activity_coef[basis_i] =
               std::pow(10.0,
                        GeochemistryActivityCalculators::log10ActCoeffDHBdotAlternative(
-                           _ionic_strength, _dhBdot));
+                           _ionic_strength, _dh.Bdot));
         }
         else if (mgd.basis_species_charge[basis_i] == 0.0)
         {
@@ -125,9 +120,9 @@ GeochemistryActivityCoefficients::buildActivityCoefficients(
                            mgd.basis_species_charge[basis_i],
                            mgd.basis_species_radius[basis_i],
                            _sqrt_ionic_strength,
-                           _dhA,
-                           _dhB,
-                           _dhBdot));
+                           _dh.A,
+                           _dh.B,
+                           _dh.Bdot));
         }
 
       for (unsigned eqm_j = 0; eqm_j < _num_eqm; ++eqm_j)
@@ -135,17 +130,17 @@ GeochemistryActivityCoefficients::buildActivityCoefficients(
           continue;
         else if (mgd.eqm_species_radius[eqm_j] == -0.5)
         {
-          eqm_activity_coef[eqm_j] =
-              std::pow(10.0,
-                       GeochemistryActivityCalculators::log10ActCoeffDHBdotNeutral(
-                           _ionic_strength, _dha, _dhb, _dhc, _dhd));
+          eqm_activity_coef[eqm_j] = std::pow(
+              10.0,
+              GeochemistryActivityCalculators::log10ActCoeffDHBdotNeutral(
+                  _ionic_strength, _dh.a_neutral, _dh.b_neutral, _dh.c_neutral, _dh.d_neutral));
         }
         else if (mgd.eqm_species_radius[eqm_j] == -1.0)
         {
           eqm_activity_coef[eqm_j] =
               std::pow(10.0,
                        GeochemistryActivityCalculators::log10ActCoeffDHBdotAlternative(
-                           _ionic_strength, _dhBdot));
+                           _ionic_strength, _dh.Bdot));
         }
         else if (mgd.eqm_species_charge[eqm_j] == 0.0)
         {
@@ -158,9 +153,9 @@ GeochemistryActivityCoefficients::buildActivityCoefficients(
               GeochemistryActivityCalculators::log10ActCoeffDHBdot(mgd.eqm_species_charge[eqm_j],
                                                                    mgd.eqm_species_radius[eqm_j],
                                                                    _sqrt_ionic_strength,
-                                                                   _dhA,
-                                                                   _dhB,
-                                                                   _dhBdot));
+                                                                   _dh.A,
+                                                                   _dh.B,
+                                                                   _dh.Bdot));
         }
       break;
     }
