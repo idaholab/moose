@@ -58,12 +58,12 @@ Burgers' equation. The Burgers' equation for speed `v` is given by:
   \frac{\partial v}{\partial t} + \frac{1}{2}\frac{\partial }{\partial x} v^2 = 0.
 \end{equation}
 
-!listing test/tests/fvkernels/fv_burger/fv_burger.i
+!listing test/tests/fvkernels/fv_burgers/fv_burgers.i
          block=FVKernels
          id=first_fv_kernel_example
          caption=Example of the FVKernels block in a [MOOSE] input file for solving one-dimensional Burgers' equation.
 
-Note that the `FVBurger1D` kernel only works for one-dimensional problems. In
+Note that the `FVBurgers1D` kernel only works for one-dimensional problems. In
 this example, the exact same time derivative kernels as for the diffusion
 example is used, but the spatial derivative term is different.
 

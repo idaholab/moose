@@ -29,8 +29,8 @@
 []
 
 [FVKernels]
-  [./burger]
-    type = FVBurger1D
+  [./burgers]
+    type = FVBurgers1D
     variable = v
   [../]
   [./time]
@@ -40,8 +40,8 @@
 []
 
 [FVBCs]
-  [./fv_burger_outflow]
-    type = FVBurgerOutflowBC
+  [./fv_burgers_outflow]
+    type = FVBurgersOutflowBC
     variable = v
     boundary = 'left right'
   [../]

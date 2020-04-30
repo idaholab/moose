@@ -9,13 +9,17 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "FVFluxBC.h"
 
-class FVBurger1D : public FVFluxKernel
+/**
+ * Constant velocity scalar advection boundary conditions
+ */
+class FVBurgersOutflowBC : public FVFluxBC
 {
 public:
+  FVBurgersOutflowBC(const InputParameters & parameters);
+
   static InputParameters validParams();
-  FVBurger1D(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;

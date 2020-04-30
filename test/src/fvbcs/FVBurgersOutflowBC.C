@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVBurgerOutflowBC.h"
+#include "FVBurgersOutflowBC.h"
 
-registerMooseObject("MooseTestApp", FVBurgerOutflowBC);
+registerMooseObject("MooseTestApp", FVBurgersOutflowBC);
 
 InputParameters
-FVBurgerOutflowBC::validParams()
+FVBurgersOutflowBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   return params;
 }
 
-FVBurgerOutflowBC::FVBurgerOutflowBC(const InputParameters & parameters) : FVFluxBC(parameters) {}
+FVBurgersOutflowBC::FVBurgersOutflowBC(const InputParameters & parameters) : FVFluxBC(parameters) {}
 
 ADReal
-FVBurgerOutflowBC::computeQpResidual()
+FVBurgersOutflowBC::computeQpResidual()
 {
-  mooseAssert(_face_info->elem().dim() == 1, "FVBurgerOutflowBC works only in 1D");
+  mooseAssert(_face_info->elem().dim() == 1, "FVBurgersOutflowBC works only in 1D");
 
   ADReal r = 0;
   // only add this on outflow faces

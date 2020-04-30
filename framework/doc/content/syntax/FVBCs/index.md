@@ -107,7 +107,7 @@ parameters and then returns it in `computeQpResidual()`.
          id=fv_dirichlet_code
          caption=Example source code for `FVNeumannBC`.
 
-## FVBCs source code: FVBurgerOutflowBC
+## FVBCs source code: FVBurgersOutflowBC
 
 Flux boundary conditions can be more complicated than assigning
 a constant value. In this example, the outflow contribution for
@@ -120,15 +120,15 @@ the Burgers' equation is computed. The relevant term is (note 1D):
 
 where $v_R$ and $v_L$ are the values of $v$ on the left and right
 boundaries of the element and $n_R$ and $n_L$ are the outward normals on these
-faces. Let's assume that the left side is a boundary face where the `FVBurgerOutflowBC` is applied. On that boundary we have $n_L = -1$.
-The `FVBurgerOutflowBC` boundary condition uses upwinding, i.e. it uses the element value $v$
+faces. Let's assume that the left side is a boundary face where the `FVBurgersOutflowBC` is applied. On that boundary we have $n_L = -1$.
+The `FVBurgersOutflowBC` boundary condition uses upwinding, i.e. it uses the element value $v$
 as boundary values on outflow faces.
 
 The code listed below first checks if the left is actually an outflow side by using the cell value of the $v$ (element average, upwinding!) and dotting it with the normal. If $v n_L > 0$, then the left is an outflow side.
 In this case the contribution $1/2 v^2 n_L$ is added, otherwise no contribution is added.
 
-!listing test/src/fvbcs/FVBurgerOutflowBC.C
-         start=FVBurgerOutflowBC::computeQpResidual()
+!listing test/src/fvbcs/FVBurgersOutflowBC.C
+         start=FVBurgersOutflowBC::computeQpResidual()
          end=""
          id=fv_burgers_outflow_bc
          caption=Outflow boundary condition for the Burgers' equation.
