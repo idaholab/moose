@@ -124,12 +124,12 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const std::vector<MooseADWrapper<T, is_ad>> & get() const { return _value; }
+  const MooseArray<MooseADWrapper<T, is_ad>> & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  std::vector<MooseADWrapper<T, is_ad>> & set() { return _value; }
+  MooseArray<MooseADWrapper<T, is_ad>> & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
@@ -193,7 +193,7 @@ private:
 
 protected:
   /// Stored parameter value.
-  std::vector<MooseADWrapper<T, is_ad>> _value;
+  MooseArray<MooseADWrapper<T, is_ad>> _value;
 };
 
 template <typename T>
@@ -278,12 +278,7 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::resize(int n)
 {
-  auto diff = n - static_cast<int>(_value.size());
-  if (diff < 0)
-    _value.erase(_value.end() + diff, _value.end());
-  else
-    for (decltype(diff) i = 0; i < diff; ++i)
-      _value.emplace_back(MooseADWrapper<T, is_ad>());
+  _value.resize(n);
 }
 
 template <typename T, bool is_ad>
