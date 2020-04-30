@@ -88,16 +88,56 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
 }
 
 void
+FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
+{
+  auto & ce = _assembly.couplingEntries();
+  for (const auto & it : ce)
+  {
+    MooseVariableFieldBase & ivariable = *(it.first);
+    MooseVariableFieldBase & jvariable = *(it.second);
+
+    // We currently only support coupling to other FV variables
+    // Remove this when we enable support for it.
+    if (!jvariable.isFV())
+      continue;
+
+    unsigned int ivar = ivariable.number();
+    unsigned int jvar = jvariable.number();
+
+    if (ivar != _var.number())
+      continue;
+
+    SystemBase & sys = _subproblem.systemBaseNonlinear();
+    auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
+
+    auto ad_offset = jvar * dofs_per_elem;
+    if (type == Moose::ElementNeighbor || type == Moose::NeighborNeighbor)
+      ad_offset += sys.system().n_vars() * dofs_per_elem;
+
+    prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
+
+    mooseAssert(
+        _local_ke.m() == 1,
+        "We are currently only supporting constant monomials for finite volume calculations");
+    mooseAssert(
+        _local_ke.n() == 1,
+        "We are currently only supporting constant monomials for finite volume calculations");
+    mooseAssert(jvariable.dofIndices().size() == 1,
+                "The AD derivative indexing below only makes sense for constant monomials, e.g. "
+                "for a number of dof indices equal to  1");
+
+    _local_ke(0, 0) = residual.derivatives()[ad_offset];
+
+    accumulateTaggedLocalMatrix();
+  }
+}
+
+void
 FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
-  DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
-
-  auto & sys = _subproblem.systemBaseNonlinear();
-  unsigned int dofs_per_elem = sys.getMaxVarNDofsPerElem();
-  unsigned int var_num = _var.number();
-  unsigned int nvars = sys.system().n_vars();
+  const DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
   // The fancy face type if condition checks here are because we might
   // currently be running on a face for which this kernel's variable is only
@@ -114,9 +154,7 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   {
     // jacobian contribution of the residual for the elem element to the elem element's DOF:
     // d/d_elem (residual_elem)
-    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementElement);
-    _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem];
-    accumulateTaggedLocalMatrix();
+    computeJacobian(Moose::ElementElement, r);
 
     mooseAssert(
         (ft == FaceInfo::VarFaceNeighbors::ELEM) == (_var.dofIndicesNeighbor().size() == 0),
@@ -127,13 +165,9 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 
     // only add residual to neighbor if the variable is defined there.
     if (ft == FaceInfo::VarFaceNeighbors::BOTH)
-    {
       // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
       // d/d_neighbor (residual_elem)
-      prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::ElementNeighbor);
-      _local_ke(0, 0) += r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
-      accumulateTaggedLocalMatrix();
-    }
+      computeJacobian(Moose::ElementNeighbor, r);
   }
 
   if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
@@ -145,21 +179,18 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
                 "the variable is defined on both sides of the face, then it should have a non-zero "
                 "number of degrees of freedom on the elem element");
 
+    // We switch the sign for the neighbor residual
+    ADReal neighbor_r = -r;
+
     // only add residual to elem if the variable is defined there.
     if (ft == FaceInfo::VarFaceNeighbors::BOTH)
-    {
       // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
       // d/d_elem (residual_neighbor)
-      prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborElement);
-      _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem];
-      accumulateTaggedLocalMatrix();
-    }
+      computeJacobian(Moose::NeighborElement, neighbor_r);
 
     // jacobian contribution of the residual for the neighbor element to the neighbor element's DOF:
     // d/d_neighbor (residual_neighbor)
-    prepareMatrixTagNeighbor(_assembly, var_num, var_num, Moose::NeighborNeighbor);
-    _local_ke(0, 0) += -1 * r.derivatives()[var_num * dofs_per_elem + nvars * dofs_per_elem];
-    accumulateTaggedLocalMatrix();
+    computeJacobian(Moose::NeighborNeighbor, neighbor_r);
   }
 }
 

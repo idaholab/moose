@@ -136,4 +136,15 @@ protected:
   /// This is holds meta-data for geometric information relevant to the current
   /// face including elem+neighbor cell centroids, cell volumes, face area, etc.
   const FaceInfo * _face_info = nullptr;
+
+private:
+  /// Computes the Jacobian contribution for every coupled variable.
+  ///
+  /// @param type Either ElementElement, ElementNeighbor, NeighborElement, or NeighborNeighbor. As an
+  /// example ElementNeighbor means the derivatives of the elemental residual with respect to the
+  /// neighbor degrees of freedom.
+  ///
+  /// @param residual The already computed residual (probably done with \p computeQpResidual) that
+  /// also holds derivative information for filling in the Jacobians.
+  void computeJacobian(Moose::DGJacobianType type, const ADReal & residual);
 };
