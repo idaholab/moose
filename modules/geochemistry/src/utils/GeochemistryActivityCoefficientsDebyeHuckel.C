@@ -7,12 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GeochemistryActivityCoefficients.h"
+#include "GeochemistryActivityCoefficientsDebyeHuckel.h"
 #include "GeochemistryActivityCalculators.h"
 
-GeochemistryActivityCoefficients::GeochemistryActivityCoefficients(
+GeochemistryActivityCoefficientsDebyeHuckel::GeochemistryActivityCoefficientsDebyeHuckel(
     ActivityCoefficientMethodEnum method, const GeochemistryIonicStrength & is_calculator)
-  : _method(method),
+  : GeochemistryActivityCoefficients(),
+    _method(method),
     _is_calculator(is_calculator),
     _ionic_strength(1.0),
     _sqrt_ionic_strength(1.0),
@@ -24,7 +25,7 @@ GeochemistryActivityCoefficients::GeochemistryActivityCoefficients(
 }
 
 void
-GeochemistryActivityCoefficients::setInternalParameters(
+GeochemistryActivityCoefficientsDebyeHuckel::setInternalParameters(
     Real /*temperature*/,
     const ModelGeochemicalDatabase & mgd,
     const std::vector<Real> & basis_species_molality,
@@ -56,13 +57,13 @@ GeochemistryActivityCoefficients::setInternalParameters(
 }
 
 const DebyeHuckelParameters &
-GeochemistryActivityCoefficients::getDebyeHuckel() const
+GeochemistryActivityCoefficientsDebyeHuckel::getDebyeHuckel() const
 {
   return _dh;
 }
 
 Real
-GeochemistryActivityCoefficients::waterActivity() const
+GeochemistryActivityCoefficientsDebyeHuckel::waterActivity() const
 {
   switch (_method)
   {
@@ -79,7 +80,7 @@ GeochemistryActivityCoefficients::waterActivity() const
 }
 
 void
-GeochemistryActivityCoefficients::buildActivityCoefficients(
+GeochemistryActivityCoefficientsDebyeHuckel::buildActivityCoefficients(
     const ModelGeochemicalDatabase & mgd,
     std::vector<Real> & basis_activity_coef,
     std::vector<Real> & eqm_activity_coef) const
@@ -163,13 +164,13 @@ GeochemistryActivityCoefficients::buildActivityCoefficients(
 }
 
 Real
-GeochemistryActivityCoefficients::getIonicStrength() const
+GeochemistryActivityCoefficientsDebyeHuckel::getIonicStrength() const
 {
   return _ionic_strength;
 }
 
 Real
-GeochemistryActivityCoefficients::getStoichiometricIonicStrength() const
+GeochemistryActivityCoefficientsDebyeHuckel::getStoichiometricIonicStrength() const
 {
   return _stoichiometric_ionic_strength;
 }
