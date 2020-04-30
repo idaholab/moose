@@ -14,8 +14,8 @@ import unittest
 # so we can find our libraries, no matter how we're called
 findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
 sys.path.append(os.path.join(findbin, "../"))
-from dbclass import ThermoDB
 from readers import eq36_reader
+from dbclass import ThermoDB
 
 class TestGWBReader(unittest.TestCase):
     """
