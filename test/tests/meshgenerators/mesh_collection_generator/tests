@@ -4,6 +4,7 @@
     input = 'mesh_collection_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'mesh_collection_generator_in.e'
+    exodiff_opts = '-pedantic'
     mesh_mode = 'REPLICATED'
     recover = false
 
