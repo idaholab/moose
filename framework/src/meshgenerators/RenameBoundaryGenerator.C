@@ -62,23 +62,9 @@ RenameBoundaryGenerator::RenameBoundaryGenerator(const InputParameters & paramet
   : MeshGenerator(parameters), _input(getMesh("input"))
 {
   // error checking.  Must have exactly one of old_boundary_id or old_boundary_name
-  if (isParamValid("old_boundary_id") && isParamValid("old_boundary_name"))
+  if (isParamValid("old_boundary_id") == isParamValid("old_boundary_name"))
     mooseError("RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or "
                "old_boundary_name\n");
-  else if (!isParamValid("old_boundary_id") && !isParamValid("old_boundary_name"))
-    mooseError("RenameBoundaryGenerator: You must supply exactly one of old_boundary_id or "
-               "old_boundary_name\n");
-
-  // error checking.  Must have exactly one of new_boundary_id or new_boundary_name
-  // In principal we could have both (the old boundary would then be given a new ID and a new name)
-  // but i feel that could lead to confusion for the user.  If the user wants to do that they
-  // should use two of these RenameBoundary MeshModifiers.
-  if (isParamValid("new_boundary_id") && isParamValid("new_boundary_name"))
-    mooseError("RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or "
-               "new_boundary_name\n");
-  else if (!isParamValid("new_boundary_id") && !isParamValid("new_boundary_name"))
-    mooseError("RenameBoundaryGenerator: You must supply exactly one of new_boundary_id or "
-               "new_boundary_name\n");
 }
 
 std::unique_ptr<MeshBase>
