@@ -13,12 +13,14 @@
     requirement = "The system shall include a utility for generating graphs of git history that"
 
     [contributors]
+      skip = "#15188"
       type = CheckFiles
       command = '../git_commit_history.py --open-source --moose-dev --unique --output=contributors.pdf'
       check_files = 'contributors.pdf'
       detail = "show the number of contributors and"
     []
     [additions]
+      skip = "#15188"
       type = CheckFiles
       command = '../git_commit_history.py --additions --moose-dev --days=7 --open-source --output=additions.pdf'
       check_files = 'additions.pdf'
