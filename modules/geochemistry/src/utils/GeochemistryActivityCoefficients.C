@@ -83,6 +83,7 @@ GeochemistryActivityCoefficients::waterActivity() const
       return std::exp(GeochemistryActivityCalculators::lnActivityDHBdotWater(
           _stoichiometric_ionic_strength, _dhA, _dhatilde, _dhbtilde, _dhctilde, _dhdtilde));
   }
+  return 1.0;
 }
 
 void
