@@ -3,7 +3,7 @@
     type = ImageDiff
     command = points.py
     imagediff = 'points.png'
-    allowed_linux = 0.96
+    allowed = 0.96
     display_required = true
   []
 
@@ -11,7 +11,7 @@
     type = ImageDiff
     command = cells.py
     imagediff = 'cells.png'
-    allowed_linux = 0.96
+    allowed = 0.96
     display_required = true
   []
 

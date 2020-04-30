@@ -16,6 +16,7 @@
     input = test_GoldDiffPlugin.py
     separate = True
     display_required = true
+    platform = LINUX
   []
   [ColorbarPlugin]
     type = PythonUnitTest

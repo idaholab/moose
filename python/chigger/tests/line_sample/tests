@@ -3,7 +3,7 @@
     type = ImageDiff
     command = line_sample_default.py
     imagediff = 'line_sample_default.png'
-    allowed_linux = 0.95
+    allowed = 0.94
     display_required = true
   []
 
@@ -12,7 +12,7 @@
     command = line_sample.py
     imagediff = 'line_sample.png'
     expect_out = '0.049\d*\s0.400' # Test the the sampled values are present
-    allowed_linux = 0.92
+    allowed = 0.92
     display_required = true
   []
 
@@ -20,7 +20,7 @@
     type = ImageDiff
     command = line_sample_elem.py
     imagediff = 'line_sample_elem.png'
-    allowed_linux = 0.97
+    allowed = 0.96
     display_required = true
   []
 

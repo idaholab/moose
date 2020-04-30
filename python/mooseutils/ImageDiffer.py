@@ -124,7 +124,7 @@ class ImageDiffer(object):
 
         # Compute the error
         import skimage.measure
-        self.__error = skimage.measure.compare_ssim(self.__data[0], self.__data[1], multichannel=True)
+        self.__error = skimage.metrics.structural_similarity(self.__data[0], self.__data[1], multichannel=True)
 
         # Report the error
         if self.__error < self.__allowed:
