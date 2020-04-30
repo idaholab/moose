@@ -61,14 +61,12 @@ class AttribTagBase : public Attribute
 {
 public:
   AttribTagBase(TheWarehouse & w, const std::string & attrib_name) : Attribute(w, attrib_name) {}
-  AttribTagBase(TheWarehouse & w, unsigned int tag, const std::string & attrib_name)
+  AttribTagBase(TheWarehouse & w, TagID tag, const std::string & attrib_name)
     : Attribute(w, attrib_name)
   {
     _vals.push_back(tag);
   }
-  AttribTagBase(TheWarehouse & w,
-                const std::set<unsigned int> tags,
-                const std::string & attrib_name)
+  AttribTagBase(TheWarehouse & w, const std::set<TagID> tags, const std::string & attrib_name)
     : Attribute(w, attrib_name)
   {
     for (auto tag : tags)
@@ -80,7 +78,7 @@ public:
   hashfunc(_vals);
 
 protected:
-  std::vector<unsigned int> _vals;
+  std::vector<TagID> _vals;
 };
 
 class AttribMatrixTags : public AttribTagBase
@@ -94,8 +92,8 @@ public:
   }
 
   AttribMatrixTags(TheWarehouse & w) : AttribTagBase(w, "matrix_tags") {}
-  AttribMatrixTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "matrix_tags") {}
-  AttribMatrixTags(TheWarehouse & w, const std::set<unsigned int> & tags)
+  AttribMatrixTags(TheWarehouse & w, TagID tag) : AttribTagBase(w, tag, "matrix_tags") {}
+  AttribMatrixTags(TheWarehouse & w, const std::set<TagID> & tags)
     : AttribTagBase(w, tags, "matrix_tags")
   {
   }
@@ -116,8 +114,8 @@ public:
   }
 
   AttribVectorTags(TheWarehouse & w) : AttribTagBase(w, "vector_tags") {}
-  AttribVectorTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "vector_tags") {}
-  AttribVectorTags(TheWarehouse & w, const std::set<unsigned int> & tags)
+  AttribVectorTags(TheWarehouse & w, TagID tag) : AttribTagBase(w, tag, "vector_tags") {}
+  AttribVectorTags(TheWarehouse & w, const std::set<TagID> & tags)
     : AttribTagBase(w, tags, "vector_tags")
   {
   }
