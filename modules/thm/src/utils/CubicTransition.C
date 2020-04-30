@@ -76,6 +76,19 @@ CubicTransition::value(const Real & x, const Real & f1, const Real & f2) const
     return _A * std::pow(x, 3) + _B * std::pow(x, 2) + _C * x + _D;
 }
 
+ADReal
+CubicTransition::value(const ADReal & x, const ADReal & f1, const ADReal & f2) const
+{
+  mooseAssert(_initialized, "initialize() must be called.");
+
+  if (x <= _x1)
+    return f1;
+  else if (x >= _x2)
+    return f2;
+  else
+    return _A * std::pow(x, 3) + _B * std::pow(x, 2) + _C * x + _D;
+}
+
 Real
 CubicTransition::derivative(const Real & x, const Real & df1dx, const Real & df2dx) const
 {
