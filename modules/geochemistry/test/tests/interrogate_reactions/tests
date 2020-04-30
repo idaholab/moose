@@ -52,11 +52,11 @@ Gypsum.  T = 44.1212'
   [./pyrite]
     type = 'RunApp'
     input = 'pyrite.i'
-    expect_out = 'Pyrite = - 1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
-Pyrite = - 3.5\*H2O \+ 1\*Fe\(OH\)3\(ppd\) \+ 2\*SO4-- \+ 4\*H\+ - 3.75\*O2\(aq\)  .  log10\(K\) = 221
-Pyrite = - 1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
-Pyrite = - 1\*H2O \+ 1\*Fe\+\+ \+ 2\*H2S\(aq\) - 2\*H\+ \+ 0.5\*O2\(aq\)  .  log10\(K\) = -45.39
-Pyrite = - 1\*H2O \+ 1\*Fe\+\+ \+ 1.75\*H2S\(aq\) - 1.5\*H\+ \+ 0.25\*SO4--  .  log10\(K\) = -12.54'
+    expect_out = 'Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
+Pyrite = -3.5\*H2O \+ 1\*Fe\(OH\)3\(ppd\) \+ 2\*SO4-- \+ 4\*H\+ - 3.75\*O2\(aq\)  .  log10\(K\) = 221
+Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
+Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*H2S\(aq\) - 2\*H\+ \+ 0.5\*O2\(aq\)  .  log10\(K\) = -45.39
+Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 1.75\*H2S\(aq\) - 1.5\*H\+ \+ 0.25\*SO4--  .  log10\(K\) = -12.54'
     requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components."
     issues = '#14981'
     design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
