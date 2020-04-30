@@ -1,0 +1,249 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+
+#include "GeochemistryIonicStrength.h"
+
+const GeochemicalDatabaseReader database("database/moose_testdb.json");
+// The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
+// >(s)FeO-, e-
+const PertinentGeochemicalSystem model(database,
+                                       {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
+                                       {"Calcite"},
+                                       {},
+                                       {"Calcite_asdf"},
+                                       {"CH4(aq)"},
+                                       {">(s)FeOCa+"},
+                                       "O2(aq)",
+                                       "e-");
+const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+const GeochemistryIonicStrength is_calc(1E9, 1E9, false);
+const GeochemistryIonicStrength is_basis_only(1E9, 1E9, true);
+
+TEST(GeochemistryIonicStrengthTest, sizeExceptions)
+{
+  const std::vector<Real> basis_m_good(6);
+  const std::vector<Real> eqm_m_good(9);
+  const std::vector<Real> kin_m_good(3);
+
+  try
+  {
+    is_calc.ionicStrength(mgd, {}, eqm_m_good, kin_m_good);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Ionic strength calculation: Number of basis species in mgd not equal to the size of "
+            "basis_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    is_calc.ionicStrength(mgd, basis_m_good, {}, kin_m_good);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Ionic strength calculation: Number of equilibrium species in mgd not "
+                         "equal to the size of "
+                         "eqm_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    is_calc.ionicStrength(mgd, basis_m_good, eqm_m_good, {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Ionic strength calculation: Number of kinetic species in mgd not "
+                         "equal to the size of "
+                         "kin_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    is_calc.stoichiometricIonicStrength(mgd, {}, eqm_m_good, kin_m_good);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Stoichiometric ionic strength calculation: Number of basis species in "
+                         "mgd not equal to the size of "
+                         "basis_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    is_calc.stoichiometricIonicStrength(mgd, basis_m_good, {}, kin_m_good);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Stoichiometric ionic strength calculation: Number of equilibrium species in mgd not "
+            "equal to the size of "
+            "eqm_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    is_calc.stoichiometricIonicStrength(mgd, basis_m_good, eqm_m_good, {});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Stoichiometric ionic strength calculation: Number of kinetic species in mgd not "
+                 "equal to the size of "
+                 "kin_species_molality") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test getting and setting maximum ionic strengths
+TEST(GeochemistryIonicStrengthTest, getsetMax)
+{
+  GeochemistryIonicStrength is(1.0, 2.0, false);
+  EXPECT_EQ(is.getMaxIonicStrength(), 1.0);
+  EXPECT_EQ(is.getMaxStoichiometricIonicStrength(), 2.0);
+
+  is.setMaxIonicStrength(3.25);
+  is.setMaxStoichiometricIonicStrength(4.5);
+
+  EXPECT_EQ(is.getMaxIonicStrength(), 3.25);
+  EXPECT_EQ(is.getMaxStoichiometricIonicStrength(), 4.5);
+}
+
+/// Test computing ionic strength
+TEST(GeochemistryIonicStrengthTest, ionicStrength)
+{
+  Real gold_ionic_str = 0.0;
+
+  std::vector<Real> basis_m(6);
+  basis_m[mgd.basis_species_index.at("H2O")] = 1.0;
+  basis_m[mgd.basis_species_index.at("H+")] = 2.0;
+  gold_ionic_str += 2.0;
+  basis_m[mgd.basis_species_index.at("HCO3-")] = 3.0;
+  gold_ionic_str += 3.0;
+  basis_m[mgd.basis_species_index.at("O2(aq)")] = 4.0;
+  basis_m[mgd.basis_species_index.at("Ca++")] = 5.0;
+  gold_ionic_str += 4 * 5.0;
+  basis_m[mgd.basis_species_index.at(">(s)FeOH")] = 6.0;
+
+  const Real gold_basis_only = 0.5 * gold_ionic_str;
+
+  std::vector<Real> eqm_m(9);
+  eqm_m[mgd.eqm_species_index.at("CO2(aq)")] = 1.1;
+  eqm_m[mgd.eqm_species_index.at("CO3--")] = 2.2;
+  gold_ionic_str += 4 * 2.2;
+  eqm_m[mgd.eqm_species_index.at("CaCO3")] = 3.3;
+  eqm_m[mgd.eqm_species_index.at("CaOH+")] = 4.4;
+  gold_ionic_str += 4.4;
+  eqm_m[mgd.eqm_species_index.at("OH-")] = 5.5;
+  gold_ionic_str += 5.5;
+  eqm_m[mgd.eqm_species_index.at("(O-phth)--")] = 6.6;
+  gold_ionic_str += 4 * 6.6;
+  eqm_m[mgd.eqm_species_index.at(">(s)FeO-")] = 7.7;
+  gold_ionic_str += 7.7;
+  eqm_m[mgd.eqm_species_index.at("e-")] = 8.8;
+  gold_ionic_str += 8.8;
+  eqm_m[mgd.eqm_species_index.at("Calcite")] = 9.9;
+
+  std::vector<Real> kin_m(3);
+  kin_m[mgd.kin_species_index.at("Calcite_asdf")] = -1.1;
+  kin_m[mgd.kin_species_index.at("CH4(aq)")] = -2.2;
+  kin_m[mgd.kin_species_index.at(">(s)FeOCa+")] = -3.3;
+  gold_ionic_str += -3.3;
+
+  gold_ionic_str *= 0.5;
+
+  const Real ionic_str = is_calc.ionicStrength(mgd, basis_m, eqm_m, kin_m);
+  const Real ionic_str_basis_only = is_basis_only.ionicStrength(mgd, basis_m, eqm_m, kin_m);
+
+  EXPECT_NEAR(ionic_str, gold_ionic_str, 1E-9);
+  EXPECT_NEAR(ionic_str_basis_only, gold_basis_only, 1E-9);
+
+  GeochemistryIonicStrength is_max(0.125, 1E9, false);
+  EXPECT_EQ(is_max.ionicStrength(mgd, basis_m, eqm_m, kin_m), 0.125);
+}
+
+/// Test computing stoichiometric ionic strength
+TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
+{
+  Real gold_ionic_str = 0.0;
+
+  std::vector<Real> basis_m(6);
+  basis_m[mgd.basis_species_index.at("H2O")] = 1.0;
+  basis_m[mgd.basis_species_index.at("H+")] = 2.0;
+  gold_ionic_str += 2.0;
+  basis_m[mgd.basis_species_index.at("HCO3-")] = 3.0;
+  gold_ionic_str += 3.0;
+  basis_m[mgd.basis_species_index.at("O2(aq)")] = 4.0;
+  basis_m[mgd.basis_species_index.at("Ca++")] = 5.0;
+  gold_ionic_str += 5.0 * 4;
+  basis_m[mgd.basis_species_index.at(">(s)FeOH")] = 6.0;
+
+  const Real gold_basis_only = 0.5 * gold_ionic_str;
+
+  std::vector<Real> eqm_m(9);
+  eqm_m[mgd.eqm_species_index.at("CO2(aq)")] = 1.1;
+  gold_ionic_str += 1.1 * (1 + 1);
+  eqm_m[mgd.eqm_species_index.at("CO3--")] = 2.2;
+  gold_ionic_str += 2.2 * 4;
+  eqm_m[mgd.eqm_species_index.at("CaCO3")] = 3.3;
+  gold_ionic_str += 3.3 * (4 + 1 - 1);
+  eqm_m[mgd.eqm_species_index.at("CaOH+")] = 4.4;
+  gold_ionic_str += 4.4 * (1);
+  eqm_m[mgd.eqm_species_index.at("OH-")] = 5.5;
+  gold_ionic_str += 5.5 * (1);
+  eqm_m[mgd.eqm_species_index.at("(O-phth)--")] = 6.6;
+  gold_ionic_str += 6.6 * (4);
+  eqm_m[mgd.eqm_species_index.at(">(s)FeO-")] = 7.7;
+  gold_ionic_str += 7.7 * (1);
+  eqm_m[mgd.eqm_species_index.at("e-")] = 8.8;
+  gold_ionic_str += 8.8 * (1);
+  eqm_m[mgd.eqm_species_index.at("Calcite")] = 9.9;
+  gold_ionic_str += 9.9 * (4 + 1 - 1);
+
+  std::vector<Real> kin_m(3);
+  kin_m[mgd.kin_species_index.at("Calcite_asdf")] = -1.1;
+  gold_ionic_str += -1.1 * (2 * 4 + 1 - 1);
+  kin_m[mgd.kin_species_index.at("CH4(aq)")] = -2.2;
+  gold_ionic_str += -2.2 * (1 + 1);
+  kin_m[mgd.kin_species_index.at(">(s)FeOCa+")] = -3.3;
+  gold_ionic_str += -3.3 * (1);
+
+  gold_ionic_str *= 0.5;
+
+  const Real ionic_str = is_calc.stoichiometricIonicStrength(mgd, basis_m, eqm_m, kin_m);
+  const Real ionic_str_basis_only =
+      is_basis_only.stoichiometricIonicStrength(mgd, basis_m, eqm_m, kin_m);
+
+  EXPECT_NEAR(ionic_str, gold_ionic_str, 1E-9);
+  EXPECT_NEAR(ionic_str_basis_only, gold_basis_only, 1E-9);
+
+  GeochemistryIonicStrength is_max(1E9, 0.125, false);
+  EXPECT_EQ(is_max.stoichiometricIonicStrength(mgd, basis_m, eqm_m, kin_m), 0.125);
+}
