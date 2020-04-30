@@ -10,8 +10,8 @@ optionally specified with the `advected_quantity` parameter or the variable upon
 which the BC is applied out of the domain with a velocity specified through the
 `vel` parameter.
 
-!syntax parameters /FVKernels/FVMatAdvectionOutflowBC
+!syntax parameters /FVBCs/FVMatAdvectionOutflowBC
 
-!syntax inputs /FVKernels/FVMatAdvectionOutflowBC
+!syntax inputs /FVBCs/FVMatAdvectionOutflowBC
 
-!syntax children /FVKernels/FVMatAdvectionOutflowBC
+!syntax children /FVBCs/FVMatAdvectionOutflowBC
