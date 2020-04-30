@@ -29,21 +29,12 @@ const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 /// Test interface with ionic strength object
 TEST(GeochemistryActivityCoefficientsTest, ionicStrengthInterface)
 {
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
   GeochemistryActivityCoefficients ac(
-      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL,
-      1.0E9,
-      2.0E9,
-      false);
+      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
 
-  EXPECT_EQ(ac.getMaxIonicStrength(), 1.0E9);
-  ac.setMaxIonicStrength(1.0E8);
-  EXPECT_EQ(ac.getMaxIonicStrength(), 1.0E8);
-  EXPECT_EQ(ac.getMaxStoichiometricIonicStrength(), 2.0E9);
-  ac.setMaxStoichiometricIonicStrength(2.0E-8);
-  EXPECT_EQ(ac.getMaxStoichiometricIonicStrength(), 2.0E-8);
-  EXPECT_TRUE(!ac.getUseOnlyBasisMolality());
-  ac.setUseOnlyBasisMolality(true);
-  EXPECT_TRUE(ac.getUseOnlyBasisMolality());
+  is.setUseOnlyBasisMolality(true);
+  is.setMaxStoichiometricIonicStrength(2.0E-8);
 
   Real gold_ionic_str = 0.0;
   std::vector<Real> basis_m(6);
@@ -57,7 +48,10 @@ TEST(GeochemistryActivityCoefficientsTest, ionicStrengthInterface)
   gold_ionic_str += 4 * 5.0;
   basis_m[mgd.basis_species_index.at(">(s)FeOH")] = 6.0;
 
-  ac.setInternalParameters(25.0, mgd, basis_m, std::vector<Real>(9), std::vector<Real>(3));
+  // the equilibrium and kinetic molalities do not make any difference due to ionic strength using
+  // only basis molalities
+  ac.setInternalParameters(
+      25.0, mgd, basis_m, std::vector<Real>(9, 1.1), std::vector<Real>(3, 2.2));
 
   EXPECT_NEAR(ac.getIonicStrength(), 0.5 * gold_ionic_str, 1E-8);
   EXPECT_EQ(ac.getStoichiometricIonicStrength(), 2.0E-8);
@@ -66,11 +60,9 @@ TEST(GeochemistryActivityCoefficientsTest, ionicStrengthInterface)
 /// Test getDebyeHuckel
 TEST(GeochemistryActivityCoefficientsTest, getDebyeHuckel)
 {
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
   GeochemistryActivityCoefficients ac(
-      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL,
-      1.0E9,
-      2.0E9,
-      false);
+      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
   std::vector<Real> dh = ac.getDebyeHuckel();
@@ -95,11 +87,9 @@ TEST(GeochemistryActivityCoefficientsTest, getDebyeHuckel)
 /// Test calculate activity coefficients for method=DebyeHuckel
 TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
 {
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
   GeochemistryActivityCoefficients ac(
-      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL,
-      1.0E9,
-      2.0E9,
-      false);
+      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 
@@ -158,11 +148,9 @@ TEST(GeochemistryActivityCoefficientsTest, buildActivityCoefficients)
 /// Test water activity for method=DebyeHuckel
 TEST(GeochemistryActivityCoefficientsTest, waterActivity)
 {
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
   GeochemistryActivityCoefficients ac(
-      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL,
-      1.0E9,
-      2.0E9,
-      false);
+      GeochemistryActivityCoefficients::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 

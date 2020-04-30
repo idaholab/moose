@@ -11,12 +11,9 @@
 #include "GeochemistryActivityCalculators.h"
 
 GeochemistryActivityCoefficients::GeochemistryActivityCoefficients(
-    ActivityCoefficientMethodEnum method,
-    Real max_ionic_strength,
-    Real max_stoichiometric_ionic_strength,
-    bool use_only_basis_molality)
+    ActivityCoefficientMethodEnum method, const GeochemistryIonicStrength & is_calculator)
   : _method(method),
-    _is_calculator(max_ionic_strength, max_stoichiometric_ionic_strength, use_only_basis_molality),
+    _is_calculator(is_calculator),
     _ionic_strength(1.0),
     _sqrt_ionic_strength(1.0),
     _stoichiometric_ionic_strength(1.0),
@@ -180,41 +177,4 @@ Real
 GeochemistryActivityCoefficients::getStoichiometricIonicStrength() const
 {
   return _stoichiometric_ionic_strength;
-}
-
-void
-GeochemistryActivityCoefficients::setMaxIonicStrength(Real max_ionic_strength)
-{
-  _is_calculator.setMaxIonicStrength(max_ionic_strength);
-}
-
-Real
-GeochemistryActivityCoefficients::getMaxIonicStrength() const
-{
-  return _is_calculator.getMaxIonicStrength();
-}
-
-void
-GeochemistryActivityCoefficients::setMaxStoichiometricIonicStrength(
-    Real max_stoichiometric_ionic_strength)
-{
-  _is_calculator.setMaxStoichiometricIonicStrength(max_stoichiometric_ionic_strength);
-}
-
-Real
-GeochemistryActivityCoefficients::getMaxStoichiometricIonicStrength() const
-{
-  return _is_calculator.getMaxStoichiometricIonicStrength();
-}
-
-void
-GeochemistryActivityCoefficients::setUseOnlyBasisMolality(bool use_only_basis_molality)
-{
-  _is_calculator.setUseOnlyBasisMolality(use_only_basis_molality);
-}
-
-Real
-GeochemistryActivityCoefficients::getUseOnlyBasisMolality() const
-{
-  return _is_calculator.getUseOnlyBasisMolality();
 }

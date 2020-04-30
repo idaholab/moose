@@ -34,13 +34,12 @@ public:
    * stoichiometric ionic strength calculations (used if method=DEBYE_HUCKEL)
    */
   GeochemistryActivityCoefficients(ActivityCoefficientMethodEnum method,
-                                   Real max_ionic_strength,
-                                   Real max_stoichiometric_ionic_strength,
-                                   bool use_only_basis_molality);
+                                   const GeochemistryIonicStrength & is_calculator);
 
   /**
    * Set internal parameters, such as the ionic strength and Debye-Huckel parameters, prior to
-   * computing activity coefficients and activity of water.
+   * computing activity coefficients and activity of water.  Ensure the ionic strength calculator
+   * (eg, maxIonicStrength) is set appropriately before calling this function.
    * @param temperature the temperature in degC
    * @param mgd the Model Geochemical database
    * @param basis_species_molality Molalities of the basis species in mgd
@@ -88,30 +87,12 @@ public:
   /// Return the current value of stoichiometric ionic strength
   Real getStoichiometricIonicStrength() const;
 
-  /// Set the maximum ionic strength
-  void setMaxIonicStrength(Real max_ionic_strength);
-
-  /// Return the value of maximum ionic strength
-  Real getMaxIonicStrength() const;
-
-  /// Set the maximum stoichiometric ionic strength
-  void setMaxStoichiometricIonicStrength(Real max_stoichiometric_ionic_strength);
-
-  /// Return the value of maximum stoichiometric ionic strength
-  Real getMaxStoichiometricIonicStrength() const;
-
-  /// Set the value of use_only_basis_molality
-  void setUseOnlyBasisMolality(bool use_only_basis_molality);
-
-  /// Return the value of use_only_basis_molality
-  Real getUseOnlyBasisMolality() const;
-
 private:
   /// method used by this object to compute activity coefficients
   const ActivityCoefficientMethodEnum _method;
 
   /// ionic-strength calculator
-  GeochemistryIonicStrength _is_calculator;
+  const GeochemistryIonicStrength & _is_calculator;
 
   /// current value of ionic strength
   Real _ionic_strength;
