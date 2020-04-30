@@ -14,13 +14,16 @@
 #include "RankTwoTensor.h"
 #include "libmesh/dense_vector.h"
 
-// Forward Declarations
-class ADInertialForceShell;
-
 namespace libMesh
 {
 class QGauss;
 }
+
+struct PosRotVectors
+{
+  std::array<ADRealVectorValue, 4> pos;
+  std::array<ADRealVectorValue, 4> rot;
+};
 
 class ADInertialForceShell : public ADTimeKernel
 {
@@ -67,62 +70,43 @@ private:
   /**
    * Rotational transformation from global to initial beam local
    * coordinate system
-   **/
+   */
   ADRankTwoTensor _original_local_config;
 
   /// Direction along which residual is calculated
   const unsigned int _component;
 
-  /**
-   * Current translational and rotational velocities at the two nodes
-   * of the beam in the global coordinate system
-   **/
-  ADRealVectorValue _vel_0, _vel_1, _rot_vel_0, _rot_vel_1;
-  ADRealVectorValue _vel_2, _vel_3, _rot_vel_2, _rot_vel_3;
-  /**
-   * Current translational and rotational velocities at the two nodes
-   * of the beam in the global coordinate system
-   **/
-  ADRealVectorValue _old_vel_0, _old_vel_1, _old_rot_vel_0, _old_rot_vel_1;
-  ADRealVectorValue _old_vel_2, _old_vel_3, _old_rot_vel_2, _old_rot_vel_3;
-  /**
-   * Current translational and rotational accelerations at the two nodes
-   * of the beam in the global coordinate system
-   **/
-  ADRealVectorValue _accel_0, _accel_1, _rot_accel_0, _rot_accel_1;
-  ADRealVectorValue _accel_2, _accel_3, _rot_accel_2, _rot_accel_3;
-  /**
-   * Current translational and rotational velocities at the two nodes
-   * of the beam in the initial beam local coordinate system
-   **/
-  ADRealVectorValue _local_vel_0, _local_vel_1, _local_rot_vel_0, _local_rot_vel_1;
-  ADRealVectorValue _local_vel_2, _local_vel_3, _local_rot_vel_2, _local_rot_vel_3;
-  /**
-   * Current translational and rotational velocities at the two nodes
-   * of the beam in the initial beam local coordinate system
-   **/
-  ADRealVectorValue _local_old_vel_0, _local_old_vel_1, _local_old_rot_vel_0, _local_old_rot_vel_1;
-  ADRealVectorValue _local_old_vel_2, _local_old_vel_3, _local_old_rot_vel_2, _local_old_rot_vel_3;
-  /**
-   * Current translational and rotational accelerations at the two nodes
-   * of the beam in the initial beam local coordinate system
-   **/
-  ADRealVectorValue _local_accel_0, _local_accel_1, _local_rot_accel_0, _local_rot_accel_1;
-  ADRealVectorValue _local_accel_2, _local_accel_3, _local_rot_accel_2, _local_rot_accel_3;
+  /// Current shell nodal velocities in the global frame of reference
+  PosRotVectors _vel;
+
+  /// Old shell nodal velocities in the global frame of reference
+  PosRotVectors _old_vel;
+
+  /// Current shell nodal accelerations in the global frame of reference
+  PosRotVectors _accel;
+
+  /// Current shell nodal velocities in the local frame of reference
+  PosRotVectors _local_vel;
+
+  /// Old shell nodal velocities in the local frame of reference
+  PosRotVectors _local_old_vel;
+
+  /// Current shell nodal accelerations in the local frame of reference
+  PosRotVectors _local_accel;
+
   /**
    * Forces and moments at the two end nodes of the beam in the initial
    * beam local configuration
-   **/
+   */
   std::vector<ADRealVectorValue> _local_force, _local_moment;
 
   /**
    * Forces and moments at the two end nodes of the beam in the global
    * coordinate system
-   **/
+   */
   ADRealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
   ADRealVectorValue _global_force_2, _global_force_3, _global_moment_2, _global_moment_3;
 
-  // AMR
   /// Derivatives of shape functions w.r.t isoparametric coordinates xi
   std::vector<std::vector<Real>> _dphidxi_map;
 
@@ -147,24 +131,26 @@ private:
   /// Second tangential vectors at nodes
   std::vector<ADRealVectorValue> _v2;
 
-  /// Helper vectors
+  /// Helper vector
   ADRealVectorValue _x2;
+
+  /// Helper vector
   ADRealVectorValue _x3;
 
   /// Normal to the element at the 4 nodes.
   std::vector<ADRealVectorValue> _node_normal;
 
-  /// Node 1 g vector in reference configuration (mass matrix)
-  std::vector<ADRealVectorValue> _0g1_vector;
+  /// Node 1 g vectors
+  std::array<ADRealVectorValue, 2> _0g1_vectors;
 
-  /// Node 2 g vector in reference configuration (mass matrix)
-  std::vector<ADRealVectorValue> _0g2_vector;
+  /// Node 2 g vectors
+  std::array<ADRealVectorValue, 2> _0g2_vectors;
 
-  /// Node 3 g vector in reference configuration (mass matrix)
-  std::vector<ADRealVectorValue> _0g3_vector;
+  /// Node 3 g vectors
+  std::array<ADRealVectorValue, 2> _0g3_vectors;
 
-  /// Node 4 g vector in reference configuration (mass matrix)
-  std::vector<ADRealVectorValue> _0g4_vector;
+  /// Node 4 g vectors
+  std::array<ADRealVectorValue, 2> _0g4_vectors;
 
   /// Mass proportional Rayleigh damping parameter
   const MaterialProperty<Real> & _eta;

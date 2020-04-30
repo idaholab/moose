@@ -265,20 +265,20 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     unsigned int dof_index_2 = _nodes[2]->dof_number(nonlinear_sys.number(), _disp_num[i], 0);
     unsigned int dof_index_3 = _nodes[3]->dof_number(nonlinear_sys.number(), _disp_num[i], 0);
 
-    _vel_0(i) = vel(dof_index_0);
-    _vel_1(i) = vel(dof_index_1);
-    _vel_2(i) = vel(dof_index_2);
-    _vel_3(i) = vel(dof_index_3);
+    _vel.pos[0](i) = vel(dof_index_0);
+    _vel.pos[1](i) = vel(dof_index_1);
+    _vel.pos[2](i) = vel(dof_index_2);
+    _vel.pos[3](i) = vel(dof_index_3);
 
-    _old_vel_0(i) = old_vel(dof_index_0);
-    _old_vel_1(i) = old_vel(dof_index_1);
-    _old_vel_2(i) = old_vel(dof_index_2);
-    _old_vel_3(i) = old_vel(dof_index_3);
+    _old_vel.pos[0](i) = old_vel(dof_index_0);
+    _old_vel.pos[1](i) = old_vel(dof_index_1);
+    _old_vel.pos[2](i) = old_vel(dof_index_2);
+    _old_vel.pos[3](i) = old_vel(dof_index_3);
 
-    _accel_0(i) = accel(dof_index_0);
-    _accel_1(i) = accel(dof_index_1);
-    _accel_2(i) = accel(dof_index_2);
-    _accel_3(i) = accel(dof_index_3);
+    _accel.pos[0](i) = accel(dof_index_0);
+    _accel.pos[1](i) = accel(dof_index_1);
+    _accel.pos[2](i) = accel(dof_index_2);
+    _accel.pos[3](i) = accel(dof_index_3);
   }
 
   for (unsigned int i = 0; i < _nrot; ++i)
@@ -289,52 +289,52 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
     unsigned int dof_index_2 = _nodes[2]->dof_number(nonlinear_sys.number(), _rot_num[i], 0);
     unsigned int dof_index_3 = _nodes[3]->dof_number(nonlinear_sys.number(), _rot_num[i], 0);
 
-    _rot_vel_0(i) = vel(dof_index_0);
-    _rot_vel_1(i) = vel(dof_index_1);
-    _rot_vel_2(i) = vel(dof_index_2);
-    _rot_vel_3(i) = vel(dof_index_3);
+    _vel.rot[0](i) = vel(dof_index_0);
+    _vel.rot[1](i) = vel(dof_index_1);
+    _vel.rot[2](i) = vel(dof_index_2);
+    _vel.rot[3](i) = vel(dof_index_3);
 
-    _old_rot_vel_0(i) = old_vel(dof_index_0);
-    _old_rot_vel_1(i) = old_vel(dof_index_1);
-    _old_rot_vel_2(i) = old_vel(dof_index_2);
-    _old_rot_vel_3(i) = old_vel(dof_index_3);
+    _old_vel.rot[0](i) = old_vel(dof_index_0);
+    _old_vel.rot[1](i) = old_vel(dof_index_1);
+    _old_vel.rot[2](i) = old_vel(dof_index_2);
+    _old_vel.rot[3](i) = old_vel(dof_index_3);
 
-    _rot_accel_0(i) = accel(dof_index_0);
-    _rot_accel_1(i) = accel(dof_index_1);
-    _rot_accel_2(i) = accel(dof_index_2);
-    _rot_accel_3(i) = accel(dof_index_3);
+    _accel.rot[0](i) = accel(dof_index_0);
+    _accel.rot[1](i) = accel(dof_index_1);
+    _accel.rot[2](i) = accel(dof_index_2);
+    _accel.rot[3](i) = accel(dof_index_3);
   }
   // transform translational and rotational velocities and accelerations to the initial local
   // configuration of the shell
-  _local_vel_0 = _original_local_config * _vel_0;
-  _local_vel_1 = _original_local_config * _vel_1;
-  _local_vel_2 = _original_local_config * _vel_2;
-  _local_vel_3 = _original_local_config * _vel_3;
+  _local_vel.pos[0] = _original_local_config * _vel.pos[0];
+  _local_vel.pos[1] = _original_local_config * _vel.pos[1];
+  _local_vel.pos[2] = _original_local_config * _vel.pos[2];
+  _local_vel.pos[3] = _original_local_config * _vel.pos[3];
 
-  _local_old_vel_0 = _original_local_config * _old_vel_0;
-  _local_old_vel_1 = _original_local_config * _old_vel_1;
-  _local_old_vel_2 = _original_local_config * _old_vel_2;
-  _local_old_vel_3 = _original_local_config * _old_vel_3;
+  _local_old_vel.pos[0] = _original_local_config * _old_vel.pos[0];
+  _local_old_vel.pos[1] = _original_local_config * _old_vel.pos[1];
+  _local_old_vel.pos[2] = _original_local_config * _old_vel.pos[2];
+  _local_old_vel.pos[3] = _original_local_config * _old_vel.pos[3];
 
-  _local_accel_0 = _original_local_config * _accel_0;
-  _local_accel_1 = _original_local_config * _accel_1;
-  _local_accel_2 = _original_local_config * _accel_2;
-  _local_accel_3 = _original_local_config * _accel_3;
+  _local_accel.pos[0] = _original_local_config * _accel.pos[0];
+  _local_accel.pos[1] = _original_local_config * _accel.pos[1];
+  _local_accel.pos[2] = _original_local_config * _accel.pos[2];
+  _local_accel.pos[3] = _original_local_config * _accel.pos[3];
 
-  _local_rot_vel_0 = _original_local_config * _rot_vel_0;
-  _local_rot_vel_1 = _original_local_config * _rot_vel_1;
-  _local_rot_vel_2 = _original_local_config * _rot_vel_2;
-  _local_rot_vel_3 = _original_local_config * _rot_vel_3;
+  _local_vel.rot[0] = _original_local_config * _vel.rot[0];
+  _local_vel.rot[1] = _original_local_config * _vel.rot[1];
+  _local_vel.rot[2] = _original_local_config * _vel.rot[2];
+  _local_vel.rot[3] = _original_local_config * _vel.rot[3];
 
-  _local_old_rot_vel_0 = _original_local_config * _old_rot_vel_0;
-  _local_old_rot_vel_1 = _original_local_config * _old_rot_vel_1;
-  _local_old_rot_vel_2 = _original_local_config * _old_rot_vel_2;
-  _local_old_rot_vel_3 = _original_local_config * _old_rot_vel_3;
+  _local_old_vel.rot[0] = _original_local_config * _old_vel.rot[0];
+  _local_old_vel.rot[1] = _original_local_config * _old_vel.rot[1];
+  _local_old_vel.rot[2] = _original_local_config * _old_vel.rot[2];
+  _local_old_vel.rot[3] = _original_local_config * _old_vel.rot[3];
 
-  _local_rot_accel_0 = _original_local_config * _rot_accel_0;
-  _local_rot_accel_1 = _original_local_config * _rot_accel_1;
-  _local_rot_accel_2 = _original_local_config * _rot_accel_2;
-  _local_rot_accel_3 = _original_local_config * _rot_accel_3;
+  _local_accel.rot[0] = _original_local_config * _accel.rot[0];
+  _local_accel.rot[1] = _original_local_config * _accel.rot[1];
+  _local_accel.rot[2] = _original_local_config * _accel.rot[2];
+  _local_accel.rot[3] = _original_local_config * _accel.rot[3];
 
   // Conversions to ADDenseVector from ADRealVectorValue: Make a method out of this.
   ADDenseVector local_accel_dv_0(3);
@@ -369,94 +369,90 @@ ADInertialForceShell::computeShellInertialForces(const MooseArray<ADReal> & _ad_
 
   for (unsigned int i = 0; i < 3; i++)
   {
-    local_accel_dv_0(i) = _local_accel_0(i);
-    local_accel_dv_1(i) = _local_accel_1(i);
-    local_accel_dv_2(i) = _local_accel_2(i);
-    local_accel_dv_3(i) = _local_accel_3(i);
+    local_accel_dv_0(i) = _local_accel.pos[0](i);
+    local_accel_dv_1(i) = _local_accel.pos[1](i);
+    local_accel_dv_2(i) = _local_accel.pos[2](i);
+    local_accel_dv_3(i) = _local_accel.pos[3](i);
 
-    local_rot_accel_dv_0(i) = _local_rot_accel_0(i);
-    local_rot_accel_dv_1(i) = _local_rot_accel_1(i);
-    local_rot_accel_dv_2(i) = _local_rot_accel_2(i);
-    local_rot_accel_dv_3(i) = _local_rot_accel_3(i);
+    local_rot_accel_dv_0(i) = _local_accel.rot[0](i);
+    local_rot_accel_dv_1(i) = _local_accel.rot[1](i);
+    local_rot_accel_dv_2(i) = _local_accel.rot[2](i);
+    local_rot_accel_dv_3(i) = _local_accel.rot[3](i);
 
-    local_vel_dv_0(i) = _local_vel_0(i);
-    local_vel_dv_1(i) = _local_vel_1(i);
-    local_vel_dv_2(i) = _local_vel_2(i);
-    local_vel_dv_3(i) = _local_vel_3(i);
+    local_vel_dv_0(i) = _local_vel.pos[0](i);
+    local_vel_dv_1(i) = _local_vel.pos[1](i);
+    local_vel_dv_2(i) = _local_vel.pos[2](i);
+    local_vel_dv_3(i) = _local_vel.pos[3](i);
 
-    local_rot_vel_dv_0(i) = _local_rot_vel_0(i);
-    local_rot_vel_dv_1(i) = _local_rot_vel_1(i);
-    local_rot_vel_dv_2(i) = _local_rot_vel_2(i);
-    local_rot_vel_dv_3(i) = _local_rot_vel_3(i);
+    local_rot_vel_dv_0(i) = _local_vel.rot[0](i);
+    local_rot_vel_dv_1(i) = _local_vel.rot[1](i);
+    local_rot_vel_dv_2(i) = _local_vel.rot[2](i);
+    local_rot_vel_dv_3(i) = _local_vel.rot[3](i);
 
-    local_old_vel_dv_0(i) = _local_old_vel_0(i);
-    local_old_vel_dv_1(i) = _local_old_vel_1(i);
-    local_old_vel_dv_2(i) = _local_old_vel_2(i);
-    local_old_vel_dv_3(i) = _local_old_vel_3(i);
+    local_old_vel_dv_0(i) = _local_old_vel.pos[0](i);
+    local_old_vel_dv_1(i) = _local_old_vel.pos[1](i);
+    local_old_vel_dv_2(i) = _local_old_vel.pos[2](i);
+    local_old_vel_dv_3(i) = _local_old_vel.pos[3](i);
 
-    local_old_rot_vel_dv_0(i) = _local_old_rot_vel_0(i);
-    local_old_rot_vel_dv_1(i) = _local_old_rot_vel_1(i);
-    local_old_rot_vel_dv_2(i) = _local_old_rot_vel_2(i);
-    local_old_rot_vel_dv_3(i) = _local_old_rot_vel_3(i);
+    local_old_rot_vel_dv_0(i) = _local_old_vel.rot[0](i);
+    local_old_rot_vel_dv_1(i) = _local_old_vel.rot[1](i);
+    local_old_rot_vel_dv_2(i) = _local_old_vel.rot[2](i);
+    local_old_rot_vel_dv_3(i) = _local_old_vel.rot[3](i);
   }
   unsigned int dim = _current_elem->dim();
 
   // Update 0g vectors at plane quadrature points.
-  _0g1_vector.clear();
-  _0g1_vector.push_back(-0.5 * _thickness * _v1[0]);
-  _0g1_vector.push_back(0.5 * _thickness * _v2[0]);
+  _0g1_vectors[0] = -0.5 * _thickness * _v1[0];
+  _0g1_vectors[1] = 0.5 * _thickness * _v2[0];
 
   ADDenseMatrix G1(3, 2);
-  G1(0, 0) = _0g1_vector[0](0);
-  G1(1, 0) = _0g1_vector[0](1);
-  G1(2, 0) = _0g1_vector[0](2);
-  G1(0, 1) = _0g1_vector[1](0);
-  G1(1, 1) = _0g1_vector[1](1);
-  G1(2, 1) = _0g1_vector[1](2);
+  G1(0, 0) = _0g1_vectors[0](0);
+  G1(1, 0) = _0g1_vectors[0](1);
+  G1(2, 0) = _0g1_vectors[0](2);
+  G1(0, 1) = _0g1_vectors[1](0);
+  G1(1, 1) = _0g1_vectors[1](1);
+  G1(2, 1) = _0g1_vectors[1](2);
   ADDenseMatrix G1T(2, 3);
   G1.get_transpose(G1T);
 
-  _0g2_vector.clear();
-  _0g2_vector.push_back(-0.5 * _thickness * _v1[1]);
-  _0g2_vector.push_back(0.5 * _thickness * _v2[1]);
+  _0g2_vectors[0] = -0.5 * _thickness * _v1[1];
+  _0g2_vectors[1] = 0.5 * _thickness * _v2[1];
 
   ADDenseMatrix G2(3, 2);
-  G2(0, 0) = _0g2_vector[0](0);
-  G2(1, 0) = _0g2_vector[0](1);
-  G2(2, 0) = _0g2_vector[0](2);
-  G2(0, 1) = _0g2_vector[1](0);
-  G2(1, 1) = _0g2_vector[1](1);
-  G2(2, 1) = _0g2_vector[1](2);
+  G2(0, 0) = _0g2_vectors[0](0);
+  G2(1, 0) = _0g2_vectors[0](1);
+  G2(2, 0) = _0g2_vectors[0](2);
+  G2(0, 1) = _0g2_vectors[1](0);
+  G2(1, 1) = _0g2_vectors[1](1);
+  G2(2, 1) = _0g2_vectors[1](2);
 
   ADDenseMatrix G2T(2, 3);
   G2.get_transpose(G2T);
 
-  _0g3_vector.clear();
-  _0g3_vector.push_back(-0.5 * _thickness * _v1[2]);
-  _0g3_vector.push_back(0.5 * _thickness * _v2[2]);
+  _0g3_vectors[0] = -0.5 * _thickness * _v1[2];
+  _0g3_vectors[1] = 0.5 * _thickness * _v2[2];
 
   ADDenseMatrix G3(3, 2);
-  G3(0, 0) = _0g3_vector[0](0);
-  G3(1, 0) = _0g3_vector[0](1);
-  G3(2, 0) = _0g3_vector[0](2);
-  G3(0, 1) = _0g3_vector[1](0);
-  G3(1, 1) = _0g3_vector[1](1);
-  G3(2, 1) = _0g3_vector[1](2);
+  G3(0, 0) = _0g3_vectors[0](0);
+  G3(1, 0) = _0g3_vectors[0](1);
+  G3(2, 0) = _0g3_vectors[0](2);
+  G3(0, 1) = _0g3_vectors[1](0);
+  G3(1, 1) = _0g3_vectors[1](1);
+  G3(2, 1) = _0g3_vectors[1](2);
 
   ADDenseMatrix G3T(2, 3);
   G3.get_transpose(G3T);
 
-  _0g4_vector.clear();
-  _0g4_vector.push_back(-0.5 * _thickness * _v1[3]);
-  _0g4_vector.push_back(0.5 * _thickness * _v2[3]);
+  _0g4_vectors[0] = -0.5 * _thickness * _v1[3];
+  _0g4_vectors[1] = 0.5 * _thickness * _v2[3];
 
   ADDenseMatrix G4(3, 2);
-  G4(0, 0) = _0g4_vector[0](0);
-  G4(1, 0) = _0g4_vector[0](1);
-  G4(2, 0) = _0g4_vector[0](2);
-  G4(0, 1) = _0g4_vector[1](0);
-  G4(1, 1) = _0g4_vector[1](1);
-  G4(2, 1) = _0g4_vector[1](2);
+  G4(0, 0) = _0g4_vectors[0](0);
+  G4(1, 0) = _0g4_vectors[0](1);
+  G4(2, 0) = _0g4_vectors[0](2);
+  G4(0, 1) = _0g4_vectors[1](0);
+  G4(1, 1) = _0g4_vectors[1](1);
+  G4(2, 1) = _0g4_vectors[1](2);
 
   ADDenseMatrix G4T(2, 3);
   G4.get_transpose(G4T);
