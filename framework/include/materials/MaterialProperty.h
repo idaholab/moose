@@ -278,7 +278,7 @@ template <typename T, bool is_ad>
 inline void
 MaterialPropertyBase<T, is_ad>::resize(int n)
 {
-  _value.resize(n);
+  _value.template resize</*value_initalize=*/true>(n);
 }
 
 template <typename T, bool is_ad>
