@@ -28,9 +28,9 @@ class PetscJacobianTester(RunApp):
         params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
 
         # override default values
-        params.valid['valgrind'] = 'none'
+        params.valid['valgrind'] = 'NONE'
         params.valid['petsc_version'] = ['>=3.9.4']
-        params.valid['method'] = 'opt'
+        params.valid['method'] = ['OPT']
 
         return params
 
