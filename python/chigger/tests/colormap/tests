@@ -4,7 +4,6 @@
     type = ImageDiff
     command = colormap.py
     imagediff = colormap.png
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -13,7 +12,6 @@
     type = ImageDiff
     command = colormap_number.py
     imagediff = colormap_number.png
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -21,7 +19,6 @@
     type = ImageDiff
     command = reverse.py
     imagediff = reverse.png
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -29,7 +26,6 @@
     type = ImageDiff
     command = reverse_xml.py
     imagediff = reverse_xml.png
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -37,7 +33,6 @@
     type = ImageDiff
     command = reverse_default.py
     imagediff = reverse_default.png
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 []

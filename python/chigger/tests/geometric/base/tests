@@ -4,7 +4,6 @@
     command = orientation.py
     imagediff = 'orientation.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [scale]
@@ -12,7 +11,6 @@
     command = scale.py
     imagediff = 'scale.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [rotation]
@@ -20,6 +18,5 @@
     command = rotation.py
     imagediff = 'rotation.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

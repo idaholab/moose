@@ -3,7 +3,6 @@
     type = RunApp
     command = options.py
     cli_args = '--type=run'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -12,7 +11,6 @@
     command = options.py
     cli_args = '--type=bad-type'
     expect_out = "param must be of type int but str provided."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -21,7 +19,6 @@
     command = options.py
     cli_args = '--type=bad-allow-type'
     expect_out = "The type provided, int, does not match the type of the allowed values, list."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -30,7 +27,6 @@
     command = options.py
     cli_args = '--type=value-not-allowed'
     expect_out = "Attempting to set param to a value of 1 but only the following are allowed"
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -39,7 +35,6 @@
     command = options.py
     cli_args = '--type=bad-arg-count'
     expect_err = "Wrong number of arguments, must supply 2 or 3 input arguments."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -49,7 +44,6 @@
     cli_args = '--type=dump'
     expect_out = "Some parameter"
     skip = 'Needs terminaltables'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -58,7 +52,6 @@
     command = options.py
     cli_args = '--type=duplicate'
     expect_out = "A parameter with the name param already exists."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 []

@@ -3,6 +3,5 @@
     type = PythonUnitTest
     input = test_InputFileEditorPlugin.py
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

@@ -4,6 +4,5 @@
     input = test_BasePeacockMainWindow.py
     display_required = true
     separate = True
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

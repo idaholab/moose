@@ -2,7 +2,6 @@
   [test]
     type = PythonUnitTest
     input = test_postprocessor_state.py
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     separate = True
     display_required = true
   []

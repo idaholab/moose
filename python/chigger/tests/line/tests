@@ -9,7 +9,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [single_point]
@@ -22,7 +21,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [empty]
@@ -34,7 +32,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [color]
@@ -46,7 +43,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [legend]
@@ -59,7 +55,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [legend_viewport]
@@ -72,7 +67,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [update]
@@ -84,7 +78,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [secondary]
@@ -97,7 +90,6 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [tracer]
@@ -110,6 +102,5 @@
     design = ''
     issues = '#7451'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

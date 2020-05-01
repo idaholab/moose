@@ -4,7 +4,6 @@
     command = clip.py
     imagediff = 'clip.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [plane_elem_var]
@@ -12,7 +11,6 @@
     command = clip_elem.py
     imagediff = 'clip_elem.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [clip_z]
@@ -20,7 +18,6 @@
     command = clip_z.py
     imagediff = 'clip_z.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [dual]
@@ -28,7 +25,6 @@
     command = dual.py
     imagediff = dual.png
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [box]
@@ -36,7 +32,6 @@
     command = box_clip.py
     imagediff = 'box_clip.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [dynamic]
@@ -44,7 +39,6 @@
     command = clip_change.py
     imagediff = 'clip_change0.png clip_change1.png clip_change2.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [multiple]
@@ -52,6 +46,5 @@
     command = multiple_clips.py
     imagediff = 'multiple_clips.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []
