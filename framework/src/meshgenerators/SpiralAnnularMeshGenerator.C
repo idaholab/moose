@@ -44,8 +44,8 @@ SpiralAnnularMeshGenerator::validParams()
                         "This number should be approximately"
                         " 2 * pi * inner_radius / nodes_per_ring to ensure that the"
                         " initial layer of elements is almost equilateral");
-  params.addClassDescription("Creates an annual mesh based on TRI3 elements"
-                             " (it can also be TRI6 elements) on several rings.");
+  params.addClassDescription(
+      "Creates an annular mesh based on TRI3 or TRI6 elements on several rings.");
 
   return params;
 }

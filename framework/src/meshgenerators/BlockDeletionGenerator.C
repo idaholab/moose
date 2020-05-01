@@ -21,7 +21,7 @@ BlockDeletionGenerator::validParams()
   InputParameters params = ElementDeletionGeneratorBase::validParams();
 
   params.addClassDescription(
-      "Mesh modifier which removes elements with the specified subdomain ID");
+      "Mesh generator which removes elements with the specified subdomain ID");
   params.addRequiredParam<SubdomainID>("block_id", "The block to be deleted");
 
   return params;

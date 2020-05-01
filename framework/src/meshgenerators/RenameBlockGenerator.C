@@ -46,10 +46,10 @@ RenameBlockGenerator::validParams()
       "given the same name, in which case they are all given the first old block "
       "number.");
   params.addClassDescription(
-      "RenameBlock re-numbers or re-names an old_block_id or old_block_name "
-      "with a new_block_id or new_block_name.  If using RenameBlock to "
+      "RenameBlockGenerator re-numbers or re-names an `old_block_id` or `old_block_name` "
+      "with a `new_block_id` or `new_block_name`.  If using RenameBlockGenerator to "
       "merge blocks (by giving them the same name, for instance) it is "
-      "advisable to specify all your blocks in old_blocks to avoid inconsistencies");
+      "advisable to specify all your blocks in `old_blocks` to avoid inconsistencies");
 
   return params;
 }

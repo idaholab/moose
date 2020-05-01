@@ -39,6 +39,8 @@ ExtraNodesetGenerator::validParams()
       "supplied).");
   params.addParam<Real>(
       "tolerance", TOLERANCE, "The tolerance in which two nodes are considered identical");
+  params.addClassDescription(
+      "Creates a new node set and a new boundary made with the nodes the user provides.");
 
   return params;
 }

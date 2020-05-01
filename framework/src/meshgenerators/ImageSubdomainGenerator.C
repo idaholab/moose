@@ -23,8 +23,8 @@ InputParameters
 ImageSubdomainGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Samples an image at the coordinates of each element centroid using "
-                             "the resulting value as each element's subdomain ID");
+  params.addClassDescription("Samples an image at the coordinates of each element centroid, using "
+                             "the resulting pixel color value as each element's subdomain ID");
   params += MeshBaseImageSampler::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
