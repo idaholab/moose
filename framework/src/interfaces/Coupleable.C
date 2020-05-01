@@ -29,6 +29,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _ad_zero(_c_fe_problem._ad_zero[_c_tid]),
     _grad_zero(_c_fe_problem._grad_zero[_c_tid]),
     _ad_grad_zero(_c_fe_problem._ad_grad_zero[_c_tid]),
+    _grad_phi_zero(_c_fe_problem._grad_phi_zero[_c_tid]),
+    _grad_test_zero(_c_fe_problem._grad_test_zero[_c_tid]),
     _second_zero(_c_fe_problem._second_zero[_c_tid]),
     _ad_second_zero(_c_fe_problem._ad_second_zero[_c_tid]),
     _second_phi_zero(_c_fe_problem._second_phi_zero[_c_tid]),

@@ -887,6 +887,10 @@ protected:
   const VariableGradient & _grad_zero;
   const MooseArray<ADRealVectorValue> & _ad_grad_zero;
 
+  /// Zero gradient of a test and trail function
+  const VariablePhiGradient & _grad_phi_zero;
+  const VariableTestGradient & _grad_test_zero;
+
   /// Zero second derivative of a variable
   const VariableSecond & _second_zero;
   const MooseArray<ADRealTensorValue> & _ad_second_zero;
