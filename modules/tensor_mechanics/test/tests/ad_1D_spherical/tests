@@ -35,7 +35,6 @@
     input = 'smallStrain_1DSphere.i'
     run_sim = 'True'
     difference_tol = 1e-5
-    petsc_version = '>=3.9.4'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
                 Materials/stress/type=ADComputeLinearElasticStress'
     issues = '#12650'
@@ -46,7 +45,6 @@
     input = 'smallStrain_1DSphere.i'
     run_sim = 'True'
     difference_tol = 1e-5
-    petsc_version = '>=3.9.4'
     cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
                 Materials/stress/type=ADComputeFiniteStrainElasticStress'
     issues = '#12650'
@@ -57,7 +55,6 @@
     input = 'finiteStrain_1DSphere_hollow.i'
     run_sim = 'True'
     difference_tol = 1
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     requirement = 'The Jacobian for the AD small incremental strain elasticity problem with Pressure BC in spherical coordinates shall be perfect'
   [../]

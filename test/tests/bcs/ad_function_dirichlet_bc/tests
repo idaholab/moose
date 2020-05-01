@@ -15,7 +15,6 @@
       run_sim = False
       ratio_tol = 3e-8
       difference_tol = 3e-6
-      method = 'opt'
       detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
     [../]
   [../]

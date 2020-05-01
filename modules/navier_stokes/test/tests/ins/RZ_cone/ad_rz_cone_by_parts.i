@@ -109,8 +109,6 @@
     type = INSADMaterial
     velocity = velocity
     pressure = p
-    transient_term = true
-    integrate_p_by_parts = true
   []
 []
 

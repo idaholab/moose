@@ -1,5 +1,4 @@
 [GlobalParams]
-  transient_term = true
   order = SECOND
   integrate_p_by_parts = true
 []

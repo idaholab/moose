@@ -30,7 +30,6 @@
   [./3D-jac]
     type = PetscJacobianTester
     input = 'pressure_test.i'
-    petsc_version = '>=3.9.4'
     run_sim = 'True'
     #ratio_tol = 5e-6
     difference_tol = 5e-7
@@ -46,7 +45,6 @@
   [./3D_Bbar-jac]
     type = PetscJacobianTester
     input = 'pressure_test.i'
-    petsc_version = '>=3.9.4'
     run_sim = 'True'
     #ratio_tol = 5e-6
     difference_tol = 5e-7

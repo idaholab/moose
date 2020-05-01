@@ -26,6 +26,12 @@ class PetscJacobianTester(RunApp):
                                           "at every non-linear iteration of every time step. This is only "
                                           "relevant for petsc versions >= 3.9.")
         params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
+
+        # override default values
+        params.valid['valgrind'] = 'NONE'
+        params.valid['petsc_version'] = ['>=3.9.4']
+        params.valid['method'] = ['OPT']
+
         return params
 
     def checkRunnable(self, options):

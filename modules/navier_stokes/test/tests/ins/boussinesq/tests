@@ -1,0 +1,35 @@
+[Tests]
+  design = 'INSADBoussinesqBodyForce.md'
+  issues = '#15099'
+  [exo]
+    type = Exodiff
+    input = boussinesq_square.i
+    exodiff = boussinesq_square_out.e
+    requirement = 'The system shall be able to simulate natural convection by adding the Boussinesq approximation to the incompressible Navier-Stokes equations.'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = boussinesq_square.i
+    run_sim = True
+    difference_tol = 1e-6
+    ratio_tol = 1e-7
+    cli_args = "Mesh/gen/nx=4 Mesh/gen/ny=4 Outputs/active=''"
+    requirement = 'The system shall have an accurate Jacobian provided by automatic differentiation when computing the Boussinesq approximation.'
+  []
+  [exo_stab]
+    type = Exodiff
+    input = boussinesq_stabilized.i
+    exodiff = boussinesq_stabilized_out.e
+    requirement = 'The system shall be able to support SUPG and PSPG stabilization of the incompressible Navier Stokes equations including the Boussinesq approximation.'
+  []
+  [jac_stab]
+    type = PetscJacobianTester
+    input = boussinesq_stabilized.i
+    run_sim = True
+    difference_tol = 1e-5
+    ratio_tol = 3e-7
+    cli_args = "Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/active='' -snes_test_err 1e-9"
+    requirement = 'The system shall have an accurate Jacobian provided by automatic differentiation when computing the Boussinesq approximation with SUPG and PSPG stabilization.'
+    method = "!dbg" # this problem is highly nonlinear and takes ~21 nonlinear iterations to solve in serial. Hence this is a relatively long test
+  []
+[]

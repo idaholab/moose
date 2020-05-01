@@ -33,7 +33,6 @@
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
   [../]
@@ -43,7 +42,6 @@
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     requirement = "The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic material using AD formulations and produce a perfect Jacobian."
   [../]
@@ -53,7 +51,6 @@
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
   [../]
@@ -63,7 +60,6 @@
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-1
-    petsc_version = '>=3.9.4'
     issues = '#12650'
     requirement = 'The ComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem and produce a perfect Jacobian.'
   [../]
