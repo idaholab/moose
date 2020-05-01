@@ -80,6 +80,8 @@ public:
 
   void computeScaling() override;
 
+  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
+
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
   ComputeResidualFunctor _nl_residual_functor;

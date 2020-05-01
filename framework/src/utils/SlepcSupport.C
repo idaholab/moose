@@ -369,6 +369,9 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
       if (solver_params._eigen_matrix_free)
         Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+
+      if (solver_params._customized_pc_for_eigen)
+        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_pc_type", "moosepc");
 #else
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -391,6 +394,12 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       {
         Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
         Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+      }
+
+      if (solver_params._customized_pc_for_eigen)
+      {
+        Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
+        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
       }
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
@@ -635,6 +644,130 @@ setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen)
                        MATOP_MULT,
                        eigen ? (void (*)(void))mooseMatMult_Eigen
                              : (void (*)(void))mooseMatMult_NonEigen);
+}
+
+PETSC_EXTERN PetscErrorCode
+registerPCToPETSc()
+{
+  PetscErrorCode ierr;
+  PetscFunctionBegin;
+
+  ierr = PCRegister("moosepc", PCCreate_MoosePC);
+  CHKERRQ(ierr);
+
+  PetscFunctionReturn(0);
+}
+
+PETSC_EXTERN PetscErrorCode
+PCCreate_MoosePC(PC pc)
+{
+  PetscFunctionBegin;
+
+  pc->ops->view = PCView_MoosePC;
+  pc->ops->destroy = PCDestroy_MoosePC;
+  pc->ops->setup = PCSetUp_MoosePC;
+  pc->ops->apply = PCApply_MoosePC;
+
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode PCDestroy_MoosePC(PC /*pc*/)
+{
+  PetscFunctionBegin;
+  /* We do not need to do anything right now, but later we may have some data we need to free here
+   */
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+PCView_MoosePC(PC /*pc*/, PetscViewer viewer)
+{
+  PetscErrorCode ierr;
+  PetscBool iascii;
+
+  PetscFunctionBegin;
+  ierr = PetscObjectTypeCompare((PetscObject)viewer, PETSCVIEWERASCII, &iascii);
+  CHKERRQ(ierr);
+  if (iascii)
+  {
+    ierr = PetscViewerASCIIPrintf(viewer, "  %s\n", "moosepc");
+    CHKERRQ(ierr);
+  }
+  PetscFunctionReturn(0);
+}
+
+PetscErrorCode
+PCApply_MoosePC(PC pc, Vec x, Vec y)
+{
+  void * ctx;
+  Mat Amat, Pmat;
+  PetscContainer container;
+  PetscErrorCode ierr;
+
+  ierr = PCGetOperators(pc, &Amat, &Pmat);
+  CHKERRQ(ierr);
+  ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
+  CHKERRQ(ierr);
+  if (container)
+  {
+    ierr = PetscContainerGetPointer(container, &ctx);
+    CHKERRQ(ierr);
+  }
+  else
+  {
+    mooseError(" Can not find a context \n");
+  }
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & nl_eigen = eigen_problem->getNonlinearEigenSystem();
+  Preconditioner<Number> * preconditioner = nl_eigen.moosePreconditioner();
+
+  if (!preconditioner)
+    mooseError("There is no moose preconditioner in nonlinear eigen system \n");
+
+  PetscVector<Number> x_vec(x, preconditioner->comm());
+  PetscVector<Number> y_vec(y, preconditioner->comm());
+
+  preconditioner->apply(x_vec, y_vec);
+
+  return 0;
+}
+
+PetscErrorCode
+PCSetUp_MoosePC(PC pc)
+{
+  void * ctx;
+  PetscErrorCode ierr;
+  Mat Amat, Pmat;
+  PetscContainer container;
+
+  ierr = PCGetOperators(pc, &Amat, &Pmat);
+  CHKERRQ(ierr);
+  ierr = PetscObjectQuery((PetscObject)Pmat, "formFunctionCtx", (PetscObject *)&container);
+  CHKERRQ(ierr);
+  if (container)
+  {
+    ierr = PetscContainerGetPointer(container, &ctx);
+    CHKERRQ(ierr);
+  }
+  else
+  {
+    mooseError(" Can not find a context \n");
+  }
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & nl_eigen = eigen_problem->getNonlinearEigenSystem();
+  Preconditioner<Number> * preconditioner = nl_eigen.moosePreconditioner();
+
+  if (!preconditioner)
+    mooseError("There is no moose preconditioner in nonlinear eigen system \n");
+
+  if (!preconditioner->initialized())
+    preconditioner->init();
+  //  libmesh_error_msg("Preconditioner not initialized!  Make sure you call init() before solve!");
+
+  preconditioner->setup();
+
+  return 0;
 }
 
 } // namespace SlepcSupport

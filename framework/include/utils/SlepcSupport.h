@@ -17,6 +17,12 @@
 
 #include "Moose.h"
 
+/* We need this in order to implement moose PC */
+#include <petsc/private/pcimpl.h>
+/* In order to use libMesh preconditioner */
+#include "libmesh/linear_solver.h"
+#include "libmesh/preconditioner.h"
+
 class EigenProblem;
 class InputParameters;
 
@@ -49,6 +55,13 @@ void attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
 PetscErrorCode mooseMatMult_Eigen(Mat mat, Vec x, Vec y);
 PetscErrorCode mooseMatMult_NonEigen(Mat mat, Vec x, Vec y);
 void setOperationsForShellMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
+
+PETSC_EXTERN PetscErrorCode PCCreate_MoosePC(PC pc);
+PETSC_EXTERN PetscErrorCode registerPCToPETSc();
+PetscErrorCode PCDestroy_MoosePC(PC pc);
+PetscErrorCode PCView_MoosePC(PC pc, PetscViewer viewer);
+PetscErrorCode PCApply_MoosePC(PC pc, Vec x, Vec y);
+PetscErrorCode PCSetUp_MoosePC(PC pc);
 
 } // namespace SlepcSupport
 } // namespace moose
