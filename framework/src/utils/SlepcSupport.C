@@ -431,8 +431,15 @@ moosePetscSNESFormJacobian(SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Ta
 
   PetscVector<Number> X_global(x, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  This operation does not modify the incoming
+  // "x" vector, it only localizes information from "x" into
+  // sys.current_local_solution.
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
 
   PetscMatrix<Number> PC(pc, sys.comm());
   PetscMatrix<Number> Jac(jac, sys.comm());
@@ -487,8 +494,15 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, TagID tag)
 
   PetscVector<Number> X_global(x, sys.comm()), R(r, sys.comm());
 
-  // update local solution
-  X_global.localize(*sys.current_local_solution.get());
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  This operation does not modify the incoming
+  // "x" vector, it only localizes information from "x" into
+  // sys.current_local_solution.
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
 
   R.zero();
 
