@@ -50,7 +50,7 @@ LevelSetOlssonBubble::gradient(Real /*t*/, const Point & p) const
   for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
   {
     g_prime = (p(i) - _center(i)) / (_epsilon * norm);
-    output(i) = (g_prime * std::exp(g)) / ((std::exp(g) + 1) * (std::exp(g) + 1));
+    output(i) = -(g_prime * std::exp(g)) / ((std::exp(g) + 1) * (std::exp(g) + 1));
   }
   return output;
 }

@@ -214,6 +214,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if visible:
             if self._colorbar is None:
                 self._colorbar = chigger.exodus.ExodusColorBar(self._result, layer=3)
+                self._colorbar.setOptions('primary', font_size=16)
 
             if self._colorbar not in self._window:
                 self._window.append(self._colorbar)
