@@ -13,25 +13,43 @@
 #include "ComputeFiniteStrain.h"
 
 // map tensor name shortcuts to tensor material property names
-const std::map<std::string, std::string> TensorMechanicsActionBase::_ranktwoaux_table = {
-    {"strain", "total_strain"},
-    {"stress", "stress"},
-    {"elastic_strain", "elastic_strain"},
-    {"plastic_strain", "plastic_strain"},
-    {"creep_strain", "creep_strain"}};
+const std::map<std::string, std::string>
+    TensorMechanicsActionBase::_rank_two_cartesian_component_table = {
+        {"strain", "total_strain"},
+        {"stress", "stress"},
+        {"elastic_strain", "elastic_strain"},
+        {"plastic_strain", "plastic_strain"},
+        {"creep_strain", "creep_strain"}};
 const std::vector<char> TensorMechanicsActionBase::_component_table = {'x', 'y', 'z'};
-// map aux variable name prefixes to RanTwoScalarAux option and list of permitted tensor name
+
+// map aux variable name prefixes to RankTwoInvariant option and list of permitted tensor name
 // shortcuts
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
-    TensorMechanicsActionBase::_ranktwoscalaraux_table = {
+    TensorMechanicsActionBase::_rank_two_invariant_table = {
         {"vonmises", {"VonMisesStress", {"stress"}}},
+        {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic", {"Hydrostatic", {"stress"}}},
-        {"max_principal", {"MaxPrincipal", {"stress"}}},
-        {"mid_principal", {"MidPrincipal", {"stress"}}},
-        {"min_principal", {"MinPrincipal", {"stress"}}},
+        {"l2norm", {"L2norm", {"stress", "strain"}}},
+        {"volumetric", {"VolumetricStrain", {"strain"}}},
         {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
-        {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}}};
+        {"thirdinv", {"ThirdInvariant", {"stress", "strain"}}},
+        {"triaxiality", {"TriaxialityStress", {"stress"}}},
+        {"maxshear", {"MaxShear", {"stress"}}},
+        {"intensity", {"StressIntensity", {"stress"}}},
+        {"max_principal", {"MaxPrincipal", {"stress"}}},
+        {"mid_principal", {"MidPrincipal", {"stress"}}},
+        {"min_principal", {"MinPrincipal", {"stress"}}}};
+
+const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
+    TensorMechanicsActionBase::_rank_two_directional_component_table = {
+        {"directional", {"Direction", {"stress", "strain"}}}};
+
+const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
+    TensorMechanicsActionBase::_rank_two_cylindrical_component_table = {
+        {"axial", {"AxialStress", {"stress", "strain"}}},
+        {"hoop", {"HoopStress", {"stress", "strain"}}},
+        {"radial", {"RadialStress", {"stress", "strain"}}}};
 
 InputParameters
 TensorMechanicsActionBase::validParams()
@@ -132,15 +150,23 @@ MultiMooseEnum
 TensorMechanicsActionBase::outputPropertiesType()
 {
   std::string options = "";
-  for (auto & r2a : _ranktwoaux_table)
+  for (auto & r2tc : _rank_two_cartesian_component_table)
     for (unsigned int a = 0; a < 3; ++a)
       for (unsigned int b = 0; b < 3; ++b)
-        options += (options == "" ? "" : " ") + r2a.first + '_' + _component_table[a] +
+        options += (options == "" ? "" : " ") + r2tc.first + '_' + _component_table[a] +
                    _component_table[b];
 
-  for (auto & r2sa : _ranktwoscalaraux_table)
-    for (auto & t : r2sa.second.second)
-      options += " " + r2sa.first + "_" + t;
+  for (auto & r2i : _rank_two_invariant_table)
+    for (auto & t : r2i.second.second)
+      options += " " + r2i.first + "_" + t;
+
+  for (auto & r2sdc : _rank_two_directional_component_table)
+    for (auto & r : r2sdc.second.second)
+      options += " " + r2sdc.first + "_" + r;
+
+  for (auto & r2cc : _rank_two_cylindrical_component_table)
+    for (auto & r : r2cc.second.second)
+      options += " " + r2cc.first + "_" + r;
 
   return MultiMooseEnum(options);
 }

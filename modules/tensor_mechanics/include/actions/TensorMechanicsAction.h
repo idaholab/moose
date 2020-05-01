@@ -10,6 +10,7 @@
 #pragma once
 
 #include "TensorMechanicsActionBase.h"
+#include "libmesh/point.h"
 
 class TensorMechanicsAction : public TensorMechanicsActionBase
 {
@@ -23,12 +24,13 @@ public:
 protected:
   void actSubdomainChecks();
   void actOutputGeneration();
+  void actOutputMatProp();
   void actGatherActionParameters();
 
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
 
-  /// Displacement variables
+  ///@{ displacement variables
   std::vector<VariableName> _displacements;
 
   /// Number of displacement variables
@@ -36,6 +38,7 @@ protected:
 
   /// Coupled displacement variables
   std::vector<VariableName> _coupled_displacements;
+  ///@}
 
   ///@{ residual debugging
   std::vector<AuxVariableName> _save_in;
@@ -93,6 +96,16 @@ protected:
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
 
-  /// output aux variables to generate for sclar stress/strain tensor quantities
+  /// output materials to generate scalar stress/strain tensor quantities
   std::vector<std::string> _generate_output;
+
+  /// booleans used to determine if cylindrical axis points are passed
+  bool _cylindrical_axis_point1_valid;
+  bool _cylindrical_axis_point2_valid;
+  bool _direction_valid;
+
+  /// points used to determine axis of rotation for cyclindrical stress/strain quantities
+  Point _cylindrical_axis_point1;
+  Point _cylindrical_axis_point2;
+  Point _direction;
 };
