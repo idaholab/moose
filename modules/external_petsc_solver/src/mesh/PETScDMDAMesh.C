@@ -388,6 +388,10 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
   // Already partitioned!
   mesh.skip_partitioning(true);
 
+  // We've already set our own unique_id values; now make sure that
+  // future mesh modifications use subsequent values.
+  mesh.set_next_unique_id(Mx*My+(Mx-1)*(My-1));
+
   // No need to renumber or find neighbors - done did it.
   // Avoid deprecation message/error by _also_ setting
   // allow_renumbering(false). This is a bit silly, but we want to
