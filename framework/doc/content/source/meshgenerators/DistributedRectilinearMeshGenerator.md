@@ -1,8 +1,8 @@
 # DistributedRectilinearMeshGenerator
 
-<!---!syntax description /MeshGenerators/DistributedRectilinearMeshGenerator--->
+!syntax description /MeshGenerators/DistributedRectilinearMeshGenerator
 
-## Description
+## Overview
 
 Similar to GeneratedMeshGenerator - builds lines, rectangles and rectangular prisms.  
 It differs though in the way the mesh is constructed in parallel.  
@@ -27,8 +27,8 @@ Final steps include adding in "ghosted" elements and making sure that boundary c
 
 !listing distributed_rectilinear_mesh_generator.i block=Mesh
 
-<!---!syntax parameters /MeshGenerators/DistributedRectilinearMeshGenerator--->
+!syntax parameters /MeshGenerators/DistributedRectilinearMeshGenerator
 
-<!---!syntax inputs /MeshGenerators/DistributedRectilinearMeshGenerator--->
+!syntax inputs /MeshGenerators/DistributedRectilinearMeshGenerator
 
-<!---!syntax children /MeshGenerators/DistributedRectilinearMeshGenerator--->
+!syntax children /MeshGenerators/DistributedRectilinearMeshGenerator

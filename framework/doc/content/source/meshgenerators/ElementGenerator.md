@@ -1,5 +1,7 @@
 # ElementGenerator
 
+!syntax description /MeshGenerators/ElementGenerator
+
 ## Overview
 
 This MeshGenerator object allows the user to create a single element (it is possible to create a simple mesh by adding elements one by one).

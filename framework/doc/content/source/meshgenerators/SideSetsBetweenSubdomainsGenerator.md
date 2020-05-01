@@ -1,6 +1,6 @@
 # SideSetsBetweenSubdomainsGenerator
 
-MeshGenerator that creates a Side set composed of the nodes located between two or more subdomains.
+!syntax description /MeshGenerators/SideSetsBetweenSubdomainsGenerator
 
 !syntax parameters /MeshGenerators/SideSetsBetweenSubdomainsGenerator
 

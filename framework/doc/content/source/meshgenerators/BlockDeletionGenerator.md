@@ -1,9 +1,16 @@
 # BlockDeletionGenerator
 
-The BlockDeletionGenerator is used to remove elements from a mesh matching a user provided subdomain ID. While most mesh generation operations should be based on geometric operations, it is sometimes easier to remove discretized elements for certain problems.
+!syntax description /MeshGenerators/BlockDeletionGenerator
 
-!syntax parameters /MeshModifiers/BlockDeleter
+## Overview
 
-!syntax inputs /MeshModifiers/BlockDeleter
+The BlockDeletionGenerator is used to remove elements from a mesh matching a
+user provided subdomain ID. While most mesh generation operations should be
+based on geometric operations, it is sometimes easier to remove discretized
+elements for certain problems.
 
-!syntax children /MeshModifiers/BlockDeleter
+!syntax parameters /MeshGenerators/BlockDeletionGenerator
+
+!syntax inputs /MeshGenerators/BlockDeletionGenerator
+
+!syntax children /MeshGenerators/BlockDeletionGenerator
