@@ -187,7 +187,7 @@ add_element_Quad4(DM da,
   elem->set_id(elem_id);
   elem->processor_id() = pid;
   // Make sure our unique_id doesn't overlap any nodes'
-  elem->set_unique_id() = elem_id + (nx+1)*(ny+1);
+  elem->set_unique_id() = elem_id + (nx + 1) * (ny + 1);
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
@@ -390,7 +390,7 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
 
   // We've already set our own unique_id values; now make sure that
   // future mesh modifications use subsequent values.
-  mesh.set_next_unique_id(Mx*My+(Mx-1)*(My-1));
+  mesh.set_next_unique_id(Mx * My + (Mx - 1) * (My - 1));
 
   // No need to renumber or find neighbors - done did it.
   // Avoid deprecation message/error by _also_ setting
