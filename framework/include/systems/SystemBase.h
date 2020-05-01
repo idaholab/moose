@@ -28,7 +28,7 @@
 // Forward declarations
 class Factory;
 class MooseApp;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
@@ -443,6 +443,8 @@ public:
   /**
    * Gets a reference to a variable of with specified name
    *
+   * This excludes and cannot return finite volume variables.
+   *
    * @param tid Thread id
    * @param var_name variable name
    * @return reference the variable (class)
@@ -451,7 +453,15 @@ public:
   MooseVariableFE<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
+   * Returns a field variable pointer - this includes finite volume variables.
+   */
+  template <typename T>
+  MooseVariableField<T> & getActualFieldVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
    * Gets a reference to a variable with specified number
+   *
+   * This excludes and cannot return finite volume variables.
    *
    * @param tid Thread id
    * @param var_number libMesh variable number
@@ -459,6 +469,12 @@ public:
    */
   template <typename T>
   MooseVariableFE<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
+
+  /**
+   * Returns a field variable pointer - this includes finite volume variables.
+   */
+  template <typename T>
+  MooseVariableField<T> & getActualFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a scalar variable with specified number
@@ -758,6 +774,8 @@ public:
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
+  void getStandardFieldVariableNames(std::vector<VariableName> & std_field_variables) const;
+
   /**
    * Returns the maximum number of all variables on the system
    */
@@ -784,6 +802,9 @@ public:
   const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
 
   std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
+
+  /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
+  void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
 protected:
   SubProblem & _subproblem;

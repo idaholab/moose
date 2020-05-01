@@ -7,6 +7,8 @@ of partial differential equations. These unknowns are often referred to as nonli
 within documentation. The nonlinear variables defined within this block are used by
 [Kernel objects](syntax/Kernels/index.md) to define the equations for a simulation.
 
+TODO: mention FV variables and how they are similar+different
+
 ## Example
 
 The following input file snippet demonstrates the creation of a single nonlinear variable that

@@ -12,6 +12,7 @@
 #include "Factory.h"
 #include "SubProblem.h"
 #include "MooseVariableFE.h"
+#include "MooseVariableFV.h"
 #include "MooseVariableScalar.h"
 #include "MooseVariableConstMonomial.h"
 #include "Conversion.h"
@@ -23,6 +24,8 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "FVBoundaryCondition.h"
+#include "FVDirichletBC.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
@@ -135,10 +138,24 @@ SystemBase::getFieldVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 template <typename T>
+MooseVariableField<T> &
+SystemBase::getActualFieldVariable(THREAD_ID tid, const std::string & var_name)
+{
+  return *_vars[tid].getActualFieldVariable<T>(var_name);
+}
+
+template <typename T>
 MooseVariableFE<T> &
 SystemBase::getFieldVariable(THREAD_ID tid, unsigned int var_number)
 {
   return *_vars[tid].getFieldVariable<T>(var_number);
+}
+
+template <typename T>
+MooseVariableField<T> &
+SystemBase::getActualFieldVariable(THREAD_ID tid, unsigned int var_number)
+{
+  return *_vars[tid].getActualFieldVariable<T>(var_number);
 }
 
 MooseVariableScalar &
@@ -1070,12 +1087,24 @@ void
 SystemBase::update()
 {
   system().update();
+  std::vector<VariableName> std_field_variables;
+  getStandardFieldVariableNames(std_field_variables);
+  cacheVarIndicesByFace(std_field_variables);
 }
 
 void
 SystemBase::solve()
 {
   system().solve();
+}
+
+void
+SystemBase::getStandardFieldVariableNames(std::vector<VariableName> & std_field_variables) const
+{
+  std_field_variables.clear();
+  for (auto & p : _vars[0].fieldVariables())
+    if (p->fieldType() == 0)
+      std_field_variables.push_back(p->name());
 }
 
 /**
@@ -1180,6 +1209,103 @@ SystemBase::applyScalingFactors(const std::vector<Real> & inverse_scaling_factor
   }
 }
 
+void
+SystemBase::cacheVarIndicesByFace(const std::vector<VariableName> & vars)
+{
+  if (!_subproblem.haveFV())
+    return;
+
+  // prepare a vector of MooseVariables from names
+  std::vector<MooseVariableBase *> moose_vars;
+  for (auto & v : vars)
+  {
+    // first make sure this is not a scalar variable
+    if (hasScalarVariable(v))
+      mooseError("Variable ", v, " is a scalar variable");
+
+    // now make sure this is a standard variable [not array/vector]
+    if (getVariable(0, v).fieldType() != 0)
+      mooseError("Variable ", v, " not a standard field variable [either VECTOR or ARRAY].");
+    moose_vars.push_back(&getVariable(0, v));
+  }
+
+  // loop over all faces
+  auto & faces = mesh().faceInfo();
+  for (auto & p : faces)
+  {
+    // get elem & neighbor elements, and set subdomain ids
+    const Elem & elem_elem = p.elem();
+    const Elem * neighbor_elem = p.neighborPtr();
+    SubdomainID elem_subdomain_id = elem_elem.subdomain_id();
+    SubdomainID neighbor_subdomain_id = Elem::invalid_subdomain_id;
+    if (neighbor_elem)
+      neighbor_subdomain_id = neighbor_elem->subdomain_id();
+
+    // TODO: what happens if elem and neighbor subdomain ids have different
+    // coordinate transforms here?  Figure out how to handle this robustly.
+    coordTransformFactor(_subproblem, elem_subdomain_id, p.faceCentroid(), p.faceCoord());
+
+    // loop through vars
+    for (unsigned int j = 0; j < moose_vars.size(); ++j)
+    {
+      // get the variable, its name, and its domain of definition
+      auto var = moose_vars[j];
+      auto var_name = var->name();
+      std::set<SubdomainID> var_subdomains = var->blockIDs();
+
+      // unfortunately, MOOSE is lazy and all subdomains has its own
+      // ID. If ANY_BLOCK_ID is in var_subdomains, inject all subdomains explicitly
+      if (var_subdomains.find(Moose::ANY_BLOCK_ID) != var_subdomains.end())
+        var_subdomains = _mesh.meshSubdomains();
+
+      // first stash away DoF information; this is more difficult than you would
+      // think because var can be defined on the elem subdomain, the neighbor subdomain
+      // or both subdomains
+      // elem
+      std::vector<dof_id_type> elem_dof_indices;
+      if (var_subdomains.find(elem_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(&elem_elem, elem_dof_indices);
+      else
+        elem_dof_indices = {libMesh::DofObject::invalid_id};
+      p.elemDofIndices(var_name) = elem_dof_indices;
+      // neighbor
+      std::vector<dof_id_type> neighbor_dof_indices;
+      if (neighbor_elem && var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end())
+        var->getDofIndices(neighbor_elem, neighbor_dof_indices);
+      else
+        neighbor_dof_indices = {libMesh::DofObject::invalid_id};
+      p.neighborDofIndices(var_name) = neighbor_dof_indices;
+
+      /**
+       * The following paragraph of code assigns the VarFaceNeighbors
+       * 1. The face is an internal face of this variable if it is defined on
+       *    the elem and neighbor subdomains
+       * 2. The face is an invalid face of this variable if it is neither defined
+       *    on the elem nor the neighbor subdomains
+       * 3. If not 1. or 2. then this is a boundary for this variable and the else clause
+       *    applies
+       */
+      bool var_defined_elem = var_subdomains.find(elem_subdomain_id) != var_subdomains.end();
+      bool var_defined_neighbor =
+          var_subdomains.find(neighbor_subdomain_id) != var_subdomains.end();
+      if (var_defined_elem && var_defined_neighbor)
+        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::BOTH;
+      else if (!var_defined_elem && !var_defined_neighbor)
+        p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEITHER;
+      else
+      {
+        // this is a boundary face for this variable, set elem or neighbor
+        if (var_defined_elem)
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::ELEM;
+        else if (var_defined_neighbor)
+          p.faceType(var_name) = FaceInfo::VarFaceNeighbors::NEIGHBOR;
+        else
+          mooseError("Should never get here");
+      }
+    }
+  }
+}
+
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
                                                                     const std::string & var_name);
 
@@ -1197,3 +1323,21 @@ SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int var_nu
 
 template MooseVariableFE<RealEigenVector> &
 SystemBase::getFieldVariable<RealEigenVector>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableField<Real> &
+SystemBase::getActualFieldVariable<Real>(THREAD_ID tid, const std::string & var_name);
+
+template MooseVariableField<RealVectorValue> &
+SystemBase::getActualFieldVariable<RealVectorValue>(THREAD_ID tid, const std::string & var_name);
+
+template MooseVariableField<RealEigenVector> &
+SystemBase::getActualFieldVariable<RealEigenVector>(THREAD_ID tid, const std::string & var_name);
+
+template MooseVariableField<Real> &
+SystemBase::getActualFieldVariable<Real>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableField<RealVectorValue> &
+SystemBase::getActualFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int var_number);
+
+template MooseVariableField<RealEigenVector> &
+SystemBase::getActualFieldVariable<RealEigenVector>(THREAD_ID tid, unsigned int var_number);

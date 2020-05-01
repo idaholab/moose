@@ -25,8 +25,12 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
+   * @param is_fv Whether the \p MooseObject is a finite volume object
    */
-  NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal);
+  NeighborCoupleable(const MooseObject * moose_object,
+                     bool nodal,
+                     bool neighbor_nodal,
+                     bool is_fv = false);
 
   // neighbor
   virtual const VariableValue & coupledNeighborValue(const std::string & var_name,

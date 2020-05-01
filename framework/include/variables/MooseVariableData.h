@@ -42,22 +42,6 @@ template <typename>
 class MooseVariableFE;
 class SystemBase;
 
-namespace Moose
-{
-enum SolutionState
-{
-  Current,
-  Old,
-  Older,
-  PreviousNL
-};
-enum GeometryType
-{
-  Volume,
-  Face
-};
-}
-
 template <typename OutputType>
 class MooseVariableData
 {

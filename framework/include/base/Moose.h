@@ -30,7 +30,7 @@ class ActionFactory;
 class Factory;
 class MooseEnumItem;
 class ExecFlagEnum;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 
 #ifdef LIBMESH_HAVE_PETSC
 void MooseVecView(NumericVector<Number> & vector);

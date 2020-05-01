@@ -62,12 +62,14 @@ bool
 AttribTagBase::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribTagBase *>(&other);
-  if (!a || a->_vals.size() < 1)
+  if (!a)
     return false;
+  if (a->_vals.size() == 0)
+    return true; // the condition is empty tags - which we take to mean any tag should match
 
-  auto cond = a->_vals[0];
+  // return true if any single tag matches between the two attribute objects
   for (auto val : _vals)
-    if (val == cond)
+    if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
       return true;
   return false;
 }
@@ -218,12 +220,14 @@ AttribBoundaries::isMatch(const Attribute & other) const
   if (!a || a->_vals.size() < 1)
     return false;
 
-  auto cond = a->_vals[0];
-  if (cond == Moose::ANY_BOUNDARY_ID)
-    return true;
-  for (auto id : _vals)
+  // return true if a single tag matches between the two attribute objects
+  for (auto val : _vals)
   {
-    if (id == cond || (!a->_must_be_restricted && (id == Moose::ANY_BOUNDARY_ID)))
+    if (!a->_must_be_restricted && (val == Moose::ANY_BOUNDARY_ID))
+      return true;
+    if (std::find(a->_vals.begin(), a->_vals.end(), val) != a->_vals.end())
+      return true;
+    else if (std::find(a->_vals.begin(), a->_vals.end(), Moose::ANY_BOUNDARY_ID) != a->_vals.end())
       return true;
   }
   return false;
@@ -337,7 +341,7 @@ AttribVar::initFrom(const MooseObject * obj)
 {
   auto vi = dynamic_cast<const MooseVariableInterface<Real> *>(obj);
   if (vi)
-    _val = static_cast<int>(vi->mooseVariable()->number());
+    _val = static_cast<int>(vi->mooseVariableBase()->number());
 }
 bool
 AttribVar::isMatch(const Attribute & other) const

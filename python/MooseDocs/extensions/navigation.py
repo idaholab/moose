@@ -260,7 +260,7 @@ class NavigationExtension(Extension):
         self._createNavigation(ul, page)
 
     def _addSideNavigation(self, parent, page):
-        """Adds the hamburger menu for small screens."""
+        """Adds the hamburgers menu for small screens."""
         id_ = uuid.uuid4()
 
         a = html.Tag(parent, 'a', href='#', class_='sidenav-trigger')

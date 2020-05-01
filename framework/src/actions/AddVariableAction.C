@@ -128,7 +128,10 @@ AddVariableAction::init()
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   // Determine the MooseVariable type
-  _type = determineType(_fe_type, _components);
+  bool is_fv = _moose_object_pars.get<bool>("fv");
+  _type = determineType(_fe_type, _components, is_fv);
+  if (is_fv)
+    _problem->needFV();
 
   // Need static_cast to resolve overloads
   _problem_add_var_method = static_cast<void (FEProblemBase::*)(
@@ -196,8 +199,11 @@ AddVariableAction::createInitialConditionAction()
 }
 
 std::string
-AddVariableAction::determineType(const FEType & fe_type, unsigned int components)
+AddVariableAction::determineType(const FEType & fe_type, unsigned int components, bool is_fv)
 {
+  if (is_fv)
+    return "MooseVariableFVReal";
+
   if (components > 1)
   {
     if (fe_type.family == LAGRANGE_VEC || fe_type.family == NEDELEC_ONE ||

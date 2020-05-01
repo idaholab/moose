@@ -1,0 +1,17 @@
+[Tests]
+  design = 'fv_design.md'
+  issues = '#14549'
+  [var_except]
+    type = RunException
+    input = transient-adapt.i
+    expect_err = 'fv_variable is null in diff. Did you forget to set fv = true in the Variables block'
+    requirement = 'The system shall suggest that the user add a finite volume variable if a finite volume object cannot retrieve one'
+  []
+  [adapt]
+    type = Exodiff
+    input = transient-adapt.i
+    exodiff = 'transient-adapt_out.e transient-adapt_out.e-s002'
+    requirement = 'The system shall be able to perform finite volume simulations with adaptivity and give correct results'
+    cli_args = 'Variables/u/fv=true'
+  []
+[]

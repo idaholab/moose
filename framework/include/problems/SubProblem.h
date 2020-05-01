@@ -28,7 +28,7 @@ class MooseMesh;
 class SubProblem;
 class Factory;
 class Assembly;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 class MooseVariableScalar;
 template <typename>
 class MooseVariableFE;
@@ -38,6 +38,7 @@ typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
 class RestartableDataValue;
 class SystemBase;
 class LineSearch;
+class FaceInfo;
 
 // libMesh forward declarations
 namespace libMesh
@@ -80,6 +81,12 @@ public:
   virtual void onTimestepEnd() = 0;
 
   virtual bool isTransient() const = 0;
+
+  /// marks this problem as including/needing finite volume functionality.
+  void needFV() { _have_fv = true; }
+
+  /// returns true if this problem includes/needs finite volume functionality.
+  bool haveFV() const { return _have_fv; }
 
   /**
    * Whether or not the user has requested default ghosting ot be on.
@@ -178,7 +185,7 @@ public:
    * in question is not in the expected System or of the expected
    * type.
    */
-  virtual MooseVariableFEBase &
+  virtual MooseVariableFieldBase &
   getVariable(THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
@@ -214,15 +221,16 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
-                                                THREAD_ID tid);
+  virtual void
+  setActiveElementalMooseVariables(const std::set<MooseVariableFieldBase *> & moose_vars,
+                                   THREAD_ID tid);
 
   /**
    * Get the MOOSE variables to be reinited on each element.
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariableFEBase *> &
+  virtual const std::set<MooseVariableFieldBase *> &
   getActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
@@ -233,9 +241,9 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
-   * Clear the active elemental MooseVariableFEBase.  If there are no active variables then they
+   * Clear the active elemental MooseVariableFieldBase.  If there are no active variables then they
    * will all be reinited. Call this after finishing the computation that was using a restricted set
-   * of MooseVariableFEBases
+   * of MooseVariableFieldBase
    *
    * @param tid The thread id
    */
@@ -673,12 +681,12 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
-  MooseVariableFEBase & getVariableHelper(THREAD_ID tid,
-                                          const std::string & var_name,
-                                          Moose::VarKindType expected_var_type,
-                                          Moose::VarFieldType expected_var_field_type,
-                                          SystemBase & nl,
-                                          SystemBase & aux);
+  MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
+                                             const std::string & var_name,
+                                             Moose::VarKindType expected_var_type,
+                                             Moose::VarFieldType expected_var_field_type,
+                                             SystemBase & nl,
+                                             SystemBase & aux);
 
   /// The currently declared tags
   std::map<TagName, TagID> _vector_tag_name_to_tag_id;
@@ -725,8 +733,8 @@ protected:
   std::map<BoundaryID, std::multimap<std::string, std::string>> _map_boundary_material_props_check;
   ///@}
 
-  /// This is the set of MooseVariableFEBases that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariableFEBase *>> _active_elemental_moose_variables;
+  /// This is the set of MooseVariableFieldBase that will actually get reinited by a call to reinit(elem)
+  std::vector<std::set<MooseVariableFieldBase *>> _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */
@@ -771,6 +779,8 @@ protected:
   bool _have_ad_objects;
 
 private:
+  bool _have_fv = false;
+
   ///@{ Helper functions for checking MaterialProperties
   std::string restrictionSubdomainCheckName(SubdomainID check_id);
   std::string restrictionBoundaryCheckName(BoundaryID check_id);

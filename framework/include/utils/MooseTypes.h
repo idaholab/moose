@@ -198,6 +198,22 @@ typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElem
 
 namespace Moose
 {
+
+// These are used by MooseVariableData and MooseVariableDataFV
+enum SolutionState
+{
+  Current,
+  Old,
+  Older,
+  PreviousNL
+};
+// These are used by MooseVariableData and MooseVariableDataFV
+enum GeometryType
+{
+  Volume,
+  Face
+};
+
 template <typename T>
 struct ADType;
 template <>

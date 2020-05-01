@@ -62,7 +62,7 @@ void
 AddLotsOfAuxVariablesAction::act()
 {
   auto fe_type = AddVariableAction::feType(_pars);
-  auto type = AddVariableAction::determineType(fe_type, 1);
+  auto type = AddVariableAction::determineType(fe_type, 1, false);
   auto var_params = _factory.getValidParams(type);
 
   var_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");

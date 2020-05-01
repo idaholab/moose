@@ -13,7 +13,7 @@
 
 // Forward Declarations
 class GreaterThanLessThanPostprocessor;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 namespace libMesh
 {
 class MeshBase;

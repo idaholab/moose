@@ -18,7 +18,7 @@
 #include "SubProblem.h"
 
 // Forward declarations
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 
 /**
  * A base storage container for MooseObjects.

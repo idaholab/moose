@@ -90,6 +90,10 @@
 #include "TimedPrint.h"
 #include "MaxVarNDofsPerElem.h"
 #include "MaxVarNDofsPerNode.h"
+#include "FVKernel.h"
+#include "FVTimeKernel.h"
+#include "MooseVariableFV.h"
+#include "FVBoundaryCondition.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -2586,6 +2590,69 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
   _has_internal_edge_residual_objects = true;
 }
 
+void
+FEProblemBase::addFVKernel(const std::string & fv_kernel_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+  }
+  else
+  {
+
+    // TODO: this if clause was copied from DG Kernels - do we really need it for FV?
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
+  }
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    std::shared_ptr<FVKernel> k = _factory.create<FVKernel>(fv_kernel_name, name, parameters, tid);
+    theWarehouse().add(k);
+  }
+}
+
+void
+FEProblemBase::addFVBC(const std::string & fv_bc_name,
+                       const std::string & name,
+                       InputParameters & parameters)
+{
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+  }
+  else
+  {
+
+    // TODO: this if clause was copied from DG Kernels - do we really need it for FV?
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl.get();
+  }
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    std::shared_ptr<FVBoundaryCondition> bc =
+        _factory.create<FVBoundaryCondition>(fv_bc_name, name, parameters, tid);
+    theWarehouse().add(bc);
+  }
+}
+
 // InterfaceKernels ////
 
 void
@@ -2673,6 +2740,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
         ic = _factory.create<VectorInitialCondition>(ic_name, name, parameters, tid);
       else if (dynamic_cast<ArrayMooseVariable *>(&var))
         ic = _factory.create<ArrayInitialCondition>(ic_name, name, parameters, tid);
+      else if (dynamic_cast<MooseVariableFVReal *>(&var))
+        ic = _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       else
         mooseError("Your FE variable in initial condition ",
                    name,
@@ -2890,6 +2959,10 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     // Non-boundary restricted require face and neighbor objects
     else
     {
+      // TODO: we only need to do this if we have needs for face materials (e.g.
+      // FV, DG, etc.) - but currently we always do it.  Figure out how to fix
+      // this.
+
       // The name of the object being created, this is changed multiple times as objects are created
       // below
       std::string object_name;
@@ -3014,6 +3087,35 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 }
 
 void
+FEProblemBase::reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+{
+  if (hasActiveMaterialProperties(tid))
+  {
+    // NOTE: this will not work with h-adaptivity
+    // The neighbor element doesn't exist, so use elem element as a stand-in.
+    auto && neighbor = _assembly[tid]->elem();
+
+    // The neighbor element doesn't actually exist - so use the current side
+    // elem side as a stand-in.
+    unsigned int neighbor_side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    _neighbor_material_data[tid]->resize(n_points);
+
+    // Only swap if requested
+    if (swap_stateful)
+      _neighbor_material_data[tid]->swap(*neighbor, neighbor_side);
+
+    if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reset(
+          _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      _neighbor_material_data[tid]->reinit(
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  }
+}
+
+void
 FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
 {
   if (hasActiveMaterialProperties(tid))
@@ -3092,6 +3194,17 @@ FEProblemBase::swapBackMaterialsFace(THREAD_ID tid)
   auto && elem = _assembly[tid]->elem();
   unsigned int side = _assembly[tid]->side();
   _bnd_material_data[tid]->swapBack(*elem, side);
+}
+
+void
+FEProblemBase::swapBackMaterialsNeighborGhost(THREAD_ID tid)
+{
+  // NOTE: this will not work with h-adaptivity
+  // Since neighbor element doesn't actually exist, use elem element info
+  // instead.
+  auto && neighbor = _assembly[tid]->elem();
+  unsigned int neighbor_side = _assembly[tid]->side();
+  _neighbor_material_data[tid]->swapBack(*neighbor, neighbor_side);
 }
 
 void

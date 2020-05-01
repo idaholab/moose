@@ -26,11 +26,11 @@ class NeighborCoupleableMooseVariableDependencyIntermediateInterface
 public:
   NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                                  bool nodal,
-                                                                 bool neighbor_nodal)
-    : NeighborCoupleable(moose_object, nodal, neighbor_nodal), ScalarCoupleable(moose_object)
+                                                                 bool neighbor_nodal,
+                                                                 bool is_fv = false)
+    : NeighborCoupleable(moose_object, nodal, neighbor_nodal, is_fv), ScalarCoupleable(moose_object)
   {
     for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())
       addMooseVariableDependency(coupled_var);
   }
 };
-
