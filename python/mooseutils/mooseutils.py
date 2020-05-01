@@ -96,7 +96,8 @@ def find_moose_executable(loc, **kwargs):
 
     Kwargs:
         methods[list]: (Default: ['opt', 'oprof', 'dbg', 'devel']) The list of build types to consider.
-        name[str]: (Default: opt.path.basename(loc)) The name of the executable to locate.
+        name[str]: The name of the executable to locate, if not provided it will infer it from
+                   a Makefile or the supplied directory
         show_error[bool]: (Default: True) Display error messages.
     """
 
@@ -106,7 +107,22 @@ def find_moose_executable(loc, **kwargs):
     else:
         methods = ['opt', 'oprof', 'dbg', 'devel']
     methods = kwargs.pop('methods', methods)
-    name = kwargs.pop('name', os.path.basename(loc))
+    name = kwargs.pop('name', None)
+
+    # If the 'name' is not provided first look for a Makefile with 'APPLICATION_NAME...' if
+    # that is not found use the name of the directory
+    if name is None:
+        makefile = os.path.join(loc, 'Makefile')
+        if os.path.isfile(makefile):
+            with open(makefile, 'r') as fid:
+                content = fid.read()
+            match = re.search(r'APPLICATION_NAME\s*[:=]+\s*(?P<name>\w+)$', content, flags=re.MULTILINE)
+            name = match.group('name') if match else None
+
+        if name is None:
+            name = os.path.basename(loc)
+
+
     show_error = kwargs.pop('show_error', True)
 
     # Handle 'combined' and 'tests'
