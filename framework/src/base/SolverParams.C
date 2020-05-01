@@ -16,6 +16,7 @@ SolverParams::SolverParams()
     _eigen_solve_type(Moose::EST_KRYLOVSCHUR),
     _eigen_problem_type(Moose::EPT_SLEPC_DEFAULT),
     _which_eigen_pairs(Moose::WEP_SLEPC_DEFAULT),
-    _eigen_matrix_free(false)
+    _eigen_matrix_free(false),
+    _customized_pc_for_eigen(false)
 {
 }

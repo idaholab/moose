@@ -34,6 +34,7 @@ public:
 
   virtual unsigned int getCurrentNonlinearIterationNumber() override { return 0; }
   virtual void setupFiniteDifferencedPreconditioner() override {}
+  virtual void attachMoosePreconditioner(Preconditioner<Number> * /* preconditioner */) override {}
 
 protected:
   NumericVector<Number> & solutionOldInternal() const override { return *_dummy; }

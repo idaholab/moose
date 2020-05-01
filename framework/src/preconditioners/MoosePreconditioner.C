@@ -1,4 +1,3 @@
-//* This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions

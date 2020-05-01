@@ -19,6 +19,7 @@
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_solver.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -70,7 +71,7 @@ public:
   /**
    * Turn off the Jacobian (must be called before equation system initialization)
    */
-  void turnOffJacobian();
+  virtual void turnOffJacobian();
 
   virtual void addExtraVectors() override;
   virtual void solve() override = 0;
@@ -462,6 +463,12 @@ public:
   {
     _assemble_constraints_separately = separately;
   }
+
+  /**
+   * Attache a customized moose preconditioner that requires physics knowledge.
+   * For generic preconditioners, they should be implemented at the PETSC side.
+   */
+  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) = 0;
 
   /**
    * Setup damping stuff (called before we actually start)

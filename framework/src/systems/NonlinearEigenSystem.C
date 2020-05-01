@@ -227,6 +227,14 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
     // Set MatMult operations for shell
     Moose::SlepcSupport::setOperationsForShellMat(_eigen_problem, mat, true);
   }
+
+  // Preconditioning matrix
+  if (_transient_sys.precond_matrix)
+  {
+    Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.precond_matrix).mat();
+
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+  }
 }
 
 void
@@ -305,6 +313,28 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
   return _transient_sys.get_eigenpair(n);
+}
+
+void
+NonlinearEigenSystem::attachMoosePreconditioner(Preconditioner<Number> * preconditioner)
+{
+  _moose_preconditioner = preconditioner;
+
+  // If we have a customized preconditioner,
+  // We need to let PETSc know that
+  if (_moose_preconditioner)
+  {
+    Moose::SlepcSupport::registerPCToPETSc();
+    // Mark this, and then we can setup correct petsc options
+    _eigen_problem.solverParams()._customized_pc_for_eigen = true;
+    _eigen_problem.solverParams()._type = Moose::ST_JFNK;
+  }
+}
+
+void
+NonlinearEigenSystem::turnOffJacobian()
+{
+  // Let us do nothing at the current moment
 }
 
 #else

@@ -134,6 +134,12 @@ public:
    */
   TagID nonEigenMatrixTag() { return _A_tag; }
 
+  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
+
+  Preconditioner<Number> * moosePreconditioner() { return _moose_preconditioner; }
+
+  virtual void turnOffJacobian() override;
+
 protected:
   NumericVector<Number> & solutionOldInternal() const override
   {
@@ -155,6 +161,7 @@ protected:
   TagID _Bx_tag;
   TagID _A_tag;
   TagID _B_tag;
+  Preconditioner<Number> * _moose_preconditioner;
 };
 
 #else

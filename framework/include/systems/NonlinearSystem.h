@@ -78,6 +78,13 @@ protected:
     return *_transient_sys.older_local_solution;
   }
 
+  virtual TransientNonlinearImplicitSystem & sys() { return _transient_sys; }
+
+  void computeScaling() override;
+
+  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
+
+protected:
   TransientNonlinearImplicitSystem & _transient_sys;
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
