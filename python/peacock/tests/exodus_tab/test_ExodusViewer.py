@@ -60,7 +60,7 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
         Test initial.
         """
         if sys.platform == 'darwin':
-            self.assertImage('testInitial.png')
+            self.assertImage('testInitial.png', allowed=0.96)
         self.assertFalse(self._widget.cornerWidget().CloseButton.isEnabled())
         self.assertEqual(self._widget.tabText(self._widget.currentIndex()), 'Results')
 
