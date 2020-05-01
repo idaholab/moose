@@ -4,7 +4,6 @@
     type = ImageDiff
     command = image_annotation.py
     imagediff = 'image_annotation.png'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
 
     display_required = true
   []
@@ -14,7 +13,6 @@
     type = ImageDiff
     command = logo_annotation.py
     imagediff = 'logo_annotation.png'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
 
     display_required = true
   []
@@ -26,7 +24,6 @@
     imagediff = 'text_annotation.png'
 
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [time]
@@ -36,7 +33,6 @@
     imagediff = 'time_annotation.png'
 
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [time_change]
@@ -44,7 +40,6 @@
     type = ImageDiff
     command = time_annotation_change.py
     imagediff = 'time_annotation_change_0.png time_annotation_change_9.png'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
 
     display_required = true
   []

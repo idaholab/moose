@@ -3,7 +3,6 @@
     type = RunApp
     command = field_data.py
     expect_out = "13.960"
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -11,7 +10,6 @@
     type = RunApp
     command = current_field_data.py
     expect_out = "0.0,\s14.\d+,\s14."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -20,7 +18,6 @@
     command = plot_field_data.py
     imagediff = 'plot_field_data.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [plot_current_field_data]
@@ -29,6 +26,5 @@
     imagediff = 'plot_current_field_data_0.png plot_current_field_data_4.png plot_current_field_data_9.png'
     allowed_linux = 0.95
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

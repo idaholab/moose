@@ -5,7 +5,6 @@
     imagediff = 'vector_magnitude.png'
     allowed_linux = 0.975
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [x_component]
@@ -14,7 +13,6 @@
     imagediff = 'vector_x.png'
     allowed_linux = 0.965
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [y_component]
@@ -23,6 +21,5 @@
     imagediff = 'vector_y.png'
     allowed_linux = 0.965
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

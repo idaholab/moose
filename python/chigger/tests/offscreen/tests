@@ -3,7 +3,6 @@
     type = ImageDiff
     command = offscreen.py
     imagediff = 'offscreen.png'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 []

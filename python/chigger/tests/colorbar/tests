@@ -6,7 +6,6 @@
     command = colorbar.py
     imagediff = 'colorbar.png'
     requirement = "Chigger shall include a colorbar object that can be oriented vertically."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -16,7 +15,6 @@
     imagediff = 'colorbar_horiz.png'
     requirement = "Chigger shall include a colorbar object that can be oriented horizontally."
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [exdous_default]
@@ -24,7 +22,6 @@
     command = exodus_colorbar.py
     imagediff = 'exodus_colorbar.png'
     requirement = "Chigger shall include a colorbar object that captures range and colormap data from an Exodus result."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -33,7 +30,6 @@
     command = colorbar_left.py
     imagediff = 'colorbar_left.png'
     requirement = "The chigger colorbar shall support placing the tick marks on the left-side of a vertical oriented colorbar."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -43,7 +39,6 @@
     imagediff = 'colorbar_top.png'
     requirement = "The chigger colorbar shall support placing the tick marks on the top of a horizontal oriented colorbar."
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [bottom]
@@ -52,7 +47,6 @@
     imagediff = 'colorbar_bottom.png'
     requirement = "The chigger colorbar shall support placing the tick marks on the bottom of a horizontal oriented colorbar."
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [common]
@@ -60,7 +54,6 @@
     command = common_colorbar.py
     imagediff = 'common_colorbar.png'
     requirement = "Chigger shall include a colorbar object oriented vertically that captures range and colormap data from two Exodus results."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -69,7 +62,6 @@
     command = common_colorbar_horiz.py
     imagediff = 'common_colorbar_horiz.png'
     requirement = "Chigger shall include a colorbar object oriented horizontally that captures range and colormap data from two Exodus results."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -78,7 +70,6 @@
     command = dual_colorbar.py
     imagediff = 'dual_colorbar.png'
     requirement = "Chigger shall support vertical colorbars associated with Exodus results within a viewport."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -87,7 +78,6 @@
     command = dual_colorbar_horiz.py
     imagediff = 'dual_colorbar_horiz.png'
     requirement = "Chigger shall support horizontal colorbars associated with Exodus results within a viewport."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -96,7 +86,6 @@
     command = colorbar_font.py
     imagediff = 'colorbar_font.png'
     requirement = "The chigger colorbar shall support the ability to change the font size of the tick labels."
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -106,7 +95,6 @@
     imagediff = 'zero_range.png'
     requirement = "The chigger colorbar shall handle range values that do not differ in value."
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 
   [precision_with_wrong_notation]
@@ -116,6 +104,5 @@
     match_literal = true
     requirement = "The chigger colorbar shall error when the 'notation' and 'precision' settings are incongruent."
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []

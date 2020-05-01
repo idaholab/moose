@@ -4,7 +4,6 @@
     type = ImageDiff
     command = simple.py
     imagediff = 'simple.png'
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
     display_required = true
   []
 
@@ -14,6 +13,5 @@
     command = simple_camera.py
     imagediff = 'simple_camera.png'
     display_required = true
-    platform = LINUX # https://github.com/conda-forge/vtk-feedstock/issues/109
   []
 []
