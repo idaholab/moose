@@ -186,7 +186,8 @@ add_element_Quad4(DM da,
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
+  // Make sure our unique_id doesn't overlap any nodes'
+  elem->set_unique_id() = elem_id + (nx+1)*(ny+1);
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
