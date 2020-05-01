@@ -23,6 +23,7 @@ apt-get install -y \
   libhwloc-dev \
   python3 \
   python3-dev \
+  python3-pip \
   cmake \
   curl \
   bison \
