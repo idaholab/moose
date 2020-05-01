@@ -43,6 +43,7 @@ NewtonMaterial::NewtonMaterial(const InputParameters & parameters)
 {
 }
 
+// MOOSEDOCS_START
 void
 NewtonMaterial::computeQpProperties()
 {

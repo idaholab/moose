@@ -45,6 +45,7 @@ RecomputeMaterial::resetQpProperties()
   _f_prime[_qp] = 42;
 }
 
+// MOOSEDOCS_START
 void
 RecomputeMaterial::computeQpProperties()
 {
