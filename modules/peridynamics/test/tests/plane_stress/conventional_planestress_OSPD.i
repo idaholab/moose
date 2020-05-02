@@ -9,8 +9,8 @@
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
-    ny = 10
+    nx = 8
+    ny = 8
   [../]
   [./gpd]
     type = MeshGeneratorPD
@@ -79,7 +79,6 @@
   line_search = none
   start_time = 0
   end_time = 1
-  nl_rel_tol = 1e-10
 []
 
 [Outputs]

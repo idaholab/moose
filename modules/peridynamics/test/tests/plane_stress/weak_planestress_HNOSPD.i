@@ -92,8 +92,6 @@
   solve_type = PJFNK
   line_search = none
 
-  nl_rel_tol = 1e-12
-
   start_time = 0
   end_time = 1
 

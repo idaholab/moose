@@ -9,7 +9,7 @@
     design = 'modules/peridynamics/ComputeSmallStrainConstantHorizonMaterialOSPD.md'
     issues = '#11561'
   [../]
-  [./conventional_planestress_NOSPD]
+  [./conventional_planestress_HNOSPD]
     type = 'Exodiff'
     input = 'conventional_planestress_HNOSPD.i'
     exodiff = 'conventional_planestress_HNOSPD.e'
