@@ -8,8 +8,13 @@ The following table summarizes the methods and kinds of values they provide:
 coupledValue | Values of a coupled variable in q-points
 coupledGradient | Gradients of a coupled variable in q-points
 coupledSecond | Second derivatives of a coupled variable in q-points
+adCoupledValue | Values of a coupled variable in q-points with automatic differentiation info
+adCoupledGradient | Gradients of a coupled variable in q-points with automatic differentiation info
+adCoupledSecond | Second derivatives of a coupled variable in q-points with automatic differentiation info
 coupledNodalValue | Values of a coupled variable at nodes.
+adCupledNodalValue | Values of a coupled (vector) variable at nodes with automatic differentiation info
 coupledVectorValue | Values of a coupled vector variable in q-points
+adCoupledVectorValue | Values of a coupled vector variable in q-points with automatic differentiation info
 coupledCurl | Curl of a coupled vector variable in q-points
 coupledDot | Time derivative of a coupled variable
 coupledDotDu | Derivative of a time derivative of a coupled variable
