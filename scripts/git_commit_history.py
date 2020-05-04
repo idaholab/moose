@@ -22,12 +22,11 @@ import os
 
 ##############################
 # Favorite plots
-# $ ./git_commit_history.py --open-source --moose-dev --unique
-# $ ./git_commit_history.py --unique --additions --moose-dev --days=7 --open-source
+# $ ./git_commit_history.py --open-source --moose-dev --unique --output=contributors.pdf
+# $ ./git_commit_history.py --additions --moose-dev --days=7 --open-source --output=additions.pdf
 ##############################
 
 from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 
 # A helper function for running git commands
 def run(*args, **kwargs):
@@ -42,9 +41,9 @@ def run(*args, **kwargs):
             loc = os.path.join(loc, 'modules')
         args += ('--', loc)
 
-    output, _ = subprocess.Popen(args, stdout = subprocess.PIPE).communicate()
-    if kwargs.pop('split',True):
-        return filter(None, output.split('\n'))
+    output = subprocess.check_output(args, encoding='utf8').strip()
+    if kwargs.pop('split', True):
+        return output.split('\n')
     else:
         return output
 
@@ -109,11 +108,11 @@ def getData(options):
 
     # Get the additions/deletions
     commits = run('git', 'log', '--format=%H\n%ad\n%aN', '--date=short', '--no-merges', '--reverse', '--shortstat', split=False, options=options)
-    commits = filter(None, re.split(r'[0-9a-z]{40}', commits))
+    commits = [x for x in re.split(r'[0-9a-z]{40}', commits) if x]
 
     # Loop over commits
     for commit in commits:
-        c = filter(None, commit.split('\n'))
+        c = commit.strip().split('\n')
         date = datetime.datetime.strptime(c[0], '%Y-%m-%d')
         author = c[1]
 
@@ -124,20 +123,20 @@ def getData(options):
 
         i = contributors.index(author) # author index
 
-        d = filter(lambda x: x > date, dates)
+        d = [x for x in dates if x > date]
         if d:
             j = dates.index(d[0])
         else:
             j = dates.index(dates[-1])
         data['commits'][i,j] += 1
 
-        if options.additions and len(c) == 3:
-            a = c[2].split()
+        if options.additions:
+            a = c[3].split()
             n = len(a)
             files = int(a[0])
 
             if n == 5:
-                if a[4].startswith('insertion'):
+                if 'insertion' in a[4]:
                     plus = int(a[3])
                     minus = 0
                 else:
@@ -177,14 +176,13 @@ if __name__ == '__main__':
     parser.add_argument('--unique', '-u', action='store_true', help='Show unique contributor on secondary axis')
     parser.add_argument('--unique-label', default='legend', choices=['none', 'arrow', 'legend'], help='Control how the unique contributor line is labeled.')
     parser.add_argument('--open-source', '-r', action='store_true', help='Show shaded region for open sourcing of MOOSE')
-    parser.add_argument('--pdf', '--file', '-f', action='store_true', help='Write the plot to a pdf file (see --output)')
-    parser.add_argument('--output', '-o', type=str, default='commit_history.pdf', help='The filename for writting the plot to a file')
+    parser.add_argument('--output', '-o', type=str, default='commit_history.pdf', help='The filename for writing the plot to a file')
     parser.add_argument('--authors', default=None, help='Limit the graph to the given number of entries authors, or use "moose" to limit to MOOSE developers')
     parser.add_argument('--moose-dev', action='store_true', help='Create two categories: MOOSE developers and other (this overrides --authors)')
     parser.add_argument('--framework', action='store_true', help='Limit the analysis to framework directory')
     parser.add_argument('--modules', action='store_true', help='Limit the analysis to modules directory')
     parser.add_argument('--font', default=12, help='The font-size, in points')
-    parser.parse_args('-surf'.split())
+    parser.parse_args('-sur'.split())
     options = parser.parse_args()
 
     # Markers/colors
@@ -249,7 +247,7 @@ if __name__ == '__main__':
             else:
                 label = contributors[i] + '(Additions)'
 
-            clr = color.next()
+            clr = next(color)
             ax1.fill_between(x, 0, y, label=label, alpha=0.4)
 
             y = -numpy.log10(numpy.array(data['out'][i,:]))
@@ -258,14 +256,13 @@ if __name__ == '__main__':
                 label = 'Deletions'
             else:
                 label = contributors[i] + '(Deletions)'
-            clr = color.next()
+            clr = next(color)
             ax1.fill_between(x, 0, y, label=label, alpha=0.4)
 
         fig.canvas.draw()
 
         labels = []
-        for tick in ax1.yaxis.get_major_ticks():
-            value = tick.get_loc()
+        for value in ax1.get_yticks():
             if value < 0:
                 labels.append('$-10^{}$'.format(numpy.abs(int(value))))
             else:
@@ -290,7 +287,7 @@ if __name__ == '__main__':
             x = numpy.array(dates)
             y = data['commits'][i,:]
             idx = y>0
-            h = ax1.plot(x[idx], y[idx], label=contributors[i], linewidth=2, markevery=60, marker=marker.next(), color=color.next())
+            h = ax1.plot(x[idx], y[idx], label=contributors[i], linewidth=2, markevery=60, marker=next(marker), color=next(color))
             handles.append(h[0])
 
         if not options.disable_legend:
@@ -319,10 +316,5 @@ if __name__ == '__main__':
         plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.1))
         ax1.annotate('Open-source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)
 
-
-    # Write to a file
-    if options.pdf:
-        fig.savefig(options.output)
-
     plt.tight_layout()
-    plt.savefig('git_commit_history.pdf', format='pdf')
+    plt.savefig(options.output, format='pdf')
