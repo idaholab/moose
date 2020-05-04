@@ -42,7 +42,6 @@
     master = 100
     model = frictionless
     formulation = mortar
-    system = constraint
     c_normal = 1e4
     tangential_tolerance = .05
     normal_lm_scaling = 1e-3

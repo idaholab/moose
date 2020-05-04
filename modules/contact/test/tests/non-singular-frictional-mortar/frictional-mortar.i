@@ -98,7 +98,6 @@ refine = 1
 
     model = coulomb
     formulation = mortar
-    system = constraint
 
     friction_coefficient = 0.2
     c_tangential = 1e3
