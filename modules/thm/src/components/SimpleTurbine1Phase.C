@@ -80,7 +80,7 @@ SimpleTurbine1Phase::addMooseObjects()
 
   {
     const std::string nm = genName(name(), "W_dot_aux");
-    const std::string class_name = "TurbinePower1PhaseAux";
+    const std::string class_name = "SimpleTurbinePowerAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _W_dot_var_name;
     params.set<Real>("value") = _power;
