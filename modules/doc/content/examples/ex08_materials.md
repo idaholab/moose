@@ -6,16 +6,17 @@ every quadrature point. Kernels, Postprocessors, and other objects all have conv
 these properties.  This example demonstrates a convection-diffusion problem with kernels that
 utilize custom non-linear material properties.
 
+Refer to the [Materials/index.md] documentation for more information about the material system.
+
 ## Problem Statement
 
 This problem considers the same coupled system from [Example 3](examples/ex03_coupling.md):
 
-\begin{equation}
+!equation
 \begin{aligned}
 -\nabla \cdot \nabla u + \nabla\vec{v} \cdot \nabla u = 0 \\
 -\alpha \nabla \cdot \nabla v = 0
 \end{aligned}
-\end{equation}
 
 but with slightly different boundary conditions: $u=v=0$ on the bottom boundary and $u=5$ and
 $\nabla v=1$ on the top boundary. The remaining boundaries taking the natural boundary condition.
@@ -58,14 +59,14 @@ class/object.  To do this we to have special code in three places:
 
 - A member variable to store the material property value:
 
-  ``` 
+  ```
     const MaterialProperty<Real> & _diffusivity;
   ```
 
 - A line in our constructor to bind our material property member to the value that is computed by
   the actual Material object:
 
-  ``` 
+  ```
   ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters)
     : Diffusion(parameters), _diffusivity(getMaterialProperty<Real>("diffusivity"))
   {
@@ -123,4 +124,3 @@ mesh via the `block = '...'` lines. These objects will provide the "diffused" an
 - [examples/ex08_materials/src/kernels/ExampleDiffusion.C]
 - [examples/ex08_materials/include/kernels/ExampleConvection.h]
 - [examples/ex08_materials/src/kernels/ExampleConvection.C]
-
