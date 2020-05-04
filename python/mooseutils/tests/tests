@@ -51,4 +51,10 @@
     input = test_make_chunks.py
     requirement = "MOOSE python utilities shall include a tool for breaking a list of items into a specified number of chunks."
   []
+  [find_moose_executable]
+    type = PythonUnitTest
+    input = test_find_moose_executable.py
+    issues = "#15017"
+    requirement = "The system shall include a utility for locating a MOOSE-based application executable."
+  []
 []
