@@ -878,6 +878,15 @@ realpath(const std::string & path)
 #endif
 }
 
+BoundingBox
+buildBoundingBox(const Point & p1, const Point & p2)
+{
+  BoundingBox bb;
+  bb.union_with(p1);
+  bb.union_with(p2);
+  return bb;
+}
+
 } // MooseUtils namespace
 
 std::string
