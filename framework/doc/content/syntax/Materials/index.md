@@ -1,7 +1,7 @@
 # Materials System
 
 The material system is the primary mechanism for defining spatially varying properties. The system
-allows properties to be defined in single object (a `Material`) and shared among the many other
+allows properties to be defined in a single object (a `Material`) and shared among the many other
 systems such as the [Kernel](syntax/Kernels/index.md) or [BoundaryCondition](syntax/BCs/index.md)
 systems. Material objects are designed to directly couple to solution variables as well as other
 materials and therefore allow for capturing the true nonlinear behavior of the equations.
@@ -102,7 +102,7 @@ The name used in the get method, "diffusivity", in this case is not arbitrary. T
 with the name used to declare the property in the material object.
 
 !alert note title=The declare/get calls must correspond
-If a material properties is declared for automatic differentiation (AD) using `declareADProperty`
+If a material property is declared for automatic differentiation (AD) using `declareADProperty`
 then it +must+ be consumed with the `getADMaterialProperty`. The same is true for non-automatic
 differentiation; properties declared with `declareProperty` +must+ be consumed with the
 `getMaterialProperty` method.
@@ -110,9 +110,9 @@ differentiation; properties declared with `declareProperty` +must+ be consumed w
 
 ## Property Names id=property-names
 
-When creating a Material object and declaring the properties that shall be computed it is often
+When creating a Material object and declaring the properties that shall be computed, it is often
 desirable to allow for the property name to be changed via the input file. This may be accomplished
-by by adding an input parameter for assigning the name. For example, considering the example above
+by adding an input parameter for assigning the name. For example, considering the example above
 the following code snippet adds an input parameter, "diffusivity_name", that allows the input
 file to set the name of the diffusivity property, but by default the name remains "diffusivity".
 
@@ -148,7 +148,7 @@ fashion.
 ## Default Material Properties
 
 The [#material-name] input parameter also provides the ability to set default values for scalar
-(`Real`) properties. For example, in the above example the input file can use number or
+(`Real`) properties. In the above example, the input file can use number or
 parsed function (see [MooseParsedFunction.md]) to define a the property value. For example, the input
 snippet above could set a constant value.
 
