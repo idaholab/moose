@@ -1612,8 +1612,10 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
         _scalar_zero[tid].resize(FORTYTHIRD, 0);
         _zero[tid].resize(max_qpts, 0);
         _grad_zero[tid].resize(max_qpts, RealGradient(0.));
-        _grad_phi_zero[tid].resize(max_qpts, {0., 0., 0.});
-        _grad_test_zero[tid].resize(max_qpts, {0., 0., 0.});
+        _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                   std::vector<RealGradient>(max_qpts, RealGradient(0.)));
+        _grad_test_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                    std::vector<RealGradient>(max_qpts, RealGradient(0.)));
         _second_zero[tid].resize(max_qpts, RealTensor(0.));
         _second_phi_zero[tid].resize(
             max_qpts, std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
@@ -4591,8 +4593,10 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _zero[tid].resize(max_qpts, 0);
     _ad_zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
-    _grad_phi_zero[tid].resize(max_qpts, {0., 0., 0.});
-    _grad_test_zero[tid].resize(max_qpts, {0., 0., 0.});
+    _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                               std::vector<RealGradient>(max_qpts, RealGradient(0.)));
+    _grad_test_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                std::vector<RealGradient>(max_qpts, RealGradient(0.)));
     _ad_grad_zero[tid].resize(max_qpts, ADRealGradient(0));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
     _ad_second_zero[tid].resize(max_qpts, ADRealTensorValue(0));
