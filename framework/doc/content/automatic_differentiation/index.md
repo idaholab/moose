@@ -12,7 +12,7 @@ task, especially for physics that require complex material
 models. Instead of spending their time running simulations and generating results,
 physicists and engineers may sink days or weeks into constructing accurate
 Jacobians. Oftentimes, the developer will just throw up their hands and elect an
-approximate Jacobian method like PJFNK where the
+approximate Jacobian method like [!ac](PJFNK) where the
 Jacobian is never explicitly formed but instead its action on vectors is
 approximated using finite differences and an approximate
 preconditioning matrix is hand coded for
@@ -32,7 +32,7 @@ in another. The presence of truncation error and hence a non-linear operator is
 evident in a linear solve derived from porous flow equations
 coupled with heat transport:
 
-```
+```text
  0 KSP unpreconditioned resid norm 5.645573426379e+16 true resid norm 5.645573426379e+16 ||r(i)||/||b|| 1.000000000000e+00
  1 KSP unpreconditioned resid norm 2.965618482980e+12 true resid norm 2.965618483296e+12 ||r(i)||/||b|| 5.252997807874e-05
  2 KSP unpreconditioned resid norm 2.724648158452e+12 true resid norm 2.890172312561e+14 ||r(i)||/||b|| 5.119360061914e-03
@@ -43,17 +43,17 @@ coupled with heat transport:
  7 KSP unpreconditioned resid norm 2.079735227207e+11 true resid norm 6.050540886054e+21 ||r(i)||/||b|| 1.071731855932e+05
 ```
 
-While the unpreconditioned residual norm, produced through GMRES iterations,
+While the unpreconditioned residual norm, produced through [!ac](GMRES) iterations,
 drops by five orders of magnitude during the solve, the true residual norm
 computed via $\mathbf{A}\vec{x} - \vec{b}$ actually increases by five orders of
-magnitude. In MOOSE, a right preconditioned GMRES
+magnitude. In MOOSE, a right preconditioned [!ac](GMRES)
 is chosen by default, where the unpreconditioned residual mathematically equal to
 the actual residual if the preconditioning matrix is well-conditioned. The inconsistencies
 generated here are, partially, because of the inaccuracy of the preconditioning matrix.
 The net result of such bad linear solves is a diverging Newton's
-method since the computed Newton update is ``wrong":
+method since the computed Newton update is "wrong":
 
-```
+```text
 0 Nonlinear |R| = 1.138921e+06
 1 Nonlinear |R| = 1.392349e+11
 2 Nonlinear |R| = 2.881060e+10
@@ -67,7 +67,7 @@ Nonlinear solve did not converge due to DIVERGED_FNORM_NAN iterations 6
 If we instead form an explicit Jacobian and eschew finite differencing, Newton's
 method converges, albeit sub-quadratically since the hand-coded Jacobian is inaccurate:
 
-```
+```text
  0 Nonlinear |R| = 1.138921e+06
  1 Nonlinear |R| = 2.171654e+05
  2 Nonlinear |R| = 4.550729e+04
@@ -87,24 +87,25 @@ differencing approximations, there is clear motivation to form accurate explicit
 representations of the matrix. Note, even if a perfect Jacobian action can be
 achieved via the finite difference scheme, a suitable preconditioning matrix
 is required to construct a robust and efficient solver.
- Some users elect to use symbolic differentiation
+
+Some users elect to use symbolic differentiation
 packages like SymPy or
 Mathematica; however, for functions of any
 complexity the resulting gradient expressions can take up to several pages and
 can be quite difficult to translate from notebook to
 code. An alternative to numerical and symbolic
-differentiation is automatic differentiation, which applies the chain rule to
+differentiation is [!ac](AD), which applies the chain rule to
 elementary operations at every step of the computer program and which applies at
 most a small constant factor (estimated to
-have an upper bound of 5 by) of additional
+have an upper bound of 5) of additional
 arithmetic operations. Weighed against the untold number of developer hours
 sunk into attempting to create accurate hand-coded Jacobians and analyst hours
 spent waiting for problems with poor hand-coded or approximated Jacobians to
-converge, the small additional CPU cost imposed by AD seemed well worth
-the trade. With an accurate Jacobian formed using AD, the overall simulation
+converge, the small additional CPU cost imposed by [!ac](AD) seemed well worth
+the trade. With an accurate Jacobian formed using [!ac](AD), the overall simulation
  can be much faster than that utilizing a deficient hand-coded matrix.
 Having elected to pursue AD, there was a choice between forward
-and reverse modes. Forward mode AD is best suited for problems with many more
+and reverse modes. Forward mode [!ac](AD) is best suited for problems with many more
 outputs than inputs; reverse mode is best suited for many more inputs than
 outputs. The latter case is more prevalent in deep learning applications and is
 what is implemented in popular machine learning libraries like
@@ -118,9 +119,9 @@ which can be implemented either through source code transformation or operator
 overloading. The latter is more easily implemented in programming languages that
 support it such as C++, the language that MOOSE is written
 in. Conveniently, the C++ header-only library MetaPhysicL came
-ready-made with a `DualNumber`  template class and an operator-overload AD
+ready-made with a `DualNumber`  template class and an operator-overload [!ac](AD)
 implementation that fit into the MOOSE architecture with minimal
-disruption to the code-base. The AD capability of MetaPhysicL was
+disruption to the code-base. The [!ac](AD) capability of MetaPhysicL was
 merged into the MOOSE code-base in the fall of 2018.
 
 ## AD implementation - MetaPhysicL
@@ -195,7 +196,7 @@ non-sparse `NumberArray` container.
 
 ## AD in MOOSE
 
-As mentioned in above, MetaPhysicL is a forward-mode AD
+As mentioned in above, MetaPhysicL is a forward-mode [!ac](AD)
 package. For a finite element framework like MOOSE derivative seeding
 begins when constructing local finite element
 solutions. The finite element solution approximation is given by
@@ -212,8 +213,8 @@ variable class data member called `_ad_dof_values` where the `ad`
 prefix denotes automatic differentiation. We then seed a derivative
 value of $1$ (recognizing that $\frac{\partial u_i}{\partial u_j} = 1$ when
 $i = j$)  at a corresponding local dof index determined through a
-somewhat arbtirary numbering scheme. We choose a variable major numbering scheme
-such that the local degrees of freedom are in a continugous block for each
+somewhat arbitrary numbering scheme. We choose a variable major numbering scheme
+such that the local degrees of freedom are in a contiguous block for each
 variable, e.g. if we have two variables in the system, $u$ and $v$, then the
 numbering scheme for a `QUAD4` element with Lagrange basis would look like
 $u_0,u_1,u_2,u_3,v_0,v_1,v_2,v_3$ with subscripts corresponding to the local
@@ -225,7 +226,7 @@ point $(\xi,\eta) = (-.577, -.577)$, we know the corresponding Lagrange $\phi$ v
 $\phi_0=.622,\phi_1=.167,\phi_2=.0447,\phi_3=.167$, and we can check and verify
 whether our automatically differentiated solution `_ad_u` matches:
 
-```
+```text
 (lldb) p _ad_u[0]
 (MetaPhysicL::DualNumber<double, MetaPhysicL::SemiDynamicSparseNumberArray<double, unsigned int, MetaPhysicL::NWrapper<50> >, false>) $10 = {
   _val = 0
@@ -244,19 +245,19 @@ whether our automatically differentiated solution `_ad_u` matches:
             [7] = 3.9525251667299724E-323
 ```
 
-Note that some of the unused values in indices 4-7 appear to contain
-garbage. This is actaully desirable; it indicates that for the
+Note that some of the unused values in indices 4--7 appear to contain
+garbage. This is actually desirable; it indicates that for the
 `SemiDynamicSparseNumberArray` container, unnecessary components of the
 derivative vector are left uninitialized.
 
 We can also check variable coupling. Let us assume a reaction-type problem in
-which the variable $u$ disappears at a rate directly propotional to its
+which the variable $u$ disappears at a rate directly proportional to its
 concentration and appears at at rate directly proportional to the concentration
 of the variable $v$. The strong form of this residual is then simply
 $u - v$. Examining the derivatives of this term produced by automatic
 differentiation
 
-```
+```text
 (lldb) p strong_residual
 (MetaPhysicL::DualNumber<double, MetaPhysicL::SemiDynamicSparseNumberArray<double, unsigned int, MetaPhysicL::NWrapper<50> >, false>) $1 = {
   _val = 0
@@ -275,9 +276,9 @@ differentiation
             [7] = -0.16666666666666669
 ```
 
-we see exactly what we would expect: values 0-3 corresponding to the $u$
+we see exactly what we would expect: values 0--3 corresponding to the $u$
 indices are equivalent to that shown in the previous lldb output whereas the
-values in 4-7, corresponding to the $v$ indices, are equal to the negative of
+values in 4--7, corresponding to the $v$ indices, are equal to the negative of
 that shown in the previous lldb output. In general, the quality of automatic
 differention results are verified with unit testing in MetaPhysicL and using a
 `PetscJacobianTester` in MOOSE which compares the Jacobian produced
@@ -296,8 +297,8 @@ override `precomputeQpResidual`. To couple in AD variables, the application
 developer should use methods like `adCoupledValue, adCoupledGradient,
 adCoupledSecond` etc. inherited through the [`Coupleable`](/Coupleable.md)
 interface. Material properties with automatic differentiation info can be
-created in `Material` classes by using the `declareADProperty` API. AD material
+created in `Material` classes by using the `declareADProperty` API. [!ac](AD) material
 properties can be retrieved in compute objects like `ADKernels` by using the
-`getADMaterialProperty` API. For detailed examples of AD use, the reader is
+`getADMaterialProperty` API. For detailed examples of [!ac](AD) use, the reader is
 encouraged to investigate the tensor mechanics, navier-stokes, and level-set
-modules, all of which heavily leverage MOOSE's AD capabilities.
+modules, all of which heavily leverage MOOSE's [!ac](AD) capabilities.

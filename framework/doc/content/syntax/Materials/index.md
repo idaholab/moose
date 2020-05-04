@@ -66,7 +66,7 @@ sense).
 !listing ex08_materials/include/materials/ExampleMaterial.h line=computeQpProperties
 
 In the source file the method is defined. For the current example this definition computes the
-"diffusivity" as well another term, refer to [ex08_materials.md].
+"diffusivity" as well another term, refer to [ex08_materials.md optional=True].
 
 !listing ex08_materials/src/materials/ExampleMaterial.C start=ExampleMaterial::computeQpProperties
 
