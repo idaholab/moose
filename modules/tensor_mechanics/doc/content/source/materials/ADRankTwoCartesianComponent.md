@@ -1,4 +1,4 @@
-# Rank Two Tensor Component
+# ADRank Two Tensor Component
 
 !syntax description /Materials/ADRankTwoCartesianComponent
 

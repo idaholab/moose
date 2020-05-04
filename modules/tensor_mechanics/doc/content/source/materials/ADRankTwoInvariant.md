@@ -1,4 +1,4 @@
-# Rank Two Invariant
+# ADRank Two Invariant
 
 !syntax description /Materials/ADRankTwoInvariant
 

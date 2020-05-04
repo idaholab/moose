@@ -1,4 +1,4 @@
-# Rank Two Directional Component
+# ADRank Two Directional Component
 
 !syntax description /Materials/ADRankTwoDirectionalComponent
 

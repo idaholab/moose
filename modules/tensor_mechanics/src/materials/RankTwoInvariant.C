@@ -10,10 +10,14 @@
 #include "RankTwoInvariant.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoInvariant);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("TensorMechanicsApp", RankTwoInvariant);
+registerMooseObject("TensorMechanicsApp", ADRankTwoInvariant);
+
+template <bool is_ad>
 InputParameters
-RankTwoInvariant::validParams()
+RankTwoInvariantTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Compute a invariant property of a RankTwoTensor");
@@ -27,32 +31,40 @@ RankTwoInvariant::validParams()
   return params;
 }
 
-RankTwoInvariant::RankTwoInvariant(const InputParameters & parameters)
+template <bool is_ad>
+RankTwoInvariantTempl<is_ad>::RankTwoInvariantTempl(const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
+    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property(declareGenericProperty<Real, is_ad>(_property_name)),
     _invariant(getParam<MooseEnum>("invariant"))
 {
 }
 
+template <bool is_ad>
 void
-RankTwoInvariant::initQpStatefulProperties()
+RankTwoInvariantTempl<is_ad>::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-RankTwoInvariant::computeQpProperties()
+RankTwoInvariantTempl<is_ad>::computeQpProperties()
 {
   if (_property_name == "max_principal_stress" || _property_name == "mid_principal_stress" ||
       _property_name == "min_principal_stress")
   {
     Point dummy_direction;
-    _property[_qp] =
-        RankTwoScalarTools::getPrincipalComponent(_tensor[_qp], _invariant, dummy_direction);
+    _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
+        MetaPhysicL::raw_value(_tensor[_qp]), _invariant, dummy_direction);
   }
   if (_property_name != "max_principal_stress" && _property_name != "mid_principal_stress" &&
       _property_name != "min_principal_stress")
-    _property[_qp] = RankTwoScalarTools::getInvariantComponent(_tensor[_qp], _invariant);
+    _property[_qp] =
+        RankTwoScalarTools::getInvariant(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
 }
+
+template class RankTwoInvariantTempl<false>;
+template class RankTwoInvariantTempl<true>;

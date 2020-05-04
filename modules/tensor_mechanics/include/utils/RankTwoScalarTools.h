@@ -519,7 +519,7 @@ getDirectionalComponent(const RankTwoTensorTempl<T> & tensor, const Point & dire
 
 template <typename T>
 T
-getInvariantComponent(const RankTwoTensorTempl<T> & tensor, const MooseEnum & scalar_type)
+getInvariant(const RankTwoTensorTempl<T> & tensor, const MooseEnum & scalar_type)
 {
   if (scalar_type == "VonMisesStress")
     return vonMisesStress(tensor);

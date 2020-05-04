@@ -1,4 +1,4 @@
-# Rank Two Cylindrical Component
+# ADRank Two Cylindrical Component
 
 !syntax description /Materials/ADRankTwoCylindricalComponent
 
@@ -12,7 +12,7 @@ This ADMaterial model is set up by
 [TensorMechanics/Master](/Modules/TensorMechanics/Master/index.md) automatically
 when stress components are requested in the generate_output parameter, but can
 also be set up directly by the user.  This class provides
-the ability to compute hoop, radial, and axial ($\boldsymbol{\sigma}$) and
+the ability to compute hoop, radial, and axial stress ($\boldsymbol{\sigma}$) and
 strain ($\boldsymbol{\epsilon}$)quantities for a Rank-2 tensor, as described in
 [RankTwoScalarTools](RankTwoScalarTools.md).  
 

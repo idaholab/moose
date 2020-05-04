@@ -13,25 +13,29 @@
 #include "RankTwoTensor.h"
 
 /// RankTwoDirectionalComponent computes the component of a rank-2 tensor in specified direction
-class RankTwoDirectionalComponent : public Material
+template <bool is_ad>
+class RankTwoDirectionalComponentTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoDirectionalComponent(const InputParameters & parameters);
+  RankTwoDirectionalComponentTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  GenericMaterialProperty<Real, is_ad> & _property;
 
   /// The direction vector in which the scalar stress value is calculated
   const Point _direction;
 };
+
+typedef RankTwoDirectionalComponentTempl<false> RankTwoDirectionalComponent;
+typedef RankTwoDirectionalComponentTempl<true> ADRankTwoDirectionalComponent;
