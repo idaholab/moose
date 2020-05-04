@@ -1,5 +1,7 @@
 # RinglebMeshGenerator
 
+!syntax description /MeshGenerators/RinglebMeshGenerator
+
 ## Overview
 
 This mesh can be applied to a Ringleb problem. This problem tests the spatial accuracy of high-order methods. The flow is transonic and smooth. The geometry is also smooth, and high-order curved boundary representation appears to be critical.
@@ -22,7 +24,7 @@ x(q,k) = \frac{1}{2\rho}\left( \frac{2}{k^2}-\frac{1}{q^2} \right) - \frac{J}{2}
 y(q,k) = \pm \frac{1}{k \rho q} \sqrt{1-\frac{q^2}{k^2}}
 \end{equation*}
 
-## Mesh Overlook
+## Mesh Example
 
 For example, let's consider the following input file:
 
@@ -45,8 +47,6 @@ The corresponding mesh looks like this:
 
 !media large_media/ringleb_mesh/ringleb_mesh.png
        style=width:50%;
-
-## Further RinglebMeshGenerator Documentation
 
 !syntax parameters /MeshGenerators/RinglebMeshGenerator
 

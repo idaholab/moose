@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<SideSetsFromBoundingBoxGenerator>();
 
 /**
- * MeshGenerator for defining a Subdomain inside or outside of a bounding box
+ * MeshGenerator for defining sidesets inside or outside of a bounding box
  */
 class SideSetsFromBoundingBoxGenerator : public MeshGenerator
 {
@@ -52,4 +52,3 @@ protected:
   /// Flag to determine if the provided boundaries need to overlap
   const bool _boundary_id_overlap;
 };
-

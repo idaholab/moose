@@ -54,7 +54,7 @@ TiledMeshGenerator::validParams()
       "z_tiles", 1, "Number of tiles to stitch together (front to back) in the z-direction");
 
   params.addClassDescription("Use the supplied mesh and create a tiled grid by repeating this mesh "
-                             "in the x,y, and z directions.");
+                             "in the x, y, and z directions.");
 
   return params;
 }

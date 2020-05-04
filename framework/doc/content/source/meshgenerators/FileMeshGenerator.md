@@ -1,6 +1,8 @@
 # FileMeshGenerator
 
-## Support File Formats
+!syntax description /MeshGenerators/FileMeshGenerator
+
+## Supported File Formats
 
 The `FileMeshGenerator` is the default type for MOOSE and as the name suggests it reads the mesh from an external file. MOOSE
 supports reading and writing a large number of formats and could be extended to read more.
@@ -23,7 +25,7 @@ supports reading and writing a large number of formats and could be extended to 
 | .xda, .xdr  | libMesh formats |
 | .vtk, .pvtu | Visualization Toolkit |
 
-When reading a mesh file in Sandia's ExodusII format, users can use parameter *exodus_extra_element_integers* to load elemental variables for setting extra element integers of the mesh.
+When reading a mesh file in Sandia's ExodusII format, users can use parameter `exodus_extra_element_integers` to load elemental variables for setting extra element integers of the mesh.
 The names of the extra element integers will be the same as the names of the element variables in the mesh file.
 
 ## Further FileMeshGenerator Documentation

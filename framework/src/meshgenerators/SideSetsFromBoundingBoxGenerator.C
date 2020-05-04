@@ -28,12 +28,8 @@ SideSetsFromBoundingBoxGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addClassDescription("Find sidesets with given boundary ids in bounding box and add new "
-                             "boundary id. This can be done by finding all required boundary "
-                             "and adding the new boundary id to those sidesets. Alternatively, "
-                             "a number of boundary ids can be provided and all nodes within the "
-                             "bounding box that have all the required boundary ids will have a new"
-                             "boundary id added.");
+  params.addClassDescription("Defines new sidesets using currently-defined sideset IDs inside or "
+                             "outside of a bounding box.");
 
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 

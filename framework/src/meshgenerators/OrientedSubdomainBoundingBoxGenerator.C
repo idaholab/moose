@@ -29,6 +29,8 @@ OrientedSubdomainBoundingBoxGenerator::validParams()
       "block_id", "Subdomain id to set for inside/outside the bounding box");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
+  params.addClassDescription(
+      "Defines a subdomain inside or outside of a bounding box with arbitrary orientation.");
 
   return params;
 }

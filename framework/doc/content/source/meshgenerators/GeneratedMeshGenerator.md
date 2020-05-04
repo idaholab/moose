@@ -1,6 +1,8 @@
 # GeneratedMeshGenerator
 
-## Description
+!syntax description /MeshGenerators/GeneratedMeshGenerator
+
+## Overview
 
 The `GeneratedMeshGenerator` object is the built-in mesh generation capable of creating lines, rectangles, and rectangular
 prisms ("boxes"). The mesh automatically creates side sets that are logically named and numbered as follows:
@@ -11,8 +13,6 @@ prisms ("boxes"). The mesh automatically creates side sets that are logically na
 
 The length, width, and height of the domain, as well as the number of elements in each direction can be specified
 independently.
-
-## Further GeneratedMeshGenerator Documentation
 
 !syntax parameters /MeshGenerators/GeneratedMeshGenerator
 

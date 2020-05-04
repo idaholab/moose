@@ -2,6 +2,8 @@
 
 !syntax description /MeshGenerators/RenameBlockGenerator
 
+## Overview
+
 `RenameBlockGenerator` is usually used to provide meaningful names to blocks so that input files are easier to
 read.  For instance
 
@@ -42,14 +44,12 @@ the block ID of new1 is the block ID of oldA.
 Secondly, in the example above, what if block 4 already existed?  An inconsistency could arise in the
 input file, because block 4 is now given the name of the old block 1.
 
-Thirdly, in this example `old_block_id = '1 2'` and `new_block_name = 'wheel wheel'`
-
-what if another block, with a different ID, already had the name
-"wheel"?  This can lead to great confusion in the MOOSE input file.
+Thirdly, in this example `old_block_id = '1 2'` and `new_block_name = 'wheel wheel'`. What if another
+block, with a different ID, already had the name "wheel"?  This can lead to great confusion in the MOOSE input file.
 
 !alert note
 Given all these potential problems, when merging blocks it is strongly recommended to use just
-**one** `RenameBlock` that includes the names or IDs of **all** the blocks involved in the merging.
+*one* `RenameBlock` that includes the names or IDs of *all* the blocks involved in the merging.
 This will make the new block IDs and new block names unequivocally obvious.
 
 !syntax parameters /MeshGenerators/RenameBlockGenerator

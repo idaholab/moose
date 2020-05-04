@@ -28,7 +28,7 @@ FileMeshGenerator::validParams()
   params.addParam<std::vector<std::string>>(
       "exodus_extra_element_integers",
       "The variable names in the mesh file for loading extra element integers");
-
+  params.addClassDescription("Read a mesh from a file.");
   return params;
 }
 

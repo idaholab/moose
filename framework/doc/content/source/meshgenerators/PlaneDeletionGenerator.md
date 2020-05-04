@@ -2,7 +2,7 @@
 
 !syntax description /MeshGenerators/PlaneDeletionGenerator
 
-## Description
+## Overview
 
 Allows for deletion of elements that lie on one side of a plane.  The plane can be specified via a point and a vector that is normal to the plane.  All elements whose centroids lie "above" (in the direction of the normal vector) the plane will be removed from the mesh.
 
@@ -43,5 +43,3 @@ An optional `new_boundary` parameter can also be specified which will make any n
 !syntax inputs /MeshGenerators/PlaneDeletionGenerator
 
 !syntax children /MeshGenerators/PlaneDeletionGenerator
-
-!bibtex bibliography

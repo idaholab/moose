@@ -2,7 +2,7 @@
 
 !syntax description /MeshGenerators/CartesianMeshGenerator
 
-## Description
+## Overview
 
 The `CartesianMeshGenerator` object is the built-in mesh generation capable of creating lines, rectangles, and hexahedra ("boxes").
 The mesh spacing can be non-uniform and each line/rectangle/hexahedron can be assigned a separate subdomain id.

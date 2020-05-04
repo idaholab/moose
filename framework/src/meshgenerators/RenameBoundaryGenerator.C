@@ -50,10 +50,10 @@ RenameBoundaryGenerator::validParams()
       "given the same name, in which case they are all given the first old boundary "
       "number.");
   params.addClassDescription(
-      "RenameBoundaryGenerator re-numbers or re-names an old_boundary_id or old_boundary_name "
-      "with a new_boundary_id or new_boundary_name.  If using RenameBoundaryGenerator to "
+      "RenameBoundaryGenerator re-numbers or re-names an `old_boundary_id` or `old_boundary_name` "
+      "with a `new_boundary_id` or `new_boundary_name`.  If using RenameBoundaryGenerator to "
       "merge boundaries (by giving them the same name, for instance) it is "
-      "advisable to specify all your boundaries in old_boundaries to avoid inconsistencies");
+      "advisable to specify all your boundaries in `old_boundaries` to avoid inconsistencies");
 
   return params;
 }

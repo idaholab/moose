@@ -36,6 +36,8 @@ StitchedMeshGenerator::validParams()
       "algorithm",
       algorithm,
       "Control the use of binary search for the nodes of the stitched surfaces.");
+  params.addClassDescription(
+      "Allows multiple mesh files to be stiched together to form a single mesh.");
 
   return params;
 }

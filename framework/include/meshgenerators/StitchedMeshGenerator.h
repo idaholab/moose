@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<StitchedMeshGenerator>();
 
 /**
- * Generates individual elements given a list of nodal positions
+ * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
 class StitchedMeshGenerator : public MeshGenerator
 {
@@ -50,4 +50,3 @@ protected:
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
   MooseEnum _algorithm;
 };
-
