@@ -10,49 +10,57 @@
 #include "SideFluxAverage.h"
 
 registerMooseObject("MooseApp", SideFluxAverage);
+registerMooseObject("MooseApp", ADSideFluxAverage);
 
-defineLegacyParams(SideFluxAverage);
-
+template <bool is_ad>
 InputParameters
-SideFluxAverage::validParams()
+SideFluxAverageTempl<is_ad>::validParams()
 {
-  InputParameters params = SideFluxIntegral::validParams();
+  InputParameters params = SideFluxIntegralTempl<is_ad>::validParams();
   return params;
 }
 
-SideFluxAverage::SideFluxAverage(const InputParameters & parameters)
-  : SideFluxIntegral(parameters), _volume(0)
+template <bool is_ad>
+SideFluxAverageTempl<is_ad>::SideFluxAverageTempl(const InputParameters & parameters)
+  : SideFluxIntegralTempl<is_ad>(parameters), _volume(0)
 {
 }
 
+template <bool is_ad>
 void
-SideFluxAverage::initialize()
+SideFluxAverageTempl<is_ad>::initialize()
 {
-  SideIntegralVariablePostprocessor::initialize();
+  SideFluxIntegralTempl<is_ad>::initialize();
   _volume = 0;
 }
 
+template <bool is_ad>
 void
-SideFluxAverage::execute()
+SideFluxAverageTempl<is_ad>::execute()
 {
-  SideIntegralVariablePostprocessor::execute();
-  _volume += _current_side_volume;
+  SideFluxIntegralTempl<is_ad>::execute();
+  _volume += this->_current_side_volume;
 }
 
+template <bool is_ad>
 Real
-SideFluxAverage::getValue()
+SideFluxAverageTempl<is_ad>::getValue()
 {
-  Real integral = SideIntegralVariablePostprocessor::getValue();
+  Real integral = SideFluxIntegralTempl<is_ad>::getValue();
 
-  gatherSum(_volume);
+  this->gatherSum(_volume);
 
   return integral / _volume;
 }
 
+template <bool is_ad>
 void
-SideFluxAverage::threadJoin(const UserObject & y)
+SideFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  SideIntegralVariablePostprocessor::threadJoin(y);
-  const SideFluxAverage & pps = static_cast<const SideFluxAverage &>(y);
+  SideFluxIntegralTempl<is_ad>::threadJoin(y);
+  const SideFluxAverageTempl & pps = static_cast<const SideFluxAverageTempl &>(y);
   _volume += pps._volume;
 }
+
+template class SideFluxAverageTempl<false>;
+template class SideFluxAverageTempl<true>;
