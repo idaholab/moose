@@ -1,9 +1,9 @@
-#include "TurbinePower1PhaseAux.h"
+#include "SimpleTurbinePowerAux.h"
 
-registerMooseObject("THMApp", TurbinePower1PhaseAux);
+registerMooseObject("THMApp", SimpleTurbinePowerAux);
 
 InputParameters
-TurbinePower1PhaseAux::validParams()
+SimpleTurbinePowerAux::validParams()
 {
   InputParameters params = ConstantScalarAux::validParams();
   params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not");
@@ -12,13 +12,13 @@ TurbinePower1PhaseAux::validParams()
   return params;
 }
 
-TurbinePower1PhaseAux::TurbinePower1PhaseAux(const InputParameters & parameters)
+SimpleTurbinePowerAux::SimpleTurbinePowerAux(const InputParameters & parameters)
   : ConstantScalarAux(parameters), _on(getParam<bool>("on"))
 {
 }
 
 Real
-TurbinePower1PhaseAux::computeValue()
+SimpleTurbinePowerAux::computeValue()
 {
   if (_on)
     return _value;
