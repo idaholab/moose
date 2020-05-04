@@ -7,10 +7,10 @@ class SinglePhaseFluidProperties;
 /**
  * Computes turbine power for 1-phase flow
  */
-class TurbinePower1PhaseAux : public ConstantScalarAux
+class SimpleTurbinePowerAux : public ConstantScalarAux
 {
 public:
-  TurbinePower1PhaseAux(const InputParameters & parameters);
+  SimpleTurbinePowerAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
