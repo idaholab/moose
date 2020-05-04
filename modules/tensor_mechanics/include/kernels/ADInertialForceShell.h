@@ -68,7 +68,7 @@ private:
   std::vector<unsigned int> _rot_accel_num;
 
   /**
-   * Rotational transformation from global to initial beam local
+   * Rotational transformation from global to initial shell local
    * coordinate system
    */
   ADRankTwoTensor _original_local_config;
@@ -95,17 +95,16 @@ private:
   PosRotVectors _local_accel;
 
   /**
-   * Forces and moments at the two end nodes of the beam in the initial
-   * beam local configuration
+   * Forces and moments at the four nodes in the initial
+   * local configuration
    */
-  std::vector<ADRealVectorValue> _local_force, _local_moment;
+  std::array<ADRealVectorValue, 4> _local_force, _local_moment;
 
   /**
-   * Forces and moments at the two end nodes of the beam in the global
+   * Forces and moments at the four nodes in the global
    * coordinate system
    */
-  ADRealVectorValue _global_force_0, _global_force_1, _global_moment_0, _global_moment_1;
-  ADRealVectorValue _global_force_2, _global_force_3, _global_moment_2, _global_moment_3;
+  std::array<ADRealVectorValue, 4> _global_force, _global_moment;
 
   /// Derivatives of shape functions w.r.t isoparametric coordinates xi
   std::vector<std::vector<Real>> _dphidxi_map;

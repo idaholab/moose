@@ -25,24 +25,14 @@
 
 [Variables]
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./rot_x]
-    order = FIRST
-    family = LAGRANGE
   [../]
   [./rot_y]
-    order = FIRST
-    family = LAGRANGE
   [../]
 []
 
@@ -58,44 +48,24 @@
 
   # aux variables for dynamics
   [./vel_x]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./vel_y]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./vel_z]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./accel_x]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./accel_y]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./accel_z]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./rot_vel_x]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./rot_vel_y]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./rot_accel_x]
-  order = FIRST
-  family = LAGRANGE
   [../]
   [./rot_accel_y]
-  order = FIRST
-  family = LAGRANGE
   [../]
 []
 

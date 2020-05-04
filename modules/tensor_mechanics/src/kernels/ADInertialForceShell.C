@@ -83,8 +83,6 @@ ADInertialForceShell::ADInertialForceShell(const InputParameters & parameters)
     _rot_vel_num(_nrot),
     _rot_accel_num(_nrot),
     _component(getParam<unsigned int>("component")),
-    _local_force(4),
-    _local_moment(4),
     _nodes(4),
     _v1(4),
     _v2(4),
@@ -132,27 +130,27 @@ ADInertialForceShell::computeResidual()
 
     if (_component < 3)
     {
-      _global_force_0 = _thickness * _original_local_config.transpose() * _local_force[0];
-      _global_force_1 = _thickness * _original_local_config.transpose() * _local_force[1];
-      _global_force_2 = _thickness * _original_local_config.transpose() * _local_force[2];
-      _global_force_3 = _thickness * _original_local_config.transpose() * _local_force[3];
+      _global_force[0] = _thickness * _original_local_config.transpose() * _local_force[0];
+      _global_force[1] = _thickness * _original_local_config.transpose() * _local_force[1];
+      _global_force[2] = _thickness * _original_local_config.transpose() * _local_force[2];
+      _global_force[3] = _thickness * _original_local_config.transpose() * _local_force[3];
 
-      _local_re(0) = raw_value(_global_force_0(_component));
-      _local_re(1) = raw_value(_global_force_1(_component));
-      _local_re(2) = raw_value(_global_force_2(_component));
-      _local_re(3) = raw_value(_global_force_3(_component));
+      _local_re(0) = raw_value(_global_force[0](_component));
+      _local_re(1) = raw_value(_global_force[1](_component));
+      _local_re(2) = raw_value(_global_force[2](_component));
+      _local_re(3) = raw_value(_global_force[3](_component));
     }
     else
     {
-      _global_moment_0 = _original_local_config.transpose() * _local_moment[0];
-      _global_moment_1 = _original_local_config.transpose() * _local_moment[1];
-      _global_moment_2 = _original_local_config.transpose() * _local_moment[2];
-      _global_moment_3 = _original_local_config.transpose() * _local_moment[3];
+      _global_moment[0] = _original_local_config.transpose() * _local_moment[0];
+      _global_moment[1] = _original_local_config.transpose() * _local_moment[1];
+      _global_moment[2] = _original_local_config.transpose() * _local_moment[2];
+      _global_moment[3] = _original_local_config.transpose() * _local_moment[3];
 
-      _local_re(0) = raw_value(_global_moment_0(_component - 3));
-      _local_re(1) = raw_value(_global_moment_1(_component - 3));
-      _local_re(2) = raw_value(_global_moment_2(_component - 3));
-      _local_re(3) = raw_value(_global_moment_3(_component - 3));
+      _local_re(0) = raw_value(_global_moment[0](_component - 3));
+      _local_re(1) = raw_value(_global_moment[1](_component - 3));
+      _local_re(2) = raw_value(_global_moment[2](_component - 3));
+      _local_re(3) = raw_value(_global_moment[3](_component - 3));
     }
   }
 
@@ -175,27 +173,27 @@ ADInertialForceShell::computeResidualForJacobian(ADDenseVector & residual)
 
     if (_component < 3)
     {
-      _global_force_0 = _thickness * _original_local_config.transpose() * _local_force[0];
-      _global_force_1 = _thickness * _original_local_config.transpose() * _local_force[1];
-      _global_force_2 = _thickness * _original_local_config.transpose() * _local_force[2];
-      _global_force_3 = _thickness * _original_local_config.transpose() * _local_force[3];
+      _global_force[0] = _thickness * _original_local_config.transpose() * _local_force[0];
+      _global_force[1] = _thickness * _original_local_config.transpose() * _local_force[1];
+      _global_force[2] = _thickness * _original_local_config.transpose() * _local_force[2];
+      _global_force[3] = _thickness * _original_local_config.transpose() * _local_force[3];
 
-      residual(0) = _global_force_0(_component);
-      residual(1) = _global_force_1(_component);
-      residual(2) = _global_force_2(_component);
-      residual(3) = _global_force_3(_component);
+      residual(0) = _global_force[0](_component);
+      residual(1) = _global_force[1](_component);
+      residual(2) = _global_force[2](_component);
+      residual(3) = _global_force[3](_component);
     }
     else
     {
-      _global_moment_0 = _original_local_config.transpose() * _local_moment[0];
-      _global_moment_1 = _original_local_config.transpose() * _local_moment[1];
-      _global_moment_2 = _original_local_config.transpose() * _local_moment[2];
-      _global_moment_3 = _original_local_config.transpose() * _local_moment[3];
+      _global_moment[0] = _original_local_config.transpose() * _local_moment[0];
+      _global_moment[1] = _original_local_config.transpose() * _local_moment[1];
+      _global_moment[2] = _original_local_config.transpose() * _local_moment[2];
+      _global_moment[3] = _original_local_config.transpose() * _local_moment[3];
 
-      residual(0) = _global_moment_0(_component - 3);
-      residual(1) = _global_moment_1(_component - 3);
-      residual(2) = _global_moment_2(_component - 3);
-      residual(3) = _global_moment_3(_component - 3);
+      residual(0) = _global_moment[0](_component - 3);
+      residual(1) = _global_moment[1](_component - 3);
+      residual(2) = _global_moment[2](_component - 3);
+      residual(3) = _global_moment[3](_component - 3);
     }
   }
 }
