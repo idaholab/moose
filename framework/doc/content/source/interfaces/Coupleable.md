@@ -12,7 +12,7 @@ adCoupledValue | Values of a coupled variable in q-points with automatic differe
 adCoupledGradient | Gradients of a coupled variable in q-points with automatic differentiation info
 adCoupledSecond | Second derivatives of a coupled variable in q-points with automatic differentiation info
 coupledNodalValue | Values of a coupled variable at nodes.
-adCupledNodalValue | Values of a coupled (vector) variable at nodes with automatic differentiation info
+adCoupledNodalValue | Values of a coupled (vector) variable at nodes with automatic differentiation info
 coupledVectorValue | Values of a coupled vector variable in q-points
 adCoupledVectorValue | Values of a coupled vector variable in q-points with automatic differentiation info
 coupledCurl | Curl of a coupled vector variable in q-points
