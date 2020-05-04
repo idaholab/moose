@@ -214,4 +214,10 @@
     requirement = "TestHarness shall be able to run tests in relative path directories supplied by the spec file"
     issues = '#14962'
   [../]
+  [unknown_param]
+    type = PythonUnitTest
+    input = test_UnknownParam.py
+    requirement = "The system shall produces a descriptive error with the file and line number when a test specification parameter is unknown."
+    issues = '#14803'
+  []
 []

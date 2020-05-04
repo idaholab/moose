@@ -1,0 +1,7 @@
+[Tests]
+  [foo]
+    type = RunApp
+    input = foo.i
+    not_a_parameter = true
+  []
+[]
