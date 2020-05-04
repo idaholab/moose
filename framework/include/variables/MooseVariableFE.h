@@ -302,30 +302,33 @@ public:
   {
     return _element_data->adSln();
   }
-  const ADTemplateVariableGradient<OutputType> & adGradSln() const
+  const ADTemplateVariableGradient<OutputType> & adGradSln() const override
   {
     return _element_data->adGradSln();
   }
-  const ADTemplateVariableSecond<OutputType> & adSecondSln() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
     return _element_data->adSecondSln();
   }
-  const ADTemplateVariableValue<OutputType> & adUDot() const { return _element_data->adUDot(); }
+  const ADTemplateVariableValue<OutputType> & adUDot() const override
+  {
+    return _element_data->adUDot();
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
   {
     return _neighbor_data->adSln();
   }
-  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const
+  const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const override
   {
     return _neighbor_data->adGradSln();
   }
-  const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const
+  const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const override
   {
     return _neighbor_data->adSecondSln();
   }
-  const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const
+  const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const override
   {
     return _neighbor_data->adUDot();
   }

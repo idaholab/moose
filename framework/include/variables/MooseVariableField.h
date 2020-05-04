@@ -94,4 +94,34 @@ public:
    * AD neighbor solution getter
    */
   virtual const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const = 0;
+
+  /**
+   * AD grad solution getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSln() const = 0;
+
+  /**
+   * AD grad neighbor solution getter
+   */
+  virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const = 0;
+
+  /**
+   * AD second solution getter
+   */
+  virtual const ADTemplateVariableSecond<OutputType> & adSecondSln() const = 0;
+
+  /**
+   * AD second neighbor solution getter
+   */
+  virtual const ADTemplateVariableSecond<OutputType> & adSecondSlnNeighbor() const = 0;
+
+  /**
+   * AD time derivative getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adUDot() const = 0;
+
+  /**
+   * AD neighbor time derivative getter
+   */
+  virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const = 0;
 };

@@ -144,17 +144,6 @@ protected:
   const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
-   * Returns value of a coupled variable for use in Automatic Differentiation
-   * @tparam T The type of the moose variable
-   * @param moose_var The coupled moose variable
-   * @param var_name The name of the \p moose_var. Used to retrieve default values if no coupled is
-   * actually found
-   * @return Reference to a ADVariableValue for the coupled variable
-   */
-  template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type = 0>
-  const ADVariableValue & adCoupledValue(const T * moose_var, const std::string & var_name);
-
-  /**
    * Returns value of a coupled vector variable for use in Automatic Differentiation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled variables
@@ -951,6 +940,7 @@ private:
   {
     Ignore,
     Gradient,
+    Second,
     GradientDot,
     Dot,
   };
@@ -1117,24 +1107,6 @@ private:
 private:
   const MooseObject * _obj;
 };
-
-template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
-const ADVariableValue &
-Coupleable::adCoupledValue(const T * moose_var, const std::string & var_name)
-{
-  if (!moose_var)
-    return *getADDefaultValue(var_name);
-  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
-
-  if (_c_nodal)
-    mooseError("Not implemented");
-  if (!_c_is_implicit)
-    mooseError("Not implemented");
-
-  if (!_coupleable_neighbor)
-    return moose_var->adSln();
-  return moose_var->adSlnNeighbor();
-}
 
 template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
 T *

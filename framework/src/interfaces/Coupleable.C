@@ -1127,7 +1127,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSln() : var->secondSlnOlder();
@@ -1140,7 +1140,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
+  checkFuncType(var_name, VarType::Second, FuncAge::Old);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
@@ -1153,7 +1153,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
+  checkFuncType(var_name, VarType::Second, FuncAge::Older);
 
   if (!_coupleable_neighbor)
     return var->secondSlnOlder();
@@ -1167,7 +1167,7 @@ Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int c
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
     return var->secondSlnPreviousNL();
@@ -1385,13 +1385,25 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 {
   MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
-  return adCoupledValue(var, var_name);
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_c_nodal)
+    mooseError("Not implemented");
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adSln();
+  return var->adSlnNeighbor();
 }
 
 const ADVariableGradient &
 Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return getADDefaultGradient();
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1407,10 +1419,11 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
 const ADVariableSecond &
 Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return getADDefaultSecond();
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_c_is_implicit)
     mooseError("Not implemented");
@@ -1431,7 +1444,8 @@ adCoupledVectorSecond(const std::string & /*var_name*/, unsigned int /*comp = 0*
 const ADVariableValue &
 Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);

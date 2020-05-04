@@ -537,6 +537,10 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     _ad_grad_u.resize(nqp);
   if (_need_ad_u_dot)
     _ad_u_dot.resize(nqp);
+  if (_need_ad_second_u)
+    _ad_second_u.resize(nqp);
+  if (_need_ad_u_dot)
+    _ad_u_dot.resize(nqp);
 
   if (bcs.size() > 0)
   {
@@ -562,7 +566,11 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     if (_need_ad_u)
       _ad_u[0] = u_ghost;
     _u[0] = u_ghost.value();
-    // TODO: figure out how to set AD u_dot, and other values
+
+    if (_need_ad_u_dot)
+      // The partial derivative with respect to time is the same as for u_other except with a
+      // negative sign. (See the u_ghost formula above)
+      _ad_u_dot[0] = -other_face.adUDot()[0];
   }
   else
   {
@@ -581,9 +589,19 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     if (_need_ad_u)
       _ad_u[0] = u_other;
     _u[0] = u_other.value();
+
+    if (_need_ad_u_dot)
+      // Since we are simply tracking the other face's value, the time derivative is also the same
+      _ad_u_dot[0] = other_face.adUDot()[0];
   }
 
-  // TODO: what do we do for _grad_u?
+  // At this point we're only doing const monomials and we're no doing reconstruction, so any
+  // spatial derivatives are zero. We need to explicitly assign here to ensure that the values and
+  // DualNumber derivatives are properly initialized
+  if (_need_ad_grad_u)
+    _ad_grad_u[0] = 0;
+  if (_need_ad_second_u)
+    _ad_second_u[0] = 0;
 }
 
 template <typename OutputType>
@@ -749,6 +767,9 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
   if (_need_ad_grad_u)
     _ad_grad_u.resize(nqp);
 
+  if (_need_ad_second_u)
+    _ad_second_u.resize(nqp);
+
   if (_need_ad_u_dot)
   {
     _ad_dofs_dot.resize(num_dofs);
@@ -792,6 +813,9 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
   if (_need_ad_grad_u)
     _ad_grad_u[0] = _ad_zero;
 
+  if (_need_ad_second_u)
+    _ad_second_u[0] = 0;
+
   if (_need_ad_u_dot)
     _ad_u_dot[0] = _ad_zero;
 
@@ -812,9 +836,6 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
 
   if (_need_ad_u)
     _ad_u[0] = _ad_dof_values[0];
-
-  if (_need_ad_grad_u)
-    _ad_grad_u[0] = 0;
 
   if (_need_ad_u_dot && _time_integrator)
     _ad_u_dot[0] = _ad_dofs_dot[0];
