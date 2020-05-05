@@ -68,15 +68,26 @@ class NodeFaceConstraint;
 template <typename P, typename C>
 void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor);
 
-struct JacEntry {
+struct JacEntry
+{
 public:
-  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const Elem * i_elem, const Elem * j_elem) : tag(t), ivar(i_var), jvar(j_var)
+  JacEntry(TagID t,
+           MooseVariableBase * i_var,
+           MooseVariableBase * j_var,
+           const Elem * i_elem,
+           const Elem * j_elem)
+    : tag(t), ivar(i_var), jvar(j_var)
   {
     ivar->getDofIndices(i_elem, iindices);
     jvar->getDofIndices(j_elem, jindices);
     matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
   }
-  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const std::vector<dof_id_type> & i_indices, const std::vector<dof_id_type> & j_indices) : tag(t), ivar(i_var), jvar(j_var), iindices(i_indices), jindices(j_indices)
+  JacEntry(TagID t,
+           MooseVariableBase * i_var,
+           MooseVariableBase * j_var,
+           const std::vector<dof_id_type> & i_indices,
+           const std::vector<dof_id_type> & j_indices)
+    : tag(t), ivar(i_var), jvar(j_var), iindices(i_indices), jindices(j_indices)
   {
     matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
   }
@@ -890,8 +901,13 @@ public:
   }
 
   void addJacobianGeneral();
-  DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag);
-  DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & i_indices, const std::vector<dof_id_type> & j_indices, TagID tag);
+  DenseMatrix<Number> & jacobianBlockGeneral(
+      unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag);
+  DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar,
+                                             unsigned int jvar,
+                                             const std::vector<dof_id_type> & i_indices,
+                                             const std::vector<dof_id_type> & j_indices,
+                                             TagID tag);
 
   /**
    * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.
@@ -1861,8 +1877,6 @@ private:
    * Dense matrices for variables (ivar+i, i = 1,...,icount) or (jvar+j, j = 1,...,jcount) are
    * empty.
    */
-
-
 
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kee;
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Keg;
