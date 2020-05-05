@@ -2769,40 +2769,21 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
                                 unsigned int jvar,
                                 TagID tag)
 {
-  if (type == Moose::ElementElement)
-    _jacobian_block_used[tag][ivar][jvar] = 1;
-  else
-    _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
-
-  if (_block_diagonal_matrix)
+  MooseVariableFieldBase * i_var = &_sys.getVariable(_tid, ivar);
+  MooseVariableFieldBase * j_var = &_sys.getVariable(_tid, jvar);
+  switch (type)
   {
-    switch (type)
-    {
-      default:
-      case Moose::ElementElement:
-        return _sub_Kee[tag][ivar][0];
-      case Moose::ElementNeighbor:
-        return _sub_Ken[tag][ivar][0];
-      case Moose::NeighborElement:
-        return _sub_Kne[tag][ivar][0];
-      case Moose::NeighborNeighbor:
-        return _sub_Knn[tag][ivar][0];
-    }
-  }
-  else
-  {
-    switch (type)
-    {
-      default:
-      case Moose::ElementElement:
-        return _sub_Kee[tag][ivar][jvar];
-      case Moose::ElementNeighbor:
-        return _sub_Ken[tag][ivar][jvar];
-      case Moose::NeighborElement:
-        return _sub_Kne[tag][ivar][jvar];
-      case Moose::NeighborNeighbor:
-        return _sub_Knn[tag][ivar][jvar];
-    }
+    case Moose::ElementElement:
+      return jacobianBlockGeneral(ivar, jvar, i_var->dofIndices(), j_var->dofIndices(), tag);
+    case Moose::ElementNeighbor:
+      return jacobianBlockGeneral(
+          ivar, jvar, i_var->dofIndices(), j_var->dofIndicesNeighbor(), tag);
+    case Moose::NeighborElement:
+      return jacobianBlockGeneral(
+          ivar, jvar, i_var->dofIndicesNeighbor(), j_var->dofIndices(), tag);
+    case Moose::NeighborNeighbor:
+      return jacobianBlockGeneral(
+          ivar, jvar, i_var->dofIndicesNeighbor(), j_var->dofIndicesNeighbor(), tag);
   }
 }
 
@@ -3511,39 +3492,7 @@ Assembly::addJacobianNonlocal()
 void
 Assembly::addJacobianNeighbor()
 {
-  for (const auto & it : _cm_ff_entry)
-  {
-    auto ivar = it.first;
-    auto jvar = it.second;
-    auto i = ivar->number();
-    auto j = jvar->number();
-    for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
-         tag < _jacobian_block_neighbor_used.size();
-         tag++)
-      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
-      {
-        addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
-                         *ivar,
-                         *jvar,
-                         ivar->dofIndices(),
-                         jvar->dofIndicesNeighbor());
-
-        addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
-                         *ivar,
-                         *jvar,
-                         ivar->dofIndicesNeighbor(),
-                         jvar->dofIndices());
-
-        addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
-                         *ivar,
-                         *jvar,
-                         ivar->dofIndicesNeighbor(),
-                         jvar->dofIndicesNeighbor());
-      }
-  }
+  addJacobianGeneral();
 }
 
 void
@@ -3647,38 +3596,11 @@ Assembly::cacheJacobianNonlocal()
 void
 Assembly::cacheJacobianNeighbor()
 {
-  for (const auto & it : _cm_ff_entry)
-  {
-    auto ivar = it.first;
-    auto jvar = it.second;
-    auto i = ivar->number();
-    auto j = jvar->number();
-
-    for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
-         tag < _jacobian_block_neighbor_used.size();
-         tag++)
-      if (_jacobian_block_neighbor_used[tag][i][j] && _sys.hasMatrix(tag))
-      {
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndices(),
-                           jvar->dofIndicesNeighbor(),
-                           tag);
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborElement, i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndicesNeighbor(),
-                           jvar->dofIndices(),
-                           tag);
-        cacheJacobianBlock(jacobianBlockNeighbor(Moose::NeighborNeighbor, i, j, tag),
-                           *ivar,
-                           *jvar,
-                           ivar->dofIndicesNeighbor(),
-                           jvar->dofIndicesNeighbor(),
-                           tag);
-      }
-  }
+  for (auto & entry : _jac_entries)
+    if (_sys.hasMatrix(entry.tag))
+      cacheJacobianBlock(
+          entry.matrix, *entry.ivar, *entry.jvar, entry.iindices, entry.jindices, entry.tag);
+  _jac_entries.clear();
 }
 
 void
