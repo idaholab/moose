@@ -84,6 +84,9 @@ class AppSyntaxExtension(command.CommandExtension):
         config = command.CommandExtension.defaultConfig()
         config['executable'] = (None,
                                 "The MOOSE application executable to use for generating syntax.")
+        config['app_name'] = (None,
+                              "The MOOSE application name (e.g., moose_test); if not provided an " \
+                              "attempt will be made to determine the name.")
         config['includes'] = ([],
                               "List of include directories to investigate for class information.")
         config['inputs'] = ([],
@@ -128,7 +131,7 @@ class AppSyntaxExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Reading MOOSE application syntax...")
         exe = mooseutils.eval_path(self['executable'])
-        exe = mooseutils.find_moose_executable(exe, show_error=False)
+        exe = mooseutils.find_moose_executable(exe, name=self['app_name'], show_error=False)
 
         if exe is None:
             LOG.error("Failed to locate a valid executable in %s.", self['executable'])
