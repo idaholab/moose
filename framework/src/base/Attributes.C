@@ -298,6 +298,23 @@ AttribPreAux::isEqual(const Attribute & other) const
 }
 
 void
+AttribPostAux::initFrom(const MooseObject * /*obj*/)
+{
+}
+bool
+AttribPostAux::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribPostAux *>(&other);
+  return a && (a->_val == _val);
+}
+
+bool
+AttribPostAux::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
 AttribName::initFrom(const MooseObject * obj)
 {
   _val = obj->name();

@@ -7,7 +7,7 @@
     [./read]
       type = CSVDiff
       input = read.i
-      csvdiff = 'read_out_reader_0000.csv'
+      csvdiff = 'read_out_reader.csv'
 
       requirement = 'The system shall support the ability to read a comma separated file into an object and make it accessible through easy to use standard C++ containers.'
     [../]
@@ -41,21 +41,13 @@
     [./read_preic]
       type = CSVDiff
       input = read_preic.i
-      csvdiff = 'read_preic_out_reader_0000.csv'
+      csvdiff = 'read_preic_out_reader.csv'
 
       requirement = 'The system shall support the ability to read a comma separated file into an object during PREIC.'
     [../]
-    [./preic_fail]
+    [./multi_read_fail]
       type = RunException
-      input = read_multi_preic.i
-      expect_err = "Error in reader. CSVReader cannot execute more than once per file."
-      recover = false
-
-      requirement = 'The system shall error if an attempt is made to read invariant CSV data after it was already read during PREIC.'
-    [../]
-    [./nopreic_fail]
-      type = RunException
-      input = read_multi_nopreic.i
+      input = multi_read_fail.i
       expect_err = "Error in reader. CSVReader cannot execute more than once per file."
       recover = false
 
