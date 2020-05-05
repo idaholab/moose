@@ -156,7 +156,7 @@ class AppSyntaxExtension(command.CommandExtension):
                 msg = "Failed to load application executable from '%s', " \
                       "application syntax is being disabled:\n%s"
                 self.setActive(False)
-                LOG.error(msg, self.get('executable'), e)
+                LOG.error(msg, exe, e)
         LOG.info("MOOSE application syntax complete [%s sec.]", time.time() - start)
 
     def __initClassDatabase(self):
