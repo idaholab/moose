@@ -112,19 +112,15 @@ SetupMeshCompleteAction::act()
   }
   else if (_current_task == "delete_remote_elements_post_equation_systems_init")
   {
-    // // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
-    // // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
-    // // trigger this. Consequently, for nearly all program executions we are retaining default
-    // // geometric ghosting, and it seems that a lot of our tests rely on that; if I delete elements
-    // // here every time I get > 40 MOOSE test failures. In the interest of consistency, we will not
-    // // execute this block. TO DO: uncomment this block, delete remote elements every time (e.g.
-    // // remove the if check) and fixup tests that are relying on default ghosting behavior
-    // if (_mesh->needsRemoteElemDeletion())
-    // {
-    //   _mesh->getMesh().delete_remote_elements();
-    //   if (_displaced_mesh)
-    //     _displaced_mesh->getMesh().delete_remote_elements();
-    // }
+    // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
+    // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
+    // trigger this.
+    if (_mesh->needsRemoteElemDeletion())
+    {
+      _mesh->getMesh().delete_remote_elements();
+      if (_displaced_mesh)
+        _displaced_mesh->getMesh().delete_remote_elements();
+    }
   }
   else
   {

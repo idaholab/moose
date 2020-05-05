@@ -398,8 +398,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     setRestartFile(restart_file_base);
   }
 
-  if (!_default_ghosting)
-    _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
+  // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
+  // // well before our FEProblemBase is constructed. Historically, in MooseMesh we have a bunch of
+  // // needs_prepare type flags that make it so we never call prepare_for_use (and consequently
+  // // delete_remote_elements) again. So the below line, historically, has had no impact. HOWEVER:
+  // // I've added some code in SetupMeshCompleteAction for deleting remote elements post
+  // // EquationSystems::init. If I execute that code without default ghosting, then I get > 40 MOOSE
+  // // test failures, so we clearly have some simulations that are not yet covered properly by
+  // // relationship managers. Until that is resolved, I am going to retain default geometric ghosting
+  // if (!_default_ghosting)
+  //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master app should hold the default database to handle system petsc options
