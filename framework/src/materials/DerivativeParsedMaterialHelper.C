@@ -14,39 +14,32 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(DerivativeParsedMaterialHelper);
-
+template <bool is_ad>
 InputParameters
-DerivativeParsedMaterialHelper::validParams()
+DerivativeParsedMaterialHelperTempl<is_ad>::validParams()
 {
-
-  InputParameters params = ParsedMaterialHelper::validParams();
+  InputParameters params = ParsedMaterialHelper<is_ad>::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
-  params.addDeprecatedParam<bool>("third_derivatives",
-                                  "Flag to indicate if third derivatives are needed",
-                                  "Use derivative_order instead.");
   params.addParam<unsigned int>("derivative_order", 3, "Maximum order of derivatives taken");
-
   return params;
 }
 
-DerivativeParsedMaterialHelper::DerivativeParsedMaterialHelper(const InputParameters & parameters,
-                                                               VariableNameMappingMode map_mode)
-  : ParsedMaterialHelper(parameters, map_mode),
-    //_derivative_order(getParam<unsigned int>("derivative_order"))
-    _derivative_order(isParamValid("third_derivatives")
-                          ? (getParam<bool>("third_derivatives") ? 3 : 2)
-                          : getParam<unsigned int>("derivative_order")),
+template <bool is_ad>
+DerivativeParsedMaterialHelperTempl<is_ad>::DerivativeParsedMaterialHelperTempl(
+    const InputParameters & parameters, VariableNameMappingMode map_mode)
+  : ParsedMaterialHelper<is_ad>(parameters, map_mode),
+    _derivative_order(this->template getParam<unsigned int>("derivative_order")),
     _dmatvar_base("matpropautoderiv"),
     _dmatvar_index(0)
 {
 }
 
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::functionsPostParse()
+DerivativeParsedMaterialHelperTempl<is_ad>::functionsPostParse()
 {
   // optimize base function
-  ParsedMaterialHelper::functionsOptimize();
+  ParsedMaterialHelper<is_ad>::functionsOptimize();
 
   // generate derivatives
   assembleDerivatives();
@@ -56,10 +49,10 @@ DerivativeParsedMaterialHelper::functionsPostParse()
     mpd.value();
 }
 
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
-                                                unsigned int order,
-                                                const MatPropDescriptorList & parent_mpd_list)
+DerivativeParsedMaterialHelperTempl<is_ad>::recurseMatProps(
+    unsigned int var, unsigned int order, const MatPropDescriptorList & parent_mpd_list)
 {
   // quit if we have exceeded the requested derivative order
   if (order > _derivative_order)
@@ -74,7 +67,7 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
       continue;
 
     // otherwise add it to _mat_prop_descriptors
-    FunctionMaterialPropertyDescriptor mpd(parent_mpd);
+    FunctionMaterialPropertyDescriptor<is_ad> mpd(parent_mpd);
     mpd.addDerivative(_arg_names[var]);
 
     // create a new symbol name for it
@@ -97,10 +90,11 @@ DerivativeParsedMaterialHelper::recurseMatProps(unsigned int var,
     recurseMatProps(i, order + 1, mpd_list);
 }
 
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
-                                                  unsigned int order,
-                                                  const Derivative & parent_derivative)
+DerivativeParsedMaterialHelperTempl<is_ad>::recurseDerivative(unsigned int var,
+                                                              unsigned int order,
+                                                              const Derivative & parent_derivative)
 {
   // quit if we have exceeded the requested derivative order
   if (order > _derivative_order)
@@ -114,7 +108,7 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
   current._darg_names = parent_derivative._darg_names;
   // the moose variable name goes into the derivative property name
   current._darg_names.push_back(_arg_names[var]);
-  current._F = std::make_shared<ADFunction>(*parent_derivative._F);
+  current._F = std::make_shared<SymFunction>(*parent_derivative._F);
 
   // execute derivative
   if (current._F->AutoDiff(derivative_var) != -1)
@@ -146,8 +140,9 @@ DerivativeParsedMaterialHelper::recurseDerivative(unsigned int var,
 /**
  * Perform construction of all requested derivatives.
  */
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::assembleDerivatives()
+DerivativeParsedMaterialHelperTempl<is_ad>::assembleDerivatives()
 {
   // need to check for zero derivatives here, otherwise at least one order is generated
   if (_derivative_order < 1)
@@ -161,8 +156,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     const MaterialWarehouse & material_warehouse = _fe_problem.getMaterialWarehouse();
     const MooseObjectWarehouse<MaterialBase> & warehouse = material_warehouse[_material_data_type];
 
-    MooseSharedPointer<DerivativeParsedMaterialHelper> master =
-        MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelper>(
+    MooseSharedPointer<DerivativeParsedMaterialHelperTempl> master =
+        MooseSharedNamespace::dynamic_pointer_cast<DerivativeParsedMaterialHelperTempl>(
             warehouse.getActiveObject(name()));
 
     // copy parsers and declare properties
@@ -170,7 +165,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     {
       Derivative newderivative;
       newderivative._mat_prop = &declarePropertyDerivative<Real>(_F_name, D._darg_names);
-      newderivative._F = std::make_shared<ADFunction>(*D._F);
+      newderivative._F = std::make_shared<SymFunction>(*D._F);
       _derivatives.push_back(newderivative);
     }
 
@@ -180,7 +175,8 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
          i < master->_mat_prop_descriptors.size();
          ++i)
     {
-      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i], this);
+      FunctionMaterialPropertyDescriptor<is_ad> newdescriptor(master->_mat_prop_descriptors[i],
+                                                              this);
       _mat_prop_descriptors.push_back(newdescriptor);
     }
 
@@ -217,8 +213,9 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   _func_params.resize(_nargs + _mat_prop_descriptors.size());
 }
 
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::initQpStatefulProperties()
+DerivativeParsedMaterialHelperTempl<is_ad>::initQpStatefulProperties()
 {
   if (_prop_F)
     (*_prop_F)[_qp] = 0.0;
@@ -227,8 +224,9 @@ DerivativeParsedMaterialHelper::initQpStatefulProperties()
     (*D._mat_prop)[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-DerivativeParsedMaterialHelper::computeQpProperties()
+DerivativeParsedMaterialHelperTempl<is_ad>::computeQpProperties()
 {
   // fill the parameter vector, apply tolerances
   for (unsigned int i = 0; i < _nargs; ++i)
@@ -255,3 +253,7 @@ DerivativeParsedMaterialHelper::computeQpProperties()
   for (auto & D : _derivatives)
     (*D._mat_prop)[_qp] = evaluate(D._F, _name);
 }
+
+// explicit instantiation
+template class DerivativeParsedMaterialHelperTempl<false>;
+// template class DerivativeParsedMaterialHelperTempl<true>;

@@ -15,20 +15,29 @@
 
 #include "libmesh/fparser_ad.hh"
 
-// forward declatration
-class ParsedMaterialHelper;
-
-template <>
-InputParameters validParams<ParsedMaterialHelper>();
+#define usingParsedMaterialHelperMembers(T)                                                        \
+  usingFunctionMaterialBaseMembers(T);                                                             \
+  usingFunctionParserUtilsMembers(T);                                                              \
+  using typename ParsedMaterialHelper<T>::VariableNameMappingMode;                                 \
+  using typename ParsedMaterialHelper<T>::MatPropDescriptorList;                                   \
+  using ParsedMaterialHelper<T>::functionParse;                                                    \
+  using ParsedMaterialHelper<T>::functionsPostParse;                                               \
+  using ParsedMaterialHelper<T>::functionsOptimize;                                                \
+  using ParsedMaterialHelper<T>::_func_F;                                                          \
+  using ParsedMaterialHelper<T>::_variable_names;                                                  \
+  using ParsedMaterialHelper<T>::_mat_prop_descriptors;                                            \
+  using ParsedMaterialHelper<T>::_tol;                                                             \
+  using ParsedMaterialHelper<T>::_map_mode
 
 /**
  * Helper class to perform the parsing and optimization of the
  * function expression.
  */
-class ParsedMaterialHelper : public FunctionMaterialBase, public FunctionParserUtils
+template <bool is_ad>
+class ParsedMaterialHelper : public FunctionMaterialBase<is_ad>, public FunctionParserUtils<is_ad>
 {
 public:
-  enum VariableNameMappingMode
+  enum class VariableNameMappingMode
   {
     USE_MOOSE_NAMES,
     USE_PARAM_NAMES
@@ -50,8 +59,11 @@ public:
                      const std::vector<Real> & tol_values);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  usingFunctionMaterialBaseMembers(is_ad);
+  usingFunctionParserUtilsMembers(is_ad);
+
+  void initQpStatefulProperties() override;
+  void computeQpProperties() override;
 
   // tasks to perform after parsing the primary function
   virtual void functionsPostParse();
@@ -60,13 +72,13 @@ protected:
   virtual void functionsOptimize();
 
   /// The undiffed free energy function parser object.
-  ADFunctionPtr _func_F;
+  SymFunctionPtr _func_F;
 
   /// variable names used in the expression (depends on the map_mode)
   std::vector<std::string> _variable_names;
 
   /// convenience typedef for the material property descriptors
-  typedef std::vector<FunctionMaterialPropertyDescriptor> MatPropDescriptorList;
+  typedef std::vector<FunctionMaterialPropertyDescriptor<is_ad>> MatPropDescriptorList;
 
   /// Material property descriptors (obtained by parsing _mat_prop_expressions)
   MatPropDescriptorList _mat_prop_descriptors;
@@ -83,3 +95,8 @@ protected:
   const VariableNameMappingMode _map_mode;
 };
 
+template <>
+void ParsedMaterialHelper<false>::functionsOptimize();
+
+template <>
+void ParsedMaterialHelper<true>::functionsOptimize();

@@ -26,7 +26,7 @@ InputParameters
 validParams<ParsedAddSideset>()
 {
   InputParameters params = validParams<AddSideSetsBase>();
-  params += validParams<FunctionParserUtils>();
+  params += FunctionParserUtils<false>::validParams();
   params.addRequiredParam<std::string>("combinatorial_geometry",
                                        "Function expression encoding a combinatorial geometry");
   params.addRequiredParam<BoundaryName>("new_sideset_name", "The name of the new sideset");
@@ -52,7 +52,7 @@ validParams<ParsedAddSideset>()
 
 ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters)
   : AddSideSetsBase(parameters),
-    FunctionParserUtils(parameters),
+    FunctionParserUtils<false>(parameters),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
     _check_subdomains(isParamValid("included_subdomain_ids")),
@@ -63,7 +63,7 @@ ParsedAddSideset::ParsedAddSideset(const InputParameters & parameters)
     _normal(getParam<Point>("normal"))
 {
   // base function object
-  _func_F = std::make_shared<ADFunction>();
+  _func_F = std::make_shared<SymFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

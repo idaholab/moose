@@ -12,16 +12,31 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class FunctionMaterialBase;
-
-template <>
-InputParameters validParams<FunctionMaterialBase>();
+#define usingFunctionMaterialBaseMembers(T)                                                        \
+  usingDerivativeMaterialInterfaceMembers(Material);                                               \
+  using FunctionMaterialBase<T>::name;                                                             \
+  using FunctionMaterialBase<T>::_qp;                                                              \
+  using FunctionMaterialBase<T>::_qrule;                                                           \
+  using FunctionMaterialBase<T>::_name;                                                            \
+  using FunctionMaterialBase<T>::_tid;                                                             \
+  using FunctionMaterialBase<T>::_pars;                                                            \
+  using FunctionMaterialBase<T>::_material_data_type;                                              \
+  using FunctionMaterialBase<T>::_fe_problem;                                                      \
+  using FunctionMaterialBase<T>::_args;                                                            \
+  using FunctionMaterialBase<T>::_F_name;                                                          \
+  using FunctionMaterialBase<T>::_nargs;                                                           \
+  using FunctionMaterialBase<T>::_arg_names;                                                       \
+  using FunctionMaterialBase<T>::_arg_numbers;                                                     \
+  using FunctionMaterialBase<T>::_arg_param_names;                                                 \
+  using FunctionMaterialBase<T>::_arg_param_numbers;                                               \
+  using FunctionMaterialBase<T>::_arg_constant_defaults;                                           \
+  using FunctionMaterialBase<T>::_prop_F
 
 /**
- * %Material base class central for all Materials that provide a Function as a
+ * Material base class, central to all Materials that provide a Function as a
  * material property value.
  */
+template <bool is_ad = false>
 class FunctionMaterialBase : public DerivativeMaterialInterface<Material>
 {
 public:
@@ -80,11 +95,8 @@ protected:
   /// coupled variables with default values
   std::vector<std::string> _arg_constant_defaults;
 
-  /// Calculate (and allocate memory for) the third derivatives of the free energy.
-  bool _third_derivatives;
-
   /// Material property to store the function value.
-  MaterialProperty<Real> * _prop_F;
+  GenericMaterialProperty<Real, is_ad> * _prop_F;
 
 private:
   /// map the variable numbers to an even/odd interspersed pattern

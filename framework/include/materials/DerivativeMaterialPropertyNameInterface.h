@@ -12,6 +12,12 @@
 #include "MooseTypes.h"
 #include "MooseError.h"
 
+#define usingDerivativeMaterialPropertyNameInterfaceMembers                                        \
+  using DerivativeMaterialPropertyNameInterface::derivativePropertyName;                           \
+  using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;                      \
+  using DerivativeMaterialPropertyNameInterface::derivativePropertyNameSecond;                     \
+  using DerivativeMaterialPropertyNameInterface::derivativePropertyNameThird
+
 class DerivativeMaterialPropertyNameInterface
 {
 public:
@@ -76,4 +82,3 @@ public:
   }
   ///@}
 };
-

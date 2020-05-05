@@ -397,6 +397,32 @@ typedef VectorVariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 
+template <bool is_ad>
+struct GenericRealStruct
+{
+  typedef Real type;
+};
+template <>
+struct GenericRealStruct<true>
+{
+  typedef ADReal type;
+};
+template <bool is_ad>
+using GenericReal = typename GenericRealStruct<is_ad>::type;
+
+template <bool is_ad>
+struct GenericVariableValueStruct
+{
+  typedef VariableValue type;
+};
+template <>
+struct GenericVariableValueStruct<true>
+{
+  typedef ADVariableValue type;
+};
+template <bool is_ad>
+using GenericVariableValue = typename GenericVariableValueStruct<is_ad>::type;
+
 // We can  use the non-ad version for test values because these don't depend on the mesh
 // displacements  (unless the location of the quadrature points depend on the mesh displacements...)
 template <typename T>

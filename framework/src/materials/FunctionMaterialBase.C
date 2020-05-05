@@ -9,12 +9,10 @@
 
 #include "FunctionMaterialBase.h"
 
-defineLegacyParams(FunctionMaterialBase);
-
+template <bool is_ad>
 InputParameters
-FunctionMaterialBase::validParams()
+FunctionMaterialBase<is_ad>::validParams()
 {
-
   InputParameters params = Material::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy)");
   params.addParam<std::string>(
@@ -24,10 +22,11 @@ FunctionMaterialBase::validParams()
   return params;
 }
 
-FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
+template <bool is_ad>
+FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _F_name(getParam<std::string>("f_name")),
-    _prop_F(&declareProperty<Real>(_F_name))
+    _prop_F(&declareGenericProperty<Real, is_ad>(_F_name))
 {
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
@@ -84,3 +83,6 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
 
   _nargs = _arg_names.size();
 }
+
+// explicit instantiation
+template class FunctionMaterialBase<false>;

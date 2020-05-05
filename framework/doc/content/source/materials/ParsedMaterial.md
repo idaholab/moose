@@ -1,4 +1,3 @@
-
 # ParsedMaterial
 
 !syntax description /Materials/ParsedMaterial
