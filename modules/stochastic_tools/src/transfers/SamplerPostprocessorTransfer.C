@@ -65,6 +65,20 @@ SamplerPostprocessorTransfer::initialSetup()
     mooseError("The 'results' object must be a 'StochasticResults' object.");
 
   _results->init(*_sampler_ptr);
+
+  // Check that postprocessor on sub-appilcation exists
+  const dof_id_type n = _multi_app->numGlobalApps();
+  for (MooseIndex(n) i = 0; i < n; i++)
+    if (_multi_app->hasLocalApp(i))
+    {
+      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      if (!app_problem.hasPostprocessor(_sub_pp_name))
+        mooseError("Unknown postprocesssor name '",
+                   _sub_pp_name,
+                   "' on sub-application '",
+                   _multi_app->name(),
+                   "'");
+    }
 }
 
 void
