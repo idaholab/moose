@@ -116,8 +116,8 @@ def find_moose_executable(loc, **kwargs):
         if os.path.isfile(makefile):
             with open(makefile, 'r') as fid:
                 content = fid.read()
-            match = re.search(r'APPLICATION_NAME\s*[:=]+\s*(?P<name>\w+)$', content, flags=re.MULTILINE)
-            name = match.group('name') if match else None
+            matches = re.findall(r'APPLICATION_NAME\s*[:=]+\s*(?P<name>\w+)$', content, flags=re.MULTILINE)
+            name = matches[-1] if matches else None
 
         if name is None:
             name = os.path.basename(loc)
