@@ -51,6 +51,14 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   // Adds action for loading Surrogate data
   registerTask("load_surrogate_data", true);
   addTaskDependency("load_surrogate_data", "add_surrogate");
+
+  // General StochasticTools action
+  registerTask("auto_create_mesh", false);
+  registerTask("auto_create_problem", false);
+  registerTask("auto_create_executioner", false);
+  registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_mesh");
+  registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_problem");
+  registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_executioner");
 }
 
 void
