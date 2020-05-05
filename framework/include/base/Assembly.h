@@ -68,6 +68,25 @@ class NodeFaceConstraint;
 template <typename P, typename C>
 void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor);
 
+struct JacEntry {
+public:
+  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const Elem * i_elem, const Elem * j_elem) : tag(t), ivar(i_var), jvar(j_var), ielem(i_elem), jelem(j_elem)
+  {
+    ivar->getDofIndices(ielem, iindices);
+    jvar->getDofIndices(jelem, jindices);
+    matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
+  }
+
+  TagID tag;
+  MooseVariableBase * ivar;
+  MooseVariableBase * jvar;
+  const Elem * ielem;
+  const Elem * jelem;
+  std::vector<dof_id_type> iindices;
+  std::vector<dof_id_type> jindices;
+  DenseMatrix<Number> matrix;
+};
+
 /**
  * Keeps track of stuff related to assembling
  *
@@ -868,6 +887,9 @@ public:
     return _sub_Keg[tag][ivar][_block_diagonal_matrix ? 0 : jvar];
   }
 
+  void addJacobianGeneral();
+  DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag);
+
   /**
    * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.
    */
@@ -1568,6 +1590,8 @@ private:
   SystemBase & _sys;
   SubProblem & _subproblem;
 
+  std::vector<JacEntry> _jac_entries;
+
   const bool _displaced;
 
   /// Coupling matrices
@@ -1834,6 +1858,9 @@ private:
    * Dense matrices for variables (ivar+i, i = 1,...,icount) or (jvar+j, j = 1,...,jcount) are
    * empty.
    */
+
+
+
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kee;
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Keg;
 
