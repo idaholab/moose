@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoxMarker.h"
+#include "MooseUtils.h"
 
 registerMooseObject("MooseApp", BoxMarker);
 
@@ -38,8 +39,8 @@ BoxMarker::BoxMarker(const InputParameters & parameters)
   : Marker(parameters),
     _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
     _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
-                  parameters.get<RealVectorValue>("top_right"))
+    _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
+                                               parameters.get<RealVectorValue>("top_right")))
 {
 }
 

@@ -10,6 +10,7 @@
 #include "BoundingBoxNodeSetGenerator.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
+#include "MooseUtils.h"
 
 #include "libmesh/node.h"
 
@@ -43,7 +44,8 @@ BoundingBoxNodeSetGenerator::BoundingBoxNodeSetGenerator(const InputParameters &
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _location(getParam<MooseEnum>("location")),
-    _bounding_box(getParam<RealVectorValue>("bottom_left"), getParam<RealVectorValue>("top_right"))
+    _bounding_box(MooseUtils::buildBoundingBox(getParam<RealVectorValue>("bottom_left"),
+                                               getParam<RealVectorValue>("top_right")))
 {
 }
 
