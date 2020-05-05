@@ -70,18 +70,20 @@ void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C
 
 struct JacEntry {
 public:
-  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const Elem * i_elem, const Elem * j_elem) : tag(t), ivar(i_var), jvar(j_var), ielem(i_elem), jelem(j_elem)
+  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const Elem * i_elem, const Elem * j_elem) : tag(t), ivar(i_var), jvar(j_var)
   {
-    ivar->getDofIndices(ielem, iindices);
-    jvar->getDofIndices(jelem, jindices);
+    ivar->getDofIndices(i_elem, iindices);
+    jvar->getDofIndices(j_elem, jindices);
+    matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
+  }
+  JacEntry(TagID t, MooseVariableBase * i_var, MooseVariableBase * j_var, const std::vector<dof_id_type> & i_indices, const std::vector<dof_id_type> & j_indices) : tag(t), ivar(i_var), jvar(j_var), iindices(i_indices), jindices(j_indices)
+  {
     matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
   }
 
   TagID tag;
   MooseVariableBase * ivar;
   MooseVariableBase * jvar;
-  const Elem * ielem;
-  const Elem * jelem;
   std::vector<dof_id_type> iindices;
   std::vector<dof_id_type> jindices;
   DenseMatrix<Number> matrix;
@@ -889,6 +891,7 @@ public:
 
   void addJacobianGeneral();
   DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag);
+  DenseMatrix<Number> & jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & i_indices, const std::vector<dof_id_type> & j_indices, TagID tag);
 
   /**
    * Get local Jacobian block of a DG Jacobian type for a pair of variables and a tag.

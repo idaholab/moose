@@ -2329,7 +2329,6 @@ Assembly::initNonlocalCoupling()
 void
 Assembly::prepareJacobianBlock()
 {
-  _jac_entries.clear();
   for (const auto & it : _cm_ff_entry)
   {
     MooseVariableFEBase & ivar = *(it.first);
@@ -2746,22 +2745,21 @@ void
 Assembly::addJacobianGeneral()
 {
   for (auto & entry : _jac_entries)
-  {
-    if (!_sys.hasMatrix(entry.tag))
-      continue;
-
-    std::vector<dof_id_type> iindices;
-    std::vector<dof_id_type> jindices;
-    entry.ivar->getDofIndices(entry.ielem, iindices);
-    entry.jvar->getDofIndices(entry.jelem, jindices);
-    addJacobianBlock(_sys.getMatrix(entry.tag), entry.matrix, *entry.ivar, *entry.jvar, iindices, jindices);
-  }
+    if (_sys.hasMatrix(entry.tag))
+      addJacobianBlock(_sys.getMatrix(entry.tag), entry.matrix, *entry.ivar, *entry.jvar, entry.iindices, entry.jindices);
+  _jac_entries.clear();
 }
 
 DenseMatrix<Number> &
 Assembly::jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag)
 {
   _jac_entries.emplace_back(tag, &_sys.getVariable(_tid, ivar), &_sys.getVariable(_tid, jvar), ielem, jelem);
+  return _jac_entries.back().matrix;
+}
+DenseMatrix<Number> &
+Assembly::jacobianBlockGeneral(unsigned int ivar, unsigned int jvar, const std::vector<dof_id_type> & i_indices, const std::vector<dof_id_type> & j_indices, TagID tag)
+{
+  _jac_entries.emplace_back(tag, &_sys.getVariable(_tid, ivar), &_sys.getVariable(_tid, jvar), i_indices, j_indices);
   return _jac_entries.back().matrix;
 }
 
