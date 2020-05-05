@@ -14,12 +14,12 @@
 /**
  * A class used to generate a lognormal distribution
  */
-class LognormalDistribution : public Distribution
+class Lognormal : public Distribution
 {
 public:
   static InputParameters validParams();
 
-  LognormalDistribution(const InputParameters & parameters);
+  Lognormal(const InputParameters & parameters);
 
   virtual Real pdf(const Real & x) const override;
   virtual Real cdf(const Real & x) const override;

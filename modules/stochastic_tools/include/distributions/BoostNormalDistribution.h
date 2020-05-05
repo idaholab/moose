@@ -9,15 +9,14 @@
 
 #pragma once
 
-#include "BoostDistribution.h"
+#include "BoostNormal.h"
 
 /**
- * A class used to generate Normal distribution via Boost
+ * A deprecated class used to generate a normal distribution via Boost
  */
-class BoostNormalDistribution : public BoostDistribution<boost::math::normal_distribution<Real>>
+class BoostNormalDistribution : public BoostNormal
 {
 public:
   static InputParameters validParams();
-
   BoostNormalDistribution(const InputParameters & parameters);
 };

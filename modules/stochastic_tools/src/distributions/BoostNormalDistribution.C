@@ -9,27 +9,18 @@
 
 #include "BoostNormalDistribution.h"
 
-#include "libmesh/auto_ptr.h"
-
-registerMooseObjectAliased("StochasticToolsApp", BoostNormalDistribution, "BoostNormal");
 registerMooseObjectReplaced("StochasticToolsApp",
                             BoostNormalDistribution,
                             "07/01/2020 00:00",
-                            BoostNormal);
+                            Normal);
 
 InputParameters
 BoostNormalDistribution::validParams()
 {
-  InputParameters params = Distribution::validParams();
-  params.addClassDescription("Boost Normal distribution.");
-  params.addRequiredParam<Real>("mean", "Mean of the distribution.");
-  params.addRequiredParam<Real>("standard_deviation", "Standard deviation of the distribution.");
-  return params;
+  return BoostNormal::validParams();
 }
 
 BoostNormalDistribution::BoostNormalDistribution(const InputParameters & parameters)
-  : BoostDistribution<boost::math::normal_distribution<Real>>(parameters)
+  : BoostNormal(parameters)
 {
-  _distribution_unique_ptr = libmesh_make_unique<boost::math::normal_distribution<Real>>(
-      getParam<Real>("mean"), getParam<Real>("standard_deviation"));
 }

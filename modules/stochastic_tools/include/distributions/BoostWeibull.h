@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "BoostLognormal.h"
+#include "BoostDistribution.h"
 
 /**
- * A deprecated class used to generate a lognormal distribution
+ * A deprecated class used to generate Weibull distribution via Boost
  */
-class BoostLognormalDistribution : public BoostLognormal
+class BoostWeibull : public BoostDistribution<boost::math::weibull_distribution<Real>>
 {
 public:
   static InputParameters validParams();
-  BoostLognormalDistribution(const InputParameters & parameters);
+
+  BoostWeibull(const InputParameters & parameters);
 };

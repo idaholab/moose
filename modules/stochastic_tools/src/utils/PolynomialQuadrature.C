@@ -35,12 +35,12 @@ makePolynomial(const Distribution * dist)
     return libmesh_make_unique<const Legendre>(dist->getParam<Real>("lower_bound"),
                                                dist->getParam<Real>("upper_bound"));
 
-  const NormalDistribution * n_dist = dynamic_cast<const NormalDistribution *>(dist);
+  const Normal * n_dist = dynamic_cast<const Normal *>(dist);
   if (n_dist)
     return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
                                               dist->getParam<Real>("standard_deviation"));
 
-  const BoostNormalDistribution * bn_dist = dynamic_cast<const BoostNormalDistribution *>(dist);
+  const BoostNormal * bn_dist = dynamic_cast<const BoostNormal *>(dist);
   if (bn_dist)
     return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
                                               dist->getParam<Real>("standard_deviation"));

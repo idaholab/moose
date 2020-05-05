@@ -13,8 +13,8 @@
 
 #include "DataIO.h"
 #include "UniformDistribution.h"
-#include "NormalDistribution.h"
-#include "BoostNormalDistribution.h"
+#include "Normal.h"
+#include "BoostNormal.h"
 #include "CartesianProduct.h"
 
 /**

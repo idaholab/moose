@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "BoostLognormal.h"
+#include "BoostDistribution.h"
 
 /**
- * A deprecated class used to generate a lognormal distribution
+ * A deprecated class used to generate a lognormal distribution via Boost
  */
-class BoostLognormalDistribution : public BoostLognormal
+class BoostLognormal : public BoostDistribution<boost::math::lognormal_distribution<Real>>
 {
 public:
   static InputParameters validParams();
-  BoostLognormalDistribution(const InputParameters & parameters);
+
+  BoostLognormal(const InputParameters & parameters);
 };
