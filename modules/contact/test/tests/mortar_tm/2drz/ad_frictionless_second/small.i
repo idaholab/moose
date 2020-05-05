@@ -21,7 +21,7 @@ name = 'small'
     nx = 2
     ny = 33
     elem_type = ${elem}
-    sideset_name_prefix = plank
+    boundary_name_prefix = plank
   [../]
   [./plank_id]
     type = SubdomainIDGenerator
@@ -39,7 +39,7 @@ name = 'small'
     nx = 3
     ny = 4
     elem_type = ${elem}
-    sideset_name_prefix = block
+    boundary_name_prefix = block
     sideset_id_offset = 10
   [../]
   [./block_id]

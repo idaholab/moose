@@ -7,7 +7,7 @@
     nz = 4
     bias_x = 2
     bias_z = 0.5
-    sideset_name_prefix = new
+    boundary_name_prefix = new
   [../]
 []
 

@@ -16,7 +16,7 @@ offset = 0.01
     nx = 1
     ny = 1
     elem_type = QUAD4
-    sideset_name_prefix = lb
+    boundary_name_prefix = lb
   [../]
   [./left_block_id]
     type = SubdomainIDGenerator
@@ -34,7 +34,7 @@ offset = 0.01
     nx = 1
     ny = 1
     elem_type = QUAD4
-    sideset_name_prefix = rb
+    boundary_name_prefix = rb
     sideset_id_offset = 10
   [../]
   [./right_block_id]

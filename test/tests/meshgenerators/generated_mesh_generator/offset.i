@@ -7,7 +7,7 @@
     nz = 4
     bias_x = 2
     bias_z = 0.5
-    sideset_id_offset = 10
+    boundary_id_offset = 10
   [../]
 []
 
