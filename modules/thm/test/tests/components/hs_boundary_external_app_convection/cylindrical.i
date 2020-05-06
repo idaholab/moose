@@ -1,3 +1,13 @@
+# This input file tests HSBoundaryExternalAppConvection by checking energy
+# conservation.
+#
+# The gold value should be the following:
+#   E_change = scale * heat_flux * A * t
+# where
+#   heat_flux = htc * (T_ambient - T_hs)
+#   A = pi * D_o * L
+#   D_o = D_i + 2 * thickness
+
 T_hs = 300
 T_ambient = 500
 htc = 100
@@ -13,11 +23,7 @@ specific_heat_capacity = 502.1
 conductivity = 16.26
 
 R_i = ${fparse 0.5 * D_i}
-D_o = ${fparse D_i + 2 * thickness}
-A = ${fparse pi * D_o * L}
-heat_flux = ${fparse htc * (T_ambient - T_hs)}
 scale = 0.8
-E_change = ${fparse scale * heat_flux * A * t}
 
 [AuxVariables]
   [./T_ext]
@@ -83,12 +89,6 @@ E_change = ${fparse scale * heat_flux * A * t}
     postprocessor = E_hs
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./E_change_relerr]
-    type = RelativeDifferencePostprocessor
-    value1 = E_hs_change
-    value2 = ${E_change}
-    execute_on = 'INITIAL TIMESTEP_END'
-  [../]
 []
 
 [Executioner]
@@ -106,7 +106,7 @@ E_change = ${fparse scale * heat_flux * A * t}
 [Outputs]
   [./out]
     type = CSV
-    show = 'E_change_relerr'
+    show = 'E_hs_change'
     execute_on = 'FINAL'
   [../]
 []
