@@ -45,7 +45,7 @@ enum class INVARIANT_TYPE
   MinPrincipal
 };
 
-enum class CYLINDRICAL_TYPE
+enum class CYLINDRICAL_COMPONENT
 {
   AxialStress,
   HoopStress,
@@ -500,7 +500,7 @@ getQuantity(const RankTwoTensorTempl<T> & tensor,
 template <typename T>
 T
 getCylindricalComponent(const RankTwoTensorTempl<T> & tensor,
-                        const CYLINDRICAL_TYPE & scalar_type,
+                        const CYLINDRICAL_COMPONENT & scalar_type,
                         const Point & point1,
                         const Point & point2,
                         const Point & curr_point,
@@ -508,11 +508,11 @@ getCylindricalComponent(const RankTwoTensorTempl<T> & tensor,
 {
   switch (scalar_type)
   {
-    case CYLINDRICAL_TYPE::AxialStress:
+    case CYLINDRICAL_COMPONENT::AxialStress:
       return axialStress(tensor, point1, point2, direction);
-    case CYLINDRICAL_TYPE::HoopStress:
+    case CYLINDRICAL_COMPONENT::HoopStress:
       return hoopStress(tensor, point1, point2, curr_point, direction);
-    case CYLINDRICAL_TYPE::RadialStress:
+    case CYLINDRICAL_COMPONENT::RadialStress:
       return radialStress(tensor, point1, point2, curr_point, direction);
     default:
       mooseError("RankTwoCylindricalComponent Error: Pass valid scalar type - " +

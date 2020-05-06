@@ -47,7 +47,7 @@ RankTwoCylindricalComponentTempl<is_ad>::RankTwoCylindricalComponentTempl(
         isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
     _property(declareGenericProperty<Real, is_ad>(_property_name)),
     _cylindrical_component(getParam<MooseEnum>("cylindrical_component")
-                               .template getEnum<RankTwoScalarTools::CYLINDRICAL_TYPE>()),
+                               .template getEnum<RankTwoScalarTools::CYLINDRICAL_COMPONENT>()),
     _cylindrical_axis_point1(isParamValid("cylindrical_axis_point1")
                                  ? getParam<Point>("cylindrical_axis_point1")
                                  : Point(0, 0, 0)),

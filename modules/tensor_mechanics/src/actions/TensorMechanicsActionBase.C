@@ -19,7 +19,8 @@ const std::map<std::string, std::string>
         {"stress", "stress"},
         {"elastic_strain", "elastic_strain"},
         {"plastic_strain", "plastic_strain"},
-        {"creep_strain", "creep_strain"}};
+        {"creep_strain", "creep_strain"},
+        {"creep_stress", "creep_stress"}};
 const std::vector<char> TensorMechanicsActionBase::_component_table = {'x', 'y', 'z'};
 
 // map aux variable name prefixes to RankTwoInvariant option and list of permitted tensor name
@@ -29,7 +30,8 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"vonmises", {"VonMisesStress", {"stress"}}},
         {"effective", {"EffectiveStrain", {"plastic_strain", "creep_strain"}}},
         {"hydrostatic", {"Hydrostatic", {"stress"}}},
-        {"l2norm", {"L2norm", {"stress", "strain"}}},
+        {"l2norm",
+         {"L2norm", {"stress", "strain", "elastic_strain", "plastic_strain", "creep_strain"}}},
         {"volumetric", {"VolumetricStrain", {"strain"}}},
         {"firstinv", {"FirstInvariant", {"stress", "strain"}}},
         {"secondinv", {"SecondInvariant", {"stress", "strain"}}},
@@ -37,9 +39,9 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
         {"triaxiality", {"TriaxialityStress", {"stress"}}},
         {"maxshear", {"MaxShear", {"stress"}}},
         {"intensity", {"StressIntensity", {"stress"}}},
-        {"max_principal", {"MaxPrincipal", {"stress"}}},
-        {"mid_principal", {"MidPrincipal", {"stress"}}},
-        {"min_principal", {"MinPrincipal", {"stress"}}}};
+        {"max_principal", {"MaxPrincipal", {"stress", "strain"}}},
+        {"mid_principal", {"MidPrincipal", {"stress", "strain"}}},
+        {"min_principal", {"MinPrincipal", {"stress", "strain"}}}};
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
     TensorMechanicsActionBase::_rank_two_directional_component_table = {
