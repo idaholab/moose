@@ -1371,10 +1371,13 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     ComputeResidualThread cr(_fe_problem, tags);
     Threads::parallel_reduce(elem_range, cr);
 
-    using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
-    ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
-    FVRange faces(&_fe_problem.mesh().faceInfo());
-    Threads::parallel_reduce(faces, fvr);
+    if (_fe_problem.haveFV())
+    {
+      using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+      ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
+      FVRange faces(&_fe_problem.mesh().faceInfo());
+      Threads::parallel_reduce(faces, fvr);
+    }
 
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
@@ -2357,12 +2360,15 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
 
-        // the same loop works for both residual and jacobians because it keys
-        // off of FEProblem's _currently_computing_jacobian parameter
-        using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
-        ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-        FVRange faces(&_fe_problem.mesh().faceInfo());
-        Threads::parallel_reduce(faces, fvj);
+        if (_fe_problem.haveFV())
+        {
+          // the same loop works for both residual and jacobians because it keys
+          // off of FEProblem's _currently_computing_jacobian parameter
+          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+          ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+          FVRange faces(&_fe_problem.mesh().faceInfo());
+          Threads::parallel_reduce(faces, fvj);
+        }
 
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
@@ -2391,13 +2397,13 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
 
-        // the same loop works for both residual and jacobians because it keys
-        // off of FEProblem's _currently_computing_jacobian parameter
-        // TO DO: this currently only does FV face on-diagonal calculations
-        using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
-        ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-        FVRange faces(&_fe_problem.mesh().faceInfo());
-        Threads::parallel_reduce(faces, fvj);
+        if (_fe_problem.haveFV())
+        {
+          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+          ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+          FVRange faces(&_fe_problem.mesh().faceInfo());
+          Threads::parallel_reduce(faces, fvj);
+        }
 
         for (unsigned int i = 0; i < n_threads; i++)
           _fe_problem.addCachedJacobian(i);
