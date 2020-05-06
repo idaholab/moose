@@ -77,7 +77,7 @@ SetupMeshCompleteAction::act()
       return;
 
     // uniform refinement has been done on master, so skip
-    if (_app.masterMesh())
+    if (_app.masterMesh() && _app.isCloneMasterMesh())
       return;
 
     /**

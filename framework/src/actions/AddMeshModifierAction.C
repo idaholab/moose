@@ -30,7 +30,7 @@ void
 AddMeshModifierAction::act()
 {
   // Don't do mesh modifiers when recovering or using master mesh!
-  if (_app.isRecovering() || _app.masterMesh())
+  if (_app.isRecovering() || (_app.masterMesh() && _app.isCloneMasterMesh()))
     return;
 
   // Add a pointer to the mesh, this is required for this MeshModifier to inherit from the

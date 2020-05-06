@@ -710,11 +710,15 @@ MultiApp::createApp(unsigned int i, Real start_time)
   {
     _console << COLOR_CYAN << "Cloned master mesh will be used for subapp " << name()
              << COLOR_DEFAULT << std::endl;
-    app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
-    auto displaced_problem = _fe_problem.getDisplacedProblem();
-    if (displaced_problem)
-      app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
+
+    app_params.set<bool>("_is_clone_master_mesh") = true;
   }
+
+  app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+  auto displaced_problem = _fe_problem.getDisplacedProblem();
+  if (displaced_problem)
+    app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
+
   _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 

@@ -580,6 +580,11 @@ public:
   const MooseMesh * masterMesh() const { return _master_mesh; }
 
   /**
+   * If or not to clone a master mesh
+   */
+  bool isCloneMasterMesh() { return _is_clone_master_mesh; }
+
+  /**
    * Returns a pointer to the master mesh
    */
   const MooseMesh * masterDisplacedMesh() const { return _master_displaced_mesh; }
@@ -1028,6 +1033,9 @@ private:
 
   /// The displaced mesh from master app
   const MooseMesh * _master_displaced_mesh;
+
+  /// Flag to indicate if we are cloning a master mesh
+  bool _is_clone_master_mesh;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;

@@ -263,6 +263,7 @@ MooseApp::validParams()
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<const MooseMesh *>("_master_mesh");
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
+  params.addPrivateParam<bool>("_is_clone_master_mesh");
 
   params.addParam<bool>(
       "use_legacy_dirichlet_bc",
@@ -325,6 +326,9 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
+    _is_clone_master_mesh(isParamValid("_is_clone_master_mesh")
+                              ? parameters.get<bool>("_is_clone_master_mesh")
+                              : false),
     _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2)),
     _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
     _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
