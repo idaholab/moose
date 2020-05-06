@@ -71,10 +71,10 @@ TestFaceInfo::execute()
     _elem_element_id.push_back(p.elem().id());
     _elem_element_side.push_back(p.elemSideID());
     // the neighbor element might be a nullptr
-    if (!p.neighborPtr())
-      _neighbor_element_id.push_back(Elem::invalid_id);
-    else
+    if (p.neighborPtr())
       _neighbor_element_id.push_back(p.neighbor().id());
+    else
+      _neighbor_element_id.push_back(-1);
 
     Point normal = p.normal();
     _nx.push_back(normal(0));
@@ -95,30 +95,38 @@ TestFaceInfo::execute()
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {
-      auto & dofs = p.elemDofIndices(_vars[l]);
-      _var_elem_dof[l]->push_back(dofs[0]);
-      _var_elem_dof_size[l]->push_back(dofs.size());
-      dofs = p.neighborDofIndices(_vars[l]);
-      _var_neighbor_dof[l]->push_back(dofs[0]);
-      _var_neighbor_dof_size[l]->push_back(dofs.size());
+      std::vector<dof_id_type> elemdofs;
+      std::vector<dof_id_type> neighbordofs;
+      elemdofs = p.elemDofIndices(_vars[l]);
+      neighbordofs = p.neighborDofIndices(_vars[l]);
       FaceInfo::VarFaceNeighbors vfn = p.faceType(_vars[l]);
       Real x = 0;
       switch (vfn)
       {
         case FaceInfo::VarFaceNeighbors::BOTH:
+          _var_elem_dof[l]->push_back(elemdofs[0]);
+          _var_neighbor_dof[l]->push_back(neighbordofs[0]);
           x = 1;
           break;
         case FaceInfo::VarFaceNeighbors::ELEM:
+          _var_elem_dof[l]->push_back(elemdofs[0]);
+          _var_neighbor_dof[l]->push_back(-1);
           x = 2;
           break;
         case FaceInfo::VarFaceNeighbors::NEIGHBOR:
+          _var_elem_dof[l]->push_back(-1);
+          _var_neighbor_dof[l]->push_back(neighbordofs[0]);
           x = 3;
           break;
         case FaceInfo::VarFaceNeighbors::NEITHER:
+          _var_elem_dof[l]->push_back(-1);
+          _var_neighbor_dof[l]->push_back(-1);
           x = 4;
           break;
       }
       _var_face_type[l]->push_back(x);
+      _var_elem_dof_size[l]->push_back(elemdofs.size());
+      _var_neighbor_dof_size[l]->push_back(neighbordofs.size());
     }
     ++j;
   }
