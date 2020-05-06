@@ -9,30 +9,14 @@
 
 #pragma once
 
-#include "Distribution.h"
+#include "Logistic.h"
 
 /**
- * A class used to generate a logistic distribution
+ * A deprecated wrapper class used to generate a logistic distribution
  */
-class LogisticDistribution : public Distribution
+class LogisticDistribution : public Logistic
 {
 public:
   static InputParameters validParams();
-
   LogisticDistribution(const InputParameters & parameters);
-
-  virtual Real pdf(const Real & x) const override;
-  virtual Real cdf(const Real & x) const override;
-  virtual Real quantile(const Real & p) const override;
-
-  static Real pdf(const Real & x, const Real & location, const Real & shape);
-  static Real cdf(const Real & x, const Real & location, const Real & shape);
-  static Real quantile(const Real & p, const Real & location, const Real & shape);
-
-protected:
-  /// The location or mean of the distribution (alpha or mu)
-  const Real & _location;
-
-  /// The shape of the distribution (beta or s)
-  const Real & _shape;
 };

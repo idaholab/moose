@@ -30,7 +30,7 @@ namespace PolynomialQuadrature
 std::unique_ptr<const Polynomial>
 makePolynomial(const Distribution * dist)
 {
-  const UniformDistribution * u_dist = dynamic_cast<const UniformDistribution *>(dist);
+  const Uniform * u_dist = dynamic_cast<const Uniform *>(dist);
   if (u_dist)
     return libmesh_make_unique<const Legendre>(dist->getParam<Real>("lower_bound"),
                                                dist->getParam<Real>("upper_bound"));

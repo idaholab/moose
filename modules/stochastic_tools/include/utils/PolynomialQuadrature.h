@@ -12,7 +12,7 @@
 #include "libmesh/utility.h"
 
 #include "DataIO.h"
-#include "UniformDistribution.h"
+#include "Uniform.h"
 #include "Normal.h"
 #include "BoostNormal.h"
 #include "CartesianProduct.h"

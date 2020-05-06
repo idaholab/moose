@@ -12,9 +12,6 @@
 #include "libmesh/utility.h"
 
 registerMooseObject("StochasticToolsApp", Weibull);
-registerMooseObjectAliased("StochasticToolsApp", Weibull, "WeibullDistribution");
-// registerMooseObjectReplaced("StochasticToolsApp", WeibullDistribution, "07/01/2020 00:00",
-// Weibull);
 
 InputParameters
 Weibull::validParams()

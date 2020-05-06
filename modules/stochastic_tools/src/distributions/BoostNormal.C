@@ -12,12 +12,7 @@
 
 #include "libmesh/auto_ptr.h"
 
-// registerMooseObjectAliased("StochasticToolsApp", BoostNormalDistribution, "BoostNormal");
 registerMooseObjectReplaced("StochasticToolsApp", BoostNormal, "07/01/2020 00:00", Normal);
-// registerMooseObjectReplaced("StochasticToolsApp",
-//                            BoostNormal,
-//                            "07/01/2020 00:00",
-//                            Normal);
 
 InputParameters
 BoostNormal::validParams()

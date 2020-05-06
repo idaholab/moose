@@ -12,12 +12,7 @@
 
 #include "libmesh/auto_ptr.h"
 
-// registerMooseObjectAliased("StochasticToolsApp", BoostWeibullDistribution, "BoostWeibull");
 registerMooseObjectReplaced("StochasticToolsApp", BoostWeibull, "07/01/2020 00:00", Weibull);
-// registerMooseObjectReplaced("StochasticToolsApp",
-//                            BoostWeibull,
-//                            "07/01/2020 00:00",
-//                            Weibull);
 
 InputParameters
 BoostWeibull::validParams()
