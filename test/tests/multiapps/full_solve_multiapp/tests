@@ -10,4 +10,13 @@
 
     requirement = "The system shall be capable of executing a sub-application that executes completely."
   [../]
+  [./exec_final]
+    type = 'Exodiff'
+    input = 'master.i'
+    cli_args = 'MultiApps/full_solve/execute_on=final Outputs/file_base=exec_final'
+    exodiff = 'exec_final.e exec_final_full_solve0.e'
+    recover = false
+
+    requirement = "The system shall be capable of executing a sub-application after the master."
+  [../]
 []
