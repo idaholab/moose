@@ -30,8 +30,7 @@ const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(
-      GeochemistryActivityCoefficientsDebyeHuckel::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
 
   is.setUseOnlyBasisMolality(true);
   is.setMaxStoichiometricIonicStrength(2.0E-8);
@@ -61,8 +60,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(
-      GeochemistryActivityCoefficientsDebyeHuckel::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
@@ -84,8 +82,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsDebyeHuckel)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(
-      GeochemistryActivityCoefficientsDebyeHuckel::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 
@@ -145,8 +142,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, waterActivity)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(
-      GeochemistryActivityCoefficientsDebyeHuckel::ActivityCoefficientMethodEnum::DEBYE_HUCKEL, is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 

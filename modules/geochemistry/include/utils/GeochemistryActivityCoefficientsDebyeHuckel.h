@@ -49,18 +49,11 @@ struct DebyeHuckelParameters
 class GeochemistryActivityCoefficientsDebyeHuckel : public GeochemistryActivityCoefficients
 {
 public:
-  /// Method used by this class to compute activity coefficients and activity of water
-  enum class ActivityCoefficientMethodEnum
-  {
-    DEBYE_HUCKEL
-  };
-
   /**
    * @param method Method used by this class to compute activity coefficients and activity of water
    * @param is_calculator Calculates ionic strengths
    */
-  GeochemistryActivityCoefficientsDebyeHuckel(ActivityCoefficientMethodEnum method,
-                                              const GeochemistryIonicStrength & is_calculator);
+  GeochemistryActivityCoefficientsDebyeHuckel(const GeochemistryIonicStrength & is_calculator);
 
   void setInternalParameters(Real temperature,
                              const ModelGeochemicalDatabase & mgd,
@@ -86,9 +79,6 @@ public:
   Real getStoichiometricIonicStrength() const;
 
 private:
-  /// method used by this object to compute activity coefficients
-  const ActivityCoefficientMethodEnum _method;
-
   /// ionic-strength calculator
   const GeochemistryIonicStrength & _is_calculator;
 
