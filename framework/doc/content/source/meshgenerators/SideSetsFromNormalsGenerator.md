@@ -1,10 +1,11 @@
 # SideSetsFromNormalsGenerator
 
-This MeshGenerator adds a sideset to the mesh on every element face with the specified normal. If the mesh contains multiple disjoint faces with the same normal, they will all be added to the sideset.
-
-See also [GenerateAllSideSetsByNormals](/AllSideSetsByNormalsGenerator.md)
-
 !syntax description /MeshGenerators/SideSetsFromNormalsGenerator
+
+See also: [AllSideSetsByNormalsGenerator](/AllSideSetsByNormalsGenerator.md)
+
+!alert note
+If the mesh contains multiple disjoint faces with the same normal, they will all be added to the sideset.
 
 !syntax parameters /MeshGenerators/SideSetsFromNormalsGenerator
 

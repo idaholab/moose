@@ -1,0 +1,17 @@
+[Tests]
+  design = 'fv_design.md'
+  issues = '#14549'
+  [exo]
+    type = 'Exodiff'
+    input = coupled.i
+    exodiff = coupled_out.e
+    requirement = 'The system shall be able to produce correct mathematical results for a coupled-reaction problem using both finite element and finite volume discretizations'
+  []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'coupled.i'
+    difference_tol = 1e-7
+    run_sim = True
+    cli_args = 'Mesh/nx=2'
+  []
+[]

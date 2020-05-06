@@ -57,8 +57,7 @@ ExampleMaterial::ExampleMaterial(const InputParameters & parameters)
 void
 ExampleMaterial::computeQpProperties()
 {
-  // Diffusivity will be the value of the (linearly-interpolated) piece-wise function described by
-  // the user.
+  // Diffusivity is the value of the interpolated piece-wise function described by the user
   _diffusivity[_qp] = _piecewise_func.sample(_q_point[_qp](2));
 
   // Convection velocity is set equal to the gradient of the variable set by the user.

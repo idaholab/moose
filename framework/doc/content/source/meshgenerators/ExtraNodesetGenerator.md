@@ -1,6 +1,6 @@
 # ExtraNodesetGenerator
 
-This MeshGenerator object creates a new node set and a new boundary made with the nodes the user provides.
+!syntax description /MeshGenerators/ExtraNodesetGenerator
 
 !syntax parameters /MeshGenerators/ExtraNodesetGenerator
 

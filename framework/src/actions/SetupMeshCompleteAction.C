@@ -112,6 +112,9 @@ SetupMeshCompleteAction::act()
   }
   else if (_current_task == "delete_remote_elements_post_equation_systems_init")
   {
+    // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
+    // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
+    // trigger this.
     if (_mesh->needsRemoteElemDeletion())
     {
       _mesh->getMesh().delete_remote_elements();

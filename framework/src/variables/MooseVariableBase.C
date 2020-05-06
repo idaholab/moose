@@ -62,6 +62,7 @@ MooseVariableBase::validParams()
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
+  params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.registerBase("MooseVariableBase");
@@ -95,6 +96,13 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _scaling_factor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                             : std::vector<Real>(_count, 1.))
 {
+  if (getParam<bool>("fv") && getParam<bool>("eigen"))
+    paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
+  if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
+    paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
+  if (getParam<bool>("fv") && _fe_type.order != 0)
+    paramError("order", "finite volume (fv=true) variables currently support CONST order only");
+
   if (_count > 1)
   {
     auto name0 = _sys.system().variable(_var_num).name();

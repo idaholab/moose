@@ -1,5 +1,9 @@
 # AllSideSetsByNormalsGenerator
 
+!syntax description /MeshGenerators/AllSideSetsByNormalsGenerator
+
+## Overview
+
 This mesh generator is useful for adding all possible sidesets to a mesh based on unique normal
 directions.  It works well for more regular shapes that don't have curves or many disjoint surfaces
 with similar normals.  If desired however, it is capable of following a slowly changing normal around

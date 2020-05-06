@@ -1,6 +1,6 @@
 # ElementSubdomainIDGenerator
 
-This MeshGenerator object allows the user to assign each element the subdomain id of his choice.
+!syntax description /MeshGenerators/ElementSubdomainIDGenerator
 
 !syntax parameters /MeshGenerators/ElementSubdomainIDGenerator
 

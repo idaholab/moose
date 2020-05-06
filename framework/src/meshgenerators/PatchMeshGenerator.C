@@ -49,6 +49,7 @@ PatchMeshGenerator::validParams()
   params.addParam<Real>("x_offset", 0.0, "Offset of the Cartesian origin in the x direction.");
   params.addParam<Real>("y_offset", 0.0, "Offset of the Cartesian origin in the y direction.");
   params.addParam<Real>("z_offset", 0.0, "Offset of the Cartesian origin in the z direction.");
+  params.addClassDescription("Creates 2D or 3D patch meshes.");
   return params;
 }
 

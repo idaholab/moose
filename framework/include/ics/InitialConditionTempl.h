@@ -129,7 +129,8 @@ protected:
   const Moose::CoordinateSystemType & _coord_sys;
 
   /// The variable that this initial condition is acting upon.
-  MooseVariableFE<T> & _var;
+  MooseVariableField<T> & _var;
+  MooseVariableFE<T> * _fe_var;
 
   /// The current element we are on will retrieving values at specific points in the domain. Note
   /// that this _IS_ valid even for nodes shared among several elements.

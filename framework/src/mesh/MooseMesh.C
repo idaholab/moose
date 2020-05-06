@@ -16,6 +16,8 @@
 #include "RelationshipManager.h"
 #include "PointListAdaptor.h"
 #include "TimedPrint.h"
+#include "Executioner.h"
+#include "NonlinearSystemBase.h"
 
 #include <utility>
 
@@ -55,9 +57,50 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/ghost_point_neighbors.h"
+#include "libmesh/fe_type.h"
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
+
+FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
+{
+  _elem = elem;
+  _neighbor = neighbor;
+
+  _elem_side_id = side;
+  _elem_centroid = elem->centroid();
+  _elem_volume = elem->volume();
+
+  std::unique_ptr<const Elem> face = elem->build_side_ptr(_elem_side_id);
+  _face_area = face->volume();
+  _face_centroid = face->centroid();
+
+  // 1. compute face centroid
+  // 2. compute an centroid face normal by using 1-point quadrature
+  //    meshes)
+  unsigned int dim = elem->dim();
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, FEType(elem->default_order())));
+  QGauss qface(dim - 1, CONSTANT);
+  fe->attach_quadrature_rule(&qface);
+  const std::vector<Point> & normals = fe->get_normals();
+  fe->reinit(elem, _elem_side_id);
+  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
+  _normal = normals[0];
+
+  // the neighbor info does not exist for domain boundaries
+  if (!_neighbor)
+  {
+    _neighbor_side_id = std::numeric_limits<unsigned int>::max();
+    _neighbor_centroid = 2 * (_face_centroid - _elem_centroid) + _elem_centroid;
+    _neighbor_volume = _elem_volume;
+  }
+  else
+  {
+    _neighbor_side_id = neighbor->which_neighbor_am_i(elem);
+    _neighbor_centroid = neighbor->centroid();
+    _neighbor_volume = neighbor->volume();
+  }
+}
 
 defineLegacyParams(MooseMesh);
 
@@ -433,6 +476,8 @@ MooseMesh::update()
   buildNodeList();
   buildBndElemList();
   cacheInfo();
+
+  _face_info_dirty = true;
 }
 
 const Node &
@@ -2870,4 +2915,105 @@ std::unique_ptr<PointLocatorBase>
 MooseMesh::getPointLocator() const
 {
   return getMesh().sub_point_locator();
+}
+
+void
+MooseMesh::buildFaceInfo()
+{
+  if (!_face_info_dirty)
+    return;
+  _face_info_dirty = false;
+
+  using Keytype = std::pair<const Elem *, unsigned short int>;
+
+  // create a map from elem/side --> boundary ids
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
+      buildSideList();
+  std::map<Keytype, std::set<boundary_id_type>> side_map;
+  for (auto & e : side_list)
+  {
+    const Elem * elem = _mesh->elem_ptr(std::get<0>(e));
+    Keytype key(elem, std::get<1>(e));
+    auto it = side_map.find(key);
+    if (it == side_map.end())
+      side_map[key] = {std::get<2>(e)};
+    else
+      side_map[key].insert(std::get<2>(e));
+  }
+
+  _face_info.clear();
+
+  // loop over all active, local elements. Note that by looping over just *local* elements and by
+  // performing the element ID comparison check in the below loop, we are ensuring that we never
+  // double count face contributions. If a face lies along a process boundary, the only process that
+  // will contribute to both sides of the face residuals/Jacobians will be the process that owns the
+  // element with the lower ID.
+  auto begin = getMesh().active_local_elements_begin();
+  auto end = getMesh().active_local_elements_end();
+
+  for (auto it = begin; it != end; ++it)
+  {
+    const Elem * elem = *it;
+    const dof_id_type elem_id = elem->id();
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+    {
+      // get the neighbor element
+      const Elem * neighbor = elem->neighbor_ptr(side);
+
+      // We want to create a face object in all of the following cases:
+      //
+      //  * at all mesh boundaries (i.e. where there is no neighbor
+      //
+      //  * when the following three conditions are met:
+      //
+      //     - the neighbor is active - this means we aren't looking at a face
+      //       between an active element and an inactive (pre-refined version)
+      //       of a neighbor
+      //
+      //     - the neighbor has the same refinement level as the element's level
+      //
+      //     - the neighbor has a higher ID than the element - this ensures
+      //       that when we revisit the same face when the neighbor is the
+      //       element and vise versa, we only create a face info object once
+      //       instead of twice.
+      //
+      //  * when the following two conditions are met:
+      //
+      //     - the neighbor is active - this means we aren't looking at a face
+      //       between an active element and an inactive (pre-refined version)
+      //       of a neighbor
+      //
+      //     - the neighbor has a lower refinement level than the element's
+      //       level - this ensures we only create face info objects for the
+      //       more finely divided version of a face when dealing with hanging
+      //       nodes caused by unequal refinement on both sides of a face.  We
+      //       need to make sure that the sum of all face areas of face info
+      //       objects is exactly equal to the shared interface area between all
+      //       mesh cells (and no larger)
+      if (!neighbor ||
+          (neighbor->active() && (neighbor->level() == elem->level()) &&
+           (elem_id < neighbor->id())) ||
+          (neighbor->level() < elem->level()))
+      {
+        _face_info.emplace_back(elem, side, neighbor);
+        auto & fi = _face_info.back();
+
+        // get all the sidesets that this face is contained in and cache them
+        // in the face info.
+        std::set<boundary_id_type> & boundary_ids = fi.boundaryIDs();
+        boundary_ids.clear();
+
+        auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
+        if (lit != side_map.end())
+          boundary_ids.insert(lit->second.begin(), lit->second.end());
+
+        if (fi.neighborPtr())
+        {
+          auto rit = side_map.find(Keytype(fi.neighborPtr(), fi.neighborSideID()));
+          if (rit != side_map.end())
+            boundary_ids.insert(rit->second.begin(), rit->second.end());
+        }
+      }
+    }
+  }
 }

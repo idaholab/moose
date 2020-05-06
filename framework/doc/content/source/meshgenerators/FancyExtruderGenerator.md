@@ -2,7 +2,7 @@
 
 !syntax description /MeshGenerators/FancyExtruderGenerator
 
-# Description
+## Overview
 
 The `FancyExtruderGenerator` adds more customization options over the [MeshExtruderGenerator](MeshExtruderGenerator.md).
 
@@ -11,5 +11,3 @@ The `FancyExtruderGenerator` adds more customization options over the [MeshExtru
 !syntax inputs /MeshGenerators/FancyExtruderGenerator
 
 !syntax children /MeshGenerators/FancyExtruderGenerator
-
-!bibtex bibliography

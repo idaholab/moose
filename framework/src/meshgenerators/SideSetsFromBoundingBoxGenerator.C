@@ -12,6 +12,7 @@
 #include "MooseTypes.h"
 #include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
+#include "MooseUtils.h"
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
@@ -28,12 +29,8 @@ SideSetsFromBoundingBoxGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addClassDescription("Find sidesets with given boundary ids in bounding box and add new "
-                             "boundary id. This can be done by finding all required boundary "
-                             "and adding the new boundary id to those sidesets. Alternatively, "
-                             "a number of boundary ids can be provided and all nodes within the "
-                             "bounding box that have all the required boundary ids will have a new"
-                             "boundary id added.");
+  params.addClassDescription("Defines new sidesets using currently-defined sideset IDs inside or "
+                             "outside of a bounding box.");
 
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
@@ -64,8 +61,8 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
     _block_id(parameters.get<SubdomainID>("block_id")),
     _boundary_id_old(parameters.get<std::vector<BoundaryName>>("boundary_id_old")),
     _boundary_id_new(parameters.get<boundary_id_type>("boundary_id_new")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
-                  parameters.get<RealVectorValue>("top_right")),
+    _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
+                                               parameters.get<RealVectorValue>("top_right"))),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
 {
   if (dynamic_pointer_cast<DistributedMesh>(_input) != nullptr)

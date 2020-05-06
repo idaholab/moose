@@ -17,8 +17,9 @@
 
 NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
                                        bool nodal,
-                                       bool neighbor_nodal)
-  : Coupleable(moose_object, nodal), _neighbor_nodal(neighbor_nodal)
+                                       bool neighbor_nodal,
+                                       bool is_fv)
+  : Coupleable(moose_object, nodal, is_fv), _neighbor_nodal(neighbor_nodal)
 {
 }
 

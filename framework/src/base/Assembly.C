@@ -33,6 +33,29 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/fe.h"
 
+template <typename P, typename C>
+void
+coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C & factor)
+{
+  switch (s.getCoordSystem(sub_id))
+  {
+    case Moose::COORD_XYZ:
+      factor = 1.0;
+      break;
+    case Moose::COORD_RZ:
+    {
+      unsigned int rz_radial_coord = s.getAxisymmetricRadialCoord();
+      factor = 2 * M_PI * point(rz_radial_coord);
+      break;
+    }
+    case Moose::COORD_RSPHERICAL:
+      factor = 4 * M_PI * point(0) * point(0);
+      break;
+    default:
+      mooseError("Unknown coordinate system");
+  }
+}
+
 Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   : _sys(sys),
     _subproblem(_sys.subproblem()),
@@ -1533,37 +1556,21 @@ Assembly::setCoordinateTransformation(const QBase * qrule,
                                       Coords & coord,
                                       SubdomainID sub_id)
 {
+
   mooseAssert(qrule, "The quadrature rule is null in Assembly::setCoordinateTransformation");
   auto n_points = qrule->n_points();
   mooseAssert(n_points == q_points.size(),
               "The number of points in the quadrature rule doesn't match the number of passed-in "
               "points in Assembly::setCoordinateTransformation");
 
-  coord.resize(n_points);
+  // Make sure to honor the name of this method and set the _coord_type member because users may
+  // make use of the const Moose::CoordinateSystem & coordTransformation() { return _coord_type; }
+  // API. MaterialBase for example uses it
   _coord_type = _subproblem.getCoordSystem(sub_id);
-  unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
 
-  switch (_coord_type)
-  {
-    case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < n_points; qp++)
-        coord[qp] = 1.;
-      break;
-
-    case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < n_points; qp++)
-        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-      break;
-
-    case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < n_points; qp++)
-        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-      break;
-
-    default:
-      mooseError("Unknown coordinate system");
-      break;
-  }
+  coord.resize(n_points);
+  for (unsigned int qp = 0; qp < n_points; qp++)
+    coordTransformFactor(_subproblem, sub_id, q_points[qp], coord[qp]);
 }
 
 void
@@ -2740,7 +2747,11 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
                                 unsigned int jvar,
                                 TagID tag)
 {
-  _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
+  if (type == Moose::ElementElement)
+    _jacobian_block_used[tag][ivar][jvar] = 1;
+  else
+    _jacobian_block_neighbor_used[tag][ivar][jvar] = 1;
+
   if (_block_diagonal_matrix)
   {
     switch (type)
@@ -3374,39 +3385,14 @@ Assembly::elementVolume(const Elem * elem) const
               "The number of points in the quadrature rule doesn't match the number of passed-in "
               "points in Assembly::setCoordinateTransformation");
 
-  // information about the coordinate system on this block & if RZ which axis is
-  // the rotation axis
-  Moose::CoordinateSystemType coord_type = _subproblem.getCoordSystem(elem->subdomain_id());
-  unsigned int rz_radial_coord = _subproblem.getAxisymmetricRadialCoord();
-
   // compute the coordinate transformation
-  std::vector<Real> coord(qrule.n_points());
-  switch (coord_type)
-  {
-    case Moose::COORD_XYZ:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 1.;
-      break;
-
-    case Moose::COORD_RZ:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 2 * M_PI * q_points[qp](rz_radial_coord);
-      break;
-
-    case Moose::COORD_RSPHERICAL:
-      for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
-        coord[qp] = 4 * M_PI * q_points[qp](0) * q_points[qp](0);
-      break;
-
-    default:
-      mooseError("Unknown coordinate system");
-      break;
-  }
-
   Real vol = 0;
   for (unsigned int qp = 0; qp < qrule.n_points(); ++qp)
-    vol += JxW[qp] * coord[qp];
-
+  {
+    Real coord;
+    coordTransformFactor(_subproblem, elem->subdomain_id(), q_points[qp], coord);
+    vol += JxW[qp] * coord;
+  }
   return vol;
 }
 
@@ -4154,3 +4140,12 @@ Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type) const
   buildVectorFaceNeighborFE(type);
   return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
 }
+
+template void coordTransformFactor<Point, Real>(SubProblem & s,
+                                                SubdomainID sub_id,
+                                                const Point & point,
+                                                Real & factor);
+template void coordTransformFactor<ADPoint, ADReal>(SubProblem & s,
+                                                    SubdomainID sub_id,
+                                                    const ADPoint & point,
+                                                    ADReal & factor);

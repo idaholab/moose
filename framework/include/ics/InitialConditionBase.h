@@ -23,7 +23,7 @@
 // forward declarations
 class InitialConditionBase;
 class SystemBase;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 namespace libMesh
 {
 class Point;

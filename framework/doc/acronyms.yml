@@ -6,13 +6,14 @@ DOE-NE: Department of Energy, Nuclear Energy
 DOF: degree-of-freedom
 FE: Finite Element
 FEM: Finite Element Method
+GMRES: Gernalized Minimum Residual Method
 GUI: graphical user interface
 HIT: Hierarchical Input Text
 HPC: High Performance Computing
 I/O: Input/Output
 INL: Idaho National Laboratory
 JFNK: Jacobian-Free Newton-Krylov
-LGPL: GNU Library General Public License
+LGPL: GNU Lesser General Public License
 MMS: Method of Manufactured Solutions
 MPI: Method Passing Interface
 MOOSE: Multiphysics Object Oriented Simulation Environment
@@ -22,6 +23,7 @@ PETSc: Portable, Extensible Toolkit for Scientific Computation
 POSIX: Portable Operating System Interface
 PDE: partial differential equation
 PDEs: partial differential equations
+PJFNK: Preconditioned Jacobian Free Newtwon Krylov
 RTM: Requirement Traceability Matrix
 SDD: Software Design Description
 SRS: Software Requirement Specification

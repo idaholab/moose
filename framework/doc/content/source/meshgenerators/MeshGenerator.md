@@ -1,7 +1,8 @@
 # MeshGenerator
 
 This is the base class of all the `MeshGenerators` systems.
-There are two types of MeshGenerators :
+
+There are two types of MeshGenerators:
 
 - Those who create a mesh (such as `AnnularMeshGenerator`, `FileMeshGenerator`,...). They are usually similar to the `Mesh` objects.
 - Those who modify an existing mesh (such as `MeshExtruderGenerator`, `StitchedMeshGenerator`,...). They are usually similar to `MeshModifier` objects.
@@ -10,7 +11,7 @@ The point of these objects is to create complex meshes using only one input file
 
 ## Input File Example
 
-For instance, let's take a look at the following input file :
+For instance, take a look at the following input file:
 
 ```
 [MeshGenerators]
@@ -51,6 +52,6 @@ For instance, let's take a look at the following input file :
 []
 ```
 
-First of all, one thing to notice is that you have several `MeshGenerator` blocks, but you only have one `Mesh` block, which is of type "MeshGeneratorMesh".
+Structurally, notice that one can have several `MeshGenerator` blocks, but only one `Mesh` block of type `MeshGeneratorMesh`.
 
-Let's analyse the different steps. First, we use a GeneratedMeshGenerator to create a 3D mesh (here it's simply a regular cube). After that, we use this mesh as an input (that's what `input = gmg` means) to create a larger mesh using a TiledMeshGenerator.
+Let's analyze the different steps. First, we use a `GeneratedMeshGenerator` to create a 3D mesh labeled `gmg` (here it's simply a regular cube). After that, we use this mesh as an input (via `input = gmg`) to create a larger mesh using a `TiledMeshGenerator`.

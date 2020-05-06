@@ -39,6 +39,15 @@
 
       detail = 'truncated normal,'
     []
+    [lognormal]
+      type = CSVDiff
+      input = lognormal.i
+      csvdiff = 'lognormal_out.csv'
+      allow_test_objects = true
+
+      detail = 'lognormal,'
+    []
+
 
     [johnsonsb]
       type = CSVDiff

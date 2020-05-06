@@ -1,10 +1,12 @@
 # AnnularMeshGenerator
 
+!syntax description /MeshGenerators/AnnularMeshGenerator
+
 ## Overview
 
 This MeshGenerator object creates a mesh with an annular shape, and Quad4 elements distributed on several rings. The user can choose the inner and outer radii, as well as the number of elements in the radial and angular directions.
 
-It is also possible to create a disc-shaped mesh with this class. To do so, the user has to choose 0 for the value of the inner radius. This will create a mesh composed of Tri3 elements at the center of the disc, and Quad4 everywhere else.
+It is also possible to create a disc-shaped mesh with this class. To do so, the user has to choose 0 for the value of the inner radius. This will create a mesh composed of TRI3 elements at the center of the disc, and QUAD4 everywhere else.
 
 If $dmin \neq 0$ and $dmax \neq 360$, this will create a fraction of an annulus or disc.
 
@@ -24,8 +26,6 @@ Sidesets are also created:
 - Sideset 1 is called "rmax" and is the set of sides at the maximum radius.
 - Sideset 2 is called "dmin" and is the set of sides at the minimum angle, which is created only in the case of a sector of an annulus (or disc)
 - Sideset 3 is called "dmax" and is the set of sides at the maximum angle, which is created only in the case of a sector of an annulus (or disc)
-
-## Further AnnularMeshGenerator Documentation
 
 !syntax parameters /MeshGenerators/AnnularMeshGenerator
 

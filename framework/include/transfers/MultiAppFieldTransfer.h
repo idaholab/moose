@@ -13,7 +13,7 @@
 
 // Forward declarations
 class MultiAppFieldTransfer;
-class MooseVariableFEBase;
+class MooseVariableFieldBase;
 namespace libMesh
 {
 class DofObject;
@@ -45,8 +45,8 @@ protected:
    */
   void transferDofObject(libMesh::DofObject * to_object,
                          libMesh::DofObject * from_object,
-                         MooseVariableFEBase & to_var,
-                         MooseVariableFEBase & from_var);
+                         MooseVariableFieldBase & to_var,
+                         MooseVariableFieldBase & from_var);
 
   /// Virtual function defining variables to be transferred
   virtual std::vector<VariableName> getFromVarNames() const = 0;

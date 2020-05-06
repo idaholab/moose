@@ -88,7 +88,12 @@ public:
    *
    * Note that this does _not_ free unused memory.
    * This is done for speed.
+   *
+   * @param size The new size of the array
+   * @tparam value_initialize Whether to perform value initialization of the array instead of
+   * default initialization
    */
+  template <bool value_initialize = false>
   void resize(unsigned int size);
 
   /**
@@ -214,6 +219,7 @@ MooseArray<T>::clear()
 }
 
 template <typename T>
+template <bool value_initialize>
 inline void
 MooseArray<T>::resize(unsigned int size)
 {
@@ -221,7 +227,10 @@ MooseArray<T>::resize(unsigned int size)
     _size = size;
   else
   {
-    _data_ptr.reset(new T[size]);
+    if (value_initialize)
+      _data_ptr.reset(new T[size]());
+    else
+      _data_ptr.reset(new T[size]);
     mooseAssert(_data_ptr, "Failed to allocate MooseArray memory!");
 
     _data = _data_ptr.get();

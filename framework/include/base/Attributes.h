@@ -54,14 +54,23 @@ std::ostream & operator<<(std::ostream & os, Interfaces & iface);
     return h;                                                                                      \
   }
 
+/// AttribTagBase tracks all (vector or matrix) tags associated with an object.
+/// When running queries, an object matches true if it has at least one tag in
+/// common with the tags in the query attribute.
 class AttribTagBase : public Attribute
 {
 public:
   AttribTagBase(TheWarehouse & w, const std::string & attrib_name) : Attribute(w, attrib_name) {}
-  AttribTagBase(TheWarehouse & w, unsigned int tag, const std::string & attrib_name)
+  AttribTagBase(TheWarehouse & w, TagID tag, const std::string & attrib_name)
     : Attribute(w, attrib_name)
   {
     _vals.push_back(tag);
+  }
+  AttribTagBase(TheWarehouse & w, const std::set<TagID> tags, const std::string & attrib_name)
+    : Attribute(w, attrib_name)
+  {
+    for (auto tag : tags)
+      _vals.push_back(tag);
   }
 
   virtual bool isMatch(const Attribute & other) const override;
@@ -69,7 +78,7 @@ public:
   hashfunc(_vals);
 
 protected:
-  std::vector<unsigned int> _vals;
+  std::vector<TagID> _vals;
 };
 
 class AttribMatrixTags : public AttribTagBase
@@ -83,7 +92,11 @@ public:
   }
 
   AttribMatrixTags(TheWarehouse & w) : AttribTagBase(w, "matrix_tags") {}
-  AttribMatrixTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "matrix_tags") {}
+  AttribMatrixTags(TheWarehouse & w, TagID tag) : AttribTagBase(w, tag, "matrix_tags") {}
+  AttribMatrixTags(TheWarehouse & w, const std::set<TagID> & tags)
+    : AttribTagBase(w, tags, "matrix_tags")
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
   clonefunc(AttribMatrixTags);
 };
@@ -101,7 +114,11 @@ public:
   }
 
   AttribVectorTags(TheWarehouse & w) : AttribTagBase(w, "vector_tags") {}
-  AttribVectorTags(TheWarehouse & w, unsigned int tag) : AttribTagBase(w, tag, "vector_tags") {}
+  AttribVectorTags(TheWarehouse & w, TagID tag) : AttribTagBase(w, tag, "vector_tags") {}
+  AttribVectorTags(TheWarehouse & w, const std::set<TagID> & tags)
+    : AttribTagBase(w, tags, "vector_tags")
+  {
+  }
   virtual void initFrom(const MooseObject * obj) override;
 };
 
@@ -155,6 +172,9 @@ private:
   std::vector<SubdomainID> _vals;
 };
 
+/// AttribBoundaries tracks all boundary IDs associated with an object.
+/// When running queries, an object matches true if it has at least one
+/// boundary id in common with the boundary IDs in the query attribute.
 class AttribBoundaries : public Attribute
 {
 public:
@@ -171,6 +191,14 @@ public:
     : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
   {
     _vals.push_back(id);
+  }
+  AttribBoundaries(TheWarehouse & w,
+                   const std::set<BoundaryID> ids,
+                   bool must_be_restricted = false)
+    : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
+  {
+    for (auto id : ids)
+      _vals.push_back(id);
   }
   virtual void initFrom(const MooseObject * obj) override;
   virtual bool isMatch(const Attribute & other) const override;
@@ -234,6 +262,36 @@ public:
   virtual bool isEqual(const Attribute & other) const override;
   hashfunc(_val);
   clonefunc(AttribPreAux);
+
+private:
+  bool _val = false;
+};
+
+/// TODO: delete this later - it is a temporary hack for dealing with inter-system dependencies
+///
+/// this attribute was added to ensure that UOs are uniquely assigned a single group to
+/// prevent multiple executions when it is queried in FEProblemBase::computeUserObjectsInternal()
+/// for a given exec flag time.
+///
+/// By default, this attribute is set to true for all UOs by computeUserObjectsThread::groupUserObjects(),
+/// and thus all UOs would be executed with the Moose::POST_AUX group.
+///
+/// However, if either AttribPreIC or AttribPreAux is set to true, then this attribute is set
+/// to false, which prevents a UO from being, unnecesarily, executed along with more than one AuxGroup.
+///
+class AttribPostAux : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(Key k) { _val = k; }
+
+  AttribPostAux(TheWarehouse & w) : Attribute(w, "post_aux") {}
+  AttribPostAux(TheWarehouse & w, bool post_aux) : Attribute(w, "post_aux"), _val(post_aux) {}
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribPostAux);
 
 private:
   bool _val = false;

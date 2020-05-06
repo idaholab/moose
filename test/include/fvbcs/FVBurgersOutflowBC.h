@@ -7,17 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseVariableFE.h"
+#pragma once
 
-defineLegacyParams(MooseVariableFEBase);
+#include "FVFluxBC.h"
 
-InputParameters
-MooseVariableFEBase::validParams()
+/**
+ * Constant velocity scalar advection boundary conditions
+ */
+class FVBurgersOutflowBC : public FVFluxBC
 {
-  return MooseVariableBase::validParams();
-}
+public:
+  FVBurgersOutflowBC(const InputParameters & parameters);
 
-MooseVariableFEBase::MooseVariableFEBase(const InputParameters & parameters)
-  : MooseVariableBase(parameters)
-{
-}
+  static InputParameters validParams();
+
+protected:
+  virtual ADReal computeQpResidual() override;
+};

@@ -45,11 +45,10 @@ ParsedGenerateSideset::validParams()
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
-  params.addClassDescription("A MeshModifier that adds element's sides to a sideset if the "
-                             "centroid satisfies the combinatorial_geometry expression, (and "
-                             "optionally) "
-                             "if one of the side's elements is in included_subdomain_ids and if it "
-                             "features the correct normal.");
+  params.addClassDescription("A MeshModifier that adds element sides to a sideset if the "
+                             "centroid satisfies the `combinatorial_geometry` expression. "
+                             "Optionally, element sides are also added if they are included in "
+                             "`included_subdomain_ids` and if they feature the designated normal.");
 
   return params;
 }

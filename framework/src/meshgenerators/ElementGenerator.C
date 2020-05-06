@@ -54,10 +54,10 @@ ElementGenerator::validParams()
   params.addRequiredParam<std::vector<dof_id_type>>("element_connectivity",
                                                     "List of nodes to use for each element");
 
-  params.addParam<MooseEnum>("elem_type",
-                             elem_types,
-                             "The type of element from libMesh to "
-                             "generate");
+  params.addParam<MooseEnum>(
+      "elem_type", elem_types, "The type of element from libMesh to generate");
+
+  params.addClassDescription("Generates individual elements given a list of nodal positions.");
 
   return params;
 }

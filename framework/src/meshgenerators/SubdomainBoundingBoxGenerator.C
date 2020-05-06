@@ -10,6 +10,7 @@
 #include "SubdomainBoundingBoxGenerator.h"
 #include "Conversion.h"
 #include "CastUniquePointer.h"
+#include "MooseUtils.h"
 
 #include "libmesh/elem.h"
 
@@ -48,8 +49,8 @@ SubdomainBoundingBoxGenerator::SubdomainBoundingBoxGenerator(const InputParamete
     _input(getMesh("input")),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<subdomain_id_type>("block_id")),
-    _bounding_box(parameters.get<RealVectorValue>("bottom_left"),
-                  parameters.get<RealVectorValue>("top_right"))
+    _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
+                                               parameters.get<RealVectorValue>("top_right")))
 {
 }
 

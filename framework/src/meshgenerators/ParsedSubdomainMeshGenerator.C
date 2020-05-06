@@ -41,10 +41,10 @@ ParsedSubdomainMeshGenerator::validParams()
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
-  params.addClassDescription("MeshModifier that uses a parsed expression (combinatorial_geometry) "
-                             "to determine if an element (aka its centroid) is inside the "
-                             "combinatorial geometry and "
-                             "assigns a new block id.");
+  params.addClassDescription(
+      "Uses a parsed expression (`combinatorial_geometry`) to determine if an "
+      "element (via its centroid) is inside the region defined by the expression and "
+      "assigns a new block ID.");
 
   return params;
 }

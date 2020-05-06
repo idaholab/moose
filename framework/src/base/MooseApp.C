@@ -362,6 +362,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribThread>("thread", 0);
   _the_warehouse->registerAttribute<AttribPreIC>("pre_ic", 0);
   _the_warehouse->registerAttribute<AttribPreAux>("pre_aux", 0);
+  _the_warehouse->registerAttribute<AttribPostAux>("post_aux", 0);
   _the_warehouse->registerAttribute<AttribName>("name", "dummy");
   _the_warehouse->registerAttribute<AttribSystem>("system", "dummy");
   _the_warehouse->registerAttribute<AttribVar>("variable", 0);

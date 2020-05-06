@@ -268,7 +268,7 @@ protected:
 
 private:
   /// Field variables coupled into this object (for error checking)
-  std::unordered_map<std::string, std::vector<MooseVariableFEBase *>> _sc_coupled_vars;
+  std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> _sc_coupled_vars;
 
   std::set<TagID> _sc_coupleable_vector_tags;
 

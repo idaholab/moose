@@ -16,7 +16,7 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -38,6 +38,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
                              ? _c_parameters.get<bool>("_neighbor")
                              : false),
     _coupleable_max_qps(_c_fe_problem.getMaxQps()),
+    _is_fv(is_fv),
     _obj(moose_object)
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
@@ -56,7 +57,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
       {
         if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariableFEBase * moose_var =
+          MooseVariableFieldBase * moose_var =
               &problem.getVariable(_c_tid,
                                    coupled_var_name,
                                    Moose::VarKindType::VAR_ANY,
@@ -69,6 +70,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
             _coupled_vector_moose_vars.push_back(tmp_var);
           else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(moose_var))
             _coupled_array_moose_vars.push_back(tmp_var);
+          else if (auto * tmp_var = dynamic_cast<MooseVariableFV<Real> *>(moose_var))
+            _coupled_standard_fv_moose_vars.push_back(tmp_var);
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
         }
@@ -194,52 +197,60 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
   auto bound = comp_bound ? comp_bound : _coupled_vars[var_name].size();
   checkComponent(_obj, comp, bound, var_name);
 
+  // We should know we have a variable now
+  MooseVariableFieldBase * var = _coupled_vars[var_name][comp];
+  if (!var)
+    mooseError(
+        _c_name,
+        ": We did all our checks for the existence of a var, yet we still don't have a var!?");
+
+  // Only perform the following checks for objects that feed into residuals/Jacobians, e.g. objects
+  // that inherit from the TaggingInterface
+  if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
+  {
+    // Are we attempting to couple to an FV var in a non-FV object?
+    if (var->isFV() && !_is_fv)
+      mooseError("Attempting to couple FV variable ",
+                 var->name(),
+                 " into a non-FV object ",
+                 _c_name,
+                 ". This is not currently supported");
+
+    // Are we attempting to couple to a non-FV var in an FV object?
+    if (!var->isFV() && _is_fv)
+      mooseError("Attempting to couple non-FV variable ",
+                 var->name(),
+                 " into an FV object ",
+                 _c_name,
+                 ". This is not currently supported");
+  }
+
   if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
 
   return true;
 }
 
-MooseVariableFEBase *
+MooseVariableFieldBase *
 Coupleable::getFEVar(const std::string & var_name, unsigned int comp)
+{
+  mooseDeprecated("Coupleable::getFEVar is deprecated. Please use Coupleable::getFieldVar instead. "
+                  "Note that this method could potentially return a finite volume variable");
+  return getFieldVar(var_name, comp);
+}
+
+MooseVariableFieldBase *
+Coupleable::getFieldVar(const std::string & var_name, unsigned int comp)
 {
   if (!checkVar(var_name, comp, 0))
     return nullptr;
   return _coupled_vars[var_name][comp];
 }
 
-template <typename T>
-MooseVariableFE<T> *
-Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
-{
-  if (!checkVar(var_name, comp, 0))
-    return nullptr;
-
-  if (auto * coupled_var = dynamic_cast<MooseVariableFE<T> *>(_coupled_vars[var_name][comp]))
-    return coupled_var;
-  else
-  {
-    for (auto & var : _coupled_standard_moose_vars)
-      if (var->name() == var_name)
-        mooseError("The named variable is a standard variable, try a "
-                   "'coupled[Value/Gradient/Dot/etc]...' function instead");
-    for (auto & var : _coupled_vector_moose_vars)
-      if (var->name() == var_name)
-        mooseError("The named variable is a vector variable, try a "
-                   "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
-    for (auto & var : _coupled_array_moose_vars)
-      if (var->name() == var_name)
-        mooseError("The named variable is an array variable, try a "
-                   "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
-    mooseError(
-        "Variable '", var_name, "' is of a different C++ type than you tried to fetch it as.");
-  }
-}
-
 MooseVariable *
 Coupleable::getVar(const std::string & var_name, unsigned int comp)
 {
-  return getVarHelper<Real>(var_name, comp);
+  return getVarHelper<MooseVariable>(var_name, comp);
 }
 
 VectorMooseVariable *
@@ -251,13 +262,13 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
                "' uses vector variables which are not required to be continuous. Don't use vector "
                "variables"
                "with nodal compute objects.");
-  return getVarHelper<RealVectorValue>(var_name, comp);
+  return getVarHelper<VectorMooseVariable>(var_name, comp);
 }
 
 ArrayMooseVariable *
 Coupleable::getArrayVar(const std::string & var_name, unsigned int comp)
 {
-  return getVarHelper<RealEigenVector>(var_name, comp);
+  return getVarHelper<ArrayMooseVariable>(var_name, comp);
 }
 
 VariableValue *
@@ -363,7 +374,7 @@ Coupleable::getDefaultNodalValue<RealEigenVector>(const std::string & var_name, 
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
-  MooseVariableFEBase * var = getFEVar(var_name, comp);
+  MooseVariableFieldBase * var = getFieldVar(var_name, comp);
   if (!var)
   {
     // make sure we don't try to access default var ids that were not provided
@@ -1116,7 +1127,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSln() : var->secondSlnOlder();
@@ -1129,7 +1140,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
+  checkFuncType(var_name, VarType::Second, FuncAge::Old);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
@@ -1142,7 +1153,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   MooseVariable * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
+  checkFuncType(var_name, VarType::Second, FuncAge::Older);
 
   if (!_coupleable_neighbor)
     return var->secondSlnOlder();
@@ -1156,7 +1167,7 @@ Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int c
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
     return _default_second;
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_coupleable_neighbor)
     return var->secondSlnPreviousNL();
@@ -1167,7 +1178,7 @@ template <typename T>
 const T &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1187,7 +1198,7 @@ template <typename T>
 const T &
 Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp)
 {
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -1207,7 +1218,7 @@ template <typename T>
 const T &
 Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp)
 {
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -1227,7 +1238,7 @@ template <typename T>
 const T &
 Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp)
 {
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1244,7 +1255,7 @@ const T &
 Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 {
   static const T zero = 0;
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -1364,7 +1375,7 @@ Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
                "adCoupledNodalValue");
 
   coupledCallback(var_name, false);
-  MooseVariableFE<T> * var = getVarHelper<T>(var_name, comp);
+  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
 
   return var->adNodalValue();
 }
@@ -1372,7 +1383,8 @@ Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
 const ADVariableValue &
 Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1390,7 +1402,8 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 const ADVariableGradient &
 Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return getADDefaultGradient();
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1406,10 +1419,11 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
 const ADVariableSecond &
 Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return getADDefaultSecond();
-  checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
+  checkFuncType(var_name, VarType::Second, FuncAge::Curr);
 
   if (!_c_is_implicit)
     mooseError("Not implemented");
@@ -1430,7 +1444,8 @@ adCoupledVectorSecond(const std::string & /*var_name*/, unsigned int /*comp = 0*
 const ADVariableValue &
 Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
   if (!var)
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -1564,12 +1579,6 @@ Coupleable::adZeroSecond()
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,
                                                              unsigned int comp);
-
-template MooseVariableFE<Real> * Coupleable::getVarHelper<Real>(const std::string & var_name,
-                                                                unsigned int comp);
-
-template MooseVariableFE<RealVectorValue> *
-Coupleable::getVarHelper<RealVectorValue>(const std::string & var_name, unsigned int comp);
 
 template const Real & Coupleable::coupledNodalValue<Real>(const std::string & var_name,
                                                           unsigned int comp);

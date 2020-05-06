@@ -33,7 +33,7 @@ AllSideSetsByNormalsGenerator::validParams()
   InputParameters params = SideSetsGeneratorBase::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-
+  params.addClassDescription("Adds sidesets to the entire mesh based on unique normals.");
   return params;
 }
 
