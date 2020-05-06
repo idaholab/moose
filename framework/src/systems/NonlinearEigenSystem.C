@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "DirichletBC.h"
 #include "EigenDirichletBC.h"
+#include "ArrayDirichletBC.h"
+#include "EigenArrayDirichletBC.h"
 #include "EigenProblem.h"
 #include "IntegratedBC.h"
 #include "KernelBase.h"
@@ -291,13 +293,32 @@ NonlinearEigenSystem::checkIntegrity()
     const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
     for (const auto & nodal_bc : nodal_bcs)
     {
+      // If this is a dirichlet boundary condition
       auto nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      // If this is a eigen Dirichlet boundary condition
       auto eigen_nbc = std::dynamic_pointer_cast<EigenDirichletBC>(nodal_bc);
+      // ArrayDirichletBC
+      auto anbc = std::dynamic_pointer_cast<ArrayDirichletBC>(nodal_bc);
+      // EigenArrayDirichletBC
+      auto aeigen_nbc = std::dynamic_pointer_cast<EigenArrayDirichletBC>(nodal_bc);
+      // If it is a Dirichlet boundary condition, then value has to be zero
       if (nbc && nbc->getParam<Real>("value"))
         mooseError(
             "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
-      else if (!nbc && !eigen_nbc)
-        mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
+      // If it is an array Dirichlet boundary condition, all values should be zero
+      else if (anbc)
+      {
+        auto & values = anbc->getParam<RealEigenVector>("values");
+        for (MooseIndex(values) i = 0; i < values.size(); i++)
+        {
+          if (values(i))
+            mooseError("Can't set an inhomogeneous array Dirichlet boundary condition for "
+                       "eigenvalue problems.");
+        }
+      }
+      else if (!nbc && !eigen_nbc && !anbc && !aeigen_nbc)
+        mooseError(
+            "Invalid NodalBC for eigenvalue problems, please use homogeneous (array) Dirichlet.");
     }
   }
 }

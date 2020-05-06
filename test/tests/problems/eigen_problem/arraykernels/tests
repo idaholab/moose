@@ -1,0 +1,22 @@
+[Tests]
+   design = "Eigenvalue.md"
+   issues = "#7398"
+
+  [./array_kernel]
+    type = 'CSVDiff'
+    input = 'ne_array_kernels.i'
+    csvdiff = 'ne_array_kernels_out_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "Eigenvalue system should support array kernels"
+  [../]
+
+  [./two_variables]
+    type = 'CSVDiff'
+    input = 'ne_two_variables.i'
+    csvdiff = 'ne_two_variables_out_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "Eigenvalue system should be able to handle multiple variables"
+  [../]
+[]
