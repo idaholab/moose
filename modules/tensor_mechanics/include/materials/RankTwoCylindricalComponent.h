@@ -11,6 +11,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankTwoScalarTools.h"
 
 /// RankTwoCylindricalComponent computes cylindrical scalar values from Rank-2 tensors.
 template <bool is_ad>
@@ -33,7 +34,7 @@ protected:
   /// Stress/strain value returned from calculation
   GenericMaterialProperty<Real, is_ad> & _property;
 
-  MooseEnum _cylindrical_component;
+  RankTwoScalarTools::CYLINDRICAL_TYPE _cylindrical_component;
 
   /// Point 1 used to determine the axis of rotation
   const Point _cylindrical_axis_point1;

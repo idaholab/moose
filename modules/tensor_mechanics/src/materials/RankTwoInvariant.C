@@ -25,8 +25,12 @@ RankTwoInvariantTempl<is_ad>::validParams()
                                                 "The rank two material tensor name");
   params.addRequiredParam<std::string>("property_name",
                                        "Name of the material property computed by this model");
-  params.addParam<MooseEnum>(
-      "invariant", RankTwoScalarTools::mixedInvariantComponentOptions(), "Type of scalar output");
+  MooseEnum mixedInvariants(
+      "VonMisesStress EffectiveStrain Hydrostatic L2norm VolumetricStrain FirstInvariant "
+      "SecondInvariant ThirdInvariant TriaxialityStress MaxShear StressIntensity MaxPrincipal "
+      "MidPrincipal MinPrincipal");
+
+  params.addParam<MooseEnum>("invariant", mixedInvariants, "Type of invariant output");
 
   return params;
 }
@@ -38,7 +42,8 @@ RankTwoInvariantTempl<is_ad>::RankTwoInvariantTempl(const InputParameters & para
     _property_name(
         isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
     _property(declareGenericProperty<Real, is_ad>(_property_name)),
-    _invariant(getParam<MooseEnum>("invariant"))
+    _invariant(
+        getParam<MooseEnum>("invariant").template getEnum<RankTwoScalarTools::INVARIANT_TYPE>())
 {
 }
 
@@ -53,17 +58,36 @@ template <bool is_ad>
 void
 RankTwoInvariantTempl<is_ad>::computeQpProperties()
 {
-  if (_property_name == "max_principal_stress" || _property_name == "mid_principal_stress" ||
-      _property_name == "min_principal_stress")
+  switch (_invariant)
   {
-    Point dummy_direction;
-    _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
-        MetaPhysicL::raw_value(_tensor[_qp]), _invariant, dummy_direction);
+    case RankTwoScalarTools::INVARIANT_TYPE::MaxPrincipal:
+    case RankTwoScalarTools::INVARIANT_TYPE::MidPrincipal:
+    case RankTwoScalarTools::INVARIANT_TYPE::MinPrincipal:
+    {
+      Point dummy_direction;
+      _property[_qp] = RankTwoScalarTools::getPrincipalComponent(
+          MetaPhysicL::raw_value(_tensor[_qp]), _invariant, dummy_direction);
+      break;
+    }
+    case RankTwoScalarTools::INVARIANT_TYPE::VonMisesStress:
+    case RankTwoScalarTools::INVARIANT_TYPE::EffectiveStrain:
+    case RankTwoScalarTools::INVARIANT_TYPE::Hydrostatic:
+    case RankTwoScalarTools::INVARIANT_TYPE::L2norm:
+    case RankTwoScalarTools::INVARIANT_TYPE::VolumetricStrain:
+    case RankTwoScalarTools::INVARIANT_TYPE::FirstInvariant:
+    case RankTwoScalarTools::INVARIANT_TYPE::SecondInvariant:
+    case RankTwoScalarTools::INVARIANT_TYPE::ThirdInvariant:
+    case RankTwoScalarTools::INVARIANT_TYPE::TriaxialityStress:
+    case RankTwoScalarTools::INVARIANT_TYPE::MaxShear:
+    case RankTwoScalarTools::INVARIANT_TYPE::StressIntensity:
+    {
+      _property[_qp] =
+          RankTwoScalarTools::getInvariant(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
+      break;
+    }
+    default:
+      mooseError("Not a recognized invariant for RankTwoInvariant");
   }
-  if (_property_name != "max_principal_stress" && _property_name != "mid_principal_stress" &&
-      _property_name != "min_principal_stress")
-    _property[_qp] =
-        RankTwoScalarTools::getInvariant(MetaPhysicL::raw_value(_tensor[_qp]), _invariant);
 }
 
 template class RankTwoInvariantTempl<false>;

@@ -11,6 +11,7 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankTwoScalarTools.h"
 
 /// RankTwoInvariant computes invariant scalar values from Rank-2 tensors.
 template <bool is_ad>
@@ -33,7 +34,7 @@ protected:
   /// Stress/strain value returned from calculation
   GenericMaterialProperty<Real, is_ad> & _property;
 
-  MooseEnum _invariant;
+  RankTwoScalarTools::INVARIANT_TYPE _invariant;
 };
 
 typedef RankTwoInvariantTempl<false> RankTwoInvariant;
