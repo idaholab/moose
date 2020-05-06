@@ -520,6 +520,7 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
   moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.nonEigenVectorTag());
+
   PetscFunctionReturn(0);
 }
 

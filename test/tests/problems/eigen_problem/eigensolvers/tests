@@ -39,7 +39,7 @@
     type = 'RunException'
     input = 'gipm.i'
     cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
-    expect_err = "Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet."
+    expect_err = 'Invalid NodalBC for eigenvalue problems, please use homogeneous \(array\) Dirichlet.'
     slepc = true
     requirement = "Eigenvalue system should use homogeneous boundary conditions only"
   [../]
