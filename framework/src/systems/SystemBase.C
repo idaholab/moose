@@ -643,10 +643,6 @@ SystemBase::addVariable(const std::string & var_type,
         fe_type.family == MONOMIAL_VEC)
       mooseError("Vector family type cannot be used in an array variable");
 
-    // Turn off automatic variable group identification so that we can be sure that this variable
-    // group will be ordered exactly like it should be
-    system().identify_variable_groups(false);
-
     // Build up the variable names
     std::vector<std::string> var_names;
     for (unsigned int i = 0; i < components; i++)
