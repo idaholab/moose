@@ -35,5 +35,4 @@ protected:
 
 private:
   std::vector<dof_id_type> _dof_indices;
-
 };
