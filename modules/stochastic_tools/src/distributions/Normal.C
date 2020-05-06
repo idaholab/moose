@@ -53,13 +53,14 @@ Normal::cdf(const Real & x, const Real & mean, const Real & std_dev)
 Real
 Normal::quantile(const Real & p, const Real & mean, const Real & std_dev)
 {
-  Real x = (p < 0.5 ? p : 1.0 - p);
-  Real y = std::sqrt(-2.0 * std::log(x));
-  Real sgn = (p - 0.5 < 0.0 ? -1.0 : 1.0);
-  Real Zp = sgn * (y + (_a[0] + _a[1] * y + _a[2] * Utility::pow<2>(y) +
-                        _a[3] * Utility::pow<3>(y) + _a[4] * Utility::pow<4>(y)) /
-                           (_b[0] + _b[1] * y + _b[2] * Utility::pow<2>(y) +
-                            _b[3] * Utility::pow<3>(y) + _b[4] * Utility::pow<4>(y)));
+  const Real x = (p < 0.5 ? p : 1.0 - p);
+  const Real y = std::sqrt(-2.0 * std::log(x));
+  const Real y2 = y * y;
+  const Real y3 = y2 * y;
+  const Real y4 = y3 * y;
+  const Real sgn = (p - 0.5 < 0.0 ? -1.0 : 1.0);
+  const Real Zp = sgn * (y + (_a[0] + _a[1] * y + _a[2] * y2 + _a[3] * y3 + _a[4] * y4) /
+                                 (_b[0] + _b[1] * y + _b[2] * y2 + _b[3] * y3 + _b[4] * y4));
   return Zp * std_dev + mean;
 }
 
