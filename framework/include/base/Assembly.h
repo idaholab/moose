@@ -71,24 +71,31 @@ void coordTransformFactor(SubProblem & s, SubdomainID sub_id, const P & point, C
 struct JacEntry
 {
 public:
-  JacEntry(TagID t,
-           MooseVariableBase * i_var,
-           MooseVariableBase * j_var,
-           const Elem * i_elem,
-           const Elem * j_elem)
-    : tag(t), ivar(i_var), jvar(j_var)
+  JacEntry() {}
+  void initialize(TagID t,
+                  MooseVariableBase * i_var,
+                  MooseVariableBase * j_var,
+                  const Elem * i_elem,
+                  const Elem * j_elem)
   {
+    tag = t;
+    ivar = i_var;
+    jvar = j_var;
     ivar->getDofIndices(i_elem, iindices);
     jvar->getDofIndices(j_elem, jindices);
     matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
   }
-  JacEntry(TagID t,
-           MooseVariableBase * i_var,
-           MooseVariableBase * j_var,
-           const std::vector<dof_id_type> & i_indices,
-           const std::vector<dof_id_type> & j_indices)
-    : tag(t), ivar(i_var), jvar(j_var), iindices(i_indices), jindices(j_indices)
+  void initialize(TagID t,
+                  MooseVariableBase * i_var,
+                  MooseVariableBase * j_var,
+                  const std::vector<dof_id_type> & i_indices,
+                  const std::vector<dof_id_type> & j_indices)
   {
+    tag = t;
+    ivar = i_var;
+    jvar = j_var;
+    iindices = i_indices;
+    jindices = j_indices;
     matrix.resize(iindices.size() * ivar->count(), jindices.size() * jvar->count());
   }
 
@@ -1609,7 +1616,24 @@ private:
   SystemBase & _sys;
   SubProblem & _subproblem;
 
-  std::vector<JacEntry> _jac_entries;
+  inline JacEntry * getJacEntry()
+  {
+    if (_jac_buffer_index >= _jac_buffer.size())
+      _jac_buffer.emplace_back(new JacEntry());
+    auto entry = _jac_buffer[_jac_buffer_index++].get();
+    _jac_entries.push_back(entry);
+    return entry;
+  }
+
+  inline void resetJacEntries()
+  {
+    _jac_entries.clear();
+    _jac_buffer_index = 0;
+  }
+
+  std::vector<JacEntry *> _jac_entries;
+  std::vector<std::unique_ptr<JacEntry>> _jac_buffer;
+  size_t _jac_buffer_index = 0;
 
   const bool _displaced;
 

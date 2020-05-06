@@ -2745,23 +2745,24 @@ void
 Assembly::addJacobianGeneral()
 {
   for (auto & entry : _jac_entries)
-    if (_sys.hasMatrix(entry.tag))
-      addJacobianBlock(_sys.getMatrix(entry.tag),
-                       entry.matrix,
-                       *entry.ivar,
-                       *entry.jvar,
-                       entry.iindices,
-                       entry.jindices);
-  _jac_entries.clear();
+    if (_sys.hasMatrix(entry->tag))
+      addJacobianBlock(_sys.getMatrix(entry->tag),
+                       entry->matrix,
+                       *entry->ivar,
+                       *entry->jvar,
+                       entry->iindices,
+                       entry->jindices);
+  resetJacEntries();
 }
 
 DenseMatrix<Number> &
 Assembly::jacobianBlockGeneral(
     unsigned int ivar, unsigned int jvar, const Elem * ielem, const Elem * jelem, TagID tag)
 {
-  _jac_entries.emplace_back(
+  auto entry = getJacEntry();
+  entry->initialize(
       tag, &_sys.getVariable(_tid, ivar), &_sys.getVariable(_tid, jvar), ielem, jelem);
-  return _jac_entries.back().matrix;
+  return entry->matrix;
 }
 DenseMatrix<Number> &
 Assembly::jacobianBlockGeneral(unsigned int ivar,
@@ -2770,9 +2771,10 @@ Assembly::jacobianBlockGeneral(unsigned int ivar,
                                const std::vector<dof_id_type> & j_indices,
                                TagID tag)
 {
-  _jac_entries.emplace_back(
+  auto entry = getJacEntry();
+  entry->initialize(
       tag, &_sys.getVariable(_tid, ivar), &_sys.getVariable(_tid, jvar), i_indices, j_indices);
-  return _jac_entries.back().matrix;
+  return entry->matrix;
 }
 
 DenseMatrix<Number> &
@@ -3610,10 +3612,10 @@ void
 Assembly::cacheJacobianNeighbor()
 {
   for (auto & entry : _jac_entries)
-    if (_sys.hasMatrix(entry.tag))
+    if (_sys.hasMatrix(entry->tag))
       cacheJacobianBlock(
-          entry.matrix, *entry.ivar, *entry.jvar, entry.iindices, entry.jindices, entry.tag);
-  _jac_entries.clear();
+          entry->matrix, *entry->ivar, *entry->jvar, entry->iindices, entry->jindices, entry->tag);
+  resetJacEntries();
 }
 
 void
