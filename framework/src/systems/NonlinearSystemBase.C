@@ -1371,10 +1371,15 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     ComputeResidualThread cr(_fe_problem, tags);
     Threads::parallel_reduce(elem_range, cr);
 
-    using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
-    ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
-    FVRange faces(&_fe_problem.mesh().faceInfo());
-    Threads::parallel_reduce(faces, fvr);
+    // this if guard prevents the faceInfo call below from causing all face
+    // data to be built unnecessarily.
+    if (_fe_problem.haveFV())
+    {
+      using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+      ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
+      FVRange faces(&_fe_problem.mesh().faceInfo());
+      Threads::parallel_reduce(faces, fvr);
+    }
 
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
@@ -2357,12 +2362,17 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         ComputeJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
 
-        // the same loop works for both residual and jacobians because it keys
-        // off of FEProblem's _currently_computing_jacobian parameter
-        using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
-        ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
-        FVRange faces(&_fe_problem.mesh().faceInfo());
-        Threads::parallel_reduce(faces, fvj);
+        // this if guard prevents the faceInfo call below from causing all face
+        // data to be built unnecessarily.
+        if (_fe_problem.haveFV())
+        {
+          // the same loop works for both residual and jacobians because it keys
+          // off of FEProblem's _currently_computing_jacobian parameter
+          using FVRange = StoredRange<std::vector<FaceInfo>::const_iterator, FaceInfo>;
+          ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+          FVRange faces(&_fe_problem.mesh().faceInfo());
+          Threads::parallel_reduce(faces, fvj);
+        }
 
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
