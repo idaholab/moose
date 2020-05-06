@@ -8,7 +8,6 @@ tensors such as stress or strain. These functions are not directly invoked in th
 input file, but are called by several other classes such as:
 [RankTwoCylindricalComponent](/RankTwoCylindricalComponent.md),
 [RankTwoDirectionalComponent](/RankTwoDirectionalComponent.md),
-[RankTwoTensorComponent](/RankTwoTensorComponent.md),
 [RankTwoCartesianComponent](/RankTwoCartesianComponent.md),
 [RankTwoInvariant](/RankTwoInvariant.md),
 [RankTwoScalarAux](/RankTwoScalarAux.md),
