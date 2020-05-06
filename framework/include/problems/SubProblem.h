@@ -373,6 +373,7 @@ public:
                               bool suppress_displaced_init = false) = 0;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid) = 0;
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;

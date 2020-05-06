@@ -126,7 +126,10 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 }
 
 void
-ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+ComputeUserObjectsThread::onBoundary(const Elem * elem,
+                                     unsigned int side,
+                                     BoundaryID bnd_id,
+                                     const Elem * lowerDElem /*=nullptr*/)
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);

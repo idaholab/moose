@@ -229,7 +229,10 @@ ComputeJacobianThread::onElement(const Elem * elem)
 }
 
 void
-ComputeJacobianThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+ComputeJacobianThread::onBoundary(const Elem * elem,
+                                  unsigned int side,
+                                  BoundaryID bnd_id,
+                                  const Elem * lowerDElem /*=nullptr*/)
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {

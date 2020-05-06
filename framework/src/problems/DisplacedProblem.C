@@ -608,6 +608,22 @@ DisplacedProblem::reinitElemFace(const Elem * elem,
 }
 
 void
+DisplacedProblem::reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid)
+{
+  _assembly[tid]->reinitMortarElem(lowerDElem);
+  _displaced_nl.prepareLowerD(tid);
+  _displaced_aux.prepareLowerD(tid);
+
+  // With the dof indices set in the moose variables, now let's properly size
+  // our local residuals/Jacobians
+  _assembly[tid]->prepareLowerD();
+
+  // Let's finally compute our variable values!
+  _displaced_nl.reinitLowerD(tid);
+  _displaced_aux.reinitLowerD(tid);
+}
+
+void
 DisplacedProblem::reinitNode(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);
