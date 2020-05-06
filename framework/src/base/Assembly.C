@@ -2797,6 +2797,7 @@ Assembly::jacobianBlockNeighbor(Moose::DGJacobianType type,
       return jacobianBlockGeneral(
           ivar, jvar, i_var->dofIndicesNeighbor(), j_var->dofIndicesNeighbor(), tag);
   }
+  mooseError("invalid element type passed to jacobianBlockNeighbor");
 }
 
 DenseMatrix<Number> &
