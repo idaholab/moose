@@ -117,6 +117,31 @@ struct ModelGeochemicalDatabase
   DenseMatrix<Real> eqm_log10K;
 
   /**
+   * surface_sorption_name[k] = name of the mineral involved in surface sorption.  Each of these
+   * will be associated with a unique surface potential.
+   */
+  std::vector<std::string> surface_sorption_name;
+
+  /**
+   * surface_sorption_area[k] = specific surface area [m^2/g] for the k^th mineral involved in
+   * surface sorption.  Each mineral involved in surface sorption must have a surface_sorption_area
+   * prescribed it (in the database) and will be associated with a unique surface potential.
+   */
+  std::vector<Real> surface_sorption_area;
+
+  /// surface_sorption_related[j] = true iff the j^th equilibrium species is involved in surface sorption
+  std::vector<bool> surface_sorption_related;
+
+  /**
+   * surface_sorption_number[j] = the index of the surface potential that should be used to modify
+   * the equilibrium constant for the j^th equilibrium species.  surface_sorption_number is only
+   * meaningful if surface_sorption_related[j] = true.  0 <= surface_sorption_number[:] <
+   * surface_sorption_name.size() = number of minerals involved in surface sorption = number of
+   * surface potentials in the simulation = surface_sorption_area.size().
+   */
+  std::vector<unsigned> surface_sorption_number;
+
+  /**
    * the name of the species on the left-hand side of the redox equations.  Upon creation of the
    * model this is e-, but it may change due to swaps
    */
