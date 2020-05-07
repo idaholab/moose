@@ -176,7 +176,11 @@ NonlinearEigenSystem::solve()
 
   _eigen_values.resize(n_converged_eigenvalues);
   for (unsigned int n = 0; n < n_converged_eigenvalues; n++)
-    _eigen_values[n] = getNthConvergedEigenvalue(n);
+    _eigen_values[n] = getConvergedEigenvalue(n);
+
+  // Update the active eigenvector to the solution vector
+  if (n_converged_eigenvalues)
+    getConvergedEigenpair(_eigen_problem.activeEigenvalueIndex());
 }
 
 void
@@ -324,7 +328,16 @@ NonlinearEigenSystem::checkIntegrity()
 }
 
 const std::pair<Real, Real>
-NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
+NonlinearEigenSystem::getConvergedEigenvalue(dof_id_type n)
+{
+  unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+  if (n >= n_converged_eigenvalues)
+    mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
+  return _transient_sys.get_eigenvalue(n);
+}
+
+const std::pair<Real, Real>
+NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n)
 {
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)

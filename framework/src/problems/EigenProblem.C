@@ -233,7 +233,7 @@ EigenProblem::computeResidualL2Norm()
   Real eigenvalue = 1.0;
 
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
-    eigenvalue = _nl_eigen->getNthConvergedEigenvalue(_active_eigen_index).first;
+    eigenvalue = _nl_eigen->getConvergedEigenvalue(_active_eigen_index).first;
 
   // Scale BX with eigenvalue
   _nl_eigen->residualVectorBX() *= eigenvalue;
