@@ -10,10 +10,14 @@
 #include "RankTwoCartesianComponent.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoCartesianComponent);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("TensorMechanicsApp", RankTwoCartesianComponent);
+registerMooseObject("TensorMechanicsApp", ADRankTwoCartesianComponent);
+
+template <bool is_ad>
 InputParameters
-RankTwoCartesianComponent::validParams()
+RankTwoCartesianComponentTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Access a component of a RankTwoTensor");
@@ -32,24 +36,32 @@ RankTwoCartesianComponent::validParams()
   return params;
 }
 
-RankTwoCartesianComponent::RankTwoCartesianComponent(const InputParameters & parameters)
+template <bool is_ad>
+RankTwoCartesianComponentTempl<is_ad>::RankTwoCartesianComponentTempl(
+    const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
+    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property(declareGenericProperty<Real, is_ad>(_property_name)),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))
 {
 }
 
+template <bool is_ad>
 void
-RankTwoCartesianComponent::initQpStatefulProperties()
+RankTwoCartesianComponentTempl<is_ad>::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-RankTwoCartesianComponent::computeQpProperties()
+RankTwoCartesianComponentTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] = RankTwoScalarTools::component(_tensor[_qp], _i, _j);
+  _property[_qp] = RankTwoScalarTools::component(MetaPhysicL::raw_value(_tensor[_qp]), _i, _j);
 }
+
+template class RankTwoCartesianComponentTempl<false>;
+template class RankTwoCartesianComponentTempl<true>;

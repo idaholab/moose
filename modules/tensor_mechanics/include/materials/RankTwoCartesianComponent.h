@@ -13,28 +13,33 @@
 #include "RankTwoTensor.h"
 
 /// ADRankTwoCartesianComponent computes selected components from a Rank-2 tensors.
-class RankTwoCartesianComponent : public Material
+
+template <bool is_ad>
+class RankTwoCartesianComponentTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoCartesianComponent(const InputParameters & parameters);
+  RankTwoCartesianComponentTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
 private:
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  GenericMaterialProperty<Real, is_ad> & _property;
 
   /// Tensor component
   const unsigned int _i;
   /// Tensor component
   const unsigned int _j;
 };
+
+typedef RankTwoCartesianComponentTempl<false> RankTwoCartesianComponent;
+typedef RankTwoCartesianComponentTempl<true> ADRankTwoCartesianComponent;

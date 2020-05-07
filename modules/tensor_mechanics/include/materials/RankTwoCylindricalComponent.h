@@ -11,31 +11,36 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankTwoScalarTools.h"
 
 /// RankTwoCylindricalComponent computes cylindrical scalar values from Rank-2 tensors.
-class RankTwoCylindricalComponent : public Material
+template <bool is_ad>
+class RankTwoCylindricalComponentTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoCylindricalComponent(const InputParameters & parameters);
+  RankTwoCylindricalComponentTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  GenericMaterialProperty<Real, is_ad> & _property;
 
-  MooseEnum _cylindrical_component;
+  RankTwoScalarTools::CYLINDRICAL_COMPONENT _cylindrical_component;
 
   /// Point 1 used to determine the axis of rotation
   const Point _cylindrical_axis_point1;
   /// Point 2 used to determine the axis of rotation
   const Point _cylindrical_axis_point2;
 };
+
+typedef RankTwoCylindricalComponentTempl<false> RankTwoCylindricalComponent;
+typedef RankTwoCylindricalComponentTempl<true> ADRankTwoCylindricalComponent;

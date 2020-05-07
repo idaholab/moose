@@ -10,10 +10,14 @@
 #include "RankTwoCylindricalComponent.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoCylindricalComponent);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("TensorMechanicsApp", RankTwoCylindricalComponent);
+registerMooseObject("TensorMechanicsApp", ADRankTwoCylindricalComponent);
+
+template <bool is_ad>
 InputParameters
-RankTwoCylindricalComponent::validParams()
+RankTwoCylindricalComponentTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
@@ -22,8 +26,9 @@ RankTwoCylindricalComponent::validParams()
                                                 "The rank two material tensor name");
   params.addRequiredParam<std::string>("property_name",
                                        "Name of the material property computed by this model");
+  MooseEnum cylindricalTypes("AxialStress HoopStress RadialStress");
   params.addParam<MooseEnum>(
-      "cylindrical_component", RankTwoScalarTools::cylindricalOptions(), "Type of scalar output");
+      "cylindrical_component", cylindricalTypes, "Type of cylindrical scalar output");
   params.addParam<Point>(
       "cylindrical_axis_point1",
       "Start point for determining axis of rotation for cylindrical stress/strain components");
@@ -33,12 +38,16 @@ RankTwoCylindricalComponent::validParams()
   return params;
 }
 
-RankTwoCylindricalComponent::RankTwoCylindricalComponent(const InputParameters & parameters)
+template <bool is_ad>
+RankTwoCylindricalComponentTempl<is_ad>::RankTwoCylindricalComponentTempl(
+    const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
-    _cylindrical_component(getParam<MooseEnum>("cylindrical_component")),
+    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property(declareGenericProperty<Real, is_ad>(_property_name)),
+    _cylindrical_component(getParam<MooseEnum>("cylindrical_component")
+                               .template getEnum<RankTwoScalarTools::CYLINDRICAL_COMPONENT>()),
     _cylindrical_axis_point1(isParamValid("cylindrical_axis_point1")
                                  ? getParam<Point>("cylindrical_axis_point1")
                                  : Point(0, 0, 0)),
@@ -48,21 +57,26 @@ RankTwoCylindricalComponent::RankTwoCylindricalComponent(const InputParameters &
 {
 }
 
+template <bool is_ad>
 void
-RankTwoCylindricalComponent::initQpStatefulProperties()
+RankTwoCylindricalComponentTempl<is_ad>::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-RankTwoCylindricalComponent::computeQpProperties()
+RankTwoCylindricalComponentTempl<is_ad>::computeQpProperties()
 {
   Point dummy_direction;
 
-  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(_tensor[_qp],
+  _property[_qp] = RankTwoScalarTools::getCylindricalComponent(MetaPhysicL::raw_value(_tensor[_qp]),
                                                                _cylindrical_component,
                                                                _cylindrical_axis_point1,
                                                                _cylindrical_axis_point2,
                                                                _q_point[_qp],
                                                                dummy_direction);
 }
+
+template class RankTwoCylindricalComponentTempl<false>;
+template class RankTwoCylindricalComponentTempl<true>;

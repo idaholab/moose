@@ -6,9 +6,12 @@ This is a set of functions to compute scalar
 quantities such as invariants and components in specified directions from rank-2
 tensors such as stress or strain. These functions are not directly invoked in the
 input file, but are called by several other classes such as:
-RankTwoCylindricalComponent, RankTwoDirectionalComponent,
-RankTwoTensorComponent, RankTwoCartesian, RankTwoInvariant, RankTwoScalarAux,
-and RankTwoAux.
+[RankTwoCylindricalComponent](/RankTwoCylindricalComponent.md),
+[RankTwoDirectionalComponent](/RankTwoDirectionalComponent.md),
+[RankTwoCartesianComponent](/RankTwoCartesianComponent.md),
+[RankTwoInvariant](/RankTwoInvariant.md),
+[RankTwoScalarAux](/RankTwoScalarAux.md),
+and [RankTwoAux](/RankTwoAux.md).
 
 The scalar quantities that can be computed include:
 

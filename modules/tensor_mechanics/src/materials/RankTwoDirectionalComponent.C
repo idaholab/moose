@@ -10,10 +10,14 @@
 #include "RankTwoDirectionalComponent.h"
 #include "RankTwoScalarTools.h"
 
-registerMooseObject("TensorMechanicsApp", RankTwoDirectionalComponent);
+#include "metaphysicl/raw_type.h"
 
+registerMooseObject("TensorMechanicsApp", RankTwoDirectionalComponent);
+registerMooseObject("TensorMechanicsApp", ADRankTwoDirectionalComponent);
+
+template <bool is_ad>
 InputParameters
-RankTwoDirectionalComponent::validParams()
+RankTwoDirectionalComponentTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Compute a Direction scalar property of a RankTwoTensor");
@@ -25,23 +29,32 @@ RankTwoDirectionalComponent::validParams()
   return params;
 }
 
-RankTwoDirectionalComponent::RankTwoDirectionalComponent(const InputParameters & parameters)
+template <bool is_ad>
+RankTwoDirectionalComponentTempl<is_ad>::RankTwoDirectionalComponentTempl(
+    const InputParameters & parameters)
   : Material(parameters),
-    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-    _property_name(isParamValid("property_name") ? getParam<std::string>("property_name") : ""),
-    _property(declareProperty<Real>(_property_name)),
+    _tensor(getGenericMaterialProperty<RankTwoTensor, is_ad>("rank_two_tensor")),
+    _property_name(
+        isParamValid("property_name") ? this->template getParam<std::string>("property_name") : ""),
+    _property(declareGenericProperty<Real, is_ad>(_property_name)),
     _direction(getParam<Point>("direction"))
 {
 }
 
+template <bool is_ad>
 void
-RankTwoDirectionalComponent::initQpStatefulProperties()
+RankTwoDirectionalComponentTempl<is_ad>::initQpStatefulProperties()
 {
   _property[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-RankTwoDirectionalComponent::computeQpProperties()
+RankTwoDirectionalComponentTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] = RankTwoScalarTools::getDirectionalComponent(_tensor[_qp], _direction);
+  _property[_qp] =
+      RankTwoScalarTools::getDirectionalComponent(MetaPhysicL::raw_value(_tensor[_qp]), _direction);
 }
+
+template class RankTwoDirectionalComponentTempl<false>;
+template class RankTwoDirectionalComponentTempl<true>;
