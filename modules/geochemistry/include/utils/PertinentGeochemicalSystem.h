@@ -117,6 +117,33 @@ struct ModelGeochemicalDatabase
   DenseMatrix<Real> eqm_log10K;
 
   /**
+   * the name of the species on the left-hand side of the redox equations.  Upon creation of the
+   * model this is e-, but it may change due to swaps
+   */
+  std::string redox_lhs;
+
+  /**
+   * redox_stoichiometry(i, j) = stoichiometric coefficients for i^th redox species that is in
+   * disequilibrium in terms of the j basis species.  These equations are all written with their
+   * left-hand sides being e-.
+   * For instance, the database contains the reactions
+   * Fe+++ = -0.5H20 + Fe++ + H+ + 0.25*O2(aq)
+   * e- = 0.5H2O - 0.25O2(aq)- H+
+   * The first is a redox reaction, and assume the user has specified it is in disquilibrium (by
+   * specifying it is in the basis).  If Fe++, H+ and O2(aq) are also in the basis then the two
+   * equations yield the single redox equation
+   * e- = -Fe+++ + Fe++
+   * Then redox_stoichiometry will be -1 for j = Fe+++, and +1 for j = Fe++.
+   */
+  DenseMatrix<Real> redox_stoichiometry;
+
+  /**
+   * redox_log10K(i, j) = log10(equilibrium constant) for i^th redox species at the j^th temperature
+   * point
+   */
+  DenseMatrix<Real> redox_log10K;
+
+  /**
    * Holds info on surface complexation, if any, in the model.  Note this is slow compared with
    * storing information in a std::vector or DenseMatrix, but it also saves memory over storing a
    * lot of "zeroes" for all species not involved in surface complexation
@@ -229,6 +256,16 @@ public:
    * this list. Their reaction must involve only the basis_species, or secondary species or
    * non-kinetically-controlled redox couples that can be expressed in terms of the basis_species.
    * They can never be "swapped" into the basis.
+   *
+   * @param redox_ox The name of the oxygen species, eg O2(aq), that appears in redox reactions. For
+   * redox pairs that are in disequilibrium to be correctly recorded, and hence their Nernst
+   * potentials to be computed easily, redox_ox must be a basis_species and it must appear in the
+   * reaction for each redox pair.
+   *
+   * @param redox_e The name of the free electron, eg e-.  For redox pairs that are in
+   * disequilibrium to be correctly recorded, and hence their Nernst potentials to be computed
+   * easily, the equilibrium reaction for redox_e must involve redox_ox, and the basis species must
+   * be chosen so that redox_e is an equilibrium species.
    */
   PertinentGeochemicalSystem(const GeochemicalDatabaseReader & db,
                              const std::vector<std::string> & basis_species,
@@ -236,7 +273,9 @@ public:
                              const std::vector<std::string> & gases,
                              const std::vector<std::string> & kinetic_minerals,
                              const std::vector<std::string> & kinetic_redox,
-                             const std::vector<std::string> & kinetic_surface_species);
+                             const std::vector<std::string> & kinetic_surface_species,
+                             const std::string & redox_ox,
+                             const std::string & redox_e);
 
   /// Return a reference to the ModelGeochemicalDatabase structure
   const ModelGeochemicalDatabase & modelGeochemicalDatabase() const;
@@ -286,6 +325,15 @@ private:
 
   /// a vector of all relevant species
   std::vector<GeochemistryEquilibriumSpecies> _secondary_info;
+
+  /**
+   * The name of the oxygen in all disequilibrium-redox equations, eg O2(aq), which must be a basis
+   * species if disequilibrium redox reactions are to be recorded
+   */
+  const std::string _redox_ox;
+
+  /// The name of the free electron involved in redox reactions
+  const std::string _redox_e;
 
   /// The important datastructure built by this class
   ModelGeochemicalDatabase _model;

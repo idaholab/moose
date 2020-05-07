@@ -57,6 +57,20 @@ GeochemicalModelDefinition::validParams()
       "A list surface sorbing species whose dynamics are governed by a rate law.  These are not in "
       "equilibrium with the aqueous solution.  All members of this list must be in the 'surface "
       "species' section of the database file.");
+  params.addParam<std::string>(
+      "redox_oxygen",
+      "O2(aq)",
+      "The name of the oxygen species that appears in redox reactions.  For redox pairs that are "
+      "in disequilibrium to be correctly recorded, and hence their Nernst potentials to be "
+      "computed easily, redox_oxygen must be a basis species and it must appear in the reaction "
+      "for each redox pair");
+  params.addParam<std::string>(
+      "redox_electron",
+      "e-",
+      "The name of the free electron.  For redox pairs that are in disequilibrium to be correctly "
+      "recorded, and hence their Nernst potentials to be computed eqsily, the equilibrium reaction "
+      "for redox_electron must involve redox_oxygen, and the basis species must be chosen to that "
+      "redox_electron is an equilibrium species");
 
   params.addClassDescription("User object that parses a geochemical database file, and only "
                              "retains information relevant to the current geochemical model");
@@ -73,7 +87,9 @@ GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & p
            getParam<std::vector<std::string>>("equilibrium_gases"),
            getParam<std::vector<std::string>>("kinetic_minerals"),
            getParam<std::vector<std::string>>("kinetic_redox"),
-           getParam<std::vector<std::string>>("kinetic_surface_species"))
+           getParam<std::vector<std::string>>("kinetic_surface_species"),
+           getParam<std::string>("redox_oxygen"),
+           getParam<std::string>("redox_electron"))
 {
 }
 

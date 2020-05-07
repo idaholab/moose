@@ -27,7 +27,7 @@ TEST(PertinentGeochemicalSystemTest, basisExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O", "Ca++", "(O-phth)--", "H2O", "Na+"}, {}, {}, {}, {}, {});
+        database, {"H2O", "Ca++", "(O-phth)--", "H2O", "Na+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -40,8 +40,15 @@ TEST(PertinentGeochemicalSystemTest, basisExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"Ca++", "H2O", "H+", "(O-phth)--", "Am++++"}, {}, {}, {}, {}, {});
+    PertinentGeochemicalSystem model(database,
+                                     {"Ca++", "H2O", "H+", "(O-phth)--", "Am++++"},
+                                     {},
+                                     {},
+                                     {},
+                                     {},
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -60,7 +67,9 @@ TEST(PertinentGeochemicalSystemTest, basisExceptions)
         {},
         {},
         {},
-        {});
+        {},
+        "O2(aq)",
+        "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -93,7 +102,9 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
                                      {},
                                      {},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -111,7 +122,9 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
                                      {},
                                      {},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -124,8 +137,15 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"H2O", "H+", "(O-phth)--", "HCO3-"}, {"Calcite"}, {}, {}, {}, {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "H+", "(O-phth)--", "HCO3-"},
+                                     {"Calcite"},
+                                     {},
+                                     {},
+                                     {},
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -139,7 +159,7 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O", "H+", "O2(aq)"}, {"Fe(OH)3(ppd)"}, {}, {}, {}, {});
+        database, {"H2O", "H+", "O2(aq)"}, {"Fe(OH)3(ppd)"}, {}, {}, {}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -152,8 +172,15 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"}, {"Fe(OH)3(ppd)"}, {}, {}, {}, {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"},
+                                     {"Fe(OH)3(ppd)"},
+                                     {},
+                                     {},
+                                     {},
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -172,7 +199,9 @@ TEST(PertinentGeochemicalSystemTest, mineralExceptions)
                                    {},
                                    {},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
 }
 
 /**
@@ -194,7 +223,9 @@ TEST(PertinentGeochemicalSystemTest, gasExceptions)
                                      {"CH4(g)", "CH4(g)"},
                                      {},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -212,7 +243,9 @@ TEST(PertinentGeochemicalSystemTest, gasExceptions)
                                      {"CH4(g)", "does_not_exist"},
                                      {},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -225,8 +258,15 @@ TEST(PertinentGeochemicalSystemTest, gasExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"H2O", "Ca++", "H+", "HCO3-"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "Ca++", "H+", "HCO3-"},
+                                     {"Calcite"},
+                                     {"CH4(g)"},
+                                     {},
+                                     {},
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -239,8 +279,15 @@ TEST(PertinentGeochemicalSystemTest, gasExceptions)
 
   // this should pass: CH4(g) depends on the redox couple CH4(aq) which in turn depends on the basis
   // species provided
-  PertinentGeochemicalSystem model(
-      database, {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"},
+                                   {"Calcite"},
+                                   {"CH4(g)"},
+                                   {},
+                                   {},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
 }
 
 /**
@@ -260,7 +307,7 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O"}, {}, {}, {"Calcite", "Calcite_asdf", "Calcite"}, {}, {});
+        database, {"H2O"}, {}, {}, {"Calcite", "Calcite_asdf", "Calcite"}, {}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -279,7 +326,9 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
                                      {},
                                      {"Calcite", "Calcite_asdf"},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -298,7 +347,9 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
                                      {},
                                      {"Calcite", "does_not_exist"},
                                      {},
-                                     {});
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -312,7 +363,7 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O", "O2(aq)", "H+"}, {}, {}, {"Fe(OH)3(ppd)"}, {}, {});
+        database, {"H2O", "O2(aq)", "H+"}, {}, {}, {"Fe(OH)3(ppd)"}, {}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -325,8 +376,15 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"}, {}, {}, {"Fe(OH)3(ppd)"}, {}, {});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH"},
+                                     {},
+                                     {},
+                                     {"Fe(OH)3(ppd)"},
+                                     {},
+                                     {},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -345,7 +403,9 @@ TEST(PertinentGeochemicalSystemTest, kineticMineralExceptions)
                                    {},
                                    {"Fe(OH)3(ppd)"},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
 }
 
 /**
@@ -363,7 +423,7 @@ TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "Am++++", "(O-phth)--"}, {});
+        database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "Am++++", "(O-phth)--"}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -377,7 +437,7 @@ TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O", "(O-phth)--"}, {}, {}, {}, {"Am++++", "(O-phth)--"}, {});
+        database, {"H2O", "(O-phth)--"}, {}, {}, {}, {"Am++++", "(O-phth)--"}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -391,7 +451,7 @@ TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "does_not_exist"}, {});
+        database, {"H2O"}, {}, {}, {}, {"(O-phth)--", "does_not_exist"}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -405,7 +465,7 @@ TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O", "HCO3-", "H+"}, {}, {}, {}, {"(O-phth)--"}, {});
+        database, {"H2O", "HCO3-", "H+"}, {}, {}, {}, {"(O-phth)--"}, {}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -418,7 +478,7 @@ TEST(PertinentGeochemicalSystemTest, kineticRedoxExceptions)
 
   // this should pass
   PertinentGeochemicalSystem model(
-      database, {"H2O", "HCO3-", "H+", "O2(aq)"}, {}, {}, {}, {"(O-phth)--"}, {});
+      database, {"H2O", "HCO3-", "H+", "O2(aq)"}, {}, {}, {}, {"(O-phth)--"}, {}, "O2(aq)", "e-");
 }
 
 /**
@@ -435,7 +495,7 @@ TEST(PertinentGeochemicalSystemTest, kineticSurfaceExceptions)
   try
   {
     PertinentGeochemicalSystem model(
-        database, {"H2O"}, {}, {}, {}, {}, {">(s)FeO-", ">(s)FeOCa+", ">(s)FeO-"});
+        database, {"H2O"}, {}, {}, {}, {}, {">(s)FeO-", ">(s)FeOCa+", ">(s)FeO-"}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -448,8 +508,15 @@ TEST(PertinentGeochemicalSystemTest, kineticSurfaceExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(
-        database, {"H2O"}, {}, {}, {}, {}, {">(s)FeO-", ">(s)FeOCa+", "does_not_exist"});
+    PertinentGeochemicalSystem model(database,
+                                     {"H2O"},
+                                     {},
+                                     {},
+                                     {},
+                                     {},
+                                     {">(s)FeO-", ">(s)FeOCa+", "does_not_exist"},
+                                     "O2(aq)",
+                                     "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -462,7 +529,8 @@ TEST(PertinentGeochemicalSystemTest, kineticSurfaceExceptions)
 
   try
   {
-    PertinentGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {">(s)FeO-"});
+    PertinentGeochemicalSystem model(
+        database, {"H2O", "H+"}, {}, {}, {}, {}, {">(s)FeO-"}, "O2(aq)", "e-");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -475,7 +543,7 @@ TEST(PertinentGeochemicalSystemTest, kineticSurfaceExceptions)
 
   // this should pass
   PertinentGeochemicalSystem model(
-      database, {"H2O", "H+", ">(s)FeOH"}, {}, {}, {}, {}, {">(s)FeO-"});
+      database, {"H2O", "H+", ">(s)FeOH"}, {}, {}, {}, {}, {">(s)FeO-"}, "O2(aq)", "e-");
 }
 
 /// Test that PertinentGeochemicalSystem correctly extracts temperatures from the GeochemicalDatabaseReader
@@ -483,7 +551,7 @@ TEST(PertinentGeochemicalSystemTest, temperatures)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {});
+  PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.temperatures, database.getTemperatures());
@@ -506,7 +574,9 @@ TEST(PertinentGeochemicalSystemTest, names1)
                                    {"O2(g)"},
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
-                                   {">(s)FeOCa+"});
+                                   {">(s)FeOCa+"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
@@ -538,7 +608,9 @@ TEST(PertinentGeochemicalSystemTest, names2)
                                    {"O2(g)"},
                                    {"Calcite_asdf", "Calcite"},
                                    {"CH4(aq)"},
-                                   {">(s)FeOCa+", ">(s)FeO-"});
+                                   {">(s)FeOCa+", ">(s)FeO-"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.basis_species_index.size(), 6);
@@ -567,7 +639,9 @@ TEST(PertinentGeochemicalSystemTest, charge)
                                    {},
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
-                                   {">(s)FeOCa+"});
+                                   {">(s)FeOCa+"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> charge_gold;
@@ -610,7 +684,9 @@ TEST(PertinentGeochemicalSystemTest, radius)
                                    {},
                                    {},
                                    {"CH4(aq)"},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> radius_gold;
@@ -649,7 +725,9 @@ TEST(PertinentGeochemicalSystemTest, molecular_weight)
                                    {},
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
-                                   {">(s)FeOCa+"});
+                                   {">(s)FeOCa+"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> molecular_weight_gold;
@@ -693,7 +771,9 @@ TEST(PertinentGeochemicalSystemTest, molecular_volume)
                                    {},
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
-                                   {">(s)FeOCa+"});
+                                   {">(s)FeOCa+"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   std::map<std::string, Real> molecular_volume_gold;
@@ -737,7 +817,9 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {},
                                     {},
                                     {"CH4(aq)"},
-                                    {});
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd1.surface_complexation_info.size(), 0);
@@ -750,7 +832,9 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {},
                                     {},
                                     {},
-                                    {});
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd2.surface_complexation_info.count("Fe(OH)3(ppd)"), 1);
@@ -766,7 +850,9 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
                                     {},
                                     {"Goethite"},
                                     {},
-                                    {});
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
   ModelGeochemicalDatabase mgd3 = model3.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd3.surface_complexation_info.count("Goethite"), 1);
@@ -788,13 +874,22 @@ TEST(PertinentGeochemicalSystemTest, GasChi)
                                     {},
                                     {},
                                     {"CH4(aq)"},
-                                    {});
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
   ModelGeochemicalDatabase mgd1 = model1.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd1.gas_chi.size(), 0);
 
-  PertinentGeochemicalSystem model2(
-      database, {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"}, {"Calcite"}, {"CH4(g)"}, {}, {}, {});
+  PertinentGeochemicalSystem model2(database,
+                                    {"H2O", "Ca++", "H+", "HCO3-", "O2(aq)"},
+                                    {"Calcite"},
+                                    {"CH4(g)"},
+                                    {},
+                                    {},
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd2.gas_chi.count("CH4(g)"), 1);
@@ -820,7 +915,9 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                                    {},
                                    {"Calcite_asdf"},
                                    {"CH4(aq)"},
-                                   {">(s)FeO-", ">(s)FeOCa+"});
+                                   {">(s)FeO-", ">(s)FeOCa+"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 8);
@@ -906,7 +1003,9 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
                                    {},
                                    {},
                                    {"CH4(aq)"},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570);
@@ -945,7 +1044,9 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                                    {"CH4(g)fake"},
                                    {"Fe(OH)3(ppd)"},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 10);
@@ -1046,7 +1147,9 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                                    {"CH4(g)fake"},
                                    {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake"},
                                    {"(O-phth)--"},
-                                   {">(s)FeO-"});
+                                   {">(s)FeO-"},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 7);
@@ -1135,7 +1238,9 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
                                    {"CH4(g)fake"},
                                    {},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CO2(aq)"], 0), -6.5570, eps);
@@ -1212,7 +1317,9 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
       {},
       {},
       {"CH4(aq)"},
-      {});
+      {},
+      "O2(aq)",
+      "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   ASSERT_EQ(mgd.eqm_species_index.size(), 9);
@@ -1234,7 +1341,9 @@ TEST(PertinentGeochemicalSystemTest, isMineral)
                                    {"CH4(g)fake"},
                                    {},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   for (const auto & species : mgd.basis_species_index)
@@ -1252,7 +1361,9 @@ TEST(PertinentGeochemicalSystemTest, isMineral)
       {"CH4(g)fake"},
       {"Fe(OH)3(ppd)fake"},
       {"(O-phth)--"},
-      {">(s)FeO-"});
+      {">(s)FeO-"},
+      "O2(aq)",
+      "e-");
   ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
 
   for (const auto & species : mgd2.basis_species_index)
@@ -1279,7 +1390,9 @@ TEST(PertinentGeochemicalSystemTest, isGas)
                                    {"CH4(g)fake", "O2(g)"},
                                    {},
                                    {},
-                                   {});
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
   for (const auto & species : mgd.basis_species_index)
@@ -1289,4 +1402,81 @@ TEST(PertinentGeochemicalSystemTest, isGas)
       ASSERT_EQ(mgd.eqm_species_gas[species.second], true);
     else
       ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
+}
+
+/// Tests the redox information is correctly captured
+TEST(PertinentGeochemicalSystemTest, redoxCapture)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  PertinentGeochemicalSystem model_no_redox(
+      database,
+      {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+      {"Fe(OH)3(ppd)fake"},
+      {"CH4(g)fake", "O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd_no_redox = model_no_redox.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 0);
+  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 0);
+
+  PertinentGeochemicalSystem model_redox(
+      database,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "(O-phth)--", "CH4(aq)", "StoiCheckRedox", "Fe+++"},
+      {"Fe(OH)3(ppd)fake"},
+      {"CH4(g)fake", "O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd_redox = model_redox.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd_redox.redox_lhs, "e-");
+
+  // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not have
+  // a pair
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 2);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), 2);
+  // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
+  Real boa = 1.0 / 4.0 / 7.5;
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 0), 0.5 + 5.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 1), -1 - 6.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 2), -8.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 4), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 5), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 7), 0.0);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 0), -boa * 594.3211 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 1), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 2), -boa * 482.3612 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 3), -boa * 425.9738 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 4), -boa * 368.7004 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 5), -boa * 321.8658 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 6), -boa * 281.8216 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 7), -boa * 246.4849 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+
+  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  boa = 1.0 / 8.0;
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 0), 0.5 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 1), -1 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 2), -boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 4), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 5), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 7), 0.0);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 0), -boa * 157.8920 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 2), -boa * 127.9360 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 3), -boa * 112.8800 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 4), -boa * 97.7060 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 5), -boa * 85.2880 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(1, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 }
