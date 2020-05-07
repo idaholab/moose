@@ -115,17 +115,17 @@
   [./one_d_7eqn_vf_interfacial_mass_transfer_high_void_fraction]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_vf_interfacial_mass_transfer.i'
-    cli_args = 'JacobianTest2Phase/alpha_vapor=0.8 JacobianTest2Phase/snes_test_err=1e-9'
-    ratio_tol = 0.008
-    difference_tol = 0.01
+    cli_args = 'JacobianTest2Phase/alpha_vapor=0.8'
+    ratio_tol = 3e-6
+    difference_tol = 5e-5
     max_threads = 1
     allow_test_objects = true
   [../]
   [./one_d_7eqn_vf_wall_mass_transfer]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_vf_wall_mass_transfer.i'
-    ratio_tol = 1.0
-    difference_tol = 0.02
+    ratio_tol = 7e-7
+    difference_tol = 1e-8
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -167,8 +167,8 @@
   [./one_d_7eqn_mass_wall_mass_transfer]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_mass_wall_mass_transfer.i'
-    ratio_tol = 0.8
-    difference_tol = 16.0
+    ratio_tol = 1e-7
+    difference_tol = 2e-6
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -250,8 +250,8 @@
   [./one_d_7eqn_momentum_wall_mass_transfer]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_momentum_wall_mass_transfer.i'
-    ratio_tol = 0.8
-    difference_tol = 31.0
+    ratio_tol = 1e-7
+    difference_tol = 3e-6
     max_threads = 1
     allow_test_objects = true
   [../]
@@ -341,8 +341,8 @@
   [./one_d_7eqn_energy_wall_mass_transfer]
     type = 'PetscJacobianTester'
     input = 'one_d_7eqn_energy_wall_mass_transfer.i'
-    ratio_tol = 2.1
-    difference_tol = 8.6e7
+    ratio_tol = 2e-6
+    difference_tol = 37
     max_threads = 1
     allow_test_objects = true
   [../]
