@@ -182,6 +182,26 @@
       "charge": "0",
       "radius": "-.5",
       "molecular weight": "31.9988"
+    },
+    "sorbsite1": {
+      "elements": {
+        "Fe": "1.000",
+        "H": "1.000",
+        "O": "1.000"
+      },
+      "charge": "0",
+      "radius": "0",
+      "molecular weight": "72.8543"
+    },
+    "sorbsite2": {
+      "elements": {
+        "Fe": "1.000",
+        "H": "1.000",
+        "O": "1.000"
+      },
+      "charge": "0",
+      "radius": "0",
+      "molecular weight": "72.8543"
     }
   },
   "secondary species": {
@@ -190,6 +210,25 @@
         "H2O": "-1.000",
         "H+": "1.000",
         "HCO3-": "1.000"
+      },
+      "charge": "0",
+      "radius": "4.0",
+      "molecular weight": "44.0098",
+      "logk": [
+        "-6.5570",
+        "-6.3660",
+        "-6.3325",
+        "-6.4330",
+        "-6.7420",
+        "-7.1880",
+        "-7.7630",
+        "-8.4650"
+      ]
+    },
+    "problem_eqm": {
+      "species": {
+        "sorbsite1": "-1.000",
+        "sorbsite2": "1.000"
       },
       "charge": "0",
       "radius": "4.0",
@@ -379,6 +418,25 @@
         "-3.8051",
         "-4.7065"
       ]
+    },
+    "problematic_sorber": {
+      "species": {
+        "H+": "-3.000",
+        "Fe+++": "1.000",
+        "H2O": "2.000"
+      },
+      "molar volume": "20.8200",
+      "molecular weight": "88.8537",
+      "logk": [
+        "1.5096",
+        ".4999",
+        "-.6071",
+        "-1.5556",
+        "-2.4347",
+        "-3.1327",
+        "-3.8051",
+        "-4.7065"
+      ]
     }
   },
   "sorbing minerals": {
@@ -393,6 +451,13 @@
       "sorbing sites": {
         ">(s)FeOH": ".050",
         ">(w)FeOH": ".222"
+      },
+      "surface area": "60.0000"
+    },
+    "problematic_sorber": {
+      "sorbing sites": {
+        "sorbsite1": ".050",
+        "sorbsite2": ".222"
       },
       "surface area": "60.0000"
     }
@@ -641,7 +706,7 @@
       "charge": "-1",
       "molecular weight": "71.8464",
       "log K": "8.9300",
-      "dlogK/dT": "2.0000"
+      "dlogK/dT": "-0.3"
     },
     ">(s)FeOCa+": {
       "species": {
