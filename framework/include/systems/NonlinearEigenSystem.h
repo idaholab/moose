@@ -102,7 +102,17 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual const std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n);
+  virtual const std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n);
+
+  /**
+   * Return the Nth converged eigenvalue and copies the respective eigen vector to the solution
+   * vector.
+   *
+   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number
+   * is the real and the imaginary part of
+   * the eigenvalue, respectively.
+   */
+  virtual const std::pair<Real, Real> getConvergedEigenpair(dof_id_type n);
 
   /**
    * Get the number of converged eigenvalues

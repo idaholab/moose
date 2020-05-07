@@ -97,6 +97,11 @@ public:
                                  TagID tagB);
 
   void scaleEigenvector(const Real scaling_factor);
+
+  /**
+   * Which eigenvalue is active
+   */
+  unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
 #endif
 
 protected:
