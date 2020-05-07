@@ -33,7 +33,7 @@ class Tester(MooseObject):
 
         params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
         params.addParam('group',       [], "A list of groups for which this test belongs.")
-        params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test.")
+        params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test. When 'prereq = ALL', TestHarness will run this test last. Multiple 'prereq = ALL' tests, or tests that depend on a 'prereq = ALL' test will result in cyclic errors. Naming a test 'ALL' when using 'prereq = ALL' will also result in an error.")
         params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
         params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
         params.addParam('success_message', 'OK', "The successful message")

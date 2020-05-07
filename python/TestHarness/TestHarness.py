@@ -379,7 +379,8 @@ class TestHarness:
             if type(params['prereq']) != list:
                 print(("Option 'prereq' needs to be of type list in " + params['test_name']))
                 sys.exit(1)
-            params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
+            elif (params['prereq'] != ['ALL']):
+                params['prereq'] = [relative_path.replace('/tests/', '') + '.' + item for item in params['prereq']]
 
         # Double the alloted time for tests when running with the valgrind option
         tester.setValgrindMode(self.options.valgrind_mode)
