@@ -13,7 +13,7 @@
 /**
  * Calculators to compute activity coefficients
  */
-namespace GeochemistryActivity
+namespace GeochemistryActivityCalculators
 {
 /// log10(activity coefficient) according to the Debye-Huckel B-dot model
 Real log10ActCoeffDHBdot(
@@ -32,4 +32,4 @@ Real log10ActCoeffDHBdotAlternative(Real ionic_strength, Real Bdot);
 /// log10(activity coefficient) according to the Davies model
 Real log10ActCoeffDavies(Real charge, Real sqrt_ionic_strength, Real A);
 
-} // namespace GeochemistryActivity
+} // namespace GeochemistryActivityCalculators

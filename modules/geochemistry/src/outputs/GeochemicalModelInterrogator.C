@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeochemicalModelInterrogator.h"
+#include "GeochemistryFormattedOutput.h"
 #include <limits>
 
 registerMooseObject("GeochemistryApp", GeochemicalModelInterrogator);
@@ -159,28 +160,12 @@ GeochemicalModelInterrogator::outputReaction(const std::string & eqm_species) co
     return;
   std::stringstream ss;
   const unsigned row = _mgd.eqm_species_index.at(eqm_species);
-  const unsigned num_cols = _mgd.basis_species_index.size();
   const Real cutoff = std::pow(10.0, -1.0 * _precision);
   ss << std::setprecision(_precision);
   ss << eqm_species << " = ";
-  bool printed_something = false;
-  for (unsigned i = 0; i < num_cols; ++i)
-    if (_mgd.eqm_stoichiometry(row, i) > cutoff)
-    {
-      if (!printed_something)
-      {
-        ss << _mgd.eqm_stoichiometry(row, i) << "*" << _mgd.basis_species_name[i] << " ";
-        printed_something = true;
-      }
-      else
-        ss << "+ " << _mgd.eqm_stoichiometry(row, i) << "*" << _mgd.basis_species_name[i] << " ";
-    }
-    else if (_mgd.eqm_stoichiometry(row, i) < -cutoff)
-    {
-      ss << "- " << -_mgd.eqm_stoichiometry(row, i) << "*" << _mgd.basis_species_name[i] << " ";
-      printed_something = true;
-    }
-  ss << " .  log10(K) = "
+  ss << GeochemistryFormattedOutput::reaction(
+      _mgd.eqm_stoichiometry, row, _mgd.basis_species_name, cutoff, _precision);
+  ss << "  .  log10(K) = "
      << log10K(_mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()), _temperature);
   ss << std::endl;
   _console << ss.str();

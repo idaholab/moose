@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GeochemistryActivity.h"
+#include "GeochemistryActivityCalculators.h"
 #include "libmesh/utility.h"
 #include "GeochemistryConstants.h"
 
-namespace GeochemistryActivity
+namespace GeochemistryActivityCalculators
 {
 Real
 log10ActCoeffDHBdot(Real charge, Real ion_size, Real sqrt_ionic_strength, Real A, Real B, Real Bdot)
@@ -67,4 +67,4 @@ lnActivityDHBdotWater(
   return -2.0 * stoichiometric_ionic_strength * outer / GeochemistryConstants::MOLES_PER_KG_WATER;
 }
 
-} // namespace GeochemistryActivity
+} // namespace GeochemistryActivityCalculators
