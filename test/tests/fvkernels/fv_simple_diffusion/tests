@@ -37,4 +37,20 @@
     exodiff = 'transient_out.e'
     requirement = 'The system shall run a simple 2D transient linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
   [../]
+
+  [refinement]
+    requirement = 'The system shall be able to solve a finite-volume-only problem'
+    [no_refinement]
+      type = 'Exodiff'
+      input = 'fv_only.i'
+      exodiff = 'fv_only_out.e'
+      detail = 'on an unrefined mesh'
+    []
+    [refinement]
+      type = 'Exodiff'
+      input = 'fv_only_refined.i'
+      exodiff = 'fv_only_refined_out.e'
+      detail = 'and on a mesh that has been refined to have the same amount of elements and achieve identical results'
+    []
+  []
 []
