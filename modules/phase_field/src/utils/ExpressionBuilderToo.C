@@ -35,8 +35,11 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
   std::stack<Comparer *> permutations;
   bool isHead = true;
   bool next_permutation = false;
+  // When the rule stack is empty, we know that we have found a match
   while (rule_stack.size() > 0)
   {
+    // This is for when we are checking the star nodes for matches
+    // We can use the same algorithm because it is a nearly identical process
     if (checkNNaryLeaf && rule_stack.size() != self_stack.size())
       return false;
     // Get the children of the top of the stack
@@ -50,6 +53,7 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
     {
       if (permutations.size() != 0)
       {
+        // Get the next permutation state
         self_stack = permutations.top()->_self_stack;
         rule_stack = permutations.top()->_rule_stack;
         star_vec = permutations.top()->_stars;
@@ -59,6 +63,7 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
         continue;
       }
       else
+        // If there are no more permutations, we have failed!
         return false;
     }
     EBStarNode * checkLeaf = dynamic_cast<EBStarNode *>(rule_stack.top());
@@ -76,6 +81,7 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
     {
       EBNNaryOpTermNode * checkSelfNNary = dynamic_cast<EBNNaryOpTermNode *>(self_stack.top());
       EBNNaryOpTermNode * checkRuleNNary = dynamic_cast<EBNNaryOpTermNode *>(rule_stack.top());
+      // If we are at an NNary node and the rule has an EBNoneNode, then the children's size won't match
       if (checkRuleNNary != NULL && checkRuleNNary->hasNone())
       {
         if (self_children.size() == rule_children.size() - 1)
@@ -91,8 +97,14 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
       }
       std::vector<std::vector<EBTermNode *>> permutedChildren(0);
       std::vector<std::vector<unsigned int>> nnary_index(0);
+      // Binary Nodes only have 2 children, but if we are at the head node, we still
+      // want to be able to match with an NNary nodewith an arbitrary number of children,
+      // checking all permutations
       if (checkSelfNNary != NULL && isHead && checkRuleNNary == NULL && !checkNNaryLeaf)
         permutedChildren = permuteChildren(self_children, nnary_index, 2, changed_indeces);
+      // NNary Nodes for both the rule and the self mean that we need to match the number
+      // of child nodes in the rule with all permutations of the children of self. Again,
+      // this is only for the head node.
       else if (checkSelfNNary != NULL && isHead && checkRuleNNary != NULL && !checkNNaryLeaf)
         permutedChildren =
             permuteChildren(self_children, nnary_index, permuteNumber, changed_indeces);
@@ -100,6 +112,8 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
       {
         if (self_children.size() != rule_children.size())
         {
+          // If the rule NNary node has a RestNode in it, then the number of children
+          // doesn't have to match.
           if (checkRuleNNary != NULL && checkRuleNNary->hasRest())
           {
             rule_stack.pop();
@@ -117,6 +131,8 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
         }
         permutedChildren = permuteChildren(self_children, changed_indeces);
       }
+      // Once we have all of the premutations, we will save these to states,
+      // and go through the loop again
       rule_stack.pop();
       for (unsigned int i = 0; i < rule_children.size(); ++i)
         rule_stack.emplace(rule_children[i]);
@@ -140,6 +156,8 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
     }
     else
     {
+      // In this case, we have found success, so we pop the current
+      // node off, and load the children on.
       self_stack.pop();
       for (unsigned int i = 0; i < self_children.size(); ++i)
       {
@@ -153,6 +171,8 @@ ExpressionBuilderToo::EBTermNode::compareRule(EBTermNode * rule,
     isHead = false;
     if (rule_stack.size() == 0 && !checkConditions(conditions, star_vec))
     {
+      // We have failed here, and so we need to go to the next permutation.
+      // We add a dummy node to the stack, just in case it is now empty.
       rule_stack.emplace(new EBNumberNode<Real>(0));
       self_stack.emplace(new EBNumberNode<Real>(0));
       next_permutation = true;
@@ -178,6 +198,8 @@ ExpressionBuilderToo::EBTermNode::simplify(std::pair<EBTermNode *, EBTermNode *>
   return this;
 }
 
+// This function recursively finds all permutations of the children for a certain number.
+// i.e. n choose m
 std::vector<std::vector<ExpressionBuilderToo::EBTermNode *>>
 ExpressionBuilderToo::EBTermNode::permuteChildren(std::vector<EBTermNode *> children,
                                                   std::vector<unsigned int> changed_indeces)
@@ -205,6 +227,8 @@ ExpressionBuilderToo::EBTermNode::permuteChildren(std::vector<EBTermNode *> chil
   return resulting;
 }
 
+// This function recursively finds all permutations of the children
+// i.e. n!
 std::vector<std::vector<ExpressionBuilderToo::EBTermNode *>>
 ExpressionBuilderToo::EBTermNode::permuteChildren(
     std::vector<EBTermNode *> children,
@@ -255,6 +279,8 @@ ExpressionBuilderToo::EBTermNode::permuteChildren(
   return resulting;
 }
 
+
+// This function checks user input conditions
 bool
 ExpressionBuilderToo::EBTermNode::checkConditions(std::vector<EBTermNode *> conditions,
                                                   std::vector<EBTermNode *> stars)
