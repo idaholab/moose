@@ -1,5 +1,7 @@
 # LogisticDistribution
 
+!syntax description /Distributions/LogisticDistribution
+
 ## Description
 
 The logistic distribution is a continuous distribution defined with a location ($\alpha$) and
@@ -15,8 +17,6 @@ Cumulative Density Function:
 
 !equation
 F(x) = \frac{1}{1+z(x)}
-
-!syntax description /Distributions/LogisticDistribution
 
 !syntax parameters /Distributions/LogisticDistribution
 

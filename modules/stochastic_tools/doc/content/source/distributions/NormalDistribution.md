@@ -1,5 +1,7 @@
 # NormalDistribution
 
+!syntax description /Distributions/Normal
+
 ## Description
 
 The normal (or Gaussian) distribution object defines a

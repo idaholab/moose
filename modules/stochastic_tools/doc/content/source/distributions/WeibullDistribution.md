@@ -1,5 +1,7 @@
 # WeibullDistribution
 
+!syntax description /Distributions/Weibull
+
 ## Description
 
 The WeibullDistribution object defines a translated Weibull distribution which

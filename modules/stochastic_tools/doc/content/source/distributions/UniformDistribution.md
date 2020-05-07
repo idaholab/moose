@@ -1,5 +1,7 @@
 # UniformDistribution
 
+!syntax description /Distributions/Uniform
+
 ## Description
 
 The uniform distribution is a probability distribution that has constant probability.

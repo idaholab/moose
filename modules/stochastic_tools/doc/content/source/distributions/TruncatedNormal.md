@@ -1,5 +1,7 @@
 # TruncatedNormal
 
+!syntax description /Distributions/TruncatedNormal
+
 ## Description
 
 The truncated normal (or Gaussian) distribution object defines a
