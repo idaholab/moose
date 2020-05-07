@@ -59,6 +59,32 @@ PorousFlowMaterial::initStatefulProperties(unsigned int n_points)
 }
 
 void
+PorousFlowMaterial::computeNodalProperties()
+{
+  const unsigned int numnodes = _current_elem->n_nodes();
+
+  // compute the values for all nodes
+  for (_qp = 0; _qp < numnodes; ++_qp)
+    computeQpProperties();
+
+  // If number_of_nodes < number_of_quadpoints, the remaining values in the
+  // material data array are zero (for scalars) and empty (for vectors).
+  // Unfortunately, this can cause issues with adaptivity, where the empty
+  // value can be transferred to a node in a child element. This can lead
+  // to a segfault when accessing stateful properties, see #14428.
+  // To prevent this, we copy the last node value to the empty array positions.
+  if (numnodes < _qrule->n_points())
+  {
+    MaterialProperties & props = _material_data->props();
+
+    // Copy from qp = _current_elem->n_nodes() - 1 to qp = _qrule->n_points() -1
+    for (const auto & prop_id : _supplied_prop_ids)
+      for (unsigned int qp = numnodes; qp < _qrule->n_points(); ++qp)
+        props[prop_id]->qpCopy(qp, props[prop_id], numnodes - 1);
+  }
+}
+
+void
 PorousFlowMaterial::computeProperties()
 {
   if (_nodal_material)
@@ -66,9 +92,7 @@ PorousFlowMaterial::computeProperties()
     // size the properties to max(number_of_nodes, number_of_quadpoints)
     sizeNodalProperties();
 
-    // compute the values for number_of_nodes
-    for (_qp = 0; _qp < _current_elem->n_nodes(); ++_qp)
-      computeQpProperties();
+    computeNodalProperties();
   }
   else
     Material::computeProperties();

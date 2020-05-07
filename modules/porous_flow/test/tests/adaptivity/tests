@@ -1,0 +1,38 @@
+[Tests]
+  [./tri]
+    type = Exodiff
+    input = 'tri3_adaptivity.i'
+    exodiff = 'tri3_adaptivity_out.e'
+    threading = '!pthreads'
+    requirement = "The system shall work when using mesh adaptivity with TRI3 elements"
+    issues = "#14428"
+    design = 'mass_lumping.md'
+  [../]
+  [./quad]
+    type = Exodiff
+    input = 'quad_adaptivity.i'
+    exodiff = 'quad_adaptivity_out.e'
+    threading = '!pthreads'
+    requirement = "The system shall work when using mesh adaptivity with QUAD elements"
+    issues = "#14428"
+    design = 'mass_lumping.md'
+  [../]
+  [./tet]
+    type = Exodiff
+    input = 'tet4_adaptivity.i'
+    exodiff = 'tet4_adaptivity_out.e'
+    threading = '!pthreads'
+    requirement = "The system shall work when using mesh adaptivity with TET4 elements"
+    issues = "#14428"
+    design = 'mass_lumping.md'
+  [../]
+  [./hex]
+    type = Exodiff
+    input = 'hex_adaptivity.i'
+    exodiff = 'hex_adaptivity_out.e'
+    threading = '!pthreads'
+    requirement = "The system shall work when using mesh adaptivity with HEX elements"
+    issues = "#14428"
+    design = 'mass_lumping.md'
+  [../]
+[]
