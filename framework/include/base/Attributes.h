@@ -66,7 +66,7 @@ public:
   {
     _vals.push_back(tag);
   }
-  AttribTagBase(TheWarehouse & w, const std::set<TagID> tags, const std::string & attrib_name)
+  AttribTagBase(TheWarehouse & w, const std::set<TagID> & tags, const std::string & attrib_name)
     : Attribute(w, attrib_name)
   {
     for (auto tag : tags)

@@ -74,18 +74,21 @@ ComputeJacobianThread::computeJacobian()
       }
   }
 
-  std::vector<FVElementalKernel *> kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribMatrixTags>(_tags)
-      .queryInto(kernels);
+  if (_fe_problem.haveFV())
+  {
+    std::vector<FVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_tags)
+        .queryInto(kernels);
 
-  for (auto kernel : kernels)
-    if (kernel->isImplicit())
-      kernel->computeJacobian();
+    for (auto kernel : kernels)
+      if (kernel->isImplicit())
+        kernel->computeJacobian();
+  }
 }
 
 void
@@ -142,26 +145,12 @@ ComputeJacobianThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  std::vector<FVElementalKernel *> fv_kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribVectorTags>(_tags)
-      .queryInto(fv_kernels);
-
   // Update variable Dependencies
   std::set<MooseVariableFEBase *> needed_moose_vars;
   _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _interface_kernels.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-  for (const auto fv_kernel : fv_kernels)
-  {
-    const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
-    needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
-  }
 
   // Update material dependencies
   std::set<unsigned int> needed_mat_props;
@@ -169,10 +158,24 @@ ComputeJacobianThread::subdomainChanged()
   _integrated_bcs.updateBoundaryMatPropDependency(needed_mat_props, _tid);
   _dg_kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
   _interface_kernels.updateBoundaryMatPropDependency(needed_mat_props, _tid);
-  for (const auto fv_kernel : fv_kernels)
+
+  if (_fe_problem.haveFV())
   {
-    const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
-    needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
+    std::vector<FVElementalKernel *> fv_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_tags)
+        .queryInto(fv_kernels);
+    for (const auto fv_kernel : fv_kernels)
+    {
+      const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
+      needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
+      const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
+      needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
+    }
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);

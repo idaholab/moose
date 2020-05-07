@@ -128,18 +128,21 @@ ComputeFullJacobianThread::computeJacobian()
       }
   }
 
-  std::vector<FVElementalKernel *> fv_kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribMatrixTags>(_tags)
-      .queryInto(fv_kernels);
+  if (_fe_problem.haveFV())
+  {
+    std::vector<FVElementalKernel *> fv_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_tags)
+        .queryInto(fv_kernels);
 
-  for (auto fv_kernel : fv_kernels)
-    if (fv_kernel->isImplicit())
-      fv_kernel->computeOffDiagJacobian();
+    for (auto fv_kernel : fv_kernels)
+      if (fv_kernel->isImplicit())
+        fv_kernel->computeOffDiagJacobian();
+  }
 }
 
 void
