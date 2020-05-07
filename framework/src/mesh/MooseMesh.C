@@ -913,9 +913,6 @@ MooseMesh::cacheInfo()
     if (is_lowerd_elem)
     {
       const Elem * ip_elem = elem->interior_parent();
-      //        if (!ip_elem)
-      //        mooseError("No interior parent exists for element. There may be a problem with
-      //        your sideset set-up.");
 
       if (ip_elem)
       {
