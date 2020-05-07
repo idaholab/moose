@@ -140,17 +140,22 @@ ComputeResidualThread::onElement(const Elem * elem)
       kernel->computeResidual();
   }
 
-  std::vector<FVElementalKernel *> kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribVectorTags>(_tags)
-      .queryInto(kernels);
+  // TODO: use a querycache here and then we probably won't need the if-guard
+  // anymore.
+  if (_fe_problem.haveFV())
+  {
+    std::vector<FVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_tags)
+        .queryInto(kernels);
 
-  for (auto kernel : kernels)
-    kernel->computeResidual();
+    for (auto kernel : kernels)
+      kernel->computeResidual();
+  }
 }
 
 void
