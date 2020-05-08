@@ -54,8 +54,6 @@
 
 [Executioner]
   type = Transient
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
   petsc_options = '-snes_converged_reason'
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-8
