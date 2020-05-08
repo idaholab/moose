@@ -11,26 +11,31 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankTwoScalarTools.h"
 
 /// RankTwoInvariant computes invariant scalar values from Rank-2 tensors.
-class RankTwoInvariant : public Material
+template <bool is_ad>
+class RankTwoInvariantTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  RankTwoInvariant(const InputParameters & parameters);
+  RankTwoInvariantTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  const MaterialProperty<RankTwoTensor> & _tensor;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
 
   /// Name of the stress/strain to be calculated
   const std::string _property_name;
 
   /// Stress/strain value returned from calculation
-  MaterialProperty<Real> & _property;
+  GenericMaterialProperty<Real, is_ad> & _property;
 
-  MooseEnum _invariant;
+  RankTwoScalarTools::INVARIANT_TYPE _invariant;
 };
+
+typedef RankTwoInvariantTempl<false> RankTwoInvariant;
+typedef RankTwoInvariantTempl<true> ADRankTwoInvariant;

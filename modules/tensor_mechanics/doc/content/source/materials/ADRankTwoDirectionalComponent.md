@@ -1,10 +1,10 @@
-# Rank Two Directional Component
+# ADRank Two Directional Component
 
 !syntax description /Materials/ADRankTwoDirectionalComponent
 
 ## Description
 
-This is an ADMaterial model used to extract components of a rank-2 tensor in a
+This is a ADMaterial model used to extract components of a rank-2 tensor in a
 Cartesian coordinate system based on an input direction. This can be used
 regardless of the coordinate system used by the model.
 
