@@ -38,7 +38,7 @@
       input = 'small.i'
       ratio_tol = 1e-3
       difference_tol = 1
-      cli_args = '-snes_test_err 1e-9'
+      cli_args = 'Executioner/end_time=0.3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
       detail = 'using the small strain formulation and calculate a perfect Jacobian.'
@@ -49,7 +49,7 @@
       input = 'finite.i'
       ratio_tol = 5e-3
       difference_tol = 1
-      cli_args = '-snes_test_err 1e-9'
+      cli_args = 'Executioner/end_time=0.3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
       detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
