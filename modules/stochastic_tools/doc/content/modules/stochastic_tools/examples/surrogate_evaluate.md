@@ -22,7 +22,7 @@ The surrogate model is loaded by inputting the training data file with the [!par
 
 ### Defining a Sampler
 
-In this example, the surrogate is evaluated at points given by a sampler. Here we use the [MonteCarloSampler](MonteCarloSampler.md) to generate random points defined by a [UniformDistribution](UniformDistribution.md) or a [NormalDistribution](NormalDistribution.md) for each parameter. See [Example 1: Monte Carlo](/examples/monte_carlo.md) for more details on setting up this sampler.
+In this example, the surrogate is evaluated at points given by a sampler. Here we use the [MonteCarloSampler](MonteCarloSampler.md) to generate random points defined by a [Uniform](Uniform.md) or a [Normal](Normal.md) distribution for each parameter. See [Example 1: Monte Carlo](/examples/monte_carlo.md) for more details on setting up this sampler.
 
 !listing examples/surrogates/nearest_point_uniform.i block=Distributions caption=Uniform distribution for each parameter
 
