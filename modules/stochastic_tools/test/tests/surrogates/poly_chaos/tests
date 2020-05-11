@@ -28,8 +28,8 @@
       type = CSVDiff
       input = master_2dnorm_quad.i
       allow_test_objects = true
-      cli_args = 'Distributions/D_dist/type=BoostNormalDistribution '
-                 'Distributions/S_dist/type=BoostNormalDistribution '
+      cli_args = 'Distributions/D_dist/type=BoostNormal '
+                 'Distributions/S_dist/type=BoostNormal '
                  'Outputs/file_base=boost_2dnorm_quad'
       csvdiff = 'boost_2dnorm_quad_pc_samp_0002.csv'
       boost = true

@@ -48,7 +48,6 @@
     formulation = kinematic
     tangential_tolerance = 1e-1
     penalty = 1e10
-    system = Constraint
   [../]
 []
 

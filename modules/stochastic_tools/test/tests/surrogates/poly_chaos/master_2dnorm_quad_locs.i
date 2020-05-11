@@ -25,7 +25,7 @@
 
 [Samplers]
   [grid]
-    type = CartesianProductSampler
+    type = CartesianProduct
     linear_space_items = '2.5 0.5 10  3 1 10'
   []
   [quadrature]
