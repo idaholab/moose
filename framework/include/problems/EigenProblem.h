@@ -79,6 +79,8 @@ public:
                                  TagID tagA,
                                  TagID tagB);
 
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks) override;
+
   /**
    * Form a vector for all kernels and BCs with a given tag
    */
@@ -118,4 +120,5 @@ protected:
   PerfID _compute_residual_tag_timer;
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
+  PerfID _compute_jacobian_blocks_timer;
 };

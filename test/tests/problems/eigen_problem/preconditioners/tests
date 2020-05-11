@@ -9,4 +9,14 @@
     slepc_version = '>=3.8.0'
     requirement = "Eigen solver should work with a physics-based preconditioner "
   [../]
+
+  [./newton_pbp_shell_precond]
+    type = 'CSVDiff'
+    input = 'ne_pbp.i'
+    csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
+    cli_args = 'Executioner/precond_matrix_free=true'
+    prereq = 'newton_pbp'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigen solver should work with a physics-based preconditioner with a shell preconditioning matrix"
+  [../]
 []

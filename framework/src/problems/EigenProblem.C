@@ -58,7 +58,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
     _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
-    _solve_timer(registerTimedSection("solve", 1))
+    _solve_timer(registerTimedSection("solve", 1)),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3))
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -141,6 +142,25 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
   computeJacobianTags(_fe_matrix_tags);
 
   _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
+}
+
+void
+EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+{
+  TIME_SECTION(_compute_jacobian_blocks_timer);
+
+  if (_displaced_problem)
+  {
+    _aux->compute(EXEC_PRE_DISPLACE);
+    _displaced_problem->updateMesh();
+  }
+
+  _aux->compute(EXEC_NONLINEAR);
+
+  _currently_computing_jacobian = true;
+  // The preconditioning matrix is formed using non eigen kernels
+  _nl->computeJacobianBlocks(blocks, {_nl_eigen->nonEigenMatrixTag()});
+  _currently_computing_jacobian = false;
 }
 
 void
@@ -308,6 +328,8 @@ EigenProblem::init()
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If matrix_free=true, this set Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
+  // We need to tell libMesh if we are using a shell preconditioning matrix
+  _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
 #endif
 
   FEProblemBase::init();

@@ -42,8 +42,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  // If we use shell matrices, we only need to form a preconditioning matrix
-  if (eigen_system.use_shell_matrices())
+  // If we use shell matrices and do not use a shell preconditioning matrix,
+  // we only need to form a preconditioning matrix
+  if (eigen_system.use_shell_matrices() && !eigen_system.use_shell_precond_matrix())
   {
     p->computeJacobianTag(*eigen_system.current_local_solution.get(),
                           *eigen_system.precond_matrix,
@@ -234,6 +235,14 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
   if (_transient_sys.precond_matrix)
   {
     Mat mat = static_cast<PetscMatrix<Number> &>(*_transient_sys.precond_matrix).mat();
+
+    Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
+  }
+
+  // Shell preconditioning matrix
+  if (_transient_sys.shell_precond_matrix)
+  {
+    Mat mat = static_cast<PetscShellMatrix<Number> &>(*_transient_sys.shell_precond_matrix).mat();
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, true);
   }
