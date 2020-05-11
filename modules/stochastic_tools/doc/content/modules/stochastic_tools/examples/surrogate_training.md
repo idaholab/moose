@@ -31,7 +31,7 @@ T_{\max} &= \max_{x\in[0,L]}T(x)
 
 ### Parameter Uncertainty
 
-For demonstration, each of these parameters will have two types of probability distributions: [Uniform](UniformDistribution.md) ($\mathcal{U}(a,b)$) and [Normal](NormalDistribution.md) ($\mathcal{N}(\mu,\sigma)$). Where $a$ and $b$ are the max and minimum bounds of the uniform distribution, respectively. And $\mu$ and $\sigma$ are the mean and standard deviation of the normal distribution, respectively.
+For demonstration, each of these parameters will have two types of probability distributions: [Uniform](Uniform.md) ($\mathcal{U}(a,b)$) and [Normal](Normal.md) ($\mathcal{N}(\mu,\sigma)$). Where $a$ and $b$ are the max and minimum bounds of the uniform distribution, respectively. And $\mu$ and $\sigma$ are the mean and standard deviation of the normal distribution, respectively.
 
 The uncertain parameters for this model problem are:
 

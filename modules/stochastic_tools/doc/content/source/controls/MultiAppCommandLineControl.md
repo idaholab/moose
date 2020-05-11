@@ -21,7 +21,7 @@ First, the MultiApps block is defined to execute the desired simulations.
 
 !listing multiapps/commandline_control/master_multiple.i block=Distributions
 
-Second, a [UniformDistribution](distributions/UniformDistribution.md)
+Second, a [Uniform](distributions/Uniform.md) distribution
 object must be created:
 
 !listing multiapps/commandline_control/master_multiple.i block=Distributions

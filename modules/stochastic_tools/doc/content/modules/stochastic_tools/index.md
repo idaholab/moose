@@ -35,7 +35,7 @@ function (CDF). Finally, the "quantile" method must return the inverse of the CD
 referred to as the [quantile function](https://en.wikipedia.org/wiki/Quantile_function).
 
 For example [uniform-distribution-h] is the header for the
-[UniformDistribution](/UniformDistribution.md), which overrides the aforementioned
+[Uniform](Uniform.md) distribution, which overrides the aforementioned
 methods.
 
 !listing modules/stochastic_tools/include/distributions/UniformDistribution.h
