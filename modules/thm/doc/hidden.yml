@@ -13,6 +13,7 @@
 - /AuxKernels/VolumeFractionLiquidAux
 - /AuxKernels/WeightedAverageAux
 
+- /AuxScalarKernels/SimpleTurbinePowerAux
 - /AuxScalarKernels/VolumeJunction1PhasePressureAux
 - /AuxScalarKernels/VolumeJunction1PhaseVelocityMagnitudeAux
 - /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
@@ -20,6 +21,8 @@
 - /BCs/BoundaryFlux7EqnNCGBC
 - /BCs/ConvectionHeatTransferBC
 - /BCs/ConvectionHeatTransferRZBC
+- /BCs/ExternalAppConvectionHeatTransferBC
+- /BCs/ExternalAppConvectionHeatTransferRZBC
 - /BCs/HeatFlux3EqnBC
 - /BCs/HeatFlux7EqnBC
 - /BCs/HSHeatFluxBC
@@ -121,6 +124,8 @@
 - /Components/TotalPower
 - /Components/SolidWall
 - /Components/SupersonicInlet
+- /Components/SimpleTurbine1Phase
+- /Components/SimpleTurbine2Phase
 - /Components/TestSetupStatusComponent
 - /Components/THMCreateMeshAction
 
@@ -316,9 +321,12 @@
 - /UserObjects/HeatFluxFromHeatStructure3EqnUserObject
 - /UserObjects/HeatFluxFromHeatStructure7EqnUserObject
 - /UserObjects/LayeredAverageRZ
+- /UserObjects/LayeredFlowAreaChange
 - /UserObjects/NumericalFlux7EqnNCGConservativeCenteredRDG
 - /UserObjects/NumericalFlux7EqnNCGConservativeRiemannSolverRDG
 - /UserObjects/RDGInterfacialVariablesSideNCGHLLC
+- /UserObjects/SimpleTurbine1PhaseUserObject
+- /UserObjects/SimpleTurbine2PhaseUserObject
 - /UserObjects/SolidMaterialProperties
 - /UserObjects/SpecificInterfacialAreaCurve
 - /UserObjects/RiemannSolver7EqnNCGHLLC
