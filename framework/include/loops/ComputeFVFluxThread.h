@@ -271,27 +271,7 @@ template <typename RangeType>
 OnScopeExit
 ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 {
-  // TODO: (VITAL) we need to figure out how to reinit/prepare assembly
-  // appropriately for residual/jacobian calcs without doing all the other
-  // heavy stuff FEProblemBase::prepare does.  Maybe we just need direct
-  // assembly.prepare() and assembly.prepareNonlocal() calls? Also there might
-  // be some stuff that happens in assembly::reinit/reinitFE that we need, but
-  // most of that is (obviously) FE specific.  Also - we need to fall back to
-  // reiniting everything like normal if there is any FV-FE variable coupling.
-  _fe_problem.prepare(&fi.elem(), _tid);
-  //_fe_problem.reinitElem(&fi.elem(), _tid);
-
-  // I'm not sure of any other way to get the qRuleFace to be initialized
-  // other than this direct call.  How does it work for DG?
-  _fe_problem.assembly(_tid).reinit(&fi.elem(), fi.elemSideID());
-
-  // TODO: this triggers a bunch of FE-specific stuff to occur that we might
-  // not need if only FV variables are active.  Some of the stuff triggered by
-  // this call, however is necessary - particularly for reiniting materials.
-  // Figure out a way to only do the minimum required here if we only have FV
-  // variables.
-  if (!fi.isBoundary())
-    _fe_problem.reinitNeighbor(&fi.elem(), fi.elemSideID(), _tid);
+  _fe_problem.assembly(_tid).reinitFVFace(fi);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -308,9 +288,6 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
   for (auto var : _needed_fv_vars)
     var->computeFaceValues(fi);
 
-  // TODO: do we really need both reinitMaterials and reinitMaterialsFace? - I
-  // think we do need both.
-  _fe_problem.reinitMaterials(fi.elem().subdomain_id(), _tid);
   _fe_problem.reinitMaterialsFace(fi.elem().subdomain_id(), _tid);
 
   if (!fi.isBoundary())
@@ -327,7 +304,6 @@ ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 
   // this is the swap-back object - don't forget to catch it into local var
   std::function<void()> fn = [this, &fi] {
-    _fe_problem.swapBackMaterials(_tid);
     _fe_problem.swapBackMaterialsFace(_tid);
     if (!fi.isBoundary())
       _fe_problem.swapBackMaterialsNeighbor(_tid);
@@ -345,9 +321,9 @@ ComputeFVFluxThread<RangeType>::onFace(const FaceInfo & fi)
   auto q = _fe_problem.theWarehouse()
                .query()
                .template condition<AttribSystem>("FVFluxKernel")
-               .template condition<AttribSubdomains>(_subdomain)
-               .template condition<AttribVectorTags>(_tags)
                .template condition<AttribThread>(_tid)
+               .template condition<AttribVectorTags>(_tags)
+               .template condition<AttribSubdomains>(_subdomain)
                .queryInto(kernels);
 
   if (kernels.size() == 0)
@@ -370,21 +346,14 @@ ComputeFVFluxThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bnd_i
   _fe_problem.theWarehouse()
       .query()
       .template condition<AttribSystem>("FVFluxBC")
-      .template condition<AttribBoundaries>(bnd_id)
       .template condition<AttribThread>(_tid)
       .template condition<AttribVectorTags>(_tags)
+      .template condition<AttribBoundaries>(bnd_id)
       .queryInto(bcs);
   if (bcs.size() == 0)
     return;
 
   auto swap_back_sentinel = reinitVariables(fi);
-
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-
-  // boundary faces only border one element and so only contribute to one element's residual
-  // and we only need to reinit the one side.
-  _fe_problem.reinitMaterialsFace(fi.elem().subdomain_id(), _tid);
-  _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
   for (const auto & bc : bcs)
     if (_do_jacobian)

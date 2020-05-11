@@ -42,6 +42,7 @@ class SparseMatrix;
 }
 
 // MOOSE Forward Declares
+class FaceInfo;
 class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
@@ -542,6 +543,8 @@ public:
    * Reinitialize the assembly data on the side of a element at the custom reference points
    */
   void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
+
+  void reinitFVFace(const FaceInfo & fi);
 
   /**
    * Reinitialize an element and its neighbor along a particular side.

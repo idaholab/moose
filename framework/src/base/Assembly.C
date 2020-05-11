@@ -1679,6 +1679,37 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 }
 
 void
+Assembly::reinitFVFace(const FaceInfo & fi)
+{
+  _current_elem = &fi.elem();
+  _current_neighbor_elem = fi.neighborPtr();
+  _current_side = fi.elemSideID();
+  _current_neighbor_side = fi.neighborSideID();
+  mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
+              "current subdomain has been set incorrectly");
+
+  _current_elem_volume_computed = false;
+  _current_side_volume_computed = false;
+
+  prepareResidual();
+  prepareNeighbor();
+  prepareJacobianBlock();
+
+  unsigned int elem_dimension = _current_elem->dim();
+
+  // Make sure the qrule is the right one
+  if (_current_qrule_face != _holder_qrule_face[elem_dimension])
+  {
+    _current_qrule_face = _holder_qrule_face[elem_dimension];
+    setFaceQRule(_current_qrule_face, elem_dimension);
+  }
+
+  if (_current_side_elem)
+    delete _current_side_elem;
+  _current_side_elem = _current_elem->build_side_ptr(_current_side).release();
+}
+
+void
 Assembly::reinit(const Elem * elem, unsigned int side)
 {
   _current_elem = elem;
