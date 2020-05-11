@@ -6,7 +6,7 @@ INL's internal network.
 
 ### SSH Config file (different remote username)
 
-The following example is identical to the example provided on the main [Remote HPC Connectivity](help/remotehpcconnectivity.md) page, except it contains `User` directives for cases where your remote username differs from your local username.
+The following example is identical to the example provided on the main [Remote HPC Connectivity](help/inl/hpc_remote.md) page, except it contains `User` directives for cases where your remote username differs from your local username.
 
 ```bash
 ServerAliveInterval 240
@@ -27,4 +27,4 @@ Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.inl.gov hp
   ProxyJump hpclogin
 ```
 
-[Back to main page](help/remotehpcconnectivity.md)
+[Back to main page](help/inl/hpc_remote.md)
