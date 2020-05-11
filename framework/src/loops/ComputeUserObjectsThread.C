@@ -138,6 +138,10 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
+  // Reinitialize Mortar variables for use in boundary Materials
+  if (lowerDElem)
+    _fe_problem.reinitLowerDElem(lowerDElem, _tid);
+
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.
   SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
