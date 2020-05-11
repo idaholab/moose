@@ -33,6 +33,11 @@ Eigenvalue::validParams()
       "If true, shell matrices will be used and meanwhile a preconditioning matrix"
       "may be formed as well.");
 
+  params.addParam<bool>("precond_matrix_free",
+                        false,
+                        "Whether or not to use a matrix free fashion to form preconditioner. "
+                        "If true, a shell matrix will be used for preconditioning.");
+
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
   params.addParam<PostprocessorName>(

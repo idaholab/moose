@@ -196,7 +196,11 @@ storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputParameter
 
   eigen_problem.es().parameters.set<unsigned int>("basis vectors") = n_basis_vectors;
 
+  // Operators A and B are formed as shell matrices
   eigen_problem.solverParams()._eigen_matrix_free = params.get<bool>("matrix_free");
+
+  // Preconditioning is formed as a shell matrix
+  eigen_problem.solverParams()._precond_matrix_free = params.get<bool>("precond_matrix_free");
 }
 
 void
@@ -460,10 +464,37 @@ moosePetscSNESFormJacobian(SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Ta
 PetscErrorCode
 mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
+  PetscBool jissell, pissell;
+  PetscBool jismffd;
+  PetscErrorCode ierr;
+
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  // If both jacobian and preconditioning are shell matrices,
+  // and then assembly them and return
+  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jissell);
+  CHKERRQ(ierr);
+  ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
+  CHKERRQ(ierr);
+  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pissell);
+  CHKERRQ(ierr);
+  if ((jissell || jismffd) && pissell)
+  {
+    // Just assembly matrices and return
+    ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+
+    PetscFunctionReturn(0);
+  }
 
   moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.nonEigenMatrixTag());
   PetscFunctionReturn(0);
@@ -472,10 +503,34 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
+  PetscBool jtype, ptype;
+  PetscErrorCode ierr;
+
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  // If both jacobian and preconditioning are shell matrices,
+  // and then assembly them and return
+  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jtype);
+  CHKERRQ(ierr);
+  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &ptype);
+  CHKERRQ(ierr);
+  if (jtype && ptype)
+  {
+    // Just assembly matrices and return
+    ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(jac, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+    ierr = MatAssemblyEnd(pc, MAT_FINAL_ASSEMBLY);
+    CHKERRQ(ierr);
+
+    PetscFunctionReturn(0);
+  }
 
   moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.eigenMatrixTag());
 

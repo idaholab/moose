@@ -49,14 +49,6 @@
     coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
-
-  [./conv_v]
-    type = CoupledForce
-    variable = v
-    v = u
-    extra_vector_tags = 'eigen'
-  [../]
-
 []
 
 [BCs]
@@ -111,7 +103,5 @@
     type = PBP
     solve_order = 'u v'
     preconditioner  = 'LU LU'
-    off_diag_row    = 'v'
-    off_diag_column = 'u'
   [../]
 []
