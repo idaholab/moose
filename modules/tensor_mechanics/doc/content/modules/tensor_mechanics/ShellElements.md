@@ -75,4 +75,15 @@ Finally the residuals are computed and assembled in [ADStressDivergenceShell](/A
 
 Note that there are quadrature points both along the plane as well as along the thickness of the element. The order of Gauss quadrature rule along the thickness is provided as input by the user to all the above mentioned objects.  
 
+## Inertia
+
+This element's generalized inertia forces are obtained directly from the kinematic of the shell by computing the inertial forces component-wise. Inertia forces can be expressed in terms of a mass matrix as described in [!cite](Bolourchi1979).
+The mass matrix takes the following form of a volume integral:
+
+\begin{equation}
+\mathbf{\M} = \int_{V}^{} \rho \mathbf{H}^{T} \mathbf{H} dV
+\end{equation}
+
+where $mathbf{H}$ is an element-wise matrix that contains the interpolation functions for displacement and rotational degrees of freedom. In the implementation, the volume integral is simplified, and it is assumed that the element thickness is constant. Similarly, one orientation matrix is used per element, that is, changes in orientation in a single element's geometry are neglected.
+
 !bibtex bibliography
