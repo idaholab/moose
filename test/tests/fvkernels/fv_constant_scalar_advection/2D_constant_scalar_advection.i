@@ -55,10 +55,9 @@
 [Executioner]
   type = Transient
   petsc_options = '-snes_converged_reason'
-  nl_abs_tol = 1e-7
-  nl_rel_tol = 1e-8
   num_steps = 10
   dt = 0.25
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
