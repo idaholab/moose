@@ -100,7 +100,7 @@ private:
   /// If a basis molality < swap_threshold, we attempt to swap it out of the basis
   const Real _swap_threshold;
   /// The minerals named in this list can have positive saturation indices and will not precipitate
-  const std::vector<std::string> & _prevent_precipitation;
+  const std::vector<std::string> _prevent_precipitation;
   /// Maximum ionic strength allowed
   const Real _max_ionic_strength;
   /// Number of iterations over which to increase the maximum ionic strength to _max_ionic_strength
