@@ -138,13 +138,14 @@ class GraphHistogram(command.CommandComponent):
                                 "'x' and 'y' fields of the 'data' setting should be replaced by "
                                 "column names or numbers.")
         settings['vectors'] = (None, "Name of postprocessor vector names to plot, default is all.")
-        settings['names'] = (None, "Name to show on legend, default is no legend.")
+        settings['names'] = (None, "Name to show on legend, by default the vector names are used.")
         settings['probability'] = (True, "True to plot with probability density normalization.")
-        settings['bins'] = (None, "Maximum number of bins to use.")
+        settings['bins'] = (0, "Number of bins to use, set to 0 for auto calculation.")
         settings['alpha'] = (1.0, "Set chart opacity alpha setting.")
         settings['title'] = ('', "Plot title")
         settings['xlabel'] = ('Value', "x-axis label")
         settings['ylabel'] = ('Probability', "y-axis label")
+        settings['legend'] = ('legend', True, "True|False toggle for legend.")
         settings.update(floats.caption_settings())
         settings['prefix'] = ('Figure', settings['prefix'][1])
         return settings
@@ -170,19 +171,21 @@ class GraphHistogram(command.CommandComponent):
                 vectors = self.settings['vectors'].split(' ')
 
             names = []
-            if not self.settings['names'] is None:
+            if self.settings['names'] is not None:
                 names = self.settings['names'].split(' ')
                 if not len(vectors) == len(names):
                     raise common.exceptions.MooseDocsException("Number of names must equal number of vectors.")
+            else:
+                names = vectors
 
             data = [dict() for i in range(len(vectors))];
             for i in range(len(vectors)):
                 if not vectors[i] in reader.variables():
-                    str = "The vector " + vectors[i] + " is not in " + filename
-                    raise common.exceptions.MooseDocsException(str)
+                    string = "The vector " + vectors[i] + " is not in " + filename
+                    raise common.exceptions.MooseDocsException(string)
                 data[i]['type'] = 'histogram'
                 data[i]['x'] = reader[vectors[i]].tolist()
-                data[i]['nbinsx'] = self.settings['bins']
+                data[i]['xbins'] = self.settings['bins']
                 data[i]['opacity'] = self.settings['alpha']
                 if self.settings['probability']:
                     data[i]['histnorm'] = 'probability'
@@ -205,7 +208,7 @@ class GraphHistogram(command.CommandComponent):
             layout = dict()
             layout['xaxis'] = xaxis
             layout['yaxis'] = yaxis
-            layout['showlegend'] = 'True'
+            layout['showlegend'] = str(self.settings['legend'])
             layout['title'] = self.settings['title']
 
         else:
@@ -303,7 +306,6 @@ class RenderHistogram(components.RenderComponent):
                                      layout=repr(token['layout']))
         html.Tag(parent, 'div', id_=plot_id)
         html.Tag(parent, 'script', string=content)
-
 
     def createLatex(self, parent, token, page):
 
