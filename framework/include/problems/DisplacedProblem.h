@@ -239,6 +239,13 @@ public:
                                 const DofMap & dof_map,
                                 std::vector<dof_id_type> & dof_indices,
                                 THREAD_ID tid) override;
+  virtual void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                                    unsigned int ivar,
+                                    unsigned int jvar,
+                                    const DofMap & dof_map,
+                                    std::vector<dof_id_type> & dof_indices,
+                                    const std::set<TagID> & tags,
+                                    THREAD_ID tid);
   virtual void addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                         unsigned int ivar,
                                         unsigned int jvar,

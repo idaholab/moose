@@ -427,6 +427,42 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 }
 
 void
+moosePetscSNESFormJacobianTags(
+    SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, std::set<TagID> & tags)
+{
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> X_global(x, sys.comm());
+
+  PetscVector<Number> & X_sys = *cast_ptr<PetscVector<Number> *>(sys.solution.get());
+
+  // Use the system's update() to get a good local version of the
+  // parallel solution.  This operation does not modify the incoming
+  // "x" vector, it only localizes information from "x" into
+  // sys.current_local_solution.
+  X_global.swap(X_sys);
+  sys.update();
+  X_global.swap(X_sys);
+
+  PetscMatrix<Number> PC(pc, sys.comm());
+  PetscMatrix<Number> Jac(jac, sys.comm());
+
+  // Set the dof maps
+  PC.attach_dof_map(sys.get_dof_map());
+  Jac.attach_dof_map(sys.get_dof_map());
+
+  PC.zero();
+
+  eigen_problem->computePrecondMatrixTags(*sys.current_local_solution.get(), PC, tags);
+
+  PC.close();
+  if (jac != pc)
+    Jac.close();
+}
+
+void
 moosePetscSNESFormJacobian(SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, TagID tag)
 {
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
@@ -496,7 +532,11 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     PetscFunctionReturn(0);
   }
 
-  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.nonEigenMatrixTag());
+  if (eigen_nl.precondMatrixIncludesEigenKernels())
+    moosePetscSNESFormJacobianTags(snes, x, jac, pc, ctx, eigen_nl.precondMatrixTags());
+  else
+    moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.nonEigenMatrixTag());
+
   PetscFunctionReturn(0);
 }
 

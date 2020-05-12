@@ -38,6 +38,11 @@ Eigenvalue::validParams()
                         "Whether or not to use a matrix free fashion to form preconditioner. "
                         "If true, a shell matrix will be used for preconditioning.");
 
+  params.addParam<bool>("precond_matrix_includes_eigen",
+                        false,
+                        "Whether or not to include eigen kernels in the preconditioning matrix. "
+                        "If true, the preconditioning matrix will include eigen kernels.");
+
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
   params.addParam<PostprocessorName>(
@@ -77,6 +82,10 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 void
 Eigenvalue::execute()
 {
+  // Set a flag to nonlinear eigen system
+  _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
+      getParam<bool>("precond_matrix_includes_eigen"));
+
 #if LIBMESH_HAVE_SLEPC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app

@@ -1527,6 +1527,38 @@ FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
 }
 
 void
+FEProblemBase::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                                    unsigned int ivar,
+                                    unsigned int jvar,
+                                    const DofMap & dof_map,
+                                    std::vector<dof_id_type> & dof_indices,
+                                    const std::set<TagID> & tags,
+                                    THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianBlockTags(jacobian, ivar, jvar, dof_map, dof_indices, tags);
+
+  if (_has_nonlocal_coupling)
+    if (_nonlocal_cm(ivar, jvar) != 0)
+    {
+      MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
+      _assembly[tid]->addJacobianBlockNonlocal(
+          jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices());
+    }
+
+  if (_displaced_problem)
+  {
+    _displaced_problem->addJacobianBlockTags(jacobian, ivar, jvar, dof_map, dof_indices, tags, tid);
+    if (_has_nonlocal_coupling)
+      if (_nonlocal_cm(ivar, jvar) != 0)
+      {
+        MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
+        _displaced_problem->addJacobianBlockNonlocal(
+            jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
+      }
+  }
+}
+
+void
 FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,

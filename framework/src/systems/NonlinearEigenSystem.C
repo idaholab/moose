@@ -41,20 +41,25 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
+  // If this is a nonlinear eigenvalue problem,
+  // we do not need to assembly anything
+  if (p->isNonlinearEigenvalueSolver())
+    return;
+
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If we use shell matrices and do not use a shell preconditioning matrix,
   // we only need to form a preconditioning matrix
   if (eigen_system.use_shell_matrices() && !eigen_system.use_shell_precond_matrix())
   {
-    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
-                          *eigen_system.precond_matrix,
-                          eigen_nl.nonEigenMatrixTag());
+    p->computePrecondMatrixTags(*eigen_system.current_local_solution.get(),
+                                *eigen_system.precond_matrix,
+                                eigen_nl.precondMatrixTags());
     return;
   }
 #endif
   // If it is a linear generalized eigenvalue problem,
   // we assemble A and B together
-  if (!p->isNonlinearEigenvalueSolver() && eigen_system.generalized())
+  if (eigen_system.generalized())
   {
     p->computeJacobianAB(*eigen_system.current_local_solution.get(),
                          *eigen_system.matrix_A,
@@ -69,7 +74,6 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   }
 
   // If it is a linear eigenvalue problem, we assemble matrix A
-  if (!p->isNonlinearEigenvalueSolver())
   {
     p->computeJacobianTag(*eigen_system.current_local_solution.get(),
                           *eigen_system.matrix_A,
@@ -96,6 +100,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   _Bx_tag = eigen_problem.addVectorTag("Eigen");
 
   _A_tag = eigen_problem.addMatrixTag("A_tag");
+
+  _precond_tags.insert(_A_tag);
 
   _B_tag = eigen_problem.addMatrixTag("Eigen");
 }
@@ -143,8 +149,34 @@ NonlinearEigenSystem::addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & war
 }
 
 void
+NonlinearEigenSystem::turnOffOnEigenNodalBCs(bool on)
+{
+  for (THREAD_ID tid = 0; tid < _nodal_bcs.numThreads(); tid++)
+  {
+    auto & objects = _nodal_bcs.getObjects(tid);
+
+    for (auto & object : objects)
+    {
+      auto & mtags = object->getMatrixTags();
+      // Current object is an eigen nodal bc
+      if (mtags.find(_B_tag) != mtags.end())
+      {
+        // Currently, there does not exist an interfance for me,
+        // so I just drop const anyway.
+        auto & params = const_cast<InputParameters &>(object->parameters());
+        params.set<bool>("enable", true) = on;
+      }
+    }
+  }
+}
+
+void
 NonlinearEigenSystem::solve()
 {
+  // If we want to take into consideration eigen kernels, and then add the eigen tag.
+  if (_precond_matrix_includes_eigen)
+    _precond_tags.insert(_B_tag);
+
   // Clear the iteration counters
   _current_l_its.clear();
   _current_nl_its = 0;
