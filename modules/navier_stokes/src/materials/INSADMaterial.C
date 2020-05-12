@@ -104,39 +104,7 @@ INSADMaterial::computeQpProperties()
   // _viscous_strong_residual[_qp] = -_mu[_qp] * Moose::Laplacian(_second_velocity[_qp]);
 
   if (_coord_sys == Moose::COORD_RZ)
-  {
-    // To understand the code immediately below, visit
-    // https://en.wikipedia.org/wiki/Del_in_cylindrical_and_spherical_coordinates.
-    // The u_r / r^2 term comes from the vector Laplacian. The -du_i/dr * 1/r term comes from
-    // the scalar Laplacian. The scalar Laplacian in axisymmetric cylindrical coordinates is
-    // equivalent to the Cartesian Laplacian plus a 1/r * du_i/dr term. And of course we are
-    // applying a minus sign here because the strong form is -\nabala^2 * \vec{u}
-    //
-    // Another note: libMesh implements grad(v) as dvi/dxj
-
-    if (_use_displaced_mesh)
-      _viscous_strong_residual[_qp] = ADRealVectorValue(
-          // u_r
-          // Additional term from vector Laplacian
-          _mu[_qp] * (_velocity[_qp](0) / (_ad_q_point[_qp](0) * _ad_q_point[_qp](0)) -
-                      // Additional term from scalar Laplacian
-                      _grad_velocity[_qp](0, 0) / _ad_q_point[_qp](0)),
-          // u_z
-          // Additional term from scalar Laplacian
-          -_mu[_qp] * _grad_velocity[_qp](1, 0) / _ad_q_point[_qp](0),
-          0);
-    else
-      _viscous_strong_residual[_qp] =
-          // u_r
-          // Additional term from vector Laplacian
-          ADRealVectorValue(_mu[_qp] * (_velocity[_qp](0) / (_q_point[_qp](0) * _q_point[_qp](0)) -
-                                        // Additional term from scalar Laplacian
-                                        _grad_velocity[_qp](0, 0) / _q_point[_qp](0)),
-                            // u_z
-                            // Additional term from scalar Laplacian
-                            -_mu[_qp] * _grad_velocity[_qp](1, 0) / _q_point[_qp](0),
-                            0);
-  }
+    viscousTermRZ();
 
   _momentum_strong_residual[_qp] = _convective_strong_residual[_qp] + _grad_p[_qp];
 
@@ -157,4 +125,59 @@ INSADMaterial::computeQpProperties()
   // // Future addition
   // if (_object_tracker->hasMMS())
   //   _momentum_strong_residual[_qp] += _mms_function_strong_residual[_qp];
+}
+
+void
+INSADMaterial::viscousTermRZ()
+{
+  // To understand the code immediately below, visit
+  // https://en.wikipedia.org/wiki/Del_in_cylindrical_and_spherical_coordinates.
+  // The u_r / r^2 term comes from the vector Laplacian. The -du_i/dr * 1/r term comes from
+  // the scalar Laplacian. The scalar Laplacian in axisymmetric cylindrical coordinates is
+  // equivalent to the Cartesian Laplacian plus a 1/r * du_i/dr term. And of course we are
+  // applying a minus sign here because the strong form is -\nabala^2 * \vec{u}
+  //
+  // Another note: libMesh implements grad(v) as dvi/dxj
+
+  if (_use_displaced_mesh)
+  {
+    ADReal r = _ad_q_point[_qp](0);
+
+    if (_object_tracker->viscousForm() == "laplace")
+      _viscous_strong_residual[_qp] = ADRealVectorValue(
+          // u_r
+          // Additional term from vector Laplacian
+          _mu[_qp] * (_velocity[_qp](0) / (r * r) -
+                      // Additional term from scalar Laplacian
+                      _grad_velocity[_qp](0, 0) / r),
+          // u_z
+          // Additional term from scalar Laplacian
+          -_mu[_qp] * _grad_velocity[_qp](1, 0) / r,
+          0);
+    else
+      _viscous_strong_residual[_qp] = ADRealVectorValue(
+          2. * _mu[_qp] * (_velocity[_qp](0) / (r * r) - _grad_velocity[_qp](0, 0) / r),
+          -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
+          0);
+  }
+  else
+  {
+    Real r = _q_point[_qp](0);
+    if (_object_tracker->viscousForm() == "laplace")
+      _viscous_strong_residual[_qp] =
+          // u_r
+          // Additional term from vector Laplacian
+          ADRealVectorValue(_mu[_qp] * (_velocity[_qp](0) / (_q_point[_qp](0) * _q_point[_qp](0)) -
+                                        // Additional term from scalar Laplacian
+                                        _grad_velocity[_qp](0, 0) / _q_point[_qp](0)),
+                            // u_z
+                            // Additional term from scalar Laplacian
+                            -_mu[_qp] * _grad_velocity[_qp](1, 0) / _q_point[_qp](0),
+                            0);
+    else
+      _viscous_strong_residual[_qp] = ADRealVectorValue(
+          2. * _mu[_qp] * (_velocity[_qp](0) / (r * r) - _grad_velocity[_qp](0, 0) / r),
+          -_mu[_qp] / r * (_grad_velocity[_qp](1, 0) + _grad_velocity[_qp](0, 1)),
+          0);
+  }
 }

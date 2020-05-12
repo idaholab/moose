@@ -25,6 +25,11 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  /**
+   * compute the strong form corresponding to RZ pieces of the viscous term
+   */
+  void viscousTermRZ();
+
   /// velocity
   const ADVectorVariableValue & _velocity;
 

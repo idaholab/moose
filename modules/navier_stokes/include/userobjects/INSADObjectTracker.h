@@ -11,6 +11,8 @@
 
 #include "GeneralUserObject.h"
 #include "MooseTypes.h"
+#include "MooseEnum.h"
+#include "MooseError.h"
 
 #include "libmesh/vector_value.h"
 
@@ -45,14 +47,40 @@ public:
   bool hasBoussinesq() const { return _has_boussinesq; }
   bool hasGravity() const { return _has_gravity; }
   bool hasTransient() const { return _has_transient; }
-  bool integratePByParts() const { return _integrate_p_by_parts; }
+  bool integratePByParts() const
+  {
+    if (!_integrate_p_by_parts_set)
+      mooseError("Requesting integrate_p_by_parts, but it has not yet been set");
+    return _integrate_p_by_parts;
+  }
+  const std::string & viscousForm() const
+  {
+    if (!_viscous_form_set)
+      mooseError("Requesting the viscous form, but it has not yet been set");
+    return _viscous_form;
+  }
 
   void setHasBoussinesq(bool has_boussinesq) { _has_boussinesq = has_boussinesq; }
   void setHasGravity(bool has_gravity) { _has_gravity = has_gravity; }
   void setHasTransient(bool has_transient) { _has_transient = has_transient; }
   void setIntegratePByParts(bool integrate_p_by_parts)
   {
+    if (_integrate_p_by_parts_set && (integrate_p_by_parts != _integrate_p_by_parts))
+      mooseError("Two INSAD objects have set different values for integrate_p_by_parts");
+
     _integrate_p_by_parts = integrate_p_by_parts;
+    _integrate_p_by_parts_set = true;
+  }
+
+  void setViscousForm(const MooseEnum & viscous_form)
+  {
+    if (!(viscous_form == "laplace" || viscous_form == "traction"))
+      mooseError("invalid value for viscous_form");
+    if (_viscous_form_set && (_viscous_form != static_cast<std::string>(viscous_form)))
+      mooseError("Two INSAD objects have set different values for the viscous form");
+
+    _viscous_form = static_cast<std::string>(viscous_form);
+    _viscous_form_set = true;
   }
 
   const RealVectorValue & gravityVector() const { return _gravity_vector; }
@@ -112,6 +140,7 @@ private:
   bool _has_gravity = false;
   bool _has_transient = false;
   bool _integrate_p_by_parts = true;
+  bool _integrate_p_by_parts_set = false;
 
   /// Default constructor initializes every component to zero
   RealVectorValue _gravity_vector;
@@ -132,4 +161,9 @@ private:
   const ADVariableValue * _t = nullptr;
 
   bool _t_set = false;
+
+  /// The form the of the viscous term. Options are either laplace or traction
+  std::string _viscous_form;
+
+  bool _viscous_form_set = false;
 };
