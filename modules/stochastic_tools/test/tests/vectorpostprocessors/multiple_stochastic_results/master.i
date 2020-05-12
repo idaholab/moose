@@ -90,7 +90,7 @@
     multi_app = mc
     sampler = mc
     to_vector_postprocessor = storage
-    from_postprocessor = avg
+    from_postprocessor = "avg max"
   []
 []
 

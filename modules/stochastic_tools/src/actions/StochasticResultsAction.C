@@ -44,7 +44,7 @@ StochasticResultsAction::act()
       {
         const VectorPostprocessorName & result_name =
             ptr->getParam<VectorPostprocessorName>("to_vector_postprocessor");
-        const VectorPostprocessorName vpp_name = ptr->vectorName();
+        const std::vector<VectorPostprocessorName> vpp_names = ptr->vectorNames();
 
         // Get the StochasticResults storage object, get it by base class to allow for better
         // type check error message
@@ -52,7 +52,9 @@ StochasticResultsAction::act()
         StochasticResults * results = dynamic_cast<StochasticResults *>(&uo);
         if (!results)
           mooseError("The 'results' object must be a 'StochasticResults' object.");
-        results->initVector(vpp_name);
+
+        for (const auto & vpp_name : vpp_names)
+          results->initVector(vpp_name);
       }
     }
   }

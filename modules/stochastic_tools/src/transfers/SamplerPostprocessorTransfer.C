@@ -17,6 +17,21 @@
 
 registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
 
+std::vector<VectorPostprocessorName>
+getVectorNamesHelper(const std::string & prefix, const std::vector<PostprocessorName> & pp_names)
+{
+  std::vector<VectorPostprocessorName> vec_names;
+  vec_names.reserve(pp_names.size());
+  for (const auto & pp_name : pp_names)
+  {
+    if (!prefix.empty())
+      vec_names.push_back(prefix + ":" + pp_name);
+    else
+      vec_names.push_back(pp_name);
+  }
+  return vec_names;
+}
+
 InputParameters
 SamplerPostprocessorTransfer::validParams()
 {
@@ -24,7 +39,7 @@ SamplerPostprocessorTransfer::validParams()
   params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
                              "VectorPostprocessor on the master application.");
 
-  params.addParam<PostprocessorName>(
+  params.addParam<std::vector<PostprocessorName>>(
       "from_postprocessor", "The name(s) of the Postprocessor(s) on the sub-app to transfer from.");
   params.addParam<VectorPostprocessorName>("to_vector_postprocessor",
                                            "The name of the VectorPostprocessor in "
@@ -42,17 +57,18 @@ SamplerPostprocessorTransfer::validParams()
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
-    _sub_pp_name(getParam<PostprocessorName>("from_postprocessor")),
+    _sub_pp_names(getParam<std::vector<PostprocessorName>>("from_postprocessor")),
     _master_vpp_name(getParam<VectorPostprocessorName>("to_vector_postprocessor")),
-    _vpp_name(isParamValid("prefix") ? getParam<std::string>("prefix") + ":" + _sub_pp_name
-                                     : _name + ":" + _sub_pp_name)
+    _vpp_names(isParamValid("prefix")
+                   ? getVectorNamesHelper(getParam<std::string>("prefix"), _sub_pp_names)
+                   : getVectorNamesHelper(_name, _sub_pp_names))
 {
 }
 
-const VectorPostprocessorName
-SamplerPostprocessorTransfer::vectorName() const
+const std::vector<VectorPostprocessorName> &
+SamplerPostprocessorTransfer::vectorNames() const
 {
-  return _vpp_name;
+  return _vpp_names;
 }
 
 void
@@ -71,21 +87,28 @@ SamplerPostprocessorTransfer::initialSetup()
     if (_multi_app->hasLocalApp(i))
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      if (!app_problem.hasPostprocessor(_sub_pp_name))
-        mooseError("Unknown postprocesssor name '",
-                   _sub_pp_name,
-                   "' on sub-application '",
-                   _multi_app->name(),
-                   "'");
+      for (const auto & sub_pp_name : _sub_pp_names)
+        if (!app_problem.hasPostprocessor(sub_pp_name))
+          mooseError("Unknown postprocesssor name '",
+                     sub_pp_name,
+                     "' on sub-application '",
+                     _multi_app->name(),
+                     "'");
     }
   }
+
+  // Initialize storage for accumulating VPP data
+  _current_data.resize(_sub_pp_names.size());
 }
 
 void
 SamplerPostprocessorTransfer::initializeFromMultiapp()
 {
-  _current_data.clear();
-  _current_data.reserve(_sampler_ptr->getNumberOfLocalRows());
+  for (VectorPostprocessorValue & current : _current_data)
+  {
+    current.clear();
+    current.reserve(_sampler_ptr->getNumberOfLocalRows());
+  }
 }
 
 void
@@ -97,7 +120,8 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
     if (_multi_app->hasLocalApp(i))
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      _current_data.emplace_back(app_problem.getPostprocessorValue(_sub_pp_name));
+      for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+        _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
     }
   }
 }
@@ -105,19 +129,25 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
 void
 SamplerPostprocessorTransfer::finalizeFromMultiapp()
 {
-  _results->setCurrentLocalVectorPostprocessorValue(_vpp_name, std::move(_current_data));
-  _current_data.clear();
+  for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+  {
+    _results->setCurrentLocalVectorPostprocessorValue(_vpp_names[j], std::move(_current_data[j]));
+    _current_data[j].clear();
+  }
 }
 
 void
 SamplerPostprocessorTransfer::execute()
 {
-  VectorPostprocessorValue current;
-  current.reserve(_sampler_ptr->getNumberOfLocalRows());
-  for (dof_id_type j = _sampler_ptr->getLocalRowBegin(); j < _sampler_ptr->getLocalRowEnd(); ++j)
+  for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
   {
-    FEProblemBase & app_problem = _multi_app->appProblemBase(j);
-    current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_name));
+    VectorPostprocessorValue current;
+    current.reserve(_sampler_ptr->getNumberOfLocalRows());
+    for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
+    {
+      FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+      current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+    }
+    _results->setCurrentLocalVectorPostprocessorValue(_vpp_names[j], std::move(current));
   }
-  _results->setCurrentLocalVectorPostprocessorValue(_vpp_name, std::move(current));
 }

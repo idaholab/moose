@@ -33,7 +33,7 @@ public:
    * The name of the vector to be created on the StochasticResults object,
    * see StochasticResultsAction)
    */
-  const VectorPostprocessorName vectorName() const;
+  const std::vector<VectorPostprocessorName> & vectorNames() const;
 
 protected:
   /**
@@ -54,14 +54,14 @@ protected:
   StochasticResults * _results;
 
   /// Name of postprocessor on the sub-applications
-  const PostprocessorName & _sub_pp_name;
+  const std::vector<PostprocessorName> & _sub_pp_names;
 
   /// Name of vector-postprocessor on the master
   const VectorPostprocessorName & _master_vpp_name;
 
   /// Storage vector names
-  const PostprocessorName _vpp_name;
+  const std::vector<VectorPostprocessorName> _vpp_names;
 
   /// Temporary storage for batch mode execution
-  VectorPostprocessorValue _current_data;
+  std::vector<VectorPostprocessorValue> _current_data;
 };
