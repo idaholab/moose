@@ -36,15 +36,24 @@ protected:
   const std::vector<unsigned int> & _num_bins_input;
 
   /// Upper limit to probability for each distribution
-  const std::vector<Real> & _upper_limits;
+  const std::vector<Real> & _upper_limits_input;
 
   /// Lower limit to probability for each distribution
-  const std::vector<Real> & _lower_limits;
+  const std::vector<Real> & _lower_limits_input;
 
   /// Portion of probability within each bin for each distribution
   std::vector<Real> _size_bins;
 
-  /// Bin sizes for each distribution; this is populated during sample setup so in the future
-  /// it can be controlled
+private:
+  ///@{
+  /// Bin sizes and limits for each distribution; these are populated during sample setup so in the
+  /// future each can be controlled
   std::vector<unsigned int> _num_bins;
+
+  /// Upper limit to probability for each distribution
+  std::vector<Real> _upper_limits;
+
+  /// Lower limit to probability for each distribution
+  std::vector<Real> _lower_limits;
+  ///@}
 };

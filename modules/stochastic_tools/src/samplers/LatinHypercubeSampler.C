@@ -26,10 +26,14 @@ LatinHypercubeSampler::validParams()
       "number of columns per matrix.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_bins", "The number of intervals to consider within the sampling.");
-  params.addRequiredParam<std::vector<Real>>(
-      "upper_limits", "The lower limit of probability for each of the associated distributions.");
-  params.addRequiredParam<std::vector<Real>>(
-      "lower_limits", "The upper limit of probability for each of the associated distributions.");
+  params.addParam<std::vector<Real>>(
+      "upper_limits",
+      std::vector<Real>(1, 1),
+      "The lower limit of probability for each of the associated distributions.");
+  params.addParam<std::vector<Real>>(
+      "lower_limits",
+      std::vector<Real>(1, 0),
+      "The upper limit of probability for each of the associated distributions.");
   return params;
 }
 
@@ -37,34 +41,34 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
     _num_bins_input(getParam<std::vector<unsigned int>>("num_bins")),
-    _upper_limits(getParam<std::vector<Real>>("upper_limits")),
-    _lower_limits(getParam<std::vector<Real>>("lower_limits"))
+    _upper_limits_input(getParam<std::vector<Real>>("upper_limits")),
+    _lower_limits_input(getParam<std::vector<Real>>("lower_limits"))
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
 
-  if (_upper_limits.size() != _distributions.size())
+  if (_upper_limits_input.size() != 1 && _upper_limits_input.size() != _distributions.size())
     paramError("upper_limits",
-               "The length of 'upper_limits' must match the length of 'distributions'");
+               "The length of 'upper_limits' must be one or match the length of 'distributions'");
 
-  if (_lower_limits.size() != _distributions.size())
+  if (_lower_limits_input.size() != 1 && _lower_limits_input.size() != _distributions.size())
     paramError("lower_limits",
-               "The length of 'lower_limits' must match the length of 'distributions'");
+               "The length of 'lower_limits' must be one or match the length of 'distributions'");
 
   if (_num_bins_input.size() != 1 && _num_bins_input.size() != _distributions.size())
     paramError("num_bins",
                "The length of 'num_bins' must be one or match the length of 'distributions'");
 
-  for (const auto & lim : _upper_limits)
+  for (const auto & lim : _upper_limits_input)
     if (lim < 0 || lim > 1)
       paramError("upper_limits", "The items in 'upper_limits' must be in the range [0,1]");
 
-  for (const auto & lim : _lower_limits)
+  for (const auto & lim : _lower_limits_input)
     if (lim < 0 || lim > 1)
       paramError("lower_limits", "The items in 'lower_limits' must be in the range [0,1]");
 
-  for (std::size_t i = 0; i < _lower_limits.size(); ++i)
-    if (_lower_limits[i] >= _upper_limits[i])
+  for (std::size_t i = 0; i < _lower_limits_input.size(); ++i)
+    if (_lower_limits_input[i] >= _upper_limits_input[i])
       paramError(
           "lower_limits",
           "The items in 'lower_limits' must be less than the corresponding 'upper_limits' value");
@@ -77,11 +81,18 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
 void
 LatinHypercubeSampler::sampleSetUp()
 {
-  // Setup bin information
+  // Setup bin and limit information
   const std::size_t num_dists = _distributions.size();
   _size_bins.resize(num_dists);
-  _num_bins = _num_bins_input.size() == 1 ? std::vector<unsigned int>(_num_bins_input[0], num_dists)
+  _num_bins = _num_bins_input.size() == 1 ? std::vector<unsigned int>(num_dists, _num_bins_input[0])
                                           : _num_bins_input;
+
+  _lower_limits = _lower_limits_input.size() == 1
+                      ? std::vector<Real>(num_dists, _lower_limits_input[0])
+                      : _lower_limits_input;
+  _upper_limits = _upper_limits_input.size() == 1
+                      ? std::vector<Real>(num_dists, _upper_limits_input[0])
+                      : _upper_limits_input;
 
   for (std::size_t dist_idx = 0; dist_idx < num_dists; ++dist_idx)
   {
