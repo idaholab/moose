@@ -83,10 +83,10 @@ class RunPBS(QueueManager):
 
         # Compute node requirement
         if self.options.pbs_node_cpus:
-            _ceiling = template['mpi_procs']/self.options.pbs_node_cpus
+            nodes = template['mpi_procs']/self.options.pbs_node_cpus
         else:
-            _ceiling = 1
-        template['nodes'] = math.ceil(_ceiling)
+            nodes = 1
+        template['nodes'] = math.ceil(nodes)
 
         # Convert MAX_TIME to hours:minutes for walltime use
         max_time = job.getMetaData().get('QUEUEING_MAXTIME', 1)
