@@ -16,10 +16,10 @@ name = 'finite'
     dim = 2
     xmin = 0
     xmax = 0.6
-    ymin = -10
+    ymin = 0
     ymax = 10
     nx = 2
-    ny = 67
+    ny = 33
     elem_type = ${elem}
   [../]
   [./plank_sidesets]

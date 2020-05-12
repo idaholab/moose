@@ -16,10 +16,10 @@ name = 'small'
     dim = 2
     xmin = 0
     xmax = 0.6
-    ymin = -10
+    ymin = 0
     ymax = 10
     nx = 2
-    ny = 67
+    ny = 33
     elem_type = ${elem}
   [../]
   [./plank_sidesets]
@@ -64,7 +64,7 @@ name = 'small'
   [./corner]
     type = ExtraNodesetGenerator
     input = block_rename
-    coord = '0 -10.0'
+    coord = '0 0'
     new_boundary = point
   [../]
   [./block_sidesets]
@@ -183,7 +183,7 @@ name = 'small'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       1e-5          NONZERO               1e-15'
-  end_time = 10
+  end_time = 5
   dt = 0.1
   dtmin = 0.1
   timestep_tolerance = 1e-6
