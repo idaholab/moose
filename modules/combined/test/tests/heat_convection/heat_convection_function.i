@@ -10,7 +10,7 @@
   [../]
   [./htc]
     type = ParsedFunction
-    value = 10.0
+    value = 10.0*5.7                 # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
   [../]
 []
 
@@ -37,8 +37,7 @@
     type = ConvectiveFluxFunction  # Convective flux, e.g. q'' = h*(Tw - Tf)
     boundary = 12
     variable = temp
-    coefficient = 5.7                   # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
-    coefficient_function = htc
+    coefficient = htc
     T_infinity = t_infinity
   [../]                                  # Convective End
 

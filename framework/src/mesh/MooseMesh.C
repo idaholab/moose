@@ -2928,7 +2928,7 @@ MooseMesh::buildFaceInfo()
 
   // create a map from elem/side --> boundary ids
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
-      buildSideList();
+      buildActiveSideList();
   std::map<Keytype, std::set<boundary_id_type>> side_map;
   for (auto & e : side_list)
   {

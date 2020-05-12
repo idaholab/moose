@@ -1,0 +1,32 @@
+[Tests]
+  design = "C0TimoshenkoBeam.md"
+  issues = "#15067"
+  [verification_tests]
+    requirement = "The mechanics system shall accurately predict the"
+                  " dynamic behavior of a shell element with clamped-"
+                  "free-free-free conditions when "
+    [./shell_dynamics_bending_moment_free]
+      type = 'CSVDiff'
+      input = 'shell_dynamics_bending_moment_free.i'
+      csvdiff = 'shell_dynamics_bending_moment_free_out.csv'
+      detail = "the surface is on the XY plane"
+      heavy = true
+    [../]
+
+    [./shell_dynamics_bending_moment_free_orientation_inclined]
+      type = 'CSVDiff'
+      input = 'shell_dynamics_bending_moment_free_orientation_inclined.i'
+      csvdiff = 'shell_dynamics_bending_moment_free_orientation_inclined_out.csv'
+      detail = "the surface is at a 45 deg. angle w.r.t. the Y axis"
+      heavy = true
+    [../]
+
+    [./shell_dynamics_bending_moment_free_orientation_inclined_hht]
+      type = 'CSVDiff'
+      input = 'shell_dynamics_bending_moment_free_orientation_inclined_hht.i'
+      csvdiff = 'shell_dynamics_bending_moment_free_orientation_inclined_hht_out.csv'
+      detail = "the surface is at a 45 deg. angle w.r.t. the Y axis and HHT input is provided"
+      heavy = true
+    [../]
+  []
+[]

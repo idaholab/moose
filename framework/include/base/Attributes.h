@@ -66,7 +66,7 @@ public:
   {
     _vals.push_back(tag);
   }
-  AttribTagBase(TheWarehouse & w, const std::set<TagID> tags, const std::string & attrib_name)
+  AttribTagBase(TheWarehouse & w, const std::set<TagID> & tags, const std::string & attrib_name)
     : Attribute(w, attrib_name)
   {
     for (auto tag : tags)
@@ -193,7 +193,7 @@ public:
     _vals.push_back(id);
   }
   AttribBoundaries(TheWarehouse & w,
-                   const std::set<BoundaryID> ids,
+                   const std::set<BoundaryID> & ids,
                    bool must_be_restricted = false)
     : Attribute(w, "boundaries"), _must_be_restricted(must_be_restricted)
   {

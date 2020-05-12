@@ -32,19 +32,19 @@
 # y = -0.57735 * (t/2) is 10 Pa at any location along the length of the beam.
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 1
-  ny = 4
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 10.0
-[]
-
-[MeshModifiers]
+  [./gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 1
+    ny = 4
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 10.0
+  []
   [./rotate]
-    type = Transform
+    type = TransformGenerator
+    input = gen
     transform = ROTATE
     vector_value = '0 90 0'
   [../]
