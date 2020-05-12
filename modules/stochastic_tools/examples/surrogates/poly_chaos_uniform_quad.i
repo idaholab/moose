@@ -69,30 +69,18 @@
 []
 
 [Transfers]
-  [data_avg]
+  [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
     sampler = sample
-    to_vector_postprocessor = samp_avg
-    from_postprocessor = avg
-  []
-  [data_max]
-    type = SamplerPostprocessorTransfer
-    multi_app = sub
-    sampler = sample
-    to_vector_postprocessor = samp_max
-    from_postprocessor = max
+    to_vector_postprocessor = results
+    from_postprocessor = 'avg max'
   []
 []
 
 [VectorPostprocessors]
-  [samp_avg]
+  [results]
     type = StochasticResults
-    samplers = sample
-  []
-  [samp_max]
-    type = StochasticResults
-    samplers = sample
   []
 []
 
@@ -103,8 +91,8 @@
     order = 10
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
-    results_vpp = samp_avg
-    results_vector = sample
+    results_vpp = results
+    results_vector = data:avg
   []
   [poly_chaos_max]
     type = PolynomialChaosTrainer
@@ -112,8 +100,8 @@
     order = 10
     distributions = 'k_dist q_dist L_dist Tinf_dist'
     sampler = sample
-    results_vpp = samp_max
-    results_vector = sample
+    results_vpp = results
+    results_vector = data:max
   []
 []
 

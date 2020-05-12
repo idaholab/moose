@@ -52,31 +52,18 @@
 []
 
 [Transfers]
-  [data_avg]
+  [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
     sampler = grid
-    to_vector_postprocessor = storage_avg
-    from_postprocessor = avg
-  []
-  [data_max]
-    type = SamplerPostprocessorTransfer
-    multi_app = sub
-    sampler = grid
-    to_vector_postprocessor = storage_max
-    from_postprocessor = max
+    to_vector_postprocessor = results
+    from_postprocessor = 'avg max'
   []
 []
 
 [VectorPostprocessors]
-  [storage_avg]
+  [results]
     type = StochasticResults
-    samplers = grid
-    outputs = none
-  []
-  [storage_max]
-    type = StochasticResults
-    samplers = grid
     outputs = none
   []
 []
@@ -86,15 +73,15 @@
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    results_vpp = storage_avg
-    results_vector = grid
+    results_vpp = results
+    results_vector = data:avg
   []
   [nearest_point_max]
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    results_vpp = storage_max
-    results_vector = grid
+    results_vpp = results
+    results_vector = data:max
   []
 []
 
