@@ -23,6 +23,7 @@ public:
   static InputParameters validParams();
   SobolStatistics(const InputParameters & parameters);
   virtual void execute() override;
+  virtual void initialSetup() override;
 
   /// Not used; all parallel computation is wrapped in the SobolCalculator objects
   virtual void initialize() final{};
