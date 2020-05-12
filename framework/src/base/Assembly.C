@@ -515,6 +515,10 @@ Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Ord
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
     _holder_qrule_face[dim] = QBase::build(type, dim - 1, face_order).release();
 
+  _holder_qrule_fv_face.resize(_mesh_dimension + 1);
+  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
+    _holder_qrule_fv_face[dim] = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+
   for (auto & it : _holder_qrule_neighbor)
     delete it.second;
   for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
@@ -1695,15 +1699,17 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   prepareNeighbor();
   prepareJacobianBlock();
 
-  unsigned int elem_dimension = _current_elem->dim();
-
-  // Make sure the qrule is the right one
-  if (_current_qrule_face != _holder_qrule_face[elem_dimension])
+  unsigned int dim = _current_elem->dim();
+  if (_current_qrule_face != _holder_qrule_fv_face[dim].get())
   {
-    _current_qrule_face = _holder_qrule_face[elem_dimension];
-    setFaceQRule(_current_qrule_face, elem_dimension);
+    setFaceQRule(_holder_qrule_fv_face[dim].get(), dim);
+    // It doesn't matter what we init with here since this is a constant
+    // monomial quadrature rule.  We just need to manually init so our
+    // quadrature points become initialized in the rule.
+    _current_qrule_face->init(EDGE2);
   }
 
+  // TODO: maybe we don't need this and can delete it? - investigate
   if (_current_side_elem)
     delete _current_side_elem;
   _current_side_elem = _current_elem->build_side_ptr(_current_side).release();

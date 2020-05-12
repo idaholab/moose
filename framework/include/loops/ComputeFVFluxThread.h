@@ -271,6 +271,10 @@ template <typename RangeType>
 OnScopeExit
 ComputeFVFluxThread<RangeType>::reinitVariables(const FaceInfo & fi)
 {
+  // TODO: this skips necessary FE reinit.  In addition to this call, we need
+  // to conditionally do some FE-specific reinit here if we have any active FE
+  // variables.  However, we still want to keep/do FV-style quadrature.
+  // Figure out how to do all this some day.
   _fe_problem.assembly(_tid).reinitFVFace(fi);
 
   // TODO: for FE variables, this is handled via setting needed vars through

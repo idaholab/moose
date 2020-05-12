@@ -1661,6 +1661,8 @@ private:
   /// The AD version of the current coordinate transformation coefficients
   MooseArray<DualReal> _ad_coord;
 
+  std::vector<std::unique_ptr<QBase>> _holder_qrule_fv_face;
+
   /// Holds volume qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_volume;
   /// Holds arbitrary qrules for each dimension
