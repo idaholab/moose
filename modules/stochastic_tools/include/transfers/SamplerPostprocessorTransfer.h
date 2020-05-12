@@ -29,6 +29,12 @@ public:
   SamplerPostprocessorTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
 
+  /**
+   * The name of the vector to be created on the StochasticResults object,
+   * see StochasticResultsAction)
+   */
+  const VectorPostprocessorName vectorName() const;
+
 protected:
   /**
    * Traditional Transfer callback
@@ -43,7 +49,7 @@ protected:
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
   ///@}
-
+  ///
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;
 

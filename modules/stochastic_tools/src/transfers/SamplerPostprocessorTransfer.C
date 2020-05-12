@@ -31,6 +31,10 @@ SamplerPostprocessorTransfer::validParams()
                                            "the MultiApp to transfer values "
                                            "to.");
 
+  params.addParam<std::string>("prefix",
+                               "Use the supplied string as the prefix for vector postprocessor "
+                               "name rather than the transfer name.");
+
   params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
@@ -40,8 +44,15 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
   : StochasticToolsTransfer(parameters),
     _sub_pp_name(getParam<PostprocessorName>("from_postprocessor")),
     _master_vpp_name(getParam<VectorPostprocessorName>("to_vector_postprocessor")),
-    _vpp_name(_name + ":" + _sub_pp_name)
+    _vpp_name(isParamValid("prefix") ? getParam<std::string>("prefix") + ":" + _sub_pp_name
+                                     : _name + ":" + _sub_pp_name)
 {
+}
+
+const VectorPostprocessorName
+SamplerPostprocessorTransfer::vectorName() const
+{
+  return _vpp_name;
 }
 
 void

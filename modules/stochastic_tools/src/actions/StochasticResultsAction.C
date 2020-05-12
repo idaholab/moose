@@ -44,8 +44,7 @@ StochasticResultsAction::act()
       {
         const VectorPostprocessorName & result_name =
             ptr->getParam<VectorPostprocessorName>("to_vector_postprocessor");
-        const PostprocessorName & pp_name = ptr->getParam<PostprocessorName>("from_postprocessor");
-        const VectorPostprocessorName vpp_name = ptr->name() + ":" + pp_name;
+        const VectorPostprocessorName vpp_name = ptr->vectorName();
 
         // Get the StochasticResults storage object, get it by base class to allow for better
         // type check error message
