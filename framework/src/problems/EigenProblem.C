@@ -145,6 +145,44 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
+EigenProblem::computePrecondMatrixTags(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & jacobian,
+                                       std::set<TagID> & tags)
+{
+  TIME_SECTION(_compute_jacobian_tag_timer);
+
+  _fe_matrix_tags.clear();
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->disassociateAllTaggedMatrices();
+
+  for (auto tag : tags)
+  {
+    _nl_eigen->associateMatrixToTag(jacobian, tag);
+    // We need to shut off eigen nodal BCs
+    // In "A+B", the corresponding rows of B are just zero
+    // Turning them off avoid overwriting
+    if (tag == _nl_eigen->eigenMatrixTag())
+    {
+      _nl_eigen->turnOffOnEigenNodalBCs(false);
+    }
+  }
+
+  computeJacobianTags(tags);
+
+  for (auto tag : tags)
+  {
+    _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
+    // Turn all nodal BCs back
+    if (tag == _nl_eigen->eigenMatrixTag())
+    {
+      _nl_eigen->turnOffOnEigenNodalBCs(true);
+    }
+  }
+}
+
+void
 EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
   TIME_SECTION(_compute_jacobian_blocks_timer);
@@ -158,8 +196,9 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   _aux->compute(EXEC_NONLINEAR);
 
   _currently_computing_jacobian = true;
-  // The preconditioning matrix is formed using non eigen kernels
-  _nl->computeJacobianBlocks(blocks, {_nl_eigen->nonEigenMatrixTag()});
+
+  _nl->computeJacobianBlocks(blocks, _nl_eigen->precondMatrixTags());
+
   _currently_computing_jacobian = false;
 }
 

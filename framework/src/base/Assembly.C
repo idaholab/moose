@@ -3717,18 +3717,31 @@ Assembly::cacheJacobianNeighbor()
 }
 
 void
+Assembly::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                               unsigned int ivar,
+                               unsigned int jvar,
+                               const DofMap & dof_map,
+                               std::vector<dof_id_type> & dof_indices,
+                               const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tag);
+}
+
+void
 Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
                            unsigned int ivar,
                            unsigned int jvar,
                            const DofMap & dof_map,
-                           std::vector<dof_id_type> & dof_indices)
+                           std::vector<dof_id_type> & dof_indices,
+                           TagID tag)
 {
   if (dof_indices.size() == 0)
     return;
   if (!(*_cm)(ivar, jvar))
     return;
 
-  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
+  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar, tag);
   auto & iv = _sys.getVariable(_tid, ivar);
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
@@ -3933,7 +3946,9 @@ Assembly::setCachedJacobianContributions()
     {
       // First zero the rows (including the diagonals) to prepare for
       // setting the cached values.
-      _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
+      // If we did not cache anything yet, we should skip
+      if (_cached_jacobian_contribution_rows[tag].size())
+        _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
 
       // TODO: Use SparseMatrix::set_values() for efficiency
       for (MooseIndex(_cached_jacobian_contribution_vals) i = 0;

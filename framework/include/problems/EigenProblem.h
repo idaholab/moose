@@ -70,6 +70,13 @@ public:
                                   TagID tag) override;
 
   /**
+   * Form a Jacobian matrix for all kernels and BCs with given tags
+   */
+  virtual void computePrecondMatrixTags(const NumericVector<Number> & soln,
+                                        SparseMatrix<Number> & jacobian,
+                                        std::set<TagID> & tags);
+
+  /**
    * Form two Jacobian matrices, whre each is associateed with one tag, through one
    * element-loop.
    */

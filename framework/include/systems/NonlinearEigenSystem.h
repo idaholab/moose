@@ -144,11 +144,28 @@ public:
    */
   TagID nonEigenMatrixTag() { return _A_tag; }
 
+  /**
+   * If the preconditioning matrix includes eigen kernels
+   */
+  void precondMatrixIncludesEigenKernels(bool precond_matrix_includes_eigen)
+  {
+    _precond_matrix_includes_eigen = precond_matrix_includes_eigen;
+  }
+
+  bool precondMatrixIncludesEigenKernels() { return _precond_matrix_includes_eigen; }
+
+  std::set<TagID> & precondMatrixTags() { return _precond_tags; }
+
   virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
 
   Preconditioner<Number> * moosePreconditioner() { return _moose_preconditioner; }
 
   virtual void turnOffJacobian() override;
+
+  /**
+   * Turn off or on eigen nodal BCs
+   */
+  void turnOffOnEigenNodalBCs(bool on);
 
 protected:
   NumericVector<Number> & solutionOldInternal() const override
@@ -171,6 +188,9 @@ protected:
   TagID _Bx_tag;
   TagID _A_tag;
   TagID _B_tag;
+  bool _precond_matrix_includes_eigen;
+  // Tags for computing preconditioning matrix
+  std::set<TagID> _precond_tags;
   Preconditioner<Number> * _moose_preconditioner;
 };
 

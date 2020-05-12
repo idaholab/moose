@@ -16,6 +16,7 @@
 #include "libmesh/petsc_macro.h"
 
 #include "Moose.h"
+#include "SystemBase.h"
 
 /* We need this in order to implement moose PC */
 #include <petsc/private/pcimpl.h>
@@ -44,6 +45,9 @@ void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & param
 void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcOutputOptions(EigenProblem & eigen_problem);
 
+void moosePetscSNESFormJacobian(SNES snes, Vec x, Mat jac, Mat pc, void * ctx, TagID tag);
+void moosePetscSNESFormJacobianTags(
+    SNES snes, Vec x, Mat jac, Mat pc, void * ctx, std::set<TagID> & tags);
 PetscErrorCode mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
 PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx);
