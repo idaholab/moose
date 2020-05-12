@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
+#include "StochasticResultsAction.h"
 
 /**
  * Storage helper for managing data being assigned to this VPP by a Transfer object.
@@ -33,9 +34,9 @@ public:
   static InputParameters validParams();
 
   StochasticResults(const InputParameters & parameters);
-  void virtual initialize() override;
-  void virtual finalize() override;
-  void virtual execute() override {}
+  virtual void initialize() override;
+  virtual void finalize() override;
+  virtual void execute() override {}
 
   // This method is used by the Transfers for populating data within the vectors for this VPP; this
   // is required to allow for the "contains_complete_history = true" to operate correctly with the
@@ -46,7 +47,7 @@ public:
   // current data from sub-application for this local process. This object then handles the
   // communication and updating of the actual VPP data being mindfull of the
   // "contains_complete_history". An r-value reference is used by this object to take ownership of
-  // the data to avoid uncesssary copying, because the supplied data can be very large.
+  // the data to avoid unnecessary copying, because the supplied data can be very large.
   //
   // For an example use, please refer to SamplerPostprocessorTransfer.
   //
@@ -55,18 +56,14 @@ public:
   void setCurrentLocalVectorPostprocessorValue(const std::string & vector_name,
                                                const VectorPostprocessorValue && current);
 
-  /**
-   * DEPRECATED
-   * Initialize storage based on the Sampler returned by the SamplerTransientMultiApp or
-   * SamplerFullSolveMultiApp.
-   * @param sampler The Sampler associated with the MultiApp that this VPP is working with.
-   *
-   * This an internal method that is called by the SamplerPostprocessorTransfer, it should not
-   * be called otherwise.
-   */
-  void init(Sampler & _sampler);
-
 protected:
   /// Storage for declared vectors
   std::vector<StochasticResultsData> _sample_vectors;
+
+  /**
+   * Create a VPP vector for results data for a given Sampler, see StochasticResultsAction for
+   * more details to why this is necessary.
+   */
+  void initVector(const std::string & vector_name);
+  friend void StochasticResultsAction::act();
 };

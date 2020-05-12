@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "Sampler.h"
+#include "SamplerPostprocessorTransfer.h"
 
 registerMooseObject("StochasticToolsApp", StochasticResults);
 
@@ -29,8 +30,10 @@ StochasticResults::validParams()
       "Storage container for stochastic simulation results coming from a Postprocessor.");
   params += SamplerInterface::validParams();
 
-  params.addParam<std::vector<SamplerName>>("samplers",
-                                            "A list of sampler names of associated data.");
+  params.addDeprecatedParam<std::vector<SamplerName>>(
+      "samplers",
+      "A list of sampler names of associated data.",
+      "This parameter is no longer needed, please remove it from your input file.");
 
   // If 'parallel_type = REPLICATED' broadcast the vector automatically
   params.set<bool>("_auto_broadcast") = true;
@@ -40,12 +43,6 @@ StochasticResults::validParams()
 StochasticResults::StochasticResults(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters), SamplerInterface(this)
 {
-  if (isParamValid("samplers"))
-    for (const SamplerName & name : getParam<std::vector<SamplerName>>("samplers"))
-    {
-      Sampler & sampler = getSamplerByName(name);
-      _sample_vectors.emplace_back(sampler.name(), &declareVector(sampler.name()));
-    }
 }
 
 void
@@ -75,26 +72,22 @@ StochasticResults::finalize()
 
 void
 StochasticResults::setCurrentLocalVectorPostprocessorValue(
-    const std::string & name, const VectorPostprocessorValue && current)
+    const std::string & vector_name, const VectorPostprocessorValue && current)
 {
-  mooseAssert(!hasVectorPostprocessorByName(name),
-              "The supplied name must be a valid vector postprocessor name.");
-  auto data_ptr = std::find_if(_sample_vectors.begin(),
-                               _sample_vectors.end(),
-                               [&name](StochasticResultsData & data) { return data.name == name; });
+  mooseAssert(!hasVectorPostprocessorByName(vector_name),
+              "The supplied VectorPostprocessor name of '" << vector_name << "' must exist.");
+  auto data_ptr = std::find_if(
+      _sample_vectors.begin(), _sample_vectors.end(), [&vector_name](StochasticResultsData & data) {
+        return data.name == vector_name;
+      });
 
+  mooseAssert(data_ptr != _sample_vectors.end(),
+              "Unable to located a vector with the supplied name of '" << vector_name << "'.");
   data_ptr->current = current;
 }
 
-// DEPRECATED
 void
-StochasticResults::init(Sampler & sampler)
+StochasticResults::initVector(const std::string & vector_name)
 {
-  if (!isParamValid("samplers"))
-  {
-    paramWarning("samplers",
-                 "Support for the 'StochasticResults' objects without the 'samplers' input "
-                 "parameter is being removed, please update your input file(s).");
-    _sample_vectors.emplace_back(sampler.name(), &declareVector(sampler.name()));
-  }
+  _sample_vectors.emplace_back(vector_name, &declareVector(vector_name));
 }

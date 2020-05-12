@@ -66,7 +66,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = quadrature
   []
   [local_sense]
     type = PolynomialChaosLocalSensitivity
@@ -94,7 +93,7 @@
     distributions = 'D_dist S_dist'
     sampler = quadrature
     results_vpp = storage
-    results_vector = quadrature
+    results_vector = data:avg
   []
 []
 

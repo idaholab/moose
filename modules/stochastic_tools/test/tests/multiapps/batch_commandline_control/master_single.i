@@ -51,7 +51,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = sample
   []
 []
 

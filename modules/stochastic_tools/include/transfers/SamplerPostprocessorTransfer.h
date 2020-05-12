@@ -26,7 +26,6 @@ class SamplerPostprocessorTransfer : public StochasticToolsTransfer
 {
 public:
   static InputParameters validParams();
-
   SamplerPostprocessorTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
 
@@ -53,6 +52,9 @@ protected:
 
   /// Name of vector-postprocessor on the master
   const VectorPostprocessorName & _master_vpp_name;
+
+  /// Storage vector names
+  const PostprocessorName _vpp_name;
 
   /// Temporary storage for batch mode execution
   VectorPostprocessorValue _current_data;

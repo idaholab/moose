@@ -59,6 +59,10 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_mesh");
   registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_problem");
   registerSyntaxTask("StochasticToolsAction", "StochasticTools", "auto_create_executioner");
+
+  // StochasticResults
+  registerTask("declare_stochastic_results_vectors", true);
+  addTaskDependency("declare_stochastic_results_vectors", "add_vector_postprocessor");
 }
 
 void

@@ -62,7 +62,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = sample
     contains_complete_history = true
     execute_on = 'INITIAL TIMESTEP_END'
   []

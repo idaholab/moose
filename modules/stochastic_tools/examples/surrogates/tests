@@ -71,7 +71,7 @@
     []
   []
   [evaluate_normal]
-    requirement = "The sytem shall check syntax for evaluating surrogate models with normal distribution for a heat conduction problem using "
+    requirement = "The system shall check syntax for evaluating surrogate models with normal distribution for a heat conduction problem using "
     [nearest_point]
       type = RunApp
       input = nearest_point_normal.i

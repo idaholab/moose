@@ -23,22 +23,13 @@ SamplerPostprocessorTransfer::validParams()
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Transfers data from Postprocessors on the sub-application to a "
                              "VectorPostprocessor on the master application.");
+
   params.addParam<PostprocessorName>(
-      "from_postprocessor", "The name of the Postprocessors on the sub-app to transfer from.");
+      "from_postprocessor", "The name(s) of the Postprocessor(s) on the sub-app to transfer from.");
   params.addParam<VectorPostprocessorName>("to_vector_postprocessor",
                                            "The name of the VectorPostprocessor in "
                                            "the MultiApp to transfer values "
                                            "to.");
-
-  params.addDeprecatedParam<PostprocessorName>(
-      "postprocessor",
-      "The name of the Postprocessors on the sub-app to transfer from.",
-      "Replaced by from_postprocessor");
-  params.addDeprecatedParam<VectorPostprocessorName>("vector_postprocessor",
-                                                     "The name of the VectorPostprocessor in "
-                                                     "the MultiApp to transfer values "
-                                                     "to.",
-                                                     "Replaced by to_vector_postprocessor");
 
   params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
@@ -47,28 +38,25 @@ SamplerPostprocessorTransfer::validParams()
 
 SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
-    _sub_pp_name(isParamValid("postprocessor") ? getParam<PostprocessorName>("postprocessor")
-                                               : getParam<PostprocessorName>("from_postprocessor")),
-    _master_vpp_name(isParamValid("vector_postprocessor")
-                         ? getParam<VectorPostprocessorName>("vector_postprocessor")
-                         : getParam<VectorPostprocessorName>("to_vector_postprocessor"))
+    _sub_pp_name(getParam<PostprocessorName>("from_postprocessor")),
+    _master_vpp_name(getParam<VectorPostprocessorName>("to_vector_postprocessor")),
+    _vpp_name(_name + ":" + _sub_pp_name)
 {
 }
 
 void
 SamplerPostprocessorTransfer::initialSetup()
 {
+  // Get the StochasticResults VPP object to populate
   auto & uo = _fe_problem.getUserObject<UserObject>(_master_vpp_name);
   _results = dynamic_cast<StochasticResults *>(&uo);
-
   if (!_results)
     mooseError("The 'results' object must be a 'StochasticResults' object.");
 
-  _results->init(*_sampler_ptr);
-
-  // Check that postprocessor on sub-appilcation exists
+  // Check that postprocessor on sub-application exists and create vectors on results VPP
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
+  {
     if (_multi_app->hasLocalApp(i))
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
@@ -79,6 +67,7 @@ SamplerPostprocessorTransfer::initialSetup()
                    _multi_app->name(),
                    "'");
     }
+  }
 }
 
 void
@@ -105,7 +94,7 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
 void
 SamplerPostprocessorTransfer::finalizeFromMultiapp()
 {
-  _results->setCurrentLocalVectorPostprocessorValue(_sampler_ptr->name(), std::move(_current_data));
+  _results->setCurrentLocalVectorPostprocessorValue(_vpp_name, std::move(_current_data));
   _current_data.clear();
 }
 
@@ -114,10 +103,10 @@ SamplerPostprocessorTransfer::execute()
 {
   VectorPostprocessorValue current;
   current.reserve(_sampler_ptr->getNumberOfLocalRows());
-  for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
+  for (dof_id_type j = _sampler_ptr->getLocalRowBegin(); j < _sampler_ptr->getLocalRowEnd(); ++j)
   {
-    FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+    FEProblemBase & app_problem = _multi_app->appProblemBase(j);
     current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_name));
   }
-  _results->setCurrentLocalVectorPostprocessorValue(_sampler_ptr->name(), std::move(current));
+  _results->setCurrentLocalVectorPostprocessorValue(_vpp_name, std::move(current));
 }

@@ -98,7 +98,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = 'sobol mc'
   []
 []
 

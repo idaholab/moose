@@ -76,7 +76,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = sobol
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

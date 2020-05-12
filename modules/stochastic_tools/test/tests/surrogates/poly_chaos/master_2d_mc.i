@@ -62,7 +62,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = sample
   []
   [pc_coeff]
     type = PolynomialChaosData
@@ -93,7 +92,7 @@
     distributions = 'D_dist S_dist'
     sampler = sample
     results_vpp = storage
-    results_vector = sample
+    results_vector = data:avg
   []
 []
 

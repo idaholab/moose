@@ -63,7 +63,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = mc
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [data]
