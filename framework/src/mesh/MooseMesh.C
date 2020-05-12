@@ -908,31 +908,25 @@ MooseMesh::cacheInfo()
   for (const auto & elem : getMesh().element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
-    // Is it a lower-d element?
-    const bool is_lowerd_elem = elem->has_interior_parent();
-    if (is_lowerd_elem)
+
+    if (elem->has_interior_parent())
     {
       const Elem * ip_elem = elem->interior_parent();
 
-      if (ip_elem)
-      {
-        unsigned int ip_side = ip_elem->which_side_am_i(elem);
-        // The following check only fails for a grid sequencing test
-        if (ip_side == libMesh::invalid_uint)
-          mooseError(
-              "An element identified as an interior parent cannot retrieve a proper side on "
-              "which the lower-d element is");
-        auto pair = std::make_pair(ip_elem, ip_side);
-        _higher_d_elem_side_to_lower_d_elem.insert(
-            std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
-      }
+      unsigned int ip_side = ip_elem->which_side_am_i(elem);
+      // The following check only fails for a grid sequencing test
+      if (ip_side == libMesh::invalid_uint)
+        mooseError("An element identified as an interior parent cannot retrieve a proper side on "
+                   "which the lower-d element is");
+      auto pair = std::make_pair(ip_elem, ip_side);
+      _higher_d_elem_side_to_lower_d_elem.insert(
+          std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
     }
-    ///
+
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
 
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
-
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
       subdomain_set.insert(boundaryids.begin(), boundaryids.end());
