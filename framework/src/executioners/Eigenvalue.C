@@ -80,12 +80,18 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 }
 
 void
-Eigenvalue::execute()
+Eigenvalue::init()
 {
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 
+  Steady::init();
+}
+
+void
+Eigenvalue::execute()
+{
 #if LIBMESH_HAVE_SLEPC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app

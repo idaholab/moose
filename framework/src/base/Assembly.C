@@ -3935,8 +3935,8 @@ Assembly::setCachedJacobianContributions()
       // First zero the rows (including the diagonals) to prepare for
       // setting the cached values.
       // If we did not cache anything yet, we should skip
-      if (_cached_jacobian_contribution_rows[tag].size())
-        _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
+      // if (_cached_jacobian_contribution_rows[tag].size())
+      _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
 
       // TODO: Use SparseMatrix::set_values() for efficiency
       for (MooseIndex(_cached_jacobian_contribution_vals) i = 0;
