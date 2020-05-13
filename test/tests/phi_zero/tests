@@ -1,0 +1,20 @@
+[Tests]
+  [./phi_zero_linear]
+    type = 'RunApp'
+    input = 'simple_transient_diffusion.i'
+    expect_out = ' Solve Converged!'
+    issues = '#15204'
+    design = ' '
+    requirement = 'The system shall be able to produce consestent size _phi_zero and _grad_phi_zero objects'
+  [../]
+  [./phi_zero_qudratic]
+    type = 'RunApp'
+    input = 'simple_transient_diffusion.i'
+    cli_args = 'Mesh/elem_type=QUAD8  Variables/dummy/order=SECOND Variables/u/order=SECOND'
+    requirement = 'The system shall be able to produce consestent size _phi_zero and _grad_phi_zero'
+    'objects for quadratic shape functions'
+    expect_out = ' Solve Converged!'
+    issues = '#15204'
+    design = ' '
+  [../]
+[]
