@@ -881,6 +881,7 @@ protected:
 
   /// Zero value of a variable
   const VariableValue & _zero;
+  const VariablePhiValue & _phi_zero;
   const MooseArray<DualReal> & _ad_zero;
 
   /// Zero gradient of a variable
