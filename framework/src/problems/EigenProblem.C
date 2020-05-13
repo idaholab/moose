@@ -145,11 +145,18 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-EigenProblem::computePrecondMatrixTags(const NumericVector<Number> & soln,
-                                       SparseMatrix<Number> & jacobian,
-                                       std::set<TagID> & tags)
+EigenProblem::computeMatricesTags(
+    const NumericVector<Number> & soln,
+    const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
+    const std::set<TagID> & tags)
 {
   TIME_SECTION(_compute_jacobian_tag_timer);
+
+  if (jacobians.size() != tags.size())
+    mooseError("The number of matrices ",
+               jacobians.size(),
+               " does not equal the number of tags ",
+               tags.size());
 
   _fe_matrix_tags.clear();
 
@@ -157,29 +164,15 @@ EigenProblem::computePrecondMatrixTags(const NumericVector<Number> & soln,
 
   _nl_eigen->disassociateAllTaggedMatrices();
 
+  unsigned int i = 0;
   for (auto tag : tags)
-  {
-    _nl_eigen->associateMatrixToTag(jacobian, tag);
-    // We need to shut off eigen nodal BCs
-    // In "A+B", the corresponding rows of B are just zero
-    // Turning them off avoid overwriting
-    if (tag == _nl_eigen->eigenMatrixTag())
-    {
-      _nl_eigen->turnOffOnEigenNodalBCs(false);
-    }
-  }
+    _nl_eigen->associateMatrixToTag(*(jacobians[i++]), tag);
 
   computeJacobianTags(tags);
 
+  i = 0;
   for (auto tag : tags)
-  {
-    _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
-    // Turn all nodal BCs back
-    if (tag == _nl_eigen->eigenMatrixTag())
-    {
-      _nl_eigen->turnOffOnEigenNodalBCs(true);
-    }
-  }
+    _nl_eigen->disassociateMatrixFromTag(*(jacobians[i++]), tag);
 }
 
 void
@@ -197,7 +190,7 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
   _currently_computing_jacobian = true;
 
-  _nl->computeJacobianBlocks(blocks, _nl_eigen->precondMatrixTags());
+  _nl->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
 
   _currently_computing_jacobian = false;
 }

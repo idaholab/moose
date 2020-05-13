@@ -70,6 +70,12 @@ public:
   template <typename T>
   void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
 
+  /**
+   * Add the precond tag to eigen kernels
+   */
+  template <typename T>
+  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
+
   virtual void initialSetup() override;
 
   void attachSLEPcCallbacks();
@@ -154,7 +160,7 @@ public:
 
   bool precondMatrixIncludesEigenKernels() { return _precond_matrix_includes_eigen; }
 
-  std::set<TagID> & precondMatrixTags() { return _precond_tags; }
+  TagID precondMatrixTag() { return _precond_tag; }
 
   virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
 
@@ -188,9 +194,9 @@ protected:
   TagID _Bx_tag;
   TagID _A_tag;
   TagID _B_tag;
+  TagID _precond_tag;
   bool _precond_matrix_includes_eigen;
   // Tags for computing preconditioning matrix
-  std::set<TagID> _precond_tags;
   Preconditioner<Number> * _moose_preconditioner;
 };
 

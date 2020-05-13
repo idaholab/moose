@@ -51,9 +51,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   // we only need to form a preconditioning matrix
   if (eigen_system.use_shell_matrices() && !eigen_system.use_shell_precond_matrix())
   {
-    p->computePrecondMatrixTags(*eigen_system.current_local_solution.get(),
-                                *eigen_system.precond_matrix,
-                                eigen_nl.precondMatrixTags());
+    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
+                          *eigen_system.precond_matrix,
+                          eigen_nl.precondMatrixTag());
     return;
   }
 #endif
@@ -101,13 +101,17 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 
   _A_tag = eigen_problem.addMatrixTag("A_tag");
 
-  _precond_tags.insert(_A_tag);
-
   _B_tag = eigen_problem.addMatrixTag("Eigen");
 
   /// Forcefully init the default solution states to match those available in libMesh
   /// Must be called here because it would call virtuals in the parent class
   solutionState(_default_solution_states);
+
+  // By default, _precond_tag and _A_tag will share the same
+  // objects. If we want to include eigen contributions to
+  // the preconditioning matrix, and then _precond_tag will
+  // point to part of "B" objects
+  _precond_tag = eigen_problem.addMatrixTag("Eigen_precond");
 }
 
 void
@@ -124,6 +128,36 @@ NonlinearEigenSystem::initialSetup()
   addEigenTagToMooseObjects(_scalar_kernels);
   // IntegratedBCs
   addEigenTagToMooseObjects(_integrated_bcs);
+  // If the precond matrix needs to include eigen kernels,
+  // we assign precond tag to all objects except nodal BCs.
+  // Mathematically speaking, we can not add eigen BCs in
+  // since they will overwrite non-eigen nodal BCs contributions.
+  if (_precond_matrix_includes_eigen)
+  {
+    // DG kernels
+    addPrecondTagToMooseObjects(_dg_kernels);
+    // Regular kernels
+    addPrecondTagToMooseObjects(_kernels);
+    // Scalar kernels
+    addPrecondTagToMooseObjects(_scalar_kernels);
+    // IntegratedBCs
+    addPrecondTagToMooseObjects(_integrated_bcs);
+  }
+}
+
+template <typename T>
+void
+NonlinearEigenSystem::addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse)
+{
+  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  {
+    // Get all objects out from the warehouse
+    auto & objects = warehouse.getObjects(tid);
+
+    // Assign precond tag to all objects
+    for (auto & object : objects)
+      object->useMatrixTag(_precond_tag);
+  }
 }
 
 template <typename T>
@@ -139,13 +173,21 @@ NonlinearEigenSystem::addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & war
       auto & vtags = object->getVectorTags();
       // If this is not an eigen kernel
       if (vtags.find(_Bx_tag) == vtags.end())
+      {
         object->useVectorTag(_Ax_tag);
+        // Noneigen Kernels
+        object->useMatrixTag(_precond_tag);
+      }
       else // also associate eigen matrix tag if this is a eigen kernel
         object->useMatrixTag(_B_tag);
 
       auto & mtags = object->getMatrixTags();
       if (mtags.find(_B_tag) == mtags.end())
+      {
         object->useMatrixTag(_A_tag);
+        // Noneigen Kernels
+        object->useMatrixTag(_precond_tag);
+      }
       else
         object->useVectorTag(_Bx_tag);
     }
@@ -177,10 +219,6 @@ NonlinearEigenSystem::turnOffOnEigenNodalBCs(bool on)
 void
 NonlinearEigenSystem::solve()
 {
-  // If we want to take into consideration eigen kernels, and then add the eigen tag.
-  if (_precond_matrix_includes_eigen)
-    _precond_tags.insert(_B_tag);
-
   // Clear the iteration counters
   _current_l_its.clear();
   _current_nl_its = 0;
