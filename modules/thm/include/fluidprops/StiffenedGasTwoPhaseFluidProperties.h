@@ -56,6 +56,17 @@ protected:
   const Real _p_inf_vapor;
   const Real _q_prime_vapor;
 
+  /// Minimum temperature value in saturation curve
+  const Real & _T_sat_min;
+  /// Maximum temperature value in saturation curve
+  const Real & _T_sat_max;
+  /// Initial guess for saturation pressure Newton solve
+  const Real & _p_sat_guess;
+  /// Number of samples to take in saturation curve
+  const unsigned int & _n_sat_samples;
+  /// Temperature increments on saturation curve
+  const Real _dT_sat;
+
   // coefficients for saturation pressure Newton solve
   const Real _A;
   const Real _B;
