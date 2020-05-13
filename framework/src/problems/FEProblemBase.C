@@ -400,16 +400,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     setRestartFile(restart_file_base);
   }
 
-  // // Generally speaking, the mesh is prepared for use, and consequently remote elements are deleted
-  // // well before our FEProblemBase is constructed. Historically, in MooseMesh we have a bunch of
-  // // needs_prepare type flags that make it so we never call prepare_for_use (and consequently
-  // // delete_remote_elements) again. So the below line, historically, has had no impact. HOWEVER:
-  // // I've added some code in SetupMeshCompleteAction for deleting remote elements post
-  // // EquationSystems::init. If I execute that code without default ghosting, then I get > 40 MOOSE
-  // // test failures, so we clearly have some simulations that are not yet covered properly by
-  // // relationship managers. Until that is resolved, I am going to retain default geometric ghosting
-  // if (!_default_ghosting)
-  //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
+  if (!_default_ghosting)
+    _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master app should hold the default database to handle system petsc options
@@ -630,10 +622,7 @@ FEProblemBase::initialSetup()
   setCurrentExecuteOnFlag(EXEC_INITIAL);
   addExtraVectors();
 
-  // Execute this here in case we want to print out the required derivative size in
-  // OutputWarehouse::initialSetup
-  // if (haveADObjects() || (_displaced_problem && _displaced_problem->haveADObjects()))
-  // {
+  // always execute this
   CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 
   MaxVarNDofsPerElem mvndpe(*this, *_nl);
@@ -664,12 +653,9 @@ FEProblemBase::initialSetup()
 
   _nl->setRequiredDerivativeSize(size_required);
 #endif
-  // }
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    mooseAssert(_nl->getMaxVarNDofsPerElem() > 0, "_nl->getMaxVarNDofsPerElem()<=0");
-    mooseAssert(getMaxQps() > 0, "getMaxQps()<=0");
     _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
     _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
                                std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
@@ -3601,13 +3587,9 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   // Post-aux UserObjects
   computeUserObjects(exec_type, Moose::POST_AUX);
 
+  // Controls
   if (exec_type != EXEC_INITIAL)
-  {
-    // Pre-ic UserObjects should execute along with the Post-aux group except on EXEC_INITIAL
-    computeUserObjects(exec_type, Moose::PRE_IC);
-
     executeControls(exec_type);
-  }
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
@@ -3696,7 +3678,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
   else if (group == Moose::PRE_AUX)
     query.condition<AttribPreAux>(true);
   else if (group == Moose::POST_AUX)
-    query.condition<AttribPostAux>(true);
+    query.condition<AttribPreAux>(false);
 
   std::vector<GeneralUserObject *> genobjs;
   query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
