@@ -182,7 +182,9 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   else
     _mobile_old = _mobile_dislocations_old[_qp];
 
-  const ADReal trial_stress_mpa = (effective_trial_stress - _three_shear_modulus * scalar) * 1.0e-6;
+  ADReal trial_stress_mpa = effective_trial_stress * 1.0e-6;
+  if (_apply_strain)
+    trial_stress_mpa -= _three_shear_modulus * scalar * 1.0e-6;
 
   if (trial_stress_mpa < 0.0)
     mooseException("In ",
@@ -221,19 +223,23 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
     Moose::out << "  dt: " << _dt << "\n";
     Moose::out << "  old mobile disl: " << _mobile_old << "\n";
     Moose::out << "  old immobile disl: " << _immobile_old << "\n";
-    Moose::out << "  initial stress (MPa): " << effective_trial_stress * 1.0e-6 << "\n";
-    Moose::out << "  temperature: " << _temperature[_qp] << "\n";
-    Moose::out << "  environmental factor: " << _environmental[_qp] << "\n";
-    Moose::out << "  calculated scalar strain value: " << scalar << "\n";
-    Moose::out << "  trial stress into rom (MPa): " << trial_stress_mpa << "\n";
+    Moose::out << "  initial stress (MPa): "
+               << MetaPhysicL::raw_value(effective_trial_stress) * 1.0e-6 << "\n";
+    Moose::out << "  temperature: " << MetaPhysicL::raw_value(_temperature[_qp]) << "\n";
+    Moose::out << "  environmental factor: " << MetaPhysicL::raw_value(_environmental[_qp]) << "\n";
+    Moose::out << "  calculated scalar strain value: " << MetaPhysicL::raw_value(scalar) << "\n";
+    Moose::out << "  trial stress into rom (MPa): " << MetaPhysicL::raw_value(trial_stress_mpa)
+               << "\n";
     Moose::out << "  old effective strain: " << effective_strain_old << "\n";
     Moose::out << " ROM outputs \n";
-    Moose::out << "  effective incremental strain from rom: " << rom_effective_strain << "\n";
-    Moose::out << "  new effective strain: " << effective_strain_old + rom_effective_strain << "\n";
-    Moose::out << "  new mobile dislocations: " << _mobile_old + _mobile_dislocation_increment
-               << "\n";
-    Moose::out << "  new immobile dislocations: " << _immobile_old + _immobile_dislocation_increment
-               << "\n"
+    Moose::out << "  effective incremental strain from rom: "
+               << MetaPhysicL::raw_value(rom_effective_strain) << "\n";
+    Moose::out << "  new effective strain: "
+               << MetaPhysicL::raw_value(effective_strain_old + rom_effective_strain) << "\n";
+    Moose::out << "  new mobile dislocations: "
+               << _mobile_old + MetaPhysicL::raw_value(_mobile_dislocation_increment) << "\n";
+    Moose::out << "  new immobile dislocations: "
+               << _immobile_old + MetaPhysicL::raw_value(_immobile_dislocation_increment) << "\n"
                << std::endl;
   }
 
@@ -254,13 +260,18 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
     Moose::out << "Finalized verbose information from " << _name << "\n";
     Moose::out << "  increment effective creep strain: "
                << std::sqrt(2.0 / 3.0 *
-                            plastic_strain_increment.doubleContraction(plastic_strain_increment))
+                            MetaPhysicL::raw_value(plastic_strain_increment.doubleContraction(
+                                plastic_strain_increment)))
                << "\n";
     Moose::out << "  effective_creep_strain: "
-               << std::sqrt(2.0 / 3.0 * _creep_strain[_qp].doubleContraction(_creep_strain[_qp]))
+               << std::sqrt(2.0 / 3.0 *
+                            MetaPhysicL::raw_value(
+                                _creep_strain[_qp].doubleContraction(_creep_strain[_qp])))
                << "\n";
-    Moose::out << "  new mobile dislocations: " << _mobile_dislocations[_qp] << "\n";
-    Moose::out << "  new immobile dislocations: " << _immobile_dislocations[_qp] << "\n"
+    Moose::out << "  new mobile dislocations: " << MetaPhysicL::raw_value(_mobile_dislocations[_qp])
+               << "\n";
+    Moose::out << "  new immobile dislocations: "
+               << MetaPhysicL::raw_value(_immobile_dislocations[_qp]) << "\n"
                << std::endl;
   }
 
@@ -364,7 +375,7 @@ ADLAROMANCEStressUpdateBase::checkInputWindows(std::vector<ADReal> & input)
                        " output=",
                        i,
                        " with value (",
-                       input[j],
+                       MetaPhysicL::raw_value(input[j]),
                        ") is out of range (",
                        _input_limits[j][0],
                        " - ",
@@ -380,7 +391,7 @@ ADLAROMANCEStressUpdateBase::checkInputWindows(std::vector<ADReal> & input)
                      " output=",
                      i,
                      " with value (",
-                     input[j],
+                     MetaPhysicL::raw_value(input[j]),
                      ") is out of range (",
                      _input_limits[j][0],
                      " - ",
@@ -497,9 +508,7 @@ ADLAROMANCEStressUpdateBase::convertOutput(const Real dt,
     if (i == 0 || i == 1)
     {
       dinput_value_increments[i] = 0.0;
-      input_value_increments[i] *= old_input_values[i];
-      if (i == 0)
-        input_value_increments[i] *= -1.0;
+      input_value_increments[i] *= -old_input_values[i];
     }
     else
       dinput_value_increments[i] = input_value_increments[i] * drom_outputs[i];
