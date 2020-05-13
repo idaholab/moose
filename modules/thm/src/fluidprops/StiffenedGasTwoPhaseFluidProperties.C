@@ -32,6 +32,11 @@ StiffenedGasTwoPhaseFluidProperties::validParams()
   params.addParam<Real>("rho_c", 322.0, "Critical density [kg/m^3]");
   params.addParam<Real>("e_c", 2702979.84310559, "Critical specific internal energy [J/kg]");
 
+  params.addParam<Real>(
+      "sigma_A", 0.2358, "'A' constant used in surface tension correlation [N/m]");
+  params.addParam<Real>("sigma_B", 1.256, "'B' constant used in surface tension correlation");
+  params.addParam<Real>("sigma_C", 0.625, "'C' constant used in surface tension correlation");
+
   // Default values correspond to water, from the freezing point to critical point, with 1 K
   // increments
   params.addParam<Real>("T_sat_min", 274.0, "Minimum temperature value in saturation curve [K]");
@@ -65,7 +70,12 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
     _p_inf_vapor(getParam<Real>("p_inf_vapor")),
     _q_prime_vapor(getParam<Real>("q_prime_vapor")),
 
+    _T_c(getParam<Real>("T_c")),
     _p_c(getParam<Real>("p_c")),
+
+    _sigma_A(getParam<Real>("sigma_A")),
+    _sigma_B(getParam<Real>("sigma_B")),
+    _sigma_C(getParam<Real>("sigma_C")),
 
     _T_sat_min(getParam<Real>("T_sat_min")),
     _T_sat_max(getParam<Real>("T_sat_max")),
@@ -192,4 +202,22 @@ Real
 StiffenedGasTwoPhaseFluidProperties::dT_sat_dp(Real pressure) const
 {
   return _ipol_temp.sampleDerivative(pressure);
+}
+
+Real
+StiffenedGasTwoPhaseFluidProperties::sigma_from_T(Real T) const
+{
+  const Real aux = 1.0 - T / _T_c;
+  return _sigma_A * std::pow(aux, _sigma_B) * (1.0 - _sigma_C * aux);
+}
+
+Real
+StiffenedGasTwoPhaseFluidProperties::dsigma_dT_from_T(Real T) const
+{
+  const Real aux = 1.0 - T / _T_c;
+  const Real daux_dT = -1.0 / _T_c;
+  const Real dsigma_daux =
+      _sigma_A * (_sigma_B * std::pow(aux, _sigma_B - 1.0) * (1.0 - _sigma_C * aux) -
+                  _sigma_C * std::pow(aux, _sigma_B));
+  return dsigma_daux * daux_dT;
 }

@@ -18,6 +18,8 @@ public:
   virtual Real T_sat(Real pressure) const override;
   virtual Real p_sat(Real temperature) const override;
   virtual Real dT_sat_dp(Real pressure) const override;
+  virtual Real sigma_from_T(Real T) const override;
+  virtual Real dsigma_dT_from_T(Real T) const override;
 
   virtual bool supportsPhaseChange() const override { return true; }
 
@@ -56,8 +58,17 @@ protected:
   const Real _p_inf_vapor;
   const Real _q_prime_vapor;
 
+  /// critical temperature
+  const Real & _T_c;
   /// critical pressure
   const Real & _p_c;
+
+  /// 'A' constant used in surface tension correlation
+  const Real & _sigma_A;
+  /// 'B' constant used in surface tension correlation
+  const Real & _sigma_B;
+  /// 'C' constant used in surface tension correlation
+  const Real & _sigma_C;
 
   /// Minimum temperature value in saturation curve
   const Real & _T_sat_min;
