@@ -1,12 +1,7 @@
 [Tests]
-  [./energy_conservation_cylindrical]
-    type = 'CSVDiff'
-    input = 'cylindrical.i'
-    csvdiff = 'cylindrical_out.csv'
-  [../]
   [./energy_conservation_plate]
-    type = 'CSVDiff'
-    input = 'plate.i'
-    csvdiff = 'plate_out.csv'
+    type = Exodiff
+    input = 'plate.master.i'
+    exodiff = 'plate.master_out.e plate.master_out_thm0.e'
   [../]
 []
