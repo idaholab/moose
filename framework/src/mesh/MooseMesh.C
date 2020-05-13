@@ -908,11 +908,10 @@ MooseMesh::cacheInfo()
   for (const auto & elem : getMesh().element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
+    const Elem * ip_elem = elem->interior_parent();
 
-    if (elem->has_interior_parent())
+    if (ip_elem)
     {
-      const Elem * ip_elem = elem->interior_parent();
-
       unsigned int ip_side = ip_elem->which_side_am_i(elem);
       // The following check only fails for a grid sequencing test
       if (ip_side == libMesh::invalid_uint)
