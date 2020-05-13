@@ -13,6 +13,9 @@
 
 class SinglePhaseFluidProperties;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Base class for fluid properties used with two-phase flow
  */
@@ -102,3 +105,5 @@ protected:
   /// The user object that provides vapor phase fluid properties
   const SinglePhaseFluidProperties * _fp_vapor;
 };
+
+#pragma GCC diagnostic pop

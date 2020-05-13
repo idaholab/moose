@@ -11,6 +11,9 @@
 
 #include "TwoPhaseFluidProperties.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * 2-phase fluid properties for 2 independent single-phase fluid properties.
  *
@@ -36,3 +39,5 @@ public:
    */
   [[noreturn]] void throwNotImplementedError() const;
 };
+
+#pragma GCC diagnostic pop
