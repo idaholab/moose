@@ -11,28 +11,27 @@ StiffenedGasTwoPhaseFluidProperties::validParams()
   InputParameters params = TwoPhaseFluidProperties::validParams();
   params += NaNInterface::validParams();
 
-  // Default parameters for Stiffened Gas EOS (liquid phase)
-  params.addParam<Real>("gamma_liquid", 2.35, "");
-  params.addParam<Real>("cv_liquid", 1816.0, "");
-  params.addParam<Real>("q_liquid", -1.167e6, "");
-  params.addParam<Real>("p_inf_liquid", 1.0e9, "");
-  params.addParam<Real>("q_prime_liquid", 0, "");
-  params.addParam<Real>("k_liquid", 0.5, "");
-  params.addParam<Real>("mu_liquid", 281.8e-6, "");
-  params.addParam<Real>("M_liquid", 0.01801488, "");
+  params.addParam<Real>("gamma_liquid", 2.35, "Liquid heat capacity ratio");
+  params.addParam<Real>("cv_liquid", 1816.0, "Liquid isochoric specific heat capacity");
+  params.addParam<Real>("q_liquid", -1.167e6, "Liquid reference specific internal energy");
+  params.addParam<Real>("p_inf_liquid", 1.0e9, "Liquid stiffness pressure");
+  params.addParam<Real>("q_prime_liquid", 0, "Liquid reference specific entropy");
+  params.addParam<Real>("k_liquid", 0.5, "Liquid thermal conductivity");
+  params.addParam<Real>("mu_liquid", 281.8e-6, "Liquid dynamic viscosity");
+  params.addParam<Real>("M_liquid", 0.01801488, "Liquid molar mass");
 
-  params.addParam<Real>("gamma_vapor", 1.43, "");
-  params.addParam<Real>("cv_vapor", 1040.0, "");
-  params.addParam<Real>("q_vapor", 2.03e6, "");
-  params.addParam<Real>("p_inf_vapor", 0.0, "");
-  params.addParam<Real>("q_prime_vapor", -2.3e4, "");
-  params.addParam<Real>("k_vapor", 0.026, "");
-  params.addParam<Real>("mu_vapor", 134.4e-7, "");
-  params.addParam<Real>("M_vapor", 0.01801488, "");
+  params.addParam<Real>("gamma_vapor", 1.43, "Vapor heat capacity ratio");
+  params.addParam<Real>("cv_vapor", 1040.0, "Vapor isochoric specific heat capacity");
+  params.addParam<Real>("q_vapor", 2.03e6, "Vapor reference specific internal energy");
+  params.addParam<Real>("p_inf_vapor", 0.0, "Vapor stiffness pressure");
+  params.addParam<Real>("q_prime_vapor", -2.3e4, "Vapor reference specific entropy");
+  params.addParam<Real>("k_vapor", 0.026, "Vapor thermal conductivity");
+  params.addParam<Real>("mu_vapor", 134.4e-7, "Vapor dynamic viscosity");
+  params.addParam<Real>("M_vapor", 0.01801488, "Vapor molar mass");
 
-  params.addParam<Real>("T_c", 647.096, "");
-  params.addParam<Real>("rho_c", 322.0, "");
-  params.addParam<Real>("e_c", 2702979.84310559, "");
+  params.addParam<Real>("T_c", 647.096, "Critical temperature [K]");
+  params.addParam<Real>("rho_c", 322.0, "Critical density [kg/m^3]");
+  params.addParam<Real>("e_c", 2702979.84310559, "Critical specific internal energy [J/kg]");
 
   // Default values correspond to water, from the freezing point to critical point, with 1 K
   // increments

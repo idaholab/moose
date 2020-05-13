@@ -78,9 +78,8 @@ protected:
   /// Newton max number of iterations
   const unsigned int _newton_max_iter;
 
-  // These two vectors store saturation line p(T) information by only calculating once in
-  // constructor
-  //   and then use interpolation to quickly calculate the value
+  // These two vectors store saturation line p(T) information by only calculating
+  // once in constructor and then use interpolation to quickly calculate the value
   std::vector<Real> _T_vec;
   std::vector<Real> _p_sat_vec;
 
