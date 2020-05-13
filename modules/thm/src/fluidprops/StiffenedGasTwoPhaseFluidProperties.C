@@ -1,8 +1,6 @@
 #include "StiffenedGasTwoPhaseFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
 
-const Real StiffenedGasTwoPhaseFluidProperties::_P_critical = 22.09E+6;
-
 registerMooseObject("THMApp", StiffenedGasTwoPhaseFluidProperties);
 
 InputParameters
@@ -30,6 +28,7 @@ StiffenedGasTwoPhaseFluidProperties::validParams()
   params.addParam<Real>("M_vapor", 0.01801488, "Vapor molar mass");
 
   params.addParam<Real>("T_c", 647.096, "Critical temperature [K]");
+  params.addParam<Real>("p_c", 22.09e6, "Critical pressure [Pa]");
   params.addParam<Real>("rho_c", 322.0, "Critical density [kg/m^3]");
   params.addParam<Real>("e_c", 2702979.84310559, "Critical specific internal energy [J/kg]");
 
@@ -65,6 +64,8 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
     _q_vapor(getParam<Real>("q_vapor")),
     _p_inf_vapor(getParam<Real>("p_inf_vapor")),
     _q_prime_vapor(getParam<Real>("q_prime_vapor")),
+
+    _p_c(getParam<Real>("p_c")),
 
     _T_sat_min(getParam<Real>("T_sat_min")),
     _T_sat_max(getParam<Real>("T_sat_max")),
@@ -143,7 +144,7 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
 Real
 StiffenedGasTwoPhaseFluidProperties::p_critical() const
 {
-  return _P_critical;
+  return _p_c;
 }
 
 Real

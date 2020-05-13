@@ -56,6 +56,9 @@ protected:
   const Real _p_inf_vapor;
   const Real _q_prime_vapor;
 
+  /// critical pressure
+  const Real & _p_c;
+
   /// Minimum temperature value in saturation curve
   const Real & _T_sat_min;
   /// Maximum temperature value in saturation curve
@@ -85,9 +88,6 @@ protected:
 
   LinearInterpolation _ipol_temp;
   LinearInterpolation _ipol_pressure;
-
-  // Critical pressure
-  static const Real _P_critical;
 
 public:
   static InputParameters validParams();
