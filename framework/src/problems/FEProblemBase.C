@@ -1760,6 +1760,7 @@ FEProblemBase::reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid)
 
   // Let's finally compute our variable values!
   _nl->reinitLowerD(tid);
+  _displaced_problem->reinitLowerDElem(lowerDElem, tid);
   _aux->reinitLowerD(tid);
 }
 
