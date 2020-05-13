@@ -9,34 +9,14 @@
 
 #pragma once
 
-#include "Distribution.h"
+#include "Weibull.h"
 
 /**
- * A class used to generate a three-parameter Weibull distribution
+ * A deprecated wrapper class used to generate a Weibull distribution
  */
-class WeibullDistribution : public Distribution
+class WeibullDistribution : public Weibull
 {
 public:
   static InputParameters validParams();
-
   WeibullDistribution(const InputParameters & parameters);
-
-  virtual Real pdf(const Real & x) const override;
-  virtual Real cdf(const Real & x) const override;
-  virtual Real quantile(const Real & p) const override;
-
-  static Real pdf(const Real & x, const Real & location, const Real & scale, const Real & shape);
-  static Real cdf(const Real & x, const Real & location, const Real & scale, const Real & shape);
-  static Real
-  quantile(const Real & p, const Real & location, const Real & scale, const Real & shape);
-
-protected:
-  /// The location parameter (a or low)
-  const Real & _a;
-
-  /// The scale parameter (b or lambda)
-  const Real & _b;
-
-  /// The shape parameter (c or k)
-  const Real & _c;
 };

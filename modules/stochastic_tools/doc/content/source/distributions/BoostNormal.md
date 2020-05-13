@@ -1,7 +1,7 @@
-# BoostNormalDistribution
+# BoostNormal
 
 !alert warning
-The BoostNormalDistribution object requires that libMesh be configured to utilize an external
+The BoostNormal object requires that libMesh be configured to utilize an external
 [Boost](www.boost.org) library. This may be done by using the `--with-boost` configuration option
 when compiling libMesh.
 
@@ -23,8 +23,8 @@ The following input file defines a normal distribution with a mean of 0 and a st
 
 !listing modules/stochastic_tools/test/tests/distributions/boost_normal.i block=Distributions
 
-!syntax parameters /Distributions/BoostNormalDistribution
+!syntax parameters /Distributions/BoostNormal
 
-!syntax inputs /Distributions/BoostNormalDistribution
+!syntax inputs /Distributions/BoostNormal
 
-!syntax children /Distributions/BoostNormalDistribution
+!syntax children /Distributions/BoostNormal

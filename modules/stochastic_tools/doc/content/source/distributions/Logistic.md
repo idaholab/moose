@@ -1,4 +1,6 @@
-# LogisticDistribution
+# Logistic
+
+!syntax description /Distributions/Logistic
 
 ## Description
 
@@ -16,12 +18,10 @@ Cumulative Density Function:
 !equation
 F(x) = \frac{1}{1+z(x)}
 
-!syntax description /Distributions/LogisticDistribution
+!syntax parameters /Distributions/Logistic
 
-!syntax parameters /Distributions/LogisticDistribution
+!syntax inputs /Distributions/Logistic
 
-!syntax inputs /Distributions/LogisticDistribution
-
-!syntax children /Distributions/LogisticDistribution
+!syntax children /Distributions/Logistic
 
 !bibtex bibliography

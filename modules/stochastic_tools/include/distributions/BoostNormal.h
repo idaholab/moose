@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "Logistic.h"
+#include "BoostDistribution.h"
 
 /**
- * A deprecated wrapper class used to generate a logistic distribution
+ * A deprecated class used to generate a normal distribution via Boost
  */
-class LogisticDistribution : public Logistic
+class BoostNormal : public BoostDistribution<boost::math::normal_distribution<Real>>
 {
 public:
   static InputParameters validParams();
-  LogisticDistribution(const InputParameters & parameters);
+
+  BoostNormal(const InputParameters & parameters);
 };

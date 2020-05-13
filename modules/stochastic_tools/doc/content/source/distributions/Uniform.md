@@ -1,4 +1,6 @@
-# UniformDistribution
+# Uniform
+
+!syntax description /Distributions/Uniform
 
 ## Description
 
@@ -19,8 +21,8 @@ where $a$ and $b$ are the lower bound and upper bound for the uniform distributi
 
 !listing modules/stochastic_tools/test/tests/distributions/uniform.i block=Distributions
 
-!syntax parameters /Distributions/UniformDistribution
+!syntax parameters /Distributions/Uniform
 
-!syntax inputs /Distributions/UniformDistribution
+!syntax inputs /Distributions/Uniform
 
-!syntax children /Distributions/UniformDistribution
+!syntax children /Distributions/Uniform

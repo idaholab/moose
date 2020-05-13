@@ -9,30 +9,14 @@
 
 #pragma once
 
-#include "Distribution.h"
+#include "Uniform.h"
 
 /**
- * A class used to generate uniform distribution
+ * A deprecated wrapper class used to generate a uniform distribution
  */
-class UniformDistribution : public Distribution
+class UniformDistribution : public Uniform
 {
 public:
   static InputParameters validParams();
-
   UniformDistribution(const InputParameters & parameters);
-
-  static Real pdf(const Real & x, const Real & lower_bound, const Real & upper_bound);
-  static Real cdf(const Real & x, const Real & lower_bound, const Real & upper_bound);
-  static Real quantile(const Real & y, const Real & lower_bound, const Real & upper_bound);
-
-  virtual Real pdf(const Real & x) const override;
-  virtual Real cdf(const Real & x) const override;
-  virtual Real quantile(const Real & y) const override;
-
-protected:
-  /// The lower bound for the uniform distribution
-  const Real & _lower_bound;
-
-  /// The upper bound for the uniform distribution
-  const Real & _upper_bound;
 };

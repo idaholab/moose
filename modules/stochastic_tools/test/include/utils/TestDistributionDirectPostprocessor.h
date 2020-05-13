@@ -11,7 +11,7 @@
 
 #include "GeneralPostprocessor.h"
 
-class NormalDistribution;
+class Normal;
 
 /**
  * Test object for testing distribution capabilities.
@@ -30,7 +30,7 @@ public:
 
 protected:
   /// Object of statistics distribution
-  const NormalDistribution & _distribution;
+  const Normal & _distribution;
 
   /// The value to supply to method
   const Real & _value;

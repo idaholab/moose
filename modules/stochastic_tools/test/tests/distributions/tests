@@ -2,8 +2,7 @@
   issues = '#12688'
   [distributions]
     requirement = 'The system shall provide distribution function including'
-    design = 'UniformDistribution.md WeibullDistribution.md NormalDistribution.md '
-             'TruncatedNormalDistribution.md JohnsonSBDistribution.md LogisticDistribution.md'
+    design = 'Uniform.md Weibull.md Normal.md TruncatedNormal.md JohnsonSB.md Logistic.md'
     issues = '#12720'
 
     [uniform]
@@ -69,7 +68,7 @@
 
   [boost]
     requirement = 'The system shall provide distribution functions based on Boost library including'
-    design = 'BoostNormalDistribution.md BoostWeibullDistribution.md'
+    design = 'BoostNormal.md BoostWeibull.md'
 
     [weibull]
       type = CSVDiff
@@ -111,7 +110,7 @@
   [no_boost]
     requirement = 'The system shall error if a distribution defined using Boost is used but the '
                   'system has not been configured to utilize the Boost library:'
-    design = 'BoostWeibullDistribution.md BoostNormalDistribution.md BoostLognormalDistribution.md'
+    design = 'BoostWeibull.md BoostNormal.md BoostLognormal.md'
 
     [weibull]
       type = RunException
@@ -153,7 +152,7 @@
     allow_test_objects = true
     requirement = 'The system shall provide a normal distribution with the ability to directly call '
                   'methods with distribution inputs.'
-    design = 'NormalDistribution.md'
+    design = 'Normal.md'
     issues = '#12720'
   []
   [normal_direct_type_error]
@@ -164,7 +163,7 @@
                  "desired type."
     requirement = 'The system shall produce an error if a distribution is retrieved with the '
                   'differing type than supplied.'
-    design = 'NormalDistribution.md'
+    design = 'Normal.md'
     issues = '#12720'
   []
 []
