@@ -1,16 +1,10 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
   [uniform]
-    type = UniformDistribution
+    type = Uniform
     lower_bound = 1
     upper_bound = 9
   []
@@ -19,7 +13,7 @@
 [Samplers]
   [mc]
     type = MonteCarlo
-    n_samples = 10
+    num_rows = 10
     distributions = 'uniform uniform'
   []
 []
@@ -45,12 +39,14 @@
     multi_app = runner
     parameters = 'BCs/left/value BCs/right/value'
     to_control = receiver
+    sampler = mc
   []
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
-    vector_postprocessor = storage
-    postprocessor = average
+    to_vector_postprocessor = storage
+    from_postprocessor = average
+    sampler = mc
   []
 []
 

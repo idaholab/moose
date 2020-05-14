@@ -1,11 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[StochasticTools]
 []
 
 [Distributions]
@@ -19,13 +12,9 @@
 [Samplers]
   [mc]
     type = MonteCarlo
-    n_samples = 10
+    num_rows = 10
     distributions = 'uniform uniform'
   []
-[]
-
-[Executioner]
-  type = Steady
 []
 
 [MultiApps]
@@ -43,12 +32,14 @@
     multi_app = runner
     parameters = 'BCs/left/value BCs/right/value'
     to_control = receiver
+    sampler = mc
   []
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = runner
-    vector_postprocessor = storage
-    postprocessor = average
+    to_vector_postprocessor = storage
+    from_postprocessor = average
+    sampler = mc
   []
 []
 
