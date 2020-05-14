@@ -53,7 +53,7 @@ PhiZeroKernel::computeQpResidual()
     mooseAssert(_second_phi.size() == _second_phi_zero.size(),
                 "_second_phi.size() " + std::to_string(_second_phi.size()) +
                     "!= _second_phi_zero.size() " + std::to_string(_second_phi_zero.size()));
-    if (_second_phi.size() > 0)
+    if (_second_phi[0].size() > 0)
     {
       mooseAssert(_second_phi[0].size() == _second_phi_zero[0].size(),
                   "_second_phi[0].size() " + std::to_string(_second_phi_zero[0].size()) +
