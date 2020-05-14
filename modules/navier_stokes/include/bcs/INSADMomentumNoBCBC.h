@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADVectorIntegratedBC.h"
+#include "MooseEnum.h"
 
 // Forward Declarations
 
@@ -30,4 +31,7 @@ protected:
   const ADVariableValue & _p;
   const bool _integrate_p_by_parts;
   const ADMaterialProperty<Real> & _mu;
+
+  /// The form of the viscous term. Either laplace or traction
+  MooseEnum _form;
 };

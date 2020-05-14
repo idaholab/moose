@@ -9,6 +9,7 @@
 
 #include "INSADMomentumNoBCBC.h"
 #include "MooseMesh.h"
+#include "INSADObjectTracker.h"
 
 registerMooseObject("NavierStokesApp", INSADMomentumNoBCBC);
 
@@ -23,6 +24,10 @@ INSADMomentumNoBCBC::validParams()
   params.addParam<bool>("integrate_p_by_parts",
                         true,
                         "Allows simulations to be run with pressure BC if set to false");
+  MooseEnum viscous_form("traction laplace", "laplace");
+  params.addParam<MooseEnum>("viscous_form",
+                             viscous_form,
+                             "The form of the viscous term. Options are 'traction' or 'laplace'");
 
   // Optional parameters
   params.addParam<MaterialPropertyName>("mu_name", "mu", "The name of the dynamic viscosity");
@@ -33,16 +38,25 @@ INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
   : ADVectorIntegratedBC(parameters),
     _p(adCoupledValue("p")),
     _integrate_p_by_parts(getParam<bool>("integrate_p_by_parts")),
-    _mu(getADMaterialProperty<Real>("mu_name"))
+    _mu(getADMaterialProperty<Real>("mu_name")),
+    _form(getParam<MooseEnum>("viscous_form"))
 {
+  auto & obj_tracker = const_cast<INSADObjectTracker &>(
+      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+  obj_tracker.setViscousForm(_form);
+  obj_tracker.setIntegratePByParts(_integrate_p_by_parts);
 }
 
 ADReal
 INSADMomentumNoBCBC::computeQpResidual()
 {
   // The viscous term
-  // -mu * (grad(u).n) * test
-  ADReal residual = -_mu[_qp] * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
+  ADReal residual;
+  if (_form == "laplace")
+    residual = -_mu[_qp] * (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
+  else
+    residual =
+        -_mu[_qp] * ((_grad_u[_qp] + _grad_u[_qp].transpose()) * _normals[_qp]) * _test[_i][_qp];
 
   if (_integrate_p_by_parts)
     // pIn * test

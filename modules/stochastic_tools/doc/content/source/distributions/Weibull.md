@@ -1,8 +1,10 @@
-# WeibullDistribution
+# Weibull
+
+!syntax description /Distributions/Weibull
 
 ## Description
 
-The WeibullDistribution object defines a translated Weibull distribution which
+The Weibull object defines a translated Weibull distribution which
 has a probability density function (PDF) defined as
 
 !equation
@@ -18,8 +20,8 @@ where $k > 0$ and defines the shape parameter, $\lambda > 0$ and defines the sca
 
 !listing modules/stochastic_tools/test/tests/distributions/weibull.i block=Distributions
 
-!syntax parameters /Distributions/WeibullDistribution
+!syntax parameters /Distributions/Weibull
 
-!syntax inputs /Distributions/WeibullDistribution
+!syntax inputs /Distributions/Weibull
 
-!syntax children /Distributions/WeibullDistribution
+!syntax children /Distributions/Weibull

@@ -10,6 +10,7 @@
 #include "INSADMomentumViscous.h"
 #include "Assembly.h"
 #include "SystemBase.h"
+#include "INSADObjectTracker.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -24,31 +25,45 @@ INSADMomentumViscous::validParams()
   params.addClassDescription("Adds the viscous term to the INS momentum equation");
   params.addParam<MaterialPropertyName>(
       "mu_name", "mu", "The name of the viscosity material property");
+  MooseEnum viscous_form("traction laplace", "laplace");
+  params.addParam<MooseEnum>("viscous_form",
+                             viscous_form,
+                             "The form of the viscous term. Options are 'traction' or 'laplace'");
   return params;
 }
 
 INSADMomentumViscous::INSADMomentumViscous(const InputParameters & parameters)
   : ADVectorKernel(parameters),
     _mu(getADMaterialProperty<Real>("mu_name")),
-    _coord_sys(_assembly.coordSystem())
+    _coord_sys(_assembly.coordSystem()),
+    _form(getParam<MooseEnum>("viscous_form"))
 {
+  auto & obj_tracker = const_cast<INSADObjectTracker &>(
+      _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
+  obj_tracker.setViscousForm(_form);
 }
 
 ADRealTensorValue
 INSADMomentumViscous::qpViscousTerm()
 {
-  return _mu[_qp] * _grad_u[_qp];
+  if (_form == "laplace")
+    return _mu[_qp] * _grad_u[_qp];
+  else
+    return _mu[_qp] * (_grad_u[_qp] + _grad_u[_qp].transpose());
 }
 
 ADRealVectorValue
 INSADMomentumViscous::qpAdditionalRZTerm()
 {
-  // Add the u_r / r^2 term
+  // Add the u_r / r^2 term. There is an extra factor of 2 for the traction form
+  ADReal resid = _mu[_qp] * _u[_qp](0);
+  if (_form == "traction")
+    resid *= 2.;
 
   if (_use_displaced_mesh)
-    return _mu[_qp] * _u[_qp](0) / (_ad_q_point[_qp](0) * _ad_q_point[_qp](0));
+    return resid / (_ad_q_point[_qp](0) * _ad_q_point[_qp](0));
   else
-    return _mu[_qp] * _u[_qp](0) / (_q_point[_qp](0) * _q_point[_qp](0));
+    return resid / (_q_point[_qp](0) * _q_point[_qp](0));
 }
 
 void

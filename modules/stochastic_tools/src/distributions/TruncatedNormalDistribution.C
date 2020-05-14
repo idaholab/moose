@@ -9,7 +9,6 @@
 
 #include "TruncatedNormalDistribution.h"
 
-registerMooseObjectAliased("StochasticToolsApp", TruncatedNormalDistribution, "TruncatedNormal");
 registerMooseObjectReplaced("StochasticToolsApp",
                             TruncatedNormalDistribution,
                             "07/01/2020 00:00",
@@ -18,87 +17,10 @@ registerMooseObjectReplaced("StochasticToolsApp",
 InputParameters
 TruncatedNormalDistribution::validParams()
 {
-  InputParameters params = NormalDistribution::validParams();
-  params.addClassDescription("Truncated normal distribution");
-  params.addParam<Real>(
-      "lower_bound", -std::numeric_limits<Real>::max(), "Lower bound of the distribution ");
-  params.addParam<Real>(
-      "upper_bound", std::numeric_limits<Real>::max(), "Upper bound of the distribution ");
-  return params;
+  return TruncatedNormal::validParams();
 }
 
 TruncatedNormalDistribution::TruncatedNormalDistribution(const InputParameters & parameters)
-  : NormalDistribution(parameters),
-    _lower_bound(getParam<Real>("lower_bound")),
-    _upper_bound(getParam<Real>("upper_bound"))
+  : TruncatedNormal(parameters)
 {
-  if (_lower_bound >= _upper_bound)
-    mooseError("lower_bound in truncated normal distribution must be less than upper_bound.");
-}
-
-Real
-TruncatedNormalDistribution::pdf(const Real & x,
-                                 const Real & mean,
-                                 const Real & std_dev,
-                                 const Real & lower_bound,
-                                 const Real & upper_bound)
-{
-  if (x <= lower_bound || x >= upper_bound)
-    return 0.0;
-  else
-    return (NormalDistribution::pdf(x, mean, std_dev)) /
-           (NormalDistribution::cdf(upper_bound, mean, std_dev) -
-            NormalDistribution::cdf(lower_bound, mean, std_dev));
-}
-
-Real
-TruncatedNormalDistribution::cdf(const Real & x,
-                                 const Real & mean,
-                                 const Real & std_dev,
-                                 const Real & lower_bound,
-                                 const Real & upper_bound)
-{
-
-  if (x <= lower_bound || x >= upper_bound)
-    return 0.0;
-  else
-    return (NormalDistribution::cdf(x, mean, std_dev) -
-            NormalDistribution::cdf(lower_bound, mean, std_dev)) /
-           (NormalDistribution::cdf(upper_bound, mean, std_dev) -
-            NormalDistribution::cdf(lower_bound, mean, std_dev));
-}
-
-Real
-TruncatedNormalDistribution::quantile(const Real & p,
-                                      const Real & mean,
-                                      const Real & std_dev,
-                                      const Real & lower_bound,
-                                      const Real & upper_bound)
-{
-  return NormalDistribution::quantile(NormalDistribution::cdf(lower_bound, mean, std_dev) +
-                                          p * (NormalDistribution::cdf(upper_bound, mean, std_dev) -
-                                               NormalDistribution::cdf(lower_bound, mean, std_dev)),
-                                      mean,
-                                      std_dev);
-}
-
-Real
-TruncatedNormalDistribution::pdf(const Real & x) const
-{
-  TIME_SECTION(_perf_pdf);
-  return pdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
-}
-
-Real
-TruncatedNormalDistribution::cdf(const Real & x) const
-{
-  TIME_SECTION(_perf_cdf);
-  return cdf(x, _mean, _standard_deviation, _lower_bound, _upper_bound);
-}
-
-Real
-TruncatedNormalDistribution::quantile(const Real & p) const
-{
-  TIME_SECTION(_perf_quantile);
-  return quantile(p, _mean, _standard_deviation, _lower_bound, _upper_bound);
 }

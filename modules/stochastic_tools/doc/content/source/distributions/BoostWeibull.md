@@ -1,13 +1,13 @@
-# BoostWeibullDistribution
+# BoostWeibull
 
 !alert warning
-The BoostWeibullDistribution object requires that libMesh be configured to utilize an external
+The BoostWeibull object requires that libMesh be configured to utilize an external
 [Boost](www.boost.org) library. This may be done using the `--with-boost` configuration option
 when compiling libMesh.
 
 ## Description
 
-As the name suggests, the BoostWeibullDistribution object defines a Weibull distribution which
+As the name suggests, the BoostWeibull object defines a Weibull distribution which
 has a probability density function (PDF) defined as
 
 !equation
@@ -37,8 +37,8 @@ Q(p;k,\lambda) = \lambda {(-\ln(1-p))}^{1/k} \quad 0 \leq p < 1.
 
 !listing modules/stochastic_tools/test/tests/distributions/boost_weibull.i block=Distributions
 
-!syntax parameters /Distributions/BoostWeibullDistribution
+!syntax parameters /Distributions/BoostWeibull
 
-!syntax inputs /Distributions/BoostWeibullDistribution
+!syntax inputs /Distributions/BoostWeibull
 
-!syntax children /Distributions/BoostWeibullDistribution
+!syntax children /Distributions/BoostWeibull

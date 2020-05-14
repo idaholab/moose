@@ -1,4 +1,6 @@
-# TruncatedNormalDistribution
+# TruncatedNormal
+
+!syntax description /Distributions/TruncatedNormal
 
 ## Description
 
@@ -21,10 +23,10 @@ The following input file defines a normal distribution with a mean of 0 and a st
 
 !listing modules/stochastic_tools/test/tests/distributions/truncated_normal.i block=Distributions
 
-!syntax parameters /Distributions/TruncatedNormalDistribution
+!syntax parameters /Distributions/TruncatedNormal
 
-!syntax inputs /Distributions/TruncatedNormalDistribution
+!syntax inputs /Distributions/TruncatedNormal
 
-!syntax children /Distributions/TruncatedNormalDistribution
+!syntax children /Distributions/TruncatedNormal
 
 !bibtex bibliography

@@ -1,4 +1,6 @@
-# JohnsonSBDistribution
+# JohnsonSB
+
+!syntax description /Distributions/JohnsonSB
 
 ## Description
 
@@ -18,12 +20,10 @@ Cumulative Density Function:
 !equation
 F(x) = \Phi(\gamma + \delta ln \tfrac{z}{1-z}),\,\textrm{where}\, z = \tfrac{x-\epsilon}{\lambda}
 
-!syntax description /Distributions/JohnsonSBDistribution
+!syntax parameters /Distributions/JohnsonSB
 
-!syntax parameters /Distributions/JohnsonSBDistribution
+!syntax inputs /Distributions/JohnsonSB
 
-!syntax inputs /Distributions/JohnsonSBDistribution
-
-!syntax children /Distributions/JohnsonSBDistribution
+!syntax children /Distributions/JohnsonSB
 
 !bibtex bibliography

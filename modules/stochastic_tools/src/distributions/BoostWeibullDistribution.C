@@ -9,27 +9,18 @@
 
 #include "BoostWeibullDistribution.h"
 
-#include "libmesh/auto_ptr.h"
-
-registerMooseObjectAliased("StochasticToolsApp", BoostWeibullDistribution, "BoostWeibull");
 registerMooseObjectReplaced("StochasticToolsApp",
                             BoostWeibullDistribution,
                             "07/01/2020 00:00",
-                            BoostWeibull);
+                            Weibull);
 
 InputParameters
 BoostWeibullDistribution::validParams()
 {
-  InputParameters params = Distribution::validParams();
-  params.addClassDescription("Boost Weibull distribution.");
-  params.addRequiredParam<Real>("shape", "The Weibull shape parameter.");
-  params.addParam<Real>("scale", 1, "The Weibull scale parameter.");
-  return params;
+  return BoostWeibull::validParams();
 }
 
 BoostWeibullDistribution::BoostWeibullDistribution(const InputParameters & parameters)
-  : BoostDistribution<boost::math::weibull_distribution<Real>>(parameters)
+  : BoostWeibull(parameters)
 {
-  _distribution_unique_ptr = libmesh_make_unique<boost::math::weibull_distribution<Real>>(
-      getParam<Real>("shape"), getParam<Real>("scale"));
 }

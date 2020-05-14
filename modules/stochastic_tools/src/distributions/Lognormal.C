@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LognormalDistribution.h"
-#include "NormalDistribution.h"
+#include "Lognormal.h"
+#include "Normal.h"
 #include "math.h"
 #include "libmesh/utility.h"
 
-registerMooseObjectAliased("StochasticToolsApp", LognormalDistribution, "Lognormal");
+registerMooseObject("StochasticToolsApp", Lognormal);
 
 InputParameters
-LognormalDistribution::validParams()
+Lognormal::validParams()
 {
   InputParameters params = Distribution::validParams();
   params.addClassDescription("Lognormal distribution");
@@ -24,46 +24,46 @@ LognormalDistribution::validParams()
   return params;
 }
 
-LognormalDistribution::LognormalDistribution(const InputParameters & parameters)
+Lognormal::Lognormal(const InputParameters & parameters)
   : Distribution(parameters), _location(getParam<Real>("location")), _scale(getParam<Real>("scale"))
 {
 }
 
 Real
-LognormalDistribution::pdf(const Real & x, const Real & location, const Real & scale)
+Lognormal::pdf(const Real & x, const Real & location, const Real & scale)
 {
   return 1.0 / (x * scale * std::sqrt(2.0 * M_PI)) *
          std::exp(-0.5 * Utility::pow<2>((std::log(x) - location) / scale));
 }
 
 Real
-LognormalDistribution::cdf(const Real & x, const Real & location, const Real & scale)
+Lognormal::cdf(const Real & x, const Real & location, const Real & scale)
 {
   return 0.5 * (1.0 + std::erf((std::log(x) - location) / (scale * std::sqrt(2.0))));
 }
 
 Real
-LognormalDistribution::quantile(const Real & p, const Real & location, const Real & scale)
+Lognormal::quantile(const Real & p, const Real & location, const Real & scale)
 {
-  return std::exp(NormalDistribution::quantile(p, location, scale));
+  return std::exp(Normal::quantile(p, location, scale));
 }
 
 Real
-LognormalDistribution::pdf(const Real & x) const
+Lognormal::pdf(const Real & x) const
 {
   TIME_SECTION(_perf_pdf);
   return pdf(x, _location, _scale);
 }
 
 Real
-LognormalDistribution::cdf(const Real & x) const
+Lognormal::cdf(const Real & x) const
 {
   TIME_SECTION(_perf_cdf);
   return cdf(x, _location, _scale);
 }
 
 Real
-LognormalDistribution::quantile(const Real & p) const
+Lognormal::quantile(const Real & p) const
 {
   TIME_SECTION(_perf_quantile);
   return quantile(p, _location, _scale);

@@ -12,9 +12,9 @@
 #include "libmesh/utility.h"
 
 #include "DataIO.h"
-#include "UniformDistribution.h"
-#include "NormalDistribution.h"
-#include "BoostNormalDistribution.h"
+#include "Uniform.h"
+#include "Normal.h"
+#include "BoostNormal.h"
 #include "CartesianProduct.h"
 
 /**

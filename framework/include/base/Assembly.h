@@ -42,6 +42,7 @@ class SparseMatrix;
 }
 
 // MOOSE Forward Declares
+class FaceInfo;
 class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
@@ -542,6 +543,8 @@ public:
    * Reinitialize the assembly data on the side of a element at the custom reference points
    */
   void reinit(const Elem * elem, unsigned int side, const std::vector<Point> & reference_points);
+
+  void reinitFVFace(const FaceInfo & fi);
 
   /**
    * Reinitialize an element and its neighbor along a particular side.
@@ -1657,6 +1660,8 @@ private:
   MooseArray<Real> _coord;
   /// The AD version of the current coordinate transformation coefficients
   MooseArray<DualReal> _ad_coord;
+
+  std::vector<std::unique_ptr<QBase>> _holder_qrule_fv_face;
 
   /// Holds volume qrules for each dimension
   std::map<unsigned int, QBase *> _holder_qrule_volume;

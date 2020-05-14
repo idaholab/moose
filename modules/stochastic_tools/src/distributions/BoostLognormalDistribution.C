@@ -9,27 +9,18 @@
 
 #include "BoostLognormalDistribution.h"
 
-#include "libmesh/auto_ptr.h"
-
-registerMooseObjectAliased("StochasticToolsApp", BoostLognormalDistribution, "BoostLognormal");
 registerMooseObjectReplaced("StochasticToolsApp",
                             BoostLognormalDistribution,
                             "07/01/2020 00:00",
-                            BoostLognormal);
+                            Lognormal);
 
 InputParameters
 BoostLognormalDistribution::validParams()
 {
-  InputParameters params = Distribution::validParams();
-  params.addClassDescription("Boost Lognormal distribution.");
-  params.addRequiredParam<Real>("location", "The Lognormal location parameter.");
-  params.addRequiredParam<Real>("scale", "The Lognormal scale parameter.");
-  return params;
+  return BoostLognormal::validParams();
 }
 
 BoostLognormalDistribution::BoostLognormalDistribution(const InputParameters & parameters)
-  : BoostDistribution<boost::math::lognormal_distribution<Real>>(parameters)
+  : BoostLognormal(parameters)
 {
-  _distribution_unique_ptr = libmesh_make_unique<boost::math::lognormal_distribution<Real>>(
-      getParam<Real>("location"), getParam<Real>("scale"));
 }

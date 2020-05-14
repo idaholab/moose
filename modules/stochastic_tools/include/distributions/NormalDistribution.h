@@ -9,36 +9,14 @@
 
 #pragma once
 
-#include "Distribution.h"
+#include "Normal.h"
 
 /**
- * A class used to generate a normal distribution
+ * A deprecated wrapper class used to generate a normal distribution
  */
-class NormalDistribution : public Distribution
+class NormalDistribution : public Normal
 {
 public:
   static InputParameters validParams();
-
   NormalDistribution(const InputParameters & parameters);
-
-  virtual Real pdf(const Real & x) const override;
-  virtual Real cdf(const Real & x) const override;
-  virtual Real quantile(const Real & p) const override;
-
-  static Real pdf(const Real & x, const Real & mean, const Real & std_dev);
-  static Real cdf(const Real & x, const Real & mean, const Real & std_dev);
-  static Real quantile(const Real & p, const Real & mean, const Real & std_dev);
-
-protected:
-  ///@{
-  /// Coefficients for the rational function used to approximate the quantile
-  static const std::array<Real, 6> _a;
-  static const std::array<Real, 6> _b;
-  ///@}
-
-  /// The mean (or expectation) of the distribution (mu)
-  const Real & _mean;
-
-  /// The standard deviation of the distribution (sigma)
-  const Real & _standard_deviation;
 };

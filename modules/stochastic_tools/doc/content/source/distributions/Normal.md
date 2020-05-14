@@ -1,4 +1,6 @@
-# NormalDistribution
+# Normal
+
+!syntax description /Distributions/Normal
 
 ## Description
 
@@ -21,10 +23,10 @@ The following input file defines a normal distribution with a mean of 0 and a st
 
 !listing modules/stochastic_tools/test/tests/distributions/normal.i block=Distributions
 
-!syntax parameters /Distributions/NormalDistribution
+!syntax parameters /Distributions/Normal
 
-!syntax inputs /Distributions/NormalDistribution
+!syntax inputs /Distributions/Normal
 
-!syntax children /Distributions/NormalDistribution
+!syntax children /Distributions/Normal
 
 !bibtex bibliography
