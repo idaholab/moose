@@ -4,5 +4,9 @@
    input = 'input.i'
    csvdiff = '360degree_model_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
+   heavy = true
+   issues = '#3705'
+   design = 'syntax/DomainIntegral/index.md'
+   requirement = 'The system shall compute mixed-mode fracture integrals that match values of K fields applied at the boundary of a 3D disk cut on one side by a slit'
  [../]
 []

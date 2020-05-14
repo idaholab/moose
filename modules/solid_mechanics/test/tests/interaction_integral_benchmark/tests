@@ -6,5 +6,6 @@
    abs_zero = 1e-7
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    no_error_deprecated = true
+   heavy = true
  [../]
 []
