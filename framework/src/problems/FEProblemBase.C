@@ -630,7 +630,7 @@ FEProblemBase::initialSetup()
   setCurrentExecuteOnFlag(EXEC_INITIAL);
   addExtraVectors();
 
-  // alwasy esecute to get the max number of DoF per elment and node needed to initialized phi_zero
+  // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
   CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 

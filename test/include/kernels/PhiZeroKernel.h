@@ -11,10 +11,9 @@
 
 #include "NullKernel.h"
 
-class PhiZeroKernel;
-
 /**
- *
+ *This kernel is used to test that _phi_zero, _grad_phi_zero and _second_phi_zero help variables
+ *have proper dimensions, i.e. [MaxVarNDofsPerElem][MaxQp]
  */
 class PhiZeroKernel : public NullKernel
 {
