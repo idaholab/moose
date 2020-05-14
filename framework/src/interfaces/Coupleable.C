@@ -426,6 +426,13 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
     mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
+  if (!_c_fe_problem.vectorTagExists(tag))
+    mooseError("Attempting to couple to vector tag with ID ",
+               tag,
+               "in ",
+               _c_name,
+               ", but a vector tag with that ID does not exist");
+
   addFEVariableCoupleableVectorTag(tag);
 
   if (_c_nodal)

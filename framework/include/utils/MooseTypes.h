@@ -450,6 +450,7 @@ extern const SubdomainID ANY_BLOCK_ID;
 extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
 extern const BoundaryID INVALID_BOUNDARY_ID;
+extern const TagID INVALID_TAG_ID;
 const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
 const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
 
@@ -740,6 +741,13 @@ enum RMSystemType
   NONLINEAR,
   AUXILIARY,
   NONE
+};
+
+enum VectorTagType
+{
+  VECTOR_TAG_RESIDUAL = 0,
+  VECTOR_TAG_SOLUTION = 1,
+  VECTOR_TAG_ANY = 2
 };
 
 /**

@@ -6,7 +6,7 @@
   [./bad_transient]
     type = 'RunException'
     input = 'bad_transient.i'
-    expect_err = 'Vector tag: TIME does not exist'
+    expect_err = 'Vector tag \'TIME\' does not exist'
     requirement = "Time kernel requires a transient executioner"
   [../]
 
@@ -14,7 +14,7 @@
     type = 'RunException'
     input = 'bad_tag.i'
     cli_args = 'Kernels/diff/vector_tags=nope'
-    expect_err = 'Vector tag: NOPE does not exist'
+    expect_err = 'Vector tag \'NOPE\' does not exist'
     requirement = "The kernel can be only assigned to the existing vector tags in the system"
   [../]
 

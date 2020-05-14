@@ -51,7 +51,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _computing_nonlinear_residual(false),
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
-    _have_ad_objects(false)
+    _have_ad_objects(false),
+    _typed_vector_tags(2)
 {
   unsigned int n_threads = libMesh::n_threads();
   _active_elemental_moose_variables.resize(n_threads);
@@ -67,49 +68,138 @@ SubProblem::SubProblem(const InputParameters & parameters)
 SubProblem::~SubProblem() {}
 
 TagID
-SubProblem::addVectorTag(TagName tag_name)
+SubProblem::addVectorTag(const TagName & tag_name,
+                         const Moose::VectorTagType type /* = Moose::VECTOR_TAG_RESIDUAL */)
 {
-  auto tag_name_upper = MooseUtils::toUpper(tag_name);
-  auto existing_tag = _vector_tag_name_to_tag_id.find(tag_name_upper);
-  if (existing_tag == _vector_tag_name_to_tag_id.end())
+  if (type == Moose::VECTOR_TAG_ANY)
+    mooseError("Vector tag type cannot be VECTOR_TAG_ANY");
+
+  const auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  // First, see if the tag exists already
+  for (const auto & vector_tag : _vector_tags)
   {
-    auto tag_id = _vector_tag_name_to_tag_id.size();
+    mooseAssert(_vector_tags[vector_tag._id] == vector_tag, "Vector tags index mismatch");
+    if (vector_tag._name == tag_name_upper)
+    {
+      if (vector_tag._type != type)
+        mooseError("While attempting to add vector tag with name '",
+                   tag_name_upper,
+                   "' and type ",
+                   type,
+                   ",\na tag with the same name but type ",
+                   vector_tag._type,
+                   " was found.\n\nA tag can only exist with one type.");
 
-    _vector_tag_name_to_tag_id[tag_name_upper] = tag_id;
-
-    _vector_tag_id_to_tag_name[tag_id] = tag_name_upper;
+      return vector_tag._id;
+    }
   }
 
-  return _vector_tag_name_to_tag_id.at(tag_name_upper);
+  // Doesn't exist - create it
+  const TagID new_tag_id = _vector_tags.size();
+  // Primary storage for all tags where the index in the vector == the tag ID
+  _vector_tags.emplace_back(new_tag_id, tag_name_upper, type);
+  // Secondary storage for each type so that we can have quick access to all tags of a type
+  _typed_vector_tags[type].emplace_back(new_tag_id, tag_name_upper, type);
+
+  verifyVectorTags();
+
+  return new_tag_id;
 }
 
 bool
-SubProblem::vectorTagExists(const TagName & tag_name)
+SubProblem::vectorTagExists(const TagName & tag_name) const
 {
-  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
 
-  return _vector_tag_name_to_tag_id.find(tag_name_upper) != _vector_tag_name_to_tag_id.end();
+  const auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  for (const auto & vector_tag : _vector_tags)
+    if (vector_tag._name == tag_name_upper)
+      return true;
+
+  return false;
+}
+
+const std::vector<VectorTag> &
+SubProblem::getVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
+{
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+
+  if (type == Moose::VECTOR_TAG_ANY)
+    return _vector_tags;
+  else
+    return _typed_vector_tags[type];
+}
+
+unsigned int
+SubProblem::numVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
+{
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+
+  return getVectorTags(type).size();
 }
 
 TagID
-SubProblem::getVectorTagID(const TagName & tag_name)
+SubProblem::getVectorTagID(const TagName & tag_name) const
 {
-  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
 
-  if (!vectorTagExists(tag_name))
-    mooseError("Vector tag: ",
-               tag_name,
-               " does not exist. ",
-               "If this is a TimeKernel then this may have happened because you didn't "
-               "specify a Transient Executioner.");
+  const auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  for (const auto & vector_tag : _vector_tags)
+    if (vector_tag._name == tag_name_upper)
+      return vector_tag._id;
 
-  return _vector_tag_name_to_tag_id.at(tag_name_upper);
+  mooseError("Vector tag '", tag_name_upper, "' does not exist");
 }
 
 TagName
-SubProblem::vectorTagName(TagID tag)
+SubProblem::vectorTagName(const TagID tag_id) const
 {
-  return _vector_tag_id_to_tag_name[tag];
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+  if (!vectorTagExists(tag_id))
+    mooseError("Vector tag with ID ", tag_id, " does not exist");
+
+  return _vector_tags[tag_id]._name;
+}
+
+Moose::VectorTagType
+SubProblem::vectorTagType(const TagID tag_id) const
+{
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+  if (!vectorTagExists(tag_id))
+    mooseError("Vector tag with ID ", tag_id, " does not exist");
+
+  return _vector_tags[tag_id]._type;
+}
+
+bool
+SubProblem::verifyVectorTags() const
+{
+  for (unsigned int i = 0; i < _vector_tags.size(); ++i)
+  {
+    const auto & vector_tag = _vector_tags[i];
+    if (vector_tag._id != i)
+      mooseError("Vector tag ", vector_tag._id, " id mismatch in _vector_tags");
+    if (vector_tag._type == Moose::VECTOR_TAG_ANY)
+      mooseError("Vector tag '", vector_tag._name, " has type VECTOR_TAG_ANY");
+
+    unsigned int found = 0;
+    for (const auto & vector_tag_type : _typed_vector_tags[vector_tag._type])
+      if (vector_tag_type == vector_tag)
+        ++found;
+    if (found == 0)
+      mooseError("Vector tag ", vector_tag._id, " not found in _typed_vector_tags");
+    if (found > 1)
+      mooseError("Vector tag ", vector_tag._id, " found multiple times in _typed_vector_tags");
+  }
+
+  unsigned int num_typed_vector_tags = 0;
+  for (const auto & typed_vector_tags : _typed_vector_tags)
+    num_typed_vector_tags += typed_vector_tags.size();
+  if (num_typed_vector_tags != _vector_tags.size())
+    mooseError("Size mismatch between _vector_tags and _typed_vector_tags");
+
+  return true;
 }
 
 TagID

@@ -156,12 +156,12 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
     solution_old.get(_dof_indices, &_u_old[0]);
     solution_older.get(_dof_indices, &_u_older[0]);
 
-    if (safe_access_tagged_vectors)
-    {
-      for (auto tag : active_coupleable_vector_tags)
+    for (auto tag : active_coupleable_vector_tags)
+      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           safe_access_tagged_vectors) ||
+          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
         if (_sys.hasVector(tag) && _need_vector_tag_u[tag])
           _sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
-    }
 
     if (safe_access_tagged_matrices)
     {

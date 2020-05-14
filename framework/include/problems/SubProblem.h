@@ -13,6 +13,7 @@
 #include "DiracKernelInfo.h"
 #include "GeometricSearchData.h"
 #include "MooseTypes.h"
+#include "VectorTag.h"
 
 #include "libmesh/coupling_matrix.h"
 
@@ -97,41 +98,48 @@ public:
    * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
    * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
    *
-   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   * Note: If the tag is already present then this will simply return the TagID of that Tag, but the
+   * type must be the same.
    *
    * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   * @param type The type of the tag
    */
-  virtual TagID addVectorTag(TagName tag_name);
+  virtual TagID addVectorTag(const TagName & tag_name,
+                             const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL);
 
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getVectorTagID(const TagName & tag_name);
+  virtual TagID getVectorTagID(const TagName & tag_name) const;
 
   /**
    * Retrieve the name associated with a TagID
    */
-  virtual TagName vectorTagName(TagID tag);
+  virtual TagName vectorTagName(const TagID tag) const;
 
   /**
-   * Return all vector tags, where a tag is represented by a map from name to ID
+   * Return all vector tags, where a tag is represented by a map from name to ID. Can optionally be
+   * limited to a vector tag type.
    */
-  virtual std::map<TagName, TagID> & getVectorTags() { return _vector_tag_name_to_tag_id; }
+  virtual const std::vector<VectorTag> &
+  getVectorTags(const Moose::VectorTagType type = Moose::VECTOR_TAG_ANY) const;
 
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool vectorTagExists(TagID tag) { return tag < _vector_tag_name_to_tag_id.size(); }
+  virtual bool vectorTagExists(const TagID tag_id) const { return tag_id < _vector_tags.size(); }
 
   /**
    * Check to see if a particular Tag exists by using Tag name
    */
-  bool vectorTagExists(const TagName & tag_name);
+  bool vectorTagExists(const TagName & tag_name) const;
 
   /**
-   * The total number of tags
+   * The total number of tags, which can be limited to the tag type
    */
-  virtual unsigned int numVectorTags() const { return _vector_tag_name_to_tag_id.size(); }
+  virtual unsigned int numVectorTags(const Moose::VectorTagType type = Moose::VECTOR_TAG_ANY) const;
+
+  virtual Moose::VectorTagType vectorTagType(const TagID tag_id) const;
 
   /**
    * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
@@ -688,11 +696,10 @@ protected:
                                              SystemBase & nl,
                                              SystemBase & aux);
 
-  /// The currently declared tags
-  std::map<TagName, TagID> _vector_tag_name_to_tag_id;
-
-  /// Reverse map
-  std::map<TagID, TagName> _vector_tag_id_to_tag_name;
+  /**
+   * Verify the integrity of _vector_tags and _typed_vector_tags
+   */
+  bool verifyVectorTags() const;
 
   /// The currently declared tags
   std::map<TagName, TagID> _matrix_tag_name_to_tag_id;
@@ -779,6 +786,16 @@ protected:
   bool _have_ad_objects;
 
 private:
+  /// The declared vector tags
+  std::vector<VectorTag> _vector_tags;
+
+  /**
+   * The vector tags assoicated with each VectorTagType
+   * This is kept separate from _vector_tags for quick access into typed vector tags in places where
+   * we don't want to build a new vector every call (like in residual evaluation)
+   */
+  std::vector<std::vector<VectorTag>> _typed_vector_tags;
+
   bool _have_fv = false;
 
   ///@{ Helper functions for checking MaterialProperties

@@ -291,39 +291,46 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 }
 
 TagID
-DisplacedProblem::addVectorTag(TagName tag_name)
+DisplacedProblem::addVectorTag(const TagName & tag_name,
+                               const Moose::VectorTagType type /* = Moose::VECTOR_TAG_RESIDUAL */)
 {
-  return _mproblem.addVectorTag(tag_name);
+  return _mproblem.addVectorTag(tag_name, type);
 }
 
 TagID
-DisplacedProblem::getVectorTagID(const TagName & tag_name)
+DisplacedProblem::getVectorTagID(const TagName & tag_name) const
 {
   return _mproblem.getVectorTagID(tag_name);
 }
 
 TagName
-DisplacedProblem::vectorTagName(TagID tag)
+DisplacedProblem::vectorTagName(const TagID tag_id) const
 {
-  return _mproblem.vectorTagName(tag);
+  return _mproblem.vectorTagName(tag_id);
 }
 
 bool
-DisplacedProblem::vectorTagExists(TagID tag)
+DisplacedProblem::vectorTagExists(const TagID tag_id) const
 {
-  return _mproblem.vectorTagExists(tag);
+  return _mproblem.vectorTagExists(tag_id);
 }
 
 unsigned int
-DisplacedProblem::numVectorTags() const
+DisplacedProblem::numVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
 {
-  return _mproblem.numVectorTags();
+  return _mproblem.numVectorTags(type);
 }
 
-std::map<TagName, TagID> &
-DisplacedProblem::getVectorTags()
+const std::vector<VectorTag> &
+DisplacedProblem::getVectorTags(const Moose::VectorTagType type /* = Moose::VECTOR_TAG_ANY */) const
 {
-  return _mproblem.getVectorTags();
+  return _mproblem.getVectorTags(type);
+}
+
+Moose::VectorTagType
+DisplacedProblem::vectorTagType(const TagID tag_id) const
+{
+  return _mproblem.vectorTagType(tag_id);
 }
 
 TagID
@@ -723,13 +730,13 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(getVectorTags());
+  _assembly[tid]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(getVectorTags());
+  _assembly[tid]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
@@ -753,8 +760,8 @@ DisplacedProblem::addCachedResidual(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual, _displaced_nl.timeVectorTag());
-  _assembly[tid]->addCachedResidual(residual, _displaced_nl.nonTimeVectorTag());
+  _assembly[tid]->addCachedResidualDirectly(residual, _displaced_nl.timeVectorTag());
+  _assembly[tid]->addCachedResidualDirectly(residual, _displaced_nl.nonTimeVectorTag());
 }
 
 void

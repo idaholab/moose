@@ -642,7 +642,7 @@ public:
    * Add local residuals of all field variables for a set of tags onto the global residual vectors
    * associated with the tags.
    */
-  void addResidual(const std::map<TagName, TagID> & tags);
+  void addResidual(const std::vector<VectorTag> & vector_tags);
   /**
    * Add local neighbor residuals of all field variables for a tag onto a given global residual
    * vector.
@@ -652,7 +652,7 @@ public:
    * Add local neighbor residuals of all field variables for a set of tags onto the global residual
    * vectors associated with the tags.
    */
-  void addResidualNeighbor(const std::map<TagName, TagID> & tags);
+  void addResidualNeighbor(const std::vector<VectorTag> & vector_tags);
   /**
    * Add residuals of all scalar variables for a tag onto the global residual vector associated
    * with the tag.
@@ -662,7 +662,7 @@ public:
    * Add residuals of all scalar variables for a set of tags onto the global residual vectors
    * associated with the tags.
    */
-  void addResidualScalar(const std::map<TagName, TagID> & tags);
+  void addResidualScalar(const std::vector<VectorTag> & vector_tags);
 
   /**
    * Takes the values that are currently in _sub_Re of all field variables and appends them to
@@ -709,17 +709,22 @@ public:
   void cacheResidualLower();
 
   /**
-   * Pushes all cached residuals to the global residual vectors.
+   * Pushes all cached residuals to the global residual vectors associated with each tag.
+   *
+   * Note that this will also clear the cache.
    */
   void addCachedResiduals();
 
   /**
    * Adds the values that have been cached by calling cacheResidual(), cacheResidualNeighbor(),
-   * and/or cacheResidualLower() to the residual.
+   * and/or cacheResidualLower() for tag tag_id to the residual.
+   *
+   * This allows for adding the cached residual into a residual vector that is not the vector
+   * associated with tag_id.
    *
    * Note that this will also clear the cache.
    */
-  void addCachedResidual(NumericVector<Number> & residual, TagID tag_id);
+  void addCachedResidualDirectly(NumericVector<Number> & residual, const TagID tag_id);
 
   /**
    * Sets local residuals of all field variables to the global residual vector for a tag.
@@ -1506,6 +1511,14 @@ protected:
   void
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
+  /**
+   * Internal method for adding the cached residual from tag _residual_vector_tags[tag_index]._id
+   * into residual
+   *
+   * Note that this will also clear the cache
+   */
+  void addCachedResidualInternal(NumericVector<Number> & residual, unsigned int tag_index);
+
 private:
   /**
    * Build FEs with a type
@@ -1567,7 +1580,12 @@ private:
    */
   void buildVectorLowerDFE(FEType type) const;
 
-private:
+  /**
+   * Gets the index of the tag with TagID tag_id in _residual_vector_tags, which can be used for
+   * indexing into _sub_Re, _sub_Rn, _sub_Rl, _cached_residual_rows, and _cached_residual_values
+   */
+  unsigned int residualVectorTagIndex(const TagID tag_id) const;
+
   SystemBase & _sys;
   SubProblem & _subproblem;
 
@@ -1813,7 +1831,11 @@ private:
   MooseArray<Point> _current_physical_points;
 
   /*
-   * Residual contributions <Tag, ivar>
+   * Residual contributions <tag_index, ivar>
+   *
+   * tag_index is the index into _residual_vector_tags, that is, _sub_Re[0] corresponds to the tag
+   * with TagID _residual_vector_tags[0]._id
+   *
    * When ivar corresponds to an array variable, the dense vector is in size of ndof * count,
    * where count is the number of components of the array variable. The local residual is ordered
    * as (r_i,j, i = 1,...,ndof; j = 1,...,count).
@@ -1937,6 +1959,15 @@ private:
   mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data_face;
   mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>>
       _ad_vector_grad_phi_data_face;
+
+  /**
+   * The residual vector tags that Assembly could possibly contribute to.
+   *
+   * The following variables are all indexed with this vector (i.e., index 0 in the following
+   * vectors corresponds to the tag with TagID _residual_vector_tags[0]._id):
+   * _sub_Re, _sub_Rn, _sub_Rl, _cached_residual_rows, _cached_residual_values,
+   */
+  const std::vector<VectorTag> & _residual_vector_tags;
 
   /// Values cached by calling cacheResidual() (the first vector is for TIME vs NONTIME)
   std::vector<std::vector<Real>> _cached_residual_values;

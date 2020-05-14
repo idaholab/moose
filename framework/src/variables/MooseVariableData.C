@@ -1282,8 +1282,8 @@ template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
 {
-  // Have to do this because upon construction this won't initialize any of the derivatives (because
-  // DualNumber::do_derivatives is false at that time).
+  // Have to do this because upon construction this won't initialize any of the derivatives
+  // (because DualNumber::do_derivatives is false at that time).
   _ad_zero = 0;
 
   _ad_dof_values.resize(num_dofs);
@@ -1318,12 +1318,12 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     case Moose::ElementType::Lower:
       // At the time of writing, this Lower case is only used in mortar applications where we are
       // re-init'ing on Element, Neighbor, and Lower dimensional elements
-      // simultaneously. Consequently, we make sure here that our offset is greater than the sum of
-      // the element and neighbor dofs. I can imagine a future case in which you're not re-init'ing
-      // on all three simultaneously in which case this offset could be smaller. Also note that the
-      // number of dofs on lower-d elements is guaranteed to be lower than on the higher dimensional
-      // element, but we're not using that knowledge here. In the future we could implement
-      // something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
+      // simultaneously. Consequently, we make sure here that our offset is greater than the sum
+      // of the element and neighbor dofs. I can imagine a future case in which you're not
+      // re-init'ing on all three simultaneously in which case this offset could be smaller. Also
+      // note that the number of dofs on lower-d elements is guaranteed to be lower than on the
+      // higher dimensional element, but we're not using that knowledge here. In the future we
+      // could implement something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
       ad_offset = 2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
                   _var_num * _sys.getMaxVarNDofsPerElem();
       break;
@@ -1387,8 +1387,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       if (_need_ad_grad_u)
       {
         // The latter check here is for handling the fact that we have not yet implemented
-        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that situation
-        // we need to default to using the non-ad grad_phi
+        // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
+        // situation we need to default to using the non-ad grad_phi
         if (_displaced && _current_ad_grad_phi)
           _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
         else
@@ -1396,8 +1396,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       }
 
       if (_need_ad_second_u)
-        // Note that this will not carry any derivatives with respect to displacements because those
-        // calculations have not yet been implemented in Assembly
+        // Note that this will not carry any derivatives with respect to displacements because
+        // those calculations have not yet been implemented in Assembly
         _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
 
       if (_need_ad_u_dot && _time_integrator)
@@ -2201,19 +2201,19 @@ MooseVariableData<OutputType>::fetchDoFValues()
     _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
   }
 
-  if (_sys.subproblem().safeAccessTaggedVectors())
-  {
-    auto & active_coupleable_vector_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-    for (auto tag : active_coupleable_vector_tags)
-      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  for (auto tag : active_coupleable_vector_tags)
+    if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           _sys.subproblem().safeAccessTaggedVectors()) ||
+          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
         if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
           auto & vec = _sys.getVector(tag);
           _vector_tags_dof_u[tag].resize(n);
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
-  }
 
   if (_sys.subproblem().safeAccessTaggedMatrices())
   {
@@ -2297,15 +2297,14 @@ MooseVariableData<RealEigenVector>::fetchDoFValues()
       _need_dof_values_previous_nl)
     getArrayDoFValues(*_sys.solutionPreviousNewton(), n, _dof_values_previous_nl);
 
-  if (_sys.subproblem().safeAccessTaggedVectors())
-  {
-    auto & active_coupleable_vector_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-    for (auto tag : active_coupleable_vector_tags)
-      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
-        if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
-          getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
-  }
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  for (auto tag : active_coupleable_vector_tags)
+    if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+         _sys.subproblem().safeAccessTaggedVectors()) ||
+        _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+        getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
 
   if (_sys.subproblem().safeAccessTaggedMatrices())
   {
