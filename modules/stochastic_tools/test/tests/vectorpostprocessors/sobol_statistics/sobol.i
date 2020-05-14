@@ -1,7 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
+[StochasticTools]
 []
 
 [Distributions/uniform]
@@ -44,15 +41,6 @@
     results = results
     execute_on = FINAL
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

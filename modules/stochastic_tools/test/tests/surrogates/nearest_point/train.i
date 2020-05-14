@@ -1,7 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
+[StochasticTools]
 []
 
 [Samplers]
@@ -30,15 +27,6 @@
     results_vpp = values
     results_vector = g_values
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]
