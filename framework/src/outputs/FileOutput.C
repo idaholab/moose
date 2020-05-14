@@ -84,7 +84,12 @@ FileOutput::FileOutput(const InputParameters & parameters)
   }
 
   // Check the file directory of file_base and create if needed
-  std::string base = "./" + _file_base;
+  // Check if _file_base is an absolute path
+  std::string base;
+  if (_file_base.find_first_of("/", 0) == 0)
+    base = "./" + MooseUtils::relativepath(_file_base);
+  else
+    base = "./" + _file_base;
   base = base.substr(0, base.find_last_of('/'));
 
   if (_app.processor_id() == 0 && access(base.c_str(), W_OK) == -1)
