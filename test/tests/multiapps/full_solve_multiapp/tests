@@ -2,12 +2,45 @@
   issues = '#1940'
   design = 'FullSolveMultiApp.md'
 
-  [./test]
-    type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'master_out.e master_out_full_solve0.e'
-    recover = false
+  [steady]
+    requirement = "The system shall be capable of executing a sub-application from a Steady executioner on "
+    [exec_initial]
+      type = 'Exodiff'
+      input = 'master.i'
+      exodiff = 'master_out.e master_out_full_solve0.e'
+      recover = false
 
-    requirement = "The system shall be capable of executing a sub-application that executes completely."
-  [../]
+      detail = "initial and "
+    []
+    [exec_final]
+      type = 'Exodiff'
+      input = 'master.i'
+      cli_args = 'MultiApps/full_solve/execute_on=final Outputs/file_base=exec_final'
+      exodiff = 'exec_final.e exec_final_full_solve0.e'
+      recover = false
+
+      detail = "final."
+    []
+  []
+
+  [nl_eigen]
+    requirement = "The system shall be capable of executing a sub-application from a Eigenvalue executioner on "
+    [exec_initial]
+      type = 'Exodiff'
+      input = 'master_eigen.i'
+      exodiff = 'master_eigen_out.e master_eigen_out_full_solve0.e'
+      recover = false
+
+      detail = "initial and "
+    []
+    [exec_final]
+      type = 'Exodiff'
+      input = 'master_eigen.i'
+      cli_args = 'MultiApps/full_solve/execute_on=final Outputs/file_base=exec_final_eigen'
+      exodiff = 'exec_final_eigen.e exec_final_eigen_full_solve0.e'
+      recover = false
+
+      detail = "final."
+    []
+  []
 []
