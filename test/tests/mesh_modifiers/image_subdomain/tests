@@ -7,6 +7,7 @@
     exodiff = image_2d_out.e
     vtk = true
     method = '!DBG' # This test is slow in debug b/c of calls to libMesh::MeshTools::libmesh_assert_valid_dof_ids
+    no_error_deprecated = true
   [../]
   [./3d]
     # Test ability to read in a single 20x20x20 stack of images and assign subdomain ids based on image
@@ -14,5 +15,6 @@
     input = image_3d.i
     exodiff = image_3d_out.e
     vtk = true
+    no_error_deprecated = true
   [../]
 []

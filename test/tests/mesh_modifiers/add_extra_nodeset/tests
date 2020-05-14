@@ -4,6 +4,7 @@
     type = 'Exodiff'
     input = 'extra_nodeset_test.i'
     exodiff = 'out.e'
+    no_error_deprecated = true
   [../]
 
   [./test_coord]
@@ -11,6 +12,7 @@
     input = 'extra_nodeset_coord_test.i'
     exodiff = 'out.e'
     prereq = 'test'
+    no_error_deprecated = true
   [../]
 
   [./test_bad_coord]
@@ -18,5 +20,6 @@
     input = 'extra_nodeset_coord_test.i'
     expect_err = "Unable to locate the following point within the domain"
     cli_args = 'MeshModifiers/middle_node/coord="0.5 10"'
+    no_error_deprecated = true
   [../]
 []

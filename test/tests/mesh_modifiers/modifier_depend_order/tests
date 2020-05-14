@@ -4,6 +4,7 @@
     type = 'Exodiff'
     input = 'modifier_depend_order.i'
     exodiff = 'modifier_depend_order_out.e'
+    no_error_deprecated = true
   [../]
 
   [./depend_with_force_prepare]
@@ -12,5 +13,6 @@
     cli_args = '--mesh-only depend_with_force_prepare_out.e'
     exodiff = 'depend_with_force_prepare_out.e'
     recover = false
+    no_error_deprecated = true
   [../]
 []
