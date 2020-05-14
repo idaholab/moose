@@ -74,8 +74,6 @@ void
 StochasticResults::setCurrentLocalVectorPostprocessorValue(
     const std::string & vector_name, const VectorPostprocessorValue && current)
 {
-  mooseAssert(!hasVectorPostprocessorByName(vector_name),
-              "The supplied VectorPostprocessor name of '" << vector_name << "' must exist.");
   auto data_ptr = std::find_if(
       _sample_vectors.begin(), _sample_vectors.end(), [&vector_name](StochasticResultsData & data) {
         return data.name == vector_name;

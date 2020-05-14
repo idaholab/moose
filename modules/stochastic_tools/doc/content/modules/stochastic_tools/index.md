@@ -12,7 +12,7 @@ used independently or in combination to meet the needs of the application develo
 - Example 2: [examples/parameter_study.md]
 - Example 3: [examples/sobol.md]
 
-### Reduce Order Models
+### Surrogate Models
 
 - Example 4:  [examples/surrogate_creation.md]
 - Example 5: [examples/surrogate_training.md]

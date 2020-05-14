@@ -27,12 +27,12 @@ LatinHypercubeSampler::validParams()
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_bins", "The number of intervals to consider within the sampling.");
   params.addParam<std::vector<Real>>(
-      "upper_limits",
-      std::vector<Real>(1, 1),
-      "The lower limit of probability for each of the associated distributions.");
-  params.addParam<std::vector<Real>>(
       "lower_limits",
       std::vector<Real>(1, 0),
+      "The lower limit of probability for each of the associated distributions.");
+  params.addParam<std::vector<Real>>(
+      "upper_limits",
+      std::vector<Real>(1, 1),
       "The upper limit of probability for each of the associated distributions.");
   return params;
 }

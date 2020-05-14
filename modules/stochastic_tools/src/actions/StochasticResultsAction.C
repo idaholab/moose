@@ -51,8 +51,9 @@ StochasticResultsAction::act()
         auto & uo = _problem->getUserObject<UserObject>(result_name);
         StochasticResults * results = dynamic_cast<StochasticResults *>(&uo);
         if (!results)
-          mooseError("The 'results' object must be a 'StochasticResults' object.");
-
+          mooseError("The object prescribed by the 'to_vector_postprocessor' parameter in ",
+                     ptr->name(),
+                     " must be a 'StochasticResults' object.");
         for (const auto & vpp_name : vpp_names)
           results->initVector(vpp_name);
       }

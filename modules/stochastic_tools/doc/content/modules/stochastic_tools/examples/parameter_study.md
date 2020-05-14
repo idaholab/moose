@@ -20,7 +20,7 @@ boundary.
 
 The boundary conditions $T_0$ and $q_0$ as well as the diffusivity ($\gamma$) and the source
 term $s$ are assumed to be known. However, these parameters have some associated uncertainty.
-The affect of the uncertainty on the average temperature and heat flux on the left boundary after
+The effect of the uncertainty on the average temperature and heat flux on the left boundary after
 one second of simulation time is desired, defined as $T_{avg} = \bar{T}(t=1)$ and
 $q_{left} = q(t=1,x=0)$.
 
@@ -30,10 +30,10 @@ The first step in performing a parameter study is to create an input file that s
 without uncertain parameters. For the example problem this will be done assuming $\gamma=1$,
 $s=1$, $T_0=-10$, and $q_0=-100$.
 
-The complete input file for this problem is provide in [#diffusion]. The only item that is atypical
-from a MOOSE simulation input file is the existence of the `Controls` block, which here simply
-creates a [SamplerReceiver.md] object. This block is required for the parameter study, but shall
-be discussed in more detail in a following section.
+The complete input file for this problem is provide in [diffusion]. The only item
+that is atypical from a MOOSE simulation input file is the existence of the `Controls` block, which
+here simply creates a [SamplerReceiver.md] object. This block is required for the parameter study,
+but shall be discussed in [parameter_study.md#transfers] section.
 
 !listing parameter_study/diffusion.i id=diffusion
          caption=Complete input file for example heat equation problem to be used in parameter study.
@@ -54,7 +54,7 @@ To perform a parameter study an input file that will drive the stochastic simula
 This file will be referred to as the master input file and is responsible for defining the
 uncertain parameters, running the stochastic simulations, and collecting the stochastic results. The
 following sub-sections will step through each portion of the master file to explain the purpose. The
-complete analysis is discussed in [#results].
+complete analysis is discussed in [parameter_study.md#results].
 
 ### StochasticTools Block
 
@@ -65,14 +65,12 @@ is empty in this example.
 
 !listing examples/parameter_study/master.i block=StochasticTools
 
-### Distributions Block
+### Distributions and Samplers Blocks
 
 The [Distributions](syntax/Distributions/index.md) block defines the statistical distribution
 for each of the uncertain parameters ($T_0$, $q_0$, $\gamma$, and $s$) to be defined. For this
 example, the diffusivity ($\gamma$) is defined by a uniform distribution, the flux ($q_0$) by
 a three-parameter Weibull, and $T_0$ and $s$ a normal distribution.
-
-### Samplers Block
 
 The [Samplers](syntax/Samplers/index.md) block defines how the distributions shall be sampled for
 the parameter study. In this case a Latin hypercube sampling strategy is employed, where each
@@ -85,8 +83,8 @@ For this problem the Sampler object is setup to run in "batch-restore" mode, whi
 operation for memory efficient creation of sub-applications. Please see
 [stochastic_tools/batch_mode.md] for more information.
 
-The input distributions
-for each of these four terms are included in [#sampler_gamma]--[#sampler_s] for 5000 samples.
+The input distributions for each of these four terms are included in [sampler_gamma]--[sampler_s]
+for 5000 samples.
 
 !listing examples/parameter_study/master.i block=Distributions
 
@@ -118,13 +116,15 @@ for each of these four terms are included in [#sampler_gamma]--[#sampler_s] for 
                 legend=False
                 caption=Input distribution of source term ($s$).
 
-### Transfers Block
+### Transfers Block id=transfers
 
 The [Transfers](syntax/Transfers/index.md) block serves two purposes. First, the "parameters"
 sub-block instantiates a [SamplerParameterTransfer.md] object that transfers each row of data from
 the Sampler object to a sub-application simulation. Within the sub-application the parameters listed
 in the in this sub-block replace the values in the sub-application. This substitution occurs using
-the aforementioned Control block in the sub-application input file.
+the aforementioned SamplerReciever object that exists in the Control block of the sub-application
+input file. The receiver on the sub-application accepts the parameter names and values from the
+SamplerParameterTransfer object on the master application.
 
 The results sub-blocks, serves the second purpose by transferring the quantities of interest back to
 the master application. In this cases those quantities are postprocessors on the sub-application that
@@ -156,18 +156,20 @@ documentation and capabilities for this object.
 The [Outputs](syntax/Outputs/index.md) block enables the output of the VectorPostprocessor data
 using the comma separated files.
 
+!listing examples/parameter_study/master.i block=Outputs
+
 ## Stochastic Results id=results
 
 ### Quantity of Interest Distribtions
 
 The resulting distributions are for the quantities of interest: $T_{avg}$ and $q_left$ are presented
-in [#results_T_avg] and [#results_q_left].
+in [results_T_avg] and [results_q_left].
 
 !plot histogram filename=stochastic_tools/parameter_study/master_out_results_0002.csv
                 vectors=results:T_avg
                 bins=20
                 xlabel=Average Temperature
-                id=results
+                id=results_T_avg
                 caption=Resulting distribution of quantity of interest: $T_{avg}$.
 
 
@@ -180,13 +182,13 @@ in [#results_T_avg] and [#results_q_left].
 
 #### Statistics
 
-[#stats] includes the computed statistics and confidence level intervals as output by the
-VectorPostprocessor object for the example heat conduction problem with 5000 samples. The results of
-which can be written as:
+[stats] includes the computed statistics and confidence level intervals as output
+by the VectorPostprocessor object for the example heat conduction problem with 5000 samples. The
+results of which can be written as:
 
-$\overline{T}_{avg} = -22.52,\,95\%CI[-22.76, -22.29]$
+$\overline{T}_{avg} = -22.52,\,95\%\, CI[-22.76, -22.29]$
 
-$\overline{q}_{left} = -66.65,\,95\%CI[-66.34, -65.97]$
+$\overline{q}_{left} = -66.65,\,95\%\, CI[-66.34, -65.97]$
 
 !listing id=stats
          caption=Resulting statistics and confidence level intervals for the computed quantities

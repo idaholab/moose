@@ -49,7 +49,7 @@ protected:
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
   ///@}
-  ///
+
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;
 

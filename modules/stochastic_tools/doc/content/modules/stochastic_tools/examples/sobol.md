@@ -101,5 +101,5 @@ $q_0$. The importance of $\gamma$ and $q_0$ if further evident by the total-effe
 !table id=total-effect caption=Total-effect Sobol indices for $T_{avg}$ and $q_{left}$.
 | $S_T$      | 1 ($\gamma$) | 2 ($q_0$) | 3 ($T_0$) | 4 ($s$) |
 | -        | -            | -         | -         | -       |
-| T_{avg}  | 0.789        | 0.237     | 0.003     | 0.002   |
-| q_{left} | 0.786        | 0.249     | 0.004     | 0.004   |
+| $T_{avg}$  | 0.789        | 0.237     | 0.003     | 0.002   |
+| $q_{left}$ | 0.786        | 0.249     | 0.004     | 0.004   |
