@@ -1,0 +1,10 @@
+[Tests]
+  [./single]
+    type = 'CSVDiff'
+    input = 'bool_function_control.i'
+    csvdiff = 'bool_function_control_out.csv'
+    requirement = "The Control system shall allow a boolean parameter to be controlled with a function."
+    issues = '#15402'
+    design = 'syntax/Controls/index.md source/controls/BoolFunctionControl.md'
+  [../]
+[]
