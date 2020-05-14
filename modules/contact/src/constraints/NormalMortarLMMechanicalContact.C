@@ -16,6 +16,8 @@ InputParameters
 NormalMortarLMMechanicalContact::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  params.addClassDescription(
+      "Enforces the normal contact complementarity conditions in a mortar discretization");
   params.addParam<NonlinearVariableName>("slave_disp_y",
                                          "The y displacement variable on the slave face");
   params.addParam<NonlinearVariableName>("master_disp_y",
