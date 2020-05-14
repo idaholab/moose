@@ -18,6 +18,8 @@ public:
   virtual Real T_sat(Real pressure) const override;
   virtual Real p_sat(Real temperature) const override;
   virtual Real dT_sat_dp(Real pressure) const override;
+  virtual Real sigma_from_T(Real T) const override;
+  virtual Real dsigma_dT_from_T(Real T) const override;
 
   virtual bool supportsPhaseChange() const override { return true; }
 
@@ -56,6 +58,29 @@ protected:
   const Real _p_inf_vapor;
   const Real _q_prime_vapor;
 
+  /// critical temperature
+  const Real & _T_c;
+  /// critical pressure
+  const Real & _p_c;
+
+  /// 'A' constant used in surface tension correlation
+  const Real & _sigma_A;
+  /// 'B' constant used in surface tension correlation
+  const Real & _sigma_B;
+  /// 'C' constant used in surface tension correlation
+  const Real & _sigma_C;
+
+  /// Minimum temperature value in saturation curve
+  const Real & _T_sat_min;
+  /// Maximum temperature value in saturation curve
+  const Real & _T_sat_max;
+  /// Initial guess for saturation pressure Newton solve
+  const Real & _p_sat_guess;
+  /// Number of samples to take in saturation curve
+  const unsigned int & _n_sat_samples;
+  /// Temperature increments on saturation curve
+  const Real _dT_sat;
+
   // coefficients for saturation pressure Newton solve
   const Real _A;
   const Real _B;
@@ -67,17 +92,13 @@ protected:
   /// Newton max number of iterations
   const unsigned int _newton_max_iter;
 
-  // These two vectors store saturation line p(T) information by only calculating once in
-  // constructor
-  //   and then use interpolation to quickly calculate the value
+  // These two vectors store saturation line p(T) information by only calculating
+  // once in constructor and then use interpolation to quickly calculate the value
   std::vector<Real> _T_vec;
   std::vector<Real> _p_sat_vec;
 
   LinearInterpolation _ipol_temp;
   LinearInterpolation _ipol_pressure;
-
-  // Critical pressure
-  static const Real _P_critical;
 
 public:
   static InputParameters validParams();

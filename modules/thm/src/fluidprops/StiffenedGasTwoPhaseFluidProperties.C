@@ -1,8 +1,6 @@
 #include "StiffenedGasTwoPhaseFluidProperties.h"
 #include "StiffenedGasFluidProperties.h"
 
-const Real StiffenedGasTwoPhaseFluidProperties::_P_critical = 22.09E+6;
-
 registerMooseObject("THMApp", StiffenedGasTwoPhaseFluidProperties);
 
 InputParameters
@@ -11,28 +9,42 @@ StiffenedGasTwoPhaseFluidProperties::validParams()
   InputParameters params = TwoPhaseFluidProperties::validParams();
   params += NaNInterface::validParams();
 
-  // Default parameters for Stiffened Gas EOS (liquid phase)
-  params.addParam<Real>("gamma_liquid", 2.35, "");
-  params.addParam<Real>("cv_liquid", 1816.0, "");
-  params.addParam<Real>("q_liquid", -1.167e6, "");
-  params.addParam<Real>("p_inf_liquid", 1.0e9, "");
-  params.addParam<Real>("q_prime_liquid", 0, "");
-  params.addParam<Real>("k_liquid", 0.5, "");
-  params.addParam<Real>("mu_liquid", 281.8e-6, "");
-  params.addParam<Real>("M_liquid", 0.01801488, "");
+  params.addParam<Real>("gamma_liquid", 2.35, "Liquid heat capacity ratio");
+  params.addParam<Real>("cv_liquid", 1816.0, "Liquid isochoric specific heat capacity");
+  params.addParam<Real>("q_liquid", -1.167e6, "Liquid reference specific internal energy");
+  params.addParam<Real>("p_inf_liquid", 1.0e9, "Liquid stiffness pressure");
+  params.addParam<Real>("q_prime_liquid", 0, "Liquid reference specific entropy");
+  params.addParam<Real>("k_liquid", 0.5, "Liquid thermal conductivity");
+  params.addParam<Real>("mu_liquid", 281.8e-6, "Liquid dynamic viscosity");
+  params.addParam<Real>("M_liquid", 0.01801488, "Liquid molar mass");
 
-  params.addParam<Real>("gamma_vapor", 1.43, "");
-  params.addParam<Real>("cv_vapor", 1040.0, "");
-  params.addParam<Real>("q_vapor", 2.03e6, "");
-  params.addParam<Real>("p_inf_vapor", 0.0, "");
-  params.addParam<Real>("q_prime_vapor", -2.3e4, "");
-  params.addParam<Real>("k_vapor", 0.026, "");
-  params.addParam<Real>("mu_vapor", 134.4e-7, "");
-  params.addParam<Real>("M_vapor", 0.01801488, "");
+  params.addParam<Real>("gamma_vapor", 1.43, "Vapor heat capacity ratio");
+  params.addParam<Real>("cv_vapor", 1040.0, "Vapor isochoric specific heat capacity");
+  params.addParam<Real>("q_vapor", 2.03e6, "Vapor reference specific internal energy");
+  params.addParam<Real>("p_inf_vapor", 0.0, "Vapor stiffness pressure");
+  params.addParam<Real>("q_prime_vapor", -2.3e4, "Vapor reference specific entropy");
+  params.addParam<Real>("k_vapor", 0.026, "Vapor thermal conductivity");
+  params.addParam<Real>("mu_vapor", 134.4e-7, "Vapor dynamic viscosity");
+  params.addParam<Real>("M_vapor", 0.01801488, "Vapor molar mass");
 
-  params.addParam<Real>("T_c", 647.096, "");
-  params.addParam<Real>("rho_c", 322.0, "");
-  params.addParam<Real>("e_c", 2702979.84310559, "");
+  params.addParam<Real>("T_c", 647.096, "Critical temperature [K]");
+  params.addParam<Real>("p_c", 22.09e6, "Critical pressure [Pa]");
+  params.addParam<Real>("rho_c", 322.0, "Critical density [kg/m^3]");
+  params.addParam<Real>("e_c", 2702979.84310559, "Critical specific internal energy [J/kg]");
+
+  params.addParam<Real>(
+      "sigma_A", 0.2358, "'A' constant used in surface tension correlation [N/m]");
+  params.addParam<Real>("sigma_B", 1.256, "'B' constant used in surface tension correlation");
+  params.addParam<Real>("sigma_C", 0.625, "'C' constant used in surface tension correlation");
+
+  // Default values correspond to water, from the freezing point to critical point, with 1 K
+  // increments
+  params.addParam<Real>("T_sat_min", 274.0, "Minimum temperature value in saturation curve [K]");
+  params.addParam<Real>("T_sat_max", 647.0, "Maximum temperature value in saturation curve [K]");
+  params.addParam<Real>(
+      "p_sat_guess", 611.0, "Initial guess for saturation pressure Newton solve [Pa]");
+  params.addParam<unsigned int>(
+      "n_sat_samples", 374, "Number of samples to take in saturation curve");
 
   params.addClassDescription("Two-phase stiffened gas fluid properties");
 
@@ -57,6 +69,19 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
     _q_vapor(getParam<Real>("q_vapor")),
     _p_inf_vapor(getParam<Real>("p_inf_vapor")),
     _q_prime_vapor(getParam<Real>("q_prime_vapor")),
+
+    _T_c(getParam<Real>("T_c")),
+    _p_c(getParam<Real>("p_c")),
+
+    _sigma_A(getParam<Real>("sigma_A")),
+    _sigma_B(getParam<Real>("sigma_B")),
+    _sigma_C(getParam<Real>("sigma_C")),
+
+    _T_sat_min(getParam<Real>("T_sat_min")),
+    _T_sat_max(getParam<Real>("T_sat_max")),
+    _p_sat_guess(getParam<Real>("p_sat_guess")),
+    _n_sat_samples(getParam<unsigned int>("n_sat_samples")),
+    _dT_sat((_T_sat_max - _T_sat_min) / (_n_sat_samples - 1)),
 
     _A((_cp_liquid - _cp_vapor + _q_prime_vapor - _q_prime_liquid) / (_cp_vapor - _cv_vapor)),
     _B((_q_liquid - _q_vapor) / (_cp_vapor - _cv_vapor)),
@@ -107,23 +132,18 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
 
   // calculate the saturation curve p(T) and store the data in two vectors for re-use
   {
-    // sample temperatures from freezing point to critical point, in increments of 1 K
-    const Real T_min = 0.0 + 274.0;   // slightly above freezing point
-    const Real T_max = 374.0 + 273.0; // slightly below critical point
-    const Real dT = 1.0;
-    const unsigned int n_samples = std::round((T_max - T_min) / dT) + 1;
-    _T_vec.resize(n_samples);
-    _p_sat_vec.resize(n_samples);
+    _T_vec.resize(_n_sat_samples);
+    _p_sat_vec.resize(_n_sat_samples);
 
     // loop over sample temperatures, starting with the minimum
-    Real T = T_min;
-    for (unsigned int i = 0; i < n_samples; i++)
+    Real T = _T_sat_min;
+    for (unsigned int i = 0; i < _n_sat_samples; i++)
     {
       _T_vec[i] = T;
       _p_sat_vec[i] = compute_p_sat(T);
 
       // increment sample temperature
-      T += dT;
+      T += _dT_sat;
     }
   }
 
@@ -134,7 +154,7 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
 Real
 StiffenedGasTwoPhaseFluidProperties::p_critical() const
 {
-  return _P_critical;
+  return _p_c;
 }
 
 Real
@@ -152,8 +172,7 @@ StiffenedGasTwoPhaseFluidProperties::p_sat(Real temperature) const
 Real
 StiffenedGasTwoPhaseFluidProperties::compute_p_sat(const Real & T) const
 {
-  // start from 0 C saturation pressure; starting from large value sometimes diverges
-  Real p_sat = 611.0;
+  Real p_sat = _p_sat_guess;
   Real f_norm = 1.0e5;
   unsigned int iter = 1;
   while (std::fabs(f_norm / p_sat) > _newton_tol)
@@ -183,4 +202,22 @@ Real
 StiffenedGasTwoPhaseFluidProperties::dT_sat_dp(Real pressure) const
 {
   return _ipol_temp.sampleDerivative(pressure);
+}
+
+Real
+StiffenedGasTwoPhaseFluidProperties::sigma_from_T(Real T) const
+{
+  const Real aux = 1.0 - T / _T_c;
+  return _sigma_A * std::pow(aux, _sigma_B) * (1.0 - _sigma_C * aux);
+}
+
+Real
+StiffenedGasTwoPhaseFluidProperties::dsigma_dT_from_T(Real T) const
+{
+  const Real aux = 1.0 - T / _T_c;
+  const Real daux_dT = -1.0 / _T_c;
+  const Real dsigma_daux =
+      _sigma_A * (_sigma_B * std::pow(aux, _sigma_B - 1.0) * (1.0 - _sigma_C * aux) -
+                  _sigma_C * std::pow(aux, _sigma_B));
+  return dsigma_daux * daux_dT;
 }
