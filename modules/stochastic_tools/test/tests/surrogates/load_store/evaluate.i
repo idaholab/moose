@@ -1,10 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-[]
-
-[Variables/u]
+[StochasticTools]
 []
 
 [Surrogates/poly_chaos]
@@ -17,15 +11,6 @@
     pc_name = poly_chaos
     compute = 'mean stddev skewness kurtosis'
     execute_on = final
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs/out]

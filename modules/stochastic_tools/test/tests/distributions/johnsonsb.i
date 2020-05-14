@@ -1,13 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
 []
 
 [Distributions]
@@ -42,15 +33,6 @@
     method = quantile
     execute_on = initial
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

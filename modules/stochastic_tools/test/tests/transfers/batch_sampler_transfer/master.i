@@ -1,11 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[StochasticTools]
 []
 
 [Distributions]
@@ -28,10 +21,6 @@
     distributions = 'uniform_0 uniform_1'
     execute_on = INITIAL
   []
-[]
-
-[Executioner]
-  type = Steady
 []
 
 [MultiApps]
