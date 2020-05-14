@@ -26,6 +26,6 @@ public:
 protected:
   virtual Real computeQpResidual() override;
 
-  /// gradient of the shape function
+  const VariableSecond & _second_u;
   const VariablePhiSecond & _second_phi;
 };

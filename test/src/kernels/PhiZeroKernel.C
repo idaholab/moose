@@ -16,11 +16,12 @@ PhiZeroKernel::validParams()
 {
   InputParameters params = NullKernel::validParams();
   params.addClassDescription("Test for phi zero values");
+  params.addParam<bool>("second_order", false, "use second order shape function");
   return params;
 }
 
 PhiZeroKernel::PhiZeroKernel(const InputParameters & parameters)
-  : NullKernel(parameters), _second_phi(_assembly.secondPhi(_var))
+  : NullKernel(parameters), _second_u(_var.secondSln()), _second_phi(_var.secondPhi())
 {
 }
 
@@ -47,20 +48,23 @@ PhiZeroKernel::computeQpResidual()
                       std::to_string(_phi_zero[0].size()));
     }
   }
-
-  if (_second_phi.size() > 0)
+  if (getParam<bool>("second_order"))
   {
-    mooseAssert(_second_phi.size() == _second_phi_zero.size(),
-                "_second_phi.size() " + std::to_string(_second_phi.size()) +
-                    "!= _second_phi_zero.size() " + std::to_string(_second_phi_zero.size()));
-    if (_second_phi[0].size() > 0)
+    mooseAssert(_second_phi.size() > 0,
+                "_second_phi.size() = 0 with getParam<bool>(second_order)=true");
+    if ((_second_phi.size() > 0))
     {
-      mooseAssert(_second_phi[0].size() == _second_phi_zero[0].size(),
-                  "_second_phi[0].size() " + std::to_string(_second_phi_zero[0].size()) +
-                      "!= _second_phi_zero[0].size() " +
-                      std::to_string(_second_phi_zero[0].size()));
+      mooseAssert(_second_phi.size() == _second_phi_zero.size(),
+                  "_second_phi.size() " + std::to_string(_second_phi.size()) +
+                      "!= _second_phi_zero.size() " + std::to_string(_second_phi_zero.size()));
+      if (_second_phi[0].size() > 0)
+      {
+        mooseAssert(_second_phi[0].size() == _second_phi_zero[0].size(),
+                    "_second_phi[0].size() " + std::to_string(_second_phi[0].size()) +
+                        "!= _second_phi_zero[0].size() " +
+                        std::to_string(_second_phi_zero[0].size()));
+      }
     }
   }
-
   return 0.0;
 }
