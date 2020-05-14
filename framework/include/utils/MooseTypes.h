@@ -177,6 +177,7 @@ typedef subdomain_id_type SubdomainID;
 typedef unsigned int MooseObjectID;
 typedef unsigned int THREAD_ID;
 typedef unsigned int TagID;
+typedef unsigned int TagTypeID;
 typedef unsigned int PerfID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
@@ -451,6 +452,7 @@ extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
 extern const BoundaryID INVALID_BOUNDARY_ID;
 extern const TagID INVALID_TAG_ID;
+extern const TagTypeID INVALID_TAG_TYPE_ID;
 const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
 const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
 

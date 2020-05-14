@@ -635,29 +635,15 @@ public:
   void copyNeighborShapes(unsigned int var);
 
   /**
-   * Add local residuals of all field variables for a tag onto a given global residual vector.
-   */
-  void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
-  /**
    * Add local residuals of all field variables for a set of tags onto the global residual vectors
    * associated with the tags.
    */
   void addResidual(const std::vector<VectorTag> & vector_tags);
   /**
-   * Add local neighbor residuals of all field variables for a tag onto a given global residual
-   * vector.
-   */
-  void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
-  /**
    * Add local neighbor residuals of all field variables for a set of tags onto the global residual
    * vectors associated with the tags.
    */
   void addResidualNeighbor(const std::vector<VectorTag> & vector_tags);
-  /**
-   * Add residuals of all scalar variables for a tag onto the global residual vector associated
-   * with the tag.
-   */
-  void addResidualScalar(TagID tag_id);
   /**
    * Add residuals of all scalar variables for a set of tags onto the global residual vectors
    * associated with the tags.
@@ -716,25 +702,33 @@ public:
   void addCachedResiduals();
 
   /**
-   * Adds the values that have been cached by calling cacheResidual(), cacheResidualNeighbor(),
-   * and/or cacheResidualLower() for tag tag_id to the residual.
+   * Clears all of the residuals in _cached_residual_rows and _cached_residual_values
    *
-   * This allows for adding the cached residual into a residual vector that is not the vector
-   * associated with tag_id.
+   * This method is designed specifically for use after calling
+   * FEProblemBase::addCachedResidualDirectly() and DisplacedProblem::addCachedResidualDirectly() to
+   * ensure that we don't have any extra residuals hanging around that we didn't have the vectors
+   * for
+   */
+  void clearCachedResiduals();
+
+  /**
+   * Adds the values that have been cached by calling cacheResidual(), cacheResidualNeighbor(),
+   * and/or cacheResidualLower() to a user-defined residual (that is, not necessarily the vector
+   * that vector_tag points to)
    *
    * Note that this will also clear the cache.
    */
-  void addCachedResidualDirectly(NumericVector<Number> & residual, const TagID tag_id);
+  void addCachedResidualDirectly(NumericVector<Number> & residual, const VectorTag & vector_tag);
 
   /**
    * Sets local residuals of all field variables to the global residual vector for a tag.
    */
-  void setResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  void setResidual(NumericVector<Number> & residual, const VectorTag & vector_tag);
 
   /**
    * Sets local neighbor residuals of all field variables to the global residual vector for a tag.
    */
-  void setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
+  void setResidualNeighbor(NumericVector<Number> & residual, const VectorTag & vector_tag);
 
   /**
    * Adds all local Jacobian to the global Jacobian matrices.
@@ -1512,12 +1506,17 @@ protected:
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
   /**
-   * Internal method for adding the cached residual from tag _residual_vector_tags[tag_index]._id
-   * into residual
-   *
-   * Note that this will also clear the cache
+   * Add local residuals of all field variables for a tag onto the tag's residual vector
    */
-  void addCachedResidualInternal(NumericVector<Number> & residual, unsigned int tag_index);
+  void addResidual(const VectorTag & vector_tag);
+  /**
+   * Add local neighbor residuals of all field variables for a tag onto the tag's residual vector
+   */
+  void addResidualNeighbor(const VectorTag & vector_tag);
+  /**
+   * Add residuals of all scalar variables for a tag onto the tag's residual vector
+   */
+  void addResidualScalar(const VectorTag & vector_tag);
 
 private:
   /**
@@ -1579,12 +1578,6 @@ private:
    * @param type The type of FE
    */
   void buildVectorLowerDFE(FEType type) const;
-
-  /**
-   * Gets the index of the tag with TagID tag_id in _residual_vector_tags, which can be used for
-   * indexing into _sub_Re, _sub_Rn, _sub_Rl, _cached_residual_rows, and _cached_residual_values
-   */
-  unsigned int residualVectorTagIndex(const TagID tag_id) const;
 
   SystemBase & _sys;
   SubProblem & _subproblem;
@@ -1966,6 +1959,8 @@ private:
    * The following variables are all indexed with this vector (i.e., index 0 in the following
    * vectors corresponds to the tag with TagID _residual_vector_tags[0]._id):
    * _sub_Re, _sub_Rn, _sub_Rl, _cached_residual_rows, _cached_residual_values,
+   *
+   * This index is also available in VectorTag::_type_id
    */
   const std::vector<VectorTag> & _residual_vector_tags;
 

@@ -9,15 +9,25 @@
 
 #include "VectorTag.h"
 
-VectorTag::VectorTag() : _id(Moose::INVALID_TAG_ID), _name(""), _type(Moose::VECTOR_TAG_ANY) {}
+VectorTag::VectorTag()
+  : _id(Moose::INVALID_TAG_ID),
+    _type_id(Moose::INVALID_TAG_TYPE_ID),
+    _name(""),
+    _type(Moose::VECTOR_TAG_ANY)
+{
+}
 
-VectorTag::VectorTag(const TagID id, const TagName name, const Moose::VectorTagType type)
-  : _id(id), _name(name), _type(type)
+VectorTag::VectorTag(const TagID id,
+                     const TagTypeID type_id,
+                     const TagName name,
+                     const Moose::VectorTagType type)
+  : _id(id), _type_id(type_id), _name(name), _type(type)
 {
 }
 
 bool
 VectorTag::operator==(const VectorTag & other) const
 {
-  return _id == other._id && _name == other._name && _type == other._type;
+  return _id == other._id && _type_id == other._type_id && _name == other._name &&
+         _type == other._type;
 }

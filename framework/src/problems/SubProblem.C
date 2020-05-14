@@ -97,11 +97,15 @@ SubProblem::addVectorTag(const TagName & tag_name,
 
   // Doesn't exist - create it
   const TagID new_tag_id = _vector_tags.size();
+  const TagTypeID new_tag_type_id = _typed_vector_tags[type].size();
   // Primary storage for all tags where the index in the vector == the tag ID
-  _vector_tags.emplace_back(new_tag_id, tag_name_upper, type);
+  _vector_tags.emplace_back(new_tag_id, new_tag_type_id, tag_name_upper, type);
   // Secondary storage for each type so that we can have quick access to all tags of a type
-  _typed_vector_tags[type].emplace_back(new_tag_id, tag_name_upper, type);
+  _typed_vector_tags[type].emplace_back(new_tag_id, new_tag_type_id, tag_name_upper, type);
+  // Name map storage for quick name access
+  _vector_tags_name_map.emplace(tag_name_upper, new_tag_id);
 
+  // Make sure that _vector_tags, _typed_vector_tags, and _vector_tags_name_map are sane
   verifyVectorTags();
 
   return new_tag_id;
@@ -118,6 +122,17 @@ SubProblem::vectorTagExists(const TagName & tag_name) const
       return true;
 
   return false;
+}
+
+const VectorTag &
+SubProblem::getVectorTag(const TagID tag_id) const
+{
+  mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
+
+  if (!vectorTagExists(tag_id))
+    mooseError("Vector tag with ID ", tag_id, " does not exist");
+
+  return _vector_tags[tag_id];
 }
 
 const std::vector<VectorTag> &
@@ -145,9 +160,9 @@ SubProblem::getVectorTagID(const TagName & tag_name) const
   mooseAssert(verifyVectorTags(), "Vector tag storage invalid");
 
   const auto tag_name_upper = MooseUtils::toUpper(tag_name);
-  for (const auto & vector_tag : _vector_tags)
-    if (vector_tag._name == tag_name_upper)
-      return vector_tag._id;
+  const auto search = _vector_tags_name_map.find(tag_name_upper);
+  if (search != _vector_tags_name_map.end())
+    return search->second;
 
   mooseError("Vector tag '", tag_name_upper, "' does not exist");
 }
@@ -175,22 +190,38 @@ SubProblem::vectorTagType(const TagID tag_id) const
 bool
 SubProblem::verifyVectorTags() const
 {
-  for (unsigned int i = 0; i < _vector_tags.size(); ++i)
+  for (TagID tag_id = 0; tag_id < _vector_tags.size(); ++tag_id)
   {
-    const auto & vector_tag = _vector_tags[i];
-    if (vector_tag._id != i)
+    const auto & vector_tag = _vector_tags[tag_id];
+
+    if (vector_tag._id != tag_id)
       mooseError("Vector tag ", vector_tag._id, " id mismatch in _vector_tags");
     if (vector_tag._type == Moose::VECTOR_TAG_ANY)
-      mooseError("Vector tag '", vector_tag._name, " has type VECTOR_TAG_ANY");
+      mooseError("Vector tag '", vector_tag._name, "' has type VECTOR_TAG_ANY");
 
-    unsigned int found = 0;
-    for (const auto & vector_tag_type : _typed_vector_tags[vector_tag._type])
+    const auto search = _vector_tags_name_map.find(vector_tag._name);
+    if (search == _vector_tags_name_map.end())
+      mooseError("Vector tag ", vector_tag._id, " is not in _vector_tags_name_map");
+    else if (search->second != tag_id)
+      mooseError("Vector tag ", vector_tag._id, " has incorrect id in _vector_tags_name_map");
+
+    unsigned int found_in_type = 0;
+    for (TagTypeID tag_type_id = 0; tag_type_id < _typed_vector_tags[vector_tag._type].size();
+         ++tag_type_id)
+    {
+      const auto & vector_tag_type = _typed_vector_tags[vector_tag._type][tag_type_id];
       if (vector_tag_type == vector_tag)
-        ++found;
-    if (found == 0)
-      mooseError("Vector tag ", vector_tag._id, " not found in _typed_vector_tags");
-    if (found > 1)
-      mooseError("Vector tag ", vector_tag._id, " found multiple times in _typed_vector_tags");
+      {
+        ++found_in_type;
+        if (vector_tag_type._type_id != tag_type_id)
+          mooseError("Type ID for Vector tag ", tag_id, " is incorrect");
+      }
+    }
+
+    if (found_in_type == 0)
+      mooseError("Vector tag ", tag_id, " not found in _typed_vector_tags");
+    if (found_in_type > 1)
+      mooseError("Vector tag ", tag_id, " found multiple times in _typed_vector_tags");
   }
 
   unsigned int num_typed_vector_tags = 0;
@@ -198,6 +229,8 @@ SubProblem::verifyVectorTags() const
     num_typed_vector_tags += typed_vector_tags.size();
   if (num_typed_vector_tags != _vector_tags.size())
     mooseError("Size mismatch between _vector_tags and _typed_vector_tags");
+  if (_vector_tags_name_map.size() != _vector_tags.size())
+    mooseError("Size mismatch between _vector_tags and _vector_tags_name_map");
 
   return true;
 }

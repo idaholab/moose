@@ -108,6 +108,11 @@ public:
                              const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL);
 
   /**
+   * Get a VectorTag from a TagID.
+   */
+  virtual const VectorTag & getVectorTag(const TagID tag_id) const;
+
+  /**
    * Get a TagID from a TagName.
    */
   virtual TagID getVectorTagID(const TagName & tag_name) const;
@@ -795,6 +800,9 @@ private:
    * we don't want to build a new vector every call (like in residual evaluation)
    */
   std::vector<std::vector<VectorTag>> _typed_vector_tags;
+
+  /// Map of vector tag TagName to TagID
+  std::map<TagName, TagID> _vector_tags_name_map;
 
   bool _have_fv = false;
 

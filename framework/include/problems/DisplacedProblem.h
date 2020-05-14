@@ -109,6 +109,7 @@ public:
 
   virtual TagID addVectorTag(const TagName & tag_name,
                              const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL) override;
+  virtual const VectorTag & getVectorTag(const TagID tag_id) const override;
   virtual TagID getVectorTagID(const TagName & tag_name) const override;
   virtual TagName vectorTagName(const TagID tag_id) const override;
   virtual bool vectorTagExists(const TagID tag_id) const override;

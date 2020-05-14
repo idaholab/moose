@@ -1402,8 +1402,15 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidualDirectly(residual, _nl->timeVectorTag());
-  _assembly[tid]->addCachedResidualDirectly(residual, _nl->nonTimeVectorTag());
+  if (_nl->hasVector(_nl->timeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual, getVectorTag(_nl->timeVectorTag()));
+
+  if (_nl->hasVector(_nl->nonTimeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual, getVectorTag(_nl->nonTimeVectorTag()));
+
+  // We do this because by adding the cached residual directly, we cannot ensure that all of the
+  // cached residuals are emptied after only the two add calls above
+  _assembly[tid]->clearCachedResiduals();
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -1412,7 +1419,7 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 void
 FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(residual, getVectorTag(_nl->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -1420,7 +1427,7 @@ FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidualNeighbor(residual);
+  _assembly[tid]->setResidualNeighbor(residual, getVectorTag(_nl->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }

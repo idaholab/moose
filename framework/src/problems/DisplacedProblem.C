@@ -297,6 +297,12 @@ DisplacedProblem::addVectorTag(const TagName & tag_name,
   return _mproblem.addVectorTag(tag_name, type);
 }
 
+const VectorTag &
+DisplacedProblem::getVectorTag(const TagID tag_id) const
+{
+  return _mproblem.getVectorTag(tag_id);
+}
+
 TagID
 DisplacedProblem::getVectorTagID(const TagName & tag_name) const
 {
@@ -760,20 +766,29 @@ DisplacedProblem::addCachedResidual(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidualDirectly(residual, _displaced_nl.timeVectorTag());
-  _assembly[tid]->addCachedResidualDirectly(residual, _displaced_nl.nonTimeVectorTag());
+  if (_displaced_nl.hasVector(_displaced_nl.timeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual,
+                                              getVectorTag(_displaced_nl.timeVectorTag()));
+
+  if (_displaced_nl.hasVector(_displaced_nl.nonTimeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual,
+                                              getVectorTag(_displaced_nl.nonTimeVectorTag()));
+
+  // We do this because by adding the cached residual directly, we cannot ensure that all of the
+  // cached residuals are emptied after only the two add calls above
+  _assembly[tid]->clearCachedResiduals();
 }
 
 void
 DisplacedProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(residual, getVectorTag(_displaced_nl.residualVectorTag()));
 }
 
 void
 DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidualNeighbor(residual);
+  _assembly[tid]->setResidualNeighbor(residual, getVectorTag(_displaced_nl.residualVectorTag()));
 }
 
 void

@@ -2234,9 +2234,11 @@ Assembly::init(const CouplingMatrix * cm)
   if (_block_diagonal_matrix && scalar_vars.size() != 0)
     _block_diagonal_matrix = false;
 
-  _sub_Re.resize(_residual_vector_tags.size());
-  _sub_Rn.resize(_residual_vector_tags.size());
-  _sub_Rl.resize(_residual_vector_tags.size());
+  auto num_vector_tags = _residual_vector_tags.size();
+
+  _sub_Re.resize(num_vector_tags);
+  _sub_Rn.resize(num_vector_tags);
+  _sub_Rl.resize(num_vector_tags);
   for (MooseIndex(_sub_Re) i = 0; i < _sub_Re.size(); i++)
   {
     _sub_Re[i].resize(n_vars);
@@ -2244,8 +2246,8 @@ Assembly::init(const CouplingMatrix * cm)
     _sub_Rl[i].resize(n_vars);
   }
 
-  _cached_residual_values.resize(_residual_vector_tags.size());
-  _cached_residual_rows.resize(_residual_vector_tags.size());
+  _cached_residual_values.resize(num_vector_tags);
+  _cached_residual_rows.resize(num_vector_tags);
 
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
@@ -2973,9 +2975,13 @@ Assembly::setResidualBlock(NumericVector<Number> & residual,
 }
 
 void
-Assembly::addResidual(NumericVector<Number> & residual, TagID tag_id)
+Assembly::addResidual(const VectorTag & vector_tag)
 {
-  auto & tag_Re = _sub_Re[residualVectorTagIndex(tag_id)];
+  mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
+              "Non-residual tag in Assembly::addResidual");
+
+  auto & tag_Re = _sub_Re[vector_tag._type_id];
+  NumericVector<Number> & residual = _sys.getVector(vector_tag._id);
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(residual,
@@ -2989,17 +2995,18 @@ void
 Assembly::addResidual(const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
-  {
-    mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL, "Non-residual tag in residual");
     if (_sys.hasVector(vector_tag._id))
-      addResidual(_sys.getVector(vector_tag._id), vector_tag._id);
-  }
+      addResidual(vector_tag);
 }
 
 void
-Assembly::addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id)
+Assembly::addResidualNeighbor(const VectorTag & vector_tag)
 {
-  auto & tag_Rn = _sub_Rn[residualVectorTagIndex(tag_id)];
+  mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
+              "Non-residual tag in Assembly::addResidualNeighbor");
+
+  auto & tag_Rn = _sub_Rn[vector_tag._type_id];
+  NumericVector<Number> & residual = _sys.getVector(vector_tag._id);
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(residual,
@@ -3013,36 +3020,31 @@ void
 Assembly::addResidualNeighbor(const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
-  {
-    mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL, "Non-residual tag in residual");
     if (_sys.hasVector(vector_tag._id))
-      addResidualNeighbor(_sys.getVector(vector_tag._id), vector_tag._id);
-  }
+      addResidualNeighbor(vector_tag);
 }
 
 void
-Assembly::addResidualScalar(TagID tag_id)
+Assembly::addResidualScalar(const VectorTag & vector_tag)
 {
+  mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL,
+              "Non-residual tag in Assembly::addResidualScalar");
+
   // add the scalar variables residuals
-  auto & tag_Re = _sub_Re[residualVectorTagIndex(tag_id)];
+  auto & tag_Re = _sub_Re[vector_tag._type_id];
+  NumericVector<Number> & residual = _sys.getVector(vector_tag._id);
   const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
   for (const auto & var : vars)
-    if (_sys.hasVector(tag_id))
-      addResidualBlock(_sys.getVector(tag_id),
-                       tag_Re[var->number()],
-                       var->dofIndices(),
-                       var->arrayScalingFactor(),
-                       false);
+    addResidualBlock(
+        residual, tag_Re[var->number()], var->dofIndices(), var->arrayScalingFactor(), false);
 }
 
 void
 Assembly::addResidualScalar(const std::vector<VectorTag> & vector_tags)
 {
   for (const auto & vector_tag : vector_tags)
-  {
-    mooseAssert(vector_tag._type == Moose::VECTOR_TAG_RESIDUAL, "Non-residual tag in residual");
-    addResidualScalar(vector_tag._id);
-  }
+    if (_sys.hasVector(vector_tag._id))
+      addResidualScalar(vector_tag);
 }
 
 void
@@ -3125,25 +3127,33 @@ Assembly::cacheResidualLower()
 void
 Assembly::addCachedResiduals()
 {
-  for (MooseIndex(_residual_vector_tags) tag_index = 0; tag_index < _residual_vector_tags.size();
-       tag_index++)
+  for (const auto & vector_tag : _residual_vector_tags)
   {
-    const TagID tag_id = _residual_vector_tags[tag_index]._id;
-    if (!_sys.hasVector(tag_id))
+    if (!_sys.hasVector(vector_tag._id))
     {
-      _cached_residual_values[tag_index].clear();
-      _cached_residual_rows[tag_index].clear();
+      _cached_residual_values[vector_tag._type_id].clear();
+      _cached_residual_rows[vector_tag._type_id].clear();
       continue;
     }
-    addCachedResidualInternal(_sys.getVector(tag_id), tag_index);
+    addCachedResidualDirectly(_sys.getVector(vector_tag._id), vector_tag);
   }
 }
 
 void
-Assembly::addCachedResidualInternal(NumericVector<Number> & residual, unsigned int tag_index)
+Assembly::clearCachedResiduals()
 {
-  std::vector<Real> & cached_residual_values = _cached_residual_values[tag_index];
-  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[tag_index];
+  for (const auto & vector_tag : _residual_vector_tags)
+  {
+    _cached_residual_values[vector_tag._type_id].clear();
+    _cached_residual_rows[vector_tag._type_id].clear();
+  }
+}
+
+void
+Assembly::addCachedResidualDirectly(NumericVector<Number> & residual, const VectorTag & vector_tag)
+{
+  std::vector<Real> & cached_residual_values = _cached_residual_values[vector_tag._type_id];
+  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[vector_tag._type_id];
 
   mooseAssert(cached_residual_values.size() == cached_residual_rows.size(),
               "Number of cached residuals and number of rows must match!");
@@ -3163,28 +3173,9 @@ Assembly::addCachedResidualInternal(NumericVector<Number> & residual, unsigned i
 }
 
 void
-Assembly::addCachedResidualDirectly(NumericVector<Number> & residual, const TagID tag_id)
+Assembly::setResidual(NumericVector<Number> & residual, const VectorTag & vector_tag)
 {
-  if (!_sys.hasVector(tag_id))
-  {
-    // Only clean up things when tag exists
-    if (_subproblem.vectorTagExists(tag_id))
-    {
-      const auto tag_index = residualVectorTagIndex(tag_id);
-      _cached_residual_values[tag_index].clear();
-      _cached_residual_rows[tag_index].clear();
-    }
-    return;
-  }
-
-  const auto tag_index = residualVectorTagIndex(tag_id);
-  addCachedResidualInternal(residual, tag_index);
-}
-
-void
-Assembly::setResidual(NumericVector<Number> & residual, TagID tag_id)
-{
-  auto & tag_Re = _sub_Re[residualVectorTagIndex(tag_id)];
+  auto & tag_Re = _sub_Re[vector_tag._type_id];
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     setResidualBlock(residual,
@@ -3195,9 +3186,9 @@ Assembly::setResidual(NumericVector<Number> & residual, TagID tag_id)
 }
 
 void
-Assembly::setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id)
+Assembly::setResidualNeighbor(NumericVector<Number> & residual, const VectorTag & vector_tag)
 {
-  auto & tag_Rn = _sub_Rn[residualVectorTagIndex(tag_id)];
+  auto & tag_Rn = _sub_Rn[vector_tag._type_id];
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     setResidualBlock(residual,
@@ -4041,18 +4032,6 @@ Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 
     xfem_face_weight_multipliers.release();
   }
-}
-
-unsigned int
-Assembly::residualVectorTagIndex(const TagID tag_id) const
-{
-  for (unsigned int tag_index = 0; tag_index < _residual_vector_tags.size(); ++tag_index)
-    if (_residual_vector_tags[tag_index]._id == tag_id)
-      return tag_index;
-
-  mooseError("The requested local residual vector for the tag with ID ",
-             tag_id,
-             " does not exist in Assembly");
 }
 
 template <>
