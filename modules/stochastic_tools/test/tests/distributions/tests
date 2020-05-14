@@ -120,6 +120,7 @@
       allow_test_objects = true
 
       detail = 'for a Weibull distribution,'
+      no_error_deprecated = true
     []
 
     [normal]
@@ -131,6 +132,7 @@
       allow_test_objects = true
 
       detail = 'a normal distribution, and'
+      no_error_deprecated = true
     []
 
     [lognormal]
@@ -142,6 +144,7 @@
       allow_test_objects = true
 
       detail = 'a lognormal distribution.'
+      no_error_deprecated = true
     []
   []
 

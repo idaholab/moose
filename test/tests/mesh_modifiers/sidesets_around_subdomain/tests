@@ -6,6 +6,7 @@
     cli_args = '--mesh-only'
     exodiff = 'around_in.e'
     recover = false
+    no_error_deprecated = true
   [../]
 
   [./around_normals]
@@ -14,6 +15,7 @@
     cli_args = '--mesh-only'
     exodiff = 'around_normals_in.e'
     recover = false
+    no_error_deprecated = true
   [../]
 
   [./around_created_subdomain]
@@ -22,6 +24,7 @@
     cli_args = '--mesh-only'
     exodiff = 'around_created_subdomain_in.e'
     recover = false
+    no_error_deprecated = true
   [../]
 
   [./around_multi_created_subdomain]
@@ -30,5 +33,6 @@
     cli_args = '--mesh-only'
     exodiff = 'around_multi_created_subdomain_in.e'
     recover = false
+    no_error_deprecated = true
   [../]
 []

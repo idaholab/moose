@@ -16,6 +16,7 @@
   mesh_mode = REPLICATED
   recover = false
   allow_test_objects = true
+  no_error_deprecated = true
 [../]
 
 [./3D3BlocksBreakMeshAuto_test]
@@ -26,6 +27,7 @@
   exodiff = 'TestBreakMesh_3D_3Block_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./3D3BlocksBreakMeshtingCompare_test]
@@ -36,6 +38,7 @@
   exodiff = 'TestBreakMesh_3D_3Block_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 #### multiple interface tests
@@ -48,6 +51,7 @@
   mesh_mode = REPLICATED
   recover = false
   allow_test_objects = true
+  no_error_deprecated = true
 [../]
 
 [./3D3BlocksBreakMeshAutoSplitInterface_test]
@@ -58,6 +62,7 @@
   exodiff = 'TestBreakMesh_3D_3Block_splitTrue_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./3DPolyCrystalBreakMesh_test]
@@ -68,6 +73,7 @@
   exodiff = 'TestBreakMesh_3D_polycrystal_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./3D3BlocksBreakMeshSplitInterfaceCompare_test]
@@ -78,6 +84,7 @@
   exodiff = 'TestBreakMesh_3D_3Block_splitTrue_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 []

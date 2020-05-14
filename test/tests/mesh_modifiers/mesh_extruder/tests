@@ -4,35 +4,41 @@
     type = 'Exodiff'
     input = 'extruder_quad.i'
     exodiff = 'out_quad.e'
+    no_error_deprecated = true
   [../]
 
   [./tri_test]
     type = 'Exodiff'
     input = 'extruder_tri.i'
     exodiff = 'out_tri.e'
+    no_error_deprecated = true
   [../]
 
   [./angle_test]
     type = 'Exodiff'
     input = 'extruder_angle.i'
     exodiff = 'out_quad_angle.e'
+    no_error_deprecated = true
   [../]
 
   [./gen_extrude]
     type = 'Exodiff'
     input = 'gen_extrude.i'
     exodiff = 'out_gen.e'
+    no_error_deprecated = true
   [../]
 
   [./extrude_remap_layer1]
     type = 'Exodiff'
     input = 'extrude_remap_layer1.i'
     exodiff = 'extrude_remap_layer1_out.e'
+    no_error_deprecated = true
   [../]
 
   [./extrude_remap_layer2]
     type = 'Exodiff'
     input = 'extrude_remap_layer2.i'
     exodiff = 'extrude_remap_layer2_out.e'
+    no_error_deprecated = true
   [../]
 []

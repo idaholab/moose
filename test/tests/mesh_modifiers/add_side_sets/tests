@@ -4,6 +4,7 @@
     type = 'Exodiff'
     input = 'cylinder_points.i'
     exodiff = 'cylinder_points_out.e'
+    no_error_deprecated = true
   [../]
 
   [./cyliner_normal]
@@ -11,11 +12,13 @@
     input = 'cylinder_normals.i'
     exodiff = 'cylinder_normals_out.e'
     group = 'requirements'
+    no_error_deprecated = true
   [../]
 
   [./cylinder_points_fixed]
     type = 'Exodiff'
     input = 'cylinder_normals_fixed.i'
     exodiff = 'cylinder_normals_fixed_out.e'
+    no_error_deprecated = true
   [../]
 []

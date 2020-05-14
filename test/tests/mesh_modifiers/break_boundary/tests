@@ -7,6 +7,7 @@
     cli_args = '--mesh-only'
     recover = false
     mesh_mode = REPLICATED
+    no_error_deprecated = true
   [../]
 
   [./break_bottom]
@@ -16,5 +17,6 @@
     cli_args = '--mesh-only'
     recover = false
     mesh_mode = REPLICATED
+    no_error_deprecated = true
   [../]
 []

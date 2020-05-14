@@ -108,33 +108,39 @@
       type = RunException
       input = annular_except1_deprecated.i
       expect_err = 'rmax must be greater than rmin'
+      no_error_deprecated = true
     [../]
     [./annular_except2_deprecated]
       type = RunException
       input = annular_except2_deprecated.i
       expect_err = 'dmax must be greater than dmin'
+      no_error_deprecated = true
     [../]
     [./annular_except3_deprecated]
       type = RunException
       input = annular_except3_deprecated.i
       expect_err = 'dmax - dmin must be <= 360'
+      no_error_deprecated = true
     [../]
     [./annular_except5_deprecated]
       type = RunException
       input = annular_except5_deprecated.i
       expect_err = 'nt must be greater than \(dmax - dmin\) / 180 in order to avoid inverted elements'
+      no_error_deprecated = true
     [../]
     [./annulus_sector_deprecated]
       type = Exodiff
       input = annulus_sector_deprecated.i
       exodiff = 'annulus_sector_deprecated_out.e'
       prereq = annular/annulus_sector
+      no_error_deprecated = true
     [../]
     [./disc_sector_deprecated]
       type = Exodiff
       input = disc_sector_deprecated.i
       exodiff = 'disc_sector_deprecated_out.e'
       prereq = annular/disc_sector
+      no_error_deprecated = true
     [../]
   []
 
