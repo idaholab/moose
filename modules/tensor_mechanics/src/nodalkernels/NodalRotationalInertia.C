@@ -118,8 +118,10 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     {
       MooseVariable * rot_var = getVar("rotations", i);
       _rot_vel_old_value[i] = &rot_var->dofValuesDotOld();
-      _rot_dot_residual[i] = &rot_var->dofValuesDotResidual();
-      _rot_dotdot_residual[i] = &rot_var->dofValuesDotDotResidual();
+      _rot_dot_residual[i] =
+          &coupledVectorTagDofValue("rotations", _time_integrator->uDotFactorTag(), i);
+      _rot_dotdot_residual[i] =
+          &coupledVectorTagDofValue("rotations", _time_integrator->uDotDotFactorTag(), i);
 
       if (i == 0)
       {

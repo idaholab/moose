@@ -22,15 +22,14 @@ public:
 
   InertialForce(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
-
 protected:
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
+  virtual void computeResidualAdditional() override;
+
 private:
-  unsigned int _var_num;
   const MaterialProperty<Real> & _density;
   const VariableValue * _u_old;
   const VariableValue * _vel_old;
@@ -45,12 +44,14 @@ private:
   const Real _alpha;
 
   // Velocity and acceleration calculated by time integrator
-  const VariableValue * _u_dot_residual;
-  const VariableValue * _u_dotdot_residual;
+  const VariableValue * _u_dot_factor_dof;
+  const VariableValue * _u_dotdot_factor_dof;
+  const VariableValue * _u_dot_factor;
+  const VariableValue * _u_dotdot_factor;
   const VariableValue * _u_dot_old;
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;
 
-  /// A pointer to TimeIntegrator
-  TimeIntegrator * _time_integrator;
+  /// The TimeIntegrator
+  TimeIntegrator & _time_integrator;
 };

@@ -76,8 +76,12 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     _du_dot_du = &(_var.duDotDu());
     _du_dotdot_du = &(_var.duDotDotDu());
     _u_dot_old = &(_var.dofValuesDotOld());
-    _u_dot_residual = &(_var.dofValuesDotResidual());
-    _u_dotdot_residual = &(_var.dofValuesDotDotResidual());
+
+    addFEVariableCoupleableVectorTag(_time_integrator->uDotFactorTag());
+    addFEVariableCoupleableVectorTag(_time_integrator->uDotDotFactorTag());
+
+    _u_dot_factor = &_var.vectorTagDofValue(_time_integrator->uDotFactorTag());
+    _u_dotdot_factor = &_var.vectorTagDofValue(_time_integrator->uDotDotFactorTag());
   }
   else
     mooseError("NodalTranslationalInertia: Either all or none of `beta`, `gamma`, `velocity` and "
@@ -183,7 +187,7 @@ NodalTranslationalInertia::computeQpResidual()
     else
       // all cases (Explicit, implicit and implicit with HHT)
       // Note that _alpha is enforced to be zero for explicit integration
-      return mass * ((*_u_dotdot_residual)[_qp] + (*_u_dot_residual)[_qp] * _eta * (1.0 + _alpha) -
+      return mass * ((*_u_dotdot_factor)[_qp] + (*_u_dot_factor)[_qp] * _eta * (1.0 + _alpha) -
                      _alpha * _eta * (*_u_dot_old)[_qp]);
   }
 }

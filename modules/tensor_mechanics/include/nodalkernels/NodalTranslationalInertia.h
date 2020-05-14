@@ -68,8 +68,8 @@ protected:
   std::map<dof_id_type, Real> _node_id_to_mass;
 
   // Velocity and acceleration calculated by time integrator
-  const VariableValue * _u_dot_residual;
-  const VariableValue * _u_dotdot_residual;
+  const VariableValue * _u_dot_factor;
+  const VariableValue * _u_dotdot_factor;
   const VariableValue * _u_dot_old;
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;

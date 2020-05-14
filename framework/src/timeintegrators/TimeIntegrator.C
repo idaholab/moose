@@ -44,9 +44,21 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _n_nonlinear_iterations(0),
     _n_linear_iterations(0),
     _is_explicit(false),
-    _is_lumped(false)
+    _is_lumped(false),
+    _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
+    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION))
 {
   _fe_problem.setUDotRequested(true);
+}
+
+void
+TimeIntegrator::preStep()
+{
+  // If nothing else (children TimeIntegrators) associated these tags, associate them now
+  if (!_nl.hasVector(_u_dot_factor_tag))
+    _nl.associateVectorToTag(*_nl.solutionUDot(), _u_dot_factor_tag);
+  if (!_nl.hasVector(_u_dotdot_factor_tag) && _fe_problem.uDotDotRequested())
+    _nl.associateVectorToTag(*_nl.solutionUDotDot(), _u_dotdot_factor_tag);
 }
 
 void
@@ -71,24 +83,4 @@ TimeIntegrator::getNumLinearIterationsLastSolve() const
       static_cast<NonlinearSolver<Real> &>(*_nonlinear_implicit_system->nonlinear_solver);
 
   return nonlinear_solver.get_total_linear_iterations();
-}
-
-NumericVector<Number> &
-TimeIntegrator::uDotResidual() const
-{
-  if (!_sys.solutionUDot())
-    mooseError("TimeIntegrator: Time derivative of solution (`u_dot`) is not stored. Please set "
-               "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
-
-  return *_sys.solutionUDot();
-}
-
-NumericVector<Number> &
-TimeIntegrator::uDotDotResidual() const
-{
-  if (!_sys.solutionUDotDot())
-    mooseError("TimeIntegrator: Time derivative of solution (`u_dotdot`) is not stored. Please set "
-               "uDotDotRequested() to true in FEProblemBase befor requesting `u_dotdot`.");
-
-  return *_sys.solutionUDotDot();
 }

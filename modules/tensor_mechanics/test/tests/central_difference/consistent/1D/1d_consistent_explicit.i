@@ -105,6 +105,7 @@
   end_time = 0.1
   dt = 0.005
   timestep_tolerance = 1e-6
+  l_tol = 1e-10
   [./TimeIntegrator]
     type = CentralDifference
   [../]

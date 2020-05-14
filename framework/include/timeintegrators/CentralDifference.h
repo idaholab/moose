@@ -26,21 +26,15 @@ class CentralDifference : public ActuallyExplicitEuler
 public:
   CentralDifference(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   virtual int order() override { return 2; }
   virtual void computeTimeDerivatives() override;
   void computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const override;
-  virtual NumericVector<Number> & uDotDotResidual() const override;
-  virtual NumericVector<Number> & uDotResidual() const override;
 
 protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
-
-  /// vector storing residual corresponding to the second time derivative
-  NumericVector<Number> & _u_dotdot_residual;
-
-  /// vector storing residual corresponding to the first time derivative
-  NumericVector<Number> & _u_dot_residual;
 
   /**
    * Helper function that actually does the math for computing the time derivative
