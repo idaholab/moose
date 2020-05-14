@@ -586,4 +586,10 @@ TEST_F(RankTwoTensorTest, ADConversion)
 
   ad = reg;
   reg = MetaPhysicL::raw_value(ad);
+
+  GenericRankTwoTensor<false> generic_reg;
+  GenericRankTwoTensor<true> generic_ad;
+
+  generic_ad = generic_reg;
+  generic_reg = MetaPhysicL::raw_value(generic_ad);
 }

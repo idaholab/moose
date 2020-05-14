@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "RankFourTensor.h"
+#include "MooseTypes.h"
 #include "ADReal.h"
 
 #include "metaphysicl/raw_type.h"
@@ -80,4 +81,10 @@ TEST(RankFourTensor, ADConversion)
 
   ad = reg;
   reg = MetaPhysicL::raw_value(ad);
+
+  GenericRankFourTensor<false> generic_reg;
+  GenericRankFourTensor<true> generic_ad;
+
+  generic_ad = generic_reg;
+  generic_reg = MetaPhysicL::raw_value(generic_ad);
 }
