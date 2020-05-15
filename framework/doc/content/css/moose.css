@@ -3,6 +3,15 @@
     --inl-blue-light: rgba(0, 104, 179, 1.0);
     --dark-blue: rgba(0, 44, 78, 1.0);
     --gray: rgba(117, 117, 117, 1.0);
+    /* darkmode */
+    --dark-mode-back: rgba(35, 35, 40, 1.0);
+    --dark-mode-card: rgba(20, 20, 20, 1.0);
+    --dark-mode-fore: rgba(200, 200, 200, 1.0);
+    --dark-navbar: rgba(29, 53, 89, 1.0);
+    --darker-highlight: rgba(100, 100, 100, 1.0);
+    --darker-embossed: rgba(80, 80, 80, 1.0);
+    --pre-textbox: rgba(10, 10, 10, 1.0);
+    --links-dark: rgba(109, 167, 240, 1.0);
 }
 
 main {
@@ -1027,4 +1036,82 @@ div.moose-mega-menu-content{
   left: 0;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
+}
+
+
+/* Text and background color for dark mode */
+@media (prefers-color-scheme: dark), (prefers-dark-interface) {
+ body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control {
+   background: var(--dark-mode-back);
+   color: var(--dark-mode-fore);
+ }
+ nav ul a:hover {
+    background-color: rgba(0, 0, 0, 0.33);
+ }
+ .grey-text.text-darken-4 {
+    color: #eaeaea !important;
+ }
+ div.moose-mega-menu-content {
+    background-color: var(--dark-mode-back);
+ }
+ .card {
+    background-color: var(--dark-mode-card);
+ }
+ .card .card-reveal {
+    background-color: var(--dark-mode-card);
+    color: var(--dark-mode-fore);
+ }
+ .collection.with-header .collection-header {
+    color: white;
+    background-color: var(--dark-navbar);
+ }
+ .collection.with-header .collection-header {
+    border-bottom: 1px solid #000;
+ }
+ .collection {
+    border: 1px solid #000;
+ }
+ .collection .collection-item {
+    background-color: var(--dark-mode-card);
+    border-bottom: 1px solid #000;
+ }
+ .collapsible-header {
+    background-color: var(--dark-mode-card);
+    border-bottom: 1px solid #000;
+ }
+ .collapsible {
+    border-top: 1px solid #000;
+    border-right: 1px solid #000;
+    border-left: 1px solid #000;
+ }
+ /*Default link color*/
+ a {
+    color: var(--links-dark);
+    font-weight: 100;
+    font-size: 100%;
+ }
+ .moose-caption-heading {
+    font-weight: 900;
+ }
+ .moose-table-div tr:hover {
+    background: #42423b;
+ }
+ tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.82);
+ }
+ .table-of-contents a {
+    color: var(--darker-highlight);
+ }
+ .breadcrumb {
+    color: var(--darker-embossed);
+ }
+ .breadcrumb:last-child {
+    color: var(--darker-highlight);
+ }
+ nav, .btn, .btn-small, .btn-large, footer.page-footer {
+    background-color: var(--dark-navbar);
+ }
+ pre.moose-pre {
+    background-color: var(--pre-textbox);
+ }
 }
