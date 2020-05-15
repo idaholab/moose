@@ -1,6 +1,8 @@
 - /AuxKernels/AddKernelAction
+- /AuxKernels/ADMaterialRealVectorValueAux
 - /AuxKernels/BoundsAux
 - /AuxKernels/DebugResidualAux
+- /AuxKernels/ElementIntegerAux
 - /AuxKernels/ElementLpNormAux
 - /AuxKernels/FunctionAux
 - /AuxKernels/GapValueAux
@@ -46,6 +48,7 @@
 - /Constraints/AddConstraintAction
 - /Constraints/CoupledTiedValueConstraint
 - /Constraints/EqualValueBoundaryConstraint
+- /Constraints/NodalStickConstraint
 - /Constraints/TiedValueConstraint
 - /Controls/AddControlAction
 - /DGKernels
@@ -68,6 +71,7 @@
 - /Executioner/InversePowerMethod
 - /Executioner/NonlinearEigen
 - /Executioner/Steady
+- /Executioner/Adaptivity
 - /Executioner/Adaptivity/AdaptivityAction
 - /Executioner/Predictor
 - /Executioner/Predictor/SetupPredictorAction
@@ -96,19 +100,16 @@
 - /Executioner/TimeStepper/PostprocessorDT
 - /Executioner/TimeStepper/SolutionTimeAdaptiveDT
 - /Executioner/TimeStepper/TimeSequenceStepper
-- /Functions
 - /Functions/AddFunctionAction
 - /Functions/Axisymmetric2D3DSolutionFunction
 - /Functions/BicubicSplineFunction
 - /Functions/ConstantFunction
-- /Functions/ImageFunction
 - /Functions/LinearCombinationFunction
 - /Functions/ParsedGradFunction
 - /Functions/ParsedVectorFunction
 - /Functions/SolutionFunction
 - /Functions/SplineFunction
 - /Functions/TestSetupPostprocessorDataActionFunction
-- /GlobalParams
 - /GlobalParams/GlobalParamsAction
 - /ICs/AddInitialConditionAction
 - /ICs/ConstantIC
@@ -120,7 +121,7 @@
 - /Kernels/AddKernelAction
 - /Kernels/NullKernel
 - /Kernels/UserForcingFunction
-- /Materials
+- /Materials/ADGenericConstantMaterial
 - /Materials/AddMaterialAction
 - /Materials/GenericConstantMaterial
 - /Materials/GenericConstantRankTwoTensor
@@ -149,6 +150,7 @@
 - /NodalKernels/UserForcingFunctionNodalKernel
 - /NodalNormals
 - /NodalNormals/AddNodalNormalsAction
+- /Postprocessors/ADSideFluxAverage
 - /Postprocessors/AddPostprocessorAction
 - /Postprocessors/SetupPostprocessorDataAction
 - /Postprocessors/AverageElementSize
@@ -157,7 +159,6 @@
 - /Postprocessors/ElementAverageValue
 - /Postprocessors/ElementH1Error
 - /Postprocessors/ElementH1SemiError
-- /Postprocessors/ElementIntegralMaterialProperty
 - /Postprocessors/ElementL2Difference
 - /Postprocessors/ElementL2Norm
 - /Postprocessors/ElementW1pError
@@ -206,7 +207,6 @@
 - /UserObjects/LayeredSideAverage
 - /UserObjects/LayeredSideFluxAverage
 - /UserObjects/LayeredSideIntegral
-- /UserObjects/NearestPointLayeredAverage
 - /UserObjects/NodalNormalsCorner
 - /UserObjects/NodalNormalsEvaluator
 - /UserObjects/NodalNormalsPreprocessor

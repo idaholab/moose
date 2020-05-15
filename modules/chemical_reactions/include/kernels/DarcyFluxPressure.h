@@ -15,7 +15,7 @@
 /**
  * Darcy flux: - cond * (Grad P - rho * g)
  * where cond is the hydraulic conductivity, P is fluid pressure,
- * rho is flui density and g is gravity
+ * rho is fluid density and g is gravity
  */
 class DarcyFluxPressure : public DerivativeMaterialInterface<Kernel>
 {

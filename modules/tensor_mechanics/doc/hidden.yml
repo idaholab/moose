@@ -3,6 +3,7 @@
 - /BCs
 - /BCs/DashpotBC
 - /BCs/PresetVelocity
+- /Kernels/ADInertialForceShell
 - /Kernels/CosseratStressDivergenceTensors
 - /Kernels/DynamicTensorMechanics
 - /Kernels/MomentBalancing
@@ -40,6 +41,7 @@
 - /Materials/TwoPhaseStressMaterial
 - /Materials/ComputeFiniteStrainElasticStressBirchMurnaghan
 - /Modules/TensorMechanics
+- /Postprocessors/ADMass
 - /Postprocessors/Mass
 - /UserObjects/EulerAngleFileReader
 - /UserObjects/HEVPEqvPlasticStrain

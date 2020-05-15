@@ -22,6 +22,7 @@ ElementIntegralMaterialPropertyTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
+  params.addClassDescription("Compute the integral of the material property over the domain");
   return params;
 }
 

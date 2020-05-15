@@ -20,7 +20,10 @@ NearestPointLayeredIntegral::validParams()
 {
   InputParameters params =
       nearestPointBaseValidParams<LayeredIntegral, ElementIntegralVariableUserObject>();
-
+  params.addClassDescription(
+      "Computes integrals of a variable storing partial sums for the specified number of intervals "
+      "in a direction (x,y,z). Given a list of points this object computes the layered integral "
+      "closest to each one of those points.");
   return params;
 }
 
