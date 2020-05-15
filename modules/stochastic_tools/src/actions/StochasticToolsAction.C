@@ -52,7 +52,7 @@ StochasticToolsAction::act()
     action_params.set<std::string>("type") = "GeneratedMesh";
 
     // Create The Action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+    auto action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create("SetupMeshAction", "Mesh", action_params));
 
     // Set the object parameters
@@ -72,7 +72,7 @@ StochasticToolsAction::act()
     InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
 
     // Create the action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+    auto action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create("CreateProblemAction", "Problem", action_params));
 
     // Set the object parameters
@@ -94,7 +94,7 @@ StochasticToolsAction::act()
     action_params.set<std::string>("type") = "Steady";
 
     // Create the action
-    std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+    auto action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create("CreateExecutionerAction", "Executioner", action_params));
 
     // Add Action to the warehouse

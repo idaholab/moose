@@ -58,7 +58,7 @@ void
 SideFluxAverageTempl<is_ad>::threadJoin(const UserObject & y)
 {
   SideFluxIntegralTempl<is_ad>::threadJoin(y);
-  const SideFluxAverageTempl & pps = static_cast<const SideFluxAverageTempl &>(y);
+  const SideFluxAverageTempl<is_ad> & pps = static_cast<const SideFluxAverageTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
 

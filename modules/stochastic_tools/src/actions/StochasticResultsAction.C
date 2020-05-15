@@ -38,18 +38,17 @@ StochasticResultsAction::act()
     for (std::shared_ptr<Transfer> & transfer_ptr :
          _problem->getTransfers(Transfer::DIRECTION::FROM_MULTIAPP))
     {
-      std::shared_ptr<SamplerPostprocessorTransfer> ptr =
-          std::dynamic_pointer_cast<SamplerPostprocessorTransfer>(transfer_ptr);
+      auto ptr = std::dynamic_pointer_cast<SamplerPostprocessorTransfer>(transfer_ptr);
       if (ptr != nullptr)
       {
-        const VectorPostprocessorName & result_name =
+        const auto & result_name =
             ptr->getParam<VectorPostprocessorName>("to_vector_postprocessor");
-        const std::vector<VectorPostprocessorName> vpp_names = ptr->vectorNames();
+        const std::vector<VectorPostprocessorName> & vpp_names = ptr->vectorNames();
 
         // Get the StochasticResults storage object, get it by base class to allow for better
         // type check error message
         auto & uo = _problem->getUserObject<UserObject>(result_name);
-        StochasticResults * results = dynamic_cast<StochasticResults *>(&uo);
+        auto * results = dynamic_cast<StochasticResults *>(&uo);
         if (!results)
           mooseError("The object prescribed by the 'to_vector_postprocessor' parameter in ",
                      ptr->name(),

@@ -80,7 +80,7 @@ StochasticResults::setCurrentLocalVectorPostprocessorValue(
       });
 
   mooseAssert(data_ptr != _sample_vectors.end(),
-              "Unable to located a vector with the supplied name of '" << vector_name << "'.");
+              "Unable to locate a vector with the supplied name of '" << vector_name << "'.");
   data_ptr->current = current;
 }
 
