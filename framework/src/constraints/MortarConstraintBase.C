@@ -96,6 +96,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
 void
 MortarConstraintBase::computeResidual(bool has_master)
 {
+  // Set this member for potential use by derived classes
   _has_master = has_master;
 
   if (_compute_primal_residuals)
@@ -103,8 +104,10 @@ MortarConstraintBase::computeResidual(bool has_master)
     // Compute the residual for the slave interior primal dofs
     computeResidual(Moose::MortarType::Slave);
 
-    // Compute the residual for the master interior primal dofs
-    computeResidual(Moose::MortarType::Master);
+    // Compute the residual for the master interior primal dofs. If we don't have a master element,
+    // then we don't have any master dofs
+    if (_has_master)
+      computeResidual(Moose::MortarType::Master);
   }
 
   if (_compute_lm_residuals)
@@ -122,8 +125,10 @@ MortarConstraintBase::computeJacobian(bool has_master)
     // Compute the jacobian for the slave interior primal dofs
     computeJacobian(Moose::MortarType::Slave);
 
-    // Compute the jacobian for the master interior primal dofs
-    computeJacobian(Moose::MortarType::Master);
+    // Compute the jacobian for the master interior primal dofs. If we don't have a master element,
+    // then we don't have any master dofs
+    if (_has_master)
+      computeJacobian(Moose::MortarType::Master);
   }
 
   if (_compute_lm_residuals)
