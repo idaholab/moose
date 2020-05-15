@@ -16,6 +16,7 @@
   mesh_mode = REPLICATED
   recover = false
   allow_test_objects = true
+  no_error_deprecated = true
 [../]
 
 [./2D4ElementJunctionBreakMeshAuto_test]
@@ -26,6 +27,7 @@
   exodiff = 'TestBreakMesh_2DJunction_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./2D4ElementJunctionBreakMeshtingCompare_test]
@@ -36,6 +38,7 @@
   exodiff = 'TestBreakMesh_2DJunction_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 ## multiple interface tests
@@ -48,6 +51,7 @@
   mesh_mode = REPLICATED
   recover = false
   allow_test_objects = true
+  no_error_deprecated = true
 [../]
 
 [./2D4ElementJunctionBreakMeshAutoSplitInterface_test]
@@ -58,6 +62,7 @@
   exodiff = 'TestBreakMesh_2DJunction_splitTrue_Auto_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./2DPolyCrystalBreakMesh_test]
@@ -68,6 +73,7 @@
   exodiff = 'TestBreakMesh_2D_polycrystal_in.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 [./2D4ElementJunctionBreakMeshSplitInterfaceCompare_test]
@@ -78,6 +84,7 @@
   exodiff = 'TestBreakMesh_2DJunction_splitTrue_ManualAuto_Comparison.e'
   mesh_mode = REPLICATED
   recover = false
+  no_error_deprecated = true
 [../]
 
 []

@@ -20,5 +20,6 @@
     deprecated = true
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#11640'
+    no_error_deprecated = true
   [../]
 []
