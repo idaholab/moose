@@ -20,5 +20,6 @@ Specifying the bulk composition of selenate as either $5\times 10^{-6}\,$mol.kg$
 | $5\times 10^{-6}$ | $0.31\times 10^{-9}$ |
 | $20\times 10^{-6}$ | $0.49\times 10^{-9}$ |
 
+!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/selenate.i
 
 !bibtex bibliography

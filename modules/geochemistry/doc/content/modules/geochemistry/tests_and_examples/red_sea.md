@@ -73,4 +73,8 @@ Allowing the minerals to precipitate [!cite](bethke_2007) predicts that 3 minera
 | Chalcocite | $9.3\times 10^{-6}$ |
 | Barite | $5.8\times 10^{-8}$ |
 
+!listing modules/geochemistry/test/tests/equilibrium_models/red_sea_no_precip.i
+
+!listing modules/geochemistry/test/tests/equilibrium_models/red_sea_precip.i
+
 !bibtex bibliography

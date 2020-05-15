@@ -137,7 +137,7 @@ private:
                   std::stringstream & ss) const;
 
   /**
-   * Progressively alger the initial-guess molalities for the algebraic system to attempt to reduce
+   * Progressively alter the initial-guess molalities for the algebraic system to attempt to reduce
    * the residual
    */
   bool reduceInitialResidual();

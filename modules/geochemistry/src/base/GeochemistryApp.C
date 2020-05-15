@@ -36,6 +36,7 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntax("AddGeochemicalModelInterrogatorAction", "GeochemicalModelInterrogator");
+  registerSyntax("AddEquilibriumReactionSolverAction", "EquilibriumReactionSolver");
 }
 
 void

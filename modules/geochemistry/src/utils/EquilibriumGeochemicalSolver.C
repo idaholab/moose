@@ -329,8 +329,10 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
     _new_mol = DenseVector<Real>(_num_in_algebraic_system);
 
     unsigned iter = 0;
-    _is.setMaxIonicStrength(std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) *
-                            _max_ionic_strength);
+    const Real max_is0 =
+        std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) * _max_ionic_strength;
+    _is.setMaxIonicStrength(max_is0);
+    _is.setMaxStoichiometricIonicStrength(max_is0);
     _abs_residual = computeResidual(_residual);
     bool reducing_initial_molalities = (_abs_residual > _max_initial_residual);
     while (reducing_initial_molalities)
@@ -345,8 +347,10 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
       tot_iter += 1;
       _egs.computeJacobian(_residual, _jacobian);
       solveAndUnderrelax(_jacobian, _new_mol);
-      _is.setMaxIonicStrength(std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) *
-                              _max_ionic_strength);
+      const Real max_is =
+          std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) * _max_ionic_strength;
+      _is.setMaxIonicStrength(max_is);
+      _is.setMaxStoichiometricIonicStrength(max_is);
       _egs.setAlgebraicVariables(_new_mol);
       if (_egs.alterChargeBalanceSpecies(_swap_threshold))
         ss << "Changed change balance species to "

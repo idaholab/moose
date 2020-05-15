@@ -17,4 +17,6 @@ A simulation is then run with different molal quantities of Na$^{+}$ and Cl$^{-}
 
 The results are shown in Figures 8.6 and 8.7 of [!cite](bethke_2007).  These can be compared with the MOOSE results shown in ????
 
+!listing modules/geochemistry/test/tests/solubilities_and_activities/gypsum_solubility.i
+
 !bibtex bibliography
