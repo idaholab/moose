@@ -88,6 +88,8 @@ protected:
   const MooseEnum _system;
   /// Mesh generator name for Mortar contact formulation
   const MeshGeneratorName _mesh_gen_name;
+  /// Whether to use the dual Mortar approach
+  const bool _use_dual;
 
 private:
   /**

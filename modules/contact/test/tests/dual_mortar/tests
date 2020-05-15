@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#15215'
+  design = 'ContactAction.md'
+  [dm_contact]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact.i'
+    csvdiff = 'mortar_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Contact/leftright/use_dual=false Outputs/file_base=mortar_contact_out'
+    requirement = 'The system shall converge and match the solution produced by standard mortar contact.'
+  []
+  [std_contact]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact.i'
+    csvdiff = 'mortar_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Contact/leftright/use_dual=false Outputs/file_base=mortar_contact_out'
+    requirement = 'The system shall converge and match the solution produced by dual mortar contact.'
+  []
+[]
