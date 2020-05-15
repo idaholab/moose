@@ -56,7 +56,7 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
 }
 
 DualReal
-TwoPhaseFluidProperties::T_sat(DualReal p) const
+TwoPhaseFluidProperties::T_sat(const DualReal & p) const
 {
   const Real p_real = p.value();
   const Real T_sat_real = T_sat(p_real);
@@ -68,7 +68,7 @@ TwoPhaseFluidProperties::T_sat(DualReal p) const
 }
 
 DualReal
-TwoPhaseFluidProperties::p_sat(DualReal T) const
+TwoPhaseFluidProperties::p_sat(const DualReal & T) const
 {
   const Real T_real = T.value();
   const Real p_sat_real = p_sat(T_real);
@@ -97,7 +97,7 @@ Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
 }
 
 DualReal
-TwoPhaseFluidProperties::sigma_from_T(DualReal T) const
+TwoPhaseFluidProperties::sigma_from_T(const DualReal & T) const
 {
   const Real T_real = T.value();
   const Real sigma_real = sigma_from_T(T_real);
