@@ -1,3 +1,5 @@
+- /Adaptivity/Indicators/MooseVariableFVReal
+- /Adaptivity/Markers/MooseVariableFVReal
 - /AuxKernels/AddKernelAction
 - /AuxKernels/ADMaterialRealVectorValueAux
 - /AuxKernels/BoundsAux
@@ -34,6 +36,8 @@
 - /AuxVariables/InitialCondition/RandomIC
 - /AuxVariables/InitialCondition/ScalarComponentIC
 - /AuxVariables/InitialCondition/ScalarConstantIC
+- /AuxVariables/MooseVariableFVReal
+- /AuxVariables/MultiAuxVariables/MooseVariableFVReal
 - /BCs
 - /BCs/AddBCAction
 - /BCs/DGFunctionDiffusionDirichletBC
@@ -100,6 +104,17 @@
 - /Executioner/TimeStepper/PostprocessorDT
 - /Executioner/TimeStepper/SolutionTimeAdaptiveDT
 - /Executioner/TimeStepper/TimeSequenceStepper
+- /FVBCs/CheckFVBCAction
+- /FVBCs/AddFVBCAction
+- /FVBCs/FVConstantScalarOutflowBC
+- /FVBCs/FVDirichletBC
+- /FVBCs/FVNeumannBC
+- /FVKernels/AddFVKernelAction
+- /FVKernels/FVAdvection
+- /FVKernels/FVDiffusion
+- /FVKernels/FVMatAdvection
+- /FVKernels/FVTimeKernel
+- /Materials/ADGenericFunctionMaterial
 - /Functions/AddFunctionAction
 - /Functions/Axisymmetric2D3DSolutionFunction
 - /Functions/BicubicSplineFunction
@@ -224,6 +239,7 @@
 - /Variables/InitialCondition/RandomIC
 - /Variables/InitialCondition/ScalarComponentIC
 - /Variables/InitialCondition/ScalarConstantIC
+- /Variables/MooseVariableFVReal
 - /VectorPostprocessors/AddVectorPostprocessorAction
 - /VectorPostprocessors/ConstantVectorPostprocessor
 - /VectorPostprocessors/Eigenvalues
