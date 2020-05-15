@@ -40,6 +40,11 @@ SobolStatistics::SobolStatistics(const InputParameters & parameters)
     _sobol_sampler(getSampler<SobolSampler>("sampler")),
     _perf_execute(registerTimedSection("execute", 1))
 {
+}
+
+void
+SobolStatistics::initialSetup()
+{
   const VectorPostprocessorName & vpp_name = getParam<VectorPostprocessorName>("results");
   const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
       vpp_vectors = _fe_problem.getVectorPostprocessorVectors(vpp_name);

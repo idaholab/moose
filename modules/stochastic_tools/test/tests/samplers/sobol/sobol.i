@@ -1,8 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
+[StochasticTools]
 []
 
 [Distributions]
@@ -49,15 +45,6 @@
     sampler = sobol
     execute_on = 'initial'
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

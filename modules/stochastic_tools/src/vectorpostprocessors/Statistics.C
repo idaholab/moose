@@ -18,7 +18,7 @@
 
 #include <numeric>
 
-registerMooseObject("MooseApp", Statistics);
+registerMooseObject("StochasticToolsApp", Statistics);
 
 InputParameters
 Statistics::validParams()

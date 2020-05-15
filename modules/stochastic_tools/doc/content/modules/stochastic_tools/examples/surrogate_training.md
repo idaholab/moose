@@ -81,9 +81,9 @@ This section describes how to set up an input file to train a surrogate and outp
 
 ### Omitting Solve
 
-Any input file in [MOOSE] needs to include a [Mesh](Mesh/index.md), [Variables](syntax/Variables/index.md), and [Executioner](Executioner/index.md) block. However, the stochastic master app does not actually create or solve a system. So the following blocks will minimize the creation of a mesh and skip the solve:
+Any input file in [MOOSE] needs to include a [Mesh](Mesh/index.md), [Variables](syntax/Variables/index.md), and [Executioner](Executioner/index.md) block. However, the stochastic master app does not actually create or solve a system. So the [StochasticToolsAction](StochasticTools/index.md) builds a minimal model to satisfy these requirements:
 
-!listing examples/surrogates/nearest_point_training.i block=Mesh Variables Executioner Problem
+!listing examples/surrogates/nearest_point_training.i block=StochasticTools
 
 !! omitting_solve_finish
 

@@ -1,11 +1,5 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
@@ -60,7 +54,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = mc
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

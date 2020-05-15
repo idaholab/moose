@@ -1,8 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
+[StochasticTools]
 []
 
 [Distributions]
@@ -36,15 +32,6 @@
     sampler = sample
     execute_on = 'initial timestep_end'
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

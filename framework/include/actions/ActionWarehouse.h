@@ -166,7 +166,11 @@ public:
       if (tp)
       {
         if (p)
-          mooseError("More than one actions have been detected in getActionByTask");
+          mooseError("More than one actions have been detected in getActionByTask for the task '",
+                     task,
+                     "' in the app '",
+                     getMooseAppName(),
+                     "'");
         else
           p = tp;
       }
@@ -219,6 +223,7 @@ public:
   std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
   std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
+  const std::string & getMooseAppName();
   const std::string & getCurrentTaskName() const { return _current_task; }
 
   std::string getCurrentActionName() const;

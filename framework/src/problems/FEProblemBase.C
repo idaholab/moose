@@ -4111,6 +4111,15 @@ FEProblemBase::getTransfers(ExecFlagType type, Transfer::DIRECTION direction) co
   return wh.getActiveObjects();
 }
 
+std::vector<std::shared_ptr<Transfer>>
+FEProblemBase::getTransfers(Transfer::DIRECTION direction) const
+{
+  const MooseObjectWarehouse<Transfer> & wh = direction == MultiAppTransfer::TO_MULTIAPP
+                                                  ? _to_multi_app_transfers
+                                                  : _from_multi_app_transfers;
+  return wh.getActiveObjects();
+}
+
 const ExecuteMooseObjectWarehouse<Transfer> &
 FEProblemBase::getMultiAppTransferWarehouse(Transfer::DIRECTION direction) const
 {

@@ -1,0 +1,13 @@
+[Tests]
+  design = parameter_study.md
+  issues = '#14933'
+
+  [stats]
+    type = CheckFiles
+    input = master.i
+    cli_args = 'Samplers/hypercube_a/num_rows=10 Samplers/hypercube_b/num_rows=10'
+    check_files = 'master_out_samples_0002.csv master_out_results_0002.csv master_out_sobol_0002.csv'
+
+    requirement = "The system shall include an example demonstrating the computation of Sobol sensitivity analysis."
+  []
+[]

@@ -36,3 +36,4 @@ if MOOSE_DIR is None:
 # List all files with git, this is done here to avoid running this command many times
 PROJECT_FILES = mooseutils.git_ls_files(ROOT_DIR)
 PROJECT_FILES.update(mooseutils.git_ls_files(MOOSE_DIR))
+PROJECT_FILES.update(mooseutils.git_ls_files(os.path.join(MOOSE_DIR, 'large_media')))
