@@ -141,15 +141,6 @@ if [ -z "$go_fast" ]; then
     export INSTALL_BINARY="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C"
   fi
 
-  # This is a temprorary fix, see #15120
-  if [[ -n "$CPPFLAGS" ]]; then
-    export CPPFLAGS=${CPPFLAGS//-DNDEBUG/}
-    export CPPFLAGS=${CPPFLAGS//-O2/}
-  fi
-  if [[ -n "$CXXFLAGS" ]]; then
-    export CXXFLAGS=${CXXFLAGS//-O2/}
-  fi
-  
   $SCRIPT_DIR/../libmesh/configure INSTALL="${INSTALL_BINARY}" \
                                    --with-methods="${METHODS}" \
                                    --prefix=$LIBMESH_DIR \
