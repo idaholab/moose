@@ -1,0 +1,25 @@
+[Tests]
+  design = 'VariableCondensationPreconditioner.md'
+  issues = '#15215'
+  [condense_amg_test]
+    type = 'CSVDiff'
+    input = 'vcp_test.i'
+    csvdiff = 'vcp_test_out.csv'
+    requirement = "The system shall converge when using the VCP interface with AMG as the "
+                  "preconditioner."
+  []
+  [condense_amg_test_dinv]
+    type = 'CSVDiff'
+    input = 'vcp_test.i'
+    csvdiff = 'vcp_test_out.csv'
+    cli_args = 'Preconditioning/vcp/is_lm_coupling_diagonal=false'
+    requirement = "The system shall converge while computing the full inverse of the coupling "
+                  "matrix."
+  []
+  [no-condense_amg_test]
+    type = 'CSVDiff'
+    input = 'no_condense_test.i'
+    csvdiff = 'no_condense_test_out.csv'
+    requirement = "The system shall converge while using LU as the solver."
+  []
+[]
