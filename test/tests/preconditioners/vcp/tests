@@ -1,0 +1,16 @@
+[Tests]
+  design = 'VariableCondensationPreconditioner.md'
+  issues = '#15215'
+  [./condense_amg_test]
+    type = 'CSVDiff'
+    input = 'vcp_test.i'
+    csvdiff = 'vcp_test_out.csv'
+    requirement = "The system shall converge when using the VCP interface with AMG as the preconditioner."
+  [../]
+  [./no-condense_amg_test]
+    type = 'CSVDiff'
+    input = 'no_condense_test.i'
+    csvdiff = 'no_condense_test_out.csv'
+    requirement = "The system shall not converge when using AMG as the preconditioner."
+  [../]
+[]
