@@ -19,6 +19,8 @@ InputParameters
 NormalNodalMechanicalContact::validParams()
 {
   InputParameters params = NodeFaceConstraint::validParams();
+  params.addClassDescription(
+      "Applies the normal contact force to displacement residuals through a Lagrange Multiplier");
   params.set<bool>("use_displaced_mesh") = true;
 
   params.addRequiredCoupledVar("lambda", "The normal lagrange multiplier");

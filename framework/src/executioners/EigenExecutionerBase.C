@@ -413,6 +413,7 @@ EigenExecutionerBase::postExecute()
 
   {
     TIME_SECTION(_final_timer)
+    _problem.execMultiApps(EXEC_FINAL);
     _problem.execute(EXEC_FINAL);
     _problem.outputStep(EXEC_FINAL);
   }
