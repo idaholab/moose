@@ -1,6 +1,6 @@
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2020.04.13" %}
+{% set version = "2020.05.13" %}
 
 package:
   name: moose-libmesh
@@ -35,6 +35,8 @@ test:
     - test -f $PREFIX/libmesh/lib/libmesh_opt.so        # [linux]
     - test -f $PREFIX/libmesh/lib/libmetaphysicl.dylib  # [osx]
     - test -f $PREFIX/libmesh/lib/libmetaphysicl.so     # [linux]
+    - test -f $PREFIX/libmesh/lib/libtimpi_opt.dylib    # [osx]
+    - test -f $PREFIX/libmesh/lib/libtimpi_opt.so       # [linux]
 
 about:
   home: http://libmesh.github.io/
