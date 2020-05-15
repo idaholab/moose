@@ -55,6 +55,9 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
                  "object with this name already exists.");
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 DualReal
 TwoPhaseFluidProperties::T_sat(const DualReal & p) const
 {
@@ -112,3 +115,5 @@ Real TwoPhaseFluidProperties::dsigma_dT_from_T(Real /*T*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
 }
+
+#pragma GCC diagnostic pop
