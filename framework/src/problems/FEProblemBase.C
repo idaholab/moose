@@ -1353,7 +1353,7 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(getVectorTags());
+  _assembly[tid]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1362,7 +1362,7 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(getVectorTags());
+  _assembly[tid]->addResidualNeighbor(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
@@ -1371,7 +1371,7 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addResidualScalar(getVectorTags());
+  _assembly[tid]->addResidualScalar(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
 }
 
 void
@@ -1402,8 +1402,15 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual, _nl->timeVectorTag());
-  _assembly[tid]->addCachedResidual(residual, _nl->nonTimeVectorTag());
+  if (_nl->hasVector(_nl->timeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual, getVectorTag(_nl->timeVectorTag()));
+
+  if (_nl->hasVector(_nl->nonTimeVectorTag()))
+    _assembly[tid]->addCachedResidualDirectly(residual, getVectorTag(_nl->nonTimeVectorTag()));
+
+  // We do this because by adding the cached residual directly, we cannot ensure that all of the
+  // cached residuals are emptied after only the two add calls above
+  _assembly[tid]->clearCachedResiduals();
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -1412,7 +1419,7 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 void
 FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(residual, getVectorTag(_nl->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidual(residual, tid);
 }
@@ -1420,7 +1427,7 @@ FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
 void
 FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->setResidualNeighbor(residual);
+  _assembly[tid]->setResidualNeighbor(residual, getVectorTag(_nl->residualVectorTag()));
   if (_displaced_problem)
     _displaced_problem->setResidualNeighbor(residual, tid);
 }
@@ -5072,12 +5079,12 @@ FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
 void
 FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  auto & tags = getVectorTags();
+  const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   _fe_vector_tags.clear();
 
-  for (auto & tag : tags)
-    _fe_vector_tags.insert(tag.second);
+  for (const auto & residual_vector_tag : residual_vector_tags)
+    _fe_vector_tags.insert(residual_vector_tag._id);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 }

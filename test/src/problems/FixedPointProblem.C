@@ -36,13 +36,13 @@ FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
   // excluding the previous tag evaluation
   _nl->disassociateVectorFromTag(_residual_previous, _tag_id);
 
-  auto & tags = getVectorTags();
+  const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   _fe_vector_tags.clear();
 
-  for (auto & tag : tags)
-    if (tag.second != _tag_id)
-      _fe_vector_tags.insert(tag.second);
+  for (const auto & residual_vector_tag : residual_vector_tags)
+    if (residual_vector_tag._id != _tag_id)
+      _fe_vector_tags.insert(residual_vector_tag._id);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 

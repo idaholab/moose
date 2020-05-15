@@ -1398,7 +1398,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       // This code should be refactored once we can do tags for scalar
       // kernels
       // Should redo this based on Warehouse
-      if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
+      if (!tags.size() || tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
         scalar_kernel_warehouse = &_scalar_kernels;
       else if (tags.size() == 1)
         scalar_kernel_warehouse =
@@ -1533,9 +1533,9 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
 {
   _nl_vector_tags.clear();
 
-  auto & tags = _fe_problem.getVectorTags();
-  for (auto & tag : tags)
-    _nl_vector_tags.insert(tag.second);
+  const auto & residual_vector_tags = _fe_problem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+  for (const auto & residual_vector_tag : residual_vector_tags)
+    _nl_vector_tags.insert(residual_vector_tag._id);
 
   associateVectorToTag(residual, residualVectorTag());
   computeNodalBCs(residual, _nl_vector_tags);
@@ -1571,7 +1571,7 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
       MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
 
       // Select nodal kernels
-      if (tags.size() == _fe_problem.numVectorTags() || !tags.size())
+      if (tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL) || !tags.size())
         nbc_warehouse = &_nodal_bcs;
       else if (tags.size() == 1)
         nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(*(tags.begin()), 0));
