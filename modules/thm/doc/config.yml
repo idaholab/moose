@@ -81,6 +81,7 @@ Extensions:
             /FluidProperties/SimpleFluidProperties: /Modules/FluidProperties/SimpleFluidProperties
             /FluidProperties/SodiumProperties: /Modules/FluidProperties/SodiumProperties
             /FluidProperties/StiffenedGasFluidProperties: /Modules/FluidProperties/StiffenedGasFluidProperties
+            /FluidProperties/StiffenedGasTwoPhaseFluidProperties: /Modules/FluidProperties/StiffenedGasTwoPhaseFluidProperties
             /FluidProperties/TabulatedFluidProperties: /Modules/FluidProperties/TabulatedFluidProperties
             /FluidProperties/TwoPhaseFluidPropertiesIndependent: /Modules/FluidProperties/TwoPhaseFluidPropertiesIndependent
             /FluidProperties/Water97FluidProperties: /Modules/FluidProperties/Water97FluidProperties
