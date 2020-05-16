@@ -132,7 +132,7 @@ A 3D soil desiccation simulation using phase-field for cohesive fracture model, 
 
   - [Heat Conduction](HeatConduction.md)
   - [Geochemistry](geochemistry/index.md)
-  - [Navier Stokes](NavierStokes/index.md)
+  - [Navier Stokes](navier_stokes/index.md)
   - [Solid Mechanics](syntax/Modules/TensorMechanics/index.md)
   - [Contact](contact/index.md)
   - [Porous Flow](porous_flow/index.md)
