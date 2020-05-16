@@ -48,7 +48,9 @@ BUILD_CONFIG=`cat <<"EOF"
   --download-ptscotch=1 \
   --download-parmetis=1 \
   --download-scalapack=1 \
-  --download-superlu_dist=1
+  --download-superlu_dist=1 \
+  --with-fortran-bindings=0 \
+  --with-sowing=0 \
 EOF
 `
 
