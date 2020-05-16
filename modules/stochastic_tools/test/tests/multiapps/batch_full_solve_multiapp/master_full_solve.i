@@ -1,11 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  solve = false
+[StochasticTools]
 []
 
 [Distributions]
@@ -22,10 +15,6 @@
     num_rows = 5
     distributions = 'uniform_0'
   []
-[]
-
-[Executioner]
-  type = Steady
 []
 
 [MultiApps]
@@ -50,7 +39,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = mc
   []
 []
 

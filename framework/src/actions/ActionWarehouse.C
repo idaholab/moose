@@ -434,3 +434,9 @@ ActionWarehouse::getCurrentActionName() const
 {
   return (*_act_iter)->parameters().blockFullpath();
 }
+
+const std::string &
+ActionWarehouse::getMooseAppName()
+{
+  return _app.name();
+}

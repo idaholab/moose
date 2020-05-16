@@ -1067,19 +1067,19 @@ MooseVariableDataFV<OutputType>::fetchDoFValues()
     _sys.solutionPreviousNewton()->get(_dof_indices, &_dof_values_previous_nl[0]);
   }
 
-  if (_sys.subproblem().safeAccessTaggedVectors())
-  {
-    auto & active_coupleable_vector_tags =
-        _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
-    for (auto tag : active_coupleable_vector_tags)
-      if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+  auto & active_coupleable_vector_tags =
+      _sys.subproblem().getActiveFEVariableCoupleableVectorTags(_tid);
+  for (auto tag : active_coupleable_vector_tags)
+    if (_need_vector_tag_u[tag] || _need_vector_tag_dof_u[tag])
+      if ((_sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
+           _sys.subproblem().safeAccessTaggedVectors()) ||
+          _sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
         if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
         {
           auto & vec = _sys.getVector(tag);
           _vector_tags_dof_u[tag].resize(n);
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
-  }
 
   if (_sys.subproblem().safeAccessTaggedMatrices())
   {

@@ -172,6 +172,13 @@ ScalarCoupleable::coupledVectorTagScalarValue(const std::string & var_name,
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
+  if (!_sc_fe_problem.vectorTagExists(tag))
+    mooseError("Attempting to couple to vector tag scalar with ID ",
+               tag,
+               "in ",
+               _sc_name,
+               ", but a vector tag with that ID does not exist");
+
   addScalarVariableCoupleableVectorTag(tag);
 
   MooseVariableScalar * var = getScalarVar(var_name, comp);

@@ -1,13 +1,5 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
@@ -64,7 +56,6 @@
 [VectorPostprocessors]
   [storage]
     type = StochasticResults
-    samplers = sample
   []
 []
 
@@ -72,11 +63,6 @@
   type = Transient
   num_steps = 5
   dt = 0.01
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

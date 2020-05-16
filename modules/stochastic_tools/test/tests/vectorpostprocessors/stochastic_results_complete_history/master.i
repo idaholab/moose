@@ -1,13 +1,5 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
@@ -62,7 +54,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = sample
     contains_complete_history = true
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -71,11 +62,6 @@
 [Executioner]
   type = Transient
   num_steps = 2
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

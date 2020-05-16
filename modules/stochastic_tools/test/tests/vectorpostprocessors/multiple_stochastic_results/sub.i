@@ -55,6 +55,11 @@
     type = AverageNodalVariableValue
     variable = u
   []
+  [max]
+    type = NodalExtremeValue
+    value_type = MAX
+    variable = u
+  []
 []
 
 [Outputs]

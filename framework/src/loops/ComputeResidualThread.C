@@ -95,7 +95,7 @@ ComputeResidualThread::subdomainChanged()
 
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
-  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
   {
     _tag_kernels = &_kernels;
     _dg_warehouse = &_dg_kernels;

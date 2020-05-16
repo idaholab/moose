@@ -44,10 +44,6 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-[]
-
 [Executioner]
   type = Transient
   num_steps = 1

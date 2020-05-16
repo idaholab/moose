@@ -6,14 +6,14 @@
     input = wrong_multi_app.i
     expect_err = "The 'multi_app' parameter must provide either a 'SamplerTransientMultiApp' or "
                  "'SamplerFullSolveMultiApp' object."
-    requirement = "MOOSE shall produce an error if neither a 'SamplerTransientMultiApp' nor "
+    requirement = "The system shall produce an error if neither a 'SamplerTransientMultiApp' nor "
                   "`SamplerFullSolveMultiApp` is provided in SamplerPostprocessorTransfer."
   []
   [require_stochastic_results]
     type = RunException
     input = require_stochastic_results.i
-    expect_err = "The 'results' object must be a 'StochasticResults' object."
-    requirement = "MOOSE shall produce an error if the 'result' object in "
+    expect_err = "The object prescribed by the 'to_vector_postprocessor' parameter in data must be a 'StochasticResults' object"
+    requirement = "The system shall produce an error if the 'result' object in "
                   "'SamplerPostprocessorTransfer' is not a 'StochasticResults object'."
   []
 []

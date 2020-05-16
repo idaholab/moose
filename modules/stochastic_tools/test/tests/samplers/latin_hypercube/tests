@@ -30,7 +30,7 @@
       type = RunException
       input = latin_hypercube.i
       cli_args = "Samplers/sample/upper_limits='0 1 2'"
-      expect_err = "The length of 'upper_limits' must match the length of 'distributions'"
+      expect_err = "The length of 'upper_limits' must be one or match the length of 'distributions'"
 
       detail = "when the number of upper probability limit differs from the number of distribution;"
     []
@@ -38,7 +38,7 @@
       type = RunException
       input = latin_hypercube.i
       cli_args = "Samplers/sample/lower_limits='0 1 2'"
-      expect_err = "The length of 'lower_limits' must match the length of 'distributions'"
+      expect_err = "The length of 'lower_limits' must be one or match the length of 'distributions'"
 
       detail = "when the number of lower probability limit differs from the number of distribution;"
     []

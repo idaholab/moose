@@ -975,6 +975,7 @@ public:
    */
   std::vector<std::shared_ptr<Transfer>> getTransfers(ExecFlagType type,
                                                       Transfer::DIRECTION direction) const;
+  std::vector<std::shared_ptr<Transfer>> getTransfers(Transfer::DIRECTION direction) const;
 
   /**
    * Return the complete warehouse for MultiAppTransfer object for the given direction

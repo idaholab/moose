@@ -1,13 +1,5 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
@@ -72,7 +64,6 @@
   [storage]
     type = StochasticResults
     parallel_type = DISTRIBUTED
-    samplers = sobol
   []
 []
 
@@ -81,10 +72,6 @@
   num_steps = 1
 []
 
-[Problem]
-  solve = false
-  kernel_coverage_check = false
-[]
 
 [Outputs]
   [out]

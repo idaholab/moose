@@ -48,7 +48,7 @@ ComputeNodalKernelsThread::pre()
 {
   _num_cached = 0;
 
-  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
     _nkernel_warehouse = &_nodal_kernels;
   else if (_tags.size() == 1)
     _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));

@@ -107,12 +107,17 @@ public:
   virtual void updateMesh(const NumericVector<Number> & soln,
                           const NumericVector<Number> & aux_soln);
 
-  virtual TagID addVectorTag(TagName tag_name) override;
-  virtual TagID getVectorTagID(const TagName & tag_name) override;
-  virtual TagName vectorTagName(TagID tag) override;
-  virtual bool vectorTagExists(TagID tag) override;
-  virtual unsigned int numVectorTags() const override;
-  virtual std::map<TagName, TagID> & getVectorTags() override;
+  virtual TagID addVectorTag(const TagName & tag_name,
+                             const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL) override;
+  virtual const VectorTag & getVectorTag(const TagID tag_id) const override;
+  virtual TagID getVectorTagID(const TagName & tag_name) const override;
+  virtual TagName vectorTagName(const TagID tag_id) const override;
+  virtual bool vectorTagExists(const TagID tag_id) const override;
+  virtual unsigned int
+  numVectorTags(const Moose::VectorTagType type = Moose::VECTOR_TAG_ANY) const override;
+  virtual const std::vector<VectorTag> &
+  getVectorTags(const Moose::VectorTagType type = Moose::VECTOR_TAG_ANY) const override;
+  virtual Moose::VectorTagType vectorTagType(const TagID tag_id) const override;
 
   virtual TagID addMatrixTag(TagName tag_name) override;
   virtual TagID getMatrixTagID(const TagName & tag_name) override;

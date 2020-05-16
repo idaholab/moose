@@ -1,13 +1,5 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
+  auto_create_executioner = false
 []
 
 [Distributions]
@@ -90,7 +82,7 @@
     multi_app = mc
     sampler = mc
     to_vector_postprocessor = storage
-    from_postprocessor = avg
+    from_postprocessor = "avg max"
   []
 []
 
@@ -98,18 +90,12 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = 'sobol mc'
   []
 []
 
 [Executioner]
   type = Transient
   num_steps = 1
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]

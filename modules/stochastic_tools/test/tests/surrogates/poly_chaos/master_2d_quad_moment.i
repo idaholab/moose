@@ -1,13 +1,4 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 1
-  ny = 1
-[]
-
-[Variables]
-  [u]
-  []
+[StochasticTools]
 []
 
 [Distributions]
@@ -62,7 +53,6 @@
   [storage]
     type = StochasticResults
     parallel_type = REPLICATED
-    samplers = quadrature
   []
   [pc_moments]
     type = PolynomialChaosStatistics
@@ -87,17 +77,8 @@
     distributions = 'D_dist S_dist'
     sampler = quadrature
     results_vpp = storage
-    results_vector = quadrature
+    results_vector = data:avg
   []
-[]
-
-[Executioner]
-  type = Steady
-[]
-
-[Problem]
-  solve = false
-  kernel_coverage_check = false
 []
 
 [Outputs]
