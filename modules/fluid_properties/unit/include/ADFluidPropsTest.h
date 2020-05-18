@@ -11,6 +11,7 @@
 
 #include "MooseObjectUnitTest.h"
 #include "IdealGasFluidProperties.h"
+#include "StiffenedGasTwoPhaseFluidProperties.h"
 
 class ADFluidPropsTest : public MooseObjectUnitTest
 {
@@ -28,6 +29,17 @@ protected:
     _fe_problem->addUserObject("IdealGasFluidProperties", name, uo_pars);
     _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>(name);
     return *_fp;
+  }
+
+  const TwoPhaseFluidProperties & buildTwoPhaseFluidProperties()
+  {
+    {
+      const std::string class_name = "StiffenedGasTwoPhaseFluidProperties";
+      const UserObjectName fp_2phase_name = "fp_2phase";
+      InputParameters params = _factory.getValidParams(class_name);
+      _fe_problem->addUserObject(class_name, fp_2phase_name, params);
+      return _fe_problem->getUserObject<TwoPhaseFluidProperties>(fp_2phase_name);
+    }
   }
 
   const SinglePhaseFluidProperties * _fp;
