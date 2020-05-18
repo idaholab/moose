@@ -11,6 +11,9 @@
 
 #include "TwoPhaseFluidProperties.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Test 2-phase fluid properties
  *
@@ -31,3 +34,5 @@ public:
   virtual Real dsigma_dT_from_T(Real T) const override;
   virtual bool supportsPhaseChange() const override;
 };
+
+#pragma GCC diagnostic pop

@@ -6,6 +6,9 @@
 
 class StiffenedGasFluidProperties;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
 /**
  * Two-phase stiffened gas fluid properties
  */
@@ -103,3 +106,5 @@ protected:
 public:
   static InputParameters validParams();
 };
+
+#pragma GCC diagnostic pop
