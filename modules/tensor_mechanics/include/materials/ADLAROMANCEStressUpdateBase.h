@@ -201,13 +201,13 @@ protected:
   const ADVariableValue & _temperature;
 
   /// Optionally coupled environmental factor
-  const ADVariableValue & _environmental;
+  const ADMaterialProperty<Real> * _environmental;
 
   /// Window applied to input maximum and minimum values
   const Real _window;
 
   /// Enum to error, warn, or ignore checks that ensure ROM input is within applicability window
-  const enum class WindowFailure { ERROR, WARN, IGNORE, ADAPT } _window_failure;
+  const enum class WindowFailure { ERROR, WARN, IGNORE, EXTRAPOLATE } _window_failure;
 
   /// Flag to optinoally allow model extrapolation to zero stress
   const bool _extrapolate_stress;

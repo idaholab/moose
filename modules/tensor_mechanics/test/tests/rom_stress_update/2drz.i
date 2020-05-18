@@ -24,6 +24,7 @@
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
+    generate_output = vonmises_stress
   [../]
 []
 
@@ -45,6 +46,7 @@
     variable = disp_x
     component = 0
     boundary = right
+    function = t
     constant = 3.1675e5
   [../]
   [./pressure_y]
@@ -52,6 +54,7 @@
     variable = disp_y
     component = 1
     boundary = top
+    function = t
     constant = 6.336e5
   [../]
 []
@@ -85,6 +88,7 @@
   compute_scaling_once = false
 
   num_steps = 5
+  dt = 2
 []
 
 [Postprocessors]
@@ -103,6 +107,10 @@
   [./immobile_disloactions]
     type = ElementAverageValue
     variable = immobile_dislocations
+  [../]
+  [./vonmises_stress]
+    type = ElementAverageValue
+    variable = vonmises_stress
   [../]
 []
 
