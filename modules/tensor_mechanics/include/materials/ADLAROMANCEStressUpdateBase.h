@@ -40,6 +40,7 @@ protected:
   }
 
   virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
+  virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
 
   /**
    * Compute the limiting value of the time step for this material
@@ -60,11 +61,12 @@ protected:
    * @param mobile_dislocation_increment Mobile dislocation density incremental change
    * @param immobile_dislocation_increment Immobile dislocation density incremental change
    * @param rom_effective_strain ROM calculated effective strain
-   * @param rom_effective_strain_derivative Derivative of ROM calculated effective strain with
+   * @param drom_effective_strain_dstress Derivative of ROM calculated effective strain with
    *respect to stress
+   * @return flag that indicates ROM was skipped
    */
 
-  void computeROMStrainRate(const Real dt,
+  bool computeROMStrainRate(const Real dt,
                             const Real & mobile_dislocations_old,
                             const Real & immobile_dislocations_old,
                             const ADReal & trial_stress,
@@ -74,13 +76,14 @@ protected:
                             ADReal & mobile_dislocation_increment,
                             ADReal & immobile_dislocation_increment,
                             ADReal & rom_effective_strain,
-                            ADReal & rom_effective_strain_derivative);
+                            ADReal & drom_effective_strain_dstress);
 
   /**
    * Function to check input values against applicability windows set by ROM data set
    * @param input Vector of input values
+   * @return flag to indicate to continue computing ROM
    */
-  void checkInputWindows(std::vector<ADReal> & input);
+  bool checkInputWindows(std::vector<ADReal> & input);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
@@ -204,7 +207,7 @@ protected:
   const Real _window;
 
   /// Enum to error, warn, or ignore checks that ensure ROM input is within applicability window
-  const enum class WindowFailure { ERROR, WARN, IGNORE } _window_failure;
+  const enum class WindowFailure { ERROR, WARN, IGNORE, ADAPT } _window_failure;
 
   /// Flag to optinoally allow model extrapolation to zero stress
   const bool _extrapolate_stress;
