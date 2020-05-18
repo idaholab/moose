@@ -159,6 +159,8 @@ AddVariableAction::createInitialConditionAction()
   // Variable name
   std::string var_name = name();
 
+  auto value = _moose_object_pars.get<std::vector<Real>>("initial_condition");
+
   // Create the object name
   std::string long_name("");
   long_name += var_name;
@@ -168,12 +170,24 @@ AddVariableAction::createInitialConditionAction()
   InputParameters action_params = _action_factory.getValidParams("AddOutputAction");
   action_params.set<ActionWarehouse *>("awh") = &_awh;
 
+  bool is_vector = (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE ||
+                    _fe_type.family == MONOMIAL_VEC);
+
   if (_scalar_var)
     action_params.set<std::string>("type") = "ScalarConstantIC";
   else if (_components == 1)
-    action_params.set<std::string>("type") = "ConstantIC";
+  {
+    if (is_vector)
+      action_params.set<std::string>("type") = "VectorConstantIC";
+    else
+      action_params.set<std::string>("type") = "ConstantIC";
+  }
   else
+  {
     action_params.set<std::string>("type") = "ArrayConstantIC";
+    if (value.size() != _components)
+      mooseError("Size of 'initial_condition' is not consistent");
+  }
 
   // Create the action
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
@@ -181,15 +195,20 @@ AddVariableAction::createInitialConditionAction()
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
-  auto value = _moose_object_pars.get<std::vector<Real>>("initial_condition");
-  if (value.size() != _components)
-    mooseError("Size of 'initial_condition' is not consistent");
   if (_components > 1)
   {
     RealEigenVector v(_components);
     for (unsigned int i = 0; i < _components; ++i)
       v(i) = value[i];
     action->getObjectParams().set<RealEigenVector>("value") = v;
+  }
+  else if (is_vector)
+  {
+    action->getObjectParams().set<Real>("x_value") = value[0];
+    if (value.size() > 0)
+      action->getObjectParams().set<Real>("y_value") = value[1];
+    if (value.size() > 1)
+      action->getObjectParams().set<Real>("z_value") = value[2];
   }
   else
     action->getObjectParams().set<Real>("value") = value[0];
