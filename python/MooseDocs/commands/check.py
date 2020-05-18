@@ -44,6 +44,8 @@ def command_line_options(subparser, parent):
     parser.add_argument('--syntax_prefix',
                         default=os.path.join('doc', 'content', 'syntax'),
                         help="The folder install prefix for MooseObject documentations pages.")
+    parser.add_argument('--error', action='store_true',
+                        help="Convert warnings to errors.")
 
 def main(options):
     """./moosedocs check"""
@@ -53,6 +55,7 @@ def main(options):
                 dump=options.dump,
                 update=options.update,
                 generate=options.generate,
+                error=options.error,
                 object_prefix=options.object_prefix,
                 syntax_prefix=options.syntax_prefix)
     return err
@@ -61,9 +64,13 @@ def check(translator,
           dump=False,
           update=False,
           generate=False,
+          error=False,
           object_prefix=os.path.join('doc', 'content', 'source'),
           syntax_prefix=os.path.join('doc', 'content', 'syntax')):
     """Helper to all both main and build.py:main to perform check."""
+
+    # Error mode
+    log_type = logging.ERROR if error else logging.WARNING
 
     # Extract the syntax root node
     app_syntax = None
@@ -102,9 +109,9 @@ def check(translator,
         if node.is_root or node.removed:
             continue
         elif isinstance(node, syntax.ObjectNode):
-            _check_object_node(node, app_name, generate, update, object_prefix)
+            _check_object_node(node, app_name, generate, update, object_prefix, log_type)
         elif isinstance(node, syntax.SyntaxNode):
-            _check_syntax_node(node, app_name, generate, update, syntax_prefix)
+            _check_syntax_node(node, app_name, generate, update, syntax_prefix, log_type)
         else:
             LOG.critical("Unexpected object type of %s, only %s and %s based types are supported",
                          type(node).__name__,
@@ -113,7 +120,7 @@ def check(translator,
 
     return 0
 
-def _check_object_node(node, app_name, generate, update, prefix):
+def _check_object_node(node, app_name, generate, update, prefix, log_type):
     """
     Check that required pages for supplied ObjectNode (i.e., MooseObject/Action).
     """
@@ -131,7 +138,7 @@ def _check_object_node(node, app_name, generate, update, prefix):
         msg += "    - The page should be located at %s.\n"
         msg += "    - It is possible to generate stub pages using " \
                "'./moosedocs.py check --generate'."
-        LOG.error(msg, node.fullpath, filename)
+        LOG.log(log_type, msg, node.fullpath, filename)
 
     elif not_exist and generate and (app_name in node.groups):
         if not os.path.exists(os.path.dirname(filename)):
@@ -142,9 +149,9 @@ def _check_object_node(node, app_name, generate, update, prefix):
             fid.write(content)
 
     elif not not_exist:
-        _check_page_for_stub(node, app_name, filename, update)
+        _check_page_for_stub(node, app_name, filename, update, log_type)
 
-def _check_syntax_node(node, app_name, generate, update, prefix):
+def _check_syntax_node(node, app_name, generate, update, prefix, log_type):
     """
     Check that required pages for syntax exists (e.g., Adaptivity/index.md).
     """
@@ -175,7 +182,7 @@ def _check_syntax_node(node, app_name, generate, update, prefix):
             for info in filenames:
                 msg += "      {}\n".format(info.name)
 
-        LOG.error(msg)
+        LOG.log(log_type, msg)
 
     # Case when when no file exists but --generate was provided
     elif not_exist and generate:
@@ -193,14 +200,14 @@ def _check_syntax_node(node, app_name, generate, update, prefix):
                   "following locations.\n".format(node.fullpath)
             for info in filenames:
                 msg += "      {}\n".format(info.name)
-            LOG.error(msg)
+            LOG.log(log_type, msg)
 
     else:
         for info in filenames:
             if info.exists:
-                _check_page_for_stub(node, app_name, info.name, update)
+                _check_page_for_stub(node, app_name, info.name, update, log_type)
 
-def _check_page_for_stub(node, app_name, filename, update):
+def _check_page_for_stub(node, app_name, filename, update, log_type):
     """
     Helper method to check if a page is a stub.
     """
@@ -217,17 +224,11 @@ def _check_page_for_stub(node, app_name, filename, update):
         elif not node.hidden:
             msg = "A MOOSE generated stub page for %s exists, but no content was " \
                   "added. Add documentation content to %s."
-            LOG.warning(msg, node.fullpath, filename)
+            LOG.log(log_type, msg, node.fullpath, filename)
 
     elif content and node.hidden:
         msg = "A page for %s exists, but it is still listed as hidden."
-        LOG.warning(msg, node.fullpath)
-
-
-    elif content and node.hidden:
-        msg = "A page for %s exists, but it is still listed as hidden."
-        LOG.error(msg, node.fullpath)
-
+        LOG.log(log_type, msg, node.fullpath)
 
 def _default_content(node):
     """

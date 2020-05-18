@@ -71,6 +71,9 @@ def command_line_options(subparser, parent):
                         help="Run the default check command prior to build, the main purpose " \
                              "of this command is to allow the make targets to avoid creating " \
                              "the syntax multiple times.")
+    parser.add_argument('--error', action='store_true',
+                        help="Convert warnings to errors when running with --check.")
+
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -212,7 +215,7 @@ def main(options):
 
     # Perform check
     if options.check:
-        check(translator)
+        check(translator, error=options.error)
 
     # Perform build
     if options.files:
