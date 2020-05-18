@@ -30,8 +30,6 @@ public:
                   Moose::VarKindType var_kind);
   virtual ~DisplacedSystem();
 
-  virtual void init() override;
-
   virtual NumericVector<Number> & getVector(TagID tag_id) override
   {
     return _undisplaced_system.getVector(tag_id);

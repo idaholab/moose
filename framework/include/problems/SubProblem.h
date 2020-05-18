@@ -678,11 +678,6 @@ public:
   void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
   /**
-   * Sets up the solution states (older copies of the solution) in the Systems
-   */
-  virtual void setupSolutionStates() = 0;
-
-  /**
    * Register with the Systems that a certain solution state is needed (1 = old, 2 = older, etc)
    */
   virtual void needOldSolutionState(const unsigned int state) = 0;

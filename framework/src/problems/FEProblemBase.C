@@ -625,12 +625,6 @@ FEProblemBase::initialSetup()
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
 
-  // Setup solution states - need at least 2 (old and older)
-  needOldSolutionState(2);
-  setupSolutionStates();
-  if (_displaced_problem)
-    _displaced_problem->setupSolutionStates();
-
   addExtraVectors();
 
   // Execute this here in case we want to print out the required derivative size in
@@ -4754,6 +4748,10 @@ FEProblemBase::init()
   if (solverParams()._type == Moose::ST_JFNK)
     _nl->turnOffJacobian();
 
+  // Request at least 2 old solution states (old and older)
+  // These get initialized in the init() calls for the systems that follow
+  needOldSolutionState(2);
+
   _nl->init();
   _aux->init();
 
@@ -6730,13 +6728,6 @@ FEProblemBase::uniformRefine()
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
 
   meshChangedHelper(/*intermediate_change=*/false);
-}
-
-void
-FEProblemBase::setupSolutionStates()
-{
-  _nl->setupSolutionStates();
-  _aux->setupSolutionStates();
 }
 
 void

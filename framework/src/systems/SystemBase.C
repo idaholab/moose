@@ -112,6 +112,31 @@ SystemBase::SystemBase(SubProblem & subproblem,
 {
 }
 
+void
+SystemBase::init()
+{
+  // At this point, we know how many solution states we need
+  setupSolutionStates();
+}
+
+void
+SystemBase::setupSolutionStates()
+{
+  // We'll always have 1 state for the current solution
+  _solution_states.resize(_old_solution_states_needed + 1);
+
+  // The first three states (now, old, older) will point to the solutions in the libMesh system
+  _solution_states[0] = &solution();
+  if (_old_solution_states_needed > 0)
+    _solution_states[1] = &solutionOld();
+  if (_old_solution_states_needed > 1)
+    _solution_states[2] = &solutionOlder();
+
+  // Create anything that is past older (state of 3+)
+  for (unsigned int i = 3; i <= _old_solution_states_needed; ++i)
+    _solution_states[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
+}
+
 MooseVariableFEBase &
 SystemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
@@ -1077,19 +1102,6 @@ SystemBase::copyVars(ExodusII_IO & io)
 
   if (did_copy)
     solution().close();
-}
-
-void
-SystemBase::setupSolutionStates()
-{
-  _solution_states.resize(_old_solution_states_needed + 1);
-  _solution_states[0] = &solution();
-  if (_old_solution_states_needed > 0)
-    _solution_states[1] = &solutionOld();
-  if (_old_solution_states_needed > 1)
-    _solution_states[2] = &solutionOlder();
-  for (unsigned int i = 3; i <= _old_solution_states_needed; ++i)
-    _solution_states[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
 }
 
 void

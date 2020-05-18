@@ -1761,7 +1761,6 @@ public:
    */
   void uniformRefine();
 
-  virtual void setupSolutionStates() override;
   virtual void needOldSolutionState(const unsigned int state) override;
 
   using SubProblem::automaticScaling;

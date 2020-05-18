@@ -308,7 +308,6 @@ public:
 
   const CouplingMatrix * couplingMatrix() const override;
 
-  virtual void setupSolutionStates() override;
   virtual void needOldSolutionState(const unsigned int state) override;
 
 protected:

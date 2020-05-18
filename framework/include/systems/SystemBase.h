@@ -180,7 +180,7 @@ public:
   /**
    * Initialize the system
    */
-  virtual void init(){};
+  virtual void init();
 
   /**
    * Called only once, just before the solve begins so objects can do some precalculations
@@ -812,11 +812,6 @@ public:
   /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
   void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
-  /*
-   * Sets up the solution states - stores older copies of the solutions in _solution_states)
-   */
-  void setupSolutionStates();
-
   /**
    * Register that a certain solution state is needed (1 = old, 2 = older, etc)
    */
@@ -898,6 +893,12 @@ protected:
 
   /// True if printing out additional information
   bool _verbose;
+
+private:
+  /*
+   * Sets up the solution states - stores older copies of the solutions in _solution_states)
+   */
+  void setupSolutionStates();
 };
 
 #define PARALLEL_TRY

@@ -33,11 +33,6 @@ DisplacedSystem::DisplacedSystem(DisplacedProblem & problem,
 
 DisplacedSystem::~DisplacedSystem() {}
 
-void
-DisplacedSystem::init()
-{
-}
-
 NumericVector<Number> &
 DisplacedSystem::getVector(const std::string & name)
 {

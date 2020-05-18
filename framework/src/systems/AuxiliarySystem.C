@@ -73,11 +73,6 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
 AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }
 
 void
-AuxiliarySystem::init()
-{
-}
-
-void
 AuxiliarySystem::addDotVectors()
 {
   if (_fe_problem.uDotRequested())
