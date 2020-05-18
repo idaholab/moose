@@ -7,11 +7,11 @@
     --dark-mode-back: rgba(35, 35, 40, 1.0);
     --dark-mode-card: rgba(20, 20, 20, 1.0);
     --dark-mode-fore: rgba(200, 200, 200, 1.0);
-    --dark-navbar: rgba(29, 53, 89, 1.0);
+    --dark-navbar: rgba(39, 63, 99, 1.0);
     --darker-highlight: rgba(100, 100, 100, 1.0);
     --darker-embossed: rgba(80, 80, 80, 1.0);
     --pre-textbox: rgba(10, 10, 10, 1.0);
-    --links-dark: rgba(109, 167, 240, 1.0);
+    --links-dark: rgba(119, 177, 250, 1.0);
 }
 
 main {
@@ -1038,12 +1038,30 @@ div.moose-mega-menu-content{
   z-index: 1;
 }
 
-
 /* Text and background color for dark mode */
 @media (prefers-color-scheme: dark), (prefers-dark-interface) {
  body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control {
    background: var(--dark-mode-back);
    color: var(--dark-mode-fore);
+ }
+ .cse .gsc-control-cse, .gsc-control-cse {
+    background-color: #000;
+    border: 1px solid #000;
+ }
+  .modal {
+    background-color: var(--dark-mode-back);
+ }
+ .modal .modal-footer {
+    background-color: var(--dark-mode-back);
+ }
+ .modal.modal-fixed-footer {
+    background-color: var(--dark-mode-back);
+ }
+ .modal.modal-fixed-footer .modal-footer {
+    border-top: 1px solid rgba(166, 166, 166, 0.1);
+ }
+ .btn-flat {
+    color: var(--dark-mode-fore);
  }
  nav ul a:hover {
     background-color: rgba(0, 0, 0, 0.33);
@@ -1084,7 +1102,6 @@ div.moose-mega-menu-content{
     border-right: 1px solid #000;
     border-left: 1px solid #000;
  }
- /*Default link color*/
  a {
     color: var(--links-dark);
     font-weight: 100;
