@@ -150,6 +150,7 @@ def _check_object_node(node, app_name, generate, update, prefix, log_type):
 
     elif not not_exist:
         _check_page_for_stub(node, app_name, filename, update, log_type)
+        _check_page_for_description(node, app_name, filename, log_type)
 
 def _check_syntax_node(node, app_name, generate, update, prefix, log_type):
     """
@@ -228,6 +229,15 @@ def _check_page_for_stub(node, app_name, filename, update, log_type):
 
     elif content and node.hidden:
         msg = "A page for %s exists, but it is still listed as hidden."
+        LOG.log(log_type, msg, node.fullpath)
+
+def _check_page_for_description(node, app_name, filename, log_type):
+    """
+    Helper for addClassDescription.
+    """
+    if (node.description is None) and (not node.hidden):
+        msg = "The class description is missing for %s, it can be added using the " \
+            "'addClassDescription' method from within the objects validParams function."
         LOG.log(log_type, msg, node.fullpath)
 
 def _default_content(node):
