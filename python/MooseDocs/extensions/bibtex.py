@@ -29,6 +29,7 @@ def make_extension(**kwargs):
 
 BibtexCite = tokens.newToken('BibtexCite', keys=[])
 BibtexBibliography = tokens.newToken('BibtexBibliography', bib_style='')
+BibtexList = tokens.newToken('BibtexList', BibtexBibliography, bib_files=None)
 
 class BibtexExtension(command.CommandExtension):
     """
@@ -46,20 +47,23 @@ class BibtexExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         self.__database = None
+        self.__bib_files = list()
+        self.__bib_file_database = dict()
 
     def preExecute(self):
 
         duplicates = self.get('duplicates', list())
         self.__database = BibliographyData()
 
-        bib_files = []
+        self.__bib_files = []
         for node in self.translator.getPages():
             if node.source.endswith('.bib'):
-                bib_files.append(node.source)
+                self.__bib_files.append(node.source)
 
-        for bfile in bib_files:
+        for bfile in self.__bib_files:
             try:
                 db = parse_file(bfile)
+                self.__bib_file_database[bfile] = db
             except UndefinedMacro as e:
                 msg = "The BibTeX file %s has an undefined macro:\n%s"
                 LOG.warning(msg, bfile, e)
@@ -92,17 +96,24 @@ class BibtexExtension(command.CommandExtension):
                 core.Heading(ast, level=2, string='References')
                 BibtexBibliography(ast, bib_style='plain')
 
-    @property
-    def database(self):
-        return self.__database
+    def database(self, bibfile=None):
+        if bibfile is None:
+            return self.__database
+        else:
+            return self.__bib_file_database[bibfile]
+
+    def bibfiles(self):
+        return self.__bib_files
 
     def extend(self, reader, renderer):
         self.requires(core, command)
 
         self.addCommand(reader, BibtexCommand())
+        self.addCommand(reader, BibtexListCommand())
         self.addCommand(reader, BibtexReferenceComponent())
 
         renderer.add('BibtexCite', RenderBibtexCite())
+        renderer.add('BibtexList', RenderBibtexList())
         renderer.add('BibtexBibliography', RenderBibtexBibliography())
 
         if isinstance(renderer, LatexRenderer):
@@ -137,6 +148,30 @@ class BibtexCommand(command.CommandComponent):
         BibtexBibliography(parent, bib_style=self.settings['style'])
         return parent
 
+class BibtexListCommand(command.CommandComponent):
+    COMMAND = 'bibtex'
+    SUBCOMMAND = 'list'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['bib_files'] = (None, "The list of *.bib files to use for a complete citation list.")
+        return config
+
+    def createToken(self, parent, token, page):
+        bfiles = self.settings['bib_files']
+        bib_files = list()
+        if bfiles is None:
+            bib_files = self.extension.bibfiles()
+        else:
+            for bfile in bfiles.split():
+                for key in self.extension.bibfiles():
+                    if key.endswith(bfile):
+                        bib_files.append(key)
+
+        BibtexList(parent, bib_files=bib_files)
+        return parent
+
 class RenderBibtexCite(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
@@ -152,13 +187,13 @@ class RenderBibtexCite(components.RenderComponent):
         num_keys = len(token['keys'])
         for i, key in enumerate(token['keys']):
 
-            if key not in self.extension.database.entries:
+            if key not in self.extension.database().entries:
                 LOG.error('Unknown BibTeX key: %s', key)
                 html.Tag(parent, 'span', string=key, style='color:red;')
                 continue
 
 
-            entry = self.extension.database.entries[key]
+            entry = self.extension.database().entries[key]
             author_found = True
             if not 'author' in entry.persons.keys() and not 'Author' in entry.persons.keys():
                 author_found = False
@@ -217,6 +252,10 @@ class RenderBibtexCite(components.RenderComponent):
         return parent
 
 class RenderBibtexBibliography(components.RenderComponent):
+
+    def getCitations(self, parent, token, page):
+        return page.get('citations', list())
+
     def createHTML(self, parent, token, page):
 
         try:
@@ -225,8 +264,8 @@ class RenderBibtexBibliography(components.RenderComponent):
             msg = 'Unknown bibliography style "{}".'
             raise exceptions.MooseDocsException(msg, token['bib_style'])
 
-        citations = page.get('citations', list())
-        formatted_bibliography = style().format_bibliography(self.extension.database, citations)
+        citations = self.getCitations(parent, token, page)
+        formatted_bibliography = style().format_bibliography(self.extension.database(), citations)
         html_backend = find_plugin('pybtex.backends', 'html')
 
         div = html.Tag(parent, 'div', class_='moose-bibliography')
@@ -244,7 +283,7 @@ class RenderBibtexBibliography(components.RenderComponent):
         for child in ol.children:
             key = child['id']
             db = BibliographyData()
-            db.add_entry(key, self.extension.database.entries[key])
+            db.add_entry(key, self.extension.database().entries[key])
             btex = db.to_string("bibtex")
 
             m_id = uuid.uuid4()
@@ -263,3 +302,10 @@ class RenderBibtexBibliography(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         pass
+
+class RenderBibtexList(RenderBibtexBibliography):
+    def getCitations(self, parent, token, page):
+        citations = list()
+        for bfile in token['bib_files']:
+            citations += self.extension.database(bfile).entries.keys()
+        return citations
