@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'ad_saturation_temperature_material.i'
+    csvdiff = 'ad_saturation_temperature_material_out.csv'
+    allow_test_objects = True
+    recover = false
+
+    requirement = 'The system shall provide an AD material that computes saturation temperature.'
+    design = '/ADSaturationTemperatureMaterial.md'
+    issues = '#15308'
+  [../]
+[]
