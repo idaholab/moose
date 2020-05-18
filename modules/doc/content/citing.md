@@ -1,5 +1,8 @@
 # Citing MOOSE
 
+This page lists the references to use if you are using MOOSE for in your publication. For a
+list of publications that have cited MOOSE, please refer to the [publications.md].
+
 ## MOOSE
 
 For all publications that use MOOSE or a MOOSE-based application please cite the following.
