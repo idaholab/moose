@@ -87,7 +87,6 @@ THMMesh::addNode(const Point & pt)
 {
   dof_id_type id = getNextNodeId();
   Node * node = _mesh->add_point(pt, id);
-  node->set_unique_id() = id;
   return node;
 }
 
@@ -100,7 +99,6 @@ THMMesh::addElementEdge2(dof_id_type node0, dof_id_type node1)
   Elem * elem = new Edge2;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
   _mesh->add_elem(elem);
   elem->set_node(0) = _mesh->node_ptr(node0);
   elem->set_node(1) = _mesh->node_ptr(node1);
@@ -116,7 +114,6 @@ THMMesh::addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2
   Elem * elem = new Edge3;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
   _mesh->add_elem(elem);
   elem->set_node(0) = _mesh->node_ptr(node0);
   elem->set_node(1) = _mesh->node_ptr(node1);
@@ -133,7 +130,6 @@ THMMesh::addElementQuad4(dof_id_type node0, dof_id_type node1, dof_id_type node2
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
   _mesh->add_elem(elem);
   elem->set_node(0) = _mesh->node_ptr(node0);
   elem->set_node(1) = _mesh->node_ptr(node1);
@@ -159,7 +155,6 @@ THMMesh::addElementQuad9(dof_id_type node0,
   Elem * elem = new Quad9;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
   _mesh->add_elem(elem);
   // vertices
   elem->set_node(0) = _mesh->node_ptr(node0);
