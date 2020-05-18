@@ -85,7 +85,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_dot_residual(_nrot),
     _rot_vel_old_value(_nrot),
     _rot_dotdot_residual(_nrot),
-    _time_integrator(_sys.getTimeIntegrator())
+    _time_integrator(*_sys.getTimeIntegrator())
 {
   if (_has_beta && _has_gamma && _has_rot_velocities && _has_rot_accelerations)
   {
@@ -119,9 +119,9 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
       MooseVariable * rot_var = getVar("rotations", i);
       _rot_vel_old_value[i] = &rot_var->dofValuesDotOld();
       _rot_dot_residual[i] =
-          &coupledVectorTagDofValue("rotations", _time_integrator->uDotFactorTag(), i);
+          &coupledVectorTagDofValue("rotations", _time_integrator.uDotFactorTag(), i);
       _rot_dotdot_residual[i] =
-          &coupledVectorTagDofValue("rotations", _time_integrator->uDotDotFactorTag(), i);
+          &coupledVectorTagDofValue("rotations", _time_integrator.uDotDotFactorTag(), i);
 
       if (i == 0)
       {
@@ -197,12 +197,12 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
                "y_orientation is different from global x or y direction, respectively.");
 
   // Check for Explicit and alpha parameter
-  if (_alpha != 0 && _time_integrator->isExplicit())
+  if (_alpha != 0 && _time_integrator.isExplicit())
     mooseError("NodalRotationalInertia: HHT time integration parameter can only be used with "
                "Newmark-Beta time integration.");
 
   // Check for Explicit and beta parameter
-  if (_has_beta != 0 && _time_integrator->isExplicit())
+  if (_has_beta != 0 && _time_integrator.isExplicit())
     mooseError("NodalRotationalInertia: beta time integration parameter can only be used with "
                "Newmark-Beta time integrator.");
 }
@@ -263,7 +263,7 @@ NodalRotationalInertia::computeQpJacobian()
     if (_has_beta)
       return _inertia(_component, _component) / (_beta * _dt * _dt) +
              _eta * (1.0 + _alpha) * _inertia(_component, _component) * _gamma / _beta / _dt;
-    else if (_time_integrator->isExplicit())
+    else if (_time_integrator.isExplicit())
       // for explicit central difference integration, _eta does not appear in the
       // Jacobian (mass matrix), and alpha is zero
       return _inertia(_component, _component) * (*_du_dotdot_du)[_qp];

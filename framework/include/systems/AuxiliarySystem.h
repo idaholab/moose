@@ -222,6 +222,7 @@ public:
   /// Old solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot_old;
 
+  /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
 
   /// Whether or not a copy of the residual needs to be made

@@ -203,6 +203,8 @@ protected:
   /// Boolean flag that is set to true if lumped mass matrix is used
   bool _is_lumped;
 
+  /// The vector tag for the nodal multiplication factor for the residual calculation of the udot term
   const TagID _u_dot_factor_tag;
+  /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
   const TagID _u_dotdot_factor_tag;
 };

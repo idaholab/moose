@@ -932,5 +932,6 @@ private:
   std::size_t _required_derivative_size;
 #endif
 
+  /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
 };

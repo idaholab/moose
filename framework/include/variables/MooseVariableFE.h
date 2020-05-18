@@ -399,12 +399,10 @@ public:
   {
     return _neighbor_data->curlSln(Moose::Current);
   }
-
   const FieldVariableCurl & curlSlnOldNeighbor() const
   {
     return _neighbor_data->curlSln(Moose::Old);
   }
-
   const FieldVariableCurl & curlSlnOlderNeighbor() const
   {
     return _neighbor_data->curlSln(Moose::Older);

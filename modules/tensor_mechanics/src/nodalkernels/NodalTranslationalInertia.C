@@ -42,7 +42,6 @@ NodalTranslationalInertia::validParams()
   params.addParam<FileName>(
       "nodal_mass_file",
       "The file containing the nodal positions and the corresponding nodal masses.");
-  params.addParam<bool>("central_difference", false, "Switch for central difference integration.");
   return params;
 }
 
@@ -59,7 +58,7 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     _gamma(_has_gamma ? getParam<Real>("gamma") : 0.1),
     _eta(getParam<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
-    _time_integrator(_sys.getTimeIntegrator())
+    _time_integrator(*_sys.getTimeIntegrator())
 {
   if (_has_beta && _has_gamma && _has_velocity && _has_acceleration)
   {
@@ -77,11 +76,11 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
     _du_dotdot_du = &(_var.duDotDotDu());
     _u_dot_old = &(_var.dofValuesDotOld());
 
-    addFEVariableCoupleableVectorTag(_time_integrator->uDotFactorTag());
-    addFEVariableCoupleableVectorTag(_time_integrator->uDotDotFactorTag());
+    addFEVariableCoupleableVectorTag(_time_integrator.uDotFactorTag());
+    addFEVariableCoupleableVectorTag(_time_integrator.uDotDotFactorTag());
 
-    _u_dot_factor = &_var.vectorTagDofValue(_time_integrator->uDotFactorTag());
-    _u_dotdot_factor = &_var.vectorTagDofValue(_time_integrator->uDotDotFactorTag());
+    _u_dot_factor = &_var.vectorTagDofValue(_time_integrator.uDotFactorTag());
+    _u_dotdot_factor = &_var.vectorTagDofValue(_time_integrator.uDotDotFactorTag());
   }
   else
     mooseError("NodalTranslationalInertia: Either all or none of `beta`, `gamma`, `velocity` and "
@@ -138,12 +137,12 @@ NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & par
   }
 
   // Check for Explicit and alpha parameter
-  if (_alpha != 0 && _time_integrator->isExplicit())
+  if (_alpha != 0 && _time_integrator.isExplicit())
     mooseError("NodalTranslationalInertia: HHT time integration parameter can only be used with "
                "Newmark-Beta time integration.");
 
   // Check if beta and explicit are being used simultaneously
-  if (_has_beta && _time_integrator->isExplicit())
+  if (_has_beta && _time_integrator.isExplicit())
     mooseError("NodalTranslationalInertia: Newmark-beta integration parameter, beta, cannot be "
                "provided along with an explicit time "
                "integrator.");

@@ -576,6 +576,7 @@ protected:
    */
   virtual const VectorVariableValue & coupledVectorDot(const std::string & var_name,
                                                        unsigned int comp = 0);
+
   /**
    * Second time derivative of a coupled vector variable
    * @param var_name Name of coupled vector variable
@@ -740,6 +741,7 @@ protected:
    */
   template <typename T>
   const T & coupledNodalDot(const std::string & var_name, unsigned int comp = 0);
+
   /**
    * Nodal values of second time derivative of a coupled variable
    * @param var_name Name of coupled variable
@@ -749,6 +751,7 @@ protected:
    */
   virtual const VariableValue & coupledNodalDotDot(const std::string & var_name,
                                                    unsigned int comp = 0);
+
   /**
    * Nodal values of old time derivative of a coupled variable
    * @param var_name Name of coupled variable

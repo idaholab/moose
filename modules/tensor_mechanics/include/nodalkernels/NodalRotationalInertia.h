@@ -104,6 +104,6 @@ protected:
   /// du_dotdot_du value
   const VariableValue * _du_dotdot_du;
 
-  /// A pointer to TimeIntegrator.
-  TimeIntegrator * _time_integrator;
+  /// The TimeIntegrator
+  TimeIntegrator & _time_integrator;
 };

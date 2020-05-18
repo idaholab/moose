@@ -74,6 +74,6 @@ protected:
   const VariableValue * _du_dot_du;
   const VariableValue * _du_dotdot_du;
 
-  /// A pointer to TimeIntegrator.
-  TimeIntegrator * _time_integrator;
+  /// The TimeIntegrator
+  TimeIntegrator & _time_integrator;
 };
