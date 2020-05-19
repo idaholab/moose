@@ -18,6 +18,7 @@ ElementIntegralVariablePostprocessor::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
+  params.addClassDescription("Computes a volume integral of the specified variable");
   return params;
 }
 

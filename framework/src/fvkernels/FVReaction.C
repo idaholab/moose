@@ -14,7 +14,9 @@ registerADMooseObject("MooseApp", FVReaction);
 InputParameters
 FVReaction::validParams()
 {
-  return FVElementalKernel::validParams();
+  InputParameters params = FVElementalKernel::validParams();
+  params.addClassDescription("Simple consuming reaction term");
+  return params;
 }
 
 FVReaction::FVReaction(const InputParameters & parameters) : FVElementalKernel(parameters) {}
