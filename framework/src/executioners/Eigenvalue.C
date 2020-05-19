@@ -82,10 +82,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 void
 Eigenvalue::init()
 {
+#if LIBMESH_HAVE_SLEPC
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
-
+#endif
   Steady::init();
 }
 
