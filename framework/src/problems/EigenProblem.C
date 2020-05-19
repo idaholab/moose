@@ -331,6 +331,13 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+#if LIBMESH_HAVE_SLEPC
+  // Set proper operations
+  // We delay this call as much as possible because libmesh
+  // could rebuild matrices due to mesh changes or something else.
+  _nl_eigen->attachSLEPcCallbacks();
+#endif
+
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
   if (!_app.isUltimateMaster())
@@ -365,10 +372,6 @@ EigenProblem::init()
 #endif
 
   FEProblemBase::init();
-#if LIBMESH_HAVE_SLEPC
-  // Set proper operations
-  _nl_eigen->attachSLEPcCallbacks();
-#endif
 }
 
 bool
