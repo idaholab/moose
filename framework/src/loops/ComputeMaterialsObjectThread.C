@@ -117,7 +117,7 @@ void
 ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
                                          unsigned int side,
                                          BoundaryID bnd_id,
-                                         const Elem * lowerDElem /*=nullptr*/)
+                                         const Elem * /*lowerDElem =nullptr*/)
 {
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {

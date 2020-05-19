@@ -38,4 +38,8 @@ protected:
   const Real _epsilon;
 
   const MooseEnum _ncp_type;
+
+  FEProblem & _fe_problem;
+
+  const DisplacedProblem * _displaced_problem;
 };

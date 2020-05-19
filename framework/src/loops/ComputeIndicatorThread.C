@@ -123,7 +123,7 @@ void
 ComputeIndicatorThread::onBoundary(const Elem * /*elem*/,
                                    unsigned int /*side*/,
                                    BoundaryID /*bnd_id*/,
-                                   const Elem * lowerDElem /*=nullptr*/)
+                                   const Elem * /*lowerDElem =nullptr*/)
 {
 }
 

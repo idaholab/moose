@@ -80,7 +80,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
         const Elem * lower_d_elem = _problem.mesh().getLowerDElem(elem, side);
         if (lower_d_elem)
-            _problem.reinitLowerDElem(lower_d_elem,_tid);
+          _problem.reinitLowerDElem(lower_d_elem, _tid);
 
         const Elem * neighbor = elem->neighbor_ptr(side);
 

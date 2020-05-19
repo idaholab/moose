@@ -46,10 +46,22 @@ NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParame
     _disp_z_id(coupled("disp_z")),
     _c(getParam<Real>("c")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
-    _ncp_type(getParam<MooseEnum>("ncp_function_type"))
-
+    _ncp_type(getParam<MooseEnum>("ncp_function_type")),
+    _fe_problem(*getCheckedPointerParam<FEProblem *>("_fe_problem", "Must be using FEProblem.")),
+    _displaced_problem(_fe_problem.getDisplacedProblem().get())
 {
   _overwrite_slave_residual = false;
+
+  // Make sure interpolation orders are consistent
+  const auto & disp_names = _displaced_problem->getDisplacementVarNames();
+
+  const auto disp_type = _sys.system().variable_type(disp_names[0]);
+  const auto lm_type = _sys.system().variable_type(_var.name());
+
+  if (disp_type.order.get_order() != lm_type.order.get_order())
+    paramError(_var.name(),
+               "The mechanical contact Lagrange multiplier has to be the same order as the mesh. "
+               "NormalNodalLMMechanicalContact is applied pointwise at every slave node.");
 }
 
 Real

@@ -41,7 +41,7 @@ public:
   virtual void onBoundary(const Elem * elem,
                           unsigned int side,
                           BoundaryID bnd_id,
-                          const Elem * lowerDElem = nullptr) override;
+                          const Elem * /* lowerDElem = nullptr*/) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
   virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
 
