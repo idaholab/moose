@@ -44,7 +44,19 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   // If this is a nonlinear eigenvalue problem,
   // we do not need to assembly anything
   if (p->isNonlinearEigenvalueSolver())
+  {
+    // If you want an efficient eigensolver,
+    // please use 3.13 or newer.
+    // We need to do an unnecessary assembly,
+    // if you use PETSc that is older than 3.13.
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+    if (eigen_system.matrix_B)
+      p->computeJacobianTag(*eigen_system.current_local_solution.get(),
+                            *eigen_system.matrix_B,
+                            eigen_nl.eigenMatrixTag());
+#endif
     return;
+  }
 
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If we use shell matrices and do not use a shell preconditioning matrix,
@@ -223,7 +235,9 @@ NonlinearEigenSystem::solve()
 
 // In DEBUG mode, Libmesh will check the residual automatically. This may cause
 // an error because B does not need to assembly by default.
-#ifdef DEBUG
+// When PETSc is older than 3.13, we always need to do an extra assembly,
+// so we do not do "close" here
+#if DEBUG && !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   if (_eigen_problem.isGeneralizedEigenvalueProblem() && sys().matrix_B)
     sys().matrix_B->close();
 #endif
