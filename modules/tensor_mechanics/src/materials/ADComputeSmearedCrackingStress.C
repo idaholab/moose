@@ -243,7 +243,6 @@ ADComputeSmearedCrackingStress::initialSetup()
 void
 ADComputeSmearedCrackingStress::computeQpStress()
 {
-  bool force_elasticity_rotation = false;
 
   if (!previouslyCracked())
     computeQpStressIntermediateConfiguration();
@@ -268,8 +267,6 @@ ADComputeSmearedCrackingStress::computeQpStress()
     // Calculate stress in intermediate configuration
     _stress[_qp] = _local_elasticity_tensor * _elastic_strain[_qp];
 
-    // TODO: Remove unnecessary stuff like force_elasticity_rotation
-    force_elasticity_rotation = true;
   }
 
   // compute crack status and adjust stress
