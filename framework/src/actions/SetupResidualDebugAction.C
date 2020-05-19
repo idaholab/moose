@@ -16,6 +16,8 @@
 #include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
 #include "Conversion.h"
+#include "AddVariableAction.h"
+#include "libmesh/string_to_enum.h"
 
 registerMooseAction("MooseApp", SetupResidualDebugAction, "setup_residual_debug");
 
@@ -51,8 +53,15 @@ SetupResidualDebugAction::act()
   for (const auto & var_name : _show_var_residual)
   {
     // add aux-variable
+    auto order = AddVariableAction::getNonlinearVariableOrders();
+    auto family = AddVariableAction::getNonlinearVariableFamilies();
+
     MooseVariableFEBase & var = _problem->getVariable(
         0, var_name, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    auto fe_type = var.feType();
+    order = Utility::enum_to_string<Order>(fe_type.order);
+    family = Utility::enum_to_string(fe_type.family);
+
     InputParameters params = _factory.getValidParams("DebugResidualAux");
     const std::set<SubdomainID> & subdomains = var.activeSubdomains();
 
@@ -61,8 +70,8 @@ SetupResidualDebugAction::act()
     std::string aux_var_name = aux_var_ss.str();
 
     auto var_params = _factory.getValidParams("MooseVariable");
-    var_params.set<MooseEnum>("family") = "LAGRANGE";
-    var_params.set<MooseEnum>("order") = "FIRST";
+    var_params.set<MooseEnum>("family") = family;
+    var_params.set<MooseEnum>("order") = order;
 
     if (subdomains.empty())
       _problem->addAuxVariable("MooseVariable", aux_var_name, var_params);
