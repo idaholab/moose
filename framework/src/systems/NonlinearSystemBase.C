@@ -203,6 +203,8 @@ NonlinearSystemBase::~NonlinearSystemBase()
 void
 NonlinearSystemBase::init()
 {
+  SystemBase::init();
+
   if (_fe_problem.hasDampers())
     setupDampers();
 

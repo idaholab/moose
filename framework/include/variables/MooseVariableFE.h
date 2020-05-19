@@ -253,6 +253,7 @@ public:
   {
     return _element_data->vectorTagValue(tag);
   }
+  const DoFValue & vectorTagDofValue(TagID tag) { return _element_data->vectorTagDofValue(tag); }
   const FieldVariableValue & matrixTagValue(TagID tag)
   {
     return _element_data->matrixTagValue(tag);
@@ -501,10 +502,12 @@ public:
   const DoFValue & dofValuesPreviousNLNeighbor();
   const DoFValue & dofValuesDot();
   const DoFValue & dofValuesDotNeighbor();
+  const DoFValue & dofValuesDotNeighborResidual();
   const DoFValue & dofValuesDotOld();
   const DoFValue & dofValuesDotOldNeighbor();
   const DoFValue & dofValuesDotDot();
   const DoFValue & dofValuesDotDotNeighbor();
+  const DoFValue & dofValuesDotDotNeighborResidual();
   const DoFValue & dofValuesDotDotOld();
   const DoFValue & dofValuesDotDotOldNeighbor();
   const MooseArray<Number> & dofValuesDuDotDu();
@@ -583,7 +586,9 @@ public:
   const OutputType & nodalValueOlderNeighbor();
   const OutputType & nodalValuePreviousNLNeighbor();
   const OutputType & nodalValueDotNeighbor();
+  const OutputType & nodalValueDotNeighborResidual();
   const OutputType & nodalValueDotDotNeighbor();
+  const OutputType & nodalValueDotDotNeighborResidual();
   const OutputType & nodalValueDotOldNeighbor();
   const OutputType & nodalValueDotDotOldNeighbor();
   const OutputType & nodalValueDuDotDuNeighbor();

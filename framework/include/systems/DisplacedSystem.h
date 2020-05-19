@@ -30,8 +30,6 @@ public:
                   Moose::VarKindType var_kind);
   virtual ~DisplacedSystem();
 
-  virtual void init() override;
-
   virtual NumericVector<Number> & getVector(TagID tag_id) override
   {
     return _undisplaced_system.getVector(tag_id);
@@ -91,15 +89,8 @@ public:
     return _undisplaced_system.currentSolution();
   }
 
-  NumericVector<Number> & solution() override { return _undisplaced_system.solution(); }
-  NumericVector<Number> & solutionOld() override;
-  NumericVector<Number> & solutionOlder() override;
-  NumericVector<Number> * solutionPreviousNewton() override { return NULL; }
-
-  const NumericVector<Number> & solution() const override { return _undisplaced_system.solution(); }
-  const NumericVector<Number> & solutionOld() const override;
-  const NumericVector<Number> & solutionOlder() const override;
-  const NumericVector<Number> * solutionPreviousNewton() const override { return NULL; }
+  NumericVector<Number> * solutionPreviousNewton() override { return nullptr; }
+  const NumericVector<Number> * solutionPreviousNewton() const override { return nullptr; }
 
   NumericVector<Number> * solutionUDot() override { return _undisplaced_system.solutionUDot(); }
   NumericVector<Number> * solutionUDotDot() override
@@ -218,7 +209,13 @@ public:
   void addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti) override;
 
 protected:
+  NumericVector<Number> & solutionInternal() const override
+  {
+    return _undisplaced_system.solution();
+  }
+  NumericVector<Number> & solutionOldInternal() const override;
+  NumericVector<Number> & solutionOlderInternal() const override;
+
   SystemBase & _undisplaced_system;
   TransientExplicitSystem & _sys;
 };
-

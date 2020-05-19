@@ -628,6 +628,7 @@ FEProblemBase::initialSetup()
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
+
   addExtraVectors();
 
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
@@ -859,7 +860,7 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering() && !_app.isRestarting())
   {
-    // During initial setup the solution is copied to solution_old and solution_older
+    // During initial setup the solution is copied to the older solution states (old, older, etc)
     CONSOLE_TIMED_PRINT("Copying soultions back");
     copySolutionsBackwards();
   }
@@ -5032,7 +5033,8 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   _nl->addTimeIntegrator(type, name, parameters);
   _has_time_integrator = true;
 
-  // add vectors to store u_dot, u_dotdot, udot_old and u_dotdot_old if requested by the time
+  // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and
+  // solution vectors older than 2 time steps, if requested by the time
   // integrator
   _aux->addDotVectors();
   _nl->addDotVectors();

@@ -165,6 +165,16 @@ protected:
   coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
 
   /**
+   * Returns dof value of a coupled variable for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a DofValue for the coupled variable
+   */
+  virtual const VariableValue &
+  coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+
+  /**
    * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
    * @param var_name Name of coupled variable
    * @param tag matrix tag ID
@@ -514,7 +524,8 @@ protected:
    * Second time derivative of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @return Reference to a VariableValue containing the second time derivative of the coupled
+   * variable
    */
   virtual const VariableValue & coupledDotDot(const std::string & var_name, unsigned int comp = 0);
 
@@ -522,7 +533,7 @@ protected:
    * Old time derivative of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @return Reference to a VariableValue containing the old time derivative of the coupled variable
    */
   virtual const VariableValue & coupledDotOld(const std::string & var_name, unsigned int comp = 0);
 
@@ -530,7 +541,8 @@ protected:
    * Old second time derivative of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * @return Reference to a VariableValue containing the old second time derivative of the coupled
+   * variable
    */
   virtual const VariableValue & coupledDotDotOld(const std::string & var_name,
                                                  unsigned int comp = 0);

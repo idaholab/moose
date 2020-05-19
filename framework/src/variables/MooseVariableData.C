@@ -1826,6 +1826,14 @@ MooseVariableData<OutputType>::dofValuesDuDotDotDu() const
 }
 
 template <typename OutputType>
+const typename MooseVariableData<OutputType>::DoFValue &
+MooseVariableData<OutputType>::vectorTagDofValue(TagID tag) const
+{
+  _need_vector_tag_dof_u[tag] = true;
+  return _vector_tags_dof_u[tag];
+}
+
+template <typename OutputType>
 void
 MooseVariableData<OutputType>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {

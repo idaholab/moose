@@ -115,6 +115,10 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     petsc_solver->use_default_monitor(false);
   }
 #endif
+
+  /// Forcefully init the default solution states to match those available in libMesh
+  /// Must be called here because it would call virtuals in the parent class
+  solutionState(_default_solution_states);
 }
 
 NonlinearSystem::~NonlinearSystem() {}

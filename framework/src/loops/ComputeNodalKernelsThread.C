@@ -71,6 +71,11 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
     if (_nkernel_warehouse->hasActiveBlockObjects(block, _tid))
     {
+      std::set<TagID> needed_fe_var_vector_tags;
+      _nkernel_warehouse->updateBlockFEVariableCoupledVectorTagDependency(
+          block, needed_fe_var_vector_tags, _tid);
+      _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
+
       const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
         nodal_kernel->computeResidual();
