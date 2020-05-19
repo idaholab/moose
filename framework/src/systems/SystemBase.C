@@ -513,7 +513,7 @@ SystemBase::saveOldSolutions()
   if (states > 1)
   {
     _saved_solution_states.resize(states);
-    for (unsigned int i = 1; i <= states; ++i)
+    for (unsigned int i = 1; i <= states - 1; ++i)
       if (!_saved_solution_states[i])
         _saved_solution_states[i] =
             &addVector("save_solution_state_" + std::to_string(i), false, PARALLEL);
