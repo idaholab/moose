@@ -1,12 +1,23 @@
 #pragma once
 
-#include "Sampler1DBase.h"
+#include "GeneralVectorPostprocessor.h"
+#include "SamplerBase.h"
+#include "BlockRestrictable.h"
+#include "Assembly.h"
+#include "MooseMesh.h"
+#include "SwapBackSentinel.h"
+#include "FEProblem.h"
+#include "libmesh/quadrature.h"
+
+class MooseMesh;
 
 /**
- * This class samples Real material properties for the integration points
- * in all elements in a block of a 1-D mesh.
+ * Samples material properties at all quadrature points in mesh block(s)
  */
-class Sampler1DReal : public Sampler1DBase<Real>
+template <bool is_ad>
+class Sampler1DRealTempl : public GeneralVectorPostprocessor,
+                           public SamplerBase,
+                           public BlockRestrictable
 {
 public:
   /**
@@ -14,17 +25,28 @@ public:
    * Sets up variables for output based on the properties to be output
    * @param parameters The input parameters
    */
-  Sampler1DReal(const InputParameters & parameters);
+  Sampler1DRealTempl(const InputParameters & parameters);
 
-  /**
-   * Reduce the material property to a scalar for output
-   * In this case, the material property is a Real already, so just return it.
-   * @param property The material property
-   * @param curr_point The point corresponding to this material property
-   * @return A scalar value from this material property to be output
-   */
-  virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+
+protected:
+  /// The material properties to be output
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _material_properties;
+
+  /// The mesh
+  MooseMesh & _mesh;
+
+  /// The quadrature rule
+  const QBase * const & _qrule;
+
+  /// The quadrature points
+  const MooseArray<Point> & _q_point;
 
 public:
   static InputParameters validParams();
 };
+
+typedef Sampler1DRealTempl<false> Sampler1DReal;
+typedef Sampler1DRealTempl<true> ADSampler1DReal;
