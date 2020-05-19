@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<SideIntegralVariablePostprocessor>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * This postprocessor computes a surface integral of the specified variable.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
@@ -40,4 +40,3 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
 };
-

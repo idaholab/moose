@@ -57,13 +57,13 @@ Extensions:
             #level_set: !include modules/level_set/doc/hidden.yml
             misc: !include modules/misc/doc/hidden.yml
             navier_stokes: !include modules/navier_stokes/doc/hidden.yml
-            #peridynamics: !include modules/peridynamics/doc/hidden.yml
+            peridynamics: !include modules/peridynamics/doc/hidden.yml
             phase_field: !include modules/phase_field/doc/hidden.yml
             porous_flow: !include modules/porous_flow/doc/hidden.yml
             #rdg: !include modules/rdg/doc/hidden.yml
             #richards: !include modules/richards/doc/hidden.yml
             #solid_mechanics: !include modules/solid_mechanics/doc/hidden.yml
-            #stochastic_tools: !include modules/stochastic_tools/doc/hidden.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/hidden.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
             xfem: !include modules/xfem/doc/hidden.yml
         remove:

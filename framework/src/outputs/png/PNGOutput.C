@@ -47,7 +47,7 @@ PNGOutput::validParams()
                                     "Value is between 0 and 1"
                                     "where 0 is completely transparent and 1 is completely opaque. "
                                     "Default transparency of the image is no transparency.");
-
+  params.addClassDescription("Output data in the PNG format");
   return params;
 }
 

@@ -22,7 +22,8 @@ LinearCombinationPostprocessor::validParams()
   params.addRequiredParam<std::vector<Real>>(
       "pp_coefs", "List of linear combination coefficients for each post-processor");
   params.addParam<Real>("b", 0, "Additional value to add to sum");
-
+  params.addClassDescription(
+      "Computes a linear combination between an arbitrary number of post-processors");
   return params;
 }
 

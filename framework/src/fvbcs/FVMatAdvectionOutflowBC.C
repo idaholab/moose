@@ -21,6 +21,8 @@ FVMatAdvectionOutflowBC::validParams()
       "An optional parameter for specifying an advected quantity from a material property. If this "
       "is not specified, then the advected quantity will simply be the variable that this object "
       "is acting on");
+  params.addClassDescription(
+      "Outflow boundary condition taking the advected quantity from a material property");
   return params;
 }
 

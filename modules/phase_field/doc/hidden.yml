@@ -59,7 +59,6 @@
 - /InterfaceKernels/EqualGradientLagrangeMultiplier
 - /InterfaceKernels/InterfaceDiffusionBoundaryTerm
 - /InterfaceKernels/InterfaceDiffusionFluxMatch
-- /Kernels/ACGBPoly
 - /Kernels/ACGrGrElasticDrivingForce
 - /Kernels/ACInterfaceKobayashi2
 - /Kernels/ACSEDGPoly
@@ -84,6 +83,8 @@
 - /Kernels/PolycrystalStoredEnergy/PolycrystalStoredEnergyAction
 - /Kernels/RigidBodyMultiKernel
 - /Kernels/RigidBodyMultiKernel/RigidBodyMultiKernelAction
+- /Materials/ADConstantAnisotropicMobility
+- /Materials/ADGBEvolution
 - /Materials/AsymmetricCrossTermBarrierFunctionMaterial
 - /Materials/CompositeMobilityTensor
 - /Materials/ComputePolycrystalElasticityTensor

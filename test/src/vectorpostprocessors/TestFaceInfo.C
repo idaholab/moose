@@ -21,6 +21,7 @@ TestFaceInfo::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addParam<std::vector<VariableName>>("vars", "Variable names");
+  params.addClassDescription("Computes element face quatities like area, neighbors, normals, etc.");
   return params;
 }
 
