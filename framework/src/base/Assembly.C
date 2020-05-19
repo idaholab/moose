@@ -3143,33 +3143,45 @@ void
 Assembly::clearCachedResiduals()
 {
   for (const auto & vector_tag : _residual_vector_tags)
-  {
-    _cached_residual_values[vector_tag._type_id].clear();
-    _cached_residual_rows[vector_tag._type_id].clear();
-  }
+    clearCachedResiduals(vector_tag);
+}
+
+void
+Assembly::clearCachedResiduals(const VectorTag & vector_tag)
+{
+  auto & values = _cached_residual_values[vector_tag._type_id];
+  auto & rows = _cached_residual_rows[vector_tag._type_id];
+
+  mooseAssert(values.size() == rows.size(),
+              "Number of cached residuals and number of rows must match!");
+
+  // Keep track of the largest size so we can use it to reserve and avoid
+  // as much dynamic allocation as possible
+  if (_max_cached_residuals < values.size())
+    _max_cached_residuals = values.size();
+
+  // Clear both vectors (keeps the capacity the same)
+  values.clear();
+  rows.clear();
+  // And then reserve: use 2 as a fudge factor to *really* avoid dynamic allocation!
+  values.reserve(_max_cached_residuals * 2);
+  rows.reserve(_max_cached_residuals * 2);
 }
 
 void
 Assembly::addCachedResidualDirectly(NumericVector<Number> & residual, const VectorTag & vector_tag)
 {
-  std::vector<Real> & cached_residual_values = _cached_residual_values[vector_tag._type_id];
-  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[vector_tag._type_id];
+  const auto & values = _cached_residual_values[vector_tag._type_id];
+  const auto & rows = _cached_residual_rows[vector_tag._type_id];
 
-  mooseAssert(cached_residual_values.size() == cached_residual_rows.size(),
+  mooseAssert(values.size() == rows.size(),
               "Number of cached residuals and number of rows must match!");
-  if (cached_residual_values.size())
-    residual.add_vector(cached_residual_values, cached_residual_rows);
 
-  if (_max_cached_residuals < cached_residual_values.size())
-    _max_cached_residuals = cached_residual_values.size();
-
-  // Try to be more efficient from now on
-  // The 2 is just a fudge factor to keep us from having to grow the vector during assembly
-  cached_residual_values.clear();
-  cached_residual_values.reserve(_max_cached_residuals * 2);
-
-  cached_residual_rows.clear();
-  cached_residual_rows.reserve(_max_cached_residuals * 2);
+  if (!values.empty())
+  {
+    residual.add_vector(values, rows);
+    clearCachedResiduals(vector_tag);
+  }
 }
 
 void
