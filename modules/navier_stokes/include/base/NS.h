@@ -19,6 +19,7 @@ const std::string momentum_y = "rhov";
 const std::string momentum_z = "rhow";
 const std::string total_energy = "rhoE";
 
+const std::string velocity = "velocity";
 const std::string velocity_x = "vel_x";
 const std::string velocity_y = "vel_y";
 const std::string velocity_z = "vel_z";

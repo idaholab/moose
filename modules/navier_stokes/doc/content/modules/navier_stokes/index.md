@@ -36,8 +36,6 @@ with the hand-coded INS implementation):
   for the velocity variable. This is because second derivatives are not
   implemented in libMesh for vector `FE` types, and consequently we cannot add in the contribution
   from the viscous term which includes a Laplacian operation
-- Only the Laplace form of the viscous term is implemented, e.g. there is
-  currently no support for the traction form.
 
 ## Notes on INS RZ
 

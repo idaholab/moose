@@ -48,6 +48,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   // Create the syntax
   registerSyntax("CNSAction", "Modules/CompressibleNavierStokes");
+  registerSyntax("INSAction", "Modules/IncompressibleNavierStokes");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
