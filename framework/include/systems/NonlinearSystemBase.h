@@ -605,9 +605,6 @@ public:
    */
   bool hasDiagSaveIn() const { return _has_diag_save_in || _has_nodalbc_diag_save_in; }
 
-  NumericVector<Number> & solution() override { return *_sys.solution; }
-  const NumericVector<Number> & solution() const override { return *_sys.solution; }
-
   virtual System & system() override { return _sys; }
   virtual const System & system() const override { return _sys; }
 
@@ -719,6 +716,8 @@ protected:
   void mortarConstraints(bool displaced);
 
 protected:
+  NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
+
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
   /// ghosted form of the residual

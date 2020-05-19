@@ -68,6 +68,10 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     dof_map.remove_algebraic_ghosting_functor(dof_map.default_algebraic_ghosting());
     dof_map.set_implicit_neighbor_dofs(false);
   }
+
+  /// Forcefully init the default solution states to match those available in libMesh
+  /// Must be called here because it would call virtuals in the parent class
+  solutionState(_default_solution_states);
 }
 
 AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }

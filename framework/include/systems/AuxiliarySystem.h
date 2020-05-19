@@ -157,17 +157,7 @@ public:
    */
   bool needMaterialOnSide(BoundaryID bnd_id);
 
-  NumericVector<Number> & solution() override { return *_sys.solution; }
-  NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
-  NumericVector<Number> & solutionOlder() override { return *_sys.older_local_solution; }
   NumericVector<Number> * solutionPreviousNewton() override { return _solution_previous_nl; }
-
-  const NumericVector<Number> & solution() const override { return *_sys.solution; }
-  const NumericVector<Number> & solutionOld() const override { return *_sys.old_local_solution; }
-  const NumericVector<Number> & solutionOlder() const override
-  {
-    return *_sys.older_local_solution;
-  }
   const NumericVector<Number> * solutionPreviousNewton() const override
   {
     return _solution_previous_nl;
@@ -184,7 +174,7 @@ public:
 
   void clearScalarVariableCoupleableTags();
 
-  // protected:
+protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
   void computeNodalVecVars(ExecFlagType type);
@@ -261,4 +251,11 @@ public:
   friend class ComputeNodalKernelBcsThread;
   friend class ComputeNodalKernelJacobiansThread;
   friend class ComputeNodalKernelBCJacobiansThread;
+
+  NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
+  NumericVector<Number> & solutionOldInternal() const override { return *_sys.old_local_solution; }
+  NumericVector<Number> & solutionOlderInternal() const override
+  {
+    return *_sys.older_local_solution;
+  }
 };

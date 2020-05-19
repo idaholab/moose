@@ -173,9 +173,8 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _resid_vs_jac_scaling_param(0)
 #ifndef MOOSE_SPARSE_AD
     ,
-    _required_derivative_size(0),
+    _required_derivative_size(0)
 #endif
-    _solution_state(0)
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)

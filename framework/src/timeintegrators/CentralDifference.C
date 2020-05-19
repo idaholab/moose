@@ -30,7 +30,9 @@ validParams<CentralDifference>()
 }
 
 CentralDifference::CentralDifference(const InputParameters & parameters)
-  : ActuallyExplicitEuler(parameters), _du_dotdot_du(_sys.duDotDotDu())
+  : ActuallyExplicitEuler(parameters),
+    _du_dotdot_du(_sys.duDotDotDu()),
+    _solution_old_old_old(_sys.solutionState(3))
 {
   _is_explicit = true;
   if (_solve_type == LUMPED)
@@ -39,19 +41,16 @@ CentralDifference::CentralDifference(const InputParameters & parameters)
   _fe_problem.setUDotOldRequested(true);
   _fe_problem.setUDotDotRequested(true);
   _fe_problem.setUDotDotOldRequested(true);
-  _fe_problem.needOldSolutionState(3);
 }
 
 void
 CentralDifference::computeADTimeDerivatives(DualReal & ad_u_dot, const dof_id_type & dof) const
 {
-  const auto & u_old_old_old = (_sys.solutionState(3))(dof);
-
   auto u_dotdot = ad_u_dot; // TODO: Ask Alex if this has to be ad_u_dotdot. Currently, it will
                             // change u_dotdot when called.
 
   computeTimeDerivativeHelper(
-      ad_u_dot, u_dotdot, _solution_old(dof), _solution_older(dof), u_old_old_old);
+      ad_u_dot, u_dotdot, _solution_old(dof), _solution_older(dof), _solution_old_old_old(dof));
 }
 
 void
@@ -78,10 +77,10 @@ CentralDifference::computeTimeDerivatives()
   // Declaring u_dot and u_dotdot
   auto & u_dot = *_sys.solutionUDot();
   auto & u_dotdot = *_sys.solutionUDotDot();
-  const auto & u_old_old_old = _sys.solutionState(3);
 
   // Computing derivatives
-  computeTimeDerivativeHelper(u_dot, u_dotdot, _solution_old, _solution_older, u_old_old_old);
+  computeTimeDerivativeHelper(
+      u_dot, u_dotdot, _solution_old, _solution_older, _solution_old_old_old);
 
   // make sure _u_dotdot and _u_dot are in good state
   u_dotdot.close();

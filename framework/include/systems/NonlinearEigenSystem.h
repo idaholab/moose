@@ -84,20 +84,6 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
-  NumericVector<Number> & solutionOld() override { return *_transient_sys.old_local_solution; }
-
-  NumericVector<Number> & solutionOlder() override { return *_transient_sys.older_local_solution; }
-
-  const NumericVector<Number> & solutionOld() const override
-  {
-    return *_transient_sys.old_local_solution;
-  }
-
-  const NumericVector<Number> & solutionOlder() const override
-  {
-    return *_transient_sys.older_local_solution;
-  }
-
   virtual TransientEigenSystem & sys() { return _transient_sys; }
 
   /**
@@ -147,6 +133,16 @@ public:
   TagID nonEigenMatrixTag() { return _A_tag; }
 
 protected:
+  NumericVector<Number> & solutionOldInternal() const override
+  {
+    return *_transient_sys.old_local_solution;
+  }
+
+  NumericVector<Number> & solutionOlderInternal() const override
+  {
+    return *_transient_sys.older_local_solution;
+  }
+
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;
   std::vector<std::pair<Real, Real>> _eigen_values;

@@ -104,37 +104,12 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _max_var_n_dofs_per_elem(0),
     _max_var_n_dofs_per_node(0),
     _time_integrator(nullptr),
-    _old_solution_states_needed(0),
     _computing_scaling_jacobian(false),
     _computing_scaling_residual(false),
     _automatic_scaling(false),
-    _verbose(false)
+    _verbose(false),
+    _default_solution_states(2)
 {
-}
-
-void
-SystemBase::init()
-{
-  // At this point, we know how many solution states we need
-  setupSolutionStates();
-}
-
-void
-SystemBase::setupSolutionStates()
-{
-  // We'll always have 1 state for the current solution
-  _solution_states.resize(_old_solution_states_needed + 1);
-
-  // The first three states (now, old, older) will point to the solutions in the libMesh system
-  _solution_states[0] = &solution();
-  if (_old_solution_states_needed > 0)
-    _solution_states[1] = &solutionOld();
-  if (_old_solution_states_needed > 1)
-    _solution_states[2] = &solutionOlder();
-
-  // Create anything that is past older (state of 3+)
-  for (unsigned int i = 3; i <= _old_solution_states_needed; ++i)
-    _solution_states[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
 }
 
 MooseVariableFEBase &
@@ -534,22 +509,23 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 void
 SystemBase::saveOldSolutions()
 {
-  if (_old_solution_states_needed == 0)
-    mooseError("Old solution states needed must be > 0 to save old solutions");
+  const auto states = _solution_states.size();
+  if (states > 1)
+  {
+    _saved_solution_states.resize(states);
+    for (unsigned int i = 1; i <= states; ++i)
+      if (!_saved_solution_states[i])
+        _saved_solution_states[i] =
+            &addVector("save_solution_state_" + std::to_string(i), false, PARALLEL);
 
-  _saved_solution_states.resize(_old_solution_states_needed + 1);
-  for (unsigned int i = 1; i <= _old_solution_states_needed; ++i)
-    if (!_saved_solution_states[i])
-      _saved_solution_states[i] =
-          &addVector("save_solution_state_" + std::to_string(i), false, PARALLEL);
+    for (unsigned int i = 1; i <= states - 1; ++i)
+      *(_saved_solution_states[i]) = solutionState(i);
+  }
 
   if (!_saved_dot_old && solutionUDotOld())
     _saved_dot_old = &addVector("save_solution_dot_old", false, PARALLEL);
   if (!_saved_dotdot_old && solutionUDotDotOld())
     _saved_dotdot_old = &addVector("save_solution_dotdot_old", false, PARALLEL);
-
-  for (unsigned int i = 1; i <= _old_solution_states_needed; ++i)
-    *(_saved_solution_states[i]) = solutionState(i);
 
   if (solutionUDotOld())
     *_saved_dot_old = *solutionUDotOld();
@@ -564,16 +540,15 @@ SystemBase::saveOldSolutions()
 void
 SystemBase::restoreOldSolutions()
 {
-  if (_old_solution_states_needed == 0)
-    mooseError("Old solution states needed must be > 0 to restore old solutions");
-
-  for (unsigned int i = 1; i <= _old_solution_states_needed; ++i)
-    if (_saved_solution_states[i])
-    {
-      solutionState(i) = *(_saved_solution_states[i]);
-      removeVector("save_solution_state_" + std::to_string(i));
-      _saved_solution_states[i] = nullptr;
-    }
+  const auto states = _solution_states.size();
+  if (states > 1)
+    for (unsigned int i = 1; i <= states - 1; ++i)
+      if (_saved_solution_states[i])
+      {
+        solutionState(i) = *(_saved_solution_states[i]);
+        removeVector("save_solution_state_" + std::to_string(i));
+        _saved_solution_states[i] = nullptr;
+      }
 
   if (_saved_dot_old && solutionUDotOld())
   {
@@ -1141,8 +1116,10 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
 
-  for (unsigned int i = 1; i <= _old_solution_states_needed; ++i)
-    solutionState(i) = solutionState(0);
+  const auto states = _solution_states.size();
+  if (states > 1)
+    for (unsigned int i = 1; i <= states - 1; ++i)
+      solutionState(i) = solutionState(0);
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
@@ -1158,11 +1135,10 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyOldSolutions()
 {
-  if (_old_solution_states_needed == 0)
-    mooseError("Old solution states needed must be > 0 to copy old solutions in ", name());
-
-  for (unsigned int i = _old_solution_states_needed; i > 0; --i)
-    solutionState(i) = solutionState(i - 1);
+  const auto states = _solution_states.size();
+  if (states > 1)
+    for (unsigned int i = states - 1; i > 0; --i)
+      solutionState(i) = solutionState(i - 1);
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
@@ -1201,23 +1177,48 @@ SystemBase::name() const
   return system().name();
 }
 
-void
-SystemBase::needOldSolutionState(const unsigned int state)
+const NumericVector<Number> &
+SystemBase::solutionState(const unsigned int state) const
 {
-  if (_old_solution_states_needed < state)
-    _old_solution_states_needed = state;
+  mooseAssert(
+      !_solution_states.empty(),
+      "No solution states available: make sure to init the default states in system constructors");
+
+  if (state >= _solution_states.size())
+    mooseError("Solution state ",
+               state,
+               " was requested in ",
+               name(),
+               " but only up to state ",
+               _solution_states.size() - 1,
+               " is available.");
+
+  return *_solution_states[state];
 }
 
 NumericVector<Number> &
 SystemBase::solutionState(const unsigned int state)
 {
-  if (state > _old_solution_states_needed)
-    mooseError("Solution state ",
-               state,
-               " was requested, but only up to state ",
-               _old_solution_states_needed,
-               " is available.\nUse the needOldSolutionState() method in the Problem to request "
-               "older solution states.");
+  // Create up to the state requested if unavailable
+  if (state >= _solution_states.size())
+  {
+    _solution_states.resize(state + 1);
+
+    // The first three states (now, old, older) will point to the solutions in the libMesh system,
+    // which is why we are using the "internal" calls to these vectors. _solution_states will then
+    // be the forward facing access to these vectors
+    _solution_states[0] = &solutionInternal();
+    if (state > 0)
+      _solution_states[1] = &solutionOldInternal();
+    if (state > 1)
+      _solution_states[2] = &solutionOlderInternal();
+
+    // Create anything that is past older (state of 3+)
+    for (unsigned int i = 3; i <= state; ++i)
+      if (!_solution_states[i])
+        _solution_states[i] = &addVector("solution_state_" + std::to_string(i), true, GHOSTED);
+  }
+
   return *_solution_states[state];
 }
 

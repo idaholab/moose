@@ -36,6 +36,8 @@ protected:
   /// solution vector for \f$ {du^dotdot}\over{du} \f$
   Real & _du_dotdot_du;
 
+  const NumericVector<Number> & _solution_old_old_old;
+
   /**
    * Helper function that actually does the math for computing the time derivative
    */
