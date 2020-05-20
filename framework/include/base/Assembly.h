@@ -502,10 +502,6 @@ public:
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights = nullptr);
 
-  void reinitLowerDElemDualRef(const Elem * elem,
-                               const std::vector<Point> * const pts,
-                               const std::vector<Real> * const weights = nullptr);
-
   /**
    * reinitialize a mortar segment mesh element in order to get a proper JxW
    */

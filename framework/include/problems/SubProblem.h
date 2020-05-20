@@ -435,11 +435,6 @@ public:
                            const std::vector<Real> * const weights = nullptr,
                            THREAD_ID tid = 0);
 
-  void reinitLowerDElemDualRef(const Elem * elem,
-                               const std::vector<Point> * const pts,
-                               const std::vector<Real> * const weights = nullptr,
-                               THREAD_ID tid = 0);
-
   /**
    * Reinit a mortar element to obtain a valid JxW
    */

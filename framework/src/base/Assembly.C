@@ -2123,49 +2123,30 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
   {
     FEBase * fe_lower = it.second;
     FEType fe_type = it.first;
-    FEShapeData * fesd = _fe_shape_data_lower[fe_type];
 
     fe_lower->reinit(elem, pts, weights);
 
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_phi()));
-    fesd->_grad_phi.shallowCopy(
-        const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dphi()));
-    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
-      fesd->_second_phi.shallowCopy(
-          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
-  }
-}
+    if (FEShapeData * fesd = _fe_shape_data_lower[fe_type])
+    {
+      fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_phi()));
+      fesd->_grad_phi.shallowCopy(
+          const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dphi()));
+      if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+        fesd->_second_phi.shallowCopy(
+            const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_d2phi()));
+    }
 
-void
-Assembly::reinitLowerDElemDualRef(const Elem * elem,
-                                  const std::vector<Point> * const pts,
-                                  const std::vector<Real> * const weights)
-{
-  mooseAssert(pts->size(),
-              "Currently reinitialization of lower d elements is only supported with custom "
-              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
-              "you never try to use JxW coming from a fe_lower object unless you are also passing "
-              "a weights argument");
-
-  _current_lower_d_elem = elem;
-
-  unsigned int elem_dim = elem->dim();
-
-  for (const auto & it : _fe_lower[elem_dim])
-  {
-    FEBase * fe_lower = it.second;
-    FEType fe_type = it.first;
-    FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type];
-
-    fe_lower->set_calculate_dual(true);
-    fe_lower->reinit(elem, pts, weights);
-
-    fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_dual_phi()));
-    fesd->_grad_phi.shallowCopy(
-        const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dual_dphi()));
-    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
-      fesd->_second_phi.shallowCopy(
-          const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_dual_d2phi()));
+    // Dual shape functions need to be computed after primal basis being initialized
+    if (FEShapeData * fesd = _fe_shape_data_dual_lower[fe_type])
+    {
+      fesd->_phi.shallowCopy(
+          const_cast<std::vector<std::vector<Real>> &>(fe_lower->get_dual_phi()));
+      fesd->_grad_phi.shallowCopy(
+          const_cast<std::vector<std::vector<RealGradient>> &>(fe_lower->get_dual_dphi()));
+      if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
+        fesd->_second_phi.shallowCopy(
+            const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_dual_d2phi()));
+    }
   }
 }
 
