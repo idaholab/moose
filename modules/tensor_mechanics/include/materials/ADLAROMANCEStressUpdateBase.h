@@ -29,7 +29,8 @@ protected:
   virtual void initialSetup() override;
 
   virtual void initQpStatefulProperties() override;
-
+  virtual void computeStressInitialize(const ADReal & /*effective_trial_stress*/,
+                                       const ADRankFourTensor & /*elasticity_tensor*/) override;
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
 
@@ -51,13 +52,6 @@ protected:
 
   /**
    *Computes the ROM Strain rate
-   * @param dt Timestep size
-   * @param mobile_dislocations_old Mobile dislocation density from previous timestep
-   * @param immobile_dislocations_old Immobile dislocation density from previous timestep
-   * @param trial_stress Trial stress from radial return method
-   * @param effective_strain_old Effective strain from the previous timestep
-   * @param temperature Temperature variable value
-   * @param environmental Environmental variable value
    * @param mobile_dislocation_increment Mobile dislocation density incremental change
    * @param immobile_dislocation_increment Immobile dislocation density incremental change
    * @param rom_effective_strain ROM calculated effective strain
@@ -66,24 +60,14 @@ protected:
    * @return flag that indicates ROM was skipped
    */
 
-  bool computeROMStrainRate(const Real dt,
-                            const Real & mobile_dislocations_old,
-                            const Real & immobile_dislocations_old,
-                            const ADReal & trial_stress,
-                            const Real & effective_strain_old,
-                            const ADReal & temperature,
-                            const ADReal & environmental,
-                            ADReal & mobile_dislocation_increment,
-                            ADReal & immobile_dislocation_increment,
-                            ADReal & rom_effective_strain,
-                            ADReal & drom_effective_strain_dstress);
+  ADReal computeROMStrainRate(const unsigned index, const bool jacobian = false);
 
   /**
    * Function to check input values against applicability windows set by ROM data set
    * @param input Vector of input values
    * @return flag to indicate to continue computing ROM
    */
-  bool checkInputWindows(std::vector<ADReal> & input);
+  bool checkSpecificInputWindow(std::vector<ADReal> & input, const unsigned int index);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
@@ -93,8 +77,9 @@ protected:
    * @param dconverted Vector of derivative of converted input values with respect to stress
    */
   void convertInput(const std::vector<ADReal> & input,
-                    std::vector<std::vector<ADReal>> & converted,
-                    std::vector<std::vector<ADReal>> & dconverted);
+                    std::vector<ADReal> & converted,
+                    std::vector<ADReal> & dconverted,
+                    const unsigned index);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM
@@ -105,10 +90,10 @@ protected:
    * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
    * respect to stress
    */
-  void buildPolynomials(const std::vector<std::vector<ADReal>> & rom_inputs,
-                        const std::vector<std::vector<ADReal>> & drom_inputs,
-                        std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
-                        std::vector<std::vector<std::vector<ADReal>>> & dpolynomial_inputs);
+  void buildPolynomials(const std::vector<ADReal> & rom_inputs,
+                        const std::vector<ADReal> & drom_inputs,
+                        std::vector<std::vector<ADReal>> & polynomial_inputs,
+                        std::vector<std::vector<ADReal>> & dpolynomial_inputs);
 
   /**
    * Arranges the calculated Legendre polynomials into the order expected by the
@@ -121,29 +106,28 @@ protected:
    * @param rom_outputs Outputs from ROM
    * @param drom_outputs Derivative of outputs from ROM with respect to stress
    */
-  void computeValues(const std::vector<std::vector<Real>> & coefs,
-                     const std::vector<std::vector<std::vector<ADReal>>> & polynomial_inputs,
-                     const std::vector<std::vector<std::vector<ADReal>>> & dpolynomial_inputs,
-                     std::vector<ADReal> & rom_outputs,
-                     std::vector<ADReal> & drom_outputs);
+  void computeValues(const std::vector<Real> & coefs,
+                     const std::vector<std::vector<ADReal>> & polynomial_inputs,
+                     const std::vector<std::vector<ADReal>> & dpolynomial_inputs,
+                     ADReal & rom_outputs,
+                     ADReal & drom_outputs);
 
   /**
    * Computes the output variable increments from the ROM predictions by bringing out of the
    * normalized map to the actual physical values
-   * @param dt Timestep size
    * @param old_input_values Previous timestep values of ROM inputs
    * @param rom_outputs Outputs from ROM
    * @param drom_outputs Derivative of outputs from ROM with respect to stress
-   * @param input_value_increments Incremental change of input values
-   * @param input_value_increments Derivative of the incremental change of input values with respect
-   * to stress
+   * @param ROM_computed_increments Incremental change of input values
+   * @param ROM_computed_increments Derivative of the incremental change of input values with
+   * respect to stress
    */
-  void convertOutput(const Real dt,
-                     const std::vector<ADReal> & old_input_values,
-                     const std::vector<ADReal> & rom_outputs,
-                     const std::vector<ADReal> & drom_outputs,
-                     std::vector<ADReal> & input_value_increments,
-                     std::vector<ADReal> & dinput_value_increments);
+  void convertOutput(const std::vector<Real> & old_input_values,
+                     const ADReal & rom_outputs,
+                     const ADReal & drom_outputs,
+                     ADReal & ROM_computed_increments,
+                     ADReal & dROM_computed_increments,
+                     const unsigned index);
 
   /**
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
@@ -255,8 +239,20 @@ protected:
   /// Container for old immobile dislocation value
   Real _immobile_old;
 
+  /// Container for old effective strain
+  Real _effective_strain_old;
+
   /// Index corresponding to the position for the stress in the input vector
-  const unsigned int _stress_index;
+  const unsigned int _stress_input_idx;
+
+  /// Index corresponding to the position for mobile dislocations increment in the output vector
+  const unsigned int _mobile_output_idx;
+
+  /// Index corresponding to the position for immobile dislocations increment in the output vector
+  const unsigned int _immobile_output_idx;
+
+  /// Index corresponding to the position for strain increment in the output vector
+  const unsigned int _strain_output_idx;
 
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
@@ -285,9 +281,6 @@ protected:
   /// Coefficients used with Legendre polynomials defined by the ROM data set
   std::vector<std::vector<Real>> _coefs;
 
-  /// Flag that checks if environmental factor is included in ROM data set
-  bool _use_env;
-
   /// Limits transformed from readabile input to ROM readable limits
   std::vector<std::vector<std::vector<Real>>> _transformed_limits;
 
@@ -297,9 +290,21 @@ protected:
   /// Creep rate material property
   ADMaterialProperty<Real> & _creep_rate;
 
-  /// Material property to indicate if material point is outside of input limits
-  MaterialProperty<Real> & _failed;
+  /// Material property to hold smootherstep applied in order to extrapolate.
+  ADMaterialProperty<Real> & _extrapolation;
 
   /// Container for derivative of creep rate with respect to strain
   ADReal _derivative;
+
+  /// Container for bool to indicate whether input checks pass or not, excluding the stress input
+  bool _input_within_range;
+
+  /// Container for bool to indicate whether or not to run the ROM
+  bool _run_ROM;
+
+  /// Container for input values
+  std::vector<ADReal> _input_values;
+
+  /// Container for old input values
+  std::vector<Real> _old_input_values;
 };
