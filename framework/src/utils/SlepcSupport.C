@@ -265,8 +265,15 @@ setSlepcOutputOptions(EigenProblem & eigen_problem)
       Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
       break;
 
-    case Moose::EST_MF_MONOLITH_NEWTON: // This should be removed once RattleSnake is updated
-      /* Falls through. */
+    // This should be removed once Griffin is updated
+    case Moose::EST_MF_MONOLITH_NEWTON:
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_monitor");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_monitor");
+      break;
     case Moose::EST_NEWTON:
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
@@ -381,9 +388,34 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
 #endif
       break;
 
-    case Moose::EST_MF_MONOLITH_NEWTON: // This block should be removed once RattleSnake is updated
+    // This block (EST_MF_MONOLITH_NEWTON) should be removed once Griffin is updated
+    // This is used to for API update
+    case Moose::EST_MF_MONOLITH_NEWTON:
       solver_params._eigen_matrix_free = true;
-      /* Falls through. */
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
+      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
+      Moose::PetscSupport::setSinglePetscOption(
+          "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
+      Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+      if (solver_params._eigen_matrix_free)
+      {
+        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+      }
+
+      if (solver_params._customized_pc_for_eigen)
+      {
+        Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
+        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
+      }
+#else
+      mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
+#endif
+      break;
     case Moose::EST_NEWTON:
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
