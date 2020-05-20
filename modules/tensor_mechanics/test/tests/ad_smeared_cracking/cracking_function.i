@@ -41,6 +41,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz stress_xy stress_yz stress_zx strain_xx strain_yy strain_xy strain_yz'
+    use_automatic_differentiation = true
   [../]
 []
 
