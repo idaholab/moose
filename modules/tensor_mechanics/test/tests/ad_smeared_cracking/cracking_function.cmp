@@ -1,0 +1,26 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             0.2 @ t81
+
+GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
+	elem_crack_flags_x  # min:               0 @ t1	max:               1 @ t2
+	elem_strain_xx      # min:               0 @ t1	max:    0.0029955077 @ t41
+	elem_stress_xx      floor 1.e-9 # min:               0 @ t1	max:       999750.08 @ t21
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x  floor 1.e-9 # min:               0 @ t1,n1	max:           0.001 @ t41,n7
+	disp_y  # min:               0 @ t1,n1	max:   7.4709978e-20 @ t23,n8
+
+ELEMENT VARIABLES relative 1.e-6 floor 1.e-10
+	cracking_stress_fn  # min:         1100000 @ t1,b1,e3	max:         1200000 @ t1,b1,e1
+	crack_flags2        # min:               0 @ t1,b1,e1	max:               1 @ t2,b1,e1
+	stress_xx           floor 1.e-3 # min:               0 @ t1,b1,e1	max:       999750.08 @ t21,b1,e3
+	stress_yy           floor 1.e-3 # min:               0 @ t1,b1,e1	max:   2.2790544e-26 @ t22,b1,e3
+	stress_zz           floor 1.e-3 # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1
+	stress_xy           floor 1.e-3 # min:               0 @ t1,b1,e1	max:   1.4363895e-10 @ t22,b1,e2
+	stress_yz           floor 1.e-3 # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1
+	stress_zx           floor 1.e-3 # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1
+	strain_xx           # min:               0 @ t1,b1,e1	max:    0.0029955077 @ t41,b1,e3
+	strain_yy           # min:               0 @ t1,b1,e1	max:   4.5715664e-38 @ t41,b1,e3
+	strain_xy           # min:               0 @ t1,b1,e1	max:   1.3547984e-19 @ t41,b1,e3
+	strain_yz           # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1

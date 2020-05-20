@@ -1,0 +1,24 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             110 @ t111
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-10
+	disp_x  # min:               0 @ t1,n1	max:             2.1 @ t111,n3
+	disp_y  # min:               0 @ t1,n1	max:               1 @ t106,n8
+	disp_z  # min:               0 @ t1,n1	max:               0 @ t1,n1
+
+ELEMENT VARIABLES relative 1.e-5 floor 1.e-10
+	crack_flags1  # min:               0 @ t1,b1,e1	max:               1 @ t2,b1,e1
+	crack_flags2  # min:               0 @ t1,b1,e1	max:               1 @ t2,b1,e1
+	crack_flags3  # min:               0 @ t1,b1,e1	max:               1 @ t2,b1,e1
+	stress_xx     floor 1.e-2 # min:               0 @ t1,b1,e1	max:   2.2029254e+09 @ t106,b1,e1
+	stress_yy     floor 1.e-2 # min:               0 @ t1,b1,e1	max:     4.51333e+09 @ t4,b1,e1
+	stress_zz     floor 1.e-2 # min:               0 @ t1,b1,e1	max:   8.6499032e-17 @ t101,b1,e1
+	stress_xy     floor 1.e-2 # min:               0 @ t1,b1,e1	max:   0.00019602985 @ t58,b1,e1
+	stress_yz     floor 1.e-2 # min:               0 @ t1,b1,e1	max:    0.0003086898 @ t26,b1,e1
+	stress_zx     floor 1.e-2 # min:               0 @ t1,b1,e1	max:   0.00011675393 @ t26,b1,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
