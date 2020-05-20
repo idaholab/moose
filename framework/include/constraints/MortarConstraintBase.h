@@ -156,16 +156,16 @@ protected:
 
 #define usingMortarConstraintBaseMembers                                                           \
   usingConstraintMembers;                                                                          \
-  using ADMortarConstraint<compute_stage>::_phys_points_slave;                                     \
-  using ADMortarConstraint<compute_stage>::_phys_points_master;                                    \
-  using ADMortarConstraint<compute_stage>::_has_master;                                            \
-  using ADMortarConstraint<compute_stage>::_use_dual;                                              \
-  using ADMortarConstraint<compute_stage>::_test;                                                  \
-  using ADMortarConstraint<compute_stage>::_test_slave;                                            \
-  using ADMortarConstraint<compute_stage>::_test_master;                                           \
-  using ADMortarConstraint<compute_stage>::_grad_test_slave;                                       \
-  using ADMortarConstraint<compute_stage>::_grad_test_master;                                      \
-  using ADMortarConstraint<compute_stage>::_normals;                                               \
-  using ADMortarConstraint<compute_stage>::_tangents;                                              \
-  using ADMortarConstraint<compute_stage>::_slave_var;                                             \
-  using ADMortarConstraint<compute_stage>::_master_var
+  using ADMortarConstraint::_phys_points_slave;                                                    \
+  using ADMortarConstraint::_phys_points_master;                                                   \
+  using ADMortarConstraint::_has_master;                                                           \
+  using ADMortarConstraint::_use_dual;                                                             \
+  using ADMortarConstraint::_test;                                                                 \
+  using ADMortarConstraint::_test_slave;                                                           \
+  using ADMortarConstraint::_test_master;                                                          \
+  using ADMortarConstraint::_grad_test_slave;                                                      \
+  using ADMortarConstraint::_grad_test_master;                                                     \
+  using ADMortarConstraint::_normals;                                                              \
+  using ADMortarConstraint::_tangents;                                                             \
+  using ADMortarConstraint::_slave_var;                                                            \
+  using ADMortarConstraint::_master_var

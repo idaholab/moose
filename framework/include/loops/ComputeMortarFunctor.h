@@ -80,7 +80,4 @@ private:
 
   /// boolean flag for holding whether our current mortar segment projects onto a master element
   bool _has_master;
-
-  /// boolean flag for holding whether to use dual basis for the lagrange multipliers
-  bool _use_dual;
 };
