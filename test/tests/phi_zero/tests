@@ -1,0 +1,22 @@
+[Tests]
+  [./phi_zero_linear]
+    type = 'RunApp'
+    input = 'simple_transient_diffusion.i'
+    issues = '#15204'
+    requirement = 'The system shall be able to construct zero objects for shape '
+    'functions and shape function gradients consistent with the maximum number of'
+    'shape functions and quadrature points in the simulation.'
+    design = 'PhiZero.md'
+  [../]
+  [./phi_zero_quadratic]
+    type = 'RunApp'
+    input = 'simple_transient_diffusion.i'
+    issues = '#15204'
+    cli_args = 'Mesh/elem_type=QUAD8  Variables/dummy/order=SECOND Variables/u/order=SECOND Kernels/phi_zero/second_order=true'
+    requirement = 'The system shall be able to construct zero objects for shape '
+    'functions and shape function gradients consistent with the maximum number of'
+    'shape functions and quadrature points in the simulation. This test checks the '
+    'size of zero objects when using second-order elements and second order-variables.'
+    design = 'PhiZero.md'
+  [../]
+[]

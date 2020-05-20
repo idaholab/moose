@@ -67,7 +67,7 @@ public:
    */
   virtual void init() {}
   virtual void preSolve() {}
-  virtual void preStep() {}
+  virtual void preStep();
 
   /**
    * Solves the time step and sets the number of nonlinear and linear iterations.
@@ -131,6 +131,31 @@ public:
    */
   const Real & dt() const { return _dt; }
 
+  /**
+   * Returns whether the explicit solvers are used
+   */
+  virtual const bool & isExplicit() const { return _is_explicit; }
+
+  /**
+   * Returns whether mass matrix is lumped
+   */
+  virtual const bool & isLumped() const { return _is_lumped; }
+
+  /**
+   * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
+   * term.
+   *
+   * By default, this tag will be associated with udot.
+   */
+  TagID uDotFactorTag() const { return _u_dot_factor_tag; }
+  /**
+   * Returns the tag for the nodal multiplication factor for the residual calculation of the udotdot
+   * term.
+   *
+   * By default, this tag will be associated with udotdot.
+   */
+  TagID uDotDotFactorTag() const { return _u_dotdot_factor_tag; }
+
 protected:
   /**
    * Gets the number of nonlinear iterations in the most recent solve.
@@ -171,4 +196,15 @@ protected:
   unsigned int _n_nonlinear_iterations;
   /// Total number of linear iterations over all stages of the time step
   unsigned int _n_linear_iterations;
+
+  /// Boolean flag that is set to true if explicit solvers are used
+  bool _is_explicit;
+
+  /// Boolean flag that is set to true if lumped mass matrix is used
+  bool _is_lumped;
+
+  /// The vector tag for the nodal multiplication factor for the residual calculation of the udot term
+  const TagID _u_dot_factor_tag;
+  /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
+  const TagID _u_dotdot_factor_tag;
 };

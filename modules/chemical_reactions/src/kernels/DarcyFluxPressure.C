@@ -17,7 +17,9 @@ DarcyFluxPressure::validParams()
   InputParameters params = Kernel::validParams();
   RealVectorValue g(0, 0, 0);
   params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
-  params.addClassDescription("");
+  params.addClassDescription(
+      "Darcy flux: - cond * (Grad P - rho * g) where cond is the hydraulic conductivity, P is "
+      "fluid pressure, rho is fluid density and g is gravity");
   return params;
 }
 

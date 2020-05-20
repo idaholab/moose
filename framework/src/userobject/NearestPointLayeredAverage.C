@@ -21,6 +21,11 @@ NearestPointLayeredAverage::validParams()
   InputParameters params =
       nearestPointBaseValidParams<LayeredAverage, ElementIntegralVariableUserObject>();
 
+  params.addClassDescription(
+      "Computes averages of a variable storing partial sums for the specified number of intervals "
+      "in a direction (x,y,z). Given a list of points this object computes the layered average "
+      "closest to each one of those points.");
+
   return params;
 }
 

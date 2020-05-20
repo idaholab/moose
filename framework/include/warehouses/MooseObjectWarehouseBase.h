@@ -136,6 +136,17 @@ public:
 
   ///@{
   /**
+   * Update FE variable coupleable vector tag vector
+   */
+  void updateBlockFEVariableCoupledVectorTagDependency(SubdomainID id,
+                                                       std::set<TagID> & needed_fe_var_vector_tags,
+                                                       THREAD_ID tid = 0) const;
+  void updateBoundaryFEVariableCoupledVectorTagDependency(
+      BoundaryID id, std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid = 0) const;
+  ///@}
+
+  ///@{
+  /**
    * Update material property dependency vector.
    */
   void updateMatPropDependency(std::set<unsigned int> & needed_mat_props, THREAD_ID tid = 0) const;
@@ -199,6 +210,13 @@ protected:
    */
   static void updateVariableDependencyHelper(std::set<MooseVariableFEBase *> & needed_moose_vars,
                                              const std::vector<std::shared_ptr<T>> & objects);
+
+  /**
+   * Helper method for updating FE variable coupleable vector tag vector
+   */
+  static void
+  updateFEVariableCoupledVectorTagDependencyHelper(std::set<TagID> & needed_fe_var_vector_tags,
+                                                   const std::vector<std::shared_ptr<T>> & objects);
 
   /**
    * Helper method for updating material property dependency vector
@@ -602,6 +620,38 @@ MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
   {
     const auto & mv_deps = object->getMooseVariableDependencies();
     needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+  }
+}
+
+template <typename T>
+void
+MooseObjectWarehouseBase<T>::updateBlockFEVariableCoupledVectorTagDependency(
+    SubdomainID id, std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveBlockObjects(id, tid))
+    updateFEVariableCoupledVectorTagDependencyHelper(needed_fe_var_vector_tags,
+                                                     getActiveBlockObjects(id, tid));
+}
+
+template <typename T>
+void
+MooseObjectWarehouseBase<T>::updateBoundaryFEVariableCoupledVectorTagDependency(
+    BoundaryID id, std::set<TagID> & needed_fe_var_vector_tags, THREAD_ID tid /* = 0*/) const
+{
+  if (hasActiveBoundaryObjects(id, tid))
+    updateFEVariableCoupledVectorTagDependencyHelper(needed_fe_var_vector_tags,
+                                                     getActiveBoundaryObjects(id, tid));
+}
+
+template <typename T>
+void
+MooseObjectWarehouseBase<T>::updateFEVariableCoupledVectorTagDependencyHelper(
+    std::set<TagID> & needed_fe_var_vector_tags, const std::vector<std::shared_ptr<T>> & objects)
+{
+  for (const auto & object : objects)
+  {
+    const auto & tag_deps = object->getFEVariableCoupleableVectorTags();
+    needed_fe_var_vector_tags.insert(tag_deps.begin(), tag_deps.end());
   }
 }
 

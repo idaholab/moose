@@ -1,0 +1,37 @@
+[Tests]
+  design = 'CentralDifference.md'
+  issues = '#13964 #9726'
+
+  # 3D explicit analysis with nodal masses equivalent to the lumped mass solve
+  [./explicit_nodalmass]
+    type = 'CSVDiff'
+    input = '3d_nodalmass_explicit.i'
+    csvdiff = '3d_nodalmass_explicit_out.csv'
+    requirement = "The CentralDifference timeintegrator shall correctly calculate "
+                  "the response of a 3D mesh with nodal masses equal to those of "
+                  "a corresponding lumped mass system."
+  [../]
+
+  # 3D implicit analysis with nodal masses equivalent to the lumped mass solve
+  [./implicit_nodalmass]
+    type = 'CSVDiff'
+    input = '3d_nodalmass_implicit.i'
+    csvdiff = '3d_nodalmass_implicit_out.csv'
+    requirement = "The NewmarkBeta timeintegrator shall correctly calculate "
+                  "the response of a 3D mesh with nodal masses equal to those of "
+                  "a corresponding lumped mass system."
+  [../]
+
+  # 3D explicit analysis with lumped mass solve
+  [./explicit_lumped]
+    type = 'CSVDiff'
+    input = '3d_lumped_explicit.i'
+    cli_args = Outputs/file_base=3d_nodalmass_explicit_out
+    csvdiff = '3d_nodalmass_explicit_out.csv'
+    prereq = explicit_nodalmass
+    requirement = "The CentralDifference timeintegrator used with the lumped mass "
+                  "option shall correctly calculate the response of a 3D mesh "
+                  "and produce results that are identical to those calculated using "
+                  "equivalent nodal masses."
+  [../]
+[]

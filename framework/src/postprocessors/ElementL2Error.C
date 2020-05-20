@@ -19,6 +19,8 @@ ElementL2Error::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
+  params.addClassDescription(
+      "Computes L2 error between a field variable and an analytical function");
   return params;
 }
 

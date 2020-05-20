@@ -26,7 +26,7 @@ ExplicitSSPRungeKutta::validParams()
 
   MooseEnum orders("1=1 2 3");
   params.addRequiredParam<MooseEnum>("order", orders, "Order of time integration");
-
+  params.addClassDescription("Explicit strong stability preserving Runge-Kutta methods");
   return params;
 }
 

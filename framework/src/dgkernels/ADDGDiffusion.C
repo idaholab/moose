@@ -25,6 +25,7 @@ ADDGDiffusion::validParams()
   params.addRequiredParam<Real>("epsilon", "epsilon");
   params.addParam<MaterialPropertyName>(
       "diff", 1., "The diffusion (or thermal conductivity or viscosity) coefficient.");
+  params.addClassDescription("DG kernel for diffusion operator");
   return params;
 }
 

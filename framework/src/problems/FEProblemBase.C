@@ -356,9 +356,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _real_zero.resize(n_threads, 0.);
   _scalar_zero.resize(n_threads);
   _zero.resize(n_threads);
+  _phi_zero.resize(n_threads);
   _ad_zero.resize(n_threads);
   _grad_zero.resize(n_threads);
   _ad_grad_zero.resize(n_threads);
+  _grad_phi_zero.resize(n_threads);
   _second_zero.resize(n_threads);
   _ad_second_zero.resize(n_threads);
   _second_phi_zero.resize(n_threads);
@@ -494,8 +496,10 @@ FEProblemBase::~FEProblemBase()
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _zero[i].release();
+    _phi_zero[i].release();
     _scalar_zero[i].release();
     _grad_zero[i].release();
+    _grad_phi_zero[i].release();
     _second_zero[i].release();
     _second_phi_zero[i].release();
     _vector_zero[i].release();
@@ -624,42 +628,49 @@ FEProblemBase::initialSetup()
   // This can be used to throw errors in methods that _must_ be called at construction time.
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
+
   addExtraVectors();
 
-  // Execute this here in case we want to print out the required derivative size in
-  // OutputWarehouse::initialSetup
-  if (haveADObjects() || (_displaced_problem && _displaced_problem->haveADObjects()))
-  {
-    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+  // always execute to get the max number of DoF per element and node needed to initialize phi_zero
+  // variables
+  CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 
-    MaxVarNDofsPerElem mvndpe(*this, *_nl);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-    auto max_var_n_dofs_per_elem = mvndpe.max();
-    _communicator.max(max_var_n_dofs_per_elem);
+  MaxVarNDofsPerElem mvndpe(*this, *_nl);
+  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+  auto max_var_n_dofs_per_elem = mvndpe.max();
+  _communicator.max(max_var_n_dofs_per_elem);
 
-    _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
-    auto displaced_problem = getDisplacedProblem();
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+  _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+  auto displaced_problem = getDisplacedProblem();
+  if (displaced_problem)
+    displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
 
-    MaxVarNDofsPerNode mvndpn(*this, *_nl);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-    auto max_var_n_dofs_per_node = mvndpn.max();
-    _communicator.max(max_var_n_dofs_per_node);
+  MaxVarNDofsPerNode mvndpn(*this, *_nl);
+  Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+  auto max_var_n_dofs_per_node = mvndpn.max();
+  _communicator.max(max_var_n_dofs_per_node);
 
-    _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
-    if (displaced_problem)
-      displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+  _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+  if (displaced_problem)
+    displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
 
 #ifndef MOOSE_SPARSE_AD
-    auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
-    if (hasMortarCoupling())
-      size_required *= 3;
-    else if (hasNeighborCoupling())
-      size_required *= 2;
+  auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
+  if (hasMortarCoupling())
+    size_required *= 3;
+  else if (hasNeighborCoupling())
+    size_required *= 2;
 
-    _nl->setRequiredDerivativeSize(size_required);
+  _nl->setRequiredDerivativeSize(size_required);
 #endif
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
+    _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                               std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
+    _second_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                 std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
   }
 
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
@@ -849,7 +860,7 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering() && !_app.isRestarting())
   {
-    // During initial setup the solution is copied to solution_old and solution_older
+    // During initial setup the solution is copied to the older solution states (old, older, etc)
     CONSOLE_TIMED_PRINT("Copying soultions back");
     copySolutionsBackwards();
   }
@@ -1616,8 +1627,6 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
         _zero[tid].resize(max_qpts, 0);
         _grad_zero[tid].resize(max_qpts, RealGradient(0.));
         _second_zero[tid].resize(max_qpts, RealTensor(0.));
-        _second_phi_zero[tid].resize(
-            max_qpts, std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
         _vector_zero[tid].resize(max_qpts, RealGradient(0.));
         _vector_curl_zero[tid].resize(max_qpts, RealGradient(0.));
       }
@@ -4604,8 +4613,6 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _ad_grad_zero[tid].resize(max_qpts, ADRealGradient(0));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));
     _ad_second_zero[tid].resize(max_qpts, ADRealTensorValue(0));
-    _second_phi_zero[tid].resize(max_qpts,
-                                 std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
     _vector_zero[tid].resize(max_qpts, RealGradient(0.));
     _vector_curl_zero[tid].resize(max_qpts, RealGradient(0.));
   }
@@ -5026,7 +5033,8 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   _nl->addTimeIntegrator(type, name, parameters);
   _has_time_integrator = true;
 
-  // add vectors to store u_dot, u_dotdot, udot_old and u_dotdot_old if requested by the time
+  // add vectors to store u_dot, u_dotdot, udot_old, u_dotdot_old and
+  // solution vectors older than 2 time steps, if requested by the time
   // integrator
   _aux->addDotVectors();
   _nl->addDotVectors();

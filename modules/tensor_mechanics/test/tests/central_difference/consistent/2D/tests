@@ -1,0 +1,23 @@
+[Tests]
+  design = 'CentralDifference.md'
+  issues = '#13964 #9726'
+
+  # 2D implicit analysis with Newmark Beta time integration
+  [./implicit]
+    type = 'CSVDiff'
+    input = '2d_consistent_implicit.i'
+    csvdiff = '2d_consistent_implicit_out.csv'
+    requirement = "The NewmarkBeta timeintegrator shall correctly calculate "
+                  "the response of a 2D mesh. "
+  [../]
+
+  # 2D explicit analysis with Central Difference time integration
+  [./explicit]
+    type = 'CSVDiff'
+    input = '2d_consistent_explicit.i'
+    csvdiff = '2d_consistent_explicit_out.csv'
+    requirement = "The CentralDifference timeintegrator shall correctly calculate "
+                  "the response of a 2D mesh when the the consistent mass matrix "
+                  "option is used."
+  [../]
+[]

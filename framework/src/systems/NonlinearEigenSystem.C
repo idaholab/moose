@@ -142,6 +142,10 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   _A_tag = eigen_problem.addMatrixTag("A_tag");
 
   _B_tag = eigen_problem.addMatrixTag("Eigen");
+
+  /// Forcefully init the default solution states to match those available in libMesh
+  /// Must be called here because it would call virtuals in the parent class
+  solutionState(_default_solution_states);
 }
 
 void

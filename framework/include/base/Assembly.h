@@ -1518,6 +1518,11 @@ protected:
    */
   void addResidualScalar(const VectorTag & vector_tag);
 
+  /**
+   * Clears all of the residuals for a specific vector tag
+   */
+  void clearCachedResiduals(const VectorTag & vector_tag);
+
 private:
   /**
    * Build FEs with a type

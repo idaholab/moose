@@ -19,7 +19,7 @@ DifferencePostprocessor::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("value1", "First value");
   params.addRequiredParam<PostprocessorName>("value2", "Second value");
-
+  params.addClassDescription("Computes the difference between two postprocessors");
   return params;
 }
 

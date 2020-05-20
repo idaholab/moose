@@ -8,6 +8,15 @@
     exodiff = 'out.e'
     expect_out = '|residual|_2 of individual variables:'
 
-    requirement = "The system shall support the ability to output the residual norms of individual variables."
+    requirement = "The system shall support the ability to output the residual norms of individual nodal variables."
+  [../]
+
+  [./elem]
+    type = 'Exodiff'
+    input = 'output_residual_elem.i'
+    exodiff = 'out_elem.e'
+    expect_out = '|residual|_2 of individual variables:'
+
+    requirement = "The system shall support the ability to output the residual norms of individual elemental variables."
   [../]
 []

@@ -435,6 +435,8 @@ public:
   const MooseArray<Number> & dofValuesDuDotDu() const;
   const MooseArray<Number> & dofValuesDuDotDotDu() const;
 
+  const DoFValue & vectorTagDofValue(TagID tag) const;
+
   /**
    * Return the AD dof values
    */
