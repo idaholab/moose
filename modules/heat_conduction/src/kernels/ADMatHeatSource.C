@@ -18,6 +18,7 @@ ADMatHeatSource::validParams()
   params.addParam<Real>("scalar", 1.0, "Scalar multiplied by the body force term");
   params.addParam<MaterialPropertyName>(
       "material_property", 1.0, "Material property describing the body force");
+  params.addClassDescription("Force term in thermal transport to represent a heat source");
   return params;
 }
 
