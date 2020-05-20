@@ -11,7 +11,7 @@
 
 #include "ColumnMajorMatrix.h"
 #include "ADComputeMultipleInelasticStress.h"
-#include "SmearedCrackSofteningBase.h"
+#include "ADSmearedCrackSofteningBase.h"
 #include "Function.h"
 
 /**
