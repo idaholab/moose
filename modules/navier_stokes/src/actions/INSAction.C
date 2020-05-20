@@ -85,6 +85,9 @@ INSAction::validParams()
   params.addParam<bool>(
       "pspg", false, "Whether to perform PSPG stabilization of the mass equation");
   params.addParam<Real>("alpha", 1, "Multiplicative factor on the stabilization parameter tau");
+  params.addParam<bool>("add_standard_velocity_variables_for_ad",
+                        true,
+                        "True to convert vector velocity variables into standard aux variables");
 
   params.addParam<std::vector<BoundaryName>>(
       "velocity_boundary", std::vector<BoundaryName>(), "Boundaries with given velocities");
@@ -240,11 +243,14 @@ INSAction::act()
       _problem->addVariable(vec_var_type, NS::velocity, adparams);
 
       // add normal velocity aux variables
-      _problem->addAuxVariable(var_type, NS::velocity_x, base_params);
-      if (_dim >= 2)
-        _problem->addAuxVariable(var_type, NS::velocity_y, base_params);
-      if (_dim >= 3)
-        _problem->addAuxVariable(var_type, NS::velocity_z, base_params);
+      if (getParam<bool>("add_standard_velocity_variables_for_ad"))
+      {
+        _problem->addAuxVariable(var_type, NS::velocity_x, base_params);
+        if (_dim >= 2)
+          _problem->addAuxVariable(var_type, NS::velocity_y, base_params);
+        if (_dim >= 3)
+          _problem->addAuxVariable(var_type, NS::velocity_z, base_params);
+      }
     }
     else
     {
@@ -350,7 +356,7 @@ INSAction::act()
     if (getParam<bool>("add_temperature_equation"))
       addINSTemperature();
 
-    if (_use_ad)
+    if (_use_ad && getParam<bool>("add_standard_velocity_variables_for_ad"))
       addINSVelocityAux();
   }
 
