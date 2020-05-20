@@ -75,15 +75,11 @@
     natural_temperature_boundary = 'top bottom'
     fixed_temperature_boundary = 'left right'
     temperature_function = '300 400'
-  []
-[]
 
-[Kernels]
-  [buoyancy]
-    type = INSADBoussinesqBodyForce
-    variable = velocity
-    temperature = temp
-    gravity = '0 -9.81 0'
+    boussinesq_approximation = true
+    # material property for reference temperature does not need to be AD material property
+    reference_temperature_name = temp_ref
+    thermal_expansion_name = alpha
   []
 []
 

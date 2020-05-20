@@ -38,6 +38,6 @@
     exodiff = 'boussinesq_stabilized_out.e'
     prereq = 'exo_stab'
     issues = '#15159'
-    requirement = 'We shall be able to reproduce the results from the input with MOOSE syntax only using the Modules/IncompressibleNavierStokes syntax'
+    requirement = 'The system shall be able to reproduce results of incompressible Navier-Stokes with Boussinesq approximation using a customized and condensed action syntax.'
   []
 []

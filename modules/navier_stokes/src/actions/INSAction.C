@@ -120,8 +120,10 @@ INSAction::validParams()
                                    RealVectorValue(0, 0, 0),
                                    "The initial velocity, assumed constant everywhere");
 
-  params.addParamNamesToGroup("equation_type block gravity dynamic_viscosity_name density_name",
-                              "Base");
+  params.addParamNamesToGroup(
+      "equation_type block gravity dynamic_viscosity_name density_name boussinesq_approximation "
+      "reference_temperature_name thermal_expansion_name",
+      "Base");
   params.addParamNamesToGroup("use_ad laplace integrate_p_by_parts convective_term supg pspg alpha",
                               "WeakFormControl");
   params.addParamNamesToGroup("velocity_boundary velocity_function pressure_pinned_node "
@@ -162,12 +164,15 @@ INSAction::INSAction(InputParameters parameters)
   if (_temperature_function.size() != _fixed_temperature_boundary.size())
     paramError("temperature_function",
                "Size is not the same as the number of boundaries in 'fixed_temperature_boundary'");
-  if (getParam<bool>("boussinesq_approximation"))
-    mooseError("Boussinesq approximation has not been enabled with action");
   if (_use_ad)
   {
     if (parameters.isParamSetByUser("convective_term"))
       mooseWarning("'convective_term' is ignored for AD");
+  }
+  else
+  {
+    if (getParam<bool>("boussinesq_approximation"))
+      mooseError("Boussinesq approximation has not been implemented for non-AD");
   }
 }
 
@@ -581,6 +586,22 @@ INSAction::addINSMomentum()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addKernel(kernel_type, "ins_momentum_supg", params);
+    }
+    if (getParam<bool>("boussinesq_approximation"))
+    {
+      const std::string kernel_type = "INSADBoussinesqBodyForce";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = NS::velocity;
+      params.set<std::vector<VariableName>>("temperature") = {_temperature_variable_name};
+      params.set<RealVectorValue>("gravity") = gravity;
+      params.set<MaterialPropertyName>("alpha_name") =
+          getParam<MaterialPropertyName>("thermal_expansion_name");
+      params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
+      params.set<MaterialPropertyName>("ref_temp") =
+          getParam<MaterialPropertyName>("reference_temperature_name");
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      _problem->addKernel(kernel_type, "ins_momentum_boussinesq_force", params);
     }
   }
   else
