@@ -155,5 +155,5 @@ protected:
 
   /// The user-supplied list of softening models to be used in the 3 crack directions
   /// TODO
-  std::vector<SmearedCrackSofteningBase *> _softening_models;
+  std::vector<ADSmearedCrackSofteningBase *> _softening_models;
 };

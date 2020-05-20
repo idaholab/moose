@@ -212,7 +212,7 @@ ADComputeSmearedCrackingStress::initialSetup()
   ADComputeMultipleInelasticStress::initialSetup();
 
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
-    mooseError("ComputeSmearedCrackingStress requires that the elasticity tensor be "
+    mooseError("ADComputeSmearedCrackingStress requires that the elasticity tensor be "
                "guaranteed isotropic");
 
   std::vector<MaterialName> soft_matls = getParam<std::vector<MaterialName>>("softening_models");
@@ -220,13 +220,14 @@ ADComputeSmearedCrackingStress::initialSetup()
   {
     for (auto soft_matl : soft_matls)
     {
-      SmearedCrackSofteningBase * scsb =
-          dynamic_cast<SmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
+      ADSmearedCrackSofteningBase * scsb =
+          dynamic_cast<ADSmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
       if (scsb)
         _softening_models.push_back(scsb);
       else
-        mooseError("Model " + soft_matl +
-                   " is not a softening model that can be used with ComputeSmearedCrackingStress");
+        mooseError(
+            "Model " + soft_matl +
+            " is not a softening model that can be used with ADComputeSmearedCrackingStress");
     }
     if (_softening_models.size() == 1)
     {
@@ -235,8 +236,9 @@ ADComputeSmearedCrackingStress::initialSetup()
       _softening_models.push_back(_softening_models[0]);
     }
     else if (_softening_models.size() != 3)
-      mooseError("If 'softening_models' is specified in ComputeSmearedCrackingStress, either 1 or "
-                 "3 models must be provided");
+      mooseError(
+          "If 'softening_models' is specified in ADComputeSmearedCrackingStress, either 1 or "
+          "3 models must be provided");
   }
 }
 
@@ -266,7 +268,6 @@ ADComputeSmearedCrackingStress::computeQpStress()
 
     // Calculate stress in intermediate configuration
     _stress[_qp] = _local_elasticity_tensor * _elastic_strain[_qp];
-
   }
 
   // compute crack status and adjust stress
@@ -444,24 +445,24 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
       if (new_crack || (pre_existing_crack && loading_existing_crack))
       {
         cracked = true;
-        //        // TODO: Take care of AD softening models.
-        //        if (_softening_models.size() != 0)
-        //          _softening_models[i]->computeCrackingRelease(sigma(i),
-        //                                                       stiffness_ratio,
-        //                                                       strain_in_crack_dir(i),
-        //                                                       _crack_initiation_strain[_qp](i),
-        //                                                       _crack_max_strain[_qp](i),
-        //                                                       cracking_stress,
-        //                                                       youngs_modulus);
-        //        else
-        //          computeCrackingRelease(i,
-        //                                 sigma(i),
-        //                                 stiffness_ratio,
-        //                                 strain_in_crack_dir(i),
-        //                                 cracking_stress,
-        //                                 cracking_alpha,
-        //                                 youngs_modulus);
-        //        _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
+
+        if (_softening_models.size() != 0)
+          _softening_models[i]->computeCrackingRelease(sigma(i),
+                                                       stiffness_ratio,
+                                                       strain_in_crack_dir(i),
+                                                       _crack_initiation_strain[_qp](i),
+                                                       _crack_max_strain[_qp](i),
+                                                       cracking_stress,
+                                                       youngs_modulus);
+        else
+          computeCrackingRelease(i,
+                                 sigma(i),
+                                 stiffness_ratio,
+                                 strain_in_crack_dir(i),
+                                 cracking_stress,
+                                 cracking_alpha,
+                                 youngs_modulus);
+        _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 
       else if (cracked && _cracking_neg_fraction > 0 &&
