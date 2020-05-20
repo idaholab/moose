@@ -41,6 +41,31 @@ INSAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
 
+  params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
+  params.addParam<MaterialPropertyName>(
+      "reference_temperature_name", "temp_ref", "Material property name for reference temperature");
+  params.addParam<MaterialPropertyName>(
+      "thermal_expansion_name", "alpha", "The name of the thermal expansion");
+
+  params.addParam<bool>("add_temperature_equation", false, "True to add temperature equation");
+  params.addParam<VariableName>(
+      "temperature_variable", NS::temperature, "Temperature variable name");
+  params.addParam<Real>("temperature_scaling", 1, "Scaling for the temperature variable");
+  params.addParam<Real>(
+      "initial_temperature", 0, "The initial temperature, assumed constant everywhere");
+  params.addParam<MaterialPropertyName>(
+      "thermal_conductivity_name", "k", "The name of the thermal conductivity");
+  params.addParam<MaterialPropertyName>(
+      "specific_heat_name", "cp", "The name of the specific heat");
+  params.addParam<std::vector<BoundaryName>>("natural_temperature_boundary",
+                                             std::vector<BoundaryName>(),
+                                             "Natural boundaries for temperature equation");
+  params.addParam<std::vector<BoundaryName>>("fixed_temperature_boundary",
+                                             std::vector<BoundaryName>(),
+                                             "Dirichlet boundaries for temperature equation");
+  params.addParam<std::vector<FunctionName>>(
+      "temperature_function", std::vector<FunctionName>(), "Temperature on Dirichlet boundaries");
+
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
 
@@ -102,6 +127,11 @@ INSAction::validParams()
   params.addParamNamesToGroup(
       "family order pressure_scaling velocity_scaling initial_pressure initial_velocity",
       "Variable");
+  params.addParamNamesToGroup(
+      "add_temperature_equation temperature_variable temperature_scaling initial_temperature "
+      "thermal_conductivity_name specific_heat_name natural_temperature_boundary "
+      "fixed_temperature_boundary temperature_function",
+      "Temperature");
   return params;
 }
 
@@ -116,13 +146,21 @@ INSAction::INSAction(InputParameters parameters)
     _no_bc_boundary(getParam<std::vector<BoundaryName>>("no_bc_boundary")),
     _has_pinned_node(isParamValid("pressure_pinned_node")),
     _pinned_node("ins_pinned_node"),
+    _fixed_temperature_boundary(getParam<std::vector<BoundaryName>>("fixed_temperature_boundary")),
+    _temperature_function(getParam<std::vector<FunctionName>>("temperature_function")),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-    _use_ad(getParam<bool>("use_ad"))
+    _use_ad(getParam<bool>("use_ad")),
+    _temperature_variable_name(getParam<VariableName>("temperature_variable"))
 {
   if (_pressure_function.size() != _pressure_boundary.size())
     paramError("pressure_function",
                "Size is not the same as the number of boundaries in 'pressure_boundary'");
+  if (_temperature_function.size() != _fixed_temperature_boundary.size())
+    paramError("temperature_function",
+               "Size is not the same as the number of boundaries in 'fixed_temperature_boundary'");
+  if (getParam<bool>("boussinesq_approximation"))
+    mooseError("Boussinesq approximation has not been enabled with action");
   if (_use_ad)
   {
     if (parameters.isParamSetByUser("convective_term"))
@@ -225,6 +263,12 @@ INSAction::act()
       }
     }
 
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
+      _problem->addVariable(var_type, _temperature_variable_name, params);
+    }
+
     // for non-stablized form, the FE order for pressure need to be at least one order lower
     if (!getParam<bool>("supg"))
       params.set<MooseEnum>("order") = _fe_type.order.get_order() - 1;
@@ -276,6 +320,15 @@ INSAction::act()
       }
     }
 
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      Real tvalue = getParam<Real>("initial_temperature");
+      InputParameters params = _factory.getValidParams("ConstantIC");
+      params.set<VariableName>("variable") = _temperature_variable_name;
+      params.set<Real>("value") = tvalue;
+      _problem->addInitialCondition("ConstantIC", "temperature_ic", params);
+    }
+
     if (pvalue != 0)
     {
       InputParameters params = _factory.getValidParams("ConstantIC");
@@ -294,6 +347,9 @@ INSAction::act()
     addINSMass();
     addINSMomentum();
 
+    if (getParam<bool>("add_temperature_equation"))
+      addINSTemperature();
+
     if (_use_ad)
       addINSVelocityAux();
   }
@@ -311,6 +367,12 @@ INSAction::act()
 
     if (_pressure_boundary.size() > 0)
       addINSPressureBC();
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      if (_fixed_temperature_boundary.size() > 0)
+        addINSTemperatureBC();
+    }
   }
 
   if (_current_task == "add_material")
@@ -359,6 +421,20 @@ INSAction::addINSTimeKernels()
       params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<NonlinearVariableName>("variable") = NS::velocity;
     _problem->addKernel(kernel_type, "ins_velocity_time_deriv", params);
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      const std::string kernel_type = "ADHeatConductionTimeDerivative";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<MaterialPropertyName>("density_name") =
+          getParam<MaterialPropertyName>("density_name");
+      params.set<MaterialPropertyName>("specific_heat") =
+          getParam<MaterialPropertyName>("specific_heat_name");
+      _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
+    }
   }
   else
   {
@@ -373,6 +449,19 @@ INSAction::addINSTimeKernels()
     {
       params.set<NonlinearVariableName>("variable") = momentums[component];
       _problem->addKernel(kernel_type, momentums[component] + "_time_deriv", params);
+    }
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      const std::string kernel_type = "INSTemperatureTimeDerivative";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
+      params.set<MaterialPropertyName>("cp_name") =
+          getParam<MaterialPropertyName>("specific_heat_name");
+      _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
     }
   }
 }
@@ -514,6 +603,52 @@ INSAction::addINSMomentum()
 }
 
 void
+INSAction::addINSTemperature()
+{
+  if (_use_ad)
+  {
+    {
+      const std::string kernel_type = "INSADTemperatureAdvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      params.set<std::vector<VariableName>>("velocity") = {NS::velocity};
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      _problem->addKernel(kernel_type, "ins_temperature_convection", params);
+    }
+    {
+      const std::string kernel_type = "ADHeatConduction";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      params.set<MaterialPropertyName>("thermal_conductivity") =
+          getParam<MaterialPropertyName>("thermal_conductivity_name");
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      _problem->addKernel(kernel_type, "ins_temperature_conduction", params);
+    }
+  }
+  else
+  {
+    const std::string kernel_type = "INSTemperature";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+    params.set<CoupledName>("u") = {NS::velocity_x};
+    if (_dim >= 2)
+      params.set<CoupledName>("v") = {NS::velocity_y};
+    if (_dim >= 3)
+      params.set<CoupledName>("w") = {NS::velocity_z};
+    params.set<MaterialPropertyName>("k_name") =
+        getParam<MaterialPropertyName>("thermal_conductivity_name");
+    params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
+    params.set<MaterialPropertyName>("cp_name") =
+        getParam<MaterialPropertyName>("specific_heat_name");
+    if (_blocks.size() > 0)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+    _problem->addKernel(kernel_type, "ins_temperature", params);
+  }
+}
+
+void
 INSAction::addINSVelocityBC()
 {
   const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
@@ -622,6 +757,40 @@ INSAction::addINSVelocityBC()
               "DirichletBC", momentums[component] + "_" + _velocity_boundary[i], params);
         }
       }
+    }
+  }
+}
+
+void
+INSAction::addINSTemperatureBC()
+{
+  for (unsigned int i = 0; i < _fixed_temperature_boundary.size(); ++i)
+  {
+    const FunctionName func = _temperature_function[i];
+    if (func == "NA")
+      continue;
+
+    std::stringstream ss(func);
+    Real val;
+    if ((ss >> val).fail() || !ss.eof())
+    {
+      InputParameters params = _factory.getValidParams("FunctionDirichletBC");
+      params.set<FunctionName>("function") = func;
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {_fixed_temperature_boundary[i]};
+      _problem->addBoundaryCondition("FunctionDirichletBC",
+                                     _temperature_variable_name + "_" +
+                                         _fixed_temperature_boundary[i],
+                                     params);
+    }
+    else
+    {
+      InputParameters params = _factory.getValidParams("DirichletBC");
+      params.set<Real>("value") = val;
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {_fixed_temperature_boundary[i]};
+      _problem->addBoundaryCondition(
+          "DirichletBC", _temperature_variable_name + "_" + _fixed_temperature_boundary[i], params);
     }
   }
 }

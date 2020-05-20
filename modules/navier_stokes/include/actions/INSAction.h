@@ -40,6 +40,7 @@ protected:
   void addINSTimeKernels();
   void addINSMass();
   void addINSMomentum();
+  void addINSTemperature();
   void addINSVelocityAux();
 
   // Helper functions that add BCs.
@@ -47,6 +48,7 @@ protected:
   void addINSPinnedPressureBC();
   void addINSNoBCBC();
   void addINSPressureBC();
+  void addINSTemperatureBC();
 
   /// Equation type, transient or steady-state
   MooseEnum _type;
@@ -66,10 +68,16 @@ protected:
   bool _has_pinned_node;
   /// The node set name of the pinned node
   BoundaryName _pinned_node;
+  /// Boundaries with temperature specified
+  std::vector<BoundaryName> _fixed_temperature_boundary;
+  /// Temperature function names at fixed temperature boundaries
+  std::vector<FunctionName> _temperature_function;
   /// FE type for various variables
   FEType _fe_type;
   /// Whether we use AD or not
   bool _use_ad;
+  /// Temperature variable name to facilitate temperature variable added outside
+  VariableName _temperature_variable_name;
   /// Mesh dimension
   unsigned int _dim;
   /// Subdomain IDs

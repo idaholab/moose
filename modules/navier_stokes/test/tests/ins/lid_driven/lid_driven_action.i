@@ -27,45 +27,15 @@
     laplace = true
     family = LAGRANGE
     order = SECOND
-  []
-[]
 
-[Variables]
-  [T]
-    order = SECOND
-    family = LAGRANGE
-    initial_condition = 1
-  []
-[]
-
-[Kernels]
-  # temperature
-  [temperature_time]
-    type = INSTemperatureTimeDerivative
-    variable = T
-  []
-
-  [temperature_space]
-    type = INSTemperature
-    variable = T
-    u = vel_x
-    v = vel_y
-  []
-[]
-
-[BCs]
-  [T_hot]
-    type = DirichletBC
-    variable = T
-    boundary = 'bottom'
-    value = 1
-  []
-
-  [T_cold]
-    type = DirichletBC
-    variable = T
-    boundary = 'top'
-    value = 0
+    add_temperature_equation = true
+    temperature_variable = T
+    initial_temperature = 1
+    thermal_conductivity_name = k
+    specific_heat_name = cp
+    natural_temperature_boundary = 'left right'
+    fixed_temperature_boundary = 'top bottom'
+    temperature_function = '0 1'
   []
 []
 

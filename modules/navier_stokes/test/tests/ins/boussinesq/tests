@@ -32,4 +32,12 @@
     requirement = 'The system shall have an accurate Jacobian provided by automatic differentiation when computing the Boussinesq approximation with SUPG and PSPG stabilization.'
     method = "!dbg" # this problem is highly nonlinear and takes ~21 nonlinear iterations to solve in serial. Hence this is a relatively long test
   []
+  [exo_stab_action]
+    type = 'Exodiff'
+    input = 'boussinesq_stabilized_action.i'
+    exodiff = 'boussinesq_stabilized_out.e'
+    prereq = 'exo_stab'
+    issues = '#15159'
+    requirement = 'We shall be able to reproduce the results from the input with MOOSE syntax only using the Modules/IncompressibleNavierStokes syntax'
+  []
 []
