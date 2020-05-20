@@ -26,9 +26,11 @@ VectorPostprocessorFunction::validParams()
                                        "VectorPostprocessor column tabulating the "
                                        "ordinate (function values) of the sampled "
                                        "function");
-  params.addRangeCheckedParam<unsigned int>(
+
+  MooseEnum component("x=0 y=1 z=2 time=3", "time");
+  params.addParam<MooseEnum>(
       "component",
-      "component < 3",
+      component,
       "Component of the function evaluation point used to sample the VectorPostprocessor");
 
   params.addClassDescription(
@@ -44,7 +46,7 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
                                                  getParam<std::string>("argument_column"))),
     _value_column(getVectorPostprocessorValue("vectorpostprocessor_name",
                                               getParam<std::string>("value_column"))),
-    _component(isParamValid("component") ? getParam<unsigned int>("component") : NO_COMPONENT)
+    _component(getParam<MooseEnum>("component"))
 {
   try
   {
@@ -70,9 +72,6 @@ VectorPostprocessorFunction::value(Real t, const Point & p) const
     // iteration?
     _linear_interp->setData(_argument_column, _value_column);
   }
-  const Real x = _component != NO_COMPONENT ? p(_component) : t;
+  const Real x = _component == 3 ? t : p(_component);
   return _linear_interp->sample(x);
 }
-
-const unsigned int VectorPostprocessorFunction::NO_COMPONENT =
-    std::numeric_limits<unsigned int>::max();

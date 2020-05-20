@@ -39,8 +39,5 @@ protected:
   /// if the "component" parameter is specified, its value is assigned here and
   /// function values are interpolated W.R.T. spatial coordinates in that direction,
   /// otherwise, they are interpolated W.R.T time
-  const unsigned int & _component;
-
-  /// used to indicate that the "component" parameter has not been specified
-  static const unsigned int NO_COMPONENT;
+  const MooseEnum & _component;
 };
