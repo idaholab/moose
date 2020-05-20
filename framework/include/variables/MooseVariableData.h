@@ -728,8 +728,11 @@ private:
   const FieldVariablePhiCurl * _current_curl_phi;
   const ADTemplateVariablePhiGradient<OutputShape> * _current_ad_grad_phi;
 
-  std::function<const typename OutputTools<OutputShape>::VariablePhiValue &(const Assembly &,
-                                                                            FEType)>
+  // dual mortar
+  const bool _use_dual;
+
+  std::function<const typename OutputTools<OutputType>::VariablePhiValue &(const Assembly &,
+                                                                           FEType)>
       _phi_assembly_method;
   std::function<const typename OutputTools<OutputShape>::VariablePhiValue &(const Assembly &,
                                                                             FEType)>
