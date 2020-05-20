@@ -1,0 +1,34 @@
+[Tests]
+   design = "Eigenvalue.md"
+   issues = "#7398"
+
+  [./array_kernel]
+    type = 'CSVDiff'
+    input = 'ne_array_kernels.i'
+    csvdiff = 'ne_array_kernels_out_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "Eigenvalue system should support array kernels"
+  [../]
+
+  [./two_variables]
+    type = 'CSVDiff'
+    input = 'ne_two_variables.i'
+    csvdiff = 'ne_two_variables_out_eigenvalues_0001.csv'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "Eigenvalue system should be able to handle multiple variables"
+  [../]
+
+  [./two_variables_precond_include_eigen_kernels]
+    type = 'CSVDiff'
+    input = 'ne_two_variables.i'
+    csvdiff = 'ne_two_variables_out_eigenvalues_0001.csv'
+    cli_args = 'Executioner/precond_matrix_includes_eigen=true -eps_power_pc_type  lu -init_eps_power_pc_type lu -eps_power_pc_factor_mat_solver_type superlu_dist'
+    prereq = 'two_variables'
+    expect_out = '6 KSP Residual norm'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    requirement = "Eigenvalue system should be able to handle multiple variables"
+  [../]
+[]

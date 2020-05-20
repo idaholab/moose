@@ -10,6 +10,9 @@
   ny = 8
 []
 
+# the minimum eigenvalue of this problem is 2*(PI/a)^2;
+# Its inverse is 0.5*(a/PI)^2 = 5.0660591821169. Here a is equal to 10.
+
 [Variables]
   [./u]
     order = FIRST
@@ -22,64 +25,61 @@
 []
 
 [Kernels]
-  [./diff_u]
+  [./diffu]
     type = Diffusion
     variable = u
   [../]
-  [./diff_v]
+
+  [./diffv]
     type = Diffusion
     variable = v
   [../]
 
-  [./rhs]
-    type = CoupledForce
+  [./rhsu]
+    type = CoefReaction
     variable = u
-    v = v
+    coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
-  [./src_v]
-    type = CoupledForce
+
+  [./rhsv]
+    type = CoefReaction
     variable = v
-    v = u
+    coefficient = -1.0
+    extra_vector_tags = 'eigen'
   [../]
 []
 
 [BCs]
-  [./homogeneous_u]
+  [./homogeneousu]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
   [../]
-  [./homogeneous_v]
+  [./homogeneousv]
     type = DirichletBC
     variable = v
     boundary = '0 1 2 3'
     value = 0
   [../]
-  [./eigenBC_u]
+
+  [./eigenu]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
   [../]
-  [./eigenBC_v]
+  [./eigenv]
     type = EigenDirichletBC
     variable = v
     boundary = '0 1 2 3'
-  [../]
-
-[]
-
-[Preconditioning]
-  [./smp]
-    type = SMP
-    full = true
   [../]
 []
 
 [Executioner]
   type = Eigenvalue
-  solve_type = MF_MONOLITH_NEWTON
+  matrix_free = true
+  solve_type = NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
 []
 
@@ -92,6 +92,5 @@
 
 [Outputs]
   csv = true
-  file_base = ne_deficient_b
   execute_on = 'timestep_end'
 []

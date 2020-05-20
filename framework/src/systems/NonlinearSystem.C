@@ -644,3 +644,9 @@ NonlinearSystem::computeScaling()
 
   _auto_scaling_initd = true;
 }
+
+void
+NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
+{
+  nonlinearSolver()->attach_preconditioner(preconditioner);
+}

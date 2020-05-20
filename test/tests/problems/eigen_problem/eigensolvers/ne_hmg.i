@@ -10,20 +10,15 @@
   ny = 8
 []
 
+# the minimum eigenvalue of this problem is 2*(PI/a)^2;
+# Its inverse is 0.5*(a/PI)^2 = 5.0660591821169. Here a is equal to 10.
+
 [Variables]
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
-
-  [./T]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  [./power]
+  [./v]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -31,10 +26,8 @@
 
 [Kernels]
   [./diff]
-    type = DiffMKernel
+    type = Diffusion
     variable = u
-    mat_prop = diffusion
-    offset = 0.0
   [../]
 
   [./rhs]
@@ -44,26 +37,16 @@
     extra_vector_tags = 'eigen'
   [../]
 
-  [./diff_T]
+  [./diffv]
     type = Diffusion
-    variable = T
+    variable = v
   [../]
-  [./src_T]
-    type = CoupledForce
-    variable = T
-    v = power
-  [../]
-[]
 
-[AuxKernels]
-  [./power_ak]
-    type = NormalizationAux
-    variable = power
-    source_variable = u
-    normalization = unorm
-    # this coefficient will affect the eigenvalue.
-    normal_factor = 10
-    execute_on = linear
+  [./rhsv]
+    type = CoefReaction
+    variable = v
+    coefficient = -1.0
+    extra_vector_tags = 'eigen'
   [../]
 []
 
@@ -74,49 +57,36 @@
     boundary = '0 1 2 3'
     value = 0
   [../]
-
-  [./eigenU]
+  [./eigen]
     type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
   [../]
 
-  [./homogeneousT]
+  [./homogeneousv]
     type = DirichletBC
-    variable = T
+    variable = v
     boundary = '0 1 2 3'
     value = 0
   [../]
-
-  [./eigenT]
+  [./eigenv]
     type = EigenDirichletBC
-    variable = T
+    variable = v
     boundary = '0 1 2 3'
-  [../]
-[]
-
-[Materials]
-  [./dc]
-    type = VarCouplingMaterial
-    var = T
-    block = 0
-    base = 1.0
-    coef = 1.0
   [../]
 []
 
 [Executioner]
   type = Eigenvalue
-  solve_type = MF_MONOLITH_NEWTON
+  matrix_free = true
+  solve_type = NEWTON
   eigen_problem_type = GEN_NON_HERMITIAN
-[]
-
-[Postprocessors]
-  [./unorm]
-    type = ElementIntegralVariablePostprocessor
-    variable = u
-    execute_on = linear
-  [../]
+  petsc_options_iname = '-init_eps_power_pc_type
+                         -init_eps_power_pc_hmg_use_subspace_coarsening
+                         -eps_power_pc_type
+                         -eps_power_pc_hmg_use_subspace_coarsening'
+  petsc_options_value = 'hmg true hmg true'
+  petsc_options = '-init_eps_view -eps_view'
 []
 
 [VectorPostprocessors]
@@ -128,6 +98,6 @@
 
 [Outputs]
   csv = true
-  file_base = ne_coupled
+  file_base = monolith_newton
   execute_on = 'timestep_end'
 []

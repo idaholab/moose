@@ -32,6 +32,8 @@ public:
 
   virtual void solve() override;
 
+  virtual void init() override;
+
   virtual bool converged() override;
 
   virtual unsigned int getNEigenPairsRequired() { return _n_eigen_pairs_required; }
@@ -68,6 +70,13 @@ public:
                                   TagID tag) override;
 
   /**
+   * Form several matrices simultaneously
+   */
+  void computeMatricesTags(const NumericVector<Number> & soln,
+                           const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
+                           const std::set<TagID> & tags);
+
+  /**
    * Form two Jacobian matrices, whre each is associateed with one tag, through one
    * element-loop.
    */
@@ -76,6 +85,8 @@ public:
                                  SparseMatrix<Number> & jacobianB,
                                  TagID tagA,
                                  TagID tagB);
+
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks) override;
 
   /**
    * Form a vector for all kernels and BCs with a given tag
@@ -95,6 +106,11 @@ public:
                                  TagID tagB);
 
   void scaleEigenvector(const Real scaling_factor);
+
+  /**
+   * Which eigenvalue is active
+   */
+  unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
 #endif
 
 protected:
@@ -111,4 +127,5 @@ protected:
   PerfID _compute_residual_tag_timer;
   PerfID _compute_residual_ab_timer;
   PerfID _solve_timer;
+  PerfID _compute_jacobian_blocks_timer;
 };

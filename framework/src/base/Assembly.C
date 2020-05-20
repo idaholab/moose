@@ -3717,18 +3717,31 @@ Assembly::cacheJacobianNeighbor()
 }
 
 void
+Assembly::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                               unsigned int ivar,
+                               unsigned int jvar,
+                               const DofMap & dof_map,
+                               std::vector<dof_id_type> & dof_indices,
+                               const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    addJacobianBlock(jacobian, ivar, jvar, dof_map, dof_indices, tag);
+}
+
+void
 Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
                            unsigned int ivar,
                            unsigned int jvar,
                            const DofMap & dof_map,
-                           std::vector<dof_id_type> & dof_indices)
+                           std::vector<dof_id_type> & dof_indices,
+                           TagID tag)
 {
   if (dof_indices.size() == 0)
     return;
   if (!(*_cm)(ivar, jvar))
     return;
 
-  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar);
+  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar, tag);
   auto & iv = _sys.getVariable(_tid, ivar);
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();

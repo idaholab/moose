@@ -846,6 +846,18 @@ DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian,
 }
 
 void
+DisplacedProblem::addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                                       unsigned int ivar,
+                                       unsigned int jvar,
+                                       const DofMap & dof_map,
+                                       std::vector<dof_id_type> & dof_indices,
+                                       const std::set<TagID> & tags,
+                                       THREAD_ID tid)
+{
+  _assembly[tid]->addJacobianBlockTags(jacobian, ivar, jvar, dof_map, dof_indices, tags);
+}
+
+void
 DisplacedProblem::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
                                            unsigned int ivar,
                                            unsigned int jvar,

@@ -14,6 +14,10 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 
+// Libmesh include
+#include "libmesh/preconditioner.h"
+#include "libmesh/linear_solver.h"
+
 // Forward declarations
 class FEProblemBase;
 class MoosePreconditioner;

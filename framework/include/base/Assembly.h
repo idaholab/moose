@@ -764,7 +764,19 @@ public:
                         unsigned int ivar,
                         unsigned int jvar,
                         const DofMap & dof_map,
-                        std::vector<dof_id_type> & dof_indices);
+                        std::vector<dof_id_type> & dof_indices,
+                        TagID tag = 0);
+
+  /**
+   * Add element matrix for ivar rows and jvar columns to the global Jacobian matrix for given
+   * tags.
+   */
+  void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                            unsigned int ivar,
+                            unsigned int jvar,
+                            const DofMap & dof_map,
+                            std::vector<dof_id_type> & dof_indices,
+                            const std::set<TagID> & tags);
 
   /**
    * Adds non-local element matrix for ivar rows and jvar columns to the global Jacobian matrix.

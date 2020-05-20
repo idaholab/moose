@@ -14,14 +14,17 @@
   [./u]
     order = FIRST
     family = LAGRANGE
+    # Make sure that system knows this is part of the eigenvector to be scaled
+    eigen = true
   [../]
-[]
 
-[AuxVariables]
   [./T]
     order = FIRST
     family = LAGRANGE
   [../]
+[]
+
+[AuxVariables]
   [./power]
     order = FIRST
     family = LAGRANGE
@@ -37,9 +40,20 @@
   [../]
 
   [./rhs]
-    type = Reaction
+    type = CoefReaction
     variable = u
+    coefficient = -1.0
     extra_vector_tags = 'eigen'
+  [../]
+
+  [./diff_T]
+    type = Diffusion
+    variable = T
+  [../]
+  [./src_T]
+    type = CoupledForce
+    variable = T
+    v = power
   [../]
 []
 
@@ -49,8 +63,9 @@
     variable = power
     source_variable = u
     normalization = unorm
+    # this coefficient will affect the eigenvalue.
     normal_factor = 10
-    execute_on = timestep_end
+    execute_on = linear
   [../]
 []
 
@@ -67,6 +82,19 @@
     variable = u
     boundary = '0 1 2 3'
   [../]
+
+  [./homogeneousT]
+    type = DirichletBC
+    variable = T
+    boundary = '0 1 2 3'
+    value = 0
+  [../]
+
+  [./eigenT]
+    type = EigenDirichletBC
+    variable = T
+    boundary = '0 1 2 3'
+  [../]
 []
 
 [Materials]
@@ -81,16 +109,17 @@
 
 [Executioner]
   type = Eigenvalue
-  solve_type = MF_MONOLITH_NEWTON
+  solve_type = NEWTON
+  matrix_free = true
   eigen_problem_type = GEN_NON_HERMITIAN
+
+  # Postprocessor value to normalize
+  normalization = unorm
+  # Value to set normilization to
+  normal_factor = 17
 []
 
 [Postprocessors]
-  [./power]
-    type = ElementIntegralVariablePostprocessor
-    variable = power
-    execute_on = timestep_end
-  [../]
   [./unorm]
     type = ElementIntegralVariablePostprocessor
     variable = u
@@ -98,14 +127,7 @@
   [../]
 []
 
-[VectorPostprocessors]
-  [./eigenvalues]
-    type = Eigenvalues
-    execute_on = 'timestep_end'
-  [../]
-[]
-
 [Outputs]
-  csv = true
+  exodus = true
   execute_on = 'timestep_end'
 []
