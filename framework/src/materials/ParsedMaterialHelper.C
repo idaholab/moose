@@ -188,12 +188,8 @@ ParsedMaterialHelper<true>::functionsOptimize()
   // base function
   if (!_disable_fpoptimizer)
     _func_F->Optimize();
-  if (!_enable_jit)
-    mooseError("ADParsedMaterials require JIT compilation to be enabled.");
-
-  // we need the detailed API here
-  if (!_func_F->JITCompile())
-    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
+  if (!_enable_jit || !_func_F->JITCompile())
+    mooseError("ADParsedMaterials require JIT compilation to be enabled and working.");
 }
 
 template <bool is_ad>
@@ -208,8 +204,6 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::computeQpProperties()
 {
-  Real a;
-
   // fill the parameter vector, apply tolerances
   for (unsigned int i = 0; i < _nargs; ++i)
   {
@@ -217,7 +211,7 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
       _func_params[i] = (*_args[i])[_qp];
     else
     {
-      a = (*_args[i])[_qp];
+      auto a = (*_args[i])[_qp];
       _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
   }

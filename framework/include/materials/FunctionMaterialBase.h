@@ -68,7 +68,7 @@ protected:
   }
 
   /// Coupled variables for function arguments
-  std::vector<const VariableValue *> _args;
+  std::vector<const GenericVariableValue<is_ad> *> _args;
 
   /**
    * Name of the function value material property and used as a base name to
@@ -105,6 +105,10 @@ private:
     const int b = static_cast<int>(var);
     return b >= 0 ? b << 1 : (-b << 1) - 1;
   }
+
+  /// helper function for coupling ad/regular variable values
+  const GenericVariableValue<is_ad> & coupledGenericValue(const std::string & var_name,
+                                                          unsigned int comp = 0);
 
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;

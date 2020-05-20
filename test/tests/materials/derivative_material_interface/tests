@@ -112,4 +112,17 @@
       detail = 'throwing an exception.'
     []
   []
+
+  [dual_number_support]
+    requirement = 'AD shall work with parsed materials'
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_parsed_material.i'
+      ratio_tol = 1e-8
+      difference_tol = 1e-7
+      run_sim = True
+      turn_off_exodus_output = False
+      issues = "#15207"
+    []
+  []
 []

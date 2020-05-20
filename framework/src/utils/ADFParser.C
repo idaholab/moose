@@ -29,9 +29,8 @@ DualReal
 ADFParser::Eval(const DualReal * vars)
 {
   mooseAssert(compiledFunction, "ADFParser objects mut be JIT compiled before evaluation!");
-  DualReal ret = 0;
-  std::cout << "[0] ret = " << ret;
-  (*reinterpret_cast<CompiledFunctionPtr<DualReal>>(compiledFunction))(&ret, vars, pImmed, _epsilon);
-  std::cout << "[1] ret = " << ret;
+  DualReal ret;
+  (*reinterpret_cast<CompiledFunctionPtr<DualReal>>(compiledFunction))(
+      &ret, vars, pImmed, _epsilon);
   return ret;
 }

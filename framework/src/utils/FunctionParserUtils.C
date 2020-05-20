@@ -91,7 +91,7 @@ FunctionParserUtils<is_ad>::setParserFeatureFlags(SymFunctionPtr & parser)
 }
 
 template <bool is_ad>
-Real
+GenericReal<is_ad>
 FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string & name)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
@@ -154,14 +154,12 @@ FunctionParserUtils<is_ad>::addFParserConstants(
     mooseError("The parameter vectors constant_names and constant_values must have equal length.");
 
   // previously evaluated constant_expressions may be used in following constant_expressions
-  std::vector<GenericReal<is_ad>> constant_values(nconst);
+  std::vector<Real> constant_values(nconst);
 
   for (unsigned int i = 0; i < nconst; ++i)
   {
-    SymFunctionPtr expression = std::make_shared<SymFunction>();
-
-    // set FParser internal feature flags
-    setParserFeatureFlags(expression);
+    // no need to use dual numbers for the constant expressions
+    auto expression = std::make_shared<FunctionParserADBase<Real>>();
 
     // add previously evaluated constants
     for (unsigned int j = 0; j < i; ++j)
@@ -184,3 +182,4 @@ FunctionParserUtils<is_ad>::addFParserConstants(
 
 // explicit instantiation
 template class FunctionParserUtils<false>;
+template class FunctionParserUtils<true>;

@@ -77,12 +77,27 @@ FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parame
       _arg_index[idx] = _args.size();
 
       // get variable value
-      _args.push_back(&coupledValue(*it, j));
+      _args.push_back(&coupledGenericValue(*it, j));
     }
   }
 
   _nargs = _arg_names.size();
 }
 
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+FunctionMaterialBase<is_ad>::coupledGenericValue(const std::string & var_name, unsigned int comp)
+{
+  return coupledValue(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+FunctionMaterialBase<true>::coupledGenericValue(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledValue(var_name, comp);
+}
+
 // explicit instantiation
 template class FunctionMaterialBase<false>;
+template class FunctionMaterialBase<true>;

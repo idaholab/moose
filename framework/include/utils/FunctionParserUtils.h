@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseTypes.h"
+#include "ADFParser.h"
 
 #include "libmesh/fparser_ad.hh"
 
@@ -32,6 +33,20 @@
   using FunctionParserUtils<T>::_eval_error_msg;                                                   \
   using FunctionParserUtils<T>::_func_params
 
+// Helper class to pic the correct function parser
+template <bool is_ad>
+struct GenericSymFunctionTempl
+{
+  typedef FunctionParserADBase<Real> type;
+};
+template <>
+struct GenericSymFunctionTempl<true>
+{
+  typedef ADFParser type;
+};
+template <bool is_ad>
+using GenericSymFunction = typename GenericSymFunctionTempl<is_ad>::type;
+
 // Forward declartions
 class InputParameters;
 
@@ -44,7 +59,7 @@ public:
   FunctionParserUtils(const InputParameters & parameters);
 
   /// Shorthand for an autodiff function parser object.
-  typedef FunctionParserADBase<Real> SymFunction;
+  typedef GenericSymFunction<is_ad> SymFunction;
 
   /// Shorthand for an smart pointer to an autodiff function parser object.
   typedef std::shared_ptr<SymFunction> SymFunctionPtr;
@@ -54,7 +69,7 @@ public:
 
 protected:
   /// Evaluate FParser object and check EvalError
-  Real evaluate(SymFunctionPtr &, const std::string & object_name = "");
+  GenericReal<is_ad> evaluate(SymFunctionPtr &, const std::string & object_name = "");
 
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(SymFunctionPtr & parser,
