@@ -45,9 +45,29 @@ FVFluxKernel::FVFluxKernel(const InputParameters & params)
 // constant monomial elements. We only have one quadrature point regardless of
 // problem dimension and just multiply by the face area.
 
+bool
+FVFluxKernel::skipForBoundary(const FaceInfo & fi)
+{
+  if (!fi.isBoundary())
+    return false;
+
+  std::vector<FVDirichletBC *> dirichlet_bcs;
+  _app.theWarehouse()
+      .query()
+      .template condition<AttribSystem>("FVDirichletBC")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribBoundaries>(fi.boundaryIDs())
+      .template condition<AttribVar>(_var.number())
+      .queryInto(dirichlet_bcs);
+  return dirichlet_bcs.size() == 0;
+}
+
 void
 FVFluxKernel::computeResidual(const FaceInfo & fi)
 {
+  if (skipForBoundary(fi))
+    return;
+
   _face_info = &fi;
   _normal = fi.normal();
   auto r = MetaPhysicL::raw_value(fi.faceArea() * fi.faceCoord() * computeQpResidual());
@@ -135,6 +155,9 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
 void
 FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
+  if (skipForBoundary(fi))
+    return;
+
   _face_info = &fi;
   _normal = fi.normal();
   const DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
