@@ -11,12 +11,11 @@
 
 #include "ADSmearedCrackSofteningBase.h"
 
-// Forward declaration
-
 /**
  * ADPowerLawSoftening is a smeared crack softening model that
  * uses a power law equation to soften the tensile response.
- * It is for use with ADComputeSmearedCrackingStress.
+ * It is for use with ADComputeSmearedCrackingStress and uses
+ * automatic differentiation.
  */
 class ADPowerLawSoftening : public ADSmearedCrackSofteningBase
 {

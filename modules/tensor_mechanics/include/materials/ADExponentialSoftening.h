@@ -14,7 +14,8 @@
 /**
  * ExponentialSoftening is a smeared crack softening model that
  * uses an exponential softening curve. It is for use with
- * ComputeSmearedCrackingStress.
+ * ADComputeSmearedCrackingStress and relies on automatic
+ * differentiation.
  */
 class ADExponentialSoftening : public ADSmearedCrackSofteningBase
 {

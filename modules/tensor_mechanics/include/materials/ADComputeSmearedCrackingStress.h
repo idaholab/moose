@@ -15,7 +15,7 @@
 #include "Function.h"
 
 /**
- * ComputeSmearedCrackingStress computes the stress for a finite strain
+ * ADComputeSmearedCrackingStress computes the stress for a finite strain
  * material with smeared cracking
  */
 class ADComputeSmearedCrackingStress : public ADComputeMultipleInelasticStress
@@ -154,6 +154,5 @@ protected:
   ///@}
 
   /// The user-supplied list of softening models to be used in the 3 crack directions
-  /// TODO
   std::vector<ADSmearedCrackSofteningBase *> _softening_models;
 };

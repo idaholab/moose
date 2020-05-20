@@ -18,7 +18,8 @@ InputParameters
 ADComputeSmearedCrackingStress::validParams()
 {
   InputParameters params = ADComputeMultipleInelasticStress::validParams();
-  params.addClassDescription("Compute stress using a fixed smeared cracking model");
+  params.addClassDescription(
+      "Compute stress using a fixed smeared cracking model. Uses automatic differentiation");
   MooseEnum cracking_release("abrupt exponential power", "abrupt");
   params.addDeprecatedParam<MooseEnum>(
       "cracking_release",

@@ -18,7 +18,8 @@ ADAbruptSoftening::validParams()
 {
   InputParameters params = ADSmearedCrackSofteningBase::validParams();
   params.addClassDescription("Softening model with an abrupt stress release upon cracking. This "
-                             "class is intended to be used with ComputeSmearedCrackingStress.");
+                             "class relies on automatic differentiation and is intended to be used "
+                             "with ADComputeSmearedCrackingStress.");
   params.addRangeCheckedParam<Real>(
       "residual_stress",
       0.0,

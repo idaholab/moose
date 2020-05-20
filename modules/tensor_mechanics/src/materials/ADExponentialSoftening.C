@@ -19,7 +19,8 @@ ADExponentialSoftening::validParams()
   InputParameters params = ADSmearedCrackSofteningBase::validParams();
   params.addClassDescription(
       "Softening model with an exponential softening response upon cracking. This "
-      "class is intended to be used with ComputeSmearedCrackingStress.");
+      "class is intended to be used with ADComputeSmearedCrackingStress and relies on automatic "
+      "differentiation.");
   params.addRangeCheckedParam<Real>(
       "residual_stress",
       0.0,

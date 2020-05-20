@@ -13,12 +13,10 @@
 #include "InputParameters.h"
 #include "ADMaterial.h"
 
-// Forward declaration
-
 /**
  * ADSmearedCrackSofteningBase is the base class for a set of models that define the
  * softening behavior of a crack under loading in a given direction.
- * These models are called by ComputeSmearedCrackingStress, so they
+ * These models are called by ADComputeSmearedCrackingStress, so they
  * must have the compute=false flag set in the parameter list.
  */
 class ADSmearedCrackSofteningBase : public ADMaterial

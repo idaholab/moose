@@ -18,7 +18,8 @@ ADPowerLawSoftening::validParams()
 {
   InputParameters params = ADSmearedCrackSofteningBase::validParams();
   params.addClassDescription("Softening model with an abrupt stress release upon cracking. This "
-                             "class is intended to be used with ComputeSmearedCrackingStress.");
+                             "class is intended to be used with ADComputeSmearedCrackingStress and "
+                             "relies on automatic differentiation.");
   params.addRequiredRangeCheckedParam<Real>(
       "stiffness_reduction",
       "stiffness_reduction <= 1 & stiffness_reduction >= 0",

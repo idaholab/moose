@@ -11,12 +11,10 @@
 
 #include "ADSmearedCrackSofteningBase.h"
 
-// Forward declaration
-
 /**
- * AbruptSoftening is a smeared crack softening model that abruptly
- * drops the stress upon crack initiation. It is for use with
- * ComputeSmearedCrackingStress.
+ * ADAbruptSoftening is a smeared crack softening model that abruptly
+ * drops the stress upon crack initiation and relies on automatic
+ * differentiation. It is for use with ADComputeSmearedCrackingStress.
  */
 class ADAbruptSoftening : public ADSmearedCrackSofteningBase
 {
