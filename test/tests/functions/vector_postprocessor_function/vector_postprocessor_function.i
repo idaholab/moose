@@ -31,14 +31,14 @@
   [../]
   [./point_value_function_u]
     type = VectorPostprocessorFunction
-    component = 1
+    component = y
     argument_column = y
     value_column = u
     vectorpostprocessor_name = point_value_vector_postprocessor_u
   [../]
   [./line_value_function_v]
     type = VectorPostprocessorFunction
-    component = 1
+    component = y
     argument_column = y
     value_column = v
     vectorpostprocessor_name = line_value_vector_postprocessor_v
