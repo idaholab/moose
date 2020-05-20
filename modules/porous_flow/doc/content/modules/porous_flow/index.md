@@ -32,6 +32,7 @@ and geomechanics.
 
 ### Tutorial and examples class=center style=font-weight:200;
 
+- [Getting started](porous_flow/getting_started_with_pf.md)
 - [PorousFlow tutorial](porous_flow/tutorial_00.md)
 - [Flow in fractures](porous_flow/flow_through_fractured_media.md)
 - [Underground mining](porous_flow/coal_mining.md)
