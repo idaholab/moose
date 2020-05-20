@@ -1,10 +1,10 @@
-# Cavity Pressure Postprocessor
+# Side Reaction Postprocessor
 
 !syntax description /Postprocessors/SidesetReaction
 
 ## Description
 
-`SidesetReaction` computes the force $F$ along vector $\vec{e}$ acting on a sideset $\partial S$:
+`SidesetReaction` computes the integral of the force $F$ along vector $\vec{e}$ acting on a sideset $\partial S$:
 
 \begin{equation}
   F = \int_{\partial S} \vec{n}^T ~ \underline{\sigma}  \vec{e}  dS,

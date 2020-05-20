@@ -13,7 +13,7 @@
 #include "RankTwoTensor.h"
 
 /**
- * This postprocessor computes the force on a sideset in direction _dir
+ * This postprocessor computes the integral of the force on a sideset in direction _dir
  */
 template <bool is_ad>
 class SidesetReactionTempl : public SideIntegralPostprocessor
@@ -27,7 +27,10 @@ protected:
   virtual Real computeQpIntegral() override;
 
 private:
+  /// the stress tensor
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _tensor;
+
+  /// the direction along which the force is computed
   const RealVectorValue _dir;
 };
 
