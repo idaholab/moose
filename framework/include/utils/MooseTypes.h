@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "ADReal.h"
 #include "ADRankTwoTensorForward.h"
+#include "ADRankThreeTensorForward.h"
 #include "ADRankFourTensorForward.h"
 
 #include "libmesh/libmesh.h"
@@ -181,19 +182,6 @@ typedef unsigned int TagTypeID;
 typedef unsigned int PerfID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
-template <bool is_ad>
-struct GenericRealStruct
-{
-  typedef Real type;
-};
-template <>
-struct GenericRealStruct<true>
-{
-  typedef ADReal type;
-};
-template <bool is_ad>
-using GenericReal = typename GenericRealStruct<is_ad>::type;
-
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
@@ -221,6 +209,21 @@ template <>
 struct ADType<Real>
 {
   typedef ADReal type;
+};
+template <>
+struct ADType<RankTwoTensor>
+{
+  typedef ADRankTwoTensor type;
+};
+template <>
+struct ADType<RankThreeTensor>
+{
+  typedef ADRankThreeTensor type;
+};
+template <>
+struct ADType<RankFourTensor>
+{
+  typedef ADRankFourTensor type;
 };
 template <template <typename> class W>
 struct ADType<W<Real>>
@@ -254,6 +257,26 @@ struct DOFType<RealVectorValue>
   typedef Real type;
 };
 } // MOOSE
+
+template <typename T, bool is_ad>
+struct GenericStruct
+{
+  typedef T type;
+};
+template <typename T>
+struct GenericStruct<T, true>
+{
+  typedef typename Moose::ADType<T>::type type;
+};
+
+template <bool is_ad>
+using GenericReal = typename GenericStruct<Real, is_ad>::type;
+template <bool is_ad>
+using GenericRankTwoTensor = typename GenericStruct<RankTwoTensor, is_ad>::type;
+template <bool is_ad>
+using GenericRankThreeTensor = typename GenericStruct<RankThreeTensor, is_ad>::type;
+template <bool is_ad>
+using GenericRankFourTensor = typename GenericStruct<RankFourTensor, is_ad>::type;
 
 template <typename OutputType>
 struct OutputTools

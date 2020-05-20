@@ -15,6 +15,7 @@
 #include "RankThreeTensor.h"
 #include "RankFourTensor.h"
 #include "MooseEnum.h"
+#include "MooseTypes.h"
 #include "ADReal.h"
 
 #include "metaphysicl/raw_type.h"
@@ -407,4 +408,10 @@ TEST(RankThreeTensor, ADConversion)
 
   ad = reg;
   reg = MetaPhysicL::raw_value(ad);
+
+  GenericRankThreeTensor<false> generic_reg;
+  GenericRankThreeTensor<true> generic_ad;
+
+  generic_ad = generic_reg;
+  generic_reg = MetaPhysicL::raw_value(generic_ad);
 }
