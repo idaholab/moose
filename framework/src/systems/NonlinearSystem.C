@@ -646,7 +646,7 @@ NonlinearSystem::computeScaling()
 }
 
 void
-NonlinearSystem::attachMoosePreconditioner(Preconditioner<Number> * preconditioner)
+NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 {
   nonlinearSolver()->attach_preconditioner(preconditioner);
 }

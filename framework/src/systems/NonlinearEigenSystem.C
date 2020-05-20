@@ -42,11 +42,11 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
   // If this is a nonlinear eigenvalue problem,
-  // we do not need to assembly anything
+  // we do not need to assemble anything
   if (p->isNonlinearEigenvalueSolver())
   {
     // If you want an efficient eigensolver,
-    // please use 3.13 or newer.
+    // please use PETSc 3.13 or newer.
     // We need to do an unnecessary assembly,
     // if you use PETSc that is older than 3.13.
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
@@ -142,7 +142,7 @@ NonlinearEigenSystem::initialSetup()
   addEigenTagToMooseObjects(_integrated_bcs);
   // If the precond matrix needs to include eigen kernels,
   // we assign precond tag to all objects except nodal BCs.
-  // Mathematically speaking, we can not add eigen BCs in
+  // Mathematically speaking, we can not add eigen nodal BCs
   // since they will overwrite non-eigen nodal BCs contributions.
   if (_precond_matrix_includes_eigen)
   {
@@ -207,28 +207,6 @@ NonlinearEigenSystem::addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & war
 }
 
 void
-NonlinearEigenSystem::turnOffOnEigenNodalBCs(bool on)
-{
-  for (THREAD_ID tid = 0; tid < _nodal_bcs.numThreads(); tid++)
-  {
-    auto & objects = _nodal_bcs.getObjects(tid);
-
-    for (auto & object : objects)
-    {
-      auto & mtags = object->getMatrixTags();
-      // Current object is an eigen nodal bc
-      if (mtags.find(_B_tag) != mtags.end())
-      {
-        // Currently, there does not exist an interfance for me,
-        // so I just drop const anyway.
-        auto & params = const_cast<InputParameters &>(object->parameters());
-        params.set<bool>("enable", true) = on;
-      }
-    }
-  }
-}
-
-void
 NonlinearEigenSystem::solve()
 {
   // Clear the iteration counters
@@ -282,7 +260,7 @@ NonlinearEigenSystem::attachSLEPcCallbacks()
 
     Moose::SlepcSupport::attachCallbacksToMat(_eigen_problem, mat, false);
 
-    // Let libmesh do not close matrices before solve
+    // Tell libmesh not close matrices before solve
     _transient_sys.eigen_solver->set_close_matrix_before_solve(false);
   }
 
@@ -424,8 +402,8 @@ NonlinearEigenSystem::checkIntegrity()
   }
 }
 
-const std::pair<Real, Real>
-NonlinearEigenSystem::getConvergedEigenvalue(dof_id_type n)
+std::pair<Real, Real>
+NonlinearEigenSystem::getConvergedEigenvalue(dof_id_type n) const
 {
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)
@@ -433,8 +411,8 @@ NonlinearEigenSystem::getConvergedEigenvalue(dof_id_type n)
   return _transient_sys.get_eigenvalue(n);
 }
 
-const std::pair<Real, Real>
-NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n)
+std::pair<Real, Real>
+NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n) const
 {
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
   if (n >= n_converged_eigenvalues)
@@ -443,13 +421,13 @@ NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n)
 }
 
 void
-NonlinearEigenSystem::attachMoosePreconditioner(Preconditioner<Number> * preconditioner)
+NonlinearEigenSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 {
-  _moose_preconditioner = preconditioner;
+  _preconditioner = preconditioner;
 
   // If we have a customized preconditioner,
   // We need to let PETSc know that
-  if (_moose_preconditioner)
+  if (_preconditioner)
   {
     Moose::SlepcSupport::registerPCToPETSc();
     // Mark this, and then we can setup correct petsc options

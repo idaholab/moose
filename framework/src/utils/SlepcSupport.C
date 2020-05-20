@@ -500,7 +500,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
   // If both jacobian and preconditioning are shell matrices,
-  // and then assembly them and return
+  // and then assemble them and return
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jissell);
   CHKERRQ(ierr);
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
@@ -509,7 +509,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   CHKERRQ(ierr);
   if ((jissell || jismffd) && pissell)
   {
-    // Just assembly matrices and return
+    // Just assemble matrices and return
     ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
@@ -574,7 +574,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
   // If both jacobian and preconditioning are shell matrices,
-  // and then assembly them and return
+  // and then assemble them and return
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jsell);
   CHKERRQ(ierr);
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
@@ -583,7 +583,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   CHKERRQ(ierr);
   if ((jsell || jismffd) && psell)
   {
-    // Just assembly matrices and return
+    // Just assemble matrices and return
     ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
@@ -869,7 +869,7 @@ PCApply_MoosePC(PC pc, Vec x, Vec y)
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & nl_eigen = eigen_problem->getNonlinearEigenSystem();
-  Preconditioner<Number> * preconditioner = nl_eigen.moosePreconditioner();
+  auto preconditioner = nl_eigen.preconditioner();
 
   if (!preconditioner)
     mooseError("There is no moose preconditioner in nonlinear eigen system \n");
@@ -905,14 +905,13 @@ PCSetUp_MoosePC(PC pc)
   }
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & nl_eigen = eigen_problem->getNonlinearEigenSystem();
-  Preconditioner<Number> * preconditioner = nl_eigen.moosePreconditioner();
+  Preconditioner<Number> * preconditioner = nl_eigen.preconditioner();
 
   if (!preconditioner)
     mooseError("There is no moose preconditioner in nonlinear eigen system \n");
 
   if (!preconditioner->initialized())
     preconditioner->init();
-  //  libmesh_error_msg("Preconditioner not initialized!  Make sure you call init() before solve!");
 
   preconditioner->setup();
 

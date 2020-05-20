@@ -108,7 +108,7 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual const std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n);
+  virtual std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n) const;
 
   /**
    * Return the Nth converged eigenvalue and copies the respective eigen vector to the solution
@@ -118,7 +118,7 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual const std::pair<Real, Real> getConvergedEigenpair(dof_id_type n);
+  virtual std::pair<Real, Real> getConvergedEigenpair(dof_id_type n) const;
 
   /**
    * Get the number of converged eigenvalues
@@ -158,20 +158,15 @@ public:
     _precond_matrix_includes_eigen = precond_matrix_includes_eigen;
   }
 
-  bool precondMatrixIncludesEigenKernels() { return _precond_matrix_includes_eigen; }
+  bool precondMatrixIncludesEigenKernels() const { return _precond_matrix_includes_eigen; }
 
-  TagID precondMatrixTag() { return _precond_tag; }
+  TagID precondMatrixTag() const { return _precond_tag; }
 
-  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) override;
+  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
 
-  Preconditioner<Number> * moosePreconditioner() { return _moose_preconditioner; }
+  Preconditioner<Number> * preconditioner() const { return _preconditioner; }
 
   virtual void turnOffJacobian() override;
-
-  /**
-   * Turn off or on eigen nodal BCs
-   */
-  void turnOffOnEigenNodalBCs(bool on);
 
 protected:
   NumericVector<Number> & solutionOldInternal() const override
@@ -196,8 +191,8 @@ protected:
   TagID _B_tag;
   TagID _precond_tag;
   bool _precond_matrix_includes_eigen;
-  // Tags for computing preconditioning matrix
-  Preconditioner<Number> * _moose_preconditioner;
+  // Libmesh preconditioner
+  Preconditioner<Number> * _preconditioner;
 };
 
 #else

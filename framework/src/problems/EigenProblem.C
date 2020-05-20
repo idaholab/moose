@@ -181,10 +181,7 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
   TIME_SECTION(_compute_jacobian_blocks_timer);
 
   if (_displaced_problem)
-  {
     _aux->compute(EXEC_PRE_DISPLACE);
-    _displaced_problem->updateMesh();
-  }
 
   _aux->compute(EXEC_NONLINEAR);
 
@@ -332,7 +329,7 @@ void
 EigenProblem::solve()
 {
 #if LIBMESH_HAVE_SLEPC
-  // Set proper operations
+  // Set necessary slepc callbacks
   // We delay this call as much as possible because libmesh
   // could rebuild matrices due to mesh changes or something else.
   _nl_eigen->attachSLEPcCallbacks();
@@ -365,7 +362,7 @@ void
 EigenProblem::init()
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
-  // If matrix_free=true, this set Libmesh to use shell matrices
+  // If matrix_free=true, this tells Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
   // We need to tell libMesh if we are using a shell preconditioning matrix
   _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);

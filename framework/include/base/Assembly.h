@@ -768,7 +768,7 @@ public:
                         TagID tag = 0);
 
   /**
-   * Adds element matrix for ivar rows and jvar columns to the global Jacobian matrix for given
+   * Add element matrix for ivar rows and jvar columns to the global Jacobian matrix for given
    * tags.
    */
   void addJacobianBlockTags(SparseMatrix<Number> & jacobian,

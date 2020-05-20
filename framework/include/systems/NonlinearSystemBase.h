@@ -465,10 +465,10 @@ public:
   }
 
   /**
-   * Attache a customized moose preconditioner that requires physics knowledge.
-   * For generic preconditioners, they should be implemented at the PETSC side.
+   * Attach a customized preconditioner that requires physics knowledge.
+   * Generic preconditioners should be implemented in PETSc, instead.
    */
-  virtual void attachMoosePreconditioner(Preconditioner<Number> * preconditioner) = 0;
+  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) = 0;
 
   /**
    * Setup damping stuff (called before we actually start)
