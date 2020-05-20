@@ -27,7 +27,7 @@ VectorPostprocessorFunction::validParams()
                                        "ordinate (function values) of the sampled "
                                        "function");
 
-  MooseEnum component("x=0 y=1 z=2 time=3", "time");
+  MooseEnum component("x=0 y=1 z=2 time=3 0=4 1=5 2=6", "time");
   params.addParam<MooseEnum>(
       "component",
       component,
@@ -46,8 +46,18 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
                                                  getParam<std::string>("argument_column"))),
     _value_column(getVectorPostprocessorValue("vectorpostprocessor_name",
                                               getParam<std::string>("value_column"))),
-    _component(getParam<MooseEnum>("component"))
+    _deprecated("0 1 2 3"),
+    _component(getParam<MooseEnum>("component") > 3 ? _deprecated
+                                                    : getParam<MooseEnum>("component"))
 {
+  if (&_component == &_deprecated) // are they the same object
+  {
+    paramWarning("component",
+                 "Using an index (0, 1, 2) for the 'component' parameter is deprecated, please use "
+                 "'x', 'y', or 'z'.");
+    _deprecated = getParam<MooseEnum>("component") - 4;
+  }
+
   try
   {
     _linear_interp = libmesh_make_unique<LinearInterpolation>(_argument_column, _value_column);

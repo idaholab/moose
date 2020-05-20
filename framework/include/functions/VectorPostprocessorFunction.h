@@ -39,5 +39,6 @@ protected:
   /// if the "component" parameter is specified, its value is assigned here and
   /// function values are interpolated W.R.T. spatial coordinates in that direction,
   /// otherwise, they are interpolated W.R.T time
+  MooseEnum _deprecated; // index based access 0,1,2
   const MooseEnum & _component;
 };
