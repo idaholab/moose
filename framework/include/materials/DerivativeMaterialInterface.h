@@ -64,13 +64,13 @@ public:
    * @param c The variable(s) to take the derivatives with respect to
    */
   template <typename U, bool is_ad = false>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string & base,
-                                                  const std::vector<VariableName> & c);
+  GenericMaterialProperty<U, is_ad> &
+  declarePropertyDerivative(const std::string & base, const std::vector<VariableName> & c);
   template <typename U, bool is_ad = false>
-  MaterialProperty<U> & declarePropertyDerivative(const std::string & base,
-                                                  const VariableName & c1,
-                                                  const VariableName & c2 = "",
-                                                  const VariableName & c3 = "");
+  GenericMaterialProperty<U, is_ad> & declarePropertyDerivative(const std::string & base,
+                                                                const VariableName & c1,
+                                                                const VariableName & c2 = "",
+                                                                const VariableName & c3 = "");
   ///@}
 
   ///@{
@@ -81,13 +81,14 @@ public:
    * @param c The variable(s) to take the derivatives with respect to
    */
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string & base,
-                                                            const std::vector<VariableName> & c);
+  const GenericMaterialProperty<U, is_ad> &
+  getMaterialPropertyDerivative(const std::string & base, const std::vector<VariableName> & c);
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> & getMaterialPropertyDerivative(const std::string & base,
-                                                            const VariableName & c1,
-                                                            const VariableName & c2 = "",
-                                                            const VariableName & c3 = "");
+  const GenericMaterialProperty<U, is_ad> &
+  getMaterialPropertyDerivative(const std::string & base,
+                                const VariableName & c1,
+                                const VariableName & c2 = "",
+                                const VariableName & c3 = "");
   ///@}
 
   /**
@@ -96,14 +97,14 @@ public:
    *   _coupled_standard_moose_vars vector.
    */
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> &
+  const GenericMaterialProperty<U, is_ad> &
   getMaterialPropertyDerivative(const std::string & base,
                                 const VariableName & c1,
                                 unsigned int v2,
                                 unsigned int v3 = libMesh::invalid_uint);
 
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> &
+  const GenericMaterialProperty<U, is_ad> &
   getMaterialPropertyDerivative(const std::string & base,
                                 unsigned int v1,
                                 unsigned int v2 = libMesh::invalid_uint,
@@ -118,14 +119,15 @@ public:
    * @param c The variable(s) to take the derivatives with respect to
    */
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> &
+  const GenericMaterialProperty<U, is_ad> &
   getMaterialPropertyDerivativeByName(const MaterialPropertyName & base,
                                       const std::vector<VariableName> & c);
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> & getMaterialPropertyDerivativeByName(const MaterialPropertyName & base,
-                                                                  const VariableName & c1,
-                                                                  const VariableName & c2 = "",
-                                                                  const VariableName & c3 = "");
+  const GenericMaterialProperty<U, is_ad> &
+  getMaterialPropertyDerivativeByName(const MaterialPropertyName & base,
+                                      const VariableName & c1,
+                                      const VariableName & c2 = "",
+                                      const VariableName & c3 = "");
   ///@}
 
   ///@{
@@ -215,7 +217,7 @@ DerivativeMaterialInterface<T>::haveMaterialProperty(const std::string & prop_na
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & name)
 {
   // get the base property name
@@ -245,7 +247,7 @@ DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::stri
 
 template <class T>
 template <typename U, bool is_ad>
-MaterialProperty<U> &
+GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & base,
                                                           const std::vector<VariableName> & c)
 {
@@ -254,7 +256,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & ba
 
 template <class T>
 template <typename U, bool is_ad>
-MaterialProperty<U> &
+GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & base,
                                                           const VariableName & c1,
                                                           const VariableName & c2,
@@ -271,7 +273,7 @@ DerivativeMaterialInterface<T>::declarePropertyDerivative(const std::string & ba
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
                                                               const std::vector<VariableName> & c)
 {
@@ -290,7 +292,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
                                                               const VariableName & c1,
                                                               const VariableName & c2,
@@ -317,7 +319,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
                                                               const VariableName & c1,
                                                               unsigned int v2,
@@ -332,7 +334,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string & base,
                                                               unsigned int v1,
                                                               unsigned int v2,
@@ -347,7 +349,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
     const MaterialPropertyName & base, const std::vector<VariableName> & c)
 {
@@ -356,7 +358,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
     const MaterialPropertyName & base,
     const VariableName & c1,

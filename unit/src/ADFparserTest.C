@@ -28,7 +28,7 @@ TEST(ADFparserTest, JITCompile)
   auto p = fparser.Eval(v);
 
   // evaluate statically compiled expression
-  auto s = 2 + 4*v[0] + 8*v[0]*v[0] + 16*v[1]*v[1] + 2*v[1]*v[1]*v[1]*v[1];
+  auto s = 2 + 4 * v[0] + 8 * v[0] * v[0] + 16 * v[1] * v[1] + 2 * v[1] * v[1] * v[1] * v[1];
 
   EXPECT_EQ(p, s);
   EXPECT_EQ(p.derivatives()[0], s.derivatives()[0]);

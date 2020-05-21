@@ -132,7 +132,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::recurseDerivative(unsigned int var,
       recurseDerivative(i, order + 1, current);
 
     // set up a material property for the derivative
-    current._mat_prop = &declarePropertyDerivative<Real>(_F_name, current._darg_names);
+    current._mat_prop = &declarePropertyDerivative<Real, is_ad>(_F_name, current._darg_names);
 
     // save off current derivative
     _derivatives.push_back(current);
