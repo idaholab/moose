@@ -26,6 +26,15 @@ public:
   virtual Real value(const Real & x, const Real & f1, const Real & f2) const = 0;
 
   /**
+   * Computes the transition value
+   *
+   * @param[in] x    Point at which to evaluate function
+   * @param[in] f1   Left function
+   * @param[in] f2   Right function
+   */
+  virtual ADReal value(const ADReal & x, const ADReal & f1, const ADReal & f2) const = 0;
+
+  /**
    * Returns the coordinate of the left end of the transition
    */
   const Real & leftEnd() const { return _x1; }
