@@ -50,11 +50,12 @@ public:
    * @param name The input parameter key of type MaterialPropertyName
    */
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> & getDefaultMaterialProperty(const std::string & name);
+  const GenericMaterialProperty<U, is_ad> & getDefaultMaterialProperty(const std::string & name);
 
   /// Fetch a material property by name if it exists, otherwise return getZeroMaterialProperty
   template <typename U, bool is_ad = false>
-  const MaterialProperty<U> & getDefaultMaterialPropertyByName(const std::string & name);
+  const GenericMaterialProperty<U, is_ad> &
+  getDefaultMaterialPropertyByName(const std::string & name);
 
   ///@{
   /**
@@ -224,23 +225,23 @@ DerivativeMaterialInterface<T>::getDefaultMaterialProperty(const std::string & n
   std::string prop_name = this->deducePropertyName(name);
 
   // Check if it's just a constant
-  const MaterialProperty<U> * default_property =
-      this->template defaultMaterialProperty<U>(prop_name);
+  const auto * default_property =
+      this->template defaultGenericMaterialProperty<U, is_ad>(prop_name);
   if (default_property)
     return *default_property;
 
   // if found return the requested property
-  return getDefaultMaterialPropertyByName<U>(prop_name);
+  return getDefaultMaterialPropertyByName<U, is_ad>(prop_name);
 }
 
 template <class T>
 template <typename U, bool is_ad>
-const MaterialProperty<U> &
+const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::string & prop_name)
 {
   // if found return the requested property
   if (haveMaterialProperty<U>(prop_name))
-    return this->template getMaterialPropertyByName<U>(prop_name);
+    return this->template getGenericMaterialPropertyByName<U, is_ad>(prop_name);
 
   return this->template getZeroMaterialProperty<U>(prop_name);
 }

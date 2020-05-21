@@ -83,6 +83,16 @@ public:
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getADMaterialPropertyByName<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getMaterialPropertyByName<T>(name);
+  }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
@@ -242,6 +252,19 @@ protected:
   template <typename T>
   const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
 
+  ///@{ generic default material property helper
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
+  {
+    return defaultADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
+  {
+    return defaultMaterialProperty<T>(name);
+  }
+  ///@}
+
   /**
    * Check and throw an error if the execution has progressed past the construction stage
    */
@@ -373,7 +396,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*
 // Forward declare explicit specializations
 template <>
 const MaterialProperty<Real> *
-MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
+MaterialPropertyInterface::defaultMaterialProperty<Real>(const std::string & name);
 
 template <>
 const ADMaterialProperty<Real> *
