@@ -693,9 +693,37 @@ public:
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
   virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-  virtual void reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-  virtual void
-  reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+
+  /**
+   * reinit materials on element faces
+   * @param blk_id The subdomain on which the element owning the face lives
+   * @param tid The thread id
+   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
+   * \p MaterialPropertyStorage
+   * @param execute_stateful Whether to execute material objects that have stateful properties. This
+   * should be \p false when for example executing material objects for mortar contexts in which
+   * stateful properties don't make sense
+   */
+  virtual void reinitMaterialsFace(SubdomainID blk_id,
+                                   THREAD_ID tid,
+                                   bool swap_stateful = true,
+                                   bool execute_stateful = true);
+
+  /**
+   * reinit materials on the neighboring element face
+   * @param blk_id The subdomain on which the neighbor element lives
+   * @param tid The thread id
+   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
+   * \p MaterialPropertyStorage
+   * @param execute_stateful Whether to execute material objects that have stateful properties. This
+   * should be \p false when for example executing material objects for mortar contexts in which
+   * stateful properties don't make sense
+   */
+  virtual void reinitMaterialsNeighbor(SubdomainID blk_id,
+                                       THREAD_ID tid,
+                                       bool swap_stateful = true,
+                                       bool execute_stateful = true);
+
   /**
    * For finite volume bcs, we need to be able to initialize and compute
    * materials on ghost elements (elements that don't exist on the mesh - on
@@ -706,8 +734,22 @@ public:
    */
   virtual void
   reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
-  virtual void
-  reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+
+  /**
+   * reinit materials on a boundary
+   * @param boundary_id The boundary on which to reinit corresponding materials
+   * @param tid The thread id
+   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
+   * \p MaterialPropertyStorage
+   * @param execute_stateful Whether to execute material objects that have stateful properties. This
+   * should be \p false when for example executing material objects for mortar contexts in which
+   * stateful properties don't make sense
+   */
+  virtual void reinitMaterialsBoundary(BoundaryID boundary_id,
+                                       THREAD_ID tid,
+                                       bool swap_stateful = true,
+                                       bool execute_stateful = true);
+
   virtual void
   reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
   /*

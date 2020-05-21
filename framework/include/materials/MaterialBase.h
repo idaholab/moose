@@ -165,6 +165,11 @@ public:
    */
   virtual const std::set<unsigned int> & getMatPropDependencies() const = 0;
 
+  /**
+   * @return Whether this material has stateful properties
+   */
+  bool hasStatefulProperties() const { return _has_stateful_property; }
+
 protected:
   /**
    * Evaluate material properties on subdomain
