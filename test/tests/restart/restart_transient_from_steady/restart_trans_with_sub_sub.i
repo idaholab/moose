@@ -5,11 +5,6 @@
   ny = 10
 []
 
-[Problem]
-  restart_file_base = steady_with_sub_out_sub0_cp/LATEST
-  skip_additional_restart_data = true
-[]
-
 [AuxVariables]
   [./power_density]
   [../]
@@ -53,7 +48,7 @@
   petsc_options_value = 'hypre boomeramg 100'
 
   start_time = 0
-  end_time = 10
+  end_time = 3
   dt = 1.0
   # steady_state_detection = true
 

@@ -73,5 +73,4 @@
   exodus = true
   color = true
   csv = true
-  checkpoint = true
 []

@@ -92,7 +92,7 @@
 [Executioner]
   type = Transient
   start_time = 0
-  end_time = 10
+  end_time = 3
   dt = 1.0
 
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
@@ -140,6 +140,5 @@
 [Outputs]
   exodus = true
   csv = true
-  checkpoint = true
   perf_graph = true
 []
