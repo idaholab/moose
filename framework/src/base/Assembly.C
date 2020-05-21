@@ -212,6 +212,12 @@ Assembly::~Assembly()
   for (auto & it : _fe_shape_data_face_neighbor)
     delete it.second;
 
+  for (auto & it : _fe_shape_data_lower)
+    delete it.second;
+
+  for (auto & it : _fe_shape_data_dual_lower)
+    delete it.second;
+
   for (auto & it : _vector_fe_shape_data)
     delete it.second;
 
@@ -224,7 +230,10 @@ Assembly::~Assembly()
   for (auto & it : _vector_fe_shape_data_face_neighbor)
     delete it.second;
 
-  for (auto & it : _fe_shape_data_lower)
+  for (auto & it : _vector_fe_shape_data_lower)
+    delete it.second;
+
+  for (auto & it : _vector_fe_shape_data_dual_lower)
     delete it.second;
 
   for (auto & it : _ad_grad_phi_data)
