@@ -151,7 +151,7 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), type);
 
-  size_t ad_offset = 0;
+  std::size_t ad_offset = 0;
   if (type == Moose::ElementElement || type == Moose::NeighborElement)
     ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
   else
@@ -201,7 +201,7 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, type);
 
-  size_t ad_offset = 0;
+  std::size_t ad_offset = 0;
   if (type == Moose::ElementElement || type == Moose::NeighborElement)
     ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
   else

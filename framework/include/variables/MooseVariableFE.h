@@ -246,6 +246,11 @@ public:
     return _element_data->adGradPhiFace();
   }
 
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhiFaceNeighbor()
+  {
+    return _neighbor_data->adGradPhiFace();
+  }
+
   // damping
   const FieldVariableValue & increment() const { return _element_data->increment(); }
 
