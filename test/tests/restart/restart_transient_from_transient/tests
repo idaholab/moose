@@ -1,0 +1,21 @@
+[Tests]
+  design = "Restartable.md DataIO.md"
+  [pseudo_trans_with_2subs]
+    type = 'Exodiff'
+    input = 'pseudo_trans_with_2subs.i'
+    exodiff = 'pseudo_trans_with_2subs_out.e pseudo_trans_with_2subs_out_sub0.e pseudo_trans_with_2subs_out_sub1.e'
+
+    issues = "#15287"
+    requirement = "The system shall support generating checkpoint files for transient to transient restart testing with multiple sub apps."
+  []
+
+  [restart_trans_from_pseudo_trans_with_2subs]
+    type = 'Exodiff'
+    input = 'restart_trans_with_2subs.i'
+    exodiff = 'restart_trans_with_2subs_out.e restart_trans_with_2subs_out_sub0.e restart_trans_with_2subs_out_sub1.e'
+    prereq = 'pseudo_trans_with_2subs'
+
+    issues = "#15287"
+    requirement = "The system shall support restarting a transient simulation from a pseudo-transient solution file with multiple sub apps."
+  []
+[]
