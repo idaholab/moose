@@ -383,6 +383,10 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
 
       if (solver_params._customized_pc_for_eigen)
         Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_pc_type", "moosepc");
+
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+     Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+#endif
 #else
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
@@ -437,6 +441,10 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
         Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
         Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
       }
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+     Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+     Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
+#endif
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
