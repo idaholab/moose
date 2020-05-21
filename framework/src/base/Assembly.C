@@ -1704,10 +1704,12 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   if (_current_qrule_face != _holder_qrule_fv_face[dim].get())
   {
     setFaceQRule(_holder_qrule_fv_face[dim].get(), dim);
-    // It doesn't matter what we init with here since this is a constant
-    // monomial quadrature rule.  We just need to manually init so our
-    // quadrature points become initialized in the rule.
-    _current_qrule_face->init(EDGE2);
+    // The order of the element that is used for initing here doesn't matter since this will just be
+    // used for constant monomials (which only need a single integration point)
+    if (dim == 3)
+      _current_qrule_face->init(QUAD4);
+    else
+      _current_qrule_face->init(EDGE2);
   }
 
   // TODO: maybe we don't need this and can delete it? - investigate
