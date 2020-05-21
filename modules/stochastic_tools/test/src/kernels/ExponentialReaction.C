@@ -19,8 +19,10 @@ ExponentialReaction::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Implements a simple consuming reaction term with weak form $(\\psi_i, u_h)$.");
-  params.addParam<Real>("mu1", "First coefficient in the nonlinear term.");
-  params.addParam<Real>("mu2", "Second coefficient in the nonlinear term.");
+  params.addParam<Real>("mu1", 0.3, "First coefficient in the nonlinear term.");
+  params.addParam<Real>("mu2", 9, "Second coefficient in the nonlinear term.");
+  params.declareControllable("mu1");
+  params.declareControllable("mu2");
   return params;
 }
 
