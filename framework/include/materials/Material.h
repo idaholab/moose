@@ -81,6 +81,7 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
+  using MaterialBase::getGenericZeroMaterialProperty;
   using MaterialBase::getZeroMaterialProperty;
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }

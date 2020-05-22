@@ -13,7 +13,6 @@
 #include "DerivativeMaterialInterface.h"
 
 #define usingFunctionMaterialBaseMembers(T)                                                        \
-  usingDerivativeMaterialInterfaceMembers(Material);                                               \
   using FunctionMaterialBase<T>::name;                                                             \
   using FunctionMaterialBase<T>::_qp;                                                              \
   using FunctionMaterialBase<T>::_qrule;                                                           \

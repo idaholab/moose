@@ -114,7 +114,7 @@ DerivativeSumMaterialTempl<is_ad>::initialSetup()
 {
   if (_validate_coupling)
     for (unsigned int n = 0; n < _num_materials; ++n)
-      validateCoupling<Real>(_sum_materials[n]);
+      this->template validateCoupling<Real>(_sum_materials[n]);
 }
 
 template <bool is_ad>

@@ -66,7 +66,7 @@ public:
   const std::string & getPropertyName() const { return _property_name; };
 
   /// get the property reference
-  const MaterialProperty<GenericReal<is_ad>> & value() const;
+  const GenericMaterialProperty<Real, is_ad> & value() const;
 
   /// take another derivative
   void addDerivative(const VariableName & var);

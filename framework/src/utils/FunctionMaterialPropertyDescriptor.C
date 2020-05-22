@@ -207,7 +207,7 @@ FunctionMaterialPropertyDescriptor<is_ad>::printDebug()
 }
 
 template <bool is_ad>
-const MaterialProperty<GenericReal<is_ad>> &
+const GenericMaterialProperty<Real, is_ad> &
 FunctionMaterialPropertyDescriptor<is_ad>::value() const
 {
   if (_value == nullptr)
@@ -219,10 +219,11 @@ FunctionMaterialPropertyDescriptor<is_ad>::value() const
 
     // get the material property reference
     if (_material_parent)
-      _value =
-          &(_material_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+      _value = &(_material_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
+                                                                              _derivative_vars));
     else if (_kernel_parent)
-      _value = &(_kernel_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+      _value = &(
+          _kernel_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name, _derivative_vars));
     else
       mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                  "Kernel object.");
@@ -240,3 +241,4 @@ FunctionMaterialPropertyDescriptor<is_ad>::updatePropertyName()
 
 // explicit instantiation
 template class FunctionMaterialPropertyDescriptor<false>;
+template class FunctionMaterialPropertyDescriptor<true>;
