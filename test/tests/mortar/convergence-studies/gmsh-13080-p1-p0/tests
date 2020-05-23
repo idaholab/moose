@@ -1,0 +1,22 @@
+[Tests]
+  design = 'EqualValueConstraint.md'
+  issues = '#13080'
+  [coarser_slave]
+    type = 'Exodiff'
+    input = 'p1p0-coarser-slave.i'
+    exodiff = 'p1p0-coarser-slave_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a coarser slave side generated in the gmsh file format, using a P1P0 discretization.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+  [coarser_master]
+    type = 'Exodiff'
+    input = 'p1p0-coarser-master.i'
+    exodiff = 'p1p0-coarser-master_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a coarser master side generated in the gmsh file format, using a P1P0 discretization.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+[]
