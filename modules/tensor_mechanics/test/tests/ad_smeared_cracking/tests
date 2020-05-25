@@ -129,4 +129,14 @@ issues = '#6815 #9227 #15311'
     prereq = cracking_rotation_pres_dir_z
     requirement = 'The MOOSE TensorMechanics module shall demonstrate the finite rotation of cracked elements where two cracks are prescribed in x and z using AD and match non-AD methods.'
   [../]
+
+  [./ad_multiple_softening_jacobian]
+    type = 'PetscJacobianTester'
+    input = cracking_multiple_softening.i
+    run_sim = 'True'
+    cli_args = 'Outputs/exodus=false'
+    ratio_tol = 1e-4
+    difference_tol = 1
+    requirement = 'The MOOSE TensorMechanics module shall compute accurate AD Jacobian of system with multiple softening laws.'
+  [../]
 []
