@@ -2,12 +2,14 @@
 
 Build issues are normally caused by an invalid environment, or perhaps an update to your repository occurred, and you now have a mismatch between MOOSE and your application, or a combination of the two with the moose-libmesh Conda package being out of date.
 
-- Verify the Conda Environment is up to date, with the latest version of our moose packages:
+- Verify the Conda Environment is active and up to date, with the latest version of our moose packages:
 
   ```bash
   conda activate moose
   conda update --all
   ```
+
+  if `conda activate moose` failed, see [Conda Issues](troubleshooting.md#condaissues) above.
 
   !alert note
   When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your application. While specific updates to moose-libmesh and/or moose-petsc may not have occurred, there are several other libraries out of our control which may have been upgraded, requiring you to rebuild.

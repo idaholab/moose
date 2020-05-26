@@ -4,61 +4,34 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### `conda: command not found`
 
-  An easy fix which either means; you have yet to install conda, or your path to it, is incorrect or not set. You will need to recall how you installed conda; Was it Miniconda, or Anaconda? Was it the bash package or a double-click install method?
-  
-  +If it was a double-click install method+, that can unfortunately mean conda is installed, well, anywhere. Your best bet, is to re-attempt the install and pay attention to where it says it's going to install it. Once you figure that out, you can set that PATH yourself, and continue from where you left off on our instructions:
-  
-  ```bash
-  export PATH=/some/path/to/conda/bin:$PATH
-  ```
-  
-  Note the 'bin:$PATH' at the end of that line. Very necesssary. Don't forget it.
-  
-  With the above PATH set, you can see if you have set it correctly by running `which`:
-  
-  ```bash
-  which conda
-  ```
-  
-  The above command should return a familiar path you exported. If not, unfortunately you'll have to figure out as to where Conda truly is.
-  
-  +If it was the bash package method+ (our perferred method), odds are you still have that information located in your terminal. The quickest way to find it, is to search through your history:
-  
-  ```bash
-  history | grep "bash \|sh "
-  ```
-  
-  If you're lucky, the above command will contain a line or two about how you install Conda. And among that line, is the path you need to export:
-  
-  ```pre
-  $ history | grep "bash \|sh "
-  999  sh ~/Downloads/Miniconda3-latest-MacOSX-x86_64.sh -b -p ~/miniconda3
-  ```
-  
-  According to the above, I installed miniconda to my home directory. So I need to export PATH like this:
-  
+  You have yet to install conda, or your path to it, is incorrect or not set. You will need to recall how you installed conda; Was it Miniconda, or Anaconda? Was it the bash package or a double-click install method?
+
+  If you were following our [Conda](getting_started/installation/conda.md) instructions to the letter, Minconda should be installed at: `~/miniconda3`. Which means you must export your PATH like so:
+
   ```bash
   export PATH=~/miniconda3/bin:$PATH
   ```
-  
-  Note: Don't forget the 'bin:$PATH'
 
-- #### `conda activate`
+  To finalize the install, you now need to initialize conda (see `conda init` below).
 
-  If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing. Unfortunately, much of what can be diagnosed, is going to be beyond this document. So instead, try to create a new environment instead:
-  
+- #### `conda activate moose`
+
+  If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at Miniconda/Anaconda. What we can attempt, is to create a new environment and go from there:
+
   ```bash
   conda create --name testing --quiet --yes
   ```
-  
+
   The above should create an empty environment. Try and activate it:
-  
+
   ```bash
   conda activate testing
   ```
-  
-  If this fails, or the create command before it, the error will likely be involved with how Conda was first installed (perhaps with sudo rights, or as another user). You should look into removing this installation of conda, and starting over. Or, install a new instance of conda, and adjust your PATH to the new one instead. Failures of this nature can also mean your conda resource file (~/.condarc) is in bad shape. We have no way of diagnosing this in a troubleshooting fashion, as this file can contain more than just moose-related configs. But the bare minimum for moose development should resemble the following:
-  
+
+  If the above is asking you to initialize conda, see `conda init` below.
+
+  If the command failed, or the `conda create` command before it, the error will likely be involved with how Conda was first installed (perhaps with sudo rights, or as another user). You should look into removing this installation of conda, and starting over with our [Getting Started](getting_started/installation/conda.md) instructions. Failures of this nature can also mean your conda resource file (~/.condarc) is in bad shape. We have no way of diagnosing this in a troubleshooting fashion, as this file can contain more than just moose-related configs. For reference, the bare minimum should resemble the following:
+
   ```bash
   channels:
     - https://mooseframework.org/conda/moose
@@ -68,15 +41,21 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### `conda init`
 
-  If init is failing, it is possible that Conda simply does not know what shell you are operating in, and it created a 'configuration' for the wrong shell, or not at all.
-  
-  WIP
+  If `conda init` is failing, or similarly doing nothing, it is possible that Conda simply does not know what shell you are operating in, and it created a 'configuration' for the wrong shell, or not at all.
 
-- #### `conda update`
+  To figure out what shell you are operating in:
 
-  WIP
+  ```bash
+  echo $0
+  ```
 
-- ### Not listed
+  What ever returns here, is the type of shell you are operating in, and is also what you should be instructing Conda to 'initialize'. Example:
+
+  ```bash
+  conda init zsh
+  ```
+
+- ### Your issue not listed
 
   The quick fix-attempt, is to re-install the moose-packages:
 
@@ -85,3 +64,5 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   conda remove moose --all --yes
   conda create moose moose-libmesh moose-tools
   ```
+
+  If the above re-install method ultimately failed, it is time to submit your errors to the [mailing list](faq/mailing_list.md).
