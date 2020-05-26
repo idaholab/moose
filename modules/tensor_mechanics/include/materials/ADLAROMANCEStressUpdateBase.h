@@ -60,14 +60,14 @@ protected:
    * @return flag that indicates ROM was skipped
    */
 
-  ADReal computeROMStrainRate(const unsigned index, const bool jacobian = false);
+  ADReal computeROMStrainRate(const unsigned out_idx, const bool jacobian = false);
 
   /**
    * Function to check input values against applicability windows set by ROM data set
-   * @param input Vector of input values
+   * @param input value
    * @return flag to indicate to continue computing ROM
    */
-  bool checkSpecificInputWindow(std::vector<ADReal> & input, const unsigned int index);
+  bool checkInputWindow(ADReal & input, const unsigned int out_idx);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
@@ -78,8 +78,8 @@ protected:
    */
   void convertInput(const std::vector<ADReal> & input,
                     std::vector<ADReal> & converted,
-                    std::vector<ADReal> & dconverted,
-                    const unsigned index);
+                    const unsigned out_idx,
+                    const bool jacobian = false);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM
@@ -93,7 +93,7 @@ protected:
   void buildPolynomials(const std::vector<ADReal> & rom_inputs,
                         const std::vector<ADReal> & drom_inputs,
                         std::vector<std::vector<ADReal>> & polynomial_inputs,
-                        std::vector<std::vector<ADReal>> & dpolynomial_inputs);
+                        const bool jacobian = false);
 
   /**
    * Arranges the calculated Legendre polynomials into the order expected by the
@@ -106,11 +106,10 @@ protected:
    * @param rom_outputs Outputs from ROM
    * @param drom_outputs Derivative of outputs from ROM with respect to stress
    */
-  void computeValues(const std::vector<Real> & coefs,
-                     const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                     const std::vector<std::vector<ADReal>> & dpolynomial_inputs,
-                     ADReal & rom_outputs,
-                     ADReal & drom_outputs);
+  ADReal computeValues(const std::vector<Real> & coefs,
+                       const std::vector<std::vector<ADReal>> & polynomial_inputs,
+                       const std::vector<std::vector<ADReal>> & dpolynomial_inputs,
+                       const bool jacobian = false);
 
   /**
    * Computes the output variable increments from the ROM predictions by bringing out of the
@@ -122,12 +121,11 @@ protected:
    * @param ROM_computed_increments Derivative of the incremental change of input values with
    * respect to stress
    */
-  void convertOutput(const std::vector<Real> & old_input_values,
-                     const ADReal & rom_outputs,
-                     const ADReal & drom_outputs,
-                     ADReal & ROM_computed_increments,
-                     ADReal & dROM_computed_increments,
-                     const unsigned index);
+  ADReal convertOutput(const std::vector<Real> & old_input_values,
+                       const ADReal & rom_outputs,
+                       const ADReal & drom_outputs,
+                       const unsigned out_idx,
+                       const bool jacobian = false);
 
   /**
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
