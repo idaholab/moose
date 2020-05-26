@@ -12,6 +12,7 @@
 #include "PorousFlowDictator.h"
 #include "SinglePhaseFluidProperties.h"
 #include "MooseVariable.h"
+#include "PorousFlowSinkBC.h"
 
 #include "libmesh/quadrature.h"
 
@@ -23,19 +24,9 @@ InputParameters
 PorousFlowEnthalpySink::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
+  params += PorousFlowSinkBC::validParamsCommon();
   params.addRequiredParam<UserObjectName>(
       "PorousFlowDictator", "The UserObject that holds the list of PorousFlow variable names");
-  params.addParam<unsigned int>(
-      "fluid_phase", "Evaluate enthalpy at the pressure of this fluid phase.");
-  params.addRequiredParam<FunctionName>(
-      "flux_function",
-      "The mass flux.  The flux is OUT of the medium: hence positive values of "
-      "this function means this BC will act as a SINK, while negative values "
-      "indicate this flux will be a SOURCE.  The functional form is useful "
-      "for spatially or temporally varying sinks.  This function is measured in kg.m^-2.s^-1.");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addRequiredCoupledVar("pressure", "Pressure");
-  params.addRequiredParam<Real>("T_in", "Specified inlet temperature (measured in K)");
   params.addClassDescription(
       "Applies a source equal to the product of the mass flux and the "
       "fluid enthalpy. The enthalpy is computed at temperature T_in and pressure equal to the "
