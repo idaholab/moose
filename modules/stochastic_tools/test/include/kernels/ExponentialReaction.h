@@ -31,4 +31,6 @@ protected:
   const Real & _mu2;
 
   virtual Real computeQpResidual() override;
+
+  virtual Real computeQpJacobian() override;
 };

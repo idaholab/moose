@@ -18,7 +18,8 @@ ExponentialReaction::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
-      "Implements a simple consuming reaction term with weak form $(\\psi_i, u_h)$.");
+      "Implements a simple reaction term with the following weak form "
+      "$(\\psi_i,\\frac{\\mu_1}{\\mu_2}\\left[e^{\\mu_2 u_h}-1\\right])$.");
   params.addParam<Real>("mu1", 0.3, "First coefficient in the nonlinear term.");
   params.addParam<Real>("mu2", 9, "Second coefficient in the nonlinear term.");
   params.declareControllable("mu1");
@@ -36,13 +37,11 @@ ExponentialReaction::ExponentialReaction(const InputParameters & parameters)
 Real
 ExponentialReaction::computeQpResidual()
 {
-  return _test[_i][_qp] * _mu1/_mu2 * (exp(_mu2 * _u[_qp]) - 1);
+  return _test[_i][_qp] * _mu1 / _mu2 * (exp(_mu2 * _u[_qp]) - 1);
 }
 
-/*
 Real
-Reaction::computeQpJacobian()
+ExponentialReaction::computeQpJacobian()
 {
-  return _test[_i][_qp] * _phi[_j][_qp];
+  return _test[_i][_qp] * _phi[_j][_qp] * _mu1 * exp(_mu2 * _u[_qp]);
 }
-*/
