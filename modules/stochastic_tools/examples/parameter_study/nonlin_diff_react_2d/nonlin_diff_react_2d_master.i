@@ -27,7 +27,8 @@
   [runner]
     type = SamplerFullSolveMultiApp
     sampler = hypercube
-    input_files = 'deim_test_case.i'
+    input_files = 'nonlin_diff_react_2d_sub.i'
+    mode = batch-restore
   []
 []
 
