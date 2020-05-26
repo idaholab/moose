@@ -62,6 +62,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
   registerSyntaxTask("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
 
+  syntax.registerActionSyntax("PorousFlowAddBCAction", "Modules/PorousFlow/BCs/*");
+
+  registerMooseObjectTask("add_porous_flow_bc", PorousFlowSinkBC, false);
+  addTaskDependency("add_porous_flow_bc", "add_bc");
+
   // Task dependency and syntax for action to automatically add PorousFlow materials
   registerSyntax("PorousFlowAddMaterialAction", "Materials");
 
