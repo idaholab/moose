@@ -24,7 +24,7 @@ CavityPressureUOAction::validParams()
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = EXEC_LINEAR;
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
-
+  params.addClassDescription("Action to add user objects for cavity pressure");
   return params;
 }
 

@@ -24,5 +24,7 @@ public:
   Moose::EigenSolveType _eigen_solve_type;
   Moose::EigenProblemType _eigen_problem_type;
   Moose::WhichEigenPairs _which_eigen_pairs;
+  bool _eigen_matrix_free;
+  bool _customized_pc_for_eigen;
+  bool _precond_matrix_free;
 };
-

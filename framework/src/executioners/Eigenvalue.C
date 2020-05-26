@@ -26,6 +26,24 @@ Eigenvalue::validParams()
 
   params.addClassDescription("Eigenvalue solves a standard/generalized eigenvaue problem");
 
+  params.addParam<bool>(
+      "matrix_free",
+      false,
+      "Whether or not to use a matrix free fashion to form operators. "
+      "If true, shell matrices will be used and meanwhile a preconditioning matrix"
+      "may be formed as well.");
+
+  params.addParam<bool>(
+      "precond_matrix_free",
+      false,
+      "Whether or not to use a matrix free fashion for forming the preconditioning matrix. "
+      "If true, a shell matrix will be used for preconditioner.");
+
+  params.addParam<bool>("precond_matrix_includes_eigen",
+                        false,
+                        "Whether or not to include eigen kernels in the preconditioning matrix. "
+                        "If true, the preconditioning matrix will include eigen kernels.");
+
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
   params.addParam<PostprocessorName>(
@@ -60,6 +78,17 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
+}
+
+void
+Eigenvalue::init()
+{
+#if LIBMESH_HAVE_SLEPC
+  // Set a flag to nonlinear eigen system
+  _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
+      getParam<bool>("precond_matrix_includes_eigen"));
+#endif
+  Steady::init();
 }
 
 void

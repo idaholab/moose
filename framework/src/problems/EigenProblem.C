@@ -58,7 +58,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _compute_jacobian_ab_timer(registerTimedSection("computeJacobianAB", 3)),
     _compute_residual_tag_timer(registerTimedSection("computeResidualTag", 3)),
     _compute_residual_ab_timer(registerTimedSection("computeResidualAB", 3)),
-    _solve_timer(registerTimedSection("solve", 1))
+    _solve_timer(registerTimedSection("solve", 1)),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3))
 {
 #if LIBMESH_HAVE_SLEPC
   _nl = _nl_eigen;
@@ -141,6 +142,54 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
   computeJacobianTags(_fe_matrix_tags);
 
   _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
+}
+
+void
+EigenProblem::computeMatricesTags(
+    const NumericVector<Number> & soln,
+    const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
+    const std::set<TagID> & tags)
+{
+  TIME_SECTION(_compute_jacobian_tag_timer);
+
+  if (jacobians.size() != tags.size())
+    mooseError("The number of matrices ",
+               jacobians.size(),
+               " does not equal the number of tags ",
+               tags.size());
+
+  _fe_matrix_tags.clear();
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->disassociateAllTaggedMatrices();
+
+  unsigned int i = 0;
+  for (auto tag : tags)
+    _nl_eigen->associateMatrixToTag(*(jacobians[i++]), tag);
+
+  computeJacobianTags(tags);
+
+  i = 0;
+  for (auto tag : tags)
+    _nl_eigen->disassociateMatrixFromTag(*(jacobians[i++]), tag);
+}
+
+void
+EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+{
+  TIME_SECTION(_compute_jacobian_blocks_timer);
+
+  if (_displaced_problem)
+    _aux->compute(EXEC_PRE_DISPLACE);
+
+  _aux->compute(EXEC_NONLINEAR);
+
+  _currently_computing_jacobian = true;
+
+  _nl->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
+
+  _currently_computing_jacobian = false;
 }
 
 void
@@ -233,7 +282,7 @@ EigenProblem::computeResidualL2Norm()
   Real eigenvalue = 1.0;
 
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
-    eigenvalue = _nl_eigen->getNthConvergedEigenvalue(_active_eigen_index).first;
+    eigenvalue = _nl_eigen->getConvergedEigenvalue(_active_eigen_index).first;
 
   // Scale BX with eigenvalue
   _nl_eigen->residualVectorBX() *= eigenvalue;
@@ -279,6 +328,13 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::solve()
 {
+#if LIBMESH_HAVE_SLEPC
+  // Set necessary slepc callbacks
+  // We delay this call as much as possible because libmesh
+  // could rebuild matrices due to mesh changes or something else.
+  _nl_eigen->attachSLEPcCallbacks();
+#endif
+
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
   if (!_app.isUltimateMaster())
@@ -288,7 +344,6 @@ EigenProblem::solve()
   if (_solve)
   {
     TIME_SECTION(_solve_timer);
-
     _nl->solve();
     _nl->update();
   }
@@ -303,6 +358,19 @@ EigenProblem::solve()
 #endif
 }
 
+void
+EigenProblem::init()
+{
+#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  // If matrix_free=true, this tells Libmesh to use shell matrices
+  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
+  // We need to tell libMesh if we are using a shell preconditioning matrix
+  _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
+#endif
+
+  FEProblemBase::init();
+}
+
 bool
 EigenProblem::converged()
 {
@@ -313,7 +381,6 @@ bool
 EigenProblem::isNonlinearEigenvalueSolver()
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_MF_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_MONOLITH_NEWTON ||
+         solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_MF_MONOLITH_NEWTON;
 }

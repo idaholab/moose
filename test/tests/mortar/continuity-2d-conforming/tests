@@ -13,7 +13,6 @@
     mesh_mode = 'REPLICATED'
     requirement = 'We shall be able to enforce solution continuity on a conforming mesh for one variable'
   [../]
-
   [./equalgradient]
     type = 'Exodiff'
     input = 'equalgradient.i'

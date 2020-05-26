@@ -78,6 +78,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
     _test_dummy(),
+    _use_dual(_var ? _var->use_dual() : false),
     _normals(_assembly.normals()),
     _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),

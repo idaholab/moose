@@ -82,6 +82,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     _has_dof_values(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
+    _use_dual(var.use_dual()),
     _second_phi_assembly_method(nullptr),
     _second_phi_face_assembly_method(nullptr),
     _curl_phi_assembly_method(nullptr),
@@ -164,10 +165,20 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     }
     case Moose::ElementType::Lower:
     {
-      _phi_assembly_method = &Assembly::fePhiLower<OutputType>;
-      _phi_face_assembly_method = &Assembly::fePhiLower<OutputType>; // Place holder
-      _grad_phi_assembly_method = &Assembly::feGradPhiLower<OutputType>;
-      _grad_phi_face_assembly_method = &Assembly::feGradPhiLower<OutputType>; // Place holder
+      if (_use_dual)
+      {
+        _phi_assembly_method = &Assembly::feDualPhiLower<OutputType>;
+        _phi_face_assembly_method = &Assembly::feDualPhiLower<OutputType>; // Place holder
+        _grad_phi_assembly_method = &Assembly::feGradDualPhiLower<OutputType>;
+        _grad_phi_face_assembly_method = &Assembly::feGradDualPhiLower<OutputType>; // Place holder
+      }
+      else
+      {
+        _phi_assembly_method = &Assembly::fePhiLower<OutputType>;
+        _phi_face_assembly_method = &Assembly::fePhiLower<OutputType>; // Place holder
+        _grad_phi_assembly_method = &Assembly::feGradPhiLower<OutputType>;
+        _grad_phi_face_assembly_method = &Assembly::feGradPhiLower<OutputType>; // Place holder
+      }
 
       _ad_grad_phi = nullptr;
       _ad_grad_phi_face = nullptr;

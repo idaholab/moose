@@ -10,6 +10,7 @@
 import os, re
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
+import math # to compute node requirement
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -79,6 +80,13 @@ class RunPBS(QueueManager):
 
         # NCPUS
         template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
+
+        # Compute node requirement
+        if self.options.pbs_node_cpus:
+            nodes = template['mpi_procs']/self.options.pbs_node_cpus
+        else:
+            nodes = 1
+        template['nodes'] = math.ceil(nodes)
 
         # Convert MAX_TIME to hours:minutes for walltime use
         max_time = job.getMetaData().get('QUEUEING_MAXTIME', 1)

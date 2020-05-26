@@ -68,6 +68,8 @@ public:
 
   void computeScaling() override;
 
+  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
+
 protected:
   NumericVector<Number> & solutionOldInternal() const override
   {

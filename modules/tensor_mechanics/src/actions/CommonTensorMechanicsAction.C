@@ -17,6 +17,7 @@ InputParameters
 CommonTensorMechanicsAction::validParams()
 {
   InputParameters params = TensorMechanicsActionBase::validParams();
+  params.addClassDescription("Store common tensor mechanics parameters");
   return params;
 }
 

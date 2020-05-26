@@ -70,7 +70,15 @@ public:
   template <typename T>
   void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
 
+  /**
+   * Add the precond tag to eigen kernels
+   */
+  template <typename T>
+  void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
+
   virtual void initialSetup() override;
+
+  void attachSLEPcCallbacks();
 
   /**
    * Get the number of converged eigenvalues
@@ -100,7 +108,17 @@ public:
    * is the real and the imaginary part of
    * the eigenvalue, respectively.
    */
-  virtual const std::pair<Real, Real> getNthConvergedEigenvalue(dof_id_type n);
+  virtual std::pair<Real, Real> getConvergedEigenvalue(dof_id_type n) const;
+
+  /**
+   * Return the Nth converged eigenvalue and copies the respective eigen vector to the solution
+   * vector.
+   *
+   * @return The Nth converged eigenvalue as a complex number, i.e. the first and the second number
+   * is the real and the imaginary part of
+   * the eigenvalue, respectively.
+   */
+  virtual std::pair<Real, Real> getConvergedEigenpair(dof_id_type n) const;
 
   /**
    * Get the number of converged eigenvalues
@@ -132,6 +150,24 @@ public:
    */
   TagID nonEigenMatrixTag() { return _A_tag; }
 
+  /**
+   * If the preconditioning matrix includes eigen kernels
+   */
+  void precondMatrixIncludesEigenKernels(bool precond_matrix_includes_eigen)
+  {
+    _precond_matrix_includes_eigen = precond_matrix_includes_eigen;
+  }
+
+  bool precondMatrixIncludesEigenKernels() const { return _precond_matrix_includes_eigen; }
+
+  TagID precondMatrixTag() const { return _precond_tag; }
+
+  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
+
+  Preconditioner<Number> * preconditioner() const { return _preconditioner; }
+
+  virtual void turnOffJacobian() override;
+
 protected:
   NumericVector<Number> & solutionOldInternal() const override
   {
@@ -153,6 +189,10 @@ protected:
   TagID _Bx_tag;
   TagID _A_tag;
   TagID _B_tag;
+  TagID _precond_tag;
+  bool _precond_matrix_includes_eigen;
+  // Libmesh preconditioner
+  Preconditioner<Number> * _preconditioner;
 };
 
 #else

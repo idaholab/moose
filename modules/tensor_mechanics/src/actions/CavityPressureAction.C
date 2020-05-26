@@ -30,6 +30,7 @@ CavityPressureAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
+  params.addClassDescription("Action to setup cavity pressure boundary condition");
   return params;
 }
 

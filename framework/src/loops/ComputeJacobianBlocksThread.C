@@ -46,8 +46,8 @@ ComputeJacobianBlocksThread::postElement(const Elem * elem)
     const auto & dof_map = block->_precond_system.get_dof_map();
     dof_map.dof_indices(elem, _dof_indices);
 
-    _fe_problem.addJacobianBlock(
-        block->_jacobian, block->_ivar, block->_jvar, dof_map, _dof_indices, _tid);
+    _fe_problem.addJacobianBlockTags(
+        block->_jacobian, block->_ivar, block->_jvar, dof_map, _dof_indices, _tags, _tid);
   }
 }
 

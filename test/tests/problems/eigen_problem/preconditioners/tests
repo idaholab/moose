@@ -1,0 +1,45 @@
+[Tests]
+  design = "Eigenvalue.md"
+  issues = "#7398"
+
+  [./newton_pbp]
+    type = 'CSVDiff'
+    input = 'ne_pbp.i'
+    csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
+    cli_args = '-eps_view'
+    slepc_version = '>=3.8.0'
+    expect_out = 'type: moosepc'
+    requirement = "Eigen solver should work with a physics-based preconditioner "
+  [../]
+
+  [./newton_pbp_shell_precond]
+    type = 'CSVDiff'
+    input = 'ne_pbp.i'
+    csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
+    cli_args = 'Executioner/precond_matrix_free=true -eps_view'
+    prereq = 'newton_pbp'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigen solver should work with a physics-based preconditioner with a shell preconditioning matrix"
+  [../]
+
+  [./newton_pbp_shell_precond_shell_matrix]
+    type = 'RunApp'
+    input = 'ne_pbp.i'
+    cli_args = 'Executioner/precond_matrix_free=true -eps_view'
+    prereq = 'newton_pbp_shell_precond'
+    expect_out = 'type: shell'
+    petsc_version = '>=3.13.0'
+    requirement = "Eigen solver should work with a physics-based preconditioner with a PETSc shell matrix"
+  [../]
+
+  [./newton_pbp_precond_include_eigen_kernels]
+    type = 'CSVDiff'
+    input = 'ne_pbp.i'
+    csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
+    cli_args = 'Executioner/precond_matrix_free=true Executioner/precond_matrix_includes_eigen=true'
+    prereq = 'newton_pbp_shell_precond'
+    expect_out = '6 KSP Residual norm'
+    slepc_version = '>=3.8.0'
+    requirement = "Eigen solver should work with a physics-based preconditioner with including eigen kernels in the preconditioning matrix"
+  [../]
+[]

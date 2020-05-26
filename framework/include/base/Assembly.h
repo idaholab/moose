@@ -764,7 +764,19 @@ public:
                         unsigned int ivar,
                         unsigned int jvar,
                         const DofMap & dof_map,
-                        std::vector<dof_id_type> & dof_indices);
+                        std::vector<dof_id_type> & dof_indices,
+                        TagID tag = 0);
+
+  /**
+   * Add element matrix for ivar rows and jvar columns to the global Jacobian matrix for given
+   * tags.
+   */
+  void addJacobianBlockTags(SparseMatrix<Number> & jacobian,
+                            unsigned int ivar,
+                            unsigned int jvar,
+                            const DofMap & dof_map,
+                            std::vector<dof_id_type> & dof_indices,
+                            const std::set<TagID> & tags);
 
   /**
    * Adds non-local element matrix for ivar rows and jvar columns to the global Jacobian matrix.
@@ -1134,7 +1146,14 @@ public:
   const typename OutputTools<OutputType>::VariablePhiValue & fePhiLower(FEType type) const;
 
   template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiValue & feDualPhiLower(FEType type) const;
+
+  template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiGradient & feGradPhiLower(FEType type) const;
+
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiGradient &
+  feGradDualPhiLower(FEType type) const;
 
   template <typename OutputType>
   const typename OutputTools<OutputType>::VariablePhiValue & fePhiFace(FEType type) const
@@ -1554,6 +1573,8 @@ private:
    */
   void buildLowerDFE(FEType type) const;
 
+  void buildLowerDDualFE(FEType type) const;
+
   /**
    * Build Vector FEs with a type
    * @param type The type of FE
@@ -1583,6 +1604,7 @@ private:
    * @param type The type of FE
    */
   void buildVectorLowerDFE(FEType type) const;
+  void buildVectorDualLowerDFE(FEType type) const;
 
   SystemBase & _sys;
   SubProblem & _subproblem;
@@ -1944,6 +1966,7 @@ private:
   mutable std::map<FEType, FEShapeData *> _fe_shape_data_neighbor;
   mutable std::map<FEType, FEShapeData *> _fe_shape_data_face_neighbor;
   mutable std::map<FEType, FEShapeData *> _fe_shape_data_lower;
+  mutable std::map<FEType, FEShapeData *> _fe_shape_data_dual_lower;
 
   /// Shape function values, gradients, second derivatives for each vector FE type
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data;
@@ -1951,6 +1974,7 @@ private:
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_neighbor;
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_face_neighbor;
   mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_lower;
+  mutable std::map<FEType, VectorFEShapeData *> _vector_fe_shape_data_dual_lower;
 
   mutable std::map<FEType, ADTemplateVariablePhiGradient<Real>> _ad_grad_phi_data;
   mutable std::map<FEType, ADTemplateVariablePhiGradient<RealVectorValue>> _ad_vector_grad_phi_data;
@@ -2055,11 +2079,27 @@ Assembly::fePhiLower(FEType type) const
 }
 
 template <typename OutputType>
+const typename OutputTools<OutputType>::VariablePhiValue &
+Assembly::feDualPhiLower(FEType type) const
+{
+  buildLowerDDualFE(type);
+  return _fe_shape_data_dual_lower[type]->_phi;
+}
+
+template <typename OutputType>
 const typename OutputTools<OutputType>::VariablePhiGradient &
 Assembly::feGradPhiLower(FEType type) const
 {
   buildLowerDFE(type);
   return _fe_shape_data_lower[type]->_grad_phi;
+}
+
+template <typename OutputType>
+const typename OutputTools<OutputType>::VariablePhiGradient &
+Assembly::feGradDualPhiLower(FEType type) const
+{
+  buildLowerDDualFE(type);
+  return _fe_shape_data_dual_lower[type]->_grad_phi;
 }
 
 template <>
@@ -2093,8 +2133,16 @@ const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::fePhiLower<VectorValue<Real>>(FEType type) const;
 
 template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
+Assembly::feDualPhiLower<VectorValue<Real>>(FEType type) const;
+
+template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
 Assembly::feGradPhiLower<VectorValue<Real>>(FEType type) const;
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiGradient &
+Assembly::feGradDualPhiLower<VectorValue<Real>>(FEType type) const;
 
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
