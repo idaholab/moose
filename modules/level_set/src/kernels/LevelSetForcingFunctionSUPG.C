@@ -18,19 +18,22 @@ LevelSetForcingFunctionSUPG::validParams()
   InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription("The SUPG stablization term for a forcing function.");
   params.addParam<FunctionName>("function", "1", "A function that describes the body force");
-  params += LevelSetVelocityInterface<ADKernelGrad>::validParams();
+  params.addRequiredCoupledVar("velocity", "Velocity vector variable.");
   return params;
 }
 
 LevelSetForcingFunctionSUPG::LevelSetForcingFunctionSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<ADKernelGrad>(parameters), _function(getFunction("function"))
+  : ADKernelGrad(parameters),
+    _function(getFunction("function")),
+    _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADRealVectorValue
 LevelSetForcingFunctionSUPG::precomputeQpResidual()
 {
-  computeQpVelocity();
-  ADReal tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return -tau * _velocity * _function.value(_t, _q_point[_qp]);
+  ADReal tau =
+      _current_elem->hmin() /
+      (2 * (_velocity[_qp] + RealVectorValue(libMesh::TOLERANCE * libMesh::TOLERANCE)).norm());
+  return -tau * _velocity[_qp] * _function.value(_t, _q_point[_qp]);
 }

@@ -15,11 +15,8 @@
 []
 
 [AuxVariables]
-  [./vel_x]
-    initial_condition = 3
-  [../]
-  [./vel_y]
-    initial_condition = 3
+  [./velocity]
+    family = LAGRANGE_VEC
   [../]
 []
 
@@ -29,6 +26,11 @@
     function = phi_exact
     variable = phi
   [../]
+  [./vel_ic]
+    type = VectorFunctionIC
+    variable = velocity
+    function = velocity_func
+  []
 []
 
 [Functions]
@@ -37,6 +39,11 @@
     epsilon = 0.05
     center = '0.5 0.5 0'
     radius = 0.15
+  [../]
+  [./velocity_func]
+    type = ParsedVectorFunction
+    value_x = '3'
+    value_y = '3'
   [../]
 []
 
@@ -57,8 +64,7 @@
 
   [./advection]
     type = LevelSetAdvection
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     variable = phi
   [../]
 []
@@ -66,8 +72,7 @@
 [Postprocessors]
   [./cfl]
     type = LevelSetCFLCondition
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     execute_on = 'initial'
   [../]
 []

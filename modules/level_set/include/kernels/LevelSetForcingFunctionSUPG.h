@@ -9,14 +9,12 @@
 
 #pragma once
 
-// MOOSE includes
 #include "ADKernelGrad.h"
-#include "LevelSetVelocityInterface.h"
 
 /**
  * SUPG stabilization term for a forcing function.
  */
-class LevelSetForcingFunctionSUPG : public LevelSetVelocityInterface<ADKernelGrad>
+class LevelSetForcingFunctionSUPG : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
@@ -29,7 +27,6 @@ protected:
   /// Function value
   const Function & _function;
 
-  using LevelSetVelocityInterface<ADKernelGrad>::computeQpVelocity;
-  using LevelSetVelocityInterface<ADKernelGrad>::_velocity;
-  using LevelSetVelocityInterface<ADKernelGrad>::_q_point;
+  /// Velocity vector variable
+  const ADVectorVariableValue & _velocity;
 };

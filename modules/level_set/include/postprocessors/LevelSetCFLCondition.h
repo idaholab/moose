@@ -9,14 +9,12 @@
 
 #pragma once
 
-// MOOSE includes
 #include "ElementPostprocessor.h"
-#include "LevelSetVelocityInterface.h"
 
 /**
  * Computes the maximum timestep based on the CFL condition.
  */
-class LevelSetCFLCondition : public LevelSetVelocityInterface<ElementPostprocessor>
+class LevelSetCFLCondition : public ElementPostprocessor
 {
 public:
   static InputParameters validParams();
@@ -34,4 +32,7 @@ private:
 
   /// The minimum timestep computed using CFL condition.
   Real _cfl_timestep;
+
+  /// Velocity vector variable
+  const ADVectorVariableValue & _velocity;
 };
