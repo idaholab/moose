@@ -233,7 +233,7 @@ ADLAROMANCEStressUpdateBase::computeStressInitialize(const ADReal & effective_tr
   _input_within_range = true;
   for (unsigned int j = 0; j < _num_inputs; j++)
     if (j != _stress_input_idx)
-      _input_within_range *= checkSpecificInputWindow(_input_values, j);
+      _input_within_range *= checkInputWindow(_input_values[j], j);
 }
 
 ADReal
@@ -253,7 +253,8 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   ADReal drom_effective_strain_inc_dstress = 0.0;
 
   // Check window of new trial stress
-  _run_ROM = _input_within_range * checkSpecificInputWindow(_input_values, _stress_input_idx);
+  _run_ROM =
+      _input_within_range * checkInputWindow(_input_values[_stress_input_idx], _stress_input_idx);
 
   // Run ROM if all values are within windows.
   if (_run_ROM)
@@ -337,59 +338,54 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeROMStrainRate(const unsigned index, const bool jacobian)
+ADLAROMANCEStressUpdateBase::computeROMStrainRate(const unsigned out_idx, const bool jacobian)
 {
   std::vector<ADReal> rom_inputs(_num_inputs, 0.0);
   std::vector<ADReal> drom_inputs(_num_inputs, 0.0);
-  convertInput(_input_values, rom_inputs, drom_inputs, index);
+  convertInput(_input_values, rom_inputs, out_idx);
 
   std::vector<std::vector<ADReal>> polynomial_inputs(_num_inputs,
                                                      std::vector<ADReal>(_degree, 0.0));
   std::vector<std::vector<ADReal>> dpolynomial_inputs(_num_inputs,
                                                       std::vector<ADReal>(_degree, 0.0));
-  buildPolynomials(rom_inputs, drom_inputs, polynomial_inputs, dpolynomial_inputs);
+  buildPolynomials(rom_inputs, drom_inputs, polynomial_inputs);
 
-  ADReal rom_outputs(0.0);
+  ADReal rom_outputs = computeValues(_coefs[out_idx], polynomial_inputs, dpolynomial_inputs);
   ADReal drom_outputs(0.0);
-  computeValues(_coefs[index], polynomial_inputs, dpolynomial_inputs, rom_outputs, drom_outputs);
-
-  ADReal dROM_computed_increments(0.0);
-  ADReal ROM_computed_increments(0.0);
-  convertOutput(_old_input_values,
-                rom_outputs,
-                drom_outputs,
-                ROM_computed_increments,
-                dROM_computed_increments,
-                index);
 
   if (jacobian)
-    return dROM_computed_increments;
-  return ROM_computed_increments;
+  {
+    convertInput(_input_values, drom_inputs, out_idx, jacobian);
+    buildPolynomials(rom_inputs, drom_inputs, dpolynomial_inputs, jacobian);
+    drom_outputs = computeValues(_coefs[out_idx], polynomial_inputs, dpolynomial_inputs, jacobian);
+    return convertOutput(_old_input_values, rom_outputs, drom_outputs, out_idx, jacobian);
+  }
+
+  return convertOutput(_old_input_values, rom_outputs, drom_outputs, out_idx);
 }
 
 bool
-ADLAROMANCEStressUpdateBase::checkSpecificInputWindow(std::vector<ADReal> & input,
-                                                      const unsigned int index)
+ADLAROMANCEStressUpdateBase::checkInputWindow(ADReal & input, const unsigned int out_idx)
 {
-  const Real high_limit = _input_limits[index][1] * _window;
-  const Real low_limit = _input_limits[index][0] * (2.0 - _window);
-  if (input[index] < low_limit || input[index] > high_limit)
+  const Real high_limit = _input_limits[out_idx][1] * _window;
+  const Real low_limit = _input_limits[out_idx][0] * (2.0 - _window);
+  if (input < low_limit || input > high_limit)
   {
-    if (input[index] < low_limit && index == _stress_input_idx && _extrapolate_stress)
-      input[index] = low_limit;
+    if (input < low_limit && out_idx == _stress_input_idx && _extrapolate_stress)
+      input = low_limit;
     else
     {
       if (_window_failure == WindowFailure::WARN)
         mooseWarning("In ",
                      _name,
                      ": input parameter number input=",
-                     index,
+                     out_idx,
                      " with value (",
-                     MetaPhysicL::raw_value(input[index]),
+                     MetaPhysicL::raw_value(input),
                      ") is out of range (",
-                     _input_limits[index][0],
+                     _input_limits[out_idx][0],
                      " - ",
-                     _input_limits[index][1],
+                     _input_limits[out_idx][1],
                      "), window (",
                      _window,
                      ")");
@@ -397,22 +393,22 @@ ADLAROMANCEStressUpdateBase::checkSpecificInputWindow(std::vector<ADReal> & inpu
         mooseError("In ",
                    _name,
                    ": input parameter number input=",
-                   index,
+                   out_idx,
                    " with value (",
-                   MetaPhysicL::raw_value(input[index]),
+                   MetaPhysicL::raw_value(input),
                    ") is out of range (",
-                   _input_limits[index][0],
+                   _input_limits[out_idx][0],
                    " - ",
-                   _input_limits[index][1],
+                   _input_limits[out_idx][1],
                    "), window (",
                    _window,
                    ")");
       else if (_window_failure == WindowFailure::EXTRAPOLATE)
       {
-        if (input[index] < low_limit)
+        if (input < low_limit)
           return false;
-        if (input[index] > high_limit)
-          input[index] = high_limit;
+        if (input > high_limit)
+          input = high_limit;
       }
     }
   }
@@ -423,30 +419,42 @@ ADLAROMANCEStressUpdateBase::checkSpecificInputWindow(std::vector<ADReal> & inpu
 void
 ADLAROMANCEStressUpdateBase::convertInput(const std::vector<ADReal> & input,
                                           std::vector<ADReal> & converted,
-                                          std::vector<ADReal> & dconverted,
-                                          const unsigned index)
+                                          const unsigned out_idx,
+                                          const bool jacobian)
 {
   for (unsigned int j = 0; j < _num_inputs; ++j)
   {
-    ADReal x = input[j];
-    ADReal dx = 1.0;
-    if (_transform[index][j] == ROMInputTransform::EXP)
+    if (jacobian && j != _stress_input_idx)
+      converted[j] = 0.0;
+    else
     {
-      x = std::exp(x / _transform_coefs[index][j]);
-      dx = x / _transform_coefs[index][j];
-    }
-    else if (_transform[index][j] == ROMInputTransform::LOG)
-    {
-      dx = 1.0 / (x + _transform_coefs[index][j]);
-      x = std::log(x + _transform_coefs[index][j]);
-    }
+      ADReal x(1.0);
+      if (_transform[out_idx][j] == ROMInputTransform::LINEAR)
+      {
+        if (!jacobian)
+          x = input[j];
+      }
+      else if (_transform[out_idx][j] == ROMInputTransform::EXP)
+      {
+        if (!jacobian)
+          x = std::exp(input[j] / _transform_coefs[out_idx][j]);
+        else
+          x = std::exp(input[j] / _transform_coefs[out_idx][j]) / _transform_coefs[out_idx][j];
+      }
+      else //(_transform[out_idx][j] == ROMInputTransform::LOG)
+      {
+        if (!jacobian)
+          x = std::log(input[j] + _transform_coefs[out_idx][j]);
+        else
+          x = 1.0 / (input[j] + _transform_coefs[out_idx][j]);
+      }
 
-    converted[j] = 2.0 * (x - _transformed_limits[index][j][0]) /
-                       (_transformed_limits[index][j][1] - _transformed_limits[index][j][0]) -
-                   1.0;
-    if (j == _stress_input_idx)
-      dconverted[j] =
-          dx * 2.0 / (_transformed_limits[index][j][1] - _transformed_limits[index][j][0]);
+      if (jacobian)
+        converted[j] = x / _transformed_limits[out_idx][j][2];
+      else
+        converted[j] =
+            (x - _transformed_limits[out_idx][j][0]) / _transformed_limits[out_idx][j][2] - 1.0;
+    }
   }
 }
 
@@ -454,27 +462,31 @@ void
 ADLAROMANCEStressUpdateBase::buildPolynomials(const std::vector<ADReal> & rom_inputs,
                                               const std::vector<ADReal> & drom_inputs,
                                               std::vector<std::vector<ADReal>> & polynomial_inputs,
-                                              std::vector<std::vector<ADReal>> & dpolynomial_inputs)
+                                              const bool jacobian)
 {
   for (unsigned int j = 0; j < _num_inputs; ++j)
   {
-    for (unsigned int k = 0; k < _degree; ++k)
+    if (!jacobian || j == _stress_input_idx)
     {
-      polynomial_inputs[j][k] = computePolynomial(rom_inputs[j], k);
-      if (j == _stress_input_idx)
-        dpolynomial_inputs[j][k] = drom_inputs[j] * computePolynomial(rom_inputs[j], k, true);
+      for (unsigned int k = 0; k < _degree; ++k)
+      {
+        if (!jacobian)
+          polynomial_inputs[j][k] = computePolynomial(rom_inputs[j], k);
+        else
+          polynomial_inputs[j][k] = drom_inputs[j] * computePolynomial(rom_inputs[j], k, true);
+      }
     }
   }
 }
 
-void
+ADReal
 ADLAROMANCEStressUpdateBase::computeValues(
     const std::vector<Real> & coefs,
     const std::vector<std::vector<ADReal>> & polynomial_inputs,
     const std::vector<std::vector<ADReal>> & dpolynomial_inputs,
-    ADReal & rom_outputs,
-    ADReal & drom_outputs)
+    const bool jacobian)
 {
+  ADReal rom_output = 0.0;
   for (unsigned int j = 0; j < _num_coefs; ++j)
   {
     ADReal xvals = coefs[j];
@@ -482,29 +494,35 @@ ADLAROMANCEStressUpdateBase::computeValues(
     for (unsigned int k = 0; k < _num_inputs; ++k)
     {
       xvals *= polynomial_inputs[k][_makeframe_helper[j][k]];
-      dxvals += dpolynomial_inputs[k][_makeframe_helper[j][k]] /
-                polynomial_inputs[k][_makeframe_helper[j][k]];
+      if (jacobian)
+        dxvals += dpolynomial_inputs[k][_makeframe_helper[j][k]] /
+                  polynomial_inputs[k][_makeframe_helper[j][k]];
     }
 
-    rom_outputs += xvals;
-    drom_outputs += dxvals * xvals;
+    if (!jacobian)
+      rom_output += xvals;
+    else
+      rom_output += dxvals * xvals;
   }
+  return rom_output;
 }
 
-void
+ADReal
 ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_values,
                                            const ADReal & rom_outputs,
                                            const ADReal & drom_outputs,
-                                           ADReal & ROM_computed_increments,
-                                           ADReal & dROM_computed_increments,
-                                           const unsigned index)
+                                           const unsigned out_idx,
+                                           const bool jacobian)
 {
+  if (jacobian && out_idx != _strain_output_idx)
+    return 0.0;
 
-  ROM_computed_increments = std::exp(rom_outputs) * _dt;
-  if (index == 2)
-    dROM_computed_increments = ROM_computed_increments * drom_outputs;
-  else
-    ROM_computed_increments *= -old_input_values[index];
+  ADReal ROM_computed_increments = std::exp(rom_outputs) * _dt;
+  if (jacobian)
+    ROM_computed_increments *= drom_outputs;
+  else if (out_idx != _strain_output_idx)
+    ROM_computed_increments *= -old_input_values[out_idx];
+  return ROM_computed_increments;
 }
 
 ADReal
@@ -542,7 +560,7 @@ std::vector<std::vector<std::vector<Real>>>
 ADLAROMANCEStressUpdateBase::getTransformedLimits() const
 {
   std::vector<std::vector<std::vector<Real>>> transformed_limits(
-      _num_outputs, std::vector<std::vector<Real>>(_num_inputs, std::vector<Real>(2)));
+      _num_outputs, std::vector<std::vector<Real>>(_num_inputs, std::vector<Real>(3)));
 
   for (unsigned int i = 0; i < _num_outputs; ++i)
   {
@@ -557,6 +575,9 @@ ADLAROMANCEStressUpdateBase::getTransformedLimits() const
         else
           transformed_limits[i][j][k] = _input_limits[j][k];
       }
+      // Pre-compute the difference between the two limits divided by two for later input conversion
+      transformed_limits[i][j][2] =
+          (transformed_limits[i][j][1] - transformed_limits[i][j][0]) / 2.0;
     }
   }
 
