@@ -71,6 +71,6 @@
     type = 'Exodiff'
     input = 'distributed_rectilinear_mesh_generator_adaptivity.i'
     exodiff = 'distributed_rectilinear_mesh_generator_adaptivity_out.e'
-    requirement = 'Distributed mesh generator should work with the mesh adaptivity'
+    requirement = 'The system shall be able to adapt a mesh generated in parallel.'
   [../]
 []
