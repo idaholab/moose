@@ -186,7 +186,6 @@
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true
-    input_window_failure_action = error
     outputs = all
     immobile_dislocation_density_forcing_function = rhoi_fcn
     mobile_dislocation_density_forcing_function = rhom_fcn

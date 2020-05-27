@@ -143,7 +143,15 @@ simulations using the physics-based constitutive laws. The maximum degree of the
 selected to maximize fidelity to the data while avoiding an overfitting of the data, where
 overfitting is indicated by a stark difference in the regression fit to training and testing data.
 To validate the obtained regression coefficient values, initial conditions are given to the ROM and
-VPSC, and the resulting simulations are compared.  
+VPSC, and the resulting simulations are compared.
+
+### ROM Input Windows
+
+Due to the nature of formulating the ROM, the input values are limited to a window of applicability,
+outside of which, the ROM can no longer be guaranteed to be valid. `ADLAROMANCEStressUpdateBase` handles
+these limits internally via input parameters for each input that allow for error handling or extrapolation.
+If the input values are to be extrapolated, a [smootherStep](MathUtils.md#smootherstep) function is utilized
+to extrapolate from the lower limit of the out-of-bound input to zero strain.
 
 ## Writing a LAROMANCE Stress Update Material
 

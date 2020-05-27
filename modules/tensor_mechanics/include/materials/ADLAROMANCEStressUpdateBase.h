@@ -50,6 +50,15 @@ protected:
    */
   virtual Real computeTimeStepLimit() override;
 
+  /// Enum to error, warn, ignore, or extrapolate if input is outside of window of applicability
+  enum class WindowFailure
+  {
+    ERROR,
+    WARN,
+    IGNORE,
+    EXTRAPOLATE
+  };
+
   /**
    *Computes the ROM Strain rate
    * @param mobile_dislocation_increment Mobile dislocation density incremental change
@@ -59,7 +68,6 @@ protected:
    *respect to stress
    * @return flag that indicates ROM was skipped
    */
-
   ADReal computeROMStrainRate(const unsigned out_idx, const bool jacobian = false);
 
   /**
@@ -67,7 +75,10 @@ protected:
    * @param input value
    * @return flag to indicate to continue computing ROM
    */
-  bool checkInputWindow(ADReal & input, const unsigned int out_idx);
+  ADReal checkInputWindow(ADReal & input,
+                          const std::vector<Real> & limits,
+                          const WindowFailure behavior,
+                          const bool derivative = false);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
@@ -186,14 +197,8 @@ protected:
   /// Optionally coupled environmental factor
   const ADMaterialProperty<Real> * _environmental;
 
-  /// Window applied to input maximum and minimum values
-  const Real _window;
-
-  /// Enum to error, warn, or ignore checks that ensure ROM input is within applicability window
-  const enum class WindowFailure { ERROR, WARN, IGNORE, EXTRAPOLATE } _window_failure;
-
-  /// Flag to optinoally allow model extrapolation to zero stress
-  const bool _extrapolate_stress;
+  /// TODO
+  std::vector<WindowFailure> _window_failure;
 
   /// Flag to output verbose infromation
   const bool _verbose;
@@ -241,8 +246,23 @@ protected:
   /// Container for old effective strain
   Real _effective_strain_old;
 
+  /// Index corresponding to the position for the mobile disloations in the input vector
+  const unsigned int _mobile_input_idx;
+
+  /// Index corresponding to the position for the immobile disloations in the input vector
+  const unsigned int _immobile_input_idx;
+
   /// Index corresponding to the position for the stress in the input vector
   const unsigned int _stress_input_idx;
+
+  /// Index corresponding to the position for the old strain in the input vector
+  const unsigned int _old_strain_input_idx;
+
+  /// Index corresponding to the position for the tempeature in the input vector
+  const unsigned int _temperature_input_idx;
+
+  /// Index corresponding to the position for the environmental factor in the input vector
+  const unsigned int _environmental_input_idx;
 
   /// Index corresponding to the position for mobile dislocations increment in the output vector
   const unsigned int _mobile_output_idx;
@@ -295,11 +315,8 @@ protected:
   /// Container for derivative of creep rate with respect to strain
   ADReal _derivative;
 
-  /// Container for bool to indicate whether input checks pass or not, excluding the stress input
-  bool _input_within_range;
-
-  /// Container for bool to indicate whether or not to run the ROM
-  bool _run_ROM;
+  /// Container for extrapolation coefficient from non-strain inputs
+  ADReal _non_stress_extrapolation;
 
   /// Container for input values
   std::vector<ADReal> _input_values;

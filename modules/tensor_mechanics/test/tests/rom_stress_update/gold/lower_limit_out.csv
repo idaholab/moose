@@ -1,0 +1,3 @@
+time,immobile_disloactions,mobile_dislocations,strain_avg,strain_diff,strain_exact,temp_avg,vonmises_stress
+0,0,0,0,0,0,0,0
+100000,439992533777.89,5999895323647.7,2.8421811383618e-09,-1.3836178844565e-16,2.842181e-09,800.0160634,199999.92372494
