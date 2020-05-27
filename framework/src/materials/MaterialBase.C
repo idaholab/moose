@@ -141,9 +141,10 @@ MaterialBase::registerPropName(std::string prop_name, bool is_get, Prop_State st
     _supplied_prop_ids.insert(property_id);
 
     _props_to_flags[prop_name] |= static_cast<int>(state);
-    if (static_cast<int>(state) % 2 == 0)
-      _has_stateful_property = true;
   }
+
+  if (static_cast<int>(state) % 2 == 0)
+    _has_stateful_property = true;
 
   // Store material properties for block ids
   for (const auto & block_id : blockIDs())
