@@ -9,10 +9,10 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 50
+    nx = 100
     xmin = 0
     xmax = 1
-    ny = 50
+    ny = 100
     ymin = 0
     ymax = 1
   []
@@ -55,30 +55,8 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 101'
-[]
-
-[Postprocessors]
-  [max]
-    type = ElementExtremeValue
-    variable = U
-  []
-  [min]
-    type = ElementExtremeValue
-    variable = U
-    value_type = min
-  []
-  [average]
-    type = ElementAverageValue
-    variable = U
-  []
-[]
-
-[Controls]
-  [stochastic]
-    type = SamplerReceiver
-  []
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

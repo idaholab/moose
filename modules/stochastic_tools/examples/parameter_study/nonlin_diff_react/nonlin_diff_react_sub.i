@@ -9,10 +9,10 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 100
+    nx = 50
     xmin = 0
     xmax = 1
-    ny = 100
+    ny = 50
     ymin = 0
     ymax = 1
   []
@@ -59,6 +59,27 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[Postprocessors]
+  [max]
+    type = ElementExtremeValue
+    variable = U
+  []
+  [min]
+    type = ElementExtremeValue
+    variable = U
+    value_type = min
+  []
+  [average]
+    type = ElementAverageValue
+    variable = U
+  []
+[]
+
+[Controls]
+  [stochastic]
+    type = SamplerReceiver
+  []
+[]
+
 [Outputs]
-  exodus = true
 []
