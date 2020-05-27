@@ -29,13 +29,8 @@ constant reference as a member variable.
 `getMaterialProperty<TYPE>()`\\
 Use within non-AD objects to retrieve non-AD material properties.
 
-`adGetMaterialProperty<TYPE>()`\\
-Use within AD objects to retrieve non-AD material properties, generally this should not be used
-unless the object is being optimized and the property cannot be AD.
-
-`adGetADMaterialProperty<TYPE>()`\\
-Use within AD objects to retrieve AD material properties, this will work even if the property is
-non-AD thus allowing it to operate for both types.
+`getADMaterialProperty<TYPE>()`\\
+Use within AD objects to retrieve AD material properties.
 
 
 !---
