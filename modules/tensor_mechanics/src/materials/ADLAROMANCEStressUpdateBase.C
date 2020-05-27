@@ -24,17 +24,29 @@ ADLAROMANCEStressUpdateBase::validParams()
   params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
-  params.addRangeCheckedParam<Real>("input_window_limit",
-                                    1.0,
-                                    "input_window_limit>0.0",
-                                    "Multiplier for the input minium/maximum input window");
-  MooseEnum window_failure("ERROR WARN IGNORE EXTRAPOLATE", "WARN");
-  params.addParam<MooseEnum>("input_window_failure_action",
+  MooseEnum window_failure("ERROR WARN IGNORE EXTRAPOLATE", "EXTRAPOLATE");
+  MooseEnum dislocation_window_failure("ERROR WARN IGNORE EXTRAPOLATE", "ERROR");
+  params.addParam<MooseEnum>(
+      "mobile_input_window_failure",
+      dislocation_window_failure,
+      "What to do if mobile dislocation concentration is outside the window of applicability.");
+  params.addParam<MooseEnum>(
+      "immobile_input_window_failure",
+      dislocation_window_failure,
+      "What to do if immobile dislocation concentration is outside the window of applicability.");
+  params.addParam<MooseEnum>("stress_input_window_failure",
                              window_failure,
-                             "What to do if ROM input is outside the window of applicability.");
-  params.addParam<bool>("extrapolate_to_zero_stress",
-                        true,
-                        "Flag to allow for extrapolation of input J2 stress to zero");
+                             "What to do if stress is outside the window of applicability.");
+  params.addParam<MooseEnum>("old_strain_input_window_failure",
+                             window_failure,
+                             "What to do if old strain is outside the window of applicability.");
+  params.addParam<MooseEnum>("temperature_input_window_failure",
+                             window_failure,
+                             "What to do if temperature is outside the window of applicability.");
+  params.addParam<MooseEnum>(
+      "environment_input_window_failure",
+      window_failure,
+      "What to do if environmental factor is outside the window of applicability.");
 
   params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
                                     0.0,
@@ -86,10 +98,8 @@ ADLAROMANCEStressUpdateBase::ADLAROMANCEStressUpdateBase(const InputParameters &
     _environmental(isParamValid("environmental_factor")
                        ? &getADMaterialProperty<Real>("environmental_factor")
                        : nullptr),
-    _window(getParam<Real>("input_window_limit")),
-    _window_failure(
-        parameters.get<MooseEnum>("input_window_failure_action").getEnum<WindowFailure>()),
-    _extrapolate_stress(getParam<bool>("extrapolate_to_zero_stress")),
+    _window_failure(6),
+
     _verbose(getParam<bool>("verbose")),
     _mobile_dislocations(declareADProperty<Real>(_base_name + "mobile_dislocations")),
     _mobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "mobile_dislocations")),
@@ -110,7 +120,12 @@ ADLAROMANCEStressUpdateBase::ADLAROMANCEStressUpdateBase(const InputParameters &
     _immobile_dislocation_increment(0.0),
     _immobile_old(0.0),
     _effective_strain_old(0.0),
+    _mobile_input_idx(0),
+    _immobile_input_idx(1),
     _stress_input_idx(2),
+    _old_strain_input_idx(3),
+    _temperature_input_idx(4),
+    _environmental_input_idx(5),
     _mobile_output_idx(0),
     _immobile_output_idx(1),
     _strain_output_idx(2),
@@ -123,11 +138,23 @@ ADLAROMANCEStressUpdateBase::ADLAROMANCEStressUpdateBase(const InputParameters &
     _extrapolation(declareADProperty<Real>("ROM_extrapolation")),
 
     _derivative(0.0),
-    _input_within_range(true),
-    _run_ROM(true),
+    _non_stress_extrapolation(1.0),
     _old_input_values(3)
 {
   _check_range = true;
+
+  _window_failure[_mobile_input_idx] =
+      parameters.get<MooseEnum>("mobile_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_immobile_input_idx] =
+      parameters.get<MooseEnum>("immobile_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_stress_input_idx] =
+      parameters.get<MooseEnum>("stress_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_old_strain_input_idx] =
+      parameters.get<MooseEnum>("old_strain_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_temperature_input_idx] =
+      parameters.get<MooseEnum>("temperature_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_environmental_input_idx] =
+      parameters.get<MooseEnum>("environment_input_window_failure").getEnum<WindowFailure>();
 }
 
 void
@@ -223,26 +250,27 @@ ADLAROMANCEStressUpdateBase::computeStressInitialize(const ADReal & effective_tr
           : std::sqrt(_creep_strain_old[_qp].doubleContraction(_creep_strain_old[_qp]) / 1.5);
 
   // Prepare input
-  _input_values[0] = _mobile_old;
-  _input_values[1] = _immobile_old;
+  _input_values[_mobile_input_idx] = _mobile_old;
+  _input_values[_immobile_input_idx] = _immobile_old;
   _input_values[_stress_input_idx] = effective_trial_stress * 1.0e-6;
-  _input_values[3] = _effective_strain_old;
-  _input_values[4] = _temperature[_qp];
+  _input_values[_old_strain_input_idx] = _effective_strain_old;
+  _input_values[_temperature_input_idx] = _temperature[_qp];
   if (_environmental)
-    _input_values[5] = (*_environmental)[_qp];
+    _input_values[_environmental_input_idx] = (*_environmental)[_qp];
 
   _old_input_values[_mobile_output_idx] = _mobile_old;
   _old_input_values[_immobile_output_idx] = _immobile_old;
   _old_input_values[_strain_output_idx] = _effective_strain_old;
 
   // Check to see if input is in range
-  _input_within_range = true;
+  _non_stress_extrapolation = 1.0;
   for (unsigned int j = 0; j < _num_inputs; j++)
     if (j != _stress_input_idx)
-      _input_within_range *= checkInputWindow(_input_values[j], j);
+      _non_stress_extrapolation *=
+          checkInputWindow(_input_values[j], _input_limits[j], _window_failure[j]);
 
   // Precompute transformed input and prebuild polynomials for inputs other than strain
-  if (_input_within_range)
+  if (_non_stress_extrapolation)
   {
     for (unsigned int i = 0; i < _num_inputs; ++i)
     {
@@ -275,14 +303,26 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   ADReal drom_effective_strain_inc_dstress = 0.0;
 
   // Check window of new trial stress
-  _run_ROM =
-      _input_within_range * checkInputWindow(_input_values[_stress_input_idx], _stress_input_idx);
+  _extrapolation[_qp] =
+      _non_stress_extrapolation * checkInputWindow(_input_values[_stress_input_idx],
+                                                   _input_limits[_stress_input_idx],
+                                                   _window_failure[_stress_input_idx]);
 
   // Run ROM if all values are within windows.
-  if (_run_ROM)
+  if (_extrapolation[_qp])
   {
     rom_effective_strain_inc = computeROMStrainRate(_strain_output_idx);
     drom_effective_strain_inc_dstress = computeROMStrainRate(_strain_output_idx, true);
+
+    // apply extrapolation
+    rom_effective_strain_inc *= _extrapolation[_qp];
+    const ADReal dextrapolation_dstress =
+        _non_stress_extrapolation * checkInputWindow(_input_values[_stress_input_idx],
+                                                     _input_limits[_stress_input_idx],
+                                                     _window_failure[_stress_input_idx],
+                                                     true);
+    drom_effective_strain_inc_dstress = drom_effective_strain_inc_dstress * _extrapolation[_qp] +
+                                        rom_effective_strain_inc * dextrapolation_dstress;
   }
 
   if (_verbose)
@@ -302,10 +342,15 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
     Moose::err << "  trial stress into rom (MPa): " << MetaPhysicL::raw_value(trial_stress_mpa)
                << "\n";
     Moose::err << "  old effective strain: " << _effective_strain_old << "\n";
+    Moose::err << "  non-stress extrapolation: "
+               << MetaPhysicL::raw_value(_non_stress_extrapolation) << "\n";
+    Moose::err << "  extrapolation: " << MetaPhysicL::raw_value(_extrapolation[_qp]) << "\n";
+    Moose::err << "  effective strain increment: "
+               << MetaPhysicL::raw_value(rom_effective_strain_inc) << std::endl;
   }
 
   // Print out relevant verbose information, and quit creep stress calculation
-  if (!_run_ROM)
+  if (!_extrapolation[_qp])
   {
     if (scalar)
       mooseError("In ", _name, ": Internal error: Scalar (", scalar, ") isn't zero!");
@@ -315,36 +360,6 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
     _creep_rate[_qp] = 0.0;
     _derivative = 1.0;
     return 0.0;
-  }
-
-  // Extrapolate to 0 stress if applicable
-  _extrapolation[_qp] = 1.0;
-  if (_extrapolate_stress)
-  {
-    // Update stress given converged strain increment
-    trial_stress_mpa =
-        (effective_trial_stress - _three_shear_modulus * rom_effective_strain_inc) * 1.0e-6;
-
-    // If stress is below the input limit, perform extrapolation with zero strain
-    if (trial_stress_mpa < _input_limits[_stress_input_idx][0])
-    {
-      _extrapolation[_qp] =
-          MathUtils::smootherStep(trial_stress_mpa, 0.0, _input_limits[_stress_input_idx][0]);
-      const ADReal dextrapolation_dstress =
-          MathUtils::smootherStep(trial_stress_mpa, 0.0, _input_limits[_stress_input_idx][0], true);
-
-      rom_effective_strain_inc *= _extrapolation[_qp];
-      drom_effective_strain_inc_dstress = drom_effective_strain_inc_dstress * _extrapolation[_qp] +
-                                          rom_effective_strain_inc * dextrapolation_dstress;
-
-      if (_verbose)
-      {
-        Moose::err << "  Stress extrapolated.\n    Smootherstep: "
-                   << MetaPhysicL::raw_value(_extrapolation[_qp]) << "\n";
-        Moose::err << "    new effective strain increment: "
-                   << MetaPhysicL::raw_value(rom_effective_strain_inc) << std::endl;
-      }
-    }
   }
 
   _creep_rate[_qp] = rom_effective_strain_inc / _dt;
@@ -391,56 +406,44 @@ ADLAROMANCEStressUpdateBase::computeROMStrainRate(const unsigned out_idx, const 
   return convertOutput(_old_input_values, rom_outputs, out_idx, drom_output, jacobian);
 }
 
-bool
-ADLAROMANCEStressUpdateBase::checkInputWindow(ADReal & input, const unsigned int out_idx)
+ADReal
+ADLAROMANCEStressUpdateBase::checkInputWindow(ADReal & input,
+                                              const std::vector<Real> & limits,
+                                              const WindowFailure behavior,
+                                              const bool derivative)
 {
-  const Real high_limit = _input_limits[out_idx][1] * _window;
-  const Real low_limit = _input_limits[out_idx][0] * (2.0 - _window);
-  if (input < low_limit || input > high_limit)
+  ADReal smoother_step = 1.0;
+  if (derivative)
+    smoother_step = 0.0;
+  if (behavior == WindowFailure::IGNORE)
+    return smoother_step;
+
+  if (input < limits[0] || input > limits[1])
   {
-    if (input < low_limit && out_idx == _stress_input_idx && _extrapolate_stress)
-      input = low_limit;
+    if (behavior == WindowFailure::EXTRAPOLATE)
+    {
+      if (input < limits[0])
+      {
+        smoother_step = MathUtils::smootherStep(input, 0.0, limits[0], derivative);
+        input = limits[0];
+      }
+      else
+        input = limits[1];
+    }
     else
     {
-      if (_window_failure == WindowFailure::WARN)
-        mooseWarning("In ",
-                     _name,
-                     ": input parameter number input=",
-                     out_idx,
-                     " with value (",
-                     MetaPhysicL::raw_value(input),
-                     ") is out of range (",
-                     _input_limits[out_idx][0],
-                     " - ",
-                     _input_limits[out_idx][1],
-                     "), window (",
-                     _window,
-                     ")");
-      else if (_window_failure == WindowFailure::ERROR)
-        mooseError("In ",
-                   _name,
-                   ": input parameter number input=",
-                   out_idx,
-                   " with value (",
-                   MetaPhysicL::raw_value(input),
-                   ") is out of range (",
-                   _input_limits[out_idx][0],
-                   " - ",
-                   _input_limits[out_idx][1],
-                   "), window (",
-                   _window,
-                   ")");
-      else if (_window_failure == WindowFailure::EXTRAPOLATE)
-      {
-        if (input < low_limit)
-          return false;
-        if (input > high_limit)
-          input = high_limit;
-      }
+      std::stringstream msg;
+      msg << "In " << _name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
+          << ") is out of range (" << limits[0] << " - " << limits[1] << ")";
+
+      if (behavior == WindowFailure::WARN)
+        mooseWarning(msg.str());
+      else if (behavior == WindowFailure::ERROR)
+        mooseError(msg.str());
     }
   }
 
-  return true;
+  return smoother_step;
 }
 
 ADReal
@@ -488,7 +491,7 @@ ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
     if (!jacobian)
       polynomial_inputs[d] = computePolynomial(rom_input, d);
     else
-      polynomial_inputs[d] = drom_input * computePolynomial(rom_input, d, true);
+      polynomial_inputs[d] = drom_input * computePolynomial(rom_input, d, jacobian);
   }
 }
 
@@ -612,7 +615,10 @@ ADLAROMANCEStressUpdateBase::getMakeFrameHelper() const
 void
 ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment)
 {
-  if (_run_ROM)
+  _mobile_dislocation_increment = 0.0;
+  _immobile_dislocation_increment = 0.0;
+
+  if (_extrapolation[_qp])
   {
     for (unsigned int i = 0; i < _num_inputs; ++i)
     {
@@ -641,49 +647,13 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
     _immobile_dislocation_increment =
         computeROMStrainRate(_immobile_output_idx) * _extrapolation[_qp];
   }
-  else
-  {
-    _mobile_dislocation_increment = 0.0;
-    _immobile_dislocation_increment = 0.0;
-  }
 
   _mobile_dislocations[_qp] = _mobile_old + _mobile_dislocation_increment;
   _immobile_dislocations[_qp] = _immobile_old + _immobile_dislocation_increment;
 
-  if (_t_step > 0 &&
-      (_current_execute_flag == EXEC_LINEAR || _current_execute_flag == EXEC_NONLINEAR))
-  {
-    if (_mobile_dislocations[_qp] < _input_limits[0][0] ||
-        _mobile_dislocations[_qp] > _input_limits[0][1])
-      mooseError("In ",
-                 _name,
-                 ": mobile dislocations (",
-                 MetaPhysicL::raw_value(_mobile_dislocations[_qp]),
-                 ") is out side of its limits (",
-                 _input_limits[0][0],
-                 " - ",
-                 _input_limits[0][1],
-                 ". Old: ",
-                 MetaPhysicL::raw_value(_mobile_old),
-                 " increment: ",
-                 MetaPhysicL::raw_value(_mobile_dislocation_increment),
-                 ". Cutting timestep");
-    if (_immobile_dislocations[_qp] < _input_limits[1][0] ||
-        _immobile_dislocations[_qp] > _input_limits[1][1])
-      mooseError("In ",
-                 _name,
-                 ": immobile dislocations (",
-                 MetaPhysicL::raw_value(_immobile_dislocations[_qp]),
-                 ") is out side of its limits (",
-                 _input_limits[1][0],
-                 " - ",
-                 _input_limits[1][1],
-                 ". Old: ",
-                 MetaPhysicL::raw_value(_immobile_old),
-                 " increment: ",
-                 MetaPhysicL::raw_value(_immobile_dislocation_increment),
-                 ". Cutting timestep");
-  }
+  for (unsigned int j = 0; j < _num_inputs; j++)
+    if (_window_failure[j] == WindowFailure::WARN || _window_failure[j] == WindowFailure::ERROR)
+      checkInputWindow(_input_values[j], _input_limits[j], _window_failure[j]);
 
   if (_verbose)
   {
