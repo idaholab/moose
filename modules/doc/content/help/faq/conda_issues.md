@@ -2,7 +2,7 @@
 
 Conda issues can be the root cause for just about any issue on this page. Scroll through this section, for what may look familiar, and follow those instructions:
 
-- #### `conda: command not found`
+- #### command not found
 
   You have yet to install conda, or your path to it, is incorrect or not set. You will need to recall how you installed conda; Was it Miniconda, or Anaconda? Was it the bash package or a double-click install method?
 
@@ -14,7 +14,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
   To finalize the install, you now need to initialize conda (see `conda init` below).
 
-- #### `conda activate moose`
+- #### conda activate moose
 
   If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at Miniconda/Anaconda. What we can attempt, is to create a new environment and go from there:
 
@@ -39,7 +39,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
     - defaults
   ```
 
-- #### `conda init`
+- #### conda init
 
   If `conda init` is failing, or similarly doing nothing, it is possible that Conda simply does not know what shell you are operating in, and it created a 'configuration' for the wrong shell, or not at all.
 
