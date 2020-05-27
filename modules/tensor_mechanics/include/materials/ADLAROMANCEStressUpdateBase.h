@@ -76,10 +76,11 @@ protected:
    * @param converted Vector of converted input values
    * @param dconverted Vector of derivative of converted input values with respect to stress
    */
-  void convertInput(const std::vector<ADReal> & input,
-                    std::vector<ADReal> & converted,
-                    const unsigned out_idx,
-                    const bool jacobian = false);
+  ADReal convertInput(const ADReal & input,
+                      const ROMInputTransform transform,
+                      const Real transform_coef,
+                      const std::vector<Real> & transformed_limits,
+                      const bool jacobian = false);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM
@@ -90,9 +91,9 @@ protected:
    * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
    * respect to stress
    */
-  void buildPolynomials(const std::vector<ADReal> & rom_inputs,
-                        const std::vector<ADReal> & drom_inputs,
-                        std::vector<std::vector<ADReal>> & polynomial_inputs,
+  void buildPolynomials(const ADReal & rom_input,
+                        std::vector<ADReal> & polynomial_inputs,
+                        const ADReal & drom_input = 0,
                         const bool jacobian = false);
 
   /**
@@ -108,7 +109,7 @@ protected:
    */
   ADReal computeValues(const std::vector<Real> & coefs,
                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                       const std::vector<std::vector<ADReal>> & dpolynomial_inputs,
+                       const std::vector<ADReal> & dpolynomial_inputs = {},
                        const bool jacobian = false);
 
   /**
@@ -122,9 +123,9 @@ protected:
    * respect to stress
    */
   ADReal convertOutput(const std::vector<Real> & old_input_values,
-                       const ADReal & rom_outputs,
-                       const ADReal & drom_outputs,
+                       const ADReal & rom_output,
                        const unsigned out_idx,
+                       const ADReal & drom_output = 0.0,
                        const bool jacobian = false);
 
   /**
@@ -305,4 +306,10 @@ protected:
 
   /// Container for old input values
   std::vector<Real> _old_input_values;
+
+  /// Container for converted rom_inputs
+  std::vector<ADReal> _rom_inputs;
+
+  /// Container for ROM polynomial inputs
+  std::vector<std::vector<ADReal>> _polynomial_inputs;
 };
