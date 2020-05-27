@@ -5,21 +5,21 @@
   [mu1]
     type = Normal
     mean = 0.3
-    standard_deviation = 0.03
+    standard_deviation = 0.045
   []
   [mu2]
     type = Normal
     mean = 9
-    standard_deviation = 0.9
+    standard_deviation = 1.35
   []
 []
 
 [Samplers]
   [hypercube]
     type = LatinHypercube
-    num_rows = 4000
+    num_rows = 5000
     distributions = 'mu1 mu2'
-    num_bins = 20
+    num_bins = 50
   []
 []
 
@@ -27,7 +27,7 @@
   [runner]
     type = SamplerFullSolveMultiApp
     sampler = hypercube
-    input_files = 'nonlin_diff_react_2d_sub.i'
+    input_files = 'nonlin_diff_react_sub.i'
     mode = batch-restore
   []
 []

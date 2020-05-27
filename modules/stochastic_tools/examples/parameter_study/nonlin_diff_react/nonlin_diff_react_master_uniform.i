@@ -19,7 +19,7 @@
     type = LatinHypercube
     num_rows = 5000
     distributions = 'mu1 mu2'
-    num_bins = 20
+    num_bins = 50
   []
 []
 
