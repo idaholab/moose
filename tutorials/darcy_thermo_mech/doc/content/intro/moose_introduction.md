@@ -83,7 +83,7 @@ Multi-physics Object Oriented Simulation Environment
 ###### moose-users@googlegroups.com
 
 !media moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
-       caption=Total posts (top) and topics (bottom) from March 1, 2018 to March 27, 2019.
+       caption=Total posts (top) and topics (bottom) from June 1, 2019 to May 25, 2020.
 
 !---
 
