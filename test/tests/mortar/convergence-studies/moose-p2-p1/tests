@@ -1,0 +1,31 @@
+[Tests]
+  design = 'EqualValueConstraint.md'
+  issues = '#13080'
+  [same]
+    type = 'Exodiff'
+    input = 'same.i'
+    exodiff = 'same_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with approximately equal geometric discretizations on either side of the interface using a P2P1 basis for the primal and LM variables respectively.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+  [coarser_slave]
+    type = 'Exodiff'
+    input = 'coarser-slave.i'
+    exodiff = 'coarser-slave_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a slave side that is approximately twice as coarse as the master side using a P2P1 basis for the primal and LM variables respectively.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+  [coarser_master]
+    type = 'Exodiff'
+    input = 'coarser-master.i'
+    exodiff = 'coarser-master_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a master side that is approximately twice as coarse as the slave side using a P2P1 basis for the primal and LM variables respectively.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+[]
