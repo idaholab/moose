@@ -48,6 +48,12 @@ protected:
   /// value to find along the line
   const Real _target;
 
+  /// boolean indicating whether to stop with an error if value is not found on the line
+  const bool & _error_if_not_found;
+
+  /// value to return if target value is not found on the line and _error_if_not_found is false
+  const Real & _default_value;
+
   /// search depth
   const unsigned int _depth;
 
@@ -69,4 +75,3 @@ protected:
   /// helper object to locate elements containing points
   std::unique_ptr<PointLocatorBase> _pl;
 };
-
