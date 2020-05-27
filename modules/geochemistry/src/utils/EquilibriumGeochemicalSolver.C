@@ -316,7 +316,7 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
                                           unsigned & tot_iter,
                                           Real & abs_residual)
 {
-  ss = std::stringstream();
+  ss.str("");
   tot_iter = 0;
 
   bool still_swapping = true;
