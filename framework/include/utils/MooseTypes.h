@@ -203,38 +203,6 @@ enum GeometryType
   Face
 };
 
-template <typename T>
-struct ADType;
-template <>
-struct ADType<Real>
-{
-  typedef ADReal type;
-};
-template <>
-struct ADType<RankTwoTensor>
-{
-  typedef ADRankTwoTensor type;
-};
-template <>
-struct ADType<RankThreeTensor>
-{
-  typedef ADRankThreeTensor type;
-};
-template <>
-struct ADType<RankFourTensor>
-{
-  typedef ADRankFourTensor type;
-};
-template <template <typename> class W>
-struct ADType<W<Real>>
-{
-  typedef W<ADReal> type;
-};
-template <>
-struct ADType<RealEigenVector>
-{
-  typedef RealEigenVector type;
-};
 template <typename OutputType>
 struct ShapeType
 {
@@ -256,27 +224,7 @@ struct DOFType<RealVectorValue>
 {
   typedef Real type;
 };
-} // MOOSE
-
-template <typename T, bool is_ad>
-struct GenericStruct
-{
-  typedef T type;
-};
-template <typename T>
-struct GenericStruct<T, true>
-{
-  typedef typename Moose::ADType<T>::type type;
-};
-
-template <bool is_ad>
-using GenericReal = typename GenericStruct<Real, is_ad>::type;
-template <bool is_ad>
-using GenericRankTwoTensor = typename GenericStruct<RankTwoTensor, is_ad>::type;
-template <bool is_ad>
-using GenericRankThreeTensor = typename GenericStruct<RankThreeTensor, is_ad>::type;
-template <bool is_ad>
-using GenericRankFourTensor = typename GenericStruct<RankFourTensor, is_ad>::type;
+} // namespace Moose
 
 template <typename OutputType>
 struct OutputTools
@@ -373,6 +321,50 @@ typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
 typedef MooseArray<libMesh::TypeNTensor<3, DualReal>> ADVectorVariableSecond;
 
+namespace Moose
+{
+
+// type conversion from regular to AD
+template <typename T>
+struct ADType;
+template <>
+struct ADType<Real>
+{
+  typedef ADReal type;
+};
+template <>
+struct ADType<RankTwoTensor>
+{
+  typedef ADRankTwoTensor type;
+};
+template <>
+struct ADType<RankThreeTensor>
+{
+  typedef ADRankThreeTensor type;
+};
+template <>
+struct ADType<RankFourTensor>
+{
+  typedef ADRankFourTensor type;
+};
+template <template <typename> class W>
+struct ADType<W<Real>>
+{
+  typedef W<ADReal> type;
+};
+template <>
+struct ADType<RealEigenVector>
+{
+  typedef RealEigenVector type;
+};
+template <>
+struct ADType<VariableValue>
+{
+  typedef ADVariableValue type;
+};
+
+} // namespace Moose
+
 /**
  * some AD typedefs for backwards compatability
  */
@@ -397,32 +389,6 @@ typedef VectorVariableTestValue ADVectorVariableTestValue;
 typedef VectorVariableTestGradient ADVectorVariableTestGradient;
 typedef VectorVariableTestSecond ADVectorVariableTestSecond;
 
-template <bool is_ad>
-struct GenericRealStruct
-{
-  typedef Real type;
-};
-template <>
-struct GenericRealStruct<true>
-{
-  typedef ADReal type;
-};
-template <bool is_ad>
-using GenericReal = typename GenericRealStruct<is_ad>::type;
-
-template <bool is_ad>
-struct GenericVariableValueStruct
-{
-  typedef VariableValue type;
-};
-template <>
-struct GenericVariableValueStruct<true>
-{
-  typedef ADVariableValue type;
-};
-template <bool is_ad>
-using GenericVariableValue = typename GenericVariableValueStruct<is_ad>::type;
-
 // We can  use the non-ad version for test values because these don't depend on the mesh
 // displacements  (unless the location of the quadrature points depend on the mesh displacements...)
 template <typename T>
@@ -442,6 +408,33 @@ template <typename T>
 using ADTemplateVariablePhiGradient =
     typename OutputTools<typename Moose::ADType<T>::type>::VariablePhiGradient;
 using ADVariablePhiGradient = ADTemplateVariablePhiGradient<Real>;
+
+// Templated typed to support is_ad templated classes
+namespace Moose
+{
+
+template <typename T, bool is_ad>
+struct GenericStruct
+{
+  typedef T type;
+};
+template <typename T>
+struct GenericStruct<T, true>
+{
+  typedef typename ADType<T>::type type;
+};
+
+} // namespace Moose
+template <bool is_ad>
+using GenericReal = typename Moose::GenericStruct<Real, is_ad>::type;
+template <bool is_ad>
+using GenericRankTwoTensor = typename Moose::GenericStruct<RankTwoTensor, is_ad>::type;
+template <bool is_ad>
+using GenericRankThreeTensor = typename Moose::GenericStruct<RankThreeTensor, is_ad>::type;
+template <bool is_ad>
+using GenericRankFourTensor = typename Moose::GenericStruct<RankFourTensor, is_ad>::type;
+template <bool is_ad>
+using GenericVariableValue = typename Moose::GenericStruct<VariableValue, is_ad>::type;
 
 #define declareADValidParams(ADObjectType)                                                         \
   template <>                                                                                      \
