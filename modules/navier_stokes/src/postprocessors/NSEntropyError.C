@@ -23,8 +23,8 @@ NSEntropyError::validParams()
   params.addClassDescription("Computes entropy error.");
   params.addRequiredParam<Real>("rho_infty", "Freestream density");
   params.addRequiredParam<Real>("p_infty", "Freestream pressure");
-  params.addRequiredCoupledVar(NS::density, "density");
-  params.addRequiredCoupledVar(NS::pressure, "pressure");
+  params.addRequiredCoupledVar("rho", "density");
+  params.addRequiredCoupledVar("pressure", "pressure");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
   return params;
@@ -34,8 +34,8 @@ NSEntropyError::NSEntropyError(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _rho_infty(getParam<Real>("rho_infty")),
     _p_infty(getParam<Real>("p_infty")),
-    _rho(coupledValue(NS::density)),
-    _pressure(coupledValue(NS::pressure)),
+    _rho(coupledValue("rho")),
+    _pressure(coupledValue("pressure")),
     _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
 {
 }
