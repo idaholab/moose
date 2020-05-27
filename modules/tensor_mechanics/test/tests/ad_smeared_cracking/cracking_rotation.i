@@ -144,7 +144,7 @@
 
 [Executioner]
   type = Transient
-
+  solve_type = Newton
   petsc_options_iname = '-ksp_gmres_restart -pc_type'
   petsc_options_value = '101                lu'
   line_search = 'none'

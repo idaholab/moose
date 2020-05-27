@@ -68,16 +68,12 @@
 
 [Executioner]
   type = Transient
-
-  solve_type = PJFNK
-
+  solve_type = Newton
 
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101               '
 
-
   line_search = 'none'
-
 
   l_max_its = 100
   nl_max_its = 100
