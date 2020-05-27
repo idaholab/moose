@@ -1,1 +1,0 @@
-!template load file=stubs/moose_action.md.template name=AddNavierStokesVariablesAction syntax=/Modules/NavierStokes/Variables/AddNavierStokesVariablesAction

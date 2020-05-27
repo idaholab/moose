@@ -26,65 +26,45 @@
 []
 
 
+
 [Modules]
-  [./FluidProperties]
-    [./ideal_gas]
+  [FluidProperties]
+    [ideal_gas]
       type = IdealGasFluidProperties
       gamma = 1.4
-      R = 287
-    [../]
-  [../]
+    []
+  []
 
-  [./NavierStokes]
-    [./Variables]
-      #         'rho rhou rhov   rhoE'
-      scaling = '1.  1.    1.    9.869232667160121e-6'
-      family = LAGRANGE
-      order = FIRST
-    [../]
+  [CompressibleNavierStokes]
+    # steady-state or transient
+    equation_type = transient
 
-    [./ICs]
-      initial_pressure = 101325.
-      initial_temperature = 300.
-      initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-      fluid_properties = ideal_gas
-    [../]
+    # fluid
+    fluid_properties = ideal_gas
 
-    [./Kernels]
-      fluid_properties = ideal_gas
-    [../]
+    # boundary conditions
+    stagnation_boundary = left
+    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
+    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
+    stagnation_flow_direction = '1 0'
+    no_penetration_boundary = 'top bottom step_top step_left step_right'
+    static_pressure_boundary = 'right'
+    static_pressure = 101325 # Pa
 
-    [./BCs]
-      [./inlet]
-        type = NSWeakStagnationInletBC
-        boundary = 'left'
-        stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-        stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-        sx = 1.
-        sy = 0.
-        fluid_properties = ideal_gas
-      [../]
-
-      [./solid_walls]
-        type = NSNoPenetrationBC
-        boundary = 'top bottom step_top step_left step_right'
-        fluid_properties = ideal_gas
-      [../]
-
-      [./outlet]
-        type = NSStaticPressureOutletBC
-        boundary = 'right'
-        specified_pressure = 101325 # Pa
-        fluid_properties = ideal_gas
-      [../]
-    [../]
-  [../]
+    # variable types, scalings and initial conditions
+    family = LAGRANGE
+    order = FIRST
+    total_energy_scaling = 9.869232667160121e-6
+    initial_pressure = 101325.
+    initial_temperature = 300.
+    initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+  []
 []
 
 
 
 [Materials]
-  [./fluid]
+  [fluid]
     type = Air
     block = 1
     rho = rho
@@ -101,17 +81,16 @@
     # realistic value.
     dynamic_viscosity = 0.0
     fluid_properties = ideal_gas
-  [../]
+  []
 []
 
 
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-    solve_type = 'PJFNK'
-  [../]
+  []
 []
 
 
@@ -130,10 +109,10 @@
   l_max_its = 100 # Number of linear iterations for each Krylov solve
 
   # Specify the order as FIRST, otherwise you will get warnings in DEBUG mode...
-  [./Quadrature]
+  [Quadrature]
     type = TRAP
     order = FIRST
-  [../]
+  []
 []
 
 

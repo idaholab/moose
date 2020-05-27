@@ -30,7 +30,7 @@ GLOBAL VARIABLES relative 1.e-6 floor 0.0
 NODAL VARIABLES relative 1.e-6 floor 0.0
 	Mach         # min:               0 @ t1,n1	max:      0.61264001 @ t11,n25
 	enthalpy     # min:       302593.82 @ t8,n29	max:       331472.02 @ t7,n23
-	pressure     # min:       86268.835 @ t8,n27	max:       119894.16 @ t7,n23
+	p            # min:       86268.835 @ t8,n27	max:       119894.16 @ t7,n23
 	rho          # min:       1.0480895 @ t8,n27	max:       1.3268611 @ t7,n23
 	rhoe         # min:       232902.05 @ t7,n29	max:       319923.18 @ t7,n23
 	rhou         # min:       173.11111 @ t8,n29	max:       244.13846 @ t11,n25

@@ -37,64 +37,44 @@
 
 
 [Modules]
-  [./FluidProperties]
-    [./ideal_gas]
+  [FluidProperties]
+    [ideal_gas]
       type = IdealGasFluidProperties
       gamma = 1.4
       molar_mass = 0.02897024320557491
-    [../]
-  [../]
+    []
+  []
 
-  [./NavierStokes]
-    [./Variables]
-      #         'rho rhou rhov   rhoE'
-      scaling = '1.  1.    1.    9.869232667160121e-6'
-      family = LAGRANGE
-      order = FIRST
-    [../]
+  [CompressibleNavierStokes]
+    # steady-state or transient
+    equation_type = transient
 
-    [./ICs]
-      initial_pressure = 101325.
-      initial_temperature = 300.
-      initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
-      fluid_properties = ideal_gas
-    [../]
+    # fluid
+    fluid_properties = ideal_gas
 
-    [./Kernels]
-      fluid_properties = ideal_gas
-    [../]
+    # boundary conditions
+    stagnation_boundary = 1
+    stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
+    stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
+    stagnation_flow_direction = '1 0'
+    no_penetration_boundary = '3 4'
+    static_pressure_boundary = 2
+    static_pressure = 101325 # Pa
 
-    [./BCs]
-      [./inlet]
-        type = NSWeakStagnationInletBC
-        boundary = '1'
-        stagnation_pressure = 120192.995549849 # Pa, Mach=0.5 at 1 atm
-        stagnation_temperature = 315 # K, Mach=0.5 at 1 atm
-        sx = 1.
-        sy = 0.
-        fluid_properties = ideal_gas
-      [../]
-
-      [./solid_walls]
-        type = NSNoPenetrationBC
-        boundary = '3 4' # 'Lower Wall, Upper Wall'
-        fluid_properties = ideal_gas
-      [../]
-
-      [./outlet]
-        type = NSStaticPressureOutletBC
-        boundary = '2' # 'Outflow'
-        specified_pressure = 101325 # Pa
-        fluid_properties = ideal_gas
-      [../]
-    [../]
-  [../]
+    # variable types, scalings and initial conditions
+    family = LAGRANGE
+    order = FIRST
+    total_energy_scaling = 9.869232667160121e-6
+    initial_pressure = 101325.
+    initial_temperature = 300.
+    initial_velocity = '173.594354746921 0 0' # Mach 0.5: = 0.5*sqrt(gamma*R*T)
+  []
 []
 
 
 
 [Materials]
-  [./fluid]
+  [fluid]
     type = Air
     block = 0 # 'MeshInterior'
     rho = rho
@@ -111,32 +91,31 @@
     # realistic value.
     dynamic_viscosity = 0.0
     fluid_properties = ideal_gas
-  [../]
+  []
 []
 
 
 
 [Postprocessors]
-  [./entropy_error]
+  [entropy_error]
     type = NSEntropyError
     execute_on = 'initial timestep_end'
     block = 0
     rho_infty = 1.1768292682926829
     p_infty = 101325
     rho = rho
-    pressure = pressure
+    pressure = p
     fluid_properties = ideal_gas
-  [../]
+  []
 []
 
 
 
 [Preconditioning]
-  [./SMP_PJFNK]
+  [SMP_PJFNK]
     type = SMP
     full = true
-    solve_type = 'PJFNK'
-  [../]
+  []
 []
 
 
@@ -154,10 +133,10 @@
 
   # We use trapezoidal quadrature.  This improves stability by
   # mimicking the "group variable" discretization approach.
-  [./Quadrature]
+  [Quadrature]
     type = TRAP
     order = FIRST
-  [../]
+  []
 []
 
 
