@@ -53,4 +53,18 @@
       detail = 'and on a mesh that has been refined to have the same amount of elements and achieve identical results'
     []
   []
+
+  [3d_dirichlet]
+    type = 'Exodiff'
+    input = '3d_dirichlet.i'
+    exodiff = '3d_dirichlet_out.e'
+    requirement = 'The system shall be able solve a three-dimensional diffusion problem using the finite volume method.'
+  []
+
+  [1d_dirichlet]
+    type = 'Exodiff'
+    input = '1d_dirichlet.i'
+    exodiff = '1d_dirichlet_out.e'
+    requirement = 'The system shall be able solve a one-dimensional diffusion problem using the finite volume method.'
+  []
 []
