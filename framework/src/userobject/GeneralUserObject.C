@@ -113,3 +113,9 @@ GeneralUserObject::subdomainSetup()
   mooseError("GeneralUserObjects do not execute subdomainSetup method, this function does nothing "
              "and should not be used.");
 }
+
+void
+GeneralUserObject::addReporterDependencyHelper(const ReporterName & reporter_name)
+{
+  _depend_vars.insert(reporter_name.getObjectName());
+}

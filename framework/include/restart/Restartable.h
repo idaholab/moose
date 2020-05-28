@@ -193,7 +193,23 @@ protected:
                                                       const std::string & object_name,
                                                       void * context);
 
+protected:
+  /// Reference to the application
+  MooseApp & _restartable_app;
+
+  /// The system name this object is in
+  const std::string _restartable_system_name;
+
+  /// The thread ID for this object
+  const THREAD_ID _restartable_tid;
+
+  /// Flag for toggling read only status (see ReporterData)
+  bool _restartable_read_only;
+
 private:
+  /// The name of the object
+  std::string _restartable_name;
+
   /// Helper function for actually registering the restartable data.
   RestartableDataValue & registerRestartableDataOnApp(const std::string & name,
                                                       std::unique_ptr<RestartableDataValue> data,
@@ -202,18 +218,6 @@ private:
   /// Helper function for actually registering the restartable data.
   void registerRestartableNameWithFilterOnApp(const std::string & name,
                                               Moose::RESTARTABLE_FILTER filter);
-
-  /// Reference to the application
-  MooseApp & _restartable_app;
-
-  /// The name of the object
-  std::string _restartable_name;
-
-  /// The system name this object is in
-  std::string _restartable_system_name;
-
-  /// The thread ID for this object
-  THREAD_ID _restartable_tid;
 };
 
 template <typename T>

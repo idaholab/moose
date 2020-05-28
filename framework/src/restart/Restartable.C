@@ -38,9 +38,10 @@ Restartable::Restartable(MooseApp & moose_app,
                          const std::string & system_name,
                          THREAD_ID tid)
   : _restartable_app(moose_app),
-    _restartable_name(name),
     _restartable_system_name(system_name),
-    _restartable_tid(tid)
+    _restartable_tid(tid),
+    _restartable_read_only(false),
+    _restartable_name(name)
 {
 }
 
@@ -49,7 +50,8 @@ Restartable::registerRestartableDataOnApp(const std::string & name,
                                           std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
-  return _restartable_app.registerRestartableData(name, std::move(data), tid, false);
+  return _restartable_app.registerRestartableData(
+      name, std::move(data), tid, _restartable_read_only);
 }
 
 void

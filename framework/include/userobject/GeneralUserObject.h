@@ -14,6 +14,7 @@
 #include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "DependencyResolverInterface.h"
+#include "ReporterInterface.h"
 
 // Forward Declarations
 class GeneralUserObject;
@@ -67,6 +68,9 @@ public:
                                     bool use_broadcast) override;
 
   ///@}
+
+protected:
+  virtual void addReporterDependencyHelper(const ReporterName & state_name) override;
 
 protected:
   std::set<std::string> _depend_vars;

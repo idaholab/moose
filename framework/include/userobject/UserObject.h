@@ -15,6 +15,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
+#include "ReporterInterface.h"
 #include "MeshChangedInterface.h"
 #include "MooseObject.h"
 #include "MooseTypes.h"
@@ -44,6 +45,7 @@ class UserObject : public MooseObject,
                    public UserObjectInterface,
                    protected PostprocessorInterface,
                    protected VectorPostprocessorInterface,
+                   protected ReporterInterface,
                    protected DistributionInterface,
                    protected Restartable,
                    protected MeshMetaDataInterface,

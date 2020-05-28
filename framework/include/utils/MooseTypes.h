@@ -14,6 +14,7 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankThreeTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ReporterName.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
