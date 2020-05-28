@@ -10,7 +10,7 @@ parameters on the distribution of the Quantities of Interest (QoIs) is showcased
 The strong formulation of the problem is taken from [!cite](chaturantabut2010nonlinear) and can be written as
 
 !equation id=nonlin-diff-react-strong
--\Delta u + \frac{\mu_1}{\mu_2}\left(e^{\mu_2 u}-1\right) = 100 sin(2\pi x)sin(2\pi y),
+-\Delta u + \frac{\mu_1}{\mu_2}\left(e^{\mu_2 u}-1\right) = 100 \sin(2\pi x)\sin(2\pi y),
 
 where $u$ is a scalar field variable, $(x,y)\in[0,1]\times[0,1]$ are the physical coordinates,
 while $\mu_1$ and $\mu_2$ are uncertain parameters with known (or assumed) probability distributions.
