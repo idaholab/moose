@@ -9,14 +9,12 @@
 
 #pragma once
 
-// MOOSE includes
 #include "ADKernelGrad.h"
-#include "LevelSetVelocityInterface.h"
 
 /**
  * SUPG stabilization for the advection portion of the level set equation.
  */
-class LevelSetAdvectionSUPG : public LevelSetVelocityInterface<ADKernelGrad>
+class LevelSetAdvectionSUPG : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
@@ -26,6 +24,6 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  using LevelSetVelocityInterface<ADKernelGrad>::computeQpVelocity;
-  using LevelSetVelocityInterface<ADKernelGrad>::_velocity;
+  /// Velocity vector variable
+  const ADVectorVariableValue & _velocity;
 };

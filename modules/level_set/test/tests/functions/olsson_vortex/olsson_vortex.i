@@ -6,35 +6,24 @@
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./vel_y]
+  [./velocity]
+    family = LAGRANGE_VEC
   [../]
 []
 
 [AuxKernels]
-  [./vel_x_aux]
-    type = FunctionAux
-    variable = vel_x
-    function = vel_x_func
-    execute_on = 'initial timestep_end'
-  [../]
-  [./vel_y_aux]
-    type = FunctionAux
-    variable = vel_y
-    function = vel_y_func
-    execute_on = 'initial timestep_end'
+  [./vec]
+    type = VectorFunctionAux
+    variable = velocity
+    function = velocity_func
+    execute_on = 'INITIAL TIMESTEP_END'
   [../]
 []
 
 [Functions]
-  [./vel_x_func]
+  [./velocity_func]
     type = LevelSetOlssonVortex
-    component = x
-  [../]
-  [./vel_y_func]
-    type = LevelSetOlssonVortex
-    component = y
+    reverse_time = 2
   [../]
 []
 

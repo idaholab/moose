@@ -21,8 +21,6 @@ public:
 
   LevelSetOlssonVortex(const InputParameters & parameters);
 
-  Real value(Real t, const Point & p) const override;
-
   RealVectorValue vectorValue(Real t, const Point & p) const override;
 
 protected:
@@ -31,9 +29,6 @@ protected:
 
   /// Type of reverse (instantaneous or smooth)
   const MooseEnum & _reverse_type;
-
-  /// The vector component to return
-  const MooseEnum & _component;
 
   // Convenience for libMesh::pi
   const Real _pi;

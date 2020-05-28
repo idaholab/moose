@@ -13,10 +13,10 @@
 []
 
 [AuxVariables]
-  [./v_x]
-    initial_condition = 1
+  [./velocity]
+    family = LAGRANGE_VEC
   [../]
-[../]
+[]
 
 [ICs]
   [./phi_ic]
@@ -24,6 +24,11 @@
     variable = phi
     type = FunctionIC
   [../]
+  [./vel_ic]
+    type = VectorFunctionIC
+    variable = velocity
+    function = velocity_func
+  []
 []
 
 [Functions]
@@ -39,13 +44,18 @@
     vars = 'a b'
     vals = '1 8'
   [../]
+  [./velocity_func]
+    type = ParsedVectorFunction
+    value_x = '1'
+    value_y = '1'
+  [../]
 []
 
 [Kernels]
   [./phi_advection]
     type = LevelSetAdvection
     variable = phi
-    velocity_x = v_x
+    velocity = velocity
   [../]
   [./phi_time]
     type = TimeDerivative
