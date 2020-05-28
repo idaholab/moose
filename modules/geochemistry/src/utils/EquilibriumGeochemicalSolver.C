@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "EquilibriumGeochemicalSolver.h"
+#include "GeochemistrySortedIndices.h"
 
 EquilibriumGeochemicalSolver::EquilibriumGeochemicalSolver(
     const ModelGeochemicalDatabase & mgd,
@@ -44,6 +45,16 @@ EquilibriumGeochemicalSolver::EquilibriumGeochemicalSolver(
 {
   if (_ramp_max_ionic_strength > _max_iter)
     mooseError("EquilibriumGeochemicalSolver: ramp_max_ionic_strength must be less than max_iter");
+  if (max_initial_residual <= 0.0)
+    mooseError("EquilibriumGeochemicalSolver: max_initial_residual must be positive");
+  if (max_ionic_strength < 0.0)
+    mooseError("EquilibriumGeochemicalSolver: max_ionic_strength must not be negative");
+  if (abs_tol < 0.0)
+    mooseError("EquilibriumGeochemicalSolver: abs_tol must not be negative");
+  if (rel_tol < 0.0)
+    mooseError("EquilibriumGeochemicalSolver: rel_tol must not be negative");
+  if (rel_tol == 0.0 && abs_tol == 0.0)
+    mooseError("EquilibriumGeochemicalSolver: either rel_tol or abs_tol must be positive");
 }
 
 Real
@@ -78,16 +89,11 @@ EquilibriumGeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
                                          std::stringstream & ss) const
 {
   bool swap_needed = false;
-  unsigned ind = 0;
 
   // check if any basis minerals have negative free number of moles
-  const std::vector<Real> basis_molality = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
-  std::vector<unsigned> molality_order(_num_basis);
-  ind = 0;
-  std::iota(molality_order.begin(), molality_order.end(), ind++);
-  std::sort(molality_order.begin(), molality_order.end(), [&](int i, int j) {
-    return basis_molality[i] < basis_molality[j];
-  });
+  const std::vector<Real> & basis_molality = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  const std::vector<unsigned> molality_order =
+      GeochemistrySortedIndices::sortedIndices(basis_molality, true);
 
   // if the Newton did not converge then check for small molalities in the non-minerals
   if (_abs_residual > _res0_times_rel && _abs_residual > _abs_tol)
@@ -202,13 +208,9 @@ EquilibriumGeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
     return swap_needed;
 
   // check maximum saturation index is not positive
-  const std::vector<Real> eqm_SI = _egs.getSaturationIndices();
-  std::vector<unsigned> mineral_SI_order(_num_eqm);
-  ind = 0;
-  std::iota(mineral_SI_order.begin(), mineral_SI_order.end(), ind++);
-  std::sort(mineral_SI_order.begin(), mineral_SI_order.end(), [&](int i, int j) {
-    return eqm_SI[i] > eqm_SI[j];
-  });
+  const std::vector<Real> & eqm_SI = _egs.getSaturationIndices();
+  const std::vector<unsigned> mineral_SI_order =
+      GeochemistrySortedIndices::sortedIndices(eqm_SI, false);
 
   for (const auto & j : mineral_SI_order)
     if (eqm_SI[j] > 0.0)
@@ -256,29 +258,24 @@ bool
 EquilibriumGeochemicalSolver::reduceInitialResidual()
 {
   const Real initial_r = _abs_residual;
-  unsigned ind = 0;
 
   // to get an indication of whether we should increase or decrease molalities in the algorithm
   // below, find the median of the original molalities
-  const std::vector<Real> original_molality = _egs.getAlgebraicBasisValues();
-  ind = 0;
-  std::vector<unsigned> mol_order(_num_basis_in_algebraic_system);
-  std::iota(mol_order.begin(), mol_order.end(), ind++);
-  std::sort(mol_order.begin(), mol_order.end(), [&](int i, int j) {
-    return (original_molality[i] > original_molality[j]);
-  });
+  const std::vector<Real> & original_molality = _egs.getAlgebraicBasisValues();
+  const std::vector<unsigned> mol_order =
+      GeochemistrySortedIndices::sortedIndices(original_molality, false);
   const Real median_molality = original_molality[mol_order[_num_basis_in_algebraic_system / 2]];
 
   // get the index order of the residual vector (largest first): ignore residuals for surface
-  // potentials
-  ind = 0;
+  // potentials (we're only using _num_basis_in_algebraic_system, not _num_in_algebraic_system)
+  unsigned ind = 0;
   std::vector<unsigned> res_order(_num_basis_in_algebraic_system);
   std::iota(res_order.begin(), res_order.end(), ind++);
   std::sort(res_order.begin(), res_order.end(), [&](int i, int j) {
     return std::abs(_residual(i)) > std::abs(_residual(j));
   });
 
-  const std::vector<Real> original_molality_and_pot = _egs.getAlgebraicVariableValues();
+  const std::vector<Real> & original_molality_and_pot = _egs.getAlgebraicVariableValues();
   DenseVector<Real> new_molality_and_pot(original_molality_and_pot);
   for (const auto & a : res_order)
   {
@@ -335,7 +332,14 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
     _is.setMaxStoichiometricIonicStrength(max_is0);
     _abs_residual = computeResidual(_residual);
     bool reducing_initial_molalities = (_abs_residual > _max_initial_residual);
-    while (reducing_initial_molalities)
+    const unsigned max_tries =
+        _num_basis *
+        unsigned(
+            std::log(_abs_residual / _max_initial_residual) /
+            std::log(1.1)); // assume each successful call to reduceInitialResidual reduces residual
+                            // by about 1.1, but that the correct basis species has to be chosen
+    unsigned tries = 0;
+    while (reducing_initial_molalities && ++tries <= max_tries)
       reducing_initial_molalities = reduceInitialResidual();
 
     ss << "iter = " << iter << " |R| = " << _abs_residual << std::endl;

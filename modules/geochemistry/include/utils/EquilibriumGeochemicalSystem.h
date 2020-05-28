@@ -228,10 +228,21 @@ public:
   Real getBasisActivity(unsigned i) const;
 
   /**
+   * @return the activity for the basis species
+   */
+  const std::vector<Real> & getBasisActivity() const;
+
+  /**
    * @return the molality of the j^th equilibrium species.  This is not defined for minerals or
    * gases
    */
   Real getEquilibriumMolality(unsigned j) const;
+
+  /**
+   * @return the molalities of the equilibrium species.  These are not defined for minerals or
+   * gases
+   */
+  const std::vector<Real> & getEquilibriumMolality() const;
 
   /**
    * @return the activity coefficient for the i^th basis species.  This is not defined for water,
@@ -240,10 +251,22 @@ public:
   Real getBasisActivityCoefficient(unsigned i) const;
 
   /**
+   * @return the activity coefficients for the basis species.  These are not defined for water,
+   * minerals, gases, or aqueous species that have been provided an activity by the user
+   */
+  const std::vector<Real> & getBasisActivityCoefficient() const;
+
+  /**
    * @return the activity coefficient for the j^th equilibrium species.  This is not defined for
    * minerals
    */
   Real getEquilibriumActivityCoefficient(unsigned j) const;
+
+  /**
+   * @return the activity coefficients for the equilibrium species.  These are not defined for
+   * minerals
+   */
+  const std::vector<Real> & getEquilibriumActivityCoefficient() const;
 
   /// Returns the total charge in the system
   Real getTotalCharge() const;

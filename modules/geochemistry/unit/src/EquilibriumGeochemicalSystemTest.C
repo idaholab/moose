@@ -1126,8 +1126,10 @@ TEST(EquilibiumGeochemicalSystemTest, getBasisActivityKnown)
 /// Check getBasisActivity
 TEST(EquilibiumGeochemicalSystemTest, getBasisActivity)
 {
-  EXPECT_EQ(egs_good_calcite.getBasisActivity(0), 1.75); // H2O
-  EXPECT_EQ(egs_good_calcite.getBasisActivity(3), 1.0);  // Calcite
+  EXPECT_EQ(egs_good_calcite.getBasisActivity(0), 1.75);   // H2O
+  EXPECT_EQ(egs_good_calcite.getBasisActivity(3), 1.0);    // Calcite
+  EXPECT_EQ(egs_good_calcite.getBasisActivity()[0], 1.75); // H2O
+  EXPECT_EQ(egs_good_calcite.getBasisActivity()[3], 1.0);  // Calcite
   try
   {
     EXPECT_EQ(egs_good_calcite.getBasisActivity(4), 1);
@@ -1168,8 +1170,10 @@ TEST(EquilibiumGeochemicalSystemTest, getBasisActivity)
       1E-20); // maximum ionic_strength = 0, so all activity_coefficients = 1
 
   EXPECT_EQ(egs.getBasisActivity(1), egs.getSolventMassAndFreeMolalityAndMineralMoles()[1]); // H+
-  EXPECT_EQ(egs.getBasisActivity(2), 2.5); // HCO3-
-  EXPECT_EQ(egs.getBasisActivity(3), 3.0); // O2(g)
+  EXPECT_EQ(egs.getBasisActivity(2), 2.5);   // HCO3-
+  EXPECT_EQ(egs.getBasisActivity(3), 3.0);   // O2(g)
+  EXPECT_EQ(egs.getBasisActivity()[2], 2.5); // HCO3-
+  EXPECT_EQ(egs.getBasisActivity()[3], 3.0); // O2(g)
 }
 
 /// Check getBasisActivityCoeff
@@ -1215,8 +1219,28 @@ TEST(EquilibiumGeochemicalSystemTest, getBasisActivityCoeff)
       0,
       1E-20); // maximum ionic_strength = 0, so all activity_coefficients = 1
 
-  EXPECT_EQ(egs.getBasisActivityCoefficient(1), 1.0); // H+
-  EXPECT_EQ(egs.getBasisActivityCoefficient(2), 1.0); // HCO3-
+  EXPECT_EQ(egs.getBasisActivityCoefficient(1), 1.0);   // H+
+  EXPECT_EQ(egs.getBasisActivityCoefficient(2), 1.0);   // HCO3-
+  EXPECT_EQ(egs.getBasisActivityCoefficient()[1], 1.0); // H+
+  EXPECT_EQ(egs.getBasisActivityCoefficient()[2], 1.0); // HCO3-
+}
+
+/// Check getEqmActivityCoefficient exception
+TEST(EquilibiumGeochemicalSystemTest, getEqmActivityCoefficientException)
+{
+  try
+  {
+    EXPECT_EQ(egs_good_calcite.getEquilibriumActivityCoefficient(44), 1);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Cannot retrieve activity coefficient for equilibrium species 44 since "
+                         "there are only 6 "
+                         "equilibrium species") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 /// Check getEqmMolality
@@ -1244,10 +1268,23 @@ TEST(EquilibiumGeochemicalSystemTest, getEqmMolality)
                    std::pow(10.0, egs_good_calcite.getLog10K(0))),
               1.0,
               1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[0] /
+                  (egs_good_calcite.getBasisActivity(1) * egs_good_calcite.getBasisActivity(2) /
+                   egs_good_calcite.getBasisActivity(0) /
+                   egs_good_calcite.getEquilibriumActivityCoefficient()[0] /
+                   std::pow(10.0, egs_good_calcite.getLog10K(0))),
+              1.0,
+              1.0E-8);
   // CO3-- = HCO3- - H+
   EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality(1) /
                   (egs_good_calcite.getBasisActivity(2) / egs_good_calcite.getBasisActivity(1) /
                    egs_good_calcite.getEquilibriumActivityCoefficient(1) /
+                   std::pow(10.0, egs_good_calcite.getLog10K(1))),
+              1.0,
+              1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[1] /
+                  (egs_good_calcite.getBasisActivity(2) / egs_good_calcite.getBasisActivity(1) /
+                   egs_good_calcite.getEquilibriumActivityCoefficient()[1] /
                    std::pow(10.0, egs_good_calcite.getLog10K(1))),
               1.0,
               1.0E-8);
@@ -1257,8 +1294,19 @@ TEST(EquilibiumGeochemicalSystemTest, getEqmMolality)
                    std::pow(10.0, egs_good_calcite.getLog10K(2))),
               1.0,
               1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[2] /
+                  (1.0 / egs_good_calcite.getEquilibriumActivityCoefficient()[2] /
+                   std::pow(10.0, egs_good_calcite.getLog10K(2))),
+              1.0,
+              1.0E-8);
   // CaOH+ = Calcite - HCO3- + H20
   EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality(3) /
+                  (egs_good_calcite.getBasisActivity(0) / egs_good_calcite.getBasisActivity(2) /
+                   egs_good_calcite.getEquilibriumActivityCoefficient()[3] /
+                   std::pow(10.0, egs_good_calcite.getLog10K(3))),
+              1.0,
+              1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[3] /
                   (egs_good_calcite.getBasisActivity(0) / egs_good_calcite.getBasisActivity(2) /
                    egs_good_calcite.getEquilibriumActivityCoefficient(3) /
                    std::pow(10.0, egs_good_calcite.getLog10K(3))),
@@ -1271,10 +1319,22 @@ TEST(EquilibiumGeochemicalSystemTest, getEqmMolality)
                    std::pow(10.0, egs_good_calcite.getLog10K(4))),
               1.0,
               1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[4] /
+                  (egs_good_calcite.getBasisActivity(0) / egs_good_calcite.getBasisActivity(1) /
+                   egs_good_calcite.getEquilibriumActivityCoefficient()[4] /
+                   std::pow(10.0, egs_good_calcite.getLog10K(4))),
+              1.0,
+              1.0E-8);
   // Ca++ = Calcite - HCO3- + H+
   EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality(5) /
                   (egs_good_calcite.getBasisActivity(1) / egs_good_calcite.getBasisActivity(2) /
                    egs_good_calcite.getEquilibriumActivityCoefficient(5) /
+                   std::pow(10.0, egs_good_calcite.getLog10K(5))),
+              1.0,
+              1.0E-8);
+  EXPECT_NEAR(egs_good_calcite.getEquilibriumMolality()[5] /
+                  (egs_good_calcite.getBasisActivity(1) / egs_good_calcite.getBasisActivity(2) /
+                   egs_good_calcite.getEquilibriumActivityCoefficient()[5] /
                    std::pow(10.0, egs_good_calcite.getLog10K(5))),
               1.0,
               1.0E-8);

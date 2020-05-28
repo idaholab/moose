@@ -10,6 +10,7 @@
 #include "EquilibriumReactionSolverOutput.h"
 #include "GeochemistryConstants.h"
 #include "GeochemistryFormattedOutput.h"
+#include "GeochemistrySortedIndices.h"
 
 registerMooseObject("GeochemistryApp", EquilibriumReactionSolverOutput);
 
@@ -205,23 +206,14 @@ EquilibriumReactionSolverOutput::output(const ExecFlagType & type)
     _console << ss.str();
 
   // retrieve information
-  const std::vector<Real> basis_molality = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
-  std::vector<Real> basis_activity;
-  for (unsigned i = 0; i < _num_basis; ++i)
-    basis_activity.push_back(_egs.getBasisActivity(i));
-  std::vector<Real> basis_act_coef;
-  for (unsigned i = 0; i < _num_basis; ++i)
-    basis_act_coef.push_back(_egs.getBasisActivityCoefficient(i));
-  const std::vector<Real> bulk_moles = _egs.getBulkMoles();
-  std::vector<Real> eqm_molality;
-  for (unsigned j = 0; j < _num_eqm; ++j)
-    eqm_molality.push_back(_egs.getEquilibriumMolality(j));
-  std::vector<Real> eqm_act_coef;
-  for (unsigned j = 0; j < _num_eqm; ++j)
-    eqm_act_coef.push_back(_egs.getEquilibriumActivityCoefficient(j));
-  const std::vector<Real> eqm_SI = _egs.getSaturationIndices();
+  const std::vector<Real> & basis_molality = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  const std::vector<Real> & basis_activity = _egs.getBasisActivity();
+  const std::vector<Real> & basis_act_coef = _egs.getBasisActivityCoefficient();
+  const std::vector<Real> & bulk_moles = _egs.getBulkMoles();
+  const std::vector<Real> & eqm_molality = _egs.getEquilibriumMolality();
+  const std::vector<Real> & eqm_act_coef = _egs.getEquilibriumActivityCoefficient();
+  const std::vector<Real> & eqm_SI = _egs.getSaturationIndices();
 
-  unsigned ind = 0;
   _console << std::setprecision(_precision);
 
   _console << "\nSummary:\n";
@@ -269,12 +261,8 @@ EquilibriumReactionSolverOutput::output(const ExecFlagType & type)
   _console << "Activity of water = " << basis_activity[0] << "\n";
 
   // Output the basis species information, sorted by molality
-  std::vector<unsigned> basis_order(_num_basis);
-  ind = 0;
-  std::iota(basis_order.begin(), basis_order.end(), ind++);
-  std::sort(basis_order.begin(), basis_order.end(), [&](int i, int j) {
-    return basis_molality[i] > basis_molality[j];
-  });
+  std::vector<unsigned> basis_order =
+      GeochemistrySortedIndices::sortedIndices(basis_molality, false);
   _console << "\nBasis Species:\n";
   for (const auto & i : basis_order)
     if (i == 0 || _mgd.basis_species_gas[i])
@@ -299,12 +287,7 @@ EquilibriumReactionSolverOutput::output(const ExecFlagType & type)
       _console << _mgd.basis_species_name[i] << ";  fugacity = " << basis_activity[i] << "\n";
 
   // Output the equilibrium species info, sorted by molality
-  std::vector<unsigned> eqm_order(_num_eqm);
-  ind = 0;
-  std::iota(eqm_order.begin(), eqm_order.end(), ind++);
-  std::sort(eqm_order.begin(), eqm_order.end(), [&](int i, int j) {
-    return eqm_molality[i] > eqm_molality[j];
-  });
+  std::vector<unsigned> eqm_order = GeochemistrySortedIndices::sortedIndices(eqm_molality, false);
   _console << "\nEquilibrium Species:\n";
   for (const auto & i : eqm_order)
     if (eqm_molality[i] <= _mol_cutoff)
@@ -331,12 +314,7 @@ EquilibriumReactionSolverOutput::output(const ExecFlagType & type)
                << ";  log10K = " << _egs.getLog10K(i) << "\n";
 
   // Output the mineral info, sorted by saturation indices
-  std::vector<unsigned> mineral_order(_num_eqm);
-  ind = 0;
-  std::iota(mineral_order.begin(), mineral_order.end(), ind++);
-  std::sort(mineral_order.begin(), mineral_order.end(), [&](int i, int j) {
-    return eqm_SI[i] > eqm_SI[j];
-  });
+  std::vector<unsigned> mineral_order = GeochemistrySortedIndices::sortedIndices(eqm_SI, false);
   _console << "\nMinerals:\n";
   for (const auto & i : mineral_order)
     if (_mgd.eqm_species_mineral[i])
@@ -353,10 +331,6 @@ EquilibriumReactionSolverOutput::output(const ExecFlagType & type)
   if (pe_defined)
     _console << "e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = " << -prefactor * pe << "V\n";
   performNernstSwaps();
-  // activities might have changed due to the swaps
-  basis_activity.resize(0);
-  for (unsigned i = 0; i < _num_basis; ++i)
-    basis_activity.push_back(_egs.getBasisActivity(i));
   if (_mgd.redox_lhs == _original_redox_lhs)
     for (unsigned red = 0; red < _mgd.redox_stoichiometry.m(); ++red)
       _console << _mgd.redox_lhs << " = "

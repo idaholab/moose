@@ -57,6 +57,77 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
         std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
+
+  try
+  {
+    const EquilibriumGeochemicalSolver solver(
+        mgd, egs, is_solver, 1.0, 0.1, 100, 0.0, 0.1, {}, 3.0, 10);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("EquilibriumGeochemicalSolver: max_initial_residual must be positive") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const EquilibriumGeochemicalSolver solver(
+        mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, {}, -1.0, 10);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("EquilibriumGeochemicalSolver: max_ionic_strength must not be negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const EquilibriumGeochemicalSolver solver(
+        mgd, egs, is_solver, 1.0, -0.1, 100, 1E100, 0.1, {}, 1.0, 10);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("EquilibriumGeochemicalSolver: rel_tol must not be negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const EquilibriumGeochemicalSolver solver(
+        mgd, egs, is_solver, -1.0, 0.1, 100, 1E100, 0.1, {}, 1.0, 10);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("EquilibriumGeochemicalSolver: abs_tol must not be negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const EquilibriumGeochemicalSolver solver(
+        mgd, egs, is_solver, 0.0, 0.0, 100, 1E100, 0.1, {}, 1.0, 10);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("EquilibriumGeochemicalSolver: either rel_tol or abs_tol must be positive") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
 }
 
 /// Solve super-simple case

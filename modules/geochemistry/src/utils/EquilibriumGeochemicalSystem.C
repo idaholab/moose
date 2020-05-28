@@ -40,7 +40,7 @@ EquilibriumGeochemicalSystem::EquilibriumGeochemicalSystem(
     _constrained_species(constrained_species),
     _constraint_value(constraint_value),
     _original_constraint_value(constraint_value),
-    _constraint_meaning(),
+    _constraint_meaning(constraint_meaning.size()),
     _eqm_log10K(_num_eqm),
     _redox_log10K(_num_redox),
     _num_basis_in_algebraic_system(0),
@@ -62,7 +62,7 @@ EquilibriumGeochemicalSystem::EquilibriumGeochemicalSystem(
     _min_initial_molality(min_initial_molality)
 {
   for (unsigned i = 0; i < constraint_meaning.size(); ++i)
-    _constraint_meaning.push_back(static_cast<ConstraintMeaningEnum>(constraint_meaning.get(i)));
+    _constraint_meaning[i] = static_cast<ConstraintMeaningEnum>(constraint_meaning.get(i));
   checkAndInitialize();
 }
 
@@ -446,20 +446,20 @@ EquilibriumGeochemicalSystem::getAlgebraicIndexOfBasisSystem() const
 std::vector<Real>
 EquilibriumGeochemicalSystem::getAlgebraicVariableValues() const
 {
-  std::vector<Real> var;
+  std::vector<Real> var(_num_basis_in_algebraic_system + _num_surface_pot);
   for (unsigned a = 0; a < _num_basis_in_algebraic_system; ++a)
-    var.push_back(_basis_molality[_basis_index[a]]);
+    var[a] = _basis_molality[_basis_index[a]];
   for (unsigned s = 0; s < _num_surface_pot; ++s)
-    var.push_back(_surface_pot_expr[s]);
+    var[s + _num_basis_in_algebraic_system] = _surface_pot_expr[s];
   return var;
 }
 
 std::vector<Real>
 EquilibriumGeochemicalSystem::getAlgebraicBasisValues() const
 {
-  std::vector<Real> var;
+  std::vector<Real> var(_num_basis_in_algebraic_system);
   for (unsigned a = 0; a < _num_basis_in_algebraic_system; ++a)
-    var.push_back(_basis_molality[_basis_index[a]]);
+    var[a] = _basis_molality[_basis_index[a]];
   return var;
 }
 
@@ -614,6 +614,12 @@ EquilibriumGeochemicalSystem::getBasisActivity(unsigned i) const
   return _basis_activity[i];
 }
 
+const std::vector<Real> &
+EquilibriumGeochemicalSystem::getBasisActivity() const
+{
+  return _basis_activity;
+}
+
 Real
 EquilibriumGeochemicalSystem::getEquilibriumMolality(unsigned j) const
 {
@@ -624,6 +630,12 @@ EquilibriumGeochemicalSystem::getEquilibriumMolality(unsigned j) const
                _num_eqm,
                " equilibrium species");
   return _eqm_molality[j];
+}
+
+const std::vector<Real> &
+EquilibriumGeochemicalSystem::getEquilibriumMolality() const
+{
+  return _eqm_molality;
 }
 
 void
@@ -650,6 +662,12 @@ EquilibriumGeochemicalSystem::getEquilibriumActivityCoefficient(unsigned j) cons
   return _eqm_activity_coef[j];
 }
 
+const std::vector<Real> &
+EquilibriumGeochemicalSystem::getEquilibriumActivityCoefficient() const
+{
+  return _eqm_activity_coef;
+}
+
 Real
 EquilibriumGeochemicalSystem::getBasisActivityCoefficient(unsigned i) const
 {
@@ -660,6 +678,12 @@ EquilibriumGeochemicalSystem::getBasisActivityCoefficient(unsigned i) const
                _num_basis,
                " basis species");
   return _basis_activity_coef[i];
+}
+
+const std::vector<Real> &
+EquilibriumGeochemicalSystem::getBasisActivityCoefficient() const
+{
+  return _basis_activity_coef;
 }
 
 void
