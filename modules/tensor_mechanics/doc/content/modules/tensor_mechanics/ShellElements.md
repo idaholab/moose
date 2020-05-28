@@ -41,7 +41,7 @@ If $^t \mathbf{g_i} = \partial ^t \mathbf{x}/\partial r_i$ are the covariant bas
 The expressions for the small and large strains in the 11, 22, 12, 13 and 23 directions are provided in equations 21 to 24 of [!cite](dvorkin1984continuum). The expressions for the shear strains in the 13 and 23 directions also include a correction for shear locking. In MOOSE the small strain increments are computed in
 [ADComputeIncrementalShellStrain](/ADComputeIncrementalShellStrain.md) and the small + large strain increments are computed in [ADComputeFiniteShellStrain](/ADComputeFiniteShellStrain.md)). Note that strain in the 33 direction is not computed.
 
-Apart from the strain increment, two other matrices (B and BNL) are computed by the strain class. These two matrices connect the nodal displacements/rotations to the small and large strains, respectively, i.e., $e=B u$ and $\eta = B_{NL} u$. These two matrices are then used to compute the residuals in [ADStressDivergenceShell](/ADStressDivergenceShell.md).  
+Apart from the strain increment, two other matrices (B and BNL) are computed by the strain class. These two matrices connect the nodal displacements/rotations to the small and large strains, respectively, i.e., $e=B u$ and $\eta = B_{NL} u$. These two matrices are then used to compute the residuals in [ADStressDivergenceShell](/ADStressDivergenceShell.md).
 
 ## Elasticity tensor
 
@@ -73,7 +73,7 @@ The total stress at each qp is computed in [ADComputeShellStress](/ADComputeShel
 
 Finally the residuals are computed and assembled in [ADStressDivergenceShell](/ADStressDivergenceShell.md) for both small and large strain scenarios. For small strain scenarios, the residual at each qp is computed by multiplying the stress tensor at that qp with the corresponding components of the B matrix. Additionally, for large strain scenarios, the old stress tensor is multiplied with corresponding components of the $B_{NL}$ matrix and that is also added to the residual at each qp. These two components for the residual are same as $K_{L} u$ and $K_{NL} u$ in equation 25 of [!cite](dvorkin1984continuum).
 
-Note that there are quadrature points both along the plane as well as along the thickness of the element. The order of Gauss quadrature rule along the thickness is provided as input by the user to all the above mentioned objects.  
+Note that there are quadrature points both along the plane as well as along the thickness of the element. The order of Gauss quadrature rule along the thickness is provided as input by the user to all the above mentioned objects.
 
 ## Inertia
 
@@ -81,9 +81,9 @@ This element's generalized inertia forces are obtained directly from the kinemat
 The mass matrix takes the following form of a volume integral:
 
 \begin{equation}
-\mathbf{\M} = \int_{V}^{} \rho \mathbf{H}^{T} \mathbf{H} dV
+\mathbf{M} = \int_{V}^{} \rho \mathbf{H}^{T} \mathbf{H} dV
 \end{equation}
 
-where $mathbf{H}$ is an element-wise matrix that contains the interpolation functions for displacement and rotational degrees of freedom. In the implementation, the volume integral is simplified, and it is assumed that the element thickness is constant. Similarly, one orientation matrix is used per element, that is, changes in orientation in a single element's geometry are neglected.
+where $\mathbf{H}$ is an element-wise matrix that contains the interpolation functions for displacement and rotational degrees of freedom. In the implementation, the volume integral is simplified, and it is assumed that the element thickness is constant. Similarly, one orientation matrix is used per element, that is, changes in orientation in a single element's geometry are neglected.
 
 !bibtex bibliography
