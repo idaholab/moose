@@ -1,8 +1,7 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   swap_out_of_basis = "O2(aq) Ba++"
   swap_into_basis = "Sphalerite Barite"
-  verbose = true
   charge_balance_species = "Cl-"
 # Approximately TDS = 257000mg/kg
 # Note that TDS = (mass_non-water) / (mass_solvent_water + mass_non-water),

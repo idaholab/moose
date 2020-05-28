@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   swap_out_of_basis = "Al+++ Fe++"
   swap_into_basis = "Kaolinite Hematite"

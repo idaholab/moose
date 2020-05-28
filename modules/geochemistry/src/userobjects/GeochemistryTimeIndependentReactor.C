@@ -1,0 +1,92 @@
+#include "GeochemistryTimeIndependentReactor.h"
+
+registerMooseObject("GeochemistryApp", GeochemistryTimeIndependentReactor);
+
+InputParameters
+GeochemistryTimeIndependentReactor::validParams()
+{
+  InputParameters params = GeochemistryReactorBase::validParams();
+  params.addParam<Real>("temperature", 25.0, "The temperature (degC) of the aqueous solution");
+  params.addClassDescription("UserObject that controls the time-independent geochemistry reaction "
+                             "processes.  Spatial dependence is not possible using this class");
+  return params;
+}
+
+GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
+    const InputParameters & parameters)
+  : GeochemistryReactorBase(parameters),
+    _temperature(getParam<Real>("temperature")),
+    _egs(_mgd,
+         _gac,
+         _is,
+         _swapper,
+         getParam<std::vector<std::string>>("swap_out_of_basis"),
+         getParam<std::vector<std::string>>("swap_into_basis"),
+         getParam<std::string>("charge_balance_species"),
+         getParam<std::vector<std::string>>("constraint_species"),
+         getParam<std::vector<Real>>("constraint_value"),
+         getParam<MultiMooseEnum>("constraint_meaning"),
+         _temperature,
+         getParam<unsigned>("extra_iterations_to_make_consistent"),
+         getParam<Real>("min_initial_molality")),
+    _solver(_mgd,
+            _egs,
+            _is,
+            getParam<Real>("abs_tol"),
+            getParam<Real>("rel_tol"),
+            getParam<unsigned>("max_iter"),
+            getParam<Real>("max_initial_residual"),
+            _small_molality,
+            _max_swaps_allowed,
+            getParam<std::vector<std::string>>("prevent_precipitation"),
+            getParam<Real>("max_ionic_strength"),
+            getParam<unsigned>("ramp_max_ionic_strength"))
+{
+}
+
+void
+GeochemistryTimeIndependentReactor::initialize()
+{
+  GeochemistryReactorBase::initialize();
+}
+void
+GeochemistryTimeIndependentReactor::finalize()
+{
+  GeochemistryReactorBase::finalize();
+}
+
+void
+GeochemistryTimeIndependentReactor::execute()
+{
+  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual);
+}
+
+const EquilibriumGeochemicalSystem &
+GeochemistryTimeIndependentReactor::getEquilibriumGeochemicalSystem(const Point & /*point*/) const
+{
+  return _egs;
+}
+
+const EquilibriumGeochemicalSystem &
+GeochemistryTimeIndependentReactor::getEquilibriumGeochemicalSystem(unsigned /*node_id*/) const
+{
+  return _egs;
+}
+
+const std::stringstream &
+GeochemistryTimeIndependentReactor::getSolverOutput(const Point & /*point*/) const
+{
+  return _solver_output;
+}
+
+unsigned
+GeochemistryTimeIndependentReactor::getSolverIterations(const Point & /*point*/) const
+{
+  return _tot_iter;
+}
+
+Real
+GeochemistryTimeIndependentReactor::getSolverResidual(const Point & /*point*/) const
+{
+  return _abs_residual;
+}

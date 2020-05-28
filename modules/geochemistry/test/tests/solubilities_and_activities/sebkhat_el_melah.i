@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Cl-"
   constraint_species = "H2O              H+       Cl- Mg++ Na+ SO4-- K+ Br- Ca++ HCO3-"

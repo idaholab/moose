@@ -36,6 +36,7 @@ public:
    * initial guesses for molalities so that the initial residual is less than max_initial_residual
    * @param swap_threshold If a basis molality < swap_threshold at the end of the Newton process,
    * EquilibriumGeochemicalSolver attempts to swap it out of the basis
+   * @param max_swaps_allowed Maximum number of swaps allowed before the solve process aborts
    * @param prevent_precipitation The minerals named in this vector will not be allowed to
    * precipitate, even if their saturation indices are positive
    * @param max_ionic_strength Maximum ionic strength ever allowed
@@ -51,6 +52,7 @@ public:
                                unsigned max_iter,
                                Real max_initial_residual,
                                Real swap_threshold,
+                               unsigned max_swaps_allowed,
                                const std::vector<std::string> & prevent_precipitation,
                                Real max_ionic_strength,
                                unsigned ramp_max_ionic_strength);
@@ -99,6 +101,8 @@ private:
   const Real _max_initial_residual;
   /// If a basis molality < swap_threshold, we attempt to swap it out of the basis
   const Real _swap_threshold;
+  /// Maximum number of swaps allowed before the solve aborts
+  const unsigned _max_swaps_allowed;
   /// The minerals named in this list can have positive saturation indices and will not precipitate
   const std::vector<std::string> _prevent_precipitation;
   /// Maximum ionic strength allowed

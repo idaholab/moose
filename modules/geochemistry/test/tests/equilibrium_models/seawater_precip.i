@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   swap_out_of_basis = "H+   "
   swap_into_basis = "  MgCO3"
@@ -12,7 +12,6 @@
   constraint_value = "  1.0              0.00019592093 0.2151E-3     0.5656             0.4850             0.02924            0.05501            0.01063            0.010576055        0.002412           0.00010349"
   constraint_meaning = "kg_solvent_water moles_bulk_species free_molality moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species"
   prevent_precipitation = "Dolomite-dis Dolomite-ord"
-  verbose = true
 []
 
 [UserObjects]

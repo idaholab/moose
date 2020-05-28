@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   temperature = 22
   charge_balance_species = "Cl-" # this means the bulk moles of Cl- will not be exactly as set below

@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "Action.h"
+#include "AddGeochemistrySolverAction.h"
 
 /**
- * Action that sets up the equilibrium reaction solver
+ * Action that sets up a time-dependent equilibrium reaction solver
  */
-class AddEquilibriumReactionSolverAction : public Action
+class AddTimeDependentReactionSolverAction : public AddGeochemistrySolverAction
 {
 public:
   static InputParameters validParams();
 
-  AddEquilibriumReactionSolverAction(InputParameters parameters);
+  AddTimeDependentReactionSolverAction(InputParameters parameters);
 
   virtual void act() override;
 };

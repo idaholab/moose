@@ -13,8 +13,7 @@
 
 const GeochemicalDatabaseReader db_solver("database/moose_testdb.json");
 const GeochemicalDatabaseReader db_full("../database/moose_geochemdb.json");
-const GeochemicalDatabaseReader
-    db_ferric("../test/tests/sorption_and_surface_complexation/ferric_hydroxide_sorption.json");
+const GeochemicalDatabaseReader db_ferric("../test/database/ferric_hydroxide_sorption.json");
 // Following model only has OH- as an equilibrium species
 const PertinentGeochemicalSystem
     model_simplest(db_solver, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
@@ -45,7 +44,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 1, 1E100, 0.1, {}, 3.0, 10);
+        mgd, egs, is_solver, 1.0, 0.1, 1, 1E100, 0.1, 1, {}, 3.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -61,7 +60,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 100, 0.0, 0.1, {}, 3.0, 10);
+        mgd, egs, is_solver, 1.0, 0.1, 100, 0.0, 0.1, 1, {}, 3.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -75,7 +74,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, {}, -1.0, 10);
+        mgd, egs, is_solver, 1.0, 0.1, 100, 1E100, 0.1, 1, {}, -1.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -89,7 +88,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, 1.0, -0.1, 100, 1E100, 0.1, {}, 1.0, 10);
+        mgd, egs, is_solver, 1.0, -0.1, 100, 1E100, 0.1, 1, {}, 1.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -103,7 +102,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, -1.0, 0.1, 100, 1E100, 0.1, {}, 1.0, 10);
+        mgd, egs, is_solver, -1.0, 0.1, 100, 1E100, 0.1, 1, {}, 1.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -117,7 +116,7 @@ TEST(EquilibiumGeochemicalSolverTest, exception)
   try
   {
     const EquilibriumGeochemicalSolver solver(
-        mgd, egs, is_solver, 0.0, 0.0, 100, 1E100, 0.1, {}, 1.0, 10);
+        mgd, egs, is_solver, 0.0, 0.0, 100, 1E100, 0.1, 1, {}, 1.0, 10);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -148,7 +147,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve1)
                                    0,
                                    1E-20);
   EquilibriumGeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 10.0, 0.1, {}, 3.0, 0);
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 10.0, 0.1, 1, {}, 3.0, 0);
 
   std::stringstream ss;
   unsigned tot_iter;
@@ -256,6 +255,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve2)
                                       100,
                                       1E3,
                                       0.1,
+                                      1,
                                       {"Antigorite",
                                        "Tremolite",
                                        "Talc",
@@ -528,7 +528,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve3)
       0,
       1E-20);
 
-  // build solver
+  // build solver (4 swaps are needed to solve this system)
   EquilibriumGeochemicalSolver solver(mgd,
                                       egs,
                                       is_solver,
@@ -537,6 +537,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve3)
                                       100,
                                       1E3,
                                       0.1,
+                                      4,
                                       {"Dolomite-ord", "Dolomite-dis"},
                                       3.0,
                                       10);
@@ -752,6 +753,142 @@ TEST(EquilibiumGeochemicalSolverTest, solve3)
   }
 }
 
+/// Solve realistic case with minerals that precipitate, no redox, no sorption, and then "restore" to check it works correctly
+TEST(EquilibiumGeochemicalSolverTest, solve3_restore)
+{
+  // build the model
+  const PertinentGeochemicalSystem model(
+      db_full,
+      {"H2O", "H+", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)", "O2(aq)"},
+      {"Antigorite",
+       "Tremolite",
+       "Talc",
+       "Chrysotile",
+       "Sepiolite",
+       "Anthophyllite",
+       "Dolomite",
+       "Dolomite-ord",
+       "Huntite",
+       "Dolomite-dis",
+       "Magnesite",
+       "Calcite",
+       "Aragonite",
+       "Quartz"},
+      {},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  // build the equilibrium system
+  GeochemistrySpeciesSwapper swapper(11, 1E-6);
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem egs(
+      mgd,
+      ac_solver,
+      is_solver,
+      swapper,
+      {"H+"},
+      {"MgCO3"},
+      "Cl-",
+      {"H2O", "MgCO3", "O2(aq)", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)"},
+      {1.0,
+       0.196E-3,
+       0.2151E-3,
+       0.5656,
+       0.4850,
+       0.02924,
+       0.05501,
+       0.01063,
+       0.010576055,
+       0.002412,
+       0.00010349},
+      cm,
+      25,
+      0,
+      1E-20);
+
+  // build solver
+  EquilibriumGeochemicalSolver solver(mgd,
+                                      egs,
+                                      is_solver,
+                                      1.0E-15,
+                                      1.0E-200,
+                                      100,
+                                      1E3,
+                                      0.1,
+                                      5,
+                                      {"Dolomite-ord", "Dolomite-dis"},
+                                      3.0,
+                                      10);
+
+  // solve
+  std::stringstream ss;
+  unsigned tot_iter;
+  Real abs_residual;
+  solver.solveSystem(ss, tot_iter, abs_residual);
+  const Real old_residual = abs_residual;
+
+  // check converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-15);
+
+  // retrieve the molalities, and set them into egs: this should result in no change if the
+  // "restore" is working correctly
+  std::vector<std::string> names = mgd.basis_species_name;
+  names.insert(names.end(), mgd.eqm_species_name.begin(), mgd.eqm_species_name.end());
+  std::vector<Real> molal = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned j = 0; j < egs.getNumInEquilibrium(); ++j)
+    molal.push_back(egs.getEquilibriumMolality(j));
+  // form constraints_from_molalities, which are all false
+  const std::vector<bool> com_false(egs.getNumInBasis(), false);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_false);
+
+  // build solver with no ramping of the maximum ionic strength
+  EquilibriumGeochemicalSolver solver0(mgd,
+                                       egs,
+                                       is_solver,
+                                       1.0E-15,
+                                       1.0E-200,
+                                       100,
+                                       1E3,
+                                       0.1,
+                                       0,
+                                       {"Dolomite-ord", "Dolomite-dis"},
+                                       3.0,
+                                       0);
+
+  // solve this: no swaps should be necessary
+  solver0.solveSystem(ss, tot_iter, abs_residual);
+
+  // check that the soler thinks this is truly a solution and the residual has not changed
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(abs_residual, old_residual);
+
+  // Now use constraints_from_molalities = true
+  const std::vector<bool> com_true(egs.getNumInBasis(), true);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_true);
+
+  solver0.solveSystem(ss, tot_iter, abs_residual);
+
+  // check that the soler thinks this is truly a solution and the residual has not increased
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_LE(abs_residual, old_residual);
+}
+
 /// Solve realistic case with redox disequilibrium, no minerals, no sorption
 TEST(EquilibiumGeochemicalSolverTest, solve4)
 {
@@ -839,7 +976,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve4)
 
   // build solver
   EquilibriumGeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, {}, 3.0, 10);
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 10);
 
   // solve
   std::stringstream ss;
@@ -1061,6 +1198,139 @@ TEST(EquilibiumGeochemicalSolverTest, solve4)
   }
 }
 
+/// Solve realistic case with redox disequilibrium, no minerals, no sorption, then "restore" the solution and check
+TEST(EquilibiumGeochemicalSolverTest, solve4_restore)
+{
+  // build the model
+  const PertinentGeochemicalSystem model(db_full,
+                                         {"H2O",
+                                          "H+",
+                                          "Cl-",
+                                          "O2(aq)",
+                                          "HCO3-",
+                                          "Ca++",
+                                          "Mg++",
+                                          "Na+",
+                                          "K+",
+                                          "Fe++",
+                                          "Fe+++",
+                                          "Mn++",
+                                          "Zn++",
+                                          "SO4--"},
+                                         {},
+                                         {},
+                                         {},
+                                         {},
+                                         {},
+                                         "O2(aq)",
+                                         "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  // build the equilibrium system
+  GeochemistrySpeciesSwapper swapper(14, 1E-6);
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac_solver,
+                                   is_solver,
+                                   swapper,
+                                   {},
+                                   {},
+                                   "Cl-",
+                                   {"H2O",
+                                    "H+",
+                                    "O2(aq)",
+                                    "Cl-",
+                                    "HCO3-",
+                                    "Ca++",
+                                    "Mg++",
+                                    "Na+",
+                                    "K+",
+                                    "Fe++",
+                                    "Fe+++",
+                                    "Mn++",
+                                    "Zn++",
+                                    "SO4--"},
+                                   {1.0,
+                                    0.8913E-6,
+                                    0.13438E-3,
+                                    3.041E-5,
+                                    0.0295E-3,
+                                    0.005938E-3,
+                                    0.01448E-3,
+                                    0.0018704E-3,
+                                    0.005115E-3,
+                                    0.012534E-3,
+                                    0.0005372E-3,
+                                    0.005042E-3,
+                                    0.001897E-3,
+                                    0.01562E-3},
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+
+  // build solver
+  EquilibriumGeochemicalSolver solver(
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 10);
+
+  // solve
+  std::stringstream ss;
+  unsigned tot_iter;
+  Real abs_residual;
+  solver.solveSystem(ss, tot_iter, abs_residual);
+  const Real old_residual = abs_residual;
+
+  // check converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-15);
+
+  // retrieve the molalities, and set them into egs: this should result in no change if the
+  // "restore" is working correctly
+  std::vector<std::string> names = mgd.basis_species_name;
+  names.insert(names.end(), mgd.eqm_species_name.begin(), mgd.eqm_species_name.end());
+  std::vector<Real> molal = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned j = 0; j < egs.getNumInEquilibrium(); ++j)
+    molal.push_back(egs.getEquilibriumMolality(j));
+  // form constraints_from_molalities, which are all false
+  const std::vector<bool> com_false(egs.getNumInBasis(), false);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_false);
+
+  // build solver with no ramping of the maximum ionic strength
+  EquilibriumGeochemicalSolver solver0(
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1E-2, 0.1, 1, {}, 3.0, 0);
+
+  solver0.solveSystem(ss, tot_iter, abs_residual);
+
+  // check that the soler thinks this is truly a solution and the residual has not changed (up to
+  // precision-loss)
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_LE(abs_residual, old_residual);
+
+  // Now use constraints_from_molalities = true
+  const std::vector<bool> com_true(egs.getNumInBasis(), true);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_true);
+
+  solver0.solveSystem(ss, tot_iter, abs_residual);
+
+  // check that the soler thinks this is truly a solution and the residual has not increased
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_LE(abs_residual, old_residual);
+}
+
 /// Solve realistic case with sorption and minerals, no redox
 TEST(EquilibiumGeochemicalSolverTest, solve5)
 {
@@ -1107,7 +1377,7 @@ TEST(EquilibiumGeochemicalSolverTest, solve5)
 
   // build solver
   EquilibriumGeochemicalSolver solver(
-      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1.0, 0.1, {}, 3.0, 10);
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1.0, 0.1, 1, {}, 3.0, 10);
 
   // solve
   std::stringstream ss;
@@ -1301,5 +1571,243 @@ TEST(EquilibiumGeochemicalSolverTest, solve5)
     for (unsigned i = 0; i < mgd.basis_species_name.size(); ++i)
       log10ap += mgd.eqm_stoichiometry(j, i) * std::log10(egs.getBasisActivity(i));
     EXPECT_LE(log10ap, egs.getLog10K(j));
+  }
+}
+
+/// Repeat the realistic case with sorption and minerals, no redox, this time with a "restore"
+TEST(EquilibiumGeochemicalSolverTest, solve5_restore)
+{
+  // build the model
+  const PertinentGeochemicalSystem model(
+      db_ferric,
+      {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {"Fe(OH)3(ppd)"},
+      {},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  // build the equilibrium system
+  GeochemistrySpeciesSwapper swapper(10, 1E-6);
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem egs(
+      mgd,
+      ac_solver,
+      is_solver,
+      swapper,
+      {"Fe+++"},
+      {"Fe(OH)3(ppd)"},
+      "Cl-",
+      {"H2O", "H+", "Na+", "Cl-", "Hg++", "Pb++", "SO4--", "Fe(OH)3(ppd)", ">(s)FeOH", ">(w)FeOH"},
+      {1.0, 1.0E-4, 10E-3, 10E-3, 0.1E-3, 0.1E-3, 0.2E-3, 9.3573E-3, 4.6786E-5, 1.87145E-3},
+      cm,
+      25,
+      0,
+      1E-20);
+
+  // build solver
+  EquilibriumGeochemicalSolver solver(
+      mgd, egs, is_solver, 1.0E-15, 1.0E-200, 100, 1.0, 0.1, 1, {}, 3.0, 0);
+
+  // solve
+  std::stringstream ss;
+  unsigned tot_iter;
+  Real abs_residual;
+  solver.solveSystem(ss, tot_iter, abs_residual);
+  const Real old_residual = abs_residual;
+
+  // check converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-15);
+
+  // now setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots to the solution obtained
+  // This should actually do nothing: we are just checking the "restore" doesn't muck something
+  // up!
+  std::vector<std::string> names = mgd.basis_species_name;
+  names.insert(names.end(), mgd.eqm_species_name.begin(), mgd.eqm_species_name.end());
+  names.push_back("Fe(OH)3(ppd)_surface_potential_expr");
+  std::vector<Real> molal = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned j = 0; j < egs.getNumInEquilibrium(); ++j)
+    molal.push_back(egs.getEquilibriumMolality(j));
+  molal.push_back(std::exp(egs.getSurfacePotential(0) * GeochemistryConstants::FARADAY /
+                           (-2.0 * GeochemistryConstants::GAS_CONSTANT *
+                            (25.0 + GeochemistryConstants::CELSIUS_TO_KELVIN))));
+  // form constraints_from_molalities, which are all false
+  const std::vector<bool> com_false(egs.getNumInBasis(), false);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_false);
+
+  solver.solveSystem(ss, tot_iter, abs_residual);
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_EQ(abs_residual, old_residual);
+
+  // Now use constraints_from_molalities = true
+  const std::vector<bool> com_true(egs.getNumInBasis(), true);
+  egs.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(names, molal, com_true);
+
+  solver.solveSystem(ss, tot_iter, abs_residual);
+
+  EXPECT_EQ(tot_iter, 0);
+  EXPECT_LE(abs_residual, old_residual);
+}
+
+/// Test progressively adding H+ to a system
+TEST(EquilibiumGeochemicalSolverTest, solve_addH)
+{
+  ModelGeochemicalDatabase mgd = model_simplest.modelGeochemicalDatabase();
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac_solver,
+                                   is_solver,
+                                   swapper2,
+                                   {},
+                                   {},
+                                   "H+",
+                                   {"H2O", "H+"},
+                                   {1.75, 1},
+                                   cm2,
+                                   25,
+                                   0,
+                                   1E-20);
+  EquilibriumGeochemicalSolver solver(
+      mgd, egs, is_solver, 1.0E-12, 1.0E-200, 100, 10.0, 0.1, 1, {}, 3.0, 0);
+
+  std::stringstream ss;
+  unsigned tot_iter;
+  Real abs_residual;
+  solver.solveSystem(ss, tot_iter, abs_residual);
+
+  // check Newton has converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-12);
+
+  // close the system by setting to fixed number of moles
+  egs.changeConstraintToBulk(0);
+
+  // add 1 mol of water
+  egs.addToBulkMoles(0, 1.0);
+  solver.solveSystem(ss, tot_iter, abs_residual);
+
+  // check Newton has converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-12);
+
+  // add 1 mol of H+ : this shouldn't make any difference because charge-balance instantly removes
+  // it!
+  egs.addToBulkMoles(1, 1.0);
+  solver.solveSystem(ss, tot_iter, abs_residual);
+
+  // check Newton has converged
+  EXPECT_LE(tot_iter, 100);
+  EXPECT_LE(abs_residual, 1.0E-12);
+}
+
+/// Test that the max swaps allowed works OK
+TEST(EquilibiumGeochemicalSolverTest, maxSwapsException)
+{
+  // build the model
+  const PertinentGeochemicalSystem model(
+      db_full,
+      {"H2O", "H+", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)", "O2(aq)"},
+      {"Antigorite",
+       "Tremolite",
+       "Talc",
+       "Chrysotile",
+       "Sepiolite",
+       "Anthophyllite",
+       "Dolomite",
+       "Dolomite-ord",
+       "Huntite",
+       "Dolomite-dis",
+       "Magnesite",
+       "Calcite",
+       "Aragonite",
+       "Quartz"},
+      {},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  // build the equilibrium system
+  GeochemistrySpeciesSwapper swapper(11, 1E-6);
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem egs(
+      mgd,
+      ac_solver,
+      is_solver,
+      swapper,
+      {"H+"},
+      {"MgCO3"},
+      "Cl-",
+      {"H2O", "MgCO3", "O2(aq)", "Cl-", "Na+", "SO4--", "Mg++", "Ca++", "K+", "HCO3-", "SiO2(aq)"},
+      {1.0,
+       0.196E-3,
+       0.2151E-3,
+       0.5656,
+       0.4850,
+       0.02924,
+       0.05501,
+       0.01063,
+       0.010576055,
+       0.002412,
+       0.00010349},
+      cm,
+      25,
+      0,
+      1E-20);
+
+  // build solver (4 swaps are needed to solve this system)
+  EquilibriumGeochemicalSolver solver(mgd,
+                                      egs,
+                                      is_solver,
+                                      1.0E-15,
+                                      1.0E-200,
+                                      100,
+                                      1E3,
+                                      0.1,
+                                      3,
+                                      {"Dolomite-ord", "Dolomite-dis"},
+                                      3.0,
+                                      10);
+
+  // solve
+  std::stringstream ss;
+  unsigned tot_iter;
+  Real abs_residual;
+  try
+  {
+    solver.solveSystem(ss, tot_iter, abs_residual);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Maximum number of swaps performed during solve") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
   }
 }

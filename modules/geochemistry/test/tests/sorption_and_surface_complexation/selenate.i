@@ -8,7 +8,7 @@
 # molality_{SorbedSelenate} = Moles_{SorbingSite} / n_{w} * r / (1 + r), where r = molality_{Selenate} / K
 # The simulation below predicts molality_{SorbedSelenate} given Moles_{SorbingSite}, K and the free molality of Selenate.
 # The Moles_{SorbingSite} results from 0.62E-9mol/g(dry soil): there is assumed 500g of dry soil in this simulation (and 1kg of solvent water).
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Na+"
   constraint_species = "H2O              H+        Na+                SeO4--        SorbingSite"
@@ -19,7 +19,7 @@
 [UserObjects]
   [./definition]
     type = GeochemicalModelDefinition
-    database_file = "selenate_sorption.json"
+    database_file = "../../database/selenate_sorption.json"
     basis_species = "H2O H+ Na+ SeO4-- SorbingSite"
   [../]
 []

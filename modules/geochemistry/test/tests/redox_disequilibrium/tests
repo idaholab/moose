@@ -18,7 +18,7 @@
   [./microbial]
     type = 'RunApp'
     input = 'microbial.i'
-    expect_out = 'e- = 0.25\*H2O - 0.875\*H\+ - 0.25\*CO2\(g\) \+ 0.125\*CH3COO-;  Eh'
+    expect_out = 'e- = 0.5\*H2O - 1.125\*H\+ - 0.25\*HCO3- \+ 0.125\*CH3COO-;  Eh'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md microbial.md'

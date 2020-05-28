@@ -1,10 +1,8 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   temperature = 25
   swap_out_of_basis = 'HCO3-  Fe+++'
   swap_into_basis = '  CO2(g) Fe(OH)3(ppd)'
-  nernst_swap_out_of_basis = 'Fe(OH)3(ppd)'
-  nernst_swap_into_basis = '  Fe+++       '
   charge_balance_species = "Cl-"
 # TDS = 80.5mg/g (roughly) = (mass_non-water) / (mass_solvent_water + mass_non-water),
 # so with mass_solvent_water = 1kg, mass_non-water = 87.6mg and total_mass = 1.0876

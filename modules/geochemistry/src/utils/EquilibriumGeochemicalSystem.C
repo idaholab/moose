@@ -55,11 +55,13 @@ EquilibriumGeochemicalSystem::EquilibriumGeochemicalSystem(
     _eqm_molality(_num_eqm),
     _basis_activity_coef(_num_basis),
     _eqm_activity_coef(_num_eqm),
+    _eqm_activity(_num_eqm),
     _surface_pot_expr(_num_surface_pot),
     _sorbing_surface_area(_num_surface_pot),
     _iters_to_make_consistent(iters_to_make_consistent),
     _temperature(initial_temperature),
-    _min_initial_molality(min_initial_molality)
+    _min_initial_molality(min_initial_molality),
+    _original_redox_lhs()
 {
   for (unsigned i = 0; i < constraint_meaning.size(); ++i)
     _constraint_meaning[i] = static_cast<ConstraintMeaningEnum>(constraint_meaning.get(i));
@@ -111,11 +113,13 @@ EquilibriumGeochemicalSystem::EquilibriumGeochemicalSystem(
     _eqm_molality(_num_eqm),
     _basis_activity_coef(_num_basis),
     _eqm_activity_coef(_num_eqm),
+    _eqm_activity(_num_eqm),
     _surface_pot_expr(_num_surface_pot),
     _sorbing_surface_area(_num_surface_pot),
     _iters_to_make_consistent(iters_to_make_consistent),
     _temperature(initial_temperature),
-    _min_initial_molality(min_initial_molality)
+    _min_initial_molality(min_initial_molality),
+    _original_redox_lhs()
 {
   checkAndInitialize();
 }
@@ -261,6 +265,7 @@ EquilibriumGeochemicalSystem::checkAndInitialize()
                    "species.  The value provided should be a reasonable estimate of the mole "
                    "number, but will be overridden as the solve progresses");
   }
+  _original_redox_lhs = _mgd.redox_lhs;
   initialize();
 }
 
@@ -532,7 +537,9 @@ EquilibriumGeochemicalSystem::initBulkAndFree(std::vector<Real> & bulk_moles,
       {
         bulk_moles[i] = 0.0; // initial guess (i is not an algebraic variable).  will be determined
                              // exactly after the solve
-        basis_molality[i] = value; // never used since this is a gas
+        basis_molality[i] =
+            0.0; // never used in any solve process, but since this is a gas should be zero, and
+                 // setting this explicitly elimiates if(species=gas) checks in various loops
         break;
       }
       case ConstraintMeaningEnum::ACTIVITY:
@@ -645,8 +652,8 @@ EquilibriumGeochemicalSystem::computeRemainingBasisActivities(
   if (!_basis_activity_known[0])
     basis_activity[0] = _gac.waterActivity();
   for (unsigned basis_ind = 1; basis_ind < _num_basis; ++basis_ind) // don't loop over water
-    if (!_basis_activity_known[basis_ind]) // minerals, gases and species with activities provided
-                                           // by the user
+    if (!_basis_activity_known[basis_ind]) // basis_activity_known = true for minerals, gases and
+                                           // species with activities provided by the user
       basis_activity[basis_ind] = _basis_activity_coef[basis_ind] * _basis_molality[basis_ind];
 }
 
@@ -804,63 +811,46 @@ EquilibriumGeochemicalSystem::setAlgebraicVariables(const DenseVector<Real> & al
 void
 EquilibriumGeochemicalSystem::computeBulk(std::vector<Real> & bulk_moles) const
 {
-  const Real nw = _basis_molality[0];
   for (unsigned i = 0; i < _num_basis; ++i)
   {
     const Real value = _constraint_value[i];
     const ConstraintMeaningEnum meaning = _constraint_meaning[i];
     switch (meaning)
     {
+      case ConstraintMeaningEnum::MOLES_BULK_SPECIES:
       case ConstraintMeaningEnum::MOLES_BULK_WATER:
       {
         bulk_moles[i] = value;
         break;
       }
       case ConstraintMeaningEnum::KG_SOLVENT_WATER:
-      {
-        bulk_moles[i] = GeochemistryConstants::MOLES_PER_KG_WATER;
-        for (unsigned j = 0; j < _num_eqm; ++j)
-          bulk_moles[i] += _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
-        bulk_moles[i] *= nw;
-        break;
-      }
-      case ConstraintMeaningEnum::MOLES_BULK_SPECIES:
-      {
-        bulk_moles[i] = value;
-        break;
-      }
       case ConstraintMeaningEnum::FREE_MOLALITY:
-      {
-        bulk_moles[i] = _basis_molality[i];
-        for (unsigned j = 0; j < _num_eqm; ++j)
-          bulk_moles[i] += _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
-        bulk_moles[i] *= nw;
-        break;
-      }
       case ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES:
-      {
-        bulk_moles[i] = value;
-        for (unsigned j = 0; j < _num_eqm; ++j)
-          bulk_moles[i] += nw * _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
-        break;
-      }
       case ConstraintMeaningEnum::FUGACITY:
-      {
-        bulk_moles[i] = 0.0;
-        for (unsigned j = 0; j < _num_eqm; ++j)
-          bulk_moles[i] += nw * _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
-        break;
-      }
       case ConstraintMeaningEnum::ACTIVITY:
       {
-        bulk_moles[i] = _basis_molality[i];
-        for (unsigned j = 0; j < _num_eqm; ++j)
-          bulk_moles[i] += _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
-        bulk_moles[i] *= nw;
+        bulk_moles[i] = computeBulkFromMolalities(i);
         break;
       }
     }
   }
+}
+
+Real
+EquilibriumGeochemicalSystem::computeBulkFromMolalities(unsigned basis_ind) const
+{
+  const Real nw = _basis_molality[0];
+  Real bulk = 0.0;
+  if (basis_ind == 0)
+    bulk = GeochemistryConstants::MOLES_PER_KG_WATER;
+  else if (_mgd.basis_species_mineral[basis_ind])
+    bulk = _basis_molality[basis_ind] / nw; // because of multiplication by nw, below
+  else
+    bulk = _basis_molality[basis_ind];
+  for (unsigned j = 0; j < _num_eqm; ++j)
+    bulk += _mgd.eqm_stoichiometry(j, basis_ind) * _eqm_molality[j];
+  bulk *= nw;
+  return bulk;
 }
 
 Real
@@ -892,7 +882,7 @@ EquilibriumGeochemicalSystem::getResidualComponent(unsigned algebraic_ind) const
                  0.0) // certainly includes water, minerals and gases
           continue;
         else // _bulk_moles has been computed using computeBulk, either from constructor,
-             // setAlgebraicVariables or performSwap
+             // setAlgebraicVariables or setSolvent... or performSwap
           res += _mgd.basis_species_charge[i] * _bulk_moles[i] / _mgd.basis_species_charge[basis_i];
       }
     }
@@ -1065,9 +1055,14 @@ EquilibriumGeochemicalSystem::computeFreeMineralMoles(std::vector<Real> & basis_
   for (unsigned i = 0; i < _num_basis; ++i)
     if (_mgd.basis_species_mineral[i])
     {
-      basis_molality[i] = _bulk_moles[i];
-      for (unsigned j = 0; j < _num_eqm; ++j)
-        basis_molality[i] -= nw * _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
+      if (_constraint_meaning[i] == ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES)
+        basis_molality[i] = _constraint_value[i];
+      else
+      {
+        basis_molality[i] = _bulk_moles[i];
+        for (unsigned j = 0; j < _num_eqm; ++j)
+          basis_molality[i] -= nw * _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j];
+      }
     }
 }
 
@@ -1099,8 +1094,14 @@ EquilibriumGeochemicalSystem::performSwap(unsigned swap_out_of_basis, unsigned s
     mooseError("EquilibriumGeochemicalSystem: attempting to swap a gas out of the basis");
   if (_mgd.eqm_species_gas[swap_into_basis])
     mooseError("EquilibriumGeochemicalSystem: attempting to swap a gas into the basis");
-
   // perform the swap
+  performSwapNoCheck(swap_out_of_basis, swap_into_basis);
+}
+
+void
+EquilibriumGeochemicalSystem::performSwapNoCheck(unsigned swap_out_of_basis,
+                                                 unsigned swap_into_basis)
+{
   DenseVector<Real> bm = _bulk_moles;
   _swapper.performSwap(_mgd, bm, swap_out_of_basis, swap_into_basis);
 
@@ -1123,7 +1124,8 @@ EquilibriumGeochemicalSystem::performSwap(unsigned swap_out_of_basis, unsigned s
   // initializes the Newton process with a better starting guess.
   Real molality_of_species_just_swapped_in =
       _eqm_molality[swap_into_basis]; // is positive, or zero iff (mineral or gas)
-  if (_mgd.basis_species_mineral[swap_out_of_basis] || _mgd.basis_species_gas[swap_out_of_basis])
+  if (_mgd.basis_species_mineral[swap_out_of_basis] || _mgd.basis_species_gas[swap_out_of_basis] ||
+      _eqm_molality[swap_into_basis] == 0.0)
   {
     // the species just swapped in is a mineral or a gas, so its equilibium molality is undefined:
     // make a guess for its molality
@@ -1331,4 +1333,468 @@ const std::vector<Real> &
 EquilibriumGeochemicalSystem::getSorbingSurfaceArea() const
 {
   return _sorbing_surface_area;
+}
+
+Real
+EquilibriumGeochemicalSystem::getTemperature() const
+{
+  return _temperature;
+}
+
+void
+EquilibriumGeochemicalSystem::setTemperature(Real temperature)
+{
+  _temperature = temperature;
+  buildTemperatureDependentQuantities(_temperature);
+  _gac.setInternalParameters(_temperature, _mgd, _basis_molality, _eqm_molality, {});
+}
+
+void
+EquilibriumGeochemicalSystem::setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+    const std::vector<std::string> & names,
+    const std::vector<Real> & values,
+    const std::vector<bool> & constraints_from_molalities)
+{
+  // assume temperature-dependent quantities have been built during instantiation
+  // assume algebraic info has been built during instantiation
+
+  /*
+   * STEP 0: Check sizes are correct
+   */
+  const unsigned num_names = names.size();
+  if (num_names != values.size())
+    mooseError("When setting all molalities, names and values must have same size");
+  if (num_names != _num_basis + _num_eqm + _num_surface_pot)
+    mooseError("When setting all molalities, values must be provided for every species and surface "
+               "potentials");
+  if (constraints_from_molalities.size() != _num_basis)
+    mooseError("constraints_from_molalities has size ",
+               constraints_from_molalities.size(),
+               " while number of basis species is ",
+               _num_basis);
+
+  /*
+   * STEP 1: Read values into _basis_molality, _eqm_molality and _surface_pot_expr
+   */
+  // The is no guarantee is made that the user-supplied molalities are "good", except they must be
+  // non-negative.
+  // There are lots of "finds" in the loops below, which is slow, but it ensures all species are
+  // given molalities.  This method is designed to be called only every once-in-a-while (eg, at the
+  // start of a simulation)
+  for (const auto & name_index : _mgd.basis_species_index)
+  {
+    const unsigned ind =
+        std::distance(names.begin(), std::find(names.begin(), names.end(), name_index.first));
+    if (ind < num_names)
+    {
+      if (_mgd.basis_species_gas[name_index.second])
+      {
+        if (values[ind] != 0.0)
+          mooseError("Molality for gas ",
+                     name_index.first,
+                     " cannot be ",
+                     values[ind],
+                     ": it must be zero");
+      }
+      else if (_mgd.basis_species_mineral[name_index.second])
+      {
+        if (values[ind] < 0.0)
+          mooseError("Molality for mineral ",
+                     name_index.first,
+                     " cannot be ",
+                     values[ind],
+                     ": it must be non-negative");
+      }
+      else if (values[ind] <= 0.0)
+        mooseError("Molality for species ",
+                   name_index.first,
+                   " cannot be ",
+                   values[ind],
+                   ": it must be positive");
+      else
+        _basis_molality[name_index.second] = values[ind];
+    }
+    else
+      mooseError("Molality (or free mineral moles, etc - whatever is appropriate) for species ",
+                 name_index.first,
+                 " needs to be provided when setting all molalities");
+  }
+  for (const auto & name_index : _mgd.eqm_species_index)
+  {
+    const unsigned ind =
+        std::distance(names.begin(), std::find(names.begin(), names.end(), name_index.first));
+    if (ind < num_names)
+    {
+      if (_mgd.eqm_species_gas[name_index.second] || _mgd.eqm_species_mineral[name_index.second])
+        _eqm_molality[name_index.second] =
+            0.0; // Note: explicitly setting to zero, irrespective of user input.  The reason for
+                 // doing this is that during a restore, a basis species with positive molality
+                 // could become a secondary species, which should have zero molality
+      else if (values[ind] < 0.0)
+        mooseError("Molality for species ",
+                   name_index.first,
+                   " cannot be ",
+                   values[ind],
+                   ": it must be non-negative");
+      else
+        _eqm_molality[name_index.second] = values[ind];
+    }
+    else
+      mooseError("Molality for species ",
+                 name_index.first,
+                 " needs to be provided when setting all molalities");
+  }
+  for (unsigned sp = 0; sp < _num_surface_pot; ++sp)
+  {
+    const unsigned ind =
+        std::distance(names.begin(),
+                      std::find(names.begin(),
+                                names.end(),
+                                _mgd.surface_sorption_name[sp] + "_surface_potential_expr"));
+    if (ind < num_names)
+    {
+      if (values[ind] <= 0.0)
+        mooseError("Surface-potential expression for mineral ",
+                   _mgd.surface_sorption_name[sp],
+                   " cannot be ",
+                   values[ind],
+                   ": it must be positive");
+      _surface_pot_expr[sp] = values[ind];
+    }
+    else
+      mooseError("Surface potential for mineral ",
+                 _mgd.surface_sorption_name[sp],
+                 " needs to be provided when setting all molalities");
+  }
+
+  /*
+   * STEP 2: Alter _constraint_values if necessary
+   */
+  // If some of the constraints_from_molalities are false, then the molalities provided to this
+  // method may have to be modified to satisfy the contraints: this alters _basis_molality so must
+  // occur first
+  for (unsigned i = 0; i < _num_basis; ++i)
+  {
+    const ConstraintMeaningEnum meaning = _constraint_meaning[i];
+    if (meaning == ConstraintMeaningEnum::KG_SOLVENT_WATER ||
+        meaning == ConstraintMeaningEnum::FREE_MOLALITY ||
+        meaning == ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES)
+    {
+      if (constraints_from_molalities[i])
+      {
+        // molalities provided to this method dictate the contraints:
+        _constraint_value[i] = _basis_molality[i];
+        _original_constraint_value[i] = _constraint_value[i];
+      }
+      else
+        // contraints take precedence over the molalities provided to this method:
+        _basis_molality[i] = _constraint_value[i];
+    }
+  }
+
+  // Potentially alter _constraint_value for the BULK contraints:
+  for (unsigned i = 0; i < _num_basis; ++i)
+  {
+    const ConstraintMeaningEnum meaning = _constraint_meaning[i];
+    if (meaning == ConstraintMeaningEnum::MOLES_BULK_WATER ||
+        meaning == ConstraintMeaningEnum::MOLES_BULK_SPECIES)
+      if (constraints_from_molalities[i])
+      {
+        // the constraint value should be overridden by the molality-computed bulk mole number
+        _constraint_value[i] = computeBulkFromMolalities(i);
+        _original_constraint_value[i] = _constraint_value[i];
+      }
+  }
+
+  // Potentially alter _constraint_value for ACTIVITY contraints:
+  for (unsigned i = 0; i < _num_basis; ++i)
+    if (constraints_from_molalities[i])
+    {
+      const ConstraintMeaningEnum meaning = _constraint_meaning[i];
+      if (meaning == ConstraintMeaningEnum::FUGACITY)
+        mooseError("Gas fugacity cannot be determined from molality: constraints_from_molalities "
+                   "must be set false for all gases");
+      else if (meaning == ConstraintMeaningEnum::ACTIVITY)
+      {
+        if (i == 0)
+          mooseError(
+              "Water activity cannot be determined from molalities: constraints_from_molalities "
+              "must be set to false for water if activity of water is fixed");
+        // the constraint value should be overidden by the molality provided to this method
+        _constraint_value[i] = _basis_activity_coef[i] * _basis_molality[i];
+        _original_constraint_value[i] = _constraint_value[i];
+      }
+    }
+
+  /*
+   * STEP 3: Follow the initialize() and computeConsistentConfiguration() methods
+   */
+  // assume done already: buildTemperatureDependentQuantities
+  enforceChargeBalanceIfSimple(_constraint_value);
+  // assume done already: buildAlgebraicInfo
+  // should not be done, as basis_molality is set by this method instead: initBulkAndFree
+  buildKnownBasisActivities(_basis_activity_known, _basis_activity);
+  // should not be done, as these are set by this method: _eqm_molality.assign
+  // should not be done, as these are set by this method: _surface_pot_expr.assign
+  _gac.setInternalParameters(_temperature, _mgd, _basis_molality, _eqm_molality, {});
+  _gac.buildActivityCoefficients(_mgd, _basis_activity_coef, _eqm_activity_coef);
+  // for constraints_from_molalities = false then the following: (1) overrides the basis molality
+  // provided to this method; (2) produces a slightly inconsistent equilibrium geochemical system
+  // because basis_activity_coef was computed on the basis of the basis molalities provided to this
+  // method
+  updateBasisMolalityForKnownActivity(_basis_molality);
+  computeRemainingBasisActivities(_basis_activity);
+  // should not be done, as these are set by this method: computeEqmMolalities
+  computeBulk(_bulk_moles);
+  // should not be done, as these are set by this method: computeFreeMineralMoles
+  computeSorbingSurfaceArea(_sorbing_surface_area);
+}
+
+const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> &
+EquilibriumGeochemicalSystem::getConstraintMeaning() const
+{
+  return _constraint_meaning;
+}
+
+void
+EquilibriumGeochemicalSystem::closeSystem()
+{
+  for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
+    if (_constraint_meaning[basis_ind] == ConstraintMeaningEnum::KG_SOLVENT_WATER ||
+        _constraint_meaning[basis_ind] == ConstraintMeaningEnum::FREE_MOLALITY ||
+        _constraint_meaning[basis_ind] == ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES)
+      changeConstraintToBulk(basis_ind);
+}
+
+void
+EquilibriumGeochemicalSystem::changeConstraintToBulk(unsigned basis_ind)
+{
+  if (basis_ind >= _num_basis)
+    mooseError("Cannot changeConstraintToBulk for species ",
+               basis_ind,
+               " because there are only ",
+               _num_basis,
+               " basis species");
+  if (_mgd.basis_species_gas[basis_ind])
+  {
+    // this is a special case where we have to swap out the gas in favour of an equilibrium species
+    unsigned swap_into_basis = 0;
+    bool legitimate_swap_found = false;
+    Real best_stoi = 0.0;
+    for (unsigned j = 0; j < _num_eqm; ++j)
+    {
+      if (_mgd.eqm_species_gas[j] || _mgd.eqm_stoichiometry(j, basis_ind) == 0.0 ||
+          _mgd.surface_sorption_related[j])
+        continue;
+      const Real stoi = std::abs(_mgd.eqm_stoichiometry(j, basis_ind));
+      if (stoi > best_stoi)
+      {
+        best_stoi = stoi;
+        swap_into_basis = j;
+        legitimate_swap_found = true;
+      }
+    }
+    if (legitimate_swap_found)
+      performSwapNoCheck(basis_ind, swap_into_basis);
+    else
+      mooseError("Attempting to change constraint of gas ",
+                 _mgd.basis_species_name[basis_ind],
+                 " to MOLES_BULK_SPECIES, which involves a search for a suitable non-gas species "
+                 "to swap with.  No such species was found");
+  }
+  else
+    changeConstraintToBulk(basis_ind, computeBulkFromMolalities(basis_ind));
+}
+
+void
+EquilibriumGeochemicalSystem::changeConstraintToBulk(unsigned basis_ind, Real value)
+{
+  if (basis_ind >= _num_basis)
+    mooseError("Cannot changeConstraintToBulk for species ",
+               basis_ind,
+               " because there are only ",
+               _num_basis,
+               " basis species");
+  if (_mgd.basis_species_gas[basis_ind])
+    mooseError("Attempting to changeConstraintToBulk for a gas species.  Since a swap is involved, "
+               "you cannot specify a value for the bulk number of moles.  You must use "
+               "changeConstraintToBulk(basis_ind) method instead of "
+               "changeConstraintToBulk(basis_ind, value)");
+  if (basis_ind == 0)
+    _constraint_meaning[basis_ind] = ConstraintMeaningEnum::MOLES_BULK_WATER;
+  else
+    _constraint_meaning[basis_ind] = ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  setConstraintValue(basis_ind, value);
+
+  // it is possible that FIXED_ACTIVITY just became MOLES_BULK_SPECIES
+  buildKnownBasisActivities(_basis_activity_known, _basis_activity);
+
+  // it is likely the algebraic system has changed
+  buildAlgebraicInfo(_in_algebraic_system,
+                     _num_basis_in_algebraic_system,
+                     _num_in_algebraic_system,
+                     _algebraic_index,
+                     _basis_index);
+}
+
+void
+EquilibriumGeochemicalSystem::addToBulkMoles(unsigned basis_ind, Real value)
+{
+  if (basis_ind >= _num_basis)
+    mooseError("Cannot addToBulkMoles for species ",
+               basis_ind,
+               " because there are only ",
+               _num_basis,
+               " basis species");
+  if (!(_constraint_meaning[basis_ind] ==
+            EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER ||
+        _constraint_meaning[basis_ind] ==
+            EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES))
+    return;
+  setConstraintValue(basis_ind, _constraint_value[basis_ind] + value);
+}
+
+void
+EquilibriumGeochemicalSystem::setConstraintValue(unsigned basis_ind, Real value)
+{
+  if (basis_ind >= _num_basis)
+    mooseError("Cannot setConstraintValue for species ",
+               basis_ind,
+               " because there are only ",
+               _num_basis,
+               " basis species");
+  _constraint_value[basis_ind] = value;
+  _original_constraint_value[basis_ind] = value;
+  switch (_constraint_meaning[basis_ind])
+  {
+    case ConstraintMeaningEnum::MOLES_BULK_SPECIES:
+    case ConstraintMeaningEnum::MOLES_BULK_WATER:
+    {
+      alterSystemBecauseBulkChanged();
+      break;
+    }
+    case ConstraintMeaningEnum::KG_SOLVENT_WATER:
+    case ConstraintMeaningEnum::FREE_MOLALITY:
+    case ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES:
+    {
+      // the changes resulting from this change are very similar to setAlgebraicVariables
+      _basis_molality[basis_ind] = value;
+      computeConsistentConfiguration();
+      break;
+    }
+    case ConstraintMeaningEnum::FUGACITY:
+    {
+      // the changes resulting from this change are very similar to setAlgebraicVariables
+      _basis_activity[basis_ind] = value;
+      _basis_molality[basis_ind] = 0.0;
+      computeConsistentConfiguration();
+      break;
+    }
+    case ConstraintMeaningEnum::ACTIVITY:
+    {
+      // the changes resulting from this change are very similar to setAlgebraicVariables
+      _basis_activity[basis_ind] = value;
+      _basis_molality[basis_ind] = _basis_activity[basis_ind] / _basis_activity_coef[basis_ind];
+      computeConsistentConfiguration();
+      break;
+    }
+  }
+}
+
+void
+EquilibriumGeochemicalSystem::alterSystemBecauseBulkChanged()
+{
+  // Altering the constraints on bulk number of moles impacts various other things.
+  // Here, we follow the initialize() and computeConsistentConfiguration() methods, picking out
+  // what might have changed.
+  // Because the constraint meanings have changed, enforcing charge-neutrality might be easy
+  enforceChargeBalanceIfSimple(_constraint_value);
+  // Because the constraint values have changed, either through charge-neutrality or directly
+  // through changing the constraint values, the bulk moles must be updated:
+  for (unsigned i = 0; i < _num_basis; ++i)
+    if (_constraint_meaning[i] == ConstraintMeaningEnum::MOLES_BULK_SPECIES ||
+        _constraint_meaning[i] == ConstraintMeaningEnum::MOLES_BULK_WATER)
+      _bulk_moles[i] = _constraint_value[i];
+  // Because the bulk mineral moles might have changed, the free mineral moles might have changed
+  computeFreeMineralMoles(_basis_molality); // free mineral moles might be changed
+}
+
+const std::string &
+EquilibriumGeochemicalSystem::getOriginalRedoxLHS() const
+{
+  return _original_redox_lhs;
+}
+
+void
+EquilibriumGeochemicalSystem::setModelGeochemicalDatabase(const ModelGeochemicalDatabase & mgd)
+{
+  _mgd = mgd;
+}
+
+const GeochemistrySpeciesSwapper &
+EquilibriumGeochemicalSystem::getSwapper() const
+{
+  return _swapper;
+}
+
+void
+EquilibriumGeochemicalSystem::setMineralRelatedFreeMoles(Real value)
+{
+  // mole numbers of basis minerals
+  for (unsigned i = 0; i < _num_basis; ++i)
+    if (_mgd.basis_species_mineral[i])
+      _basis_molality[i] = value;
+
+  // mole numbers of sorption sites
+  for (const auto & name_info :
+       _mgd.surface_complexation_info) // all minerals involved in surface complexation
+    for (const auto & name_frac :
+         name_info.second.sorption_sites) // all sorption sites on the given mineral
+    {
+      if (_mgd.basis_species_index.count(name_frac.first))
+        _basis_molality[_mgd.basis_species_index.at(name_frac.first)] = value;
+      else
+        _eqm_molality[_mgd.eqm_species_index.at(name_frac.first)] = value;
+    }
+
+  // mole numbers of sorbed equilibrium species
+  for (unsigned j = 0; j < _num_eqm; ++j)
+  {
+    if (_mgd.eqm_species_mineral[j])
+      _eqm_molality[j] = 0.0; // Note: explicitly setting to zero, irrespective of user input, to
+                              // ensure consistency with the rest of the code
+    if (_mgd.surface_sorption_related[j])
+      _eqm_molality[j] = value;
+  }
+}
+
+Real
+EquilibriumGeochemicalSystem::getEquilibriumActivity(unsigned eqm_ind) const
+{
+  if (eqm_ind >= _num_eqm)
+    mooseError("Cannot retrieve activity for equilibrium species ",
+               eqm_ind,
+               " since there are only ",
+               _num_eqm,
+               " equilibrium species");
+  if (_mgd.eqm_species_mineral[eqm_ind])
+    return 1.0;
+  else if (_mgd.eqm_species_gas[eqm_ind])
+  {
+    Real log10f = 0.0;
+    for (unsigned basis_i = 0; basis_i < _num_basis; ++basis_i)
+      log10f += _mgd.eqm_stoichiometry(eqm_ind, basis_i) * std::log10(_basis_activity[basis_i]);
+    log10f -= getLog10K(eqm_ind);
+    return std::pow(10.0, log10f);
+  }
+  else
+    return _eqm_activity_coef[eqm_ind] * _eqm_molality[eqm_ind];
+}
+
+const std::vector<Real> &
+EquilibriumGeochemicalSystem::computeAndGetEquilibriumActivity()
+{
+  for (unsigned j = 0; j < _num_eqm; ++j)
+    _eqm_activity[j] = getEquilibriumActivity(j);
+  return _eqm_activity;
 }

@@ -283,6 +283,12 @@ public:
   const ModelGeochemicalDatabase & getModelGeochemicalDatabase() const;
 
   /**
+   * Copies a ModelGeochemicalDatabase into our _mgd structure
+   * @param mgd reference to the ModelGeochemicalDatabase that will be copied into _mgd
+   */
+  void setModelGeochemicalDatabase(const ModelGeochemicalDatabase & mgd);
+
+  /**
    * Compute the Jacobian for the algebraic system and put it in jac
    * @param res The residual of the algebraic system.  This is used to speed up computations of the
    * jacobian
@@ -357,6 +363,218 @@ public:
    */
   const std::vector<Real> & getSorbingSurfaceArea() const;
 
+  /**
+   * @return the temperature in degC
+   */
+  Real getTemperature() const;
+
+  /**
+   * Sets the temperature to the given quantity.  This also:
+   * - calculates new values of equilibrium constants
+   * - instructs the activity-coefficient calculator to set its internal temperature and calculate
+   * new values of the Debye-Huckel parameters.
+   * However, it does NOT update activity coefficients, basis molalities for species of known
+   * activities, basis activities, equilibrium molalities, bulk mole number of species with fixed
+   * free molality, free mineral mole numbers, or surface sorbing area.  Hence, the state of the
+   * equilibrium geochemical system will be left inconsistent after a call to setTemperature, and
+   * you should computeConsistentConfiguration() to rectify this, if needed.
+   * @param temperature the temperature in degC
+   */
+  void setTemperature(Real temperature);
+
+  /**
+   * Sets:
+   * - solvent water mass
+   * - free molality of all basis species and equilibrium species that are not (water or gas or
+   * mineral)
+   * - free number of moles of all minerals (if any)
+   * - surface potential expressions for all surface-sorption sites (if any)
+   * Then computes bulk mole composition, activities, activity coefficients and sorbing surface
+   * areas so that the EquilibriumGeochemicalSystem is kept self-consistent.
+   *
+   * @param names the names of all the basis species, equilibrium species and surface-sorption
+   * minerals that are in the system.  Note, there must be exactly num_basis + num_eqm +
+   * num_surface_pot of these, ie, all species must be provided with a value
+   * @param values the values of the molalities (or solvent water mass for water, or free number of
+   * moles for minerals, or surface_potential_expr for surface-sorption sites).  There must be an
+   * equal number of these as "names".
+   * @param contraints_from_molalities whether the constraints initial provided to the
+   * EquilibriumGeochemicalSystem should be updated by the values provided.  This must have size
+   * num_basis.
+   *
+   * This method is reasonably nontrivial:
+   * - it assumes that temperature-dependent quantities (equilibrium constants, Debye-Huckel
+   * parameters, etc) have been set prior to calling this method, eg in the constructor or
+   * setTemperature()
+   * - it assumes the algebraic info has been built during instantiation, or during swaps, etc
+   * - it does not assume the value provided are "good", although since they most usually come from
+   * a previous solve, they are typically pretty "good".  It does check for non-negativity: molality
+   * for basis gases must be zero; molality for basis minerals must be non-negative; molality for
+   * every other basis species must be positive; molality for equilibrium gases and equilibrium
+   * minerals are set to zero irrespective of values provided; molality of other equilibrium species
+   * must be non-negative; surface_potential_expressions must be positive.  (In the previous
+   * sentence, "molality" is molality, kg solvent water, or free mineral moles, whichever is
+   * appropriate.)
+   * - if constraints_from_molalities is false then: if the original constraint was
+   * KG_SOLVENT_WATER, FREE_MOLALITY or FREE_MOLES_MINERAL_SPECIES then the constraint take
+   * precedence over the molality provided to this method, so the molality is ignored and the
+   * constraint value used instead.
+   * - if constraints_from_molalities is true then: if the original constraint was KG_SOLVENT_WATER,
+   * FREE_MOLALITY or FREE_MOLES_MINERAL_SPECIES then the constraint value is set to the value
+   * provided by to this method; if the original constraint was MOLES_BULK_WATER or
+   * MOLES_BULK_SPECIES then the constraint value is set to the value computed from the molalities
+   * provided to this method; if the original constraint was ACTIVITY, then the constraint value is
+   * set to activity_coefficient * molality_provided_to_this_method
+   * - Note the possibilities for ignoring the values provided to this method mentioned in the
+   * preceeding paragraphs (setting to zero for equilibrium minerals and gases, and constraints
+   * overriding the values provided)!
+   */
+  void setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+      const std::vector<std::string> & names,
+      const std::vector<Real> & values,
+      const std::vector<bool> & constraints_from_molalities);
+
+  /**
+   * @return a vector of the constraint meanings for the basis species
+   */
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> &
+  getConstraintMeaning() const;
+
+  /**
+   * Changes a KG_SOLVENT_WATER constraint to MOLES_BULK_WATER (if there is such a constraint) and
+   * all FREE_MOLALITY and FREE_MOLES_MINERAL_SPECIES to MOLES_BULK_SPECIES using the current values
+   * of _bulk_moles.  If, after performing these changes, all constraints are MOLES_BULK_WATER or
+   * MOLES_BULK_SPECIES then charge-balance is performed by altering the bulk_moles for the
+   * charge-balance species.
+   */
+  void closeSystem();
+
+  /**
+   * Changes the constraint to MOLES_BULK_SPECIES (or MOLES_BULK_WATER if basis_ind = 0) for the
+   * basis index.  The constraint value (the bulk number of moles of the species) is computed from
+   * the current molality values.  Note that if basis_ind corresponds to a gas, then changing the
+   * constraint involves performing a basis swap with a non-gaseous equilibrium species (eg O2(g) is
+   * removed from the basis and O2(aq) enters in its place).  If, after performing the change to
+   * MOLES_BULK_SPECIES, all constraints are MOLES_BULK_WATER or MOLES_BULK_SPECIES then
+   * charge-balance is performed by altering the bulk_moles for the charge-balance species.
+   * @param basis_ind the index of the basis species
+   */
+  void changeConstraintToBulk(unsigned basis_ind);
+
+  /**
+   * Changes the constraint to MOLES_BULK_SPECIES (or MOLES_BULK_WATER if basis_ind = 0) for the
+   * basis index.  The constraint value (the bulk number of moles of the species) is set to value.
+   * It is an error to call this function when basis_ind corresponds to a gas, because changing the
+   * constraint involves performing a basis swap with a non-gaseous equilibrium species (eg O2(g) is
+   * removed from the basis and O2(aq) enters in its place), so the bulk number of moles will be
+   * computed by the swapper: use changeConstraintToBulk(basis_ind) instead.    If, after performing
+   * the change to MOLES_BULK_SPECIES, all constraints are MOLES_BULK_WATER or MOLES_BULK_SPECIES
+   * then charge-balance is performed by altering the bulk_moles for the charge-balance species.
+   * @param basis_ind the index of the basis species
+   * @param value the value to set the bulk number of moles to
+   */
+  void changeConstraintToBulk(unsigned basis_ind, Real value);
+
+  /**
+   * Add to the MOLES_BULK_SPECIES (or MOLES_BULK_WATER if basis_ind = 0) for the basis species.
+   * Note that if the constraint on the basis species is not MOLES_BULK_SPECIES (or
+   * MOLES_BULK_WATER) then this will have no impact.  Note that charge-balance is performed if all
+   * constraints are BULK-type.
+   * @param basis_ind the index of the basis species
+   * @param value the value to add to the bulk number of moles
+   */
+  void addToBulkMoles(unsigned basis_ind, Real value);
+
+  /**
+   * Set the constraint value for the basis species.  If molalities or activities are changed, this
+   * method uses computeConsistentConfiguration to result in a consistent configuration, while if
+   * bulk composition is altered it uses alterSystemBecauseBulkChanged to result in a consistent
+   * configuration (charge-balance is performed if all constraints are BULK-type)
+   * @param basis_ind the index of the basis species
+   * @param value the value to set the constraint to
+   */
+  void setConstraintValue(unsigned basis_ind, Real value);
+
+  /**
+   * Compute a reasonably consistent configuration that can be used as an initial condition in a
+   * Newton process to solve the algebraic system.  Note that unless _iters_to_make_consistent is
+   * very large, the resulting configuration will not be completely consistent, but this is
+   * conventional in geochemical modelling: there are so many unknowns and approximations used in
+   * the Newton process, that starting from a completely consistent configuration is unimportant.
+   *
+   * Before entering this method, it is assumed that::
+   * - basis molality has been set for all basis species.  For species where this is unknown (viz,
+   * it will be solved for in the Newton process) a reasonable initial condition should be set.  Use
+   * the initBulkAndFree method.
+   * - basis_activity_known has been set to true for basis species whose activities are specified by
+   * the user, for basis gases and for basis minerals.  Use the buildKnownBasisActivities method.
+   * - basis_activity has been set for basis species with basis_activity_known = true.  Use the
+   * buildKnownBasisActivities method.
+   * - equilibrium molality has been pre-initialised (eg, to zero) for all equilibrium species prior
+   * to entering this method.
+   *
+   * This method computes:
+   * - ionic strength and stoichiometric ionic strength
+   * - basis activity coefficients (not for water, minerals or gases)
+   * - equilibrium activity coefficients (not for minerals or gases)
+   * - basis molality for basis species where the user has specified the activity
+   * - basis molality for mineral basis species
+   * - basis activity for all basis species
+   * - equilibrium molality for all equilibrium species except minerals and gases
+   * - bulk mole number for all basis species
+   *
+   * It does not compute activity for equilibrium species: use computeAndGetEquilibriumActivity for
+   * that
+   */
+  void computeConsistentConfiguration();
+
+  /**
+   * @return the original redox left-hand-side after the initial basis swaps
+   */
+  const std::string & getOriginalRedoxLHS() const;
+
+  /**
+   * Perform the basis swap, and ensure that the resulting system is consistent.  This is a private
+   * method because no sanity-checks regarding swapping out the charge-balance species, etc, are
+   * made.
+   * @param swap_out_of_basis index of basis species to remove from basis
+   * @param swap_into_basis index of equilibrium species to add to basis
+   */
+  void performSwapNoCheck(unsigned swap_out_of_basis, unsigned swap_into_basis);
+
+  /**
+   * @return a reference to the swapper used by this object
+   */
+  const GeochemistrySpeciesSwapper & getSwapper() const;
+
+  /**
+   * Set the free mole number of mineral-related species to the value provided.  This sets the mole
+   * number of basis minerals, the molality of unoccupied sorption sites (whether in the basis or
+   * not), and the molality of sorbed species to the value provided.  It does not set the molality
+   * of equilibrium minerals, which is always zero.
+   * NOTE: calling this method can easily result in a
+   * completely inconsistent EquilibriumGeochemicalSystem because no
+   * computeConsistentConfiguration() is called.  If you need a consistent configuration, please
+   * call that method after calling this one
+   * @param value the mole number (or molality, for sorption-related species)
+   */
+  void setMineralRelatedFreeMoles(Real value);
+
+  /**
+   * Computes activity for all equilibrium species (_eqm_activity) and returns a reference to the
+   * vector.  The vector _eqm_activity is only used for output purposes (such as recording the
+   * fugacity of equilibrium gases) so it is only computed by this method and not internally during
+   * computeConsistentConfiguration.
+   * @return equilibrium activities
+   */
+  const std::vector<Real> & computeAndGetEquilibriumActivity();
+
+  /**
+   * Returns the value of activity for the equilibrium species with index eqm_index
+   * @param eqm_index the index in mgd for the equilibrium species of interest
+   */
+  Real getEquilibriumActivity(unsigned eqm_ind) const;
+
 private:
   /// The minimal geochemical database
   ModelGeochemicalDatabase & _mgd;
@@ -408,7 +626,12 @@ private:
   std::vector<unsigned> _basis_index;
   /// Number of bulk moles of basis species
   std::vector<Real> _bulk_moles;
-  /// Number of kg of solvent water, molality of basis aqueous species, or free moles of basis mineral, whichever is appropriate
+  /**
+   * IMPORTANT: this is
+   * - number of kg of solvent water as the first element
+   * - molality of basis aqueous species, or free moles of basis mineral, whichever is appropriate
+   * - always zero for gases
+   */
   std::vector<Real> _basis_molality;
   /// whether basis_activity[i] is fixed by the user
   std::vector<bool> _basis_activity_known;
@@ -420,6 +643,11 @@ private:
   std::vector<Real> _basis_activity_coef;
   /// equilibrium activity coefficients
   std::vector<Real> _eqm_activity_coef;
+  /**
+   * equilibrium activities.  NOTE: for computational efficiency, these are not computed until
+   * computeAndGetEqmActivity is called, and they are currently only ever used for output purposes
+   */
+  std::vector<Real> _eqm_activity;
   /**
    * surface potential expressions.  These are not the surface potentials themselves.  Instead they
    * are exp(-surface_potential * Faraday / 2 / R / T_k).  Hence _surface_pot_expr >= 0 (like
@@ -443,6 +671,8 @@ private:
   Real _temperature;
   /// Minimum molality ever used in an initial guess
   const Real _min_initial_molality;
+  /// The left-hand-side of the redox equations in _mgd after initial swaps
+  std::string _original_redox_lhs;
 
   /**
    * Using the provided value of temperature, build _eqm_log10K for each eqm species and redox
@@ -525,36 +755,6 @@ private:
    */
   void computeFreeMineralMoles(std::vector<Real> & basis_molality) const;
 
-  /**
-   * Compute a reasonably consistent configuration that can be used as an initial condition in a
-   * Newton process to solve the algebraic system.  Note that unless _iters_to_make_consistent is
-   * very large, the resulting configuration will not be completely consistent, but this is
-   * conventional in geochemical modelling: there are so many unknowns and approximations used in
-   * the Newton process, that starting from a completely consistent configuration is unimportant.
-   *
-   * Before entering this method, it is assumed that::
-   * - basis molality has been set for all basis species.  For species where this is unknown (viz,
-   * it will be solved for in the Newton process) a reasonable initial condition should be set.  Use
-   * the initBulkAndFree method.
-   * - basis_activity_known has been set to true for basis species whose activities are specified by
-   * the user, for basis gases and for basis minerals.  Use the buildKnownBasisActivities method.
-   * - basis_activity has been set for basis species with basis_activity_known = true.  Use the
-   * buildKnownBasisActivities method.
-   * - equilibrium molality has been pre-initialised (eg, to zero) for all equilibrium species prior
-   * to entering this method.
-   *
-   * This method computes:
-   * - ionic strength and stoichiometric ionic strength
-   * - basis activity coefficients (not for water, minerals or gases)
-   * - equilibrium activity coefficients (not for minerals or gases)
-   * - basis molality for basis species where the user has specified the activity
-   * - basis molality for mineral basis species
-   * - basis activity for all basis species
-   * - equilibrium molality for all equilibrium species except minerals and gases
-   * - bulk mole number for all basis species
-   */
-  void computeConsistentConfiguration();
-
   /// Used during construction: checks for sane inputs and initializes molalities, etc, using the initialize() method
   void checkAndInitialize();
 
@@ -585,4 +785,21 @@ private:
 
   /// Compute sorbing_surface_area depending on the current molality of the sorbing minerals
   void computeSorbingSurfaceArea(std::vector<Real> & sorbing_surface_area) const;
+
+  /**
+   * @param basis_ind the index of the basis species in mgd
+   * @return the number of bulk moles of the species basis_ind.  This depends on the molality of the
+   * basis_ind species as well as the molalities of the equilibrium species that depend on this
+   * basis species.
+   */
+  Real computeBulkFromMolalities(unsigned basis_ind) const;
+
+  /**
+   * Alter the EquilibriumGeochemicalSystem to reflect changes in bulk composition constraints that
+   * occur through, for instance, setConstraintValue or addToBulkMoles or changeConstraintToBulk
+   * (the latter because charge neutrality might be easily enforced, changing constraints and hence
+   * bulk moles). This method enforces charge neutrality if simple (ie, all constraints are
+   * BULK-type), then sets _bulk_moles, and free mineral moles appropriately
+   */
+  void alterSystemBecauseBulkChanged();
 };
