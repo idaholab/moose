@@ -16,7 +16,7 @@ ADDensity::validParams()
 {
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Creates density AD material property");
-  params.addRequiredCoupledVar(
+  params.addCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addRequiredParam<Real>("density", "Initial density");
@@ -26,7 +26,7 @@ ADDensity::validParams()
 ADDensity::ADDensity(const InputParameters & parameters)
   : ADMaterial(parameters),
     _coord_system(getBlockCoordSystem()),
-    _disp_r(adCoupledValue("displacements", 0)),
+    _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),
     _initial_density(getParam<Real>("density")),
     _density(declareADProperty<Real>("density"))
 {
