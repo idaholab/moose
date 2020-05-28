@@ -57,10 +57,10 @@ protected:
   virtual void computeCrackingRelease(int i,
                                       ADReal & sigma,
                                       ADReal & stiffness_ratio,
-                                      const ADReal strain_in_crack_dir,
-                                      const ADReal cracking_stress,
-                                      const ADReal cracking_alpha,
-                                      const ADReal youngs_modulus);
+                                      const ADReal & strain_in_crack_dir,
+                                      const ADReal & cracking_stress,
+                                      const ADReal & cracking_alpha,
+                                      const ADReal & youngs_modulus);
 
   /**
    * Get the number of known crack directions. This includes cracks
@@ -149,10 +149,12 @@ protected:
   const MaterialProperty<RealVectorValue> & _crack_max_strain_old;
   ///@}
 
-  //@{ Variables used by multiple methods within the calculation for a single material point
+  /// Variables used by multiple methods within the calculation for a single material point
   ADRankFourTensor _local_elasticity_tensor;
-  ///@}
 
   /// The user-supplied list of softening models to be used in the 3 crack directions
   std::vector<ADSmearedCrackSofteningBase *> _softening_models;
+
+  /// Vector helper to update local elasticity tensor
+  std::vector<ADReal> _local_elastic_vector;
 };

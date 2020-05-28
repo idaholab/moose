@@ -36,11 +36,11 @@ ADPowerLawSoftening::ADPowerLawSoftening(const InputParameters & parameters)
 void
 ADPowerLawSoftening::computeCrackingRelease(ADReal & stress,
                                             ADReal & stiffness_ratio,
-                                            const ADReal strain,
-                                            const ADReal /*crack_initiation_strain*/,
-                                            const ADReal /*crack_max_strain*/,
-                                            const ADReal cracking_stress,
-                                            const ADReal youngs_modulus)
+                                            const ADReal & strain,
+                                            const ADReal & /*crack_initiation_strain*/,
+                                            const ADReal & /*crack_max_strain*/,
+                                            const ADReal & cracking_stress,
+                                            const ADReal & youngs_modulus)
 {
   if (stress > cracking_stress)
   {

@@ -142,6 +142,8 @@ ADComputeSmearedCrackingStress::ADComputeSmearedCrackingStress(const InputParame
       mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_beta' and "
                  "'softening_models'");
   }
+
+  _local_elastic_vector.resize(9);
 }
 
 void
@@ -343,22 +345,21 @@ ADComputeSmearedCrackingStress::updateLocalElasticityTensor()
 
       // Filling with 9 components is sufficient because these are the only nonzero entries
       // for isotropic or orthotropic materials.
-      std::vector<ADReal> local_elastic(9);
+      _local_elastic_vector[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
+                                             : stiffness_ratio_local(0) * youngs_modulus);
+      _local_elastic_vector[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
+      _local_elastic_vector[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
+      _local_elastic_vector[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
+                                             : stiffness_ratio_local(1) * youngs_modulus);
+      _local_elastic_vector[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
+      _local_elastic_vector[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
+                                             : stiffness_ratio_local(2) * youngs_modulus);
+      _local_elastic_vector[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
+      _local_elastic_vector[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
+      _local_elastic_vector[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
 
-      local_elastic[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
-                                     : stiffness_ratio_local(0) * youngs_modulus);
-      local_elastic[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
-      local_elastic[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
-      local_elastic[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
-                                     : stiffness_ratio_local(1) * youngs_modulus);
-      local_elastic[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
-      local_elastic[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
-                                     : stiffness_ratio_local(2) * youngs_modulus);
-      local_elastic[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
-      local_elastic[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
-      local_elastic[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
-
-      _local_elasticity_tensor.fillFromInputVector(local_elastic, ADRankFourTensor::symmetric9);
+      _local_elasticity_tensor.fillFromInputVector(_local_elastic_vector,
+                                                   ADRankFourTensor::symmetric9);
 
       // Rotate the modified elasticity tensor back into global coordinates
       _local_elasticity_tensor.rotate(R);
@@ -584,10 +585,10 @@ void
 ADComputeSmearedCrackingStress::computeCrackingRelease(int i,
                                                        ADReal & sigma,
                                                        ADReal & stiffness_ratio,
-                                                       const ADReal strain_in_crack_dir,
-                                                       const ADReal cracking_stress,
-                                                       const ADReal cracking_alpha,
-                                                       const ADReal youngs_modulus)
+                                                       const ADReal & strain_in_crack_dir,
+                                                       const ADReal & cracking_stress,
+                                                       const ADReal & cracking_alpha,
+                                                       const ADReal & youngs_modulus)
 {
   switch (_cracking_release)
   {

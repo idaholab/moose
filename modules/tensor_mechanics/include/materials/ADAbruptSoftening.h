@@ -25,11 +25,11 @@ public:
 
   virtual void computeCrackingRelease(ADReal & stress,
                                       ADReal & stiffness_ratio,
-                                      const ADReal strain,
-                                      const ADReal crack_initiation_strain,
-                                      const ADReal crack_max_strain,
-                                      const ADReal cracking_stress,
-                                      const ADReal youngs_modulus) override;
+                                      const ADReal & strain,
+                                      const ADReal & crack_initiation_strain,
+                                      const ADReal & crack_max_strain,
+                                      const ADReal & cracking_stress,
+                                      const ADReal & youngs_modulus) override;
 
 protected:
   /// Residual stress after full softening

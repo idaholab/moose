@@ -53,11 +53,11 @@ ADExponentialSoftening::ADExponentialSoftening(const InputParameters & parameter
 void
 ADExponentialSoftening::computeCrackingRelease(ADReal & stress,
                                                ADReal & stiffness_ratio,
-                                               const ADReal /*strain*/,
-                                               const ADReal crack_initiation_strain,
-                                               const ADReal crack_max_strain,
-                                               const ADReal cracking_stress,
-                                               const ADReal youngs_modulus)
+                                               const ADReal & /*strain*/,
+                                               const ADReal & crack_initiation_strain,
+                                               const ADReal & crack_max_strain,
+                                               const ADReal & cracking_stress,
+                                               const ADReal & youngs_modulus)
 {
   mooseAssert(crack_max_strain >= crack_initiation_strain,
               "crack_max_strain must be >= crack_initiation_strain");
