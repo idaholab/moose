@@ -12,16 +12,10 @@
 #include "AuxKernel.h"
 #include "FunctionParserUtils.h"
 
-// Forward Declarations
-class ParsedAux;
-
-template <>
-InputParameters validParams<ParsedAux>();
-
 /**
  * AuxKernel that evaluates a parsed function expression
  */
-class ParsedAux : public AuxKernel, public FunctionParserUtils
+class ParsedAux : public AuxKernel, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -39,6 +33,7 @@ protected:
   std::vector<const VariableValue *> _args;
 
   /// function parser object for the resudual and on-diagonal Jacobian
-  ADFunctionPtr _func_F;
-};
+  SymFunctionPtr _func_F;
 
+  usingFunctionParserUtilsMembers(false);
+};

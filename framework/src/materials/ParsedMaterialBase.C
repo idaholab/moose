@@ -9,12 +9,9 @@
 
 #include "ParsedMaterialBase.h"
 
-defineLegacyParams(ParsedMaterialBase);
-
 InputParameters
 ParsedMaterialBase::validParams()
 {
-
   InputParameters params = emptyInputParameters();
   params.addCoupledVar("args", "Arguments of F() - use vector coupling");
 

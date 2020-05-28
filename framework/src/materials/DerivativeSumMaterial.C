@@ -13,13 +13,11 @@
 
 registerMooseObject("MooseApp", DerivativeSumMaterial);
 
-defineLegacyParams(DerivativeSumMaterial);
-
+template <bool is_ad>
 InputParameters
-DerivativeSumMaterial::validParams()
+DerivativeSumMaterialTempl<is_ad>::validParams()
 {
-
-  InputParameters params = DerivativeFunctionMaterialBase::validParams();
+  InputParameters params = DerivativeFunctionMaterialBaseTempl<is_ad>::validParams();
   params.addClassDescription("Meta-material to sum up multiple derivative materials");
   params.addParam<std::vector<std::string>>(
       "sum_materials",
@@ -48,20 +46,21 @@ DerivativeSumMaterial::validParams()
   return params;
 }
 
-DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
-  : DerivativeFunctionMaterialBase(parameters),
-    _sum_materials(getParam<std::vector<std::string>>("sum_materials")),
+template <bool is_ad>
+DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParameters & parameters)
+  : DerivativeFunctionMaterialBaseTempl<is_ad>(parameters),
+    _sum_materials(this->template getParam<std::vector<std::string>>("sum_materials")),
     _num_materials(_sum_materials.size()),
     _prefactor(_num_materials, 1.0),
-    _constant(getParam<Real>("constant")),
-    _validate_coupling(getParam<bool>("validate_coupling"))
+    _constant(this->template getParam<Real>("constant")),
+    _validate_coupling(this->template getParam<bool>("validate_coupling"))
 {
   // we need at least one material in the sum
   if (_num_materials == 0)
     mooseError("Please supply at least one material to sum in DerivativeSumMaterial ", name());
 
   // get prefactor values if not 1.0
-  std::vector<Real> p = getParam<std::vector<Real>>("prefactor");
+  std::vector<Real> p = this->template getParam<std::vector<Real>>("prefactor");
 
   // if prefactor is used we need the same number of prefactors as sum materials
   if (_num_materials == p.size())
@@ -77,14 +76,15 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
 
   for (unsigned int n = 0; n < _num_materials; ++n)
   {
-    _summand_F[n] = &getMaterialProperty<Real>(_sum_materials[n]);
+    _summand_F[n] = &this->template getMaterialProperty<Real>(_sum_materials[n]);
     _summand_dF[n].resize(_nargs);
     _summand_d2F[n].resize(_nargs);
     _summand_d3F[n].resize(_nargs);
 
     for (unsigned int i = 0; i < _nargs; ++i)
     {
-      _summand_dF[n][i] = &getMaterialPropertyDerivative<Real>(_sum_materials[n], _arg_names[i]);
+      _summand_dF[n][i] =
+          &this->template getMaterialPropertyDerivative<Real>(_sum_materials[n], _arg_names[i]);
       _summand_d2F[n][i].resize(_nargs);
 
       if (_third_derivatives)
@@ -92,15 +92,15 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
 
       for (unsigned int j = 0; j < _nargs; ++j)
       {
-        _summand_d2F[n][i][j] =
-            &getMaterialPropertyDerivative<Real>(_sum_materials[n], _arg_names[i], _arg_names[j]);
+        _summand_d2F[n][i][j] = &this->template getMaterialPropertyDerivative<Real>(
+            _sum_materials[n], _arg_names[i], _arg_names[j]);
 
         if (_third_derivatives)
         {
           _summand_d3F[n][i][j].resize(_nargs);
 
           for (unsigned int k = 0; k < _nargs; ++k)
-            _summand_d3F[n][i][j][k] = &getMaterialPropertyDerivative<Real>(
+            _summand_d3F[n][i][j][k] = &this->template getMaterialPropertyDerivative<Real>(
                 _sum_materials[n], _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
@@ -108,16 +108,18 @@ DerivativeSumMaterial::DerivativeSumMaterial(const InputParameters & parameters)
   }
 }
 
+template <bool is_ad>
 void
-DerivativeSumMaterial::initialSetup()
+DerivativeSumMaterialTempl<is_ad>::initialSetup()
 {
   if (_validate_coupling)
     for (unsigned int n = 0; n < _num_materials; ++n)
-      validateCoupling<Real>(_sum_materials[n]);
+      this->template validateCoupling<Real>(_sum_materials[n]);
 }
 
+template <bool is_ad>
 void
-DerivativeSumMaterial::computeProperties()
+DerivativeSumMaterialTempl<is_ad>::computeProperties()
 {
   unsigned int i, j, k;
 

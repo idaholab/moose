@@ -24,7 +24,7 @@ InputParameters validParams<ParsedGenerateSideset>();
  * optionally by looking at the subdomain a side's element belongs to
  * and the side's normal vector
  */
-class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils
+class ParsedGenerateSideset : public SideSetsGeneratorBase, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -55,6 +55,7 @@ protected:
   Point _normal;
 
   /// function parser object describing the combinatorial geometry
-  ADFunctionPtr _func_F;
-};
+  SymFunctionPtr _func_F;
 
+  usingFunctionParserUtilsMembers(false);
+};

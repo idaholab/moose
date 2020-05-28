@@ -12,16 +12,10 @@
 #include "ODEKernel.h"
 #include "FunctionParserUtils.h"
 
-// Forward Declarations
-class ParsedODEKernel;
-
-template <>
-InputParameters validParams<ParsedODEKernel>();
-
 /**
- *
+ * Parsed ODE function kernel
  */
-class ParsedODEKernel : public ODEKernel, public FunctionParserUtils
+class ParsedODEKernel : public ODEKernel, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
@@ -44,17 +38,19 @@ protected:
   std::vector<std::string> _arg_names;
 
   /// function parser object for the residual and on-diagonal Jacobian
-  ADFunctionPtr _func_F;
-  ADFunctionPtr _func_dFdu;
+  SymFunctionPtr _func_F;
+  SymFunctionPtr _func_dFdu;
 
   /// function parser objects for the Jacobian
-  std::vector<ADFunctionPtr> _func_dFdarg;
+  std::vector<SymFunctionPtr> _func_dFdarg;
 
   /// number of non-linear variables in the problem
   const unsigned int _number_of_nl_variables;
 
   /// coupled postprocessors
   std::vector<const PostprocessorValue *> _pp;
+
+  usingFunctionParserUtilsMembers(false);
 
 private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number

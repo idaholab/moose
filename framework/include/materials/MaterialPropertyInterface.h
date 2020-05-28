@@ -83,6 +83,16 @@ public:
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialPropertyByName(const MaterialPropertyName & name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getADMaterialPropertyByName<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getMaterialPropertyByName<T>(name);
+  }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
@@ -107,8 +117,16 @@ public:
    * Return a material property that is initialized to zero by default and does
    * not need to (but can) be declared by another material.
    */
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> &
+  getGenericZeroMaterialProperty(const std::string & prop_name);
+
+  /// for backwards compatibility
   template <typename T>
-  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name);
+  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name)
+  {
+    return getGenericZeroMaterialProperty<T, false>(prop_name);
+  }
 
   /**
    * Retrieve the block ids that the material property is defined
@@ -242,6 +260,19 @@ protected:
   template <typename T>
   const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
 
+  ///@{ generic default material property helper
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
+  {
+    return defaultADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> * defaultGenericMaterialProperty(const std::string & name)
+  {
+    return defaultMaterialProperty<T>(name);
+  }
+  ///@}
+
   /**
    * Check and throw an error if the execution has progressed past the construction stage
    */
@@ -264,6 +295,8 @@ protected:
   std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
   /// Storage vector for ADMaterialProperty<Real> default objects
   std::vector<std::unique_ptr<ADMaterialProperty<Real>>> _default_ad_real_properties;
+  /// Storage vector for MaterialProperty<RealVectorValue> default objects
+  std::vector<std::unique_ptr<MaterialProperty<RealVectorValue>>> _default_real_vector_properties;
   /// Storage vector for ADMaterialProperty<RealVectorValue> default objects
   std::vector<std::unique_ptr<ADMaterialProperty<RealVectorValue>>>
       _default_ad_real_vector_properties;
@@ -373,11 +406,15 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*
 // Forward declare explicit specializations
 template <>
 const MaterialProperty<Real> *
-MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
+MaterialPropertyInterface::defaultMaterialProperty<Real>(const std::string & name);
 
 template <>
 const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty<Real>(const std::string & name);
+
+template <>
+const MaterialProperty<RealVectorValue> *
+MaterialPropertyInterface::defaultMaterialProperty<RealVectorValue>(const std::string & name);
 
 template <>
 const ADMaterialProperty<RealVectorValue> *
@@ -490,12 +527,12 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
   return _material_data->haveProperty<T>(name);
 }
 
-template <typename T>
-const MaterialProperty<T> &
-MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_name*/)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & /*prop_name*/)
 {
   // static zero property storage
-  static MaterialProperty<T> zero;
+  static GenericMaterialProperty<T, is_ad> zero;
 
   // resize to accomodate maximum number of qpoints
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
@@ -505,7 +542,7 @@ MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_na
 
   // set values for all qpoints to zero
   for (unsigned int qp = 0; qp < nqp; ++qp)
-    MathUtils::mooseSetToZero<T>(zero[qp]);
+    MathUtils::mooseSetToZero(zero[qp]);
 
   return zero;
 }
