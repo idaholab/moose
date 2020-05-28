@@ -1056,6 +1056,14 @@ void Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
     bool in_global,
     GlobalParamsAction * global_block);
 
+template <>
+void Parser::setScalarParameter<ReporterName, std::string>(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<ReporterName> * param,
+    bool in_global,
+    GlobalParamsAction * global_block);
+
 // Vectors
 template <>
 void Parser::setVectorParameter<RealVectorValue, RealVectorValue>(
@@ -1283,7 +1291,6 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(TagName, string);
       setscalar(MeshGeneratorName, string);
       setscalar(ExtraElementIDName, string);
-
       setscalar(PostprocessorName, PostprocessorName);
 
       // Moose Compound Scalars
@@ -1295,6 +1302,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(MultiMooseEnum, MultiMooseEnum);
       setscalar(RealTensorValue, RealTensorValue);
       setscalar(ExecFlagEnum, ExecFlagEnum);
+      setscalar(ReporterName, string);
 
       // vector types
       setvector(Real, double);
@@ -1994,6 +2002,19 @@ Parser::setScalarParameter<PostprocessorName, PostprocessorName>(
     global_block->remove(short_name);
     global_block->setScalarParam<PostprocessorName>(short_name) = pps_name;
   }
+}
+
+template <>
+void
+Parser::setScalarParameter<ReporterName, std::string>(
+    const std::string & full_name,
+    const std::string & /*short_name*/,
+    InputParameters::Parameter<ReporterName> * param,
+    bool /*in_global*/,
+    GlobalParamsAction * /*global_block*/)
+{
+  std::vector<std::string> names = MooseUtils::split(_root->param<std::string>(full_name), "::");
+  param->set() = ReporterName(names[0], names[1]);
 }
 
 template <>

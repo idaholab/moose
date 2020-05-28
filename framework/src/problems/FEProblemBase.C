@@ -94,6 +94,7 @@
 #include "FVTimeKernel.h"
 #include "MooseVariableFV.h"
 #include "FVBoundaryCondition.h"
+#include "Reporter.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -235,6 +236,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         "neighbor_material_props", &_mesh)),
     _pps_data(*this),
     _vpps_data(*this),
+    _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
@@ -3337,6 +3339,7 @@ FEProblemBase::initPostprocessorData(const std::string & name)
 }
 
 void
+
 FEProblemBase::initVectorPostprocessorData(const std::string & name)
 {
   _vpps_data.init(name);
@@ -3370,6 +3373,20 @@ FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
 
   addUserObject(pp_name, name, parameters);
   initVectorPostprocessorData(name);
+}
+
+void
+
+FEProblemBase::addReporter(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  // Check for name collision
+  if (hasUserObject(name))
+    mooseError(std::string("A UserObject with the name \"") + name +
+               "\" already exists.  You may not add a Reporter by the same name.");
+
+  addUserObject(type, name, parameters);
 }
 
 void
@@ -3759,6 +3776,9 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     auto vpp = dynamic_cast<VectorPostprocessor *>(obj);
     if (vpp)
       _vpps_data.broadcastScatterVectors(vpp->PPName());
+    auto reporter = dynamic_cast<Reporter *>(obj);
+    if (reporter)
+      _reporter_data.finalize(obj->name());
   }
 }
 
@@ -5057,6 +5077,7 @@ FEProblemBase::advanceState()
 
   _pps_data.copyValuesBack();
   _vpps_data.copyValuesBack();
+  _reporter_data.copyValuesBack();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift(*this);

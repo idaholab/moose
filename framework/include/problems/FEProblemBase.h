@@ -15,6 +15,7 @@
 #include "MortarData.h"
 #include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
+#include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
 #include "ScalarInitialConditionWarehouse.h"
@@ -799,6 +800,25 @@ public:
 
   /// Initialize the VectorPostprocessor data
   void initVectorPostprocessorData(const std::string & name);
+
+  /**
+   * Add a Reporter object to the simulation.
+   * @param name A uniquely identifying object name
+   * @param parameters Complete parameters for the object to be created.
+   *
+   * For an example use, refer to AddReporterAction.C/h
+   */
+  virtual void
+  addReporter(const std::string & type, const std::string & name, InputParameters & parameters);
+
+  /**
+   * Provides means to access the ReporterData object that is used to store reporter values. This
+   * method is an internal method that should not be used. Only Reporter
+   * objects (see Reporter.C/h) should to produce (declare) values. And only objects that
+   * inherit from ReporterInterface are allowed to consume values.
+   */
+  ReporterData & getReporterData() { return _reporter_data; }
+  ///@}
 
   // UserObjects /////
   virtual void addUserObject(const std::string & user_object_name,
@@ -1958,6 +1978,9 @@ protected:
 
   // VectorPostprocessors
   VectorPostprocessorData _vpps_data;
+
+  // Helper class to access Reporter object values
+  ReporterData _reporter_data;
 
   // TODO: delete this after apps have been updated to not call getUserObjects
   ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;

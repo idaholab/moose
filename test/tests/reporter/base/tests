@@ -1,0 +1,7 @@
+[Tests]
+  [base]
+    type = RunApp
+    input = base.i
+    allow_test_objects = true
+  []
+[]
