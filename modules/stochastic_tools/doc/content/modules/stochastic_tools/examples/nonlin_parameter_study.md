@@ -57,7 +57,7 @@ assumed probability distributions are defined for the uncertain parameters.
 !listing parameter_study/nonlin_diff_react/nonlin_diff_react_master_uniform.i id=nonlin_diff_react_master_uniform
          caption=Complete input file for the driver of the parameter study with uniformly distributed uncertain parameters.
 
-!listing parameter_study/nonlin_diff_react/nonlin_diff_react_master_normal.i id=nonlin_diff_react_master_normal
+!listing parameter_study/nonlin_diff_react/nonlin_diff_react_master_normal.i block=Distributions id=nonlin_diff_react_master_normal
          caption=Complete input file for the driver of the parameter study with normally distributed uncertain parameters.
 
 For the sampling of the uncertain parameters, a Latin Hypercube Sampling (LHS) strategy is utilized.
