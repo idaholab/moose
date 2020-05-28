@@ -1,10 +1,9 @@
 # Parameter Study on a Highly Nonlinear Problem
 
-This example showcases a parameter study on another diffusion-based problem
-and assumes that the reader has already visited [examples/parameter_study.md] and is familiar
+This example assumes that the reader has already visited the example in [examples/parameter_study.md] and is familiar
 with the fundamental blocks used in master input files.
 In this example, the effect of varying the distribution of the uncertain
-parameters on the distribution of the Quantities of Interest (QoIs) is analyzed as well.   
+parameters on the distribution of the Quantities of Interest (QoIs) is showcased as well.   
 
 ## Problem Description
 
@@ -15,15 +14,14 @@ The strong formulation of the problem is taken from [!cite](chaturantabut2010non
 
 where $u$ is a scalar field variable, $(x,y)\in[0,1]\times[0,1]$ are the physical coordinates,
 while $\mu_1$ and $\mu_2$ are uncertain parameters with known (or assumed) probability distributions.
-This equation is suplemented with homogeneous Dirichlet boundary conditions on every side
+This equation is supplemented with homogeneous Dirichlet boundary conditions on every side
 of the $[0,1]\times[0,1]$ square.
 
 ## Solution of the Problem
 
-To be able to perform a parameter study, the code has to be able to solve the
-problem with fixed parameters first. The input file used for this purpose is
-The complete input file used for this purpose is provided in [nonlin_diff_react].
-The nominal values of the uncertain parameters are $\mu_{1,n}=0.3$ and $\mu_{2,n}$=9.
+To be able to perform a parameter study, the application has to be able to solve the
+problem with fixed parameters first. The input file used for this purpose is provided in [nonlin_diff_react].
+The nominal values of the uncertain parameters are $\mu_{1,n}=0.3$ and $\mu_{2,n}$=9 in this case.
 There are two blocks in the input file that are worth examining in detail.
 The first is the `Kernels` block that shows that a custom test kernel has been implemented to be
 able to handle the exponential reaction term in [nonlin-diff-react-strong].  
@@ -36,7 +34,7 @@ cd moose/modules/stocastic_tools/examples/parameter_study/nonlin_diff_react
 ```
 
 The second atypical block is `Controls` which is necessary to set up a channel
-for communication with a master input through the parameter study.
+to receive and substitute new parameter samples from the master application.
 As shown in the `Postprocessors` block, the Quantities of Interest (QoIs) are the
 maximum value ($u_{max}$), minimum value ($u_{min}$) and the average value ($u_{avg}$)
 of the scalar field variable $u$.
@@ -46,13 +44,13 @@ of the scalar field variable $u$.
 
 ## Master Input
 
-As described in [stochastic_tools/examples/parameter_study.md] in detail, one needs a driver input (or master input)
+As described in [parameter_study.md] in detail, one needs a driver input (or master input)
 to perform a parameter study.
 Two master input files are provided for this example in [nonlin_diff_react_master_uniform]
-and [nonlin_diff_react_master_normal]. The first
-one considers the uncertain parameters to be uniformly distributed around their nominal values
+and [nonlin_diff_react_master_normal]. The first considers the uncertain parameters to be
+uniformly distributed around their nominal values
 , $\mu_i\sim\mathcal{U} (0.7\mu_{i,n},1.3\mu_{i,n})$, while the second one assumes normal
-distribution $\mu_i\sim\mathcal{N} (\mu_{i,n},(0.15\mu_{i,n})^2)$.
+distribution $\mu_i\sim\mathcal{N} (\mu_{i,n},0.15\mu_{i,n})$.
 The only difference between the two input files is the `Distributions` block where the
 assumed probability distributions are defined for the uncertain parameters.
 
@@ -72,11 +70,27 @@ The objects in the `Transfers` block are responsible for the communication betwe
 master and sub-applications. It streams parameter samples to sub-applications and
 receives the corresponding values for the selected QoIs.
 It is visible that in this example the type of the parameter transfer object is
-[SamplerParameterTransfer.md] which requires the parameters to be controllable in
-the material, kernel and boundary condition objects.
-This is implemented using the following code in the `ExponentialReaction` kernel.
+[SamplerParameterTransfer.md] which streams the parameter samples to a [SamplerReceiver.md]
+object (in `Controls` block) in the sub-application. This object then plugs the
+new parameter values into kernels, materials or boundary conditions.
+Unfortunately, this requires the parameters to be controllable in the sub-application,
+which might not be true in every case.
+For this specific example, the controllability of the parameters in `ExponentialReaction` kernel
+is ensured by the last two commands in the `validParams` function.
 
 !listing ExponentialReaction.C re=InputParameters\sExponentialReaction::validParams.*?^}
+
+If the target parameters are not controllable, one can use a command line based communication
+between master and sub-applications. For more information about this approach see the example
+covered in [poly_chaos_surrogate.md].
+
+To run the master application, it is still necessary to enable test objects using the following
+command
+
+```
+cd moose/modules/stocastic_tools/examples/parameter_study/nonlin_diff_react
+../../../stocastic_tools-opt -i nonlin_diff_react_master_uniform.i --allow-test-objects
+```
 
 
 ## Stochastic Results id=results
