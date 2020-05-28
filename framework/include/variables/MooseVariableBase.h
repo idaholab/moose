@@ -65,7 +65,7 @@ public:
   /**
    * Get dual mortar option
    */
-  bool use_dual() const { return _use_dual; }
+  bool useDual() const { return _use_dual; }
 
   /**
    * Get all global dofindices for the variable

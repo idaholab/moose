@@ -82,7 +82,7 @@ MooseVariableData<OutputType>::MooseVariableData(const MooseVariableFE<OutputTyp
     _has_dof_values(false),
     _qrule(qrule_in),
     _qrule_face(qrule_face_in),
-    _use_dual(var.use_dual()),
+    _use_dual(var.useDual()),
     _second_phi_assembly_method(nullptr),
     _second_phi_face_assembly_method(nullptr),
     _curl_phi_assembly_method(nullptr),
