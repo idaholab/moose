@@ -27,6 +27,7 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, level=2)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -50,10 +51,12 @@ class ContentExtension(command.CommandExtension):
         self.addCommand(reader, ContentCommand())
         self.addCommand(reader, AtoZCommand())
         self.addCommand(reader, TableOfContentsCommand())
+        self.addCommand(reader, ContentOutlineCommand())
 
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
         renderer.add('TableOfContents', RenderTableOfContents())
+        renderer.add('ContentOutline', RenderContentOutline())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
@@ -76,10 +79,8 @@ class ContentExtension(command.CommandExtension):
         nodes.sort(key=lambda n: n.local)
 
         headings = collections.defaultdict(list)
-        func = lambda n: n.local.startswith(location) and isinstance(n, pages.Source)
         for node in nodes:
             h_node = heading.find_heading(node)
-
             if h_node is not None:
                 text = h_node.text()
                 label = text.replace(' ', '-').lower()
@@ -161,6 +162,25 @@ class TableOfContentsCommand(command.CommandComponent):
                                hide=self.settings['hide'].split(),
                                levels=levels,
                                columns=int(self.settings['columns']))
+
+class ContentOutlineCommand(command.CommandComponent):
+    COMMAND = 'content'
+    SUBCOMMAND = 'outline'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['location'] = (None, "The markdown content directory to build outline.")
+        settings['level'] = (2, 'Heading level(s) to display.')
+        return settings
+
+    def createToken(self, parent, info, page):
+        if self.settings['location'] is None:
+            msg = "The 'location' setting is required for the !content outline command."
+            raise exceptions.MooseDocsException(msg)
+
+        return ContentOutline(parent, level=self.settings['level'],
+                              location=self.settings['location'])
 
 class RenderContentToken(components.RenderComponent):
 
@@ -281,3 +301,13 @@ class RenderTableOfContents(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         return None
+
+class RenderContentOutline(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        location = token['location']
+        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
+        nodes = self.translator.findPages(func)
+        for node in nodes:
+            print(node.local)
+            for k, v in node['headings'].items():
+                print(k, v.text(), v['level'])
