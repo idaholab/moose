@@ -11,24 +11,8 @@
 []
 
 [AuxVariables]
-  [./vel_x]
-  [../]
-  [./vel_y]
-  [../]
-[]
-
-[AuxKernels]
-  [./vel_x]
-    type = FunctionAux
-    function = 4*y
-    variable = vel_x
-    execute_on = initial
-  [../]
-  [./vel_y]
-    type = FunctionAux
-    function = -4*x
-    variable = vel_y
-    execute_on = initial
+  [./velocity]
+    family = LAGRANGE_VEC
   [../]
 []
 
@@ -53,6 +37,11 @@
     center = '0 0.5 0'
     radius = 0.15
   [../]
+  [./velocity_func]
+    type = ParsedVectorFunction
+    value_x = '4*y'
+    value_y = '-4*x'
+  [../]
 []
 
 [ICs]
@@ -61,6 +50,11 @@
     function = phi_exact
     variable = phi
   [../]
+  [./vel_ic]
+    type = VectorFunctionIC
+    variable = velocity
+    function = velocity_func
+  []
 []
 
 [Kernels]
@@ -71,8 +65,7 @@
 
   [./advection]
     type = LevelSetAdvection
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     variable = phi
   [../]
 []
@@ -87,8 +80,7 @@
   [../]
   [./cfl]
     type = LevelSetCFLCondition
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     execute_on = 'initial timestep_end'
   [../]
 []

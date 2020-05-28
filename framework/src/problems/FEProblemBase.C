@@ -3119,7 +3119,10 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 }
 
 void
-FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
+                                   THREAD_ID tid,
+                                   bool swap_stateful,
+                                   bool execute_stateful)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3138,7 +3141,8 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id, THREAD_ID tid, bool swap_
 
     if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
-          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
+          execute_stateful);
   }
 }
 
@@ -3172,7 +3176,10 @@ FEProblemBase::reinitMaterialsNeighborGhost(SubdomainID blk_id, THREAD_ID tid, b
 }
 
 void
-FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful)
+FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
+                                       THREAD_ID tid,
+                                       bool swap_stateful,
+                                       bool execute_stateful)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3192,12 +3199,16 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id, THREAD_ID tid, bool s
 
     if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
+          execute_stateful);
   }
 }
 
 void
-FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful)
+FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id,
+                                       THREAD_ID tid,
+                                       bool swap_stateful,
+                                       bool execute_stateful)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3214,7 +3225,8 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id, THREAD_ID tid, bo
           _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
 
     if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
+      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid),
+                                      execute_stateful);
   }
 }
 

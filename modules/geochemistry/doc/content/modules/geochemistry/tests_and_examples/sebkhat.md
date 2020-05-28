@@ -26,4 +26,6 @@ Using the Debye-Huckel-B-dot formulae, [!cite](bethke_2007) predicts that:
 
 The MOOSE results are ????
 
+!listing modules/geochemistry/test/tests/solubilities_and_activities/sebkhat_el_melah.i
+
 !bibtex bibliography

@@ -702,8 +702,8 @@ TEST(PertinentGeochemicalSystemTest, radius)
   radius_gold["CaOH+"] = 4.0;
   radius_gold["OH-"] = 3.5;
   radius_gold["(O-phth)--"] = 4.0;
-  radius_gold[">(s)FeO-"] = 0.0;
-  radius_gold[">(s)FeOCa+"] = 0.0;
+  radius_gold[">(s)FeO-"] = -1.5;
+  radius_gold[">(s)FeOCa+"] = -1.5;
   radius_gold["Calcite"] = 0.0;
   radius_gold["e-"] = 0.0;
   for (const auto & sp : mgd.basis_species_index)
@@ -859,6 +859,102 @@ TEST(PertinentGeochemicalSystemTest, surfaceComplexationInfo)
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].surface_area, 60.0);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].sorption_sites[">(s)FeOH"], 0.05);
   ASSERT_EQ(mgd3.surface_complexation_info["Goethite"].sorption_sites[">(w)FeOH"], 0.222);
+}
+
+/// Test exception when a sorption site is involved in more than one mineral
+TEST(PertinentGeochemicalSystemTest, surfaceComplexationRepeatedException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  try
+  {
+    PertinentGeochemicalSystem model3(database,
+                                      {"H2O", "H+", "O2(aq)", "Fe++", ">(s)FeOH", ">(w)FeOH"},
+                                      {"Goethite", "Fe(OH)3(ppd)"},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      "O2(aq)",
+                                      "e-");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("The sorbing site >(s)FeOH appears in more than one sorbing mineral") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test exception when an equilibrium species has a reaction involving more than one sorbing site
+TEST(PertinentGeochemicalSystemTest, excessSorbingSitesException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  try
+  {
+    PertinentGeochemicalSystem model2(database,
+                                      {"H2O", "H+", "Fe+++", "sorbsite1", "sorbsite2"},
+                                      {"problematic_sorber"},
+                                      {},
+                                      {},
+                                      {},
+                                      {},
+                                      "O2(aq)",
+                                      "e-");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("It is an error for any equilibrium species (such as problem_eqm) to have "
+                         "a reaction involving more than one sorbing site") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test information related to surface sorption is correctly built
+TEST(PertinentGeochemicalSystemTest, surfaceSorptionBuilding)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  PertinentGeochemicalSystem modelC(
+      database, {"H2O", "H+", "Ca++", "HCO3-"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgdC = modelC.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgdC.surface_sorption_name.size(), 0);
+  EXPECT_EQ(mgdC.surface_sorption_area.size(), 0);
+  for (unsigned j = 0; j < mgdC.eqm_species_name.size(); ++j)
+    EXPECT_EQ(mgdC.surface_sorption_related[j], false);
+
+  PertinentGeochemicalSystem model2(database,
+                                    {"H2O", "H+", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+                                    {"Fe(OH)3(ppd)fake", "Goethite"},
+                                    {},
+                                    {},
+                                    {},
+                                    {},
+                                    "O2(aq)",
+                                    "e-");
+  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
+  EXPECT_EQ(mgd2.surface_complexation_info.count("Goethite"), 1);
+  EXPECT_EQ(mgd2.surface_sorption_name.size(), 1);
+  EXPECT_EQ(mgd2.surface_sorption_name[0], "Goethite");
+  EXPECT_EQ(mgd2.surface_sorption_area.size(), 1);
+  EXPECT_EQ(mgd2.surface_sorption_area[0], 60.0);
+  EXPECT_EQ(mgd2.surface_sorption_related.size(), mgd2.eqm_species_name.size());
+  EXPECT_EQ(mgd2.surface_sorption_number.size(), mgd2.eqm_species_name.size());
+  // Eqm species are: OH- >(s)FeO- Fe(OH)3(ppd)fake Goethite
+  EXPECT_EQ(mgd2.eqm_species_index.count(">(s)FeO-"), 1);
+  const unsigned posn = mgd2.eqm_species_index.at(">(s)FeO-");
+  for (unsigned j = 0; j < mgd2.eqm_species_name.size(); ++j)
+    if (j == posn)
+      EXPECT_TRUE(mgd2.surface_sorption_related[j]);
+    else
+      EXPECT_FALSE(mgd2.surface_sorption_related[j]);
+  EXPECT_EQ(mgd2.surface_sorption_number[posn], 0);
 }
 
 /// Test that the fugacity coefficients are correctly recorded
@@ -1251,13 +1347,13 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Fe+++"], 0), -10.0553, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["e-"], 0), 23.4266, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 0), 8.93, eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 1), 8.93 + 2 * (25 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 2), 8.93 + 2 * (60 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 3), 8.93 + 2 * (100 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 4), 8.93 + 2 * (150 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 5), 8.93 + 2 * (200 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 6), 8.93 + 2 * (250 - 0), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 7), 8.93 + 2 * (300 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 1), 8.93 - 0.3 * (25 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 2), 8.93 - 0.3 * (60 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 3), 8.93 - 0.3 * (100 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 4), 8.93 - 0.3 * (150 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 5), 8.93 - 0.3 * (200 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 6), 8.93 - 0.3 * (250 - 0), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 7), 8.93 - 0.3 * (300 - 0), eps);
   ASSERT_NEAR(
       mgd.eqm_log10K(mgd.eqm_species_index["Fe(OH)3(ppd)fake"], 0), 6.1946 + 2 * (-10.0553), eps);
   ASSERT_NEAR(
@@ -1438,8 +1534,8 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
 
   EXPECT_EQ(mgd_redox.redox_lhs, "e-");
 
-  // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not have
-  // a pair
+  // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not
+  // have a pair
   EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 2);
   EXPECT_EQ(mgd_redox.redox_log10K.m(), 2);
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-

@@ -55,4 +55,6 @@ The following assumptions are made.
 | 2e$^{-}$ + 2H$^{+}$ $\rightleftharpoons$ H$_{2}$(aq) | -197 |
 | 8e$^{-}$ + 9H$^{+}$ + 2HCO$_{3}^{-}$ $\rightleftharpoons$ 4H$_{2}$O + CH$_{3}$COO$^{-}$ | -230 |
 
+!listing modules/geochemistry/test/tests/redox_disequilibrium/microbial.i
+
 !bibtex bibliography

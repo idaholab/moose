@@ -17,19 +17,20 @@ LevelSetTimeDerivativeSUPG::validParams()
   InputParameters params = ADTimeKernelGrad::validParams();
   params.addClassDescription(
       "SUPG stablization terms for the time derivative of the level set equation.");
-  params += LevelSetVelocityInterface<ADTimeKernelGrad>::validParams();
+  params.addRequiredCoupledVar("velocity", "Velocity vector variable.");
   return params;
 }
 
 LevelSetTimeDerivativeSUPG::LevelSetTimeDerivativeSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<ADTimeKernelGrad>(parameters)
+  : ADTimeKernelGrad(parameters), _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADRealVectorValue
 LevelSetTimeDerivativeSUPG::precomputeQpResidual()
 {
-  computeQpVelocity();
-  Real tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return tau * _velocity * _u_dot[_qp];
+  ADReal tau =
+      _current_elem->hmin() /
+      (2 * (_velocity[_qp] + RealVectorValue(libMesh::TOLERANCE * libMesh::TOLERANCE)).norm());
+  return tau * _velocity[_qp] * _u_dot[_qp];
 }

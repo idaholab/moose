@@ -11,27 +11,18 @@
 []
 
 [AuxVariables]
-  [vel_x]
-    family = LAGRANGE
-  []
-  [vel_y]
-    family = LAGRANGE
-  []
+  [./velocity]
+    family = LAGRANGE_VEC
+  [../]
 []
 
 [AuxKernels]
-  [vel_x]
-    type = FunctionAux
-    function = vel_x
-    variable = vel_x
-    execute_on = 'initial timestep_begin'
-  []
-  [vel_y]
-    type = FunctionAux
-    function = vel_y
-    variable = vel_y
-    execute_on = 'initial timestep_begin'
-  []
+  [./vec]
+    type = VectorFunctionAux
+    variable = velocity
+    function = velocity_func
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
 []
 
 [Variables]
@@ -47,16 +38,10 @@
     center = '0.5 0.75 0'
     radius = 0.15
   []
-  [vel_x]
+  [./velocity_func]
     type = LevelSetOlssonVortex
-    component = x
     reverse_time = 2
-  []
-  [vel_y]
-    type = LevelSetOlssonVortex
-    component = y
-    reverse_time = 2
-  []
+  [../]
 []
 
 [ICs]
@@ -74,20 +59,17 @@
   []
   [advection]
     type = LevelSetAdvection
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     variable = phi
   []
   [advection_supg]
     type = LevelSetAdvectionSUPG
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     variable = phi
   []
   [time_supg]
     type = LevelSetTimeDerivativeSUPG
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     variable = phi
   []
 []
@@ -102,8 +84,7 @@
   []
   [cfl]
     type = LevelSetCFLCondition
-    velocity_x = vel_x
-    velocity_y = vel_y
+    velocity = velocity
     execute_on = 'initial timestep_end'
   []
 []

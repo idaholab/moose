@@ -23,9 +23,17 @@
 []
 
 [AuxVariables]
-  [./v_x]
-    initial_condition = 2
+  [./velocity]
+    family = LAGRANGE_VEC
   [../]
+[]
+
+[ICs]
+  [./vel_ic]
+    type = VectorFunctionIC
+    variable = velocity
+    function = velocity_func
+  []
 []
 
 [BCs]
@@ -50,13 +58,18 @@
     vars = 'a b'
     vals = '2 12'
   [../]
+  [./velocity_func]
+    type = ParsedVectorFunction
+    value_x = '2'
+    value_y = '2'
+  [../]
 []
 
 [Kernels]
   [./phi_advection]
     type = LevelSetAdvection
     variable = phi
-    velocity_x = v_x
+    velocity = velocity
   [../]
   [./phi_forcing]
     type = BodyForce

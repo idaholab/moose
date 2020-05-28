@@ -48,6 +48,14 @@ GeochemistrySpeciesSwapper::checkSwap(const ModelGeochemicalDatabase & mgd,
     mooseError(basis_index_to_replace, " exceeds the number of basis species in the problem");
   if (eqm_index_to_insert >= num_rows)
     mooseError(eqm_index_to_insert, " exceeds the number of equilibrium species in the problem");
+  if (mgd.surface_sorption_related[eqm_index_to_insert])
+    mooseError(
+        "Equilibrium species ",
+        mgd.eqm_species_name[eqm_index_to_insert],
+        " is involved in surface sorption so cannot be swapped into the basis.  If this is truly "
+        "necessary, code enhancements will need to be made including: recording whether basis "
+        "species are involved in surface sorption, including them in the surface-potential "
+        "calculations, and carefully swapping surface-potential-modified equilibrium constants");
 
   constructInverseMatrix(mgd, basis_index_to_replace, eqm_index_to_insert);
 }

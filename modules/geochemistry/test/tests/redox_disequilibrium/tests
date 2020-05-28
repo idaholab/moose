@@ -1,0 +1,26 @@
+[Tests]
+  [./morro]
+    type = 'RunApp'
+    input = 'morro.i'
+    expect_out = 'pH = 6.05'
+    requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems'
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md morro.md'
+  [../]
+  [./morro_disequilibrium]
+    type = 'RunApp'
+    input = 'morro_disequilibrium.i'
+    expect_out = 'e- = 1\*Fe\+\+ - 1\*Fe\+\+\+;  Eh'
+    requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium'
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md morro.md'
+  [../]
+  [./microbial]
+    type = 'RunApp'
+    input = 'microbial.i'
+    expect_out = 'e- = 0.25\*H2O - 0.875\*H\+ - 0.25\*CO2\(g\) \+ 0.125\*CH3COO-;  Eh'
+    requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md microbial.md'
+  [../]
+[]

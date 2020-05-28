@@ -92,6 +92,10 @@
     prop_values = '.03'
     block = '1 2'
   []
+  [./ssm]
+    type = SpatialStatefulMaterial
+    block = '1 2'
+  [../]
 []
 
 

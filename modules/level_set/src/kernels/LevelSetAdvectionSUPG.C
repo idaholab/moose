@@ -17,19 +17,20 @@ LevelSetAdvectionSUPG::validParams()
   InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription(
       "SUPG stablization term for the advection portion of the level set equation.");
-  params += LevelSetVelocityInterface<ADKernelGrad>::validParams();
+  params.addRequiredCoupledVar("velocity", "Velocity vector variable.");
   return params;
 }
 
 LevelSetAdvectionSUPG::LevelSetAdvectionSUPG(const InputParameters & parameters)
-  : LevelSetVelocityInterface<ADKernelGrad>(parameters)
+  : ADKernelGrad(parameters), _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADRealVectorValue
 LevelSetAdvectionSUPG::precomputeQpResidual()
 {
-  computeQpVelocity();
-  ADReal tau = _current_elem->hmin() / (2 * _velocity.norm());
-  return (tau * _velocity) * (_velocity * _grad_u[_qp]);
+  ADReal tau =
+      _current_elem->hmin() /
+      (2 * (_velocity[_qp] + RealVectorValue(libMesh::TOLERANCE * libMesh::TOLERANCE)).norm());
+  return (tau * _velocity[_qp]) * (_velocity[_qp] * _grad_u[_qp]);
 }

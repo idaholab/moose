@@ -17,13 +17,14 @@ LevelSetCFLCondition::validParams()
   InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription("Compute the minimum timestep from the Courant-Friedrichs-Lewy (CFL) "
                              "condition for the level-set equation.");
-  params += LevelSetVelocityInterface<ElementPostprocessor>::validParams();
+  params.addRequiredCoupledVar("velocity", "Velocity vector variable.");
   return params;
 }
 
 LevelSetCFLCondition::LevelSetCFLCondition(const InputParameters & parameters)
-  : LevelSetVelocityInterface<ElementPostprocessor>(parameters),
-    _cfl_timestep(std::numeric_limits<Real>::max())
+  : ElementPostprocessor(parameters),
+    _cfl_timestep(std::numeric_limits<Real>::max()),
+    _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
@@ -34,7 +35,7 @@ LevelSetCFLCondition::execute()
   _max_velocity = std::numeric_limits<Real>::min();
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
   {
-    RealVectorValue vel(_velocity_x[qp], _velocity_y[qp], _velocity_z[qp]);
+    RealVectorValue vel = MetaPhysicL::raw_value(_velocity[qp]);
     _max_velocity = std::max(_max_velocity, std::abs(vel.norm()));
   }
   _cfl_timestep = std::min(_cfl_timestep, _current_elem->hmin() / _max_velocity);

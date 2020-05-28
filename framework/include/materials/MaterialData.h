@@ -82,8 +82,15 @@ public:
   /// material properties for given element (and possible side)
   void swap(const Elem & elem, unsigned int side = 0);
 
-  /// Reinit material properties for given element (and possible side)
-  void reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats);
+  /**
+   * Reinit material properties for given element (and possible side)
+   * @param mats The material objects for which to compute properties
+   * @param execute_stateful Whether to execute material objects that have stateful properties. This
+   * should be \p false when for example executing material objects for mortar contexts in which
+   * stateful properties don't make sense
+   */
+  void reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats,
+              bool execute_stateful = true);
 
   /// Calls the reset method of Materials to ensure that they are in a proper state.
   void reset(const std::vector<std::shared_ptr<MaterialBase>> & mats);

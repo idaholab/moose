@@ -7,5 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
-#include "LevelSetVelocityInterface.h"
+#pragma once
+
+#include "Action.h"
+
+/**
+ * Action that sets up the equilibrium reaction solver
+ */
+class AddEquilibriumReactionSolverAction : public Action
+{
+public:
+  static InputParameters validParams();
+
+  AddEquilibriumReactionSolverAction(InputParameters parameters);
+
+  virtual void act() override;
+};

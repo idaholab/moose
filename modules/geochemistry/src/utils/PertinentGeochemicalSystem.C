@@ -247,7 +247,7 @@ PertinentGeochemicalSystem::buildSecondarySpecies()
         GeochemistryEquilibriumSpecies to_sec;
         to_sec.name = ss.name;
         to_sec.basis_species = ss.basis_species;
-        to_sec.radius = 0.0;
+        to_sec.radius = -1.5; // flag to activity calculators that activity coefficient = 1
         to_sec.charge = ss.charge;
         to_sec.molecular_weight = ss.molecular_weight;
         const Real T0 = _db.getTemperatures()[0];
@@ -640,6 +640,57 @@ PertinentGeochemicalSystem::createModel()
         mooseError("Kinetic species " + species.name + " includes " + react.first +
                    ", which cannot be expressed in terms of the basis.  Previous checks must be "
                    "erroneous!");
+    }
+  }
+
+  // check that there are no repeated sorbing sites in the SurfaceComplexationInfo
+  std::vector<std::string> all_sorbing_sites;
+  for (const auto & name_info : _model.surface_complexation_info)
+    for (const auto & name_frac : name_info.second.sorption_sites)
+      if (std::find(all_sorbing_sites.begin(), all_sorbing_sites.end(), name_frac.first) !=
+          all_sorbing_sites.end())
+        mooseError(
+            "The sorbing site ", name_frac.first, " appears in more than one sorbing mineral");
+      else
+        all_sorbing_sites.push_back(name_frac.first);
+
+  // build the information related to surface sorption
+  _model.surface_sorption_related.assign(num_rows, false);
+  _model.surface_sorption_number.assign(num_rows, 99);
+  for (const auto & name_info :
+       _model.surface_complexation_info) // all minerals involved in surface complexation
+  {
+    bool mineral_involved_in_eqm = false;
+    for (const auto & name_frac :
+         name_info.second.sorption_sites) // all sorption sites on the given mineral
+    {
+      const unsigned basis_index_of_sorption_site = _model.basis_species_index.at(name_frac.first);
+      for (unsigned j = 0; j < num_rows; ++j) // all equilibrium species
+        if (_model.eqm_stoichiometry(j, basis_index_of_sorption_site) != 0.0)
+        {
+          mineral_involved_in_eqm = true;
+          break;
+        }
+    }
+    if (!mineral_involved_in_eqm)
+      continue;
+    const unsigned num_surface_sorption = _model.surface_sorption_name.size();
+    _model.surface_sorption_name.push_back(name_info.first);
+    _model.surface_sorption_area.push_back(name_info.second.surface_area);
+    for (const auto & name_frac :
+         name_info.second.sorption_sites) // all sorption sites on the given mineral
+    {
+      const unsigned basis_index_of_sorption_site = _model.basis_species_index.at(name_frac.first);
+      for (unsigned j = 0; j < num_rows; ++j) // all equilibrium species
+        if (_model.eqm_stoichiometry(j, basis_index_of_sorption_site) != 0.0)
+        {
+          if (_model.surface_sorption_related[j])
+            mooseError("It is an error for any equilibrium species (such as ",
+                       _model.eqm_species_name[j],
+                       ") to have a reaction involving more than one sorbing site");
+          _model.surface_sorption_related[j] = true;
+          _model.surface_sorption_number[j] = num_surface_sorption;
+        }
     }
   }
 }
