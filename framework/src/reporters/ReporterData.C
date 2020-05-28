@@ -46,11 +46,14 @@ ReporterData::copyValuesBack()
 void
 ReporterData::finalize(const std::string & object_name)
 {
-  mooseAssert(_data_ptrs.find(object_name) != _data_ptrs.end(),
-              "Unable to find a Reporter object with the name " << object_name);
-  for (RestartableDataValue * data_ptr : _data_ptrs[object_name])
+  std::unordered_map<std::string, std::set<RestartableDataValue *>>::const_iterator iter =
+      _data_ptrs.find(object_name);
+  if (iter != _data_ptrs.end())
   {
-    ReporterContextBase * context_ptr = static_cast<ReporterContextBase *>(data_ptr->context());
-    context_ptr->finalize();
+    for (RestartableDataValue * data_ptr : iter->second)
+    {
+      ReporterContextBase * context_ptr = static_cast<ReporterContextBase *>(data_ptr->context());
+      context_ptr->finalize();
+    }
   }
 }

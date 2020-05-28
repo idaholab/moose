@@ -3,5 +3,6 @@
     type = RunApp
     input = base.i
     allow_test_objects = true
+    min_parallel = 2
   []
 []
