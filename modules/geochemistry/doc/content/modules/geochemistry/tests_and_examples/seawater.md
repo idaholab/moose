@@ -109,8 +109,8 @@ The saturation indices of the equilibrium solution in [table:molalities_etc] are
 | Aragonite | 0.64 | 0 |
 | Quartz | -0.02 | 1 |
 
+!listing modules/geochemistry/test/tests/equilibrium_models/seawater_no_precip.i
 
-
-
+!listing modules/geochemistry/test/tests/equilibrium_models/seawater_precip.i
 
 !bibtex bibliography

@@ -1,0 +1,58 @@
+[Tests]
+  [./invalid_nernst_swap]
+    type = RunException
+    input = invalid_nernst_swap.i
+    expect_err = 'nernst_swap_out_of_basis: must be of same size as nernst_swap_into_basis'
+    requirement = 'The equilibrium reaction solver output will throw an error for incorrectly-sized Nernst swaps'
+    issues = '#15290'
+    design = 'EquilibriumReactionSolverOutput.md'
+  [../]
+  [./seawater_no_precip]
+    type = 'RunApp'
+    input = 'seawater_no_precip.i'
+    expect_out = 'Mass of solvent water = 1kg'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems with no precipitation"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md seawater.md'
+  [../]
+  [./seawater_precip]
+    type = 'RunApp'
+    input = 'seawater_precip.i'
+    expect_out = 'Dolomite;  bulk_moles'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems including mineral precipitation"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md seawater.md'
+  [../]
+  [./amazon]
+    type = 'RunApp'
+    input = 'amazon.i'
+    expect_out = 'pH = 6.5'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md amazon.md'
+  [../]
+  [./amazon_with_minerals]
+    type = 'RunApp'
+    input = 'amazon_with_minerals.i'
+    expect_out = 'Hematite;  bulk_moles'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed and minerals precipitate"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md amazon.md'
+  [../]
+  [./red_sea_no_precip]
+    type = 'RunApp'
+    input = 'red_sea_no_precip.i'
+    expect_out = 'pH = 5.6'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md red_sea.md'
+  [../]
+  [./red_sea_precip]
+    type = 'RunApp'
+    input = 'red_sea_precip.i'
+    expect_out = 'Chalcocite;  bulk_moles'
+    requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature, including when mineral precipitate"
+    issues = '#15290 #15261'
+    design = 'EquilibriumReactionSolverOutput.md red_sea.md'
+  [../]
+[]

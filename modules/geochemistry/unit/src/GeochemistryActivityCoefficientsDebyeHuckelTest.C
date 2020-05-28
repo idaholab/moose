@@ -123,7 +123,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
   for (unsigned j = 0; j < 8; ++j) // don't loop over the mineral calcite
   {
     Real gold = 0.0;
-    if (j == 1 || j == 3) // CO2(aq) and CaCO3
+    if (j == 1 || j == 3 || j == 7) // CO2(aq) and CaCO3 and >(s)FeO-
       gold = 1.0;
     else
       gold =

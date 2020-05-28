@@ -112,7 +112,7 @@ m_{q} = \frac{1}{K_{q}e^{z_{a}F\Psi/RT}} \left(a_{w}^{\nu_{wq}}\cdot \prod_{i}(\
 which sets the molality of each surface complex.  Here:
 
 - $z_{q}$ \[dimensionless\] is the electronic charge of the surface complex $A_{q}$
-- $\Psi$ \[J.K$^{-1}$\] is the surface potential, which is set as below
+- $\Psi$ \[J.C$^{-1}$ = V\] is the surface potential, which is set as below
 - $F = 96485\ldots \,$C.mol$^{-1}$ is the Faraday constant
 - $R = 8.314\ldots\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
 - $T$ \[K\] is temperature

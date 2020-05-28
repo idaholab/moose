@@ -90,5 +90,6 @@ The chemical composition of the water is shown in [table:analysis].  In addition
 | Pb$^{2+}$ | 39.59 | 100 |
 | SO$_{4}^{2-}$ | 99.95 | 1.98 |
 
+!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/ferric_hydroxide.i
 
 !bibtex bibliography

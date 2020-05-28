@@ -65,4 +65,9 @@ An alternate model assumes the water is in equilibrium with kaolinite and hemati
 
 According to this model, only nontronite clay is supersaturated by any significant amount.  MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon.i
+
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon_with_minerals.i
+
+
 !bibtex bibliography

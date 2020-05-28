@@ -85,4 +85,8 @@ MOOSE produces a total free charge of ????
 \end{equation}
 MOOSE produces the result of ????
 
+!listing modules/geochemistry/test/tests/redox_disequilibrium/morro.i
+
+!listing modules/geochemistry/test/tests/redox_disequilibrium/morro_disequilibrium.i
+
 !bibtex bibliography

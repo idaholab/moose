@@ -18,4 +18,7 @@ constexpr Real LOGTEN = 2.30258509299404;
 constexpr Real FARADAY = 96485.3415;    // Coulombs . mol^-1
 constexpr Real GAS_CONSTANT = 8.314472; // m^2 . kg . s^-2 . K^-1 . mol^-1
 constexpr Real CELSIUS_TO_KELVIN = 273.15;
+constexpr Real PERMITTIVITY_FREE_SPACE = 8.8541878128E-12; // F . m^-1
+constexpr Real DIELECTRIC_CONSTANT_WATER = 78.5;
+constexpr Real DENSITY_WATER = 1000; // kg . m^-3.  Used in surface-potential calculation
 }

@@ -59,7 +59,7 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
   // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
-                                   {"Fe(OH)3(ppd)fake"},
+                                   {"Fe(OH)3(ppd)"},
                                    {"CH4(g)fake"},
                                    {},
                                    {},
@@ -184,6 +184,23 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
     ASSERT_TRUE(
         msg.find("GeochemistrySpeciesSwapper constructed with incorrect basis_species size") !=
         std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    swapper.checkSwap(mgd, ">(s)FeOH", ">(s)FeO-");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Equilibrium species >(s)FeO- is involved in surface sorption so cannot be "
+                 "swapped into the basis.  If this is truly necessary, code enhancements will need "
+                 "to be made including: recording whether basis species are involved in surface "
+                 "sorption, including them in the surface-potential calculations, and carefully "
+                 "swapping surface-potential-modified equilibrium constants") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }

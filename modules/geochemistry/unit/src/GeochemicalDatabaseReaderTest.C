@@ -621,7 +621,7 @@ TEST(GeochemicalDatabaseReaderTest, secondarySpeciesNames)
   std::vector<std::string> names = database.secondarySpeciesNames();
   for (const auto & n : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "e-"})
     EXPECT_TRUE(std::find(names.begin(), names.end(), n) != names.end());
-  EXPECT_EQ(names.size(), 6);
+  EXPECT_EQ(names.size(), 7);
 }
 
 TEST(GeochemicalDatabaseReaderTest, redoxCoupleNames)
