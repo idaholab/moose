@@ -18,15 +18,11 @@
 #include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
-class MortarConstraintBase;
 class FEProblemBase;
 namespace libMesh
 {
 class QBase;
 }
-
-template <>
-InputParameters validParams<MortarConstraintBase>();
 
 /**
  * User for mortar methods
@@ -120,6 +116,9 @@ protected:
   /// the normals along the secondary face
   const MooseArray<Point> & _normals;
 
+  /// the normals along the primary face
+  const MooseArray<Point> & _normals_primary;
+
   /// the tangents along the secondary face
   const MooseArray<std::vector<Point>> & _tangents;
 
@@ -152,20 +151,16 @@ protected:
 
   /// The locations of the quadrature points on the interior primary elements
   const MooseArray<Point> & _phys_points_primary;
-};
 
-#define usingMortarConstraintBaseMembers                                                           \
-  usingConstraintMembers;                                                                          \
-  using ADMortarConstraint::_phys_points_secondary;                                                \
-  using ADMortarConstraint::_phys_points_primary;                                                  \
-  using ADMortarConstraint::_has_primary;                                                          \
-  using ADMortarConstraint::_use_dual;                                                             \
-  using ADMortarConstraint::_test;                                                                 \
-  using ADMortarConstraint::_test_secondary;                                                       \
-  using ADMortarConstraint::_test_primary;                                                         \
-  using ADMortarConstraint::_grad_test_secondary;                                                  \
-  using ADMortarConstraint::_grad_test_primary;                                                    \
-  using ADMortarConstraint::_normals;                                                              \
-  using ADMortarConstraint::_tangents;                                                             \
-  using ADMortarConstraint::_secondary_var;                                                        \
-  using ADMortarConstraint::_primary_var
+  /// The secondary face lower dimensional element (not the mortar element!)
+  Elem const * const & _lower_secondary_elem;
+
+  /// The primary face lower dimensional element
+  Elem const * const & _lower_primary_elem;
+
+  /// The secondary face lower dimensional element (not the mortar element!) volume
+  const Real & _lower_secondary_volume;
+
+  /// The primary face lower dimensional element volume
+  const Real & _lower_primary_volume;
+};

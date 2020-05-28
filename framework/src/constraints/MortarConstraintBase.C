@@ -80,6 +80,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _test_dummy(),
     _use_dual(_var ? _var->useDual() : false),
     _normals(_assembly.normals()),
+    _normals_primary(_assembly.neighborNormals()),
     _tangents(_assembly.tangents()),
     _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.mortarCoordTransformation()),
@@ -90,7 +91,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
     _phys_points_secondary(_assembly.qPointsFace()),
-    _phys_points_primary(_assembly.qPointsFaceNeighbor())
+    _phys_points_primary(_assembly.qPointsFaceNeighbor()),
+    _lower_secondary_elem(_assembly.lowerDElem()),
+    _lower_primary_elem(_assembly.neighborLowerDElem()),
+    _lower_secondary_volume(_assembly.lowerDElemVolume()),
+    _lower_primary_volume(_assembly.neighborLowerDElemVolume())
 {
 }
 

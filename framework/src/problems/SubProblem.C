@@ -887,6 +887,12 @@ SubProblem::reinitLowerDElem(const Elem * elem,
 }
 
 void
+SubProblem::reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid)
+{
+  assembly(tid).reinitNeighborLowerDElem(elem);
+}
+
+void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
   assembly(tid).reinitMortarElem(elem);

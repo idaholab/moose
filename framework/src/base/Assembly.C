@@ -92,6 +92,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_side_volume_computed(false),
 
     _current_lower_d_elem(nullptr),
+    _current_neighbor_lower_d_elem(nullptr),
 
     _residual_vector_tags(_subproblem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL)),
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
@@ -2142,6 +2143,8 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
   // We need to dig out the q_points from it
   _current_q_points_face_neighbor.shallowCopy(const_cast<std::vector<Point> &>(
       (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
+  _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
+      (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_normals()));
 }
 
 void
@@ -2149,6 +2152,9 @@ Assembly::reinitLowerDElem(const Elem * elem,
                            const std::vector<Point> * const pts,
                            const std::vector<Real> * const weights)
 {
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitLowerDElemRef on a lower dimensional element");
+
   _current_lower_d_elem = elem;
 
   unsigned int elem_dim = elem->dim();
@@ -2200,6 +2206,27 @@ Assembly::reinitLowerDElem(const Elem * elem,
             const_cast<std::vector<std::vector<TensorValue<Real>>> &>(fe_lower->get_dual_d2phi()));
     }
   }
+
+  mooseAssert(elem_dim == 1,
+              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
+              "anything with the coordinate transformation. We currently only support 2D mortar, "
+              "so if you hit this assertion there is a problem");
+  _current_lower_d_elem_volume = _current_lower_d_elem->volume();
+}
+
+void
+Assembly::reinitNeighborLowerDElem(const Elem * elem)
+{
+  mooseAssert(elem->dim() == _mesh_dimension - 1,
+              "You should be calling reinitNeighborLowerDElem on a lower dimensional element");
+
+  _current_neighbor_lower_d_elem = elem;
+
+  mooseAssert(elem->dim() == 1,
+              "Lower-D Volume calculations are only accurate in 1D because we are not doing "
+              "anything with the coordinate transformation. We currently only support 2D mortar, "
+              "so if you hit this assertion there is a problem");
+  _current_neighbor_lower_d_elem_volume = _current_neighbor_lower_d_elem->volume();
 }
 
 void

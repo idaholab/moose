@@ -431,6 +431,11 @@ public:
                                      THREAD_ID tid = 0);
 
   /**
+   * reinitialize a neighboring lower dimensional element
+   */
+  void reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid = 0);
+
+  /**
    * Reinit a mortar element to obtain a valid JxW
    */
   void reinitMortarElem(const Elem * elem, THREAD_ID tid = 0);

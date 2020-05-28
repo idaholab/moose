@@ -178,6 +178,12 @@ ComputeMortarFunctor::operator()()
     // secondary (element) and primary (neighbor)
     _subproblem.reinitLowerDElem(secondary_face_elem, /*tid=*/0, &custom_xi1_pts);
 
+    // All this does currently is sets the neighbor/primary lower dimensional elem in Assembly and
+    // computes its volume for potential use in the MortarConstraints. Solution continuity
+    // stabilization for example relies on being able to access the volume
+    if (_has_primary)
+      _subproblem.reinitNeighborLowerDElem(msinfo.primary_elem);
+
     // reinit higher-dimensional secondary face/boundary materials. Do this after we reinit lower-d
     // variables in case we want to pull the lower-d variable values into the secondary
     // face/boundary materials. Be careful not to execute stateful materials since conceptually they

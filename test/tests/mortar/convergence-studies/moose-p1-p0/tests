@@ -1,7 +1,7 @@
 [Tests]
   design = 'EqualValueConstraint.md'
   issues = '#13080'
-  [same]
+  [10_to_11_slave_to_master]
     type = 'Exodiff'
     input = 'same.i'
     exodiff = 'same_out.e'
@@ -10,7 +10,7 @@
     map = False
     mesh_mode = 'REPLICATED'
   []
-  [coarser_slave]
+  [5_to_11_slave_to_master]
     type = 'Exodiff'
     input = 'coarser-slave.i'
     exodiff = 'coarser-slave_out.e'
@@ -19,11 +19,29 @@
     map = False
     mesh_mode = 'REPLICATED'
   []
-  [coarser_master]
+  [11_to_5_slave_to_master]
     type = 'Exodiff'
     input = 'coarser-master.i'
     exodiff = 'coarser-master_out.e'
     requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a master side that is approximately twice as coarse as the slave side.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+  [2_to_2_slave_to_master]
+    type = 'Exodiff'
+    input = '2-to-2-slave-to-master.i'
+    exodiff = '2-to-2-slave-to-master_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with an exactly equal discretization on either side of the interface.'
+    partial = True
+    map = False
+    mesh_mode = 'REPLICATED'
+  []
+  [4_to_2_slave_to_master]
+    type = 'Exodiff'
+    input = '4-to-2-slave-to-master.i'
+    exodiff = '4-to-2-slave-to-master_out.e'
+    requirement = 'The system shall be able to solve a solution continuity problem at a mortar interface with a 2:1 n_slave:n_master discretization at the interface.'
     partial = True
     map = False
     mesh_mode = 'REPLICATED'
