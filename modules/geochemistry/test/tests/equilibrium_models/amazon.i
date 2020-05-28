@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Cl-"
 # Approximately TDS = 44mg/kg

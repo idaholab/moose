@@ -1,12 +1,4 @@
 [Tests]
-  [./invalid_nernst_swap]
-    type = RunException
-    input = invalid_nernst_swap.i
-    expect_err = 'nernst_swap_out_of_basis: must be of same size as nernst_swap_into_basis'
-    requirement = 'The equilibrium reaction solver output will throw an error for incorrectly-sized Nernst swaps'
-    issues = '#15290'
-    design = 'EquilibriumReactionSolverOutput.md'
-  [../]
   [./seawater_no_precip]
     type = 'RunApp'
     input = 'seawater_no_precip.i'

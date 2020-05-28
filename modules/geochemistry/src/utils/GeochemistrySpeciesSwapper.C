@@ -204,6 +204,10 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
     }
   }
 
+  // record that the swap has occurred
+  mgd.have_swapped_out_of_basis.push_back(basis_index_to_replace);
+  mgd.have_swapped_into_basis.push_back(eqm_index_to_insert);
+
   // express stoichiometry in new basis
   for (unsigned i = 0; i < num_cols; ++i)
     mgd.eqm_stoichiometry(eqm_index_to_insert, i) = 0.0;
@@ -295,4 +299,45 @@ GeochemistrySpeciesSwapper::alterBulkComposition(unsigned basis_size,
   DenseVector<Real> result;
   _inv_swap_matrix.vector_mult_transpose(result, bulk_composition);
   bulk_composition = result;
+}
+
+bool
+GeochemistrySpeciesSwapper::findBestEqmSwap(unsigned basis_ind,
+                                            const ModelGeochemicalDatabase & mgd,
+                                            const std::vector<Real> & eqm_molality,
+                                            bool minerals_allowed,
+                                            bool gas_allowed,
+                                            bool sorption_allowed,
+                                            unsigned & best_eqm_species) const
+{
+  const unsigned num_eqm = mgd.eqm_species_name.size();
+  if (eqm_molality.size() != num_eqm)
+    mooseError("Size of eqm_molality is ",
+               eqm_molality.size(),
+               " which is not equal to the number of equilibrium species ",
+               num_eqm);
+  if (basis_ind >= mgd.basis_species_name.size())
+    mooseError("basis index ", basis_ind, " must be less than ", mgd.basis_species_name.size());
+  best_eqm_species = 0;
+  bool legitimate_swap_found = false;
+  Real best_stoi = 0.0;
+  for (unsigned j = 0; j < num_eqm; ++j)
+  {
+    if (mgd.eqm_stoichiometry(j, basis_ind) == 0.0)
+      continue;
+    if (!minerals_allowed && mgd.eqm_species_mineral[j])
+      continue;
+    if (!gas_allowed && mgd.eqm_species_gas[j])
+      continue;
+    if (!sorption_allowed && mgd.surface_sorption_related[j])
+      continue;
+    const Real stoi = std::abs(mgd.eqm_stoichiometry(j, basis_ind)) * eqm_molality[j];
+    if (stoi >= best_stoi)
+    {
+      best_stoi = stoi;
+      best_eqm_species = j;
+      legitimate_swap_found = true;
+    }
+  }
+  return legitimate_swap_found;
 }

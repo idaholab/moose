@@ -1,4 +1,4 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   swap_out_of_basis = "H+     O2(aq)"
   swap_into_basis = "  CO2(g) O2(g)"

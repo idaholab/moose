@@ -19,6 +19,7 @@ EquilibriumGeochemicalSolver::EquilibriumGeochemicalSolver(
     unsigned max_iter,
     Real max_initial_residual,
     Real swap_threshold,
+    unsigned max_swaps_allowed,
     const std::vector<std::string> & prevent_precipitation,
     Real max_ionic_strength,
     unsigned ramp_max_ionic_strength)
@@ -39,6 +40,7 @@ EquilibriumGeochemicalSolver::EquilibriumGeochemicalSolver(
     _max_iter(max_iter),
     _max_initial_residual(max_initial_residual),
     _swap_threshold(swap_threshold),
+    _max_swaps_allowed(max_swaps_allowed),
     _prevent_precipitation(prevent_precipitation),
     _max_ionic_strength(max_ionic_strength),
     _ramp_max_ionic_strength(ramp_max_ionic_strength)
@@ -112,33 +114,14 @@ EquilibriumGeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
         // a non-mineral in the algebraic system has super low molality: try to find a legitimate
         // swap
         swap_out_of_basis = i;
-        swap_into_basis = 0;
-
-        bool legitimate_swap_found = false;
-        Real best_stoi = 0.0;
-        // the first non-gas is the best possible so far
-        for (unsigned j = 0; j < _num_eqm; ++j)
-        {
-          if (_mgd.eqm_species_gas[j] || _mgd.eqm_stoichiometry(j, i) == 0.0 ||
-              _mgd.surface_sorption_related[j])
-            continue;
-          best_stoi = std::abs(_mgd.eqm_stoichiometry(j, i)) * _egs.getEquilibriumMolality(j);
-          swap_into_basis = j;
-          legitimate_swap_found = true;
-        }
-        // now go through the remainder, trying to find a better swap
-        for (unsigned j = swap_into_basis; j < _num_eqm; ++j)
-        {
-          if (_mgd.eqm_species_gas[j] || _mgd.eqm_stoichiometry(j, i) == 0.0 ||
-              _mgd.surface_sorption_related[j])
-            continue;
-          const Real stoi = std::abs(_mgd.eqm_stoichiometry(j, i)) * _egs.getEquilibriumMolality(j);
-          if (stoi > best_stoi)
-          {
-            best_stoi = stoi;
-            swap_into_basis = j;
-          }
-        }
+        bool legitimate_swap_found =
+            _egs.getSwapper().findBestEqmSwap(swap_out_of_basis,
+                                              _mgd,
+                                              _egs.getEquilibriumMolality(),
+                                              true,
+                                              false,
+                                              false,
+                                              swap_into_basis);
         if (legitimate_swap_found)
         {
           ss << "Basis species " << _mgd.basis_species_name[swap_out_of_basis]
@@ -158,9 +141,9 @@ EquilibriumGeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
   // now look through the molalities for minerals that are consumed
   for (const auto & i : molality_order)
   {
-    if (basis_molality[i] >= 0.0)
+    if (basis_molality[i] > 0.0)
     {
-      // since we're going through basis_molality in ascending order, as soon as we get >=0, we're
+      // since we're going through basis_molality in ascending order, as soon as we get >0, we're
       // safe
       break;
     }
@@ -168,33 +151,13 @@ EquilibriumGeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
     {
       swap_needed = true;
       swap_out_of_basis = i;
-      swap_into_basis = 0;
-
-      bool legitimate_swap_found = false;
-      Real best_stoi = 0.0;
-      // the first non-mineral and non-gas is the best possible so far
-      for (unsigned j = 0; j < _num_eqm; ++j)
-      {
-        if (_mgd.eqm_species_mineral[j] || _mgd.eqm_species_gas[j] ||
-            _mgd.surface_sorption_related[j] || _mgd.eqm_stoichiometry(j, i) == 0.0)
-          continue;
-        best_stoi = std::abs(_mgd.eqm_stoichiometry(j, i)) * _egs.getEquilibriumMolality(j);
-        swap_into_basis = j;
-        legitimate_swap_found = true;
-      }
-      // now go through the remainder, trying to find a better swap
-      for (unsigned j = swap_into_basis; j < _num_eqm; ++j)
-      {
-        if (_mgd.eqm_species_mineral[j] || _mgd.eqm_species_gas[j] ||
-            _mgd.surface_sorption_related[j] || _mgd.eqm_stoichiometry(j, i) == 0.0)
-          continue;
-        const Real stoi = std::abs(_mgd.eqm_stoichiometry(j, i)) * _egs.getEquilibriumMolality(j);
-        if (stoi > best_stoi)
-        {
-          best_stoi = stoi;
-          swap_into_basis = j;
-        }
-      }
+      bool legitimate_swap_found = _egs.getSwapper().findBestEqmSwap(swap_out_of_basis,
+                                                                     _mgd,
+                                                                     _egs.getEquilibriumMolality(),
+                                                                     false,
+                                                                     false,
+                                                                     false,
+                                                                     swap_into_basis);
       if (!legitimate_swap_found)
         mooseException("Cannot find a legitimate swap for mineral ",
                        _mgd.basis_species_name[swap_out_of_basis]);
@@ -315,9 +278,10 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
 {
   ss.str("");
   tot_iter = 0;
+  unsigned num_swaps = 0;
 
   bool still_swapping = true;
-  while (still_swapping)
+  while (still_swapping && num_swaps <= _max_swaps_allowed)
   {
     _num_basis_in_algebraic_system = _egs.getNumBasisInAlgebraicSystem();
     _num_in_algebraic_system = _egs.getNumInAlgebraicSystem();
@@ -367,7 +331,9 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
 
     _egs.enforceChargeBalance(); // just to get _bulk_moles of the charge-balance species correct.
                                  // This is not used within EquilibriumGeochemicalSystem, but may be
-                                 // used in the output, so we should ensure it is set correctly here
+                                 // used in the output and subsequent solves (the charge-balance
+                                 // species could even change between now and the next solve) so we
+                                 // should ensure it is set correctly here
     if (iter >= _max_iter)
       ss << std::endl << "Warning: Number of iterations exceeds " << _max_iter << std::endl;
 
@@ -387,6 +353,7 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
       try
       {
         _egs.performSwap(swap_out_of_basis, swap_into_basis);
+        num_swaps += 1;
       }
       catch (const MooseException & e)
       {
@@ -394,4 +361,6 @@ EquilibriumGeochemicalSolver::solveSystem(std::stringstream & ss,
       }
     }
   }
+  if (num_swaps > _max_swaps_allowed)
+    mooseException("Maximum number of swaps performed during solve");
 }

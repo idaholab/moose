@@ -229,6 +229,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
@@ -372,6 +375,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["Ca++"], calcite_posn);
+
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], ca_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], calcite_posn);
 
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
@@ -522,6 +531,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
   for (const auto & species : mgd.eqm_species_index)
@@ -649,6 +661,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["StoiCheckBasis"], sc_gas_posn);
+
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], sc_basis_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], sc_gas_posn);
 
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
@@ -805,6 +823,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   ASSERT_EQ(mgd.kin_species_index.size(), 4);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -1021,6 +1042,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   for (const auto & sp : {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake", "(O-phth)--", ">(s)FeO-"})
     ASSERT_EQ(mgd.kin_species_index.count(sp), 1);
 
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], o2aq_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], fe3_posn);
+
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_charge[sp.second], charge_gold[sp.first]);
@@ -1178,8 +1205,19 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   DenseMatrix<Real> orig_stoi = mgd.redox_stoichiometry;
   DenseMatrix<Real> orig_log10K = mgd.redox_log10K;
 
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
+
+  const unsigned o2aq_posn = mgd.basis_species_index["O2(aq)"];
+  const unsigned e_posn = mgd.eqm_species_index["e-"];
+
   // swap e- with O2(aq)
   swapper.performSwap(mgd, "O2(aq)", "e-");
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], o2aq_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], e_posn);
 
   EXPECT_EQ(mgd.redox_lhs, "O2(aq)");
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
@@ -1221,6 +1259,14 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   // swap O2(aq) with e-
   swapper.performSwap(mgd, "e-", "O2(aq)");
 
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 2);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 2);
+  for (unsigned i = 0; i < 2; ++i)
+  {
+    ASSERT_EQ(mgd.have_swapped_out_of_basis[i], o2aq_posn);
+    ASSERT_EQ(mgd.have_swapped_into_basis[i], e_posn);
+  }
+
   EXPECT_EQ(mgd.redox_lhs, "e-");
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
   for (unsigned red = 0; red < 2; ++red)
@@ -1231,8 +1277,16 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
       EXPECT_NEAR(mgd.redox_log10K(red, temp), orig_log10K(red, temp), 1.0E-8);
   }
 
+  const unsigned hco3_posn = mgd.basis_species_index["HCO3-"];
+  const unsigned co3_posn = mgd.eqm_species_index["CO3--"];
+
   // swap CO3-- into the basis in place of HCO3-
   swapper.performSwap(mgd, "HCO3-", "CO3--");
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 3);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 3);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[2], hco3_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[2], co3_posn);
 
   EXPECT_EQ(mgd.redox_lhs, "e-");
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
@@ -1260,4 +1314,70 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
     EXPECT_NEAR(mgd.redox_stoichiometry(red, basis_i), orig_stoi(red, basis_i), 1.0E-8);
   for (unsigned temp = 0; temp < 8; ++temp)
     EXPECT_NEAR(mgd.redox_log10K(red, temp), orig_log10K(red, temp), 1.0E-8);
+}
+
+/// Check findBestEqmSwap execption
+TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwapException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+  unsigned best;
+
+  try
+  {
+    const std::vector<Real> eqm_molality(6, 1.0);
+    swapper.findBestEqmSwap(4, mgd, eqm_molality, false, false, false, best);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("basis index 4 must be less than 4") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const std::vector<Real> eqm_molality(5, 1.0);
+    swapper.findBestEqmSwap(1, mgd, eqm_molality, false, false, false, best);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Size of eqm_molality is 5 which is not equal to the number of "
+                         "equilibrium species 6") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check findBestEqmSwap
+TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwap)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+  unsigned best;
+  // the following equilibrium molality has molality=5.0 for equilibrium mineral Calcite, which
+  // violates the assumption in the Geochemistry module that all equilibrium minerals have zero
+  // molality, but i'm setting this for testing only
+  const std::vector<Real> eqm_molality = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+  bool legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, false, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 3);
+  legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 5);
+  legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, true, true, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 5);
 }

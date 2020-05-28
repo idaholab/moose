@@ -1340,6 +1340,55 @@ TEST(EquilibiumGeochemicalSystemTest, getEqmMolality)
               1.0E-8);
 }
 
+/// Check computeAndGetEquilibriumActivity)
+TEST(EquilibiumGeochemicalSystemTest, computeAndGetEquilibriumActivity)
+{
+  EquilibriumGeochemicalSystem nonconst = egs_redox;
+  const ModelGeochemicalDatabase & mgd = nonconst.getModelGeochemicalDatabase();
+  const std::vector<Real> & eqm_m = nonconst.getEquilibriumMolality();
+  const std::vector<Real> & eqm_ga = nonconst.getEquilibriumActivityCoefficient();
+  const std::vector<Real> & eqm_act = nonconst.computeAndGetEquilibriumActivity();
+  for (unsigned j = 0; j < nonconst.getNumInEquilibrium(); ++j)
+  {
+    EXPECT_EQ(eqm_act[j], nonconst.getEquilibriumActivity(j));
+    if (mgd.eqm_species_mineral[j])
+      EXPECT_EQ(eqm_act[j], 1.0);
+    else if (mgd.eqm_species_name[j] == "O2(g)")
+      EXPECT_NEAR(eqm_act[j],
+                  nonconst.getBasisActivity(mgd.basis_species_index.at("O2(aq)")) /
+                      std::pow(10.0, nonconst.getLog10K(j)),
+                  1E-3);
+    else if (mgd.eqm_species_name[j] == "CH4(g)fake")
+      EXPECT_NEAR(
+          eqm_act[j],
+          std::pow(nonconst.getBasisActivity(mgd.basis_species_index.at("CH4(aq)")), 2.0) *
+              std::pow(nonconst.getBasisActivity(mgd.basis_species_index.at("Fe+++")), -2.0) *
+              std::pow(nonconst.getBasisActivity(mgd.basis_species_index.at("HCO3-")), 1.5) /
+              std::pow(10.0, nonconst.getLog10K(j)),
+          1E-3);
+    else
+      EXPECT_EQ(eqm_act[j], eqm_m[j] * eqm_ga[j]);
+  }
+}
+
+/// Check getEquilibriumActivity execption
+TEST(EquilibiumGeochemicalSystemTest, getEquilibriumActivityExeception)
+{
+  try
+  {
+    EXPECT_EQ(egs_good_calcite.getEquilibriumActivity(6), 1);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Cannot retrieve activity for equilibrium species 6 since there are only 6 "
+                 "equilibrium species") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
 /// Check getTotalCharge
 TEST(EquilibiumGeochemicalSystemTest, getTotalCharge)
 {
@@ -2039,6 +2088,12 @@ TEST(EquilibiumGeochemicalSystemTest, alterAndRevertChargeBalance)
 /// Check getNumRedox
 TEST(EquilibiumGeochemicalSystemTest, getNumRedox) { EXPECT_EQ(egs_redox.getNumRedox(), 2); }
 
+/// Check getOriginalRedoxLHS
+TEST(EquilibiumGeochemicalSystemTest, getOriginalRedoxLHS)
+{
+  EXPECT_EQ(egs_redox.getOriginalRedoxLHS(), "e-");
+}
+
 /// Check getRedoxLog10K
 TEST(EquilibiumGeochemicalSystemTest, getRedoxLog10K)
 {
@@ -2363,4 +2418,1130 @@ TEST(EquilibiumGeochemicalSystemTest, surfacePotJac)
         EXPECT_NEAR(expected / jac(res_comp, var_num), 1.0, 1.0E-2);
     }
   }
+}
+
+/// Check setTemperature and getTemperature
+TEST(EquilibiumGeochemicalSystemTest, setGetTemperature)
+{
+  EquilibriumGeochemicalSystem nonconst = egs_good_calcite;
+  EXPECT_EQ(nonconst.getTemperature(), 25.0);
+  nonconst.setTemperature(40.0);
+  EXPECT_EQ(nonconst.getTemperature(), 40.0);
+}
+
+/// Check exceptions for setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
+TEST(EquilibriumGeochemicalSystemTest, setMolalitiesExcept1)
+{
+  EquilibriumGeochemicalSystem nonconst = egs_good_calcite;
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("When setting all molalities, names and values must have same size") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+"},
+        {1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "When setting all molalities, values must be provided for every species and surface "
+            "potentials") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("constraints_from_molalities has size 3 while number of basis species is 4") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, -1.0, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality for mineral Calcite cannot be -1: it must be non-negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, -1.0, 1.0, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality for species Ca++ cannot be -1: it must be non-negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"OH-", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 1.0, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality (or free mineral moles, etc - whatever is appropriate) for "
+                         "species H2O needs to be provided when setting all molalities") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 1.0, -1.0, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality for species CO2(aq) cannot be -1: it must be non-negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO2(aq)", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 1.0, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Molality for species CO3-- needs to be provided when setting all molalities") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O", "H+", "HCO3-", "Ca++", "Calcite", "CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-"},
+        {1.1, 2.2, 3.3, 4.4, 1.0, 6.6, 7.7, 8.8, 9.9, 10.1},
+        {true, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Water activity cannot be determined from molalities: constraints_from_molalities "
+                 "must be set to false for water if activity of water is fixed") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check exceptions for setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
+TEST(EquilibriumGeochemicalSystemTest, setMolalitiesExcept2)
+{
+  const PertinentGeochemicalSystem model_gas_and_sorption(
+      database_good_calcite,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {"Goethite"},
+      {"O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  EquilibriumGeochemicalSystem nonconst(
+      mgd,
+      ac3,
+      is3,
+      swapper7,
+      {"O2(aq)"},
+      {"O2(g)"},
+      "H+",
+      {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+      cm,
+      25,
+      0,
+      1E-20);
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)"},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16},
+        {false, true, true, false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("When setting all molalities, values must be provided for every species "
+                         "and surface potentials") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)",
+         "Goethite_surface_potential_expr"},
+        {1.1, 2.2, 3.3, 1.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {false, true, true, false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality for gas O2(g) cannot be 1: it must be zero") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)",
+         "Goethite_surface_potential_expr"},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, -1.0, 17},
+        {false, true, true, false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Molality for species O2(aq) cannot be -1: it must be non-negative") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)",
+         "Goethite"},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {false, true, true, false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Surface potential for mineral Goethite needs to be provided when setting "
+                         "all molalities") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)",
+         "Goethite_surface_potential_expr"},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 0},
+        {false, true, true, false, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Surface-potential expression for mineral Goethite cannot be 0: it must "
+                         "be positive") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+        {"H2O",
+         "H+",
+         "HCO3-",
+         "O2(g)",
+         "Fe+++",
+         ">(s)FeOH",
+         ">(w)FeOH",
+         "(O-phth)--",
+         "CH4(aq)",
+         "CO2(aq)",
+         "CO3--",
+         "OH-",
+         "e-",
+         ">(s)FeO-",
+         "Goethite",
+         "O2(aq)",
+         "Goethite_surface_potential_expr"},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {false, true, true, true, true, true, true});
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Gas fugacity cannot be determined from molality: "
+                         "constraints_from_molalities must be set false for all gases") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
+TEST(EquilibriumGeochemicalSystemTest, setMolalities1)
+{
+  const PertinentGeochemicalSystem model_gas_and_sorption(
+      database_good_calcite,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {"Goethite"},
+      {"O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  EquilibriumGeochemicalSystem nonconst(
+      mgd,
+      ac0,
+      is0,
+      swapper7,
+      {"O2(aq)"},
+      {"O2(g)"},
+      "Fe+++",
+      {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+      cm,
+      25,
+      0,
+      1E-20);
+  const std::vector<Real> bulk_before_set = nonconst.getBulkMoles();
+  const std::vector<Real> molal_before_set =
+      nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
+
+  const std::vector<std::string> gold_name = {"H2O",
+                                              "H+",
+                                              "HCO3-",
+                                              "O2(g)",
+                                              "Fe+++",
+                                              ">(s)FeOH",
+                                              ">(w)FeOH",
+                                              "(O-phth)--",
+                                              "CH4(aq)",
+                                              "CO2(aq)",
+                                              "CO3--",
+                                              "OH-",
+                                              "e-",
+                                              ">(s)FeO-",
+                                              "Goethite",
+                                              "O2(aq)",
+                                              "Goethite_surface_potential_expr"};
+  const std::vector<Real> set_molal = {
+      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17};
+  nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+      gold_name, set_molal, {true, true, true, false, false, true, false});
+
+  const unsigned num_basis = nonconst.getNumInBasis();
+  const unsigned num_eqm = nonconst.getNumInEquilibrium();
+
+  // check molalities:
+  std::vector<Real> gold_molal = set_molal;
+  gold_molal[6] = molal_before_set[6]; // >(w)FeOH has a FREE_MOLALITY constraint and the
+                                       // setSolvent... method has false
+  gold_molal[14] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
+  const std::vector<Real> molal = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned i = 0; i < num_basis; ++i)
+    EXPECT_EQ(molal[mgd.basis_species_index[gold_name[i]]], gold_molal[i]);
+  for (unsigned j = num_basis; j < num_basis + num_eqm; ++j)
+    EXPECT_EQ(nonconst.getEquilibriumMolality(mgd.eqm_species_index[gold_name[j]]), gold_molal[j]);
+  EXPECT_NEAR(nonconst.getSurfacePotential(0),
+              -2.0 * GeochemistryConstants::GAS_CONSTANT *
+                  (25.0 + GeochemistryConstants::CELSIUS_TO_KELVIN) /
+                  GeochemistryConstants::FARADAY * std::log(17.0),
+              1.0E-8);
+  EXPECT_EQ(nonconst.getSolventWaterMass(), 1.1);
+
+  // check activities
+  const std::vector<bool> act_known_gold = {false, true, false, true, false, false, false};
+  const std::vector<bool> act_known = nonconst.getBasisActivityKnown();
+  for (unsigned i = 0; i < num_basis; ++i)
+    EXPECT_EQ(act_known[i], act_known_gold[i]);
+  EXPECT_EQ(nonconst.getBasisActivity(1),
+            2.2); // H+: activity changed by setSolvent... (activity coeffs = 1)
+  EXPECT_EQ(nonconst.getBasisActivity(3), 4.0); // O2(g): fugacity unchanged by setSolvent...
+
+  // check sorbing surface area
+  EXPECT_EQ(nonconst.getSorbingSurfaceArea()[0], 60.0); // Goethite is not in the basis
+
+  // check bulk moles
+  const std::vector<Real> bulk = nonconst.getBulkMoles();
+  for (unsigned i = 0; i < num_basis; ++i)
+  {
+    Real b = 0.0;
+    if (i == 0)
+      b = GeochemistryConstants::MOLES_PER_KG_WATER;
+    else
+      b = gold_molal[i];
+    for (unsigned j = 0; j < num_eqm; ++j)
+      b += mgd.eqm_stoichiometry(j, i) * nonconst.getEquilibriumMolality(j);
+    b *= gold_molal[0];
+    if (i == 4)
+      EXPECT_EQ(bulk[4], bulk_before_set[4]); // Fe+++ is set by original constraints
+    else
+      EXPECT_NEAR(bulk[mgd.basis_species_index[gold_name[i]]] / b, 1.0, 1.0E-8);
+  }
+}
+
+/// Check setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots
+TEST(EquilibriumGeochemicalSystemTest, setMolalities2)
+{
+  const PertinentGeochemicalSystem model_gas_and_sorption(
+      database_good_calcite,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {"Goethite"},
+      {"O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
+  EquilibriumGeochemicalSystem nonconst(
+      mgd,
+      ac3,
+      is3,
+      swapper7,
+      {"O2(aq)"},
+      {"O2(g)"},
+      "Fe+++",
+      {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH"},
+      {11.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0},
+      cm,
+      25,
+      0,
+      1E-20);
+  const std::vector<Real> bulk_before_set = nonconst.getBulkMoles();
+  const std::vector<Real> molal_before_set =
+      nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
+
+  const std::vector<std::string> gold_name = {"H2O",
+                                              "H+",
+                                              "HCO3-",
+                                              "O2(g)",
+                                              "Fe+++",
+                                              ">(s)FeOH",
+                                              ">(w)FeOH",
+                                              "(O-phth)--",
+                                              "CH4(aq)",
+                                              "CO2(aq)",
+                                              "CO3--",
+                                              "OH-",
+                                              "e-",
+                                              ">(s)FeO-",
+                                              "Goethite",
+                                              "O2(aq)",
+                                              "Goethite_surface_potential_expr"};
+  const std::vector<Real> set_molal = {
+      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17};
+  nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+      gold_name, set_molal, {false, false, true, false, false, true, false});
+
+  const unsigned num_basis = nonconst.getNumInBasis();
+  const unsigned num_eqm = nonconst.getNumInEquilibrium();
+
+  // check molalities:
+  std::vector<Real> gold_molal = set_molal;
+  gold_molal[1] =
+      molal_before_set[1]; // H+ has an ACTIVITY constraint and the setSolvent... method has false
+  gold_molal[6] = molal_before_set[6]; // >(w)FeOH has a FREE_MOLALITY constraint and the
+                                       // setSolvent... method has false
+  gold_molal[14] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
+  const std::vector<Real> molal = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned i = 0; i < num_basis; ++i)
+    EXPECT_EQ(molal[mgd.basis_species_index[gold_name[i]]], gold_molal[i]);
+  for (unsigned j = num_basis; j < num_basis + num_eqm; ++j)
+    EXPECT_EQ(nonconst.getEquilibriumMolality(mgd.eqm_species_index[gold_name[j]]), gold_molal[j]);
+  EXPECT_NEAR(nonconst.getSurfacePotential(0),
+              -2.0 * GeochemistryConstants::GAS_CONSTANT *
+                  (25.0 + GeochemistryConstants::CELSIUS_TO_KELVIN) /
+                  GeochemistryConstants::FARADAY * std::log(17.0),
+              1.0E-8);
+  EXPECT_EQ(nonconst.getSolventWaterMass(), 1.1);
+
+  // check activities
+  const std::vector<bool> act_known_gold = {false, true, false, true, false, false, false};
+  const std::vector<bool> act_known = nonconst.getBasisActivityKnown();
+  for (unsigned i = 0; i < num_basis; ++i)
+    EXPECT_EQ(act_known[i], act_known_gold[i]);
+  EXPECT_EQ(nonconst.getBasisActivity(1),
+            2.0); // H+: activity unchanged by setSolvent... (activity coeffs = 1)
+  EXPECT_EQ(nonconst.getBasisActivity(3), 4.0); // O2(g): fugacity unchanged by setSolvent...
+
+  // check sorbing surface area
+  EXPECT_EQ(nonconst.getSorbingSurfaceArea()[0], 60.0); // Goethite is not in the basis
+
+  // check bulk moles
+  const std::vector<Real> bulk = nonconst.getBulkMoles();
+  for (unsigned i = 0; i < num_basis; ++i)
+  {
+    Real b = 0.0;
+    if (i == 0)
+      b = GeochemistryConstants::MOLES_PER_KG_WATER;
+    else
+      b = gold_molal[i];
+    for (unsigned j = 0; j < num_eqm; ++j)
+      b += mgd.eqm_stoichiometry(j, i) * nonconst.getEquilibriumMolality(j);
+    b *= gold_molal[0];
+    if (i == 0 || i == 4)
+      EXPECT_EQ(bulk[i], bulk_before_set[i]); // H2O and Fe+++ are set by original constraints
+    else
+      EXPECT_NEAR(bulk[mgd.basis_species_index[gold_name[i]]] / b, 1.0, 1.0E-8);
+  }
+}
+
+/// Check getConstraintMeaning
+TEST(EquilibriumGeochemicalSystemTest, getConstraintMeaning)
+{
+  ModelGeochemicalDatabase mgd = model_good_calcite.modelGeochemicalDatabase();
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  const EquilibriumGeochemicalSystem egs(mgd,
+                                         ac3,
+                                         is3,
+                                         swapper4,
+                                         {"Ca++"},
+                                         {"Calcite"},
+                                         "H+",
+                                         {"H2O", "H+", "HCO3-", "Calcite"},
+                                         {1.75, 3.0, 2.0, 1.0},
+                                         cm,
+                                         25,
+                                         0,
+                                         1E-20);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+}
+
+/// Check changeConstraintToBulk exceptions
+TEST(EquilibriumGeochemicalSystemTest, changeContraintToBulkExceptions)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {"O2(aq)"},
+                                   {"O2(g)"},
+                                   "H+",
+                                   {"H2O", "H+", "O2(g)", "HCO3-"},
+                                   {1.0, 2.0, 3.0, 4.0},
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+
+  try
+  {
+    egs.changeConstraintToBulk(4);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot changeConstraintToBulk for species 4 because there are only 4 basis species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    egs.changeConstraintToBulk(4, 1.0);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot changeConstraintToBulk for species 4 because there are only 4 basis species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    egs.changeConstraintToBulk(3, 1.0);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Attempting to changeConstraintToBulk for a gas species.  Since a swap is "
+                         "involved, you cannot specify a value for the bulk number of moles.  You "
+                         "must use changeConstraintToBulk(basis_ind) method instead of "
+                         "changeConstraintToBulk(basis_ind, value)") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check closeSystem
+TEST(EquilibriumGeochemicalSystemTest, closeSystem)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {"O2(aq)"},
+                                   {"O2(g)"},
+                                   "H+",
+                                   {"H2O", "H+", "HCO3-", "O2(g)"},
+                                   {1.0, 2.0, 3.0, 4.0},
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+  egs.closeSystem();
+  cm[0] = EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER;
+  cm[2] = EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+}
+
+/// Check changeConstraintToBulk
+TEST(EquilibriumGeochemicalSystemTest, changeConstraintToBulk)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {"O2(aq)"},
+                                   {"O2(g)"},
+                                   "H+",
+                                   {"H2O", "H+", "HCO3-", "O2(g)"},
+                                   {1.0, 2.0, 3.0, 4.0},
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+  const std::vector<Real> orig_bulk = egs.getBulkMoles();
+
+  egs.changeConstraintToBulk(0);
+  cm[0] = EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], orig_bulk[i]);
+
+  std::vector<Real> new_bulk = orig_bulk;
+  egs.changeConstraintToBulk(1, 1.1); // just resets the bulk constraint value
+  new_bulk[1] = 1.1;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], new_bulk[i]);
+
+  egs.changeConstraintToBulk(2); // this means charge-balance can be enforced simply: see next line
+  new_bulk[1] = new_bulk[2];
+  cm[2] = EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], new_bulk[i]);
+
+  egs.changeConstraintToBulk(3);
+  cm[3] = EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getConstraintMeaning()[i], cm[i]);
+  EXPECT_EQ(mgd.basis_species_name[3], "(O-phth)--");
+}
+
+/// Check addToBulkMoles exceptions
+TEST(EquilibriumGeochemicalSystemTest, addToBulkMolesExceptions)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY);
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {"O2(aq)"},
+                                   {"O2(g)"},
+                                   "H+",
+                                   {"H2O", "H+", "HCO3-", "O2(g)"},
+                                   {1.0, 2.0, 3.0, 4.0},
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+
+  try
+  {
+    egs.addToBulkMoles(4, 1.0);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("Cannot addToBulkMoles for species 4 because there are only 4 basis species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check addToBulkMoles
+TEST(EquilibriumGeochemicalSystemTest, addToBulkMoles)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+
+  std::vector<Real> bm = {1.0, 2.0, 3.0, 4.0};
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {},
+                                   {},
+                                   "H+",
+                                   {"H2O", "H+", "O2(aq)", "HCO3-"},
+                                   bm,
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+
+  egs.addToBulkMoles(0, 1.1);
+  bm[0] += 1.1;
+  for (unsigned i = 0; i < 3; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  egs.addToBulkMoles(1, 2.2);
+  bm[1] += 2.2;
+  for (unsigned i = 0; i < 3; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  egs.addToBulkMoles(2, 3.3);
+  bm[2] += 3.3;
+  for (unsigned i = 0; i < 3; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+}
+
+/// Check setConstraintValue exceptions
+TEST(EquilibriumGeochemicalSystemTest, setConstraintValueExceptions)
+{
+  EquilibriumGeochemicalSystem nonconst = egs_good_calcite;
+  try
+  {
+    nonconst.setConstraintValue(4, 1.0);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot setConstraintValue for species 4 because there are only 4 basis species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check setConstraintValue
+TEST(EquilibriumGeochemicalSystemTest, setConstraintValue)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm;
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_WATER);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY);
+  cm.push_back(EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY);
+
+  std::vector<Real> bm_in = {1.0, 2.0, 3.0, 4.0};
+
+  EquilibriumGeochemicalSystem egs(mgd,
+                                   ac3,
+                                   is3,
+                                   swapper4,
+                                   {},
+                                   {},
+                                   "H+",
+                                   {"H2O", "H+", "O2(aq)", "HCO3-"},
+                                   bm_in,
+                                   cm,
+                                   25,
+                                   0,
+                                   1E-20);
+
+  std::vector<Real> bm = egs.getBulkMoles();
+  std::vector<Real> mol = egs.getSolventMassAndFreeMolalityAndMineralMoles();
+
+  egs.setConstraintValue(0, 1.1);
+  bm[0] = 1.1;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[i], mol[i]);
+
+  egs.setConstraintValue(1, 2.2);
+  bm[1] = 2.2;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[i], mol[i]);
+
+  egs.setConstraintValue(3, 4.4);
+  mol[3] = 4.4;
+  bm = egs.getBulkMoles(); // setting the molality to 4.4 changes the bulk composition
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getSolventMassAndFreeMolalityAndMineralMoles()[i], mol[i]);
+
+  egs.setConstraintValue(2, 3.3);
+  bm = egs.getBulkMoles(); // setting the activity to 3.3 changes the basis molality and hence the
+                           // bulk composition
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_EQ(egs.getBulkMoles()[i], bm[i]);
+  EXPECT_EQ(egs.getBasisActivity(2), 3.3);
+
+  // now set the constraint on HCO3- to bulk, which allows charge-neutrality to be enforced simply
+  egs.changeConstraintToBulk(3);
+  // set HCO3- and see it changes H+
+  bm = egs.getBulkMoles();
+  egs.setConstraintValue(3, 7.7);
+  bm[1] = 7.7;
+  bm[3] = 7.7;
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_NEAR(egs.getBulkMoles()[i], bm[i], 1.0E-8);
+  // set H+ and see it actually makes no difference because of charge-neutrality
+  egs.setConstraintValue(1, 1.2345);
+  for (unsigned i = 0; i < 4; ++i)
+    EXPECT_NEAR(egs.getBulkMoles()[i], bm[i], 1.0E-8);
+}
+
+/// illustrates how to use getModelGeochemicalDatabase and setModelGeochemicalDatabase
+TEST(EquilibriumGeochemicalSystemTest, getsetModelGeochemicalDatabase)
+{
+  // this test involves radically changing the basis to illustrate copying, etc, works: no coder
+  // should actually perform these radical changes otherwise a crash is virtually guaranteed!
+
+  const GeochemicalDatabaseReader db("database/moose_testdb.json");
+  const PertinentGeochemicalSystem pgs(db, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = pgs.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(2, 1E-6);
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem egs(
+      mgd, ac3, is3, swapper, {}, {}, "H+", {"H2O", "H+"}, {1, 1}, cm, 25, 0, 1E-20);
+
+  const ModelGeochemicalDatabase & mgd_ref = egs.getModelGeochemicalDatabase();
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), 2);
+  ModelGeochemicalDatabase copy_of_mgd = egs.getModelGeochemicalDatabase();
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2);
+
+  // the following copies all the data of egs into copy_of_egs, but only the references (such as
+  // _mgd) get copied: the data they refer to doesn't get copied
+  EquilibriumGeochemicalSystem copy_of_egs = egs;
+
+  // create a new ModelGeochemicalDatabase, with 3 basis species
+  const PertinentGeochemicalSystem pgs3(
+      db, {"H2O", "H+", "Ca++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd3 = pgs3.modelGeochemicalDatabase();
+
+  // Copy mgd3 into the memory referred to by copy_of_egs._mgd, which is also referred to by
+  // egs._mgd and mgd_ref
+  copy_of_egs.setModelGeochemicalDatabase(mgd3);
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), 3);
+  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), 3);
+  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), 3);
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2); // copy_of_mgd shouldn't be impacted
+
+  // do a similar thing with 1 basis species
+  const PertinentGeochemicalSystem pgs1(db, {"H2O"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd1 = pgs1.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd1);
+  EXPECT_EQ(mgd_ref.basis_species_name.size(), 1);
+  EXPECT_EQ(egs.getModelGeochemicalDatabase().basis_species_name.size(), 1);
+  EXPECT_EQ(copy_of_egs.getModelGeochemicalDatabase().basis_species_name.size(), 1);
+  EXPECT_EQ(copy_of_mgd.basis_species_name.size(), 2);
+}
+
+/// check setMineralRelatedFreeMoles
+TEST(EquilibriumGeochemicalSystemTest, getsetMineralRelatedFreeMoles)
+{
+  // first, create an EquilibriumGeochemicalSystem that has minerals and sorption-related things
+  const PertinentGeochemicalSystem model_gas_and_sorption(
+      database_good_calcite,
+      {"H2O", "H+", "HCO3-", "O2(aq)", "Fe+++", ">(s)FeOH", ">(w)FeOH", "Ca++"},
+      {"Goethite", "Calcite"},
+      {"O2(g)"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd = model_gas_and_sorption.modelGeochemicalDatabase();
+  const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> cm = {
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::KG_SOLVENT_WATER,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
+      EquilibriumGeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
+  EquilibriumGeochemicalSystem nonconst(
+      mgd,
+      ac0,
+      is0,
+      swapper8,
+      {"O2(aq)", "Ca++"},
+      {"O2(g)", "Calcite"},
+      "Fe+++",
+      {"H2O", "H+", "HCO3-", "O2(g)", "Fe+++", ">(s)FeOH", ">(w)FeOH", "Calcite"},
+      {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0},
+      cm,
+      25,
+      0,
+      1E-20);
+  const unsigned num_basis = nonconst.getNumInBasis();
+  const unsigned num_eqm = nonconst.getNumInEquilibrium();
+
+  // preset some molalities
+  const std::vector<std::string> gold_name = {"H2O",        "H+",
+                                              "HCO3-",      "O2(g)",
+                                              "Fe+++",      ">(s)FeOH",
+                                              ">(w)FeOH",   "Calcite",
+                                              "(O-phth)--", "CH4(aq)",
+                                              "CO2(aq)",    "CO3--",
+                                              "CaCO3",      "CaOH+",
+                                              "OH-",        "e-",
+                                              ">(s)FeO-",   ">(s)FeOCa+",
+                                              "Goethite",   "Ca++",
+                                              "O2(aq)",     "Goethite_surface_potential_expr"};
+  const std::vector<Real> set_molal = {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11,
+                                       12,  13,  14,  15,  16,  17,  18,  19,  20,  21, 22};
+  nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePots(
+      gold_name, set_molal, {true, true, true, false, true, true, true, true});
+
+  // now set the moles of mineral-related things to 1234.5
+  nonconst.setMineralRelatedFreeMoles(1234.5);
+
+  std::vector<Real> gold_molal = set_molal;
+  gold_molal[5] = 1234.5;  // >(s)FeOH
+  gold_molal[6] = 1234.5;  // >(w)FeOH
+  gold_molal[7] = 1234.5;  // Calcite
+  gold_molal[16] = 1234.5; // >(s)FeO-
+  gold_molal[17] = 1234.5; // >(s)FeOCa+
+  gold_molal[18] = 0.0;    // Goethite is an equilibrium mineral
+
+  const std::vector<Real> & basis_mol = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned i = 0; i < num_basis; ++i)
+    EXPECT_EQ(basis_mol[mgd.basis_species_index[gold_name[i]]], gold_molal[i]);
+  const std::vector<Real> & eqm_mol = nonconst.getEquilibriumMolality();
+  for (unsigned j = num_basis; j < num_basis + num_eqm; ++j)
+    EXPECT_EQ(eqm_mol[mgd.eqm_species_index[gold_name[j]]], gold_molal[j]);
 }

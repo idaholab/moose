@@ -1,0 +1,102 @@
+[Tests]
+  [./add_feldspar]
+    type = 'RunApp'
+    input = 'add_feldspar.i'
+    expect_out = 'Quartz;  bulk_moles'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions that involve adding reactants"
+    issues = '#15330'
+    design = 'adding_feldspar.md'
+  [../]
+  [./calcite_dumping]
+    type = 'RunApp'
+    input = 'calcite_dumping.i'
+    expect_out = 'Mass of solvent water = 1kg'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
+    issues = '#15330'
+    design = 'calcite_buffer.md'
+  [../]
+  [./calcite_no_dumping]
+    type = 'RunApp'
+    input = 'calcite_dumping.i'
+    cli_args = 'TimeDependentReactionSolver/mode=0'
+    prereq = 'calcite_dumping'
+    expect_out = 'Mass of solvent water = 1kg'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are not dumped and then reactants are added"
+    issues = '#15330'
+    design = 'calcite_buffer.md'
+  [../]
+  [./changing_fugacity_calcite]
+    type = 'RunApp'
+    input = 'changing_fugacity_calcite.i'
+    expect_out = 'CO2\(g\);  fugacity = 1'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where gas fugacity is changed over time"
+    issues = '#15330'
+    design = 'changing_fugacity_with_calcite.md'
+  [../]
+  [./changing_pH_ferric_hydroxide]
+    type = 'RunApp'
+    input = 'changing_pH_ferric_hydroxide.i'
+    expect_out = 'pH = 12'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where pH is changed over time"
+    issues = '#15330'
+    design = 'changing_pH_iron.md'
+  [../]
+  [./cooling]
+    type = 'RunApp'
+    input = 'cooling.i'
+    expect_out = 'Temperature = 25'
+    requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
+    issues = '#15330'
+    design = 'cooling_feldspar.md'
+  [../]
+  [./dissolution_pyrite_1]
+    type = 'RunApp'
+    input = 'dissolution_pyrite_1.i'
+    expect_out = 'Pyrite = -8\*H2O \+ 16\*H\+ \+ 14\*e- \+ 2\*SO4-- \+ 1\*Fe\+\+'
+    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
+    issues = '#15330'
+    design = 'adding_pyrite.md'
+  [../]
+  [./dissolution_pyrite_2]
+    type = 'RunApp'
+    input = 'dissolution_pyrite_2.i'
+    expect_out = 'Pyrite = -2\*H2O \+ 4\*H\+ \+ 0.5\*Hematite \+ 2\*SO4-- - 3.75\*O2\(g\)'
+    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is fixed"
+    issues = '#15330'
+    design = 'adding_pyrite.md'
+  [../]
+  [./mixing_1]
+    type = 'RunApp'
+    input = 'mixing_1.i'
+    expect_out = 'pH = 8.1'
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    issues = '#15330'
+    design = 'pickup.md'
+  [../]
+  [./mixing_2]
+    type = 'RunApp'
+    input = 'mixing_2.i'
+    expect_out = 'Mass of solvent water = 11kg'
+    requirement = "The geochemistry module shall be able to progressively add one fluid to another fluid, even if they have different temperatures, and find the resulting stable equilibrium"
+    issues = '#15330'
+    design = 'pickup.md'
+  [../]
+  [./seawater_flowthrough]
+    type = 'RunApp'
+    input = 'seawater_evaporation.i'
+    expect_out = 'Mass of solvent water = 0.0272kg'
+    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
+    issues = '#15330'
+    design = 'flow_through.md'
+  [../]
+  [./seawater_no_flowthrough]
+    type = 'RunApp'
+    input = 'seawater_evaporation.i'
+    cli_args = "AuxKernels/mode/function='if(t<=1.0, 1.0, 0.0)'"
+    prereq = 'seawater_flowthrough'
+    expect_out = 'Halite;  bulk_moles'
+    requirement = "The geochemistry module shall be able to progressively remove reactants, allowing precipitates for form"
+    issues = '#15330'
+    design = 'flow_through.md'
+  [../]
+[]

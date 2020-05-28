@@ -2,7 +2,7 @@
 # There is 1 free gram of Fe(OH)3(ppd), which amounts to 9.357E-3 free moles.
 # Per mole of Fe(OH)3(ppd) there are 0.005 moles of >(s)FeOH, giving a total of 4.679E-5 moles (bulk composition)
 # Per mole of Fe(OH)3(ppd) there are 0.2 moles of >(w)FeOH, giving a total of 1.871E-3 moles (bulk composition)
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   swap_out_of_basis = "Fe+++"
   swap_into_basis = "Fe(OH)3(ppd)"
@@ -16,7 +16,7 @@
 [UserObjects]
   [./definition]
     type = GeochemicalModelDefinition
-    database_file = "ferric_hydroxide_sorption.json"
+    database_file = "../../database/ferric_hydroxide_sorption.json"
     basis_species = "H2O H+ Na+ Cl- Hg++ Pb++ SO4-- Fe+++ >(s)FeOH >(w)FeOH"
     equilibrium_minerals = "Fe(OH)3(ppd)"
   [../]

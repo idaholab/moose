@@ -63,9 +63,6 @@ struct ModelGeochemicalDatabase
   /// all quantities have a charge (mineral charge = 0, gas charge = 0, oxide charge = 0)
   std::vector<Real> basis_species_charge;
 
-  /// all quantities have a molecular weight (g)
-  std::vector<Real> basis_species_weight;
-
   /// all quantities have an ionic radius (Angstrom) for computing activity (mineral radius = 0, gas radius = 0, surface species radius = 0)
   std::vector<Real> basis_species_radius;
 
@@ -210,6 +207,20 @@ struct ModelGeochemicalDatabase
    * the basis species "j"
    */
   DenseMatrix<Real> kin_stoichiometry;
+
+  /**
+   * Species that have been swapped out of the basis.  Every time a swap is performed on the
+   * ModelGeochemicalDatabase, the basis-index of the species removed from the basis is appended to
+   * this list
+   */
+  std::vector<unsigned> have_swapped_out_of_basis;
+
+  /**
+   * Species that have been swapped into the basis.  Every time a swap is performed on the
+   * ModelGeochemicalDatabase, the equilibrium-index of the species added to the basis is appended
+   * to this list
+   */
+  std::vector<unsigned> have_swapped_into_basis;
 };
 
 /**
