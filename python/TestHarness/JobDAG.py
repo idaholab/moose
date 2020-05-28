@@ -45,7 +45,7 @@ class JobDAG(object):
         self.__name_to_job = {}
         for tester in testers:
             job = Job(tester, self, self.options)
-            name = job.getUniqueIdentifier()
+            name = job.getTestName()
             if name not in self.__name_to_job:
                 self.__name_to_job[name] = job
             else:
@@ -113,7 +113,7 @@ class JobDAG(object):
     def _doMakeDependencies(self):
         """ Setup dependencies within the current Job DAG """
         for job in self.__job_dag.ind_nodes():
-            prereq_jobs = job.getUniquePrereqs()
+            prereq_jobs = job.getPrereqs()
             for prereq_job in prereq_jobs:
                 try:
                     self.__name_to_job[prereq_job]
