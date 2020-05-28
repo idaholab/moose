@@ -53,10 +53,6 @@
   [results]
     type = StochasticResults
   []
-  [samples]
-    type = SamplerData
-    sampler = hypercube
-  []
   [stats]
     type = Statistics
     vectorpostprocessors = results

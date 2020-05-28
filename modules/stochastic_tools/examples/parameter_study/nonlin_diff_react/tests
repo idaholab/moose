@@ -12,7 +12,7 @@
                 Samplers/hypercube/num_bins=3
                 runner:Mesh/gen/nx=10
                 runner:Mesh/gen/ny=10"
-    csvdiff = 'nonlin_diff_react_master_uniform_out_results_0002.csv nonlin_diff_react_master_uniform_out_samples_0002.csv nonlin_diff_react_master_uniform_out_stats_0002.csv'
+    csvdiff = 'nonlin_diff_react_master_uniform_out_results_0002.csv nonlin_diff_react_master_uniform_out_stats_0002.csv'
 
     detail = "uniformly distributed and "
   []
@@ -24,7 +24,7 @@
                 Samplers/hypercube/num_bins=3
                 runner:Mesh/gen/nx=10
                 runner:Mesh/gen/ny=10"
-    csvdiff = 'nonlin_diff_react_master_normal_out_results_0002.csv nonlin_diff_react_master_normal_out_samples_0002.csv nonlin_diff_react_master_normal_out_stats_0002.csv'
+    csvdiff = 'nonlin_diff_react_master_normal_out_results_0002.csv nonlin_diff_react_master_normal_out_stats_0002.csv'
 
     detail = "normally distributed."
   []
