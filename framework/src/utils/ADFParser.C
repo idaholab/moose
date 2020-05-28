@@ -16,10 +16,7 @@ ADFParser::ADFParser(const ADFParser & cpy) : FunctionParserAD(cpy), _epsilon(1e
 bool
 ADFParser::JITCompile()
 {
-  auto result =
-      JITCompileHelper("DualReal",
-                       ADFPARSER_INCLUDES,
-                       "#include \"DualReal.h\"\n#include \"metaphysicl/dualnumberarray.h\"\n");
+  auto result = JITCompileHelper("DualReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
   if (!result)
     mooseError("ADFParser::JITCompile() failed. Evaluation not possible.");
   return true;
