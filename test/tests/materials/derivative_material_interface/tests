@@ -1,6 +1,6 @@
 [Tests]
   design = 'DerivativeMaterialInterface.md'
-  issues = '#4299 #6360 #5055 #6901 #5039 #14975'
+  issues = '#4299 #6360 #5055 #6901 #5039 #14975 #15207'
 
   [analytic_derivatives]
     requirement = 'The system shall be capable of producing analytic derivatives of material '
@@ -122,7 +122,7 @@
       difference_tol = 1e-7
       run_sim = True
       turn_off_exodus_output = False
-      issues = "#15207"
+      detail = 'returning an exact jacobian.'
     []
   []
 []
