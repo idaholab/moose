@@ -491,34 +491,34 @@ public:
    */
   void addSolutionNeighbor(const DenseVector<Number> & v);
 
-  const DoFValue & dofValue();
-  const DoFValue & dofValues();
-  const DoFValue & dofValuesOld();
-  const DoFValue & dofValuesOlder();
-  const DoFValue & dofValuesPreviousNL();
-  const DoFValue & dofValuesNeighbor();
-  const DoFValue & dofValuesOldNeighbor();
-  const DoFValue & dofValuesOlderNeighbor();
-  const DoFValue & dofValuesPreviousNLNeighbor();
-  const DoFValue & dofValuesDot();
-  const DoFValue & dofValuesDotNeighbor();
-  const DoFValue & dofValuesDotNeighborResidual();
-  const DoFValue & dofValuesDotOld();
-  const DoFValue & dofValuesDotOldNeighbor();
-  const DoFValue & dofValuesDotDot();
-  const DoFValue & dofValuesDotDotNeighbor();
-  const DoFValue & dofValuesDotDotNeighborResidual();
-  const DoFValue & dofValuesDotDotOld();
-  const DoFValue & dofValuesDotDotOldNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDu();
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDotDu();
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor();
+  const DoFValue & dofValue() const;
+  const DoFValue & dofValues() const;
+  const DoFValue & dofValuesOld() const;
+  const DoFValue & dofValuesOlder() const;
+  const DoFValue & dofValuesPreviousNL() const;
+  const DoFValue & dofValuesNeighbor() const;
+  const DoFValue & dofValuesOldNeighbor() const;
+  const DoFValue & dofValuesOlderNeighbor() const;
+  const DoFValue & dofValuesPreviousNLNeighbor() const;
+  const DoFValue & dofValuesDot() const;
+  const DoFValue & dofValuesDotNeighbor() const;
+  const DoFValue & dofValuesDotNeighborResidual() const;
+  const DoFValue & dofValuesDotOld() const;
+  const DoFValue & dofValuesDotOldNeighbor() const;
+  const DoFValue & dofValuesDotDot() const;
+  const DoFValue & dofValuesDotDotNeighbor() const;
+  const DoFValue & dofValuesDotDotNeighborResidual() const;
+  const DoFValue & dofValuesDotDotOld() const;
+  const DoFValue & dofValuesDotDotOldNeighbor() const;
+  const MooseArray<Number> & dofValuesDuDotDu() const;
+  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const;
+  const MooseArray<Number> & dofValuesDuDotDotDu() const;
+  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const;
 
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues();
+  const MooseArray<ADReal> & adDofValues() const;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -613,7 +613,7 @@ public:
   const DoFValue & nodalVectorTagValue(TagID tag);
   const DoFValue & nodalMatrixTagValue(TagID tag);
 
-  const typename Moose::ADType<OutputType>::type & adNodalValue();
+  const typename Moose::ADType<OutputType>::type & adNodalValue() const;
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
@@ -633,14 +633,14 @@ protected:
 
 template <typename OutputType>
 inline const MooseArray<ADReal> &
-MooseVariableFE<OutputType>::adDofValues()
+MooseVariableFE<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
 }
 
 template <typename OutputType>
 inline const typename Moose::ADType<OutputType>::type &
-MooseVariableFE<OutputType>::adNodalValue()
+MooseVariableFE<OutputType>::adNodalValue() const
 {
   return _element_data->adNodalValue();
 }

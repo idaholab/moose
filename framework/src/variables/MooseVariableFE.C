@@ -227,7 +227,7 @@ MooseVariableFE<OutputType>::addSolutionNeighbor(const DenseVector<Number> & v)
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValue()
+MooseVariableFE<OutputType>::dofValue() const
 {
   mooseDeprecated("Use dofValues instead of dofValue");
   return dofValues();
@@ -235,140 +235,140 @@ MooseVariableFE<OutputType>::dofValue()
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValues()
+MooseVariableFE<OutputType>::dofValues() const
 {
   return _element_data->dofValues();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesOld()
+MooseVariableFE<OutputType>::dofValuesOld() const
 {
   return _element_data->dofValuesOld();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesOlder()
+MooseVariableFE<OutputType>::dofValuesOlder() const
 {
   return _element_data->dofValuesOlder();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesPreviousNL()
+MooseVariableFE<OutputType>::dofValuesPreviousNL() const
 {
   return _element_data->dofValuesPreviousNL();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesNeighbor()
+MooseVariableFE<OutputType>::dofValuesNeighbor() const
 {
   return _neighbor_data->dofValues();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesOldNeighbor()
+MooseVariableFE<OutputType>::dofValuesOldNeighbor() const
 {
   return _neighbor_data->dofValuesOld();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesOlderNeighbor()
+MooseVariableFE<OutputType>::dofValuesOlderNeighbor() const
 {
   return _neighbor_data->dofValuesOlder();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesPreviousNLNeighbor()
+MooseVariableFE<OutputType>::dofValuesPreviousNLNeighbor() const
 {
   return _neighbor_data->dofValuesPreviousNL();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDot()
+MooseVariableFE<OutputType>::dofValuesDot() const
 {
   return _element_data->dofValuesDot();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotDot()
+MooseVariableFE<OutputType>::dofValuesDotDot() const
 {
   return _element_data->dofValuesDotDot();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotOld()
+MooseVariableFE<OutputType>::dofValuesDotOld() const
 {
   return _element_data->dofValuesDotOld();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotDotOld()
+MooseVariableFE<OutputType>::dofValuesDotDotOld() const
 {
   return _element_data->dofValuesDotDotOld();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotNeighbor()
+MooseVariableFE<OutputType>::dofValuesDotNeighbor() const
 {
   return _neighbor_data->dofValuesDot();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotDotNeighbor()
+MooseVariableFE<OutputType>::dofValuesDotDotNeighbor() const
 {
   return _neighbor_data->dofValuesDotDot();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotOldNeighbor()
+MooseVariableFE<OutputType>::dofValuesDotOldNeighbor() const
 {
   return _neighbor_data->dofValuesDotOld();
 }
 
 template <typename OutputType>
 const typename MooseVariableFE<OutputType>::DoFValue &
-MooseVariableFE<OutputType>::dofValuesDotDotOldNeighbor()
+MooseVariableFE<OutputType>::dofValuesDotDotOldNeighbor() const
 {
   return _neighbor_data->dofValuesDotDotOld();
 }
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableFE<OutputType>::dofValuesDuDotDu()
+MooseVariableFE<OutputType>::dofValuesDuDotDu() const
 {
   return _element_data->dofValuesDuDotDu();
 }
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableFE<OutputType>::dofValuesDuDotDotDu()
+MooseVariableFE<OutputType>::dofValuesDuDotDotDu() const
 {
   return _element_data->dofValuesDuDotDotDu();
 }
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableFE<OutputType>::dofValuesDuDotDuNeighbor()
+MooseVariableFE<OutputType>::dofValuesDuDotDuNeighbor() const
 {
   return _neighbor_data->dofValuesDuDotDu();
 }
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableFE<OutputType>::dofValuesDuDotDotDuNeighbor()
+MooseVariableFE<OutputType>::dofValuesDuDotDotDuNeighbor() const
 {
   return _neighbor_data->dofValuesDuDotDotDu();
 }
