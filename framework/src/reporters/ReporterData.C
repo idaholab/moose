@@ -16,14 +16,10 @@ void
 ReporterData::init()
 {
   // Calls the init() method of the ReporterContext objects for each Reporter value. This method
-  // copyies the current value to the old/older vector and shrinks this vector the the correct size
+  // copies the current value to the old/older vector and shrinks this vector the the correct size
   // based on the requested old/older values.
-  for (const std::pair<std::string, std::set<RestartableDataValue *>> & data_pair : _data_ptrs)
-    for (auto data_ptr : data_pair.second)
-    {
-      ReporterContextBase * context_ptr = static_cast<ReporterContextBase *>(data_ptr->context());
-      context_ptr->init();
-    }
+  for (const auto & context_ptr : _context_ptrs)
+    context_ptr->init();
 
   // Mark the data as initialized to trigger errors if calls to the declare/get methods are made.
   // This is here to help application developers avoid creating new data values in arbitrary
@@ -35,25 +31,16 @@ ReporterData::init()
 void
 ReporterData::copyValuesBack()
 {
-  for (const std::pair<std::string, std::set<RestartableDataValue *>> & data_pair : _data_ptrs)
-    for (auto data_ptr : data_pair.second)
-    {
-      ReporterContextBase * context_ptr = static_cast<ReporterContextBase *>(data_ptr->context());
-      context_ptr->copyValuesBack();
-    }
+  for (const auto & context_ptr : _context_ptrs)
+    context_ptr->copyValuesBack();
 }
 
 void
 ReporterData::finalize(const std::string & object_name)
 {
-  std::unordered_map<std::string, std::set<RestartableDataValue *>>::const_iterator iter =
-      _data_ptrs.find(object_name);
-  if (iter != _data_ptrs.end())
-  {
-    for (RestartableDataValue * data_ptr : iter->second)
-    {
-      ReporterContextBase * context_ptr = static_cast<ReporterContextBase *>(data_ptr->context());
-      context_ptr->finalize();
-    }
-  }
+  auto func = [object_name](auto & ptr) {
+    if (ptr->name().getObjectName() == object_name)
+      ptr->finalize();
+  };
+  std::for_each(_context_ptrs.begin(), _context_ptrs.end(), func);
 }

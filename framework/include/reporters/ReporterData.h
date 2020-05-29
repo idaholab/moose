@@ -26,11 +26,11 @@
  * first value is the current value and the data in the vector are the older data.
  *
  * The ReporterState object is a RestartableData object that serves as a helper for managing the
- * time history it also includes a "context" object for preforming special operations. Refer to
- * ReporterState.h/C for more information.
+ * time history. A "context" object also exists that uses the ReporterState for preforming special
+ * operations. Refer to ReporterState.h/C for more information.
  *
  * It is important to note that the Reporter values are not threaded. However, the Reporter
- * objects are UserObjects based, so the calculation of the values can be threaded.
+ * objects are UserObject based, so the calculation of the values can be threaded.
  *
  * This object also relies on ReporterName objects, which are simply a combination of the
  * Reporter object name and the data name. If you recall the VectorPostprocessor system on which
@@ -45,7 +45,7 @@ public:
   // The old/older values are stored in vector and this vector must have memory that doesn't
   // get reallocated. This is because the calls to getReporterValue can occur in any order using
   // any time index.
-  constexpr static std::size_t HISTORY_CAPACITY = 5;
+  constexpr static std::size_t HISTORY_CAPACITY = 2; // old and older
 
   ReporterData(MooseApp & moose_app);
 
@@ -66,7 +66,7 @@ public:
    * Method for returning a writable reference to the current Reporter value. This method is
    * used by the Reporter class to produce values.
    * @tparam T The Reporter value C++ type.
-   * @tparam S (optional) The Reporter context for performing specialized actions after the values
+   * @tparam S (optional) The ReporterContext for performing specialized actions after the values
    *           have been computed. For example, ReporterBroadcastContext automatically broadcasts
    *           the computed value. See ReporterState.C/h for more information.
    * @param reporter_name The name of the reporter value, which includes the object name and the
@@ -127,25 +127,17 @@ private:
   /**
    * Helper object for declaring Reporter values.
    *
-   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the value),
-   * these context objects use the context system that exists on the MooseApp restart/recover
-   * system. However, the get/declare methods can be called in any order thus an the underlying
-   * RestartableData object is often created by the get method before it is declared. The get
-   * methods should not have any knowledge of the ReporterContext object. As such the context object
-   * must be applied to the RestartableData object after creation. This helper does just that.
+   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the value).
+   * The get/declare methods can be called in any order thus an the underlying RestartableData
+   * object is often created by the get method before it is declared. Therefore the custom
+   * functionality cannot be handled by specializing the RestartableData object directly.
    */
   template <typename T, template <typename> class S>
   ReporterState<T> & declareReporterValueHelper(const ReporterName & reporter_name);
 
-  /// Convenience for accessing all the ReporterValues for a given Reporter object, the
-  /// map key is the ReporterObject name. The data pointers are used by the init, finalize, and
-  /// copyValuesBack methods. Those functions could operate using the MooseApp interface, but
-  /// this is much more convient.
-  std::unordered_map<std::string, std::set<RestartableDataValue *>> _data_ptrs;
-
-  /// The ReporterContext objects are "attached" to the RestartableDataValue objects via a void
-  /// pointer. Therefore, the actual object must be owned and managed by something, this is the
-  /// something.
+  /// The ReporterContext objects are created when a value is declared. The context objects
+  /// include a reference to the associated ReporterState values. This container stores the
+  /// context object for each Reporter value.
   std::set<std::unique_ptr<ReporterContextBase>> _context_ptrs;
 
   /// When true an error message is triggered so that the get/declare methods cannot be called
@@ -161,22 +153,17 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool de
   if (_initialized)
     mooseError("An attempt was made to declare or get Reporter data with the name '",
                reporter_name,
-               "' after FEProblemBase::init(), calls to get or declare Reporter data cannot be "
-               "made after FEProblem::init(); all calls should be made in the object constructor.");
-
-  // Full name of the Reporter value to be stored in the MooseApp restart/recover system
-  const std::string data_name =
-      "ReporterData/" + reporter_name.getObjectName() + "/" + reporter_name.getValueName();
+               "' after Reporter data was initialized, calls to get or declare Reporter data "
+               "should be made in the object constructor.");
 
   // Creates the RestartableData object for storage in the MooseApp restart/recover system
-  auto data_ptr = libmesh_make_unique<ReporterState<T>>(data_name);
+  auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
 
   // Limits the number of old/older values. It is possible to call get
   data_ptr->get().second.resize(ReporterData::HISTORY_CAPACITY);
   RestartableDataValue & value =
-      _app.registerRestartableData(data_name, std::move(data_ptr), 0, !declare);
+      _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
   auto & data_ref = static_cast<ReporterState<T> &>(value);
-  _data_ptrs[reporter_name.getObjectName()].insert(&data_ref);
   return data_ref;
 }
 
@@ -185,14 +172,8 @@ ReporterState<T> &
 ReporterData::declareReporterValueHelper(const ReporterName & reporter_name)
 {
   ReporterState<T> & data_ref = getReporterStateHelper<T>(reporter_name, true);
-
-  // Create the ReporterContext object if it does not exist
-  if (data_ref.context() == nullptr)
-  {
-    auto context_ptr = libmesh_make_unique<S<T>>(_app, data_ref);
-    auto emplace_pair = _context_ptrs.emplace(std::move(context_ptr));
-    data_ref.setContext(emplace_pair.first->get());
-  }
+  auto context_ptr = libmesh_make_unique<S<T>>(_app, data_ref);
+  _context_ptrs.emplace(std::move(context_ptr));
   return data_ref;
 }
 
