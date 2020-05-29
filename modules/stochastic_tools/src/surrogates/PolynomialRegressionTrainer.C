@@ -27,8 +27,7 @@ PolynomialRegressionTrainer::validParams()
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
   params.addRequiredParam<unsigned int>(
       "max_degree",
-      "Maximum polynomial degree to use for the regression."
-  )
+      "Maximum polynomial degree to use for the regression.");
 
   return params;
 }
@@ -36,8 +35,8 @@ PolynomialRegressionTrainer::validParams()
 PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
-    _poly_basis(declareModelData<std::vector<std::vector<Real>>("_poly_basis")),
-    _max_degree(declareModelData<int>("_max_degree"))
+    _power_matrix(declareModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
+    _max_degree(declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree")))
 {
 }
 
@@ -52,11 +51,11 @@ PolynomialRegressionTrainer::initialSetup()
   // Sampler
   _sampler = &getSamplerByName(getParam<SamplerName>("sampler"));
 
-  unsigned int _n_dims = _sampler->getNumberOfCols();
+  _n_dims = _sampler->getNumberOfCols();
 
   // Initializing power matrix, using _max_degree+1 to tackle the indexing offset
   // within generateTuple
-  _power_matrix = PolynomialChaosTrainer::generateTuple(_n_dims, _max_degree+1);
+  _power_matrix = StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree+1);
   _n_poly_terms = _power_matrix.size();
 
   // Check if we have enough data points to solve the problem

@@ -11,7 +11,7 @@
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
-#include "PolynomialChaosTrainer.h"
+#include "MultiDimPolynomialGenerator.h"
 
 class PolynomialRegressionTrainer : public SurrogateTrainer
 {
@@ -33,12 +33,18 @@ protected:
   /// Coefficients of regression model
   std::vector<Real> & _coeff;
 
-  std::vector<std::vector<Real>> & _power_matrix;
+  std::vector<std::vector<unsigned int>> & _power_matrix;
 
 private:
 
-  unsigned int _n_dim;
-  unsigned in _n_poly_terms;
+  /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
+  const unsigned int & _max_degree;
+
+  /// Number of dimensions.
+  unsigned int _n_dims;
+
+  /// Number of terms in the polynomial expression.
+  unsigned int _n_poly_terms;
 
   ///@{
   /// Matrix and rhs for ordinary least squares
