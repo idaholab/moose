@@ -29,8 +29,8 @@ protected:
   virtual void initialSetup() override;
 
   virtual void initQpStatefulProperties() override;
-  virtual void computeStressInitialize(const ADReal & /*effective_trial_stress*/,
-                                       const ADRankFourTensor & /*elasticity_tensor*/) override;
+  virtual void computeStressInitialize(const ADReal & effective_trial_stress,
+                                       const ADRankFourTensor & elasticity_tensor) override;
   virtual ADReal computeResidual(const ADReal & effective_trial_stress,
                                  const ADReal & scalar) override;
 
@@ -60,20 +60,30 @@ protected:
   };
 
   /**
-   *Computes the ROM Strain rate
-   * @param mobile_dislocation_increment Mobile dislocation density incremental change
-   * @param immobile_dislocation_increment Immobile dislocation density incremental change
-   * @param rom_effective_strain ROM calculated effective strain
-   * @param drom_effective_strain_dstress Derivative of ROM calculated effective strain with
-   *respect to stress
-   * @return flag that indicates ROM was skipped
+   * Precompute the ROM strain rate information for all inputs except for strain. Strain will be
+   * computed in the radial return algorithm several times, while the remainder of the inputs remain
+   * constant.
+   * @param out_idx Ouput index
    */
-  ADReal computeROMStrainRate(const unsigned out_idx, const bool jacobian = false);
+  void precomputeROM(const unsigned out_idx);
 
   /**
-   * Function to check input values against applicability windows set by ROM data set
-   * @param input value
-   * @return flag to indicate to continue computing ROM
+   *Computes the ROM calcualted increment a given output.
+   * @param out_idx Ouput index
+   * @param derivative Flag to return derivative of ROM increment with respect to stress.
+   * @return ROM computed increment
+   */
+  ADReal computeROM(const unsigned out_idx, const bool derivative = false);
+
+  /**
+   * Method to check input values against applicability windows set by ROM data set. In addition,
+   * extrapolation is performed if the WindowFailure behavior == extraploation. The returned value
+   * is an extrapolated value multiplied by the ROM computed increment if extrapolation occurs.
+   * @param input Input value
+   * @param limits Vector of lower and upper limits of the input
+   * @param behavior WindowFailure MooseEnum indicating what to do if input is outside of limits
+   * @param derivative Flag to return derivative of extrapolation with respect to stress.
+   * @return Extrapolation value
    */
   ADReal checkInputWindow(ADReal & input,
                           const std::vector<Real> & limits,
@@ -83,61 +93,77 @@ protected:
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
    * to have a normalized space from [-1, 1] so that every variable has equal weight
-   * @param input Vector of input values
-   * @param converted Vector of converted input values
-   * @param dconverted Vector of derivative of converted input values with respect to stress
+   * @param input Input value
+   * @param transform ROMInputTransform enum indicating how the input is transformed
+   * @param transform_coef Transform coefficient for the given input
+   * @param transformed_limits Transformed limits for the given input
+   * @param derivative Flag to return derivative of converted input with respect to stress.
+   * @return Converted input
    */
   ADReal convertInput(const ADReal & input,
                       const ROMInputTransform transform,
                       const Real transform_coef,
                       const std::vector<Real> & transformed_limits,
-                      const bool jacobian = false);
+                      const bool derivative = false);
 
   /**
-   * Assemble the array of Legendre polynomials to be multiplied by the ROM
-   * coefficients
-   * @param rom_inputs Vector of converted input values
-   * @param drom_inputs Vector of derivative of converted input values with respect to stress
+   * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
+   * @param rom_input ROM input
    * @param polynomial_inputs Vector of Legendre polynomial transformation
-   * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
-   * respect to stress
+   * @param drom_input Derivative of ROM input with respect to stress
+   * @param derivative Flag to return derivative of converted input with respect to stress.
    */
   void buildPolynomials(const ADReal & rom_input,
                         std::vector<ADReal> & polynomial_inputs,
                         const ADReal & drom_input = 0,
-                        const bool jacobian = false);
+                        const bool derivative = false);
 
   /**
    * Arranges the calculated Legendre polynomials into the order expected by the
    * ROM coefficients and ultiplies the Legendre polynomials by the ROM coefficients to compute the
-   * the predicted output values
-   * @param coefs Legendre polynomials
+   * the predicted output values. This method only manipulates all inputs besides stress, with
+   * stress handled in computeValues
+   * @param coefs Legendre polynomial coefficients
+   * @param polynomial_inputs Vector of Legendre polynomial transformation
+   * @param precomputed Vector that holds the precomputed ROM values
+   */
+  void precomputeValues(const std::vector<Real> & coefs,
+                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
+                        std::vector<ADReal> & precomputed);
+
+  /**
+   * Arranges the calculated Legendre polynomials into the order expected by the
+   * ROM coefficients and ultiplies the Legendre polynomials by the ROM coefficients to compute the
+   * the predicted output values. This method only manipulates the stress input, with all others
+   * handled in precomputeValues
+   * @param precomputed Precomputed multiplication of polynomials
    * @param polynomial_inputs Vector of Legendre polynomial transformation
    * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
    * respect to stress
-   * @param rom_outputs Outputs from ROM
-   * @param drom_outputs Derivative of outputs from ROM with respect to stress
+   * @param derivative Flag to return derivative of converted computed values with respect to
+   * stress.
+   * @return rom_outputs Outputs from ROM
    */
-  ADReal computeValues(const std::vector<Real> & coefs,
+  ADReal computeValues(const std::vector<ADReal> & precomputed,
                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
                        const std::vector<ADReal> & dpolynomial_inputs = {},
-                       const bool jacobian = false);
+                       const bool derivative = false);
 
   /**
    * Computes the output variable increments from the ROM predictions by bringing out of the
    * normalized map to the actual physical values
    * @param old_input_values Previous timestep values of ROM inputs
    * @param rom_outputs Outputs from ROM
+   * @param out_idx Output index
+   * @param drom_output Derivative of output with respect to stress
    * @param drom_outputs Derivative of outputs from ROM with respect to stress
-   * @param ROM_computed_increments Incremental change of input values
-   * @param ROM_computed_increments Derivative of the incremental change of input values with
-   * respect to stress
+   * @param derivative Flag to return derivative of output with respect to stress.
    */
   ADReal convertOutput(const std::vector<Real> & old_input_values,
                        const ADReal & rom_output,
                        const unsigned out_idx,
                        const ADReal & drom_output = 0.0,
-                       const bool jacobian = false);
+                       const bool derivative = false);
 
   /**
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
@@ -157,9 +183,9 @@ protected:
 
   /*
    * Calculates and returns vector utilized in assign values
-   * @return Multi-dimentional vector that preallocates calculations for polynomial calculation
+   * @return Vector that preallocates indexing calculations for polynomial calculation
    */
-  std::vector<std::vector<unsigned int>> getMakeFrameHelper() const;
+  std::vector<unsigned int> getMakeFrameHelper() const;
 
   /*
    * Returns vector of the functions to use for the conversion of input variables.
@@ -197,7 +223,7 @@ protected:
   /// Optionally coupled environmental factor
   const ADMaterialProperty<Real> * _environmental;
 
-  /// TODO
+  /// Vector of WindowFailure enum that informs how to handle input that is outside of the limits
   std::vector<WindowFailure> _window_failure;
 
   /// Flag to output verbose infromation
@@ -304,7 +330,7 @@ protected:
   std::vector<std::vector<std::vector<Real>>> _transformed_limits;
 
   /// Helper container defined by the ROM data set
-  std::vector<std::vector<unsigned int>> _makeframe_helper;
+  std::vector<unsigned int> _makeframe_helper;
 
   /// Creep rate material property
   ADMaterialProperty<Real> & _creep_rate;
@@ -329,4 +355,7 @@ protected:
 
   /// Container for ROM polynomial inputs
   std::vector<std::vector<ADReal>> _polynomial_inputs;
+
+  /// Container for ROM precomputed values
+  std::vector<ADReal> _precomputed_vals;
 };

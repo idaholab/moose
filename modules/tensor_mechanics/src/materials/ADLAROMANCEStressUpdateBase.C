@@ -188,6 +188,15 @@ ADLAROMANCEStressUpdateBase::initialSetup()
   if (_transform_coefs.size() != _num_outputs || _transform_coefs[0].size() != _num_inputs)
     mooseError("In ", _name, ": transform_coef is the wrong shape!");
 
+  /// Check for divide by zero
+  for (unsigned int o = 0; o < _num_outputs; ++o)
+    for (unsigned int i = 0; i < _num_inputs; ++i)
+      if (_transform[o][i] == ROMInputTransform::EXP && _transform_coefs[o][i] == 0)
+        mooseError("In ",
+                   _name,
+                   ": One of the transform coefficients is 0 with an exponential transform. This "
+                   "will lead to a divide-by-zero error. Check the ROM parameters");
+
   _input_limits = getInputLimits();
   if (_input_limits.size() != _num_inputs || _input_limits[0].size() != 2)
     mooseError("In ", _name, ": input_limits is the wrong shape!");
@@ -197,6 +206,8 @@ ADLAROMANCEStressUpdateBase::initialSetup()
     mooseError("In ", _name, ": coefs is the wrong shape!");
 
   _num_coefs = _coefs[0].size();
+  _precomputed_vals.resize(_num_coefs);
+
   _degree = std::pow(_num_coefs, 1.0 / _num_inputs);
   if (!_degree || _degree > 4)
     mooseError("In ", _name, ": degree must be 1, 2, 3 or 4.");
@@ -230,7 +241,7 @@ ADLAROMANCEStressUpdateBase::maximumPermissibleValue(const ADReal & effective_tr
 {
   // Make maximum allowed scalar a little bit less than the deformation that would reduce the trial
   // stress to zero. This prevents negative trial stresses.
-  return (effective_trial_stress - 1.0e-9) / _three_shear_modulus;
+  return effective_trial_stress / _three_shear_modulus * 0.999999;
 }
 
 void
@@ -271,19 +282,24 @@ ADLAROMANCEStressUpdateBase::computeStressInitialize(const ADReal & effective_tr
 
   // Precompute transformed input and prebuild polynomials for inputs other than strain
   if (_non_stress_extrapolation)
+    precomputeROM(_strain_output_idx);
+}
+
+void
+ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_idx)
+{
+  for (unsigned int i = 0; i < _num_inputs; ++i)
   {
-    for (unsigned int i = 0; i < _num_inputs; ++i)
+    if (i != _stress_input_idx)
     {
-      if (i != _stress_input_idx)
-      {
-        _rom_inputs[i] = convertInput(_input_values[i],
-                                      _transform[_strain_output_idx][i],
-                                      _transform_coefs[_strain_output_idx][i],
-                                      _transformed_limits[_strain_output_idx][i]);
-        buildPolynomials(_rom_inputs[i], _polynomial_inputs[i]);
-      }
+      _rom_inputs[i] = convertInput(_input_values[i],
+                                    _transform[out_idx][i],
+                                    _transform_coefs[out_idx][i],
+                                    _transformed_limits[out_idx][i]);
+      buildPolynomials(_rom_inputs[i], _polynomial_inputs[i]);
     }
   }
+  precomputeValues(_coefs[out_idx], _polynomial_inputs, _precomputed_vals);
 }
 
 ADReal
@@ -311,8 +327,8 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   // Run ROM if all values are within windows.
   if (_extrapolation[_qp])
   {
-    rom_effective_strain_inc = computeROMStrainRate(_strain_output_idx);
-    drom_effective_strain_inc_dstress = computeROMStrainRate(_strain_output_idx, true);
+    rom_effective_strain_inc = computeROM(_strain_output_idx);
+    drom_effective_strain_inc_dstress = computeROM(_strain_output_idx, true);
 
     // apply extrapolation
     rom_effective_strain_inc *= _extrapolation[_qp];
@@ -375,7 +391,7 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeROMStrainRate(const unsigned out_idx, const bool jacobian)
+ADLAROMANCEStressUpdateBase::computeROM(const unsigned out_idx, const bool derivative)
 {
   // Update due to new stress
   _rom_inputs[_stress_input_idx] = convertInput(_input_values[_stress_input_idx],
@@ -385,25 +401,25 @@ ADLAROMANCEStressUpdateBase::computeROMStrainRate(const unsigned out_idx, const 
   buildPolynomials(_rom_inputs[_stress_input_idx], _polynomial_inputs[_stress_input_idx]);
 
   // Compute ROM values
-  const ADReal rom_outputs = computeValues(_coefs[out_idx], _polynomial_inputs);
+  const ADReal rom_outputs = computeValues(_precomputed_vals, _polynomial_inputs);
 
-  // Return converted output if not Jacobian
-  if (!jacobian)
+  // Return converted output if not derivative
+  if (!derivative)
     return convertOutput(_old_input_values, rom_outputs, out_idx);
 
   const ADReal drom_input = convertInput(_input_values[_stress_input_idx],
                                          _transform[out_idx][_stress_input_idx],
                                          _transform_coefs[out_idx][_stress_input_idx],
                                          _transformed_limits[out_idx][_stress_input_idx],
-                                         jacobian);
+                                         derivative);
 
   std::vector<ADReal> dpolynomial_inputs(_degree, 0.0);
-  buildPolynomials(_rom_inputs[_stress_input_idx], dpolynomial_inputs, drom_input, jacobian);
+  buildPolynomials(_rom_inputs[_stress_input_idx], dpolynomial_inputs, drom_input, derivative);
 
   const ADReal drom_output =
-      computeValues(_coefs[out_idx], _polynomial_inputs, dpolynomial_inputs, jacobian);
+      computeValues(_precomputed_vals, _polynomial_inputs, dpolynomial_inputs, derivative);
 
-  return convertOutput(_old_input_values, rom_outputs, out_idx, drom_output, jacobian);
+  return convertOutput(_old_input_values, rom_outputs, out_idx, drom_output, derivative);
 }
 
 ADReal
@@ -451,30 +467,30 @@ ADLAROMANCEStressUpdateBase::convertInput(const ADReal & input,
                                           const ROMInputTransform transform,
                                           const Real transform_coef,
                                           const std::vector<Real> & transformed_limits,
-                                          const bool jacobian)
+                                          const bool derivative)
 {
   ADReal x(1.0);
   if (transform == ROMInputTransform::LINEAR)
   {
-    if (!jacobian)
+    if (!derivative)
       x = input;
   }
   else if (transform == ROMInputTransform::EXP)
   {
-    if (!jacobian)
+    if (!derivative)
       x = std::exp(input / transform_coef);
     else
       x = std::exp(input / transform_coef) / transform_coef;
   }
   else // ROMInputTransform::LOG
   {
-    if (!jacobian)
+    if (!derivative)
       x = std::log(input + transform_coef);
     else
       x = 1.0 / (input + transform_coef);
   }
 
-  if (jacobian)
+  if (derivative)
     return x / transformed_limits[2];
   else
     return (x - transformed_limits[0]) / transformed_limits[2] - 1.0;
@@ -484,41 +500,51 @@ void
 ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
                                               std::vector<ADReal> & polynomial_inputs,
                                               const ADReal & drom_input,
-                                              const bool jacobian)
+                                              const bool derivative)
 {
   for (unsigned int d = 0; d < _degree; ++d)
   {
-    if (!jacobian)
-      polynomial_inputs[d] = computePolynomial(rom_input, d);
-    else
-      polynomial_inputs[d] = drom_input * computePolynomial(rom_input, d, jacobian);
+    polynomial_inputs[d] = computePolynomial(rom_input, d);
+    if (derivative)
+      polynomial_inputs[d] =
+          drom_input * computePolynomial(rom_input, d, derivative) / polynomial_inputs[d];
+  }
+}
+
+void
+ADLAROMANCEStressUpdateBase::precomputeValues(
+    const std::vector<Real> & coefs,
+    const std::vector<std::vector<ADReal>> & polynomial_inputs,
+    std::vector<ADReal> & precomputed)
+{
+  for (unsigned int j = 0; j < _num_coefs; ++j)
+  {
+    precomputed[j] = coefs[j];
+    for (unsigned int i = 0; i < _num_inputs; ++i)
+      if (i != _stress_input_idx)
+        precomputed[j] *= polynomial_inputs[i][_makeframe_helper[j + _num_coefs * i]];
   }
 }
 
 ADReal
 ADLAROMANCEStressUpdateBase::computeValues(
-    const std::vector<Real> & coefs,
+    const std::vector<ADReal> & precomputed,
     const std::vector<std::vector<ADReal>> & polynomial_inputs,
     const std::vector<ADReal> & dpolynomial_inputs,
-    const bool jacobian)
+    const bool derivative)
 {
   ADReal rom_output = 0.0;
   for (unsigned int j = 0; j < _num_coefs; ++j)
   {
-    ADReal xvals = coefs[j];
-    ADReal dxvals = 0.0;
-    for (unsigned int i = 0; i < _num_inputs; ++i)
-    {
-      xvals *= polynomial_inputs[i][_makeframe_helper[j][i]];
-      if (jacobian && i == _stress_input_idx)
-        dxvals += dpolynomial_inputs[_makeframe_helper[j][i]] /
-                  polynomial_inputs[i][_makeframe_helper[j][i]];
-    }
+    ADReal vals =
+        precomputed[j] *
+        polynomial_inputs[_stress_input_idx][_makeframe_helper[j + _num_coefs * _stress_input_idx]];
 
-    if (!jacobian)
-      rom_output += xvals;
+    if (!derivative)
+      rom_output += vals;
     else
-      rom_output += dxvals * xvals;
+      rom_output +=
+          dpolynomial_inputs[_makeframe_helper[j + _num_coefs * _stress_input_idx]] * vals;
   }
   return rom_output;
 }
@@ -528,13 +554,13 @@ ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_v
                                            const ADReal & rom_output,
                                            const unsigned out_idx,
                                            const ADReal & drom_output,
-                                           const bool jacobian)
+                                           const bool derivative)
 {
-  if (jacobian && out_idx != _strain_output_idx)
+  if (derivative && out_idx != _strain_output_idx)
     return 0.0;
 
   ADReal ROM_computed_increments = std::exp(rom_output) * _dt;
-  if (jacobian)
+  if (derivative)
     ROM_computed_increments *= drom_output;
   else if (out_idx != _strain_output_idx)
     ROM_computed_increments *= -old_input_values[out_idx];
@@ -591,7 +617,8 @@ ADLAROMANCEStressUpdateBase::getTransformedLimits() const
         else
           transformed_limits[i][j][k] = _input_limits[j][k];
       }
-      // Pre-compute the difference between the two limits divided by two for later input conversion
+      // Pre-compute the difference between the two limits divided by two for later input
+      // conversion
       transformed_limits[i][j][2] =
           (transformed_limits[i][j][1] - transformed_limits[i][j][0]) / 2.0;
     }
@@ -600,14 +627,14 @@ ADLAROMANCEStressUpdateBase::getTransformedLimits() const
   return transformed_limits;
 }
 
-std::vector<std::vector<unsigned int>>
+std::vector<unsigned int>
 ADLAROMANCEStressUpdateBase::getMakeFrameHelper() const
 {
-  std::vector<std::vector<unsigned int>> v(_num_coefs, std::vector<unsigned int>(_num_inputs));
+  std::vector<unsigned int> v(_num_coefs * _num_inputs);
 
   for (unsigned int numcoeffs = 0; numcoeffs < _num_coefs; ++numcoeffs)
     for (unsigned int invar = 0; invar < _num_inputs; ++invar)
-      v[numcoeffs][invar] = numcoeffs / MathUtils::pow(_degree, invar) % _degree;
+      v[numcoeffs + _num_coefs * invar] = numcoeffs / MathUtils::pow(_degree, invar) % _degree;
 
   return v;
 }
@@ -620,32 +647,11 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
 
   if (_extrapolation[_qp])
   {
-    for (unsigned int i = 0; i < _num_inputs; ++i)
-    {
-      if (i != _stress_input_idx)
-      {
-        _rom_inputs[i] = convertInput(_input_values[i],
-                                      _transform[_mobile_output_idx][i],
-                                      _transform_coefs[_mobile_output_idx][i],
-                                      _transformed_limits[_mobile_output_idx][i]);
-        buildPolynomials(_rom_inputs[i], _polynomial_inputs[i]);
-      }
-    }
-    _mobile_dislocation_increment = computeROMStrainRate(_mobile_output_idx) * _extrapolation[_qp];
+    precomputeROM(_mobile_output_idx);
+    _mobile_dislocation_increment = computeROM(_mobile_output_idx) * _extrapolation[_qp];
 
-    for (unsigned int i = 0; i < _num_inputs; ++i)
-    {
-      if (i != _stress_input_idx)
-      {
-        _rom_inputs[i] = convertInput(_input_values[i],
-                                      _transform[_immobile_output_idx][i],
-                                      _transform_coefs[_immobile_output_idx][i],
-                                      _transformed_limits[_immobile_output_idx][i]);
-        buildPolynomials(_rom_inputs[i], _polynomial_inputs[i]);
-      }
-    }
-    _immobile_dislocation_increment =
-        computeROMStrainRate(_immobile_output_idx) * _extrapolation[_qp];
+    precomputeROM(_immobile_output_idx);
+    _immobile_dislocation_increment = computeROM(_immobile_output_idx) * _extrapolation[_qp];
   }
 
   _mobile_dislocations[_qp] = _mobile_old + _mobile_dislocation_increment;
