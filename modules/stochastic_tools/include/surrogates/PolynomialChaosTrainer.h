@@ -12,6 +12,7 @@
 #include "SurrogateTrainer.h"
 #include "PolynomialQuadrature.h"
 #include "QuadratureSampler.h"
+#include "MultiDimPolynomialGenerator.h"
 
 #include "Distribution.h"
 
@@ -24,20 +25,6 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-
-protected:
-  /**
-   * Function computing for computing _tuple
-   * Example for ndim = 3, order = 4:
-   * | 0 | 1 0 0 | 2 1 1 0 0 0 | 3 2 2 1 1 1 0 0 0 0 |
-   * | 0 | 0 1 0 | 0 1 0 2 1 0 | 0 1 0 2 1 0 3 2 1 0 |
-   * | 0 | 0 0 1 | 0 0 1 0 1 2 | 0 0 1 0 1 2 0 1 2 3 |
-   */
-  static std::vector<std::vector<unsigned int>> generateTuple(const unsigned int ndim,
-                                                              const unsigned int order);
-  /// Tuple sorter function
-  static bool sortTuple(const std::vector<unsigned int> & first,
-                        const std::vector<unsigned int> & second);
 
 private:
   // TODO: Move as much of these to constructor initialization
