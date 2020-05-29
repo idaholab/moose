@@ -11,7 +11,7 @@
 
 #include "MooseError.h"
 #include "MooseTypes.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "libmesh/fparser_ad.hh"
 
 class ADFParser : public FunctionParserAD
@@ -23,7 +23,7 @@ public:
   bool JITCompile();
 
   Real Eval(const Real *) { mooseError("Not implemented."); }
-  DualReal Eval(const DualReal * Vars);
+  ADReal Eval(const ADReal * Vars);
 
 protected:
   const Real _epsilon;

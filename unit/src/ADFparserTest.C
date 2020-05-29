@@ -20,7 +20,7 @@ TEST(ADFparserTest, JITCompile)
   fparser.Optimize();
   fparser.JITCompile();
 
-  DualReal v[2] = {1.5, 2.5};
+  ADReal v[2] = {1.5, 2.5};
   v[0].derivatives()[0] = 1;
   v[1].derivatives()[1] = 1;
 

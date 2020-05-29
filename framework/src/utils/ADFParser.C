@@ -16,18 +16,17 @@ ADFParser::ADFParser(const ADFParser & cpy) : FunctionParserAD(cpy), _epsilon(1e
 bool
 ADFParser::JITCompile()
 {
-  auto result = JITCompileHelper("DualReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+  auto result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
   if (!result)
     mooseError("ADFParser::JITCompile() failed. Evaluation not possible.");
   return true;
 }
 
-DualReal
-ADFParser::Eval(const DualReal * vars)
+ADReal
+ADFParser::Eval(const ADReal * vars)
 {
   mooseAssert(compiledFunction, "ADFParser objects mut be JIT compiled before evaluation!");
-  DualReal ret;
-  (*reinterpret_cast<CompiledFunctionPtr<DualReal>>(compiledFunction))(
-      &ret, vars, pImmed, _epsilon);
+  ADReal ret;
+  (*reinterpret_cast<CompiledFunctionPtr<ADReal>>(compiledFunction))(&ret, vars, pImmed, _epsilon);
   return ret;
 }
