@@ -7,7 +7,7 @@
     ymin = 0
     ymax = 1
     nx = 2
-    ny = 4
+    ny = 2
     elem_type = QUAD4
   [../]
   [./left_block_sidesets]
@@ -158,7 +158,6 @@
     slave_subdomain = slave_lower
     slave_variable = T
     variable = lambda
-    delta = 0.4
   [../]
 []
 
@@ -172,8 +171,9 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       basic                 superlu_dist'
+  petsc_options = '-snes_converged_reason'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       basic                 superlu_dist               NONZERO'
 []
 
 [Outputs]

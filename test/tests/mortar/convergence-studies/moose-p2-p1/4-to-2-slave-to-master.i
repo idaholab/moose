@@ -1,4 +1,5 @@
 [Mesh]
+  second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 2
@@ -94,11 +95,10 @@
 [Variables]
   [./T]
     block = 'left_block right_block'
+    order = SECOND
   [../]
   [./lambda]
     block = 'slave_lower'
-    family = MONOMIAL
-    order = CONSTANT
   [../]
 []
 
@@ -158,7 +158,6 @@
     slave_subdomain = slave_lower
     slave_variable = T
     variable = lambda
-    delta = 0.4
   [../]
 []
 

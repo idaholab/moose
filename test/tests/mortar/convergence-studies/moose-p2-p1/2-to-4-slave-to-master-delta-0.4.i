@@ -1,4 +1,5 @@
 [Mesh]
+  second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 2
@@ -7,7 +8,7 @@
     ymin = 0
     ymax = 1
     nx = 2
-    ny = 4
+    ny = 2
     elem_type = QUAD4
   [../]
   [./left_block_sidesets]
@@ -29,7 +30,7 @@
     ymin = 0
     ymax = 1
     nx = 2
-    ny = 2
+    ny = 4
     elem_type = QUAD4
   [../]
   [./right_block_id]
@@ -94,11 +95,10 @@
 [Variables]
   [./T]
     block = 'left_block right_block'
+    order = SECOND
   [../]
   [./lambda]
     block = 'slave_lower'
-    family = MONOMIAL
-    order = CONSTANT
   [../]
 []
 

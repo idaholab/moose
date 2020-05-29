@@ -1,4 +1,5 @@
 [Mesh]
+  second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 2
@@ -6,8 +7,8 @@
     xmax = 0.5
     ymin = 0
     ymax = 1
-    nx = 2
-    ny = 4
+    nx = 5
+    ny = 11
     elem_type = QUAD4
   [../]
   [./left_block_sidesets]
@@ -28,8 +29,8 @@
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 2
-    ny = 2
+    nx = 5
+    ny = 5
     elem_type = QUAD4
   [../]
   [./right_block_id]
@@ -94,11 +95,11 @@
 [Variables]
   [./T]
     block = 'left_block right_block'
+    order = SECOND
   [../]
   [./lambda]
     block = 'slave_lower'
-    family = MONOMIAL
-    order = CONSTANT
+    order = FIRST
   [../]
 []
 
@@ -172,8 +173,8 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       basic                 superlu_dist'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []
 
 [Outputs]
