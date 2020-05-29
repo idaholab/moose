@@ -214,29 +214,16 @@ ComputeMortarFunctor::operator()()
       for (auto && mc : _mortar_constraints)
         mc->computeJacobian(_has_primary);
 
-      // Cache SecondarySecondary
-      _assembly.cacheJacobian();
-
-      // It doesn't appears that we have caching functions for these yet, or at least it's not
-      // used in ComputeJacobianThread. I'll make sure to add/use them if these methods show up in
-      // profiling
-      //
-      // Add SecondaryPrimary, PrimarySecondary, PrimaryPrimary
-      _assembly.addJacobianNeighbor();
-
-      // Add LowerLower, LowerSecondary, LowerPrimary, SecondaryLower, PrimaryLower
-      _assembly.addJacobianLower();
-
-      num_cached++;
-
-      if (num_cached % 20 == 0)
-        _assembly.addCachedJacobian();
+      // No caching currently. Add caching if this shows up in profiling
+      _assembly.addJacobianMortar();
     }
   } // end for loop over elements
 
-  // Make sure any remaining cached residuals/Jacobians get added
+  // Make sure any remaining cached residuals get added
   if (!_fe_problem.currentlyComputingJacobian())
     _assembly.addCachedResiduals();
-  else
-    _assembly.addCachedJacobian();
+
+  // // Not currently caching Jacobians
+  // else
+  //   _assembly.addCachedJacobian();
 }

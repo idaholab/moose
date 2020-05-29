@@ -861,11 +861,11 @@ public:
                                 const std::vector<dof_id_type> & jdof_indices);
 
   /**
-   * Add LowerLower, LowerSecondary (LowerElement), LowerPrimary (LowerNeighbor), SecondaryLower
-   * (ElementLower), and PrimaryLower (NeighborLower) portions of the Jacobian for compute objects
-   * like MortarConstraints
+   * Add *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
+   * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
+   * PrimaryPrimary for mortar-like objects
    */
-  void addJacobianLower();
+  void addJacobianMortar();
 
   /**
    * Adds three neighboring element matrices for ivar rows and jvar columns to the global Jacobian
@@ -965,10 +965,10 @@ public:
   /**
    * Returns the jacobian block for the given mortar Jacobian type
    */
-  DenseMatrix<Number> & jacobianBlockLower(Moose::ConstraintJacobianType type,
-                                           unsigned int ivar,
-                                           unsigned int jvar,
-                                           TagID tag = 0);
+  DenseMatrix<Number> & jacobianBlockMortar(Moose::ConstraintJacobianType type,
+                                            unsigned int ivar,
+                                            unsigned int jvar,
+                                            TagID tag = 0);
 
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           const std::vector<dof_id_type> & idof_indices,
