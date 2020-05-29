@@ -87,6 +87,9 @@ class ConvergencePlot(object):
         self._axes.legend()
         return lines
 
+    def set_title(self, title):
+        self._axes.set_title(title)
+
     def _fit(self, x, y):
         """
         Apply the fit and report the slope.
