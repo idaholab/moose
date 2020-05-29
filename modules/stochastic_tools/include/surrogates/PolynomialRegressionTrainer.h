@@ -9,23 +9,37 @@
 
 #pragma once
 
+#include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
+#include "PolynomialChaosTrainer.h"
 
 class PolynomialRegressionTrainer : public SurrogateTrainer
 {
 public:
+
   static InputParameters validParams();
+
   PolynomialRegressionTrainer(const InputParameters & parameters);
+
   virtual void initialSetup() override;
+
   virtual void initialize() override;
+
   virtual void execute() override;
+
   virtual void finalize() override;
 
 protected:
   /// Coefficients of regression model
   std::vector<Real> & _coeff;
 
+  std::vector<std::vector<Real>> & _power_matrix;
+
 private:
+
+  unsigned int _n_dim;
+  unsigned in _n_poly_terms;
+
   ///@{
   /// Matrix and rhs for ordinary least squares
   DenseMatrix<Real> _matrix;
@@ -40,4 +54,5 @@ private:
 
   /// True when _sampler data is distributed
   bool _values_distributed = false; // default to false; set in initialSetup
+
 };

@@ -16,20 +16,28 @@ InputParameters
 PolynomialRegressionTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription("Computes coefficients for linear regession model.");
+
+  params.addClassDescription("Computes coefficients for polynomial regession model.");
+
   params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
   params.addRequiredParam<VectorPostprocessorName>(
       "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
   params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
+  params.addRequiredParam<unsigned int>(
+      "max_degree",
+      "Maximum polynomial degree to use for the regression."
+  )
 
   return params;
 }
 
 PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _coeff(declareModelData<std::vector<Real>>("_coeff"))
+    _coeff(declareModelData<std::vector<Real>>("_coeff")),
+    _poly_basis(declareModelData<std::vector<std::vector<Real>>("_poly_basis")),
+    _max_degree(declareModelData<int>("_max_degree"))
 {
 }
 
@@ -44,11 +52,21 @@ PolynomialRegressionTrainer::initialSetup()
   // Sampler
   _sampler = &getSamplerByName(getParam<SamplerName>("sampler"));
 
+  unsigned int _n_dims = _sampler->getNumberOfCols();
+
+  // Initializing power matrix, using _max_degree+1 to tackle the indexing offset
+  // within generateTuple
+  _power_matrix = PolynomialChaosTrainer::generateTuple(_n_dims, _max_degree+1);
+  _n_poly_terms = _power_matrix.size();
+
+  // Check if we have enough data points to solve the problem
+  if (_sampler->getNumberOfRows() <= _n_poly_terms)
+      mooseError("Number of data points must be greater than the number of terms in the polynomial.");
+
   // Resize _coeff, _matrix, _rhs to number of sampler columns
-  unsigned int N = _sampler->getNumberOfCols() + 1;
-  _coeff.resize(N);
-  _matrix.resize(N, N);
-  _rhs.resize(N);
+  _coeff.resize(_n_poly_terms);
+  _matrix.resize(_n_poly_terms, _n_poly_terms);
+  _rhs.resize(_n_poly_terms);
 }
 
 void
@@ -59,10 +77,6 @@ PolynomialRegressionTrainer::initialize()
       _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
   mooseAssert(num_rows == _values_ptr->size(),
               "Sampler number of rows does not match number of results from vector postprocessor.");
-
-  // Check to make sure there are enough sample points
-  if (_sampler->getNumberOfRows() <= _sampler->getNumberOfCols())
-    mooseError("Number of sampler rows must be greater than number of columns.");
 }
 
 void
@@ -75,13 +89,26 @@ PolynomialRegressionTrainer::execute()
   for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler->getNextLocalRow();
-    data.insert(data.begin(), 1.0);
 
-    for (unsigned int i = 0; i < data.size(); ++i)
+    for (unsigned int i = 0; i < _n_poly_terms; ++i)
     {
-      for (unsigned int j = 0; j < data.size(); ++j)
-        _matrix(i, j) += data[i] * data[j];
-      _rhs(i) += data[i] * (*_values_ptr)[p - offset];
+      std::vector<unsigned int> i_powers(_power_matrix[i]);
+
+      Real i_value(0.0);
+      for (unsigned int ii = 0; ii < data.size(); ++ii)
+        i_value += pow(data[ii], i_powers[ii]);
+
+      for (unsigned int j = 0; j < _n_poly_terms; ++j)
+      {
+        std::vector<unsigned int> j_powers(_power_matrix[j]);
+
+        Real j_value(0.0);
+        for (unsigned int jj = 0; jj < data.size(); ++jj)
+          j_value += pow(data[jj], j_powers[jj]);
+
+        _matrix(i, j) += i_value * j_value;
+        _rhs(i) += i_value * (*_values_ptr)[p - offset];
+      }
     }
   }
 }
