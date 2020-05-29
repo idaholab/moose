@@ -22,6 +22,6 @@ The following is a list of markdown pages within the "extensions" directory.
 
 ### TOC 2
 
-## Outline
+## Outline id=outline
 
-!content outline location=extensions
+!content outline location=extensions levels=1 2 hide=outline

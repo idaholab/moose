@@ -27,7 +27,7 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
-ContentOutline = tokens.newToken('ContentOutline', location=None, level=2)
+ContentOutline = tokens.newToken('ContentOutline', location=None, levels=list(), hide=[])
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -171,7 +171,8 @@ class ContentOutlineCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build outline.")
-        settings['level'] = (2, 'Heading level(s) to display.')
+        settings['levels'] = (1, 'Heading level(s) to display.')
+        settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -179,8 +180,17 @@ class ContentOutlineCommand(command.CommandComponent):
             msg = "The 'location' setting is required for the !content outline command."
             raise exceptions.MooseDocsException(msg)
 
-        return ContentOutline(parent, level=self.settings['level'],
-                              location=self.settings['location'])
+        levels = self.settings['levels']
+        if isinstance(levels, (str, str)):
+            levels = [int(l) for l in levels.split()]
+        else:
+            # still need to convert to a list so that it is iterable
+            levels = [int(levels)]
+
+        return ContentOutline(parent,
+                              location=self.settings['location'],
+                              levels=levels,
+                              hide=self.settings['hide'].split())
 
 class RenderContentToken(components.RenderComponent):
 
@@ -305,9 +315,30 @@ class RenderTableOfContents(components.RenderComponent):
 class RenderContentOutline(components.RenderComponent):
     def createHTML(self, parent, token, page):
         location = token['location']
+        levels = token['levels']
+        hide = token['hide']
         func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
         nodes = self.translator.findPages(func)
+
+        # the pages are found in alphabetical order, we need to make it so that the
+        # first level headings appear in the desired order when we loop through nodes.
+        # This could be ugly from an input perspective, because there's no way of
+        # knowing in which order a user wishes the pages to appear
+
+        div = html.Tag(parent, 'div', class_='moose-outline')
         for node in nodes:
-            print(node.local)
+            print("\n", node.local, ":\n")
+            pageref = str(node.relativeDestination(page))
+
+            # this loop produces a KeyError: 'headings' when it re-renders after changing
+            # a markdown file while already serving, but not on the first build --serve.
+            # can we fix this?
             for k, v in node['headings'].items():
-                print(k, v.text(), v['level'])
+                print("ID: ", k, "Heading: ", v.text(), "Level: ", v['level'], "\n")
+                if v['level'] in levels and k not in hide:
+                    url = pageref + '#{}'.format(k)
+                    head = heading.find_heading(node, k)
+                    link = core.Link(None, url=url)
+                    head.copyToToken(link)
+                    core.LineBreak(link)
+                    self.renderer.render(div, link, page)
