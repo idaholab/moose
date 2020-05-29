@@ -93,17 +93,17 @@ PolynomialRegressionTrainer::execute()
     {
       std::vector<unsigned int> i_powers(_power_matrix[i]);
 
-      Real i_value(0.0);
+      Real i_value(1.0);
       for (unsigned int ii = 0; ii < data.size(); ++ii)
-        i_value += pow(data[ii], i_powers[ii]);
+        i_value *= pow(data[ii], i_powers[ii]);
 
       for (unsigned int j = 0; j < _n_poly_terms; ++j)
       {
         std::vector<unsigned int> j_powers(_power_matrix[j]);
 
-        Real j_value(0.0);
+        Real j_value(1.0);
         for (unsigned int jj = 0; jj < data.size(); ++jj)
-          j_value += pow(data[jj], j_powers[jj]);
+          j_value *= pow(data[jj], j_powers[jj]);
 
         _matrix(i, j) += i_value * j_value;
         _rhs(i) += i_value * (*_values_ptr)[p - offset];

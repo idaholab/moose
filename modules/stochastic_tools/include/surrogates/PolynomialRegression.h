@@ -13,12 +13,22 @@
 
 class PolynomialRegression : public SurrogateModel
 {
-public:
-  static InputParameters validParams();
-  PolynomialRegression(const InputParameters & parameters);
-  virtual Real evaluate(const std::vector<Real> & x) const override;
+  public:
+    static InputParameters validParams();
 
-protected:
-  /// Coefficients of regression model
-  const std::vector<Real> & _coeff;
+    PolynomialRegression(const InputParameters & parameters);
+
+    virtual Real evaluate(const std::vector<Real> & x) const override;
+
+  protected:
+    /// Coefficients of regression model
+    const std::vector<Real> & _coeff;
+
+    /// The power matrix for the terms in the polynomial expressions
+    const std::vector<std::vector<unsigned int>> & _power_matrix;
+
+  private:
+
+    /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
+    const unsigned int & _max_degree;
 };

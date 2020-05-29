@@ -15,13 +15,15 @@ InputParameters
 PolynomialRegression::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
-  params.addClassDescription("Evaluates linear regression model with coefficients computed from PolynomialRegressionTrainer.");
+  params.addClassDescription("Evaluates polynomial regression model with coefficients computed from PolynomialRegressionTrainer.");
   return params;
 }
 
 PolynomialRegression::PolynomialRegression(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _coeff(getModelData<std::vector<Real>>("_coeff"))
+    _coeff(getModelData<std::vector<Real>>("_coeff")),
+    _power_matrix(getModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
+    _max_degree(getModelData<unsigned int>("_max_degree"))
 {
 }
 
@@ -29,12 +31,23 @@ Real
 PolynomialRegression::evaluate(const std::vector<Real> & x) const
 {
   // Check whether input point has same dimensionality as training data
-  mooseAssert((_coeff.size() - 1) == x.size(),
+  mooseAssert(_power_matrix[0].size() == x.size(),
               "Input point does not match dimensionality of training data.");
 
-  Real val = _coeff[0];
-  for (unsigned int i = 0; i < x.size(); ++i)
-    val += _coeff[i + 1] * x[i];
+  Real val(0.0);
+  unsigned int n_terms(_power_matrix.size());
+
+  for (unsigned int i = 0; i < n_terms; ++i)
+  {
+    std::vector<unsigned int> i_powers(_power_matrix[i]);
+
+    Real tmp_val(1.0);
+    for (unsigned int j = 0; j < i_powers.size(); ++j)
+    {
+        tmp_val *= pow(x[j], i_powers[j]);
+    }
+    val += _coeff[i] * tmp_val;
+  }
 
   return val;
 }
