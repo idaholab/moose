@@ -29,11 +29,11 @@
  * 1. It can create arbitrary data types rather than only Real and std::vector<Real>
  * 2. It can create many values per object. This was possible for VectorPostprocessor objects but
  *    not for Postprocessors. Therefore, this allows a single Reporter to provide multiple values
- *    and consolidate similar items. For example, the Counter object replaced several individual
+ *    and consolidate similar items. For example, a "counter" object replaced several individual
  *    Postprocessor objects.
  * 3. The ReporterContext system allows for each data value to have special operation within a
- * single object. Previously the VectorPostprocessor system had capability to perform broadcasting,
- * but it was applied to all vectors in the object.
+ *    single object. Previously the VectorPostprocessor system had capability to perform
+ *    broadcasting, but it was applied to all vectors in the object.
  */
 class Reporter : public OutputInterface
 {
@@ -55,11 +55,11 @@ protected:
    *                      the warning below.
    *
    * WARNING on "default_value":
-   * The Reporter system, like the systems before it, allow for objects
-   * that consume values to be constructed prior to the produce objects. When a value is requested
-   * either by a producer (Reporter) or consumer (ReporterInterface) the data is allocated. As such
-   * the assigned default value from the producer should not be relied upon on the consumer side
-   * during object construction.
+   * The Reporter system, like the systems before it, allow for objects that consume values to be
+   * constructed prior to the produce objects. When a value is requested either by a producer
+   * (Reporter) or consumer (ReporterInterface) the data is allocated. As such the assigned default
+   * value from the producer should not be relied upon on the consumer side during object
+   * construction.
    *
    * Note to MOOSE Developers:
    * The ReporterContext is just a mechanism to allow for handling of values in special ways. In

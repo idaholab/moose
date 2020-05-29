@@ -19,15 +19,19 @@
 /**
  * A special version of RestartableData to aid in storing Reporter values. This object is
  * used by the ReporterData object. The objects provides a convenient method to define
- * Reporter data that has a value as well as some number of old data values as well as
- * a method for setting the context pointer after construction. Please refer to ReporterData.h
- * for more information regarding the use of this class.
+ * Reporter data that has a value as well as some number of old data values. Please refer to
+ * ReporterData.h for more information regarding the use of this class.
  */
 template <typename T>
 class ReporterState : public RestartableData<std::pair<T, std::vector<T>>>
 {
 public:
-  ReporterState(const std::string & name);
+  ReporterState(const ReporterName & name);
+
+  /**
+   * Return the ReporterName that this state is associated
+   */
+  const ReporterName & getReporterName() const;
 
   /**
    * Return a reference to the current value or one of the old values.
@@ -37,12 +41,7 @@ public:
   T & value(const std::size_t time_index = 0);
 
   /**
-   * Set the context pointer, see ReporterData for the reason.
-   */
-  void setContext(void * void_ptr);
-
-  /**
-   * This object tracks the max requested index, which is used by the RepoterContext to manage
+   * This object tracks the max requested index, which is used by the ReporterContext to manage
    * the old values
    */
   std::size_t getMaxRequestedTimeIndex() const;
@@ -50,12 +49,24 @@ public:
 private:
   /// Tracking of the largest desired old value
   std::size_t _max_requested_time_index = 0;
+
+  /// Name of data that state is associated
+  const ReporterName _reporter_name;
 };
 
 template <typename T>
-ReporterState<T>::ReporterState(const std::string & name)
-  : RestartableData<std::pair<T, std::vector<T>>>(name, nullptr)
+ReporterState<T>::ReporterState(const ReporterName & name)
+  : RestartableData<std::pair<T, std::vector<T>>>(
+        "ReporterData/" + name.getObjectName() + "/" + name.getValueName(), nullptr),
+    _reporter_name(name)
 {
+}
+
+template <typename T>
+const ReporterName &
+ReporterState<T>::getReporterName() const
+{
+  return _reporter_name;
 }
 
 template <typename T>
@@ -75,13 +86,6 @@ ReporterState<T>::value(const std::size_t time_index)
 }
 
 template <typename T>
-void
-ReporterState<T>::setContext(void * void_ptr)
-{
-  this->_context = void_ptr;
-}
-
-template <typename T>
 std::size_t
 ReporterState<T>::getMaxRequestedTimeIndex() const
 {
@@ -89,15 +93,17 @@ ReporterState<T>::getMaxRequestedTimeIndex() const
 }
 
 /**
- * The recover/restart system has a context system. The Reporter system uses the context system
- * to perform special operations such as shrinking the old/older value storage in the general
- * case or performing broadcasting of values.
+ * The ReporterData helper class uses the a context object to perform special operations such as
+ * shrinking the old/older value storage in the general case or performing broadcasting of values.
  */
 class ReporterContextBase : public libMesh::ParallelObject
 {
 public:
   ReporterContextBase(const libMesh::ParallelObject & other);
   virtual ~ReporterContextBase() = default;
+
+  /// Return the ReporterName that the context is associated
+  virtual const ReporterName & name() const = 0;
 
   /// Called by InitReporterAction via ReporterData
   virtual void init() = 0;
@@ -120,15 +126,13 @@ class ReporterContext : public ReporterContextBase
 {
 public:
   ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
+  virtual const ReporterName & name() const final;
   virtual void init() override;
   virtual void copyValuesBack() override;
   virtual void finalize() override {}
 
 protected:
-  /// The object that contains the Reporter value data. It seems silly that the context value
-  /// needs this, but because of the template parameter this is required to perform the correct
-  /// operations while allowing ReporterData to call the base context methods that do not
-  /// include template parameters.
+  /// The state on which this context object operates
   ReporterState<T> & _state;
 };
 
@@ -136,6 +140,13 @@ template <typename T>
 ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
   : ReporterContextBase(other), _state(state)
 {
+}
+
+template <typename T>
+const ReporterName &
+ReporterContext<T>::name() const
+{
+  return _state.getReporterName();
 }
 
 template <typename T>
