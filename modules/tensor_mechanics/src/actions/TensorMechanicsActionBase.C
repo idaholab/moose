@@ -49,8 +49,11 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
 
 const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
     TensorMechanicsActionBase::_rank_two_cylindrical_component_table = {
-        {"axial", {"AxialStress", {"stress", "strain"}}},
-        {"hoop", {"HoopStress", {"stress", "strain"}}},
+        {"axial",
+         {"AxialStress",
+          {"stress", "strain", "plasitic_strain", "creep_strain", "elastic_strain"}}},
+        {"hoop",
+         {"HoopStress", {"stress", "strain", "plasitic_strain", "creep_strain", "elastic_strain"}}},
         {"radial", {"RadialStress", {"stress", "strain"}}}};
 
 InputParameters
