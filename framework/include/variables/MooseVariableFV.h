@@ -336,7 +336,7 @@ public:
   const MooseArray<Number> & dofValuesDuDotDotDuNeighbor();
 
   /// Returns the AD dof values.
-  const MooseArray<ADReal> & adDofValues();
+  const MooseArray<ADReal> & adDofValues() const override;
 
   /// Note: const monomial is always the case - higher order solns are
   /// reconstructed - so this is simpler func than FE equivalent.
@@ -369,7 +369,7 @@ protected:
 
 template <typename OutputType>
 inline const MooseArray<ADReal> &
-MooseVariableFV<OutputType>::adDofValues()
+MooseVariableFV<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
 }
