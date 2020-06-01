@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PolynomialRegression.h"
+#include "PolynomialRegressionSurrogate.h"
 
-registerMooseObject("StochasticToolsApp", PolynomialRegression);
+registerMooseObject("StochasticToolsApp", PolynomialRegressionSurrogate);
 
 InputParameters
-PolynomialRegression::validParams()
+PolynomialRegressionSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Evaluates polynomial regression model with coefficients computed from PolynomialRegressionTrainer.");
   return params;
 }
 
-PolynomialRegression::PolynomialRegression(const InputParameters & parameters)
+PolynomialRegressionSurrogate::PolynomialRegressionSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
     _coeff(getModelData<std::vector<Real>>("_coeff")),
     _power_matrix(getModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
@@ -28,7 +28,7 @@ PolynomialRegression::PolynomialRegression(const InputParameters & parameters)
 }
 
 Real
-PolynomialRegression::evaluate(const std::vector<Real> & x) const
+PolynomialRegressionSurrogate::evaluate(const std::vector<Real> & x) const
 {
   // Check whether input point has same dimensionality as training data
   mooseAssert(_power_matrix[0].size() == x.size(),

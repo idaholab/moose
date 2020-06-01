@@ -11,12 +11,12 @@
 
 #include "SurrogateModel.h"
 
-class PolynomialRegression : public SurrogateModel
+class PolynomialRegressionSurrogate : public SurrogateModel
 {
   public:
     static InputParameters validParams();
 
-    PolynomialRegression(const InputParameters & parameters);
+    PolynomialRegressionSurrogate(const InputParameters & parameters);
 
     virtual Real evaluate(const std::vector<Real> & x) const override;
 
