@@ -54,7 +54,7 @@ PolynomialChaosTrainer::initialSetup()
 {
   // Setup data needed for training
   _tuple = StochasticTools::MultiDimPolynomialGenerator::generateTuple(
-          getParam<std::vector<DistributionName>>("distributions").size(), _order);
+      getParam<std::vector<DistributionName>>("distributions").size(), _order);
   _ncoeff = _tuple.size();
 
   // Results VPP

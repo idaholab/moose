@@ -25,9 +25,8 @@ PolynomialRegressionTrainer::validParams()
   params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
-  params.addRequiredParam<unsigned int>(
-      "max_degree",
-      "Maximum polynomial degree to use for the regression.");
+  params.addRequiredParam<unsigned int>("max_degree",
+                                        "Maximum polynomial degree to use for the regression.");
 
   return params;
 }
@@ -55,13 +54,14 @@ PolynomialRegressionTrainer::initialSetup()
 
   // Initializing power matrix, using _max_degree+1 to tackle the indexing offset
   // within generateTuple
-  _power_matrix = StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree+1);
+  _power_matrix =
+      StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree + 1);
 
   _n_poly_terms = _power_matrix.size();
 
   // Check if we have enough data points to solve the problem
   if (_sampler->getNumberOfRows() <= _n_poly_terms)
-      mooseError("Number of data points must be greater than the number of terms in the polynomial.");
+    mooseError("Number of data points must be greater than the number of terms in the polynomial.");
 
   // Resize _coeff, _matrix, _rhs to number of sampler columns
   _coeff.resize(_n_poly_terms);

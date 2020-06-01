@@ -15,7 +15,8 @@ InputParameters
 PolynomialRegressionSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
-  params.addClassDescription("Evaluates polynomial regression model with coefficients computed from PolynomialRegressionTrainer.");
+  params.addClassDescription("Evaluates polynomial regression model with coefficients computed "
+                             "from PolynomialRegressionTrainer.");
   return params;
 }
 
@@ -44,7 +45,7 @@ PolynomialRegressionSurrogate::evaluate(const std::vector<Real> & x) const
     Real tmp_val(1.0);
     for (unsigned int j = 0; j < i_powers.size(); ++j)
     {
-        tmp_val *= pow(x[j], i_powers[j]);
+      tmp_val *= pow(x[j], i_powers[j]);
     }
     val += _coeff[i] * tmp_val;
   }

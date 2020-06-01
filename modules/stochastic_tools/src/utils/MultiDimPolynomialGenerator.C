@@ -13,8 +13,7 @@ namespace StochasticTools
 {
 
 std::vector<std::vector<unsigned int>>
-MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim,
-                                           const unsigned int order)
+MultiDimPolynomialGenerator::generateTuple(const unsigned int ndim, const unsigned int order)
 {
   // Compute full tensor tuple
   std::vector<std::vector<unsigned int>> tuple_1d(ndim);
@@ -49,7 +48,7 @@ MultiDimPolynomialGenerator::sortTuple(const std::vector<unsigned int> & first,
       std::accumulate(second.begin(), second.end(), 0))
     return true;
   else if (std::accumulate(first.begin(), first.end(), 0) >
-            std::accumulate(second.begin(), second.end(), 0))
+           std::accumulate(second.begin(), second.end(), 0))
     return false;
 
   // Loop over elements

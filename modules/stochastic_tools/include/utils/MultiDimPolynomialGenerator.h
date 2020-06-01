@@ -25,25 +25,24 @@ namespace StochasticTools
  */
 class MultiDimPolynomialGenerator
 {
-  public:
-    MultiDimPolynomialGenerator(){};
+public:
+  MultiDimPolynomialGenerator(){};
 
-    ~MultiDimPolynomialGenerator() = default;
+  ~MultiDimPolynomialGenerator() = default;
 
-    /**
-    * Function computing for computing _tuple
-    * Example for ndim = 3, order = 4:
-    * | 0 | 1 0 0 | 2 1 1 0 0 0 | 3 2 2 1 1 1 0 0 0 0 |
-    * | 0 | 0 1 0 | 0 1 0 2 1 0 | 0 1 0 2 1 0 3 2 1 0 |
-    * | 0 | 0 0 1 | 0 0 1 0 1 2 | 0 0 1 0 1 2 0 1 2 3 |
-    */
-    static std::vector<std::vector<unsigned int>> generateTuple(unsigned int n_dims,
-                                                                unsigned int max_degree);
+  /**
+   * Function computing for computing _tuple
+   * Example for ndim = 3, order = 4:
+   * | 0 | 1 0 0 | 2 1 1 0 0 0 | 3 2 2 1 1 1 0 0 0 0 |
+   * | 0 | 0 1 0 | 0 1 0 2 1 0 | 0 1 0 2 1 0 3 2 1 0 |
+   * | 0 | 0 0 1 | 0 0 1 0 1 2 | 0 0 1 0 1 2 0 1 2 3 |
+   */
+  static std::vector<std::vector<unsigned int>> generateTuple(unsigned int n_dims,
+                                                              unsigned int max_degree);
 
-    /// Tuple sorter function
-    static bool sortTuple(const std::vector<unsigned int> & first,
-                          const std::vector<unsigned int> & second);
-
+  /// Tuple sorter function
+  static bool sortTuple(const std::vector<unsigned int> & first,
+                        const std::vector<unsigned int> & second);
 };
 
 }

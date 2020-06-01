@@ -16,7 +16,6 @@
 class PolynomialRegressionTrainer : public SurrogateTrainer
 {
 public:
-
   static InputParameters validParams();
 
   PolynomialRegressionTrainer(const InputParameters & parameters);
@@ -36,7 +35,6 @@ protected:
   std::vector<std::vector<unsigned int>> & _power_matrix;
 
 private:
-
   /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
   const unsigned int & _max_degree;
 
@@ -60,5 +58,4 @@ private:
 
   /// True when _sampler data is distributed
   bool _values_distributed = false; // default to false; set in initialSetup
-
 };
