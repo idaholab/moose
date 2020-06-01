@@ -19,12 +19,6 @@
     lower_bound = 0
     upper_bound = 1
   []
-  [other]
-    type = Weibull
-    location = 0
-    scale = 1
-    shape = 0.5
-  []
 []
 
 [Samplers]
