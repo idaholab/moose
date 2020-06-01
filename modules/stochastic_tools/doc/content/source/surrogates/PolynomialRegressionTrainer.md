@@ -1,5 +1,7 @@
 # PolynomialRegressionTrainer
 
+!syntax description /Trainers/PolynomialRegressionTrainer
+
 ## Overview
 
 This class is responsible for determining the coefficients of a multi-dimensional polynomial which
@@ -23,10 +25,11 @@ x_{N,1} & x_{N,2} & \dots  & x_{N,D}
 \textbf{x}_{N}
 \end{bmatrix}.
 
-where $D$ denotes the number of dimensions in the parameter space.
+where $D$ denotes the dimension of the parameter space and $\textbf{x}$ is a
+D-dimensional vector containing the coordinates in each dimension.
 Similarly to other `Trainer` classes, `PolynomialRegressionTrainer` accesses this matrix
 from a `Sampler` object. Of course, the trainer has to know the values of the QoI at
-these locations as well:
+these coordinates as well:
 
 !equation
 \textbf{y} =
@@ -39,7 +42,7 @@ y_{N}
 .
 
 This data is accessed through a `VectorPostprocessor`. Now that all data is available,
-the $\textbf{y}=f(\textbf{x})$ is approximated using a polynomial expression of the following form:
+$\textbf{y}=f(\textbf{x})$ unknown function is approximated using a polynomial expression of the following form:
 
 !equation id=poly_exp
 \textbf{y} \approx \hat{\textbf{y}} = \sum \limits_{k=1}^{N_p}P(\textbf{x}, \textbf{i}_{k})c_k=\textbf{P}(\textbf{x})\textbf{c},
@@ -54,8 +57,8 @@ P(\textbf{x}, \textbf{i}) = \textbf{x}^\textbf{i} = \prod \limits_{j=1}^D x_j^{i
 where $x_j$ denotes the $j$-th coordinate of parameter vector $\textbf{x}$,
 while $\textbf{i}=(i_1,...,i_D)$ is a $D$-dimensional tuple containing the powers
 for each coordinate. This tuple is the same as described in [PolynomialChaos.md].
-To determine these tuples the trainer needs an additional input parameter, namely
-the maximum degree of the polynomials. This limits the number of polynomial terms in
+To determine these tuples, the trainer needs an additional input parameter, namely
+the maximum degree of the polynomial. This limits the number of polynomial terms in
 [poly_exp]. If this number is fixed, the only unknown parameters are the elements of
 $\textbf{c}$.
 
@@ -77,7 +80,7 @@ coefficients can be determined as follows:
 !equation
 \textbf{c}=\left(\textbf{R}^T\textbf{R}\right)^{-1}\textbf{R}^T\textbf{y}.
 
-As a last note, it must be mentioned that this method is only applicable if $N_p \leq N$
+Finally, it must be mentioned that this method is only applicable if $N_p \leq N$
 and keeping $N_p << N$ is recommended.
 
 
@@ -87,14 +90,17 @@ To get the necessary data, two essential blocks have to be included in the maste
 The first, the sampler defined in `Samplers`, creates the coordinates in matrix $textbf{X}$, while
 the objects in `VectorPostprocessors` create, fill and store the result vector $\textbf{y}$.
 
-EXAMPLE HERE Sampler
+!listing polynomial_regression/train.i block=Samplers
 
-EXAMPLE HERE VectorPostprocessor
+!listing polynomial_regression/train.i block=VectorPostprocessors
 
-The trainer then uses these arrays together with the defined `max_degree`
-to compute the model coefficients `_coeffs` array:
+Similarly to [NearestPointTrainer.md], a `GFunction` vector postprocessor from [SobolStatistics.md] is
+used to emulate a full-order model. This simply evaluates a function at sample points.
 
-EXAMPLE HERE Trainers
+Using this data and the maximum degree setting (`max_degree` in the input file),
+the trainer computes the model coefficients $\textbf{c}$:
+
+!listing polynomial_regression/train.i block=Trainers
 
 !syntax parameters /Trainers/PolynomialRegressionTrainer
 
