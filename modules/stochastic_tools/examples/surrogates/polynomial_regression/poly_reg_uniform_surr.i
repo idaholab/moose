@@ -35,11 +35,11 @@
 
 [Surrogates]
   [poly_reg_avg]
-    type = PolynomialRegression
+    type = PolynomialRegressionSurrogate
     filename = 'poly_reg_training_poly_reg_avg.rd'
   []
   [poly_reg_max]
-    type = PolynomialRegression
+    type = PolynomialRegressionSurrogate
     filename = 'poly_reg_training_poly_reg_max.rd'
   []
 []

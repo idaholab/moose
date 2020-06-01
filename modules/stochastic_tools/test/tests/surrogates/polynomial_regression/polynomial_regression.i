@@ -60,7 +60,7 @@
 
 [Surrogates]
   [surrogate]
-    type = PolynomialRegression
+    type = PolynomialRegressionSurrogate
     trainer = train
   []
 []
