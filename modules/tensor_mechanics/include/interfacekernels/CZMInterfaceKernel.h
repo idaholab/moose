@@ -38,6 +38,9 @@ protected:
   std::vector<unsigned int> _disp_neighbor_var;
   ///@}
 
+  // pointer to displacement variables
+  std::vector<MooseVariable *> _vars;
+
   // values of the traction and traction derivatives used
   ///@{
   const MaterialProperty<RealVectorValue> & _traction_global;
