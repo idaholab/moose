@@ -87,7 +87,7 @@ and keeping $N_p << N$ is recommended.
 ## Example Input File Syntax
 
 To get the necessary data, two essential blocks have to be included in the master input file.
-The first, the sampler defined in `Samplers`, creates the coordinates in matrix $textbf{X}$, while
+The first, the sampler defined in `Samplers`, creates the coordinates in matrix $\textbf{X}$, while
 the objects in `VectorPostprocessors` create, fill and store the result vector $\textbf{y}$.
 
 !listing polynomial_regression/train.i block=Samplers
