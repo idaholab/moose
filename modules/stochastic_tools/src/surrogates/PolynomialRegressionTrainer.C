@@ -56,6 +56,7 @@ PolynomialRegressionTrainer::initialSetup()
   // Initializing power matrix, using _max_degree+1 to tackle the indexing offset
   // within generateTuple
   _power_matrix = StochasticTools::MultiDimPolynomialGenerator::generateTuple(_n_dims, _max_degree+1);
+
   _n_poly_terms = _power_matrix.size();
 
   // Check if we have enough data points to solve the problem
@@ -106,8 +107,9 @@ PolynomialRegressionTrainer::execute()
           j_value *= pow(data[jj], j_powers[jj]);
 
         _matrix(i, j) += i_value * j_value;
-        _rhs(i) += i_value * (*_values_ptr)[p - offset];
       }
+
+      _rhs(i) += i_value * (*_values_ptr)[p - offset];
     }
   }
 }
