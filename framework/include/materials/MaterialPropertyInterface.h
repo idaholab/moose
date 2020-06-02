@@ -185,6 +185,10 @@ public:
   bool hasMaterialProperty(const std::string & name);
   template <typename T>
   bool hasMaterialPropertyByName(const std::string & name);
+  template <typename T>
+  bool hasADMaterialProperty(const std::string & name);
+  template <typename T>
+  bool hasADMaterialPropertyByName(const std::string & name);
   ///@}
 
   /**
@@ -545,4 +549,20 @@ MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & /*
     MathUtils::mooseSetToZero(zero[qp]);
 
   return zero;
+}
+
+template <typename T>
+bool
+MaterialPropertyInterface::hasADMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string prop_name = deducePropertyName(name);
+  return hasADMaterialPropertyByName<T>(prop_name);
+}
+
+template <typename T>
+bool
+MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name)
+{
+  return _material_data->haveADProperty<T>(name);
 }

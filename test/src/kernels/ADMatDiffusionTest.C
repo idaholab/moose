@@ -35,6 +35,19 @@ ADMatDiffusionTest::ADMatDiffusionTest(const InputParameters & parameters)
     _regular_diff_from_regular_prop(getMaterialProperty<Real>("regular_mat_prop")),
     _prop_to_use(getParam<MooseEnum>("prop_to_use"))
 {
+  // check whether our has APIs work
+
+  if (!hasADMaterialProperty<Real>("ad_mat_prop") &&
+      !defaultADMaterialProperty<Real>(deducePropertyName("ad_mat_prop")))
+    mooseError("It should be impossible to get an AD property without erroring and simultaneously "
+               "be neither able to retrieve the property with 'hasADMaterialProperty' nor through "
+               "a default property");
+  if (!hasMaterialProperty<Real>("regular_mat_prop") &&
+      !defaultMaterialProperty<Real>(deducePropertyName("regular_mat_prop")))
+    mooseError(
+        "It should be impossible to get a regular property without erroring and simultaneously "
+        "be neither able to retrieve the property with 'hasMaterialProperty' nor through "
+        "a default property");
 }
 
 ADReal
