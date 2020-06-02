@@ -18,6 +18,7 @@ used independently or in combination to meet the needs of the application develo
 - Example 5: [examples/surrogate_training.md]
 - Example 6: [examples/surrogate_evaluate.md]
 - Example 7: [examples/poly_chaos_surrogate.md]
+- Example 8: [examples/poly_regression_surrogate.md]
 
 ## Performance
 
