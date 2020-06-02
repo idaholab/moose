@@ -18,6 +18,17 @@
     issues = "#8265"
     requirement = 'PiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation of a variable and perform approriate scaling'
   [../]
+  [./test_extrapolation]
+    type = 'Exodiff'
+    input = 'piecewise_linear_interpolation_material.i'
+    prereq = test
+    cli_args = "Materials/m2/x='0.4 0.6' Materials/m2/y='0.4 0.6' Materials/m2/extrapolation=true"
+    exodiff = 'piecewise_linear_interpolation_material_out.e'
+    issues = "#15379"
+    custom_cmp = custom.cmp
+    design = "ADPiecewiseLinearInterpolationMaterial.md"
+    requirement = 'ADPiecewiseLinearInterpolationMaterial shall create a material with a linear interpolation and extrapolation of a variable'
+  [../]
   [./test_err1]
     type = 'RunException'
     input = 'piecewise_linear_interpolation_material.i'
