@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -104,6 +103,8 @@ parseOpts(int argc, char ** argv, Flags & flags)
     std::string arg = argv[i];
     if (arg[0] != '-')
       break;
+    else if (arg.length() == 1)
+      return std::vector<std::string>(1, "-");
 
     std::string flagname = arg.substr(1);
     if (flagname[0] == '-')
@@ -177,7 +178,8 @@ findParam(int argc, char ** argv)
   for (int i = 1; i < positional.size(); i++)
   {
     std::string fname(positional[i]);
-    std::ifstream f(fname);
+    std::istream && f =
+        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
     std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
     hit::Node * root = nullptr;
@@ -257,7 +259,8 @@ format(int argc, char ** argv)
     try
     {
       std::string fname(flags.val("style"));
-      std::ifstream f(fname);
+      std::istream && f =
+          (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
       std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
       fmt = hit::Formatter(flags.val("style"), input);
     }
@@ -272,13 +275,14 @@ format(int argc, char ** argv)
   for (int i = 0; i < positional.size(); i++)
   {
     std::string fname(positional[i]);
-    std::ifstream f(fname);
+    std::istream && f =
+        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
     std::string input(std::istreambuf_iterator<char>(f), {});
 
     try
     {
       auto fmted = fmt.format(fname, input);
-      if (flags.have("i"))
+      if (flags.have("i") && fname != "-")
       {
         std::ofstream output(fname);
         output << fmted << "\n";
@@ -310,7 +314,8 @@ validate(int argc, char ** argv)
   for (int i = 0; i < argc; i++)
   {
     std::string fname(argv[i]);
-    std::ifstream f(fname);
+    std::istream && f =
+        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
     std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
     std::unique_ptr<hit::Node> root;
