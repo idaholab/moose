@@ -1,4 +1,5 @@
 ## Upcoming Training Events
 
-All upcoming workshops have been postponed, please follow the MOOSE mailing list for additional
-updates regarding rescheduled times.
+- [MOOSE Training Workshop (webinar), June 9 - 10, 2020 8:00am to 4:00pm MDT](https://attendee.gotowebinar.com/register/3351154618519053325)
+
+  After registering, you will receive a confirmation email containing information about joining the webinar.
