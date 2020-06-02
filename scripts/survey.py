@@ -24,12 +24,8 @@ except Exception :
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-home =os.getenv('HOME')
-if home is None:
-    # $HOME is not defined. Nope out.
-    sys.exit(0)
-
-base = home + '/.moose_survey'
+# base name for the survey persistent state files
+base = os.path.dirname(os.path.realpath(__file__)) + '/.moose_survey'
 
 # we allow users to opt out completely in case they have some weird hostname issues
 if os.path.exists(base) :
