@@ -8,7 +8,7 @@ Caveats:
 - Peacock does not work correctly (artifacts during rendering: surface normals are flipped).
 - Different flavors of Linux are available.
 
-    - Be sure to choose an OS in which we support. While MOOSE will ultimately work on just about every flavor of Linux, this document assumes you have chosen Ubuntu.
+    - Be sure to choose an OS in which we support. While MOOSE will ultimately work on just about every flavor of Linux, this document assumes you have chosen Ubuntu 20.04.
 !alert-end!
 
 !include installation/wsl.md

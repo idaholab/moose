@@ -30,7 +30,7 @@ As should this text.
 !devel-end!
 
 
-Inline text may also be style, for example the following creates colored text within a box.
+Inline text may also be styled, for example the following creates colored text within a box.
 
 !devel! example id=style-inline-example caption=Example use of "style" command for inline text.
 It is possible to create [!style color=red border=2](red text within a box) using the "style"
