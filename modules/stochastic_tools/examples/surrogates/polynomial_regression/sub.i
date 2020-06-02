@@ -51,10 +51,6 @@
 []
 
 [Postprocessors]
-  [avg]
-    type = AverageNodalVariableValue
-    variable = T
-  []
   [max]
     type = NodalExtremeValue
     variable = T

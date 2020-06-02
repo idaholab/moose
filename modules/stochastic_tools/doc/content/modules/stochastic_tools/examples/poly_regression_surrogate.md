@@ -177,6 +177,6 @@ The statistical moments obtained by the execution of the
 | $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3351 | 301.3332 |
 | $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9548 | 5.9537 |
 
-!media poly_reg_uniform_surr_max_hist.svg id=uniform caption=Temperature distributions with uniform parameter distribution
+!media poly_reg_uniform_surr_max_hist.svg
 
 ### Normal parameter distributions
