@@ -177,6 +177,30 @@ The statistical moments obtained by the execution of the
 | $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3351 | 301.3332 |
 | $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9548 | 5.9537 |
 
-!media poly_reg_uniform_surr_max_hist.svg
+It is visible that by increasing the polynomial order for the regression, the accuracy
+in the standard deviation slightly decreases. This behavior is often referred to as overfitting
+which decreases the
+The histogram of the results is presented in [uniform_hist]. It is important to mention
+that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
+It is apparent that the two methods give similar solutions.
+
+!media stochastic_tools/surrogates/poly_reg/poly_reg_example_uniform_hist.svg id=uniform_hist
+       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models.
 
 ### Normal parameter distributions
+
+!table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models.
+| Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
+| :- | - | - | - | - |
+| $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.6289 | 301.7549 |
+| $\sigma_{T_{max}}$ | 10.0011 | 10.1125 | 11.2611 | 59.6608 |
+
+It is visible that by increasing the polynomial order for the regression, the accuracy
+in the standard deviation slightly decreases. This behavior is often referred to as overfitting
+which decreases the
+The histogram of the results is presented in [normal_hist]. It is important to mention
+that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
+It is apparent that the two methods give similar solutions.
+
+!media stochastic_tools/surrogates/poly_reg/poly_reg_example_normal_hist.svg id=normal_hist
+       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models.
