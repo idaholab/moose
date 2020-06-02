@@ -90,13 +90,20 @@ PolynomialRegressionTrainer::execute()
   {
     std::vector<Real> data = _sampler->getNextLocalRow();
 
+    // Caching the different powers of data to accelerate the assembly of the
+    // system
+    DenseMatrix<Real> data_pow(data.size(), _max_degree + 1);
+    for (unsigned int d = 0; d < data.size(); ++d)
+      for (unsigned int i = 0; i <= _max_degree; ++i)
+        data_pow(d, i) = pow(data[d], i);
+
     for (unsigned int i = 0; i < _n_poly_terms; ++i)
     {
       std::vector<unsigned int> i_powers(_power_matrix[i]);
 
       Real i_value(1.0);
       for (unsigned int ii = 0; ii < data.size(); ++ii)
-        i_value *= pow(data[ii], i_powers[ii]);
+        i_value *= data_pow(ii, i_powers[ii]);
 
       for (unsigned int j = 0; j < _n_poly_terms; ++j)
       {
@@ -104,7 +111,7 @@ PolynomialRegressionTrainer::execute()
 
         Real j_value(1.0);
         for (unsigned int jj = 0; jj < data.size(); ++jj)
-          j_value *= pow(data[jj], j_powers[jj]);
+          j_value *= data_pow(jj, j_powers[jj]);
 
         _matrix(i, j) += i_value * j_value;
       }
