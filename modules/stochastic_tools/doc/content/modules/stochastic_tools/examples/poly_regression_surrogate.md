@@ -1,227 +1,182 @@
 # Polynomial Regression Surrogate
 
 This example is meant to demonstrate how a polynomial regression based surrogate model is trained
-and evaluated on a parametric problem. Additionally, the input syntax and results are compared
-to those of the Polynomial Chaos (PC) surrogate.
+and used on a parametric problem. Additionally, the input syntax and results are compared
+to those of the Polynomial Chaos (PC) surrogate to highlight possible differences in
+applicability. The Polynomial Regression method used here is described in [PolynomialRegressionTrainer.md]
+while details of Polynomial Chaos are available under [PolynomialChaos.md].
 
-## Overview
+## Problem Statement
 
-Polynomial chaos (PC) is a stochastic element method. Its formulation is similar to finite element method, but instead of discretizing spatial dimensions, PC discretizes random variables, i.e. uncertain parameters. Within the training phase, PC creates a functional of a quantity of interest (QoI) that is dependent on the random variables. This function consists of a finite sum of orthogonal polynomials with coefficients, these coefficients are what the training phase is attempting to compute. Another difference from finite elements is that these polynomials do not necessarily have compact support and increasing the terms in the sum increases the polynomial order. Please see [PolynomialChaos.md] for more details of the polynomial chaos method.
+The full-order model in this example is essentially the same as the one described in [surrogate_training.md].
+It is a one-dimensional heat conduction model:
 
-!include surrogate_training.md start=heat_conduction_model_begin end=heat_conduction_model_finish
+!equation
+-k\frac{d^2T}{dx^2} = q \,, \quad x\in[0, L]
 
-## Training
+!equation
+\begin{aligned}
+\left.\frac{dT}{dx}\right|_{x=0} &= 0 \\
+T(x=L) &= T_{\infty}
+\end{aligned}
 
-This section describes how to set up an input for a [PolynomialChaosTrainer](PolynomialChaosTrainer.md). There are three aspects that need to be known before setting up the input file.
+where $T$ is the temperature, $k$ is the thermal conductivity, $L$ is the length of the domain
+and $T_\infty$ is the value of the Dirichlet boundary condition.
+To make the comparison between different surrogate models easier, only the maximum temperature is
+selected to be the Quantity of Interest (QoI):
 
-1. A sub app needs to be built, defining the physics of the problem, this example uses a [heat conduction model](examples/surrogates/sub.i) described in the previous section.
-2. Uncertain parameters need to be identified with a defined probability distribution.
-3. Quantities of interest need to be defined, for now, these come in the form of postprocessors from the sub app.
+!equation id=problem
+\begin{aligned}\\
+T_{\max} &= \max_{x\in[0,L]}T(x)
+\end{aligned}
 
-!include surrogate_training.md start=omitting_solve_begin end=omitting_solve_finish replace=['nearest_point_training', 'poly_chaos_uniform_mc']
+The problem is parametric in a sense that the solution depends on four input parameters:
+$T(x,k,q,L,T_\infty)$. To make the differences between the surrogate models more apparent,
+two problem setting are considered.
+In the first scenario, all of the parameters are assumed to have
+[Uniform](Uniform.md) distributions ($\mathcal{U}(a,b)$), while the second considers parameters with
+[Normal](Normal.md) distributions ($\mathcal{N}(\mu,\sigma)$).
+To be more specific the distributions for the two cases are:
 
-### Parameter Uncertainty Distributions
+!table id=param_dist
+| Parameter | Symbol | Uniform | Normal |
+| :- | - | - | - |
+| Conductivity | $k$ | $\sim\mathcal{U}(1, 10)$ | $\sim\mathcal{N}(5, 2)$ |
+| Volumetric Heat Source | $q$ | $\sim\mathcal{U}(9000, 11000)$ | $\sim\mathcal{N}(10000, 500)$ |
+| Domain Size | $L$ | $\sim\mathcal{U}(0.01, 0.05)$ | $\sim\mathcal{N}(0.03, 0.01)$ |
+| Right Boundary Temperature | $T_{\infty}$ | $\sim\mathcal{U}(290, 310)$ | $\sim\mathcal{N}(300, 10)$ |
 
-A required aspect of the polynomial chaos method is a definition of the probability distribution of the uncertain parameters. These distributions define the type of polynomial used for the PC expansion. This example shows the two types of distributions available for PC training:
+Where the parameters of the uniform distribution are the minimum and maximum bounds,
+and the parameters of the normal distribution are the mean and standard deviation.
+It must be mentioned that the analytic solution for the maximum temperature is available:
 
-!listing examples/surrogates/poly_chaos_uniform_mc.i block=Distributions caption=Uniform distribution for each parameter
+!equation
+\begin{aligned}
+T_{\max}(k,q,L,T_{\infty}) &= \frac{qL^2}{2k} + T_{\infty}
+\end{aligned}
 
-!listing examples/surrogates/poly_chaos_normal_mc.i block=Distributions caption=Normal distribution for each parameter
+Using this expression and the previously described probability density functions, the mean ($\mu$)
+and standard deviation ($\sigma$) of the QoI can be computed for reference:
 
-### Training Sampler
-
-Non-intrusive polynomial chaos training relies on sampling the full-order model (i.e. sub app) at a number of sample points. There are two general types of sampling techniques for PC: Monte Carlo and numerical quadrature.
-
-#### Monte Carlo Sampling
-
-Monte Carlo sampling is the most intuitive type of sampling and can be done using the [MonteCarlo](MonteCarloSampler.md) or [LatinHypercube](LatinHypercubeSampler.md) samplers in the stochastic tools module.
-
-!listing examples/surrogates/poly_chaos_uniform_mc.i block=Samplers
-
-#### Quadrature Sampling
-
-Because PC expansion uses very specific types of polynomials, using numerical quadrature is typically a more precise approach to training a PC model. The [QuadratureSampler](QuadratureSampler.md) implements numerical quadrature for uniform and normal distributions. There are three different techniques for building a multidimensional quadrature grid: Cartesian grid, Smolyak sparse grid, and Clenshaw-Curtis sparse grid. These grids are specified by the [!param](/Samplers/Quadrature/sparse_grid) parameter: `none`, `smolyak`, and `clenshaw-curtis`. Using sparse grids can significantly reduce the number of training points while retaining accuracy, see [QuadratureSampler](QuadratureSampler.md) for more details. The number of sample points is ultimately defined by the [!param](/Samplers/Quadrature/order) parameter. It is generally advisable that this parameter be set to the same value as the [!param](/Trainers/PolynomialChaosTrainer/order) parameter in [PolynomialChaosTrainer](PolynomialChaosTrainer.md).
-
-!listing examples/surrogates/poly_chaos_uniform_quad.i block=Samplers
-
-### Running Sub Application
-
-Running the sub app and transferring data back and forth for PC is exactly the same as any other type of surrogate. See [Training a surrogate model](/examples/surrogate_training.md) on more details on setting up this part of the input file.
-
-!listing examples/surrogates/poly_chaos_uniform_quad.i block=MultiApps Controls Transfers VectorPostprocessors
+!table id=ref_results caption=The reference results for the mean and standard deviation of the maximum temperature.
+| Moment | Uniform | Normal |
+| :- | - | - |
+| $\mu_{T_{max}}$ | 301.3219 | 301.2547 |
+| $\sigma_{T_{max}}$ | 5.9585 | 10.0011 |
 
 
-### Trainers
+## Solving the problem without uncertain parameters
 
-The PC training object is defined within the [Trainers](Trainers/index.md) block. The required parameters for a PC trainer are:
+The first step towards creating a surrogate model is the generation of a full-order model
+which can solve [problem] without uncertain parameters. The complete input file
+for this case is presented in [sub_app].
 
-- [!param](/Trainers/PolynomialChaosTrainer/distributions) specify the type of polynomials to use for the expansion, it is very import that these distributions match the distributions given to the sampler.
-- [!param](/Trainers/PolynomialChaosTrainer/sampler) is the object to that will provide sample points that were given to the sub app during execution.
-- [!param](/Trainers/PolynomialChaosTrainer/results_vpp) specifies the result object for storing the computed values.
-- [!param](/Trainers/PolynomialChaosTrainer/results_vector) specifies the result vector, within the result object, for storing the computed values.
-- [!param](/Trainers/PolynomialChaosTrainer/order) defines the maximum order of the PC expansion, this parameter ultimately defines the accuracy and complexity of the surrogate model.
+!listing surrogates/polynomial_regression/sub.i id=sub_app
+         caption=Complete input file for the heat equation problem in this study.
 
-!listing examples/surrogates/poly_chaos_uniform_mc.i block=Trainers
+## Training surrogate models
 
-### Outputting Training Data
+Both surrogate models are constructed using some knowledge about the full-order problem.
+This means that the [problem](surrogates/polynomial_regression/sub.i) is solved
+multiple times with different parameter samples and the value of the QoI is stored from
+every run.
+This step is managed by a master input file which creates parameter samples,
+transfers them to the sub-application and collects the results from the
+completed computations.
+For more information about setting up master input files see
+[examples/surrogate_training.md] and [examples/parameter_study.md].
+The two complete training input files used for the two cases with
+the two different parameter distributions
+are available under [uniform](surrogates/polynomial_regression/uniform_train.i) and
+[normal](surrogates/polynomial_regression/normal_train.i).
 
-Outputting the data after training a PC trainer is exactly the same as outputting data for any other type of trainer. See [Training a surrogate model](/examples/surrogate_training.md) on more details on setting up this part of the input file.
+The training phase starts with the definition of the distributions listed in [param_dist]
+in the `Distributions` block. The uniform distributions can be defined as:
 
-!listing examples/surrogates/poly_chaos_uniform_mc.i block=Outputs
+!listing surrogates/polynomial_regression/uniform_train.i block=Distributions
 
-### Example Input Files
+Meanwhile, for the case with normal distributions the block changes to:
 
-- [examples/surrogates/poly_chaos_uniform_mc.i]
-- [examples/surrogates/poly_chaos_uniform_quad.i]
-- [examples/surrogates/poly_chaos_normal_mc.i]
-- [examples/surrogates/poly_chaos_normal_quad.i]
+!listing surrogates/polynomial_regression/normal_train.i block=Distributions
 
-## Evaluation and Statistics
+As a next step, several parameter instances are prepared by sampling the underlying distributions.
+The sampling objects can be defined in the `Samplers` block.
+The generation of these parameter samples is different for the two surrogate models.
+techniques.
+Meanwhile the polynomial chaos uses the samples at specific quadrature points
+in the parameters space (generated by a [QuadratureSampler.md]),
+the polynomial regression model is trained using samples from a [LatinHypercubeSampler.md].
+It is visible that the number of sample (`num_rows`) is set in the [LatinHypercubeSampler.md]
+to match the number of samples in the tensor-product quadrature set of [QuadratureSampler.md].
 
-This section will go over how to set up an input file to evaluate and perform statistical analysis on a trained [polynomial chaos surrogate](PolynomialChaos.md). The polynomial chaos surrogate is unique in that it is able to compute statistical moments and sensitivities analytically. Specific postprocessors are available to compute these quantities without the need for sampling.
+!listing surrogates/polynomial_regression/normal_train.i block=Samplers  
 
-!include surrogate_training.md start=omitting_solve_begin end=omitting_solve_finish replace=['nearest_point_training', 'poly_chaos_uniform']
+The objects in blocks `Controls`, `MultiApps`, `Transfers` and `VectorPostprocessors`
+are responsible for managing the communication of the sub-applications, the
+execution of the sub-applications and the collection of the results.
+For a more detailed description of these blocks see [examples/parameter_study.md]
+and [surrogate_training.md].
 
-### Evaluation
+!listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers VectorPostprocessors
 
-Evaluating a polynomial chaos surrogate model is exactly the same as any other type of surrogate, see [Evaluating a surrogate model](/examples/surrogate_evaluate.md) for more details.
+The next step in the process is to set up `Trainer` objects to generate the surrogate models
+from the available data. This can be done in the `Trainers` block. It is visible that
+both examples use the data from a `Sampler` and a `VectorPostprocessor`. A polynomial chaos surrogate of
+order 8 and a polynomial regression surrogate with a
+polynomial of degree at most 4 is used in this study.
+The polynomial chaos trainer also needs knowledge about the underlying parameter distributions
+to be able to select matching polynomials.
 
-!listing examples/surrogates/poly_chaos_uniform.i block=Surrogates caption=Loading training data
+As a last step in the training process, the important parameters of the trained
+surrogates are saved into `.rd` files. These files can be used to construct surrogate models
+again without the need to carry out the training process from the beginning.
 
-!listing examples/surrogates/poly_chaos_uniform.i block=Distributions Samplers caption=Defining sampler for evaluation -- Uniform distributions
+!listing surrogates/polynomial_regression/normal_train.i block=Outputs
 
-!listing examples/surrogates/poly_chaos_normal.i block=Distributions Samplers caption=Defining sampler for evaluation -- Normal distributions
+## Evaluation of surrogate models
 
-!listing examples/surrogates/poly_chaos_uniform.i block=samp_avg samp_max caption=Evaluating surrogate with [SurrogateTester](SurrogateTester.C)
+To evaluate surrogate models, a new master input file has to be created for
+[uniform](surrogates/polynomial_regression/uniform_surr.i) and
+[normal](surrogates/polynomial_regression/normal_surr.i) parameter distributions.
+The input files contain testing distributions for the parameters defined in the `Distributions` block.
+In this study, the training distributions are used for the testing of the surrogates as well.
+Both surrogate models are tested using the same parameter samples. These samples are selected
+using [LatinHypercubeSampler.md] defined in the `Samplers` block.
+Since the surrogate models are orders of magnitude faster
+than the full-order model, $100,000$ samples are selected for testing (compared to $6,560$ used for training).
 
-### Statistical Moments
+!listing surrogates/polynomial_regression/normal_surr.i block=Samplers  
 
-[PolynomialChaos](PolynomialChaos.md) has the ability to compute statistical moments analytically. These are computed using [PolynomialChaosStatistics](PolynomialChaosStatistics.md). The implemented moments include mean, standard deviation, skewness, and kurtosis. The type of moment is specified by the [!param](/VectorPostprocessors/PolynomialChaosStatistics/compute) parameter, which can be a combination of `mean`, `stddev`, `skewness`, and `kurtosis`. This example computes mean and standard deviation.
+As a next step, two object are created in the `Surrogates` block for the two surrogate modeling techniques.
+Both of them are constructed using the information available within the corresponding `.rd` files.
 
-!listing examples/surrogates/poly_chaos_uniform.i block=stats_avg stats_max
+!listing surrogates/polynomial_regression/normal_surr.i block=Surrogates
 
-It should be noted that computing skewness and kurtosis can be very computationally demanding using the analytical technique. Therefore, it might be better to sample the surrogate model and compute these quantities with the result.
+These surrogate models can be evaluated at the points defined in the testing sample batch.
+This is done using objects in the `VectorPostprocessors` block.
 
-### Local Sensitivity
+!listing surrogates/polynomial_regression/normal_surr.i block=VectorPostprocessors
 
-[PolynomialChaos](PolynomialChaos.md) has the ability to compute local sensitivities analytically. These are computed using [PolynomialChaosLocalSensitivity](PolynomialChaosLocalSensitivity.md). The points to compute the sensitivity can be defined explicitly by specifying the [!param](/VectorPostprocessors/PolynomialChaosLocalSensitivity/local_points) parameter, and/or using a sampler by specifying the [!param](/VectorPostprocessors/PolynomialChaosLocalSensitivity/local_points_sampler). It is vital that the columns of the points match with the distributions defined from the original trainer.
-
-!listing examples/surrogates/poly_chaos_uniform.i block=sense_avg sense_max
-
-### Sobol Statistics
-
-Sobol statistics are a metric of the global sensitivity of each parameter, or a combination of parameters, see [SobolStatistics.md] for more details. [PolynomialChaos](PolynomialChaos.md) has the ability to compute Sobol statistics analytically. These are computed using [PolynomialChaosSobolStatistics](PolynomialChaosSobolStatistics.md). This vector postprocessor has the ability to compute all Sobol indicies, including total sensitivities, which is specified by the [!param](/VectorPostprocessors/PolynomialChaosSobolStatistics/sensitivity_order) parameter. This examples computes the first and second order indicies for all the parameters.
-
-!listing examples/surrogates/poly_chaos_uniform.i block=sobol_avg sobol_max
-
-### Example Input Files
-
-- [examples/surrogates/poly_chaos_uniform.i]
-- [examples/surrogates/poly_chaos_normal.i]
 
 ## Results and Analysis
 
-In this section, the results of training and evaluation of the surrogate model as described in the previous sections is shown. A convergence study of the polynomial chaos training, including analysis of sampling and polynomial order, is also provided.
+In this section the results from the different surrogate models are provided. They are compared
+to the reference results summarized in [ref_results]. A short analysis of the results is provided
+as well to showcase potential issues the user might encounter when using surrogate models.
 
-### Evaluation Results
+### Uniform parameter distributions
 
-[samp_uniform] and [samp_normal] show the resulting probability distributions from sampling each surrogate with 100,000 points.
+First, the case with parameters having uniform distributions are investigated.
+The statistical moments obtained by the execution of the
+[surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
+[stats_uniform].
 
-!media poly_chaos_uniform_hist.svg id=samp_uniform caption=Temperature distributions with uniform parameter distribution
+!table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models.
+| Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
+| :- | - | - | - | - |
+| $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3351 | 301.3332 |
+| $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9548 | 5.9537 |
 
-!media poly_chaos_normal_hist.svg id=samp_normal caption=Temperature distribution with normal parameter distribution
+!media poly_reg_uniform_surr_max_hist.svg id=uniform caption=Temperature distributions with uniform parameter distribution
 
-### Local Sensitivity Results
-
-[local_sense] shows the results of computing the local sensitivity of each parameter for every surrogate. For reference, the the sensitivity is defined as
-
-!equation
-S_p = \frac{\partial u(\vec{\xi})}{\partial \xi_p} \frac{\xi_p}{u(\vec{\xi})}
-
-where $u$ is either $\bar{T}$ or $T_{\max}$, $\xi_p$ is $k$, $q$, $L$, or $T_{\infty}$, and the point tested ($\vec{\xi}$) is $[k=5,q=10^4,L=0.03,T_{\infty}=300]$
-
-!table id=local_sense caption=Local sensitivity results
-| QoI | Distribution | $k$ Sensitivity | $q$ Sensitivity | $L$ Sensitivity | $T_{\infty}$ Sensitivity |
-| :- | :- | - | - | - | - |
-| $\bar{T}$  | Uniform | -0.001944 | 0.001985 | 0.003976 | 0.9977 |
-| $\bar{T}$  | Normal  | -0.002009 | 0.001667 | 0.003303 | 0.9983 |
-| $T_{\max}$ | Uniform | -0.002918 | 0.002979 | 0.005966 | 0.9967 |
-| $T_{\max}$ | Normal  | -0.002897 | 0.002736 | 0.005437 | 0.9973 |
-
-### Sobol Statistics Results
-
-[sobol_stats] shows the results of computing Sobol statistics for average temperature and uniform parameter distributions (the other surrogates produced very similar statistics). In the plot, the x axis represents the first index subscript and the y axis represents the second. As can be seen, the statistics are symmetric, i.e. it does not matter the order of the index subscripts.
-
-!plot scatter id=sobol_stats caption=Average temperature Sobol statistics results uniform parameter distribution
-  data=[{
-        'type': 'heatmap',
-        'z': [[-1.92374355e+00, -4.40086571e+00, -2.25831206e+00, -1.78394694e+01],
-              [-4.40086571e+00, -4.12327151e+00, -4.45782994e+00, -1.80335784e+01],
-              [-2.25831206e+00, -4.45782994e+00, -1.98071681e+00, -1.81868220e+01],
-              [-1.78394694e+01, -1.80335784e+01, -1.81868220e+01, -1.23598907e-02]],
-        'y': ['k','q','L','T<sub>&#8734;</sub>'],
-        'x': ['k','q','L','T<sub>&#8734;</sub>'],
-        'colorbar': {'tickvals': [-16,-13,-10,-7,-4,-1],
-                     'ticktext': ['10<sup>-16</sup>', '10<sup>-13</sup>', '10<sup>-10</sup>', '10<sup>-7</sup>', '10<sup>-4</sup>', '10<sup>-1</sup>']}
-        }]
-
-### Sampling Analysis
-
-Here the effect of various sampling techniques on the training of a polynomial chaos surrogate is shown. Three different types of samplers were used: Monte Carlo, tensor quadrature, and Smolyak sparse quadrature. Monte Carlo was run with increasing number of samples and the quadrature was run with increasing order. Note, the polynomial expansion order was set constant. The performance metric is the error in the mean and standard deviation versus the number of total training points. [samp_avg_uniform]-[samp_max_normal] show the results of this study for each quantity of interest and each parameter distribution. The uniform distributions ([samp_avg_uniform] and [samp_max_uniform]) have an analytical mean and standard deviation, which is why there is nice convergence. However, the normal distributions ([samp_avg_normal] and [samp_max_normal]) use numerical integration to compute the reference mean and standard deviation, which is why there is a more spurious convergence at low errors.
-
-!plot scatter id=samp_avg_uniform caption=Sample convergence for moments of average temperature with uniform parameter distributions
-  filename=examples/surrogates/gold/poly_chaos_avg_uniform_results.csv
-  data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
-        {'x':'mc_points', 'y':'mc_sig', 'name':'MC &#963; error'},
-        {'x':'tensor_points', 'y':'tensor_mu', 'name':'Tensor &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig', 'name':'Tensor &#963; error'},
-        {'x':'smolyak_points', 'y':'smolyak_mu', 'name':'Smolyak &#956; error'},
-        {'x':'smolyak_points', 'y':'smolyak_sig', 'name':'Smolyak &#963; error'}]
-  layout={'xaxis':{'type':'log','title':'Number of Training Points'},
-          'yaxis':{'type':'log','title':'Relative Moment Error'}}
-
-!plot scatter id=samp_max_uniform caption=Sample convergence for moments of maximum temperature with uniform parameter distributions
-  filename=examples/surrogates/gold/poly_chaos_max_uniform_results.csv
-  data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
-        {'x':'mc_points', 'y':'mc_sig', 'name':'MC &#963; error'},
-        {'x':'tensor_points', 'y':'tensor_mu', 'name':'Tensor &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig', 'name':'Tensor &#963; error'},
-        {'x':'smolyak_points', 'y':'smolyak_mu', 'name':'Smolyak &#956; error'},
-        {'x':'smolyak_points', 'y':'smolyak_sig', 'name':'Smolyak &#963; error'}]
-  layout={'xaxis':{'type':'log','title':'Number of Training Points'},
-          'yaxis':{'type':'log','title':'Relative Moment Error'}}
-
-!plot scatter id=samp_avg_normal caption=Sample convergence for moments of average temperature with normal parameter distributions
-  filename=examples/surrogates/gold/poly_chaos_avg_normal_results.csv
-  data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
-        {'x':'mc_points', 'y':'mc_sig', 'name':'MC &#963; error'},
-        {'x':'tensor_points', 'y':'tensor_mu', 'name':'Tensor &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig', 'name':'Tensor &#963; error'},
-        {'x':'smolyak_points', 'y':'smolyak_mu', 'name':'Smolyak &#956; error'},
-        {'x':'smolyak_points', 'y':'smolyak_sig', 'name':'Smolyak &#963; error'}]
-  layout={'xaxis':{'type':'log','title':'Number of Training Points'},
-          'yaxis':{'type':'log','title':'Relative Moment Error'}}
-
-!plot scatter id=samp_max_normal caption=Sample convergence for moments of maximum temperature with normal parameter distributions
-  filename=examples/surrogates/gold/poly_chaos_max_normal_results.csv
-  data=[{'x':'mc_points', 'y':'mc_mu', 'name':'MC &#956; error'},
-        {'x':'mc_points', 'y':'mc_sig', 'name':'MC &#963; error'},
-        {'x':'tensor_points', 'y':'tensor_mu', 'name':'Tensor &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig', 'name':'Tensor &#963; error'},
-        {'x':'smolyak_points', 'y':'smolyak_mu', 'name':'Smolyak &#956; error'},
-        {'x':'smolyak_points', 'y':'smolyak_sig', 'name':'Smolyak &#963; error'}]
-  layout={'xaxis':{'type':'log','title':'Number of Training Points'},
-          'yaxis':{'type':'log','title':'Relative Moment Error'}}
-
-### Polynomial Order Analysis
-
-The effect of polynomial expansion order on the accuracy of the surrogate model is shown here. Again, the performance metric is the error in the mean and standard deviation versus the number of total training points. The maximum polynomial order is ranged from 3 to 9, where the tensor quadrature sampler order matches (which is generally advisable in any case). [ord_uniform] shows the result of the convergence study with a uniform distribution. Normal distribution was omitted since there is no analytical reference.
-
-!plot scatter id=ord_uniform caption=Polynomial order convergence for moments of maximum and average temperature with uniform parameter distributions
-  filename=examples/surrogates/gold/poly_chaos_order_uniform_results.csv
-  data=[{'x':'tensor_points', 'y':'tensor_mu_avg', 'name':'T&#773; &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig_avg', 'name':'T&#773; &#963; error'},
-        {'x':'tensor_points', 'y':'tensor_mu_max', 'name':'T<sub>max</sub> &#956; error'},
-        {'x':'tensor_points', 'y':'tensor_sig_max', 'name':'T<sub>max</sub> &#963; error'}]
-  layout={'xaxis':{'type':'log','title':'Number of Training Points'},
-          'yaxis':{'type':'log','title':'Relative Moment Error'}}
+### Normal parameter distributions
