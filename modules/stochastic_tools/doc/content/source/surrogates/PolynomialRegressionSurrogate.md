@@ -23,13 +23,13 @@ To create a surrogate model which uses polynomial regression, one can use the fo
 
 !listing polynomial_regression/evaluate.i block=Surrogates
 
-It is visible that the data from [PolynomialRegressionTrainer] has been saved to `train_out_train.rd`
+It is visible that the data from [PolynomialRegressionTrainer.md] has been saved to `train_out_train.rd`
 and the surrogate model is constructed by loading the necessary information from it.
 If one wants to do the training and evaluation in the same input, the following syntax can be used:
 
 !listing polynomial_regression/train_and_evaluate.i block=Surrogates
 
-where `train` is the ID of the [PolynomialRegressionTrainer] object. For the sampling
+where `train` is the ID of the [PolynomialRegressionTrainer.md] object. For the sampling
 of the surrogate model, the same objects can be used in the `Samplers` block:
 
 !listing polynomial_regression/evaluate.i block=Samplers
