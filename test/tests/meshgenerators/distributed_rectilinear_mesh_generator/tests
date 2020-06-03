@@ -47,4 +47,23 @@
     requirement = 'MOOSE shall be able to generate 3D HEX8 mesh in parallel using hierarch partitioner'
   [../]
 
+  [./drmg_3d_scomm_out]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    exodiff = 'drmg_3d_scomm_out.e'
+    min_parallel = 3
+    issues = '#15464'
+    cli_args = 'Mesh/gmg/num_cores_for_partition=2 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/file_base=drmg_3d_scomm_out Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall be able to generate a first-order hexahedral mesh in parallel using a small number of cores for the graph partitioner.'
+  [../]
+
+  [./drmg_3d_scomm_10_out]
+    type = 'RunException'
+    input = 'distributed_rectilinear_mesh_generator.i'
+    expect_err = 'Number of cores for the graph partitioner is too large'
+    max_parallel = 8
+    issues = '#15464'
+    cli_args = 'Mesh/gmg/num_cores_for_partition=10 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/hide="pid npid" '
+    requirement = 'MOOSE shall error out if the number of cores for partition is larger than the total number of cores.'
+  [../]
 []

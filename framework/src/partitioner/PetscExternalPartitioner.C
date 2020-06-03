@@ -34,9 +34,10 @@ PetscExternalPartitioner::validParams()
                              partPackage,
                              "The external package is used for partitioning the mesh via PETSc");
 
-  params.addParam<dof_id_type>("num_cores_per_compute_node",
-                               1,
-                               "Number of cores per compute node for hierarchical partitioning");
+  params.addParam<processor_id_type>(
+      "num_cores_per_compute_node",
+      1,
+      "Number of cores per compute node for hierarchical partitioning");
 
   params.addParam<bool>("apply_element_weight",
                         false,
@@ -56,7 +57,7 @@ PetscExternalPartitioner::PetscExternalPartitioner(const InputParameters & param
     _part_package(params.get<MooseEnum>("part_package")),
     _apply_element_weight(params.get<bool>("apply_element_weight")),
     _apply_side_weight(params.get<bool>("apply_side_weight")),
-    _num_parts_per_compute_node(params.get<dof_id_type>("num_cores_per_compute_node"))
+    _num_parts_per_compute_node(params.get<processor_id_type>("num_cores_per_compute_node"))
 {
   if ((_apply_element_weight || _apply_side_weight) &&
       (_part_package == "chaco" || _part_package == "party"))
