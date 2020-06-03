@@ -162,7 +162,8 @@ private:
 int
 findParam(int argc, char ** argv)
 {
-  Flags flags("hit find [flags] <parameter-path> <file>...");
+  Flags flags("hit find [flags] <parameter-path> <file>...\n  Specify '-' as a file name to accept "
+              "input from stdin.");
   flags.add("f", "only show file name");
   auto positional = parseOpts(argc, argv, flags);
 
@@ -232,7 +233,8 @@ findParam(int argc, char ** argv)
 int
 format(int argc, char ** argv)
 {
-  Flags flags("hit format [flags] <file>...");
+  Flags flags(
+      "hit format [flags] <file>...\n  Specify '-' as a file name to accept input from stdin.");
   flags.add("h", "print help");
   flags.add("help", "print help");
   flags.add("i", "modify file(s) inplace");
@@ -259,8 +261,7 @@ format(int argc, char ** argv)
     try
     {
       std::string fname(flags.val("style"));
-      std::istream && f =
-          (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
+      std::ifstream f(fname);
       std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
       fmt = hit::Formatter(flags.val("style"), input);
     }
@@ -306,7 +307,7 @@ validate(int argc, char ** argv)
 {
   if (argc < 1)
   {
-    std::cerr << "please pass in an input file argument\n";
+    std::cerr << "please pass in an input file argument (or pass '-' to validate stdin).\n";
     return 1;
   }
 
