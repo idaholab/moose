@@ -11,8 +11,11 @@
 
 // MOOSE includes
 #include "NodeFaceConstraint.h"
+#include "FEProblem.h"
+#include "DisplacedProblem.h"
 
 // Forward Declarations
+class FEProblem;
 
 class NormalNodalLMMechanicalContact : public NodeFaceConstraint
 {
