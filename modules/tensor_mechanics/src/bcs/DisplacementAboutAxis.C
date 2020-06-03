@@ -37,7 +37,8 @@ addDisplacementAboutAxisParams(InputParameters & params)
                                          units.getRawNames());
   params.addRequiredParam<RealVectorValue>("axis_origin", "Origin of the axis of rotation");
   params.addRequiredParam<RealVectorValue>("axis_direction", "Direction of the axis of rotation");
-  params.addParam<bool>("incremental", false, "if true use an incremental formulation");
+  params.addParam<bool>(
+      "angular_velocity", false, "If true interprets the function value as an angular velocity");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
 }
@@ -51,8 +52,7 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
     _axis_direction(getParam<RealVectorValue>("axis_direction")),
     _ndisp(coupledComponents("displacements")),
     _vars(_ndisp),
-    _incremental(getParam<bool>("incremental"))
-
+    _angular_velocity(getParam<bool>("angular_velocity"))
 {
   if (_component < 0 || _component > 2)
     mooseError("Invalid component given for ", name(), ": ", _component, ".");
@@ -67,7 +67,7 @@ DisplacementAboutAxis::initialSetup()
   calculateUnitDirectionVector();
   calculateTransformationMatrices();
 
-  if (_incremental)
+  if (_angular_velocity)
     for (unsigned int i = 0; i < _ndisp; ++i)
       _vars[i] = getVar("displacements", i);
 }
@@ -81,13 +81,16 @@ DisplacementAboutAxis::computeQpValue()
   if (_angle_units == "degrees")
     angle = angle * libMesh::pi / 180.0;
 
+  if (_angular_velocity)
+    angle *= _dt;
+
   ColumnMajorMatrix p_old(4, 1);
   p_old(0, 0) = p(0);
   p_old(1, 0) = p(1);
   p_old(2, 0) = p(2);
   p_old(3, 0) = 1;
 
-  if (_incremental)
+  if (_angular_velocity)
     for (unsigned int i = 0; i < _ndisp; i++)
       p_old(i, 0) += _vars[i]->dofValuesOld()[_qp];
 

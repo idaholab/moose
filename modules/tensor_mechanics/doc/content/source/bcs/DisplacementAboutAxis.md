@@ -27,7 +27,8 @@ $\hat{x}$, $\hat{y}$, and $\hat{z}$ coordinate system axes, respectively.
 A Function is required to prescribe the total rotation of the `DisplacementAboutAxis` boundary condition
 application to the mesh. Either the name of another function defined elsewhere or a parsed
 function is used as the argument for the `function` input parameter in the `DisplacementAboutAxis`
-block. In this example, a parsed function is used. The input parameter `incremental` allows to use an incremental rotation.
+block. In this example, a parsed function is used. The input parameter `angular_velocity` allows to use
+an angular velocity instead of a total rotation angle.
 
 !syntax parameters /BCs/DisplacementAboutAxis
 

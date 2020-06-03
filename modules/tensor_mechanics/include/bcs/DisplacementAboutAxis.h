@@ -60,7 +60,7 @@ protected:
   std::vector<MooseVariable *> _vars;
 
   /// flag for incremental formulation
-  const bool _incremental;
+  const bool _angular_velocity;
 
   ColumnMajorMatrix _transformation_matrix;
   ColumnMajorMatrix _transformation_matrix_inv;

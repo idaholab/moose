@@ -39,7 +39,7 @@
     design = DisplacementAboutAxis.md
     requirement = 'The system shall provide a boundary condition that applies pure finite rigid body rotation to a surface of an elastic body incrementally'
     type = 'CSVDiff'
-    cli_args = 'BCs/top_x/incremental=true BCs/top_x/function=2 BCs/top_y/incremental=true BCs/top_y/function=2  Outputs/file_base=disp_about_axis_axial_motion_incremental_out'
+    cli_args = 'BCs/top_x/angular_velocity=true BCs/top_x/function=1 BCs/top_y/angular_velocity=true BCs/top_y/function=1  Outputs/file_base=disp_about_axis_axial_motion_incremental_out'
     input = 'disp_about_axis_axial_motion.i'
     csvdiff = 'disp_about_axis_axial_motion_incremental_out.csv'
     rel_err = 1E-5
