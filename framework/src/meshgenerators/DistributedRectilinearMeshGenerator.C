@@ -1011,8 +1011,15 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   // Already partitioned!
   mesh.skip_partitioning(true);
 
-  // No need to renumber or find neighbors - done did it.
-  mesh.prepare_for_use(true, true);
+  // No need to renumber or find neighbors this time - done did it.
+  bool old_allow_renumbering = mesh.allow_renumbering();
+  mesh.allow_renumbering(false);
+  mesh.allow_find_neighbors(false);
+  mesh.prepare_for_use();
+
+  // But we'll want to at least find neighbors after any future mesh changes!
+  mesh.allow_find_neighbors(true);
+  mesh.allow_renumbering(old_allow_renumbering);
 
   // Scale the nodal positions
   scaleNodalPositions<T>(nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax, mesh);

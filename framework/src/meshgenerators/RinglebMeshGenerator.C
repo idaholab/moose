@@ -206,7 +206,7 @@ RinglebMeshGenerator::generate()
   }
 
   /// Find neighbors, etc.
-  mesh->prepare_for_use(false, false);
+  mesh->prepare_for_use();
 
   /// Create the triangular elements if required by the user
   if (_triangles)

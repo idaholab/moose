@@ -107,7 +107,7 @@ TiledMesh::buildMesh()
     {
       ExodusII_IO ex(*this);
       ex.read(mesh_file);
-      serial_mesh->prepare_for_use(false, false);
+      serial_mesh->prepare_for_use();
     }
     else
       serial_mesh->read(mesh_file);

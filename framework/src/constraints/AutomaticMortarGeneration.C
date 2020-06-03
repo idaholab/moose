@@ -448,7 +448,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // Set up the the mortar segment neighbor information.
   mortar_segment_mesh.allow_renumbering(true);
   mortar_segment_mesh.skip_partitioning(true);
-  mortar_segment_mesh.prepare_for_use(/*skip_renumbering=*/false, /*skip_find_neighbors=*/true);
+  mortar_segment_mesh.allow_find_neighbors(false);
+  mortar_segment_mesh.prepare_for_use();
+  mortar_segment_mesh.allow_find_neighbors(true);
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
