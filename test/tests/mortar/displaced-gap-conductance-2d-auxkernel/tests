@@ -1,0 +1,11 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [gap_conductance]
+    type = Exodiff
+    input = 'gap-conductance.i'
+    exodiff = 'gap-conductance_out.e'
+    custom_cmp = 'auxkernel.cmp'
+    requirement = 'We shall be able to couple variables between auxiliary kernels and ad mortar constraints'
+  [../]
+[]
