@@ -98,7 +98,7 @@ protected:
   const ADTemplateVariableTestGradient<T> & _grad_test;
 
   /// Coupled neighbor variable
-  MooseVariableFE<T> & _neighbor_var;
+  const MooseVariableFE<T> & _neighbor_var;
 
   /// Coupled neighbor variable value
   const ADTemplateVariableValue<T> & _neighbor_value;

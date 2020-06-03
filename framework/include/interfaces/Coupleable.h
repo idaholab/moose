@@ -46,7 +46,8 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> & getCoupledVars()
+  const std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> &
+  getCoupledVars() const
   {
     return _coupled_vars;
   }
@@ -100,7 +101,7 @@ protected:
    * A call-back function provided by the derived object for actions before coupling a variable
    * with functions such as coupledValue.
    */
-  virtual void coupledCallback(const std::string & /*var_name*/, bool /*is_old*/) {}
+  virtual void coupledCallback(const std::string & /*var_name*/, bool /*is_old*/) const {}
 
   /**
    * Returns true if a variables has been coupled as name.
@@ -108,14 +109,14 @@ protected:
    * @param i By default 0, in general the index to test in a vector of MooseVariable pointers.
    * @return True if a coupled variable has the supplied name
    */
-  virtual bool isCoupled(const std::string & var_name, unsigned int i = 0);
+  virtual bool isCoupled(const std::string & var_name, unsigned int i = 0) const;
 
   /**
    * Number of coupled components
    * @param var_name Name of the variable
    * @return number of components this variable has (usually 1)
    */
-  unsigned int coupledComponents(const std::string & var_name);
+  unsigned int coupledComponents(const std::string & var_name) const;
 
   /**
    * Returns the index for a coupled variable by name
@@ -124,7 +125,7 @@ protected:
    * @return Index of coupled variable, if this is an optionally coupled variable that wasn't
    * provided this will return a unique "invalid" index.
    */
-  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled variable
@@ -133,7 +134,8 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    * @see Kernel::_u
    */
-  virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledValue(const std::string & var_name,
+                                             unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled variable for use in templated auatomatic differentiation classes
@@ -151,7 +153,7 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a ADVariableValue for the coupled variable
    */
-  const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableValue & adCoupledValue(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled vector variable for use in Automatic Differentiation
@@ -161,7 +163,7 @@ protected:
    * @see Kernel::value
    */
   const ADVectorVariableValue & adCoupledVectorValue(const std::string & var_name,
-                                                     unsigned int comp = 0);
+                                                     unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled variable for a given tag
@@ -172,7 +174,7 @@ protected:
    * @see Kernel::_u
    */
   virtual const VariableValue &
-  coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+  coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
   /**
    * Returns dof value of a coupled variable for a given tag
@@ -182,7 +184,7 @@ protected:
    * @return Reference to a DofValue for the coupled variable
    */
   virtual const VariableValue &
-  coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+  coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
@@ -193,7 +195,7 @@ protected:
    * @see Kernel::_u
    */
   virtual const VariableValue &
-  coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+  coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled vector variable
@@ -203,7 +205,7 @@ protected:
    * @see VectorKernel::_u
    */
   virtual const VectorVariableValue & coupledVectorValue(const std::string & var_name,
-                                                         unsigned int comp = 0);
+                                                         unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled array variable
@@ -213,7 +215,7 @@ protected:
    * @see ArrayKernel::_u
    */
   virtual const ArrayVariableValue & coupledArrayValue(const std::string & var_name,
-                                                       unsigned int comp = 0);
+                                                       unsigned int comp = 0) const;
 
   /**
    * Returns a *writable* reference to a coupled variable.  Note: you
@@ -235,7 +237,7 @@ protected:
    * @see Kernel::valueOld
    */
   virtual const VariableValue & coupledValueOld(const std::string & var_name,
-                                                unsigned int comp = 0);
+                                                unsigned int comp = 0) const;
 
   /**
    * Returns an old value from two time steps previous of a coupled variable
@@ -245,7 +247,7 @@ protected:
    * @see Kernel::valueOlder
    */
   virtual const VariableValue & coupledValueOlder(const std::string & var_name,
-                                                  unsigned int comp = 0);
+                                                  unsigned int comp = 0) const;
 
   /**
    * Returns value of previous Newton iterate of a coupled variable
@@ -254,7 +256,7 @@ protected:
    * @return Reference to a VariableValue containing the older value of the coupled variable
    */
   virtual const VariableValue & coupledValuePreviousNL(const std::string & var_name,
-                                                       unsigned int comp = 0);
+                                                       unsigned int comp = 0) const;
 
   /**
    * Returns an old value from previous time step  of a coupled vector variable
@@ -264,7 +266,7 @@ protected:
    * @see VectorKernel::_u_old
    */
   virtual const VectorVariableValue & coupledVectorValueOld(const std::string & var_name,
-                                                            unsigned int comp = 0);
+                                                            unsigned int comp = 0) const;
 
   /**
    * Returns an old value from two time steps previous of a coupled vector variable
@@ -274,7 +276,7 @@ protected:
    * @see VectorKernel::_u_older
    */
   virtual const VectorVariableValue & coupledVectorValueOlder(const std::string & var_name,
-                                                              unsigned int comp = 0);
+                                                              unsigned int comp = 0) const;
 
   /**
    * Returns an old value from previous time step  of a coupled array variable
@@ -284,7 +286,7 @@ protected:
    * @see ArrayKernel::_u_old
    */
   virtual const ArrayVariableValue & coupledArrayValueOld(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
 
   /**
    * Returns an old value from two time steps previous of a coupled array variable
@@ -294,7 +296,7 @@ protected:
    * @see ArrayKernel::_u_older
    */
   virtual const ArrayVariableValue & coupledArrayValueOlder(const std::string & var_name,
-                                                            unsigned int comp = 0);
+                                                            unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled variable
@@ -304,7 +306,7 @@ protected:
    * @see Kernel::gradient
    */
   virtual const VariableGradient & coupledGradient(const std::string & var_name,
-                                                   unsigned int comp = 0);
+                                                   unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled variable for use in Automatic Differentation
@@ -313,7 +315,8 @@ protected:
    * @return Reference to a VariableGradient containing the gradient of the coupled variable
    * @see Kernel::gradient
    */
-  const ADVariableGradient & adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableGradient & adCoupledGradient(const std::string & var_name,
+                                               unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled variable for use in templated automatic differentiation
@@ -334,7 +337,7 @@ protected:
    * @see Kernel::gradient
    */
   const ADVectorVariableGradient & adCoupledVectorGradient(const std::string & var_name,
-                                                           unsigned int comp = 0);
+                                                           unsigned int comp = 0) const;
 
   /**
    * Returns second derivatives of a coupled variable for use in Automatic Differentation
@@ -342,7 +345,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableSecond containing the second derivatives of the coupled variable
    */
-  const ADVariableSecond & adCoupledSecond(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableSecond & adCoupledSecond(const std::string & var_name,
+                                           unsigned int comp = 0) const;
 
   /**
    * Returns second derivatives of a coupled vector variable for use in Automatic Differentation
@@ -352,7 +356,7 @@ protected:
    * variable
    */
   const ADVectorVariableSecond & adCoupledVectorSecond(const std::string & var_name,
-                                                       unsigned int comp = 0);
+                                                       unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from previous time step of a coupled variable
@@ -362,7 +366,7 @@ protected:
    * @see Kernel::gradientOld
    */
   virtual const VariableGradient & coupledGradientOld(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from two time steps previous of a coupled variable
@@ -372,7 +376,7 @@ protected:
    * @see Kernel::gradientOlder
    */
   virtual const VariableGradient & coupledGradientOlder(const std::string & var_name,
-                                                        unsigned int comp = 0);
+                                                        unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled variable for previous Newton iterate
@@ -381,7 +385,7 @@ protected:
    * @return Reference to a VariableGradient containing the gradient of the coupled variable
    */
   virtual const VariableGradient & coupledGradientPreviousNL(const std::string & var_name,
-                                                             unsigned int comp = 0);
+                                                             unsigned int comp = 0) const;
 
   /**
    * Time derivative of the gradient of a coupled variable
@@ -391,7 +395,7 @@ protected:
    * coupled variable
    */
   virtual const VariableGradient & coupledGradientDot(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
 
   /**
    * Second time derivative of the gradient of a coupled variable
@@ -401,7 +405,7 @@ protected:
    * coupled variable
    */
   virtual const VariableGradient & coupledGradientDotDot(const std::string & var_name,
-                                                         unsigned int comp = 0);
+                                                         unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled vector variable
@@ -411,7 +415,7 @@ protected:
    * variable
    */
   virtual const VectorVariableGradient & coupledVectorGradient(const std::string & var_name,
-                                                               unsigned int comp = 0);
+                                                               unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from previous time step of a coupled vector variable
@@ -421,7 +425,7 @@ protected:
    * variable
    */
   virtual const VectorVariableGradient & coupledVectorGradientOld(const std::string & var_name,
-                                                                  unsigned int comp = 0);
+                                                                  unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from two time steps previous of a coupled vector variable
@@ -431,7 +435,7 @@ protected:
    * vector variable
    */
   virtual const VectorVariableGradient & coupledVectorGradientOlder(const std::string & var_name,
-                                                                    unsigned int comp = 0);
+                                                                    unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled array variable
@@ -441,7 +445,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableGradient & coupledArrayGradient(const std::string & var_name,
-                                                             unsigned int comp = 0);
+                                                             unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from previous time step of a coupled array variable
@@ -451,7 +455,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableGradient & coupledArrayGradientOld(const std::string & var_name,
-                                                                unsigned int comp = 0);
+                                                                unsigned int comp = 0) const;
 
   /**
    * Returns an old gradient from two time steps previous of a coupled array variable
@@ -461,7 +465,7 @@ protected:
    * array variable
    */
   virtual const ArrayVariableGradient & coupledArrayGradientOlder(const std::string & var_name,
-                                                                  unsigned int comp = 0);
+                                                                  unsigned int comp = 0) const;
 
   /**
    * Returns curl of a coupled variable
@@ -471,7 +475,7 @@ protected:
    * @see Kernel::_curl_u
    */
   virtual const VectorVariableCurl & coupledCurl(const std::string & var_name,
-                                                 unsigned int comp = 0);
+                                                 unsigned int comp = 0) const;
 
   /**
    * Returns an old curl from previous time step of a coupled variable
@@ -481,7 +485,7 @@ protected:
    * @see Kernel::_curl_u_old
    */
   virtual const VectorVariableCurl & coupledCurlOld(const std::string & var_name,
-                                                    unsigned int comp = 0);
+                                                    unsigned int comp = 0) const;
 
   /**
    * Returns an old curl from two time steps previous of a coupled variable
@@ -491,7 +495,7 @@ protected:
    * @see Kernel::_curl_u_older
    */
   virtual const VectorVariableCurl & coupledCurlOlder(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
 
   /**
    * Returns second derivative of a coupled variable
@@ -500,7 +504,8 @@ protected:
    * @return Reference to a VariableSecond containing the second derivative of the coupled variable
    * @see Kernel::second
    */
-  virtual const VariableSecond & coupledSecond(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableSecond & coupledSecond(const std::string & var_name,
+                                               unsigned int comp = 0) const;
 
   /**
    * Returns an old second derivative from previous time step of a coupled variable
@@ -511,7 +516,7 @@ protected:
    * @see Kernel::secondOld
    */
   virtual const VariableSecond & coupledSecondOld(const std::string & var_name,
-                                                  unsigned int comp = 0);
+                                                  unsigned int comp = 0) const;
 
   /**
    * Returns an old second derivative from two time steps previous of a coupled variable
@@ -522,7 +527,7 @@ protected:
    * @see Kernel::secondOlder
    */
   virtual const VariableSecond & coupledSecondOlder(const std::string & var_name,
-                                                    unsigned int comp = 0);
+                                                    unsigned int comp = 0) const;
 
   /**
    * Returns second derivative of a coupled variable for the previous Newton iterate
@@ -531,7 +536,7 @@ protected:
    * @return Reference to a VariableSecond containing the second derivative of the coupled variable
    */
   virtual const VariableSecond & coupledSecondPreviousNL(const std::string & var_name,
-                                                         unsigned int comp = 0);
+                                                         unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled variable
@@ -539,7 +544,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue containing the time derivative of the coupled variable
    */
-  virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDot(const std::string & var_name,
+                                           unsigned int comp = 0) const;
 
   /**
    * Second time derivative of a coupled variable
@@ -548,7 +554,8 @@ protected:
    * @return Reference to a VariableValue containing the second time derivative of the coupled
    * variable
    */
-  virtual const VariableValue & coupledDotDot(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDotDot(const std::string & var_name,
+                                              unsigned int comp = 0) const;
 
   /**
    * Old time derivative of a coupled variable
@@ -556,7 +563,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue containing the old time derivative of the coupled variable
    */
-  virtual const VariableValue & coupledDotOld(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDotOld(const std::string & var_name,
+                                              unsigned int comp = 0) const;
 
   /**
    * Old second time derivative of a coupled variable
@@ -566,7 +574,7 @@ protected:
    * variable
    */
   virtual const VariableValue & coupledDotDotOld(const std::string & var_name,
-                                                 unsigned int comp = 0);
+                                                 unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled variable for ad simulations
@@ -575,7 +583,7 @@ protected:
    * @return Reference to a VariableValue containing the time derivative of the coupled variable
    * @see Kernel::dot
    */
-  const ADVariableValue & adCoupledDot(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableValue & adCoupledDot(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Time derivative of a vector coupled variable for ad simulations
@@ -586,7 +594,7 @@ protected:
    * @see Kernel::dot
    */
   const ADVectorVariableValue & adCoupledVectorDot(const std::string & var_name,
-                                                   unsigned int comp = 0);
+                                                   unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled vector variable
@@ -596,7 +604,7 @@ protected:
    * variable
    */
   virtual const VectorVariableValue & coupledVectorDot(const std::string & var_name,
-                                                       unsigned int comp = 0);
+                                                       unsigned int comp = 0) const;
 
   /**
    * Second time derivative of a coupled vector variable
@@ -606,7 +614,7 @@ protected:
    * variable
    */
   virtual const VectorVariableValue & coupledVectorDotDot(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
 
   /**
    * Old time derivative of a coupled vector variable
@@ -616,7 +624,7 @@ protected:
    * variable
    */
   virtual const VectorVariableValue & coupledVectorDotOld(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
 
   /**
    * Old second time derivative of a coupled vector variable
@@ -626,7 +634,7 @@ protected:
    * variable
    */
   virtual const VectorVariableValue & coupledVectorDotDotOld(const std::string & var_name,
-                                                             unsigned int comp = 0);
+                                                             unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled vector variable with respect to the coefficients
@@ -636,7 +644,7 @@ protected:
    * vector variable with respect to the coefficients
    */
   virtual const VariableValue & coupledVectorDotDu(const std::string & var_name,
-                                                   unsigned int comp = 0);
+                                                   unsigned int comp = 0) const;
 
   /**
    * Second time derivative of a coupled vector variable with respect to the coefficients
@@ -646,7 +654,7 @@ protected:
    * variable with respect to the coefficients
    */
   virtual const VariableValue & coupledVectorDotDotDu(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled array variable
@@ -656,7 +664,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableValue & coupledArrayDot(const std::string & var_name,
-                                                     unsigned int comp = 0);
+                                                     unsigned int comp = 0) const;
 
   /**
    * Second time derivative of a coupled array variable
@@ -666,7 +674,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableValue & coupledArrayDotDot(const std::string & var_name,
-                                                        unsigned int comp = 0);
+                                                        unsigned int comp = 0) const;
 
   /**
    * Old time derivative of a coupled array variable
@@ -676,7 +684,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableValue & coupledArrayDotOld(const std::string & var_name,
-                                                        unsigned int comp = 0);
+                                                        unsigned int comp = 0) const;
 
   /**
    * Old second time derivative of a coupled array variable
@@ -686,7 +694,7 @@ protected:
    * variable
    */
   virtual const ArrayVariableValue & coupledArrayDotDotOld(const std::string & var_name,
-                                                           unsigned int comp = 0);
+                                                           unsigned int comp = 0) const;
 
   /**
    * Time derivative of a coupled variable with respect to the coefficients
@@ -695,7 +703,8 @@ protected:
    * @return Reference to a VariableValue containing the time derivative of the coupled variable
    * with respect to the coefficients
    */
-  virtual const VariableValue & coupledDotDu(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledDotDu(const std::string & var_name,
+                                             unsigned int comp = 0) const;
 
   /**
    * Second time derivative of a coupled variable with respect to the coefficients
@@ -705,7 +714,7 @@ protected:
    * with respect to the coefficients
    */
   virtual const VariableValue & coupledDotDotDu(const std::string & var_name,
-                                                unsigned int comp = 0);
+                                                unsigned int comp = 0) const;
 
   /**
    * Returns nodal values of a coupled variable
@@ -714,7 +723,7 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   template <typename T>
-  const T & coupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+  const T & coupledNodalValue(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns AD nodal values of a coupled variable
@@ -724,7 +733,7 @@ protected:
    */
   template <typename T>
   const typename Moose::ADType<T>::type & adCoupledNodalValue(const std::string & var_name,
-                                                              unsigned int comp = 0);
+                                                              unsigned int comp = 0) const;
 
   /**
    * Returns an old nodal value from previous time step  of a coupled variable
@@ -733,7 +742,7 @@ protected:
    * @return Reference to a VariableValue containing the old value of the coupled variable
    */
   template <typename T>
-  const T & coupledNodalValueOld(const std::string & var_name, unsigned int comp = 0);
+  const T & coupledNodalValueOld(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns an old nodal value from two time steps previous of a coupled variable
@@ -742,7 +751,7 @@ protected:
    * @return Reference to a VariableValue containing the older value of the coupled variable
    */
   template <typename T>
-  const T & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0);
+  const T & coupledNodalValueOlder(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns nodal values of a coupled variable for previous Newton iterate
@@ -751,7 +760,7 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   template <typename T>
-  const T & coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp = 0);
+  const T & coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Nodal values of time derivative of a coupled variable
@@ -761,7 +770,7 @@ protected:
    * coupled variable
    */
   template <typename T>
-  const T & coupledNodalDot(const std::string & var_name, unsigned int comp = 0);
+  const T & coupledNodalDot(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Nodal values of second time derivative of a coupled variable
@@ -771,7 +780,7 @@ protected:
    * the coupled variable
    */
   virtual const VariableValue & coupledNodalDotDot(const std::string & var_name,
-                                                   unsigned int comp = 0);
+                                                   unsigned int comp = 0) const;
 
   /**
    * Nodal values of old time derivative of a coupled variable
@@ -781,7 +790,7 @@ protected:
    * coupled variable
    */
   virtual const VariableValue & coupledNodalDotOld(const std::string & var_name,
-                                                   unsigned int comp = 0);
+                                                   unsigned int comp = 0) const;
 
   /**
    * Nodal values of old second time derivative of a coupled variable
@@ -791,7 +800,7 @@ protected:
    * the coupled variable
    */
   virtual const VariableValue & coupledNodalDotDotOld(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
   // coupled-dof-values-begin
   /**
    * Returns DoFs in the current solution vector of a coupled variable for the local element
@@ -800,7 +809,7 @@ protected:
    * @return Reference to a VariableValue for the DoFs of the coupled variable
    */
   virtual const VariableValue & coupledDofValues(const std::string & var_name,
-                                                 unsigned int comp = 0);
+                                                 unsigned int comp = 0) const;
 
   /**
    * Returns DoFs in the old solution vector of a coupled variable for the local element
@@ -809,7 +818,7 @@ protected:
    * @return Reference to a VariableValue for the old DoFs of the coupled variable
    */
   virtual const VariableValue & coupledDofValuesOld(const std::string & var_name,
-                                                    unsigned int comp = 0);
+                                                    unsigned int comp = 0) const;
 
   /**
    * Returns DoFs in the older solution vector of a coupled variable for the local element
@@ -818,25 +827,25 @@ protected:
    * @return Reference to a VariableValue for the older DoFs of the coupled variable
    */
   virtual const VariableValue & coupledDofValuesOlder(const std::string & var_name,
-                                                      unsigned int comp = 0);
+                                                      unsigned int comp = 0) const;
   // coupled-dof-values-end
 
   /**
    * method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
    * computing objects
    */
-  const ADVariableValue & adZeroValue();
+  const ADVariableValue & adZeroValue() const;
 
   /**
    *  method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
    * JACOBIAN computing objects
    */
-  const ADVariableGradient & adZeroGradient();
+  const ADVariableGradient & adZeroGradient() const;
 
   /**
    * Retrieve a zero second for automatic differentiation
    */
-  const ADVariableSecond & adZeroSecond();
+  const ADVariableSecond & adZeroSecond() const;
 
   /**
    * Returns zero value templated with automatic differentiation boolean
@@ -897,19 +906,21 @@ protected:
   THREAD_ID _c_tid;
 
   /// Will hold the default value for optional coupled variables.
-  std::unordered_map<std::string, std::vector<std::unique_ptr<VariableValue>>> _default_value;
+  mutable std::unordered_map<std::string, std::vector<std::unique_ptr<VariableValue>>>
+      _default_value;
 
   /// Will hold the default value for optional coupled variables for automatic differentiation.
-  std::unordered_map<std::string, std::unique_ptr<MooseArray<DualReal>>> _ad_default_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<DualReal>>> _ad_default_value;
 
   /// Will hold the default value for optional vector coupled variables.
-  std::unordered_map<std::string, std::unique_ptr<VectorVariableValue>> _default_vector_value;
+  mutable std::unordered_map<std::string, std::unique_ptr<VectorVariableValue>>
+      _default_vector_value;
 
   /// Will hold the default value for optional array coupled variables.
-  std::map<std::string, ArrayVariableValue *> _default_array_value;
+  mutable std::map<std::string, ArrayVariableValue *> _default_array_value;
 
   /// Will hold the default value for optional vector coupled variables for automatic differentiation.
-  std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
+  mutable std::unordered_map<std::string, std::unique_ptr<MooseArray<ADRealVectorValue>>>
       _ad_default_vector_value;
 
   /**
@@ -984,7 +995,8 @@ protected:
    *
    * @param var_name The name of the coupled variable
    */
-  bool checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0);
+  bool
+  checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0) const;
 
 private:
   enum class FuncAge
@@ -1003,7 +1015,7 @@ private:
     Dot,
   };
 
-  void checkFuncType(const std::string var_name, VarType t, FuncAge age);
+  void checkFuncType(const std::string var_name, VarType t, FuncAge age) const;
 
 protected:
   /**
@@ -1014,7 +1026,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableFieldBase * getFEVar(const std::string & var_name, unsigned int comp);
+  const MooseVariableFieldBase * getFEVar(const std::string & var_name, unsigned int comp) const;
 
   /*
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
@@ -1023,13 +1035,13 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp);
+  const MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Helper that that be used to retrieve a variable of arbitrary type \p T
    */
   template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type = 0>
-  T * getVarHelper(const std::string & var_name, unsigned int comp);
+  const T * getVarHelper(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Reverse compatibility helper that can be used to retried a variable of type \p
@@ -1037,7 +1049,7 @@ protected:
    */
   template <typename T,
             typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type = 0>
-  MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp);
+  const MooseVariableFE<T> * getVarHelper(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Extract pointer to a coupled variable
@@ -1064,6 +1076,30 @@ protected:
   ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp);
 
   /**
+   * Extract pointer to a coupled variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  const MooseVariable * getVar(const std::string & var_name, unsigned int comp) const;
+
+  /**
+   * Extract pointer to a coupled vector variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  const VectorMooseVariable * getVectorVar(const std::string & var_name, unsigned int comp) const;
+
+  /**
+   * Extract pointer to a coupled array variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  const ArrayMooseVariable * getArrayVar(const std::string & var_name, unsigned int comp) const;
+
+  /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
    * are coupled in.
    * @param name the name of the variable
@@ -1081,7 +1117,7 @@ public:
    * @param var_name the name of the variable for which to retrieve a default value
    * @return VariableValue * a pointer to the associated VarirableValue.
    */
-  ADVariableValue * getADDefaultValue(const std::string & var_name);
+  const ADVariableValue * getADDefaultValue(const std::string & var_name) const;
 
   /**
    * Helper method to return (and insert if necessary) the default vector value for Automatic
@@ -1089,7 +1125,7 @@ public:
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return VariableVectorValue * a pointer to the associated VarirableVectorValue.
    */
-  ADVectorVariableValue * getADDefaultVectorValue(const std::string & var_name);
+  const ADVectorVariableValue * getADDefaultVectorValue(const std::string & var_name) const;
 
   /**
    * Helper method to return (and insert if necessary) the default gradient for Automatic
@@ -1097,7 +1133,7 @@ public:
    * @param var_name the name of the variable for which to retrieve a default gradient
    * @return VariableGradient * a pointer to the associated VariableGradient.
    */
-  ADVariableGradient & getADDefaultGradient();
+  const ADVariableGradient & getADDefaultGradient() const;
 
   /**
    * Helper method to return (and insert if necessary) the default gradient for Automatic
@@ -1105,7 +1141,7 @@ public:
    * @param var_name the name of the vector variable for which to retrieve a default gradient
    * @return VariableGradient * a pointer to the associated VectorVariableGradient.
    */
-  ADVectorVariableGradient & getADDefaultVectorGradient();
+  const ADVectorVariableGradient & getADDefaultVectorGradient() const;
 
   /**
    * Helper method to return (and insert if necessary) the default second derivatives for Automatic
@@ -1113,7 +1149,7 @@ public:
    * @param var_name the name of the variable for which to retrieve a default second derivative
    * @return VariableSecond * a pointer to the associated VariableSecond.
    */
-  ADVariableSecond & getADDefaultSecond();
+  const ADVariableSecond & getADDefaultSecond() const;
 
 private:
   /**
@@ -1122,7 +1158,7 @@ private:
    * @param var_name the name of the variable for which to retrieve a default value
    * @return a pointer to the associated VariableValue.
    */
-  VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp);
+  const VariableValue * getDefaultValue(const std::string & var_name, unsigned int comp) const;
 
   /**
    * Helper method to return (and insert if necessary) the default value
@@ -1130,7 +1166,7 @@ private:
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return a pointer to the associated VectorVariableValue.
    */
-  VectorVariableValue * getDefaultVectorValue(const std::string & var_name);
+  const VectorVariableValue * getDefaultVectorValue(const std::string & var_name) const;
 
   /**
    * Helper method to return (and insert if necessary) the default value
@@ -1138,13 +1174,13 @@ private:
    * @param var_name the name of the vector variable for which to retrieve a default value
    * @return a pointer to the associated VectorVariableValue.
    */
-  ArrayVariableValue * getDefaultArrayValue(const std::string & var_name);
+  const ArrayVariableValue * getDefaultArrayValue(const std::string & var_name) const;
 
   /**
    * Get nodal default value
    */
   template <typename T>
-  const T & getDefaultNodalValue(const std::string & var_name, unsigned int comp = 0);
+  const T & getDefaultNodalValue(const std::string & var_name, unsigned int comp = 0) const;
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
@@ -1167,13 +1203,17 @@ private:
 };
 
 template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>
-T *
-Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
+const T *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
 {
   if (!checkVar(var_name, comp, 0))
     return nullptr;
 
-  if (auto * coupled_var = dynamic_cast<T *>(_coupled_vars[var_name][comp]))
+  auto coupled_vars_it = _coupled_vars.find(var_name);
+  if (coupled_vars_it == _coupled_vars.end())
+    mooseError("Trying to get a coupled var ", var_name, " that doesn't exist");
+
+  if (auto coupled_var = dynamic_cast<T *>(coupled_vars_it->second[comp]))
     return coupled_var;
   else
   {
@@ -1195,8 +1235,8 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
 }
 
 template <typename T, typename std::enable_if<!HasMemberType_OutputShape<T>::value, int>::type>
-MooseVariableFE<T> *
-Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
+const MooseVariableFE<T> *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
 {
   return getVarHelper<MooseVariableFE<T>>(var_name, comp);
 }
