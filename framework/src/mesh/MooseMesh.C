@@ -478,10 +478,6 @@ MooseMesh::update()
   cacheInfo();
 
   _face_info_dirty = true;
-
-  for (auto const & pair : _higher_d_elem_side_to_lower_d_elem)
-    Moose::out << "Higher element index: " << pair.first.first->id()
-               << "Lower element index: " << pair.second->id() << "\n";
 }
 
 const Node &
@@ -913,13 +909,14 @@ MooseMesh::cacheInfo()
     if (ip_elem)
     {
       unsigned int ip_side = ip_elem->which_side_am_i(elem);
-      // The following check only fails for a grid sequencing test
-      if (ip_side == libMesh::invalid_uint)
-        mooseError("An element identified as an interior parent cannot retrieve a proper side on "
-                   "which the lower-d element is");
-      auto pair = std::make_pair(ip_elem, ip_side);
-      _higher_d_elem_side_to_lower_d_elem.insert(
-          std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
+
+      // For some grid sequencing tests: ip_side == libMesh::invalid_uint
+      if (ip_side != libMesh::invalid_uint)
+      {
+        auto pair = std::make_pair(ip_elem, ip_side);
+        _higher_d_elem_side_to_lower_d_elem.insert(
+            std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
+      }
     }
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
