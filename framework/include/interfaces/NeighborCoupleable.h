@@ -35,8 +35,20 @@ public:
   // neighbor
   virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
                                                      unsigned int comp = 0) const;
+
+  /**
+   * Get the coupled neighbor variable value for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
   virtual const ADVariableValue & adCoupledNeighborValue(const std::string & var_name,
                                                          unsigned int comp = 0) const;
+
+  /**
+   * Get the coupled neighbor vector variable value for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
+  virtual const ADVectorVariableValue & adCoupledVectorNeighborValue(const std::string & var_name,
+                                                                     unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueDot(const std::string & var_name,
                                                         unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueDotDu(const std::string & var_name,

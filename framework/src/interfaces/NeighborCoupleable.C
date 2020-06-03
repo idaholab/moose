@@ -51,6 +51,27 @@ NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigne
   return var->adSlnNeighbor();
 }
 
+const ADVectorVariableValue &
+NeighborCoupleable::adCoupledVectorNeighborValue(const std::string & var_name,
+                                                 unsigned int comp) const
+{
+  auto var = getVarHelper<MooseVariableField<RealVectorValue>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultVectorValue(var_name);
+
+  if (_neighbor_nodal)
+    mooseError(
+        "adCoupledVectorNeighborValue cannot be used for nodal compute objects at this time");
+  if (!_c_is_implicit)
+    mooseError(
+        "adCoupledVectorNeighborValue returns a data structure with derivatives. Explicit schemes "
+        "use old solution data which do not have derivatives so adCoupledVectorNeighborValue is "
+        "not appropriate. Please use coupledNeighborValue instead");
+
+  return var->adSlnNeighbor();
+}
+
 const VariableValue &
 NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsigned int comp) const
 {
