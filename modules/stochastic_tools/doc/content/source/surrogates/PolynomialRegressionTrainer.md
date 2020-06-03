@@ -83,6 +83,24 @@ coefficients can be determined as follows:
 Finally, it must be mentioned that this method is only applicable if $N_p \leq N$
 and keeping $N_p << N$ is recommended.
 
+## Ridge regression
+
+Unfortunately, the OLS approach is known to have some issues like:
+- It is prone to overfit the data,
+- It yields inaccurate results if the input variables are correlated,
+- It is sensitive to outliers.
+
+To tackle the problem an $L^2$ regularization (or
+[Tikhonov regularization](https://en.wikipedia.org/wiki/Regularized_least_squares) is adopted
+to make sure that the coefficients of the expansion do have uncontrollably high values.
+This extended least squares regression is often referred to as Ridge Regression.
+In this scenario the coefficients can be determined by solving:
+
+!equation
+\textbf{c}=\left(\textbf{R}^T\textbf{R}+\lambda I\right)^{-1}\textbf{R}^T\textbf{y},
+
+where $\lambda$ is a penalty parameter which penalizes coefficients with large
+magnitudes. As $\lambda \rightarrow 0$, Ridge regression converges to OLS.     
 
 ## Example Input File Syntax
 

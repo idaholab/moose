@@ -3,13 +3,14 @@
   issues = '#15361'
 
   [errors]
-    requirement = "The system shall throw an error when the number of samples does not match the number of results."
+    requirement = "The system shall throw an error when "
 
     [wrong_sampler]
       type = RunException
       input = error.i
       allow_test_objects = true
       expect_err = "The number of elements in 'values/g_values' is not equal to the number of samples in 'sample'!"
+      detail = "the number of samples does not match the number of results."
     []
   []
 []
