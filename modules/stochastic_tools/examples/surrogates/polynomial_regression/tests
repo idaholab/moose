@@ -41,8 +41,8 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5
                   Samplers/sample/num_bins=2"
-      csvdiff = 'uniform_surr_out_pc_max_res_0001.csv uniform_surr_out_pr_max_res_0001.csv
-                 uniform_surr_out_pc_max_stats_0001.csv uniform_surr_out_pr_max_stats_0001.csv'
+      csvdiff = "uniform_surr_out_pc_max_res_0001.csv uniform_surr_out_pr_max_res_0001.csv
+                 uniform_surr_out_pc_max_stats_0001.csv uniform_surr_out_pr_max_stats_0001.csv"
       method = opt
       detail = "with uniform parameter distributions "
     []

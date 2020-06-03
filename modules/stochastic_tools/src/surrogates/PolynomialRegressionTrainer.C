@@ -79,7 +79,11 @@ PolynomialRegressionTrainer::initialize()
       _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
 
   if (num_rows != _values_ptr->size())
-    mooseError("Sampler number of rows does not match number of results from vector postprocessor.");
+    paramError("results_vpp", "The number of elements in '",
+               getParam<VectorPostprocessorName>("results_vpp"),"/",
+               getParam<std::string>("results_vector"),
+               "' is not equal to the number of samples in '",
+               getParam<SamplerName>("sampler"),"'!");
 }
 
 void
