@@ -45,8 +45,8 @@ int
 MultiPlasticityLinearSystem::singularValuesOfR(const std::vector<RankTwoTensor> & r,
                                                std::vector<Real> & s)
 {
-  int bm = r.size();
-  int bn = 6;
+  PetscBLASInt bm = r.size();
+  PetscBLASInt bn = 6;
 
   s.resize(std::min(bm, bn));
 
@@ -73,15 +73,16 @@ MultiPlasticityLinearSystem::singularValuesOfR(const std::vector<RankTwoTensor> 
 
   // u and vt are dummy variables because they won't
   // get referenced due to the "N" and "N" choices
-  int sizeu = 1;
+  PetscBLASInt sizeu = 1;
   std::vector<double> u(sizeu);
-  int sizevt = 1;
+  PetscBLASInt sizevt = 1;
   std::vector<double> vt(sizevt);
 
-  int sizework = 16 * (bm + 6); // this is above the lowerbound specified in the LAPACK doco
+  PetscBLASInt sizework =
+      16 * (bm + 6); // this is above the lowerbound specified in the LAPACK doco
   std::vector<double> work(sizework);
 
-  int info;
+  PetscBLASInt info;
 
   LAPACKgesvd_("N",
                "N",
@@ -630,7 +631,7 @@ MultiPlasticityLinearSystem::nrStep(const RankTwoTensor & stress,
   calculateJacobian(stress, intnl, pm, E_inv, active, deactivated_due_to_ld, jac);
 
   // prepare for LAPACKgesv_ routine provided by PETSc
-  int system_size = rhs.size();
+  PetscBLASInt system_size = rhs.size();
 
   std::vector<double> a(system_size * system_size);
   // Fill in the a "matrix" by going down columns
@@ -639,9 +640,9 @@ MultiPlasticityLinearSystem::nrStep(const RankTwoTensor & stress,
     for (int row = 0; row < system_size; ++row)
       a[ind++] = jac[row][col];
 
-  int nrhs = 1;
-  std::vector<int> ipiv(system_size);
-  int info;
+  PetscBLASInt nrhs = 1;
+  std::vector<PetscBLASInt> ipiv(system_size);
+  PetscBLASInt info;
   LAPACKgesv_(&system_size, &nrhs, &a[0], &system_size, &ipiv[0], &rhs[0], &system_size, &info);
 
   if (info != 0)
