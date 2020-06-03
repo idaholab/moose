@@ -15,8 +15,8 @@ void
 rotVtoU(RealVectorValue v, RealVectorValue u)
 {
   RealTensorValue ident(1, 0, 0, 0, 1, 0, 0, 0, 1);
-  RealVectorValue vhat = v / v.size();
-  RealVectorValue uhat = u / u.size();
+  RealVectorValue vhat = v / v.norm();
+  RealVectorValue uhat = u / u.norm();
   RealTensorValue r = RotationMatrix::rotVec1ToVec2(v, u);
   RealVectorValue rotated_v = r * vhat;
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)

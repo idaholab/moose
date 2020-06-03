@@ -34,6 +34,7 @@ export CC=mpicc
 export CXX=mpicxx
 export CFLAGS="${TUNING}"
 export CXXFLAGS="${TUNING}"
+export LDFLAGS="-Wl,-S"
 
 if [[ $mpi == "openmpi" ]]; then
   export OMPI_MCA_plm=isolated
@@ -58,7 +59,7 @@ EOF`
                      --prefix=${PREFIX}/libmesh \
                      --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
                      --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
-                     --with-methods="opt dbg devel oprof" \
+                     --with-methods="opt oprof devel dbg" \
                      --without-gdb-command
 
 make -j $CPU_COUNT
