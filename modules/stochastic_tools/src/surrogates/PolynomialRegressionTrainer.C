@@ -36,7 +36,8 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
   : SurrogateTrainer(parameters),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _power_matrix(declareModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
-    _max_degree(declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree"))),
+    _max_degree(
+        declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree"))),
     _penalty(declareModelData<Real>("_penalty", getParam<Real>("penalty")))
 {
 }
@@ -79,11 +80,14 @@ PolynomialRegressionTrainer::initialize()
       _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
 
   if (num_rows != _values_ptr->size())
-    paramError("results_vpp", "The number of elements in '",
-               getParam<VectorPostprocessorName>("results_vpp"),"/",
+    paramError("results_vpp",
+               "The number of elements in '",
+               getParam<VectorPostprocessorName>("results_vpp"),
+               "/",
                getParam<std::string>("results_vector"),
                "' is not equal to the number of samples in '",
-               getParam<SamplerName>("sampler"),"'!");
+               getParam<SamplerName>("sampler"),
+               "'!");
 }
 
 void
