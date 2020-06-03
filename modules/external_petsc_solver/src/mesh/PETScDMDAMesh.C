@@ -393,13 +393,10 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
   mesh.set_next_unique_id(Mx * My + (Mx - 1) * (My - 1));
 
   // No need to renumber or find neighbors - done did it.
-  // Avoid deprecation message/error by _also_ setting
-  // allow_renumbering(false). This is a bit silly, but we want to
-  // catch cases where people are purely using the old "skip"
-  // interface and not the new flag setting one.
   mesh.allow_renumbering(false);
-  mesh.prepare_for_use(/*skip_renumber (ignored!) = */ false,
-                       /*skip_find_neighbors = */ true);
+  mesh.allow_find_neighbors(false);
+  mesh.prepare_for_use();
+  mesh.allow_find_neighbors(true);
 }
 
 void
