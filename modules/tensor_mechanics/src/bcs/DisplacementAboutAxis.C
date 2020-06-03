@@ -37,6 +37,9 @@ addDisplacementAboutAxisParams(InputParameters & params)
                                          units.getRawNames());
   params.addRequiredParam<RealVectorValue>("axis_origin", "Origin of the axis of rotation");
   params.addRequiredParam<RealVectorValue>("axis_direction", "Direction of the axis of rotation");
+  params.addParam<bool>("incremental", false, "if true use an incremental formulation");
+  params.addRequiredCoupledVar("displacements",
+                               "The string of displacements suitable for the problem statement");
 }
 
 DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
@@ -45,7 +48,11 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
     _func(getFunction("function")),
     _angle_units(getParam<MooseEnum>("angle_units")),
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
-    _axis_direction(getParam<RealVectorValue>("axis_direction"))
+    _axis_direction(getParam<RealVectorValue>("axis_direction")),
+    _ndisp(coupledComponents("displacements")),
+    _vars(_ndisp),
+    _incremental(getParam<bool>("incremental"))
+
 {
   if (_component < 0 || _component > 2)
     mooseError("Invalid component given for ", name(), ": ", _component, ".");
@@ -59,6 +66,10 @@ DisplacementAboutAxis::initialSetup()
 {
   calculateUnitDirectionVector();
   calculateTransformationMatrices();
+
+  if (_incremental)
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      _vars[i] = getVar("displacements", i);
 }
 
 Real
@@ -76,9 +87,13 @@ DisplacementAboutAxis::computeQpValue()
   p_old(2, 0) = p(2);
   p_old(3, 0) = 1;
 
+  if (_incremental)
+    for (unsigned int i = 0; i < _ndisp; i++)
+      p_old(i, 0) += _vars[i]->dofValuesOld()[_qp];
+
   ColumnMajorMatrix p_new = rotateAroundAxis(p_old, angle);
 
-  return p_new(_component, 0) - p_old(_component, 0);
+  return p_new(_component, 0) - p(_component);
 }
 
 ColumnMajorMatrix

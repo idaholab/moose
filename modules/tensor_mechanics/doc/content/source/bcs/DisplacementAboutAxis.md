@@ -24,10 +24,10 @@ $\hat{x}$, $\hat{y}$, and $\hat{z}$ coordinate system axes, respectively.
 !listing modules/tensor_mechanics/test/tests/torque_reaction/torque_reaction_cylinder.i
          block=BCs/top_x
 
-A Function is required to prescribe the rate of the `DisplacementAboutAxis` boundary condition
+A Function is required to prescribe the total rotation of the `DisplacementAboutAxis` boundary condition
 application to the mesh. Either the name of another function defined elsewhere or a parsed
 function is used as the argument for the `function` input parameter in the `DisplacementAboutAxis`
-block. In this example, a parsed function is used.
+block. In this example, a parsed function is used. The input parameter `incremental` allows to use an incremental rotation.
 
 !syntax parameters /BCs/DisplacementAboutAxis
 

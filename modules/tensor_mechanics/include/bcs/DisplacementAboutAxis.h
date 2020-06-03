@@ -53,6 +53,15 @@ protected:
   const Point _axis_origin;
   Point _axis_direction;
 
+  /// number of displacement components
+  const unsigned int _ndisp;
+
+  /// pointer to displacement variables
+  std::vector<MooseVariable *> _vars;
+
+  /// flag for incremental formulation
+  const bool _incremental;
+
   ColumnMajorMatrix _transformation_matrix;
   ColumnMajorMatrix _transformation_matrix_inv;
 };
