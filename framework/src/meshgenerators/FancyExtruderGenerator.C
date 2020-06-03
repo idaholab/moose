@@ -209,7 +209,7 @@ FancyExtruderGenerator::generate()
                                              (current_node_layer - 1) * (orig_nodes + orig_elem) +
                                              node->id();
 
-        new_node->set_unique_id() = uid;
+        new_node->set_unique_id(uid);
 #endif
 
         input_boundary_info.boundary_ids(node, ids_to_copy);
@@ -491,7 +491,7 @@ FancyExtruderGenerator::generate()
                                              (current_layer - 1) * (orig_nodes + orig_elem) +
                                              orig_nodes + elem->id();
 
-        new_elem->set_unique_id() = uid;
+        new_elem->set_unique_id(uid);
 #endif
 
         // maintain the subdomain_id
