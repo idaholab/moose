@@ -38,6 +38,11 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 #
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc $(hit_DIR)/braceexpr.cc
 
+#
+# FParser JIT defines
+#
+ADDITIONAL_CPPFLAGS += -DADFPARSER_INCLUDES="\"-I$(FRAMEWORK_DIR)/include/utils -I$(FRAMEWORK_DIR)/include/base -I$(LIBMESH_DIR)/include\""
+
 # some systems have python2/3 but no python2/3-config command - fall back to python-config for them
 pyconfig := python3-config
 ifeq (, $(shell which $(pyconfig) 2>/dev/null))

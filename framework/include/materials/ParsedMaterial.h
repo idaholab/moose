@@ -13,21 +13,20 @@
 #include "FunctionMaterialBase.h"
 #include "ParsedMaterialBase.h"
 
-// Forward Declarations
-class ParsedMaterial;
-
-template <>
-InputParameters validParams<ParsedMaterial>();
-
 /**
  * FunctionMaterialBase child class to evaluate a parsed function. The function
  * can access non-linear and aux variables (unlike MooseParsedFunction).
  */
-class ParsedMaterial : public ParsedMaterialHelper, public ParsedMaterialBase
+template <bool is_ad>
+class ParsedMaterialTempl : public ParsedMaterialHelper<is_ad>, public ParsedMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedMaterial(const InputParameters & parameters);
+  ParsedMaterialTempl(const InputParameters & parameters);
+
+  usingParsedMaterialHelperMembers(is_ad);
 };
 
+typedef ParsedMaterialTempl<false> ParsedMaterial;
+typedef ParsedMaterialTempl<true> ADParsedMaterial;

@@ -11,7 +11,7 @@ make -j 8
 ```
 
 !alert note title=did make -j 8 fail?
-If `make -j 8` fails, please proceed to [Build Issues](help/troubleshooting.md#buildissues) above. This may also be the reason why all your tests are failing.
+If `make -j 8` fails, please proceed to [Build Issues](help/troubleshooting.md#buildissues) above. This is most likely why all your tests are failing.
 
 This test, proves the TestHarness is available. That libMesh is built, and the TestHarness has a working MOOSE framework available to it. Meaning, your test that is failing may be beyond the scope of this troubleshooting guide. However, do continue to read through the bolded situations below. If the error is not listed, please submit your failed test results to our [mailing list](https://groups.google.com/forum/#!forum/moose-users) for help.
 
@@ -20,34 +20,15 @@ If the test did fail, chances are your test and our test is failing for the same
 - +Environment Variables+ is somehow instructing the TestHarness to use improper paths. Try each of the following and re-run your test again. You may find you receive a different error each time. Simply continue troubleshooting using that new error, and work your way down. If the error is not listed here, then it is time to ask the [mailing list](https://groups.google.com/forum/#!forum/moose-users) for help:
 
   - check if `echo $METHOD` returns anything. If it does, try unsetting it with `unset METHOD`
-
-    - If this *was* set to anything other than `opt`, it will be necessary to rebuild moose/test again:
-
-      ```bash
-      cd moose/test
-      make -j 8
-      ```
-
   - check if `echo $MOOSE_DIR` returns anything. If it does, try unsetting it with `unset MOOSE_DIR`
-
-    - If this *was* set to anything, you must rebuild [libMesh](help/troubleshooting.md#libmesh).
-
   - check if `echo $PYTHONPATH` returns anything. If it does, try unsetting it with `unset PYTHONPATH`
+
+    !alert note title=METHOD and MOOSE_DIR
+    If these were set, it will be necessary to perform a rebuild. See [Build Issues](help/troubleshooting.md#buildissues) above.
 
 - +Failed to import hit+:
 
-  - Verify you have the miniconda package loaded. See [Modules](help/troubleshooting.md#modules)
-
-    - If it was not loaded, and now it is, it may be necessary to re-build moose:
-
-      ```bash
-      cd moose/test
-      make -j 8
-      ```
-
-- +No Modulefiles Currently Loaded+
-
-  - Verify you have modules loaded. See [Modules](help/troubleshooting.md#modules)
+  - Verify you have activated the conda moose environment: `echo $CONDA_DEFAULT_ENV`. This command should return 'moose'. If not, see [Conda Issues](help/troubleshooting.md#condaissues) above.
 
 - +Application not found+
 
@@ -93,18 +74,18 @@ If the test did fail, chances are your test and our test is failing for the same
       sudo scutil --set HostName mycoolname
       ```
 
-      We have received reports where this method sometimes does not work.
+      We have received reports where the second method sometimes does not work.
 
 - +TIMEOUT+
 
-  - If your tests fail due to timeout errors, its most likely you have a good installation, but a slow machine (or slow filesystem). You can adjust the amount of time that the TestHarness allows a test to run to completion by adding a paramater to your test file:
+  - If your tests fail due to timeout errors, it is most likely you have a good installation, but a slow machine (or slow filesystem). You can adjust the amount of time that the TestHarness allows a test to run before timing out, by adding a paramater to your test file:
 
     ```pre
     [Tests]
       [./timeout]
         type = RunApp
         input = my_input_file.i
-        max_time = 300   <-- time in seconds before a timeout occurs . 300 is the default for all tests.
+        max_time = 300   <-- time in seconds before a timeout occurs. 300 is the default for all tests.
       [../]
     []
     ```

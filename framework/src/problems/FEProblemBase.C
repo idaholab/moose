@@ -633,22 +633,26 @@ FEProblemBase::initialSetup()
 
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
-  CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+  dof_id_type max_var_n_dofs_per_elem;
+  dof_id_type max_var_n_dofs_per_node;
+  {
+    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
 
-  MaxVarNDofsPerElem mvndpe(*this, *_nl);
-  Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
-  auto max_var_n_dofs_per_elem = mvndpe.max();
-  _communicator.max(max_var_n_dofs_per_elem);
+    MaxVarNDofsPerElem mvndpe(*this, *_nl);
+    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
+    max_var_n_dofs_per_elem = mvndpe.max();
+    _communicator.max(max_var_n_dofs_per_elem);
+
+    MaxVarNDofsPerNode mvndpn(*this, *_nl);
+    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
+    max_var_n_dofs_per_node = mvndpn.max();
+    _communicator.max(max_var_n_dofs_per_node);
+  }
 
   _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
   auto displaced_problem = getDisplacedProblem();
   if (displaced_problem)
     displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
-
-  MaxVarNDofsPerNode mvndpn(*this, *_nl);
-  Threads::parallel_reduce(*_mesh.getLocalNodeRange(), mvndpn);
-  auto max_var_n_dofs_per_node = mvndpn.max();
-  _communicator.max(max_var_n_dofs_per_node);
 
   _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
   if (displaced_problem)

@@ -27,7 +27,7 @@ InputParameters
 ParsedGenerateSideset::validParams()
 {
   InputParameters params = SideSetsGeneratorBase::validParams();
-  params += FunctionParserUtils::validParams();
+  params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",
@@ -55,7 +55,7 @@ ParsedGenerateSideset::validParams()
 
 ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
   : SideSetsGeneratorBase(parameters),
-    FunctionParserUtils(parameters),
+    FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
@@ -70,7 +70,7 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     mooseError("GenerateAllSideSetsByNormals only works with ReplicatedMesh.");
 
   // base function object
-  _func_F = std::make_shared<ADFunction>();
+  _func_F = std::make_shared<SymFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

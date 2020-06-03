@@ -11,21 +11,19 @@
 
 #include "DerivativeFunctionMaterialBase.h"
 
-class DerivativeSumMaterial;
-
-template <>
-InputParameters validParams<DerivativeSumMaterial>();
-
-class DerivativeSumMaterial : public DerivativeFunctionMaterialBase
+template <bool is_ad>
+class DerivativeSumMaterialTempl : public DerivativeFunctionMaterialBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  DerivativeSumMaterial(const InputParameters & parameters);
+  DerivativeSumMaterialTempl(const InputParameters & parameters);
 
   virtual void initialSetup();
 
 protected:
+  usingDerivativeFunctionMaterialBaseMembers(is_ad);
+
   virtual void computeProperties();
 
   std::vector<std::string> _sum_materials;
@@ -39,14 +37,17 @@ protected:
   const bool _validate_coupling;
 
   /// Function values of the summands.
-  std::vector<const MaterialProperty<Real> *> _summand_F;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _summand_F;
 
   /// Derivatives of the summands with respect to arg[i]
-  std::vector<std::vector<const MaterialProperty<Real> *>> _summand_dF;
+  std::vector<std::vector<const GenericMaterialProperty<Real, is_ad> *>> _summand_dF;
 
   /// Second derivatives of the summands.
-  std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _summand_d2F;
+  std::vector<std::vector<std::vector<const GenericMaterialProperty<Real, is_ad> *>>> _summand_d2F;
 
   /// Third derivatives of the summands.
-  std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>>> _summand_d3F;
+  std::vector<std::vector<std::vector<std::vector<const GenericMaterialProperty<Real, is_ad> *>>>>
+      _summand_d3F;
 };
+
+typedef DerivativeSumMaterialTempl<false> DerivativeSumMaterial;

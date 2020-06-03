@@ -11,7 +11,7 @@ import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
-    def testWorkingDirectory(self):
+    def testWorkingDirectoryGood(self):
         """
         Verify TestHarness can operate in specified subdirectories
         """
@@ -19,6 +19,16 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runTests('--no-color', '-i', 'working_directory', '--re', 'relative_and_available')
         self.assertRegexpMatches(output.decode('utf-8'), 'tests/test_harness.relative_and_available.*? OK')
 
+
+    def testDependency(self):
+        # Test prereqs are working (check for an OK for the dependency test)
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('--no-color', '-i', 'working_directory')
+
+        e = cm.exception
+        self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.depend_on_available.*? OK')
+
+    def testAbsolutePath(self):
         # Test we catch an absolute path
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'absolute_path')
@@ -26,6 +36,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.absolute_path.*? FAILED \(ABSOLUTE PATH DETECTED\)')
 
+    def testDirectoryNotFound(self):
         # Test we catch a directory not found
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'non_existent')
@@ -33,6 +44,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.non_existent.*? FAILED \(WORKING DIRECTORY NOT FOUND\)')
 
+    def testExodiff(self):
         ## Specific Testers ##
         # exodiff can access sub directories
         with self.assertRaises(subprocess.CalledProcessError) as cm:
@@ -41,6 +53,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.exodiff.*? FAILED \(EXODIFF\)')
 
+    def testCSVDiff(self):
         # csvdiff can access sub directories
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'csvdiff')
@@ -48,6 +61,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output.decode('utf-8'), r'tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)')
 
+    def testRunException(self):
         # RunException can access sub directories
         with self.assertRaises(subprocess.CalledProcessError) as cm:
             self.runTests('--no-color', '-i', 'working_directory', '--re', 'runexception')

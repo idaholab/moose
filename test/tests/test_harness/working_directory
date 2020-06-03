@@ -35,5 +35,10 @@
     expect_err = 'Wrong Error \w+'
     working_directory = sub_directory
   [../]
-
+  [./depend_on_available]
+    type = RunApp
+    input = sub_good.i
+    working_directory = sub_directory_dependency
+    prereq = relative_and_available
+  [../]
 []

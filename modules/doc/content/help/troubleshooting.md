@@ -4,12 +4,8 @@ The content you find here, is a collection of issues commonly experienced by all
 
 !include help/faq/mailing_list.md
 
-!include help/faq/modules_issues.md
-
-!include help/faq/libmesh_issues.md
+!include help/faq/conda_issues.md
 
 !include help/faq/build_issues.md
 
 !include help/faq/failing_tests.md
-
-!include help/faq/catalina_caveats.md

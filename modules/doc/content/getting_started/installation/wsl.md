@@ -1,7 +1,7 @@
-Begin by performing the following external sets of instructions. Remember to choose Ubuntu, unless you know what you are doing.
+Begin by performing the following external instructions:
 
-- [Windows Subsystem for Linux (WSL)](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide)
-- [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Only needed for Peacock)
+- Install [Ubuntu 20.04](https://www.microsoft.com/en-us/p/ubuntu-2004-lts/9n6svws3rx71) from the Microsoft store
+- Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/reviews/) (Only needed for Peacock)
 
 ## Launch VcXsrv
 

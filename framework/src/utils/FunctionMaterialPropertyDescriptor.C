@@ -13,7 +13,8 @@
 #include "Kernel.h"
 #include <algorithm>
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+template <bool is_ad>
+FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const std::string & expression, MooseObject * parent)
   : _dependent_vars(), _derivative_vars(), _parent(parent)
 {
@@ -40,9 +41,13 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
   updatePropertyName();
 }
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() : _value(nullptr) {}
+template <bool is_ad>
+FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor() : _value(nullptr)
+{
+}
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+template <bool is_ad>
+FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
@@ -54,7 +59,8 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
 {
 }
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+template <bool is_ad>
+FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs, MooseObject * parent)
   : _fparser_name(rhs._fparser_name),
     _base_name(rhs._base_name),
@@ -66,9 +72,10 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
 {
 }
 
-std::vector<FunctionMaterialPropertyDescriptor>
-FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> & expression_list,
-                                                MooseObject * parent)
+template <bool is_ad>
+std::vector<FunctionMaterialPropertyDescriptor<is_ad>>
+FunctionMaterialPropertyDescriptor<is_ad>::parseVector(
+    const std::vector<std::string> & expression_list, MooseObject * parent)
 {
   std::vector<FunctionMaterialPropertyDescriptor> fmpds;
   for (auto & ex : expression_list)
@@ -76,23 +83,26 @@ FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> &
   return fmpds;
 }
 
+template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
+FunctionMaterialPropertyDescriptor<is_ad>::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
   _value = nullptr;
   updatePropertyName();
 }
 
+template <bool is_ad>
 bool
-FunctionMaterialPropertyDescriptor::dependsOn(const std::string & var) const
+FunctionMaterialPropertyDescriptor<is_ad>::dependsOn(const std::string & var) const
 {
   return std::find(_dependent_vars.begin(), _dependent_vars.end(), var) != _dependent_vars.end() ||
          std::find(_derivative_vars.begin(), _derivative_vars.end(), var) != _derivative_vars.end();
 }
 
+template <bool is_ad>
 std::vector<VariableName>
-FunctionMaterialPropertyDescriptor::getDependentVariables()
+FunctionMaterialPropertyDescriptor<is_ad>::getDependentVariables()
 {
   std::set<VariableName> all;
   all.insert(_dependent_vars.begin(), _dependent_vars.end());
@@ -101,8 +111,9 @@ FunctionMaterialPropertyDescriptor::getDependentVariables()
   return std::vector<VariableName>(all.begin(), all.end());
 }
 
+template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expression)
+FunctionMaterialPropertyDescriptor<is_ad>::parseDerivative(const std::string & expression)
 {
   auto open = expression.find_first_of("[");
   auto close = expression.find_last_of("]");
@@ -153,8 +164,9 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
   mooseError("Malformed material_properties expression '", expression, "'");
 }
 
+template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & expression)
+FunctionMaterialPropertyDescriptor<is_ad>::parseDependentVariables(const std::string & expression)
 {
   auto open = expression.find_first_of("(");
   auto close = expression.find_last_of(")");
@@ -181,8 +193,9 @@ FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & 
     mooseError("Malformed material_properties expression '", expression, "'");
 }
 
+template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor::printDebug()
+FunctionMaterialPropertyDescriptor<is_ad>::printDebug()
 {
   Moose::out << "MPD: " << _fparser_name << ' ' << _base_name << " deriv = [";
   for (auto & dv : _derivative_vars)
@@ -193,8 +206,9 @@ FunctionMaterialPropertyDescriptor::printDebug()
   Moose::out << "] " << getPropertyName() << '\n';
 }
 
-const MaterialProperty<Real> &
-FunctionMaterialPropertyDescriptor::value() const
+template <bool is_ad>
+const GenericMaterialProperty<Real, is_ad> &
+FunctionMaterialPropertyDescriptor<is_ad>::value() const
 {
   if (_value == nullptr)
   {
@@ -205,10 +219,11 @@ FunctionMaterialPropertyDescriptor::value() const
 
     // get the material property reference
     if (_material_parent)
-      _value =
-          &(_material_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+      _value = &(_material_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
+                                                                              _derivative_vars));
     else if (_kernel_parent)
-      _value = &(_kernel_parent->getMaterialPropertyDerivative<Real>(_base_name, _derivative_vars));
+      _value = &(
+          _kernel_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name, _derivative_vars));
     else
       mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                  "Kernel object.");
@@ -217,8 +232,13 @@ FunctionMaterialPropertyDescriptor::value() const
   return *_value;
 }
 
+template <bool is_ad>
 void
-FunctionMaterialPropertyDescriptor::updatePropertyName()
+FunctionMaterialPropertyDescriptor<is_ad>::updatePropertyName()
 {
   _property_name = derivativePropertyName(_base_name, _derivative_vars);
 }
+
+// explicit instantiation
+template class FunctionMaterialPropertyDescriptor<false>;
+template class FunctionMaterialPropertyDescriptor<true>;

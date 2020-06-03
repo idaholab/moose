@@ -84,7 +84,7 @@ public:
   /**
    * Whether to use dual mortar
    */
-  bool use_dual() const { return _use_dual; }
+  bool useDual() const { return _use_dual; }
 
 private:
   /// Reference to the finite element problem

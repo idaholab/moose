@@ -22,7 +22,7 @@ InputParameters validParams<ParsedSubdomainMeshModifier>();
 /**
  * MeshModifier for defining a Subdomain inside or outside of combinatorial geometry
  */
-class ParsedSubdomainMeshModifier : public MeshModifier, public FunctionParserUtils
+class ParsedSubdomainMeshModifier : public MeshModifier, public FunctionParserUtils<false>
 {
 public:
   /**
@@ -32,6 +32,8 @@ public:
   ParsedSubdomainMeshModifier(const InputParameters & parameters);
 
   virtual void modify() override;
+
+  usingFunctionParserUtilsMembers(false);
 
 private:
   /// function expression
@@ -44,6 +46,5 @@ private:
   const std::vector<SubdomainID> _excluded_ids;
 
   /// function parser object describing the combinatorial geometry
-  ADFunctionPtr _func_F;
+  SymFunctionPtr _func_F;
 };
-

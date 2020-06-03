@@ -9,12 +9,10 @@
 
 #include "FunctionMaterialBase.h"
 
-defineLegacyParams(FunctionMaterialBase);
-
+template <bool is_ad>
 InputParameters
-FunctionMaterialBase::validParams()
+FunctionMaterialBase<is_ad>::validParams()
 {
-
   InputParameters params = Material::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy)");
   params.addParam<std::string>(
@@ -24,10 +22,11 @@ FunctionMaterialBase::validParams()
   return params;
 }
 
-FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
+template <bool is_ad>
+FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _F_name(getParam<std::string>("f_name")),
-    _prop_F(&declareProperty<Real>(_F_name))
+    _prop_F(&declareGenericProperty<Real, is_ad>(_F_name))
 {
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
@@ -78,9 +77,27 @@ FunctionMaterialBase::FunctionMaterialBase(const InputParameters & parameters)
       _arg_index[idx] = _args.size();
 
       // get variable value
-      _args.push_back(&coupledValue(*it, j));
+      _args.push_back(&coupledGenericValue(*it, j));
     }
   }
 
   _nargs = _arg_names.size();
 }
+
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+FunctionMaterialBase<is_ad>::coupledGenericValue(const std::string & var_name, unsigned int comp)
+{
+  return coupledValue(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+FunctionMaterialBase<true>::coupledGenericValue(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledValue(var_name, comp);
+}
+
+// explicit instantiation
+template class FunctionMaterialBase<false>;
+template class FunctionMaterialBase<true>;

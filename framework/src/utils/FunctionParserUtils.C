@@ -13,10 +13,9 @@
 #include "InputParameters.h"
 #include "MooseEnum.h"
 
-defineLegacyParams(FunctionParserUtils);
-
+template <bool is_ad>
 InputParameters
-FunctionParserUtils::validParams()
+FunctionParserUtils<is_ad>::validParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -55,7 +54,8 @@ FunctionParserUtils::validParams()
   return params;
 }
 
-const char * FunctionParserUtils::_eval_error_msg[] = {
+template <bool is_ad>
+const char * FunctionParserUtils<is_ad>::_eval_error_msg[] = {
     "Unknown",
     "Division by zero",
     "Square root of a negative value",
@@ -63,7 +63,8 @@ const char * FunctionParserUtils::_eval_error_msg[] = {
     "Trigonometric error (asin or acos of illegal value)",
     "Maximum recursion level reached"};
 
-FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
+template <bool is_ad>
+FunctionParserUtils<is_ad>::FunctionParserUtils(const InputParameters & parameters)
   : _enable_jit(parameters.isParamValid("enable_jit") && parameters.get<bool>("enable_jit")),
     _enable_ad_cache(parameters.get<bool>("enable_ad_cache")),
     _disable_fpoptimizer(parameters.get<bool>("disable_fpoptimizer")),
@@ -81,22 +82,24 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
 #endif
 }
 
+template <bool is_ad>
 void
-FunctionParserUtils::setParserFeatureFlags(ADFunctionPtr & parser)
+FunctionParserUtils<is_ad>::setParserFeatureFlags(SymFunctionPtr & parser)
 {
-  parser->SetADFlags(ADFunction::ADCacheDerivatives, _enable_ad_cache);
-  parser->SetADFlags(ADFunction::ADAutoOptimize, _enable_auto_optimize);
+  parser->SetADFlags(SymFunction::ADCacheDerivatives, _enable_ad_cache);
+  parser->SetADFlags(SymFunction::ADAutoOptimize, _enable_auto_optimize);
 }
 
-Real
-FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
+template <bool is_ad>
+GenericReal<is_ad>
+FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser, const std::string & name)
 {
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL)
     return 0.0;
 
   // evaluate expression
-  Real result = parser->Eval(_func_params.data());
+  auto result = parser->Eval(_func_params.data());
 
   // fetch fparser evaluation error
   int error_code = parser->EvalError();
@@ -138,10 +141,12 @@ FunctionParserUtils::evaluate(ADFunctionPtr & parser, const std::string & name)
   return _quiet_nan;
 }
 
+template <bool is_ad>
 void
-FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
-                                         const std::vector<std::string> & constant_names,
-                                         const std::vector<std::string> & constant_expressions)
+FunctionParserUtils<is_ad>::addFParserConstants(
+    SymFunctionPtr & parser,
+    const std::vector<std::string> & constant_names,
+    const std::vector<std::string> & constant_expressions)
 {
   // check constant vectors
   unsigned int nconst = constant_expressions.size();
@@ -153,10 +158,8 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
 
   for (unsigned int i = 0; i < nconst; ++i)
   {
-    ADFunctionPtr expression = std::make_shared<ADFunction>();
-
-    // set FParser internal feature flags
-    setParserFeatureFlags(expression);
+    // no need to use dual numbers for the constant expressions
+    auto expression = std::make_shared<FunctionParserADBase<Real>>();
 
     // add previously evaluated constants
     for (unsigned int j = 0; j < i; ++j)
@@ -176,3 +179,7 @@ FunctionParserUtils::addFParserConstants(ADFunctionPtr & parser,
       mooseError("Invalid constant name in parsed function object");
   }
 }
+
+// explicit instantiation
+template class FunctionParserUtils<false>;
+template class FunctionParserUtils<true>;

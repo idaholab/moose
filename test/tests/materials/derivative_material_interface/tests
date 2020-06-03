@@ -1,6 +1,6 @@
 [Tests]
   design = 'DerivativeMaterialInterface.md'
-  issues = '#4299 #6360 #5055 #6901 #5039 #14975'
+  issues = '#4299 #6360 #5055 #6901 #5039 #14975 #15207'
 
   [analytic_derivatives]
     requirement = 'The system shall be capable of producing analytic derivatives of material '
@@ -110,6 +110,19 @@
       cli_args = 'Materials/F/evalerror_behavior=exception'
       recover = false
       detail = 'throwing an exception.'
+    []
+  []
+
+  [dual_number_support]
+    requirement = 'AD shall work with parsed materials'
+    [jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_parsed_material.i'
+      ratio_tol = 1e-8
+      difference_tol = 1e-7
+      run_sim = True
+      turn_off_exodus_output = False
+      detail = 'returning an exact jacobian.'
     []
   []
 []
