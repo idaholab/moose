@@ -202,5 +202,4 @@ The histogram of the results is presented in [normal_hist]. It is important to m
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
 It is apparent that the two methods give similar solutions.
 
-!media stochastic_tools/surrogates/poly_reg/poly_reg_example_normal_hist.svg id=normal_hist
-       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models.
+!media stochastic_tools/surrogates/poly_reg/poly_reg_example_normal_hist.svg
