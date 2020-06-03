@@ -204,7 +204,7 @@ The statistical moments of the results from testing the
 It is visible that polynomial chaos surrogate gives the closest results to the reference values.
 The overfitting phenomenon can also be observed, since the increase in the polynomial degree
 for the regression leads to a decrease in accuracy for both the mean and the standard deviation.
-The histogram of the results is presented in [normal_dist]. It is important to mention
+The histogram of the results is presented in [normal_hist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
 It is apparent that the two methods give similar solutions, however the tails of the Histogram
 from the polynomial regression are longer.
@@ -217,7 +217,7 @@ outliers in terms of QoIs. The least squares regression is sensitive to these ou
 because even if there are a few of them, their contribution to the squared error can
 be considerable. This is not an issue for the polynomial chaos surrogate, since it
 includes additional weighting functions in the integrals. To further demonstrate this,
-`num_bins=20` is set in the [LatinHypercubeSampler] to create the training set
+`num_bins=20` is set in the [LatinHypercubeSampler.md] to create the training set
 for the polynomial regression surrogate. This allows more samples on the tails of
 the bell curves, thus the number of outliers potentially increases.
 The histogram of the testing results compared to that of the polynomial chaos surrogate

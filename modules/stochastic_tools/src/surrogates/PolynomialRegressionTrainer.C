@@ -27,6 +27,7 @@ PolynomialRegressionTrainer::validParams()
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
   params.addRequiredParam<unsigned int>("max_degree",
                                         "Maximum polynomial degree to use for the regression.");
+  params.addParam<Real>("penalty", 0.0, "Penalty for Ridge regularization.");
 
   return params;
 }
@@ -35,7 +36,8 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
   : SurrogateTrainer(parameters),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _power_matrix(declareModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
-    _max_degree(declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree")))
+    _max_degree(declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree"))),
+    _penalty(declareModelData<Real>("_penalty", getParam<Real>("penalty")))
 {
 }
 
@@ -75,8 +77,9 @@ PolynomialRegressionTrainer::initialize()
   // Check if results of samples matches number of samples
   __attribute__((unused)) dof_id_type num_rows =
       _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
-  mooseAssert(num_rows == _values_ptr->size(),
-              "Sampler number of rows does not match number of results from vector postprocessor.");
+
+  if (num_rows != _values_ptr->size())
+    mooseError("Sampler number of rows does not match number of results from vector postprocessor.");
 }
 
 void
@@ -118,6 +121,12 @@ PolynomialRegressionTrainer::execute()
 
       _rhs(i) += i_value * (*_values_ptr)[p - offset];
     }
+  }
+
+  // Adding penalty term for Ridge regularization
+  for (unsigned int i = 0; i < _n_poly_terms; ++i)
+  {
+    _matrix(i, i) += _penalty;
   }
 }
 

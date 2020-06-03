@@ -38,6 +38,9 @@ private:
   /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
   const unsigned int & _max_degree;
 
+  /// The penalty parameter for Ridge regularization
+  const Real & _penalty;
+
   /// Number of dimensions.
   unsigned int _n_dims;
 

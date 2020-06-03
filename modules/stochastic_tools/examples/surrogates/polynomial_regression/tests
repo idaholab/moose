@@ -1,95 +1,61 @@
 [Tests]
   design = 'Surrogates/index.md'
-  issues = '#14933'
+  issues = '#15361'
 
   [train]
-    requirement = "The sytem shall test syntax for training surrogate models for a heat conduction problem using "
-    [nearest_point]
+    requirement = "The sytem shall test syntax for training surrogate models for the comparison example "
+    [uniform]
       type = CheckFiles
-      input = nearest_point_training.i
-      check_files = 'nearest_point_training_out_nearest_point_avg.rd nearest_point_training_out_nearest_point_max.rd'
-      cli_args = "Samplers/grid/linear_space_items='1.45  0.9   3
-                                                    9100  200   3
-                                                    0.012 0.004 3
-                                                    291   2     3'"
+      input = uniform_train.i
+      check_files = 'uniform_train_pc_out_pc_max.rd uniform_train_pr_out_pr_max.rd'
+      cli_args = "Samplers/pc_sampler/order=1
+                  Samplers/pr_sampler/num_rows=6
+                  Samplers/pr_sampler/num_bins=2
+                  Trainers/pc_max/order=1
+                  Trainers/pr_max/max_degree=1
+                  pc_sub:Mesh/nx=5
+                  pr_sub:Mesh/nx=5"
       method = opt
-      detail = "nearest point surrogate, "
+      detail = "with uniform parameter distributions "
     []
-    [poly_chaos_uniform_mc]
+    [normal]
       type = CheckFiles
-      input = poly_chaos_uniform_mc.i
-      cli_args = 'Outputs/file_base=uniform_mc Samplers/sample/num_rows=10'
-      check_files = 'uniform_mc_poly_chaos_avg.rd uniform_mc_poly_chaos_max.rd'
+      input = normal_train.i
+      check_files = 'normal_train_pc_out_pc_max.rd normal_train_pr_out_pr_max.rd'
+      cli_args = "Samplers/pc_sampler/order=1
+                  Samplers/pr_sampler/num_rows=6
+                  Samplers/pr_sampler/num_bins=2
+                  Trainers/pc_max/order=1
+                  Trainers/pr_max/max_degree=1
+                  pc_sub:Mesh/nx=5
+                  pr_sub:Mesh/nx=5"
       method = opt
-      detail = "polynomial chaos with uniform parameter distribution and Monte Carlo sampling, "
-    []
-    [poly_chaos_uniform_quad]
-      type = CheckFiles
-      input = poly_chaos_uniform_quad.i
-      cli_args = 'Outputs/file_base=uniform_quad Samplers/sample/order=2'
-      check_files = 'uniform_quad_poly_chaos_avg.rd uniform_quad_poly_chaos_max.rd'
-      method = opt
-      detail = "polynomial chaos with uniform parameter distribution and quadrature sampling, "
-    []
-    [poly_chaos_normal_mc]
-      type = CheckFiles
-      input = poly_chaos_normal_mc.i
-      cli_args = 'Outputs/file_base=normal_mc Samplers/sample/num_rows=10'
-      check_files = 'normal_mc_poly_chaos_avg.rd normal_mc_poly_chaos_max.rd'
-      method = opt
-      detail = "polynomial chaos with normal parameter distribution and Monte Carlo sampling, "
-    []
-    [poly_chaos_normal_quad]
-      type = CheckFiles
-      input = poly_chaos_normal_quad.i
-      cli_args = 'Outputs/file_base=normal_quad Samplers/sample/order=2'
-      check_files = 'normal_quad_poly_chaos_avg.rd normal_quad_poly_chaos_max.rd'
-      method = opt
-      detail = "and polynomial chaos with normal parameter distribution and quadrature sampling."
+      detail = "and with normally distributed parameters."
     []
   []
-  [evaluate_uniform]
-    requirement = "The sytem shall check syntax for evaluating surrogate models with uniform distribution for a heat conduction problem using "
-    [nearest_point]
-      type = RunApp
-      input = nearest_point_uniform.i
+  [evaluate]
+    requirement = "The sytem shall test results for evaluating surrogate models for the comparison example "
+    [uniform]
+      type = CSVDiff
+      input = uniform_surr.i
       allow_test_objects = true
-      cli_args = "Samplers/sample/num_rows=10"
-      prereq = train/nearest_point
+      cli_args = "Samplers/sample/num_rows=5
+                  Samplers/sample/num_bins=2"
+      csvdiff = 'uniform_surr_out_pc_max_res_0001.csv uniform_surr_out_pr_max_res_0001.csv
+                 uniform_surr_out_pc_max_stats_0001.csv uniform_surr_out_pr_max_stats_0001.csv'
       method = opt
-      detail = "nearest point surrogate and "
+      detail = "with uniform parameter distributions "
     []
-    [poly_chaos]
-      type = RunApp
-      input = poly_chaos_uniform.i
-      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'
-                  Surrogates/poly_chaos_avg/filename=uniform_quad_poly_chaos_avg.rd
-                  Surrogates/poly_chaos_max/filename=uniform_quad_poly_chaos_max.rd"
-      prereq = train/poly_chaos_uniform_quad
-      method = opt
-      detail = "polynomial chaos."
-    []
-  []
-  [evaluate_normal]
-    requirement = "The system shall check syntax for evaluating surrogate models with normal distribution for a heat conduction problem using "
-    [nearest_point]
-      type = RunApp
-      input = nearest_point_normal.i
-      cli_args = "Samplers/sample/num_rows=10"
+    [normal]
+      type = CSVDiff
+      input = normal_surr.i
       allow_test_objects = true
-      prereq = evaluate_uniform/nearest_point
+      cli_args = "Samplers/sample/num_rows=5
+                  Samplers/sample/num_bins=2"
+      csvdiff = "normal_surr_out_pc_max_res_0001.csv normal_surr_out_pr_max_res_0001.csv
+                 normal_surr_out_pc_max_stats_0001.csv normal_surr_out_pr_max_stats_0001.csv"
       method = opt
-      detail = "nearest point surrogate and "
-    []
-    [poly_chaos]
-      type = RunApp
-      input = poly_chaos_normal.i
-      cli_args = "VectorPostprocessors/inactive='samp_avg samp_max'
-                  Surrogates/poly_chaos_avg/filename=normal_quad_poly_chaos_avg.rd
-                  Surrogates/poly_chaos_max/filename=normal_quad_poly_chaos_max.rd"
-      prereq = train/poly_chaos_normal_quad
-      method = opt
-      detail = "polynomial chaos."
+      detail = "with uniform parameter distributions "
     []
   []
 []

@@ -115,7 +115,6 @@
 []
 
 [Outputs]
-  csv = true
   [pc_out]
     type = SurrogateTrainerOutput
     trainers = 'pc_max'
