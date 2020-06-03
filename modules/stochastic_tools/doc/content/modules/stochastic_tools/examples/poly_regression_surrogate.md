@@ -1,9 +1,10 @@
 # Polynomial Regression Surrogate
 
 This example is meant to demonstrate how a polynomial regression based surrogate model is trained
-and used on a parametric problem. Additionally, the input syntax and results are compared
-to those of the Polynomial Chaos (PC) surrogate to highlight possible differences in
-applicability. The Polynomial Regression method used here is described in [PolynomialRegressionTrainer.md]
+and used on a parametric problem. Additionally, the results are compared
+to those obtained using a Polynomial Chaos (PC) surrogate.
+The possible differences in applicability are highlighted as well.
+For more on the regression method used here, see [PolynomialRegressionTrainer.md]
 while details of Polynomial Chaos are available under [PolynomialChaos.md].
 
 ## Problem Statement
@@ -20,25 +21,24 @@ It is a one-dimensional heat conduction model:
 T(x=L) &= T_{\infty}
 \end{aligned}
 
-where $T$ is the temperature, $k$ is the thermal conductivity, $L$ is the length of the domain
-and $T_\infty$ is the value of the Dirichlet boundary condition.
+where $T$ is the temperature, $k$ is the thermal conductivity, $L$ is the length of the domain,
+ $q$ is a heat source and $T_\infty$ is the value of the Dirichlet boundary condition.
 To make the comparison between different surrogate models easier, only the maximum temperature is
 selected to be the Quantity of Interest (QoI):
 
 !equation id=problem
 \begin{aligned}\\
-T_{\max} &= \max_{x\in[0,L]}T(x)
+T_{\max} &= \max_{x\in[0,L]}T(x).
 \end{aligned}
 
 The problem is parametric in a sense that the solution depends on four input parameters:
-$T(x,k,q,L,T_\infty)$. To make the differences between the surrogate models more apparent,
-two problem setting are considered.
+$T=T(x,k,q,L,T_\infty)$. Two problem settings are considered in this example.
 In the first scenario, all of the parameters are assumed to have
 [Uniform](Uniform.md) distributions ($\mathcal{U}(a,b)$), while the second considers parameters with
 [Normal](Normal.md) distributions ($\mathcal{N}(\mu,\sigma)$).
 To be more specific the distributions for the two cases are:
 
-!table id=param_dist
+!table
 | Parameter | Symbol | Uniform | Normal |
 | :- | - | - | - |
 | Conductivity | $k$ | $\sim\mathcal{U}(1, 10)$ | $\sim\mathcal{N}(5, 2)$ |
@@ -46,13 +46,14 @@ To be more specific the distributions for the two cases are:
 | Domain Size | $L$ | $\sim\mathcal{U}(0.01, 0.05)$ | $\sim\mathcal{N}(0.03, 0.01)$ |
 | Right Boundary Temperature | $T_{\infty}$ | $\sim\mathcal{U}(290, 310)$ | $\sim\mathcal{N}(300, 10)$ |
 
-Where the parameters of the uniform distribution are the minimum and maximum bounds,
-and the parameters of the normal distribution are the mean and standard deviation.
-It must be mentioned that the analytic solution for the maximum temperature is available:
+The parameters of the uniform distribution are the minimum and maximum bounds,
+while the parameters of the normal distribution are the mean and standard deviation.
+It must be mentioned that the maximum temperature can be determined
+analytically and turns out to be:
 
 !equation
 \begin{aligned}
-T_{\max}(k,q,L,T_{\infty}) &= \frac{qL^2}{2k} + T_{\infty}
+T_{\max}(k,q,L,T_{\infty}) &= \frac{qL^2}{2k} + T_{\infty}.
 \end{aligned}
 
 Using this expression and the previously described probability density functions, the mean ($\mu$)
@@ -68,7 +69,7 @@ and standard deviation ($\sigma$) of the QoI can be computed for reference:
 ## Solving the problem without uncertain parameters
 
 The first step towards creating a surrogate model is the generation of a full-order model
-which can solve [problem] without uncertain parameters. The complete input file
+which can solve [problem] fixed parameter combination. The complete input file
 for this case is presented in [sub_app].
 
 !listing surrogates/polynomial_regression/sub.i id=sub_app
@@ -77,9 +78,9 @@ for this case is presented in [sub_app].
 ## Training surrogate models
 
 Both surrogate models are constructed using some knowledge about the full-order problem.
-This means that the [problem](surrogates/polynomial_regression/sub.i) is solved
+This means that the [full-order problem](surrogates/polynomial_regression/sub.i) is solved
 multiple times with different parameter samples and the value of the QoI is stored from
-every run.
+each computation.
 This step is managed by a master input file which creates parameter samples,
 transfers them to the sub-application and collects the results from the
 completed computations.
@@ -90,19 +91,18 @@ the two different parameter distributions
 are available under [uniform](surrogates/polynomial_regression/uniform_train.i) and
 [normal](surrogates/polynomial_regression/normal_train.i).
 
-The training phase starts with the definition of the distributions listed in [param_dist]
+The training phase starts with the definition of the distributions
 in the `Distributions` block. The uniform distributions can be defined as:
 
 !listing surrogates/polynomial_regression/uniform_train.i block=Distributions
 
-Meanwhile, for the case with normal distributions the block changes to:
+For the case with normal distributions the block changes to:
 
 !listing surrogates/polynomial_regression/normal_train.i block=Distributions
 
 As a next step, several parameter instances are prepared by sampling the underlying distributions.
 The sampling objects can be defined in the `Samplers` block.
 The generation of these parameter samples is different for the two surrogate models.
-techniques.
 Meanwhile the polynomial chaos uses the samples at specific quadrature points
 in the parameters space (generated by a [QuadratureSampler.md]),
 the polynomial regression model is trained using samples from a [LatinHypercubeSampler.md].
@@ -112,23 +112,23 @@ to match the number of samples in the tensor-product quadrature set of [Quadratu
 !listing surrogates/polynomial_regression/normal_train.i block=Samplers  
 
 The objects in blocks `Controls`, `MultiApps`, `Transfers` and `VectorPostprocessors`
-are responsible for managing the communication of the sub-applications, the
+are responsible for managing the communication between master and sub-applications,
 execution of the sub-applications and the collection of the results.
 For a more detailed description of these blocks see [examples/parameter_study.md]
 and [surrogate_training.md].
 
 !listing surrogates/polynomial_regression/normal_train.i block=MultiApps Controls Transfers VectorPostprocessors
 
-The next step in the process is to set up `Trainer` objects to generate the surrogate models
+The next step is to set up two `Trainer` objects to generate the surrogate models
 from the available data. This can be done in the `Trainers` block. It is visible that
-both examples use the data from a `Sampler` and a `VectorPostprocessor`. A polynomial chaos surrogate of
+both examples use the data from `Sampler` and `VectorPostprocessor` objects. A polynomial chaos surrogate of
 order 8 and a polynomial regression surrogate with a
 polynomial of degree at most 4 is used in this study.
-The polynomial chaos trainer also needs knowledge about the underlying parameter distributions
+The [PolynomialChaosTrainer.md] also needs knowledge about the underlying parameter distributions
 to be able to select matching polynomials.
 
 As a last step in the training process, the important parameters of the trained
-surrogates are saved into `.rd` files. These files can be used to construct surrogate models
+surrogates are saved into `.rd` files. These files can be used to construct the surrogate models
 again without the need to carry out the training process from the beginning.
 
 !listing surrogates/polynomial_regression/normal_train.i block=Outputs
@@ -162,7 +162,7 @@ This is done using objects in the `VectorPostprocessors` block.
 
 In this section the results from the different surrogate models are provided. They are compared
 to the reference results summarized in [ref_results]. A short analysis of the results is provided
-as well to showcase potential issues the user might encounter when using surrogate models.
+as well to showcase potential issues the user might encounter when using polynomial regression.
 
 ### Uniform parameter distributions
 
@@ -171,35 +171,64 @@ The statistical moments obtained by the execution of the
 [surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
 [stats_uniform].
 
-!table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models.
+!table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models assuming uniform parameter distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
 | $\mu_{T_{max}}$ | 301.3219 | 301.3218 | 301.3351 | 301.3332 |
 | $\sigma_{T_{max}}$ | 5.9585 | 5.9585 | 5.9548 | 5.9537 |
 
-It is visible that by increasing the polynomial order for the regression, the accuracy
-in the standard deviation slightly decreases. This behavior is often referred to as overfitting
-which decreases the
+It can be observed that the polynomial chaos surrogate gives results closer to the reference values.
+It is also visible that by increasing the polynomial order for the regression, the accuracy
+in the standard deviation slightly decreases. This behavior is often referred to as [overfitting](https://en.wikipedia.org/wiki/Overfitting)
+which decreases the accuracy with the increasing model parameters.
 The histogram of the results is presented in [uniform_hist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
 It is apparent that the two methods give similar solutions.
 
 !media stochastic_tools/surrogates/poly_reg/poly_reg_example_uniform_hist.svg id=uniform_hist
-       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models.
+       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models and assuming uniform parameter distributions.
 
 ### Normal parameter distributions
 
-!table id=stats_uniform caption=Comparison of the statistical moments from different surrogate models.
+Next, the case with normally distributed parameters is analyzed.
+The statistical moments of the results from testing the
+[surrogate model](surrogates/polynomial_regression/uniform_surr.i) are summarized in
+[stats_normal].
+
+!table id=stats_normal caption=Comparison of the statistical moments from different surrogate models assuming normal distributions.
 | Moment | Reference | Poly. Chaos | Poly. Reg. (deg. 4) | Poly. Reg. (deg. 8)|
 | :- | - | - | - | - |
 | $\mu_{T_{max}}$ | 301.2547 | 301.3162 | 301.6289 | 301.7549 |
 | $\sigma_{T_{max}}$ | 10.0011 | 10.1125 | 11.2611 | 59.6608 |
 
-It is visible that by increasing the polynomial order for the regression, the accuracy
-in the standard deviation slightly decreases. This behavior is often referred to as overfitting
-which decreases the
-The histogram of the results is presented in [normal_hist]. It is important to mention
+It is visible that polynomial chaos surrogate gives the closest results to the reference values.
+The overfitting phenomenon can also be observed, since the increase in the polynomial degree
+for the regression leads to a decrease in accuracy for both the mean and the standard deviation.
+The histogram of the results is presented in [normal_dist]. It is important to mention
 that the results for the polynomial regression surrogate were obtained using `max_degree=4`.
-It is apparent that the two methods give similar solutions.
+It is apparent that the two methods give similar solutions, however the tails of the Histogram
+from the polynomial regression are longer.
 
-!media stochastic_tools/surrogates/poly_reg/poly_reg_example_normal_hist.svg
+!media poly_reg_example_normal_hist.svg id=normal_hist
+       caption=Histogram of the maximum temperature coming from the Monte Carlo run using the surrogate models and assuming normal parameter distributions.
+
+An explanation for this can be that the normal parameter distributions result in more
+outliers in terms of QoIs. The least squares regression is sensitive to these outliers
+because even if there are a few of them, their contribution to the squared error can
+be considerable. This is not an issue for the polynomial chaos surrogate, since it
+includes additional weighting functions in the integrals. To further demonstrate this,
+`num_bins=20` is set in the [LatinHypercubeSampler] to create the training set
+for the polynomial regression surrogate. This allows more samples on the tails of
+the bell curves, thus the number of outliers potentially increases.
+The histogram of the testing results compared to that of the polynomial chaos surrogate
+is presented in [normal_hist_outlier]. It is visible that the tails of the histogram
+further increased and the mean got distorted as well.
+
+!media poly_reg_example_normal_hist_outlier.svg id=normal_hist_outlier
+       caption=Histogram of the maximum temperature presenting the ffect of increasing the outliers in the training of the polynomial regression surrogate.
+
+To conclude, it is apparent that there are potential issues associated with the polynomial regression
+such as overfitting and the bias introduced by the outliers. For this reason, the utilization
+of polynomial regression surrogates may require several optimization steps to set the
+best maximum degree and filter potential outliers. Alternatively, the utilization of
+a regularizer can be considered as well.
