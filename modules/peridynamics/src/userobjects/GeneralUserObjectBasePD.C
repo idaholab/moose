@@ -23,6 +23,7 @@ GeneralUserObjectBasePD::GeneralUserObjectBasePD(const InputParameters & paramet
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
+    _dim(_pdmesh.dimension()),
     _nnodes(2)
 {
 }
