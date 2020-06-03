@@ -61,6 +61,16 @@ public:
   /**
    * Retrieve the property named "name"
    */
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getADMaterialPropertyByName<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> & getGenericMaterialPropertyByName(const std::string & name)
+  {
+    return getMaterialPropertyByName<T>(name);
+  }
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const std::string & prop_name);
   template <typename T>
@@ -71,6 +81,7 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
+  using MaterialBase::getGenericZeroMaterialProperty;
   using MaterialBase::getZeroMaterialProperty;
 
   virtual bool isBoundaryMaterial() const override { return _bnd; }

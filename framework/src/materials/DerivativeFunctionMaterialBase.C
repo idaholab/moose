@@ -11,13 +11,12 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(DerivativeFunctionMaterialBase);
-
+template <bool is_ad>
 InputParameters
-DerivativeFunctionMaterialBase::validParams()
+DerivativeFunctionMaterialBaseTempl<is_ad>::validParams()
 {
 
-  InputParameters params = FunctionMaterialBase::validParams();
+  InputParameters params = FunctionMaterialBase<is_ad>::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy) and its "
                              "derivatives w.r.t. the coupled variables");
   params.addDeprecatedParam<bool>("third_derivatives",
@@ -30,9 +29,11 @@ DerivativeFunctionMaterialBase::validParams()
   return params;
 }
 
-DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParameters & parameters)
-  : FunctionMaterialBase(parameters),
-    _third_derivatives(getParam<unsigned int>("derivative_order") == 3)
+template <bool is_ad>
+DerivativeFunctionMaterialBaseTempl<is_ad>::DerivativeFunctionMaterialBaseTempl(
+    const InputParameters & parameters)
+  : FunctionMaterialBase<is_ad>(parameters),
+    _third_derivatives(this->template getParam<unsigned int>("derivative_order") == 3)
 {
   // reserve space for material properties and explicitly initialize to NULL
   _prop_dF.resize(_nargs, NULL);
@@ -54,14 +55,14 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
   // initialize derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    // first derivatives
-    _prop_dF[i] = &declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
+    // first derivatives (TODO: declareGenericPropertyDerivative)
+    _prop_dF[i] = &this->template declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
       _prop_d2F[i][j] = _prop_d2F[j][i] =
-          &declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
+          &this->template declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
 
       // third derivatives
       if (_third_derivatives)
@@ -71,16 +72,18 @@ DerivativeFunctionMaterialBase::DerivativeFunctionMaterialBase(const InputParame
           // filling all permutations does not cost us much and simplifies access
           // (no need to check i<=j<=k)
           _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
-              _prop_d3F[j][i][k] = _prop_d3F[i][k][j] = &declarePropertyDerivative<Real>(
-                  _F_name, _arg_names[i], _arg_names[j], _arg_names[k]);
+              _prop_d3F[j][i][k] = _prop_d3F[i][k][j] =
+                  &this->template declarePropertyDerivative<Real>(
+                      _F_name, _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
     }
   }
 }
 
+template <bool is_ad>
 void
-DerivativeFunctionMaterialBase::initialSetup()
+DerivativeFunctionMaterialBaseTempl<is_ad>::initialSetup()
 {
   // set the _prop_* pointers of all material properties that are not beeing used back to NULL
   bool needs_third_derivatives = false;
@@ -90,14 +93,14 @@ DerivativeFunctionMaterialBase::initialSetup()
 
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    if (!_fe_problem.isMatPropRequested(derivativePropertyNameFirst(_F_name, _arg_names[i])))
+    if (!_fe_problem.isMatPropRequested(this->derivativePropertyNameFirst(_F_name, _arg_names[i])))
       _prop_dF[i] = NULL;
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
       if (!_fe_problem.isMatPropRequested(
-              derivativePropertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
+              this->derivativePropertyNameSecond(_F_name, _arg_names[i], _arg_names[j])))
         _prop_d2F[i][j] = _prop_d2F[j][i] = NULL;
 
       // third derivatives
@@ -105,7 +108,7 @@ DerivativeFunctionMaterialBase::initialSetup()
       {
         for (unsigned int k = j; k < _nargs; ++k)
         {
-          if (!_fe_problem.isMatPropRequested(derivativePropertyNameThird(
+          if (!_fe_problem.isMatPropRequested(this->derivativePropertyNameThird(
                   _F_name, _arg_names[i], _arg_names[j], _arg_names[k])))
             _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
                 _prop_d3F[j][i][k] = _prop_d3F[i][k][j] = NULL;
@@ -115,15 +118,16 @@ DerivativeFunctionMaterialBase::initialSetup()
 
         if (!needs_third_derivatives)
           mooseWarning("This simulation does not actually need the third derivatives of "
-                       "DerivativeFunctionMaterialBase " +
+                       "DerivativeFunctionMaterialBaseTempl " +
                        name());
       }
     }
   }
 }
 
+template <bool is_ad>
 void
-DerivativeFunctionMaterialBase::computeProperties()
+DerivativeFunctionMaterialBaseTempl<is_ad>::computeProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -155,3 +159,6 @@ DerivativeFunctionMaterialBase::computeProperties()
     }
   }
 }
+
+// explicit instantiation
+template class DerivativeFunctionMaterialBaseTempl<false>;

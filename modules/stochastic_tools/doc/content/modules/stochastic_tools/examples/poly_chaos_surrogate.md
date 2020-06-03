@@ -54,7 +54,7 @@ Running the sub app and transferring data back and forth for PC is exactly the s
 The PC training object is defined within the [Trainers](Trainers/index.md) block. The required parameters for a PC trainer are:
 
 - [!param](/Trainers/PolynomialChaosTrainer/distributions) specify the type of polynomials to use for the expansion, it is very import that these distributions match the distributions given to the sampler.
-- [!param](/Trainers/PolynomialChaosTrainer/sampler) is the object to that will provide sample points that were given to the sub app during execution.
+- [!param](/Trainers/PolynomialChaosTrainer/sampler) is the object that will provide sample points which are given to the sub app during execution.
 - [!param](/Trainers/PolynomialChaosTrainer/results_vpp) specifies the result object for storing the computed values.
 - [!param](/Trainers/PolynomialChaosTrainer/results_vector) specifies the result vector, within the result object, for storing the computed values.
 - [!param](/Trainers/PolynomialChaosTrainer/order) defines the maximum order of the PC expansion, this parameter ultimately defines the accuracy and complexity of the surrogate model.

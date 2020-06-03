@@ -11,13 +11,11 @@
 
 registerMooseObject("MooseApp", ParsedAux);
 
-defineLegacyParams(ParsedAux);
-
 InputParameters
 ParsedAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params += FunctionParserUtils::validParams();
+  params += FunctionParserUtils<false>::validParams();
   params.addClassDescription("Parsed function AuxKernel.");
 
   params.addRequiredCustomTypeParam<std::string>(
@@ -48,7 +46,7 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   }
 
   // base function object
-  _func_F = std::make_shared<ADFunction>();
+  _func_F = std::make_shared<SymFunction>();
 
   // set FParser interneal feature flags
   setParserFeatureFlags(_func_F);

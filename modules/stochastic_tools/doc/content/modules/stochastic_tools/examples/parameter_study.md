@@ -30,7 +30,7 @@ The first step in performing a parameter study is to create an input file that s
 without uncertain parameters. For the example problem this will be done assuming $\gamma=1$,
 $s=1$, $T_0=-10$, and $q_0=-100$.
 
-The complete input file for this problem is provide in [diffusion]. The only item
+The complete input file for this problem is provided in [diffusion]. The only item
 that is atypical from a MOOSE simulation input file is the existence of the `Controls` block, which
 here simply creates a [SamplerReceiver.md] object. This block is required for the parameter study,
 but shall be discussed in [parameter_study.md#transfers] section.
@@ -122,7 +122,7 @@ The [Transfers](syntax/Transfers/index.md) block serves two purposes. First, the
 sub-block instantiates a [SamplerParameterTransfer.md] object that transfers each row of data from
 the Sampler object to a sub-application simulation. Within the sub-application the parameters listed
 in the in this sub-block replace the values in the sub-application. This substitution occurs using
-the aforementioned SamplerReciever object that exists in the Control block of the sub-application
+the aforementioned SamplerReciever object that exists in the Controls block of the sub-application
 input file. The receiver on the sub-application accepts the parameter names and values from the
 SamplerParameterTransfer object on the master application.
 
@@ -144,7 +144,7 @@ The "samples" sub-block simply is used as a means to output the sample data, it 
 for presenting the results in the next section.
 
 This Statistics object is designed to compute multiple statistics and confidence intervals for each
-of the input vectors. In this case it computes the mean for $T_{avg}$ and $q_{left} vectors
+of the input vectors. In this case it computes the mean for $T_{avg}$ and $q_{left}$ vectors
 in the "results" object as well as the 5% and 95% confidence level intervals. Please
 refer to the documentation for the [vectorpostprocessors/Statistics.md] object for further
 documentation and capabilities for this object.
@@ -162,7 +162,7 @@ using the comma separated files.
 
 ### Quantity of Interest Distribtions
 
-The resulting distributions are for the quantities of interest: $T_{avg}$ and $q_left$ are presented
+The resulting distributions are for the quantities of interest: $T_{avg}$ and $q_{left}$ are presented
 in [results_T_avg] and [results_q_left].
 
 !plot histogram filename=stochastic_tools/parameter_study/master_out_results_0002.csv

@@ -10,27 +10,32 @@
 #include "ParsedMaterial.h"
 
 registerMooseObject("MooseApp", ParsedMaterial);
+registerMooseObject("MooseApp", ADParsedMaterial);
 
-defineLegacyParams(ParsedMaterial);
-
+template <bool is_ad>
 InputParameters
-ParsedMaterial::validParams()
+ParsedMaterialTempl<is_ad>::validParams()
 {
-
-  InputParameters params = ParsedMaterialHelper::validParams();
+  InputParameters params = ParsedMaterialHelper<is_ad>::validParams();
   params += ParsedMaterialBase::validParams();
   params.addClassDescription("Parsed Function Material.");
   return params;
 }
 
-ParsedMaterial::ParsedMaterial(const InputParameters & parameters)
-  : ParsedMaterialHelper(parameters, USE_MOOSE_NAMES), ParsedMaterialBase(parameters)
+template <bool is_ad>
+ParsedMaterialTempl<is_ad>::ParsedMaterialTempl(const InputParameters & parameters)
+  : ParsedMaterialHelper<is_ad>(parameters, VariableNameMappingMode::USE_MOOSE_NAMES),
+    ParsedMaterialBase(parameters)
 {
   // Build function and optimize
   functionParse(_function,
                 _constant_names,
                 _constant_expressions,
-                getParam<std::vector<std::string>>("material_property_names"),
+                this->template getParam<std::vector<std::string>>("material_property_names"),
                 _tol_names,
                 _tol_values);
 }
+
+// explicit instantiation
+template class ParsedMaterialTempl<false>;
+template class ParsedMaterialTempl<true>;

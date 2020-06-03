@@ -9,24 +9,29 @@
 
 #pragma once
 
-#include "DerivativeFunctionMaterialBase.h"
 #include "ParsedMaterialHelper.h"
 #include "libmesh/fparser_ad.hh"
 
-// Forward Declarations
-class DerivativeParsedMaterialHelper;
-
-template <>
-InputParameters validParams<DerivativeParsedMaterialHelper>();
+#define usingDerivativeParsedMaterialHelperMembers(T)                                              \
+  usingParsedMaterialHelperMembers(T);                                                             \
+  using typename DerivativeParsedMaterialHelperTempl<T>::Derivative;                               \
+  using typename DerivativeParsedMaterialHelperTempl<T>::MaterialPropertyDerivativeRule;           \
+  using DerivativeParsedMaterialHelperTempl<T>::_derivative_order;                                 \
+  using DerivativeParsedMaterialHelperTempl<T>::_derivatives
 
 /**
  * Helper class to perform the auto derivative taking.
  */
-class DerivativeParsedMaterialHelper : public ParsedMaterialHelper
+template <bool is_ad>
+class DerivativeParsedMaterialHelperTempl : public ParsedMaterialHelper<is_ad>
 {
+protected:
+  usingParsedMaterialHelperMembers(is_ad);
+
 public:
-  DerivativeParsedMaterialHelper(const InputParameters & parameters,
-                                 VariableNameMappingMode map_mode = USE_PARAM_NAMES);
+  DerivativeParsedMaterialHelperTempl(
+      const InputParameters & parameters,
+      VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES);
 
   static InputParameters validParams();
 
@@ -34,10 +39,10 @@ protected:
   struct Derivative;
   struct MaterialPropertyDerivativeRule;
 
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  void initQpStatefulProperties() override;
+  void computeQpProperties() override;
 
-  virtual void functionsPostParse();
+  void functionsPostParse() override;
   void assembleDerivatives();
 
   void
@@ -63,14 +68,16 @@ private:
   std::vector<MaterialPropertyDerivativeRule> _bulk_rules;
 };
 
-struct DerivativeParsedMaterialHelper::Derivative
+template <bool is_ad>
+struct DerivativeParsedMaterialHelperTempl<is_ad>::Derivative
 {
-  MaterialProperty<Real> * _mat_prop;
-  ADFunctionPtr _F;
+  GenericMaterialProperty<Real, is_ad> * _mat_prop;
+  SymFunctionPtr _F;
   std::vector<VariableName> _darg_names;
 };
 
-struct DerivativeParsedMaterialHelper::MaterialPropertyDerivativeRule
+template <bool is_ad>
+struct DerivativeParsedMaterialHelperTempl<is_ad>::MaterialPropertyDerivativeRule
 {
   MaterialPropertyDerivativeRule(std::string p, std::string v, std::string c)
     : _parent(p), _var(v), _child(c)
@@ -81,3 +88,6 @@ struct DerivativeParsedMaterialHelper::MaterialPropertyDerivativeRule
   std::string _var;
   std::string _child;
 };
+
+typedef DerivativeParsedMaterialHelperTempl<false> DerivativeParsedMaterialHelper;
+typedef DerivativeParsedMaterialHelperTempl<true> ADDerivativeParsedMaterialHelper;

@@ -23,7 +23,7 @@ InputParameters
 ParsedSubdomainMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params += FunctionParserUtils::validParams();
+  params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::string>("combinatorial_geometry",
@@ -51,14 +51,14 @@ ParsedSubdomainMeshGenerator::validParams()
 
 ParsedSubdomainMeshGenerator::ParsedSubdomainMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
-    FunctionParserUtils(parameters),
+    FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _block_id(parameters.get<SubdomainID>("block_id")),
     _excluded_ids(parameters.get<std::vector<SubdomainID>>("excluded_subdomain_ids"))
 {
   // base function object
-  _func_F = std::make_shared<ADFunction>();
+  _func_F = std::make_shared<SymFunction>();
 
   // set FParser internal feature flags
   setParserFeatureFlags(_func_F);

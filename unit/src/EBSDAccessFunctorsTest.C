@@ -41,7 +41,7 @@ TEST_F(EBSDAccessFunctorsTest, test)
   // Test average data access
   {
     RealVectorValue angle = *(_avg._angles);
-    EXPECT_EQ((angle - reference_angle).size(), 0);
+    EXPECT_EQ((angle - reference_angle).norm(), 0);
 
     EBSDAvgDataPhi1 phi1;
     EXPECT_EQ(phi1(_avg), angle(0));
