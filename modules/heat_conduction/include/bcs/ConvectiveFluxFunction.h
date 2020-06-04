@@ -38,7 +38,4 @@ protected:
 
   /// Type of function used for the heat transfer coefficient
   const CoefFuncType _coef_func_type;
-
-  /// Heat transfer coefficient function (Deprecated -- being replaced by _coefficient)
-  const Function * const _coef_func;
 };
