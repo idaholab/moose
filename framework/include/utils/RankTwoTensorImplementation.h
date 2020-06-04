@@ -809,9 +809,9 @@ RankTwoTensor::syev(const char * calculation_type,
   a.resize(N * N);
 
   // prepare data for the LAPACKsyev_ routine (which comes from petscblaslapack.h)
-  int nd = N;
-  int lwork = 66 * nd;
-  int info;
+  PetscBLASInt nd = N;
+  PetscBLASInt lwork = 66 * nd;
+  PetscBLASInt info;
   std::vector<PetscScalar> work(lwork);
 
   for (unsigned int i = 0; i < N; ++i)

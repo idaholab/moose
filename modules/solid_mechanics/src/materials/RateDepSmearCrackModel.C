@@ -217,9 +217,9 @@ RateDepSmearCrackModel::calcJacobian()
 }
 
 int
-RateDepSmearCrackModel::matrixInversion(std::vector<Real> & A, int n) const
+RateDepSmearCrackModel::matrixInversion(std::vector<Real> & A, int int_n) const
 {
-  int return_value, buffer_size = n * 64;
+  PetscBLASInt return_value, n = int_n, buffer_size = n * 64;
   std::vector<PetscBLASInt> ipiv(n);
   std::vector<PetscScalar> buffer(buffer_size);
 

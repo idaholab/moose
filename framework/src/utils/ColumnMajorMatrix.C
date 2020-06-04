@@ -150,8 +150,8 @@ ColumnMajorMatrixTempl<T>::eigen(ColumnMajorMatrixTempl<T> & eval,
 
   char jobz = 'V';
   char uplo = 'U';
-  int n = _n_rows;
-  int return_value = 0;
+  PetscBLASInt n = _n_rows;
+  PetscBLASInt return_value = 0;
 
   eval._n_rows = _n_rows;
   eval._n_cols = 1;
@@ -163,7 +163,7 @@ ColumnMajorMatrixTempl<T>::eigen(ColumnMajorMatrixTempl<T> & eval,
   T * eval_data = eval.rawData();
   T * evec_data = evec.rawData();
 
-  int buffer_size = n * 64;
+  PetscBLASInt buffer_size = n * 64;
   std::vector<T> buffer(buffer_size);
 
 #if !defined(LIBMESH_HAVE_PETSC)
@@ -198,8 +198,8 @@ ColumnMajorMatrixTempl<T>::eigenNonsym(ColumnMajorMatrixTempl<T> & eval_real,
 
   char jobvl = 'V';
   char jobvr = 'V';
-  int n = _n_rows;
-  int return_value = 0;
+  PetscBLASInt n = _n_rows;
+  PetscBLASInt return_value = 0;
 
   eval_real._n_rows = _n_rows;
   eval_real._n_cols = 1;
@@ -217,7 +217,7 @@ ColumnMajorMatrixTempl<T>::eigenNonsym(ColumnMajorMatrixTempl<T> & eval_real,
   T * evec_ri = evec_right.rawData();
   T * evec_le = evec_left.rawData();
 
-  int buffer_size = n * 64;
+  PetscBLASInt buffer_size = n * 64;
   std::vector<T> buffer(buffer_size);
 
 #if !defined(LIBMESH_HAVE_PETSC)
@@ -296,15 +296,15 @@ ColumnMajorMatrixTempl<T>::inverse(ColumnMajorMatrixTempl<T> & invA) const
   this->checkSquareness();
   this->checkShapeEquality(invA);
 
-  int n = _n_rows;
-  int return_value = 0;
+  PetscBLASInt n = _n_rows;
+  PetscBLASInt return_value = 0;
 
   invA = *this;
 
   std::vector<PetscBLASInt> ipiv(n);
   T * invA_data = invA.rawData();
 
-  int buffer_size = n * 64;
+  PetscBLASInt buffer_size = n * 64;
   std::vector<T> buffer(buffer_size);
 
 #if !defined(LIBMESH_HAVE_PETSC)
