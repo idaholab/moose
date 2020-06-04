@@ -18,11 +18,12 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::validParams()
 {
   InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription("Compute a constant isotropic elasticity tensor.");
-  params.addParam<Real>("bulk_modulus", "The bulk modulus for the material.");
-  params.addParam<Real>("lambda", "Lame's first constant for the material.");
-  params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
-  params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
-  params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.addParam<Real>("bulk_modulus", -1, "The bulk modulus for the material.");
+  params.addParam<Real>("lambda", -1, "Lame's first constant for the material.");
+  params.addParam<Real>("poissons_ratio", -1, "Poisson's ratio for the material.");
+  params.addParam<Real>("shear_modulus", -1, "The shear modulus of the material.");
+  params.addParam<Real>("youngs_modulus", -1, "Young's modulus of the material.");
+  params.declareControllable("bulk_modulus lambda poissons_ratio shear_modulus youngs_modulus");
   return params;
 }
 
@@ -30,16 +31,16 @@ template <bool is_ad>
 ComputeIsotropicElasticityTensorTempl<is_ad>::ComputeIsotropicElasticityTensorTempl(
     const InputParameters & parameters)
   : ComputeElasticityTensorBaseTempl<is_ad>(parameters),
-    _bulk_modulus_set(parameters.isParamValid("bulk_modulus")),
-    _lambda_set(parameters.isParamValid("lambda")),
-    _poissons_ratio_set(parameters.isParamValid("poissons_ratio")),
-    _shear_modulus_set(parameters.isParamValid("shear_modulus")),
-    _youngs_modulus_set(parameters.isParamValid("youngs_modulus")),
-    _bulk_modulus(_bulk_modulus_set ? this->template getParam<Real>("bulk_modulus") : -1),
-    _lambda(_lambda_set ? this->template getParam<Real>("lambda") : -1),
-    _poissons_ratio(_poissons_ratio_set ? this->template getParam<Real>("poissons_ratio") : -1),
-    _shear_modulus(_shear_modulus_set ? this->template getParam<Real>("shear_modulus") : -1),
-    _youngs_modulus(_youngs_modulus_set ? this->template getParam<Real>("youngs_modulus") : -1),
+    _bulk_modulus_set(parameters.isParamSetByUser("bulk_modulus")),
+    _lambda_set(parameters.isParamSetByUser("lambda")),
+    _poissons_ratio_set(parameters.isParamSetByUser("poissons_ratio")),
+    _shear_modulus_set(parameters.isParamSetByUser("shear_modulus")),
+    _youngs_modulus_set(parameters.isParamSetByUser("youngs_modulus")),
+    _bulk_modulus(this->template getParam<Real>("bulk_modulus")),
+    _lambda(this->template getParam<Real>("lambda")),
+    _poissons_ratio(this->template getParam<Real>("poissons_ratio")),
+    _shear_modulus(this->template getParam<Real>("shear_modulus")),
+    _youngs_modulus(this->template getParam<Real>("youngs_modulus")),
     _effective_stiffness_local(parameters.isParamValid("effective_stiffness_local"))
 {
   unsigned int num_elastic_constants = _bulk_modulus_set + _lambda_set + _poissons_ratio_set +
@@ -66,7 +67,12 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::ComputeIsotropicElasticityTensorTe
 
   if (_youngs_modulus_set && _youngs_modulus <= 0.0)
     mooseError("Youngs modulus must be positive in material '" + name() + "'.");
+}
 
+template <bool is_ad>
+void
+ComputeIsotropicElasticityTensorTempl<is_ad>::residualSetup()
+{
   std::vector<Real> iso_const(2);
   Real elas_mod;
   Real poiss_rat;

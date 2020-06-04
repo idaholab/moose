@@ -23,6 +23,8 @@ public:
 
   ComputeIsotropicElasticityTensorTempl(const InputParameters & parameters);
 
+  virtual void residualSetup() override;
+
 protected:
   virtual void computeQpElasticityTensor() override;
 
@@ -33,11 +35,11 @@ protected:
   bool _shear_modulus_set;
   bool _youngs_modulus_set;
 
-  Real _bulk_modulus;
-  Real _lambda;
-  Real _poissons_ratio;
-  Real _shear_modulus;
-  Real _youngs_modulus;
+  const Real & _bulk_modulus;
+  const Real & _lambda;
+  const Real & _poissons_ratio;
+  const Real & _shear_modulus;
+  const Real & _youngs_modulus;
 
   /// Individual elasticity tensor
   RankFourTensor _Cijkl;
