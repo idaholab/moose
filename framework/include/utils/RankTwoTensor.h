@@ -278,6 +278,9 @@ public:
   /// returns C_ijkl = a_il * b_jk
   RankFourTensorTempl<T> mixedProductIlJk(const RankTwoTensorTempl<T> & a) const;
 
+  /// returns C_ijkl = a_ik * b_lj
+  RankFourTensorTempl<T> mixedProductIkLj(const RankTwoTensorTempl<T> & a) const;
+
   /// return positive projection tensor of eigen-decomposition
   template <typename T2 = T>
   typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankFourTensorTempl<T>>::type
@@ -391,6 +394,12 @@ public:
    */
   RankTwoTensorTempl<T> ddet() const;
 
+  /**
+   * Denote the _coords[i][j] by A_ij, then this returns
+   * A^inv_ij/dA_ij
+   */
+  RankFourTensorTempl<T> dInverse() const;
+
   /// Print the rank two tensor
   void print(std::ostream & stm = Moose::out) const;
 
@@ -503,6 +512,12 @@ public:
    * rotation tensor.
    */
   void getRUDecompositionRotation(RankTwoTensorTempl<T> & rot) const;
+
+  /**
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to perform RU decomposition and obtain the
+   * rotation and stretch tensor.
+   */
+  void getRUDecomposition(RankTwoTensorTempl<T> & rot, RankTwoTensorTempl<T> & stretch) const;
 
   /**
    * This function initializes random seed based on a user-defined number.

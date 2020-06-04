@@ -324,6 +324,28 @@ TEST_F(RankTwoTensorTest, d2thirdInvariant)
     }
 }
 
+TEST_F(RankTwoTensorTest, dRInverse)
+{
+  // Here i do a finite-difference calculation of derivative of the inverse of a tensor
+  Real ep = 1E-5;             // small finite-difference parameter
+  RankFourTensor fd_dT2invdT; // the derivative compute by forward finite difference
+  const RankTwoTensor Tinv = _m3.inverse();
+  const RankFourTensor dTinvdT = _m3.dInverse(); // the analytical derivative of the inverse
+                                                 // computed from RankTwoTensorImplementation
+  RankTwoTensor T_perturbed = _m3;
+  RankTwoTensor T_perturbed_inv = Tinv;
+  for (unsigned i = 0; i < 3; i++)
+    for (unsigned j = 0; j < 3; j++)
+    {
+      T_perturbed(i, j) += ep;
+      RankTwoTensor T_perturbed_inv = T_perturbed.inverse();
+      for (unsigned int k = 0; k < 3; k++)
+        for (unsigned int l = 0; l < 3; l++)
+          EXPECT_NEAR((T_perturbed_inv(k, l) - Tinv(k, l)) / ep, dTinvdT(k, l, i, j), ep);
+      T_perturbed(i, j) = _m3(i, j);
+    }
+}
+
 TEST_F(RankTwoTensorTest, sin3Lode)
 {
   EXPECT_NEAR(-0.72218212, _unsymmetric1.sin3Lode(0, 0), 0.0001);

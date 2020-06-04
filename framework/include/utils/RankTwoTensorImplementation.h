@@ -464,6 +464,21 @@ RankTwoTensorTempl<T>::mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
 }
 
 template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::mixedProductIkLj(const RankTwoTensorTempl<T> & b) const
+{
+  RankFourTensorTempl<T> result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i, j, k, l) = (*this)(i, k) * b(l, j);
+
+  return result;
+}
+
+template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::deviatoric() const
 {
@@ -1123,6 +1138,30 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
       evec(i, j) = cmat[i][j];
 
   rot = a * (evec.transpose() * diag * evec).inverse();
+}
+
+template <typename T>
+void
+RankTwoTensorTempl<T>::getRUDecomposition(RankTwoTensorTempl<T> &, RankTwoTensorTempl<T> &) const
+{
+  mooseError("getRUDecomposition is only supported for Real valued tensors");
+}
+
+template <>
+void
+RankTwoTensor::getRUDecomposition(RankTwoTensor & rot, RankTwoTensor & stretch) const
+{
+  const RankTwoTensor & a = *this;
+  getRUDecompositionRotation(rot);
+  stretch = rot.transpose() * a;
+}
+
+template <typename T>
+RankFourTensorTempl<T>
+RankTwoTensorTempl<T>::dInverse() const
+{
+  RankTwoTensorTempl<T> c(inverse());
+  return -c.mixedProductIkLj(c);
 }
 
 template <typename T>
