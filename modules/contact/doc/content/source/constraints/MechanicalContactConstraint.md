@@ -51,6 +51,9 @@ Note that the `kinematic` method uses penalty parameter only to enforce the cond
 
 For the frictional contact (`coulomb` model), the `penalty` method calculates normal force and tangential predictor force using penalty stiffness and check for frictional capacity. While using the `kinematic` method, the deformation of surrounding material serves the role of the penalty parameter.
 
+### Contact gap offset
+
+Gap offset can be provided to the current mechanical contact constraint. It can be either `slave_gap_offset` (gap offset from slave side) or `mapped_master_gap_offset` (gap offset from master side but mapped to slave side). This could be useful to model contact in such as plates or shells. However, the offsetted gap is treated as rigid region without deformation.
 
 !syntax parameters /Constraints/MechanicalContactConstraint
 

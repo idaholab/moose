@@ -44,7 +44,7 @@ that can be created for various types of contact enforcement.
 | mortar             | all          | [NormalMortarMechanicalContact](/constraints/NormalMortarMechanicalContact.md) [NormalMortarLMMechanicalContact](/constraints/NormalMortarLMMechanicalContact.md) |
 | mortar             | coulomb      | [TangentialMortarMechanicalContact](/constraints/TangentialMortarMechanicalContact.md) [TangentialMortarLMMechanicalContact](/constraints/TangentialMortarLMMechanicalContact.md) |
 
-In addition to the Constraint class, several other objects are created, as shown in 
+In addition to the Constraint class, several other objects are created, as shown in
 
 !table id=contact_action_otherobj_table caption=Other objects constructed by ContactAction
 | Constructed Object | Purpose |
@@ -87,7 +87,11 @@ large, the solver may struggle due to poor conditioning.
 ## `System` Parameter
 
 The `system` parameter is deprecated and currently defaults to `Constraint`.
-  
+
+## Gap offset parameters
+
+Gap offset can be provided to the current contact formulation enforced using the [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md). It can be either `slave_gap_offset` (gap offset from slave side) or `mapped_master_gap_offset` (gap offset from master side but mapped to slave side). This could be useful to model contact in such as plates or shells. However, the offsetted gap is treated as rigid region without deformation.
+
 ## Example Input syntax id=example
 
 Node/face frictionless contact:
@@ -105,6 +109,10 @@ Normal (frictionless) mortar contact:
 Normal and tangential (frictional) mortar contact:
 
 !listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+
+Gap offset:
+
+!listing test/tests/mechanical_constraint/frictionless_kinematic_gap_offsets.i block=Contact
 
 !syntax parameters /Contact/ContactAction
 
