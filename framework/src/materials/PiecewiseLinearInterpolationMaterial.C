@@ -33,6 +33,10 @@ PiecewiseLinearInterpolationMaterial::validParams()
   params.addParam<std::vector<Real>>("xy_data",
                                      "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.addParam<bool>(
+      "extrapolation",
+      false,
+      "Use linear extrapolation to evaluate points that lie outside given data set domain. ");
   return params;
 }
 
@@ -42,6 +46,7 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(
     _prop_name(getParam<std::string>("property")),
     _coupled_var(coupledValue("variable")),
     _scale_factor(getParam<Real>("scale_factor")),
+    _extrap(getParam<bool>("extrapolation")),
     _property(declareProperty<Real>(_prop_name)),
     _dproperty(declarePropertyDerivative<Real>(_prop_name, getVar("variable", 0)->name()))
 {
@@ -84,7 +89,7 @@ PiecewiseLinearInterpolationMaterial::PiecewiseLinearInterpolationMaterial(
 
   try
   {
-    _linear_interp = libmesh_make_unique<LinearInterpolation>(x, y);
+    _linear_interp = libmesh_make_unique<LinearInterpolation>(x, y, _extrap);
   }
   catch (std::domain_error & e)
   {

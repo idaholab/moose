@@ -20,8 +20,9 @@ int LinearInterpolationTempl<T>::_file_number = 0;
 
 template <typename T>
 LinearInterpolationTempl<T>::LinearInterpolationTempl(const std::vector<Real> & x,
-                                                      const std::vector<Real> & y)
-  : _x(x), _y(y)
+                                                      const std::vector<Real> & y,
+                                                      const bool extrap)
+  : _x(x), _y(y), _extrap(extrap)
 {
   errorCheck();
 }
@@ -49,13 +50,27 @@ LinearInterpolationTempl<T>::sample(const T & x) const
 {
   // sanity check (empty LinearInterpolationTempls get constructed in many places
   // so we cannot put this into the errorCheck)
-  assert(_x.size() > 0);
+  if (_extrap)
+    assert(_x.size() > 1);
+  else
+    assert(_x.size() > 0);
 
   // endpoint cases
-  if (x <= _x[0])
-    return _y[0];
-  if (x >= _x.back())
-    return _y.back();
+  if (_extrap)
+  {
+    if (x <= _x[0])
+      return _y[0] + (x - _x[0]) / (_x[1] - _x[0]) * (_y[1] - _y[0]);
+    if (x >= _x.back())
+      return _y.back() +
+             (x - _x.back()) / (_x[_x.size() - 2] - _x.back()) * (_y[_y.size() - 2] - _y.back());
+  }
+  else
+  {
+    if (x <= _x[0])
+      return _y[0];
+    if (x >= _x.back())
+      return _y.back();
+  }
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
     if (x >= _x[i] && x < _x[i + 1])
@@ -70,10 +85,20 @@ T
 LinearInterpolationTempl<T>::sampleDerivative(const T & x) const
 {
   // endpoint cases
-  if (x < _x[0])
-    return 0.0;
-  if (x >= _x[_x.size() - 1])
-    return 0.0;
+  if (_extrap)
+  {
+    if (x <= _x[0])
+      return (_y[1] - _y[0]) / (_x[1] - _x[0]);
+    if (x >= _x.back())
+      return (_y[_y.size() - 2] - _y.back()) / (_x[_x.size() - 2] - _x.back());
+  }
+  else
+  {
+    if (x < _x[0])
+      return 0.0;
+    if (x >= _x[_x.size() - 1])
+      return 0.0;
+  }
 
   for (unsigned int i = 0; i + 1 < _x.size(); ++i)
     if (x >= _x[i] && x < _x[i + 1])
