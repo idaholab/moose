@@ -396,6 +396,16 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   }
 }
 
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+Coupleable::coupledGenericValue(const std::string & var_name, unsigned int comp)
+{
+  if (!is_ad)
+    return coupledValue(var_name, comp);
+  else
+    return adCoupledValue(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
@@ -1579,22 +1589,34 @@ Coupleable::getADDefaultSecond()
   return _ad_default_second;
 }
 
-const ADVariableValue &
-Coupleable::adZeroValue()
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+Coupleable::genericZeroValue()
 {
-  return _ad_zero;
+  if (!is_ad)
+    return _zero;
+  else
+    return _ad_zero;
 }
 
-const ADVariableGradient &
-Coupleable::adZeroGradient()
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+Coupleable::genericZeroGradient()
 {
-  return _ad_grad_zero;
+  if (!is_ad)
+    return _grad_zero;
+  else
+    return _ad_grad_zero;
 }
 
-const ADVariableSecond &
-Coupleable::adZeroSecond()
+template <bool is_ad>
+const GenericVariableValue<is_ad> &
+Coupleable::genericZeroSecond()
 {
-  return _ad_second_zero;
+  if (!is_ad)
+    return _second_zero;
+  else
+    return _ad_second_zero;
 }
 
 // Explicit instantiations

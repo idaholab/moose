@@ -136,6 +136,16 @@ protected:
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled TODO helper function for coupling ad/regular variable values
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  template <bool is_ad = false>
+  const GenericVariableValue<is_ad> & coupledGenericValue(const std::string & var_name,
+                                                          unsigned int comp = 0);
+
+  /**
    * Returns value of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -801,21 +811,25 @@ protected:
   // coupled-dof-values-end
 
   /**
-   *  method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
-   * computing objects
+   * Returns zero value templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
    */
-  const ADVariableValue & adZeroValue();
+  template <bool is_ad = false>
+  const GenericVariableValue<is_ad> & genericZeroValue();
 
   /**
-   *  method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
-   * JACOBIAN computing objects
+   * Returns zero gradient templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
    */
-  const ADVariableGradient & adZeroGradient();
+  template <bool is_ad = false>
+  const GenericVariableValue<is_ad> & genericZeroGradient();
 
   /**
-   * Retrieve a zero second for automatic differentiation
+   * Returns zero second derivative templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
    */
-  const ADVariableSecond & adZeroSecond();
+  template <bool is_ad = false>
+  const GenericVariableValue<is_ad> & genericZeroSecond();
 
 protected:
   // Reference to the interface's input parameters
