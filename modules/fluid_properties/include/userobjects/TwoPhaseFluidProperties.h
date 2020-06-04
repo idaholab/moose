@@ -42,6 +42,11 @@ public:
   virtual Real p_critical() const = 0;
 
   /**
+   * Returns the triple-point temperature
+   */
+  virtual Real T_triple() const;
+
+  /**
    * Computes the saturation temperature at a pressure
    *
    * @param[in] p  pressure

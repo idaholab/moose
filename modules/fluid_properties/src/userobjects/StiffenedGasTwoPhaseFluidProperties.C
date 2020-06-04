@@ -31,6 +31,7 @@ StiffenedGasTwoPhaseFluidProperties::validParams()
   params.addParam<Real>("p_c", 22.09e6, "Critical pressure [Pa]");
   params.addParam<Real>("rho_c", 322.0, "Critical density [kg/m^3]");
   params.addParam<Real>("e_c", 2702979.84310559, "Critical specific internal energy [J/kg]");
+  params.addParam<Real>("T_triple", 273.16, "Triple-point temperature [K]");
 
   params.addParam<Real>(
       "sigma_A", 0.2358, "'A' constant used in surface tension correlation [N/m]");
@@ -72,6 +73,7 @@ StiffenedGasTwoPhaseFluidProperties::StiffenedGasTwoPhaseFluidProperties(
 
     _T_c(getParam<Real>("T_c")),
     _p_c(getParam<Real>("p_c")),
+    _T_triple(getParam<Real>("T_triple")),
 
     _sigma_A(getParam<Real>("sigma_A")),
     _sigma_B(getParam<Real>("sigma_B")),
@@ -155,6 +157,12 @@ Real
 StiffenedGasTwoPhaseFluidProperties::p_critical() const
 {
   return _p_c;
+}
+
+Real
+StiffenedGasTwoPhaseFluidProperties::T_triple() const
+{
+  return _T_triple;
 }
 
 Real
