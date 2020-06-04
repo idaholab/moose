@@ -91,6 +91,8 @@ protected:
   const Point _point2;
   ///@
 
+  bool _singular_shape_tensor;
+
   /// displacement variables
   std::vector<MooseVariable *> _disp_var;
 

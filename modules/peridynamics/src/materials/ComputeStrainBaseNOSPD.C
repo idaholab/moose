@@ -86,13 +86,21 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
   if (_dim == 2)
     _shape2[_qp](2, 2) = _deformation_gradient[_qp](2, 2) = 1.0;
 
-  if (_stabilization == "FORCE")
-    computeConventionalQpDeformationGradient();
-  else if (_stabilization == "HORIZON")
-    computeBondHorizonQpDeformationGradient();
+  if (_bond_status_var->getElementalValue(_current_elem) > 0.5)
+  {
+    if (_stabilization == "FORCE")
+      computeConventionalQpDeformationGradient();
+    else if (_stabilization == "HORIZON")
+      computeBondHorizonQpDeformationGradient();
+    else
+      paramError("stabilization",
+                 "Unknown stabilization scheme for peridynamic correspondence model");
+  }
   else
-    paramError("stabilization",
-               "Unknown stabilization scheme for peridynamic correspondence model");
+  {
+    _shape2[_qp].setToIdentity();
+    _deformation_gradient[_qp].setToIdentity();
+  }
 }
 
 void
@@ -135,6 +143,10 @@ ComputeStrainBaseNOSPD::computeConventionalQpDeformationGradient()
     }
 
   // finalize the deformation gradient tensor
+  if (MooseUtils::absoluteFuzzyEqual(_shape2[_qp].det(), 0.0))
+    mooseError("Singular shape tensor is detected in ComputeStrainBaseNOSPD! Use "
+               "SingularShapeTensorEliminatorUserObjectPD to avoid singular shape tensor");
+
   _deformation_gradient[_qp] *= _shape2[_qp].inverse();
   _ddgraddu[_qp] *= _shape2[_qp].inverse();
   _ddgraddv[_qp] *= _shape2[_qp].inverse();
@@ -199,6 +211,10 @@ ComputeStrainBaseNOSPD::computeBondHorizonQpDeformationGradient()
         }
       }
     // finalize the deformation gradient and its derivatives
+    if (MooseUtils::absoluteFuzzyEqual(_shape2[_qp].det(), 0.0))
+      mooseError("Singular shape tensor is detected in ComputeStrainBaseNOSPD! Use "
+                 "SingularShapeTensorEliminatorUserObjectPD to avoid singular shape tensor");
+
     _deformation_gradient[_qp] *= _shape2[_qp].inverse();
     _ddgraddu[_qp] *= _shape2[_qp].inverse();
     _ddgraddv[_qp] *= _shape2[_qp].inverse();

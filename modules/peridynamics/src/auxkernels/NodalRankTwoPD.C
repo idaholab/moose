@@ -74,7 +74,8 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j")),
     _point1(parameters.get<Point>("point1")),
-    _point2(parameters.get<Point>("point2"))
+    _point2(parameters.get<Point>("point2")),
+    _singular_shape_tensor(false)
 {
   if (!_var.isNodal())
     mooseError("NodalRankTwoPD operates on nodal variable!");
@@ -170,31 +171,43 @@ NodalRankTwoPD::computeNodalTotalStrain()
         }
     }
 
+  RankTwoTensor total_strain;
+
   // finalize the deformation gradient tensor
-  dgrad *= shape.inverse();
-
-  // the green-lagrange strain tensor
-  RankTwoTensor total_strain = 0.5 * (dgrad.transpose() * dgrad - delta);
-
-  if (_scalar_out_of_plane_strain_coupled)
-    total_strain(2, 2) = _scalar_out_of_plane_strain[0];
-  else if (_plane_stress)
+  if (MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
   {
-    if (_has_temp)
+    _singular_shape_tensor = true;
+    shape.setToIdentity();
+    dgrad.setToIdentity();
+    total_strain.zero();
+  }
+  else
+  {
+    dgrad *= shape.inverse();
+
+    // the green-lagrange strain tensor
+    total_strain = 0.5 * (dgrad.transpose() * dgrad - delta);
+
+    if (_scalar_out_of_plane_strain_coupled)
+      total_strain(2, 2) = _scalar_out_of_plane_strain[0];
+    else if (_plane_stress)
     {
-      Real mstrain00 =
-          (total_strain(0, 0) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
-      Real mstrain11 =
-          (total_strain(1, 1) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
-      Real mstrain22 =
-          -(_Cijkl(2, 2, 0, 0) * mstrain00 + _Cijkl(2, 2, 1, 1) * mstrain11) / _Cijkl(2, 2, 2, 2);
-      total_strain(2, 2) =
-          mstrain22 + _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref);
+      if (_has_temp)
+      {
+        Real mstrain00 =
+            (total_strain(0, 0) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
+        Real mstrain11 =
+            (total_strain(1, 1) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
+        Real mstrain22 =
+            -(_Cijkl(2, 2, 0, 0) * mstrain00 + _Cijkl(2, 2, 1, 1) * mstrain11) / _Cijkl(2, 2, 2, 2);
+        total_strain(2, 2) =
+            mstrain22 + _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref);
+      }
+      else
+        total_strain(2, 2) =
+            -(_Cijkl(2, 2, 0, 0) * total_strain(0, 0) + _Cijkl(2, 2, 1, 1) * total_strain(1, 1)) /
+            _Cijkl(2, 2, 2, 2);
     }
-    else
-      total_strain(2, 2) =
-          -(_Cijkl(2, 2, 0, 0) * total_strain(0, 0) + _Cijkl(2, 2, 1, 1) * total_strain(1, 1)) /
-          _Cijkl(2, 2, 2, 2);
   }
 
   return total_strain;
@@ -211,6 +224,9 @@ NodalRankTwoPD::computeNodalMechanicalStrain()
     thermal_strain = _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref) * delta;
 
   RankTwoTensor mechanical_strain = total_strain - thermal_strain;
+
+  if (_singular_shape_tensor)
+    mechanical_strain.zero();
 
   return mechanical_strain;
 }
