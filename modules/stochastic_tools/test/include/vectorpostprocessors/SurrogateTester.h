@@ -33,10 +33,10 @@ protected:
   Sampler & _sampler;
   /// Where or not to output all the samples used
   const bool _output_samples;
-  /// Reference to surrogate model
-  const SurrogateModel & _model;
-  /// Vector containing results of sampling PCE model
-  VectorPostprocessorValue & _value_vector;
   /// Vector containing all the sample points for each parameter
   std::vector<VectorPostprocessorValue *> _sample_vector;
+  /// Pointers to surrogate model
+  std::vector<const SurrogateModel *> _model;
+  /// Vectors containing results of sampling model
+  std::vector<VectorPostprocessorValue *> _value_vector;
 };

@@ -27,14 +27,14 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// Reference to PolynomialChaos
-  const PolynomialChaos & _pc_uo;
   /// The selected Sobol sensitivity orders to compute
   const MultiMooseEnum & _order;
-  /// Vector containing the Sobol statistics
-  VectorPostprocessorValue & _stats;
+  /// Pointers to PolynomialChaos
+  std::vector<const PolynomialChaos *> _pc_uo;
+  /// Vectors containing the Sobol statistics
+  std::vector<VectorPostprocessorValue *> _stats;
   /// Vector containing the Sobol total sensitivity indices
-  VectorPostprocessorValue * _total_ind;
+  VectorPostprocessorValue * _total_ind = nullptr;
   /// Vector containing the Sobol sensitivity indices
   std::vector<VectorPostprocessorValue *> _ind_vector;
 
@@ -55,6 +55,8 @@ private:
     }
   };
 
+  /// Number of parameters for all models
+  unsigned int _ndim;
   /// Number of indices based on maximum order
   unsigned int _nind;
   /// Number of values to be computed

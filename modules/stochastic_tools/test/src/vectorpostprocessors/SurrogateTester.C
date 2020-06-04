@@ -21,7 +21,7 @@ SurrogateTester::validParams()
   params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling surrogate model.");
-  params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
+  params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of surrogate model.");
   params += SamplerInterface::validParams();
   params.addRequiredParam<SamplerName>(
       "sampler", "Sampler to use for evaluating PCE model (mainly for testing).");
@@ -36,10 +36,17 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
     SamplerInterface(this),
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
-    _output_samples(getParam<bool>("output_samples")),
-    _model(getSurrogateModel("model")),
-    _value_vector(declareVector("value"))
+    _output_samples(getParam<bool>("output_samples"))
 {
+  const auto & model_names = getParam<std::vector<UserObjectName>>("model");
+  _model.reserve(model_names.size());
+  _value_vector.reserve(model_names.size());
+  for (const auto & nm : model_names)
+  {
+    _model.push_back(&getSurrogateModelByName(nm));
+    _value_vector.push_back(&declareVector(nm));
+  }
+
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector.push_back(&declareVector("sample_p" + std::to_string(d)));
@@ -48,7 +55,9 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
 void
 SurrogateTester::initialize()
 {
-  _value_vector.resize(_sampler.getNumberOfLocalRows(), 0);
+  for (auto & vec : _value_vector)
+    vec->resize(_sampler.getNumberOfLocalRows(), 0);
+
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
@@ -61,7 +70,8 @@ SurrogateTester::execute()
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
-    _value_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data);
+    for (unsigned int m = 0; m < _model.size(); ++m)
+      (*_value_vector[m])[p - _sampler.getLocalRowBegin()] = _model[m]->evaluate(data);
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       {
@@ -73,7 +83,8 @@ SurrogateTester::execute()
 void
 SurrogateTester::finalize()
 {
-  _communicator.gather(0, _value_vector);
+  for (auto & vec : _value_vector)
+    _communicator.gather(0, *vec);
   if (_output_samples)
     for (auto & ppv_ptr : _sample_vector)
       _communicator.gather(0, *ppv_ptr);
