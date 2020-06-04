@@ -18,6 +18,7 @@ public:
   StiffenedGasTwoPhaseFluidProperties(const InputParameters & parameters);
 
   virtual Real p_critical() const override;
+  virtual Real T_triple() const override;
   virtual Real T_sat(Real pressure) const override;
   virtual Real p_sat(Real temperature) const override;
   virtual Real dT_sat_dp(Real pressure) const override;
@@ -65,6 +66,8 @@ protected:
   const Real & _T_c;
   /// critical pressure
   const Real & _p_c;
+  /// Triple-point temperature
+  const Real & _T_triple;
 
   /// 'A' constant used in surface tension correlation
   const Real & _sigma_A;
