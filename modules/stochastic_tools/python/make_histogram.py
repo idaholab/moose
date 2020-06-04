@@ -44,20 +44,22 @@ if __name__ == '__main__':
 
     # Set the default vector names
     vectors = []
-    for dt in data:
-        if not opt.vectors:
-            vectors.extend(dt.variables())
-        else:
-            vectors.extend(opt.vectors)
+    if not opt.vectors:
+        vectors = data[0].variables()
+    else:
+        vectors = opt.vectors
 
     # Plot the results
-    fig_data = [dict() for i in range(len(vectors))]
+    fig_data = [dict() for k in range(len(vectors)*len(data))]
     k = -1
     for i in range(len(data)):
-        for j in range(len(data[i].variables())):
+        for j in range(len(vectors)):
+            if not vectors[j] in data[i].variables():
+                fig_data.pop(k+1)
+                continue
             k += 1
             fig_data[k]['type'] = 'histogram'
-            fig_data[k]['x'] = data[i][vectors[k]].tolist()
+            fig_data[k]['x'] = data[i][vectors[j]].tolist()
             fig_data[k]['nbinsx'] = opt.bins
             fig_data[k]['opacity'] = opt.alpha
             if opt.probability:
