@@ -5900,13 +5900,19 @@ FEProblemBase::adaptMesh()
 
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
-    CONSOLE_TIMED_PRINT("Adaptivity step ", i + 1, " of ", cycles_per_step);
-
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();
 
-    if (_adaptivity.adaptMesh())
+    bool mesh_changed_this_step;
+    {
+      // scope this here instead of at the top of the method to prevent race conditions to console
+      // output
+      CONSOLE_TIMED_PRINT("Adaptivity step ", i + 1, " of ", cycles_per_step);
+      mesh_changed_this_step = _adaptivity.adaptMesh();
+    }
+
+    if (mesh_changed_this_step)
     {
       mesh_changed = true;
 
