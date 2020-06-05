@@ -822,14 +822,14 @@ protected:
    * @return Reference to a const GenericVariableValue
    */
   template <bool is_ad = false>
-  const GenericVariableValue<is_ad> & genericZeroGradient();
+  const GenericVariableGradient<is_ad> & genericZeroGradient();
 
   /**
    * Returns zero second derivative templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
   template <bool is_ad = false>
-  const GenericVariableValue<is_ad> & genericZeroSecond();
+  const GenericVariableSecond<is_ad> & genericZeroSecond();
 
 protected:
   // Reference to the interface's input parameters

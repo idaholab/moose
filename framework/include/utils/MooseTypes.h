@@ -362,6 +362,16 @@ struct ADType<VariableValue>
 {
   typedef ADVariableValue type;
 };
+template <>
+struct ADType<VariableGradient>
+{
+  typedef ADVariableGradient type;
+};
+template <>
+struct ADType<VariableSecond>
+{
+  typedef ADVariableSecond type;
+};
 
 } // namespace Moose
 
@@ -435,6 +445,10 @@ template <bool is_ad>
 using GenericRankFourTensor = typename Moose::GenericStruct<RankFourTensor, is_ad>::type;
 template <bool is_ad>
 using GenericVariableValue = typename Moose::GenericStruct<VariableValue, is_ad>::type;
+template <bool is_ad>
+using GenericVariableGradient = typename Moose::GenericStruct<VariableGradient, is_ad>::type;
+template <bool is_ad>
+using GenericVariableSecond = typename Moose::GenericStruct<VariableSecond, is_ad>::type;
 
 #define declareADValidParams(ADObjectType)                                                         \
   template <>                                                                                      \

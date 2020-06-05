@@ -396,14 +396,18 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   }
 }
 
-template <bool is_ad>
-const GenericVariableValue<is_ad> &
-Coupleable::coupledGenericValue(const std::string & var_name, unsigned int comp)
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp)
 {
-  if (!is_ad)
-    return coupledValue(var_name, comp);
-  else
-    return adCoupledValue(var_name, comp);
+  return coupledValue(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledValue(var_name, comp);
 }
 
 const VariableValue &
@@ -1593,30 +1597,42 @@ template <bool is_ad>
 const GenericVariableValue<is_ad> &
 Coupleable::genericZeroValue()
 {
-  if (!is_ad)
-    return _zero;
-  else
-    return _ad_zero;
+  return _zero;
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::genericZeroValue<true>()
+{
+  return _ad_zero;
 }
 
 template <bool is_ad>
-const GenericVariableValue<is_ad> &
+const GenericVariableGradient<is_ad> &
 Coupleable::genericZeroGradient()
 {
-  if (!is_ad)
-    return _grad_zero;
-  else
-    return _ad_grad_zero;
+  return _grad_zero;
+}
+
+template <>
+const GenericVariableGradient<true> &
+Coupleable::genericZeroGradient<true>()
+{
+  return _ad_grad_zero;
 }
 
 template <bool is_ad>
-const GenericVariableValue<is_ad> &
+const GenericVariableSecond<is_ad> &
 Coupleable::genericZeroSecond()
 {
-  if (!is_ad)
-    return _second_zero;
-  else
-    return _ad_second_zero;
+  return _second_zero;
+}
+
+template <>
+const GenericVariableSecond<true> &
+Coupleable::genericZeroSecond<true>()
+{
+  return _ad_second_zero;
 }
 
 // Explicit instantiations
