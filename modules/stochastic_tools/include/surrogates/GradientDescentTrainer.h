@@ -57,6 +57,17 @@ private:
   mutable DenseVector<Real> _Ax_minus_b;
 };
 
+class Polynomial
+{
+public:
+  Polynomial() = default;
+
+  DenseMatrix<Real> buildMatrix(const std::vector<Real> & x_training_data);
+
+protected:
+  const unsigned int _order = 1;
+};
+
 // Start of Optimizer? Need to include ways to plugin custom step-size and regularize
 // Perhaps we create a new block
 class GradientDescentTrainer : public SurrogateTrainer

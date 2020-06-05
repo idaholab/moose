@@ -1,0 +1,28 @@
+[Tests]
+  issues = '#15361'
+  design = 'GradientDescentTrainer.md'
+
+  [monte_carlo]
+    requirement = 'The system shall include a test object for generating x,y data that follows a polynomial'
+
+    [replicated]
+      type = 'CSVDiff'
+      input = 'polynomial.i'
+      allow_test_objects = true
+      csvdiff = 'polynomial_out_data_0000.csv polynomial_out_data_0001.csv'
+
+      detail = 'that can be replicated or'
+    []
+
+    [distributed]
+      type = 'CSVDiff'
+      input = 'polynomial.i'
+      allow_test_objects = true
+      min_parallel = 3
+      max_parallel = 3
+      csvdiff = 'polynomial_out_data_0000.csv.0 polynomial_out_data_0000.csv.1 polynomial_out_data_0000.csv.2 '
+                'polynomial_out_data_0001.csv.0 polynomial_out_data_0001.csv.1 polynomial_out_data_0001.csv.2'
+      detail = 'distributed across processors.'
+    []
+  []
+[]

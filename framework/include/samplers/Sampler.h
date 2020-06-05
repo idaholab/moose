@@ -144,13 +144,24 @@ protected:
   /**
    * Get the next random integer from the generator within the specified range [lower, upper)
    * @param index The index of the seed, by default this is zero. To add additional seeds
-   *              indices call the setNumberOfRequiedRandomSeeds method.
+   *              indices call the setNumberOfRandomSeeds method.
    * @param lower Lower bounds
    * @param upper Upper bounds
    *
    * @return A integer for the random number
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
+
+  /**
+   * Get a random number that follows a normal distribution.
+   * @param index The index of the seed, by default this is zero. To add additional seeds
+   *              indices call the setNumberOfRandomSeeds method.
+   * @param mean Mean of normal distribution
+   * @param sigma Standard deviation of normal distribution
+   *
+   * @return A Real for the random number
+   */
+  Real getRandNormal(std::size_t index, Real mean, Real sigma);
 
   // TODO: Restore this pure virtual after application are updated to new interface
   /**

@@ -34,7 +34,8 @@ SamplerData::validParams()
       "sampler_method",
       method,
       "Control the method of data retrieval from the Sampler object; this is mainly for testing.");
-
+  params.addParam<bool>(
+      "disable_gather", false, "Disable the gather to support distributed output.");
   return params;
 }
 
@@ -42,7 +43,8 @@ SamplerData::SamplerData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
     _sampler(getSampler("sampler")),
-    _sampler_method(getParam<MooseEnum>("sampler_method"))
+    _sampler_method(getParam<MooseEnum>("sampler_method")),
+    _disable_gather(getParam<bool>("disable_gather"))
 {
   for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
     _sample_vectors.push_back(
@@ -91,7 +93,7 @@ SamplerData::execute()
 void
 SamplerData::finalize()
 {
-  if (_sampler_method != "get_global_samples")
+  if (_sampler_method != "get_global_samples" && !_disable_gather)
     for (auto & ppv_ptr : _sample_vectors)
       _communicator.gather(0, *ppv_ptr);
 }

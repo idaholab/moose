@@ -27,6 +27,17 @@ ObjectiveFunction::ObjectiveFunction(const InputParameters & parameters)
 {
 }
 
+DenseMatrix<Real>
+Polynomial::buildMatrix(const std::vector<Real> & x_training_data)
+{
+  DenseMatrix<Real> A_matrix;
+  A_matrix.resize(x_training_data.size(), _order + 1);
+  for (unsigned int col = 0; col < _order + 1; ++col)
+    for (unsigned int row = 0; row < A_matrix.m(); ++row)
+      A_matrix(row, col) = std::pow(x_training_data[row], col);
+  return A_matrix;
+}
+
 InputParameters
 PolynomialLeastSquares::validParams()
 {
@@ -74,15 +85,17 @@ PolynomialLeastSquares::gradient(const DenseVector<Real> & x) const
   // can be created late via an action, for now hack it in
   if (_b_vector.size() == 0)
   {
-    _A_matrix.resize(_x_training_data.size(), _order + 1);
+    Polynomial func;
+    _A_matrix = func.buildMatrix(_x_training_data);
+    //_A_matrix.resize(_x_training_data.size(), _order + 1);
     _b_vector = _y_training_data;
     _Ax_minus_b.resize(_y_training_data.size());
 
     // TODO: Loop over offsets and to a std::fill using _A.get_values() on the underlying
     // std::vector
-    for (unsigned int col = 0; col < _order + 1; ++col)
-      for (unsigned int row = 0; row < _A_matrix.m(); ++row)
-        _A_matrix(row, col) = std::pow(_x_training_data[row], col);
+    // for (unsigned int col = 0; col < _order + 1; ++col)
+    //  for (unsigned int row = 0; row < _A_matrix.m(); ++row)
+    //    _A_matrix(row, col) = std::pow(_x_training_data[row], col);
   }
 
   // compute A^T(Ax-b)

@@ -36,4 +36,7 @@ protected:
 
   /// The method of data retrival from the Sample
   const MooseEnum & _sampler_method;
+
+  /// Flag for disable gather operation
+  const bool _disable_gather;
 };

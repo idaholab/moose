@@ -293,7 +293,7 @@ Sampler::advanceGenerators(dof_id_type count)
       getRand(j);
 }
 
-double
+Real
 Sampler::getRand(const unsigned int index)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
@@ -305,6 +305,13 @@ Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
   return _generator.randl(index, lower, upper);
+}
+
+Real
+Sampler::getRandNormal(std::size_t index, Real mean, Real sigma)
+{
+  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  return _generator.randNormal(index, mean, sigma);
 }
 
 dof_id_type
