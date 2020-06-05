@@ -37,6 +37,9 @@ protected:
   /// Factor to scale the ordinate values by (default = 1)
   const Real _scale_factor;
 
+  /// use linear extrapolation
+  const bool _extrap;
+
   /// Material property to be calculated
   ADMaterialProperty<Real> & _property;
 
