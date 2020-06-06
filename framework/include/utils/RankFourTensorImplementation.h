@@ -501,7 +501,6 @@ template <typename T>
 void
 RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMethod fill_method)
 {
-  zero();
 
   switch (fill_method)
   {
@@ -509,10 +508,10 @@ RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMe
       fillAntisymmetricFromInputVector(input);
       break;
     case symmetric9:
-      fillSymmetricFromInputVector(input, false);
+      fillSymmetric9FromInputVector(input);
       break;
     case symmetric21:
-      fillSymmetricFromInputVector(input, true);
+      fillSymmetric21FromInputVector(input);
       break;
     case general_isotropic:
       fillGeneralIsotropicFromInputVector(input);
@@ -542,62 +541,147 @@ RankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & input, FillMe
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricFromInputVector(const std::vector<T> & input, bool all)
+RankFourTensorTempl<T>::fillSymmetric9FromInputVector(const std::vector<T> & input)
 {
-  if ((all == true && input.size() != 21) || (all == false && input.size() != 9))
-    mooseError("Please check the number of entries in the stiffness input vector.");
+  mooseAssert(input.size() == 9,
+              "To use fillSymmetric9FromInputVector, your input must have size 9.");
 
   zero();
 
-  if (all == true)
-  {
-    (*this)(0, 0, 0, 0) = input[0]; // C1111
-    (*this)(0, 0, 1, 1) = input[1]; // C1122
-    (*this)(0, 0, 2, 2) = input[2]; // C1133
-    (*this)(0, 0, 1, 2) = input[3]; // C1123
-    (*this)(0, 0, 0, 2) = input[4]; // C1113
-    (*this)(0, 0, 0, 1) = input[5]; // C1112
+  (*this)(0, 0, 0, 0) = input[0]; // C1111
+  (*this)(1, 1, 1, 1) = input[3]; // C2222
+  (*this)(2, 2, 2, 2) = input[5]; // C3333
 
-    (*this)(1, 1, 1, 1) = input[6];  // C2222
-    (*this)(1, 1, 2, 2) = input[7];  // C2233
-    (*this)(1, 1, 1, 2) = input[8];  // C2223
-    (*this)(0, 2, 1, 1) = input[9];  // C2213  //flipped for filling purposes
-    (*this)(0, 1, 1, 1) = input[10]; // C2212 //flipped for filling purposes
+  (*this)(0, 0, 1, 1) = input[1]; // C1122
+  (*this)(1, 1, 0, 0) = input[1];
 
-    (*this)(2, 2, 2, 2) = input[11]; // C3333
-    (*this)(1, 2, 2, 2) = input[12]; // C3323 //flipped for filling purposes
-    (*this)(0, 2, 2, 2) = input[13]; // C3313 //flipped for filling purposes
-    (*this)(0, 1, 2, 2) = input[14]; // C3312 //flipped for filling purposes
+  (*this)(0, 0, 2, 2) = input[2]; // C1133
+  (*this)(2, 2, 0, 0) = input[2];
 
-    (*this)(1, 2, 1, 2) = input[15]; // C2323
-    (*this)(0, 2, 1, 2) = input[16]; // C2313 //flipped for filling purposes
-    (*this)(0, 1, 1, 2) = input[17]; // C2312 //flipped for filling purposes
+  (*this)(1, 1, 2, 2) = input[4]; // C2233
+  (*this)(2, 2, 1, 1) = input[4];
 
-    (*this)(0, 2, 0, 2) = input[18]; // C1313
-    (*this)(0, 1, 0, 2) = input[19]; // C1312 //flipped for filling purposes
+  (*this)(1, 2, 1, 2) = input[6]; // C2323
+  (*this)(2, 1, 2, 1) = input[6];
+  (*this)(2, 1, 1, 2) = input[6];
+  (*this)(1, 2, 2, 1) = input[6];
 
-    (*this)(0, 1, 0, 1) = input[20]; // C1212
-  }
-  else
-  {
-    (*this)(0, 0, 0, 0) = input[0]; // C1111
-    (*this)(0, 0, 1, 1) = input[1]; // C1122
-    (*this)(0, 0, 2, 2) = input[2]; // C1133
-    (*this)(1, 1, 1, 1) = input[3]; // C2222
-    (*this)(1, 1, 2, 2) = input[4]; // C2233
-    (*this)(2, 2, 2, 2) = input[5]; // C3333
-    (*this)(1, 2, 1, 2) = input[6]; // C2323
-    (*this)(0, 2, 0, 2) = input[7]; // C1313
-    (*this)(0, 1, 0, 1) = input[8]; // C1212
-  }
+  (*this)(0, 2, 0, 2) = input[7]; // C1313
+  (*this)(2, 0, 2, 0) = input[7];
+  (*this)(2, 0, 0, 2) = input[7];
+  (*this)(0, 2, 2, 0) = input[7];
 
-  // fill in from symmetry relations
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
-        for (unsigned int l = 0; l < N; ++l)
-          (*this)(i, j, l, k) = (*this)(j, i, k, l) = (*this)(j, i, l, k) = (*this)(k, l, i, j) =
-              (*this)(l, k, j, i) = (*this)(k, l, j, i) = (*this)(l, k, i, j) = (*this)(i, j, k, l);
+  (*this)(0, 1, 0, 1) = input[8]; // C1212
+  (*this)(1, 0, 1, 0) = input[8];
+  (*this)(1, 0, 0, 1) = input[8];
+  (*this)(0, 1, 1, 0) = input[8];
+}
+template <typename T>
+void
+RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const std::vector<T> & input)
+{
+  mooseAssert(input.size() == 21,
+              "To use fillSymmetric21FromInputVector, your input must have size 21.");
+
+  (*this)(0, 0, 0, 0) = input[0];  // C1111
+  (*this)(1, 1, 1, 1) = input[6];  // C2222
+  (*this)(2, 2, 2, 2) = input[11]; // C3333
+
+  (*this)(0, 0, 1, 1) = input[1]; // C1122
+  (*this)(1, 1, 0, 0) = input[1];
+
+  (*this)(0, 0, 2, 2) = input[2]; // C1133
+  (*this)(2, 2, 0, 0) = input[2];
+
+  (*this)(1, 1, 2, 2) = input[7]; // C2233
+  (*this)(2, 2, 1, 1) = input[7];
+
+  (*this)(0, 0, 0, 2) = input[4]; // C1113
+  (*this)(0, 0, 2, 0) = input[4];
+  (*this)(0, 2, 0, 0) = input[4];
+  (*this)(2, 0, 0, 0) = input[4];
+
+  (*this)(0, 0, 0, 1) = input[5]; // C1112
+  (*this)(0, 0, 1, 0) = input[5];
+  (*this)(0, 1, 0, 0) = input[5];
+  (*this)(1, 0, 0, 0) = input[5];
+
+  (*this)(1, 1, 1, 2) = input[8]; // C2223
+  (*this)(1, 1, 2, 1) = input[8];
+  (*this)(1, 2, 1, 1) = input[8];
+  (*this)(2, 1, 1, 1) = input[8];
+
+  (*this)(1, 1, 1, 0) = input[10];
+  (*this)(1, 1, 0, 1) = input[10];
+  (*this)(1, 0, 1, 1) = input[10];
+  (*this)(0, 1, 1, 1) = input[10]; // C2212 //flipped for filling purposes
+
+  (*this)(2, 2, 2, 1) = input[12];
+  (*this)(2, 2, 1, 2) = input[12];
+  (*this)(2, 1, 2, 2) = input[12];
+  (*this)(1, 2, 2, 2) = input[12]; // C3323 //flipped for filling purposes
+
+  (*this)(2, 2, 2, 0) = input[13];
+  (*this)(2, 2, 0, 2) = input[13];
+  (*this)(2, 0, 2, 2) = input[13];
+  (*this)(0, 2, 2, 2) = input[13]; // C3313 //flipped for filling purposes
+
+  (*this)(0, 0, 1, 2) = input[3]; // C1123
+  (*this)(0, 0, 2, 1) = input[3];
+  (*this)(1, 2, 0, 0) = input[3];
+  (*this)(2, 1, 0, 0) = input[3];
+
+  (*this)(1, 1, 0, 2) = input[9];
+  (*this)(1, 1, 2, 0) = input[9];
+  (*this)(0, 2, 1, 1) = input[9]; // C2213  //flipped for filling purposes
+  (*this)(2, 0, 1, 1) = input[9];
+
+  (*this)(2, 2, 0, 1) = input[14];
+  (*this)(2, 2, 1, 0) = input[14];
+  (*this)(0, 1, 2, 2) = input[14]; // C3312 //flipped for filling purposes
+  (*this)(1, 0, 2, 2) = input[14];
+
+  (*this)(1, 2, 1, 2) = input[15]; // C2323
+  (*this)(2, 1, 2, 1) = input[15];
+  (*this)(2, 1, 1, 2) = input[15];
+  (*this)(1, 2, 2, 1) = input[15];
+
+  (*this)(0, 2, 0, 2) = input[18]; // C1313
+  (*this)(2, 0, 2, 0) = input[18];
+  (*this)(2, 0, 0, 2) = input[18];
+  (*this)(0, 2, 2, 0) = input[18];
+
+  (*this)(0, 1, 0, 1) = input[20]; // C1212
+  (*this)(1, 0, 1, 0) = input[20];
+  (*this)(1, 0, 0, 1) = input[20];
+  (*this)(0, 1, 1, 0) = input[20];
+
+  (*this)(1, 2, 0, 2) = input[16];
+  (*this)(0, 2, 1, 2) = input[16]; // C2313 //flipped for filling purposes
+  (*this)(2, 1, 0, 2) = input[16];
+  (*this)(1, 2, 2, 0) = input[16];
+  (*this)(2, 0, 1, 2) = input[16];
+  (*this)(0, 2, 2, 1) = input[16];
+  (*this)(2, 1, 2, 0) = input[16];
+  (*this)(2, 0, 2, 1) = input[16];
+
+  (*this)(1, 2, 0, 1) = input[17];
+  (*this)(0, 1, 1, 2) = input[17]; // C2312 //flipped for filling purposes
+  (*this)(2, 1, 0, 1) = input[17];
+  (*this)(1, 2, 1, 0) = input[17];
+  (*this)(1, 0, 1, 2) = input[17];
+  (*this)(0, 1, 2, 1) = input[17];
+  (*this)(2, 1, 1, 0) = input[17];
+  (*this)(1, 0, 2, 1) = input[17];
+
+  (*this)(0, 2, 0, 1) = input[19];
+  (*this)(0, 1, 0, 2) = input[19]; // C1312 //flipped for filling purposes
+  (*this)(2, 0, 0, 1) = input[19];
+  (*this)(0, 2, 1, 0) = input[19];
+  (*this)(1, 0, 0, 2) = input[19];
+  (*this)(0, 1, 2, 0) = input[19];
+  (*this)(2, 0, 1, 0) = input[19];
+  (*this)(1, 0, 2, 0) = input[19];
 }
 
 template <typename T>
@@ -651,9 +735,9 @@ void
 RankFourTensorTempl<T>::fillGeneralIsotropicFromInputVector(const std::vector<T> & input)
 {
   if (input.size() != 3)
-    mooseError(
-        "To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours has size ",
-        input.size());
+    mooseError("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours "
+               "has size ",
+               input.size());
 
   fillGeneralIsotropic(input[0], input[1], input[2]);
 }
@@ -683,6 +767,7 @@ RankFourTensorTempl<T>::fillAntisymmetricIsotropicFromInputVector(const std::vec
     mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. "
                "Yours has size ",
                input.size());
+
   fillGeneralIsotropic(0.0, 0.0, input[0]);
 }
 
@@ -697,18 +782,17 @@ template <typename T>
 void
 RankFourTensorTempl<T>::fillSymmetricIsotropicFromInputVector(const std::vector<T> & input)
 {
-  if (input.size() != 2)
-    mooseError("To use fillSymmetricIsotropicFromInputVector, your input must have size 2. Yours "
-               "has size ",
-               input.size());
-  fillGeneralIsotropic(input[0], input[1], 0.0);
+  mooseAssert(input.size() == 2,
+              "To use fillSymmetricIsotropicFromInputVector, your input must have size 2.");
+  fillSymmetricIsotropic(input[0], input[1]);
 }
 
 template <typename T>
 void
-RankFourTensorTempl<T>::fillSymmetricIsotropic(T i0, T i1)
+RankFourTensorTempl<T>::fillSymmetricIsotropic(T lambda, T G)
 {
-  fillGeneralIsotropic(i0, i1, 0.0);
+  fillSymmetric9FromInputVector(
+      {lambda + 2.0 * G, lambda, lambda, lambda + 2.0 * G, lambda, lambda + 2.0 * G, G, G, G});
 }
 
 template <typename T>
@@ -732,30 +816,27 @@ RankFourTensorTempl<T>::fillSymmetricIsotropicEandNu(T E, T nu)
   const T & lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
   const T & G = E / (2.0 * (1.0 + nu));
 
-  fillGeneralIsotropic(lambda, G, 0.0);
+  fillSymmetricIsotropic(lambda, G);
 }
 
 template <typename T>
 void
 RankFourTensorTempl<T>::fillAxisymmetricRZFromInputVector(const std::vector<T> & input)
 {
-  if (input.size() != 5)
-    mooseError("To use fillAxisymmetricRZFromInputVector, your input must have size 5.  Your "
-               "vector has size ",
-               input.size());
+  mooseAssert(input.size() == 5,
+              "To use fillAxisymmetricRZFromInputVector, your input must have size 5.");
 
   // C1111     C1122     C1133     C2222     C2233=C1133
-  fillSymmetricFromInputVector({input[0],
-                                input[1],
-                                input[2],
-                                input[0],
-                                input[2],
-                                // C3333     C2323     C3131=C2323   C1212
-                                input[3],
-                                input[4],
-                                input[4],
-                                (input[0] - input[1]) * 0.5},
-                               false);
+  fillSymmetric9FromInputVector({input[0],
+                                 input[1],
+                                 input[2],
+                                 input[0],
+                                 input[2],
+                                 // C3333     C2323     C3131=C2323   C1212
+                                 input[3],
+                                 input[4],
+                                 input[4],
+                                 (input[0] - input[1]) * 0.5});
 }
 
 template <typename T>
@@ -812,7 +893,8 @@ template <typename T>
 T
 RankFourTensorTempl<T>::sum3x3() const
 {
-  // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking correction
+  // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking
+  // correction
   return (*this)(0, 0, 0, 0) + (*this)(0, 0, 1, 1) + (*this)(0, 0, 2, 2) + (*this)(1, 1, 0, 0) +
          (*this)(1, 1, 1, 1) + (*this)(1, 1, 2, 2) + (*this)(2, 2, 0, 0) + (*this)(2, 2, 1, 1) +
          (*this)(2, 2, 2, 2);

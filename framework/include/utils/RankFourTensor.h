@@ -267,8 +267,8 @@ public:
    * @param input the numbers that will be placed in the tensor
    * @param fill_method this can be:
    *             antisymmetric (use fillAntisymmetricFromInputVector)
-   *             symmetric9 (use fillSymmetricFromInputVector with all=false)
-   *             symmetric21 (use fillSymmetricFromInputVector with all=true)
+   *             symmetric9 (use fillSymmetric9FromInputVector)
+   *             symmetric21 (use fillSymmetric21FromInputVector)
    *             general_isotropic (use fillGeneralIsotropicFrominputVector)
    *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
    *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
@@ -312,20 +312,26 @@ protected:
   T _vals[N4];
 
   /**
-   * fillSymmetricFromInputVector takes either 21 (all=true) or 9 (all=false) inputs to fill in
+   * fillSymmetric9FromInputVector takes 9 inputs to fill in
    * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
    * C_ijkl = C_ijlk, C_ijkl = C_jikl
-   * @param input If all==true then this is
+   * @param input is:
    *                C1111 C1122 C1133 C2222 C2233 C3333 C2323 C1313 C1212
    *                In the isotropic case this is (la is first Lame constant, mu is second (shear)
    * Lame constant)
    *                la+2mu la la la+2mu la la+2mu mu mu mu
-   *              If all==false then this is
+   */
+  void fillSymmetric9FromInputVector(const std::vector<T> & input);
+
+  /**
+   * fillSymmetric21FromInputVector takes either 21 inputs to fill in
+   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
+   * C_ijkl = C_ijlk, C_ijkl = C_jikl
+   * @param input is
    *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
    * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
-   * @param all Determines the compoinents passed in vis the input parameter
    */
-  void fillSymmetricFromInputVector(const std::vector<T> & input, bool all);
+  void fillSymmetric21FromInputVector(const std::vector<T> & input);
 
   /**
    * fillAntisymmetricFromInputVector takes 6 inputs to fill the
