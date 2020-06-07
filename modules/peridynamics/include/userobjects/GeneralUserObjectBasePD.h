@@ -29,6 +29,12 @@ protected:
   /// Problem dimension
   const unsigned int _dim;
 
+  /// Reference to auxiliary system
+  AuxiliarySystem & _aux;
+
+  /// Bond status aux variable
+  MooseVariable * _bond_status_var;
+
   /// number of nodes for a edge element
   const unsigned int _nnodes;
 };

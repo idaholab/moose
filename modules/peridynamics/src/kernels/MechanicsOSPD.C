@@ -134,6 +134,7 @@ MechanicsOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
         _current_unit_vec(_component) * _current_unit_vec(coupled_component) * _bond_local_dfdU[0] -
         _bond_local_force[0] * _current_unit_vec(_component) *
             _current_unit_vec(coupled_component) / _current_vec.norm();
+
     for (_i = 0; _i < _test.size(); ++_i)
       for (_j = 0; _j < _phi.size(); ++_j)
         _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
@@ -288,6 +289,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
           const Real val = (nd == 0 ? 1 : -1) * current_vec_nb(_component) *
                            _current_unit_vec(coupled_component) * _bond_nonlocal_dfdU[nd] /
                            origin_vec_nb.norm() * vol_nb;
+
           for (_i = 0; _i < _test.size(); ++_i)
             for (_j = 0; _j < _phi.size(); ++_j)
               _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;

@@ -18,14 +18,16 @@ SingularShapeTensorEliminatorUserObjectPD::validParams()
   InputParameters params = GeneralUserObjectBasePD::validParams();
   params.addClassDescription("UserObject to eliminate the existance of singular shape tensor");
 
+  MooseEnum formulation_option("CONVENTION BONDHORIZON");
+  params.addRequiredParam<MooseEnum>(
+      "formulation", formulation_option, "Which form of shape tensor used in the formulation");
+
   return params;
 }
 
 SingularShapeTensorEliminatorUserObjectPD::SingularShapeTensorEliminatorUserObjectPD(
     const InputParameters & parameters)
-  : GeneralUserObjectBasePD(parameters),
-    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
-    _aux(_fe_problem.getAuxiliarySystem())
+  : GeneralUserObjectBasePD(parameters), _formulation(getParam<MooseEnum>("formulation"))
 {
 }
 
@@ -117,17 +119,41 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
     if (_dim == 2)
       shape_tensor(2, 2) = 1.0;
 
-    for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
-      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
-      {
-        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
-        origin_vec_nb = *_pdmesh.nodePtr(neighbors[nb]) - *elem->node_ptr(nd);
-        weight_nb = horizon_nd / origin_vec_nb.norm();
+    if (_formulation == "CONVENTION")
+    {
+      for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
+        if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
+        {
+          vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+          origin_vec_nb = *_pdmesh.nodePtr(neighbors[nb]) - *elem->node_ptr(nd);
+          weight_nb = horizon_nd / origin_vec_nb.norm();
 
-        for (unsigned int k = 0; k < _dim; ++k)
-          for (unsigned int l = 0; l < _dim; ++l)
-            shape_tensor(k, l) += weight_nb * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
-      }
+          for (unsigned int k = 0; k < _dim; ++k)
+            for (unsigned int l = 0; l < _dim; ++l)
+              shape_tensor(k, l) += weight_nb * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+        }
+    }
+    else if (_formulation == "BONDHORIZON")
+    {
+      unsigned int nb_index =
+          std::find(neighbors.begin(), neighbors.end(), elem->node_id(1 - nd)) - neighbors.begin();
+      std::vector<dof_id_type> dg_neighbors =
+          _pdmesh.getDefGradNeighbors(elem->node_id(nd), nb_index);
+
+      for (unsigned int nb = 0; nb < dg_neighbors.size(); ++nb)
+        if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[dg_neighbors[nb]])) > 0.5)
+        {
+          vol_nb = _pdmesh.getPDNodeVolume(neighbors[dg_neighbors[nb]]);
+          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) - *elem->node_ptr(nd);
+          weight_nb = horizon_nd / origin_vec_nb.norm();
+
+          for (unsigned int k = 0; k < _dim; ++k)
+            for (unsigned int l = 0; l < _dim; ++l)
+              shape_tensor(k, l) += weight_nb * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
+        }
+    }
+    else
+      paramError("formulation", "Unknown formulation for peridynamic shape tensor");
 
     if (MooseUtils::absoluteFuzzyEqual(shape_tensor.det(), 0.0))
       singular = true;

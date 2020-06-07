@@ -110,15 +110,19 @@ NodalRankTwoPD::NodalRankTwoPD(const InputParameters & parameters)
 Real
 NodalRankTwoPD::computeValue()
 {
+
   Real val = 0.0;
   RankTwoTensor tensor;
   Point p = Point(0, 0, 0);
+
+  computeRankTwoTensors();
+
   if (_rank_two_tensor == "total_strain")
-    tensor = computeNodalTotalStrain();
+    tensor = _total_strain;
   else if (_rank_two_tensor == "mechanical_strain")
-    tensor = computeNodalMechanicalStrain();
+    tensor = _mechanical_strain;
   else if (_rank_two_tensor == "stress")
-    tensor = computeNodalStress();
+    tensor = _stress;
   else
     mooseError("NodalRankTwoPD Error: Pass valid rank two tensor: total_strain, "
                "mechanical_strain or stress");
@@ -133,19 +137,25 @@ NodalRankTwoPD::computeValue()
   return val;
 }
 
-RankTwoTensor
-NodalRankTwoPD::computeNodalTotalStrain()
+void
+NodalRankTwoPD::computeRankTwoTensors()
 {
+  _total_strain.zero();
+  _mechanical_strain.zero();
+  _stress.zero();
+
   std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_node->id());
   std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_node->id());
   Real horizon = _pdmesh.getHorizon(_current_node->id());
 
   // calculate the shape tensor and prepare the deformation gradient tensor
-  RankTwoTensor shape, dgrad, delta(RankTwoTensor::initIdentity);
+  RankTwoTensor shape, dgrad, delta(RankTwoTensor::initIdentity), thermal_strain;
   shape.zero();
   dgrad.zero();
   if (_dim == 2)
     shape(2, 2) = dgrad(2, 2) = 1.0;
+
+  thermal_strain.zero();
 
   Real vol_nb, weight;
   RealGradient origin_vec, current_vec;
@@ -171,68 +181,41 @@ NodalRankTwoPD::computeNodalTotalStrain()
         }
     }
 
-  RankTwoTensor total_strain;
-
   // finalize the deformation gradient tensor
-  if (MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
-  {
-    _singular_shape_tensor = true;
-    shape.setToIdentity();
-    dgrad.setToIdentity();
-    total_strain.zero();
-  }
-  else
+  if (!MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
   {
     dgrad *= shape.inverse();
 
     // the green-lagrange strain tensor
-    total_strain = 0.5 * (dgrad.transpose() * dgrad - delta);
+    _total_strain = 0.5 * (dgrad.transpose() * dgrad - delta);
 
     if (_scalar_out_of_plane_strain_coupled)
-      total_strain(2, 2) = _scalar_out_of_plane_strain[0];
+      _total_strain(2, 2) = _scalar_out_of_plane_strain[0];
     else if (_plane_stress)
     {
       if (_has_temp)
       {
         Real mstrain00 =
-            (total_strain(0, 0) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
+            (_total_strain(0, 0) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
         Real mstrain11 =
-            (total_strain(1, 1) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
+            (_total_strain(1, 1) - _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref));
         Real mstrain22 =
             -(_Cijkl(2, 2, 0, 0) * mstrain00 + _Cijkl(2, 2, 1, 1) * mstrain11) / _Cijkl(2, 2, 2, 2);
-        total_strain(2, 2) =
+
+        _total_strain(2, 2) =
             mstrain22 + _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref);
       }
       else
-        total_strain(2, 2) =
-            -(_Cijkl(2, 2, 0, 0) * total_strain(0, 0) + _Cijkl(2, 2, 1, 1) * total_strain(1, 1)) /
+        _total_strain(2, 2) =
+            -(_Cijkl(2, 2, 0, 0) * _total_strain(0, 0) + _Cijkl(2, 2, 1, 1) * _total_strain(1, 1)) /
             _Cijkl(2, 2, 2, 2);
     }
+
+    if (_has_temp)
+      thermal_strain = _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref) * delta;
+
+    _mechanical_strain = _total_strain - thermal_strain;
+
+    _stress = _Cijkl * _mechanical_strain;
   }
-
-  return total_strain;
-}
-
-RankTwoTensor
-NodalRankTwoPD::computeNodalMechanicalStrain()
-{
-  RankTwoTensor total_strain = computeNodalTotalStrain();
-  RankTwoTensor delta(RankTwoTensor::initIdentity);
-  RankTwoTensor thermal_strain;
-
-  if (_has_temp)
-    thermal_strain = _alpha * (_temp_var->getNodalValue(*_current_node) - _temp_ref) * delta;
-
-  RankTwoTensor mechanical_strain = total_strain - thermal_strain;
-
-  if (_singular_shape_tensor)
-    mechanical_strain.zero();
-
-  return mechanical_strain;
-}
-
-RankTwoTensor
-NodalRankTwoPD::computeNodalStress()
-{
-  return _Cijkl * computeNodalMechanicalStrain();
 }

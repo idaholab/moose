@@ -33,7 +33,7 @@ MechanicsActionPD::validParams()
   MooseEnum formulation_option("BOND ORDINARY_STATE NONORDINARY_STATE");
   params.addRequiredParam<MooseEnum>(
       "formulation", formulation_option, "Peridynamic formulation options");
-  MooseEnum stabilization_option("FORCE HORIZON", "HORIZON");
+  MooseEnum stabilization_option("FORCE BONDHORIZON", "BONDHORIZON");
   params.addParam<MooseEnum>("stabilization",
                              stabilization_option,
                              "Stabilization techniques for the peridynamic correspondence model");
@@ -190,7 +190,7 @@ MechanicsActionPD::getKernelName()
   {
     if (_stabilization == "FORCE")
       name = "ForceStabilizedSmallStrainMechanicsNOSPD";
-    else if (_stabilization == "HORIZON")
+    else if (_stabilization == "BONDHORIZON")
     {
       if (_strain == "FINITE")
         name = "HorizonStabilizedFiniteStrainMechanicsNOSPD";

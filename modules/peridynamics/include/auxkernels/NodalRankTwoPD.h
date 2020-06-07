@@ -30,22 +30,10 @@ protected:
   Real computeValue() override;
 
   /**
-   * Function to compute the total strain tensor at each discrete material point
-   * @return The calculated total strain tensor
+   * Function to compute the total strain, mechanical strain, and stress tensors at each discrete
+   * material point
    */
-  virtual RankTwoTensor computeNodalTotalStrain();
-
-  /**
-   * Function to compute the elastic strain tensor at each discrete material point
-   * @return The calculated elastic strain tensor
-   */
-  virtual RankTwoTensor computeNodalMechanicalStrain();
-
-  /**
-   * Function to compute the stress tensor at each discrete materials point
-   * @return The calculated stress tensor
-   */
-  virtual RankTwoTensor computeNodalStress();
+  virtual void computeRankTwoTensors();
 
   bool _has_temp;
 
@@ -98,4 +86,9 @@ protected:
 
   /// elasticity tensor
   RankFourTensor _Cijkl;
+
+  /// rank two tensors
+  RankTwoTensor _total_strain;
+  RankTwoTensor _mechanical_strain;
+  RankTwoTensor _stress;
 };

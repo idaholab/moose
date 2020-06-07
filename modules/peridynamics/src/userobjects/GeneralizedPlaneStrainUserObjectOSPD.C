@@ -75,6 +75,7 @@ GeneralizedPlaneStrainUserObjectOSPD::execute()
                nv_j / active_neighbors[1] * bond_status;
 
   // diagonal jacobian
-  _jacobian += _Cijkl[0](2, 2, 2, 2) * nv_i / active_neighbors[0] * bond_status +
-               _Cijkl[0](2, 2, 2, 2) * nv_j / active_neighbors[1] * bond_status;
+  _jacobian += (_Cijkl[0](2, 2, 2, 2) * nv_i / active_neighbors[0] +
+                _Cijkl[0](2, 2, 2, 2) * nv_j / active_neighbors[1]) *
+               bond_status;
 }

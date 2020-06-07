@@ -104,7 +104,7 @@
 [Modules/Peridynamics/Mechanics/Master]
   [./all]
     formulation = NONORDINARY_STATE
-    stabilization = HORIZON
+    stabilization = BONDHORIZON
   [../]
 []
 
@@ -116,7 +116,7 @@
   [../]
   [./strain]
     type = ComputeSmallStrainNOSPD
-    stabilization = HORIZON
+    stabilization = BONDHORIZON
   [../]
   [./stress]
     type = ComputeLinearElasticStress

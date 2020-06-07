@@ -35,9 +35,6 @@ protected:
   /// function to compute and check the singularity of shape tensor of a bond
   bool checkShapeTensorSingularity(const Elem * elem);
 
-  /// Bond status aux variable
-  MooseVariable * _bond_status_var;
-
-  /// Reference to auxiliary system
-  AuxiliarySystem & _aux;
+  /// Option of formulation for peridynamic shape tensor: CONVENTION or BONDHORIZON
+  const MooseEnum _formulation;
 };

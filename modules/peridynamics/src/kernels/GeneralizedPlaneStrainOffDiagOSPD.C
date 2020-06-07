@@ -186,7 +186,6 @@ void
 GeneralizedPlaneStrainOffDiagOSPD::computeTempOffDiagJacobianScalar(unsigned int jvar_num)
 {
   // off-diagonal jacobian entries on the row
-
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar_num, _var.number());
 
   // calculate number of active neighbors for node i and j
