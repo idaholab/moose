@@ -56,8 +56,8 @@ protected:
   /// number of displacement components
   const unsigned int _ndisp;
 
-  /// pointer to displacement variables
-  std::vector<MooseVariable *> _vars;
+  /// the old displacemnt value
+  std::vector<const VariableValue *> _disp_old;
 
   /// flag for incremental formulation
   const bool _angular_velocity;

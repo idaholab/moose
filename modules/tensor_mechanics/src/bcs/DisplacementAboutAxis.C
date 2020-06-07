@@ -51,7 +51,7 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
     _axis_direction(getParam<RealVectorValue>("axis_direction")),
     _ndisp(coupledComponents("displacements")),
-    _vars(_ndisp),
+    _disp_old(_ndisp),
     _angular_velocity(getParam<bool>("angular_velocity"))
 {
   if (_component < 0 || _component > 2)
@@ -69,7 +69,7 @@ DisplacementAboutAxis::initialSetup()
 
   if (_angular_velocity)
     for (unsigned int i = 0; i < _ndisp; ++i)
-      _vars[i] = getVar("displacements", i);
+      _disp_old[i] = &coupledDofValuesOld("displacements", i);
 }
 
 Real
@@ -92,7 +92,7 @@ DisplacementAboutAxis::computeQpValue()
 
   if (_angular_velocity)
     for (unsigned int i = 0; i < _ndisp; i++)
-      p_old(i, 0) += _vars[i]->dofValuesOld()[_qp];
+      p_old(i, 0) += (*_disp_old[i])[_qp];
 
   ColumnMajorMatrix p_new = rotateAroundAxis(p_old, angle);
 

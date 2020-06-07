@@ -46,6 +46,16 @@
     abs_zero = 1e-10
     issues = '#15388'
   [../]
+  [./disp_about_axis_axial_motion_delayed]
+    design = DisplacementAboutAxis.md
+    requirement = 'The system shall be able to use disaplcement about axis after applying an arbitraty deformation'
+    type = 'CSVDiff'
+    input = 'disp_about_axis_axial_motion_delayed.i'
+    csvdiff = 'disp_about_axis_axial_motion_delayed_out.csv'
+    rel_err = 1E-5
+    abs_zero = 1e-10
+    issues = '#15388'
+  [../]
   [./disp_about_axis_error1]
     design = DisplacementAboutAxis.md
     issues = '#15092'
