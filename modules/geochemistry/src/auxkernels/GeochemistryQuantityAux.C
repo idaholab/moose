@@ -15,7 +15,8 @@ InputParameters
 GeochemistryQuantityAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("TODO");
+  params.addClassDescription(
+      "Extracts information from the Reactor and records it in the AuxVariable");
   params.addRequiredParam<std::string>("species", "Species name");
   MooseEnum quantity_choice("molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
                             "surface_charge surface_potential temperature",
@@ -24,12 +25,10 @@ GeochemistryQuantityAux::validParams()
       "quantity",
       quantity_choice,
       "Type of quantity to output.  These are available for all species: activity (which equals "
-      "fugacity for gases); bulk moles "
-      "(this will be zero if the species is not in the basis).  These are available only for "
-      "non-minerals: molal = "
-      "mol(species)/kg(solvent_water); mg_per_kg "
-      "= mg(species)/kg(solvent_water); neglog10a = -log10(activity).  These "
-      "are available only for minerals: "
+      "fugacity for gases); bulk moles (this will be zero if the species is not in the basis); "
+      "neglog10a = -log10(activity).  These are available only for non-minerals: molal = "
+      "mol(species)/kg(solvent_water); mg_per_kg = mg(species)/kg(solvent_water).  These are "
+      "available only for minerals: "
       "free_mg = free mg; free_cm3 = free cubic-centimeters.  These are available for minerals "
       "that host sorbing sites: surface_charge (C/m^2); surface_potential (V).  If "
       "quantity=temperature, then the 'species' is ignored and the AuxVariable will record the "
@@ -68,10 +67,9 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
                "the free_mg, free_cm3 and surface-related quantities are only available for "
                "mineral species");
   if (is_mineral && (_quantity_choice == QuantityChoiceEnum::MOLAL ||
-                     _quantity_choice == QuantityChoiceEnum::MG_PER_KG ||
-                     _quantity_choice == QuantityChoiceEnum::NEGLOG10A))
+                     _quantity_choice == QuantityChoiceEnum::MG_PER_KG))
     paramError("quantity",
-               "the molal and mg_per_kg and neglog10a quantities are only available for "
+               "the molal and mg_per_kg quantities are only available for "
                "non-mineral species");
   if (_quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE ||
       _quantity_choice == QuantityChoiceEnum::SURFACE_POTENTIAL)
@@ -148,8 +146,7 @@ GeochemistryQuantityAux::computeValue()
                 1000.0;
           break;
         case QuantityChoiceEnum::NEGLOG10A:
-          ret = -std::log10(egs.getEquilibriumMolality(eqm_ind) *
-                            egs.getEquilibriumActivityCoefficient(eqm_ind));
+          ret = -std::log10(egs.getEquilibriumActivity(eqm_ind));
           break;
         case QuantityChoiceEnum::ACTIVITY:
           ret = egs.getEquilibriumActivity(eqm_ind);

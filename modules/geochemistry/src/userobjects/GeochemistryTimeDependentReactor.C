@@ -42,7 +42,8 @@ GeochemistryTimeDependentReactor::validParams()
       "remove_fixed_activity_name",
       "The name of the species that should have their activity or fugacity constraint removed at "
       "time given in remove_fixed_activity_time.  There should be an equal number of these names "
-      "as times given in remove_fixed_activity_time");
+      "as times given in remove_fixed_activity_time.  Each of these must be in the basis and have "
+      "an activity or fugacity constraint");
   params.addParam<std::vector<Real>>("remove_fixed_activity_time",
                                      "The times at which the species in remove_fixed_activity_name "
                                      "should have their activity or fugacity constraint removed.");
@@ -57,7 +58,10 @@ GeochemistryTimeDependentReactor::validParams()
   params.addParam<std::vector<std::string>>(
       "controlled_activity_name",
       "The names of the species that have their activity or fugacity constrained.  There should be "
-      "an equal number of these names as values given in controlled_activity_value");
+      "an equal number of these names as values given in controlled_activity_value.  NOTE: if "
+      "these species are not in the basis, or they do not have an activity (or fugacity) "
+      "constraint then their activity cannot be controlled: in this case MOOSE will ignore the "
+      "value you prescribe in controlled_activity_value.");
   params.addCoupledVar("controlled_activity_value",
                        "Values of the activity or fugacity of the species in "
                        "controlled_activity_name list.  These should always be positive");
@@ -126,11 +130,33 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
                      " does not appear in the basis or equilibrium species list");
 
   // check and set activity controllers
+  for (unsigned i = 0; i < _num_removed_fixed; ++i)
+  {
+    if (_mgd.basis_species_index.count(_remove_fixed_activity_name[i]) == 0)
+      paramError(
+          "remove_fixed_activity_name",
+          "The species ",
+          _remove_fixed_activity_name[i],
+          " is not in the basis, so cannot have its activity or fugacity constraint removed");
+    else
+    {
+      const unsigned basis_ind = _mgd.basis_species_index.at(_remove_fixed_activity_name[i]);
+      const EquilibriumGeochemicalSystem::ConstraintMeaningEnum cm =
+          _egs.getConstraintMeaning()[basis_ind];
+      if (!(cm == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY ||
+            cm == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY))
+        paramError("remove_fixed_activity_name",
+                   "The species ",
+                   _remove_fixed_activity_name[i],
+                   " is does not have an activity or fugacity constraint so cannot have such a "
+                   "constraint removed");
+    }
+  }
   if (_num_removed_fixed != _remove_fixed_activity_time.size())
     paramError("remove_fixed_activity_name",
                "must be of the same size as remove_fixed_activity_time");
   if (coupledComponents("controlled_activity_value") != _num_controlled_activity)
-    paramError("controlled_activity_names", "must have the same size as controlled_activity_value");
+    paramError("controlled_activity_name", "must have the same size as controlled_activity_value");
   for (unsigned i = 0; i < _num_controlled_activity; ++i)
     _controlled_activity_species_values.push_back(&coupledValue("controlled_activity_value", i));
 
@@ -184,11 +210,6 @@ GeochemistryTimeDependentReactor::execute()
     {
       if (_mgd.basis_species_index.count(_remove_fixed_activity_name[i]))
         _egs.changeConstraintToBulk(_mgd.basis_species_index.at(_remove_fixed_activity_name[i]));
-      else
-        mooseError(
-            "The species ",
-            _remove_fixed_activity_name[i],
-            " is not in the basis, so cannot have its activity or fugacity constraint removed");
       _removed_fixed_activity[i] = true;
     }
   }

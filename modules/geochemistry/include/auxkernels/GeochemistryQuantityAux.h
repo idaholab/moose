@@ -13,7 +13,7 @@
 #include "AuxKernel.h"
 
 /**
- * TODO
+ * AuxKernel to extract information from a Geochemistry*Reactor to record into an AuxVariable
  */
 class GeochemistryQuantityAux : public AuxKernel
 {

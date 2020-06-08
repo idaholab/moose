@@ -1,4 +1,53 @@
 [Tests]
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'source_species_names: must have the same size as source_species_rates'
+    requirement = 'An error will be thrown if each source species is not provided with exactly onerate'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except2]
+    type = RunException
+    input = except2.i
+    expect_err = 'source_species_names: The name badname does not appear in the basis or equilibrium species list'
+    requirement = 'An error will be thrown if a source species does not exist in the geochemical system'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except3]
+    type = RunException
+    input = except3.i
+    expect_err = 'The species NaCl is not in the basis, so cannot have its activity or fugacity constraint removed'
+    requirement = 'An error will be thrown if a species whose activity constraint is to be removed is not in the basis'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except4]
+    type = RunException
+    input = except4.i
+    expect_err = 'remove_fixed_activity_name:
+    The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
+    requirement = 'An error will be thrown if a species whose activity constraint is to be removed does not have an activity or fugacity constraint'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except5]
+    type = RunException
+    input = except5.i
+    expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
+    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except6]
+    type = RunException
+    input = except6.i
+    expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
+    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
   [./add_feldspar]
     type = 'RunApp'
     input = 'add_feldspar.i'
@@ -98,5 +147,24 @@
     requirement = "The geochemistry module shall be able to progressively remove reactants, allowing precipitates for form"
     issues = '#15330'
     design = 'flow_through.md'
+  [../]
+  [./simple]
+    type = 'CSVDiff'
+    input = 'simple.i'
+    csvdiff = 'simple_out.csv'
+    rel_err = 1.0E-5
+    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./simple_no_action]
+    type = 'CSVDiff'
+    input = 'simple.i'
+    csvdiff = 'simple_out.csv'
+    prereq = 'simple'
+    rel_err = 1.0E-5
+    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution, without using an Action'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
   [../]
 []

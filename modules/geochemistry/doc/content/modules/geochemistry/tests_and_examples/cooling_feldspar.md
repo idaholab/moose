@@ -19,4 +19,6 @@ The initial composition of the water is shown in [table:composition].  In additi
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/cooling.i
+
 !bibtex bibliography

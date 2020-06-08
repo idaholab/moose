@@ -31,6 +31,7 @@ The system is brought to equilibrium and but the calcite is not "dumped".  After
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/calcite_dumping.i
 
 
 

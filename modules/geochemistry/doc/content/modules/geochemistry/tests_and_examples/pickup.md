@@ -73,5 +73,9 @@ Figures 22.3 and 22.4 of [!cite](bethke_2007) show the results.
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing_1.i
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/mixing_2.i
+
 
 !bibtex bibliography

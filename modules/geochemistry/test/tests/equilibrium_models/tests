@@ -5,7 +5,7 @@
     expect_out = 'Mass of solvent water = 1kg'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems with no precipitation"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md seawater.md'
+    design = 'GeochemistryTimeIndependentReactor.md seawater.md'
   [../]
   [./seawater_precip]
     type = 'RunApp'
@@ -13,7 +13,7 @@
     expect_out = 'Dolomite;  bulk_moles'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems including mineral precipitation"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md seawater.md'
+    design = 'GeochemistryTimeIndependentReactor.md seawater.md'
   [../]
   [./amazon]
     type = 'RunApp'
@@ -21,7 +21,7 @@
     expect_out = 'pH = 6.5'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md amazon.md'
+    design = 'GeochemistryTimeIndependentReactor.md amazon.md'
   [../]
   [./amazon_with_minerals]
     type = 'RunApp'
@@ -29,7 +29,7 @@
     expect_out = 'Hematite;  bulk_moles'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed and minerals precipitate"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md amazon.md'
+    design = 'GeochemistryTimeIndependentReactor.md amazon.md'
   [../]
   [./red_sea_no_precip]
     type = 'RunApp'
@@ -37,7 +37,7 @@
     expect_out = 'pH = 5.6'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md red_sea.md'
+    design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
   [../]
   [./red_sea_precip]
     type = 'RunApp'
@@ -45,6 +45,95 @@
     expect_out = 'Chalcocite;  bulk_moles'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature, including when mineral precipitate"
     issues = '#15290 #15261'
-    design = 'EquilibriumReactionSolverOutput.md red_sea.md'
+    design = 'GeochemistryTimeIndependentReactor.md red_sea.md'
+  [../]
+  [./HCl]
+    type = 'CSVDiff'
+    input = 'HCl.i'
+    csvdiff = 'HCl_out.csv'
+    rel_err = 1.0E-5
+    requirement = 'Time-indpendent problems involving fixing pH should be solvable using an Action'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./HCl_no_action]
+    type = 'CSVDiff'
+    input = 'HCl.i'
+    csvdiff = 'HCl_out.csv'
+    prereq = 'HCl'
+    rel_err = 1.0E-5
+    requirement = 'Time-indpendent problems involving fixing pH should be solvable without using an Action'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except1]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_solvent_kg=false'
+    expect_err = 'Unknown variable kg_solvent_H2O'
+    requirement = 'It shall be possible to record solvent mass in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except2]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_pH=false'
+    expect_err = 'Unknown variable pH'
+    requirement = 'It shall be possible to record pH in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except3]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_molal=false'
+    expect_err = 'Unknown variable molal_Cl-'
+    requirement = 'It shall be possible to record molality in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except4]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_mg_per_kg=false'
+    expect_err = 'Unknown variable mg_per_kg_HCl'
+    requirement = 'It shall be possible to record mg/kg in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except5]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_activity=false'
+    expect_err = 'Unknown variable activity_OH-'
+    requirement = 'It shall be possible to record activity in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except6]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_bulk_moles=false'
+    expect_err = 'Unknown variable bulk_moles_H\+'
+    requirement = 'It shall be possible to record bulk moles in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
+  [../]
+  [./except7]
+    type = RunException
+    input = 'HCl.i'
+    prereq = 'HCl'
+    cli_args = 'TimeIndependentReactionSolver/add_aux_temperature=false'
+    expect_err = 'Unknown variable solution_temperature'
+    requirement = 'It shall be possible to record bulk moles in time-indpendent problems'
+    issues = '#15290 #15261'
+    design = 'GeochemistryTimeIndependentReactor.md'
   [../]
 []

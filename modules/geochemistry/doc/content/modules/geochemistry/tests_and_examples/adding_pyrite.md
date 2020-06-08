@@ -35,4 +35,8 @@ The initial composition of the water is shown in [table:composition].  In additi
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/dissolution_pyrite_1.i
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/dissolution_pyrite_2.i
+
 !bibtex bibliography

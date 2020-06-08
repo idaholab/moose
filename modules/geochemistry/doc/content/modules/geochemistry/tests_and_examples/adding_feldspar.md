@@ -21,4 +21,6 @@ The initial composition of the water is shown in [table:composition].  Assume th
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/add_feldspar.i
+
 !bibtex bibliography
