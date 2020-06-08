@@ -206,6 +206,8 @@ FEProblemBase::validParams()
 
   params.addPrivateParam<MooseMesh *>("mesh");
 
+  params.declareControllable("solve");
+
   return params;
 }
 

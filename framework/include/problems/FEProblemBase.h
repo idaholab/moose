@@ -1866,7 +1866,7 @@ protected:
   std::set<TagID> _fe_matrix_tags;
 
   /// Whether or not to actually solve the nonlinear system
-  bool _solve;
+  const bool & _solve;
 
   bool _transient;
   Real & _time;
