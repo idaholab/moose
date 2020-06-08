@@ -12,13 +12,23 @@
     lower_bound = 9000
     upper_bound = 11000
   []
+  [L_dist]
+    type = Uniform
+    lower_bound = 0.01
+    upper_bound = 0.05
+  []
+  [Tinf_dist]
+    type = Uniform
+    lower_bound = 290
+    upper_bound = 310
+  []
 []
 
 [Samplers]
-  [train_sample]
+  [sample]
     type = MonteCarlo
-    num_rows = 10
-    distributions = 'k_dist q_dist'
+    num_rows = 6
+    distributions = 'q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -27,7 +37,7 @@
   [sub]
     type = SamplerFullSolveMultiApp
     input_files = sub.i
-    sampler = train_sample
+    sampler = sample
   []
 []
 
@@ -35,8 +45,8 @@
   [cmdline]
     type = MultiAppCommandLineControl
     multi_app = sub
-    sampler = train_sample
-    param_names = 'Materials/conductivity/prop_values Kernels/source/value'
+    sampler = sample
+    param_names = 'Kernels/source/value'
   []
 []
 
@@ -44,9 +54,9 @@
   [data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    sampler = train_sample
+    sampler = sample
     to_vector_postprocessor = results
-    from_postprocessor = 'avg'
+    from_postprocessor = 'avg max'
   []
 []
 
@@ -57,25 +67,23 @@
 []
 
 [Trainers]
-  [GP_avg_trainer]
+  [gauss_process_avg]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    covariance_function = 'covar'             #Choose a squared exponential for the kernel
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'k_dist q_dist'
-    sampler = train_sample
+    length_factor = '20000.0'
+    distributions = 'q_dist'
+    sampler = sample
     results_vpp = results
     results_vector = data:avg
   []
-[]
-
-[Covariance]
-  [covar]
-    type=SquaredExponentialCovariance
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
+  [gauss_process_max]
+    type = GaussianProcessTrainer
+    execute_on = timestep_end
+    length_factor = '20000.0'
+    distributions = 'q_dist'
+    sampler = sample
+    results_vpp = results
+    results_vector = data:max
   []
 []
 
@@ -83,7 +91,7 @@
   file_base = gauss_process_training
   [out]
     type = SurrogateTrainerOutput
-    trainers = 'GP_avg_trainer'
+    trainers = 'gauss_process_avg gauss_process_max'
     execute_on = FINAL
   []
 []

@@ -10,8 +10,6 @@
 #include "GaussianProcess.h"
 #include "Sampler.h"
 
-#include "CovarianceFunctionBase.h"
-
 registerMooseObject("StochasticToolsApp", GaussianProcess);
 
 InputParameters
@@ -24,97 +22,128 @@ GaussianProcess::validParams()
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _training_data(getModelData<RealEigenMatrix>("_training_data")),
-    _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
-    _K(getModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
-    _covar_type(getModelData<std::string>("_covar_type")),
-    _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(
-        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
+  _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points")),
+  _length_factor(getModelData<std::vector<Real> >("_length_factor")),
+  _parameter_mat(getModelData<DenseMatrix<Real> >("_parameter_mat")),
+  _covariance_mat(getModelData<DenseMatrix<Real> >("_covariance_mat")),
+  _training_results(getModelData<DenseMatrix<Real> >("_training_results")),
+  _covariance_results_solve(getModelData<DenseMatrix<Real> >("_covariance_results_solve"))
 {
-  if (isParamValid("trainer"))
-  {
-    const GaussianProcessTrainer & trainer =
-        dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer"));
-    _covariance_function = trainer.getCovarPtr();
-  }
-}
-
-void
-GaussianProcess::setupCovariance()
-{
-}
-
-void
-GaussianProcess::setupCovariance(UserObjectName covar_name)
-{
-  /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction
-  /// Must be called AFTER Covariacne Function is potentially created by action.
-  std::vector<CovarianceFunctionBase *> models;
-  _feproblem.theWarehouse()
-      .query()
-      .condition<AttribName>(covar_name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
-      .queryInto(models);
-  if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object associated with surrogate trainer, "
-               "searching on '" +
-               covar_name + "'");
-  _covariance_function = models[0];
+  std::cout << "TEST IWH A" << '\n';
 }
 
 Real
 GaussianProcess::evaluate(const std::vector<Real> & x) const
 {
-  // Overlaod for evaluate to maintain general compatibility. Only returns mean
-  Real dummy = 0;
-  return this->evaluate(x, dummy);
+  Real dummy=0;
+  return this->evaluate(x, & dummy);
 }
 
 Real
-GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
+GaussianProcess::evaluate(const std::vector<Real> & x, Real* std_dev) const
 {
+  //mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
 
-  //*******************************************//
-  //*****This bock should be .initialize()*****//
-  //*****Only Needs Called Once****************//
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp(_K);
-  //*******************************************//
-  //*******************************************//
-  //*******************************************//
+  //A basic test of prediction ability. Move to surrogate after test
+  //
+  //
+  std::cout << "TEST IWH B" << '\n';
 
-  unsigned int _n_params = _training_params.cols();
-  unsigned int _num_tests = 1;
+  int _n_params = _parameter_mat.n();
+  int _num_samples = _parameter_mat.m();
 
-  mooseAssert(x.size() == _n_params,
-              "Number of parameters provided for evaluation does not match number of parameters "
-              "used for training.");
+  std::cout << "n_params " << _n_params << '\n';
+  std::cout << "_num_samples " << _num_samples << '\n';
+  for (int ii=0; ii<_n_params; ii++){
+    std::cout << "x= " << x.at(ii) << '\n';
+  }
 
-  RealEigenMatrix test_points(_num_tests, _n_params);
-  for (unsigned int ii = 0; ii < _n_params; ++ii)
-    test_points(0, ii) = x[ii];
+  std::cout << "test A" << '\n';
+  Real _num_tests=1;
+  //DenseMatrix<Real> _test_params(_num_tests,_n_params);
+  //_test_params(0,0)=3;
+  //_test_params(1,0)=5;
+  std::cout << "test B" << '\n';
 
-  test_points = _param_standardizer.getStandardized(test_points);
+  DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
+  DenseMatrix<Real> K_test(_num_tests,_num_tests);
 
-  RealEigenMatrix K_train_test =
-      _covariance_function->computeCovarianceMatrix(_training_params, test_points, false);
-  RealEigenMatrix K_test =
-      _covariance_function->computeCovarianceMatrix(test_points, test_points, true);
+  std::cout << "test C" << '\n';
 
-  // Compute the predicted mean value (centered)
-  RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);
-  // De-center/scale the value and store for return
-  pred_value = _data_standardizer.getDestandardized(pred_value);
+  _parameter_mat.print();
+  //_test_params.print();
+  for (int ii=0; ii<_num_samples; ii++){
+    for (int jj=0; jj<_num_tests; jj++){
+      Real cov =0;
+      for (int kk=0; kk<_n_params; kk++){
+        std::cout << _parameter_mat(ii,kk) <<"   " << x.at(kk) << "   " << _length_factor.at(kk) << '\n';
+        cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (2.0 * _length_factor.at(kk));
+      }
+      cov = std::exp(-cov);
+      K_train_test(ii,jj) = cov;
+      }
+  }
 
-  RealEigenMatrix pred_var =
-      K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
+  K_train_test.print();
 
-  // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  std_dev = _data_standardizer.getDescaled(pred_var.array().sqrt())(0, 0);
+  for (int ii=0; ii<_num_tests; ii++){
+    for (int jj=0; jj<_num_tests; jj++){
+      Real cov =0;
+      for (int kk=0; kk<_n_params; kk++){
+        std::cout << _parameter_mat(ii,kk) <<"   " << x.at(kk) << "   " << _length_factor.at(kk) << '\n';
+        cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (2.0 * _length_factor.at(kk));
+      }
+      cov = std::exp(-cov);
+      K_test(ii,jj) = cov;
+      }
+  }
 
-  return pred_value(0, 0);
+  K_test.print();
+  std::cout << "Training Points" << '\n';
+  _parameter_mat.print();
+
+  std::cout << "Training Data" << '\n';
+  _training_results.print();
+
+
+
+  DenseMatrix<Real> _test_pred(_covariance_results_solve);
+  _test_pred.left_multiply_transpose(K_train_test);
+  std::cout << "pred" << '\n';
+  _test_pred.print();
+
+
+
+  //This is annoying, find better way to go between DenseMatrix and DenseVector
+  DenseMatrix<Real> _test_std(_num_samples,_num_tests);
+  DenseVector<Real> cho_solution_vec;
+  DenseVector<Real> K_train_test_vec(_num_samples);
+  for (int ii=0; ii<_num_samples; ii++){
+    K_train_test_vec(ii)=K_train_test(ii,0);
+  }
+  std::cout << "Covar" << '\n';
+   _covariance_mat.print();
+  DenseMatrix<Real> covariance_mat_copy(_covariance_mat);
+  std::cout << "Covar Copy" << '\n';
+   covariance_mat_copy.print();
+  covariance_mat_copy.cholesky_solve(K_train_test_vec,cho_solution_vec);
+  for (int ii=0; ii<_num_tests; ii++){
+    _test_std(ii,0)=cho_solution_vec(ii);
+    }
+  std::cout << "STD After Cho Solve" << '\n';
+   _test_std.print();
+  //  std::cout << "Training results"<< '\n';
+  //  _training_results.print();
+  //  std::cout << "Cho Solutiol" << '\n';
+  //  _covariance_results_solve.print();
+  // DenseMatrix<Real> _test_std(_covariance_results_solve);
+  _test_std.left_multiply_transpose(K_train_test);
+  _test_std.scale(-1);
+  _test_std += K_test;
+  std::cout << "stddev" << '\n';
+  _test_std.print();
+
+  *std_dev=_test_std(0,0);
+
+  return _test_pred(0,0);
 }

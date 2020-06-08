@@ -10,9 +10,6 @@
 #pragma once
 
 #include "SurrogateModel.h"
-#include "GaussianProcessTrainer.h"
-#include "Standardizer.h"
-#include <Eigen/Dense>
 
 class GaussianProcess : public SurrogateModel
 {
@@ -20,54 +17,24 @@ public:
   static InputParameters validParams();
   GaussianProcess(const InputParameters & parameters);
   virtual Real evaluate(const std::vector<Real> & x) const override;
-  virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
+  virtual Real evaluate(const std::vector<Real> & x, Real* std) const;
 
-  // void setCovarianceName(std::string covar_name);
-
-  virtual void setupCovariance();
-
-  virtual void setupCovariance(UserObjectName _covar_name);
-
-  const std::string & getCovarType() const { return _covar_type; }
-
-  const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
-
-  const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVecMap() const
-  {
-    return _hyperparam_vec_map;
-  }
+protected:
+  /// Array containing sample points and the results
+  const std::vector<std::vector<Real>> & _sample_points;
 
 private:
-  /// Paramaters (x) used for training
-  const RealEigenMatrix & _training_params;
+  const std::vector<Real> & _length_factor;
 
-  /// Standardizer for use with params (x)
-  const StochasticTools::Standardizer & _param_standardizer;
-
-  /// Data (y) used for training
-  const RealEigenMatrix & _training_data;
-
-  /// Standardizer for use with data (y)
-  const StochasticTools::Standardizer & _data_standardizer;
+  ///
+  const DenseMatrix<Real> & _parameter_mat;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  const RealEigenMatrix & _K;
+  const DenseMatrix<Real> & _covariance_mat;
+
+  /// An _n_sample vector containg results of traing runs
+  const DenseMatrix<Real> & _training_results;
 
   /// A solve of Ax=b via Cholesky.
-  const RealEigenMatrix & _K_results_solve;
-
-  /// MOOSE problem,
-  const FEProblemBase & _feproblem;
-
-  /// Type of covariance function used for this surrogate
-  const std::string & _covar_type;
-
-  /// Scalar hyperparameters. Stored for use in surrogate
-  const std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
+  const DenseMatrix<Real> & _covariance_results_solve;
 };

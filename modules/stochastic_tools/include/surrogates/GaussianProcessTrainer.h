@@ -10,12 +10,10 @@
 #pragma once
 
 #include "SurrogateTrainer.h"
-#include "Standardizer.h"
-#include <Eigen/Dense>
+#include "PolynomialQuadrature.h"
+#include "QuadratureSampler.h"
 
 #include "Distribution.h"
-
-#include "CovarianceFunctionBase.h"
 
 class GaussianProcessTrainer : public SurrogateTrainer
 {
@@ -27,9 +25,11 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-  CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
+protected:
 
 private:
+  // TODO: Move as much of these to constructor initialization
+
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
 
@@ -39,45 +39,24 @@ private:
   /// True when _sampler data is distributed
   bool _values_distributed;
 
+  // The following items are stored using declareModelData for use as a trained model.
+
   /// Total number of parameters/dimensions
   unsigned int _n_params;
 
-  /// Paramaters (x) used for training, along with statistics
-  RealEigenMatrix & _training_params;
+  ///
+  std::vector<Real> & _length_factor;
 
-  /// Standardizer for use with params (x)
-  StochasticTools::Standardizer & _param_standardizer;
-
-  /// Data (y) used for training
-  RealEigenMatrix & _training_data;
-
-  /// Standardizer for use with data (y)
-  StochasticTools::Standardizer & _data_standardizer;
+  ///
+  DenseMatrix<Real> & _parameter_mat;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  RealEigenMatrix & _K;
+  DenseMatrix<Real> & _covariance_mat;
+
+  /// An _n_sample vector containg results of traing runs
+  DenseMatrix<Real> & _training_results;
 
   /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix & _K_results_solve;
+  DenseMatrix<Real> & _covariance_results_solve;
 
-  /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
-
-  /// Switch for training param (x) standardization
-  bool _standardize_params;
-
-  /// Switch for training data(y) standardization
-  bool _standardize_data;
-
-  /// Type of covariance function used for this surrogate
-  std::string & _covar_type;
-
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
 };

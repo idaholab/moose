@@ -17,53 +17,34 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription(
-      "Provides data preperation and training for a Gaussian Process surrogate model.");
+  params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
   params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
   params.addRequiredParam<VectorPostprocessorName>(
       "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
   params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
-  params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
+  params.addRequiredParam<std::vector<Real> >("length_factor", "Length Factor to use for Covariance Kernel");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
-  params.addParam<bool>(
-      "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
-  params.addParam<bool>(
-      "standardize_data", true, "Standardize (center and scale) training data (y values)");
 
   return params;
 }
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _training_data(declareModelData<RealEigenMatrix>("_training_data")),
-    _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
-    _K(declareModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
-    _standardize_params(getParam<bool>("standardize_params")),
-    _standardize_data(getParam<bool>("standardize_data")),
-    _covar_type(declareModelData<std::string>("_covar_type")),
-    _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(
-        declareModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
-
+    _length_factor(declareModelData<std::vector<Real> >("_length_factor")),
+    _parameter_mat(declareModelData<DenseMatrix<Real> >("_parameter_mat")),
+    _covariance_mat(declareModelData<DenseMatrix<Real> >("_covariance_mat")),
+    _training_results(declareModelData<DenseMatrix<Real> >("_training_results")),
+    _covariance_results_solve(declareModelData<DenseMatrix<Real> >("_covariance_results_solve"))
 {
-  const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
-  FEProblemBase & feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"));
+}
 
-  std::vector<CovarianceFunctionBase *> models;
-  feproblem.theWarehouse()
-      .query()
-      .condition<AttribName>(name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
-      .queryInto(models);
-  if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
-  _covariance_function = models[0];
+void
+GaussianProcessTrainer::initialize()
+{
+  _length_factor=getParam<std::vector<Real>>("length_factor");
 }
 
 void
@@ -86,89 +67,137 @@ GaussianProcessTrainer::initialSetup()
 }
 
 void
-GaussianProcessTrainer::initialize()
+GaussianProcessTrainer::execute()
 {
   // Check if results of samples matches number of samples
   __attribute__((unused)) dof_id_type num_rows =
       _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
+  mooseAssert(num_rows == _values_ptr->size(),
+              "Sampler number of rows does not match number of results from vector postprocessor.");
 
-  if (num_rows != _values_ptr->size())
-    paramError("results_vpp",
-               "The number of elements in '",
-               getParam<VectorPostprocessorName>("results_vpp"),
-               "/",
-               getParam<std::string>("results_vector"),
-               "' is not equal to the number of samples in '",
-               getParam<SamplerName>("sampler"),
-               "'!");
+  std::cout << "_n_params " << _n_params << '\n';
+  // Initialize covariance matrix
+  int _num_samples = _values_ptr->size();
+  _covariance_mat.resize(_num_samples, _num_samples);
 
-  _covar_type = _covariance_function->type();
+  std::cout << "_covariance_mat " << '\n' << _covariance_mat << '\n' << '\n';
+  //
 
-  unsigned int num_samples = _values_ptr->size();
-
+  //TODO:figure this out
   // Offset for replicated/distributed result data
   dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
 
-  // Load training parameters into Eigen::Matrix for easier liner algebra manipulation
-  // Load training data into Eigen::Vector for easier liner algebra manipulation
-  std::cout << _sampler->getNumberOfRows() << "?=" << num_samples << '\n';
-  mooseAssert(_sampler->getNumberOfRows() == num_samples,
-              "Number of sampler rows not equal to number of results in selected VPP.");
+  //load this into matrix for the time being, optimize later with proper Calls.
+  //Arbitary access is helpfor for initial dev.
+  //May load a very large matrix, which could be bad.
+  _parameter_mat = _sampler->getLocalSamples();
+  std::cout << "_parameter_mat " << '\n' << _parameter_mat << '\n' << '\n';
 
-  // Consider the possibility of a very large matrix load.
-  _training_params.setZero(_sampler->getNumberOfRows(), _sampler->getNumberOfCols());
-  _training_data.setZero(num_samples, 1);
-  for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
-  {
-    // Loading parameters from sampler
-    std::vector<Real> data = _sampler->getNextLocalRow();
-    for (unsigned int d = 0; d < data.size(); ++d)
-      _training_params(p, d) = data[d];
+  //todo, implement scaling
 
-    // Loading result data from VPP
-    _training_data(p, 0) = (*_values_ptr)[p - offset];
+  //Get training data
+  _training_results.resize(_num_samples,1);
+
+  std::cout << _values_ptr->at(0) << '\n';
+
+  //populate covariance mat and load reasult data
+  for (int ii=0; ii<_num_samples; ii++){
+    for (int jj=0; jj<_num_samples; jj++){
+        //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
+        Real cov =0;
+        for (int kk=0; kk<_n_params; kk++){
+          //Compute distance per parameter
+          std::cout << _parameter_mat(ii,kk) <<"   " << _parameter_mat(jj,kk) << "   " << _length_factor.at(kk) << '\n';
+          cov += std::pow(( _parameter_mat(ii,kk)-  _parameter_mat(jj,kk) ),2) / (2.0 * _length_factor.at(kk));
+        }
+        cov = std::exp(-cov);
+        _covariance_mat(ii,jj) = cov;
+        _covariance_mat(jj,ii) = cov;
+      }
+    _training_results(ii,0) =   (*_values_ptr)[ii - offset];
   }
+
+  _covariance_mat.print();
+  // std::cout << "test 0" << '\n';
+  // _training_results.print();
+
+
+  //This is annoying, find better way to go between DenseMatrix and DenseVector
+  DenseVector<Real> cho_solution_vec;
+  DenseVector<Real> _training_results_vec(_num_samples);
+  for (int ii=0; ii<_num_samples; ii++){
+    _training_results_vec(ii)=_training_results(ii,0);
+  }
+  _covariance_results_solve.resize(_num_samples,1);
+  DenseMatrix<Real> covariance_mat_copy(_covariance_mat);
+  covariance_mat_copy.cholesky_solve(_training_results_vec,cho_solution_vec);
+  for (int ii=0; ii<_num_samples; ii++){
+    _covariance_results_solve(ii,0)=cho_solution_vec(ii);
+    }
+  std::cout << "After Cho Solve" << '\n';
+   _covariance_mat.print();
+   std::cout << "Training results"<< '\n';
+   _training_results.print();
+   std::cout << "Cho Solution" << '\n';
+   _covariance_results_solve.print();
+
+   // std::cout << "L?" << '\n';
+   // covariance_mat_copy.print();
+   //
+   // std::cout << "A?" << '\n';
+   // DenseMatrix<Real> another_covariance_mat_copy(covariance_mat_copy);
+   // covariance_mat_copy.right_multiply_transpose(another_covariance_mat_copy);
+   // covariance_mat_copy.print();
+
+
+  // //A basic test of prediction ability. Move to surrogate after test
+  // //
+  // //
+  // std::cout << "test A" << '\n';
+  // Real _num_tests=2;
+  // DenseMatrix<Real> _test_params(_num_tests,_n_params);
+  // _test_params(0,0)=3;
+  // _test_params(1,0)=5;
+  // std::cout << "test B" << '\n';
+  //
+  // DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
+  // DenseMatrix<Real> K_test(_num_tests,_num_tests);
+  //
+  // std::cout << "test C" << '\n';
+  //
+  // for (int ii=0; ii<_num_samples; ii++){
+  //   for (int jj=0; jj<_num_tests; jj++){
+  //       //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
+  //       Real val = std::pow(( _parameter_mat(ii,0)-  _test_params(jj,0)),2);
+  //       val = val / (2.0 * _length_factor.at(0));
+  //       val = std::exp(-val);
+  //       K_train_test(ii,jj) = val;
+  //     }
+  // }
+  //
+  // K_train_test.print();
+  //
+  // for (int ii=0; ii<_num_tests; ii++){
+  //   for (int jj=0; jj<_num_tests; jj++){
+  //       //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
+  //       Real val = std::pow(( _test_params(ii,0)-  _test_params(jj,0)),2);
+  //       val = val / (2.0 * _length_factor.at(0));
+  //       val = std::exp(-val);
+  //       K_test(ii,jj) = val;
+  //     }
+  // }
+  //
+  // K_test.print();
+  // std::cout << "Test Points" << '\n';
+  // _parameter_mat.print();
+  //
+  // DenseMatrix<Real> _test_pred((_covariance_results_solve));
+  // _test_pred.left_multiply_transpose(K_train_test);
+  // std::cout << "pred" << '\n';
+  // _test_pred.print();
 }
 
 void
-GaussianProcessTrainer::execute()
-{
-}
-
-void
-
 GaussianProcessTrainer::finalize()
 {
-  for (unsigned int ii = 0; ii < _training_params.rows(); ++ii)
-  {
-    for (unsigned int jj = 0; jj < _training_params.cols(); ++jj)
-      gatherSum(_training_params(ii, jj));
-    gatherSum(_training_data(ii, 0));
-  }
-
-  // Standardize (center and scale) training params
-  if (_standardize_params)
-  {
-    _param_standardizer.computeSet(_training_params);
-    _training_params = _param_standardizer.getStandardized(_training_params);
-  }
-  // if not standardizing data set mean=0, std=1 for use in surrogate
-  else
-    _param_standardizer.set(0, 1, _n_params);
-
-  // Standardize (center and scale) training data
-  if (_standardize_data)
-  {
-    _data_standardizer.computeSet(_training_data);
-    _training_data = _data_standardizer.getStandardized(_training_data);
-  }
-  // if not standardizing data set mean=0, std=1 for use in surrogate
-  else
-    _param_standardizer.set(0, 1, _n_params);
-
-
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
 }
