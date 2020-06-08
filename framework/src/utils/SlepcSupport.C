@@ -35,7 +35,7 @@ InputParameters
 getSlepcValidParams(InputParameters & params)
 {
   MooseEnum solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
-                       "NONLINEAR_POWER NEWTON MF_MONOLITH_NEWTON");
+                       "NONLINEAR_POWER NEWTON");
   params.set<MooseEnum>("solve_type") = solve_type;
 
   params.setDocString("solve_type",
@@ -44,8 +44,7 @@ getSlepcValidParams(InputParameters & params)
                       "KRYLOVSCHUR: Krylov-Schur "
                       "JACOBI_DAVIDSON: Jacobi-Davidson "
                       "NONLINEAR_POWER: Nonlinear Power "
-                      "NEWTON: Newton "
-                      "MF_MONOLITH_NEWTON: Matrix-free Newton ");
+                      "NEWTON: Newton ");
 
   // When the eigenvalue problems is reformed as a coupled nonlinear system,
   // we use part of Jacobian as the preconditioning matrix.
@@ -265,15 +264,6 @@ setSlepcOutputOptions(EigenProblem & eigen_problem)
       Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
       break;
 
-    // This should be removed once Griffin is updated
-    case Moose::EST_MF_MONOLITH_NEWTON:
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_monitor");
-      break;
     case Moose::EST_NEWTON:
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
       Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
@@ -385,39 +375,10 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
         Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_pc_type", "moosepc");
 
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-     Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
 #endif
 #else
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
-#endif
-      break;
-
-    // This block (EST_MF_MONOLITH_NEWTON) should be removed once Griffin is updated
-    // This is used to for API update
-    case Moose::EST_MF_MONOLITH_NEWTON:
-      solver_params._eigen_matrix_free = true;
-#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
-      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
-      Moose::PetscSupport::setSinglePetscOption(
-          "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      if (solver_params._eigen_matrix_free)
-      {
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
-        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
-      }
-
-      if (solver_params._customized_pc_for_eigen)
-      {
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
-        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
-      }
-#else
-      mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
 #endif
       break;
     case Moose::EST_NEWTON:
@@ -442,8 +403,8 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
         Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
       }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-     Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
-     Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
+      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+      Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
 #endif
 #else
       mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
