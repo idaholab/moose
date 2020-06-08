@@ -26,7 +26,8 @@ PolynomialRegressionTrainer::validParams()
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer.");
   MooseEnum rtype("ols=0 ridge=1");
-  params.addRequiredParam<MooseEnum>("regression_type", rtype, "The type of regression to perform.");
+  params.addRequiredParam<MooseEnum>(
+      "regression_type", rtype, "The type of regression to perform.");
   params.addRequiredParam<unsigned int>("max_degree",
                                         "Maximum polynomial degree to use for the regression.");
   params.addParam<Real>("penalty", 0.0, "Penalty for Ridge regularization.");
