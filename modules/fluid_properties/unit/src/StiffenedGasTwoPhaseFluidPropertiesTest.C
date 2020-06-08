@@ -53,4 +53,6 @@ TEST_F(StiffenedGasTwoPhaseFluidPropertiesTest, test)
         (_fp->sigma_from_T(T + T_pert) - _fp->sigma_from_T(T - T_pert)) / (2.0 * T_pert);
     REL_TEST(_fp->dsigma_dT_from_T(T), dsigma_dT_fd, REL_TOL_DERIVATIVE);
   }
+
+  EXPECT_NEAR(_fp->T_triple(), _T_triple, 1e-14);
 }

@@ -646,10 +646,10 @@ MultiParameterPlasticityStressUpdate::nrStep(const yieldAndFlow & smoothed_q,
   dnRHSdVar(smoothed_q, dintnl, stress_params, gaE, jac);
 
   // use LAPACK to solve the linear system
-  const int nrhs = 1;
-  std::vector<int> ipiv(_num_sp + 1);
-  int info;
-  const int gesv_num_rhs = _num_sp + 1;
+  const PetscBLASInt nrhs = 1;
+  std::vector<PetscBLASInt> ipiv(_num_sp + 1);
+  PetscBLASInt info;
+  const PetscBLASInt gesv_num_rhs = _num_sp + 1;
   LAPACKgesv_(
       &gesv_num_rhs, &nrhs, &jac[0], &gesv_num_rhs, &ipiv[0], &rhs[0], &gesv_num_rhs, &info);
   return info;
@@ -925,10 +925,10 @@ MultiParameterPlasticityStressUpdate::dVardTrial(bool elastic_only,
   std::vector<double> jac((_num_sp + 1) * (_num_sp + 1));
   dnRHSdVar(smoothed_q, dintnl, stress_params, gaE, jac);
 
-  std::vector<int> ipiv(_num_sp + 1);
-  int info;
-  const int gesv_num_rhs = _num_sp + 1;
-  const int gesv_num_pq = _num_sp;
+  std::vector<PetscBLASInt> ipiv(_num_sp + 1);
+  PetscBLASInt info;
+  const PetscBLASInt gesv_num_rhs = _num_sp + 1;
+  const PetscBLASInt gesv_num_pq = _num_sp;
   LAPACKgesv_(&gesv_num_rhs,
               &gesv_num_pq,
               &jac[0],

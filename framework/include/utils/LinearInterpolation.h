@@ -27,8 +27,10 @@ public:
    * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.
    */
-  LinearInterpolationTempl(const std::vector<Real> & X, const std::vector<Real> & Y);
-  LinearInterpolationTempl() : _x(std::vector<Real>()), _y(std::vector<Real>()) {}
+  LinearInterpolationTempl(const std::vector<Real> & X,
+                           const std::vector<Real> & Y,
+                           const bool extrap = false);
+  LinearInterpolationTempl() : _x(std::vector<Real>()), _y(std::vector<Real>()), _extrap(false) {}
 
   virtual ~LinearInterpolationTempl() = default;
 
@@ -74,6 +76,8 @@ public:
 private:
   std::vector<Real> _x;
   std::vector<Real> _y;
+
+  bool _extrap;
 
   static int _file_number;
 };

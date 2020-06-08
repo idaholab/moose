@@ -58,6 +58,12 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
+Real
+TwoPhaseFluidProperties::T_triple() const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+}
+
 DualReal
 TwoPhaseFluidProperties::T_sat(const DualReal & p) const
 {

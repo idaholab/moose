@@ -25,11 +25,6 @@ ConvectiveFluxFunction::validParams()
       "coefficient_function_type",
       coef_func_type,
       "Type of function for heat transfer coefficient provided in 'coefficient' parameter");
-  params.addDeprecatedParam<FunctionName>(
-      "coefficient_function",
-      "Heat transfer coefficient function",
-      "'coefficient' should be used instead. 'coefficient_function will be removed on March 1, "
-      "2020.");
   params.addClassDescription(
       "Determines boundary value by fluid heat transfer coefficient and far-field temperature");
 
@@ -40,12 +35,8 @@ ConvectiveFluxFunction::ConvectiveFluxFunction(const InputParameters & parameter
   : IntegratedBC(parameters),
     _T_infinity(getFunction("T_infinity")),
     _coefficient(getFunction("coefficient")),
-    _coef_func_type(getParam<MooseEnum>("coefficient_function_type").getEnum<CoefFuncType>()),
-    _coef_func(isParamValid("coefficient_function") ? &getFunction("coefficient_function") : NULL)
+    _coef_func_type(getParam<MooseEnum>("coefficient_function_type").getEnum<CoefFuncType>())
 {
-  if (_coef_func_type == CoefFuncType::TEMPERATURE && _coef_func)
-    mooseError("Deprecated 'coefficient_function' parameter cannot be used with "
-               "'coefficient_function_type=TEMPERATURE'");
 }
 
 Real
@@ -53,11 +44,7 @@ ConvectiveFluxFunction::computeQpResidual()
 {
   Real coef;
   if (_coef_func_type == CoefFuncType::TIME_AND_POSITION)
-  {
     coef = _coefficient.value(_t, _q_point[_qp]);
-    if (_coef_func) // Deprecated behavior
-      coef *= _coef_func->value(_t, _q_point[_qp]);
-  }
   else
     coef = _coefficient.value(_u[_qp], Point());
 
@@ -70,8 +57,6 @@ ConvectiveFluxFunction::computeQpJacobian()
   if (_coef_func_type == CoefFuncType::TIME_AND_POSITION)
   {
     Real coef = _coefficient.value(_t, _q_point[_qp]);
-    if (_coef_func) // Deprecated behavior
-      coef *= _coef_func->value(_t, _q_point[_qp]);
     return _test[_i][_qp] * coef * _phi[_j][_qp];
   }
   else

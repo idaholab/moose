@@ -361,7 +361,7 @@ EigenProblem::solve()
 void
 EigenProblem::init()
 {
-#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
+#if !PETSC_RELEASE_LESS_THAN(3, 13, 0) && LIBMESH_HAVE_SLEPC
   // If matrix_free=true, this tells Libmesh to use shell matrices
   _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
   // We need to tell libMesh if we are using a shell preconditioning matrix

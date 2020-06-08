@@ -422,10 +422,10 @@ XFEMCutElem2D::solveMomentFitting(unsigned int nen,
       mooseError("Q-points of more than 6 are not allowed now!");
   }
 
-  int nrhs = 1;
-  int info;
-  int n = wsg.size();
-  std::vector<int> ipiv(n);
+  PetscBLASInt nrhs = 1;
+  PetscBLASInt info;
+  PetscBLASInt n = wsg.size();
+  std::vector<PetscBLASInt> ipiv(n);
 
   LAPACKgesv_(&n, &nrhs, A, &n, &ipiv[0], b, &n, &info);
 

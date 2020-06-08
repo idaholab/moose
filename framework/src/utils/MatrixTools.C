@@ -62,11 +62,11 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
   // Following does a LU decomposition of "square matrix A"
   // upon return "A = P*L*U" if return_value == 0
   // Here I use quotes because A is actually an array of length n^2, not a matrix of size n-by-n
-  int return_value;
-  LAPACKgetrf_(reinterpret_cast<int *>(&n),
-               reinterpret_cast<int *>(&n),
+  PetscBLASInt return_value;
+  LAPACKgetrf_(reinterpret_cast<PetscBLASInt *>(&n),
+               reinterpret_cast<PetscBLASInt *>(&n),
                &A[0],
-               reinterpret_cast<int *>(&n),
+               reinterpret_cast<PetscBLASInt *>(&n),
                &ipiv[0],
                &return_value);
 
@@ -79,20 +79,20 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
                   " was exactly zero during LU factorization in MatrixTools::inverse.");
 
   // get the inverse of A
-  int buffer_size = buffer.size();
+  PetscBLASInt buffer_size = buffer.size();
 #if PETSC_VERSION_LESS_THAN(3, 5, 0)
   FORTRAN_CALL(dgetri)
-  (reinterpret_cast<int *>(&n),
+  (reinterpret_cast<PetscBLASInt *>(&n),
    &A[0],
-   reinterpret_cast<int *>(&n),
+   reinterpret_cast<PetscBLASInt *>(&n),
    &ipiv[0],
    &buffer[0],
    &buffer_size,
    &return_value);
 #else
-  LAPACKgetri_(reinterpret_cast<int *>(&n),
+  LAPACKgetri_(reinterpret_cast<PetscBLASInt *>(&n),
                &A[0],
-               reinterpret_cast<int *>(&n),
+               reinterpret_cast<PetscBLASInt *>(&n),
                &ipiv[0],
                &buffer[0],
                &buffer_size,
