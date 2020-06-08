@@ -29,8 +29,8 @@ void
 addDisplacementAboutAxisParams(InputParameters & params)
 {
   MooseEnum units("degrees radians");
-  params.addRequiredParam<FunctionName>("function",
-                                        "The function providing the angle of rotation.");
+  params.addRequiredParam<FunctionName>(
+      "function", "The function providing the total angle of rotation or the angular velocity.");
   params.addRequiredParam<MooseEnum>("angle_units",
                                      units,
                                      "The units of the angle of rotation. Choices are:" +
@@ -70,6 +70,9 @@ DisplacementAboutAxis::initialSetup()
   if (_angular_velocity)
     for (unsigned int i = 0; i < _ndisp; ++i)
       _disp_old[i] = &coupledDofValuesOld("displacements", i);
+  else
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      _disp_old[i] = nullptr;
 }
 
 Real
