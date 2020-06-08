@@ -97,8 +97,7 @@ if [ -z "$go_fast" ]; then
       --download-superlu_dist=1 \
       --download-mumps=1 \
       --download-scalapack=1 \
-      --download-slepc=git://https://gitlab.com/slepc/slepc.git \
-      --download-slepc-commit= 59ff81b \
+      --download-slepc=1 \
       --with-mpi=1 \
       --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
