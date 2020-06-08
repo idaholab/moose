@@ -43,4 +43,6 @@ pH is initialised to 4 and progressively increased to 12.
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i
+
 !bibtex bibliography

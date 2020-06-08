@@ -1,0 +1,10 @@
+[Tests]
+  [./console]
+    type = 'RunApp'
+    input = 'console.i'
+    expect_out = 'Mass of aqueous solution = 1.0003646kg'
+    requirement = "The geochemistry module shall be able to output descriptive information concerning molalities, bulk composition, free minerals, temperature, etc, at any point"
+    issues = '#15330'
+    design = 'GeochemistryConsoleOutput.md'
+  [../]
+[]

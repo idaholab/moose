@@ -16,4 +16,6 @@ Then the fugacity of CO$_{2}$(g) is changed from $10^{-3.5}$ to 1, and the disso
 
 MOOSE produces the result ????
 
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_fugacity_calcite.i
+
 !bibtex bibliography

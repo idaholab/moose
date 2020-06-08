@@ -1,0 +1,43 @@
+#Extract molal
+[TimeIndependentReactionSolver]
+  model_definition = definition
+  charge_balance_species = "Cl-"
+  constraint_species = "H2O H+ Cl-"
+  constraint_value = "  1.0 1.0E-4 1.0E-4"
+  constraint_meaning = "kg_solvent_water free_molality moles_bulk_species"
+  ramp_max_ionic_strength = 0
+[]
+
+[UserObjects]
+  [./definition]
+    type = GeochemicalModelDefinition
+    database_file = "../../database/ferric_hydroxide_sorption.json"
+    basis_species = "H2O H+ Cl-"
+  [../]
+[]
+
+[AuxVariables]
+  [./the_aux]
+  [../]
+[]
+
+[AuxKernels]
+  [./the_aux]
+    type = GeochemistryQuantityAux
+    species = 'H+'
+    reactor = geochemistry_reactor
+    variable = the_aux
+  [../]
+[]
+
+[Postprocessors]
+  [./value]
+    type = PointValue
+    point = '0 0 0'
+    variable = the_aux
+  [../]
+[]
+
+[Outputs]
+  csv = true
+[]
