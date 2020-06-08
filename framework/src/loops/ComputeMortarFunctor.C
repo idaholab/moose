@@ -60,6 +60,7 @@ ComputeMortarFunctor::operator()()
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
   unsigned int num_cached = 0;
+
   for (MeshBase::const_element_iterator
            el = _amg.mortar_segment_mesh.active_local_elements_begin(),
            end_el = _amg.mortar_segment_mesh.active_local_elements_end();

@@ -221,9 +221,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // Find the current mortar segment that will have to be split.
     auto & mortar_segment_set = secondary_elems_to_mortar_segments[secondary_elem];
     Elem * current_mortar_segment = nullptr;
+    MortarSegmentInfo * info;
+
     for (const auto & mortar_segment_candidate : mortar_segment_set)
     {
-      MortarSegmentInfo * info;
       try
       {
         info = &msm_elem_to_info.at(mortar_segment_candidate);
@@ -257,20 +258,18 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
     new_elem_left->set_node(1) = new_node;
 
-    // Now for quadratic elements, we have to determine where the interior node
-    // lies. We can imagine a new parameterizing coordinate; let's call it
-    // eta. Then for the new left element, when eta = -1 then xi = -1, and when
-    // eta = 1 then xi = xi1. We want to put the interior node where eta = 0,
-    // which will correspond to the location of the point on the pre-split
-    // element where xi = (xi1 - 1) / 2
     if (order == SECOND)
     {
       Point left_interior_point(0);
-      Real left_interior_xi = (xi1 - 1.) / 2.;
+      Real left_interior_xi = (xi1 + info->xi1_a) / 2;
+
+      // This is eta for the current mortar segment that we're splitting
+      Real current_left_interior_eta = (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
            ++n)
-        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, left_interior_xi) *
+        left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
                                current_mortar_segment->point(n);
       new_elem_left->set_node(2) = mortar_segment_mesh.add_point(left_interior_point);
     }
@@ -287,20 +286,17 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_right->set_node(0) = new_node;
     new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
 
-    // Now for quadratic elements, we have to determine where the interior node
-    // lies. We can imagine a new parameterizing coordinate; let's call it
-    // eta. Then for the new right element, when eta = -1 then xi = xi1, and when
-    // eta = 1 then xi = 1. We want to put the interior node where eta = 0,
-    // which will correspond to the location of the point on the pre-split
-    // element where xi = (xi1 + 1) / 2
     if (order == SECOND)
     {
       Point right_interior_point(0);
-      Real right_interior_xi = (xi1 + 1.) / 2.;
+      Real right_interior_xi = (xi1 + info->xi1_b) / 2;
+      // This is eta for the current mortar segment that we're splitting
+      Real current_right_interior_eta = (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
            ++n)
-        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, right_interior_xi) *
+        right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
                                 current_mortar_segment->point(n);
       new_elem_right->set_node(2) = mortar_segment_mesh.add_point(right_interior_point);
     }
