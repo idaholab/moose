@@ -1,4 +1,4 @@
-# Material Tensor Integral
+# Material Tensor Average
 
 !syntax description /Postprocessors/MaterialTensorAverage
 
@@ -10,7 +10,7 @@ Rank-2 tensor component specified by the user.
   \label{eqn:volume_integal_tensor_comp}
   S^{avg} = \int_V T_{ij} dV / \int_V dv
 \end{equation}
-where $S^{int}$ is the computed volume integral quantity and $T_{ij}$ is the
+where $S^{avg}$ is the computed volume average quantity and $T_{ij}$ is the
 tensor component selected by the user.
 The tensor component indicies, $i$ and $j$, range from 0 to 2 as shown in the
 reference tensor
