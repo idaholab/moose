@@ -25,10 +25,16 @@
 []
 
 [Samplers]
-  [sample]
+  [mc_sample]
     type = MonteCarlo
-    num_rows = 100000
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
+    num_rows = 6
+    distributions = 'q_dist'
+    execute_on = initial
+  []
+  [cart_sample]
+    type = CartesianProduct
+    linear_space_items = '9000 2 1000'
+                          #9000 200 11'
     execute_on = initial
   []
 []
@@ -47,15 +53,24 @@
 # # Computing statistics
 [VectorPostprocessors]
   [samp_avg]
-    type = SurrogateTester
+    type = GaussianProcessTester
     model = gauss_process_avg
-    sampler = sample
+    sampler = cart_sample
+    output_samples = true
   []
   [samp_max]
-    type = SurrogateTester
+    type = GaussianProcessTester
     model = gauss_process_max
-    sampler = sample
+    sampler = cart_sample
+    output_samples = true
   []
+  [train_avg]
+    type = GaussianProcessTester
+    model = gauss_process_avg
+    sampler = mc_sample
+    output_samples = true
+  []
+[]
 #   [stats_avg]
 #     type = PolynomialChaosStatistics
 #     pc_name = 'gauss_process_avg'
@@ -86,7 +101,7 @@
 #     pc_name = 'gauss_process_max'
 #     sensitivity_order = 'first second'
 #   []
-[]
+# []
 
 [Outputs]
   csv = true

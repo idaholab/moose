@@ -33,9 +33,6 @@ private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
 
-  /// QuadratureSampler pointer, necessary for applying quadrature weights
-  QuadratureSampler * _quad_sampler;
-
   /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue * _values_ptr = nullptr;
 
@@ -44,21 +41,22 @@ private:
 
   // The following items are stored using declareModelData for use as a trained model.
 
-  /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
-  const unsigned int & _order;
-
   /// Total number of parameters/dimensions
-  unsigned int & _ndim;
+  unsigned int _n_params;
 
-  /// Total number of coefficient (defined by size of _tuple)
-  std::size_t & _ncoeff;
+  ///
+  std::vector<Real> & _length_factor;
 
-  /// A _ndim-by-_ncoeff matrix containing the appropriate one-dimensional polynomial order
-  std::vector<std::vector<unsigned int>> & _tuple;
+  ///
+  DenseMatrix<Real> & _parameter_mat;
 
-  /// These are the coefficients we are after in the PC expansion
-  std::vector<Real> & _coeff;
+  /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
+  DenseMatrix<Real> & _covariance_mat;
 
-  /// The distributions used for sampling
-  std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>> & _poly;
+  /// An _n_sample vector containg results of traing runs
+  DenseMatrix<Real> & _training_results;
+
+  /// A solve of Ax=b via Cholesky.
+  DenseMatrix<Real> & _covariance_results_solve;
+
 };

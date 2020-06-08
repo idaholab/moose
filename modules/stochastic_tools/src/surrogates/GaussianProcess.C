@@ -9,7 +9,6 @@
 
 #include "GaussianProcess.h"
 #include "Sampler.h"
-#include "CartesianProduct.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcess);
 
@@ -23,216 +22,128 @@ GaussianProcess::validParams()
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _order(getModelData<unsigned int>("_order")),
-    _ndim(getModelData<unsigned int>("_ndim")),
-    _ncoeff(getModelData<std::size_t>("_ncoeff")),
-    _tuple(getModelData<std::vector<std::vector<unsigned int>>>("_tuple")),
-    _coeff(getModelData<std::vector<Real>>("_coeff")),
-    _poly(
-        getModelData<std::vector<std::unique_ptr<const PolynomialQuadrature::Polynomial>>>("_poly"))
+  _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points")),
+  _length_factor(getModelData<std::vector<Real> >("_length_factor")),
+  _parameter_mat(getModelData<DenseMatrix<Real> >("_parameter_mat")),
+  _covariance_mat(getModelData<DenseMatrix<Real> >("_covariance_mat")),
+  _training_results(getModelData<DenseMatrix<Real> >("_training_results")),
+  _covariance_results_solve(getModelData<DenseMatrix<Real> >("_covariance_results_solve"))
 {
+  std::cout << "TEST IWH A" << '\n';
 }
 
 Real
 GaussianProcess::evaluate(const std::vector<Real> & x) const
 {
-  mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
-
-  DenseMatrix<Real> poly_val(_ndim, _order);
-
-  // Evaluate polynomials to avoid duplication
-  for (unsigned int d = 0; d < _ndim; ++d)
-    for (unsigned int i = 0; i < _order; ++i)
-      poly_val(d, i) = _poly[d]->compute(i, x[d], /*normalize =*/false);
-
-  Real val = 0;
-  for (std::size_t i = 0; i < _ncoeff; ++i)
-  {
-    Real tmp = _coeff[i];
-    for (unsigned int d = 0; d < _ndim; ++d)
-      tmp *= poly_val(d, _tuple[i][d]);
-    val += tmp;
-  }
-
-  return val;
-}
-
-const std::vector<std::vector<unsigned int>> &
-GaussianProcess::getPolynomialOrders() const
-{
-  return _tuple;
-}
-
-unsigned
-GaussianProcess::getPolynomialOrder(const unsigned int dim, const unsigned int i) const
-{
-  return _tuple[i][dim];
-}
-
-const std::vector<Real> &
-GaussianProcess::getCoefficients() const
-{
-  return _coeff;
+  Real dummy=0;
+  return this->evaluate(x, & dummy);
 }
 
 Real
-GaussianProcess::computeMean() const
+GaussianProcess::evaluate(const std::vector<Real> & x, Real* std_dev) const
 {
-  mooseAssert(_coeff.size() > 0, "The coefficient matrix is empty.");
-  return _coeff[0];
-}
+  //mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
 
-Real
-GaussianProcess::computeStandardDeviation() const
-{
-  Real var = 0;
-  for (std::size_t i = 1; i < _ncoeff; ++i)
-  {
-    Real norm = 1.0;
-    for (std::size_t d = 0; d < _ndim; ++d)
-      norm *= _poly[d]->innerProduct(_tuple[i][d]);
-    var += _coeff[i] * _coeff[i] * norm;
+  //A basic test of prediction ability. Move to surrogate after test
+  //
+  //
+  std::cout << "TEST IWH B" << '\n';
+
+  int _n_params = _parameter_mat.n();
+  int _num_samples = _parameter_mat.m();
+
+  std::cout << "n_params " << _n_params << '\n';
+  std::cout << "_num_samples " << _num_samples << '\n';
+  for (int ii=0; ii<_n_params; ii++){
+    std::cout << "x= " << x.at(ii) << '\n';
   }
 
-  return std::sqrt(var);
-}
+  std::cout << "test A" << '\n';
+  Real _num_tests=1;
+  //DenseMatrix<Real> _test_params(_num_tests,_n_params);
+  //_test_params(0,0)=3;
+  //_test_params(1,0)=5;
+  std::cout << "test B" << '\n';
 
-Real
-GaussianProcess::powerExpectation(const unsigned int n) const
-{
-  std::vector<StochasticTools::WeightedCartesianProduct<unsigned int, Real>> order;
-  order.reserve(_ndim);
-  std::vector<std::vector<Real>> c_1d(n, std::vector<Real>(_coeff.begin() + 1, _coeff.end()));
-  for (unsigned int d = 0; d < _ndim; ++d)
-  {
-    std::vector<std::vector<unsigned int>> order_1d(n, std::vector<unsigned int>(_ncoeff - 1));
-    for (std::size_t i = 1; i < _ncoeff; ++i)
-      for (unsigned int m = 0; m < n; ++m)
-        order_1d[m][i - 1] = _tuple[i][d];
-    order.push_back(StochasticTools::WeightedCartesianProduct<unsigned int, Real>(order_1d, c_1d));
-  }
+  DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
+  DenseMatrix<Real> K_test(_num_tests,_num_tests);
 
-  dof_id_type n_local, st_local, end_local;
-  MooseUtils::linearPartitionItems(
-      order[0].numRows(), n_processors(), processor_id(), n_local, st_local, end_local);
+  std::cout << "test C" << '\n';
 
-  Real val = 0;
-  for (dof_id_type i = st_local; i < end_local; ++i)
-  {
-    Real tmp = order[0].computeWeight(i);
-    for (unsigned int d = 0; d < _ndim; ++d)
-    {
-      if (MooseUtils::absoluteFuzzyEqual(tmp, 0.0))
-        break;
-      std::vector<unsigned int> comb(n);
-      for (unsigned int m = 0; m < n; ++m)
-        comb[m] = order[d].computeValue(i, m);
-      tmp *= _poly[d]->productIntegral(comb);
-    }
-    val += tmp;
-  }
-
-  return val;
-}
-
-Real
-GaussianProcess::computeDerivative(const unsigned int dim, const std::vector<Real> & x) const
-{
-  return computePartialDerivative({dim}, x);
-}
-
-Real
-GaussianProcess::computePartialDerivative(const std::vector<unsigned int> & dim,
-                                          const std::vector<Real> & x) const
-{
-  mooseAssert(x.size() == _ndim, "Number of inputted parameters does not match PC model.");
-
-  std::vector<unsigned int> grad(_ndim);
-  for (const auto & d : dim)
-  {
-    mooseAssert(d < _ndim, "Specified dimension is greater than total number of parameters.");
-    grad[d]++;
-  }
-
-  DenseMatrix<Real> poly_val(_ndim, _order);
-
-  // Evaluate polynomials to avoid duplication
-  for (unsigned int d = 0; d < _ndim; ++d)
-    for (unsigned int i = 0; i < _order; ++i)
-      poly_val(d, i) = _poly[d]->computeDerivative(i, x[d], grad[d]);
-
-  Real val = 0;
-  for (std::size_t i = 0; i < _ncoeff; ++i)
-  {
-    Real tmp = _coeff[i];
-    for (unsigned int d = 0; d < _ndim; ++d)
-      tmp *= poly_val(d, _tuple[i][d]);
-    val += tmp;
-  }
-
-  return val;
-}
-
-Real
-GaussianProcess::computeSobolIndex(const std::set<unsigned int> & ind) const
-{
-  linearPartitionCoefficients();
-
-  // If set is empty, compute mean
-  if (ind.empty())
-    return computeMean();
-
-  // Do some sanity checks in debug
-  mooseAssert(ind.size() <= _ndim, "Number of indices is greater than number of parameters.");
-  mooseAssert(*ind.rbegin() < _ndim, "Maximum index provided exceeds number of parameters.");
-
-  Real val = 0.0;
-  for (dof_id_type i = _local_coeff_begin; i < _local_coeff_end; ++i)
-  {
-    Real tmp = _coeff[i] * _coeff[i];
-    for (unsigned int d = 0; d < _ndim; ++d)
-    {
-      if ((ind.find(d) != ind.end() && _tuple[i][d] > 0) ||
-          (ind.find(d) == ind.end() && _tuple[i][d] == 0))
-      {
-        tmp *= _poly[d]->innerProduct(_tuple[i][d]);
+  _parameter_mat.print();
+  //_test_params.print();
+  for (int ii=0; ii<_num_samples; ii++){
+    for (int jj=0; jj<_num_tests; jj++){
+      Real cov =0;
+      for (int kk=0; kk<_n_params; kk++){
+        std::cout << _parameter_mat(ii,kk) <<"   " << x.at(kk) << "   " << _length_factor.at(kk) << '\n';
+        cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (2.0 * _length_factor.at(kk));
       }
-      else
-      {
-        tmp = 0.0;
-        break;
+      cov = std::exp(-cov);
+      K_train_test(ii,jj) = cov;
       }
-    }
-    val += tmp;
   }
 
-  return val;
-}
+  K_train_test.print();
 
-Real
-GaussianProcess::computeSobolTotal(const unsigned int dim) const
-{
-  linearPartitionCoefficients();
+  for (int ii=0; ii<_num_tests; ii++){
+    for (int jj=0; jj<_num_tests; jj++){
+      Real cov =0;
+      for (int kk=0; kk<_n_params; kk++){
+        std::cout << _parameter_mat(ii,kk) <<"   " << x.at(kk) << "   " << _length_factor.at(kk) << '\n';
+        cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (2.0 * _length_factor.at(kk));
+      }
+      cov = std::exp(-cov);
+      K_test(ii,jj) = cov;
+      }
+  }
 
-  // Do some sanity checks in debug
-  mooseAssert(dim < _ndim, "Requested dimension is greater than number of parameters.");
+  K_test.print();
+  std::cout << "Training Points" << '\n';
+  _parameter_mat.print();
 
-  Real val = 0.0;
-  for (dof_id_type i = _local_coeff_begin; i < _local_coeff_end; ++i)
-    if (_tuple[i][dim] > 0)
-      val += _coeff[i] * _coeff[i] * _poly[dim]->innerProduct(_tuple[i][dim]);
+  std::cout << "Training Data" << '\n';
+  _training_results.print();
 
-  return val;
-}
 
-void
-GaussianProcess::linearPartitionCoefficients() const
-{
-  if (_n_local_coeff == std::numeric_limits<dof_id_type>::max())
-    MooseUtils::linearPartitionItems(_ncoeff,
-                                     n_processors(),
-                                     processor_id(),
-                                     _n_local_coeff,
-                                     _local_coeff_begin,
-                                     _local_coeff_end);
+
+  DenseMatrix<Real> _test_pred(_covariance_results_solve);
+  _test_pred.left_multiply_transpose(K_train_test);
+  std::cout << "pred" << '\n';
+  _test_pred.print();
+
+
+
+  //This is annoying, find better way to go between DenseMatrix and DenseVector
+  DenseMatrix<Real> _test_std(_num_samples,_num_tests);
+  DenseVector<Real> cho_solution_vec;
+  DenseVector<Real> K_train_test_vec(_num_samples);
+  for (int ii=0; ii<_num_samples; ii++){
+    K_train_test_vec(ii)=K_train_test(ii,0);
+  }
+  std::cout << "Covar" << '\n';
+   _covariance_mat.print();
+  DenseMatrix<Real> covariance_mat_copy(_covariance_mat);
+  std::cout << "Covar Copy" << '\n';
+   covariance_mat_copy.print();
+  covariance_mat_copy.cholesky_solve(K_train_test_vec,cho_solution_vec);
+  for (int ii=0; ii<_num_tests; ii++){
+    _test_std(ii,0)=cho_solution_vec(ii);
+    }
+  std::cout << "STD After Cho Solve" << '\n';
+   _test_std.print();
+  //  std::cout << "Training results"<< '\n';
+  //  _training_results.print();
+  //  std::cout << "Cho Solutiol" << '\n';
+  //  _covariance_results_solve.print();
+  // DenseMatrix<Real> _test_std(_covariance_results_solve);
+  _test_std.left_multiply_transpose(K_train_test);
+  _test_std.scale(-1);
+  _test_std += K_test;
+  std::cout << "stddev" << '\n';
+  _test_std.print();
+
+  *std_dev=_test_std(0,0);
+
+  return _test_pred(0,0);
 }

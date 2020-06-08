@@ -28,7 +28,7 @@
   [sample]
     type = MonteCarlo
     num_rows = 6
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
+    distributions = 'q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -46,7 +46,7 @@
     type = MultiAppCommandLineControl
     multi_app = sub
     sampler = sample
-    param_names = 'Materials/conductivity/prop_values Kernels/source/value Mesh/xmax BCs/right/value'
+    param_names = 'Kernels/source/value'
   []
 []
 
@@ -70,8 +70,8 @@
   [gauss_process_avg]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    order = 10
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
+    length_factor = '20000.0'
+    distributions = 'q_dist'
     sampler = sample
     results_vpp = results
     results_vector = data:avg
@@ -79,8 +79,8 @@
   [gauss_process_max]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    order = 10
-    distributions = 'k_dist q_dist L_dist Tinf_dist'
+    length_factor = '20000.0'
+    distributions = 'q_dist'
     sampler = sample
     results_vpp = results
     results_vector = data:max
