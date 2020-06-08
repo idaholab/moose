@@ -128,9 +128,8 @@ public:
     return haveProperty<T>(prop_name);
   }
 
-  ///@{
   /**
-   * Methods for retieving a MaterialProperty object
+   * @{ Methods for retieving a MaterialProperty object
    * @tparam T The type of the property
    * @param prop_name The name of the property
    * @return The property for the supplied type and name

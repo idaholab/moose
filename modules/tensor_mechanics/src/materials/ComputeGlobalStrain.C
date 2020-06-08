@@ -30,6 +30,7 @@ ComputeGlobalStrain::validParams()
   params.addRequiredParam<UserObjectName>("global_strain_uo",
                                           "The name of the GlobalStrainUserObject");
 
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 
@@ -52,16 +53,13 @@ ComputeGlobalStrain::initQpStatefulProperties()
 }
 
 void
-ComputeGlobalStrain::computeProperties()
+ComputeGlobalStrain::computeQpProperties()
 {
-  RankTwoTensor & strain = _global_strain[0];
+  RankTwoTensor & strain = _global_strain[_qp];
   strain.fillFromScalarVariable(_scalar_global_strain);
 
   for (unsigned int dir = 0; dir < _dim; ++dir)
     if (!_periodic_dir(dir))
       for (unsigned int var = 0; var < _ndisp; ++var)
         strain(dir, var) = 0.0;
-
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    _global_strain[_qp] = strain;
 }

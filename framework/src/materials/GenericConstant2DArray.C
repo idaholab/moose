@@ -25,6 +25,7 @@ GenericConstant2DArray::validParams()
   params.declareControllable("prop_value");
   params.addClassDescription(
       "A material evaluating one material property in type of RealEigenMatrix");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 

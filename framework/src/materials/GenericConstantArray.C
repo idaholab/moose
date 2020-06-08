@@ -27,6 +27,7 @@ GenericConstantArray::validParams()
   params.declareControllable("prop_value");
   params.addClassDescription(
       "A material evaluating one material property in type of RealEigenVector");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 

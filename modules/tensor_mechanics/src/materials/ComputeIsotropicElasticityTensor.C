@@ -23,6 +23,7 @@ ComputeIsotropicElasticityTensorTempl<is_ad>::validParams()
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("shear_modulus", "The shear modulus of the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 
