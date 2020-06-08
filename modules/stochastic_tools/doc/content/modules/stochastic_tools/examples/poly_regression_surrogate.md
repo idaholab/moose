@@ -127,6 +127,8 @@ polynomial of degree at most 4 is used in this study.
 The [PolynomialChaosTrainer.md] also needs knowledge about the underlying parameter distributions
 to be able to select matching polynomials.
 
+!listing surrogates/polynomial_regression/uniform_train.i block=Trainers
+
 As a last step in the training process, the important parameters of the trained
 surrogates are saved into `.rd` files. These files can be used to construct the surrogate models
 again without the need to carry out the training process from the beginning.

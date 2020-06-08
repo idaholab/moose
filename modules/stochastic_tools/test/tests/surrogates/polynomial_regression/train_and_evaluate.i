@@ -39,6 +39,7 @@
 [Trainers]
   [train]
     type = PolynomialRegressionTrainer
+    regression_type = "ols"
     sampler = sample
     results_vpp = values
     results_vector = g_values

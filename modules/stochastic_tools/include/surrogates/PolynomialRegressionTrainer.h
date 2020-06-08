@@ -32,7 +32,11 @@ protected:
   /// Coefficients of regression model
   std::vector<Real> & _coeff;
 
+  /// Matirx co containing the touples of the powers for each term
   std::vector<std::vector<unsigned int>> & _power_matrix;
+
+  /// Types for the polynomial regression
+  const MooseEnum & _regression_type;
 
 private:
   /// Maximum polynomial degree, limiting the sum of constituent polynomial degrees.
@@ -48,7 +52,7 @@ private:
   unsigned int _n_poly_terms;
 
   ///@{
-  /// Matrix and rhs for ordinary least squares
+  /// Matrix and rhs for the regression problem
   DenseMatrix<Real> _matrix;
   DenseVector<Real> _rhs;
   ///@}

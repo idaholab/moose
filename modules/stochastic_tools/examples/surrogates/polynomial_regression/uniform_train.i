@@ -106,6 +106,7 @@
   []
   [pr_max]
     type = PolynomialRegressionTrainer
+    regression_type = "ols"
     execute_on = timestep_end
     max_degree = 4
     sampler = pr_sampler

@@ -73,7 +73,9 @@ To determine these, a regression matrix can be defined as:
 \textbf{P}(\textbf{x}_{N})
 \end{bmatrix}.
 
-Using this regression matrix and and Ordinary Least Squares (OLS) approach described on
+## Ordinary Least Squares (OLS) regression
+
+Using regression matrix $\textbf{R}$ and and Ordinary Least Squares (OLS) approach described on
 [Wikipedia](https://en.wikipedia.org/wiki/Polynomial_regression) in detail, the unknown
 coefficients can be determined as follows:
 
@@ -90,7 +92,7 @@ Unfortunately, the OLS approach is known to have some issues like:
 - It yields inaccurate results if the input variables are correlated,
 - It is sensitive to outliers.
 
-To tackle the problem an $L^2$ regularization (or
+To tackle the problem, an $L^2$ regularization (or
 [Tikhonov regularization](https://en.wikipedia.org/wiki/Regularized_least_squares) is adopted
 to make sure that the coefficients of the expansion do have uncontrollably high values.
 This extended least squares regression is often referred to as Ridge Regression.
@@ -100,7 +102,7 @@ In this scenario the coefficients can be determined by solving:
 \textbf{c}=\left(\textbf{R}^T\textbf{R}+\lambda I\right)^{-1}\textbf{R}^T\textbf{y},
 
 where $\lambda$ is a penalty parameter which penalizes coefficients with large
-magnitudes. As $\lambda \rightarrow 0$, Ridge regression converges to OLS.     
+magnitudes. As $\lambda \rightarrow 0$, Ridge regression converges to OLS.
 
 ## Example Input File Syntax
 
@@ -116,7 +118,8 @@ Similarly to [NearestPointTrainer.md], a `GFunction` vector postprocessor from [
 used to emulate a full-order model. This simply evaluates a function at sample points.
 
 Using this data and the maximum degree setting (`max_degree` in the input file),
-the trainer computes the model coefficients $\textbf{c}$:
+the trainer computes the model coefficients $\textbf{c}$. To control the type of regression,
+the user has to set `regression_type` to either 'ols' or 'ridge' in the input file:
 
 !listing polynomial_regression/train.i block=Trainers
 

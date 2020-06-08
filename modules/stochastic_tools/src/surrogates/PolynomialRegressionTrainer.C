@@ -24,7 +24,9 @@ PolynomialRegressionTrainer::validParams()
       "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
   params.addRequiredParam<std::string>(
       "results_vector",
-      "Name of vector from vectorpostprocessor with results of samples created by trainer");
+      "Name of vector from vectorpostprocessor with results of samples created by trainer.");
+  MooseEnum rtype("ols=0 ridge=1");
+  params.addRequiredParam<MooseEnum>("regression_type", rtype, "The type of regression to perform.");
   params.addRequiredParam<unsigned int>("max_degree",
                                         "Maximum polynomial degree to use for the regression.");
   params.addParam<Real>("penalty", 0.0, "Penalty for Ridge regularization.");
@@ -36,15 +38,20 @@ PolynomialRegressionTrainer::PolynomialRegressionTrainer(const InputParameters &
   : SurrogateTrainer(parameters),
     _coeff(declareModelData<std::vector<Real>>("_coeff")),
     _power_matrix(declareModelData<std::vector<std::vector<unsigned int>>>("_power_matrix")),
+    _regression_type(getParam<MooseEnum>("regression_type")),
     _max_degree(
         declareModelData<unsigned int>("_max_degree", getParam<unsigned int>("max_degree"))),
-    _penalty(declareModelData<Real>("_penalty", getParam<Real>("penalty")))
+    _penalty(getParam<Real>("penalty"))
 {
 }
 
 void
 PolynomialRegressionTrainer::initialSetup()
 {
+  // Throwing a warning if the penalty parameter is set with OLS regression
+  if (_regression_type == "ols" && _penalty != 0)
+    mooseWarning("Penalty parameter is not used for OLS regression, found penalty=", _penalty);
+
   // Results VPP
   _values_distributed = isVectorPostprocessorDistributed("results_vpp");
   _values_ptr = &getVectorPostprocessorValue(
@@ -132,10 +139,11 @@ PolynomialRegressionTrainer::execute()
   }
 
   // Adding penalty term for Ridge regularization
-  for (unsigned int i = 0; i < _n_poly_terms; ++i)
-  {
-    _matrix(i, i) += _penalty;
-  }
+  if (_regression_type == "ridge")
+    for (unsigned int i = 0; i < _n_poly_terms; ++i)
+    {
+      _matrix(i, i) += _penalty;
+    }
 }
 
 void
