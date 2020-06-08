@@ -9,13 +9,17 @@
 
 #include "ElementExtremeMaterialProperty.h"
 
+#include "metaphysicl/raw_type.h"
+
 #include <algorithm>
 #include <limits>
 
 registerMooseObject("MooseApp", ElementExtremeMaterialProperty);
+registerMooseObject("MooseApp", ADElementExtremeMaterialProperty);
 
+template <bool is_ad>
 InputParameters
-ElementExtremeMaterialProperty::validParams()
+ElementExtremeMaterialPropertyTempl<is_ad>::validParams()
 {
   InputParameters params = ElementPostprocessor::validParams();
 
@@ -34,18 +38,21 @@ ElementExtremeMaterialProperty::validParams()
   return params;
 }
 
-ElementExtremeMaterialProperty::ElementExtremeMaterialProperty(const InputParameters & parameters)
+template <bool is_ad>
+ElementExtremeMaterialPropertyTempl<is_ad>::ElementExtremeMaterialPropertyTempl(
+    const InputParameters & parameters)
   : ElementPostprocessor(parameters),
 
-    _mat_prop(getMaterialProperty<Real>("mat_prop")),
+    _mat_prop(getGenericMaterialProperty<Real, is_ad>("mat_prop")),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
     _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max()),
     _qp(0)
 {
 }
 
+template <bool is_ad>
 void
-ElementExtremeMaterialProperty::initialize()
+ElementExtremeMaterialPropertyTempl<is_ad>::initialize()
 {
   switch (_type)
   {
@@ -59,30 +66,33 @@ ElementExtremeMaterialProperty::initialize()
   }
 }
 
+template <bool is_ad>
 void
-ElementExtremeMaterialProperty::execute()
+ElementExtremeMaterialPropertyTempl<is_ad>::execute()
 {
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     computeQpValue();
 }
 
+template <bool is_ad>
 void
-ElementExtremeMaterialProperty::computeQpValue()
+ElementExtremeMaterialPropertyTempl<is_ad>::computeQpValue()
 {
   switch (_type)
   {
     case MAX:
-      _value = std::max(_value, _mat_prop[_qp]);
+      _value = std::max(_value, MetaPhysicL::raw_value(_mat_prop[_qp]));
       break;
 
     case MIN:
-      _value = std::min(_value, _mat_prop[_qp]);
+      _value = std::min(_value, MetaPhysicL::raw_value(_mat_prop[_qp]));
       break;
   }
 }
 
+template <bool is_ad>
 Real
-ElementExtremeMaterialProperty::getValue()
+ElementExtremeMaterialPropertyTempl<is_ad>::getValue()
 {
   switch (_type)
   {
@@ -97,11 +107,12 @@ ElementExtremeMaterialProperty::getValue()
   return _value;
 }
 
+template <bool is_ad>
 void
-ElementExtremeMaterialProperty::threadJoin(const UserObject & y)
+ElementExtremeMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  const ElementExtremeMaterialProperty & pps =
-      static_cast<const ElementExtremeMaterialProperty &>(y);
+  const ElementExtremeMaterialPropertyTempl<is_ad> & pps =
+      static_cast<const ElementExtremeMaterialPropertyTempl<is_ad> &>(y);
 
   switch (_type)
   {
@@ -113,3 +124,6 @@ ElementExtremeMaterialProperty::threadJoin(const UserObject & y)
       break;
   }
 }
+
+template class ElementExtremeMaterialPropertyTempl<false>;
+template class ElementExtremeMaterialPropertyTempl<true>;

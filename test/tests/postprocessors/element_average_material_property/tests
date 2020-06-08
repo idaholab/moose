@@ -2,11 +2,21 @@
   design = 'ElementAverageMaterialProperty.md'
   issues = '#14648'
 
-  [./test_average]
+  [./non_ad]
     type = 'CSVDiff'
     input = 'element_average_material_property.i'
     csvdiff = 'element_average_material_property_out.csv'
 
-    requirement = 'The system shall compute the the average value of a material property over the domain.'
+    requirement = 'The system shall compute the the average value of a non-AD material property over the domain.'
+  [../]
+  [./ad]
+    type = 'CSVDiff'
+    input = 'element_average_material_property.i'
+    cli_args = 'Materials/mat/type=ADGenericFunctionMaterial Postprocessors/avg/type=ADElementAverageMaterialProperty'
+    csvdiff = 'element_average_material_property_out.csv'
+    prereq = 'non_ad'
+
+    requirement = 'The system shall compute the the average value of an AD material property over the domain.'
+    issues = '#14648 #15428'
   [../]
 []
