@@ -3,7 +3,7 @@
 For those of you who have previously installed the moose-environment package, you should remove it. Removal of the moose-environment package only needs to be performed once.
 
 !alert! note title=Step not applicable to first-time users
-If you are a first time MOOSE user, please skip down to [Install Miniconda](install_miniconda.md#installconda).
+If you are a first time MOOSE user, please skip down to [Install Miniconda](conda.md#installconda).
 !alert-end!
 
 - Using Conda, it is no longer necessary to have /opt/moose present on your machine. Depending on the type of machine you have, please do the following:
