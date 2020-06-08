@@ -44,7 +44,8 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
     _primary_boundary_name(getParam<BoundaryName>("primary_boundary")),
     _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
     _primary_subdomain_name(getParam<SubdomainName>("primary_subdomain")),
-    _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain"))
+    _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain")),
+    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING))
 {
 }
 
@@ -115,8 +116,10 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 
   // If we're on a dynamic mesh, we need to ghost the entire interface because we don't know at the
   // beginning of the non-linear solve which elements will project onto which over the course of the
-  // solve
-  if (_use_displaced_mesh)
+  // solve. We *do not* add the whole interface if we are a coupling functor because based on
+  // profiling the cost is very expensive. It's perhaps better in that case to deal with mallocs
+  // coming out of MatSetValues, especially if the mesh displacements are relatively small
+  if (_use_displaced_mesh && !_is_coupling_functor)
   {
     for (const auto & elem : _moose_mesh->getMesh().active_element_ptr_range())
     {
@@ -131,8 +134,8 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
       }
     }
   }
-  // For a static mesh we can just ghost the cross interface neighbors calculated during mortar mesh
-  // generation
+  // For a static mesh (or for determining a sparsity pattern approximation on a displaced mesh) we
+  // can just ghost the coupled elements determined during mortar mesh generation
   else if (_amg)
   {
     for (const auto & elem : as_range(range_begin, range_end))
@@ -142,26 +145,16 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 
       for (const auto & pr : as_range(bounds))
       {
-        const Elem * cross_interface_neighbor = _moose_mesh->getMesh().elem_ptr(pr.second);
+        auto coupled_elem_id = pr.second;
+        const Elem * coupled_elem = _mesh.getMesh().elem_ptr(coupled_elem_id);
+        mooseAssert(coupled_elem,
+                    "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-        if (cross_interface_neighbor->processor_id() != p)
-          coupled_elements.insert(std::make_pair(cross_interface_neighbor, null_mat));
-
-        // If the cross_interface_neighbor is a lower-dimensional element with
-        // an interior parent, add the interior parent to the
-        // list of Elems coupled to us.
-        const Elem * cross_interface_neighbor_ip = cross_interface_neighbor->interior_parent();
-        if (cross_interface_neighbor_ip && cross_interface_neighbor_ip->processor_id() != p)
-          coupled_elements.insert(std::make_pair(cross_interface_neighbor_ip, null_mat));
-      } // end loop over bounds range
-
-      // Finally add the interior parent of this element if it's not local
-      auto elem_ip = elem->interior_parent();
-      if (elem_ip && elem_ip->processor_id() != p)
-        coupled_elements.insert(std::make_pair(elem_ip, null_mat));
-
-    } // end loop over active local elements range
-  }   // end if (_amg)
+        if (coupled_elem->processor_id() != p)
+          coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+      }
+    }
+  }
 }
 
 bool
@@ -172,7 +165,7 @@ AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
     if (_primary_boundary_name == asoi->_primary_boundary_name &&
         _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
-        _secondary_subdomain_name == asoi->_secondary_subdomain_name)
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name && isType(asoi->_rm_type))
       return true;
   }
   return false;

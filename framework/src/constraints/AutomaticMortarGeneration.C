@@ -264,7 +264,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       Real left_interior_xi = (xi1 + info->xi1_a) / 2;
 
       // This is eta for the current mortar segment that we're splitting
-      Real current_left_interior_eta = (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+      Real current_left_interior_eta =
+          (2. * left_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
 
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
@@ -291,7 +292,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       Point right_interior_point(0);
       Real right_interior_xi = (xi1 + info->xi1_b) / 2;
       // This is eta for the current mortar segment that we're splitting
-      Real current_right_interior_eta = (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
+      Real current_right_interior_eta =
+          (2. * right_interior_xi - info->xi1_a - info->xi1_b) / (info->xi1_b - info->xi1_a);
 
       for (MooseIndex(current_mortar_segment->n_nodes()) n = 0;
            n < current_mortar_segment->n_nodes();
@@ -468,21 +470,27 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
-    // The interior_parent() element should also be coupled to the
-    // secondary_elem. The coupling in the other direction (secondary_elem
-    // -> secondary_elem->interior_parent()) happens automatically.
+    // LowerSecondary
+    mortar_interface_coupling.insert(
+        std::make_pair(secondary_elem->id(), secondary_elem->interior_parent()->id()));
+    // SecondaryLower
     mortar_interface_coupling.insert(
         std::make_pair(secondary_elem->interior_parent()->id(), secondary_elem->id()));
 
     // Insert both Elems as key and value.
     if (primary_elem)
     {
-      mortar_interface_coupling.insert(std::make_pair(secondary_elem->id(), primary_elem->id()));
-      mortar_interface_coupling.insert(std::make_pair(primary_elem->id(), secondary_elem->id()));
+      // LowerPrimary
+      mortar_interface_coupling.insert(
+          std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+      // PrimaryLower
+      mortar_interface_coupling.insert(
+          std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
 
-      // Also insert both interior parents as key and value.
+      // SecondaryPrimary
       mortar_interface_coupling.insert(std::make_pair(secondary_elem->interior_parent()->id(),
                                                       primary_elem->interior_parent()->id()));
+      // PrimarySecondary
       mortar_interface_coupling.insert(std::make_pair(primary_elem->interior_parent()->id(),
                                                       secondary_elem->interior_parent()->id()));
     }
