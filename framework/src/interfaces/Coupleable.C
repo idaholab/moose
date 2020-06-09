@@ -1593,6 +1593,27 @@ Coupleable::getADDefaultSecond()
   return _ad_default_second;
 }
 
+const ADVariableValue &
+Coupleable::adZeroValue()
+{
+  mooseDeprecated("Method adZeroValue() is deprecated. Use '_ad_zero' instead.");
+  return _ad_zero;
+}
+
+const ADVariableGradient &
+Coupleable::adZeroGradient()
+{
+  mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_grad_zero' instead.");
+  return _ad_grad_zero;
+}
+
+const ADVariableSecond &
+Coupleable::adZeroSecond()
+{
+  mooseDeprecated("Method adZeroSecond() is deprecated. Use '_ad_second_zero' instead.");
+  return _ad_second_zero;
+}
+
 template <>
 const GenericVariableValue<false> &
 Coupleable::genericZeroValue<false>()

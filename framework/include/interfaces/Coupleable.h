@@ -822,6 +822,23 @@ protected:
   // coupled-dof-values-end
 
   /**
+   * method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
+   * computing objects
+   */
+  const ADVariableValue & adZeroValue();
+
+  /**
+   *  method that returns _grad_zero to RESIDUAL computing objects and _ad_grad_zero to
+   * JACOBIAN computing objects
+   */
+  const ADVariableGradient & adZeroGradient();
+
+  /**
+   * Retrieve a zero second for automatic differentiation
+   */
+  const ADVariableSecond & adZeroSecond();
+
+  /**
    * Returns zero value templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
