@@ -141,7 +141,7 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
    */
-  template <bool is_ad = false>
+  template <bool is_ad>
   const GenericVariableValue<is_ad> & coupledGenericValue(const std::string & var_name,
                                                           unsigned int comp = 0);
 
@@ -322,7 +322,7 @@ protected:
    * @return Reference to a VariableGradient containing the gradient of the coupled variable
    * @see Kernel::gradient
    */
-  template <bool is_ad = false>
+  template <bool is_ad>
   const GenericVariableGradient<is_ad> & coupledGenericGradient(const std::string & var_name,
                                                                 unsigned int comp = 0);
 
@@ -842,21 +842,21 @@ protected:
    * Returns zero value templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
-  template <bool is_ad = false>
+  template <bool is_ad>
   const GenericVariableValue<is_ad> & genericZeroValue();
 
   /**
    * Returns zero gradient templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
-  template <bool is_ad = false>
+  template <bool is_ad>
   const GenericVariableGradient<is_ad> & genericZeroGradient();
 
   /**
    * Returns zero second derivative templated with automatic differentiation boolean
    * @return Reference to a const GenericVariableValue
    */
-  template <bool is_ad = false>
+  template <bool is_ad>
   const GenericVariableSecond<is_ad> & genericZeroSecond();
 
 protected:
