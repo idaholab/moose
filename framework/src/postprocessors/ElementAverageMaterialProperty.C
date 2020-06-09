@@ -10,52 +10,63 @@
 #include "ElementAverageMaterialProperty.h"
 
 registerMooseObject("MooseApp", ElementAverageMaterialProperty);
+registerMooseObject("MooseApp", ADElementAverageMaterialProperty);
 
+template <bool is_ad>
 InputParameters
-ElementAverageMaterialProperty::validParams()
+ElementAverageMaterialPropertyTempl<is_ad>::validParams()
 {
-  InputParameters params = ElementIntegralMaterialProperty::validParams();
+  InputParameters params = ElementIntegralMaterialPropertyTempl<is_ad>::validParams();
   params.addClassDescription("Computes the average of a material property over a volume.");
   return params;
 }
 
-ElementAverageMaterialProperty::ElementAverageMaterialProperty(const InputParameters & parameters)
-  : ElementIntegralMaterialProperty(parameters), _volume(0.0)
+template <bool is_ad>
+ElementAverageMaterialPropertyTempl<is_ad>::ElementAverageMaterialPropertyTempl(
+    const InputParameters & parameters)
+  : ElementIntegralMaterialPropertyTempl<is_ad>(parameters), _volume(0.0)
 {
 }
 
+template <bool is_ad>
 void
-ElementAverageMaterialProperty::initialize()
+ElementAverageMaterialPropertyTempl<is_ad>::initialize()
 {
-  ElementIntegralMaterialProperty::initialize();
+  ElementIntegralMaterialPropertyTempl<is_ad>::initialize();
 
   _volume = 0.0;
 }
 
+template <bool is_ad>
 void
-ElementAverageMaterialProperty::execute()
+ElementAverageMaterialPropertyTempl<is_ad>::execute()
 {
-  ElementIntegralMaterialProperty::execute();
+  ElementIntegralMaterialPropertyTempl<is_ad>::execute();
 
-  _volume += _current_elem_volume;
+  _volume += this->_current_elem_volume;
 }
 
+template <bool is_ad>
 Real
-ElementAverageMaterialProperty::getValue()
+ElementAverageMaterialPropertyTempl<is_ad>::getValue()
 {
-  const Real integral = ElementIntegralMaterialProperty::getValue();
+  const Real integral = ElementIntegralMaterialPropertyTempl<is_ad>::getValue();
 
-  gatherSum(_volume);
+  ElementIntegralMaterialPropertyTempl<is_ad>::gatherSum(_volume);
 
   return integral / _volume;
 }
 
+template <bool is_ad>
 void
-ElementAverageMaterialProperty::threadJoin(const UserObject & y)
+ElementAverageMaterialPropertyTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  ElementIntegralMaterialProperty::threadJoin(y);
+  ElementIntegralMaterialPropertyTempl<is_ad>::threadJoin(y);
 
-  const ElementAverageMaterialProperty & pps =
-      static_cast<const ElementAverageMaterialProperty &>(y);
+  const ElementAverageMaterialPropertyTempl<is_ad> & pps =
+      static_cast<const ElementAverageMaterialPropertyTempl<is_ad> &>(y);
   _volume += pps._volume;
 }
+
+template class ElementAverageMaterialPropertyTempl<false>;
+template class ElementAverageMaterialPropertyTempl<true>;

@@ -2,11 +2,21 @@
   design = 'ElementExtremeMaterialProperty.md'
   issues = '#14648'
 
-  [./test_min_max]
+  [./non_ad]
     type = 'CSVDiff'
     input = 'element_extreme_material_property.i'
     csvdiff = 'element_extreme_material_property_out.csv'
 
-    requirement = 'The system shall compute the the extreme (min/max) values of a material property over the domain.'
+    requirement = 'The system shall compute the the extreme (min/max) values of a non-AD material property over the domain.'
+  [../]
+  [./ad]
+    type = 'CSVDiff'
+    input = 'element_extreme_material_property.i'
+    cli_args = 'Materials/mat/type=ADGenericFunctionMaterial Postprocessors/min/type=ADElementExtremeMaterialProperty Postprocessors/max/type=ADElementExtremeMaterialProperty'
+    csvdiff = 'element_extreme_material_property_out.csv'
+    prereq = 'non_ad'
+
+    requirement = 'The system shall compute the the extreme (min/max) values of an AD material property over the domain.'
+    issues = '#14648 #15428'
   [../]
 []
