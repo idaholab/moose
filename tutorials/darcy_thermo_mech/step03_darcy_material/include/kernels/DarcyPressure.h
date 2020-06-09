@@ -9,17 +9,13 @@
 
 #pragma once
 
-// Including the "ADDiffusion" Kernel so it can be extended
-#include "ADDiffusion.h"
+// Including the "ADKernel" Kernel here so we can extend it
+#include "ADKernel.h"
 
 /**
  * Computes the residual contribution: K / mu * grad_u * grad_phi.
- *
- * We are inheriting from ADDiffusion instead of from ADKernel because
- * the grad_u * grad_phi is already coded and all that is
- * needed is to specialize that calculation by multiplying by K / mu.
  */
-class DarcyPressure : public ADDiffusion
+class DarcyPressure : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -27,8 +23,8 @@ public:
   DarcyPressure(const InputParameters & parameters);
 
 protected:
-  /// ADKernelGrad objects must override precomputeQpResidual
-  virtual ADRealVectorValue precomputeQpResidual() override;
+  /// ADKernel objects must override precomputeQpResidual
+  virtual ADReal computeQpResidual() override;
 
   // References to be set from Material system
 

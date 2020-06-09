@@ -40,7 +40,7 @@ elements of the same type.
 `Indicators` report an amount of "error" for each element, built-in `Indicators` include:
 
 `GradientJumpIndicator`\\
-Jump in the gradient of a variable across element edges (pictured to the right). A good "curvature"
+Jump in the gradient of a variable across element edges. A good "curvature"
 indicator that works well over a wide range of problems.
 
 `FluxJumpIndicator`\\
