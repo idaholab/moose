@@ -259,7 +259,7 @@ MaterialOutputAction::getParams(const std::string & type,
 
   params.set<MaterialPropertyName>("property") = property_name;
   params.set<AuxVariableName>("variable") = variable_name;
-  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
   if (material.boundaryRestricted())
     params.set<std::vector<BoundaryName>>("boundary") = material.boundaryNames();
