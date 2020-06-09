@@ -18,6 +18,7 @@ CoupledConvectiveHeatFluxBC::validParams()
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by auxiliary variables.");
+  params.addCoupledVar("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addCoupledVar("alpha", 1., "Volume fraction of components");
   params.addRequiredCoupledVar("T_infinity", "Field holding far-field temperature");
   params.addRequiredCoupledVar("htc", "Heat transfer coefficient");
@@ -26,7 +27,9 @@ CoupledConvectiveHeatFluxBC::validParams()
 }
 
 CoupledConvectiveHeatFluxBC::CoupledConvectiveHeatFluxBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _n_components(coupledComponents("T_infinity"))
+  : IntegratedBC(parameters),
+    _n_components(coupledComponents("T_infinity")),
+    _scale_factor(coupledValue("scale_factor"))
 {
   if (coupledComponents("alpha") != _n_components)
     paramError(
@@ -54,7 +57,7 @@ CoupledConvectiveHeatFluxBC::computeQpResidual()
   Real q = 0;
   for (std::size_t c = 0; c < _n_components; c++)
     q += (*_alpha[c])[_qp] * (*_htc[c])[_qp] * (_u[_qp] - (*_T_infinity[c])[_qp]);
-  return _test[_i][_qp] * q;
+  return _test[_i][_qp] * q * _scale_factor[_qp];
 }
 
 Real
@@ -63,5 +66,5 @@ CoupledConvectiveHeatFluxBC::computeQpJacobian()
   Real dq = 0;
   for (std::size_t c = 0; c < _n_components; c++)
     dq += (*_alpha[c])[_qp] * (*_htc[c])[_qp] * _phi[_j][_qp];
-  return _test[_i][_qp] * dq;
+  return _test[_i][_qp] * dq * _scale_factor[_qp];
 }

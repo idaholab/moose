@@ -37,4 +37,12 @@
     expect_err = '\(BCs/right/htc\).*?The number of coupled components does not match the number of `T_infinity` components.'
     requirement = 'The system shall report an error if the number of `htc` components does not match the number of `T_infinity` components.'
   [../]
+
+  [./on_off]
+    type = 'Exodiff'
+    input = 'on_off.i'
+    exodiff = 'on_off_out.e'
+    requirement = 'The system shall enable scaling of the total heat flux of the convective heat flux boundary condition'
+    issues = '#15421'
+  [../]
 []
