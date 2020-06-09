@@ -1,10 +1,14 @@
+[Problem]
+  error_on_jacobian_nonzero_reallocation = true
+[]
+
 [Mesh]
   second_order = true
   [./left_block]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 0.5
+    xmax = 1
     ymin = 0
     ymax = 1
     nx = 2
@@ -25,8 +29,8 @@
   [./right_block]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0.5
-    xmax = 1
+    xmin = 2
+    xmax = 3
     ymin = 0
     ymax = 1
     nx = 2
@@ -99,6 +103,8 @@
   [../]
   [./lambda]
     block = 'slave_lower'
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -133,15 +139,23 @@
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    value = '-12*x^2 -24*y^2 - 2*x + x^4 + 2*y^4 + x*y^2'
+    value = ''
   [../]
   [./exact_soln_primal]
     type = ParsedFunction
-    value = 'x^4 + 2*y^4 + x*y^2'
+    value = ''
   [../]
   [exact_soln_lambda]
     type = ParsedFunction
-    value = '4*x^3 + y^2'
+    value = ''
+  []
+  [mms_slave]
+    type = ParsedFunction
+    value = ''
+  []
+  [mms_master]
+    type = ParsedFunction
+    value = ''
   []
 []
 
@@ -151,13 +165,17 @@
 
 [Constraints]
   [./mortar]
-    type = EqualValueConstraint
+    type = GapHeatConductanceTest
     master_boundary = rb_left
     slave_boundary = lb_right
     master_subdomain = master_lower
     slave_subdomain = slave_lower
     slave_variable = T
     variable = lambda
+    slave_gap_conductance = 1
+    master_gap_conductance = 1
+    slave_mms_function = mms_slave
+    master_mms_function = mms_master
   [../]
 []
 
@@ -171,8 +189,11 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       basic                 superlu_dist'
+  petsc_options = '-snes_converged_reason'
+  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  # petsc_options_value = 'lu       superlu_dist'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre    boomeramg'
 []
 
 [Outputs]

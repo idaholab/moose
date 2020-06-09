@@ -46,6 +46,8 @@ class ConvergencePlot(object):
         # Apply grid marks
         plt.grid(True, which='both', color=[0.8]*3)
 
+        self.label_to_slope = {}
+
     def plot(self, df, label=None, title=None, num_fitted_points=None, slope_precision=3, **kwargs):
         num_y_columns = len(df.columns) - 1
 
@@ -76,6 +78,8 @@ class ConvergencePlot(object):
                 slope = self._fit(x[-num_fitted_points:], y[-num_fitted_points:])
             else:
                 slope = self._fit(x, y)
+
+            self.label_to_slope.update({this_label:slope})
 
             this_label = '{}: {:.{precision}f}'.format(this_label, slope, precision=slope_precision)
 

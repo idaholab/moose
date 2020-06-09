@@ -4,11 +4,11 @@
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 0.5
+    xmax = 1
     ymin = 0
     ymax = 1
-    nx = 5
-    ny = 5
+    nx = 2
+    ny = 2
     elem_type = QUAD4
   [../]
   [./left_block_sidesets]
@@ -25,12 +25,12 @@
   [./right_block]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0.5
-    xmax = 1
+    xmin = 1
+    xmax = 2
     ymin = 0
     ymax = 1
-    nx = 5
-    ny = 11
+    nx = 2
+    ny = 2
     elem_type = QUAD4
   [../]
   [./right_block_id]
@@ -99,7 +99,6 @@
   [../]
   [./lambda]
     block = 'slave_lower'
-    order = FIRST
   [../]
 []
 
@@ -134,15 +133,15 @@
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    value = '-12*x^2 -24*y^2 - 2*x + x^4 + 2*y^4 + x*y^2'
+    value = ''
   [../]
   [./exact_soln_primal]
     type = ParsedFunction
-    value = 'x^4 + 2*y^4 + x*y^2'
+    value = ''
   [../]
   [exact_soln_lambda]
     type = ParsedFunction
-    value = '4*x^3 + y^2'
+    value = ''
   []
 []
 
@@ -159,6 +158,7 @@
     slave_subdomain = slave_lower
     slave_variable = T
     variable = lambda
+    delta = 0.4
   [../]
 []
 
@@ -172,8 +172,9 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       basic                 NONZERO               1e-15'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       basic                 mumps'
 []
 
 [Outputs]
