@@ -136,7 +136,7 @@ protected:
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
-   * Returns value of a coupled TODO helper function for coupling ad/regular variable values
+   * Returns value of a coupled variable for use in templated auatomatic differentiation classes
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
@@ -314,6 +314,17 @@ protected:
    * @see Kernel::gradient
    */
   const ADVariableGradient & adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled variable for use in templated automatic differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  template <bool is_ad = false>
+  const GenericVariableGradient<is_ad> & coupledGenericGradient(const std::string & var_name,
+                                                                unsigned int comp = 0);
 
   /**
    * Returns gradient of a coupled vector variable for use in Automatic Differentation

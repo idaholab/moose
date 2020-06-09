@@ -1593,9 +1593,9 @@ Coupleable::getADDefaultSecond()
   return _ad_default_second;
 }
 
-template <bool is_ad>
-const GenericVariableValue<is_ad> &
-Coupleable::genericZeroValue()
+template <>
+const GenericVariableValue<false> &
+Coupleable::genericZeroValue<false>()
 {
   return _zero;
 }
@@ -1607,9 +1607,9 @@ Coupleable::genericZeroValue<true>()
   return _ad_zero;
 }
 
-template <bool is_ad>
-const GenericVariableGradient<is_ad> &
-Coupleable::genericZeroGradient()
+template <>
+const GenericVariableGradient<false> &
+Coupleable::genericZeroGradient<false>()
 {
   return _grad_zero;
 }
@@ -1621,9 +1621,9 @@ Coupleable::genericZeroGradient<true>()
   return _ad_grad_zero;
 }
 
-template <bool is_ad>
-const GenericVariableSecond<is_ad> &
-Coupleable::genericZeroSecond()
+template <>
+const GenericVariableSecond<false> &
+Coupleable::genericZeroSecond<false>()
 {
   return _second_zero;
 }
@@ -1635,6 +1635,19 @@ Coupleable::genericZeroSecond<true>()
   return _ad_second_zero;
 }
 
+template <>
+const GenericVariableGradient<false> &
+Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp)
+{
+  return coupledGradient(var_name, comp);
+}
+
+template <>
+const GenericVariableGradient<true> &
+Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledGradient(var_name, comp);
+}
 // Explicit instantiations
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,
