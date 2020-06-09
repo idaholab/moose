@@ -360,6 +360,17 @@ outputLegacyInformation(MooseApp & app)
            "behavior.\n"
         << COLOR_DEFAULT << '\n';
   }
+  if (app.parameters().get<bool>("use_legacy_material_output"))
+  {
+    oss << COLOR_RED << "LEGACY MODES ENABLED:" << COLOR_DEFAULT << '\n';
+    oss << " This application uses the legacy material output option: material properties are "
+           "output only on TIMESTEP_END, not INITIAL. To remove this message, set "
+           "'use_legacy_material_output' to false in this application. If there are gold output "
+           "files that contain material property output for which output occurs on INITIAL, then "
+           "these will generate diffs due to zero values being stored, and these tests should be "
+           "re-golded.\n"
+        << COLOR_DEFAULT << '\n';
+  }
 
   return oss.str();
 }
