@@ -12,8 +12,8 @@
 #include "MaterialTensorIntegral.h"
 
 /**
- * This postprocessor computes an element integral of a
- * component of a material tensor as specified by the user-supplied indices.
+ * This postprocessor computes the volume average of a
+ * component of a RankTwoTensor as specified by the user-supplied indices.
  */
 template <bool is_ad>
 class MaterialTensorAverageTempl : public MaterialTensorIntegralTempl<is_ad>

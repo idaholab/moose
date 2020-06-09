@@ -23,6 +23,8 @@ reference tensor
             \end{bmatrix}
 \end{equation}
 
+The parameter `use_displaced_mesh` controls the volume utilized to compute the average. If `use_displaced_mesh=true` the average is compute utilizing the deformed volume, if `use_displaced_mesh=false` (default) the average is compute utilizing the initial volume.
+
 ## Example Input File
 
 !listing modules/tensor_mechanics/test/tests/postprocessors/material_tensor_average_test.i block=Postprocessors

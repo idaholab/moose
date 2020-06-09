@@ -17,7 +17,7 @@ InputParameters
 MaterialTensorAverageTempl<is_ad>::validParams()
 {
   InputParameters params = MaterialTensorIntegralTempl<is_ad>::validParams();
-  params.addClassDescription("Computes the average of a material property over a volume.");
+  params.addClassDescription("Computes the average of a RankTwoTensor component over a volume.");
   return params;
 }
 
