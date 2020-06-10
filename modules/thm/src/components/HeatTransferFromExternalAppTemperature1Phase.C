@@ -44,7 +44,8 @@ HeatTransferFromExternalAppTemperature1Phase::addVariables()
 {
   HeatTransferFromTemperature1Phase::addVariables();
 
-  _sim.addFunctionIC(_T_wall_name, getParam<FunctionName>("initial_T_wall"), _flow_channel_name);
+  _sim.addFunctionIC(
+      _T_wall_name, getParam<FunctionName>("initial_T_wall"), _flow_channel_subdomains);
 }
 
 void

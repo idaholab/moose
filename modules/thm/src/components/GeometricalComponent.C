@@ -10,6 +10,8 @@ GeometricalComponent::validParams()
   params.addRequiredParam<Point>("position", "Origin (start) of the component [m]");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the component");
   params.addParam<Real>("rotation", 0., "Rotation of the component [degrees]");
+  params.addParam<std::vector<std::string>>("axial_region_names",
+                                            "Names to assign to axial regions");
   params.addRequiredParam<std::vector<Real>>(
       "length", "Length of each subsection of the geometric component along the main axis [m]");
   params.addRequiredParam<std::vector<unsigned int>>(
@@ -32,10 +34,13 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
     _n_sections(_lengths.size()),
+    _axial_region_names(getParam<std::vector<std::string>>("axial_region_names")),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
   checkSizeGreaterThan<Real>("length", 0);
   checkEqualSize<Real, unsigned int>("length", "n_elems");
+  if (_axial_region_names.size() > 0)
+    checkEqualSize<Real, std::string>("length", "axial_region_names");
 }
 
 unsigned int

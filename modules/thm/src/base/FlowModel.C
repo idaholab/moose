@@ -98,13 +98,13 @@ FlowModel::getVariableFn(const FunctionName & fn_param_name)
 void
 FlowModel::addCommonVariables()
 {
-  const SubdomainName & subdomain_name = _flow_channel.getSubdomainName();
+  const std::vector<SubdomainName> & subdomains = _flow_channel.getSubdomainNames();
 
-  _sim.addSimVariable(false, AREA, _fe_type, subdomain_name);
-  _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomain_name);
+  _sim.addSimVariable(false, AREA, _fe_type, subdomains);
+  _sim.addSimVariable(false, HEAT_FLUX_PERIMETER, _fe_type, subdomains);
 
   if (_spatial_discretization == rDG)
-    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomain_name);
+    _sim.addSimVariable(false, AREA_LINEAR, FEType(FIRST, LAGRANGE), subdomains);
 }
 
 void

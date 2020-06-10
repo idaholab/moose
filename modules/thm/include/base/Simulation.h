@@ -108,7 +108,6 @@ public:
   void addSimVariable(bool nl,
                       const VariableName & name,
                       FEType type,
-                      const SubdomainName & subdomain_name = "",
                       Real scaling_factor = 1.);
   void addSimVariable(bool nl,
                       const VariableName & name,
@@ -116,13 +115,9 @@ public:
                       const std::vector<SubdomainName> & subdomain_names,
                       Real scaling_factor = 1.);
 
-  void addConstantIC(const VariableName & var_name, Real value, const SubdomainName & block_name);
   void addConstantIC(const VariableName & var_name,
                      Real value,
                      const std::vector<SubdomainName> & block_names);
-  void addFunctionIC(const VariableName & var_name,
-                     const std::string & func_name,
-                     const SubdomainName & block_name);
   void addFunctionIC(const VariableName & var_name,
                      const std::string & func_name,
                      const std::vector<SubdomainName> & block_names);

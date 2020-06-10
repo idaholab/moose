@@ -69,7 +69,6 @@ public:
 
   unsigned int getNodesetID() const;
   const BoundaryName & getNodesetName() const;
-  SubdomainName getSubdomainName() const;
 
   /**
    * Gets heat transfer geometry

@@ -23,7 +23,7 @@ HeatTransferFromSpecifiedTemperature1Phase::addVariables()
 {
   HeatTransferFromTemperature1Phase::addVariables();
 
-  _sim.addFunctionIC(_T_wall_name, _T_wall_fn_name, _flow_channel_name);
+  _sim.addFunctionIC(_T_wall_name, _T_wall_fn_name, _flow_channel_subdomains);
   makeFunctionControllableIfConstant(_T_wall_fn_name, "T_wall");
 }
 
@@ -36,7 +36,7 @@ HeatTransferFromSpecifiedTemperature1Phase::addMooseObjects()
     const std::string class_name = "FunctionAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _T_wall_name;
-    params.set<std::vector<SubdomainName>>("block") = {_flow_channel_name};
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<FunctionName>("function") = _T_wall_fn_name;
 
     ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());

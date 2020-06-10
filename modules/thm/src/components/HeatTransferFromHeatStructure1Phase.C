@@ -99,7 +99,7 @@ HeatTransferFromHeatStructure1Phase::addVariables()
   if (!_app.isRestarting())
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_name);
+    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
   }
 }
 
