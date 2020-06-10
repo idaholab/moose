@@ -48,14 +48,16 @@ pipeline {
         stage('Run Tests')
         {            
             steps {
-                sh '''
-                # Want to use all available cores
-                NUM_JOBS=$(grep -c ^processor /proc/cpuinfo)
+                ansiColor('xterm') {
+                    sh '''
+                    # Want to use all available cores
+                    NUM_JOBS=$(grep -c ^processor /proc/cpuinfo)
 
-                # Run tests and pipe to accessible log file
-                docker run $DOCKER_TAG /bin/bash -c \
-                "cd test; ./run_tests -j $NUM_JOBS --no-color" | tee test_results.log
-                '''
+                    # Run tests and pipe to accessible log file
+                    docker run $DOCKER_TAG /bin/bash -c \
+                    "cd test; ./run_tests -j $NUM_JOBS" | tee test_results.log
+                    '''
+                }
             }
         }
         
