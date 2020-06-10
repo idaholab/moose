@@ -102,6 +102,9 @@ private:
 
   /// Reference to the OutputWarehouse
   OutputWarehouse & _output_warehouse;
+
+  /// Output only on TIMESTEP_END, not on INITIAL?
+  const bool _output_only_on_timestep_end;
 };
 
 template <typename T>

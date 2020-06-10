@@ -76,5 +76,6 @@
     type = Exodus
     output_material_properties = true
     show_material_properties = 'a_value a_dot a_dot_dot a_dot_du a_dot_dot_du'
+    execute_on = 'TIMESTEP_END'
   [../]
 []
