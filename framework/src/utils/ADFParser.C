@@ -16,16 +16,20 @@ ADFParser::ADFParser(const ADFParser & cpy) : FunctionParserAD(cpy), _epsilon(1e
 bool
 ADFParser::JITCompile()
 {
+#if LIBMESH_HAVE_FPARSER_JIT
   auto result = JITCompileHelper("ADReal", ADFPARSER_INCLUDES, "#include \"ADReal.h\"\n");
+
   if (!result)
+#endif
     mooseError("ADFParser::JITCompile() failed. Evaluation not possible.");
+
   return true;
 }
 
 ADReal
 ADFParser::Eval(const ADReal * vars)
 {
-  mooseAssert(compiledFunction, "ADFParser objects mut be JIT compiled before evaluation!");
+  mooseAssert(compiledFunction, "ADFParser objects must be JIT compiled before evaluation!");
   ADReal ret;
   (*reinterpret_cast<CompiledFunctionPtr<ADReal>>(compiledFunction))(&ret, vars, pImmed, _epsilon);
   return ret;
