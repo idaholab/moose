@@ -27,8 +27,6 @@ HeatStructureBase::validParams()
   params.addPrivateParam<std::string>("component_type", "heat_struct");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
   params.addRequiredParam<std::vector<std::string>>("names", "User given heat structure names");
-  params.addParam<std::vector<std::string>>("axial_region_names",
-                                            "Names to assign to axial regions");
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each heat structure [m]");
   params.addRequiredParam<std::vector<unsigned int>>("n_part_elems",
                                                      "Number of elements of each heat structure");
@@ -42,7 +40,6 @@ HeatStructureBase::HeatStructureBase(const InputParameters & params)
   : GeometricalComponent(params),
     _number_of_hs(0),
     _names(getParam<std::vector<std::string>>("names")),
-    _axial_region_names(getParam<std::vector<std::string>>("axial_region_names")),
     _material_names(getParam<std::vector<std::string>>("materials")),
     _width(getParam<std::vector<Real>>("widths")),
     _total_width(std::accumulate(_width.begin(), _width.end(), 0.0)),

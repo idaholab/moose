@@ -113,6 +113,9 @@ protected:
   /// Number of sections in the geometric component
   const unsigned int _n_sections;
 
+  /// Axial region names
+  const std::vector<std::string> & _axial_region_names;
+
   /// The name of the user object to displace nodes into the physical space
   UserObjectName _displace_node_user_object_name;
 
