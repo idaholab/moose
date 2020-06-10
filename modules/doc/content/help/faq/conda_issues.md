@@ -55,7 +55,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   conda init zsh
   ```
 
-- ### Your issue not listed
+- #### Your issue not listed
 
   The quick fix-attempt, is to re-install the moose-packages:
 
