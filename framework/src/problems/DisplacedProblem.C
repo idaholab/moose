@@ -608,9 +608,9 @@ DisplacedProblem::reinitElemFace(const Elem * elem,
 }
 
 void
-DisplacedProblem::reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid)
+DisplacedProblem::reinitLowerDElem(const Elem * lower_d_elem, THREAD_ID tid)
 {
-  _assembly[tid]->reinitMortarElem(lowerDElem);
+  _assembly[tid]->reinitMortarElem(lower_d_elem);
   _displaced_nl.prepareLowerD(tid);
   _displaced_aux.prepareLowerD(tid);
 

@@ -129,7 +129,7 @@ void
 ComputeUserObjectsThread::onBoundary(const Elem * elem,
                                      unsigned int side,
                                      BoundaryID bnd_id,
-                                     const Elem * lowerDElem /*=nullptr*/)
+                                     const Elem * lower_d_elem /*=nullptr*/)
 {
   std::vector<UserObject *> userobjs;
   queryBoundary(Interfaces::SideUserObject, bnd_id, userobjs);
@@ -139,8 +139,8 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
   // Reinitialize Mortar variables for use in boundary Materials
-  if (lowerDElem)
-    _fe_problem.reinitLowerDElem(lowerDElem, _tid);
+  if (lower_d_elem)
+    _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
   // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
   // still remember to swap back during stack unwinding.

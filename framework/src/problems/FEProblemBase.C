@@ -1744,12 +1744,12 @@ FEProblemBase::reinitElemFace(const Elem * elem,
 }
 
 void
-FEProblemBase::reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid)
+FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem, THREAD_ID tid)
 {
   // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
   // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
   // _assembly(tid).reinitLowerDElemRef(elem, pts, weights);
-  _assembly[tid]->reinitMortarElem(lowerDElem); // Is it?
+  _assembly[tid]->reinitMortarElem(lower_d_elem); // Is it?
   // Actually get the dof indices in the moose variables
   _nl->prepareLowerD(tid);
   _aux->prepareLowerD(tid);
@@ -1762,7 +1762,7 @@ FEProblemBase::reinitLowerDElem(const Elem * lowerDElem, THREAD_ID tid)
   _nl->reinitLowerD(tid);
 
   if (_displaced_problem)
-    _displaced_problem->reinitLowerDElem(lowerDElem, tid);
+    _displaced_problem->reinitLowerDElem(lower_d_elem, tid);
 
   _aux->reinitLowerD(tid);
 }

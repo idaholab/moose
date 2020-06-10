@@ -68,12 +68,12 @@ public:
    * @param elem - The element we are checking is on the boundary.
    * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
-   * @param lowerDElem - Lower dimensional element (e.g. Mortar)
+   * @param lower_d_elem - Lower dimensional element (e.g. Mortar)
    */
   virtual void preBoundary(const Elem * elem,
                            unsigned int side,
                            BoundaryID bnd_id,
-                           const Elem * lowerDElem = nullptr);
+                           const Elem * lower_d_elem = nullptr);
 
   /**
    * Called when doing boundary assembling
@@ -81,12 +81,12 @@ public:
    * @param elem - The element we are checking is on the boundary.
    * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
-   * @param lowerDElem - Lower dimensional element (e.g. Mortar)
+   * @param lower_d_elem - Lower dimensional element (e.g. Mortar)
    */
   virtual void onBoundary(const Elem * elem,
                           unsigned int side,
                           BoundaryID bnd_id,
-                          const Elem * lowerDElem = nullptr);
+                          const Elem * lower_d_elem = nullptr);
 
   /**
    * Called before evaluations on an element internal side
