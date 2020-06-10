@@ -45,7 +45,7 @@ HeatTransferFromTemperature1Phase::addHeatTransferKernels()
     const std::string class_name = "OneDEnergyWallHeating";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-    params.set<std::vector<SubdomainName>>("block") = {_flow_channel_name};
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<VariableName>>("T_wall") = {_T_wall_name};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};

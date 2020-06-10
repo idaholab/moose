@@ -267,7 +267,6 @@ void
 Simulation::addSimVariable(bool nl,
                            const VariableName & name,
                            FEType type,
-                           const SubdomainName & subdomain_name,
                            Real scaling_factor)
 {
   if (_vars.find(name) == _vars.end())
@@ -275,8 +274,6 @@ Simulation::addSimVariable(bool nl,
     VariableInfo vi;
     vi._nl = nl;
     vi._type = type;
-    if (!subdomain_name.empty())
-      vi._subdomain.insert(subdomain_name);
     vi._scaling_factor = scaling_factor;
     _vars[name] = vi;
   }
@@ -286,7 +283,6 @@ Simulation::addSimVariable(bool nl,
     if (vi._type != type)
       mooseError(
           "A component is trying to add variable of the same name but with different order/type");
-    vi._subdomain.insert(subdomain_name);
   }
 }
 
@@ -297,8 +293,25 @@ Simulation::addSimVariable(bool nl,
                            const std::vector<SubdomainName> & subdomain_names,
                            Real scaling_factor /* = 1.*/)
 {
-  for (auto && sdn : subdomain_names)
-    addSimVariable(nl, name, type, sdn, scaling_factor);
+  if (_vars.find(name) == _vars.end())
+  {
+    VariableInfo vi;
+    vi._nl = nl;
+    vi._type = type;
+    for (auto && sdn : subdomain_names)
+      vi._subdomain.insert(sdn);
+    vi._scaling_factor = scaling_factor;
+    _vars[name] = vi;
+  }
+  else
+  {
+    VariableInfo & vi = _vars[name];
+    if (vi._type != type)
+      mooseError(
+          "A component is trying to add variable of the same name but with different order/type");
+    for (auto && sdn : subdomain_names)
+      vi._subdomain.insert(sdn);
+  }
 }
 
 void
@@ -329,22 +342,6 @@ Simulation::addSimInitialCondition(const std::string & type,
 void
 Simulation::addConstantIC(const VariableName & var_name,
                           Real value,
-                          const SubdomainName & block_name)
-{
-  if (hasInitialConditionsFromFile())
-    return;
-
-  std::string class_name = "ConstantIC";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<VariableName>("variable") = var_name;
-  params.set<Real>("value") = value;
-  params.set<std::vector<SubdomainName>>("block") = {block_name};
-  addSimInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
-}
-
-void
-Simulation::addConstantIC(const VariableName & var_name,
-                          Real value,
                           const std::vector<SubdomainName> & block_names)
 {
   if (hasInitialConditionsFromFile())
@@ -360,22 +357,6 @@ Simulation::addConstantIC(const VariableName & var_name,
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = block_names;
   addSimInitialCondition(class_name, genName(var_name, blk_str, "ic"), params);
-}
-
-void
-Simulation::addFunctionIC(const VariableName & var_name,
-                          const std::string & func_name,
-                          const SubdomainName & block_name)
-{
-  if (hasInitialConditionsFromFile())
-    return;
-
-  std::string class_name = "FunctionIC";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<VariableName>("variable") = var_name;
-  params.set<std::vector<SubdomainName>>("block") = {block_name};
-  params.set<FunctionName>("function") = func_name;
-  addSimInitialCondition(class_name, genName(var_name, block_name, "ic"), params);
 }
 
 void

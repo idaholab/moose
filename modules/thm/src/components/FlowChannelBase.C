@@ -239,8 +239,6 @@ FlowChannelBase::buildMesh()
   }
 
   // elems
-  SubdomainID subdomain_id = _mesh.getNextSubdomainId();
-  setSubdomainInfo(subdomain_id, name());
   BoundaryID bc_id_inlet = _mesh.getNextBoundaryId();
   BoundaryID bc_id_outlet = _mesh.getNextBoundaryId();
   for (unsigned int i = 0; i < _n_elem; i++)
@@ -250,7 +248,6 @@ FlowChannelBase::buildMesh()
       elem = addElementEdge3(_node_ids[2 * i], _node_ids[2 * i + 2], _node_ids[2 * i + 1]);
     else
       elem = addElementEdge2(_node_ids[i], _node_ids[i + 1]);
-    elem->subdomain_id() = subdomain_id;
 
     // BCs
     if (i == 0)
@@ -269,6 +266,31 @@ FlowChannelBase::buildMesh()
       boundary_info.add_side(elem, 1, bc_id_outlet);
       _mesh.setBoundaryName(bc_id_outlet, genName(name(), "out"));
     }
+  }
+
+  if (_axial_region_names.size() > 0)
+  {
+    unsigned int k = 0;
+    for (unsigned int i = 0; i < _axial_region_names.size(); i++)
+    {
+      const std::string & region_name = _axial_region_names[i];
+      SubdomainID subdomain_id = _mesh.getNextSubdomainId();
+      setSubdomainInfo(subdomain_id, genName(name(), region_name));
+
+      for (unsigned int j = 0; j < _n_elems[i]; j++, k++)
+      {
+        dof_id_type elem_id = _elem_ids[k];
+        _mesh.elemPtr(elem_id)->subdomain_id() = subdomain_id;
+      }
+    }
+  }
+  else
+  {
+    SubdomainID subdomain_id = _mesh.getNextSubdomainId();
+    setSubdomainInfo(subdomain_id, name());
+
+    for (auto && id : _elem_ids)
+      _mesh.elemPtr(id)->subdomain_id() = subdomain_id;
   }
 }
 
@@ -487,12 +509,4 @@ FlowChannelBase::getNodesetName() const
   checkSetupStatus(MESH_PREPARED);
 
   return _nodeset_name;
-}
-
-SubdomainName
-FlowChannelBase::getSubdomainName() const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  return name();
 }
