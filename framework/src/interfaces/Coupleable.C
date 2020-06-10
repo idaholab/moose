@@ -396,6 +396,20 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   }
 }
 
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp)
+{
+  return coupledValue(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledValue(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
@@ -1582,21 +1596,79 @@ Coupleable::getADDefaultSecond()
 const ADVariableValue &
 Coupleable::adZeroValue()
 {
+  mooseDeprecated("Method adZeroValue() is deprecated. Use '_ad_zero' instead.");
   return _ad_zero;
 }
 
 const ADVariableGradient &
 Coupleable::adZeroGradient()
 {
+  mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_grad_zero' instead.");
   return _ad_grad_zero;
 }
 
 const ADVariableSecond &
 Coupleable::adZeroSecond()
 {
+  mooseDeprecated("Method adZeroSecond() is deprecated. Use '_ad_second_zero' instead.");
   return _ad_second_zero;
 }
 
+template <>
+const GenericVariableValue<false> &
+Coupleable::genericZeroValue<false>()
+{
+  return _zero;
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::genericZeroValue<true>()
+{
+  return _ad_zero;
+}
+
+template <>
+const GenericVariableGradient<false> &
+Coupleable::genericZeroGradient<false>()
+{
+  return _grad_zero;
+}
+
+template <>
+const GenericVariableGradient<true> &
+Coupleable::genericZeroGradient<true>()
+{
+  return _ad_grad_zero;
+}
+
+template <>
+const GenericVariableSecond<false> &
+Coupleable::genericZeroSecond<false>()
+{
+  return _second_zero;
+}
+
+template <>
+const GenericVariableSecond<true> &
+Coupleable::genericZeroSecond<true>()
+{
+  return _ad_second_zero;
+}
+
+template <>
+const GenericVariableGradient<false> &
+Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp)
+{
+  return coupledGradient(var_name, comp);
+}
+
+template <>
+const GenericVariableGradient<true> &
+Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledGradient(var_name, comp);
+}
 // Explicit instantiations
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,

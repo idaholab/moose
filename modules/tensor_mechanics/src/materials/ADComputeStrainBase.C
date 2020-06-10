@@ -78,8 +78,8 @@ ADComputeStrainBase::initialSetup()
   // set unused dimensions to zero
   for (unsigned i = _ndisp; i < 3; ++i)
   {
-    _disp[i] = &adZeroValue();
-    _grad_disp[i] = &adZeroGradient();
+    _disp[i] = &_ad_zero;
+    _grad_disp[i] = &_ad_grad_zero;
   }
 }
 
