@@ -9,27 +9,28 @@
 
 #pragma once
 
-#include "SmearedCrackSofteningBase.h"
+#include "ADSmearedCrackSofteningBase.h"
 
 /**
  * ExponentialSoftening is a smeared crack softening model that
  * uses an exponential softening curve. It is for use with
- * ComputeSmearedCrackingStress.
+ * ADComputeSmearedCrackingStress and relies on automatic
+ * differentiation.
  */
-class ExponentialSoftening : public SmearedCrackSofteningBase
+class ADExponentialSoftening : public ADSmearedCrackSofteningBase
 {
 public:
   static InputParameters validParams();
 
-  ExponentialSoftening(const InputParameters & parameters);
+  ADExponentialSoftening(const InputParameters & parameters);
 
-  virtual void computeCrackingRelease(Real & stress,
-                                      Real & stiffness_ratio,
-                                      const Real strain,
-                                      const Real crack_initiation_strain,
-                                      const Real crack_max_strain,
-                                      const Real cracking_stress,
-                                      const Real youngs_modulus) override;
+  virtual void computeCrackingRelease(ADReal & stress,
+                                      ADReal & stiffness_ratio,
+                                      const ADReal & strain,
+                                      const ADReal & crack_initiation_strain,
+                                      const ADReal & crack_max_strain,
+                                      const ADReal & cracking_stress,
+                                      const ADReal & youngs_modulus) override;
 
 protected:
   /// Residual stress after full softening

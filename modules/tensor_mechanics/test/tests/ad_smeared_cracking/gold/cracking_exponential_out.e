@@ -1,0 +1,1 @@
+../../smeared_cracking/gold/cracking_exponential_out.e

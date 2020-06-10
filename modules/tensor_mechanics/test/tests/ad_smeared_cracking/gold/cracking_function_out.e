@@ -1,0 +1,1 @@
+../../smeared_cracking/gold/cracking_function_out.e

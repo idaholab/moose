@@ -1,0 +1,24 @@
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               6 @ t1202
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 1.e-4
+	disp_x  # min:               0 @ t1,n1	max:   0.00020452287 @ t75,n2
+	disp_y  # min:               0 @ t1,n1	max:          0.0035 @ t1202,n2
+
+ELEMENT VARIABLES relative 1.e-6 floor 5.e-3
+	stress_xx  # min:               0 @ t1,b1,e1	max:   0.00011799418 @ t46,b1,e1
+	stress_yy  # min:               0 @ t1,b1,e1	max:   1.1908885e+08 @ t74,b1,e1
+	stress_zz  # min:               0 @ t1,b1,e1	max:   0.00011799428 @ t46,b1,e1
+	stress_xy  # min:               0 @ t1,b1,e1	max:     1.40819e-09 @ t56,b1,e1
+	stress_yz  # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1
+	stress_zx  # min:               0 @ t1,b1,e1	max:               0 @ t1,b1,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
