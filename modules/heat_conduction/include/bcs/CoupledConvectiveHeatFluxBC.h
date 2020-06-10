@@ -35,4 +35,6 @@ protected:
   std::vector<const VariableValue *> _htc;
   /// Volume fraction of individual phase
   std::vector<const VariableValue *> _alpha;
+  /// Scale factor
+  const VariableValue & _scale_factor;
 };

@@ -11,10 +11,9 @@
 
 #include "ElementPostprocessor.h"
 
-class ElementExtremeMaterialProperty;
-
 /// Determines the minimum or maximum of a material property over a volume.
-class ElementExtremeMaterialProperty : public ElementPostprocessor
+template <bool is_ad>
+class ElementExtremeMaterialPropertyTempl : public ElementPostprocessor
 {
 public:
   static InputParameters validParams();
@@ -26,7 +25,7 @@ public:
     MIN
   };
 
-  ElementExtremeMaterialProperty(const InputParameters & parameters);
+  ElementExtremeMaterialPropertyTempl(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -37,7 +36,7 @@ protected:
   virtual void computeQpValue();
 
   /// Material property for which to find extreme
-  const MaterialProperty<Real> & _mat_prop;
+  const GenericMaterialProperty<Real, is_ad> & _mat_prop;
 
   /// Type of extreme value to compute
   ExtremeType _type;
@@ -48,3 +47,6 @@ protected:
   /// Current quadrature point
   unsigned int _qp;
 };
+
+typedef ElementExtremeMaterialPropertyTempl<false> ElementExtremeMaterialProperty;
+typedef ElementExtremeMaterialPropertyTempl<true> ADElementExtremeMaterialProperty;

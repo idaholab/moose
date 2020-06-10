@@ -11,17 +11,16 @@
 
 #include "ElementIntegralMaterialProperty.h"
 
-class ElementAverageMaterialProperty;
-
 /**
  * Computes the average of a material property over a volume.
  */
-class ElementAverageMaterialProperty : public ElementIntegralMaterialProperty
+template <bool is_ad>
+class ElementAverageMaterialPropertyTempl : public ElementIntegralMaterialPropertyTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ElementAverageMaterialProperty(const InputParameters & parameters);
+  ElementAverageMaterialPropertyTempl(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -32,3 +31,6 @@ protected:
   /// Domain volume
   Real _volume;
 };
+
+typedef ElementAverageMaterialPropertyTempl<false> ElementAverageMaterialProperty;
+typedef ElementAverageMaterialPropertyTempl<true> ADElementAverageMaterialProperty;

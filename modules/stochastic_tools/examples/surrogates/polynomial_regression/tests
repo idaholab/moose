@@ -1,0 +1,61 @@
+[Tests]
+  design = 'Surrogates/index.md'
+  issues = '#15361'
+
+  [train]
+    requirement = "The sytem shall test syntax for training surrogate models for the comparison example "
+    [uniform]
+      type = CheckFiles
+      input = uniform_train.i
+      check_files = 'uniform_train_pc_out_pc_max.rd uniform_train_pr_out_pr_max.rd'
+      cli_args = "Samplers/pc_sampler/order=1
+                  Samplers/pr_sampler/num_rows=6
+                  Samplers/pr_sampler/num_bins=2
+                  Trainers/pc_max/order=1
+                  Trainers/pr_max/max_degree=1
+                  pc_sub:Mesh/nx=5
+                  pr_sub:Mesh/nx=5"
+      method = opt
+      detail = "with uniform parameter distributions "
+    []
+    [normal]
+      type = CheckFiles
+      input = normal_train.i
+      check_files = 'normal_train_pc_out_pc_max.rd normal_train_pr_out_pr_max.rd'
+      cli_args = "Samplers/pc_sampler/order=1
+                  Samplers/pr_sampler/num_rows=6
+                  Samplers/pr_sampler/num_bins=2
+                  Trainers/pc_max/order=1
+                  Trainers/pr_max/max_degree=1
+                  pc_sub:Mesh/nx=5
+                  pr_sub:Mesh/nx=5"
+      method = opt
+      detail = "and with normally distributed parameters."
+    []
+  []
+  [evaluate]
+    requirement = "The sytem shall test results for evaluating surrogate models for the comparison example "
+    [uniform]
+      type = CSVDiff
+      input = uniform_surr.i
+      allow_test_objects = true
+      cli_args = "Samplers/sample/num_rows=5
+                  Samplers/sample/num_bins=2"
+      csvdiff = "uniform_surr_out_pc_max_res_0001.csv uniform_surr_out_pr_max_res_0001.csv
+                 uniform_surr_out_pc_max_stats_0001.csv uniform_surr_out_pr_max_stats_0001.csv"
+      method = opt
+      detail = "with uniform parameter distributions "
+    []
+    [normal]
+      type = CSVDiff
+      input = normal_surr.i
+      allow_test_objects = true
+      cli_args = "Samplers/sample/num_rows=5
+                  Samplers/sample/num_bins=2"
+      csvdiff = "normal_surr_out_pc_max_res_0001.csv normal_surr_out_pr_max_res_0001.csv
+                 normal_surr_out_pc_max_stats_0001.csv normal_surr_out_pr_max_stats_0001.csv"
+      method = opt
+      detail = "with uniform parameter distributions "
+    []
+  []
+[]

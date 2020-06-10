@@ -1,0 +1,27 @@
+[Tests]
+  issues = "#15361"
+  design = "PolynomialRegressionTrainer.md PolynomialRegressionSurrogate.md"
+  requirement = 'The system shall demonstrate a polnomial regression surrogate by '
+  [train]
+    type = CheckFiles
+    input = train.i
+    check_files = 'train_out_train.rd'
+    allow_test_objects = true
+    detail = 'training using known 3D data '
+  []
+  [load]
+    type = CSVDiff
+    input = evaluate.i
+    allow_test_objects = true
+    csvdiff = 'evaluate_out_results_0002.csv'
+    prereq = train # Creates data files that this test uses
+    detail = 'and then evaluating new samples separately for the same data'
+  []
+  [train_and_load]
+    type = CSVDiff
+    input = train_and_evaluate.i
+    allow_test_objects = true
+    csvdiff = 'train_and_evaluate_out_results_0002.csv'
+    detail = 'and then doing both on another 1D case.'
+  []
+[]
