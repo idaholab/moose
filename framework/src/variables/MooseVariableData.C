@@ -15,6 +15,7 @@
 #include "TimeIntegrator.h"
 #include "MooseVariableFE.h"
 #include "MooseTypes.h"
+#include "DualRealOps.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -1313,37 +1314,8 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     _ad_u_dot.resize(nqp);
   }
 
-  // Derivatives are offset by the variable number
-  size_t ad_offset;
-  switch (_element_type)
-  {
-    case Moose::ElementType::Element:
-      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem();
-      break;
-
-    case Moose::ElementType::Neighbor:
-      ad_offset = _var_num * _sys.getMaxVarNDofsPerElem() +
-                  (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
-      break;
-
-    case Moose::ElementType::Lower:
-      // At the time of writing, this Lower case is only used in mortar applications where we are
-      // re-init'ing on Element, Neighbor, and Lower dimensional elements
-      // simultaneously. Consequently, we make sure here that our offset is greater than the sum
-      // of the element and neighbor dofs. I can imagine a future case in which you're not
-      // re-init'ing on all three simultaneously in which case this offset could be smaller. Also
-      // note that the number of dofs on lower-d elements is guaranteed to be lower than on the
-      // higher dimensional element, but we're not using that knowledge here. In the future we
-      // could implement something like SystemBase::getMaxVarNDofsPerFace (or *PerLowerDElem)
-      ad_offset = 2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
-                  _var_num * _sys.getMaxVarNDofsPerElem();
-      break;
-
-    default:
-      mooseError(
-          "Unsupported element type ",
-          static_cast<typename std::underlying_type<decltype(_element_type)>::type>(_element_type));
-  }
+  auto ad_offset = Moose::adOffset(
+      _var_num, _sys.getMaxVarNDofsPerElem(), _element_type, _sys.system().n_vars());
   mooseAssert(_var.kind() == Moose::VarKindType::VAR_AUXILIARY || ad_offset || !_var_num,
               "Either this is the zeroth variable or we should have an offset");
 

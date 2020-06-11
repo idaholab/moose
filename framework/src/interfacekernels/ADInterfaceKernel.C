@@ -13,6 +13,7 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include "ADOffset.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"
@@ -153,12 +154,8 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   else
     prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 
-  std::size_t ad_offset;
-  if (type == Moose::ElementElement || type == Moose::NeighborElement)
-    ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
-  else
-    ad_offset = jvar * _sys.getMaxVarNDofsPerElem() +
-                (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
+  auto ad_offset =
+      Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
@@ -215,12 +212,8 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
     resid_type = Moose::Neighbor;
   }
 
-  std::size_t ad_offset;
-  if (type == Moose::ElementElement || type == Moose::NeighborElement)
-    ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
-  else
-    ad_offset = jvar * _sys.getMaxVarNDofsPerElem() +
-                (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem());
+  auto ad_offset =
+      Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), type, _sys.system().n_vars());
 
   if (type == Moose::ElementElement)
     prepareMatrixTag(_assembly, ivar, jvar);
