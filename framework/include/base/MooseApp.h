@@ -31,6 +31,7 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+#include <chrono>
 
 // Forward declarations
 class Executioner;
@@ -789,6 +790,14 @@ public:
   }
   ///@}
 
+  /**
+   * Get the starting wall time of this moose app
+   */
+  const std::chrono::time_point<std::chrono::steady_clock> & getStartWallTime() const
+  {
+    return _start_wall_time;
+  }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -1074,6 +1083,9 @@ private:
   bool _popped_final_mesh_generator;
 
   bool _profiling = false;
+
+  /// The start time of this app
+  std::chrono::time_point<std::chrono::steady_clock> _start_wall_time;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

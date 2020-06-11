@@ -1868,6 +1868,9 @@ protected:
   /// Whether or not to actually solve the nonlinear system
   const bool & _solve;
 
+  /// Whether or not to show the progress of initial setup
+  bool _show_initial_setup;
+
   bool _transient;
   Real & _time;
   Real & _time_old;
@@ -2207,6 +2210,9 @@ private:
   /// MooseEnum describing how to obtain reference points for displaced mesh dgkernels and/or
   /// interface kernels. Options are invert_elem_phys, use_undisplaced_ref, and the default unset.
   MooseEnum _displaced_neighbor_ref_pts;
+
+  /// Helper function for print progress of initial setup
+  void showInitialSetup(const std::string & tag) const;
 };
 
 template <typename T>

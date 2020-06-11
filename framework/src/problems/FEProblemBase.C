@@ -94,6 +94,7 @@
 #include "FVTimeKernel.h"
 #include "MooseVariableFV.h"
 #include "FVBoundaryCondition.h"
+#include "MemoryUtils.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -103,6 +104,8 @@
 #include "libmesh/string_to_enum.h"
 
 #include "metaphysicl/dualnumber.h"
+
+#include <chrono>
 
 // Anonymous namespace for helper function
 namespace
@@ -130,6 +133,7 @@ FEProblemBase::validParams()
       "transpose_null_space_dimension", 0, "The dimension of the transpose nullspace");
   params.addParam<unsigned int>(
       "near_null_space_dimension", 0, "The dimension of the near nullspace");
+  params.addParam<bool>("show_initial_setup", false, "Whether or not to show the initial setup");
   params.addParam<bool>("solve",
                         true,
                         "Whether or not to actually solve the Nonlinear system.  "
@@ -218,6 +222,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _eq(_mesh),
     _initialized(false),
     _solve(getParam<bool>("solve")),
+    _show_initial_setup(getParam<bool>("show_initial_setup")),
     _transient(false),
     _time(declareRestartableData<Real>("time")),
     _time_old(declareRestartableData<Real>("time_old")),
@@ -617,8 +622,25 @@ FEProblemBase::getEvaluableElementRange()
 }
 
 void
+FEProblemBase::showInitialSetup(const std::string & tag) const
+{
+  MemoryUtils::Stats stats;
+  MemoryUtils::getMemoryStats(stats);
+  auto usage = MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+  auto end = std::chrono::steady_clock::now();
+  std::chrono::duration<double> duration = end - _app.getStartWallTime();
+  _console << "[DBG][InitialSetup]"
+           << " Memory usage " << usage << "MB [Time] " << std::fixed << std::setprecision(2)
+           << duration.count() << "s"
+           << " (" << tag << ")" << std::endl;
+}
+
+void
 FEProblemBase::initialSetup()
 {
+  if (_show_initial_setup)
+    showInitialSetup("Starting FEProblem initial setup");
+
   TIME_SECTION(_initial_setup_timer);
 
   if (_skip_exception_check)
@@ -631,10 +653,14 @@ FEProblemBase::initialSetup()
   _started_initial_setup = true;
   setCurrentExecuteOnFlag(EXEC_INITIAL);
 
+  if (_show_initial_setup)
+    showInitialSetup("Adding extra vectors");
   addExtraVectors();
 
   // always execute to get the max number of DoF per element and node needed to initialize phi_zero
   // variables
+  if (_show_initial_setup)
+    showInitialSetup("Computing max dofs per elem/node");
   dof_id_type max_var_n_dofs_per_elem;
   dof_id_type max_var_n_dofs_per_node;
   {
@@ -661,6 +687,8 @@ FEProblemBase::initialSetup()
     displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
 
 #ifndef MOOSE_SPARSE_AD
+  if (_show_initial_setup)
+    showInitialSetup("Setting AD required derrivative size");
   auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
   if (hasMortarCoupling())
     size_required *= 3;
@@ -687,6 +715,8 @@ FEProblemBase::initialSetup()
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
   {
+    if (_show_initial_setup)
+      showInitialSetup("Restarting from file");
     CONSOLE_TIMED_PRINT("Restarting from file");
 
     _restart_io->readRestartableDataHeader(true);
@@ -706,6 +736,8 @@ FEProblemBase::initialSetup()
 
     if (reader)
     {
+      if (_show_initial_setup)
+        showInitialSetup("Copying variables from Exodus");
       CONSOLE_TIMED_PRINT("Copying variables from Exodus");
       _nl->copyVars(*reader);
       _aux->copyVars(*reader);
@@ -713,6 +745,8 @@ FEProblemBase::initialSetup()
   }
 
   // Perform output related setups
+  if (_show_initial_setup)
+    showInitialSetup("OutputWarehouse initial setup");
   _app.getOutputWarehouse().initialSetup();
 
   // Flush all output to _console that occur during construction and initialization of objects
@@ -726,6 +760,8 @@ FEProblemBase::initialSetup()
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
 
+    if (_show_initial_setup)
+      showInitialSetup("Building refine/coarsen maps");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0].get());
   }
 
@@ -742,16 +778,22 @@ FEProblemBase::initialSetup()
         mooseError(
             "Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
 
+      if (_show_initial_setup)
+        showInitialSetup("Uniform refinement with projection");
       adaptivity().uniformRefineWithProjection();
     }
   }
 
   // Do this just in case things have been done to the mesh
   {
+    if (_show_initial_setup)
+      showInitialSetup("Ghosting ghosted boundaries");
     CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
     ghostGhostedBoundaries();
   }
 
+  if (_show_initial_setup)
+    showInitialSetup("Calling mesh changed");
   _mesh.meshChanged();
 
   if (_displaced_problem)
@@ -763,6 +805,8 @@ FEProblemBase::initialSetup()
   unsigned int n_threads = libMesh::n_threads();
 
   // UserObject initialSetup
+  if (_show_initial_setup)
+    showInitialSetup("Pre IC/aux user objects initial setup");
   std::set<std::string> depend_objects_ic = _ics.getDependObjects();
   std::set<std::string> depend_objects_aux = _aux->getDependObjects();
 
@@ -778,12 +822,16 @@ FEProblemBase::initialSetup()
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
     checkUserObjectJacobianRequirement(tid);
 
-  // Check whether nonlocal couling is required or not
+  // Check whether nonlocal coupling is required or not
+  if (_show_initial_setup)
+    showInitialSetup("Checking nonlocal coupling");
   checkNonlocalCoupling();
   if (_requires_nonlocal_coupling)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   // Call the initialSetup methods for functions
+  if (_show_initial_setup)
+    showInitialSetup("Functions initial setup");
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     reinitScalars(
@@ -792,13 +840,19 @@ FEProblemBase::initialSetup()
   }
 
   // Random interface objects
+  if (_show_initial_setup)
+    showInitialSetup("Updating seeds for random interface objects");
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_INITIAL);
 
   if (!_app.isRecovering())
   {
+    if (_show_initial_setup)
+      showInitialSetup("Computing pre IC user objects");
     computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
 
+    if (_show_initial_setup)
+      showInitialSetup("Applying initial conditions");
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       _ics.initialSetup(tid);
     _scalar_ics.initialSetup();
@@ -810,6 +864,8 @@ FEProblemBase::initialSetup()
   // Materials
   if (_all_materials.hasActiveObjects(0))
   {
+    if (_show_initial_setup)
+      showInitialSetup("Initializing stateful material properties");
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
@@ -843,6 +899,8 @@ FEProblemBase::initialSetup()
       _has_initialized_stateful = true;
   }
 
+  if (_show_initial_setup)
+    showInitialSetup("Indicators/markers initial setup");
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _internal_side_indicators.initialSetup(tid);
@@ -855,6 +913,8 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
+    if (_show_initial_setup)
+      showInitialSetup("Initial mesh adaptation");
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
@@ -867,6 +927,8 @@ FEProblemBase::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting())
   {
     // During initial setup the solution is copied to the older solution states (old, older, etc)
+    if (_show_initial_setup)
+      showInitialSetup("Copying solutions backwards");
     CONSOLE_TIMED_PRINT("Copying soultions back");
     copySolutionsBackwards();
   }
@@ -875,23 +937,33 @@ FEProblemBase::initialSetup()
   {
     if (haveXFEM())
     {
+      if (_show_initial_setup)
+        showInitialSetup("Updating XFEM");
       CONSOLE_TIMED_PRINT("Updating XFEM");
       updateMeshXFEM();
     }
   }
 
   // Call initialSetup on the nonlinear system
+  if (_show_initial_setup)
+    showInitialSetup("Nonlinear system initial setup");
   _nl->initialSetup();
 
   // Auxilary variable initialSetup calls
+  if (_show_initial_setup)
+    showInitialSetup("Auxiliary system initial setup");
   _aux->initialSetup();
 
   _nl->setSolution(*(_nl->system().current_local_solution.get()));
 
   // Update the nearest node searches (has to be called after the problem is all set up)
   // We do this here because this sets up the Element's DoFs to ghost
+  if (_show_initial_setup)
+    showInitialSetup("Updating nearest node geometry search");
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
 
+  if (_show_initial_setup)
+    showInitialSetup("Updating active semi-local node range");
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
@@ -899,6 +971,8 @@ FEProblemBase::initialSetup()
   // We need to move the mesh in order to build a map between mortar slave and master
   // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
   // know which dofs we need ghosted when we call EquationSystems::reinit
+  if (_show_initial_setup)
+    showInitialSetup("Updating mesh for mortar");
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
     _displaced_problem->updateMesh();
 
@@ -918,8 +992,12 @@ FEProblemBase::initialSetup()
   if (_displaced_mesh)
     _displaced_problem->updateMesh();
 
+  if (_show_initial_setup)
+    showInitialSetup("Updating geometry search");
   updateGeomSearch(); // Call all of the rest of the geometric searches
 
+  if (_show_initial_setup)
+    showInitialSetup("Time integrator initial setup");
   auto ti = _nl->getTimeIntegrator();
 
   if (ti)
@@ -930,12 +1008,16 @@ FEProblemBase::initialSetup()
     if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
                                 // Backup
     {
+      if (_show_initial_setup)
+        showInitialSetup("Restoring cached backup");
       CONSOLE_TIMED_PRINT("Restoring cached backup");
 
       _app.restoreCachedBackup();
     }
     else
     {
+      if (_show_initial_setup)
+        showInitialSetup("Restoring restart data");
       CONSOLE_TIMED_PRINT("Restoring restart data");
 
       _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
@@ -946,6 +1028,8 @@ FEProblemBase::initialSetup()
     // for some of the variables which should override what's coming from the restart file
     if (!_app.isRecovering())
     {
+      if (_show_initial_setup)
+        showInitialSetup("Reprojecting ICs");
       CONSOLE_TIMED_PRINT("Reprojecting initial conditions after restoring restart data");
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -961,12 +1045,16 @@ FEProblemBase::initialSetup()
   // Call initialSetup on the MultiApps
   if (_multi_apps.hasObjects())
   {
+    if (_show_initial_setup)
+      showInitialSetup("MultiApps initial setup");
     _console << COLOR_CYAN << "Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
     _multi_apps.initialSetup();
     _console << COLOR_CYAN << "Finished Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
   }
 
   // Call initialSetup on the transfers
+  if (_show_initial_setup)
+    showInitialSetup("Transfers initial setup");
   _transfers.initialSetup();
 
   // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
@@ -987,6 +1075,8 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
+    if (_show_initial_setup)
+      showInitialSetup("Execute initial transfers/multiapps/uos/auxkernels");
     execTransfers(EXEC_INITIAL);
 
     bool converged = execMultiApps(EXEC_INITIAL);
@@ -1023,6 +1113,8 @@ FEProblemBase::initialSetup()
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
        _neighbor_material_props.hasStatefulProperties()))
   {
+    if (_show_initial_setup)
+      showInitialSetup("Re-initializing stateful material properties");
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
@@ -1036,30 +1128,51 @@ FEProblemBase::initialSetup()
   }
 
   // Control Logic
+  if (_show_initial_setup)
+    showInitialSetup("Executing inital controls");
   executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
+  if (_show_initial_setup)
+    showInitialSetup("Initializing scalar variables");
   for (unsigned int tid = 0; tid < n_threads; tid++)
     reinitScalars(tid);
 
   if (_displaced_mesh)
+  {
+    if (_show_initial_setup)
+      showInitialSetup("Sync displaced solutions");
     _displaced_problem->syncSolutions();
+  }
 
   // Writes all calls to _console from initialSetup() methods
+  if (_show_initial_setup)
+    showInitialSetup("Flushing console");
   _app.getOutputWarehouse().mooseConsole();
 
   if (_requires_nonlocal_coupling)
   {
+    if (_show_initial_setup)
+      showInitialSetup("Initializing nonlocal coupling");
     setNonlocalCouplingMatrix();
     for (THREAD_ID tid = 0; tid < n_threads; ++tid)
       _assembly[tid]->initNonlocalCoupling();
   }
 
   if (_line_search)
+  {
+    if (_show_initial_setup)
+      showInitialSetup("Line search initial setup");
     _line_search->initialSetup();
+  }
 
+  if (_show_initial_setup)
+    showInitialSetup("Checking registry lables");
   _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
+
+  if (_show_initial_setup)
+    showInitialSetup("Finished FEProblem initial setup");
 }
 
 void

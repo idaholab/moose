@@ -23,6 +23,8 @@
 
 #include "libmesh/simple_range.h"
 
+#include <chrono>
+
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory)
   : ConsoleStreamInterface(app),
     _app(app),
@@ -347,7 +349,10 @@ ActionWarehouse::executeAllActions()
     MemoryUtils::getMemoryStats(stats);
     auto usage =
         MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
-    _console << "[DBG][ACT] Finished executing all actions with memory usage " << usage << "MB"
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> duration = end - _app.getStartWallTime();
+    _console << "[DBG][ACT] Finished executing all actions with memory usage " << usage
+             << "MB at time " << std::fixed << std::setprecision(2) << duration.count() << "s"
              << std::endl;
   }
 }
@@ -367,12 +372,15 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
       MemoryUtils::getMemoryStats(stats);
       auto usage =
           MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+      auto end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> duration = end - _app.getStartWallTime();
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
                << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
                << ") "
                << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
-               << ") Memory usage " << usage << "MB" << std::endl;
+               << ") Memory usage " << usage << "MB [Time] " << std::fixed << std::setprecision(2)
+               << duration.count() << "s" << std::endl;
     }
 
     (*_act_iter)->timedAct();

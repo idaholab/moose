@@ -15,6 +15,7 @@
 #include <vector>
 #include <list>
 #include <ostream>
+#include <chrono>
 
 // MOOSE includes
 #include "Action.h"

@@ -1,0 +1,11 @@
+[Tests]
+  [./test_show_problem_initial_setup]
+    type = RunApp
+    input = 'show_initial_setup.i'
+    expect_out = '[DBG][InitialSetup] Memory usage'
+    match_literal = true
+    issues = '#15444'
+    design = 'Problem/index.md'
+    requirement = "The system shall be capable of reporting information of problem initial setup."
+  [../]
+[]
