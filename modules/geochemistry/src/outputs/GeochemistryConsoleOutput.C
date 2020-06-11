@@ -60,13 +60,13 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
     _console << _reactor.getSolverOutput(_point).str();
 
   // retrieve information
-  const EquilibriumGeochemicalSystem & egs = _reactor.getEquilibriumGeochemicalSystem(_point);
+  const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(_point);
   const unsigned num_basis = egs.getNumInBasis();
   const unsigned num_eqm = egs.getNumInEquilibrium();
   const std::vector<Real> & basis_molality = egs.getSolventMassAndFreeMolalityAndMineralMoles();
   const std::vector<Real> & basis_activity = egs.getBasisActivity();
   const std::vector<Real> & basis_act_coef = egs.getBasisActivityCoefficient();
-  const std::vector<Real> & bulk_moles = egs.getBulkMoles();
+  const std::vector<Real> & bulk_moles = egs.getBulkMolesOld();
   const std::vector<Real> & eqm_molality = egs.getEquilibriumMolality();
   const std::vector<Real> & eqm_act_coef = egs.getEquilibriumActivityCoefficient();
   const std::vector<Real> & eqm_SI = egs.getSaturationIndices();
@@ -79,7 +79,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   _console << "Total number of iterations required = " << _reactor.getSolverIterations(_point)
            << "\n";
   _console << "Error in calculation = " << _reactor.getSolverResidual(_point) << "mol\n";
-  _console << "Charge of solution = " << egs.getTotalCharge() << "mol";
+  _console << "Charge of solution = " << egs.getTotalChargeOld() << "mol";
   _console << " (charge-balance species = "
            << mgd.basis_species_name[egs.getChargeBalanceBasisIndex()] << ")\n";
 
@@ -215,12 +215,12 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
 }
 
 void
-GeochemistryConsoleOutput::outputNernstInfo(const EquilibriumGeochemicalSystem & egs_ref) const
+GeochemistryConsoleOutput::outputNernstInfo(const GeochemicalSystem & egs_ref) const
 {
   // Copy egs_ref so we can call non-const methods (viz, swaps).  This does not copy the data in
   // egs.getModelGeochemicalDatabase(), only the reference (both references refer to the same
   // block of memory) and unfortunately the swaps below manipulate that memory
-  EquilibriumGeochemicalSystem egs = egs_ref;
+  GeochemicalSystem egs = egs_ref;
   // Since we only want to do the swaps to print out some Nernst info, but don't want to impact
   // the rest of the simulation, copy the mgd, so that we can copy it back into the aforementioned
   // block of memory at the end of this method

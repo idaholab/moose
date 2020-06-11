@@ -564,6 +564,7 @@ PertinentGeochemicalSystem::createModel()
     ms.molecular_volume = 0.0;
     ms.basis_species = species.basis_species;
     ms.molecular_weight = species.molecular_weight;
+    ms.equilibrium_const = species.equilibrium_const;
     overlap_kin.push_back(ms);
   }
   for (const auto & species : _kinetic_surface_info)
@@ -573,6 +574,9 @@ PertinentGeochemicalSystem::createModel()
     ms.molecular_volume = 0.0;
     ms.basis_species = species.basis_species;
     ms.molecular_weight = species.molecular_weight;
+    const Real T0 = _db.getTemperatures()[0];
+    for (const auto & temp : _db.getTemperatures())
+      ms.equilibrium_const.push_back(species.log10K + species.dlog10KdT * (temp - T0));
     overlap_kin.push_back(ms);
   }
   const unsigned num_kin = overlap_kin.size();
@@ -615,11 +619,14 @@ PertinentGeochemicalSystem::createModel()
 
   // extract the stoichiometry
   _model.kin_stoichiometry.resize(num_kin, num_cols);
+  _model.kin_log10K.resize(num_kin, num_temperatures);
 
   // populate the stoichiometry
   for (const auto & species : overlap_kin)
   {
     const unsigned row = _model.kin_species_index[species.name];
+    for (unsigned i = 0; i < num_temperatures; ++i)
+      _model.kin_log10K(row, i) = species.equilibrium_const[i];
     for (const auto & react : species.basis_species)
     {
       const Real stoi_coeff = react.second;
@@ -633,6 +640,8 @@ PertinentGeochemicalSystem::createModel()
         // reaction species is not a basis component, but a secondary component.
         // So express stoichiometry in terms of the secondary component's reaction
         const unsigned sec_row = _model.eqm_species_index[react.first];
+        for (unsigned i = 0; i < num_temperatures; ++i)
+          _model.kin_log10K(row, i) += stoi_coeff * _model.eqm_log10K(sec_row, i);
         for (unsigned col = 0; col < num_cols; ++col)
           _model.kin_stoichiometry(row, col) += stoi_coeff * _model.eqm_stoichiometry(sec_row, col);
       }
@@ -699,4 +708,38 @@ const ModelGeochemicalDatabase &
 PertinentGeochemicalSystem::modelGeochemicalDatabase() const
 {
   return _model;
+}
+
+void
+PertinentGeochemicalSystem::addKineticRate(const KineticRateUserDescription & description)
+{
+  const std::string kinetic_species = description.kinetic_species_name;
+  if (_model.kin_species_index.count(kinetic_species) == 0)
+    mooseError("Cannot prescribe a kinetic rate to species ",
+               kinetic_species,
+               " since it is not a kinetic species");
+  const unsigned kinetic_species_index = _model.kin_species_index.at(kinetic_species);
+
+  // build the promoting index list
+  const unsigned num_pro = description.promoting_species.size();
+  const unsigned num_basis = _model.basis_species_name.size();
+  const unsigned num_eqm = _model.eqm_species_name.size();
+  std::vector<Real> promoting_ind(num_basis + num_eqm, 0.0);
+  for (unsigned i = 0; i < num_pro; ++i)
+  {
+    unsigned index = 0;
+    const std::string promoting_species = description.promoting_species[i];
+    if (_model.basis_species_index.count(promoting_species) == 1)
+      index = _model.basis_species_index.at(promoting_species);
+    else if (_model.eqm_species_index.count(promoting_species) == 1)
+      index = num_basis + _model.eqm_species_index.at(promoting_species);
+    else
+      mooseError(
+          "Promoting species ", promoting_species, " must be a basis or a secondary species");
+    promoting_ind[index] = description.promoting_indices[i];
+  }
+
+  // append the result to kin_rate
+  _model.kin_rate.push_back(
+      KineticRateDefinition(kinetic_species_index, promoting_ind, description));
 }

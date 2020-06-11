@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "EquilibriumGeochemicalSolver.h"
+#include "GeochemicalSolver.h"
 #include "GeochemistryReactorBase.h"
 
 /**
@@ -27,13 +27,11 @@ public:
   virtual void initialSetup() override;
   virtual void execute() override;
 
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(const Point & point) const override;
+  virtual const GeochemicalSystem & getGeochemicalSystem(const Point & point) const override;
   virtual const std::stringstream & getSolverOutput(const Point & point) const override;
   virtual unsigned getSolverIterations(const Point & point) const override;
   virtual Real getSolverResidual(const Point & point) const override;
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(unsigned node_id) const override;
+  virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
 
 protected:
   /// Temperature specified by user
@@ -41,9 +39,11 @@ protected:
   /// Temperature at which the _egs was last made consistent
   Real _previous_temperature;
   /// The equilibrium geochemical system that holds all the molalities, activities, etc
-  EquilibriumGeochemicalSystem _egs;
+  GeochemicalSystem _egs;
   /// The solver
-  EquilibriumGeochemicalSolver _solver;
+  GeochemicalSolver _solver;
+  /// Number of kinetic species
+  const unsigned _num_kin;
   /// Defines the time at which to close the system
   const Real _close_system_at_time;
   /// Whether the system has been closed
@@ -68,8 +68,10 @@ protected:
   const unsigned _num_controlled_activity;
   /// Activity or fugacity of the species with controlled activity or fugacity
   std::vector<const VariableValue *> _controlled_activity_species_values;
-  /// moles of each basis species added at the current timestep
-  std::vector<Real> _moles_added;
+  /// Moles of each basis species added at the current timestep, along with kinetic rates
+  DenseVector<Real> _mole_additions;
+  /// Derivative of moles_added
+  DenseMatrix<Real> _dmole_additions;
   /// Mode of the system (flush, flow-through, etc)
   const VariableValue & _mode;
   /// Moles of mineral removed by dump and flow-through

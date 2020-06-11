@@ -122,7 +122,7 @@ AddTimeIndependentReactionSolverAction::act()
     params.set<unsigned>("ramp_max_ionic_strength") = getParam<unsigned>("ramp_max_ionic_strength");
     params.set<bool>("ionic_str_using_basis_only") = getParam<bool>("ionic_str_using_basis_only");
     params.set<Real>("temperature") = getParam<Real>("temperature");
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
     _problem->addUserObject(
         class_name, getParam<UserObjectName>("geochemistry_reactor_name"), params);
   }

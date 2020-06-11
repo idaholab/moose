@@ -47,7 +47,7 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
     _surface_sorption_mineral_index(0)
 {
   const ModelGeochemicalDatabase & mgd =
-      _reactor.getEquilibriumGeochemicalSystem(0).getModelGeochemicalDatabase();
+      _reactor.getGeochemicalSystem(0).getModelGeochemicalDatabase();
   if (!(mgd.basis_species_index.count(_species) == 1 || mgd.eqm_species_index.count(_species) == 1))
     paramError(
         "species",
@@ -88,8 +88,7 @@ Real
 GeochemistryQuantityAux::computeValue()
 {
   Real ret = 0.0;
-  const EquilibriumGeochemicalSystem & egs =
-      _reactor.getEquilibriumGeochemicalSystem(_current_node->id());
+  const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(_current_node->id());
   const ModelGeochemicalDatabase & mgd = egs.getModelGeochemicalDatabase();
   if (_quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE)
     ret = egs.getSurfaceCharge(_surface_sorption_mineral_index);
@@ -123,7 +122,7 @@ GeochemistryQuantityAux::computeValue()
           ret = egs.getBasisActivity(basis_ind);
           break;
         case QuantityChoiceEnum::BULK_MOLES:
-          ret = egs.getBulkMoles()[basis_ind];
+          ret = egs.getBulkMolesOld()[basis_ind];
           break;
         default:
           ret = egs.getSolventMassAndFreeMolalityAndMineralMoles()[basis_ind];

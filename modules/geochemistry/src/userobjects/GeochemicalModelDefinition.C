@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GeochemicalModelDefinition.h"
+#include "GeochemistryKineticRate.h"
 
 registerMooseObject("GeochemistryApp", GeochemicalModelDefinition);
 
@@ -71,6 +72,10 @@ GeochemicalModelDefinition::validParams()
       "recorded, and hence their Nernst potentials to be computed eqsily, the equilibrium reaction "
       "for redox_electron must involve redox_oxygen, and the basis species must be chosen to that "
       "redox_electron is an equilibrium species");
+  params.addParam<std::vector<UserObjectName>>(
+      "kinetic_rate_descriptions",
+      "A list of GeochemistryKineticRate UserObject names that define the kinetic rates.  If a "
+      "kinetic species has no rate prescribed to it, its reaction rate will be zero");
 
   params.addClassDescription("User object that parses a geochemical database file, and only "
                              "retains information relevant to the current geochemical model");
@@ -91,6 +96,8 @@ GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & p
            getParam<std::string>("redox_oxygen"),
            getParam<std::string>("redox_electron"))
 {
+  for (const auto & kr : getParam<std::vector<UserObjectName>>("kinetic_rate_descriptions"))
+    _model.addKineticRate(getUserObjectByName<GeochemistryKineticRate>(kr).getRateDescription());
 }
 
 void

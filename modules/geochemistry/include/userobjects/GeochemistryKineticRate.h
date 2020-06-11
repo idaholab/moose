@@ -10,26 +10,25 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "PertinentGeochemicalSystem.h"
+#include "KineticRateUserDescription.h"
 
 /**
- * User object that parses a geochemical database file, and only retains information relevant to the
- * current geochemical model
+ * User object that defines a kinetic rate
  */
-class GeochemicalModelDefinition : public GeneralUserObject
+class GeochemistryKineticRate : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  GeochemicalModelDefinition(const InputParameters & parameters);
+  GeochemistryKineticRate(const InputParameters & parameters);
 
   virtual void initialize() override final;
   virtual void execute() override final;
   virtual void finalize() override final;
 
-  /// provides a reference to the pertinent geochemical database held by this object
-  const ModelGeochemicalDatabase & getDatabase() const;
+  /// provides a reference to the rate description held by this object
+  const KineticRateUserDescription & getRateDescription() const;
 
 private:
-  PertinentGeochemicalSystem _model;
+  const KineticRateUserDescription _rate_description;
 };
