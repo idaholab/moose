@@ -87,7 +87,7 @@ as shown in [quote-nested-example].
 ### Headings id=headings
 
 Headings can range from level one to six and are specified using the hash (`#`) character, where the
-number of hashes indicate the heading level (see [#heading-basic-example]). The following is required
+number of hashes indicate the heading level (see [heading-basic-example]). The following is required
 to define a heading:
 
 1. the hash(es) must be followed by a single space,
@@ -291,7 +291,7 @@ syntax. The available settings for links is include in [link-settings].
 
 Links to shortcuts use the typical [markdown] syntax of a key enclosed in square brackets (`[key]`),
 where the key references a shortcut, which are defined as detailed in the [#shortcuts] section, refer
-to [#shortcut-example] for a demonstration of shortcut and shortcut link use.
+to [shortcut-example] for a demonstration of shortcut and shortcut link use.
 
 In addition to linking to [#shortcuts] created directly, the same syntax is used to reference
 headings that have an "id" setting applied, see [heading-link-example]. When used in this fashion

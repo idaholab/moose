@@ -7,6 +7,8 @@
     --alert-warning-content: rgba(255, 255, 51, 0.2);
     --alert-construction: rgba(255, 114, 33, 1.0);
     --alert-construction-content: rgba(255, 114, 33, 0.2);
+    --alert-tip: rgba(0, 128, 21, 1.0);
+    --alert-tip-content: rgba(0, 128, 21, 0.2);
     /* darkmode */
     --alert-error-dark: rgba(153, 0, 0, 1.0);
     --alert-error-content-dark: rgba(153, 0, 0, 0.2);
@@ -16,7 +18,11 @@
     --alert-warning-dark: rgba(187, 170, 78, 1.0);
     --alert-warning-content-dark: rgba(36, 34, 10, 1.0);
     --alert-construction-dark: rgba(210, 72, 0, 1.0);
-    --alert-construction-content-dark: rgba(34, 10, 0, 1.0);;
+    --alert-construction-content-dark: rgba(34, 10, 0, 1.0);
+
+    /* I am unable to test dark-mode colors, using the standard */
+    --alert-tip: rgba(0, 128, 21, 1.0);
+    --alert-tip-content: rgba(0, 128, 21, 0.2);
 }
 
 .moose-alert-title a{
@@ -67,6 +73,15 @@
 
 .moose-alert-note .moose-alert-content{
   background-color: var(--alert-note-content);
+}
+
+.moose-alert-tip .moose-alert-title{
+  color: white;
+  background-color: var(--alert-tip);
+}
+
+.moose-alert-tip .moose-alert-content{
+  background-color: var(--alert-tip-content);
 }
 
 .moose-alert-construction .moose-alert-title{
@@ -128,6 +143,13 @@
  }
  .moose-alert-warning .moose-alert-content {
     background-color: var(--alert-warning-content-dark);
+ }
+ .moose-alert-tip .moose-alert-title {
+    color: white;
+    background-color: var(--alert-tip-dark);
+ }
+ .moose-alert-tip .moose-alert-content {
+    background-color: var(--alert-tip-content-dark);
  }
  .moose-alert-construction .moose-alert-title{
    color: black;

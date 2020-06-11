@@ -35,7 +35,7 @@ ALERT_LATEX = """\\setlength\\intextsep{0pt}
 
 class AlertExtension(command.CommandExtension):
     """
-    Adds alert boxes (note, error, warning, and construction) to display important information.
+    Adds alert boxes (note, tip, error, warning, and construction) to display important information.
     """
 
     @staticmethod
@@ -63,6 +63,7 @@ class AlertExtension(command.CommandExtension):
             renderer.addPreamble('\\definecolor{alert-error}{RGB}{153,0,0}')
             renderer.addPreamble('\\definecolor{alert-note}{RGB}{0,88,151}')
             renderer.addPreamble('\\definecolor{alert-warning}{RGB}{220,200,100}')
+            renderer.addPreamble('\\definecolor{alert-tip}{RGB}{0,128,21}')
             renderer.addPreamble('\\definecolor{alert-construction}{RGB}{255,114,33}')
             renderer.addPreamble(ALERT_LATEX)
 
@@ -71,7 +72,7 @@ class AlertExtension(command.CommandExtension):
 
 class AlertCommand(command.CommandComponent):
     COMMAND = 'alert'
-    SUBCOMMAND = ('error', 'warning', 'note', 'construction')
+    SUBCOMMAND = ('error', 'warning', 'note', 'tip', 'construction')
 
     @staticmethod
     def defaultSettings():

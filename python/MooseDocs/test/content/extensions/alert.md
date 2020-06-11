@@ -15,6 +15,9 @@ An error.
 !alert warning
 A warning.
 
+!alert tip
+A helpful tip.
+
 !alert construction
 Under construction.
 
