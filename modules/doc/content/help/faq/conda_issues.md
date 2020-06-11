@@ -4,19 +4,17 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### command not found
 
-  You have yet to install conda, or your path to it, is incorrect or not set. You will need to recall how you installed conda; Was it Miniconda, or Anaconda? Was it the bash package or a double-click install method?
-
-  If you were following our [Conda](getting_started/installation/conda.md) instructions to the letter, Minconda should be installed at: `~/miniconda3`. Which means you must export your PATH like so:
+  You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Miniconda3 installed to your home directory: `~/miniconda3`. Which requires you to set your PATH accordingly:
 
   ```bash
   export PATH=~/miniconda3/bin:$PATH
   ```
 
-  To finalize the install, you now need to initialize conda (see `conda init` below).
+  With PATH set, try to run again, what ever command you were initially attempting.
 
 - #### conda activate moose
 
-  If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at Miniconda/Anaconda. What we can attempt, is to create a new environment and go from there:
+  If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at [Conda](https://docs.conda.io/en/latest/help-support.html). What we can attempt, is to create a new environment and go from there:
 
   ```bash
   conda create --name testing --quiet --yes
@@ -55,7 +53,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   conda init zsh
   ```
 
-- ### Your issue not listed
+- #### Your issue not listed
 
   The quick fix-attempt, is to re-install the moose-packages:
 
