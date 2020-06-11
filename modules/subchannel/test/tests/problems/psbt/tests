@@ -1,0 +1,7 @@
+[Tests]
+  [01-1237]
+    type = Exodiff
+    input = psbt.i
+    exodiff = psbt_out.e
+  []
+[]
