@@ -266,7 +266,7 @@ MooseApp::validParams()
 
   params.addParam<bool>(
       "use_legacy_dirichlet_bc",
-      true,
+      false,
       "Set false to have MOOSE utilize the new and preferred method of setting preset = true as "
       "default for all DirichletBC and derived objects, which is ideal for the majority of solves "
       "utilizing this boundary condition type.\nThe old behavior (which is utilized if this is set "
