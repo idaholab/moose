@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeochemicalModelDefinition.h"
-#include "EquilibriumGeochemicalSystem.h"
+#include "GeochemicalSystem.h"
 #include "NodalUserObject.h"
 
 /**
@@ -30,15 +30,13 @@ public:
    * @return a reference to the equilibrium geochemical system at the given point
    * @param point the point of interest
    */
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(const Point & point) const = 0;
+  virtual const GeochemicalSystem & getGeochemicalSystem(const Point & point) const = 0;
 
   /**
    * @return a reference to the equilibrium geochemical system at the given node
    * @param node_id the ID of the node
    */
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(unsigned node_id) const = 0;
+  virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const = 0;
 
   /**
    * @return a reference to the most recent solver output (containing iteration info, swap info,

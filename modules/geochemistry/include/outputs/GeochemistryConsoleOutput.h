@@ -40,5 +40,5 @@ protected:
   const Real _mol_cutoff;
 
 private:
-  void outputNernstInfo(const EquilibriumGeochemicalSystem & egs_ref) const;
+  void outputNernstInfo(const GeochemicalSystem & egs_ref) const;
 };

@@ -1576,3 +1576,170 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
   EXPECT_NEAR(mgd_redox.redox_log10K(1, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
   EXPECT_NEAR(mgd_redox.redox_log10K(1, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 }
+
+/// Test addKineticRate exceptions
+TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                   {},
+                                   {},
+                                   {"Calcite"},
+                                   {"CH4(aq)"},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+
+  try
+  {
+    KineticRateUserDescription rate("Ca++", 1.0, 2.0, true, {"H2O"}, {3.0}, 4.0, 5.0, 6.0, 7.0);
+    model.addKineticRate(rate);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot prescribe a kinetic rate to species Ca++ since it is not a kinetic species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    KineticRateUserDescription rate(
+        "CH4(aq)", 1.0, 2.0, true, {"H2O", "H++"}, {3.0, 1.0}, 4.0, 5.0, 6.0, 7.0);
+    model.addKineticRate(rate);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Promoting species H++ must be a basis or a secondary species") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test addKineticRate
+TEST(PertinentGeochemicalSystemTest, addKineticRate)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                   {},
+                                   {},
+                                   {"Calcite"},
+                                   {"CH4(aq)"},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+  KineticRateUserDescription rate("CH4(aq)",
+                                  1.0,
+                                  2.0,
+                                  true,
+                                  {"H2O", "OH-", "O2(aq)", "CO2(aq)", "CaCO3"},
+                                  {3.0, 3.1, 3.2, 3.3, 3.4},
+                                  4.0,
+                                  5.0,
+                                  6.0,
+                                  7.0);
+  model.addKineticRate(rate);
+
+  const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd.kin_rate.size(), 1);
+  EXPECT_EQ(mgd.kin_rate[0].kinetic_species_index, mgd.kin_species_index.at("CH4(aq)"));
+  EXPECT_EQ(mgd.kin_rate[0].description.intrinsic_rate_constant, 1.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.area_quantity, 2.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.multiply_by_mass, true);
+  std::vector<Real> pi_gold(mgd.basis_species_index.size() + mgd.eqm_species_index.size(), 0.0);
+  EXPECT_EQ(mgd.kin_rate[0].promoting_indices.size(), pi_gold.size());
+  pi_gold[0] = 3.0; // H2O
+  pi_gold[5 + mgd.eqm_species_index.at("OH-")] = 3.1;
+  pi_gold[3] = 3.2; // O2(aq)
+  pi_gold[5 + mgd.eqm_species_index.at("CO2(aq)")] = 3.3;
+  pi_gold[5 + mgd.eqm_species_index.at("CaCO3")] = 3.4;
+  for (unsigned i = 0; i < pi_gold.size(); ++i)
+    EXPECT_EQ(mgd.kin_rate[0].promoting_indices[i], pi_gold[i]);
+  EXPECT_EQ(mgd.kin_rate[0].description.theta, 4.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.eta, 5.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.activation_energy, 6.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.one_over_T0, 7.0);
+
+  KineticRateUserDescription ratec("Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 5.0, 4.0, 3.0, 2.0);
+  model.addKineticRate(ratec);
+
+  EXPECT_EQ(mgd.kin_rate.size(), 2);
+  EXPECT_EQ(mgd.kin_rate[1].kinetic_species_index, mgd.kin_species_index.at("Calcite"));
+  EXPECT_EQ(mgd.kin_rate[1].description.intrinsic_rate_constant, 7.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.area_quantity, 6.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.multiply_by_mass, false);
+  EXPECT_EQ(mgd.kin_rate[1].promoting_indices.size(), pi_gold.size());
+  std::fill(pi_gold.begin(), pi_gold.end(), 0.0);
+  pi_gold[1] = -3.0; // H++
+  for (unsigned i = 0; i < pi_gold.size(); ++i)
+    EXPECT_EQ(mgd.kin_rate[1].promoting_indices[i], pi_gold[i]);
+  EXPECT_EQ(mgd.kin_rate[1].description.theta, 5.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.eta, 4.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.activation_energy, 3.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.one_over_T0, 2.0);
+}
+
+/**
+ * Test that the kinetic equilibrium constants are correctly computed and recorded, including the
+ * case where the kinetic species depend on the basis species only through redox or other
+ * secondary species
+ */
+TEST(PertinentGeochemicalSystemTest, kin_log10K1)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {},
+                                   {"CH4(g)fake"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"(O-phth)--"},
+                                   {">(s)FeO-"},
+                                   "O2(aq)",
+                                   "e-");
+  const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
+
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 0),
+              6.1946 + 2 * (-10.0553),
+              eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 1), 4.8890 + 2 * (-8.4878), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 2), 3.4608 + 2 * (-6.6954), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 3), 2.2392 + 2 * (-5.0568), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 4), 1.1150 + 2 * (-3.4154), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 5), 0.2446 + 2 * (-2.0747), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 6),
+              -0.5504 + 2 * (-0.8908),
+              eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 7), -1.5398 + 2 * (0.2679), eps);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 0), 594.3211);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 1), 542.8292);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 2), 482.3612);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 3), 425.9738);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 4), 368.7004);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 5), 321.8658);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 6), 281.8216);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 7), 246.4849);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 0), 8.93, eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 1), 8.93 - 0.3 * (25 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 2), 8.93 - 0.3 * (60 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 3), 8.93 - 0.3 * (100 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 4), 8.93 - 0.3 * (150 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 5), 8.93 - 0.3 * (200 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 6), 8.93 - 0.3 * (250 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 7), 8.93 - 0.3 * (300 - 0), eps);
+}

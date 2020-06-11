@@ -81,6 +81,10 @@ This is a list of [surface sorbing species](basis.md) that whose dynamics are go
 
 These species can never be [swapped](swap.md) into the basis.
 
+## kinetic_rate_descriptions
+
+A list of [GeochemistryKineticRate](GeochemistryKineticRate.md) user objects that define the kinetic rates for the kinetic species should be supplied.  If a kinetic species has no rate prescribed then its reaction rate will be zero.  Multiple [GeochemistryKineticRate](GeochemistryKineticRate.md) user objects can apply to a single kinetic species: in this case the sum of all the rates defines the overall reaction rate for the kinetic species.
+
 ## Secondary species
 
 The complete list of [secondary species](equilibrium.md) is automatically computed based on the above information using the following algorithm:

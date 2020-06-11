@@ -9,6 +9,7 @@ GeochemistryTimeIndependentReactor::validParams()
   params.addParam<Real>("temperature", 25.0, "The temperature (degC) of the aqueous solution");
   params.addClassDescription("UserObject that controls the time-independent geochemistry reaction "
                              "processes.  Spatial dependence is not possible using this class");
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
   return params;
 }
 
@@ -28,7 +29,9 @@ GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
          getParam<MultiMooseEnum>("constraint_meaning"),
          _temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),
-         getParam<Real>("min_initial_molality")),
+         getParam<Real>("min_initial_molality"),
+         {},
+         {}),
     _solver(_mgd,
             _egs,
             _is,
@@ -58,17 +61,25 @@ GeochemistryTimeIndependentReactor::finalize()
 void
 GeochemistryTimeIndependentReactor::execute()
 {
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual);
+  GeochemistryReactorBase::execute();
 }
 
-const EquilibriumGeochemicalSystem &
-GeochemistryTimeIndependentReactor::getEquilibriumGeochemicalSystem(const Point & /*point*/) const
+void
+GeochemistryTimeIndependentReactor::initialSetup()
+{
+  DenseVector<Real> mole_additions(_egs.getNumInBasis());
+  DenseMatrix<Real> dmole_additions(_egs.getNumInBasis(), _egs.getNumInBasis());
+  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, mole_additions, dmole_additions);
+}
+
+const GeochemicalSystem &
+GeochemistryTimeIndependentReactor::getGeochemicalSystem(const Point & /*point*/) const
 {
   return _egs;
 }
 
-const EquilibriumGeochemicalSystem &
-GeochemistryTimeIndependentReactor::getEquilibriumGeochemicalSystem(unsigned /*node_id*/) const
+const GeochemicalSystem &
+GeochemistryTimeIndependentReactor::getGeochemicalSystem(unsigned /*node_id*/) const
 {
   return _egs;
 }

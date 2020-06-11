@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "EquilibriumGeochemicalSolver.h"
+#include "GeochemicalSolver.h"
 #include "GeochemistryReactorBase.h"
 
 /**
@@ -24,20 +24,19 @@ public:
 
   virtual void finalize() override;
 
+  virtual void initialSetup() override;
   virtual void execute() override;
 
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(const Point & point) const override;
+  virtual const GeochemicalSystem & getGeochemicalSystem(const Point & point) const override;
   virtual const std::stringstream & getSolverOutput(const Point & point) const override;
   virtual unsigned getSolverIterations(const Point & point) const override;
   virtual Real getSolverResidual(const Point & point) const override;
-  virtual const EquilibriumGeochemicalSystem &
-  getEquilibriumGeochemicalSystem(unsigned node_id) const override;
+  virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
 
 protected:
   const Real _temperature;
   /// The equilibrium geochemical system that holds all the molalities, activities, etc
-  EquilibriumGeochemicalSystem _egs;
+  GeochemicalSystem _egs;
   /// The solver
-  EquilibriumGeochemicalSolver _solver;
+  GeochemicalSolver _solver;
 };

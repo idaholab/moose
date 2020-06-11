@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeochemicalDatabaseReader.h"
+#include "KineticRateUserDescription.h"
 #include <unordered_map>
 #include "DenseMatrix.h"
 #include <libmesh/dense_vector.h>
@@ -27,6 +28,23 @@ struct SurfaceComplexationInfo
 
   Real surface_area;
   std::map<std::string, Real> sorption_sites;
+};
+
+/**
+ * A single rate expression for the kinetic species with index kinetic_species_index.
+ */
+struct KineticRateDefinition
+{
+  KineticRateDefinition(unsigned kinetic_species_index,
+                        const std::vector<Real> & promoting_indices,
+                        const KineticRateUserDescription & description)
+    : kinetic_species_index(kinetic_species_index),
+      promoting_indices(promoting_indices),
+      description(description){};
+
+  unsigned kinetic_species_index;
+  std::vector<Real> promoting_indices;
+  KineticRateUserDescription description;
 };
 
 /**
@@ -196,17 +214,30 @@ struct ModelGeochemicalDatabase
   /// all kinetic quantities have a charge (mineral charge = 0)
   std::vector<Real> kin_species_charge;
 
-  /// all quantities have a molecular weight (g)
+  /// all quantities have a molecular weight (g/mol)
   std::vector<Real> kin_species_molecular_weight;
 
-  /// all quantities have a molecular volume (cm^3) (only nonzero for minerals, however)
+  /// all quantities have a molecular volume (cm^3/mol) (only nonzero for minerals, however)
   std::vector<Real> kin_species_molecular_volume;
+
+  /**
+   * kin_log10K(i, j) = log10(equilibrium constant for the i^th kinetic species at the j^th
+   * temperature point
+   */
+  DenseMatrix<Real> kin_log10K;
 
   /**
    * kin_stoichiometry(i, j) = stoichiometric coefficient for kinetic species "i" in terms of
    * the basis species "j"
    */
   DenseMatrix<Real> kin_stoichiometry;
+
+  /**
+   * rates given to kinetic species.  See the method addKineticRate for a detailed description. This
+   * quantity is organised in such a way that a solver can loop through kin_rate, calculting the
+   * rates and applying them to the kin_rate[i].kinetic_species_index species
+   */
+  std::vector<KineticRateDefinition> kin_rate;
 
   /**
    * Species that have been swapped out of the basis.  Every time a swap is performed on the
@@ -315,6 +346,13 @@ public:
 
   /// Return a reference to the ModelGeochemicalDatabase structure
   const ModelGeochemicalDatabase & modelGeochemicalDatabase() const;
+
+  /**
+   * Adds a rate description for kinetic_species.  Note that a single kinetic species can have
+   * multiple rates prescribed to it (by calling this method multiple times): they are added
+   * together to give an overall rate.
+   */
+  void addKineticRate(const KineticRateUserDescription & description);
 
 private:
   /// The database

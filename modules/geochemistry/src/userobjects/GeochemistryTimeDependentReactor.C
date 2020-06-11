@@ -87,7 +87,9 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
          getParam<MultiMooseEnum>("constraint_meaning"),
          _previous_temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),
-         getParam<Real>("min_initial_molality")),
+         getParam<Real>("min_initial_molality"),
+         {},
+         {}),
     _solver(_mgd,
             _egs,
             _is,
@@ -100,6 +102,7 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
             getParam<std::vector<std::string>>("prevent_precipitation"),
             getParam<Real>("max_ionic_strength"),
             getParam<unsigned>("ramp_max_ionic_strength")),
+    _num_kin(_egs.getNumKinetic()),
     _close_system_at_time(getParam<Real>("close_system_at_time")),
     _closed_system(false),
     _source_species_names(getParam<std::vector<std::string>>("source_species_names")),
@@ -113,7 +116,8 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
         getParam<std::vector<std::string>>("controlled_activity_name")),
     _num_controlled_activity(_controlled_activity_species_names.size()),
     _controlled_activity_species_values(0),
-    _moles_added(_num_basis),
+    _mole_additions(_num_basis + _num_kin),
+    _dmole_additions(_num_basis + _num_kin, _num_basis + _num_kin),
     _mode(coupledValue("mode")),
     _minerals_dumped()
 {
@@ -141,10 +145,9 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     else
     {
       const unsigned basis_ind = _mgd.basis_species_index.at(_remove_fixed_activity_name[i]);
-      const EquilibriumGeochemicalSystem::ConstraintMeaningEnum cm =
-          _egs.getConstraintMeaning()[basis_ind];
-      if (!(cm == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY ||
-            cm == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY))
+      const GeochemicalSystem::ConstraintMeaningEnum cm = _egs.getConstraintMeaning()[basis_ind];
+      if (!(cm == GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY ||
+            cm == GeochemicalSystem::ConstraintMeaningEnum::FUGACITY))
         paramError("remove_fixed_activity_name",
                    "The species ",
                    _remove_fixed_activity_name[i],
@@ -189,7 +192,9 @@ void
 GeochemistryTimeDependentReactor::initialSetup()
 {
   // solve the geochemical system with its initial composition
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual);
+  _mole_additions.zero();
+  _dmole_additions.zero();
+  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, _mole_additions, _dmole_additions);
 }
 
 void
@@ -197,6 +202,9 @@ GeochemistryTimeDependentReactor::execute()
 {
   if (_current_node->id() != 0)
     return;
+
+  _mole_additions.zero();
+  _dmole_additions.zero();
 
   // remove appropriate constraints
   if (!_closed_system && _t >= _close_system_at_time)
@@ -217,37 +225,35 @@ GeochemistryTimeDependentReactor::execute()
   // control activity
   for (unsigned ca = 0; ca < _num_controlled_activity; ++ca)
   {
-    const std::vector<EquilibriumGeochemicalSystem::ConstraintMeaningEnum> & cm =
-        _egs.getConstraintMeaning();
+    const std::vector<GeochemicalSystem::ConstraintMeaningEnum> & cm = _egs.getConstraintMeaning();
     if (_mgd.basis_species_index.count(_controlled_activity_species_names[ca]))
     {
       const unsigned basis_ind =
           _mgd.basis_species_index.at(_controlled_activity_species_names[ca]);
-      if (cm[basis_ind] == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::ACTIVITY ||
-          cm[basis_ind] == EquilibriumGeochemicalSystem::ConstraintMeaningEnum::FUGACITY)
+      if (cm[basis_ind] == GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY ||
+          cm[basis_ind] == GeochemicalSystem::ConstraintMeaningEnum::FUGACITY)
         _egs.setConstraintValue(basis_ind, (*_controlled_activity_species_values[ca])[0]);
     }
   }
 
   // compute moles added
-  std::fill(_moles_added.begin(), _moles_added.end(), 0.0);
   for (unsigned i = 0; i < _num_source_species; ++i)
   {
     const Real this_rate = (*_source_species_rates[i])[0];
     if (_mgd.basis_species_index.count(_source_species_names[i]))
     {
       const unsigned basis_ind = _mgd.basis_species_index.at(_source_species_names[i]);
-      _moles_added[basis_ind] += this_rate;
+      _mole_additions(basis_ind) += this_rate;
     }
     else
     {
       const unsigned eqm_j = _mgd.eqm_species_index.at(_source_species_names[i]);
       for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-        _moles_added[basis_ind] += _mgd.eqm_stoichiometry(eqm_j, basis_ind) * this_rate;
+        _mole_additions(basis_ind) += _mgd.eqm_stoichiometry(eqm_j, basis_ind) * this_rate;
     }
   }
   for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-    _moles_added[basis_ind] *= _dt;
+    _mole_additions(basis_ind) *= _dt;
 
   // activate special modes
   if (_mode[0] == 1.0) // dump
@@ -256,7 +262,8 @@ GeochemistryTimeDependentReactor::execute()
     for (unsigned i = 1; i < _num_basis; ++i)
       if (_mgd.basis_species_mineral[i])
       {
-        _moles_added[i] = -current_molal[i]; // might overwrite the rates set above, which is good
+        _mole_additions(i) =
+            -current_molal[i]; // might overwrite the rates set above, which is good
         _minerals_dumped[_mgd.basis_species_name[i]] += current_molal[i];
       }
   }
@@ -265,8 +272,8 @@ GeochemistryTimeDependentReactor::execute()
     // Here we conserve mass, so compute the mass of the solution, without the free mineral moles.
     // We don't include the free mineral moles because users of GeochemistWorkbench will want
     // "flush" to operate like Bethke Eqn(13.14)
-    const Real kg_in = _moles_added[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
-    const std::vector<Real> & current_bulk = _egs.getBulkMoles();
+    const Real kg_in = _mole_additions(0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+    const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
     const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
     Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
     for (unsigned i = 1; i < _num_basis; ++i)
@@ -282,9 +289,9 @@ GeochemistryTimeDependentReactor::execute()
     for (unsigned i = 0; i < _num_basis; ++i)
     {
       if (_mgd.basis_species_mineral[i])
-        _moles_added[i] -= fraction_to_remove * (current_bulk[i] - current_molal[i]);
+        _mole_additions(i) -= fraction_to_remove * (current_bulk[i] - current_molal[i]);
       else
-        _moles_added[i] -= fraction_to_remove * current_bulk[i];
+        _mole_additions(i) -= fraction_to_remove * current_bulk[i];
     }
   }
 
@@ -294,7 +301,7 @@ GeochemistryTimeDependentReactor::execute()
     // if reactants are being added, the system temperature will not be _temperature[0]
     bool any_additions = false;
     for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-      if (_moles_added[basis_ind] > 0)
+      if (_mole_additions(basis_ind) > 0)
       {
         any_additions = true;
         break;
@@ -304,32 +311,33 @@ GeochemistryTimeDependentReactor::execute()
       // assume heat capacities of inputs and outputs are the same, so final temperature is dictated
       // by masses, also assume that the input happens first, then temperature equilibration, then
       // the outputs occur
-      const std::vector<Real> & current_bulk = _egs.getBulkMoles();
+      const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
       Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
-      Real input_kg = std::max(_moles_added[0], 0.0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+      Real input_kg = std::max(_mole_additions(0), 0.0) / GeochemistryConstants::MOLES_PER_KG_WATER;
       for (unsigned i = 1; i < _num_basis; ++i)
       {
         current_kg += current_bulk[i] * _mgd.basis_species_molecular_weight[i] / 1000.0;
         input_kg +=
-            std::max(_moles_added[i], 0.0) * _mgd.basis_species_molecular_weight[i] / 1000.0;
+            std::max(_mole_additions(i), 0.0) * _mgd.basis_species_molecular_weight[i] / 1000.0;
       }
       new_temperature = (_previous_temperature * current_kg + _temperature[0] * input_kg) /
                         (current_kg + input_kg);
     }
   }
 
-  // add the chemicals
-  for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
+  if (_mode[0] == 1.0) // dump all minerals
   {
-    _egs.addToBulkMoles(basis_ind, _moles_added[basis_ind]);
-  }
-
-  // dump needs free mineral moles to be exactly zero and the above addToBulkMoles will have set
-  // this for standard minerals, but not things related to sorption.  Also, need to swap all
-  // minerals from the basis
-  if (_mode[0] == 1.0)
-  {
+    // add the chemicals immediately instead of during the solve (as occurs for other modes)
+    for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
+    {
+      _egs.addToBulkMoles(basis_ind, _mole_additions(basis_ind));
+      _mole_additions(basis_ind) = 0.0;
+    }
+    // dump needs free mineral moles to be exactly zero and the above addToBulkMoles will have set
+    // this for standard minerals, but not things related to sorption or kinetic minerals, so:
     _egs.setMineralRelatedFreeMoles(0.0);
+
+    // Now need to swap all minerals out of the basis
     const std::vector<Real> & eqm_molality = _egs.getEquilibriumMolality();
     unsigned swap_into_basis = 0;
     for (unsigned i = 0; i < _num_basis; ++i)
@@ -360,7 +368,7 @@ GeochemistryTimeDependentReactor::execute()
   _previous_temperature = new_temperature;
 
   // solve the geochemical system
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual);
+  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, _mole_additions, _dmole_additions);
 
   if (_mode[0] == 2.0) // flow-through
   {
@@ -375,14 +383,14 @@ GeochemistryTimeDependentReactor::execute()
   }
 }
 
-const EquilibriumGeochemicalSystem &
-GeochemistryTimeDependentReactor::getEquilibriumGeochemicalSystem(const Point & /*point*/) const
+const GeochemicalSystem &
+GeochemistryTimeDependentReactor::getGeochemicalSystem(const Point & /*point*/) const
 {
   return _egs;
 }
 
-const EquilibriumGeochemicalSystem &
-GeochemistryTimeDependentReactor::getEquilibriumGeochemicalSystem(unsigned /*node_id*/) const
+const GeochemicalSystem &
+GeochemistryTimeDependentReactor::getGeochemicalSystem(unsigned /*node_id*/) const
 {
   return _egs;
 }

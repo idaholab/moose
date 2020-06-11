@@ -29,6 +29,11 @@
 []
 
 [Postprocessors]
+  [./solution_temperature]
+    type = PointValue
+    point = '0 0 0'
+    variable = 'temperature'
+  [../]
   [./cm3_Max_Micro]
     type = PointValue
     point = '0 0 0'
