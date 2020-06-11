@@ -176,7 +176,7 @@ ComputeResidualThread::onBoundary(const Elem * elem,
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
-    // Needed to use Mortar variables on Materials
+    // Needed to use lower-dimensional variables on Materials
     if (lower_d_elem)
       _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 

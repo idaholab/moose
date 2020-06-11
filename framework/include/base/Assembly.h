@@ -498,9 +498,9 @@ public:
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
    */
-  void reinitLowerDElemRef(const Elem * elem,
-                           const std::vector<Point> * const pts,
-                           const std::vector<Real> * const weights = nullptr);
+  void reinitLowerDElem(const Elem * elem,
+                        const std::vector<Point> * const pts = nullptr,
+                        const std::vector<Real> * const weights = nullptr);
 
   /**
    * reinitialize a mortar segment mesh element in order to get a proper JxW

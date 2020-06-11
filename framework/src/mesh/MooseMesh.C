@@ -921,7 +921,6 @@ MooseMesh::cacheInfo()
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 

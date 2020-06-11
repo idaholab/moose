@@ -2116,16 +2116,10 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 }
 
 void
-Assembly::reinitLowerDElemRef(const Elem * elem,
-                              const std::vector<Point> * const pts,
-                              const std::vector<Real> * const weights)
+Assembly::reinitLowerDElem(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const weights)
 {
-  mooseAssert(pts->size(),
-              "Currently reinitialization of lower d elements is only supported with custom "
-              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
-              "you never try to use JxW coming from a fe_lower object unless you are also passing "
-              "a weights argument");
-
   _current_lower_d_elem = elem;
 
   unsigned int elem_dim = elem->dim();
@@ -2135,7 +2129,10 @@ Assembly::reinitLowerDElemRef(const Elem * elem,
     FEBase * fe_lower = it.second;
     FEType fe_type = it.first;
 
-    fe_lower->reinit(elem, pts, weights);
+    if (pts)
+      fe_lower->reinit(elem, pts, weights);
+    else
+      fe_lower->reinit(elem);
 
     if (FEShapeData * fesd = _fe_shape_data_lower[fe_type])
     {

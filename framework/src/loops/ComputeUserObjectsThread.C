@@ -138,7 +138,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem,
 
   _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 
-  // Reinitialize Mortar variables for use in boundary Materials
+  // Reinitialize lower-dimensional variables for use in boundary Materials
   if (lower_d_elem)
     _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 

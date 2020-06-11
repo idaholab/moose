@@ -184,7 +184,6 @@ public:
                               bool = false) override;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
-  virtual void reinitLowerDElem(const Elem * lower_d_elem, THREAD_ID tid) override;
   virtual void reinitNode(const Node * node, THREAD_ID tid) override;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) override;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;

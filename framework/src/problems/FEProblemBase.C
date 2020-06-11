@@ -1744,27 +1744,16 @@ FEProblemBase::reinitElemFace(const Elem * elem,
 }
 
 void
-FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem, THREAD_ID tid)
+FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem,
+                                THREAD_ID tid,
+                                const std::vector<Point> * const pts,
+                                const std::vector<Real> * const weights)
 {
-  // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
-  // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
-  // _assembly(tid).reinitLowerDElemRef(elem, pts, weights);
-  _assembly[tid]->reinitMortarElem(lower_d_elem); // Is it?
-  // Actually get the dof indices in the moose variables
-  _nl->prepareLowerD(tid);
-  _aux->prepareLowerD(tid);
+  SubProblem::reinitLowerDElem(lower_d_elem, tid, pts, weights);
 
-  // With the dof indices set in the moose variables, now let's properly size
-  // our local residuals/Jacobians
-  _assembly[tid]->prepareLowerD();
-
-  // Let's finally compute our variable values!
-  _nl->reinitLowerD(tid);
-
-  if (_displaced_problem)
-    _displaced_problem->reinitLowerDElem(lower_d_elem, tid);
-
-  _aux->reinitLowerD(tid);
+  if (_displaced_problem && _displaced_mesh)
+    _displaced_problem->reinitLowerDElem(
+        _displaced_mesh->elemPtr(lower_d_elem->id()), tid, pts, weights);
 }
 
 void
