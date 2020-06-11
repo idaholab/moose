@@ -35,7 +35,7 @@ ADComputePlaneIncrementalStrain::ADComputePlaneIncrementalStrain(const InputPara
     _nscalar_strains(coupledScalarComponents("scalar_out_of_plane_strain")),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain(_out_of_plane_strain_coupled ? adCoupledValue("out_of_plane_strain")
-                                                      : adZeroValue()),
+                                                      : _ad_zero),
     _out_of_plane_strain_old(_out_of_plane_strain_coupled ? coupledValueOld("out_of_plane_strain")
                                                           : _zero)
 {

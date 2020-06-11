@@ -15,6 +15,8 @@ TEST(ADFparserTest, JITCompile)
 {
   std::string func = "2 + 4*x + 8*x^2 + 16*y^2 + 2*y^4";
 
+  // ADFParser only works with JIT support right now
+#if LIBMESH_HAVE_FPARSER_JIT
   ADFParser fparser;
   fparser.Parse(func, "x,y");
   fparser.Optimize();
@@ -33,4 +35,5 @@ TEST(ADFparserTest, JITCompile)
   EXPECT_EQ(p, s);
   EXPECT_EQ(p.derivatives()[0], s.derivatives()[0]);
   EXPECT_EQ(p.derivatives()[1], s.derivatives()[1]);
+#endif
 }

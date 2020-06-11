@@ -86,7 +86,8 @@ ENV PETSC_DIR=/usr/local
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
 ARG LIBMESH_REV
-ENV LIBMESH_DIR=/usr/local
+ENV LIBMESH_DIR=/usr/local \
+libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
 RUN git clone https://github.com/libMesh/libmesh.git ; \
 cd libmesh ; \

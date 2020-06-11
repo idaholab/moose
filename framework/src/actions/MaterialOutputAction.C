@@ -63,7 +63,9 @@ MaterialOutputAction::validParams()
 }
 
 MaterialOutputAction::MaterialOutputAction(InputParameters params)
-  : Action(params), _output_warehouse(_app.getOutputWarehouse())
+  : Action(params),
+    _output_warehouse(_app.getOutputWarehouse()),
+    _output_only_on_timestep_end(_app.parameters().get<bool>("use_legacy_material_output"))
 {
 }
 
@@ -259,7 +261,10 @@ MaterialOutputAction::getParams(const std::string & type,
 
   params.set<MaterialPropertyName>("property") = property_name;
   params.set<AuxVariableName>("variable") = variable_name;
-  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  if (_output_only_on_timestep_end)
+    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  else
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
   if (material.boundaryRestricted())
     params.set<std::vector<BoundaryName>>("boundary") = material.boundaryNames();

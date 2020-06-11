@@ -136,6 +136,16 @@ protected:
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled variable for use in templated auatomatic differentiation classes
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & coupledGenericValue(const std::string & var_name,
+                                                          unsigned int comp = 0);
+
+  /**
    * Returns value of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -304,6 +314,17 @@ protected:
    * @see Kernel::gradient
    */
   const ADVariableGradient & adCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns gradient of a coupled variable for use in templated automatic differentiation
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the gradient of the coupled variable
+   * @see Kernel::gradient
+   */
+  template <bool is_ad>
+  const GenericVariableGradient<is_ad> & coupledGenericGradient(const std::string & var_name,
+                                                                unsigned int comp = 0);
 
   /**
    * Returns gradient of a coupled vector variable for use in Automatic Differentation
@@ -801,7 +822,7 @@ protected:
   // coupled-dof-values-end
 
   /**
-   *  method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
+   * method that returns _zero to RESIDUAL computing objects and _ad_zero to JACOBIAN
    * computing objects
    */
   const ADVariableValue & adZeroValue();
@@ -816,6 +837,27 @@ protected:
    * Retrieve a zero second for automatic differentiation
    */
   const ADVariableSecond & adZeroSecond();
+
+  /**
+   * Returns zero value templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & genericZeroValue();
+
+  /**
+   * Returns zero gradient templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
+   */
+  template <bool is_ad>
+  const GenericVariableGradient<is_ad> & genericZeroGradient();
+
+  /**
+   * Returns zero second derivative templated with automatic differentiation boolean
+   * @return Reference to a const GenericVariableValue
+   */
+  template <bool is_ad>
+  const GenericVariableSecond<is_ad> & genericZeroSecond();
 
 protected:
   // Reference to the interface's input parameters

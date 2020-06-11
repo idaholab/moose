@@ -36,8 +36,8 @@ ADCompute2DIncrementalStrain::initialSetup()
   {
     if (_out_of_plane_direction == i)
     {
-      _disp[i] = &adZeroValue();
-      _grad_disp[i] = &adZeroGradient();
+      _disp[i] = &_ad_zero;
+      _grad_disp[i] = &_ad_grad_zero;
     }
     else
     {

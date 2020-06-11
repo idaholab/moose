@@ -47,7 +47,7 @@ ADDensity::ADDensity(const InputParameters & parameters)
     _grad_disp[i] = &adCoupledGradient("displacements", i);
 
   // fill remaining components with zero
-  _grad_disp.resize(3, &adZeroGradient());
+  _grad_disp.resize(3, &_ad_grad_zero);
 }
 
 void

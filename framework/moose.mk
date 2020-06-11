@@ -60,9 +60,8 @@ endif
 UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
 	# disable unity build and header symlinking
-	MOOSE_HEADER_SYMLINKS := false
-	MOOSE_UNITY           := false
-
+	MOOSE_UNITY        := false
+	libmesh_LDFLAGS    += -no-undefined
 	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
 	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
 else

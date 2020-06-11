@@ -34,7 +34,10 @@ yum install -y \
   boost-devel \
   bison \
   flex \
-  tar
+  tar \
+  libtool \
+  libtirpc \
+  libtirpc-devel
 
 # Clear cache
 yum clean all

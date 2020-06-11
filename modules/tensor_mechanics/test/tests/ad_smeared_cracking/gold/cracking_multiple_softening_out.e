@@ -1,0 +1,1 @@
+../../smeared_cracking/gold/cracking_multiple_softening_out.e

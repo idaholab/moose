@@ -23,6 +23,8 @@ ExternalPetscSolverApp::validParams()
 
   // By default, use preset BCs
   params.set<bool>("use_legacy_dirichlet_bc") = false;
+
+  params.set<bool>("use_legacy_material_output") = false;
   return params;
 }
 

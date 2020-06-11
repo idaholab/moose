@@ -11,8 +11,6 @@
 
 #include "SmearedCrackSofteningBase.h"
 
-// Forward declaration
-
 /**
  * ExponentialSoftening is a smeared crack softening model that
  * uses an exponential softening curve. It is for use with
