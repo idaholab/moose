@@ -110,7 +110,7 @@ curl -L -O https://github.com/xiaoyeli/superlu_dist/archive/v6.2.0.tar.gz
 curl -L -O https://gitlab.com/slepc/slepc/-/archive/bda551b/slepc-bda551b.tar.gz
 ```
 
-At this point, everything necessary should be downloaded and available in the directory hierarchy at `~/offline`. At this time, you may copy this directory to your offline-no-internet access machine. At the time of this writing, tallying up the disc space used equates to approximately ~2GB. Depending on your internet connection, you may want to compress the entire ~/offline directory instead (saves about 500Mb):
+At this point, everything necessary should be downloaded and available in the directory hierarchy at `~/offline`. At this time, you may copy this directory to your offline-no-internet access machine's home directory. At the time of this writing, tallying up the disc space used equates to approximately ~2GB. Depending on your internet connection, you may want to compress the entire ~/offline directory instead (saves about 500Mb):
 
 ```bash
 cd ~/
@@ -120,14 +120,31 @@ tar -pzcf offline.tar.gz offline
 !alert note
 If operating on a Macintosh machine, creating a tarball to be extracted on a Linux machine produces warnings. They are warnings only, and can be safely ignored.
 
+If copying the tarball over, you can extract it with:
+
+```bash
+tar -xf offline.tar.gz -C ~/
+```
 
 ## Build PETSc, libMesh, and MOOSE
 
-With the tarball copied and extracted on the target machine (`tar -xf offline.tar.gz -C ~/`), or you simply copied the entire `~/offline` directory to your target machine's home directory, we can now build PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
+With the `~/offline` directory available in your target machine's home directory, we can now build PETSc, libMesh, and MOOSE, using your MPI Wrapper/Compiler established in earlier steps.
 
 ### PETSc
 
-Configure, build, and install PETSc to `$HOME/libs/petsc`:
+Configure, build, and install PETSc to:`$HOME/libs/petsc`
+
+First, you should set your environment to make use of the compiler and MPI wrapper you established in earlier steps. On HPC machines, this normally involves loading modules. On a workstation, this may mean adjusting your PATH environment variable.
+
+Verify an MPI wrapper is available:
+
+```bash
+which mpicc mpicxx mpif90 mpif77
+```
+
+The `which` command above should return the paths to your MPI wrappers established in earlier steps. If it returns nothing, or fewer paths than the 4 we were asking for, something is wrong. You will need to figure out how to enable your MPI wrapper before proceeding.
+
+With your compilers ready for use, we can now build PETSc:
 
 ```bash
 cd ~/offline/moose/petsc
@@ -156,9 +173,9 @@ Proceed only if PETSc completed successfully.
 
 ### libMesh
 
-Configure, build, and install libMesh to `$HOME/libs/libmesh`.
+Configure, build, and install libMesh to: `$HOME/libs/libmesh`
 
-First, we need to tell libMesh where PETSc is installed, and set the environment to use the MPI wrapper:
+First, we need to tell libMesh where PETSc is installed, and instruct libMesh to specifically use MPI:
 
 ```bash
 export PETSC_DIR=$HOME/libs/petsc
