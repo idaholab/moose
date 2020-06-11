@@ -176,6 +176,24 @@ DumpObjectsProblem::addMaterial(const std::string & type,
   FEProblemBase::addMaterial(type, name, parameters);
 }
 
+void
+DumpObjectsProblem::addPostprocessor(std::string type,
+                                     const std::string & name,
+                                     InputParameters & parameters)
+{
+  dumpObjectHelper("Postprocessors", type, name, parameters);
+  FEProblemBase::addPostprocessor(type, name, parameters);
+}
+
+void
+DumpObjectsProblem::addVectorPostprocessor(std::string type,
+                                           const std::string & name,
+                                           InputParameters & parameters)
+{
+  dumpObjectHelper("VectorPostprocessors", type, name, parameters);
+  FEProblemBase::addVectorPostprocessor(type, name, parameters);
+}
+
 std::string
 DumpObjectsProblem::deduceNecessaryParameters(const std::string & type,
                                               const InputParameters & parameters)
@@ -276,8 +294,10 @@ DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
   if (pathit == _generated_syntax.end())
     return;
 
+  Moose::out << "**START DUMP DATA**\n";
   for (const auto & system_pair : pathit->second)
     Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
+  Moose::out << "**END DUMP DATA**\n";
 }
 
 std::map<std::string, std::string>
@@ -321,8 +341,8 @@ DumpObjectsProblem::stringifyParameters(const InputParameters & parameters)
         if (param_value.back() == ' ')
           param_value.pop_back();
 
-        // add quotes if the parameter contains spaces
-        if (param_value.find_first_of(" ") != std::string::npos)
+        // add quotes if the parameter contains spaces or is empty
+        if (param_value.find_first_of(" ") != std::string::npos || param_value.length() == 0)
           param_value = "'" + param_value + "'";
 
         parameter_map[param_name] = param_value;

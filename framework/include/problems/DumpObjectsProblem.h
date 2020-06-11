@@ -76,6 +76,12 @@ public:
   void addMaterial(const std::string & type,
                    const std::string & name,
                    InputParameters & parameters) override;
+  void addPostprocessor(std::string type,
+                        const std::string & name,
+                        InputParameters & parameters) override;
+  void addVectorPostprocessor(std::string type,
+                              const std::string & name,
+                              InputParameters & parameters) override;
 
   /// output input blocks for a given action path
   void dumpGeneratedSyntax(const std::string path);
