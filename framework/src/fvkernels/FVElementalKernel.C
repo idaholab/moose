@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NonlinearSystemBase.h"
+#include "ADUtils.h"
 
 #include "libmesh/elem.h"
 
@@ -60,7 +61,7 @@ FVElementalKernel::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
-  size_t ad_offset = _var.number() * dofs_per_elem;
+  auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
   const auto r = computeQpResidual() * _assembly.elemVolume();
   _local_ke(0, 0) += r.derivatives()[ad_offset];
   accumulateTaggedLocalMatrix();
@@ -87,7 +88,8 @@ FVElementalKernel::computeOffDiagJacobian()
     if (ivar != _var.number())
       continue;
 
-    size_t ad_offset = jvar * _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
+    auto ad_offset =
+        Moose::adOffset(jvar, _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem());
 
     prepareMatrixTag(_assembly, ivar, jvar);
 

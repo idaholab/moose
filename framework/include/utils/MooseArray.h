@@ -16,6 +16,8 @@ template <typename T>
 class MooseArray
 {
 public:
+  typedef T value_type;
+
   /**
    * Default constructor.  Doesn't initialize anything.
    */

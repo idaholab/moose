@@ -11,6 +11,7 @@
 #include "MooseVariableFV.h"
 #include "SystemBase.h"
 #include "Assembly.h"
+#include "ADUtils.h"
 
 InputParameters
 FVFluxBC::validParams()
@@ -85,9 +86,7 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
     SystemBase & sys = _subproblem.systemBaseNonlinear();
     auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
 
-    auto ad_offset = jvar * dofs_per_elem;
-    if (type == Moose::ElementNeighbor || type == Moose::NeighborNeighbor)
-      ad_offset += sys.system().n_vars() * dofs_per_elem;
+    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, sys.system().n_vars());
 
     prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 

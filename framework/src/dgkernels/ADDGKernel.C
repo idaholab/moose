@@ -13,7 +13,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "NonlinearSystemBase.h"
-#include "ADOffset.h"
+#include "ADUtils.h"
 
 // libmesh includes
 #include "libmesh/threads.h"

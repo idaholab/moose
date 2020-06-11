@@ -11,6 +11,7 @@
 #include "MathUtils.h"
 #include "Assembly.h"
 #include "SystemBase.h"
+#include "ADUtils.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -68,7 +69,7 @@ ADKernelStabilizedTempl<T>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  auto ad_offset = Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerElem());
 
   precalculateResidual();
 
@@ -147,7 +148,7 @@ ADKernelStabilizedTempl<T>::computeADOffDiagJacobian()
     if (ivar != _var.number())
       continue;
 
-    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
+    auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem());
 
     prepareMatrixTag(_assembly, ivar, jvar);
 

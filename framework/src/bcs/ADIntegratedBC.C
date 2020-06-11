@@ -15,7 +15,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
-#include "ADOffset.h"
+#include "ADUtils.h"
 
 #include "libmesh/quadrature.h"
 

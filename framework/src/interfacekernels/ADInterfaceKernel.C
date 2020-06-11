@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
-#include "ADOffset.h"
+#include "ADUtils.h"
 
 // libmesh includes
 #include "libmesh/quadrature.h"

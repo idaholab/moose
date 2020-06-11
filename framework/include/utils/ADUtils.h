@@ -12,6 +12,12 @@
 #include "MooseError.h"
 #include "MooseTypes.h"
 
+class SystemBase;
+namespace libMesh
+{
+class Elem;
+}
+
 namespace Moose
 {
 /**
@@ -52,33 +58,33 @@ namespace Moose
  * @param max_dofs_per_elem The maximum number of degrees of freedom for any one variable on an
  * element
  * @param element_type The "type" of element that we are on. Current options are
- * \p Moose::ElementType::Element, \p Moose::ElementType::Neighbor, and \p Moose::ElementType::Lower
+ * \p ElementType::Element, \p ElementType::Neighbor, and \p ElementType::Lower
  * @param num_vars_in_system The number of vars in the system. This is used in offset calculation
- * unless \p element_type is \p Moose::ElementType::Element
+ * unless \p element_type is \p ElementType::Element
  * @return The automatic differentiation indexing offset
  *
  */
 inline std::size_t
 adOffset(unsigned int var_num,
          std::size_t max_dofs_per_elem,
-         Moose::ElementType element_type,
+         ElementType element_type = ElementType::Element,
          unsigned int num_vars_in_system = 0)
 {
-  // If our element type is anything other than Moose::ElementType::Element, then the user must
+  // If our element type is anything other than ElementType::Element, then the user must
   // supply num_vars_in_system in order to calculate the offset
-  mooseAssert(element_type == Moose::ElementType::Element || num_vars_in_system,
-              "If our element type is anything other than Moose::ElementType::Element, then you "
+  mooseAssert(element_type == ElementType::Element || num_vars_in_system,
+              "If our element type is anything other than ElementType::Element, then you "
               "must supply num_vars_in_system in order to calculate the offset");
 
   switch (element_type)
   {
-    case Moose::ElementType::Element:
+    case ElementType::Element:
       return var_num * max_dofs_per_elem;
 
-    case Moose::ElementType::Neighbor:
+    case ElementType::Neighbor:
       return num_vars_in_system * max_dofs_per_elem + var_num * max_dofs_per_elem;
 
-    case Moose::ElementType::Lower:
+    case ElementType::Lower:
       return 2 * num_vars_in_system * max_dofs_per_elem + var_num * max_dofs_per_elem;
 
     default:
@@ -91,13 +97,45 @@ adOffset(unsigned int var_num,
 inline std::size_t
 adOffset(unsigned int var_num,
          std::size_t max_dofs_per_elem,
-         Moose::DGJacobianType dg_jacobian_type,
+         DGJacobianType dg_jacobian_type,
          unsigned int num_vars_in_system = 0)
 {
-  if (dg_jacobian_type == Moose::DGJacobianType::ElementElement ||
-      dg_jacobian_type == Moose::DGJacobianType::NeighborElement)
-    return adOffset(var_num, max_dofs_per_elem, Moose::ElementType::Element);
+  if (dg_jacobian_type == DGJacobianType::ElementElement ||
+      dg_jacobian_type == DGJacobianType::NeighborElement)
+    return adOffset(var_num, max_dofs_per_elem, ElementType::Element);
   else
-    return adOffset(var_num, max_dofs_per_elem, Moose::ElementType::Neighbor, num_vars_in_system);
+    return adOffset(var_num, max_dofs_per_elem, ElementType::Neighbor, num_vars_in_system);
 }
+
+/**
+ * Generate a map from global dof index to derivative value
+ */
+std::unordered_map<dof_id_type, Real>
+globalDofIndexToDerivative(const ADReal & ad_real,
+                           const SystemBase & sys,
+                           ElementType elem_type = ElementType::Element,
+                           THREAD_ID tid = 0);
+
+/**
+ * Generate a map from global dof index to derivative value for a (probably quadrature-point-based)
+ * container like a material property or a variable value
+ */
+template <typename T>
+auto
+globalDofIndexToDerivative(const T & ad_real_container,
+                           const SystemBase & sys,
+                           ElementType elem_type = ElementType::Element,
+                           THREAD_ID tid = 0)
+    -> std::vector<std::unordered_map<
+        dof_id_type,
+        typename std::enable_if<std::is_same<ADReal, typename T::value_type>::value, Real>::type>>
+{
+  std::vector<std::unordered_map<dof_id_type, Real>> ret_val(ad_real_container.size());
+
+  for (MooseIndex(ad_real_container) i = 0; i < ad_real_container.size(); ++i)
+    ret_val[i] = globalDofIndexToDerivative(ad_real_container[i], sys, elem_type, tid);
+
+  return ret_val;
+}
+
 }
