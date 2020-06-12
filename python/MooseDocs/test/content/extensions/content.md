@@ -25,3 +25,11 @@ The following is a list of markdown pages within the "extensions" directory.
 ## Outline id=outline
 
 !content outline location=extensions levels=1 2 hide=outline
+
+## Next/Previous Buttons
+
+"Next" and "Previous" buttons are designed to be the last element of a page.
+
+!content previous destination=materialicon.md
+
+!content next destination=config.md

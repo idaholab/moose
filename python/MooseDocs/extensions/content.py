@@ -28,6 +28,7 @@ ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 ContentOutline = tokens.newToken('ContentOutline', location=None, levels=list(), hide=[])
+NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -52,11 +53,13 @@ class ContentExtension(command.CommandExtension):
         self.addCommand(reader, AtoZCommand())
         self.addCommand(reader, TableOfContentsCommand())
         self.addCommand(reader, ContentOutlineCommand())
+        self.addCommand(reader, NextAndPreviousCommand())
 
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
         renderer.add('TableOfContents', RenderTableOfContents())
         renderer.add('ContentOutline', RenderContentOutline())
+        renderer.add('NextAndPrevious', RenderNextAndPrevious())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
@@ -191,6 +194,23 @@ class ContentOutlineCommand(command.CommandComponent):
                               location=self.settings['location'],
                               levels=levels,
                               hide=self.settings['hide'].split())
+
+class NextAndPreviousCommand(command.CommandComponent):
+    COMMAND = 'content'
+    SUBCOMMAND = ('next', 'previous')
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['destination'] = (None, "The markdown page to navigate to.")
+        return settings
+
+    def createToken(self, parent, info, page):
+        if self.settings['destination'] is None:
+            msg = "The 'destination' setting is required for the !content next and !content previous commands."
+            raise exceptions.MooseDocsException(msg)
+
+        return NextAndPrevious(parent, direction=info['subcommand'], destination=self.settings['destination'])
 
 class RenderContentToken(components.RenderComponent):
 
@@ -327,14 +347,14 @@ class RenderContentOutline(components.RenderComponent):
 
         div = html.Tag(parent, 'div', class_='moose-outline')
         for node in nodes:
-            print("\n", node.local, ":\n")
+            #print("\n", node.local, ":\n")
             pageref = str(node.relativeDestination(page))
 
             # this loop produces a KeyError: 'headings' when it re-renders after changing
             # a markdown file while already serving, but not on the first build --serve.
             # can we fix this?
             for k, v in node['headings'].items():
-                print("ID: ", k, "Heading: ", v.text(), "Level: ", v['level'], "\n")
+                #print("ID: ", k, "Heading: ", v.text(), "Level: ", v['level'], "\n")
                 if v['level'] in levels and k not in hide:
                     url = pageref + '#{}'.format(k)
                     head = heading.find_heading(node, k)
@@ -342,3 +362,12 @@ class RenderContentOutline(components.RenderComponent):
                     head.copyToToken(link)
                     core.LineBreak(link)
                     self.renderer.render(div, link, page)
+
+class RenderNextAndPrevious(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        node = self.translator.findPage(token['destination'])
+        url = str(node.relativeDestination(page))
+        div = html.Tag(parent, 'a',
+                       string=token['direction'],
+                       class_='btn moose-content-{}'.format(token['direction']),
+                       href=url)

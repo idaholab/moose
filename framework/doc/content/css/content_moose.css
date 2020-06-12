@@ -44,3 +44,14 @@ ul.moose-a-to-z a{
   /* need to make this a list so that sections are numbered and levels are indented
      also, a sub-numbering system, i.e., 1.0, 1.1, 2.0, 2.1, etc., would be nice */
 }
+
+.moose-content-next{
+  float: right;
+  position: relative;
+  top: 48px; /* this is the spacing of the h1:first-of-type */
+}
+
+.moose-content-previous{
+  position: relative;
+  top: 48px;
+}
