@@ -29,7 +29,7 @@ It is highly likely the target machine in which you will be operating on will al
 While arguably a [better compiler](https://opensource.apple.com/source/clang/clang-23/clang/tools/clang/www/comparison.html) over traditional GCC, it is more difficult to build. Nevertheless, if you wish to make the attempt, head on over to [llvm.org](http://llvm.org/), to begin.
 
 !alert note
-If you choose LLVM, know that you will also need to build (or use) a GCC toolchain! This is due to the lack of a Fortran compiler included in LLVM.
+If you choose LLVM, know that you will also need to build (or use) a GCC toolchain! This is due to the lack of a Fortran compiler included with LLVM.
 
 ## MPI Wrapper
 
@@ -223,13 +223,14 @@ Again, any errors incurred during this step, is going to be beyond the scope of 
 
 ## Your Application
 
-With all the libraries built, you are now able to build your application. To recap, there were several environment variables we previously set, which you will need to always set, when you perform any MOOSE-based development. Here are those environment variables again:
+With all the libraries built, you are now able to build your application. To recap, there were several environment variables we previously set, which you will need to always set, when you perform any MOOSE-based development. Here are those environment variables again (setting them multiple times is harmless):
 
 ```bash
+export PATH=/some/path/to/MPI/bin:/some/path/to/GCC/bin:$PATH <--EXAMPLE, CHANGE ME
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 export PETSC_DIR=$HOME/libs/petsc
 export LIBMESH_DIR=$HOME/libs/libmesh
 export MOOSE_DIR=$HOME/offline/moose
 ```
 
-You will need to set the above variables, each and every time you log in and out of your target machine.
+You will need to perform the above, each and every time you log into the target machine and wish to perform development on your application. To that end, creating a special profile you can source in one command is recommended. 
