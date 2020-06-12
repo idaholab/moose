@@ -40,7 +40,6 @@ ul.moose-a-to-z a{
 }
 
 .moose-outline{
-  text-align:left;
   /* need to make this a list so that sections are numbered and levels are indented
      also, a sub-numbering system, i.e., 1.0, 1.1, 2.0, 2.1, etc., would be nice */
 }

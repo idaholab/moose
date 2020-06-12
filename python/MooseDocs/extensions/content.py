@@ -27,7 +27,7 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
-ContentOutline = tokens.newToken('ContentOutline', location=None, levels=list(), hide=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), levels=list(), hide=[])
 NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None)
 
 LATEX_CONTENTLIST = """
@@ -174,13 +174,19 @@ class ContentOutlineCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build outline.")
+        settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
         settings['levels'] = (1, 'Heading level(s) to display.')
+
+        # hide setting should accept the `page.md#heading` format, in case theres identical ids in the outline
         settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
     def createToken(self, parent, info, page):
-        if self.settings['location'] is None:
-            msg = "The 'location' setting is required for the !content outline command."
+        if self.settings['location'] is None and not self.settings['pages']:
+            msg = "Either the 'location' or the 'pages' setting is required for the !content outline command."
+            raise exceptions.MooseDocsException(msg)
+        if self.settings['location'] is not None and self.settings['pages']:
+            msg = "The 'location' and 'pages' may not be specified simultaneously."
             raise exceptions.MooseDocsException(msg)
 
         levels = self.settings['levels']
@@ -192,6 +198,7 @@ class ContentOutlineCommand(command.CommandComponent):
 
         return ContentOutline(parent,
                               location=self.settings['location'],
+                              pages=self.settings['pages'].split(),
                               levels=levels,
                               hide=self.settings['hide'].split())
 
@@ -334,28 +341,21 @@ class RenderTableOfContents(components.RenderComponent):
 
 class RenderContentOutline(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        location = token['location']
-        levels = token['levels']
-        hide = token['hide']
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        nodes = self.translator.findPages(func)
-
-        # the pages are found in alphabetical order, we need to make it so that the
-        # first level headings appear in the desired order when we loop through nodes.
-        # This could be ugly from an input perspective, because there's no way of
-        # knowing in which order a user wishes the pages to appear
+        if token['location'] is not None:
+            func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
+            nodes = self.translator.findPages(func)
+        elif token['pages']: # should I even check? It would have to be pages option at this point
+            nodes = [self.translator.findPage(p) for p in token['pages']]
 
         div = html.Tag(parent, 'div', class_='moose-outline')
         for node in nodes:
-            #print("\n", node.local, ":\n")
             pageref = str(node.relativeDestination(page))
 
             # this loop produces a KeyError: 'headings' when it re-renders after changing
             # a markdown file while already serving, but not on the first build --serve.
             # can we fix this?
             for k, v in node['headings'].items():
-                #print("ID: ", k, "Heading: ", v.text(), "Level: ", v['level'], "\n")
-                if v['level'] in levels and k not in hide:
+                if v['level'] in token['levels'] and k not in token['hide']:
                     url = pageref + '#{}'.format(k)
                     head = heading.find_heading(node, k)
                     link = core.Link(None, url=url)
@@ -365,6 +365,7 @@ class RenderContentOutline(components.RenderComponent):
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
+        # there are a lot of settings for the findPage() func, I should enable them
         node = self.translator.findPage(token['destination'])
         url = str(node.relativeDestination(page))
         div = html.Tag(parent, 'a',
