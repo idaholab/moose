@@ -312,9 +312,10 @@ public:
    */
   void checkNonlocalCoupling();
   void checkUserObjectJacobianRequirement(THREAD_ID tid);
-  void setVariableAllDoFMap(const std::vector<MooseVariableFEBase *> moose_vars);
+  void setVariableAllDoFMap(const std::vector<const MooseVariableFEBase *> & moose_vars);
 
-  const std::vector<MooseVariableFEBase *> & getUserObjectJacobianVariables(THREAD_ID tid) const
+  const std::vector<const MooseVariableFEBase *> &
+  getUserObjectJacobianVariables(THREAD_ID tid) const
   {
     return _uo_jacobian_moose_vars[tid];
   }
@@ -2057,7 +2058,7 @@ protected:
   bool _has_nonlocal_coupling;
   bool _calculate_jacobian_in_uo;
 
-  std::vector<std::vector<MooseVariableFEBase *>> _uo_jacobian_moose_vars;
+  std::vector<std::vector<const MooseVariableFEBase *>> _uo_jacobian_moose_vars;
 
   SolverParams _solver_params;
 

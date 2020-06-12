@@ -13,6 +13,7 @@
 #include "SystemBase.h"
 #include "FVDirichletBC.h"
 #include "MooseMesh.h"
+#include "ADUtils.h"
 #include "libmesh/elem.h"
 
 InputParameters
@@ -130,9 +131,7 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
     SystemBase & sys = _subproblem.systemBaseNonlinear();
     auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
 
-    auto ad_offset = jvar * dofs_per_elem;
-    if (type == Moose::ElementNeighbor || type == Moose::NeighborNeighbor)
-      ad_offset += sys.system().n_vars() * dofs_per_elem;
+    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, sys.system().n_vars());
 
     prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 

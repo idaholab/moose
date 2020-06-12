@@ -12,37 +12,17 @@
 // local includes
 #include "InterfaceKernelBase.h"
 
-#define TemplateVariableValue typename OutputTools<T>::VariableValue
-#define TemplateVariableGradient typename OutputTools<T>::VariableGradient
-#define TemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
-#define TemplateVariablePhiGradient typename OutputTools<T>::VariablePhiGradient
-#define TemplateVariableTestValue typename OutputTools<T>::VariableTestValue
-#define TemplateVariableTestGradient typename OutputTools<T>::VariableTestGradient
-
-// Forward Declarations
-template <typename T>
-class InterfaceKernelTempl;
-
-typedef InterfaceKernelTempl<Real> InterfaceKernel;
-typedef InterfaceKernelTempl<RealVectorValue> VectorInterfaceKernel;
-
-template <>
-InputParameters validParams<InterfaceKernel>();
-
-template <>
-InputParameters validParams<VectorInterfaceKernel>();
-
 /**
- * InterfaceKernel and VectorInterfaceKernel is responsible for interfacing physics across
+ * ADInterfaceKernel and ADVectorInterfaceKernel is responsible for interfacing physics across
  * subdomains
  */
 template <typename T>
-class InterfaceKernelTempl : public InterfaceKernelBase, public NeighborMooseVariableInterface<T>
+class ADInterfaceKernelTempl : public InterfaceKernelBase, public NeighborMooseVariableInterface<T>
 {
 public:
   static InputParameters validParams();
 
-  InterfaceKernelTempl(const InputParameters & parameters);
+  ADInterfaceKernelTempl(const InputParameters & parameters);
 
   /// The master variable that this interface kernel operates on
   virtual MooseVariableFE<T> & variable() const override { return _var; }
@@ -84,7 +64,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Compute residuals at quadrature points
-  virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;
 
 protected:
   /// The master side MooseVariable
@@ -94,45 +74,54 @@ protected:
   const MooseArray<Point> & _normals;
 
   /// Holds the current solution at the current quadrature point on the face.
-  const TemplateVariableValue & _u;
+  const ADTemplateVariableValue<T> & _u;
 
   /// Holds the current solution gradient at the current quadrature point on the face.
-  const TemplateVariableGradient & _grad_u;
+  const ADTemplateVariableGradient<T> & _grad_u;
+
+  /// The ad version of JxW
+  const MooseArray<ADReal> & _ad_JxW;
+
+  /// The ad version of coord
+  const MooseArray<ADReal> & _ad_coord;
+
+  /// The ad version of q_point
+  const MooseArray<ADPoint> & _ad_q_point;
 
   /// shape function
-  const TemplateVariablePhiValue & _phi;
-
-  /// Shape function gradient
-  const TemplateVariablePhiGradient & _grad_phi;
+  const ADTemplateVariablePhiValue<T> & _phi;
 
   /// Side shape function.
-  const TemplateVariableTestValue & _test;
+  const ADTemplateVariableTestValue<T> & _test;
 
   /// Gradient of side shape function
-  const TemplateVariableTestGradient & _grad_test;
+  const ADTemplateVariableTestGradient<T> & _grad_test;
 
   /// Coupled neighbor variable
   const MooseVariableFE<T> & _neighbor_var;
 
   /// Coupled neighbor variable value
-  const TemplateVariableValue & _neighbor_value;
+  const ADTemplateVariableValue<T> & _neighbor_value;
 
   /// Coupled neighbor variable gradient
-  const TemplateVariableGradient & _grad_neighbor_value;
+  const ADTemplateVariableGradient<T> & _grad_neighbor_value;
 
   /// Side neighbor shape function.
-  const TemplateVariablePhiValue & _phi_neighbor;
-
-  /// Gradient of side neighbor shape function
-  const TemplateVariablePhiGradient & _grad_phi_neighbor;
+  const ADTemplateVariablePhiValue<T> & _phi_neighbor;
 
   /// Side neighbor test function
-  const TemplateVariableTestValue & _test_neighbor;
+  const ADTemplateVariableTestValue<T> & _test_neighbor;
 
   /// Gradient of side neighbor shape function
-  const TemplateVariableTestGradient & _grad_test_neighbor;
+  const ADTemplateVariableTestGradient<T> & _grad_test_neighbor;
 
   /// Holds residual entries as they are accumulated by this InterfaceKernel
   /// This variable is temporarily reserved for RattleSnake
   DenseMatrix<Number> _local_kxx;
+
+private:
+  Moose::DGResidualType resid_type;
 };
+
+typedef ADInterfaceKernelTempl<Real> ADInterfaceKernel;
+typedef ADInterfaceKernelTempl<RealVectorValue> ADVectorInterfaceKernel;

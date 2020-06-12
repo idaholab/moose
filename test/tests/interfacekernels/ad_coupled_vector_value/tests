@@ -1,0 +1,17 @@
+[Tests]
+  design = 'automatic_differentiation/index.md'
+  issues = '#15307'
+  [exo]
+    type = 'Exodiff'
+    input = 'coupled.i'
+    exodiff = 'coupled_out.e'
+    requirement = 'The system shall be able to solve a simple interfacial source problem using automatic differentiation and vector variables in which the slope on the left-hand side of the interface has a slope greater by two than the slope on the right-hand side.'
+  []
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'coupled.i'
+    difference_tol = 1e-6
+    run_sim = True
+    requirement = 'The system shall be able to couple vector variables at interfaces and have an accurate Jacobian provided through automatic differentiation.'
+  []
+[]
