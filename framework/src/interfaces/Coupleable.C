@@ -487,7 +487,7 @@ Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp)
+Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
 {
   const auto * var = getVar(var_name, comp);
   if (!var)

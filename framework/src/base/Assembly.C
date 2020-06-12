@@ -2129,11 +2129,12 @@ Assembly::reinitLowerDElem(const Elem * elem,
     FEBase * fe_lower = it.second;
     FEType fe_type = it.first;
 
+    QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
+
     if (pts)
       fe_lower->reinit(elem, pts, weights);
     else
     {
-      QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
       fe_lower->attach_quadrature_rule(&qrule);
       fe_lower->reinit(elem);
     }
