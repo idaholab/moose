@@ -1,9 +1,3 @@
 # MacOS Catalina
 
-!include sqa/minimum_requirements.md
-
-!include getting_started/installation/macos_catalina_pre_req.md
-
-!include getting_started/installation/catalina_profile.md
-
-!include getting_started/installation/install_moose.md
+!include getting_started/installation/deprecated_instructions.md
