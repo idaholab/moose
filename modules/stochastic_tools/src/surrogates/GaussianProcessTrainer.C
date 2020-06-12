@@ -37,7 +37,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _parameter_mat(declareModelData<DenseMatrix<Real> >("_parameter_mat")),
     _covariance_mat(declareModelData<DenseMatrix<Real> >("_covariance_mat")),
     _training_results(declareModelData<DenseMatrix<Real> >("_training_results")),
-    _covariance_results_solve(declareModelData<DenseMatrix<Real> >("_covariance_results_solve"))
+    _training_mean(declareModelData<DenseMatrix<Real> >("_training_mean")),
+    _training_variance(declareModelData<DenseMatrix<Real> >("_training_variance")),
+    _covariance_results_solve(declareModelData<DenseMatrix<Real> >("_covariance_results_solve")),
+    _covariance_mat_cho_decomp(declareModelData<DenseMatrix<Real> >("_covariance_mat_cho_decomp"))
 {
 }
 
@@ -66,6 +69,44 @@ GaussianProcessTrainer::initialSetup()
     mooseError("Sampler number of columns does not match number of inputted distributions.");
 }
 
+DenseMatrix<Real>
+GaussianProcessTrainer::cholesky_back_substitute(const DenseMatrix<Real> & A, const DenseMatrix<Real> & b)
+{
+  unsigned int n_cols=A.n();
+  //verify A.n == A.m == b.n
+  unsigned int n_solves=b.n();
+  //std::cout << n_cols << A.m() << b.n() << n_solves <<'\n';
+  DenseMatrix<Real> x(n_cols,n_solves);
+
+
+  //loosly modified
+  for (unsigned int s=0; s<n_solves; ++s){
+    // Solve for Ly=b
+    //std::cout << "s " << s << '\n';
+    for (unsigned int i=0; i<n_cols; ++i)
+    {
+      //std::cout << "i " << i << '\n';
+      Real temp = b(i,s);
+      for (unsigned int k=0; k<i; ++k){
+        temp -= A(i,k)*x(k,s);
+      }
+      x(i,s) = temp / A(i,i);
+    }
+
+    // Solve for L^T x = y
+    for (unsigned int i=0; i<n_cols; ++i)
+    {
+      //std::cout << "i " << i << '\n';
+      const unsigned int ib = (n_cols-1)-i;
+      for (unsigned int k=(ib+1); k<n_cols; ++k){
+        x(ib,s) -= A(k,ib) * x(k,s);
+      }
+      x(ib,s) /= A(ib,ib);
+    }
+  }
+  return x;
+}
+
 void
 GaussianProcessTrainer::execute()
 {
@@ -75,12 +116,10 @@ GaussianProcessTrainer::execute()
   mooseAssert(num_rows == _values_ptr->size(),
               "Sampler number of rows does not match number of results from vector postprocessor.");
 
-  std::cout << "_n_params " << _n_params << '\n';
   // Initialize covariance matrix
-  int _num_samples = _values_ptr->size();
-  _covariance_mat.resize(_num_samples, _num_samples);
+  unsigned int _num_samples = _values_ptr->size();
 
-  std::cout << "_covariance_mat " << '\n' << _covariance_mat << '\n' << '\n';
+  //std::cout << "_covariance_mat " << '\n' << _covariance_mat << '\n' << '\n';
   //
 
   //TODO:figure this out
@@ -91,110 +130,61 @@ GaussianProcessTrainer::execute()
   //Arbitary access is helpfor for initial dev.
   //May load a very large matrix, which could be bad.
   _parameter_mat = _sampler->getLocalSamples();
-  std::cout << "_parameter_mat " << '\n' << _parameter_mat << '\n' << '\n';
 
-  //todo, implement scaling
 
   //Get training data
   _training_results.resize(_num_samples,1);
+  _training_mean.resize(1,1);
+  _training_variance.resize(1,1);
+  for (unsigned int ii=0; ii<_num_samples; ii++){
+    _training_results(ii,0) =   (*_values_ptr)[ii - offset];
+    _training_mean(0,0) += (*_values_ptr)[ii - offset] / _num_samples;
+  }
+  for (unsigned int ii=0; ii<_num_samples; ii++){
+    _training_variance(0,0) +=  std::pow((_training_results(ii,0)-_training_mean(0,0)),2) / _num_samples;
+  }
 
-  std::cout << _values_ptr->at(0) << '\n';
-
-  //populate covariance mat and load reasult data
-  for (int ii=0; ii<_num_samples; ii++){
-    for (int jj=0; jj<_num_samples; jj++){
+  //populate covariance mat
+  _covariance_mat.resize(_num_samples, _num_samples);
+  for (unsigned int ii=0; ii<_num_samples; ii++){
+    for (unsigned int jj=0; jj<_num_samples; jj++){
         //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
         Real cov =0;
-        for (int kk=0; kk<_n_params; kk++){
+        for (unsigned int kk=0; kk<_n_params; kk++){
           //Compute distance per parameter
-          std::cout << _parameter_mat(ii,kk) <<"   " << _parameter_mat(jj,kk) << "   " << _length_factor.at(kk) << '\n';
-          cov += std::pow(( _parameter_mat(ii,kk)-  _parameter_mat(jj,kk) ),2) / (2.0 * _length_factor.at(kk));
+          cov += std::pow(( _parameter_mat(ii,kk)-  _parameter_mat(jj,kk) ),2) / (std::pow(_length_factor.at(kk),2));
         }
-        cov = std::exp(-cov);
+        cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
         _covariance_mat(ii,jj) = cov;
         _covariance_mat(jj,ii) = cov;
       }
-    _training_results(ii,0) =   (*_values_ptr)[ii - offset];
   }
 
-  _covariance_mat.print();
-  // std::cout << "test 0" << '\n';
-  // _training_results.print();
 
 
   //This is annoying, find better way to go between DenseMatrix and DenseVector
-  DenseVector<Real> cho_solution_vec;
   DenseVector<Real> _training_results_vec(_num_samples);
-  for (int ii=0; ii<_num_samples; ii++){
-    _training_results_vec(ii)=_training_results(ii,0);
+  DenseMatrix<Real> _training_results_centered(_training_results);
+  for (unsigned int ii=0; ii<_num_samples; ii++){
+    _training_results_vec(ii)=_training_results(ii,0) - _training_mean(0,0);
+    _training_results_centered(ii,0) = _training_results(ii,0) - _training_mean(0,0);
   }
-  _covariance_results_solve.resize(_num_samples,1);
-  DenseMatrix<Real> covariance_mat_copy(_covariance_mat);
-  covariance_mat_copy.cholesky_solve(_training_results_vec,cho_solution_vec);
-  for (int ii=0; ii<_num_samples; ii++){
-    _covariance_results_solve(ii,0)=cho_solution_vec(ii);
-    }
-  std::cout << "After Cho Solve" << '\n';
-   _covariance_mat.print();
-   std::cout << "Training results"<< '\n';
-   _training_results.print();
-   std::cout << "Cho Solution" << '\n';
-   _covariance_results_solve.print();
+  //Perform Initial Cholesky Solve. We are more interested in the decomposed matrix.
+  _covariance_mat_cho_decomp = _covariance_mat;
+    DenseVector<Real> cho_solution_vec;
+  _covariance_mat_cho_decomp.cholesky_solve(_training_results_vec,cho_solution_vec);
 
-   // std::cout << "L?" << '\n';
-   // covariance_mat_copy.print();
-   //
-   // std::cout << "A?" << '\n';
-   // DenseMatrix<Real> another_covariance_mat_copy(covariance_mat_copy);
-   // covariance_mat_copy.right_multiply_transpose(another_covariance_mat_copy);
-   // covariance_mat_copy.print();
+  // std::cout << "After Cho Solve" << '\n';
+  //  _covariance_mat.print();
+  //  std::cout << "Training results"<< '\n';
+  //  _training_results.print();
+  //  std::cout << "Cho Solution LibMesh Vec" << '\n';
+  //  cho_solution_vec.print(std::cout);
+  //  std::cout << "Cho Solution Static Function" << '\n';
+   _covariance_results_solve = cholesky_back_substitute(_covariance_mat_cho_decomp, _training_results_centered);
+   //_covariance_results_solve.print();
 
-
-  // //A basic test of prediction ability. Move to surrogate after test
-  // //
-  // //
-  // std::cout << "test A" << '\n';
-  // Real _num_tests=2;
-  // DenseMatrix<Real> _test_params(_num_tests,_n_params);
-  // _test_params(0,0)=3;
-  // _test_params(1,0)=5;
-  // std::cout << "test B" << '\n';
-  //
-  // DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
-  // DenseMatrix<Real> K_test(_num_tests,_num_tests);
-  //
-  // std::cout << "test C" << '\n';
-  //
-  // for (int ii=0; ii<_num_samples; ii++){
-  //   for (int jj=0; jj<_num_tests; jj++){
-  //       //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
-  //       Real val = std::pow(( _parameter_mat(ii,0)-  _test_params(jj,0)),2);
-  //       val = val / (2.0 * _length_factor.at(0));
-  //       val = std::exp(-val);
-  //       K_train_test(ii,jj) = val;
-  //     }
-  // }
-  //
-  // K_train_test.print();
-  //
-  // for (int ii=0; ii<_num_tests; ii++){
-  //   for (int jj=0; jj<_num_tests; jj++){
-  //       //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
-  //       Real val = std::pow(( _test_params(ii,0)-  _test_params(jj,0)),2);
-  //       val = val / (2.0 * _length_factor.at(0));
-  //       val = std::exp(-val);
-  //       K_test(ii,jj) = val;
-  //     }
-  // }
-  //
-  // K_test.print();
-  // std::cout << "Test Points" << '\n';
-  // _parameter_mat.print();
-  //
-  // DenseMatrix<Real> _test_pred((_covariance_results_solve));
-  // _test_pred.left_multiply_transpose(K_train_test);
-  // std::cout << "pred" << '\n';
-  // _test_pred.print();
+   _parameter_mat.print();
 }
 
 void

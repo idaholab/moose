@@ -66,7 +66,6 @@ SurrogateTester::initialize()
 void
 SurrogateTester::execute()
 {
-  // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
