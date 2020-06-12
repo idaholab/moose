@@ -26,8 +26,8 @@ public:
   LevelSetBiMaterialReal(const InputParameters & parameters);
 
 protected:
-  virtual void assignQpPropertiesForLevelSetPositive();
-  virtual void assignQpPropertiesForLevelSetNegative();
+  virtual void assignQpPropertiesForLevelSetPositive() override;
+  virtual void assignQpPropertiesForLevelSetNegative() override;
 
   /// Real Material properties for the two separate materials in the bi-material system
   std::vector<const MaterialProperty<Real> *> _bimaterial_material_prop;

@@ -26,8 +26,8 @@ public:
   ADLevelSetBiMaterialBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
-  virtual void computeQpProperties();
+  virtual void computeProperties() override;
+  virtual void computeQpProperties() override;
 
   /// assign the material properties for the negative level set region.
   virtual void assignQpPropertiesForLevelSetNegative() = 0;
@@ -55,8 +55,4 @@ protected:
 
   /// use the positive level set region's material properties
   bool _use_positive_property;
-
-  // usingMaterialMembers;
 };
-
-// declareADValidParams(ADLevelSetBiMaterialBase);

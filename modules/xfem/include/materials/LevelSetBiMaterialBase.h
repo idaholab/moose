@@ -26,8 +26,8 @@ public:
   LevelSetBiMaterialBase(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
-  virtual void computeQpProperties();
+  virtual void computeProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
    * assign the material properties for the negative level set region.
