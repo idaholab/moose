@@ -45,8 +45,6 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   }
   inFile.close();
 
-  cout << "Number of Lines in power profile input file is: " << numberoflines << endl;
-
   inFile.open(filename);
   int i(0);
   while (inFile >> vin)
@@ -59,21 +57,12 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   power_dis.resize(_mesh->ny_ - 1, _mesh->nx_ - 1);
   auto sum = power_dis.sum();
 
-  std::cout << "filename:" << filename << std::endl;
-  std::cout << "power_dis: "
-            << "\n"
-            << power_dis << std::endl;
-
   auto fpin_power = power / sum;           // MW
   auto ref_power = power_dis * fpin_power; // MW
 
   // Convert the reference power to a linear heat rate.
   Real heated_length = _mesh->heated_length_;     // in m
   _ref_qprime = 1e+3 * ref_power / heated_length; // in KW/m
-
-  std::cout << "_ref_qprime "
-            << "\n"
-            << _ref_qprime << std::endl;
 }
 
 Real
