@@ -25,6 +25,8 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
+  static DenseMatrix<Real> cholesky_back_substitute(const DenseMatrix<Real> & A, const DenseMatrix<Real> & b);
+
 protected:
 
 private:
@@ -44,7 +46,7 @@ private:
   /// Total number of parameters/dimensions
   unsigned int _n_params;
 
-  ///
+  /// Vector of length factors. Main hyper-parameters for squared exponential kernel
   std::vector<Real> & _length_factor;
 
   ///
@@ -56,7 +58,18 @@ private:
   /// An _n_sample vector containg results of traing runs
   DenseMatrix<Real> & _training_results;
 
+  /// An _n_sample vector containg results of traing runs
+  DenseMatrix<Real> & _training_mean;
+
+  /// An _n_sample vector containg results of traing runs
+  DenseMatrix<Real> & _training_variance;
+
   /// A solve of Ax=b via Cholesky.
   DenseMatrix<Real> & _covariance_results_solve;
+
+  ///
+  DenseMatrix<Real> & _covariance_mat_cho_decomp;
+
+
 
 };
