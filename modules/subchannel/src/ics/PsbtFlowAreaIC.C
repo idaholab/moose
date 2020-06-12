@@ -1,14 +1,12 @@
 #include "PsbtFlowAreaIC.h"
 
-registerMooseObject("MooseApp", PsbtFlowAreaIC);
+registerMooseObject("SubChannelApp", PsbtFlowAreaIC);
 
-template <>
 InputParameters
-validParams<PsbtFlowAreaIC>()
+PsbtFlowAreaIC::validParams()
 {
-  InputParameters params = validParams<PsbtIC>();
-
-  return validParams<PsbtIC>();
+  InputParameters params = PsbtIC::validParams();
+  return params;
 }
 
 PsbtFlowAreaIC::PsbtFlowAreaIC(const InputParameters & params) : PsbtIC(params) {}

@@ -1,12 +1,11 @@
 #include "PsbtWettedPerimIC.h"
 
-registerMooseObject("MooseApp", PsbtWettedPerimIC);
+registerMooseObject("SubChannelApp", PsbtWettedPerimIC);
 
-template <>
 InputParameters
-validParams<PsbtWettedPerimIC>()
+PsbtWettedPerimIC::validParams()
 {
-  return validParams<PsbtIC>();
+  return PsbtIC::validParams();
 }
 
 PsbtWettedPerimIC::PsbtWettedPerimIC(const InputParameters & params) : PsbtIC(params) {}

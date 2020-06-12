@@ -3,11 +3,6 @@
 #include "PsbtIC.h"
 #include <Eigen/Dense>
 
-class PsbtPowerIC;
-
-template <>
-InputParameters validParams<PsbtPowerIC>();
-
 /**
  * Sets the linear heat rate for the PSBT 01-6232 fluid temperature benchmark.
  */
@@ -27,4 +22,7 @@ protected:
 
 private:
   Eigen::MatrixXd _ref_qprime;
+
+public:
+  static InputParameters validParams();
 };

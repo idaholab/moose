@@ -1,10 +1,9 @@
 #include "PsbtIC.h"
 
-template <>
 InputParameters
-validParams<PsbtIC>()
+PsbtIC::validParams()
 {
-  return validParams<InitialCondition>();
+  return InitialCondition::validParams();
 }
 
 PsbtIC::PsbtIC(const InputParameters & params) : InitialCondition(params) {}

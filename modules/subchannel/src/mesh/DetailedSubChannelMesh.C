@@ -6,13 +6,12 @@
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", DetailedSubChannelMesh);
+registerMooseObject("SubChannelApp", DetailedSubChannelMesh);
 
-template <>
 InputParameters
-validParams<DetailedSubChannelMesh>()
+DetailedSubChannelMesh::validParams()
 {
-  InputParameters params = validParams<SubChannelMesh>();
+  InputParameters params = SubChannelMesh::validParams();
   return params;
 }
 

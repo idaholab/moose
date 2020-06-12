@@ -4,11 +4,6 @@
 #include "SolutionHandle.h"
 #include "SubChannelMesh.h"
 
-class PsbtFlowAreaIC;
-
-template <>
-InputParameters validParams<PsbtFlowAreaIC>();
-
 class PsbtFlowAreaIC : public PsbtIC
 {
 public:
@@ -18,4 +13,7 @@ public:
 
 protected:
   SubChannelMesh * _mesh;
+
+public:
+  static InputParameters validParams();
 };

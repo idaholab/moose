@@ -2,11 +2,6 @@
 
 #include "InitialCondition.h"
 
-class PsbtIC;
-
-template <>
-InputParameters validParams<PsbtIC>();
-
 /**
  * An abstract class for ICs relating to the PSBT fluid temperature benchmarks
  */
@@ -20,4 +15,7 @@ protected:
    * Find the (row, column) indices of the subchannel containing a given point.
    */
   std::pair<int, int> index_point(const Point & p) const;
+
+public:
+  static InputParameters validParams();
 };

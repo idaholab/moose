@@ -7,13 +7,12 @@
 
 using namespace Eigen;
 
-registerMooseObject("MooseApp", SubChannelSolver);
+registerMooseObject("SubChannelApp", SubChannelSolver);
 
-template <>
 InputParameters
-validParams<SubChannelSolver>()
+SubChannelSolver::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredCoupledVar("mdot", "axial mass flow rate");
   params.addRequiredCoupledVar("SumWij", "Sum of cross flows for each channel");
   params.addRequiredCoupledVar("SumWijh", "Sum of enthaly crossflow flux for each channel");

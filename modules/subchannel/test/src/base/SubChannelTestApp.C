@@ -5,11 +5,10 @@
 #include "MooseSyntax.h"
 #include "ModulesApp.h"
 
-template <>
 InputParameters
-validParams<SubChannelTestApp>()
+SubChannelTestApp::validParams()
 {
-  InputParameters params = validParams<SubChannelApp>();
+  InputParameters params = SubChannelApp::validParams();
   return params;
 }
 
