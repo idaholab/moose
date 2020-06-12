@@ -37,7 +37,7 @@ PiecewiseLinearInterpolationMaterial::validParams()
       "extrapolation",
       false,
       "Use linear extrapolation to evaluate points that lie outside given data set domain. ");
-  params.declareControllable("scale_factor");      
+  params.declareControllable("scale_factor");
   return params;
 }
 
