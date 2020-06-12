@@ -3,11 +3,6 @@
 #include <vector>
 #include "MooseMesh.h"
 
-class SubChannelMesh;
-
-template <>
-InputParameters validParams<SubChannelMesh>();
-
 class SubChannelMesh : public MooseMesh
 {
 public:
@@ -33,4 +28,7 @@ public:
 
 protected:
   Real max_dz_;
+
+public:
+  static InputParameters validParams();
 };

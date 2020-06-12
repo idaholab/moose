@@ -3,13 +3,12 @@
 using namespace std;
 using namespace Eigen;
 
-registerMooseObject("MooseApp", PsbtPowerIC);
+registerMooseObject("SubChannelApp", PsbtPowerIC);
 
-template <>
 InputParameters
-validParams<PsbtPowerIC>()
+PsbtPowerIC::validParams()
 {
-  InputParameters params = validParams<PsbtIC>();
+  InputParameters params = PsbtIC::validParams();
   params.addParam<Real>("power", 413.0, " [MW]");
   params.addParam<std::string>("filename", 413.0, "Location of power profile txt file");
   return params;

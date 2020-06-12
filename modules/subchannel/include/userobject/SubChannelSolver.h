@@ -4,11 +4,6 @@
 #include "Coupleable.h"
 #include "SubChannelMesh.h"
 
-class SubChannelSolver;
-
-template <>
-InputParameters validParams<SubChannelSolver>();
-
 class SubChannelSolver : public GeneralUserObject, public Coupleable
 {
 public:
@@ -36,4 +31,7 @@ protected:
   Real _mflux_in;
   Real _T_in;
   Real _P_out;
+
+public:
+  static InputParameters validParams();
 };

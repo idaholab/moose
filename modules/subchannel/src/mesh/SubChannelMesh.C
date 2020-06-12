@@ -5,13 +5,12 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", SubChannelMesh);
+registerMooseObject("SubChannelApp", SubChannelMesh);
 
-template <>
 InputParameters
-validParams<SubChannelMesh>()
+SubChannelMesh::validParams()
 {
-  InputParameters params = validParams<MooseMesh>();
+  InputParameters params = MooseMesh::validParams();
   params.addParam<unsigned int>("nx", 1, "Number of channels in the x direction");
   params.addParam<unsigned int>("ny", 1, "Number of channels in the x direction");
   params.addParam<Real>("max_dz", 0.1, "The maximum element height in meters");
