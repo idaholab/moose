@@ -1,0 +1,10 @@
+[tests]
+  [./sideset_force]
+    type = 'CSVDiff'
+    input = 'sideset_reaction.i'
+    csvdiff = 'sideset_reaction_out.csv'
+    requirement = "The system shall be able to compute the force on a sideset."
+    design = "SidesetReaction.md"
+    issues = "#15163"
+  [../]
+[]
