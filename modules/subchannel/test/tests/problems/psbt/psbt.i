@@ -56,7 +56,7 @@
     wetted_perimeter = w_perim
     q_prime = q_prime
     T_in = 359.15 # K
-    P_out = 4.923 # MPa
+    P_out = 4.923e6 # Pa
     mflux_in = ${fparse 1e+6 * 17.00 / 3600.}
   []
 []
