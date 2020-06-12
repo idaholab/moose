@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from dbclass import ThermoDB
+import readers.reader_utils as reader_utils
 
 def readDatabase(dblist):
     """
@@ -17,6 +18,8 @@ def readDatabase(dblist):
 
     activity_model = None
     fugacity_model = None
+    logk_model = 'fourth-order'
+    logk_model_eqn = 'a0 + a1 T + a2 T^2 + a3 T^3 + a4 T^4'
     temperatures = []
     pressures = []
     adh = []
@@ -34,7 +37,13 @@ def readDatabase(dblist):
     sorbing_minerals = {}
     surface_species = {}
 
+    missing_value = '500.0000'
     line = 0
+
+    # Helper function for interpolating missing array values
+    # (to reduce number of paramters required during use)
+    def fillValues(vals):
+        return reader_utils.fillMissingValues(temperatures, vals, logk_model, missing_value)
 
     while line < len(dblist):
 
@@ -47,13 +56,13 @@ def readDatabase(dblist):
         if 'temperatures' in dblist[line]:
             line = line+1
             while dblist[line].strip()[0].isnumeric():
-                temperatures.extend(dblist[line].split())
+                temperatures.extend([float(item) for item in dblist[line].split()])
                 line = line+1
 
         if 'pressures' in dblist[line]:
             line = line+1
             while len(pressures) < len(temperatures):
-                pressures.extend(dblist[line].split())
+                pressures.extend([float(item) for item in dblist[line].split()])
                 line = line+1
 
         if activity_model == 'debye-huckel':
@@ -61,19 +70,19 @@ def readDatabase(dblist):
             if 'debye huckel a' in dblist[line]:
                 line = line+1
                 while len(adh) < len(temperatures):
-                    adh.extend(dblist[line].split())
+                    adh.extend([float(item) for item in dblist[line].split()])
                     line = line+1
 
             if 'debye huckel b' in dblist[line]:
                 line = line+1
                 while len(bdh) < len(temperatures):
-                    bdh.extend(dblist[line].split())
+                    bdh.extend([float(item) for item in dblist[line].split()])
                     line = line+1
 
             if 'bdot' in dblist[line]:
                 line = line+1
                 while len(bdot) < len(temperatures):
-                    bdot.extend(dblist[line].split())
+                    bdot.extend([float(item) for item in dblist[line].split()])
                     line = line+1
 
         # Read the neutral species activity coefficients
@@ -86,10 +95,13 @@ def readDatabase(dblist):
             line = line+1
             vals = []
             while len(vals) < len(temperatures):
-                vals.extend(dblist[line].split())
+                vals.extend([float(item) for item in dblist[line].split()])
                 line = line+1
 
+            vals, note = fillValues(vals)
             neutral_species['co2'][key] = vals
+            if note:
+                 neutral_species['co2']['note'] = note
             line = line-1
 
         if 'c h2o' in dblist[line]:
@@ -103,7 +115,10 @@ def readDatabase(dblist):
                 vals.extend(dblist[line].split())
                 line = line+1
 
+            vals, note = fillValues(vals)
             neutral_species['h2o'][key] = vals
+            if note:
+                 neutral_species['h2o']['note'] = note
             line = line-1
 
         if 'elements\n' in dblist[line] and len(dblist[line].split()) == 2:
@@ -118,7 +133,7 @@ def readDatabase(dblist):
                         raise ValueError("Element line incorrectly specified.  Offending line is: " + dblist[line])
                     elements[elemlist[1]] = {}
                     elements[elemlist[1]]['name'] = elemlist[0]
-                    elements[elemlist[1]]['molecular weight'] = elemlist[4]
+                    elements[elemlist[1]]['molecular weight'] = float(elemlist[4])
                 line = line+1
 
                 if '-end-' in dblist[line]:
@@ -135,27 +150,27 @@ def readDatabase(dblist):
                     species = dblist[line].strip()
                     basis_species[species] = {}
                     basis_species[species]['elements'] = {}
-                    basis_species[species]['radius'] = "0" # default for sorption sites that are counted as basis species
+                    basis_species[species]['radius'] = 0 # default for sorption sites that are counted as basis species
                     line = line+1
 
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
                         data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
-                        basis_species[species]['charge'] = data.split()[0]
+                        basis_species[species]['charge'] = float(data.split()[0])
                         if len(data.split()) <= 1:
                             line = line+1
                     if 'ion size' in dblist[line]:
                         data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "A":
                             raise ValueError("ion size must be measured in Angstroms.  Offending line is: " + dblist[line])
-                        basis_species[species]['radius'] = data.split()[0]
+                        basis_species[species]['radius'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
                     if 'mole wt.' in dblist[line]:
                         data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        basis_species[species]['molecular weight'] = data.split()[0]
+                        basis_species[species]['molecular weight'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
 
@@ -166,7 +181,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                basis_species[species]['elements'][data[i+1]] = data[i]
+                                basis_species[species]['elements'][data[i+1]] = float(data[i])
 
                 line = line+1
 
@@ -189,21 +204,21 @@ def readDatabase(dblist):
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
                         data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
-                        redox_couples[couple]['charge'] = data.split()[0]
+                        redox_couples[couple]['charge'] = float(data.split()[0])
                         if len(data.split()) <= 1:
                             line = line+1
                     if 'ion size' in dblist[line]:
                         data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "A":
                             raise ValueError("ion size must be measured in Angstroms.  Offending line is: " + dblist[line])
-                        redox_couples[couple]['radius'] = data.split()[0]
+                        redox_couples[couple]['radius'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
                     if 'mole wt.' in dblist[line]:
                         data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        redox_couples[couple]['molecular weight'] = data.split()[0]
+                        redox_couples[couple]['molecular weight'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
 
@@ -214,16 +229,20 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                redox_couples[couple]['species'][data[i+1]] = data[i]
+                                redox_couples[couple]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
                     # Equilibrium constant values
                     vals = []
                     while len(vals) < len(temperatures):
-                        vals.extend(dblist[line].split())
+                        vals.extend([float(item) for item in dblist[line].split()])
                         line = line+1
+
+                    vals, note = fillValues(vals)
                     redox_couples[couple]['logk'] = vals
+                    if note:
+                         redox_couples[couple]['note'] = note
 
                 line = line+1
 
@@ -246,21 +265,21 @@ def readDatabase(dblist):
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
                         data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
-                        secondary_species[species]['charge'] = data.split()[0]
+                        secondary_species[species]['charge'] = float(data.split()[0])
                         if len(data.split()) <= 1:
                             line = line+1
                     if 'ion size' in dblist[line]:
                         data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "A":
                             raise ValueError("ion size must be measured in Angstroms.  Offending line is: " + dblist[line])
-                        secondary_species[species]['radius'] = data.split()[0]
+                        secondary_species[species]['radius'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
                     if 'mole wt.' in dblist[line]:
                         data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        secondary_species[species]['molecular weight'] = data.split()[0]
+                        secondary_species[species]['molecular weight'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
 
@@ -271,7 +290,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                secondary_species[species]['species'][data[i+1]] = data[i]
+                                secondary_species[species]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
@@ -280,7 +299,11 @@ def readDatabase(dblist):
                     while len(vals) < len(temperatures):
                         vals.extend(dblist[line].split())
                         line = line+1
+
+                    vals, note = fillValues(vals)
                     secondary_species[species]['logk'] = vals
+                    if note:
+                         secondary_species[species]['note'] = note
 
                 line = line+1
 
@@ -303,21 +326,21 @@ def readDatabase(dblist):
                     # Charge, ionic radius and molecular weight
                     if 'charge' in dblist[line]:
                         data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
-                        free_electron[species]['charge'] = data.split()[0]
+                        free_electron[species]['charge'] = float(data.split()[0])
                         if len(data.split()) <= 1:
                             line = line+1
                     if 'ion size' in dblist[line]:
                         data = dblist[line][dblist[line].index("ion size") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "A":
                             raise ValueError("ion size must be measured in Angstroms.  Offending line is: " + dblist[line])
-                        free_electron[species]['radius'] = data.split()[0]
+                        free_electron[species]['radius'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
                     if 'mole wt.' in dblist[line]:
                         data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        free_electron[species]['molecular weight'] = data.split()[0]
+                        free_electron[species]['molecular weight'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
 
@@ -328,7 +351,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                free_electron[species]['species'][data[i+1]] = data[i]
+                                free_electron[species]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
@@ -337,7 +360,11 @@ def readDatabase(dblist):
                     while len(vals) < len(temperatures):
                         vals.extend(dblist[line].split())
                         line = line+1
+
+                    vals, note = fillValues(vals)
                     free_electron[species]['logk'] = vals
+                    if note:
+                         free_electron[species]['note'] = note
 
                 line = line+1
 
@@ -362,7 +389,7 @@ def readDatabase(dblist):
                         data = dblist[line].split("surface area")[1].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "m2/g":
                             raise ValueError("sorbing mineral surface area must be specified in m2/g.  Offending line is: " + dblist[line])
-                        sorbing_minerals[species]['surface area'] = data.split()[0]
+                        sorbing_minerals[species]['surface area'] = float(data.split()[0])
                         line = line+1
 
                     if 'sorption sites' in dblist[line] and len(dblist[line].split()) == 3:
@@ -372,7 +399,7 @@ def readDatabase(dblist):
                             data = dblist[line].split()
                             if len(data) != 6 and data[1] != "site" and data[2] != "density=" and data[4] != "mol/mol" and data[5] != "mineral":
                                 raise ValueError("sorbing minerals must define site density in mol/mol mineral.  Offending line is: " + dblist[line])
-                            sorbing_minerals[species]['sorbing sites'][data[0]] = data[3];
+                            sorbing_minerals[species]['sorbing sites'][data[0]] = float(data[3]);
 
                         line = line+1
 
@@ -402,8 +429,8 @@ def readDatabase(dblist):
                         data = dblist[line].replace('=', ' ').split()
                         if len(data) != 8 or data[0] != "mole" or data[1] != "vol." or data[3] != "cc" or data[4] != "mole" or data[5] != "wt." or data[7] != "g":
                             raise ValueError("molar volume must be measured in cc and molecular weight in grams.  Offending line is: " + dblist[line])
-                        mineral_species[species]['molar volume'] = data[2]
-                        mineral_species[species]['molecular weight'] = data[6]
+                        mineral_species[species]['molar volume'] = float(data[2])
+                        mineral_species[species]['molecular weight'] = float(data[6])
                         line = line+1
 
                     # Species in minerals
@@ -413,7 +440,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                mineral_species[species]['species'][data[i+1]] = data[i]
+                                mineral_species[species]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
@@ -422,7 +449,11 @@ def readDatabase(dblist):
                     while len(vals) < len(temperatures):
                         vals.extend(dblist[line].split())
                         line = line+1
+
+                    vals, note = fillValues(vals)
                     mineral_species[species]['logk'] = vals
+                    if note:
+                         mineral_species[species]['note'] = note
 
                 line = line+1
 
@@ -447,12 +478,12 @@ def readDatabase(dblist):
                         data = dblist[line].replace('=', ' ').split()
                         if len(data) != 4 or data[0] != "mole" or data[1] != "wt." or data[3] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        gas_species[species]['molecular weight'] = data[2]
+                        gas_species[species]['molecular weight'] = float(data[2])
                         line = line+1
 
                     # Spycher-Reed fugacity model coefficients
                     if 'chi' in dblist[line]:
-                        gas_species[species]['chi'] = dblist[line].split()[1:]
+                        gas_species[species]['chi'] = [float(item) for item in dblist[line].split()[1:]]
                         line = line+1
 
                     # Tsonopoulos fugacity model coefficients
@@ -460,16 +491,15 @@ def readDatabase(dblist):
                         data = dblist[line].replace('=', ' ').split()
                         if not (len(data) == 8 or len(data) == 12) or data[0] != "Pcrit" or data[2] != "bar" or data[3] != "Tcrit" or data[5] != "K" or data[6] != "omega":
                             raise ValueError("Tsonopoulos parameters must be measured in bar and Kelvin.  Offending line is: " + dblist[line])
-                        gas_species[species][data[0]] = data[1]
-                        gas_species[species][data[3]] = data[4]
-                        gas_species[species][data[6]] = data[7]
+                        gas_species[species][data[0]] = float(data[1])
+                        gas_species[species][data[3]] = float(data[4])
+                        gas_species[species][data[6]] = float(data[7])
                         if len(data) == 8:
-                            gas_species[species]["a"] = "0.0"
-                            gas_species[species]["b"] = "0.0"
+                            gas_species[species]["a"] = 0.0
+                            gas_species[species]["b"] = 0.0
                         else:
-                            gas_species[species]["a"] = data[9]
-                            gas_species[species]["b"] = data[11]
-
+                            gas_species[species]["a"] = float(data[9])
+                            gas_species[species]["b"] = float(data[11])
 
                         line = line+1
 
@@ -480,7 +510,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                gas_species[species]['species'][data[i+1]] = data[i]
+                                gas_species[species]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
@@ -489,7 +519,11 @@ def readDatabase(dblist):
                     while len(vals) < len(temperatures):
                         vals.extend(dblist[line].split())
                         line = line+1
+
+                    vals, note = fillValues(vals)
                     gas_species[species]['logk'] = vals
+                    if note:
+                         gas_species[species]['note'] = note
 
                 line = line+1
 
@@ -514,7 +548,7 @@ def readDatabase(dblist):
                         data = dblist[line].replace('=', ' ').split()
                         if len(data) != 4 or data[0] != "mole" or data[1] != "wt." or data[3] != "g":
                             raise ValueError("Oxide molecular weight must be measured in grams.  Offending line is: " + dblist[line])
-                        oxides[species]['molecular weight'] = data[2]
+                        oxides[species]['molecular weight'] = float(data[2])
                         line = line+1
 
                     # Species in gas_species
@@ -524,7 +558,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                oxides[species]['species'][data[i+1]] = data[i]
+                                oxides[species]['species'][data[i+1]] = float(data[i])
 
                         line = line+1
 
@@ -549,14 +583,14 @@ def readDatabase(dblist):
                     # Charge and molecular weight
                     if 'charge' in dblist[line]:
                         data = dblist[line][dblist[line].index("charge") + 6:].split("=")[1]
-                        surface_species[species]['charge'] = data.split()[0]
+                        surface_species[species]['charge'] = float(data.split()[0])
                         if len(data.split()) <= 1:
                             line = line+1
                     if 'mole wt.' in dblist[line]:
                         data = dblist[line][dblist[line].index("mole wt.") + 8:].split("=")[1]
                         if len(data.split()) <= 1 or data.split()[1] != "g":
                             raise ValueError("molecular weight must be measured in grams.  Offending line is " + dblist[line])
-                        surface_species[species]['molecular weight'] = data.split()[0]
+                        surface_species[species]['molecular weight'] = float(data.split()[0])
                         if len(data.split()) <= 2:
                             line = line + 1
 
@@ -567,7 +601,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                surface_species[species]['species'][data[i+1]] = data[i]
+                                surface_species[species]['species'][data[i+1]] = float(data[i])
                         line = line+1
 
                     # Equilibrium constant values
@@ -575,8 +609,8 @@ def readDatabase(dblist):
                         data = dblist[line].split()
                         if len(data) != 5 and data[0] != "log" and data[1] != "K=" and data[3] != "dlogK/dT=":
                             raise ValueError("log K and dlogK/dT must be specified for surface species.  Offending line is " + dblist[line])
-                        surface_species[species]["log K"] = data[2]
-                        surface_species[species]["dlogK/dT"] = data[4]
+                        surface_species[species]["log K"] = float(data[2])
+                        surface_species[species]["dlogK/dT"] = float(data[4])
 
                 line = line+1
 
@@ -595,6 +629,8 @@ def readDatabase(dblist):
         db.bdh = bdh
         db.bdot = bdot
     db.fugacity_model = fugacity_model
+    db.logk_model = logk_model
+    db.logk_model_eqn = logk_model_eqn
     db.temperatures = temperatures
     db.pressures = pressures
     db.neutral_species = neutral_species

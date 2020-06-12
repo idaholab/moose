@@ -20,6 +20,8 @@ class ThermoDB(object):
         self._header = None
         self._activity_model = None
         self._fugacity_model = None
+        self._logk_model = None
+        self._logk_model_eqn = None
         self._temperatures = None
         self._pressures = None
         self._elements = None
@@ -71,6 +73,24 @@ class ThermoDB(object):
     @fugacity_model.setter
     def fugacity_model(self, fugacity_model):
         self._fugacity_model = fugacity_model
+
+    # Original DB equilibrium constant model
+    @property
+    def logk_model(self):
+        return self._logk_model
+
+    @logk_model.setter
+    def logk_model(self, logk_model):
+        self._logk_model = logk_model
+
+    # Original DB equilibrium constant model in equation form
+    @property
+    def logk_model_eqn(self):
+        return self._logk_model_eqn
+
+    @logk_model_eqn.setter
+    def logk_model_eqn(self, logk_model_eqn):
+        self._logk_model_eqn = logk_model_eqn
 
     # Original DB temperature points
     # (for reaction equilibrium constants)
@@ -207,4 +227,3 @@ class ThermoDB(object):
     @surface_species.setter
     def surface_species(self, surface_species):
         self._surface_species = surface_species
-

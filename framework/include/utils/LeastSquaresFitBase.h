@@ -23,6 +23,7 @@
 class LeastSquaresFitBase
 {
 public:
+  LeastSquaresFitBase();
   LeastSquaresFitBase(const std::vector<Real> & x, const std::vector<Real> & y);
 
   virtual ~LeastSquaresFitBase() = default;
@@ -54,6 +55,8 @@ public:
    */
   const std::vector<Real> & getCoefficients();
 
+  void setVariables(const std::vector<Real> & x, const std::vector<Real> & y);
+
 protected:
   /**
    * Helper function that creates the matrix necessary for the least squares algorithm
@@ -77,4 +80,3 @@ protected:
   /// The number of coefficients
   unsigned int _num_coeff;
 };
-

@@ -87,6 +87,12 @@ GeochemicalDatabaseReader::getFugacityModel() const
   return _root["Header"]["fugacity model"].asString();
 }
 
+std::string
+GeochemicalDatabaseReader::getLogKModel() const
+{
+  return _root["Header"]["logk model"].asString();
+}
+
 std::vector<Real>
 GeochemicalDatabaseReader::getTemperatures()
 {
@@ -734,11 +740,20 @@ GeochemicalDatabaseReader::isSurfaceSpecies(const std::string & name) const
 std::string
 GeochemicalDatabaseReader::getSpeciesData(const std::string name) const
 {
+  moosecontrib::Json::StreamWriterBuilder builder;
+  builder.settings_["indentation"] = "    ";
+  builder.settings_["precision"] = 4;
+  std::unique_ptr<moosecontrib::Json::StreamWriter> writer(builder.newStreamWriter());
+
   std::string output;
 
   for (auto & key : _root.getMemberNames())
     if (_root[key].isMember(name))
-      output = _root[key][name].toStyledString();
+    {
+      std::ostringstream os;
+      writer->write(_root[key][name], &os);
+      output = os.str();
+    }
 
   if (output.empty())
     mooseError(name + " is not a species in the database");
