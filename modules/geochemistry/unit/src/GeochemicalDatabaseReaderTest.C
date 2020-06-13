@@ -33,6 +33,13 @@ TEST(GeochemicalDatabaseReaderTest, getFugacityModel)
   EXPECT_EQ(database.getFugacityModel(), "tsonopoulos");
 }
 
+TEST(GeochemicalDatabaseReaderTest, getLogKModel)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  EXPECT_EQ(database.getLogKModel(), "fourth-order");
+}
+
 TEST(GeochemicalDatabaseReaderTest, getTemperatures)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
@@ -649,9 +656,8 @@ TEST(GeochemicalDatabaseReaderTest, getSpeciesData)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   std::string data = database.getSpeciesData("Ca++");
-  std::string gold = "Ca++:\n{\n   \"charge\" : \"2\",\n   \"elements\" : {\n      \"Ca\" : "
-                     "\"1.000\"\n   },\n   "
-                     "\"molecular weight\" : \"40.0800\",\n   \"radius\" : \"6.0\"\n}\n";
+  std::string gold = "Ca++:\n{\n    \"charge\" : 2,\n    \"elements\" : \n    {\n        \"Ca\" : "
+                     "1.0\n    },\n    \"molecular weight\" : 40.08,\n    \"radius\" : 6.0\n}";
   EXPECT_EQ(data, gold);
 }
 

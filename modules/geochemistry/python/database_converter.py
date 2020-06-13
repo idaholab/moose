@@ -25,7 +25,7 @@ def command_line_options():
     parser = argparse.ArgumentParser(description="Utility to read data from thermodynamic database and write to MOOSE thermodynamic database (in JSON format)")
     parser.add_argument('-i', '--input', type=str, help="The input database", required=True)
     parser.add_argument('--format', type=str, help="The database format", choices=['gwb', 'eq36'], required=True)
-    parser.add_argument('-o', '--output', type=str, default='moose_thermo.json', help="The output filename. Default: %(default)s")
+    parser.add_argument('-o', '--output', type=str, default='moose_geochemdb.json', help="The output filename. Default: %(default)s")
     return parser.parse_args()
 
 
@@ -56,7 +56,7 @@ def main():
     # Header information
     database['Header'] = {}
     database['Header']['title'] = 'MOOSE thermodynamic database'
-    database['Header']['original'] = os.path.abspath(opt.input)
+    database['Header']['original'] = 'moose' + os.path.abspath(opt.input).split('moose')[1]
     database['Header']['date'] = datetime.datetime.now().strftime("%H:%M %d-%m-%Y")
     database['Header']['original format'] = db.format
     if db.header:
@@ -65,6 +65,10 @@ def main():
         database['Header']['activity model'] = db.activity_model
     if db.fugacity_model:
         database['Header']['fugacity model'] = db.fugacity_model
+    if db.logk_model:
+        database['Header']['logk model'] = db.logk_model
+    if db.logk_model_eqn:
+        database['Header']['logk model (functional form)'] = db.logk_model_eqn
     database['Header']['temperatures'] = db.temperatures
     database['Header']['pressures'] = db.pressures
 

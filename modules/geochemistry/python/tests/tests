@@ -2,6 +2,7 @@
   [gwb_reader]
     type = PythonUnitTest
     input = test_gwbreader.py
+    required_python_packages = 'scipy'
     requirement = "The geochemistry module shall provide a python utility to read thermodynamic databases in GWB format"
     issues = "#14897"
     design = "database.md"
@@ -9,6 +10,7 @@
   [eq36_reader]
     type = PythonUnitTest
     input = test_eq36reader.py
+    required_python_packages = 'scipy'
     requirement = "The geochemistry module shall provide a python utility to read thermodynamic databases in EQ3/6 format"
     issues = "#14897"
     design = "database.md"
@@ -18,6 +20,14 @@
     input = test_dbutils.py
     requirement = "The geochemistry module shall provide a python utility to extract information from a MOOSE thermodynamic database"
     issues = "#14897"
+    design = "database.md"
+  []
+  [readerutils]
+    type = PythonUnitTest
+    input = test_readerutils.py
+    required_python_packages = 'scipy'
+    requirement = "The geochemistry module shall provide a python utility to fill missing values in a MOOSE thermodynamic database"
+    issues = "#15145"
     design = "database.md"
   []
 []

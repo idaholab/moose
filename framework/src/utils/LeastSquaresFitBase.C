@@ -8,8 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LeastSquaresFitBase.h"
+#include "MooseError.h"
 
 extern "C" void FORTRAN_CALL(dgels)(...);
+
+LeastSquaresFitBase::LeastSquaresFitBase() {}
 
 LeastSquaresFitBase::LeastSquaresFitBase(const std::vector<Real> & x, const std::vector<Real> & y)
   : _x(x), _y(y)
@@ -17,8 +20,19 @@ LeastSquaresFitBase::LeastSquaresFitBase(const std::vector<Real> & x, const std:
 }
 
 void
+LeastSquaresFitBase::setVariables(const std::vector<Real> & x, const std::vector<Real> & y)
+{
+  _x = x;
+  _y = y;
+}
+
+void
 LeastSquaresFitBase::generate()
 {
+  if (_x.empty())
+    mooseError("Empty variables in LeastSquaresFitBase. x and y must be set in the constructor or "
+               "using setVariables(x, y)");
+
   fillMatrix();
   doLeastSquares();
 }

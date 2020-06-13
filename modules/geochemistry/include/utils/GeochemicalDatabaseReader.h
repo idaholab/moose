@@ -250,6 +250,12 @@ public:
   std::string getFugacityModel() const;
 
   /**
+   * Get the equilibrium constant model type
+   * @retrun equilibrium constant model
+   */
+  std::string getLogKModel() const;
+
+  /**
    * Get the list of basis (primary) species read from database
    * @return list of primary species names
    */

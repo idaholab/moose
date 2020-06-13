@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from dbclass import ThermoDB
+import readers.reader_utils as reader_utils
 
 def readDatabase(dblist):
     """
@@ -18,6 +19,8 @@ def readDatabase(dblist):
     dataset = []
     activity_model = None
     fugacity_model = None
+    logk_model = 'maier-kelly'
+    logk_model_eqn = 'a_0 ln(T) + a_1 + a_2 T + a_3 / T + a_4 / T^2'
     temperatures = []
     pressures = []
     adh = []
@@ -33,8 +36,14 @@ def readDatabase(dblist):
     gas_species = {}
     oxides = {}
 
+    missing_value = '500.0000'
     line = 0
     parsing_header = True
+
+    # Helper function for interpolating missing array values
+    # (to reduce number of paramters required during use)
+    def fillValues(vals):
+        return reader_utils.fillMissingValues(temperatures, vals, logk_model, missing_value)
 
     while line < len(dblist):
 
@@ -68,13 +77,13 @@ def readDatabase(dblist):
                 if dblist[line].strip().startswith('temperatures'):
                     line = line+1
                     while dblist[line].strip()[0].isnumeric():
-                        temperatures.extend(dblist[line].split())
+                        temperatures.extend([float(item) for item in dblist[line].split()])
                         line = line+1
 
                 if dblist[line].strip().startswith('pressures'):
                     line = line+1
                     while dblist[line].strip()[0].isnumeric():
-                        pressures.extend(dblist[line].split())
+                        pressures.extend([float(item) for item in dblist[line].split()])
                         line = line+1
 
                 if activity_model == 'debye-huckel':
@@ -82,19 +91,19 @@ def readDatabase(dblist):
                     if 'debye huckel a' in dblist[line]:
                         line = line+1
                         while len(adh) < len(temperatures):
-                            adh.extend(dblist[line].split())
+                            adh.extend([float(item) for item in dblist[line].split()])
                             line = line+1
 
                     if 'debye huckel b' in dblist[line]:
                         line = line+1
                         while len(bdh) < len(temperatures):
-                            bdh.extend(dblist[line].split())
+                            bdh.extend([float(item) for item in dblist[line].split()])
                             line = line+1
 
                     if 'bdot' in dblist[line]:
                         line = line+1
                         while len(bdot) < len(temperatures):
-                            bdot.extend(dblist[line].split())
+                            bdot.extend([float(item) for item in dblist[line].split()])
                             line = line+1
 
                 # Read the neutral species activity coefficients
@@ -106,7 +115,7 @@ def readDatabase(dblist):
                     line = line+1
                     vals = []
                     while not dblist[line].split()[0].isalpha():
-                        vals.extend(dblist[line].split())
+                        vals.extend([float(item) for item in dblist[line].split()])
                         line = line+1
 
                     neutral_species['co2'][key] = vals
@@ -120,7 +129,7 @@ def readDatabase(dblist):
                     line = line+1
                     vals = []
                     while len(vals) < len(temperatures):
-                        vals.extend(dblist[line].split())
+                        vals.extend([float(item) for item in dblist[line].split()])
                         line = line+1
 
                     neutral_species['h2o'][key] = vals
@@ -136,7 +145,7 @@ def readDatabase(dblist):
                 if dblist[line].split():
                     element, molecular_weight = dblist[line].split()
                     elements[element] = {}
-                    elements[element]['molecular weight'] = molecular_weight
+                    elements[element]['molecular weight'] = float(molecular_weight)
 
                 line = line+1
 
@@ -158,15 +167,15 @@ def readDatabase(dblist):
                 while not dblist[line].strip().startswith('+--'):
                     # Read molar weight
                     if 'mol.wt.' in dblist[line]:
-                        basis_species[species]['molecular weight'] = dblist[line].split()[3]
+                        basis_species[species]['molecular weight'] = float(dblist[line].split()[3])
 
                      # Read radius
                     if 'DHazero' in dblist[line]:
-                        basis_species[species]['radius'] = dblist[line].split()[3]
+                        basis_species[species]['radius'] = float(dblist[line].split()[3])
 
                      # Read charge
                     if 'charge' in dblist[line]:
-                        basis_species[species]['charge'] = dblist[line].split()[2]
+                        basis_species[species]['charge'] = float(dblist[line].split()[2])
 
                     # Read elements
                     if 'element(s)' in dblist[line]:
@@ -175,7 +184,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                basis_species[species]['elements'][data[i+1]] = data[i]
+                                basis_species[species]['elements'][data[i+1]] = float(data[i])
 
                     line = line+1
 
@@ -203,15 +212,15 @@ def readDatabase(dblist):
                 while not dblist[line].strip().startswith('+--'):
                     # Read molecular weight
                     if 'mol.wt.' in dblist[line]:
-                        redox_couples[species]['molecular weight'] = dblist[line].split()[3]
+                        redox_couples[species]['molecular weight'] = float(dblist[line].split()[3])
 
                      # Read radius
                     if 'DHazero' in dblist[line]:
-                        redox_couples[species]['radius'] = dblist[line].split()[3]
+                        redox_couples[species]['radius'] = float(dblist[line].split()[3])
 
                      # Read charge
                     if 'charge' in dblist[line]:
-                        redox_couples[species]['charge'] = dblist[line].split()[2]
+                        redox_couples[species]['charge'] = float(dblist[line].split()[2])
 
                     # Read elements
                     if 'element' in dblist[line]:
@@ -220,7 +229,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                redox_couples[species]['elements'][data[i+1]] = data[i]
+                                redox_couples[species]['elements'][data[i+1]] = float(data[i])
 
                     # Species in redox couples
                     # (note: EQ3/6 includes species in this list, so we remove it)
@@ -231,7 +240,7 @@ def readDatabase(dblist):
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
                                 if data[i+1] != species:
-                                    redox_couples[species]['species'][data[i+1]] = data[i]
+                                    redox_couples[species]['species'][data[i+1]] = float(data[i])
 
                     # Equilibrium constant values
                     if 'logK grid' in dblist[line]:
@@ -240,7 +249,11 @@ def readDatabase(dblist):
                         while len(vals) < len(temperatures):
                             vals.extend(dblist[line].split())
                             line = line+1
-                        redox_couples[species]['logk'] = vals
+
+                    vals, note = fillValues(vals)
+                    redox_couples[species]['logk'] = vals
+                    if note:
+                         redox_couples[species]['note'] = note
 
                     line = line+1
 
@@ -268,15 +281,15 @@ def readDatabase(dblist):
                 while not dblist[line].strip().startswith('+--'):
                     # Read molecular weight
                     if 'mol.wt.' in dblist[line]:
-                        secondary_species[species]['molecular weight'] = dblist[line].split()[3]
+                        secondary_species[species]['molecular weight'] = float(dblist[line].split()[3])
 
                      # Read radius
                     if 'DHazero' in dblist[line]:
-                        secondary_species[species]['radius'] = dblist[line].split()[3]
+                        secondary_species[species]['radius'] = float(dblist[line].split()[3])
 
                      # Read charge
                     if 'charge' in dblist[line]:
-                        secondary_species[species]['charge'] = dblist[line].split()[2]
+                        secondary_species[species]['charge'] = float(dblist[line].split()[2])
 
                     # Read elements
                     if 'element' in dblist[line]:
@@ -285,7 +298,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                secondary_species[species]['elements'][data[i+1]] = data[i]
+                                secondary_species[species]['elements'][data[i+1]] = float(data[i])
 
                     # Basis species in aqueous species
                     # (note: EQ3/6 includes aqueous species in this list, so we remove it)
@@ -296,7 +309,7 @@ def readDatabase(dblist):
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
                                 if data[i+1] != species:
-                                    secondary_species[species]['species'][data[i+1]] = data[i]
+                                    secondary_species[species]['species'][data[i+1]] = float(data[i])
 
                     # Equilibrium constant values
                     if 'logK grid' in dblist[line]:
@@ -305,8 +318,11 @@ def readDatabase(dblist):
                         while len(vals) < len(temperatures):
                             vals.extend(dblist[line].split())
                             line = line+1
-                        secondary_species[species]['logk'] = vals
 
+                    vals, note = fillValues(vals)
+                    secondary_species[species]['logk'] = vals
+                    if note:
+                         secondary_species[species]['note'] = note
                     line = line+1
 
                 if dblist[line].strip().startswith('+--') and dblist[line+2].strip().startswith('+--'):
@@ -333,11 +349,11 @@ def readDatabase(dblist):
                 while not dblist[line].strip().startswith('+--'):
                     # Read molecular weight
                     if 'mol.wt.' in dblist[line]:
-                        mineral_species[species]['molecular weight'] = dblist[line].split()[3]
+                        mineral_species[species]['molecular weight'] = float(dblist[line].split()[3])
 
                      # Read molar volume
                     if 'V0PrTr' in dblist[line]:
-                        mineral_species[species]['molar volume'] = dblist[line].split()[2]
+                        mineral_species[species]['molar volume'] = float(dblist[line].split()[2])
 
                     # Read elements
                     if 'element' in dblist[line]:
@@ -346,7 +362,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                mineral_species[species]['elements'][data[i+1]] = data[i]
+                                mineral_species[species]['elements'][data[i+1]] = float(data[i])
 
                     # Basis species in solid species
                     # (note: EQ3/6 includes solid species in this list, so we remove it)
@@ -357,7 +373,7 @@ def readDatabase(dblist):
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
                                 if data[i+1] != species:
-                                    mineral_species[species]['species'][data[i+1]] = data[i]
+                                    mineral_species[species]['species'][data[i+1]] = float(data[i])
 
                     # Equilibrium constant values
                     if 'logK grid' in dblist[line]:
@@ -366,8 +382,11 @@ def readDatabase(dblist):
                         while len(vals) < len(temperatures):
                             vals.extend(dblist[line].split())
                             line = line+1
-                        mineral_species[species]['logk'] = vals
 
+                    vals, note = fillValues(vals)
+                    mineral_species[species]['logk'] = vals
+                    if note:
+                         mineral_species[species]['note'] = note
                     line = line+1
 
                 if dblist[line].strip().startswith('+--') and dblist[line+2].strip().startswith('+--'):
@@ -394,7 +413,7 @@ def readDatabase(dblist):
                 while not dblist[line].strip().startswith('+--'):
                     # Read molecular weight
                     if 'mol.wt.' in dblist[line]:
-                        gas_species[species]['molecular weight'] = dblist[line].split()[3]
+                        gas_species[species]['molecular weight'] = float(dblist[line].split()[3])
 
                     # Read elements
                     if 'element' in dblist[line]:
@@ -403,7 +422,7 @@ def readDatabase(dblist):
                             line = line+1
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
-                                gas_species[species]['elements'][data[i+1]] = data[i]
+                                gas_species[species]['elements'][data[i+1]] = float(data[i])
 
                     # Basis species in gas species
                     # (note: EQ3/6 includes gas species in this list, so we remove it)
@@ -414,7 +433,7 @@ def readDatabase(dblist):
                             data = dblist[line].split()
                             for i in range(0, len(data), 2):
                                 if data[i+1] != species or not data[i].startswith('-1'):
-                                    gas_species[species]['species'][data[i+1]] = data[i]
+                                    gas_species[species]['species'][data[i+1]] = float(data[i])
 
                     # Equilibrium constant values
                     if 'logK grid' in dblist[line]:
@@ -423,8 +442,11 @@ def readDatabase(dblist):
                         while len(vals) < len(temperatures):
                             vals.extend(dblist[line].split())
                             line = line+1
-                        gas_species[species]['logk'] = vals
 
+                    vals, note = fillValues(vals)
+                    gas_species[species]['logk'] = vals
+                    if note:
+                         gas_species[species]['note'] = note
                     line = line+1
 
                 if dblist[line].strip().startswith('+--') and dblist[line+2].strip().startswith('+--'):
@@ -444,6 +466,8 @@ def readDatabase(dblist):
         db.bdh = bdh
         db.bdot = bdot
     db.fugacity_model = fugacity_model
+    db.logk_model = logk_model
+    db.logk_model_eqn = logk_model_eqn
     db.temperatures = temperatures
     db.pressures = pressures
     db.neutral_species = neutral_species
