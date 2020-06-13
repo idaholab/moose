@@ -34,47 +34,61 @@ public:
 
   // neighbor
   virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
-                                                     unsigned int comp = 0);
+                                                     unsigned int comp = 0) const;
+
+  /**
+   * Get the coupled neighbor variable value for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
+  virtual const ADVariableValue & adCoupledNeighborValue(const std::string & var_name,
+                                                         unsigned int comp = 0) const;
+
+  /**
+   * Get the coupled neighbor vector variable value for \p var_name with derivative information for
+   * automatic differentiation objects
+   */
+  virtual const ADVectorVariableValue & adCoupledVectorNeighborValue(const std::string & var_name,
+                                                                     unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueDot(const std::string & var_name,
-                                                        unsigned int comp = 0);
+                                                        unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueDotDu(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueOld(const std::string & var_name,
-                                                        unsigned int comp = 0);
+                                                        unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborValueOlder(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
 
   virtual const VariableGradient & coupledNeighborGradient(const std::string & var_name,
-                                                           unsigned int comp = 0);
+                                                           unsigned int comp = 0) const;
   virtual const VariableGradient & coupledNeighborGradientOld(const std::string & var_name,
-                                                              unsigned int comp = 0);
+                                                              unsigned int comp = 0) const;
   virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name,
-                                                                unsigned int comp = 0);
+                                                                unsigned int comp = 0) const;
   virtual const VectorVariableGradient & coupledVectorNeighborGradient(const std::string & var_name,
-                                                                       unsigned int comp = 0);
+                                                                       unsigned int comp = 0) const;
   virtual const VectorVariableGradient &
-  coupledVectorNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
+  coupledVectorNeighborGradientOld(const std::string & var_name, unsigned int comp = 0) const;
   virtual const VectorVariableGradient &
-  coupledVectorNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  coupledVectorNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0) const;
 
   virtual const ArrayVariableValue & coupledArrayNeighborValue(const std::string & var_name,
-                                                               unsigned int comp = 0);
+                                                               unsigned int comp = 0) const;
   virtual const ArrayVariableGradient & coupledArrayNeighborGradient(const std::string & var_name,
-                                                                     unsigned int comp = 0);
+                                                                     unsigned int comp = 0) const;
   virtual const ArrayVariableGradient &
-  coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
+  coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp = 0) const;
   virtual const ArrayVariableGradient &
-  coupledArrayNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  coupledArrayNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0) const;
 
   virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name,
-                                                       unsigned int i = 0);
+                                                       unsigned int i = 0) const;
 
   virtual const VariableValue & coupledNeighborDofValues(const std::string & var_name,
-                                                         unsigned int comp = 0);
+                                                         unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborDofValuesOld(const std::string & var_name,
-                                                            unsigned int comp = 0);
+                                                            unsigned int comp = 0) const;
   virtual const VariableValue & coupledNeighborDofValuesOlder(const std::string & var_name,
-                                                              unsigned int comp = 0);
+                                                              unsigned int comp = 0) const;
 
 protected:
   bool _neighbor_nodal;

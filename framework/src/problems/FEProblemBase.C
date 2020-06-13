@@ -111,7 +111,7 @@ namespace
  * Method for sorting the MooseVariableFEBases based on variable numbers
  */
 bool
-sortMooseVariables(MooseVariableFEBase * a, MooseVariableFEBase * b)
+sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
@@ -1216,7 +1216,7 @@ FEProblemBase::checkNonlocalCoupling()
 void
 FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
-  std::set<MooseVariableFEBase *> uo_jacobian_moose_vars;
+  std::set<const MooseVariableFEBase *> uo_jacobian_moose_vars;
   {
     std::vector<ShapeElementUserObject *> objs;
     theWarehouse()
@@ -1228,7 +1228,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     for (const auto & uo : objs)
     {
       _calculate_jacobian_in_uo = uo->computeJacobianFlag();
-      const std::set<MooseVariableFEBase *> & mv_deps = uo->jacobianMooseVariables();
+      const auto & mv_deps = uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -1242,7 +1242,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     for (const auto & uo : objs)
     {
       _calculate_jacobian_in_uo = uo->computeJacobianFlag();
-      const std::set<MooseVariableFEBase *> & mv_deps = uo->jacobianMooseVariables();
+      const auto & mv_deps = uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -1253,7 +1253,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 }
 
 void
-FEProblemBase::setVariableAllDoFMap(const std::vector<MooseVariableFEBase *> moose_vars)
+FEProblemBase::setVariableAllDoFMap(const std::vector<const MooseVariableFEBase *> & moose_vars)
 {
   for (unsigned int i = 0; i < moose_vars.size(); ++i)
   {

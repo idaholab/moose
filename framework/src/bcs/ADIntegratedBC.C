@@ -15,6 +15,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "ADUtils.h"
 
 #include "libmesh/quadrature.h"
 
@@ -122,7 +123,8 @@ ADIntegratedBCTempl<T>::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  auto ad_offset =
+      Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
 
   if (_use_displaced_mesh)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -172,7 +174,8 @@ ADIntegratedBCTempl<T>::computeJacobianBlock(MooseVariableFEBase & jvar)
         phi_size == ke.n(),
         "The size of the phi container does not match the number of local Jacobian columns");
 
-    size_t ad_offset = jvar_num * _sys.getMaxVarNDofsPerElem();
+    auto ad_offset =
+        Moose::adOffset(jvar_num, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
 
     if (_use_displaced_mesh)
       for (_i = 0; _i < _test.size(); _i++)

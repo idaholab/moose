@@ -96,7 +96,7 @@ public:
 
   const std::set<UserObjectName> & getDependObjects() const { return _depend_uo; }
 
-  void coupledCallback(const std::string & var_name, bool is_old) override;
+  void coupledCallback(const std::string & var_name, bool is_old) const override;
 
   virtual const std::set<std::string> & getRequestedItems() override;
 
@@ -154,10 +154,10 @@ protected:
   virtual ComputeValueType computeValue() = 0;
 
   virtual const VariableValue & coupledDot(const std::string & var_name,
-                                           unsigned int comp = 0) override;
+                                           unsigned int comp = 0) const override;
 
   virtual const VariableValue & coupledDotDu(const std::string & var_name,
-                                             unsigned int comp = 0) override;
+                                             unsigned int comp = 0) const override;
 
   /// This callback is used for AuxKernelTempls that need to perform a per-element calculation
   virtual void precalculateValue() {}
@@ -231,7 +231,7 @@ protected:
   unsigned int _qp;
 
   /// Depend AuxKernelTempls
-  std::set<std::string> _depend_vars;
+  mutable std::set<std::string> _depend_vars;
   std::set<std::string> _supplied_vars;
 
   /// Depend UserObjects

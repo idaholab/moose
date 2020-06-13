@@ -10,6 +10,7 @@
 #include "ADKernelValue.h"
 #include "Assembly.h"
 #include "SystemBase.h"
+#include "ADUtils.h"
 
 // libmesh includes
 #include "libmesh/threads.h"
@@ -67,7 +68,8 @@ ADKernelValueTempl<T>::computeJacobian()
 {
   prepareMatrixTag(_assembly, _var.number(), _var.number());
 
-  size_t ad_offset = _var.number() * _sys.getMaxVarNDofsPerElem();
+  auto ad_offset =
+      Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
 
   precalculateResidual();
 
@@ -148,7 +150,8 @@ ADKernelValueTempl<T>::computeADOffDiagJacobian()
     if (ivar != _var.number() || jvariable.isFV())
       continue;
 
-    size_t ad_offset = jvar * _sys.getMaxVarNDofsPerElem();
+    auto ad_offset =
+        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element);
 
     prepareMatrixTag(_assembly, ivar, jvar);
 

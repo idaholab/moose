@@ -236,25 +236,33 @@ public:
   const FieldVariablePhiValue & phiLower() const { return _lower_data->phi(); }
   const FieldVariablePhiGradient & gradPhiLower() const { return _lower_data->gradPhi(); }
 
-  const ADTemplateVariableTestGradient<OutputShape> & adGradPhi()
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhi() const
   {
     return _element_data->adGradPhi();
   }
 
-  const ADTemplateVariableTestGradient<OutputShape> & adGradPhiFace()
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhiFace() const
   {
     return _element_data->adGradPhiFace();
+  }
+
+  const ADTemplateVariableTestGradient<OutputShape> & adGradPhiFaceNeighbor() const
+  {
+    return _neighbor_data->adGradPhiFace();
   }
 
   // damping
   const FieldVariableValue & increment() const { return _element_data->increment(); }
 
-  const FieldVariableValue & vectorTagValue(TagID tag)
+  const FieldVariableValue & vectorTagValue(TagID tag) const
   {
     return _element_data->vectorTagValue(tag);
   }
-  const DoFValue & vectorTagDofValue(TagID tag) { return _element_data->vectorTagDofValue(tag); }
-  const FieldVariableValue & matrixTagValue(TagID tag)
+  const DoFValue & vectorTagDofValue(TagID tag) const
+  {
+    return _element_data->vectorTagDofValue(tag);
+  }
+  const FieldVariableValue & matrixTagValue(TagID tag) const
   {
     return _element_data->matrixTagValue(tag);
   }
@@ -491,34 +499,34 @@ public:
    */
   void addSolutionNeighbor(const DenseVector<Number> & v);
 
-  const DoFValue & dofValue();
-  const DoFValue & dofValues();
-  const DoFValue & dofValuesOld();
-  const DoFValue & dofValuesOlder();
-  const DoFValue & dofValuesPreviousNL();
-  const DoFValue & dofValuesNeighbor();
-  const DoFValue & dofValuesOldNeighbor();
-  const DoFValue & dofValuesOlderNeighbor();
-  const DoFValue & dofValuesPreviousNLNeighbor();
-  const DoFValue & dofValuesDot();
-  const DoFValue & dofValuesDotNeighbor();
-  const DoFValue & dofValuesDotNeighborResidual();
-  const DoFValue & dofValuesDotOld();
-  const DoFValue & dofValuesDotOldNeighbor();
-  const DoFValue & dofValuesDotDot();
-  const DoFValue & dofValuesDotDotNeighbor();
-  const DoFValue & dofValuesDotDotNeighborResidual();
-  const DoFValue & dofValuesDotDotOld();
-  const DoFValue & dofValuesDotDotOldNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDu();
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor();
-  const MooseArray<Number> & dofValuesDuDotDotDu();
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor();
+  const DoFValue & dofValue() const;
+  const DoFValue & dofValues() const;
+  const DoFValue & dofValuesOld() const;
+  const DoFValue & dofValuesOlder() const;
+  const DoFValue & dofValuesPreviousNL() const;
+  const DoFValue & dofValuesNeighbor() const;
+  const DoFValue & dofValuesOldNeighbor() const;
+  const DoFValue & dofValuesOlderNeighbor() const;
+  const DoFValue & dofValuesPreviousNLNeighbor() const;
+  const DoFValue & dofValuesDot() const;
+  const DoFValue & dofValuesDotNeighbor() const;
+  const DoFValue & dofValuesDotNeighborResidual() const;
+  const DoFValue & dofValuesDotOld() const;
+  const DoFValue & dofValuesDotOldNeighbor() const;
+  const DoFValue & dofValuesDotDot() const;
+  const DoFValue & dofValuesDotDotNeighbor() const;
+  const DoFValue & dofValuesDotDotNeighborResidual() const;
+  const DoFValue & dofValuesDotDotOld() const;
+  const DoFValue & dofValuesDotDotOldNeighbor() const;
+  const MooseArray<Number> & dofValuesDuDotDu() const;
+  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const;
+  const MooseArray<Number> & dofValuesDuDotDotDu() const;
+  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const;
 
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues();
+  const MooseArray<ADReal> & adDofValues() const;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -571,28 +579,28 @@ public:
   /**
    * Methods for retrieving values of variables at the nodes
    */
-  const OutputType & nodalValue();
-  const OutputType & nodalValueOld();
-  const OutputType & nodalValueOlder();
-  const OutputType & nodalValuePreviousNL();
-  const OutputType & nodalValueDot();
-  const OutputType & nodalValueDotDot();
-  const OutputType & nodalValueDotOld();
-  const OutputType & nodalValueDotDotOld();
-  const OutputType & nodalValueDuDotDu();
-  const OutputType & nodalValueDuDotDotDu();
-  const OutputType & nodalValueNeighbor();
-  const OutputType & nodalValueOldNeighbor();
-  const OutputType & nodalValueOlderNeighbor();
-  const OutputType & nodalValuePreviousNLNeighbor();
-  const OutputType & nodalValueDotNeighbor();
-  const OutputType & nodalValueDotNeighborResidual();
-  const OutputType & nodalValueDotDotNeighbor();
-  const OutputType & nodalValueDotDotNeighborResidual();
-  const OutputType & nodalValueDotOldNeighbor();
-  const OutputType & nodalValueDotDotOldNeighbor();
-  const OutputType & nodalValueDuDotDuNeighbor();
-  const OutputType & nodalValueDuDotDotDuNeighbor();
+  const OutputType & nodalValue() const;
+  const OutputType & nodalValueOld() const;
+  const OutputType & nodalValueOlder() const;
+  const OutputType & nodalValuePreviousNL() const;
+  const OutputType & nodalValueDot() const;
+  const OutputType & nodalValueDotDot() const;
+  const OutputType & nodalValueDotOld() const;
+  const OutputType & nodalValueDotDotOld() const;
+  const OutputType & nodalValueDuDotDu() const;
+  const OutputType & nodalValueDuDotDotDu() const;
+  const OutputType & nodalValueNeighbor() const;
+  const OutputType & nodalValueOldNeighbor() const;
+  const OutputType & nodalValueOlderNeighbor() const;
+  const OutputType & nodalValuePreviousNLNeighbor() const;
+  const OutputType & nodalValueDotNeighbor() const;
+  const OutputType & nodalValueDotNeighborResidual() const;
+  const OutputType & nodalValueDotDotNeighbor() const;
+  const OutputType & nodalValueDotDotNeighborResidual() const;
+  const OutputType & nodalValueDotOldNeighbor() const;
+  const OutputType & nodalValueDotDotOldNeighbor() const;
+  const OutputType & nodalValueDuDotDuNeighbor() const;
+  const OutputType & nodalValueDuDotDotDuNeighbor() const;
 
   /**
    * Methods for retrieving values of variables at the nodes in a MooseArray for AuxKernelBase
@@ -610,10 +618,10 @@ public:
     return _element_data->nodalValueArray(Moose::Older);
   }
 
-  const DoFValue & nodalVectorTagValue(TagID tag);
-  const DoFValue & nodalMatrixTagValue(TagID tag);
+  const DoFValue & nodalVectorTagValue(TagID tag) const;
+  const DoFValue & nodalMatrixTagValue(TagID tag) const;
 
-  const typename Moose::ADType<OutputType>::type & adNodalValue();
+  const typename Moose::ADType<OutputType>::type & adNodalValue() const;
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
@@ -633,14 +641,14 @@ protected:
 
 template <typename OutputType>
 inline const MooseArray<ADReal> &
-MooseVariableFE<OutputType>::adDofValues()
+MooseVariableFE<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
 }
 
 template <typename OutputType>
 inline const typename Moose::ADType<OutputType>::type &
-MooseVariableFE<OutputType>::adNodalValue()
+MooseVariableFE<OutputType>::adNodalValue() const
 {
   return _element_data->adNodalValue();
 }

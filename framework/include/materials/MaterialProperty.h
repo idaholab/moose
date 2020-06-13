@@ -109,6 +109,8 @@ template <typename T, bool is_ad>
 class MaterialPropertyBase : public PropertyValue
 {
 public:
+  typedef MooseADWrapper<T, is_ad> value_type;
+
   /// Explicitly declare a public constructor because we made the copy constructor private
   MaterialPropertyBase() : PropertyValue()
   { /* */
@@ -349,6 +351,8 @@ class ADMaterialProperty : public MaterialPropertyBase<T, true>
 {
 public:
   ADMaterialProperty() = default;
+
+  using typename MaterialPropertyBase<T, true>::value_type;
 
   PropertyValue * init(int size) override { return _init_helper(size, this); }
 

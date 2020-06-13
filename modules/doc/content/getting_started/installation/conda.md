@@ -16,6 +16,8 @@ and an experimental [WSL](installation/windows10.md) option is available.
 
 !include installation/install_miniconda.md
 
+!include installation/install_conda_moose.md
+
 !include getting_started/installation/clone_moose.md
 
 !include getting_started/installation/test_moose.md

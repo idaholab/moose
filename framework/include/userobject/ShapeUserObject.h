@@ -51,7 +51,7 @@ public:
   /**
    * Returns the set of variables a Jacobian has been requested for
    */
-  const std::set<MooseVariableFEBase *> & jacobianMooseVariables() const
+  const std::set<const MooseVariableFEBase *> & jacobianMooseVariables() const
   {
     return _jacobian_moose_variables;
   }
@@ -76,7 +76,7 @@ protected:
    * of a Jacobian w.r.t. to this variable i.e. the call to executeJacobian() with
    * shapefunctions initialized for this variable.
    */
-  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0);
+  virtual unsigned int coupled(const std::string & var_name, unsigned int comp = 0) const override;
 
   /// shape function values
   const VariablePhiValue & _phi;
@@ -92,7 +92,7 @@ protected:
 
 private:
   const bool _compute_jacobians;
-  std::set<MooseVariableFEBase *> _jacobian_moose_variables;
+  mutable std::set<const MooseVariableFEBase *> _jacobian_moose_variables;
 };
 
 template <typename T>
@@ -119,9 +119,9 @@ ShapeUserObject<T>::validParams()
 
 template <typename T>
 unsigned int
-ShapeUserObject<T>::coupled(const std::string & var_name, unsigned int comp)
+ShapeUserObject<T>::coupled(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFEBase * var = Coupleable::getVar(var_name, comp);
+  const auto * var = Coupleable::getVar(var_name, comp);
 
   // add to the set of variables for which executeJacobian will be called
   if (_compute_jacobians && var->kind() == Moose::VAR_NONLINEAR)

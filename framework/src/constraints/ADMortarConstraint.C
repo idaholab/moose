@@ -13,6 +13,7 @@
 #include "MooseVariable.h"
 #include "Assembly.h"
 #include "SystemBase.h"
+#include "ADUtils.h"
 
 InputParameters
 ADMortarConstraint::validParams()
@@ -123,11 +124,14 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
 
     // Derivatives are offset by the variable number
-    std::vector<size_t> ad_offsets{jvar * _sys.getMaxVarNDofsPerElem(),
-                                   jvar * _sys.getMaxVarNDofsPerElem() +
-                                       (_sys.system().n_vars() * _sys.getMaxVarNDofsPerElem()),
-                                   2 * _sys.system().n_vars() * _sys.getMaxVarNDofsPerElem() +
-                                       jvar * _sys.getMaxVarNDofsPerElem()};
+    std::vector<size_t> ad_offsets{
+        Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
+        Moose::adOffset(jvar,
+                        _sys.getMaxVarNDofsPerElem(),
+                        Moose::ElementType::Neighbor,
+                        _sys.system().n_vars()),
+        Moose::adOffset(
+            jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Lower, _sys.system().n_vars())};
     std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
                                           jvariable.dofIndicesNeighbor().size(),
                                           jvariable.dofIndicesLower().size()};

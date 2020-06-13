@@ -109,7 +109,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
 }
 
 bool
-Coupleable::isCoupled(const std::string & var_name, unsigned int i)
+Coupleable::isCoupled(const std::string & var_name, unsigned int i) const
 {
   auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
@@ -130,10 +130,14 @@ Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 }
 
 unsigned int
-Coupleable::coupledComponents(const std::string & var_name)
+Coupleable::coupledComponents(const std::string & var_name) const
 {
   if (isCoupled(var_name))
-    return _coupled_vars[var_name].size();
+  {
+    mooseAssert(_coupled_vars.find(var_name) != _coupled_vars.end(),
+                var_name << " must not actually be coupled!");
+    return _coupled_vars.at(var_name).size();
+  }
   else
   {
     if (_c_parameters.hasDefaultCoupledValue(var_name))
@@ -158,7 +162,7 @@ checkComponent(const MooseObject * obj,
 // return).  Because checkFuncType calls coupledCallback which should only be
 // called if the variables was actually coupled.
 void
-Coupleable::checkFuncType(const std::string var_name, VarType t, FuncAge age)
+Coupleable::checkFuncType(const std::string var_name, VarType t, FuncAge age) const
 {
   if (t == VarType::Gradient && _c_nodal)
     mooseError(_c_name, ": nodal variables do not have gradients");
@@ -171,12 +175,11 @@ Coupleable::checkFuncType(const std::string var_name, VarType t, FuncAge age)
                _c_name,
                "' uses older variable values that are unavailable with explicit schemes");
 
-  // this goes at end after all error checks
   coupledCallback(var_name, age == FuncAge::Old || age == FuncAge::Older);
 }
 
 bool
-Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned int comp_bound)
+Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned int comp_bound) const
 {
   auto it = _c_coupled_scalar_vars.find(var_name);
   if (it != _c_coupled_scalar_vars.end())
@@ -196,11 +199,17 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
   if (!isCoupled(var_name, comp))
     return false; // return false since variable is *not* coupled
 
-  auto bound = comp_bound ? comp_bound : _coupled_vars[var_name].size();
+  auto vars_vector_it = _coupled_vars.find(var_name);
+  if (vars_vector_it == _coupled_vars.end())
+    mooseError("Trying to get a coupled var ", var_name, " that doesn't exist");
+
+  const auto & vars_vector = vars_vector_it->second;
+
+  auto bound = comp_bound ? comp_bound : vars_vector.size();
   checkComponent(_obj, comp, bound, var_name);
 
   // We should know we have a variable now
-  MooseVariableFieldBase * var = _coupled_vars[var_name][comp];
+  const auto * var = vars_vector[comp];
   if (!var)
     mooseError(
         _c_name,
@@ -227,32 +236,32 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
                  ". This is not currently supported");
   }
 
-  if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
+  if (!(vars_vector[comp])->isNodal() && _c_nodal)
     mooseError(_c_name, ": cannot couple elemental variables into nodal objects");
 
   return true;
 }
 
-MooseVariableFieldBase *
-Coupleable::getFEVar(const std::string & var_name, unsigned int comp)
+const MooseVariableFieldBase *
+Coupleable::getFEVar(const std::string & var_name, unsigned int comp) const
 {
   mooseDeprecated("Coupleable::getFEVar is deprecated. Please use Coupleable::getFieldVar instead. "
                   "Note that this method could potentially return a finite volume variable");
   return getFieldVar(var_name, comp);
 }
 
-MooseVariableFieldBase *
-Coupleable::getFieldVar(const std::string & var_name, unsigned int comp)
+const MooseVariableFieldBase *
+Coupleable::getFieldVar(const std::string & var_name, unsigned int comp) const
 {
   if (!checkVar(var_name, comp, 0))
     return nullptr;
-  return _coupled_vars[var_name][comp];
+  return _coupled_vars.at(var_name)[comp];
 }
 
 MooseVariable *
 Coupleable::getVar(const std::string & var_name, unsigned int comp)
 {
-  return getVarHelper<MooseVariable>(var_name, comp);
+  return const_cast<MooseVariable *>(getVarHelper<MooseVariable>(var_name, comp));
 }
 
 VectorMooseVariable *
@@ -264,17 +273,41 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
                "' uses vector variables which are not required to be continuous. Don't use vector "
                "variables"
                "with nodal compute objects.");
-  return getVarHelper<VectorMooseVariable>(var_name, comp);
+  return const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
 }
 
 ArrayMooseVariable *
 Coupleable::getArrayVar(const std::string & var_name, unsigned int comp)
 {
+  return const_cast<ArrayMooseVariable *>(getVarHelper<ArrayMooseVariable>(var_name, comp));
+}
+
+const MooseVariable *
+Coupleable::getVar(const std::string & var_name, unsigned int comp) const
+{
+  return getVarHelper<MooseVariable>(var_name, comp);
+}
+
+const VectorMooseVariable *
+Coupleable::getVectorVar(const std::string & var_name, unsigned int comp) const
+{
+  if (_c_nodal)
+    mooseError("Nodal object '",
+               _c_name,
+               "' uses vector variables which are not required to be continuous. Don't use vector "
+               "variables"
+               "with nodal compute objects.");
+  return getVarHelper<VectorMooseVariable>(var_name, comp);
+}
+
+const ArrayMooseVariable *
+Coupleable::getArrayVar(const std::string & var_name, unsigned int comp) const
+{
   return getVarHelper<ArrayMooseVariable>(var_name, comp);
 }
 
-VariableValue *
-Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
+const VariableValue *
+Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp) const
 {
   // make sure we don't access values that were not provided
   checkComponent(_obj, comp, _c_parameters.numberDefaultCoupledValues(var_name), var_name);
@@ -293,8 +326,8 @@ Coupleable::getDefaultValue(const std::string & var_name, unsigned int comp)
   return default_value_it->second[comp].get();
 }
 
-VectorVariableValue *
-Coupleable::getDefaultVectorValue(const std::string & var_name)
+const VectorVariableValue *
+Coupleable::getDefaultVectorValue(const std::string & var_name) const
 {
   auto default_value_it = _default_vector_value.find(var_name);
   if (default_value_it == _default_vector_value.end())
@@ -328,8 +361,8 @@ Coupleable::getDefaultVectorValue(const std::string & var_name)
   return default_value_it->second.get();
 }
 
-ArrayVariableValue *
-Coupleable::getDefaultArrayValue(const std::string & var_name)
+const ArrayVariableValue *
+Coupleable::getDefaultArrayValue(const std::string & var_name) const
 {
   std::map<std::string, ArrayVariableValue *>::iterator default_value_it =
       _default_array_value.find(var_name);
@@ -351,7 +384,7 @@ Coupleable::getDefaultArrayValue(const std::string & var_name)
 
 template <typename T>
 const T &
-Coupleable::getDefaultNodalValue(const std::string & var_name, unsigned int comp)
+Coupleable::getDefaultNodalValue(const std::string & var_name, unsigned int comp) const
 {
   auto && default_variable_value = getDefaultValue(var_name, comp);
   return *default_variable_value->data();
@@ -359,7 +392,7 @@ Coupleable::getDefaultNodalValue(const std::string & var_name, unsigned int comp
 
 template <>
 const RealVectorValue &
-Coupleable::getDefaultNodalValue<RealVectorValue>(const std::string & var_name, unsigned int)
+Coupleable::getDefaultNodalValue<RealVectorValue>(const std::string & var_name, unsigned int) const
 {
   auto && default_variable_value = getDefaultVectorValue(var_name);
   return *default_variable_value->data();
@@ -367,21 +400,23 @@ Coupleable::getDefaultNodalValue<RealVectorValue>(const std::string & var_name, 
 
 template <>
 const RealEigenVector &
-Coupleable::getDefaultNodalValue<RealEigenVector>(const std::string & var_name, unsigned int)
+Coupleable::getDefaultNodalValue<RealEigenVector>(const std::string & var_name, unsigned int) const
 {
   auto && default_variable_value = getDefaultArrayValue(var_name);
   return *default_variable_value->data();
 }
 
 unsigned int
-Coupleable::coupled(const std::string & var_name, unsigned int comp)
+Coupleable::coupled(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFieldBase * var = getFieldVar(var_name, comp);
+  const auto * var = getFieldVar(var_name, comp);
   if (!var)
   {
+    mooseAssert(_optional_var_index.find(var_name) != _optional_var_index.end(),
+                "optional var index for " << var_name << " does not exist!");
     // make sure we don't try to access default var ids that were not provided
-    checkComponent(_obj, comp, _optional_var_index[var_name].size(), var_name);
-    return _optional_var_index[var_name][comp];
+    checkComponent(_obj, comp, _optional_var_index.at(var_name).size(), var_name);
+    return _optional_var_index.at(var_name)[comp];
   }
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
@@ -411,9 +446,9 @@ Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int
 }
 
 const VariableValue &
-Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -435,9 +470,9 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp)
+Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -449,7 +484,7 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
                _c_name,
                ", but a vector tag with that ID does not exist");
 
-  addFEVariableCoupleableVectorTag(tag);
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
   if (_c_nodal)
     return var->nodalVectorTagValue(tag);
@@ -458,27 +493,29 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
 }
 
 const VariableValue &
-Coupleable::coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp)
+Coupleable::coupledVectorTagDofValue(const std::string & var_name,
+                                     TagID tag,
+                                     unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledVectorTagDofValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  addFEVariableCoupleableVectorTag(tag);
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableVectorTag(tag);
 
   return var->vectorTagDofValue(tag);
 }
 
 const VariableValue &
-Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp)
+Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     mooseError(var_name, ": invalid variable name for coupledMatrixTagValue");
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  addFEVariableCoupleableMatrixTag(tag);
+  const_cast<Coupleable *>(this)->addFEVariableCoupleableMatrixTag(tag);
 
   if (_c_nodal)
     return var->nodalMatrixTagValue(tag);
@@ -486,9 +523,9 @@ Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsig
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return *getDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -499,9 +536,9 @@ Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp)
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayValue(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayValue(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return *getDefaultArrayValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -527,9 +564,9 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
 }
 
 const VariableValue &
-Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -549,9 +586,9 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -571,9 +608,9 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -594,9 +631,9 @@ Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int co
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return *getDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -607,9 +644,9 @@ Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int com
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return *getDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -620,9 +657,9 @@ Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int c
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayValueOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayValueOld(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return *getDefaultArrayValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -642,9 +679,9 @@ Coupleable::coupledArrayValueOld(const std::string & var_name, unsigned int comp
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayValueOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayValueOlder(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return *getDefaultArrayValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -664,9 +701,9 @@ Coupleable::coupledArrayValueOlder(const std::string & var_name, unsigned int co
 }
 
 const VariableValue &
-Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -686,9 +723,9 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -708,9 +745,9 @@ Coupleable::coupledDotDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -730,9 +767,9 @@ Coupleable::coupledDotOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDotOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -752,9 +789,9 @@ Coupleable::coupledDotDotOld(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -765,9 +802,9 @@ Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -778,9 +815,9 @@ Coupleable::coupledVectorDotDot(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotOld(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -791,9 +828,9 @@ Coupleable::coupledVectorDotOld(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableValue &
-Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -804,9 +841,9 @@ Coupleable::coupledVectorDotDotOld(const std::string & var_name, unsigned int co
 }
 
 const VariableValue &
-Coupleable::coupledVectorDotDu(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotDu(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -817,9 +854,9 @@ Coupleable::coupledVectorDotDu(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledVectorDotDotDu(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorDotDotDu(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -830,9 +867,9 @@ Coupleable::coupledVectorDotDotDu(const std::string & var_name, unsigned int com
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayDot(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -852,9 +889,9 @@ Coupleable::coupledArrayDot(const std::string & var_name, unsigned int comp)
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -874,9 +911,9 @@ Coupleable::coupledArrayDotDot(const std::string & var_name, unsigned int comp)
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayDotOld(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -896,9 +933,9 @@ Coupleable::coupledArrayDotOld(const std::string & var_name, unsigned int comp)
 }
 
 const ArrayVariableValue &
-Coupleable::coupledArrayDotDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayDotDotOld(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -918,9 +955,9 @@ Coupleable::coupledArrayDotDotOld(const std::string & var_name, unsigned int com
 }
 
 const VariableValue &
-Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -940,9 +977,9 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -962,9 +999,9 @@ Coupleable::coupledDotDotDu(const std::string & var_name, unsigned int comp)
 }
 
 const VariableGradient &
-Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradient(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -975,9 +1012,9 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 }
 
 const VariableGradient &
-Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
@@ -988,9 +1025,9 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableGradient &
-Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
@@ -1001,9 +1038,9 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
 }
 
 const VariableGradient &
-Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
     return _default_gradient;
@@ -1015,9 +1052,9 @@ Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int
 }
 
 const VariableGradient &
-Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::GradientDot, FuncAge::Curr);
@@ -1028,9 +1065,9 @@ Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableGradient &
-Coupleable::coupledGradientDotDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGradientDotDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_gradient;
   checkFuncType(var_name, VarType::GradientDot, FuncAge::Curr);
@@ -1041,9 +1078,9 @@ Coupleable::coupledGradientDotDot(const std::string & var_name, unsigned int com
 }
 
 const VectorVariableGradient &
-Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1054,9 +1091,9 @@ Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int com
 }
 
 const VectorVariableGradient &
-Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
@@ -1067,9 +1104,9 @@ Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int 
 }
 
 const VectorVariableGradient &
-Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
@@ -1080,9 +1117,9 @@ Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned in
 }
 
 const ArrayVariableGradient &
-Coupleable::coupledArrayGradient(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayGradient(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1093,9 +1130,9 @@ Coupleable::coupledArrayGradient(const std::string & var_name, unsigned int comp
 }
 
 const ArrayVariableGradient &
-Coupleable::coupledArrayGradientOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayGradientOld(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
@@ -1106,9 +1143,9 @@ Coupleable::coupledArrayGradientOld(const std::string & var_name, unsigned int c
 }
 
 const ArrayVariableGradient &
-Coupleable::coupledArrayGradientOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledArrayGradientOlder(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (!var)
     return _default_array_gradient;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
@@ -1119,9 +1156,9 @@ Coupleable::coupledArrayGradientOlder(const std::string & var_name, unsigned int
 }
 
 const VectorVariableCurl &
-Coupleable::coupledCurl(const std::string & var_name, unsigned int comp)
+Coupleable::coupledCurl(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_curl;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1132,9 +1169,9 @@ Coupleable::coupledCurl(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableCurl &
-Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_curl;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Old);
@@ -1145,9 +1182,9 @@ Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp)
 }
 
 const VectorVariableCurl &
-Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return _default_vector_curl;
   checkFuncType(var_name, VarType::Gradient, FuncAge::Older);
@@ -1158,9 +1195,9 @@ Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp)
 }
 
 const VariableSecond &
-Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
+Coupleable::coupledSecond(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
   checkFuncType(var_name, VarType::Second, FuncAge::Curr);
@@ -1171,9 +1208,9 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 }
 
 const VariableSecond &
-Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
   checkFuncType(var_name, VarType::Second, FuncAge::Old);
@@ -1184,9 +1221,9 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableSecond &
-Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_second;
   checkFuncType(var_name, VarType::Second, FuncAge::Older);
@@ -1197,9 +1234,9 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 }
 
 const VariableSecond &
-Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int comp)
+Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   _c_fe_problem.needsPreviousNewtonIteration(true);
   if (!var)
     return _default_second;
@@ -1212,9 +1249,9 @@ Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int c
 
 template <typename T>
 const T &
-Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1232,9 +1269,9 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 
 template <typename T>
 const T &
-Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -1252,9 +1289,9 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
 
 template <typename T>
 const T &
-Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -1272,9 +1309,9 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 
 template <typename T>
 const T &
-Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return getDefaultNodalValue<T>(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1288,10 +1325,10 @@ Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned i
 
 template <typename T>
 const T &
-Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp) const
 {
   static const T zero = 0;
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
   if (!var)
     return zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -1302,9 +1339,9 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -1315,9 +1352,9 @@ Coupleable::coupledNodalDotDot(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledNodalDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalDotOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -1328,9 +1365,9 @@ Coupleable::coupledNodalDotOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return _default_value_zero;
   checkFuncType(var_name, VarType::Dot, FuncAge::Old);
@@ -1341,9 +1378,9 @@ Coupleable::coupledNodalDotDotOld(const std::string & var_name, unsigned int com
 }
 
 const VariableValue &
-Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1354,9 +1391,9 @@ Coupleable::coupledDofValues(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Old);
@@ -1367,9 +1404,9 @@ Coupleable::coupledDofValuesOld(const std::string & var_name, unsigned int comp)
 }
 
 const VariableValue &
-Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int comp)
+Coupleable::coupledDofValuesOlder(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Older);
@@ -1394,7 +1431,7 @@ Coupleable::validateExecutionerType(const std::string & name, const std::string 
 
 template <typename T>
 const typename Moose::ADType<T>::type &
-Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp) const
 {
   static const typename Moose::ADType<T>::type zero = 0;
   if (!isCoupled(var_name))
@@ -1410,16 +1447,15 @@ Coupleable::adCoupledNodalValue(const std::string & var_name, unsigned int comp)
     mooseError("If you're going to use an explicit scheme, then use coupledNodalValue instead of "
                "adCoupledNodalValue");
 
-  coupledCallback(var_name, false);
-  MooseVariableFE<T> * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableFE<T>>(var_name, comp);
 
   return var->adNodalValue();
 }
 
 const ADVariableValue &
-Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   if (!var)
     return *getADDefaultValue(var_name);
@@ -1436,9 +1472,9 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp)
 }
 
 const ADVariableGradient &
-Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   if (!var)
     return getADDefaultGradient();
@@ -1453,9 +1489,9 @@ Coupleable::adCoupledGradient(const std::string & var_name, unsigned int comp)
 }
 
 const ADVariableSecond &
-Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledSecond(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   if (!var)
     return getADDefaultSecond();
@@ -1478,9 +1514,9 @@ adCoupledVectorSecond(const std::string & /*var_name*/, unsigned int /*comp = 0*
 }
 
 const ADVariableValue &
-Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableField<Real> * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
 
   if (!var)
     return *getADDefaultValue(var_name);
@@ -1495,9 +1531,9 @@ Coupleable::adCoupledDot(const std::string & var_name, unsigned int comp)
 }
 
 const ADVectorVariableValue &
-Coupleable::adCoupledVectorDot(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledVectorDot(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return *getADDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Dot, FuncAge::Curr);
@@ -1511,9 +1547,9 @@ Coupleable::adCoupledVectorDot(const std::string & var_name, unsigned int comp)
 }
 
 const ADVectorVariableValue &
-Coupleable::adCoupledVectorValue(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledVectorValue(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return *getADDefaultVectorValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1529,9 +1565,9 @@ Coupleable::adCoupledVectorValue(const std::string & var_name, unsigned int comp
 }
 
 const ADVectorVariableGradient &
-Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int comp) const
 {
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (!var)
     return getADDefaultVectorGradient();
   checkFuncType(var_name, VarType::Gradient, FuncAge::Curr);
@@ -1544,8 +1580,8 @@ Coupleable::adCoupledVectorGradient(const std::string & var_name, unsigned int c
   return var->adGradSlnNeighbor();
 }
 
-ADVariableValue *
-Coupleable::getADDefaultValue(const std::string & var_name)
+const ADVariableValue *
+Coupleable::getADDefaultValue(const std::string & var_name) const
 {
   auto default_value_it = _ad_default_value.find(var_name);
   if (default_value_it == _ad_default_value.end())
@@ -1558,8 +1594,8 @@ Coupleable::getADDefaultValue(const std::string & var_name)
   return default_value_it->second.get();
 }
 
-ADVectorVariableValue *
-Coupleable::getADDefaultVectorValue(const std::string & var_name)
+const ADVectorVariableValue *
+Coupleable::getADDefaultVectorValue(const std::string & var_name) const
 {
   auto default_value_it = _ad_default_vector_value.find(var_name);
   if (default_value_it == _ad_default_vector_value.end())
@@ -1575,40 +1611,40 @@ Coupleable::getADDefaultVectorValue(const std::string & var_name)
   return default_value_it->second.get();
 }
 
-ADVariableGradient &
-Coupleable::getADDefaultGradient()
+const ADVariableGradient &
+Coupleable::getADDefaultGradient() const
 {
   return _ad_default_gradient;
 }
 
-ADVectorVariableGradient &
-Coupleable::getADDefaultVectorGradient()
+const ADVectorVariableGradient &
+Coupleable::getADDefaultVectorGradient() const
 {
   return _ad_default_vector_gradient;
 }
 
-ADVariableSecond &
-Coupleable::getADDefaultSecond()
+const ADVariableSecond &
+Coupleable::getADDefaultSecond() const
 {
   return _ad_default_second;
 }
 
 const ADVariableValue &
-Coupleable::adZeroValue()
+Coupleable::adZeroValue() const
 {
   mooseDeprecated("Method adZeroValue() is deprecated. Use '_ad_zero' instead.");
   return _ad_zero;
 }
 
 const ADVariableGradient &
-Coupleable::adZeroGradient()
+Coupleable::adZeroGradient() const
 {
   mooseDeprecated("Method adZeroGradient() is deprecated. Use '_ad_grad_zero' instead.");
   return _ad_grad_zero;
 }
 
 const ADVariableSecond &
-Coupleable::adZeroSecond()
+Coupleable::adZeroSecond() const
 {
   mooseDeprecated("Method adZeroSecond() is deprecated. Use '_ad_second_zero' instead.");
   return _ad_second_zero;
@@ -1672,32 +1708,35 @@ Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned 
 // Explicit instantiations
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,
-                                                             unsigned int comp);
+                                                             unsigned int comp) const;
 
 template const Real & Coupleable::coupledNodalValue<Real>(const std::string & var_name,
-                                                          unsigned int comp);
+                                                          unsigned int comp) const;
 template const ADReal & Coupleable::adCoupledNodalValue<Real>(const std::string & var_name,
-                                                              unsigned int comp);
+                                                              unsigned int comp) const;
 template const ADRealVectorValue &
-Coupleable::adCoupledNodalValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
+Coupleable::adCoupledNodalValue<RealVectorValue>(const std::string & var_name,
+                                                 unsigned int comp) const;
 
 template const RealVectorValue &
-Coupleable::coupledNodalValue<RealVectorValue>(const std::string & var_name, unsigned int comp);
+Coupleable::coupledNodalValue<RealVectorValue>(const std::string & var_name,
+                                               unsigned int comp) const;
 template const Real & Coupleable::coupledNodalValueOld<Real>(const std::string & var_name,
-                                                             unsigned int comp);
+                                                             unsigned int comp) const;
 template const RealVectorValue &
-Coupleable::coupledNodalValueOld<RealVectorValue>(const std::string & var_name, unsigned int comp);
+Coupleable::coupledNodalValueOld<RealVectorValue>(const std::string & var_name,
+                                                  unsigned int comp) const;
 template const Real & Coupleable::coupledNodalValueOlder<Real>(const std::string & var_name,
-                                                               unsigned int comp);
+                                                               unsigned int comp) const;
 template const RealVectorValue &
 Coupleable::coupledNodalValueOlder<RealVectorValue>(const std::string & var_name,
-                                                    unsigned int comp);
+                                                    unsigned int comp) const;
 template const Real & Coupleable::coupledNodalValuePreviousNL<Real>(const std::string & var_name,
-                                                                    unsigned int comp);
+                                                                    unsigned int comp) const;
 template const RealVectorValue &
 Coupleable::coupledNodalValuePreviousNL<RealVectorValue>(const std::string & var_name,
-                                                         unsigned int comp);
+                                                         unsigned int comp) const;
 template const Real & Coupleable::coupledNodalDot<Real>(const std::string & var_name,
-                                                        unsigned int comp);
+                                                        unsigned int comp) const;
 template const RealVectorValue &
-Coupleable::coupledNodalDot<RealVectorValue>(const std::string & var_name, unsigned int comp);
+Coupleable::coupledNodalDot<RealVectorValue>(const std::string & var_name, unsigned int comp) const;

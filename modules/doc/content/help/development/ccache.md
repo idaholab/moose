@@ -4,25 +4,25 @@
 
 ## Usage
 
-When using one of our [redistributable packages](getting_started/index.md), one must simply load an additional module to utilize ccache:
+In order to use ccache with MOOSE-based applications, it will be necessary to first build libMesh using ccache. This is due to the fact that each MOOSE-based application will ask libMesh how it was built, and in turn, use the same flags to build itself.
+
+In other words If you are using our Conda moose-libmesh package, then you cannot use ccache. In order to begin using ccache, first create a new conda environment, free of moose-libmesh, and install everything necessary to build libMesh with ccache:
 
 ```bash
-module load ccache
+conda create --name ccache-env moose-petsc moose-tools
+conda activate ccache-env
+export CC="ccache mpicc" CXX="ccache mpicxx"
 ```
 
-After loading this module you'll need to recompile libMesh using our `moose/scripts/update_and_rebuild_libmesh.sh` script. This script will detect the presence of ccache and append the appropriate configure arguments for you.  
-
-Using the ccache module is a "*once you use it, you always have to use it*" type of module. If you forget to load this module after already having used it to build libMesh, you will receive `ccache: command not found` failures when attempting to build MOOSE and MOOSE-based apps.  
-
-Our advice is to add this module to the list of modules that automatically get loaded when ever you open a new terminal. In order to do this add the `module load ccache` command to the end of your bash profile like so:
+Next, build libMesh:
 
 ```bash
-# Source MOOSE profile
-if [ -f /opt/moose/environments/moose_profile ]; then
-       . /opt/moose/environments/moose_profile
-fi
-module load ccache
+cd moose
+scripts/update_and_rebuild_libmesh.sh
 ```
+
+!alert note
+Because ccache is a conda-forge package as opposed to one controlled by the MOOSE development team, it will be necessary for you set your CC and CXX variables manually, each time you `conda activate ccache-env`.
 
 ## Using ccache
 

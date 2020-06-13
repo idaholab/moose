@@ -246,7 +246,7 @@ AuxKernelTempl<ComputeValueType>::getScatterVectorPostprocessorValueByName(
 
 template <typename ComputeValueType>
 void
-AuxKernelTempl<ComputeValueType>::coupledCallback(const std::string & var_name, bool is_old)
+AuxKernelTempl<ComputeValueType>::coupledCallback(const std::string & var_name, bool is_old) const
 {
   if (is_old)
   {
@@ -258,9 +258,9 @@ AuxKernelTempl<ComputeValueType>::coupledCallback(const std::string & var_name, 
 
 template <typename ComputeValueType>
 const VariableValue &
-AuxKernelTempl<ComputeValueType>::coupledDot(const std::string & var_name, unsigned int comp)
+AuxKernelTempl<ComputeValueType>::coupledDot(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariableFEBase * var = getVar(var_name, comp);
+  auto var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(
         name(),
@@ -271,9 +271,10 @@ AuxKernelTempl<ComputeValueType>::coupledDot(const std::string & var_name, unsig
 
 template <typename ComputeValueType>
 const VariableValue &
-AuxKernelTempl<ComputeValueType>::coupledDotDu(const std::string & var_name, unsigned int comp)
+AuxKernelTempl<ComputeValueType>::coupledDotDu(const std::string & var_name,
+                                               unsigned int comp) const
 {
-  MooseVariableFEBase * var = getVar(var_name, comp);
+  auto var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(
         name(),

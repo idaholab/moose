@@ -24,19 +24,58 @@ NeighborCoupleable::NeighborCoupleable(const MooseObject * moose_object,
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_neighbor_nodal)
     return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
   else
     return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
 }
 
-const VariableValue &
-NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsigned int comp)
+const ADVariableValue &
+NeighborCoupleable::adCoupledNeighborValue(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultValue(var_name);
+
+  if (_neighbor_nodal)
+    mooseError("adCoupledNeighborValue cannot be used for nodal compute objects at this time");
+  if (!_c_is_implicit)
+    mooseError("adCoupledNeighborValue returns a data structure with derivatives. Explicit schemes "
+               "use old solution data which do not have derivatives so adCoupledNeighborValue is "
+               "not appropriate. Please use coupledNeighborValue instead");
+
+  return var->adSlnNeighbor();
+}
+
+const ADVectorVariableValue &
+NeighborCoupleable::adCoupledVectorNeighborValue(const std::string & var_name,
+                                                 unsigned int comp) const
+{
+  auto var = getVarHelper<MooseVariableField<RealVectorValue>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultVectorValue(var_name);
+
+  if (_neighbor_nodal)
+    mooseError(
+        "adCoupledVectorNeighborValue cannot be used for nodal compute objects at this time");
+  if (!_c_is_implicit)
+    mooseError(
+        "adCoupledVectorNeighborValue returns a data structure with derivatives. Explicit schemes "
+        "use old solution data which do not have derivatives so adCoupledVectorNeighborValue is "
+        "not appropriate. Please use coupledNeighborValue instead");
+
+  return var->adSlnNeighbor();
+}
+
+const VariableValue &
+NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVar(var_name, comp);
   if (_neighbor_nodal)
     return var->dofValuesDotNeighbor();
   else
@@ -44,9 +83,9 @@ NeighborCoupleable::coupledNeighborValueDot(const std::string & var_name, unsign
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborValueDotDu(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborValueDotDu(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_neighbor_nodal)
     return var->dofValuesDuDotDuNeighbor();
   else
@@ -54,11 +93,11 @@ NeighborCoupleable::coupledNeighborValueDotDu(const std::string & var_name, unsi
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp) const
 {
   validateExecutionerType(var_name, "coupledNeighborValueOld");
 
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_neighbor_nodal)
     return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
   else
@@ -66,11 +105,11 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp) const
 {
   validateExecutionerType(var_name, "coupledNeighborValueOlder");
 
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_neighbor_nodal)
   {
     if (_c_is_implicit)
@@ -88,34 +127,36 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
 }
 
 const VariableGradient &
-NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborGradient(const std::string & var_name, unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
 const VariableGradient &
-NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name,
+                                               unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name, "coupledNeighborGradientOld");
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
 
 const VariableGradient &
-NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name,
+                                                 unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
   validateExecutionerType(var_name, "coupledNeighborGradientOlder");
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
@@ -123,36 +164,37 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
 }
 
 const VectorVariableGradient &
-NeighborCoupleable::coupledVectorNeighborGradient(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledVectorNeighborGradient(const std::string & var_name,
+                                                  unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
 const VectorVariableGradient &
 NeighborCoupleable::coupledVectorNeighborGradientOld(const std::string & var_name,
-                                                     unsigned int comp)
+                                                     unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
   validateExecutionerType(var_name, "coupledVectorNeighborGradientOld");
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
 
 const VectorVariableGradient &
 NeighborCoupleable::coupledVectorNeighborGradientOlder(const std::string & var_name,
-                                                       unsigned int comp)
+                                                       unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
   validateExecutionerType(var_name, "coupledVectorNeighborGradientOlder");
-  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  const auto * var = getVectorVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
@@ -160,9 +202,9 @@ NeighborCoupleable::coupledVectorNeighborGradientOlder(const std::string & var_n
 }
 
 const ArrayVariableValue &
-NeighborCoupleable::coupledArrayNeighborValue(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledArrayNeighborValue(const std::string & var_name, unsigned int comp) const
 {
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (_neighbor_nodal)
     return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
   else
@@ -170,35 +212,37 @@ NeighborCoupleable::coupledArrayNeighborValue(const std::string & var_name, unsi
 }
 
 const ArrayVariableGradient &
-NeighborCoupleable::coupledArrayNeighborGradient(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledArrayNeighborGradient(const std::string & var_name,
+                                                 unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
 const ArrayVariableGradient &
-NeighborCoupleable::coupledArrayNeighborGradientOld(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledArrayNeighborGradientOld(const std::string & var_name,
+                                                    unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
   validateExecutionerType(var_name, "coupledArrayNeighborGradientOld");
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
 
 const ArrayVariableGradient &
 NeighborCoupleable::coupledArrayNeighborGradientOlder(const std::string & var_name,
-                                                      unsigned int comp)
+                                                      unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Gradients are non-sensical with nodal compute objects");
 
   validateExecutionerType(var_name, "coupledArrayNeighborGradientOlder");
-  ArrayMooseVariable * var = getArrayVar(var_name, comp);
+  const auto * var = getArrayVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
   else
@@ -206,44 +250,46 @@ NeighborCoupleable::coupledArrayNeighborGradientOlder(const std::string & var_na
 }
 
 const VariableSecond &
-NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborSecond(const std::string & var_name, unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->secondSlnNeighbor() : var->secondSlnOldNeighbor();
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborDofValues(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborDofValues(const std::string & var_name, unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("nodal objects should not call coupledDofValues");
 
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborDofValuesOld(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborDofValuesOld(const std::string & var_name,
+                                                unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("nodal objects should not call coupledDofValuesOld");
 
   validateExecutionerType(var_name, "coupledNeighborDofValuesOld");
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
 }
 
 const VariableValue &
-NeighborCoupleable::coupledNeighborDofValuesOlder(const std::string & var_name, unsigned int comp)
+NeighborCoupleable::coupledNeighborDofValuesOlder(const std::string & var_name,
+                                                  unsigned int comp) const
 {
   if (_neighbor_nodal)
     mooseError("nodal objects should not call coupledDofValuesOlder");
 
   validateExecutionerType(var_name, "coupledNeighborDofValuesOlder");
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->dofValuesOlderNeighbor();
   else

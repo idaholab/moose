@@ -59,4 +59,11 @@
     ratio_tol = 1e-7
     difference_tol = 1e-5
   [../]
+  [global_index_derivative_map]
+    type = 'Exodiff'
+    input = 'ad_global_index_mapping.i'
+    exodiff = 'ad_global_index_mapping_out.e'
+    requirement = 'For a given dual number, the system shall be able to construct a map from global degree of freedom index to the corresponding derivative'
+    issues = '#15450'
+  []
 []
