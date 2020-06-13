@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#15321'
+  design = 'source/functions/PiecewiseLinear.md source/materials/PiecewiseLinearInterpolationMaterial.md'
+  [./controlled_piecewise]
+    type = 'Exodiff'
+    input = 'controlled_piecewise.i'
+    exodiff = 'controlled_piecewise_out.e'
+    requirement = "The system shall allow controlling piecewise functions and material properties."
+  [../]
+[]

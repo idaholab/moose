@@ -34,6 +34,7 @@ PiecewiseBase::validParams()
   params.addParam<MooseEnum>(
       "format", format, "Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.declareControllable("scale_factor");
   return params;
 }
 
