@@ -47,7 +47,7 @@ protected:
   ///@}
 
   /// function value scale factor
-  const Real _scale_factor;
+  const Real & _scale_factor;
 
   ///@{ if _has_axis is true point component to use as function argument, otherwise use t
   int _axis;
