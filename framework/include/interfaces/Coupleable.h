@@ -145,7 +145,7 @@ protected:
    */
   template <bool is_ad>
   const GenericVariableValue<is_ad> & coupledGenericValue(const std::string & var_name,
-                                                          unsigned int comp = 0);
+                                                          unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled lower-dimensional variable
@@ -154,7 +154,7 @@ protected:
    * @return Reference to a VariableValue for the coupled variable
    */
   virtual const VariableValue & coupledValueLower(const std::string & var_name,
-                                                  unsigned int comp = 0);
+                                                  unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled variable for use in Automatic Differentiation
@@ -170,7 +170,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a ADVariableValue for the coupled variable
    */
-  const ADVariableValue & adCoupledValueLower(const std::string & var_name, unsigned int comp = 0);
+  const ADVariableValue & adCoupledValueLower(const std::string & var_name,
+                                              unsigned int comp = 0) const;
 
   /**
    * Returns value of a coupled vector variable for use in Automatic Differentiation
@@ -344,7 +345,7 @@ protected:
    */
   template <bool is_ad>
   const GenericVariableGradient<is_ad> & coupledGenericGradient(const std::string & var_name,
-                                                                unsigned int comp = 0);
+                                                                unsigned int comp = 0) const;
 
   /**
    * Returns gradient of a coupled vector variable for use in Automatic Differentation

@@ -433,14 +433,14 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp) const
 
 template <>
 const GenericVariableValue<false> &
-Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp) const
 {
   return coupledValue(var_name, comp);
 }
 
 template <>
 const GenericVariableValue<true> &
-Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp) const
 {
   return adCoupledValue(var_name, comp);
 }
@@ -470,9 +470,9 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
 }
 
 const VariableValue &
-Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp)
+Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp) const
 {
-  MooseVariable * var = getVar(var_name, comp);
+  const auto * var = getVar(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
@@ -1490,7 +1490,7 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) cons
 }
 
 const ADVariableValue &
-Coupleable::adCoupledValueLower(const std::string & var_name, unsigned int comp)
+Coupleable::adCoupledValueLower(const std::string & var_name, unsigned int comp) const
 {
   auto var = getVarHelper<MooseVariableFE<Real>>(var_name, comp);
 
@@ -1730,14 +1730,14 @@ Coupleable::genericZeroSecond<true>()
 
 template <>
 const GenericVariableGradient<false> &
-Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp) const
 {
   return coupledGradient(var_name, comp);
 }
 
 template <>
 const GenericVariableGradient<true> &
-Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp) const
 {
   return adCoupledGradient(var_name, comp);
 }

@@ -1323,10 +1323,11 @@ public:
 
   // Displaced problem /////
   virtual void addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem);
-  virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() const
+  virtual std::shared_ptr<const DisplacedProblem> getDisplacedProblem() const
   {
     return _displaced_problem;
   }
+  virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
