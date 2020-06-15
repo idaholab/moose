@@ -4,6 +4,8 @@
 #include "Coupleable.h"
 #include "SubChannelMesh.h"
 
+class SinglePhaseFluidProperties;
+
 class SubChannelSolver : public GeneralUserObject, public Coupleable
 {
 public:
@@ -31,6 +33,8 @@ protected:
   Real _mflux_in;
   Real _T_in;
   Real _P_out;
+  /// Fluid properties user object
+  const SinglePhaseFluidProperties & _fp;
 
 public:
   static InputParameters validParams();

@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include "SubChannelSolver.h"
-#include "iapws.h"
+#include "SinglePhaseFluidProperties.h"
 #include "SolutionHandle.h"
 
 using namespace Eigen;
@@ -31,6 +31,7 @@ SubChannelSolver::validParams()
   params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
   params.addParam<Real>("T_in", 566.3, "Inlet coolant temperature in [K]");
   params.addRequiredParam<Real>("P_out", "Outlet coolant pressure in [Pa]");
+  params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
 
@@ -52,7 +53,8 @@ SubChannelSolver::SubChannelSolver(const InputParameters & params)
     _q_prime_var(*getFieldVar("q_prime", 0)),
     _mflux_in(getParam<Real>("mflux_in")),
     _T_in(getParam<Real>("T_in")),
-    _P_out(getParam<Real>("P_out"))
+    _P_out(getParam<Real>("P_out")),
+    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
 
@@ -97,11 +99,11 @@ SubChannelSolver::execute()
         // creates node
         auto * node = _mesh->nodes_[i_ch][iz];
         // Initial enthalpy same everywhere
-        h_soln.set(node, iapws::h1(_P_out * 1e-6, _T_in) * 1e3);
+        h_soln.set(node, _fp.h_from_p_T(_P_out, _T_in));
         T_soln.set(node, _T_in);
         P_soln.set(node, _P_out);
-        // Initial Density is the same everywhere
-        rho_soln.set(node, 1.0 / iapws::nu1(_P_out * 1e-6, _T_in));
+        // Initial density is the same everywhere
+        rho_soln.set(node, _fp.rho_from_p_T(_P_out, _T_in));
         SumWij_soln.set(node, 0.0);
         SumWijh_soln.set(node, 0.0);
         SumWijPrimeDhij_soln.set(node, 0.0);
@@ -246,7 +248,7 @@ SubChannelSolver::execute()
             auto Mass_Term = (Mass_Termi + Mass_Termj) * 2 * Sij / dz; // (kg/sec)^2
             auto Pressure_Term =
                 std::pow(Sij, 2) * std::abs(P_soln(node_in_i) - P_soln(node_in_j)) * rho_bar;
-            auto mu = iapws::mu((T_i + T_j) / 2, rho_bar / 2);
+            auto mu = _fp.mu_from_rho_T(rho_bar / 2, (T_i + T_j) / 2);
             double a;
             double b;
 
@@ -376,8 +378,8 @@ SubChannelSolver::execute()
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
                           q_prime_soln(node_out) * dz);
-            auto T_out = iapws::T_from_p_h(P_soln(node_out) * 1e-6, h_out * 1e-3);
-            auto rho_out = 1.0 / iapws::nu1(P_soln(node_out) * 1e-6, T_out);
+            auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
+            auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
             // Update the solution vectors.
             mdot_soln.set(node_out, mdot_out); // kg/sec
@@ -435,7 +437,7 @@ SubChannelSolver::execute()
             counter++;
           }
 
-          auto mu = iapws::mu(T_i, rho_i);
+          auto mu = _fp.mu_from_rho_T(rho_i, T_i);
           auto Re = ((mdot_soln(node_in) / Si) * Dh_i / mu);
           auto fi = 0.184 * std::pow(Re, -0.2);
           auto Friction = (fi * dz / Dh_i) * 0.5 * (std::pow(mdot_soln(node_in), 2)) /
