@@ -28,7 +28,7 @@ SubChannelSolver::validParams()
   params.addRequiredCoupledVar("cross_flow_area", "");
   params.addRequiredCoupledVar("wetted_perimeter", "");
   params.addRequiredCoupledVar("q_prime", "linear heat rate");
-  params.addParam<Real>("mflux_in", 1.0, "Inlet coolant mass flux [10^6 kg/m^2 hr]");
+  params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
   params.addParam<Real>("T_in", 566.3, "Inlet coolant temperature in [K]");
   params.addParam<Real>("P_out", 15.51, "Outlet coolant pressure in [MPa]");
   return params;
@@ -106,7 +106,7 @@ SubChannelSolver::execute()
         SumWijh_soln.set(node, 0.0);
         SumWijPrimeDhij_soln.set(node, 0.0);
         SumWijPrimeDUij_soln.set(node, 0.0);
-        mdot_soln.set(node, 1e+6 * _mflux_in * S_flow_soln(node) / 3600); // kg/sec
+        mdot_soln.set(node, _mflux_in * S_flow_soln(node)); // kg/sec
         P_soln.set(node, _P_out);
       }
     }
@@ -167,11 +167,11 @@ SubChannelSolver::execute()
   P_global_old *= _P_out;
   mdot.setOnes();
   // flow profile same as the inlet on all axial levels
-  mdot *= 1e+6 * _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]) / 3600;
+  mdot *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
   mdot_old.setOnes();
-  mdot_old *= 1e+6 * _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]) / 3600;
+  mdot_old *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
   mdot_global.setOnes();
-  mdot_global *= 1e+6 * _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]) / 3600;
+  mdot_global *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
   // _mesh->nz_ + 1
 
   for (int axial_level = 1; axial_level < _mesh->nz_ + 1; axial_level++) // nz level calculations

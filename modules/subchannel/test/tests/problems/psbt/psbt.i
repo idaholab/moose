@@ -57,7 +57,7 @@
     q_prime = q_prime
     T_in = 359.15 # K
     P_out = 4.923 # MPa
-    mflux_in = 17.00 # 10^6 kg/m^2 Hr
+    mflux_in = ${fparse 1e+6 * 17.00 / 3600.}
   []
 []
 
