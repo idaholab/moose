@@ -97,7 +97,7 @@ SubChannelSolver::execute()
         // creates node
         auto * node = _mesh->nodes_[i_ch][iz];
         // Initial enthalpy same everywhere
-        h_soln.set(node, iapws::h1(_P_out * 1e-6, _T_in));
+        h_soln.set(node, iapws::h1(_P_out * 1e-6, _T_in) * 1e3);
         T_soln.set(node, _T_in);
         P_soln.set(node, _P_out);
         // Initial Density is the same everywhere
@@ -352,9 +352,9 @@ SubChannelSolver::execute()
             SumSumWij += SumWij;
             // The total crossflow coming out of cell i [kg/sec]
             SumWij_soln.set(node_out, SumWij);
-            // The total enthalpy crossflow coming out of cell i [kJ/sec]
+            // The total enthalpy crossflow coming out of cell i [J/sec]
             SumWijh_soln.set(node_out, SumWijh);
-            // The total turbulent enthalpy crossflow coming out of cell i [kJ/sec]
+            // The total turbulent enthalpy crossflow coming out of cell i [J/sec]
             SumWijPrimeDhij_soln.set(node_out, SumWijPrimeDhij);
             // The total turbulent velocity crossflow coming out of cell i [kg m/sec^2]
             SumWijPrimeDUij_soln.set(node_out, SumWijPrimeDUij);
@@ -369,19 +369,19 @@ SubChannelSolver::execute()
             auto * node_out = _mesh->nodes_[i_ch][iz];
             // Copy the variables at the inlet (bottom) of this element.
             auto mdot_in = mdot_soln(node_in);
-            auto h_in = h_soln(node_in); // kj/kg
+            auto h_in = h_soln(node_in); // J/kg
 
             // Wij positive out of i into j;
             auto mdot_out = mdot_in - SumWij_soln(node_out);
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
-                          q_prime_soln(node_out) * dz * 1e-3); //
-            auto T_out = iapws::T_from_p_h(P_soln(node_out) * 1e-6, h_out);
+                          q_prime_soln(node_out) * dz);
+            auto T_out = iapws::T_from_p_h(P_soln(node_out) * 1e-6, h_out * 1e-3);
             auto rho_out = 1.0 / iapws::nu1(P_soln(node_out) * 1e-6, T_out);
 
             // Update the solution vectors.
             mdot_soln.set(node_out, mdot_out); // kg/sec
-            h_soln.set(node_out, h_out);       // kj/kg
+            h_soln.set(node_out, h_out);       // J/kg
             T_soln.set(node_out, T_out);       // Kelvin
             rho_soln.set(node_out, rho_out);   // Kg/m3 (This line couples density)
             mdot(i_ch) = mdot_out;
@@ -479,9 +479,9 @@ SubChannelSolver::execute()
     rho_in(i, j) = rho_soln(node_in);      // Kg/m3
     rho_out(i, j) = rho_soln(node_out);    // Kg/m3
     Pressure_out(i, j) = P_soln(node_out); // Pa
-    Enthalpy_out(i, j) = h_soln(node_out); // Kj/kg
+    Enthalpy_out(i, j) = h_soln(node_out); // J/kg
     Pressure_in(i, j) = P_soln(node_in);   // Pa
-    Enthalpy_in(i, j) = h_soln(node_in);   // Kj/kg
+    Enthalpy_in(i, j) = h_soln(node_in);   // J/kg
     mdotin(i, j) = mdot_soln(node_in);     // Kg/sec
     mdotout(i, j) = mdot_soln(node_out);   // Kg/sec
     Area(i, j) = S_flow_soln(node_in);
