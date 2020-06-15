@@ -28,6 +28,12 @@ ArbitraryQuadrature::setPoints(const std::vector<Point> & points)
 }
 
 void
+ArbitraryQuadrature::setWeights(const std::vector<Real> & weights)
+{
+  _weights = weights;
+}
+
+void
 ArbitraryQuadrature::init_1D(const ElemType _type, unsigned int p_level)
 {
   this->_type = _type;

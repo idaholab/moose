@@ -458,6 +458,16 @@ public:
    */
   void setFaceQRule(QBase * qrule, unsigned int dim);
 
+private:
+  /**
+   * Set the qrule to be used for lower dimensional integration.
+   *
+   * @param qrule The qrule you want to set
+   * @param dim The spatial dimension of the qrule
+   */
+  void setLowerQRule(QBase * qrule, unsigned int dim);
+
+public:
   /**
    * Set the qrule to be used for neighbor integration.
    *
@@ -1809,6 +1819,15 @@ private:
   /// A pointer to const qrule_msm
   const QBase * _const_qrule_msm;
 
+private:
+  /// quadrature rule used on lower dimensional elements. This should always be
+  /// the same as the face qrule
+  const QBase * _const_current_qrule_lower;
+  /// quadrature rule used on lower dimensional elements. This should always be
+  /// the same as the face qrule
+  QBase * _current_qrule_lower;
+
+protected:
   /// The current "element" we are currently on.
   const Elem * _current_elem;
   /// The current subdomain ID
