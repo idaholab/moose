@@ -303,7 +303,7 @@ void
 ThreadedElementLoopBase<RangeType>::preBoundary(const Elem * /*elem*/,
                                                 unsigned int /*side*/,
                                                 BoundaryID /*bnd_id*/,
-                                                const Elem * /* nullptr*/)
+                                                const Elem * /*lower_d_elem = nullptr*/)
 {
 }
 
@@ -312,7 +312,7 @@ void
 ThreadedElementLoopBase<RangeType>::onBoundary(const Elem * /*elem*/,
                                                unsigned int /*side*/,
                                                BoundaryID /*bnd_id*/,
-                                               const Elem * /*=nullptr*/)
+                                               const Elem * /*lower_d_elem = nullptr*/)
 {
 }
 
