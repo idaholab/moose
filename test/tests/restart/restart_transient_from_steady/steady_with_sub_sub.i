@@ -49,7 +49,6 @@
   start_time = 0
   end_time = 10
   dt = 1.0
-  # steady_state_detection = true
 
   nl_abs_tol = 1e-7
   nl_rel_tol = 1e-7
@@ -73,5 +72,4 @@
   exodus = true
   color = true
   csv = true
-  checkpoint = true
 []

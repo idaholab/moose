@@ -3,11 +3,11 @@
   dim = 2
   nx = 10
   ny = 10
+  parallel_type = 'replicated'
 []
 
 [Problem]
-  restart_file_base = steady_with_sub_out_cp/LATEST
-  skip_additional_restart_data = true
+  restart_file_base = pseudo_trans_with_2subs_out_cp/LATEST
 []
 
 [AuxVariables]
@@ -50,7 +50,7 @@
     type = DirichletBC
     variable = power_density
     boundary = left
-    value = 0
+    value = 50
   []
   [right]
     type = DirichletBC
@@ -99,11 +99,7 @@
   petsc_options_value = 'hypre boomeramg 100'
 
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-7
-
-  picard_rel_tol = 1e-7
-  picard_abs_tol = 1e-07
-  picard_max_its = 4
+  nl_rel_tol = 1e-12
 
   line_search = none
 []
@@ -112,15 +108,16 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '0 0 0'
-    input_files  = restart_trans_with_sub_sub.i
+    positions = '0   0 0
+                 0.5 0 0'
+    input_files  = restart_trans_with_2subs_sub.i
     execute_on = 'timestep_end'
   [../]
 []
 
 [Transfers]
   [p_to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppProjectionTransfer
     direction = to_multiapp
     source_variable = power_density
     variable = power_density
@@ -128,7 +125,7 @@
     execute_on = 'timestep_end'
   []
   [t_from_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     source_variable = temp
     variable = Tf

@@ -3,11 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-[]
-
-[Problem]
-  restart_file_base = steady_with_sub_out_cp/LATEST
-  skip_additional_restart_data = true
+  parallel_type = 'replicated'
 []
 
 [AuxVariables]
@@ -23,16 +19,11 @@
 [Functions]
   [pwr_func]
     type = ParsedFunction
-    value = '1e3*x*(1-x)+5e2' # increase this function to drive transient
+    value = '1e3*x*(1-x)+5e2'
   []
 []
 
 [Kernels]
-  [timedt]
-    type = TimeDerivative
-    variable = power_density
-  []
-
   [diff]
     type = Diffusion
     variable = power_density
@@ -50,7 +41,7 @@
     type = DirichletBC
     variable = power_density
     boundary = left
-    value = 0
+    value = 50
   []
   [right]
     type = DirichletBC
@@ -63,64 +54,55 @@
 [Postprocessors]
   [pwr_avg]
     type = ElementAverageValue
-    block = '0'
     variable = power_density
     execute_on = 'initial timestep_end'
   []
   [temp_avg]
     type = ElementAverageValue
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
   [temp_max]
     type = ElementExtremeValue
     value_type = max
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
   [temp_min]
     type = ElementExtremeValue
     value_type = min
     variable = Tf
-    block = '0'
-    execute_on = 'initial timestep_end'
+    execute_on = 'initial final'
   []
 []
 
 [Executioner]
-  type = Transient
-  start_time = 0
-  end_time = 3
-  dt = 1.0
-
+  type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
 
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 1e-12
 
-  picard_rel_tol = 1e-7
-  picard_abs_tol = 1e-07
-  picard_max_its = 4
-
-  line_search = none
+  picard_rel_tol = 1E-7
+  picard_abs_tol = 1.0e-07
+  picard_max_its = 12
 []
 
 [MultiApps]
-  [./sub]
-    type = TransientMultiApp
+  [sub]
+    type = FullSolveMultiApp
     app_type = MooseTestApp
-    positions = '0 0 0'
-    input_files  = restart_trans_with_sub_sub.i
+    positions = '0   0 0
+                 0.5 0 0'
+    input_files  = steady_with_sub_sub.i
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Transfers]
   [p_to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppProjectionTransfer
     direction = to_multiapp
     source_variable = power_density
     variable = power_density
@@ -128,7 +110,7 @@
     execute_on = 'timestep_end'
   []
   [t_from_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppInterpolationTransfer
     direction = from_multiapp
     source_variable = temp
     variable = Tf
@@ -141,4 +123,6 @@
   exodus = true
   csv = true
   perf_graph = true
+  checkpoint = true
+  execute_on = 'INITIAL TIMESTEP_END FINAL'
 []
