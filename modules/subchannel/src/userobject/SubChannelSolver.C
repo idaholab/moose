@@ -27,7 +27,7 @@ SubChannelSolver::validParams()
   params.addRequiredCoupledVar("flow_area", "");
   params.addRequiredCoupledVar("cross_flow_area", "");
   params.addRequiredCoupledVar("wetted_perimeter", "");
-  params.addRequiredCoupledVar("q_prime", "linear heat rate");
+  params.addRequiredCoupledVar("q_prime", "linear heat rate [W/m]");
   params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
   params.addParam<Real>("T_in", 566.3, "Inlet coolant temperature in [K]");
   params.addRequiredParam<Real>("P_out", "Outlet coolant pressure in [Pa]");
@@ -375,7 +375,7 @@ SubChannelSolver::execute()
             auto mdot_out = mdot_in - SumWij_soln(node_out);
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
-                          q_prime_soln(node_out) * dz); //
+                          q_prime_soln(node_out) * dz * 1e-3); //
             auto T_out = iapws::T_from_p_h(P_soln(node_out) * 1e-6, h_out);
             auto rho_out = 1.0 / iapws::nu1(P_soln(node_out) * 1e-6, T_out);
 

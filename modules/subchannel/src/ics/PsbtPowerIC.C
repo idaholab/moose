@@ -9,7 +9,7 @@ InputParameters
 PsbtPowerIC::validParams()
 {
   InputParameters params = PsbtIC::validParams();
-  params.addParam<Real>("power", 413.0, " [MW]");
+  params.addRequiredParam<Real>("power", "[W]");
   params.addParam<std::string>("filename", 413.0, "Location of power profile txt file");
   return params;
 }
@@ -57,12 +57,12 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   power_dis.resize(_mesh->ny_ - 1, _mesh->nx_ - 1);
   auto sum = power_dis.sum();
 
-  auto fpin_power = power / sum;           // MW
-  auto ref_power = power_dis * fpin_power; // MW
+  auto fpin_power = power / sum;           // W
+  auto ref_power = power_dis * fpin_power; // W
 
   // Convert the reference power to a linear heat rate.
   Real heated_length = _mesh->heated_length_;     // in m
-  _ref_qprime = 1e+3 * ref_power / heated_length; // in KW/m
+  _ref_qprime = ref_power / heated_length; // in W/m
 }
 
 Real

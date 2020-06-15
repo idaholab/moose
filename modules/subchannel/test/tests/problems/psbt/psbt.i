@@ -73,7 +73,7 @@
   [q_prime_IC]
     type = PsbtPowerIC
     variable = q_prime
-    power = 3.44 #MW
+    power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
   []
 []
