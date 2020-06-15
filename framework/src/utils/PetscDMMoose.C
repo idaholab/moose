@@ -1796,7 +1796,7 @@ DMSetUp_Moose_Pre(DM dm)
           dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
               cpair.first, cpair.second);
         else
-          dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {
@@ -1824,7 +1824,7 @@ DMSetUp_Moose_Pre(DM dm)
           dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(
               cpair.first, cpair.second);
         else
-          dmm->_nl->_fe_problem.geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
+          dmm->_nl->_fe_problem.getDisplacedProblem()->geomSearchData().getPenetrationLocator(cpair.first, cpair.second);
       }
       catch (...)
       {

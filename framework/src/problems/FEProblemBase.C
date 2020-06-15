@@ -4848,11 +4848,6 @@ FEProblemBase::solve()
     _is_petsc_options_inserted = true;
   }
 #endif
-  // set up DM which is required if use a field split preconditioner
-  // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
-  // Do not worry, DM setup is very cheap
-  if (_nl->haveFieldSplitPreconditioner())
-    Moose::PetscSupport::petscSetupDM(*_nl);
 #endif
 
   Moose::setSolverDefaults(*this);
@@ -4866,6 +4861,12 @@ FEProblemBase::solve()
   // the old converged reason "DIVERGED_NANORINF", when
   // we throw  an exception and stop solve
   _fail_next_linear_convergence_check = false;
+
+  // set up DM which is required if use a field split preconditioner
+  // We need to setup DM every "solve()" because libMesh destroy SNES after solve()
+  // Do not worry, DM setup is very cheap
+  if (_nl->haveFieldSplitPreconditioner())
+    Moose::PetscSupport::petscSetupDM(*_nl);
 
   if (_solve)
     _nl->solve();
