@@ -38,6 +38,14 @@
   []
 []
 
+[Modules]
+  [FluidProperties]
+    [water]
+      type = Water97FluidProperties
+    []
+  []
+[]
+
 [UserObjects]
   [subchannel_solver]
     type = SubChannelSolver
@@ -58,6 +66,7 @@
     T_in = 359.15 # K
     P_out = 4.923e6 # Pa
     mflux_in = ${fparse 1e+6 * 17.00 / 3600.}
+    fp = water
   []
 []
 
