@@ -29,7 +29,7 @@ protected:
 
 private:
 
-  const std::vector<Real> & _length_factor;
+  //const std::vector<Real> & _length_factor;
 
   ///
   const DenseMatrix<Real> & _parameter_mat;
@@ -44,27 +44,15 @@ private:
   const DenseMatrix<Real> & _training_variance;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  const DenseMatrix<Real> & _covariance_mat;
+  const DenseMatrix<Real> & _K;
 
   /// A solve of Ax=b via Cholesky.
-  const DenseMatrix<Real> & _covariance_results_solve;
+  const DenseMatrix<Real> & _K_results_solve;
 
   ///
-  const DenseMatrix<Real> & _covariance_mat_cho_decomp;
+  const DenseMatrix<Real> & _K_cho_decomp;
 
-  // unsigned int _n_params;
-  // unsigned int _num_samples ;
-  // //Support could be added for evaluating multiple test points at once, but just set this =1 for now
-  // unsigned int _num_tests;
-  //
-  // /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  // DenseMatrix<Real> _covariance_mat;
-  //
-  // /// A solve of Ax=b via Cholesky.
-  // DenseMatrix<Real> _covariance_results_solve;
-  //
-  // ///
-  // DenseMatrix<Real> _covariance_mat_cho_decomp;
-
+  ///
+  const std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 
 };

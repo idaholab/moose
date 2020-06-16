@@ -25,14 +25,15 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
   _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points")),
   //_length_factor(getParam<std::vector<Real>>("length_factor")),
-  _length_factor(getModelData<std::vector<Real> >("_length_factor")),
+  //_length_factor(getModelData<std::vector<Real> >("_length_factor")),
   _parameter_mat(getModelData<DenseMatrix<Real> >("_parameter_mat")),
   _training_results(getModelData<DenseMatrix<Real> >("_training_results")),
   _training_mean(getModelData<DenseMatrix<Real> >("_training_mean")),
   _training_variance(getModelData<DenseMatrix<Real> >("_training_variance")),
-  _covariance_mat(getModelData<DenseMatrix<Real> >("_covariance_mat")),
-  _covariance_results_solve(getModelData<DenseMatrix<Real> >("_covariance_results_solve")),
-  _covariance_mat_cho_decomp(getModelData<DenseMatrix<Real> >("_covariance_mat_cho_decomp"))
+  _K(getModelData<DenseMatrix<Real> >("_K")),
+  _K_results_solve(getModelData<DenseMatrix<Real> >("_K_results_solve")),
+  _K_cho_decomp(getModelData<DenseMatrix<Real> >("_K_cho_decomp")),
+  _covar_function(getModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel> >("_covar_function"))
 {
    std::cout << "In Constructor" << '\n';
      _parameter_mat.print();
@@ -91,55 +92,74 @@ Real
 GaussianProcess::evaluate(const std::vector<Real> & x, Real* std_dev) const
 {
   unsigned int _n_params = _parameter_mat.n();
-  unsigned int _num_samples = _parameter_mat.m();
+  //unsigned int _num_samples = _parameter_mat.m();
   unsigned int _num_tests=1;
 
+  //assert x.size() == _n_params
+
    //BEGIN UNIQUE SOLVE
-   std::cout << "In evaluate!" << '\n';
-   _parameter_mat.print();
+   //std::cout << "In evaluate!" << '\n';
+   //_parameter_mat.print();
 
-  DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
-  DenseMatrix<Real> K_test(_num_tests,_num_tests);
+   DenseMatrix<Real> test_points(_num_tests,_n_params);
+   for (unsigned int ii=0; ii<_n_params; ii++){
+     test_points(0,ii)=x.at(ii);}
 
-  //Load Kernel matrix section consisting of training--testing covariance values
-  for (unsigned int ii=0; ii<_num_samples; ii++){
-    for (unsigned int jj=0; jj<_num_tests; jj++){
-      Real cov =0;
-      for (unsigned int kk=0; kk<_n_params; kk++){
-        cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (std::pow(_length_factor.at(kk),2));
-      }
-      cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
-      K_train_test(ii,jj) = cov;
-      }
-  }
 
-  //Load Kernel matrix section for testing--testing covariance values
-  //When num_tests==1 this sinple produces a 1x1 matrix (a scalar), but useful to have this in
-  //a matrix object for math
-  for (unsigned int ii=0; ii<_num_tests; ii++){
-    for (unsigned int jj=0; jj<_num_tests; jj++){
-      Real cov =0;
-      for (unsigned int kk=0; kk<_n_params; kk++){
-        cov +=  std::pow(( x.at(kk)-  x.at(kk)),2) / (std::pow(_length_factor.at(kk),2));
-      }
-      cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
-      K_test(ii,jj) = cov;
-      }
-  }
+  // DenseMatrix<Real> K_train_test(_num_samples,_num_tests);
+  // DenseMatrix<Real> K_test(_num_tests,_num_tests);
+
+  DenseMatrix<Real> K_train_test = _covar_function->compute_matrix(_parameter_mat,test_points);
+  DenseMatrix<Real> K_test = _covar_function->compute_matrix(test_points,test_points);
+
+  // //Load Kernel matrix section consisting of training--testing covariance values
+  // for (unsigned int ii=0; ii<_num_samples; ii++){
+  //   for (unsigned int jj=0; jj<_num_tests; jj++){
+  //     Real cov =0;
+  //     for (unsigned int kk=0; kk<_n_params; kk++){
+  //       cov +=  std::pow(( _parameter_mat(ii,kk)-  x.at(kk)),2) / (std::pow(_length_factor.at(kk),2));
+  //     }
+  //     cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
+  //     K_train_test(ii,jj) = cov;
+  //     }
+  // }
+  //
+  // //Load Kernel matrix section for testing--testing covariance values
+  // //When num_tests==1 this sinple produces a 1x1 matrix (a scalar), but useful to have this in
+  // //a matrix object for math
+  // for (unsigned int ii=0; ii<_num_tests; ii++){
+  //   for (unsigned int jj=0; jj<_num_tests; jj++){
+  //     Real cov =0;
+  //     for (unsigned int kk=0; kk<_n_params; kk++){
+  //       cov +=  std::pow(( x.at(kk)-  x.at(kk)),2) / (std::pow(_length_factor.at(kk),2));
+  //     }
+  //     cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
+  //     K_test(ii,jj) = cov;
+  //     }
+  // }
 
   //Compute the predicted mean value (centered)
-  DenseMatrix<Real> test_pred(_covariance_results_solve);
+  DenseMatrix<Real> test_pred(_K_results_solve);
   test_pred.left_multiply_transpose(K_train_test);
   //De-center the value and store for return
   Real mean_value = test_pred(0,0) + _training_mean(0,0);
 
   //Compute standard deviation
-  DenseMatrix<Real> test_std = GaussianProcessTrainer::cholesky_back_substitute(_covariance_mat_cho_decomp, K_train_test);
+  DenseMatrix<Real> test_std = GaussianProcessTrainer::cholesky_back_substitute(_K_cho_decomp, K_train_test);
   test_std.left_multiply_transpose(K_train_test);
   test_std.scale(-1);
   test_std += K_test;
   //Vairance computed, take sqrt for standard deviation and store
   *std_dev=std::sqrt(test_std(0,0));
+
+  // std::cout << "Params" << '\n';
+  //  _parameter_mat.print();
+  //  std::cout << "Training results"<< '\n';
+  //  _training_results.print();
+  //  std::cout << "K" << '\n';
+  //   _K.print();
+  //   std::cout << "training_mean "<< _training_mean(0,0) <<'\n';
+  //   std::cout << "training_var "<< _training_variance(0,0) <<'\n';
 
   return mean_value;
 }
