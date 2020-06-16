@@ -8,7 +8,7 @@
 class SolutionHandle
 {
 public:
-  SolutionHandle(MooseVariableFEBase & variable) : _var(variable), _soln(variable.sys().solution())
+  SolutionHandle(const MooseVariableFieldBase & variable) : _var(const_cast<MooseVariableFieldBase &>(variable)), _soln(_var.sys().solution())
   {
   }
 
@@ -34,6 +34,6 @@ public:
   }
 
 private:
-  MooseVariableFEBase & _var;
+  MooseVariableFieldBase & _var;
   NumericVector<Number> & _soln;
 };
