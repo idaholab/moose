@@ -27,9 +27,16 @@ public:
 
   virtual void finalize() override;
 
-  void addSnapshot(NumericVector<Number>& new_vector);
+  void addSnapshot(std::unique_ptr<NumericVector<Number>> new_vector);
 
 protected:
+
+  void computeEigenDecomposition();
+
+  void computeCorrelationMatrix();
+
+  void computeBasisVectors();
+
   /// The snapshots contained for this problem
   std::vector<std::unique_ptr<NumericVector<Number>>> _solution_vectors;
 
@@ -44,6 +51,9 @@ protected:
 
   /// Matirx containing the eigenvectors of the correlation matrix
   DenseMatrix<Real> _eigenvectors;
+
+  /// Pointer to a multi-app
+  std::shared_ptr<MultiApp> _multi_app; 
 
 private:
 
