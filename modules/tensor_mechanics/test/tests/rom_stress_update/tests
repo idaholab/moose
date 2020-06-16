@@ -77,7 +77,7 @@
       type = 'CSVDiff'
       input = lower_limit.i
       csvdiff = extrapolated_out.csv
-      cli_args = 'temp=600 Outputs/file_base=extrapolated_out'
+      cli_args = 'temp=500 disp=0.5e6 Outputs/file_base=extrapolated_out'
       allow_test_objects = true
       detail = 'below the lower temperature limit and extrapolate correctly.'
     [../]
