@@ -347,7 +347,7 @@ class RenderContentOutline(components.RenderComponent):
         elif token['pages']: # should I even check? It would have to be pages option at this point
             nodes = [self.translator.findPage(p) for p in token['pages']]
 
-        div = html.Tag(parent, 'div', class_='moose-outline')
+        ul = html.Tag(parent, 'ul', class_='moose-outline')
         for node in nodes:
             pageref = str(node.relativeDestination(page))
 
@@ -356,12 +356,38 @@ class RenderContentOutline(components.RenderComponent):
             # can we fix this?
             for k, v in node['headings'].items():
                 if v['level'] in token['levels'] and k not in token['hide']:
+                    classref = 'moose-outline-{}'.format(v['level'])
+
+                    if v['level'] is 1:
+                        ol1 = html.Tag(ul, 'ol', class_=classref)
+                        li = html.Tag(ol1, 'li')
+                    elif v['level'] is 2:
+                        ol2 = html.Tag(ol1, 'ol', class_=classref)
+                        li = html.Tag(ol2, 'li')
+                    elif v['level'] is 3:
+                        ol3 = html.Tag(ol2, 'ol', class_=classref)
+                        li = html.Tag(ol3, 'li')
+                    elif v['level'] is 4:
+                        ol4 = html.Tag(ol3, 'ol', class_=classref)
+                        li = html.Tag(ol4, 'li')
+                    elif v['level'] is 5:
+                        ol5 = html.Tag(ol4, 'ol', class_=classref)
+                        li = html.Tag(ol5, 'li')
+                    elif v['level'] is 6:
+                        ol6 = html.Tag(ol5, 'ol', class_=classref)
+                        li = html.Tag(ol6, 'li')
+                    # else: error? is this even possible?
+
                     url = pageref + '#{}'.format(k)
                     head = heading.find_heading(node, k)
                     link = core.Link(None, url=url)
                     head.copyToToken(link)
-                    core.LineBreak(link)
-                    self.renderer.render(div, link, page)
+                    self.renderer.render(li, link, page)
+
+            # There is a hidden bug here... if someone creates a level 4 heading, but no
+            # level 3 heading has yet been generated, then that ol tag doesn't exist yet...
+            # But to be fair, why would anyone follow a level 1 or 2 heading by a level 4?
+            # To be even more fair, I'm probably the only one who is going to use this.
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):

@@ -24,9 +24,9 @@ The following is a list of markdown pages within the "extensions" directory.
 
 ## Outline Pages id=outline-pages
 
-The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in the order in which they appear on the [main index page](/).
+The following is a list of all headings in the "extensions" directory, except this section's heading, in the order in which they appear on the [main index page](/).
 
-!content outline levels=1 2
+!content outline levels=1 2 3 4 5 6
                  hide=outline-pages
                  pages=core.md
                        autolink.md
