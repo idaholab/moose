@@ -18,6 +18,8 @@ You will have successfully activated the moose environment when you see 'moose' 
 
 If you close, and re-open this terminal window, know that you will need to `conda activate moose` again. You will need to do this for each terminal you open. If you wish to make this automatic, you may append `conda activate moose` to your bash or zsh profiles.
 
+## Keeping Conda up to date
+
 The MOOSE team will make periodic updates to the conda packages. To stay up-to-date, activate the moose environment, and perform an update:
 
 ```bash
@@ -25,5 +27,5 @@ conda activate moose
 conda update --all
 ```
 
-!alert note title= sudo is not necessary
-If you find yourself applying the use of `sudo` for any of the above conda commands... something's not right. The most common reason for needing sudo, is due to an improper installation. Conda *should* be installed to your home directory, and without any use of `sudo`.
+!alert note title=Keep Conda updates and MOOSE updates in sync
+Know, that after performing a conda update, it is always advisable to update and rebuild MOOSE, and/or your Application(s).
