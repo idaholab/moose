@@ -35,7 +35,7 @@ SamplerFullSolveMultiApp::validParams()
       "mode",
       modes,
       "The operation mode, 'normal' creates one sub-application for each row in the Sampler and "
-      "'batch' creates on sub-application for each processor and re-executes for each row.");
+      "'batch' creates one sub-application for each processor and re-executes for each row.");
 
   return params;
 }

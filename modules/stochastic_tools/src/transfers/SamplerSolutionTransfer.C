@@ -70,7 +70,7 @@ SamplerSolutionTransfer::executeFromMultiapp()
 
       NumericVector<Number>& solution = app_problem.getNonlinearSystemBase().solution();
 
-      _trainer->addSnapshot(solution);
+      _trainer->addSnapshot(solution.clone());
     }
   }
 }
@@ -83,12 +83,14 @@ SamplerSolutionTransfer::finalizeFromMultiapp()
 void
 SamplerSolutionTransfer::execute()
 {
+  // Looping over sub-apps
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
   {
+    // Getting reference to solution vector
     FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-
     NumericVector<Number>& solution = app_problem.getNonlinearSystemBase().solution();
 
-    _trainer->addSnapshot(solution);
+    // Adding pointer to cloned solution
+    _trainer->addSnapshot(solution.clone());
   }
 }

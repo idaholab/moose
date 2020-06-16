@@ -51,7 +51,6 @@
   [pod_rb]
     type = PODReducedBasisTrainer
     execute_on = timestep_end
-    transfer_name = "data"
   []
 []
 
