@@ -33,21 +33,20 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _length_factor(declareModelData<std::vector<Real> >("_length_factor")),
     _parameter_mat(declareModelData<DenseMatrix<Real> >("_parameter_mat")),
-    _covariance_mat(declareModelData<DenseMatrix<Real> >("_covariance_mat")),
+    _K(declareModelData<DenseMatrix<Real> >("_K")),
     _training_results(declareModelData<DenseMatrix<Real> >("_training_results")),
     _training_mean(declareModelData<DenseMatrix<Real> >("_training_mean")),
     _training_variance(declareModelData<DenseMatrix<Real> >("_training_variance")),
-    _covariance_results_solve(declareModelData<DenseMatrix<Real> >("_covariance_results_solve")),
-    _covariance_mat_cho_decomp(declareModelData<DenseMatrix<Real> >("_covariance_mat_cho_decomp"))
+    _K_results_solve(declareModelData<DenseMatrix<Real> >("_K_results_solve")),
+    _K_cho_decomp(declareModelData<DenseMatrix<Real> >("_K_cho_decomp")),
+    _covar_function(declareModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel> >("_covar_function"))
 {
 }
 
 void
 GaussianProcessTrainer::initialize()
 {
-  _length_factor=getParam<std::vector<Real>>("length_factor");
 }
 
 void
@@ -67,6 +66,8 @@ GaussianProcessTrainer::initialSetup()
   std::vector<DistributionName> dname = getParam<std::vector<DistributionName>>("distributions");
   if (dname.size() != _n_params)
     mooseError("Sampler number of columns does not match number of inputted distributions.");
+
+  _covar_function = CovarianceFunction::makeCovarianceKernel(1, this);
 }
 
 DenseMatrix<Real>
@@ -144,21 +145,31 @@ GaussianProcessTrainer::execute()
     _training_variance(0,0) +=  std::pow((_training_results(ii,0)-_training_mean(0,0)),2) / _num_samples;
   }
 
-  //populate covariance mat
-  _covariance_mat.resize(_num_samples, _num_samples);
-  for (unsigned int ii=0; ii<_num_samples; ii++){
-    for (unsigned int jj=0; jj<_num_samples; jj++){
-        //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
-        Real cov =0;
-        for (unsigned int kk=0; kk<_n_params; kk++){
-          //Compute distance per parameter
-          cov += std::pow(( _parameter_mat(ii,kk)-  _parameter_mat(jj,kk) ),2) / (std::pow(_length_factor.at(kk),2));
-        }
-        cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
-        _covariance_mat(ii,jj) = cov;
-        _covariance_mat(jj,ii) = cov;
-      }
-  }
+  _covar_function->set_signal_variance(_training_variance(0,0));
+  _K = _covar_function->compute_matrix(_parameter_mat,_parameter_mat);
+  // std::cout << "K" << '\n';
+  // _K.print();
+
+  //_covariance_mat=K;
+
+  // //populate covariance mat
+  // _covariance_mat.resize(_num_samples, _num_samples);
+  // for (unsigned int ii=0; ii<_num_samples; ii++){
+  //   for (unsigned int jj=0; jj<_num_samples; jj++){
+  //       //std::cout << _parameter_mat(ii,0) << "  "  << _parameter_mat(jj,0)  << '\n';
+  //       Real cov =0;
+  //       for (unsigned int kk=0; kk<_n_params; kk++){
+  //         //Compute distance per parameter
+  //         cov += std::pow(( _parameter_mat(ii,kk)-  _parameter_mat(jj,kk) ),2) / (std::pow(_length_factor.at(kk),2));
+  //       }
+  //       cov = _training_variance(0,0) * std::exp(-cov) / 2.0;
+  //       _covariance_mat(ii,jj) = cov;
+  //       _covariance_mat(jj,ii) = cov;
+  //     }
+  // }
+  //
+  // std::cout << "_covariance_mat" << '\n';
+  // _covariance_mat.print();
 
 
 
@@ -170,9 +181,9 @@ GaussianProcessTrainer::execute()
     _training_results_centered(ii,0) = _training_results(ii,0) - _training_mean(0,0);
   }
   //Perform Initial Cholesky Solve. We are more interested in the decomposed matrix.
-  _covariance_mat_cho_decomp = _covariance_mat;
+  _K_cho_decomp = _K;
     DenseVector<Real> cho_solution_vec;
-  _covariance_mat_cho_decomp.cholesky_solve(_training_results_vec,cho_solution_vec);
+  _K_cho_decomp.cholesky_solve(_training_results_vec,cho_solution_vec);
 
   // std::cout << "After Cho Solve" << '\n';
   //  _covariance_mat.print();
@@ -181,10 +192,11 @@ GaussianProcessTrainer::execute()
   //  std::cout << "Cho Solution LibMesh Vec" << '\n';
   //  cho_solution_vec.print(std::cout);
   //  std::cout << "Cho Solution Static Function" << '\n';
-   _covariance_results_solve = cholesky_back_substitute(_covariance_mat_cho_decomp, _training_results_centered);
+   _K_results_solve = cholesky_back_substitute(_K_cho_decomp, _training_results_centered);
    //_covariance_results_solve.print();
 
-   _parameter_mat.print();
+   //_parameter_mat.print();
+
 }
 
 void

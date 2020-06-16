@@ -10,8 +10,7 @@
 #pragma once
 
 #include "SurrogateTrainer.h"
-#include "PolynomialQuadrature.h"
-#include "QuadratureSampler.h"
+#include "CovarianceFunction.h"
 
 #include "Distribution.h"
 
@@ -46,14 +45,14 @@ private:
   /// Total number of parameters/dimensions
   unsigned int _n_params;
 
-  /// Vector of length factors. Main hyper-parameters for squared exponential kernel
-  std::vector<Real> & _length_factor;
+  // /// Vector of length factors. Main hyper-parameters for squared exponential kernel
+  // std::vector<Real> & _length_factor;
 
   ///
   DenseMatrix<Real> & _parameter_mat;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  DenseMatrix<Real> & _covariance_mat;
+  DenseMatrix<Real> & _K;
 
   /// An _n_sample vector containg results of traing runs
   DenseMatrix<Real> & _training_results;
@@ -65,11 +64,12 @@ private:
   DenseMatrix<Real> & _training_variance;
 
   /// A solve of Ax=b via Cholesky.
-  DenseMatrix<Real> & _covariance_results_solve;
+  DenseMatrix<Real> & _K_results_solve;
 
   ///
-  DenseMatrix<Real> & _covariance_mat_cho_decomp;
+  DenseMatrix<Real> & _K_cho_decomp;
 
-
+  ///
+  std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 
 };
