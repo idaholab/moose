@@ -15,7 +15,8 @@ enum class ROMInputTransform
 {
   LINEAR,
   LOG,
-  EXP
+  EXP,
+  INVERSE
 };
 
 class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase
@@ -73,7 +74,7 @@ protected:
    * @param derivative Flag to return derivative of ROM increment with respect to stress.
    * @return ROM computed increment
    */
-  ADReal computeROM(const unsigned out_idx, const bool derivative = false);
+  ADReal computeROM(const unsigned int tile, const unsigned out_idx, const bool derivative = false);
 
   /**
    * Method to check input values against applicability windows set by ROM data set. In addition,
@@ -85,10 +86,9 @@ protected:
    * @param derivative Flag to return derivative of extrapolation with respect to stress.
    * @return Extrapolation value
    */
-  ADReal checkInputWindow(ADReal & input,
-                          const std::vector<Real> & limits,
-                          const WindowFailure behavior,
-                          const bool derivative = false);
+  void checkInputWindow(const ADReal & input,
+                        const WindowFailure behavior,
+                        const std::vector<Real> & global_limits);
 
   /**
    * Convert the input variables into the form expected by the ROM Legendre polynomials
@@ -100,11 +100,11 @@ protected:
    * @param derivative Flag to return derivative of converted input with respect to stress.
    * @return Converted input
    */
-  ADReal convertInput(const ADReal & input,
-                      const ROMInputTransform transform,
-                      const Real transform_coef,
-                      const std::vector<Real> & transformed_limits,
-                      const bool derivative = false);
+  ADReal normalizeInput(const ADReal & input,
+                        const ROMInputTransform transform,
+                        const Real transform_coef,
+                        const std::vector<Real> & transformed_limits,
+                        const bool derivative = false);
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
@@ -177,9 +177,21 @@ protected:
 
   /*
    * Calculates and returns the transformed limits for the ROM calculations
+   * Indexes are [tile][ouput][input].
+   * Inputs ordering is
+   * input[0]: mobile_old
+   * input[1]: immobile_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * output ordering is:
+   * output[0]: mobile dislocations increment
+   * output[1]: immobile dislocations increment
+   * output[2]: strain increment
    * @return Multi-dimentional vector of transformed limits
    */
-  std::vector<std::vector<std::vector<Real>>> getTransformedLimits() const;
+  std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformedLimits();
 
   /*
    * Calculates and returns vector utilized in assign values
@@ -189,33 +201,63 @@ protected:
 
   /*
    * Returns vector of the functions to use for the conversion of input variables.
+   * Indexes are [tile][ouput][input].
+   * Inputs ordering is
+   * input[0]: mobile_old
+   * input[1]: immobile_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * output ordering is:
+   * output[0]: mobile dislocations increment
+   * output[1]: immobile dislocations increment
+   * output[2]: strain increment
    * @return vector of the functions to use for the conversion of input variables.
    */
-  virtual std::vector<std::vector<ROMInputTransform>> getTransform() = 0;
+  virtual std::vector<std::vector<std::vector<ROMInputTransform>>> getTransform() = 0;
 
   /*
    * Returns factors for the functions for the conversion functions given in getTransform
+   * Indexes are [tile][ouput][input].
+   * Inputs ordering is
+   * input[0]: mobile_old
+   * input[1]: immobile_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * output ordering is:
+   * output[0]: mobile dislocations increment
+   * output[1]: immobile dislocations increment
+   * output[2]: strain increment
    * @return factors for the functions for the conversion functions given in getTransform
    */
-  virtual std::vector<std::vector<Real>> getTransformCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<Real>>> getTransformCoefs() = 0;
 
-  /* Returns human-readable limits for the inputs. Inputs ordering is
-   * 0: mobile_old
-   * 1: immobile_old
-   * 2: trial stress,
-   * 3: effective strain old,
-   * 4: temperature
-   * 5: environmental factor (optional)
+  /* Returns human-readable limits for the inputs.
+   * Indexes are [tile][ouput][input].
+   * Inputs ordering is
+   * input[0]: mobile_old
+   * input[1]: immobile_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * output ordering is:
+   * output[0]: mobile dislocations increment
+   * output[1]: immobile dislocations increment
+   * output[2]: strain increment
    * @return human-readable limits for the inputs
    */
-  virtual std::vector<std::vector<Real>> getInputLimits() = 0;
+  virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() = 0;
 
   /*
    * Material specific coefficients multiplied by the Legendre polynomials for each of the input
    * variables
    * @return Legendre polynomial coefficients
    */
-  virtual std::vector<std::vector<Real>> getCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<Real>>> getCoefs() = 0;
 
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
@@ -302,6 +344,9 @@ protected:
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
 
+  /// Number of ROM tiles
+  unsigned int _num_tiles;
+
   /// Number of inputs for the ROM data set
   unsigned int _num_inputs;
 
@@ -315,19 +360,19 @@ protected:
   unsigned int _num_coefs;
 
   /// Transform rules defined by the ROM data set
-  std::vector<std::vector<ROMInputTransform>> _transform;
+  std::vector<std::vector<std::vector<ROMInputTransform>>> _transform;
 
   /// Transform coefficients defined by the ROM data set
-  std::vector<std::vector<Real>> _transform_coefs;
+  std::vector<std::vector<std::vector<Real>>> _transform_coefs;
 
   /// Input limits defined by the ROM data set
-  std::vector<std::vector<Real>> _input_limits;
+  std::vector<std::vector<std::vector<Real>>> _input_limits;
 
   /// Coefficients used with Legendre polynomials defined by the ROM data set
-  std::vector<std::vector<Real>> _coefs;
+  std::vector<std::vector<std::vector<Real>>> _coefs;
 
   /// Limits transformed from readabile input to ROM readable limits
-  std::vector<std::vector<std::vector<Real>>> _transformed_limits;
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _transformed_limits;
 
   /// Helper container defined by the ROM data set
   std::vector<unsigned int> _makeframe_helper;
@@ -335,14 +380,17 @@ protected:
   /// Creep rate material property
   ADMaterialProperty<Real> & _creep_rate;
 
+  /// Mobile dislocations rate
+  ADMaterialProperty<Real> & _mobile_rate;
+
+  /// Immobile dislocations rate
+  ADMaterialProperty<Real> & _immobile_rate;
+
   /// Material property to hold smootherstep applied in order to extrapolate.
   ADMaterialProperty<Real> & _extrapolation;
 
   /// Container for derivative of creep rate with respect to strain
   ADReal _derivative;
-
-  /// Container for extrapolation coefficient from non-strain inputs
-  ADReal _non_stress_extrapolation;
 
   /// Container for input values
   std::vector<ADReal> _input_values;
@@ -351,11 +399,63 @@ protected:
   std::vector<Real> _old_input_values;
 
   /// Container for converted rom_inputs
-  std::vector<ADReal> _rom_inputs;
+  std::vector<std::vector<ADReal>> _rom_inputs;
 
   /// Container for ROM polynomial inputs
-  std::vector<std::vector<ADReal>> _polynomial_inputs;
+  std::vector<std::vector<std::vector<ADReal>>> _polynomial_inputs;
 
   /// Container for ROM precomputed values
-  std::vector<ADReal> _precomputed_vals;
+  std::vector<std::vector<ADReal>> _precomputed_vals;
+
+  ADReal
+  sigmoid(const Real lower, const Real upper, const ADReal & val, const bool derivative = false);
+  void computeTileWeight(std::vector<ADReal> & weights,
+                         ADReal & input,
+                         const unsigned int in_idx,
+                         const bool derivative = false);
+
+  std::vector<std::vector<Real>> _global_limits;
+  std::vector<ADReal> _non_stress_weights;
+  std::vector<ADReal> _weights;
+  std::vector<unsigned int> _tiling;
+
+  virtual std::vector<unsigned int> getTilings()
+  {
+    if (_environmental)
+      return {1, 1, 1, 1, 1, 1};
+    return {1, 1, 1, 1, 1};
+  };
+
+  template <typename T>
+  void convertValue(T & x,
+                    const ROMInputTransform transform,
+                    const Real coef,
+                    const bool derivative = false)
+  {
+    if (transform == ROMInputTransform::EXP)
+    {
+      if (derivative)
+        x = std::exp(x / coef) / coef;
+      else
+        x = std::exp(x / coef);
+    }
+    else if (transform == ROMInputTransform::LOG)
+    {
+      mooseAssert(x + coef > 0, "Sum must be greater than 0.");
+      if (derivative)
+        x = 1.0 / (x + coef);
+      else
+        x = std::log(x + coef);
+    }
+    else if (transform == ROMInputTransform::INVERSE)
+    {
+      mooseAssert(input + transform_coef != 0, "Sum must not equal zero.");
+      if (derivative)
+        x = -1.0 / Utility::pow<2>(x + coef);
+      else
+        x = 1.0 / (x + coef);
+    }
+    else if (derivative)
+      x = 1.0;
+  }
 };

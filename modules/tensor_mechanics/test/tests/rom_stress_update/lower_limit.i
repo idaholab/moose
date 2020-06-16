@@ -1,4 +1,5 @@
 temp = 800.0160634
+disp = 1.0053264195e6
 
 [Mesh]
   type = GeneratedMesh
@@ -19,14 +20,31 @@ temp = 800.0160634
 []
 
 [Functions]
-  [./strain_exact]
+  [./temp_weight]
     type = ParsedFunction
-    vars = 'lower_limit_strain lower_limit_temperature temp_avg'
-    vals = '2.842181e-09       800.0160634             temp_avg'
-    value = 'val := temp_avg / lower_limit_temperature;
-             clamped := if(val < 0, 0, if(val > 1, 1, val));
-             smootherstep := clamped^3 * (clamped * (clamped * 6.0 - 15.0) + 10.0);
-             smootherstep * lower_limit_strain'
+    vars = 'lower_limit avg'
+    vals = '800.0160634 temp_avg'
+    value = 'val := 2 * avg / lower_limit - 1;
+             clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
+             plus := exp(-2 / (1 + clamped));
+             minus := exp(-2 / (1 - clamped));
+             plus / (plus + minus)'
+  [../]
+  [./stress_weight]
+    type = ParsedFunction
+    vars = 'lower_limit avg'
+    vals = '2.010652839e6 vonmises_stress'
+    value = 'val := 2 * avg / lower_limit - 1;
+             clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
+             plus := exp(-2 / (1 + clamped));
+             minus := exp(-2 / (1 - clamped));
+             plus / (plus + minus)'
+  [../]
+  [./creep_rate_exact]
+    type = ParsedFunction
+    vars = 'lower_limit_strain temp_weight stress_weight'
+    vals = '3.370764e-12       temp_weight stress_weight'
+    value = 'lower_limit_strain * temp_weight * stress_weight'
   [../]
 []
 
@@ -63,21 +81,21 @@ temp = 800.0160634
     variable = disp_x
     component = 0
     boundary = right
-    constant = 1.0e5
+    constant = ${disp}
   [../]
   [./pressure_y]
     type = ADPressure
     variable = disp_y
     component = 1
     boundary = top
-    constant = -1.0e5
+    constant = -${disp}
   [../]
   [./pressure_z]
     type = ADPressure
     variable = disp_z
     component = 2
     boundary = front
-    constant = -1.0e5
+    constant = -${disp}
   [../]
 []
 
@@ -97,6 +115,7 @@ temp = 800.0160634
     initial_mobile_dislocation_density = 6.0e12
     initial_immobile_dislocation_density = 4.4e11
     outputs = all
+    apply_strain = false
   [../]
 []
 
@@ -114,18 +133,18 @@ temp = 800.0160634
 []
 
 [Postprocessors]
-  [./strain_exact]
+  [./creep_rate_exact]
     type = FunctionValuePostprocessor
-    function = strain_exact
+    function = creep_rate_exact
   [../]
-  [./strain_avg]
+  [./creep_rate_avg]
     type = ElementAverageValue
-    variable = effective_creep_strain
+    variable = creep_rate
   [../]
-  [./strain_diff]
+  [./creep_rate_diff]
     type = DifferencePostprocessor
-    value1 = strain_exact
-    value2 = strain_avg
+    value1 = creep_rate_exact
+    value2 = creep_rate_avg
   [../]
   [./temp_avg]
     type = ElementAverageValue
