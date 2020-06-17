@@ -14,10 +14,11 @@ PsbtFlowAreaIC::PsbtFlowAreaIC(const InputParameters & params) : PsbtIC(params) 
 Real
 PsbtFlowAreaIC::value(const Point & p)
 {
-  _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
-  Real pitch = _mesh->pitch_;
-  Real rod_diameter = _mesh->rod_diameter_;
-  Real gap = _mesh->gap_;
+  _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
+  auto pitch = _mesh->pitch_;
+  auto rod_diameter = _mesh->rod_diameter_;
+  auto gap = _mesh->gap_;
+
   // Compute the flow area for a standard channel (one that touches 4 pins).
   auto rod_area = 0.25 * M_PI * rod_diameter * rod_diameter;
   auto standard_area = pitch * pitch - rod_area;
@@ -33,15 +34,9 @@ PsbtFlowAreaIC::value(const Point & p)
 
   // Compute and return the channel area.
   if (is_corner)
-  {
     return standard_area * 0.25 + pitch * gap + gap * gap;
-  }
   else if (is_edge)
-  {
     return standard_area * 0.5 + pitch * gap;
-  }
   else
-  {
     return standard_area;
-  }
 }

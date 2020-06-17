@@ -4,6 +4,9 @@
 #include "SolutionHandle.h"
 #include "SubChannelMesh.h"
 
+/**
+ * This class calculates the area of the subchannel
+ */
 class PsbtFlowAreaIC : public PsbtIC
 {
 public:

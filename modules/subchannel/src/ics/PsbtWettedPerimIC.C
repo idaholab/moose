@@ -15,11 +15,10 @@ PsbtWettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
   _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
-  Real pitch = _mesh->pitch_;
-  Real rod_diameter = _mesh->rod_diameter_;
-  Real gap = _mesh->gap_;
-
-  Real rod_circumference = M_PI * rod_diameter;
+  auto pitch = _mesh->pitch_;
+  auto rod_diameter = _mesh->rod_diameter_;
+  auto gap = _mesh->gap_;
+  auto rod_circumference = M_PI * rod_diameter;
 
   // Determine which channel this point is in and if that channel lies at an
   // edge or corner of the assembly.
@@ -32,15 +31,9 @@ PsbtWettedPerimIC::value(const Point & p)
 
   // Compute and return the wetted perimeter.
   if (is_corner)
-  {
     return 0.25 * rod_circumference + pitch + 2 * gap;
-  }
   else if (is_edge)
-  {
     return 0.5 * rod_circumference + pitch;
-  }
   else
-  {
     return rod_circumference;
-  }
 }
