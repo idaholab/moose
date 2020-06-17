@@ -87,6 +87,7 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
 
   // for off-diagonal low components
   if (_bond_status > 0.5)
+  {
     for (unsigned int nd = 0; nd < _nnodes; nd++)
     {
       if (_dim == 2)
@@ -143,6 +144,7 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
       shape[nd] = shape[nd].inverse();
       dgrad[nd] = dgrad[nd] * shape[nd];
     }
+  }
 
   // off-diagonal jacobian entries on the row
   Real dEidUi =

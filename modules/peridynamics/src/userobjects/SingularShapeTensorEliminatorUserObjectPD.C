@@ -18,7 +18,7 @@ SingularShapeTensorEliminatorUserObjectPD::validParams()
   InputParameters params = GeneralUserObjectBasePD::validParams();
   params.addClassDescription("UserObject to eliminate the existance of singular shape tensor");
 
-  MooseEnum formulation_option("CONVENTION BONDHORIZON");
+  MooseEnum formulation_option("CONVENTIONAL BOND_HORIZON");
   params.addRequiredParam<MooseEnum>(
       "formulation", formulation_option, "Which form of shape tensor used in the formulation");
 
@@ -119,7 +119,7 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
     if (_dim == 2)
       shape_tensor(2, 2) = 1.0;
 
-    if (_formulation == "CONVENTION")
+    if (_formulation == "CONVENTIONAL")
     {
       for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
         if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
@@ -133,7 +133,7 @@ SingularShapeTensorEliminatorUserObjectPD::checkShapeTensorSingularity(const Ele
               shape_tensor(k, l) += weight_nb * origin_vec_nb(k) * origin_vec_nb(l) * vol_nb;
         }
     }
-    else if (_formulation == "BONDHORIZON")
+    else if (_formulation == "BOND_HORIZON")
     {
       unsigned int nb_index =
           std::find(neighbors.begin(), neighbors.end(), elem->node_id(1 - nd)) - neighbors.begin();

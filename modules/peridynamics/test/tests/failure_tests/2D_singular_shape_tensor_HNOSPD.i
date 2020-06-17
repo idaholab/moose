@@ -49,7 +49,7 @@
 [UserObjects]
   [./singular_shape_tensor]
     type = SingularShapeTensorEliminatorUserObjectPD
-    formulation = BONDHORIZON
+    formulation = BOND_HORIZON
   [../]
 []
 
@@ -96,7 +96,7 @@
 [Modules/Peridynamics/Mechanics/Master]
   [./all]
     formulation = NONORDINARY_STATE
-    stabilization = BONDHORIZON
+    stabilization = BOND_HORIZON
   [../]
 []
 
@@ -108,7 +108,7 @@
   [../]
   [./strain]
     type = ComputeSmallStrainNOSPD
-    stabilization = BONDHORIZON
+    stabilization = BOND_HORIZON
   [../]
   [./stress]
     type = ComputeLinearElasticStress

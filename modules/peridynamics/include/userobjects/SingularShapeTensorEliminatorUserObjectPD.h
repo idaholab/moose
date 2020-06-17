@@ -35,6 +35,6 @@ protected:
   /// function to compute and check the singularity of shape tensor of a bond
   bool checkShapeTensorSingularity(const Elem * elem);
 
-  /// Option of formulation for peridynamic shape tensor: CONVENTION or BONDHORIZON
+  /// Option of formulation for peridynamic shape tensor: CONVENTIONAL or BOND_HORIZON
   const MooseEnum _formulation;
 };

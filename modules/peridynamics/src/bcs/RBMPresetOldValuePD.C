@@ -41,8 +41,6 @@ RBMPresetOldValuePD::computeQpValue()
 bool
 RBMPresetOldValuePD::shouldApply()
 {
-  bool should_apply = false;
-
   // check whether the number of active bonds is less than number of problem dimension
   unsigned int active_bonds = 0;
   std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_node->id());
@@ -51,8 +49,5 @@ RBMPresetOldValuePD::shouldApply()
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       active_bonds++;
 
-  if (active_bonds < _pdmesh.dimension())
-    should_apply = true;
-
-  return should_apply;
+  return (active_bonds < _pdmesh.dimension() + 1);
 }
