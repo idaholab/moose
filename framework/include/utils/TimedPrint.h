@@ -12,6 +12,7 @@
 #include "Moose.h" // Color constants
 #include "ConsoleStream.h"
 #include "StreamArguments.h"
+#include "MemoryUtils.h"
 
 #include "libmesh/auto_ptr.h" // libmesh_make_unique
 
@@ -92,6 +93,10 @@ public:
       auto done_future = this->_done.get_future();
       auto start = std::chrono::steady_clock::now();
 
+      MemoryUtils::Stats stats;
+      MemoryUtils::getMemoryStats(stats);
+      auto start_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+
       unsigned int offset = 0;
       if (done_future.wait_for(initial_wait) == std::future_status::timeout ||
           initial_wait == std::chrono::duration<double>::zero())
@@ -122,11 +127,17 @@ public:
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration = end - start;
 
+        MemoryUtils::getMemoryStats(stats);
+        auto end_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+        int memory_increment = end_memory - start_memory; // int on purpose so it can be negative
+
         auto original_precision = out.precision();
         auto original_flags = out.flags();
 
         out << std::setw(WRAP_LENGTH - offset) << ' ' << " [" << COLOR_YELLOW << std::setw(6)
             << std::fixed << std::setprecision(2) << duration.count() << " s" << COLOR_DEFAULT
+            << ']' << " [" << COLOR_YELLOW << std::setw(5)
+            << std::fixed << memory_increment << " MB" << COLOR_DEFAULT
             << ']';
 
         // Restore the original stream state
