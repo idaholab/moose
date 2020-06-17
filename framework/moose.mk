@@ -59,8 +59,6 @@ endif
 # windows (msys2) specific settings (we need to cut the version number off)
 UNAME10 := $(shell uname | cut -c-10)
 ifeq ($(UNAME10), MINGW64_NT)
-	# disable unity build and header symlinking
-	MOOSE_UNITY        := false
 	libmesh_LDFLAGS    += -no-undefined
 	pyhit_LIB          := $(FRAMEWORK_DIR)/../python/pyhit/hit.pyd
 	pyhit_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
@@ -183,13 +181,21 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # 4: The unity build area (for filtering out, not a dependency)
 # The "|" in the prereqs starts the beginning of "position dependent" prereqs
 # these are prereqs that must be run first - but their timestamp isn't used
+ifeq ($(UNAME10), MINGW64_NT)
+define unity_file_rule
+$(1):$(2) $(3) | $(4)
+	@echo Creating Unity \(Windows\) $$@
+	$$(shell echo > $$@)
+	$$(foreach srcfile,$$(sort $$(filter-out $(3) $(4),$$^)),$$(shell echo '#include "'$$(shell cygpath -m $$(srcfile))'"' >> $$@))
+endef
+else
 define unity_file_rule
 $(1):$(2) $(3) | $(4)
 	@echo Creating Unity $$@
 	$$(shell echo > $$@)
 	$$(foreach srcfile,$$(sort $$(filter-out $(3) $(4),$$^)),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
-
+endif
 # 1: The directory where the unity source files will go
 # 2: The application directory
 # 3: A subdir that will be unity built
