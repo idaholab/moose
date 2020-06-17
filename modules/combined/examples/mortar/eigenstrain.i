@@ -32,26 +32,26 @@
     new_block_id = 10
     new_block_name = "secondary_x"
   []
-  [master_x]
+  [primary_x]
     input = secondary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = 12
-    new_block_name = "master_x"
+    new_block_name = "primary_x"
   []
   [secondary_y]
-    input = master_x
+    input = primary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '0'
     new_block_id = 11
     new_block_name = "secondary_y"
   []
-  [master_y]
+  [primary_y]
     input = secondary_y
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = 13
-    new_block_name = "master_y"
+    new_block_name = "primary_y"
   []
 []
 
@@ -153,9 +153,9 @@
     component = 0
     secondary_variable = disp_x
     secondary_boundary = bottom
-    master_boundary = top
+    primary_boundary = top
     secondary_subdomain = secondary_y
-    master_subdomain = master_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_x_grad_y]
@@ -164,9 +164,9 @@
     component = 1
     secondary_variable = disp_x
     secondary_boundary = bottom
-    master_boundary = top
+    primary_boundary = top
     secondary_subdomain = secondary_y
-    master_subdomain = master_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_y_grad_x]
@@ -175,9 +175,9 @@
     component = 0
     secondary_variable = disp_y
     secondary_boundary = bottom
-    master_boundary = top
+    primary_boundary = top
     secondary_subdomain = secondary_y
-    master_subdomain = master_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_y_grad_y]
@@ -186,9 +186,9 @@
     component = 1
     secondary_variable = disp_y
     secondary_boundary = bottom
-    master_boundary = top
+    primary_boundary = top
     secondary_subdomain = secondary_y
-    master_subdomain = master_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
 
@@ -198,9 +198,9 @@
     component = 0
     secondary_variable = disp_x
     secondary_boundary = left
-    master_boundary = right
+    primary_boundary = right
     secondary_subdomain = secondary_x
-    master_subdomain = master_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_x_grad_y]
@@ -209,9 +209,9 @@
     component = 1
     secondary_variable = disp_x
     secondary_boundary = left
-    master_boundary = right
+    primary_boundary = right
     secondary_subdomain = secondary_x
-    master_subdomain = master_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_y_grad_x]
@@ -220,9 +220,9 @@
     component = 0
     secondary_variable = disp_y
     secondary_boundary = left
-    master_boundary = right
+    primary_boundary = right
     secondary_subdomain = secondary_x
-    master_subdomain = master_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_y_grad_y]
@@ -231,9 +231,9 @@
     component = 1
     secondary_variable = disp_y
     secondary_boundary = left
-    master_boundary = right
+    primary_boundary = right
     secondary_subdomain = secondary_x
-    master_subdomain = master_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
 []

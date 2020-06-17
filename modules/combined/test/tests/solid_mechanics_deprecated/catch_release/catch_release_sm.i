@@ -58,7 +58,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 2
+    primary = 2
     secondary = 3
     penalty = 1e6
     model = frictionless

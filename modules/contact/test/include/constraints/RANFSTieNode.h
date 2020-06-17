@@ -51,7 +51,7 @@ protected:
   Real _lagrange_multiplier;
   const Node * _nearest_node;
   std::unordered_map<dof_id_type, Real> _node_to_lm;
-  dof_id_type _master_index;
+  dof_id_type _primary_index;
 
   std::unordered_map<dof_id_type, Number> _dof_number_to_value;
 };

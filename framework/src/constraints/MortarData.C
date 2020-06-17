@@ -35,7 +35,7 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
     if (periodic_map_iterator != _displaced_periodic_map.end() &&
         periodic_map_iterator->second != periodic)
       mooseError("We do not currently support enforcing both periodic and non-perodic constraints "
-                 "on the same boundary master-secondary pair");
+                 "on the same boundary primary-secondary pair");
     else
       _displaced_periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
@@ -50,7 +50,7 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
     auto && periodic_map_iterator = _periodic_map.find(boundary_key);
     if (periodic_map_iterator != _periodic_map.end() && periodic_map_iterator->second != periodic)
       mooseError("We do not currently support enforcing both periodic and non-perodic constraints "
-                 "on the same boundary master-secondary pair");
+                 "on the same boundary primary-secondary pair");
     else
       _periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
@@ -135,7 +135,7 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // Clear exiting data
   amg.clear();
 
-  // Construct maps from nodes -> lower dimensional elements on the master and secondary boundaries.
+  // Construct maps from nodes -> lower dimensional elements on the primary and secondary boundaries.
   amg.buildNodeToElemMaps();
 
   // Compute nodal normals.
@@ -147,7 +147,7 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // Project secondary nodes (find xi^(2) values).
   amg.projectSlaveNodes();
 
-  // Project master nodes (find xi^(1) values).
+  // Project primary nodes (find xi^(1) values).
   amg.projectMasterNodes();
 
   // Build the mortar segment mesh on the secondary boundary.

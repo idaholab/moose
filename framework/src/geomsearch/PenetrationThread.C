@@ -27,7 +27,7 @@ Threads::spin_mutex pinfo_mutex;
 PenetrationThread::PenetrationThread(
     SubProblem & subproblem,
     const MooseMesh & mesh,
-    BoundaryID master_boundary,
+    BoundaryID primary_boundary,
     BoundaryID secondary_boundary,
     std::map<dof_id_type, PenetrationInfo *> & penetration_info,
     bool check_whether_reasonable,
@@ -43,7 +43,7 @@ PenetrationThread::PenetrationThread(
     const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples)
   : _subproblem(subproblem),
     _mesh(mesh),
-    _master_boundary(master_boundary),
+    _primary_boundary(primary_boundary),
     _secondary_boundary(secondary_boundary),
     _penetration_info(penetration_info),
     _check_whether_reasonable(check_whether_reasonable),
@@ -67,7 +67,7 @@ PenetrationThread::PenetrationThread(
 PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/)
   : _subproblem(x._subproblem),
     _mesh(x._mesh),
-    _master_boundary(x._master_boundary),
+    _primary_boundary(x._primary_boundary),
     _secondary_boundary(x._secondary_boundary),
     _penetration_info(x._penetration_info),
     _check_whether_reasonable(x._check_whether_reasonable),
@@ -1152,13 +1152,13 @@ PenetrationThread::restrictPointToFace(Point & p, const Node *& closest_node, co
 }
 
 bool
-PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
+PenetrationThread::isFaceReasonableCandidate(const Elem * primary_elem,
                                              const Elem * side,
                                              FEBase * fe,
                                              const Point * secondary_point,
                                              const Real tangential_tolerance)
 {
-  unsigned int dim = master_elem->dim();
+  unsigned int dim = primary_elem->dim();
 
   const std::vector<Point> & phys_point = fe->get_xyz();
 
@@ -1183,7 +1183,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   }
   else if (dim - 1 == 1)
   {
-    const Node * const * elem_nodes = master_elem->get_nodes();
+    const Node * const * elem_nodes = primary_elem->get_nodes();
     const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
     const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
 
@@ -1649,7 +1649,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
   //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
   // }
   getSidesOnMasterBoundary(sides, elem);
-  // _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
+  // _mesh.sidesWithBoundaryID(sides, elem, _primary_boundary);
 
   for (unsigned int i = 0; i < sides.size(); ++i)
   {
@@ -1765,6 +1765,6 @@ PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> & sides,
   sides.clear();
   for (const auto & t : _bc_tuples)
     if (std::get<0>(t) == elem->id() &&
-        std::get<2>(t) == static_cast<boundary_id_type>(_master_boundary))
+        std::get<2>(t) == static_cast<boundary_id_type>(_primary_boundary))
       sides.push_back(std::get<1>(t));
 }

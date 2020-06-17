@@ -18,7 +18,7 @@ InterfaceIntegralVariableValuePostprocessor::validParams()
   InputParameters params = InterfaceIntegralPostprocessor::validParams();
 
   params.addRequiredCoupledVar("variable",
-                               "The name of the variable on the master side of the interface");
+                               "The name of the variable on the primary side of the interface");
   params.addCoupledVar("neighbor_variable",
                        "The name of the variable on the secondary side of the interface. By default "
                        "the same variable name is used for the secondary side");

@@ -50,7 +50,7 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 
     case Moose::MortarType::Master:
       // Equal and opposite reactions so we put a negative sign here
-      return -_test_master[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
+      return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
              _tangents[_qp][0].norm();
 
     default:

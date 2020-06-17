@@ -227,7 +227,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
                                : _real_zero),
     _halo_ids(_maps_size),
     _is_elemental(getParam<MooseEnum>("flood_entity_type") == "ELEMENTAL"),
-    _is_master(processor_id() == 0),
+    _is_primary(processor_id() == 0),
     _distribute_merge_work(_app.n_processors() >= _maps_size && _maps_size > 1),
     _execute_timer(registerTimedSection("execute", 1)),
     _merge_timer(registerTimedSection("mergeFeatures", 2)),
@@ -435,7 +435,7 @@ FeatureFloodCount::communicateAndMerge()
   /**
    * When we distribute merge work, we are reducing computational work by adding more communication.
    * Each of the first _n_vars processors will receive one variable worth of information to merge.
-   * After each of those processors has merged that information, it'll be sent to the master
+   * After each of those processors has merged that information, it'll be sent to the primary
    * processor where final consolidation will occur.
    */
   if (_distribute_merge_work)
@@ -499,7 +499,7 @@ FeatureFloodCount::communicateAndMerge()
       // Merge one variable's worth of data
       mergeSets();
 
-      // Now we need to serialize again to send to the master (only the processors who did work)
+      // Now we need to serialize again to send to the primary (only the processors who did work)
       serialize(send_buffers[0]);
 
       // Free up as much memory as possible here before we do global communication
@@ -515,7 +515,7 @@ FeatureFloodCount::communicateAndMerge()
                                      send_buffers.end(),
                                      std::back_inserter(recv_buffers));
 
-      if (_is_master)
+      if (_is_primary)
       {
         // The root process now needs to deserialize all of the data
         deserialize(recv_buffers);
@@ -531,10 +531,10 @@ FeatureFloodCount::communicateAndMerge()
     }
   }
 
-  // Serialized merging (master does all the work)
+  // Serialized merging (primary does all the work)
   else
   {
-    if (_is_master)
+    if (_is_primary)
       recv_buffers.reserve(_app.n_processors());
 
     serialize(send_buffers[0]);
@@ -552,7 +552,7 @@ FeatureFloodCount::communicateAndMerge()
                                       send_buffers.end(),
                                       std::back_inserter(recv_buffers));
 
-    if (_is_master)
+    if (_is_primary)
     {
       // The root process now needs to deserialize all of the data
       deserialize(recv_buffers);
@@ -571,7 +571,7 @@ FeatureFloodCount::communicateAndMerge()
 void
 FeatureFloodCount::sortAndLabel()
 {
-  mooseAssert(_is_master, "sortAndLabel can only be called on the master");
+  mooseAssert(_is_primary, "sortAndLabel can only be called on the primary");
 
   /**
    * Perform a sort to give a parallel unique sorting to the identified features.
@@ -618,7 +618,7 @@ void
 FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to_global_all,
                                              std::vector<int> & counts) const
 {
-  mooseAssert(_is_master, "This method must only be called on the root processor");
+  mooseAssert(_is_primary, "This method must only be called on the root processor");
 
   counts.assign(_n_procs, 0);
   // Now size the individual counts vectors based on the largest index seen per processor
@@ -640,7 +640,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
     globalsize += counts[i];
   }
 
-  // Finally populate the master vector
+  // Finally populate the primary vector
   local_to_global_all.resize(globalsize, FeatureFloodCount::invalid_size_t);
   for (const auto & feature : _feature_sets)
   {
@@ -686,7 +686,7 @@ FeatureFloodCount::finalize()
   communicateAndMerge();
 
   // Sort and label the features
-  if (_is_master)
+  if (_is_primary)
     sortAndLabel();
 
   // Send out the local to global mappings
@@ -718,14 +718,14 @@ FeatureFloodCount::scatterAndUpdateRanks()
   // local to global map (one per processor)
   std::vector<int> counts;
   std::vector<std::size_t> local_to_global_all;
-  if (_is_master)
+  if (_is_primary)
     buildLocalToGlobalIndices(local_to_global_all, counts);
 
   // Scatter local_to_global indices to all processors and store in class member variable
   _communicator.scatter(local_to_global_all, counts, _local_to_global_feature_map);
 
   std::size_t largest_global_index = std::numeric_limits<std::size_t>::lowest();
-  if (!_is_master)
+  if (!_is_primary)
   {
     _feature_sets.resize(_local_to_global_feature_map.size());
 
@@ -1098,7 +1098,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
      * buffers. This leaves us a choice, either we just duplicate the Features from the original
      * data structure after we've swapped out the buffer, or we go ahead and unpack data that we
      * would normally already have. So during distributed merging, that's exactly what we'll do.
-     * Later however when the master is doing the final consolidating, we'll opt to just skip
+     * Later however when the primary is doing the final consolidating, we'll opt to just skip
      * the local unpacking. To tell the difference, between these two modes, we just need to
      * see if a var_num was passed in.
      */
@@ -1183,7 +1183,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
    * features and find the max local index seen on any processor
    * Note: This is all occurring on rank 0 only!
    */
-  mooseAssert(_is_master, "cosolidateMergedFeatures() may only be called on the master processor");
+  mooseAssert(_is_primary, "cosolidateMergedFeatures() may only be called on the primary processor");
 
   // Offset where the current set of features with the same variable id starts in the flat vector
   unsigned int feature_offset = 0;

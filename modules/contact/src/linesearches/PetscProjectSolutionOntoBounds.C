@@ -89,7 +89,7 @@ PetscProjectSolutionOntoBounds::lineSearch()
 
   const auto & pen_locs = _displaced_problem->geomSearchData().getPenetrationLocators();
 
-  // Keep track of the secondary nodes that we push back onto the master face. We'll eventually check to
+  // Keep track of the secondary nodes that we push back onto the primary face. We'll eventually check to
   // make sure that we didn't have a corner node at the intersection of two secondary faces that we
   // tried to displace twice. As this stands now this won't cover the case wherethe intersection
   // happens only across processes

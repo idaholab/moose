@@ -22,18 +22,18 @@ There are four
 required parameters the user will always have to supply for a constraint derived
 from `MortarConstraint`:
 
-- `master_boundary`: the boundary name or ID assigned to the master side of the
+- `primary_boundary`: the boundary name or ID assigned to the primary side of the
   mortar interface
 - `secondary_boundary`: the boundary name or ID assigned to the secondary side of the
   mortar interface
-- `master_subdomain`: the subdomain name or ID assigned to the lower-dimesional
-  block on the master side of the mortar interface
+- `primary_subdomain`: the subdomain name or ID assigned to the lower-dimesional
+  block on the primary side of the mortar interface
 - `secondary_boundary`: the subdomain name or ID assigned to the lower-dimensional
   block on the secondary side of the mortar interface
 
 As suggested by the above required parameters, the user must do some mesh work
 before they can use a `MortarConstraint` object. The easiest way to prepare
-the mesh is to assign boundary IDs to the secondary and master sides of the
+the mesh is to assign boundary IDs to the secondary and primary sides of the
 interface when creating the mesh in their 3rd-party meshing software (e.g. Cubit
 or Gmsh). If these boundary IDs exist, then the lower dimensional blocks can be
 generated automatically using the `LowerDBlockFromSideset` mesh modifiers as
@@ -41,7 +41,7 @@ shown in the below input file snippet:
 
 ```
 [MeshModifiers]
-  [./master]
+  [./primary]
     type = LowerDBlockFromSideset
     sidesets = '2'
     new_block_id = '20'
@@ -61,9 +61,9 @@ There are also some optional parameters that can be supplied to
   lower dimensional block on the secondary face
 - `secondary_variable`: Primal variable on the secondary side of the mortar interface
   (lives on the interior elements)
-- `master_variable`: Primal variable on the master side of the mortar interface
+- `primary_variable`: Primal variable on the primary side of the mortar interface
   (lives on the interior elements). Most often `secondary_variable` and
-  `master_variable` will correspond to the same variable
+  `primary_variable` will correspond to the same variable
 - `compute_lm_residuals`: Whether to compute Lagrange Multiplier residuals. This
   will automatically be set to false if a `variable` parameter is not
   supplied. Other cases where the user may want to set this to false is when a
@@ -80,7 +80,7 @@ There are also some optional parameters that can be supplied to
   condition. This has the effect of changing the normals vector, for mortar
   projection, from outward to inward facing.
 
-At present, either the `secondary_variable` or `master_variable` parameter must be supplied.
+At present, either the `secondary_variable` or `primary_variable` parameter must be supplied.
 
 ### Limitations
 

@@ -35,9 +35,9 @@ InterfaceReaction::computeQpResidual(Moose::DGResidualType type)
   Real r = 0;
   switch (type)
   {
-    // Move all the terms to the LHS to get residual, for master domain
+    // Move all the terms to the LHS to get residual, for primary domain
     // Residual = kf*u - kb*v = kf*u - kb*v
-    // Weak form for master domain is: (test, kf*u - kb*v)
+    // Weak form for primary domain is: (test, kf*u - kb*v)
     case Moose::Element:
       r = _test[_i][_qp] * (_kf * _u[_qp] - _kb * _neighbor_value[_qp]);
       break;

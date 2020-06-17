@@ -73,7 +73,7 @@ public:
 
   /**
    * Once the secondary_requested_boundary_ids and
-   * master_requested_boundary_ids containers have been filled in,
+   * primary_requested_boundary_ids containers have been filled in,
    * call this function to build node-to-Elem maps for the
    * lower-dimensional elements.
    */
@@ -97,21 +97,21 @@ public:
 
   /**
    * Project secondary nodes (find xi^(2) values) to the closest points on
-   * the master surface.
+   * the primary surface.
    * Inputs:
    * - The nodal normals values
    * - mesh
-   * - nodes_to_master_elem_map
+   * - nodes_to_primary_elem_map
    *
    * Outputs:
-   * - secondary_node_and_elem_to_xi2_master_elem
+   * - secondary_node_and_elem_to_xi2_primary_elem
    *
    * Defined in the file project_secondary_nodes.C.
    */
   void projectSlaveNodes();
 
   /**
-   * (Inverse) project master nodes to the points on the secondary surface
+   * (Inverse) project primary nodes to the points on the secondary surface
    * where they would have come from (find (xi^(1) values)).
    *
    * Inputs:
@@ -120,21 +120,21 @@ public:
    * - nodes_to_secondary_elem_map
    *
    * Outputs:
-   * - master_node_and_elem_to_xi1_secondary_elem
+   * - primary_node_and_elem_to_xi1_secondary_elem
    *
-   * Defined in the file project_master_nodes.C.
+   * Defined in the file project_primary_nodes.C.
    */
   void projectMasterNodes();
 
   /**
-   * Builds the mortar segment mesh once the secondary and master node
+   * Builds the mortar segment mesh once the secondary and primary node
    * projections have been completed.
    *
    * Inputs:
    * - mesh
-   * - master_node_and_elem_to_xi1_secondary_elem
-   * - secondary_node_and_elem_to_xi2_master_elem
-   * - nodes_to_master_elem_map
+   * - primary_node_and_elem_to_xi1_secondary_elem
+   * - secondary_node_and_elem_to_xi2_primary_elem
+   * - nodes_to_primary_elem_map
    *
    * Outputs:
    * - mortar_segment_mesh
@@ -161,21 +161,21 @@ public:
   // The boundary ids corresponding to all the secondary surfaces.
   std::set<boundary_id_type> secondary_requested_boundary_ids;
 
-  // The boundary ids corresponding to all the master surfaces.
-  std::set<boundary_id_type> master_requested_boundary_ids;
+  // The boundary ids corresponding to all the primary surfaces.
+  std::set<boundary_id_type> primary_requested_boundary_ids;
 
-  // A list of master/secondary boundary id pairs corresponding to each
+  // A list of primary/secondary boundary id pairs corresponding to each
   // side of the mortar interface.
-  std::vector<std::pair<boundary_id_type, boundary_id_type>> master_secondary_boundary_id_pairs;
+  std::vector<std::pair<boundary_id_type, boundary_id_type>> primary_secondary_boundary_id_pairs;
 
-  // Map from nodes to connected lower-dimensional elements on the secondary/master subdomains.
+  // Map from nodes to connected lower-dimensional elements on the secondary/primary subdomains.
   std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_secondary_elem_map;
-  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_master_elem_map;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_primary_elem_map;
 
   // Similar to the map above, but associates a (Slave Node, Slave Elem)
-  // pair to a (xi^(2), master Elem) pair. This allows a single secondary node, which is
+  // pair to a (xi^(2), primary Elem) pair. This allows a single secondary node, which is
   // potentially connected to two elements on the secondary side, to be associated with
-  // multiple master Elem/xi^(2) values to handle the case where the master and secondary
+  // multiple primary Elem/xi^(2) values to handle the case where the primary and secondary
   // nodes are "matching".
   // In this configuration:
   //
@@ -183,22 +183,22 @@ public:
   // o-----o-----o  (secondary orientation ->)
   //       |
   //       v
-  // ------x------ (master orientation <-)
+  // ------x------ (primary orientation <-)
   //    C     D
   //
   // The entries in the map should be:
   // (Elem A, Node 1) -> (Elem C, xi^(2)=-1)
   // (Elem B, Node 0) -> (Elem D, xi^(2)=+1)
   std::unordered_map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
-      secondary_node_and_elem_to_xi2_master_elem;
+      secondary_node_and_elem_to_xi2_primary_elem;
 
   // Same type of container, but for mapping (Master Node ID, Master Node,
   // Master Elem) -> (xi^(1), Slave Elem) where they are inverse-projected along
-  // the nodal normal direction. Note that the first item of the key, the master
+  // the nodal normal direction. Note that the first item of the key, the primary
   // node ID, is important for storing the key-value pairs in a consistent order
   // across processes, e.g. this container has to be ordered!
   std::map<std::tuple<dof_id_type, const Node *, const Elem *>, std::pair<Real, const Elem *>>
-      master_node_and_elem_to_xi1_secondary_elem;
+      primary_node_and_elem_to_xi1_secondary_elem;
 
   // 1D Mesh of mortar segment elements which gets built by the call
   // to build_mortar_segment_mesh().
@@ -217,14 +217,14 @@ public:
   // are offset from their respective interior parent's subdomain ids.
   const subdomain_id_type boundary_subdomain_id_offset = 1000;
 
-  // A list of master/secondary subdomain id pairs corresponding to each
+  // A list of primary/secondary subdomain id pairs corresponding to each
   // side of the mortar interface.
-  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> master_secondary_subdomain_id_pairs;
+  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> primary_secondary_subdomain_id_pairs;
 
-  // The secondary/master lower-dimensional boundary subdomain ids are the
-  // secondary/master *boundary* ids offset by the value above.
+  // The secondary/primary lower-dimensional boundary subdomain ids are the
+  // secondary/primary *boundary* ids offset by the value above.
   std::set<subdomain_id_type> secondary_boundary_subdomain_ids;
-  std::set<subdomain_id_type> master_boundary_subdomain_ids;
+  std::set<subdomain_id_type> primary_boundary_subdomain_ids;
 
   // Size of the largest secondary side lower-dimensional element added to
   // the mesh. Used in plotting convergence data.
@@ -235,7 +235,7 @@ public:
   // to explicitly set up the dependence between interior_parent()
   // elements on the secondary side and their lower-dimensional sides
   // which are on the interface. This latter type of coupling must be
-  // explicitly declared when there is no master_elem for a given
+  // explicitly declared when there is no primary_elem for a given
   // mortar segment and you are using e.g.  a P^1-P^0 discretization
   // which does not induce the coupling automatically.
   std::unordered_multimap<dof_id_type, dof_id_type> mortar_interface_coupling;
@@ -246,16 +246,16 @@ public:
 private:
   /**
    * Helper function responsible for projecting secondary nodes
-   * onto master elements for a single master/secondary pair. Called by the class member
+   * onto primary elements for a single primary/secondary pair. Called by the class member
    * AutomaticMortarGeneration::project_secondary_nodes().
    */
-  void projectSlaveNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
+  void projectSlaveNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                    subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
   /**
-   * Helper function used internally by AutomaticMortarGeneration::project_master_nodes().
+   * Helper function used internally by AutomaticMortarGeneration::project_primary_nodes().
    */
-  void projectMasterNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
+  void projectMasterNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                     subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
 private:

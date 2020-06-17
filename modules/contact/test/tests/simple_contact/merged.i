@@ -16,7 +16,7 @@
 []
 
 [DiracKernels]
-  [./master_x]
+  [./primary_x]
     type = ContactMaster
     variable = disp_x
     component = 0
@@ -24,7 +24,7 @@
     secondary = 2
   [../]
 
-  [./master_y]
+  [./primary_y]
     type = ContactMaster
     variable = disp_y
     component = 1
@@ -32,7 +32,7 @@
     secondary = 2
   [../]
 
-  [./master_z]
+  [./primary_z]
     type = ContactMaster
     variable = disp_z
     component = 2
@@ -45,7 +45,7 @@
     variable = disp_x
     component = 0
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 
   [./secondary_y]
@@ -53,7 +53,7 @@
     variable = disp_y
     component = 1
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 
   [./secondary_z]
@@ -61,7 +61,7 @@
     variable = disp_z
     component = 2
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 []
 

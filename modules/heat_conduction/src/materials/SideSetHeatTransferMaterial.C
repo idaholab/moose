@@ -30,12 +30,12 @@ validParams<SideSetHeatTransferMaterial>()
   params.addParam<FunctionName>("gap_length", 1.0, "Total width of gap in m.");
   params.addParam<FunctionName>("Tbulk", 300, "Bulk temperature of gap in K.");
   params.addParam<FunctionName>(
-      "h_master", 0.0, "Convective heat transfer coefficient (master face) in W/m^2/K.");
+      "h_primary", 0.0, "Convective heat transfer coefficient (primary face) in W/m^2/K.");
   params.addParam<FunctionName>(
       "h_neighbor", 0.0, "Convective heat transfer coefficient (neighbor face) in W/m^2/K.");
-  params.addParam<FunctionName>("emissivity_master", 0.0, "Master face emissivity.");
+  params.addParam<FunctionName>("emissivity_primary", 0.0, "Master face emissivity.");
   params.addParam<FunctionName>("emissivity_neighbor", 0.0, "Neighbor face emissivity.");
-  params.addParam<FunctionName>("reflectivity_master",
+  params.addParam<FunctionName>("reflectivity_primary",
                                 "Master face reflectivity, uses (1-emissivity) if not provided.");
   params.addParam<FunctionName>("reflectivity_neighbor",
                                 "Neighbor face reflectivity, uses (1-emissivity) if not provided.");
@@ -50,17 +50,17 @@ SideSetHeatTransferMaterial::SideSetHeatTransferMaterial(const InputParameters &
     _Tk(isCoupled("gap_temperature") ? &coupledValue("gap_temperature") : nullptr),
     _dgap(getFunction("gap_length")),
     _Tb(getFunction("Tbulk")),
-    _hp(getFunction("h_master")),
+    _hp(getFunction("h_primary")),
     _hm(getFunction("h_neighbor")),
-    _eps_p(getFunction("emissivity_master")),
+    _eps_p(getFunction("emissivity_primary")),
     _eps_m(getFunction("emissivity_neighbor")),
-    _rho_p(isParamValid("reflectivity_master") ? &getFunction("reflectivity_master") : nullptr),
+    _rho_p(isParamValid("reflectivity_primary") ? &getFunction("reflectivity_primary") : nullptr),
     _rho_m(isParamValid("reflectivity_neighbor") ? &getFunction("reflectivity_neighbor") : nullptr),
     _cond(declareProperty<Real>("gap_conductance")),
     _Tbulk(declareProperty<Real>("gap_Tbulk")),
-    _h_master(declareProperty<Real>("gap_h_master")),
+    _h_primary(declareProperty<Real>("gap_h_primary")),
     _h_neighbor(declareProperty<Real>("gap_h_neighbor")),
-    _emmissivity_eff_master(declareProperty<Real>("gap_emissivity_eff_master")),
+    _emmissivity_eff_primary(declareProperty<Real>("gap_emissivity_eff_primary")),
     _emmissivity_eff_neighbor(declareProperty<Real>("gap_emissivity_eff_neighbor")),
     _sigma(SIGMA)
 {
@@ -81,17 +81,17 @@ SideSetHeatTransferMaterial::SideSetHeatTransferMaterial(const InputParameters &
                "Variable specification for temp needed if specifying a temperature dependent "
                "conductivity.");
 
-  if (parameters.isParamSetByUser("h_master") && !parameters.isParamSetByUser("h_neighbor"))
+  if (parameters.isParamSetByUser("h_primary") && !parameters.isParamSetByUser("h_neighbor"))
     paramError("h_neighbor", "h_neighbor not set, but convection term requested.");
-  if (parameters.isParamSetByUser("h_neighbor") && !parameters.isParamSetByUser("h_master"))
-    paramError("h_master", "h_master not set, but convection term requested.");
+  if (parameters.isParamSetByUser("h_neighbor") && !parameters.isParamSetByUser("h_primary"))
+    paramError("h_primary", "h_primary not set, but convection term requested.");
 
-  if (parameters.isParamSetByUser("emissivity_master") &&
+  if (parameters.isParamSetByUser("emissivity_primary") &&
       !parameters.isParamSetByUser("emissivity_neighbor"))
     paramError("emissivity_neighbor", "emissivity_neighbor not set, but radiation term requested");
   if (parameters.isParamSetByUser("emissivity_neighbor") &&
-      !parameters.isParamSetByUser("emissivity_master"))
-    paramError("emissivity_master", "emissivity_master not set, but radiation term requested");
+      !parameters.isParamSetByUser("emissivity_primary"))
+    paramError("emissivity_primary", "emissivity_primary not set, but radiation term requested");
 }
 
 void
@@ -103,17 +103,17 @@ SideSetHeatTransferMaterial::computeQpProperties()
 
   // Convection parameters
   _Tbulk[_qp] = _Tb.value(_t, _q_point[_qp]);
-  _h_master[_qp] = _hp.value(_t, _q_point[_qp]);
+  _h_primary[_qp] = _hp.value(_t, _q_point[_qp]);
   _h_neighbor[_qp] = _hm.value(_t, _q_point[_qp]);
 
   // If reflectivity not provided, assume 1 - epsilon
   Real rhop = (_rho_p ? (*_rho_p).value(_t, _q_point[_qp]) : 1.0 - _eps_p.value(_t, _q_point[_qp]));
   Real rhom = (_rho_m ? (*_rho_m).value(_t, _q_point[_qp]) : 1.0 - _eps_m.value(_t, _q_point[_qp]));
 
-  // Compute effective emissivity (master): \frac{\sigma\epsilon^+(1-\rho^-)}{1-rho^+\rho^-}
-  _emmissivity_eff_master[_qp] = _sigma * _eps_p.value(_t, _q_point[_qp]) * (1.0 - rhom);
-  if (_emmissivity_eff_master[_qp] != 0.0) // Making sure we don't devide by zero
-    _emmissivity_eff_master[_qp] /= 1.0 - rhop * rhom;
+  // Compute effective emissivity (primary): \frac{\sigma\epsilon^+(1-\rho^-)}{1-rho^+\rho^-}
+  _emmissivity_eff_primary[_qp] = _sigma * _eps_p.value(_t, _q_point[_qp]) * (1.0 - rhom);
+  if (_emmissivity_eff_primary[_qp] != 0.0) // Making sure we don't devide by zero
+    _emmissivity_eff_primary[_qp] /= 1.0 - rhop * rhom;
 
   // Compute effective emissivity (neighbor): \frac{\sigma\epsilon^-(1-\rho^+)}{1-rho^+\rho^-}
   _emmissivity_eff_neighbor[_qp] = _sigma * _eps_m.value(_t, _q_point[_qp]) * (1.0 - rhop);

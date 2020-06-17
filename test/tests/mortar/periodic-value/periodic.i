@@ -10,11 +10,11 @@
     new_block_name = "secondary"
     sidesets = '101'
   []
-  [master]
+  [primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 12
-    new_block_name = "master"
+    new_block_name = "primary"
     sidesets = '103'
   []
 []
@@ -56,9 +56,9 @@
     type = EqualValueConstraint
     variable = lm
     secondary_variable = u
-    master_boundary = 103
+    primary_boundary = 103
     secondary_boundary = 101
-    master_subdomain = 12
+    primary_subdomain = 12
     secondary_subdomain = 11
     periodic = true
   []

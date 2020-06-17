@@ -43,8 +43,8 @@
     type = TiedValueConstraint
     variable = u
     secondary = 2
-    master = 3
-    master_variable = u
+    primary = 3
+    primary_variable = u
   [../]
 []
 

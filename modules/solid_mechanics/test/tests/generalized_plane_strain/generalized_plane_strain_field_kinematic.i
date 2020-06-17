@@ -108,7 +108,7 @@
   [./szz]
     type = EqualValueBoundaryConstraint
     variable = strain_zz
-    master = '8'
+    primary = '8'
     secondary = 10
     penalty = 1e12
     formulation = kinematic

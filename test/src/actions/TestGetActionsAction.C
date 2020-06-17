@@ -54,7 +54,7 @@ TestGetActionsAction::act()
       auto size = actions.size();
       comm.receive(pid, size);
       if (size != actions.size())
-        mooseError("error occurs during getting actions, sizes of actions on master and rank ",
+        mooseError("error occurs during getting actions, sizes of actions on primary and rank ",
                    pid,
                    " are different");
       for (MooseIndex(actions) i = 0; i < actions.size(); ++i)
@@ -62,7 +62,7 @@ TestGetActionsAction::act()
         std::string action_name;
         comm.receive(pid, action_name);
         if (action_name != actions[i]->name())
-          mooseError("error occurs during getting actions, action names are inconsistent on master "
+          mooseError("error occurs during getting actions, action names are inconsistent on primary "
                      "and rank ",
                      pid);
       }

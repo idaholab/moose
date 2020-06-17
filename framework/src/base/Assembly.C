@@ -2656,7 +2656,7 @@ Assembly::prepareLowerD()
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
-      // derivatives w.r.t. interior master residuals
+      // derivatives w.r.t. interior primary residuals
       jacobianBlockLower(Moose::MasterLower, vi, vj, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
@@ -3179,7 +3179,7 @@ Assembly::cacheResidualNodes(const DenseVector<Number> & res,
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
   // respectively.
-  // This is used by NodalConstraint.C to cache the residual calculated for master and secondary node.
+  // This is used by NodalConstraint.C to cache the residual calculated for primary and secondary node.
   for (MooseIndex(dof_index) i = 0; i < dof_index.size(); ++i)
   {
     _cached_residual_values[tag].push_back(res(i));

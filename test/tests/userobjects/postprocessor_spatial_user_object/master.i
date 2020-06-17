@@ -54,7 +54,7 @@
   [./sub]
     type = TransientMultiApp
     app_type = MooseTestApp
-    input_files = 'secondary.i'
+    input_files = 'slave.i'
     positions = '
       0.25 0.25 0
       0.75 0.75 0'

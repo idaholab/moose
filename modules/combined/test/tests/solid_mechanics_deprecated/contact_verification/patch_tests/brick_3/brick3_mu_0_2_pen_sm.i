@@ -351,7 +351,7 @@
 [Contact]
   [./leftright]
     secondary = 3
-    master = 4
+    primary = 4
     model = coulomb
     formulation = penalty
     normalize_penalty = true

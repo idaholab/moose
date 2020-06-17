@@ -17,11 +17,11 @@
 
 [Contact]
   [./dummy_name]
-    master = 3
+    primary = 3
     secondary = 2
     penalty = 5e6
     formulation = penalty
-    master_secondary_jacobian = false
+    primary_secondary_jacobian = false
     normalize_penalty = true
   [../]
 []

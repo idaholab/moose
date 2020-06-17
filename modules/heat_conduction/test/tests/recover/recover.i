@@ -42,9 +42,9 @@
   [./thermal_contact]
     type = GapHeatTransfer
     variable = temp
-    master = 5
+    primary = 5
     secondary = 10
-    emissivity_master = 0
+    emissivity_primary = 0
     emissivity_secondary = 0
     quadrature = true
   [../]

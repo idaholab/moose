@@ -20,8 +20,8 @@ NormalMortarLMMechanicalContact::validParams()
       "Enforces the normal contact complementarity conditions in a mortar discretization");
   params.addParam<NonlinearVariableName>("secondary_disp_y",
                                          "The y displacement variable on the secondary face");
-  params.addParam<NonlinearVariableName>("master_disp_y",
-                                         "The y displacement variable on the master face");
+  params.addParam<NonlinearVariableName>("primary_disp_y",
+                                         "The y displacement variable on the primary face");
   MooseEnum ncp_type("min fb", "min");
   params.addParam<MooseEnum>("ncp_function_type",
                              ncp_type,
@@ -35,26 +35,26 @@ NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputPara
     _secondary_disp_y(isParamValid("secondary_disp_y") ? &this->_subproblem.getStandardVariable(
                                                      _tid, parameters.getMooseType("secondary_disp_y"))
                                                : nullptr),
-    _master_disp_y(
-        isParamValid("master_disp_y")
-            ? &this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
+    _primary_disp_y(
+        isParamValid("primary_disp_y")
+            ? &this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_disp_y"))
             : isParamValid("secondary_disp_y") ? &this->_subproblem.getStandardVariable(
                                                  _tid, parameters.getMooseType("secondary_disp_y"))
                                            : nullptr),
     _computing_gap_dependence(false),
     _secondary_disp_y_sln(nullptr),
-    _master_disp_y_sln(nullptr),
+    _primary_disp_y_sln(nullptr),
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _ncp_type(getParam<MooseEnum>("ncp_function_type"))
 {
   if (_secondary_disp_y)
   {
-    mooseAssert(_master_disp_y,
+    mooseAssert(_primary_disp_y,
                 "It doesn't make any sense that we have a secondary displacement variable and not a "
-                "master displacement variable");
+                "primary displacement variable");
     _computing_gap_dependence = true;
     _secondary_disp_y_sln = &_secondary_disp_y->adSln();
-    _master_disp_y_sln = &_master_disp_y->adSlnNeighbor();
+    _primary_disp_y_sln = &_primary_disp_y->adSlnNeighbor();
   }
 }
 
@@ -65,16 +65,16 @@ NormalMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type
   {
     case Moose::MortarType::Lower:
     {
-      if (_has_master)
+      if (_has_primary)
       {
-        DualRealVectorValue gap_vec = _phys_points_master[_qp] - _phys_points_secondary[_qp];
+        DualRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
         if (_computing_gap_dependence)
         {
-          // Here we're assuming that the user provided the x-component as the secondary/master
+          // Here we're assuming that the user provided the x-component as the secondary/primary
           // variable!
-          gap_vec(0).derivatives() = _u_master[_qp].derivatives() - _u_secondary[_qp].derivatives();
+          gap_vec(0).derivatives() = _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
           gap_vec(1).derivatives() =
-              (*_master_disp_y_sln)[_qp].derivatives() - (*_secondary_disp_y_sln)[_qp].derivatives();
+              (*_primary_disp_y_sln)[_qp].derivatives() - (*_secondary_disp_y_sln)[_qp].derivatives();
         }
 
         auto gap = gap_vec * _normals[_qp];

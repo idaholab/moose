@@ -19,7 +19,7 @@ EqualGradientConstraint::validParams()
   InputParameters params = ADMortarConstraint::validParams();
   params.addClassDescription(
       "EqualGradientConstraint enforces continuity of a gradient component between secondary and "
-      "master sides of a mortar interface using lagrange multipliers");
+      "primary sides of a mortar interface using lagrange multipliers");
   params.addRequiredParam<unsigned int>("component", "Gradient component to constrain");
   return params;
 }
@@ -37,9 +37,9 @@ EqualGradientConstraint::computeQpResidual(Moose::MortarType mortar_type)
     case Moose::MortarType::Slave:
       return -_lambda[_qp] * _grad_test_secondary[_i][_qp](_component);
     case Moose::MortarType::Master:
-      return _lambda[_qp] * _grad_test_master[_i][_qp](_component);
+      return _lambda[_qp] * _grad_test_primary[_i][_qp](_component);
     case Moose::MortarType::Lower:
-      return (_grad_u_master[_qp](_component) - _grad_u_secondary[_qp](_component)) * _test[_i][_qp];
+      return (_grad_u_primary[_qp](_component) - _grad_u_secondary[_qp](_component)) * _test[_i][_qp];
     default:
       return 0;
   }

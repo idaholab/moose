@@ -68,7 +68,7 @@ public:
   /**
    * Method for linking control parameters of different names
    */
-  void addControllableParameterConnection(const MooseObjectParameterName & master,
+  void addControllableParameterConnection(const MooseObjectParameterName & primary,
                                           const MooseObjectParameterName & secondary,
                                           bool error_on_empty = true);
 

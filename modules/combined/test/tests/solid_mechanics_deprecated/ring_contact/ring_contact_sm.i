@@ -42,7 +42,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 3
+    primary = 3
     secondary = 2
     disp_x = disp_x
     disp_y = disp_y

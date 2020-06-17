@@ -34,7 +34,7 @@ MechanicalContactConstraint::validParams()
   InputParameters params = NodeFaceConstraint::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
@@ -72,9 +72,9 @@ MechanicalContactConstraint::validParams()
       "normalize_penalty",
       false,
       "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
-  params.addParam<bool>("master_secondary_jacobian",
+  params.addParam<bool>("primary_secondary_jacobian",
                         true,
-                        "Whether to include jacobian entries coupling master and secondary nodes.");
+                        "Whether to include jacobian entries coupling primary and secondary nodes.");
   params.addParam<bool>(
       "connected_secondary_nodes_jacobian",
       true,
@@ -103,7 +103,7 @@ MechanicalContactConstraint::validParams()
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
 
   params.addClassDescription("Apply non-penetration constraints on the mechanical deformation "
-                             "using a node on face, master/secondary algorithm, and multiple options "
+                             "using a node on face, primary/secondary algorithm, and multiple options "
                              "for the physical behavior on the interface and the mathematical "
                              "formulation for constraint enforcement");
 
@@ -133,7 +133,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
-    _master_secondary_jacobian(getParam<bool>("master_secondary_jacobian")),
+    _primary_secondary_jacobian(getParam<bool>("primary_secondary_jacobian")),
     _connected_secondary_nodes_jacobian(getParam<bool>("connected_secondary_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
     _contact_linesearch(dynamic_cast<ContactLineSearchBase *>(_subproblem.getLineSearch())),
@@ -478,7 +478,7 @@ MechanicalContactConstraint::shouldApply()
       bool is_nonlinear = _subproblem.computingNonlinearResid();
 
       // This computes the contact force once per constraint, rather than once per quad point
-      // and for both master and secondary cases.
+      // and for both primary and secondary cases.
       if (_component == 0)
         computeContactForce(pinfo, is_nonlinear);
 
@@ -830,7 +830,7 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
       return _test_secondary[_i][_qp] * resid;
 
     case Moose::Master:
-      return _test_master[_i][_qp] * -resid;
+      return _test_primary[_i][_qp] * -resid;
   }
 
   return 0.0;
@@ -983,24 +983,24 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case ContactFormulation::KINEMATIC:
             {
-              const Node * curr_master_node = _current_master->node_ptr(_j);
+              const Node * curr_primary_node = _current_primary->node_ptr(_j);
 
               RealVectorValue jac_vec;
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
                 jac_vec(i) = (*_jacobian)(dof_number,
-                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                                          curr_primary_node->dof_number(0, _vars[_component], 0)) /
                              _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
-                     (_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
+                     (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
                          pinfo->_normal(_component) * pinfo->_normal(_component);
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+              return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                      pinfo->_normal(_component) * pinfo->_normal(_component);
 
             default:
@@ -1015,28 +1015,28 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                   pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
               {
-                const Node * curr_master_node = _current_master->node_ptr(_j);
+                const Node * curr_primary_node = _current_primary->node_ptr(_j);
 
                 RealVectorValue jac_vec;
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
                   jac_vec(i) = (*_jacobian)(dof_number,
-                                            curr_master_node->dof_number(0, _vars[_component], 0)) /
+                                            curr_primary_node->dof_number(0, _vars[_component], 0)) /
                                _var_objects[i]->scalingFactor();
                 }
                 return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
-                       (_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
+                       (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
                            pinfo->_normal(_component) * pinfo->_normal(_component);
               }
               else
               {
-                const Node * curr_master_node = _current_master->node_ptr(_j);
+                const Node * curr_primary_node = _current_primary->node_ptr(_j);
                 const Real curr_jac =
                     (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
-                                 curr_master_node->dof_number(0, _vars[_component], 0)) /
+                                 curr_primary_node->dof_number(0, _vars[_component], 0)) /
                     _var.scalingFactor();
-                return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]);
+                return (-curr_jac - _phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]);
               }
             }
 
@@ -1044,42 +1044,42 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             {
               if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                   pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
-                return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+                return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                        pinfo->_normal(_component) * pinfo->_normal(_component);
               else
-                return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp];
+                return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
             }
             case ContactFormulation::AUGMENTED_LAGRANGE:
             {
-              Real normal_comp = -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+              Real normal_comp = -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                                  pinfo->_normal(_component) * pinfo->_normal(_component);
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = -_phi_master[_j][_qp] * penalty_slip * _test_secondary[_i][_qp] *
+                tang_comp = -_phi_primary[_j][_qp] * penalty_slip * _test_secondary[_i][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
               return normal_comp + tang_comp;
             }
 
             case ContactFormulation::TANGENTIAL_PENALTY:
             {
-              const Node * curr_master_node = _current_master->node_ptr(_j);
+              const Node * curr_primary_node = _current_primary->node_ptr(_j);
 
               RealVectorValue jac_vec;
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
                 jac_vec(i) = (*_jacobian)(dof_number,
-                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                                          curr_primary_node->dof_number(0, _vars[_component], 0)) /
                              _var_objects[i]->scalingFactor();
               }
               Real normal_comp = -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
-                                 (_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
+                                 (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
                                      pinfo->_normal(_component) * pinfo->_normal(_component);
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+                tang_comp = -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
 
               return normal_comp + tang_comp;
@@ -1093,17 +1093,17 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           {
             case ContactFormulation::KINEMATIC:
             {
-              const Node * curr_master_node = _current_master->node_ptr(_j);
+              const Node * curr_primary_node = _current_primary->node_ptr(_j);
               const Real curr_jac =
                   (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
-                               curr_master_node->dof_number(0, _vars[_component], 0)) /
+                               curr_primary_node->dof_number(0, _vars[_component], 0)) /
                   _var.scalingFactor();
-              return (-curr_jac - _phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]);
+              return (-curr_jac - _phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]);
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp];
+              return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp];
 
             default:
               mooseError("Invalid contact formulation");
@@ -1129,12 +1129,12 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                              _var_objects[i]->scalingFactor();
               }
               return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
-                     _test_master[_i][_qp];
+                     _test_primary[_i][_qp];
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
+              return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
                      pinfo->_normal(_component) * pinfo->_normal(_component);
 
             default:
@@ -1156,7 +1156,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                                _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
-                       _test_master[_i][_qp];
+                       _test_primary[_i][_qp];
               }
               else
               {
@@ -1164,7 +1164,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                     (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
                                  _connected_dof_indices[_j]) /
                     _var.scalingFactor();
-                return secondary_jac * _test_master[_i][_qp];
+                return secondary_jac * _test_primary[_i][_qp];
               }
             }
 
@@ -1172,19 +1172,19 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             {
               if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                   pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
-                return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
+                return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
                        pinfo->_normal(_component) * pinfo->_normal(_component);
               else
-                return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp];
+                return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp];
             }
             case ContactFormulation::AUGMENTED_LAGRANGE:
             {
-              Real normal_comp = -_phi_secondary[_j][_qp] * penalty * _test_master[_i][_qp] *
+              Real normal_comp = -_phi_secondary[_j][_qp] * penalty * _test_primary[_i][_qp] *
                                  pinfo->_normal(_component) * pinfo->_normal(_component);
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = -_phi_secondary[_j][_qp] * penalty_slip * _test_master[_i][_qp] *
+                tang_comp = -_phi_secondary[_j][_qp] * penalty_slip * _test_primary[_i][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
               return normal_comp + tang_comp;
             }
@@ -1199,11 +1199,11 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                              _var_objects[i]->scalingFactor();
               }
               Real normal_comp =
-                  pinfo->_normal(_component) * (pinfo->_normal * jac_vec) * _test_master[_i][_qp];
+                  pinfo->_normal(_component) * (pinfo->_normal * jac_vec) * _test_primary[_i][_qp];
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
+                tang_comp = -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
 
               return normal_comp + tang_comp;
@@ -1222,12 +1222,12 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                   (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
                                _connected_dof_indices[_j]) /
                   _var.scalingFactor();
-              return secondary_jac * _test_master[_i][_qp];
+              return secondary_jac * _test_primary[_i][_qp];
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp];
+              return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp];
 
             default:
               mooseError("Invalid contact formulation");
@@ -1248,7 +1248,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+              return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                      pinfo->_normal(_component) * pinfo->_normal(_component);
 
             default:
@@ -1266,29 +1266,29 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             {
               if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                   pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
-                return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+                return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                        pinfo->_normal(_component) * pinfo->_normal(_component);
               else
-                return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp];
+                return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp];
             }
 
             case ContactFormulation::TANGENTIAL_PENALTY:
             {
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+                tang_comp = _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
               return tang_comp; // normal component is zero
             }
 
             case ContactFormulation::AUGMENTED_LAGRANGE:
             {
-              Real normal_comp = _phi_master[_j][_qp] * penalty * _test_master[_i][_qp] *
+              Real normal_comp = _phi_primary[_j][_qp] * penalty * _test_primary[_i][_qp] *
                                  pinfo->_normal(_component) * pinfo->_normal(_component);
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = _phi_master[_j][_qp] * penalty_slip * _test_master[_i][_qp] *
+                tang_comp = _phi_primary[_j][_qp] * penalty_slip * _test_primary[_i][_qp] *
                             (1.0 - pinfo->_normal(_component) * pinfo->_normal(_component));
               return normal_comp + tang_comp;
             }
@@ -1415,24 +1415,24 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           {
             case ContactFormulation::KINEMATIC:
             {
-              const Node * curr_master_node = _current_master->node_ptr(_j);
+              const Node * curr_primary_node = _current_primary->node_ptr(_j);
 
               RealVectorValue jac_vec;
               for (unsigned int i = 0; i < _mesh_dimension; ++i)
               {
                 dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
                 jac_vec(i) = (*_jacobian)(dof_number,
-                                          curr_master_node->dof_number(0, _vars[_component], 0)) /
+                                          curr_primary_node->dof_number(0, _vars[_component], 0)) /
                              _var_objects[i]->scalingFactor();
               }
               return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
-                     (_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
+                     (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
                          pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+              return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                      pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             default:
@@ -1445,35 +1445,35 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION))
           {
-            const Node * curr_master_node = _current_master->node_ptr(_j);
+            const Node * curr_primary_node = _current_primary->node_ptr(_j);
 
             RealVectorValue jac_vec;
             for (unsigned int i = 0; i < _mesh_dimension; ++i)
             {
               dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
               jac_vec(i) =
-                  (*_jacobian)(dof_number, curr_master_node->dof_number(0, _vars[_component], 0)) /
+                  (*_jacobian)(dof_number, curr_primary_node->dof_number(0, _vars[_component], 0)) /
                   _var_objects[i]->scalingFactor();
             }
 
             return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
-                   (_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
+                   (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
                        pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
           }
           else if ((_formulation == ContactFormulation::PENALTY) &&
                    (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                     pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION))
-            return -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+            return -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                    pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
           else if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE)
           {
-            Real normal_comp = -_phi_master[_j][_qp] * penalty * _test_secondary[_i][_qp] *
+            Real normal_comp = -_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp] *
                                pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             Real tang_comp = 0.0;
             if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-              tang_comp = -_phi_master[_j][_qp] * penalty_slip * _test_secondary[_i][_qp] *
+              tang_comp = -_phi_primary[_j][_qp] * penalty_slip * _test_secondary[_i][_qp] *
                           (-pinfo->_normal(_component) * normal_component_in_coupled_var_dir);
             return normal_comp + tang_comp;
           }
@@ -1503,12 +1503,12 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                              _var_objects[i]->scalingFactor();
               }
               return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
-                     _test_master[_i][_qp];
+                     _test_primary[_i][_qp];
             }
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
+              return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
                      pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             default:
@@ -1530,7 +1530,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                                _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
-                       _test_master[_i][_qp];
+                       _test_primary[_i][_qp];
               }
               else
               {
@@ -1538,7 +1538,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                     (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
                                  _connected_dof_indices[_j]) /
                     _var.scalingFactor();
-                return secondary_jac * _test_master[_i][_qp];
+                return secondary_jac * _test_primary[_i][_qp];
               }
             }
 
@@ -1546,19 +1546,19 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             {
               if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                   pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
-                return -_test_master[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
+                return -_test_primary[_i][_qp] * penalty * _phi_secondary[_j][_qp] *
                        pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
               else
                 return 0.0;
             }
             case ContactFormulation::AUGMENTED_LAGRANGE:
             {
-              Real normal_comp = -_phi_secondary[_j][_qp] * penalty * _test_master[_i][_qp] *
+              Real normal_comp = -_phi_secondary[_j][_qp] * penalty * _test_primary[_i][_qp] *
                                  pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
               Real tang_comp = 0.0;
               if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-                tang_comp = -_phi_secondary[_j][_qp] * penalty_slip * _test_master[_i][_qp] *
+                tang_comp = -_phi_secondary[_j][_qp] * penalty_slip * _test_primary[_i][_qp] *
                             (-pinfo->_normal(_component) * normal_component_in_coupled_var_dir);
               return normal_comp + tang_comp;
             }
@@ -1575,7 +1575,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                                _var_objects[i]->scalingFactor();
                 }
                 return pinfo->_normal(_component) * (pinfo->_normal * jac_vec) *
-                       _test_master[_i][_qp];
+                       _test_primary[_i][_qp];
               }
               else
                 return 0.0;
@@ -1594,7 +1594,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
                   (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
                                _connected_dof_indices[_j]) /
                   _var.scalingFactor();
-              return secondary_jac * _test_master[_i][_qp];
+              return secondary_jac * _test_primary[_i][_qp];
             }
 
             case ContactFormulation::PENALTY:
@@ -1620,7 +1620,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
 
             case ContactFormulation::PENALTY:
             case ContactFormulation::AUGMENTED_LAGRANGE:
-              return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+              return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                      pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             default:
@@ -1632,7 +1632,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE)
           {
 
-            Real normal_comp = _phi_master[_j][_qp] * penalty * _test_master[_i][_qp] *
+            Real normal_comp = _phi_primary[_j][_qp] * penalty * _test_primary[_i][_qp] *
                                pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
@@ -1644,7 +1644,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           else if (_formulation == ContactFormulation::PENALTY &&
                    (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                     pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION))
-            return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+            return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                    pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
           else
             return 0.0;
@@ -1654,16 +1654,16 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           if (_formulation == ContactFormulation::PENALTY &&
               (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION))
-            return _test_master[_i][_qp] * penalty * _phi_master[_j][_qp] *
+            return _test_primary[_i][_qp] * penalty * _phi_primary[_j][_qp] *
                    pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
           else if (_formulation == ContactFormulation::AUGMENTED_LAGRANGE)
           {
-            Real normal_comp = _phi_master[_j][_qp] * penalty * _test_master[_i][_qp] *
+            Real normal_comp = _phi_primary[_j][_qp] * penalty * _test_primary[_i][_qp] *
                                pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
 
             Real tang_comp = 0.0;
             if (pinfo->_mech_status == PenetrationInfo::MS_STICKING)
-              tang_comp = _phi_master[_j][_qp] * penalty_slip * _test_master[_i][_qp] *
+              tang_comp = _phi_primary[_j][_qp] * penalty_slip * _test_primary[_i][_qp] *
                           (-pinfo->_normal(_component) * normal_component_in_coupled_var_dir);
             return normal_comp + tang_comp;
           }
@@ -1722,7 +1722,7 @@ MechanicalContactConstraint::computeJacobian()
   getConnectedDofIndices(_var.number());
 
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 
@@ -1731,25 +1731,25 @@ MechanicalContactConstraint::computeJacobian()
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
 
-  if (_master_secondary_jacobian)
+  if (_primary_secondary_jacobian)
   {
     DenseMatrix<Number> & Ken =
         _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
     if (Ken.m() && Ken.n())
       for (_i = 0; _i < _test_secondary.size(); _i++)
-        for (_j = 0; _j < _phi_master.size(); _j++)
+        for (_j = 0; _j < _phi_primary.size(); _j++)
           Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
 
-    _Kne.resize(_test_master.size(), _connected_dof_indices.size());
-    for (_i = 0; _i < _test_master.size(); _i++)
+    _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
+    for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
         _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
   }
 
   if (Knn.m() && Knn.n())
-    for (_i = 0; _i < _test_master.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
+    for (_i = 0; _i < _test_primary.size(); _i++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
         Knn(_i, _j) += computeQpJacobian(Moose::MasterMaster);
 }
 
@@ -1761,31 +1761,31 @@ MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
-  if (_master_secondary_jacobian)
+  if (_primary_secondary_jacobian)
   {
     DenseMatrix<Number> & Ken =
         _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
     for (_i = 0; _i < _test_secondary.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
         Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
-    _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+    _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     if (_Kne.m() && _Kne.n())
-      for (_i = 0; _i < _test_master.size(); _i++)
+      for (_i = 0; _i < _test_primary.size(); _i++)
         // Loop over the connected dof indices so we can get all the jacobian contributions
         for (_j = 0; _j < _connected_dof_indices.size(); _j++)
           _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
   }
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
+    for (_j = 0; _j < _phi_primary.size(); _j++)
       Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
 }
 
@@ -1795,7 +1795,7 @@ MechanicalContactConstraint::getConnectedDofIndices(unsigned int var_num)
   unsigned int component;
   if (getCoupledVarComponent(var_num, component) || _non_displacement_vars_jacobian)
   {
-    if (_master_secondary_jacobian && _connected_secondary_nodes_jacobian)
+    if (_primary_secondary_jacobian && _connected_secondary_nodes_jacobian)
       NodeFaceConstraint::getConnectedDofIndices(var_num);
     else
     {

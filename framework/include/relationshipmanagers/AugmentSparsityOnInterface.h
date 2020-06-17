@@ -71,9 +71,9 @@ protected:
 
   bool _has_attached_amg;
 
-  BoundaryName _master_boundary_name;
+  BoundaryName _primary_boundary_name;
   BoundaryName _secondary_boundary_name;
-  SubdomainName _master_subdomain_name;
+  SubdomainName _primary_subdomain_name;
   SubdomainName _secondary_subdomain_name;
 
   std::pair<SubdomainID, SubdomainID> _subdomain_pair;

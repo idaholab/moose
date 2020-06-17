@@ -90,7 +90,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 3
+    primary = 3
     secondary = 2
     formulation = penalty
     penalty = 1e9

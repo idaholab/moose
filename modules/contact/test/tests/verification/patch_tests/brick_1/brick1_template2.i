@@ -361,7 +361,7 @@
 [Contact]
   [./leftright]
     secondary = 3
-    master = 4
+    primary = 4
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 5e+9

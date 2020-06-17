@@ -185,7 +185,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 1000
+    primary = 1000
     secondary = 100
     disp_x = disp_x
     disp_y = disp_y

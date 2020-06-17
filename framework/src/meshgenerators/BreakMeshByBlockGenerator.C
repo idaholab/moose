@@ -179,7 +179,7 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
   {
 
     // find the appropriate boundary name and id
-    //  given master and secondary block ID
+    //  given primary and secondary block ID
     if (_split_interface)
       findBoundaryNameAndInd(mesh,
                              boundary_side_map.first.first,

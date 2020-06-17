@@ -44,8 +44,8 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  // Holds the master node id
-  unsigned int _master_node_id;
+  // Holds the primary node id
+  unsigned int _primary_node_id;
   // Holds the list of secondary node ids
   std::vector<unsigned int> _secondary_node_ids;
   // Holds the secondary node set or side set

@@ -26,8 +26,8 @@ public:
 
   /**
    * Create mortar generation object
-   * @param boundary_key The master-secondary boundary pair on which the AMG objects lives
-   * @param subdomain_key The master-secondary subdomain pair on which the AMG objects lives
+   * @param boundary_key The primary-secondary boundary pair on which the AMG objects lives
+   * @param subdomain_key The primary-secondary subdomain pair on which the AMG objects lives
    * @param subproblem A reference to the subproblem
    * @param on_displaced Whether the AMG object lives on the displaced mesh
    * @param periodic Whether the AMG object will be used for enforcing periodic constraints. Note
@@ -100,11 +100,11 @@ private:
 
   typedef std::pair<BoundaryID, BoundaryID> MortarKey;
 
-  /// Map from master-secondary (in that order) boundary ID pair to the corresponding
+  /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
   /// undisplaced AutomaticMortarGeneration object
   std::unordered_map<MortarKey, AutomaticMortarGeneration> _mortar_interfaces;
 
-  /// Map from master-secondary (in that order) boundary ID pair to the corresponding
+  /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
   /// displaced AutomaticMortarGeneration object
   std::unordered_map<MortarKey, AutomaticMortarGeneration> _displaced_mortar_interfaces;
 

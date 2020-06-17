@@ -29,7 +29,7 @@
   [../]
   [./iface_u]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = 1
+    primary_block = 1
     paired_block = 2
     new_boundary = 10
     input = right_side

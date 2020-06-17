@@ -114,7 +114,7 @@ name = 'finite_rr'
 [Contact]
   [./frictionless]
     mesh = block_sidesets
-    master = plank_right
+    primary = plank_right
     secondary = block_left
     formulation = mortar
   [../]

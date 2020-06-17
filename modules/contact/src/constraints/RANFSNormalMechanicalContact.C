@@ -36,8 +36,8 @@ RANFSNormalMechanicalContact::validParams()
       "ping_pong_protection",
       false,
       "Whether to protect against ping-ponging, e.g. the oscillation of the secondary node between two "
-      "different master faces, by tying the secondary node to the "
-      "edge between the involved master faces");
+      "different primary faces, by tying the secondary node to the "
+      "edge between the involved primary faces");
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
@@ -87,8 +87,8 @@ RANFSNormalMechanicalContact::initialSetup()
 void
 RANFSNormalMechanicalContact::timestepSetup()
 {
-  _node_to_master_elem_sequence.clear();
-  _ping_pong_secondary_node_to_master_node.clear();
+  _node_to_primary_elem_sequence.clear();
+  _ping_pong_secondary_node_to_primary_node.clear();
 }
 
 void
@@ -168,48 +168,48 @@ RANFSNormalMechanicalContact::shouldApply()
       _tied_lm = _node_to_tied_lm[_current_node->id()];
 
       // Check to see whether we've locked a ping-ponging node
-      if (_ping_pong_secondary_node_to_master_node.find(_current_node->id()) ==
-          _ping_pong_secondary_node_to_master_node.end())
+      if (_ping_pong_secondary_node_to_primary_node.find(_current_node->id()) ==
+          _ping_pong_secondary_node_to_primary_node.end())
       {
         if (_contact_lm > -_pinfo->_distance)
         {
           // Ok, our math is telling us we should apply the constraint, but what if we are
-          // ping-ponging back and forth between different master faces?
+          // ping-ponging back and forth between different primary faces?
 
           // This only works for a basic line search! Write assertion here
           if (_subproblem.computingNonlinearResid())
           {
-            auto & master_elem_sequence = _node_to_master_elem_sequence[_current_node->id()];
+            auto & primary_elem_sequence = _node_to_primary_elem_sequence[_current_node->id()];
             mooseAssert(
-                _current_master == _pinfo->_elem,
-                "The current master element and the PenetrationInfo object's element should "
+                _current_primary == _pinfo->_elem,
+                "The current primary element and the PenetrationInfo object's element should "
                 "be the same");
-            master_elem_sequence.push_back(_pinfo->_elem);
+            primary_elem_sequence.push_back(_pinfo->_elem);
 
             // 5 here is a heuristic choice. In testing, generally speaking, if a node ping-pongs
             // back and forth 5 times then it will ping pong indefinitely. However, if it goes 3
             // times for example, it is not guaranteed to ping-pong indefinitely and the Newton
             // iteration may naturally resolve the correct face dofs that need to be involved in the
             // constraint.
-            if (_ping_pong_protection && master_elem_sequence.size() >= 5 &&
-                _pinfo->_elem == *(master_elem_sequence.rbegin() + 2) &&
-                _pinfo->_elem == *(master_elem_sequence.rbegin() + 4) &&
-                _pinfo->_elem != *(master_elem_sequence.rbegin() + 1) &&
-                *(master_elem_sequence.rbegin() + 1) == *(master_elem_sequence.rbegin() + 3))
+            if (_ping_pong_protection && primary_elem_sequence.size() >= 5 &&
+                _pinfo->_elem == *(primary_elem_sequence.rbegin() + 2) &&
+                _pinfo->_elem == *(primary_elem_sequence.rbegin() + 4) &&
+                _pinfo->_elem != *(primary_elem_sequence.rbegin() + 1) &&
+                *(primary_elem_sequence.rbegin() + 1) == *(primary_elem_sequence.rbegin() + 3))
             {
-              // Ok we are ping-ponging. Determine the master node
-              auto master_node =
+              // Ok we are ping-ponging. Determine the primary node
+              auto primary_node =
                   _penetration_locator._nearest_node.nearestNode(_current_node->id());
 
               // Sanity checks
-              mooseAssert(_pinfo->_elem->get_node_index(master_node) != libMesh::invalid_uint,
-                          "The master node is not on the current element");
-              mooseAssert((*(master_elem_sequence.rbegin() + 1))->get_node_index(master_node) !=
+              mooseAssert(_pinfo->_elem->get_node_index(primary_node) != libMesh::invalid_uint,
+                          "The primary node is not on the current element");
+              mooseAssert((*(primary_elem_sequence.rbegin() + 1))->get_node_index(primary_node) !=
                               libMesh::invalid_uint,
-                          "The master node is not on the other ping-ponging element");
+                          "The primary node is not on the other ping-ponging element");
 
-              _ping_pong_secondary_node_to_master_node.insert(
-                  std::make_pair(_current_node->id(), master_node));
+              _ping_pong_secondary_node_to_primary_node.insert(
+                  std::make_pair(_current_node->id(), primary_node));
             }
           }
         }
@@ -221,14 +221,14 @@ RANFSNormalMechanicalContact::shouldApply()
 
       // Determine whether we're going to apply the tied node equality constraint or the contact
       // inequality constraint
-      auto it = _ping_pong_secondary_node_to_master_node.find(_current_node->id());
-      if (it != _ping_pong_secondary_node_to_master_node.end())
+      auto it = _ping_pong_secondary_node_to_primary_node.find(_current_node->id());
+      if (it != _ping_pong_secondary_node_to_primary_node.end())
       {
         _tie_nodes = true;
         _nearest_node = it->second;
-        _master_index = _current_master->get_node_index(_nearest_node);
-        mooseAssert(_master_index != libMesh::invalid_uint,
-                    "nearest node not a node on the current master element");
+        _primary_index = _current_primary->get_node_index(_nearest_node);
+        mooseAssert(_primary_index != libMesh::invalid_uint,
+                    "nearest node not a node on the current primary element");
       }
       else
       {
@@ -259,11 +259,11 @@ RANFSNormalMechanicalContact::shouldApply()
     }
   }
 
-  // If we're not applying the constraint then we can clear the node to master elem sequence for
+  // If we're not applying the constraint then we can clear the node to primary elem sequence for
   // this node
-  if (_node_to_master_elem_sequence.find(_current_node->id()) !=
-      _node_to_master_elem_sequence.end())
-    _node_to_master_elem_sequence[_current_node->id()].clear();
+  if (_node_to_primary_elem_sequence.find(_current_node->id()) !=
+      _node_to_primary_elem_sequence.end())
+    _node_to_primary_elem_sequence[_current_node->id()].clear();
   return false;
 }
 
@@ -288,7 +288,7 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
         }
 
         else
-          // The normal points out of the master face
+          // The normal points out of the primary face
           return _contact_lm * -_pinfo->_normal(_component);
       }
     }
@@ -297,13 +297,13 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
     {
       if (_tie_nodes)
       {
-        if (_i == _master_index)
+        if (_i == _primary_index)
           return _tied_lm;
         else
           return 0;
       }
       else
-        return _test_master[_i][_qp] * _contact_lm * _pinfo->_normal(_component);
+        return _test_primary[_i][_qp] * _contact_lm * _pinfo->_normal(_component);
     }
 
     default:
@@ -354,11 +354,11 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
     {
       if (_tie_nodes)
       {
-        if (_master_index == _j)
+        if (_primary_index == _j)
           return -1;
 
-        // We're tying the secondary node to only one node on the master side (specified by
-        // _master_index). If the current _j doesn't correspond to that tied master node, then the
+        // We're tying the secondary node to only one node on the primary side (specified by
+        // _primary_index). If the current _j doesn't correspond to that tied primary node, then the
         // secondary residual doesn't depend on it
         else
           return 0;
@@ -366,11 +366,11 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       else
       {
         if (_largest_component == static_cast<unsigned int>(_component))
-          return -std::abs(_pinfo->_normal(_component)) * _phi_master[_j][_qp];
+          return -std::abs(_pinfo->_normal(_component)) * _phi_primary[_j][_qp];
 
         // If we're not applying the gap constraint equation on this _component, then we're
         // applying a Lagrange multiplier, and consequently there is no dependence of the secondary
-        // residual on the master dofs because the Lagrange multiplier is only a functon of the
+        // residual on the primary dofs because the Lagrange multiplier is only a functon of the
         // secondary residuals
         else
           return 0;
@@ -381,7 +381,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
     {
       if (_tie_nodes)
       {
-        if (_i == _master_index)
+        if (_i == _primary_index)
         {
           mooseAssert(_dof_number_to_value[_component].find(_connected_dof_indices[_j]) !=
                           _dof_number_to_value[_component].end(),
@@ -390,7 +390,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
           return _dof_number_to_value[_component][_connected_dof_indices[_j]];
         }
 
-        // We only apply the tied node Lagrange multiplier to the closest master node
+        // We only apply the tied node Lagrange multiplier to the closest primary node
         else
           return 0;
       }
@@ -405,14 +405,14 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
                     _dof_number_to_value[i].end(),
                 "The connected dof index is not found in the _dof_number_to_value container. "
                 "This must mean that insufficient sparsity was allocated");
-            ret_val += _test_master[_i][_qp] * _pinfo->_normal(_component) * _pinfo->_normal(i) *
+            ret_val += _test_primary[_i][_qp] * _pinfo->_normal(_component) * _pinfo->_normal(i) *
                        _dof_number_to_value[i][_connected_dof_indices[_j]];
           }
         return ret_val;
       }
     }
 
-      // The only master-master dependence would come from the dependence of the normal and also the
+      // The only primary-primary dependence would come from the dependence of the normal and also the
       // location of the integration (quadrature) points. We assume (valid or not) that this
       // dependence is weak
       // case MooseConstraintJacobianType::MasterMaster

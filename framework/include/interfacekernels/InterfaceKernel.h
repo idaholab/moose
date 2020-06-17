@@ -44,7 +44,7 @@ public:
 
   InterfaceKernelTempl(const InputParameters & parameters);
 
-  /// The master variable that this interface kernel operates on
+  /// The primary variable that this interface kernel operates on
   virtual MooseVariableFE<T> & variable() const override { return _var; }
 
   /// The neighbor variable number that this interface kernel operates on
@@ -71,7 +71,7 @@ public:
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
                                                unsigned int jvar) override;
 
-  /// Selects the correct Jacobian type and routine to call for the master variable jacobian
+  /// Selects the correct Jacobian type and routine to call for the primary variable jacobian
   virtual void computeElementOffDiagJacobian(unsigned int jvar) override;
 
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
@@ -87,7 +87,7 @@ public:
   virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
 
 protected:
-  /// The master side MooseVariable
+  /// The primary side MooseVariable
   MooseVariableFE<T> & _var;
 
   /// Normal vectors at the quadrature points

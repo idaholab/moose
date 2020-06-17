@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   /// Holds the secondary node set or side set
-  BoundaryName _master_boundary_id;
+  BoundaryName _primary_boundary_id;
 
   /// Holds the secondary node set or side set
   BoundaryName _secondary_boundary_id;
@@ -45,12 +45,12 @@ protected:
   /// Coefficient of friction
   const Real & _friction_coefficient;
 
-  /// master node id connected to each secondary node in _connected_nodes
-  std::vector<dof_id_type> _master_conn;
+  /// primary node id connected to each secondary node in _connected_nodes
+  std::vector<dof_id_type> _primary_conn;
 
   /// Old value of the constrainted variable on the secondary nodes
   const VariableValue & _u_secondary_old;
 
-  /// Old value of the constrainted variable on the master nodes
-  const VariableValue & _u_master_old;
+  /// Old value of the constrainted variable on the primary nodes
+  const VariableValue & _u_primary_old;
 };

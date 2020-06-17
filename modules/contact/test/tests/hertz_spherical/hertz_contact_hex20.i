@@ -223,7 +223,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 1000
+    primary = 1000
     secondary = 100
 
     normalize_penalty = true
@@ -235,7 +235,7 @@
 #[Dampers]
 #  [./contact_slip]
 #    type = ContactSlipDamper
-#    master = 1000
+#    primary = 1000
 #    secondary = 100
 #  [../]
 #[]

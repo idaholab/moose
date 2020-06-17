@@ -3,14 +3,14 @@
     type = FileMeshGenerator
     file = nodal_normals_test_offset_nonmatching_gap.e
   []
-  [./master]
+  [./primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
   [../]
   [./secondary]
-    input = master
+    input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
@@ -76,9 +76,9 @@
 [Constraints]
   [./mortar]
     type = GapHeatConductanceTest
-    master_boundary = 2
+    primary_boundary = 2
     secondary_boundary = 1
-    master_subdomain = 20
+    primary_subdomain = 20
     secondary_subdomain = 10
     variable = lambda
     secondary_variable = T

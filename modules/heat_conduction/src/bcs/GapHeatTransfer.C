@@ -346,7 +346,7 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
     //   dh_conduction/du_[xyz] = -gapK/gapLength^2 * dgapLength/du_[xyz]
     // Given
     //   gapLength = ((u_x-m_x)^2+(u_y-m_y)^2+(u_z-m_z)^2)^1/2
-    // where m_[xyz] is the master coordinate, then
+    // where m_[xyz] is the primary coordinate, then
     //   dGapLength/du_[xyz] =
     //   1/2*((u_x-m_x)^2+(u_y-m_y)^2+(u_z-m_z)^2)^(-1/2)*2*(u_[xyz]-m_[xyz])
     //                       = (u_[xyz]-m_[xyz])/gapLength
@@ -397,7 +397,7 @@ GapHeatTransfer::computeSlaveQpOffDiagJacobian(unsigned jvar)
 
     const Real dgap = dgapLength(-normal(coupled_component));
 
-    // The sign of the secondary side should presumably be opposite that of the master side
+    // The sign of the secondary side should presumably be opposite that of the primary side
     dRdx = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] *
            GapConductance::gapAttenuation(gapL, _min_gap, _min_gap_order) * dgap;
   }

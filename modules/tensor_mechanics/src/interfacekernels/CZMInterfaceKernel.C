@@ -59,7 +59,7 @@ CZMInterfaceKernel::computeQpResidual(Moose::DGResidualType type)
 
   switch (type)
   {
-    // [test_secondary-test_master]*T where T represents the traction.
+    // [test_secondary-test_primary]*T where T represents the traction.
     case Moose::Element:
       r *= -_test[_i][_qp];
       break;

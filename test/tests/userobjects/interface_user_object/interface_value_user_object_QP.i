@@ -14,15 +14,15 @@
     top_right = '1 1 0'
     block_id = 1
   [../]
-  [./master0_interface]
+  [./primary0_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./break_boundary]
-    input = master0_interface
+    input = primary0_interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
@@ -62,11 +62,11 @@
 []
 
 [InterfaceKernels]
-  [./master0_interface]
+  [./primary0_interface]
     type = PenaltyInterfaceDiffusionDot
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
   [../]
 []
@@ -114,47 +114,47 @@
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = average
   [../]
-  [./interface_master_minus_secondary_uo]
+  [./interface_primary_minus_secondary_uo]
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
-    interface_value_type = jump_master_minus_secondary
+    interface_value_type = jump_primary_minus_secondary
   [../]
-  [./interface_secondary_minus_master_uo]
+  [./interface_secondary_minus_primary_uo]
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
-    interface_value_type = jump_secondary_minus_master
+    interface_value_type = jump_secondary_minus_primary
   [../]
   [./interface_absolute_jump_uo]
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = jump_abs
   [../]
-  [./interface_master_uo]
+  [./interface_primary_uo]
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
-    interface_value_type = master
+    interface_value_type = primary
   [../]
   [./interface_secondary_uo]
     type = InterfaceQpValueUserObject
     var = diffusivity_1
     var_neighbor = diffusivity_2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'initial timestep_end'
     interface_value_type = secondary
   [../]
@@ -190,42 +190,42 @@
   [./interface_avg_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_value_uo
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [./interface_master_minus_secondary_qp_aux]
+  [./interface_primary_minus_secondary_qp_aux]
     type = InterfaceValueUserObjectAux
-    variable = master_minus_secondary_qp
-    boundary = 'master0_interface'
-    interface_uo_name = interface_master_minus_secondary_uo
+    variable = primary_minus_secondary_qp
+    boundary = 'primary0_interface'
+    interface_uo_name = interface_primary_minus_secondary_uo
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./interface_secondary_minus_master_qp_aux]
+  [./interface_secondary_minus_primary_qp_aux]
     type = InterfaceValueUserObjectAux
-    variable = secondary_minus_master_qp
-    boundary = 'master0_interface'
-    interface_uo_name = interface_secondary_minus_master_uo
+    variable = secondary_minus_primary_qp
+    boundary = 'primary0_interface'
+    interface_uo_name = interface_secondary_minus_primary_uo
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_absolute_jump_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = abs_jump_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_absolute_jump_uo
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./interface_master_qp_aux]
+  [./interface_primary_qp_aux]
     type = InterfaceValueUserObjectAux
-    variable = master_qp
-    boundary = 'master0_interface'
-    interface_uo_name = interface_master_uo
+    variable = primary_qp
+    boundary = 'primary0_interface'
+    interface_uo_name = interface_primary_uo
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./interface_secondary_qp_aux]
     type = InterfaceValueUserObjectAux
     variable = secondary_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_secondary_uo
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
@@ -246,11 +246,11 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./master_minus_secondary_qp]
+  [./primary_minus_secondary_qp]
     family = MONOMIAL
     order = CONSTANT
   []
-  [./secondary_minus_master_qp]
+  [./secondary_minus_primary_qp]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -258,7 +258,7 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./master_qp]
+  [./primary_qp]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -273,37 +273,37 @@
 [Postprocessors]
   [./interface_average_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     variable =  avg_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./master_minus_secondary_qp_PP]
+  [./primary_minus_secondary_qp_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
-    variable =  master_minus_secondary_qp
+    boundary = 'primary0_interface'
+    variable =  primary_minus_secondary_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./secondary_minus_master_qp_PP]
+  [./secondary_minus_primary_qp_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
-    variable =  secondary_minus_master_qp
+    boundary = 'primary0_interface'
+    variable =  secondary_minus_primary_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./abs_jump_qp_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     variable =  abs_jump_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
-  [./master_qp_PP]
+  [./primary_qp_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
-    variable =  master_qp
+    boundary = 'primary0_interface'
+    variable =  primary_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./secondary_qp_PP]
     type = SideAverageValue
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     variable =  secondary_qp
     execute_on = 'INITIAL TIMESTEP_END'
   [../]

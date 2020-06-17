@@ -1339,14 +1339,14 @@ public:
   virtual void updateMortarMesh();
 
   void
-  createMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_secondary_boundary_pair,
-                        const std::pair<SubdomainID, SubdomainID> & master_secondary_subdomain_pair,
+  createMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                        const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                         bool on_displaced,
                         bool periodic);
 
   const AutomaticMortarGeneration &
-  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_secondary_boundary_pair,
-                     const std::pair<SubdomainID, SubdomainID> & master_secondary_subdomain_pair,
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                      bool on_displaced) const;
 
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &

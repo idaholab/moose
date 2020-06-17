@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   /// Holds the secondary node set or side set
-  BoundaryName _master_boundary_id;
+  BoundaryName _primary_boundary_id;
 
   /// Holds the secondary node set or side set
   BoundaryName _secondary_boundary_id;
@@ -39,6 +39,6 @@ protected:
   /// Tangential stiffness of spring in all directions
   const Real & _penalty;
 
-  /// master node id connected to each secondary node in _connected_nodes
-  std::vector<dof_id_type> _master_conn;
+  /// primary node id connected to each secondary node in _connected_nodes
+  std::vector<dof_id_type> _primary_conn;
 };

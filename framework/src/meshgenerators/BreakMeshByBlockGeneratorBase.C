@@ -69,17 +69,17 @@ BreakMeshByBlockGeneratorBase::findFreeBoundaryId(MeshBase & mesh)
 
 std::string
 BreakMeshByBlockGeneratorBase::generateBoundaryName(MeshBase & mesh,
-                                                    const subdomain_id_type & masterBlockID,
+                                                    const subdomain_id_type & primaryBlockID,
                                                     const subdomain_id_type & secondaryBlockID)
 {
-  std::string master_block_name = mesh.subdomain_name(masterBlockID);
+  std::string primary_block_name = mesh.subdomain_name(primaryBlockID);
   std::string secondary_block_name = mesh.subdomain_name(secondaryBlockID);
-  if (master_block_name.empty())
-    master_block_name = "Block" + std::to_string(masterBlockID);
+  if (primary_block_name.empty())
+    primary_block_name = "Block" + std::to_string(primaryBlockID);
   if (secondary_block_name.empty())
     secondary_block_name = "Block" + std::to_string(secondaryBlockID);
 
-  return master_block_name + "_" + secondary_block_name;
+  return primary_block_name + "_" + secondary_block_name;
 }
 
 void
@@ -91,7 +91,7 @@ BreakMeshByBlockGeneratorBase::mapBoundaryIdAndBoundaryName(boundary_id_type & b
 
 void
 BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
-                                                      const subdomain_id_type & masterBlockID,
+                                                      const subdomain_id_type & primaryBlockID,
                                                       const subdomain_id_type & secondaryBlockID,
                                                       std::string & boundaryName,
                                                       boundary_id_type & boundaryID,
@@ -102,7 +102,7 @@ BreakMeshByBlockGeneratorBase::findBoundaryNameAndInd(MeshBase & mesh,
 
   // mpi barrier
   // first check which boundary name will be created
-  boundaryName = generateBoundaryName(mesh, masterBlockID, secondaryBlockID);
+  boundaryName = generateBoundaryName(mesh, primaryBlockID, secondaryBlockID);
 
   // check if the boundary name already exist
   bool checkBoundaryAlreadyExist = false;

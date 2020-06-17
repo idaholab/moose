@@ -31,7 +31,7 @@ InputParameters validParams<NodeFaceConstraint>();
  * two surfaces in a mesh.  It works by allowing you to modify the residual
  * and jacobian entries on "this" side (the node side, also referred to as
  * the secondary side) and the "other" side (the face side, also referred to as
- * the master side)
+ * the primary side)
  *
  * This is common for contact algorithms and other constraints.
  */
@@ -96,7 +96,7 @@ public:
   /**
    * The variable on the Master side of the domain.
    */
-  virtual MooseVariable & masterVariable() { return _master_var; }
+  virtual MooseVariable & primaryVariable() { return _primary_var; }
 
   /**
    * The variable number that this object operates on.
@@ -217,13 +217,13 @@ protected:
 
   /// Boundary ID for the secondary surface
   unsigned int _secondary;
-  /// Boundary ID for the master surface
-  unsigned int _master;
+  /// Boundary ID for the primary surface
+  unsigned int _primary;
 
   MooseVariable & _var;
 
-  const MooseArray<Point> & _master_q_point;
-  const QBase * const & _master_qrule;
+  const MooseArray<Point> & _primary_q_point;
+  const QBase * const & _primary_qrule;
 
 public:
   PenetrationLocator & _penetration_locator;
@@ -231,7 +231,7 @@ public:
 protected:
   /// current node being processed
   const Node * const & _current_node;
-  const Elem * const & _current_master;
+  const Elem * const & _current_primary;
 
   /// Value of the unknown variable this BC is action on
   const VariableValue & _u_secondary;
@@ -241,25 +241,25 @@ protected:
   VariableTestValue _test_secondary;
 
   /// Master side variable
-  MooseVariable & _master_var;
+  MooseVariable & _primary_var;
 
-  /// Number for the master variable
-  unsigned int _master_var_num;
+  /// Number for the primary variable
+  unsigned int _primary_var_num;
 
   /// Side shape function.
-  const VariablePhiValue & _phi_master;
+  const VariablePhiValue & _phi_primary;
   /// Gradient of side shape function
-  const VariablePhiGradient & _grad_phi_master;
+  const VariablePhiGradient & _grad_phi_primary;
 
   /// Side test function
-  const VariableTestValue & _test_master;
+  const VariableTestValue & _test_primary;
   /// Gradient of side shape function
-  const VariableTestGradient & _grad_test_master;
+  const VariableTestGradient & _grad_test_primary;
 
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_master;
+  const VariableValue & _u_primary;
   /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_master;
+  const VariableGradient & _grad_u_primary;
 
   /// DOF map
   const DofMap & _dof_map;
@@ -274,8 +274,8 @@ protected:
    */
   bool _overwrite_secondary_residual;
 
-  /// JxW on the master face
-  const MooseArray<Real> & _master_JxW;
+  /// JxW on the primary face
+  const MooseArray<Real> & _primary_JxW;
 
   /// Whether the secondary residual has been computed
   bool _secondary_residual_computed;
@@ -286,22 +286,22 @@ protected:
 public:
   std::vector<dof_id_type> _connected_dof_indices;
 
-  /// The Jacobian corresponding to the derivatives of the neighbor/master residual with respect to
+  /// The Jacobian corresponding to the derivatives of the neighbor/primary residual with respect to
   /// the elemental/secondary degrees of freedom.  We want to manually manipulate Kne because of the
-  /// dependence of the master residuals on dofs from all elements connected to the secondary node
+  /// dependence of the primary residuals on dofs from all elements connected to the secondary node
   /// (e.g. those held by _connected_dof_indices)
   DenseMatrix<Number> _Kne;
 
   /// The Jacobian corresponding to the derivatives of the elemental/secondary residual with respect to
   /// the elemental/secondary degrees of freedom.  We want to manually manipulate Kee because of the
-  /// dependence of the secondary/master residuals on // dofs from all elements connected to the secondary
+  /// dependence of the secondary/primary residuals on // dofs from all elements connected to the secondary
   /// node (e.g. those held by _connected_dof_indices) // and because when we're overwriting the
   /// secondary residual we traditionally want to use a different // scaling factor from the one
   /// associated with interior physics
   DenseMatrix<Number> _Kee;
 
   /// The Jacobian corresponding to the derivatives of the elemental/secondary residual with respect to
-  /// the neighbor/master degrees of freedom.  We want to manually manipulate Ken because when we're
+  /// the neighbor/primary degrees of freedom.  We want to manually manipulate Ken because when we're
   /// overwriting the secondary residual we traditionally want to use a different scaling factor from the
   /// one associated with interior physics
   DenseMatrix<Number> _Ken;

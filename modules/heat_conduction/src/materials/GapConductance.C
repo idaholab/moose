@@ -83,17 +83,17 @@ GapConductance::actionParameters()
                                    "End point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("sphere_origin", "Origin for sphere geometry");
 
-  params.addRangeCheckedParam<Real>("emissivity_master",
+  params.addRangeCheckedParam<Real>("emissivity_primary",
                                     1,
-                                    "emissivity_master>=0 & emissivity_master<=1",
-                                    "The emissivity of the master surface");
+                                    "emissivity_primary>=0 & emissivity_primary<=1",
+                                    "The emissivity of the primary surface");
   params.addRangeCheckedParam<Real>("emissivity_secondary",
                                     1,
                                     "emissivity_secondary>=0 & emissivity_secondary<=1",
                                     "The emissivity of the secondary surface");
   params.addDeprecatedParam<Real>("emissivity_1",
                                   "The emissivity of the fuel surface",
-                                  "Please use \"emissivity_master\" instead");
+                                  "Please use \"emissivity_primary\" instead");
   params.addDeprecatedParam<Real>("emissivity_2",
                                   "The emissivity of the cladding surface",
                                   "Please use \"emissivity_secondary\" instead");
@@ -147,16 +147,16 @@ GapConductance::GapConductance(const InputParameters & parameters)
 {
   // set emissivity but allow legacy naming; legacy names are used if they
   // are present
-  Real emissivity_master = getParam<Real>("emissivity_master");
+  Real emissivity_primary = getParam<Real>("emissivity_primary");
   if (isParamValid("emissivity_1"))
   {
-    emissivity_master = getParam<Real>("emissivity_1");
+    emissivity_primary = getParam<Real>("emissivity_1");
 
     // make sure emissivity is physical
-    if (emissivity_master < 0 || emissivity_master > 1)
+    if (emissivity_primary < 0 || emissivity_primary > 1)
       paramError("emissivity_1",
                  "Emissivities must have values between 0 and 1. You provided: ",
-                 emissivity_master);
+                 emissivity_primary);
   }
 
   Real emissivity_secondary = getParam<Real>("emissivity_secondary");
@@ -170,8 +170,8 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  "Emissivities must have values between 0 and 1. You provided: ",
                  emissivity_secondary);
   }
-  _emissivity = emissivity_master != 0.0 && emissivity_secondary != 0.0
-                    ? 1.0 / emissivity_master + 1.0 / emissivity_secondary - 1
+  _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
+                    ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1
                     : 0.0;
 
   if (_quadrature)

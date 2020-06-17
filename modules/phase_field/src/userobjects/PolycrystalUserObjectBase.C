@@ -180,7 +180,7 @@ PolycrystalUserObjectBase::finalize()
   {
     // Resize the color assignment vector here. All ranks need a copy of this
     _grain_to_op.resize(_feature_count, PolycrystalUserObjectBase::INVALID_COLOR);
-    if (_is_master)
+    if (_is_primary)
     {
       buildGrainAdjacencyMatrix();
 
@@ -388,7 +388,7 @@ PolycrystalUserObjectBase::areFeaturesMergeable(const FeatureData & f1,
 void
 PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 {
-  mooseAssert(_is_master, "This routine should only be called on the master rank");
+  mooseAssert(_is_primary, "This routine should only be called on the primary rank");
 
   _adjacency_matrix = libmesh_make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
   for (auto & grain1 : _feature_sets)
@@ -410,7 +410,7 @@ PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 void
 PolycrystalUserObjectBase::assignOpsToGrains()
 {
-  mooseAssert(_is_master, "This routine should only be called on the master rank");
+  mooseAssert(_is_primary, "This routine should only be called on the primary rank");
 
   Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
 

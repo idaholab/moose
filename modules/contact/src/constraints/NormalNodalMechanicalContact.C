@@ -68,9 +68,9 @@ NormalNodalMechanicalContact::computeOffDiagJacobian(unsigned jvar)
   _Kee.resize(1, 1);
   _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
-  _Kne.resize(_test_master.size(), 1);
+  _Kne.resize(_test_primary.size(), 1);
 
-  for (_i = 0; _i < _test_master.size(); ++_i)
+  for (_i = 0; _i < _test_primary.size(); ++_i)
     _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
 }
 
@@ -92,7 +92,7 @@ NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
           return _lambda * -pinfo->_normal(_component);
 
         case Moose::ConstraintType::Master:
-          return _test_master[_i][_qp] * _lambda * pinfo->_normal(_component);
+          return _test_primary[_i][_qp] * _lambda * pinfo->_normal(_component);
 
         default:
           return 0;
@@ -126,7 +126,7 @@ NormalNodalMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobian
         case Moose::SlaveSlave:
           return -pinfo->_normal(_component);
         case Moose::MasterSlave:
-          return _test_master[_i][_qp] * pinfo->_normal(_component);
+          return _test_primary[_i][_qp] * pinfo->_normal(_component);
         default:
           return 0;
       }

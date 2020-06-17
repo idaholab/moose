@@ -18,8 +18,8 @@ TangentialMortarLMMechanicalContact::validParams()
   auto params = MortarConstraintBase::validParams();
   params.addRequiredParam<NonlinearVariableName>("secondary_disp_y",
                                                  "The y displacement variable on the secondary face");
-  params.addParam<NonlinearVariableName>("master_disp_y",
-                                         "The y displacement variable on the master face");
+  params.addParam<NonlinearVariableName>("primary_disp_y",
+                                         "The y displacement variable on the primary face");
   params.addRequiredParam<NonlinearVariableName>(
       "contact_pressure",
       "The normal contact pressure; oftentimes this may be a separate lagrange multiplier "
@@ -44,17 +44,17 @@ TangentialMortarLMMechanicalContact::TangentialMortarLMMechanicalContact(
   : ADMortarConstraint(parameters),
     _secondary_disp_y(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_disp_y"))),
-    _master_disp_y(
-        isParamValid("master_disp_y")
-            ? this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
+    _primary_disp_y(
+        isParamValid("primary_disp_y")
+            ? this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_disp_y"))
             : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_disp_y"))),
     _contact_pressure_var(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
     _contact_pressure(_contact_pressure_var.adSlnLower()),
     _secondary_x_dot(_secondary_var.adUDot()),
-    _master_x_dot(_master_var.adUDotNeighbor()),
+    _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(_secondary_disp_y.adUDot()),
-    _master_y_dot(_master_disp_y.adUDotNeighbor()),
+    _primary_y_dot(_primary_disp_y.adUDotNeighbor()),
     _friction_coeff(getParam<Real>("friction_coefficient")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _ncp_type(getParam<MooseEnum>("ncp_function_type")),
@@ -69,15 +69,15 @@ TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_
   {
     case Moose::MortarType::Lower:
     {
-      // Check whether we project onto a master face
-      if (_has_master)
+      // Check whether we project onto a primary face
+      if (_has_primary)
       {
         // Check whether we are actually in contact
         if (_contact_pressure[_qp] > TOLERANCE * TOLERANCE)
         {
           // Build the velocity vector
           ADRealVectorValue relative_velocity(
-              _secondary_x_dot[_qp] - _master_x_dot[_qp], _secondary_y_dot[_qp] - _master_y_dot[_qp], 0);
+              _secondary_x_dot[_qp] - _primary_x_dot[_qp], _secondary_y_dot[_qp] - _primary_y_dot[_qp], 0);
 
           // Get the component in the tangential direction
           auto tangential_velocity = relative_velocity * _tangents[_qp][0];
@@ -116,7 +116,7 @@ TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_
       }
       else
         // If not in contact then we force the tangential lagrange multiplier to zero (if we don't
-        // project onto a master face, then we're definitely not in contact)
+        // project onto a primary face, then we're definitely not in contact)
         return _test[_i][_qp] * _lambda[_qp];
     }
 

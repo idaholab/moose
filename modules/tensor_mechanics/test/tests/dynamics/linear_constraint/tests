@@ -7,7 +7,7 @@
     compiler = 'GCC CLANG'
 
     requirement = "The LinearNodalConstraint class shall constrain the secondary nodes"
-                  " to move as a linear combination of the master nodes."
+                  " to move as a linear combination of the primary nodes."
     design = "LinearNodalConstraint.md"
     issues = "#5783"
   [../]

@@ -74,12 +74,12 @@ name = 'finite_noaction'
     new_block_id = '30'
     new_block_name = 'frictionless_secondary_subdomain'
   [../]
-  [./master]
+  [./primary]
     input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'plank_right'
     new_block_id = '20'
-    new_block_name = 'frictionless_master_subdomain'
+    new_block_name = 'frictionless_primary_subdomain'
   [../]
 []
 
@@ -116,18 +116,18 @@ name = 'finite_noaction'
   [./lm]
     type = NormalNodalLMMechanicalContact
     secondary = block_left
-    master = plank_right
+    primary = plank_right
     variable = frictionless_normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
   [../]
   [./normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = plank_right
+    primary_boundary = plank_right
     secondary_boundary = block_left
-    master_subdomain = frictionless_master_subdomain
+    primary_subdomain = frictionless_primary_subdomain
     secondary_subdomain = frictionless_secondary_subdomain
     variable = frictionless_normal_lm
     secondary_variable = disp_x
@@ -137,9 +137,9 @@ name = 'finite_noaction'
   [../]
   [./normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = plank_right
+    primary_boundary = plank_right
     secondary_boundary = block_left
-    master_subdomain = frictionless_master_subdomain
+    primary_subdomain = frictionless_primary_subdomain
     secondary_subdomain = frictionless_secondary_subdomain
     variable = frictionless_normal_lm
     secondary_variable = disp_y

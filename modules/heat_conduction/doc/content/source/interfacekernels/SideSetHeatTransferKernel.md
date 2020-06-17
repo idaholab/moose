@@ -14,15 +14,15 @@ This kernel models the heat transfer across a side set using all three heat tran
 \begin{equation}
   q''^+_{\mathrm{radiation}} = q''^-_{\mathrm{radiation}} = \epsilon^{-}_{\mathrm{eff}}T_{-}^4 -  \epsilon^{+}_{\mathrm{eff}}T_{+}^4,
 \end{equation}
-where the $+$ and $-$ indices indicate the master and neighbor side of the boundary, respectively.
+where the $+$ and $-$ indices indicate the primary and neighbor side of the boundary, respectively.
 
  - $C_{\mathrm{gap}}$ is the gap conductance typically defined as conductivity divided by gap width: `conductance`
 
- - $h_{\mathrm{gap}}^{\pm}$ is the convective heat transfer coefficient: `h_master`/`h_neighbor`
+ - $h_{\mathrm{gap}}^{\pm}$ is the convective heat transfer coefficient: `h_primary`/`h_neighbor`
 
  - $T_{\mathrm{bulk}}$ is the bulk temperature of the gap, either defined by a material property or variable: `Tbulk_mat` or `Tbulk_var`
 
- - $\epsilon^{\pm}_{\mathrm{eff}}$ is the effective emmissivity: `emissivity_eff_master`/`emissivity_eff_neighbor`
+ - $\epsilon^{\pm}_{\mathrm{eff}}$ is the effective emmissivity: `emissivity_eff_primary`/`emissivity_eff_neighbor`
 
 \begin{equation}
   \epsilon^{\pm}_{\mathrm{eff}} = \sigma\epsilon^{\pm}\frac{1-\rho^{\mp}}{1-\rho^{+}\rho^{-}}

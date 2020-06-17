@@ -4,7 +4,7 @@
     type = FileMeshGenerator
     file = mesh.e
   []
-  [./master]
+  [./primary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
@@ -14,7 +14,7 @@
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-    input = master
+    input = primary
   [../]
 []
 
@@ -83,9 +83,9 @@
 [Constraints]
   [lm]
     type = NormalMortarLMMechanicalContact
-    master_boundary = '2'
+    primary_boundary = '2'
     secondary_boundary = '1'
-    master_subdomain = '20'
+    primary_subdomain = '20'
     secondary_subdomain = '10'
     variable = lambda
     secondary_variable = disp_x
@@ -95,9 +95,9 @@
   []
   [x]
     type = NormalMortarMechanicalContact
-    master_boundary = '2'
+    primary_boundary = '2'
     secondary_boundary = '1'
-    master_subdomain = '20'
+    primary_subdomain = '20'
     secondary_subdomain = '10'
     variable = lambda
     secondary_variable = disp_x
@@ -107,9 +107,9 @@
   []
   [y]
     type = NormalMortarMechanicalContact
-    master_boundary = '2'
+    primary_boundary = '2'
     secondary_boundary = '1'
-    master_subdomain = '20'
+    primary_subdomain = '20'
     secondary_subdomain = '10'
     variable = lambda
     secondary_variable = disp_y

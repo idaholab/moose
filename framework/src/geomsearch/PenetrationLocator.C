@@ -22,20 +22,20 @@
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
-                                       const unsigned int master_id,
+                                       const unsigned int primary_id,
                                        const unsigned int secondary_id,
                                        Order order,
                                        NearestNodeLocator & nearest_node)
   : Restartable(subproblem.getMooseApp(),
-                Moose::stringify(master_id) + "to" + Moose::stringify(secondary_id),
+                Moose::stringify(primary_id) + "to" + Moose::stringify(secondary_id),
                 "PenetrationLocator",
                 0),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(),
-                       "PenetrationLocator_" + Moose::stringify(master_id) + "_" +
+                       "PenetrationLocator_" + Moose::stringify(primary_id) + "_" +
                            Moose::stringify(secondary_id)),
     _subproblem(subproblem),
     _mesh(mesh),
-    _master_boundary(master_id),
+    _primary_boundary(primary_id),
     _secondary_boundary(secondary_id),
     _fe_type(order),
     _nearest_node(nearest_node),
@@ -101,7 +101,7 @@ PenetrationLocator::detectPenetration()
 
   PenetrationThread pt(_subproblem,
                        _mesh,
-                       _master_boundary,
+                       _primary_boundary,
                        _secondary_boundary,
                        _penetration_info,
                        _check_whether_reasonable,
@@ -138,7 +138,7 @@ PenetrationLocator::detectPenetration()
       _subproblem.currentlyComputingJacobian())
     mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
                              "detected for one or more secondary nodes. This could be because "
-                             "those secondary nodes simply do not project to faces on the master "
+                             "those secondary nodes simply do not project to faces on the primary "
                              "surface. However, this could also be because contact should be "
                              "enforced on those nodes, but the faces that they project to "
                              "are outside the contact patch, which will give an erroneous "

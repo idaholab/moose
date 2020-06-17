@@ -208,7 +208,7 @@
 [Contact]
   [./leftright]
     secondary = 3
-    master = 2
+    primary = 2
     model = frictionless
     penalty = 1e+7
     formulation = penalty

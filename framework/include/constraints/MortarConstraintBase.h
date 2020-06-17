@@ -56,15 +56,15 @@ public:
 
   /**
    * Method for computing the residual
-   * @param has_master Whether the mortar segment element projects onto the master face
+   * @param has_primary Whether the mortar segment element projects onto the primary face
    */
-  virtual void computeResidual(bool has_master);
+  virtual void computeResidual(bool has_primary);
 
   /**
    * Method for computing the Jacobian
-   * @param has_master Whether the mortar segment element projects onto the master face
+   * @param has_primary Whether the mortar segment element projects onto the primary face
    */
-  virtual void computeJacobian(bool has_master);
+  virtual void computeJacobian(bool has_primary);
 
   /**
    * compute the residual for the specified element type
@@ -97,8 +97,8 @@ protected:
   /// Reference to the secondary variable
   const MooseVariable & _secondary_var;
 
-  /// Reference to the master variable
-  const MooseVariable & _master_var;
+  /// Reference to the primary variable
+  const MooseVariable & _primary_var;
 
 private:
   /// Whether to compute primal residuals
@@ -111,8 +111,8 @@ private:
   const VariableTestValue _test_dummy;
 
 protected:
-  /// Whether the current mortar segment projects onto a face on the master side
-  bool _has_master;
+  /// Whether the current mortar segment projects onto a face on the primary side
+  bool _has_primary;
 
   /// Whether to use the dual motar approach
   const bool _use_dual;
@@ -138,34 +138,34 @@ protected:
   /// The shape functions corresponding to the secondary interior primal variable
   const VariableTestValue & _test_secondary;
 
-  /// The shape functions corresponding to the master interior primal variable
-  const VariableTestValue & _test_master;
+  /// The shape functions corresponding to the primary interior primal variable
+  const VariableTestValue & _test_primary;
 
   /// The shape function gradients corresponding to the secondary interior primal variable
   const VariableTestGradient & _grad_test_secondary;
 
-  /// The shape function gradients corresponding to the master interior primal variable
-  const VariableTestGradient & _grad_test_master;
+  /// The shape function gradients corresponding to the primary interior primal variable
+  const VariableTestGradient & _grad_test_primary;
 
   /// The locations of the quadrature points on the interior secondary elements
   const MooseArray<Point> & _phys_points_secondary;
 
-  /// The locations of the quadrature points on the interior master elements
-  const MooseArray<Point> & _phys_points_master;
+  /// The locations of the quadrature points on the interior primary elements
+  const MooseArray<Point> & _phys_points_primary;
 };
 
 #define usingMortarConstraintBaseMembers                                                           \
   usingConstraintMembers;                                                                          \
   using ADMortarConstraint::_phys_points_secondary;                                                    \
-  using ADMortarConstraint::_phys_points_master;                                                   \
-  using ADMortarConstraint::_has_master;                                                           \
+  using ADMortarConstraint::_phys_points_primary;                                                   \
+  using ADMortarConstraint::_has_primary;                                                           \
   using ADMortarConstraint::_use_dual;                                                             \
   using ADMortarConstraint::_test;                                                                 \
   using ADMortarConstraint::_test_secondary;                                                           \
-  using ADMortarConstraint::_test_master;                                                          \
+  using ADMortarConstraint::_test_primary;                                                          \
   using ADMortarConstraint::_grad_test_secondary;                                                      \
-  using ADMortarConstraint::_grad_test_master;                                                     \
+  using ADMortarConstraint::_grad_test_primary;                                                     \
   using ADMortarConstraint::_normals;                                                              \
   using ADMortarConstraint::_tangents;                                                             \
   using ADMortarConstraint::_secondary_var;                                                            \
-  using ADMortarConstraint::_master_var
+  using ADMortarConstraint::_primary_var

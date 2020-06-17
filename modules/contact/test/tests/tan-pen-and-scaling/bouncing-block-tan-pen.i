@@ -48,7 +48,7 @@ offset = 1e-2
 [Contact]
   [leftright]
     secondary = 10
-    master = 20
+    primary = 20
     model = coulomb
     formulation = tangential_penalty
     penalty = 1e3

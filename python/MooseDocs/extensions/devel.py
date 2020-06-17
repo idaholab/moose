@@ -59,15 +59,15 @@ class Example(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page):
-        master = floats.create_float(parent, self.extension, self.reader, page,
+        primary = floats.create_float(parent, self.extension, self.reader, page,
                                      self.settings, token_type=ExampleFloat)
         data = info['block'] if 'block' in info else info['inline']
-        code = core.Code(master, content=data)
+        code = core.Code(primary, content=data)
 
-        if master is parent:
+        if primary is parent:
             code.attributes.update(**self.attributes)
 
-        return master
+        return primary
 
 class ComponentSettings(command.CommandComponent):
     COMMAND = 'devel'
@@ -90,7 +90,7 @@ class ComponentSettings(command.CommandComponent):
         if self.settings['object'] is None:
             raise exceptions.MooseDocsException("The 'object' setting is required.")
 
-        master = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        primary = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                      token_type=table.TableFloat)
         try:
             mod = importlib.import_module(self.settings['module'])
@@ -116,9 +116,9 @@ class ComponentSettings(command.CommandComponent):
 
         rows = [[key, value[0], value[1]] for key, value in settings.items()]
         tbl = table.builder(rows, headings=['Key', 'Default', 'Description'])
-        tbl.parent = master
+        tbl.parent = primary
 
-        if master is parent:
+        if primary is parent:
             tbl.attributes.update(**self.attributes)
 
         return parent

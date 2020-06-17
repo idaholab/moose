@@ -230,7 +230,7 @@
 
 [Contact]
   [./leftright]
-    master = 2
+    primary = 2
     secondary = 3
     model = coulomb
     formulation = kinematic
@@ -244,7 +244,7 @@
  [Dampers]
    [./contact_slip]
      type = ContactSlipDamper
-     master = '2'
+     primary = '2'
      secondary = '3'
    [../]
  []

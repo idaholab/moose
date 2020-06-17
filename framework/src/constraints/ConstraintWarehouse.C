@@ -56,8 +56,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     bool displaced = mc->getParam<bool>("use_displaced_mesh");
 
     auto secondary_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("secondary_boundary"));
-    auto master_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("master_boundary"));
-    auto key = std::make_pair(master_boundary_id, secondary_boundary_id);
+    auto primary_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("primary_boundary"));
+    auto key = std::make_pair(primary_boundary_id, secondary_boundary_id);
 
     if (displaced)
       _displaced_mortar_constraints[key].addObject(mc);
@@ -83,14 +83,14 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   {
     MooseMesh & mesh = nec->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
     SubdomainID secondary = mesh.getSubdomainID(nec->getParam<SubdomainName>("secondary"));
-    SubdomainID master = mesh.getSubdomainID(nec->getParam<SubdomainName>("master"));
+    SubdomainID primary = mesh.getSubdomainID(nec->getParam<SubdomainName>("primary"));
     bool displaced = nec->parameters().have_parameter<bool>("use_displaced_mesh") &&
                      nec->getParam<bool>("use_displaced_mesh");
 
     if (displaced)
-      _displaced_node_elem_constraints[std::make_pair(secondary, master)].addObject(nec);
+      _displaced_node_elem_constraints[std::make_pair(secondary, primary)].addObject(nec);
     else
-      _node_elem_constraints[std::make_pair(secondary, master)].addObject(nec);
+      _node_elem_constraints[std::make_pair(secondary, primary)].addObject(nec);
   }
 
   // NodalConstraint
@@ -150,7 +150,7 @@ ConstraintWarehouse::getActiveMortarConstraints(
   }
 
   mooseAssert(it != end_it,
-              "No MortarConstraints exist for the specified master-secondary boundary pair, master "
+              "No MortarConstraints exist for the specified primary-secondary boundary pair, primary "
                   << mortar_interface_key.first << " and secondary " << mortar_interface_key.second);
 
   return it->second.getActiveObjects();
@@ -182,7 +182,7 @@ ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id
 
 const std::vector<std::shared_ptr<NodeElemConstraint>> &
 ConstraintWarehouse::getActiveNodeElemConstraints(SubdomainID secondary_id,
-                                                  SubdomainID master_id,
+                                                  SubdomainID primary_id,
                                                   bool displaced) const
 {
   std::map<std::pair<SubdomainID, SubdomainID>,
@@ -191,19 +191,19 @@ ConstraintWarehouse::getActiveNodeElemConstraints(SubdomainID secondary_id,
 
   if (displaced)
   {
-    it = _displaced_node_elem_constraints.find(std::make_pair(secondary_id, master_id));
+    it = _displaced_node_elem_constraints.find(std::make_pair(secondary_id, primary_id));
     end_it = _displaced_node_elem_constraints.end();
   }
   else
   {
-    it = _node_elem_constraints.find(std::make_pair(secondary_id, master_id));
+    it = _node_elem_constraints.find(std::make_pair(secondary_id, primary_id));
     end_it = _node_elem_constraints.end();
   }
 
   mooseAssert(it != end_it,
               "Unable to locate storage for NodeElemConstraint objects for the given secondary and "
-              "master id pair: ["
-                  << secondary_id << ", " << master_id << "]");
+              "primary id pair: ["
+                  << secondary_id << ", " << primary_id << "]");
   return it->second.getActiveObjects();
 }
 
@@ -256,7 +256,7 @@ ConstraintWarehouse::hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
 
 bool
 ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
-                                                  SubdomainID master_id,
+                                                  SubdomainID primary_id,
                                                   bool displaced) const
 {
   std::map<std::pair<SubdomainID, SubdomainID>,
@@ -265,13 +265,13 @@ ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
 
   if (displaced)
   {
-    it = _displaced_node_elem_constraints.find(std::make_pair(secondary_id, master_id));
+    it = _displaced_node_elem_constraints.find(std::make_pair(secondary_id, primary_id));
     end_it = _displaced_node_elem_constraints.end();
   }
 
   else
   {
-    it = _node_elem_constraints.find(std::make_pair(secondary_id, master_id));
+    it = _node_elem_constraints.find(std::make_pair(secondary_id, primary_id));
     end_it = _node_elem_constraints.end();
   }
 
@@ -319,9 +319,9 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
 
-      // Mortar constraints require the creation of a master lower dimensional subdomain in order to
+      // Mortar constraints require the creation of a primary lower dimensional subdomain in order to
       // create the mortar segment mesh. We don't need any computing objects on it
-      subdomains_covered.insert(mc->masterSubdomain());
+      subdomains_covered.insert(mc->primarySubdomain());
     }
   }
 
@@ -339,9 +339,9 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
 
-      // Mortar constraints require the creation of a master lower dimensional subdomain in order to
+      // Mortar constraints require the creation of a primary lower dimensional subdomain in order to
       // create the mortar segment mesh. We don't need any computing objects on it
-      subdomains_covered.insert(mc->masterSubdomain());
+      subdomains_covered.insert(mc->primarySubdomain());
     }
   }
 }

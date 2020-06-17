@@ -305,7 +305,7 @@ GrainTracker::prepopulateState(const FeatureFloodCount & ffc_object)
    * _feature_sets
    * _feature_count
    */
-  if (_is_master)
+  if (_is_primary)
   {
     const auto & features = ffc_object.getFeatures();
     for (auto & feature : features)
@@ -391,7 +391,7 @@ GrainTracker::broadcastAndUpdateGrainData()
   std::vector<PartialFeatureData> root_feature_data;
   std::vector<std::string> send_buffer(1), recv_buffer;
 
-  if (_is_master)
+  if (_is_primary)
   {
     root_feature_data.reserve(_feature_sets.size());
 
@@ -421,7 +421,7 @@ GrainTracker::broadcastAndUpdateGrainData()
                                        std::back_inserter(recv_buffer));
 
   // Unpack and update
-  if (!_is_master)
+  if (!_is_primary)
   {
     std::istringstream iss;
     iss.str(recv_buffer[0]);
@@ -455,7 +455,7 @@ GrainTracker::assignGrains()
    * doesn't require valid grainIDs (relies on _min_entity_id and _var_index). These will be the
    * unique grain numbers that we must track for remainder of the simulation.
    */
-  if (_is_master)
+  if (_is_primary)
   {
     // Find the largest grain ID, this requires sorting if the ID is not already set
     sortAndLabel();
@@ -474,13 +474,13 @@ GrainTracker::assignGrains()
     for (auto & grain : _feature_sets)
       grain._status = Status::MARKED; // Mark the grain
 
-  } // is_master
+  } // is_primary
 
   /*************************************************************
    ****************** COLLECTIVE WORK SECTION ******************
    *************************************************************/
 
-  // Make IDs on all non-master ranks consistent
+  // Make IDs on all non-primary ranks consistent
   scatterAndUpdateRanks();
 
   // Build up an id to index map
@@ -504,10 +504,10 @@ GrainTracker::trackGrains()
   auto _old_max_grain_id = _max_curr_grain_id;
 
   /**
-   * Only the master rank does tracking, the remaining ranks
-   * wait to receive local to global indices from the master.
+   * Only the primary rank does tracking, the remaining ranks
+   * wait to receive local to global indices from the primary.
    */
-  if (_is_master)
+  if (_is_primary)
   {
     // Reset Status on active unique grains
     std::vector<unsigned int> map_sizes(_maps_size);
@@ -843,13 +843,13 @@ GrainTracker::trackGrains()
         }
       }
     }
-  } // is_master
+  } // is_primary
 
   /*************************************************************
    ****************** COLLECTIVE WORK SECTION ******************
    *************************************************************/
 
-  // Make IDs on all non-master ranks consistent
+  // Make IDs on all non-primary ranks consistent
   scatterAndUpdateRanks();
 
   // Build up an id to index map
@@ -880,7 +880,7 @@ GrainTracker::trackGrains()
 void
 GrainTracker::newGrainCreated(unsigned int new_grain_id)
 {
-  if (!_first_time && _is_master)
+  if (!_first_time && _is_primary)
   {
     mooseAssert(new_grain_id < _feature_id_to_local_index.size(), "new_grain_id is out of bounds");
     auto grain_index = _feature_id_to_local_index[new_grain_id];
@@ -941,7 +941,7 @@ GrainTracker::remapGrains()
    * Additionally we need to record each grain's variable index so that we can communicate
    * changes to the non-root ranks later in a single batch.
    */
-  if (_is_master)
+  if (_is_primary)
   {
     // Build the map to detect difference in _var_index mappings after the remap operation
     std::map<unsigned int, std::size_t> grain_id_to_existing_var_index;
@@ -1097,7 +1097,7 @@ GrainTracker::remapGrains()
         mooseError("Split grain remapped - This case is currently not handled");
 
     /**
-     * The remapping loop is complete but only on the master process.
+     * The remapping loop is complete but only on the primary process.
      * Now we need to build the remap map and communicate it to the
      * remaining processors.
      */
@@ -1119,7 +1119,7 @@ GrainTracker::remapGrains()
 
         /**
          * Since the remapping algorithm only runs on the root process,
-         * the variable index on the master's grains is inconsistent from
+         * the variable index on the primary's grains is inconsistent from
          * the rest of the ranks. These are the grains with a status of
          * DIRTY. As we build this map we will temporarily switch these
          * variable indices back to the correct value so that all
@@ -1643,7 +1643,7 @@ GrainTracker::communicateHaloMap()
 
     const bool isDistributedMesh = _mesh.isDistributedMesh();
 
-    if (_is_master)
+    if (_is_primary)
     {
       std::vector<std::vector<std::pair<std::size_t, dof_id_type>>> root_halo_ids(_n_procs);
       counts.resize(_n_procs);

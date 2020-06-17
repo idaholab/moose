@@ -44,7 +44,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 3
+    primary = 3
     secondary = 2
     penalty = 1e5
   [../]

@@ -1,7 +1,7 @@
 starting_point = 2e-1
 
 # We offset slightly so we avoid the case where the bottom of the secondary block and the top of the
-# master block are perfectly vertically aligned which can cause the backtracking line search some
+# primary block are perfectly vertically aligned which can cause the backtracking line search some
 # issues for a coarse mesh (basic line search handles that fine)
 offset = 1e-2
 
@@ -64,17 +64,17 @@ offset = 1e-2
   [frictional_normal_lm]
     type = NormalNodalLMMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = frictional_normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
   [../]
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = frictional_normal_lm
     secondary_variable = disp_x
@@ -84,9 +84,9 @@ offset = 1e-2
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = frictional_normal_lm
     secondary_variable = disp_y
@@ -96,9 +96,9 @@ offset = 1e-2
   []
   [frictional_tangential_lm]
     type = TangentialMortarLMMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = frictional_tangential_lm
     secondary_variable = disp_x
@@ -111,9 +111,9 @@ offset = 1e-2
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = frictional_tangential_lm
     secondary_variable = disp_x
@@ -123,9 +123,9 @@ offset = 1e-2
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = frictional_tangential_lm
     secondary_variable = disp_y

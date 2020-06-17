@@ -81,19 +81,19 @@ template <typename T>
 Real
 InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned int qp)
 {
-  Real value_master = 0;
+  Real value_primary = 0;
   Real value_secondary = 0;
   // using an if else here because a switch produce an unkown error in the docuemantion test
   if (_value_type == 0) /*value*/
   {
-    value_master = computeScalarMaterialProperty(&_prop, qp);
+    value_primary = computeScalarMaterialProperty(&_prop, qp);
     value_secondary = computeScalarMaterialProperty(&_prop_neighbor, qp);
   }
   else if (_value_type == 1) /*rate*/
   {
     if (_dt != 0)
     {
-      value_master = (computeScalarMaterialProperty(&_prop, qp) -
+      value_primary = (computeScalarMaterialProperty(&_prop, qp) -
                       computeScalarMaterialProperty(_prop_old, qp)) /
                      _dt;
       value_secondary = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
@@ -103,7 +103,7 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned in
   }
   else if (_value_type == 2) /*increment*/
   {
-    value_master =
+    value_primary =
         (computeScalarMaterialProperty(&_prop, qp) - computeScalarMaterialProperty(_prop_old, qp));
     value_secondary = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
                    computeScalarMaterialProperty(_prop_neighbor_old, qp));
@@ -112,5 +112,5 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned in
     mooseError("InterfaceQpMaterialPropertyBaseUserObject::computeRealValue the supplied "
                "value type has not been implemented");
 
-  return computeInterfaceValueType(value_master, value_secondary);
+  return computeInterfaceValueType(value_primary, value_secondary);
 }

@@ -406,7 +406,7 @@
 
 [Contact]
   [./interface]
-    master = 2
+    primary = 2
     secondary = 3
     disp_x = disp_x
     disp_y = disp_y
@@ -422,7 +422,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    master = '2'
+    primary = '2'
     secondary = '3'
   [../]
 []

@@ -41,21 +41,21 @@ public:
   GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
   virtual ~GeometricSearchData();
 
-  PenetrationLocator & getPenetrationLocator(const BoundaryName & master,
+  PenetrationLocator & getPenetrationLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary,
                                              Order order = FIRST);
-  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master,
+  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary,
                                                        Order order = FIRST);
 
-  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master,
+  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary);
-  NearestNodeLocator & getNearestNodeLocator(const unsigned int master_id,
+  NearestNodeLocator & getNearestNodeLocator(const unsigned int primary_id,
                                              const unsigned int secondary_id);
 
-  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master,
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary);
-  NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int master_id,
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int primary_id,
                                                        const unsigned int secondary_id);
 
   const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> &

@@ -31,11 +31,11 @@
 
 [ThermalContact]
   [./left_to_right]
-    emissivity_master = 0
+    emissivity_primary = 0
     emissivity_secondary = 0
     secondary = leftright
     quadrature = true
-    master = rightleft
+    primary = rightleft
     variable = temp
     type = GapHeatTransfer
   [../]

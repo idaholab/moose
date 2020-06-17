@@ -135,11 +135,11 @@
   [./left_to_right]
     secondary = leftright
     quadrature = true
-    master = rightleft
+    primary = rightleft
     variable = temp
     min_gap = 1
     min_gap_order = 1
-    emissivity_master = 0
+    emissivity_primary = 0
     emissivity_secondary = 0
     type = GapHeatTransfer
   [../]

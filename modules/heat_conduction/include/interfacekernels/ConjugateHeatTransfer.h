@@ -11,7 +11,7 @@
 
 /**
  * InterfaceKernel for modeling conjugate heat transfer.
- * The fluid block must be the master block that owns
+ * The fluid block must be the primary block that owns
  * the sidset; therefore, "element" is the element that
  * the fluid temperature is defined. The solid block is the
  * neighbor side and the solid element is the "neighbor_elem"

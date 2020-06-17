@@ -52,9 +52,9 @@
   [equal]
     type = EqualValueEmbeddedConstraint
     secondary = 2
-    master = 1
+    primary = 1
     penalty = 1e3
-    master_variable = phi
+    primary_variable = phi
     variable = phi
   []
 []

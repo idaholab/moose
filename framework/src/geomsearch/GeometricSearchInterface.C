@@ -25,31 +25,31 @@ GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_obj
 }
 
 PenetrationLocator &
-GeometricSearchInterface::getPenetrationLocator(const BoundaryName & master,
+GeometricSearchInterface::getPenetrationLocator(const BoundaryName & primary,
                                                 const BoundaryName & secondary,
                                                 Order order)
 {
-  return _geometric_search_data.getPenetrationLocator(master, secondary, order);
+  return _geometric_search_data.getPenetrationLocator(primary, secondary, order);
 }
 
 PenetrationLocator &
-GeometricSearchInterface::getQuadraturePenetrationLocator(const BoundaryName & master,
+GeometricSearchInterface::getQuadraturePenetrationLocator(const BoundaryName & primary,
                                                           const BoundaryName & secondary,
                                                           Order order)
 {
-  return _geometric_search_data.getQuadraturePenetrationLocator(master, secondary, order);
+  return _geometric_search_data.getQuadraturePenetrationLocator(primary, secondary, order);
 }
 
 NearestNodeLocator &
-GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & master,
+GeometricSearchInterface::getNearestNodeLocator(const BoundaryName & primary,
                                                 const BoundaryName & secondary)
 {
-  return _geometric_search_data.getNearestNodeLocator(master, secondary);
+  return _geometric_search_data.getNearestNodeLocator(primary, secondary);
 }
 
 NearestNodeLocator &
-GeometricSearchInterface::getQuadratureNearestNodeLocator(const BoundaryName & master,
+GeometricSearchInterface::getQuadratureNearestNodeLocator(const BoundaryName & primary,
                                                           const BoundaryName & secondary)
 {
-  return _geometric_search_data.getQuadratureNearestNodeLocator(master, secondary);
+  return _geometric_search_data.getQuadratureNearestNodeLocator(primary, secondary);
 }

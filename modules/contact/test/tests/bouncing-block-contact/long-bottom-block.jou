@@ -11,13 +11,13 @@ curve 1 3 interval 49
 
 # secondary boundary
 sideset 10 curve 7
-# master boundary
+# primary boundary
 sideset 20 curve 1
 block 1 surface 1
 block 2 surface 2
 # secondary face
 block 3 curve 7
-# master face
+# primary face
 block 4 curve 1
 
 # rotate surface 1 2 about z angle 315

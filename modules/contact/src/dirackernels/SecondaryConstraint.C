@@ -27,7 +27,7 @@ SlaveConstraint::validParams()
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The secondary boundary");
-  params.addRequiredParam<BoundaryName>("master", "The master boundary");
+  params.addRequiredParam<BoundaryName>("primary", "The primary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
@@ -65,7 +65,7 @@ SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
-        getPenetrationLocator(getParam<BoundaryName>("master"),
+        getPenetrationLocator(getParam<BoundaryName>("primary"),
                               getParam<BoundaryName>("boundary"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
     _penalty(getParam<Real>("penalty")),

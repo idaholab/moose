@@ -18,13 +18,13 @@
 
 SlaveNeighborhoodThread::SlaveNeighborhoodThread(
     const MooseMesh & mesh,
-    const std::vector<dof_id_type> & trial_master_nodes,
+    const std::vector<dof_id_type> & trial_primary_nodes,
     const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
     const unsigned int patch_size,
     KDTree & kd_tree)
   : _kd_tree(kd_tree),
     _mesh(mesh),
-    _trial_master_nodes(trial_master_nodes),
+    _trial_primary_nodes(trial_primary_nodes),
     _node_to_elem_map(node_to_elem_map),
     _patch_size(patch_size)
 {
@@ -35,7 +35,7 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x,
                                                  Threads::split /*split*/)
   : _kd_tree(x._kd_tree),
     _mesh(x._mesh),
-    _trial_master_nodes(x._trial_master_nodes),
+    _trial_primary_nodes(x._trial_primary_nodes),
     _node_to_elem_map(x._node_to_elem_map),
     _patch_size(x._patch_size)
 {
@@ -51,7 +51,7 @@ void
 SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 {
   unsigned int patch_size =
-      std::min(_patch_size, static_cast<unsigned int>(_trial_master_nodes.size()));
+      std::min(_patch_size, static_cast<unsigned int>(_trial_primary_nodes.size()));
 
   std::vector<std::size_t> return_index(patch_size);
 
@@ -67,7 +67,7 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
      * input and
      * finds the k (=patch_size) nearest neighbors to the secondary node from the
      * trial
-     *  master node set. The indices of the nearest neighbors are stored in the
+     *  primary node set. The indices of the nearest neighbors are stored in the
      * array
      * return_index.
      */
@@ -76,7 +76,7 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 
     std::vector<dof_id_type> neighbor_nodes(return_index.size());
     for (unsigned int i = 0; i < return_index.size(); ++i)
-      neighbor_nodes[i] = _trial_master_nodes[return_index[i]];
+      neighbor_nodes[i] = _trial_primary_nodes[return_index[i]];
 
     processor_id_type processor_id = _mesh.processor_id();
 

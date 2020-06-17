@@ -1,7 +1,7 @@
 starting_point = 2e-1
 
 # We offset slightly so we avoid the case where the bottom of the secondary block and the top of the
-# master block are perfectly vertically aligned which can cause the backtracking line search some
+# primary block are perfectly vertically aligned which can cause the backtracking line search some
 # issues for a coarse mesh (basic line search handles that fine)
 offset = 1e-2
 
@@ -45,7 +45,7 @@ offset = 1e-2
 [Contact]
   [frictional]
     mesh = revised_file_mesh
-    master = 20
+    primary = 20
     secondary = 10
     formulation = mortar
     model = coulomb

@@ -403,7 +403,7 @@
 
 [Contact]
   [./interface]
-    master = 2
+    primary = 2
     secondary = 3
     model = coulomb
     friction_coefficient = 0.0
@@ -417,7 +417,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    master = '2'
+    primary = '2'
     secondary = '3'
   [../]
 []

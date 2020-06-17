@@ -188,7 +188,7 @@
 
 [Contact]
   [./dummy_name]
-    master = 1000
+    primary = 1000
     secondary = 100
     model = coulomb
     formulation = penalty

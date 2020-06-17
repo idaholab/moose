@@ -27,8 +27,8 @@ NodeFaceConstraint::validParams()
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = Constraint::validParams();
   params.addRequiredParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
-  params.addRequiredParam<BoundaryName>("master",
-                                        "The boundary ID associated with the master side");
+  params.addRequiredParam<BoundaryName>("primary",
+                                        "The boundary ID associated with the primary side");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
@@ -38,7 +38,7 @@ NodeFaceConstraint::validParams()
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
-  params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
+  params.addRequiredCoupledVar("primary_variable", "The variable on the primary side of the domain");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 
@@ -47,46 +47,46 @@ NodeFaceConstraint::validParams()
 
 NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
   : Constraint(parameters),
-    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the master side and
+    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side and
     // it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _secondary(_mesh.getBoundaryID(getParam<BoundaryName>("secondary"))),
-    _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
+    _primary(_mesh.getBoundaryID(getParam<BoundaryName>("primary"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
-    _master_q_point(_assembly.qPointsFace()),
-    _master_qrule(_assembly.qRuleFace()),
+    _primary_q_point(_assembly.qPointsFace()),
+    _primary_qrule(_assembly.qRuleFace()),
 
     _penetration_locator(
-        getPenetrationLocator(getParam<BoundaryName>("master"),
+        getPenetrationLocator(getParam<BoundaryName>("primary"),
                               getParam<BoundaryName>("secondary"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
 
     _current_node(_var.node()),
-    _current_master(_var.neighbor()),
+    _current_primary(_var.neighbor()),
     _u_secondary(_var.dofValues()),
     _phi_secondary(1),  // One entry
     _test_secondary(1), // One entry
 
-    _master_var(*getVar("master_variable", 0)),
-    _master_var_num(_master_var.number()),
+    _primary_var(*getVar("primary_variable", 0)),
+    _primary_var_num(_primary_var.number()),
 
-    _phi_master(_assembly.phiFaceNeighbor(_master_var)),
-    _grad_phi_master(_assembly.gradPhiFaceNeighbor(_master_var)),
+    _phi_primary(_assembly.phiFaceNeighbor(_primary_var)),
+    _grad_phi_primary(_assembly.gradPhiFaceNeighbor(_primary_var)),
 
-    _test_master(_var.phiFaceNeighbor()),
-    _grad_test_master(_var.gradPhiFaceNeighbor()),
+    _test_primary(_var.phiFaceNeighbor()),
+    _grad_test_primary(_var.gradPhiFaceNeighbor()),
 
-    _u_master(_master_var.slnNeighbor()),
-    _grad_u_master(_master_var.gradSlnNeighbor()),
+    _u_primary(_primary_var.slnNeighbor()),
+    _grad_u_primary(_primary_var.gradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
 
     _overwrite_secondary_residual(true),
-    _master_JxW(_assembly.JxWNeighbor())
+    _primary_JxW(_assembly.JxWNeighbor())
 {
   addMooseVariableDependency(&_var);
 
@@ -140,11 +140,11 @@ void
 NodeFaceConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_master_var.number());
+  DenseVector<Number> & neighbor_re = _assembly.residualBlockNeighbor(_primary_var.number());
 
   _qp = 0;
 
-  for (_i = 0; _i < _test_master.size(); _i++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
     neighbor_re(_i) += computeQpResidual(Moose::Master);
 
   _i = 0;
@@ -164,10 +164,10 @@ NodeFaceConstraint::computeJacobian()
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement,
   //  _var.number(), _var.number());
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
   _phi_secondary.resize(_connected_dof_indices.size());
 
@@ -192,17 +192,17 @@ NodeFaceConstraint::computeJacobian()
 
   if (_Ken.m() && _Ken.n())
     for (_i = 0; _i < _test_secondary.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
         _Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
 
-  for (_i = 0; _i < _test_master.size(); _i++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
 
   if (Knn.m() && Knn.n())
-    for (_i = 0; _i < _test_master.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
+    for (_i = 0; _i < _test_primary.size(); _i++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
         Knn(_i, _j) += computeQpJacobian(Moose::MasterMaster);
 }
 
@@ -212,20 +212,20 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
   getConnectedDofIndices(jvar);
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
   // Just do a direct assignment here because the Jacobian coming from assembly has already been
   // properly sized according to the jvar neighbor dof indices. It has also been zeroed
   _Ken = _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
 
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar);
 
   _phi_secondary.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
-  auto master_jsize = _sys.getVariable(0, jvar).dofIndicesNeighbor().size();
+  auto primary_jsize = _sys.getVariable(0, jvar).dofIndicesNeighbor().size();
 
   // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
@@ -245,17 +245,17 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
-    for (_j = 0; _j < master_jsize; _j++)
+    for (_j = 0; _j < primary_jsize; _j++)
       _Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
   if (_Kne.m() && _Kne.n())
-    for (_i = 0; _i < _test_master.size(); _i++)
+    for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
         _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    for (_j = 0; _j < master_jsize; _j++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
+    for (_j = 0; _j < primary_jsize; _j++)
       Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
 }
 

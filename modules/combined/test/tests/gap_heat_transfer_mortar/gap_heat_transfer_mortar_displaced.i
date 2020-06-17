@@ -11,11 +11,11 @@
     new_block_name = 'secondary_lower'
     input = file
   []
-  [master]
+  [primary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '100'
     new_block_id = 10000
-    new_block_name = 'master_lower'
+    new_block_name = 'primary_lower'
     input = secondary
   []
 []
@@ -102,8 +102,8 @@
     secondary_variable = temp
     k = 100
     use_displaced_mesh = true
-    master_boundary = 100
-    master_subdomain = 10000
+    primary_boundary = 100
+    primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
   [../]

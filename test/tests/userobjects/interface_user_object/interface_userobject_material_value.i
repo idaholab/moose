@@ -14,15 +14,15 @@
     top_right = '1 1 0'
     block_id = 1
   [../]
-  [./master0_interface]
+  [./primary0_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./break_boundary]
-    input = master0_interface
+    input = primary0_interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
@@ -63,11 +63,11 @@
 []
 
 [InterfaceKernels]
-  [./master0_interface]
+  [./primary0_interface]
     type = PenaltyInterfaceDiffusionDot
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
   [../]
 []
@@ -109,21 +109,21 @@
 [UserObjects]
   [./interface_material_uo]
     type = InterfaceUserObjectTestGetMaterialProperty
-    property = 'master_prop'
+    property = 'primary_prop'
     property_neighbor = 'secondary_prop'
     property_boundary = 'boundary_prop'
     property_interface = 'interface_prop'
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
   [../]
 []
 
 [Materials]
-  [./mat_master]
+  [./mat_primary]
     type = LinearNonLinearIterationMaterial
     block = 0
     prefactor = 1
-    prop_name = 'master_prop'
+    prop_name = 'primary_prop'
   [../]
   [./mat_secondary]
     type = LinearNonLinearIterationMaterial
@@ -134,13 +134,13 @@
   [./mat_boundary]
     type = LinearNonLinearIterationMaterial
     prefactor = 3
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     prop_name = 'boundary_prop'
   [../]
   [./mat_interface]
     type = LinearNonLinearIterationInterfaceMaterial
     prefactor = 4
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     prop_name = 'interface_prop'
   [../]
 []

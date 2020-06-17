@@ -15,7 +15,7 @@ models for the physical behavior of the interaction:
 - glued
 - coulomb (frictional)
 
-Contact enforcement using node/face master/secondary algorithms is available using the following mathematical
+Contact enforcement using node/face primary/secondary algorithms is available using the following mathematical
 formulations:
 
 - kinematic
@@ -55,10 +55,10 @@ In addition to the Constraint class, several other objects are created, as shown
 
 ## Notes on Node/Face Contact Enforcement
 
-The node/face contact enforcement is based on a master/secondary algorithm, in
+The node/face contact enforcement is based on a primary/secondary algorithm, in
 which contact is enforced at the nodes on the secondary surface, which cannot
-penetrate faces on the master surface. As with all such approaches, for the
-best results, the master surface should be the coarser of the two surfaces.
+penetrate faces on the primary surface. As with all such approaches, for the
+best results, the primary surface should be the coarser of the two surfaces.
 
 The contact enforcement system relies on MOOSE's geometric search system to
 provide the candidate set of faces that can interact with a secondary node at a
@@ -70,8 +70,8 @@ recommended that the `patch_update_strategy=auto` be used.
 
 The formulation parameter specifies the technique used to enforce contact. The
 DEFAULT option uses a kinematic enforcement algorithm that transfers the
-internal forces at secondary nodes to the corresponding master face, and forces the
-secondary node to be at a specific location on the master face using a penalty
+internal forces at secondary nodes to the corresponding primary face, and forces the
+secondary node to be at a specific location on the primary face using a penalty
 parameter. The converged solution with this approach results no penetration
 between the surfaces. The PENALTY algorithm employs a penalty approach, where
 the penetration between the surfaces is penalized, and the converged solution

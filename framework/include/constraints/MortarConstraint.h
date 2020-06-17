@@ -59,14 +59,14 @@ protected:
   /// The primal solution on the secondary side
   const VariableValue & _u_secondary;
 
-  /// The primal solution on the master side
-  const VariableValue & _u_master;
+  /// The primal solution on the primary side
+  const VariableValue & _u_primary;
 
   /// The primal solution gradient on the secondary side
   const VariableGradient & _grad_u_secondary;
 
-  /// The primal solution gradient on the master side
-  const VariableGradient & _grad_u_master;
+  /// The primal solution gradient on the primary side
+  const VariableGradient & _grad_u_primary;
 
   /// The current shape functions
   const VariablePhiValue * _phi;

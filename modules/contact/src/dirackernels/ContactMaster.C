@@ -27,7 +27,7 @@ ContactMaster::validParams()
   InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "

@@ -15,9 +15,9 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -56,7 +56,7 @@
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
     jump_prop_name = jump
   [../]
@@ -82,12 +82,12 @@
       type = JumpInterfaceMaterial
       var = u
       neighbor_var = v
-      boundary = master0_interface
+      boundary = primary0_interface
     [../]
   [./stateful]
     type = StatefulMaterial
     initial_diffusivity = 1
-    boundary = master0_interface
+    boundary = primary0_interface
   [../]
   [./block0]
     type = GenericConstantMaterial

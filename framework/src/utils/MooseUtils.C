@@ -223,7 +223,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
     Moose::out << "Waiting For Other Processors To Finish" << std::endl;
   if (comm.rank() == 0)
   {
-    // The master process is already through, so report it
+    // The primary process is already through, so report it
     if (messaging)
       Moose::out << "Jobs complete: 1/" << comm.size() << (1 == comm.size() ? "\n" : "\r")
                  << std::flush;

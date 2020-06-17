@@ -161,16 +161,16 @@ InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
 }
 
 void
-InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & master,
+InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & primary,
                                                             const MooseObjectParameterName & secondary,
                                                             bool error_on_empty /*=true*/)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> masters = getControllableItems(master, tid);
-    if (masters.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
-      mooseError("Unable to locate master parameter with name ", master);
-    else if (masters.empty())
+    std::vector<ControllableItem *> primarys = getControllableItems(primary, tid);
+    if (primarys.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate primary parameter with name ", primary);
+    else if (primarys.empty())
       return;
 
     std::vector<ControllableItem *> secondarys = getControllableItems(secondary, tid);
@@ -179,10 +179,10 @@ InputParameterWarehouse::addControllableParameterConnection(const MooseObjectPar
     else if (secondarys.empty())
       return;
 
-    for (auto master_ptr : masters)
+    for (auto primary_ptr : primarys)
       for (auto secondary_ptr : secondarys)
-        if (master_ptr != secondary_ptr)
-          master_ptr->connect(secondary_ptr);
+        if (primary_ptr != secondary_ptr)
+          primary_ptr->connect(secondary_ptr);
   }
 }
 

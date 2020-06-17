@@ -17,7 +17,7 @@ SubdomainBoundaryConnectivity::validParams()
   InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addParam<bool>(
-      "interface_boundary", false, "True to include master and neighbor subdomains.");
+      "interface_boundary", false, "True to include primary and neighbor subdomains.");
   params.addParam<BoundaryName>("boundary", "Boundary to find connected subdomains.");
   params.addParam<SubdomainName>("block", "Subdomain to find connected boundaries.");
   return params;

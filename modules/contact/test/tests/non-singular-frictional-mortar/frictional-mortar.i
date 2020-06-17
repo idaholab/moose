@@ -94,7 +94,7 @@ refine = 1
   [leftright]
     mesh = original_file_mesh
     secondary = 10
-    master = 20
+    primary = 20
 
     model = coulomb
     formulation = mortar

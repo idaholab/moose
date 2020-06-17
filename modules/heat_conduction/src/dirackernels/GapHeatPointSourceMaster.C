@@ -22,7 +22,7 @@ GapHeatPointSourceMaster::validParams()
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = DiracKernel::validParams();
-  params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;

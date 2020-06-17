@@ -31,9 +31,9 @@
   [demo]
     type = TiedValueConstraint
     variable = T
-    master_variable = T
+    primary_variable = T
     secondary = 1
-    master = 2
+    primary = 2
   []
 []
 

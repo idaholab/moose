@@ -28,8 +28,8 @@ InputParameters validParams<NodeElemConstraint>();
 
 /**
  * A NodeElemConstraint is used when you need to create constraints between
- * a secondary node and a master element. It works by allowing you to modify the
- * residual and jacobian entries on the secondary node and the master element.
+ * a secondary node and a primary element. It works by allowing you to modify the
+ * residual and jacobian entries on the secondary node and the primary element.
  */
 class NodeElemConstraint : public Constraint,
                            public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -77,10 +77,10 @@ public:
   virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
 
   /**
-   * The variable on the master elem.
-   * @return MooseVariable & a reference to the master variable
+   * The variable on the primary elem.
+   * @return MooseVariable & a reference to the primary variable
    */
-  virtual MooseVariable & masterVariable() { return _master_var; }
+  virtual MooseVariable & primaryVariable() { return _primary_var; }
 
   /**
    * The variable number that this object operates on.
@@ -88,7 +88,7 @@ public:
   MooseVariable & variable() { return _var; }
 
 protected:
-  /// prepare the _secondary_to_master_map
+  /// prepare the _secondary_to_primary_map
   virtual void prepareSlaveToMasterMap() = 0;
 
   /// Compute the value the secondary node should have at the beginning of a timestep.
@@ -186,13 +186,13 @@ protected:
 
   /// secondary block id
   unsigned short _secondary;
-  /// master block id
-  unsigned short _master;
+  /// primary block id
+  unsigned short _primary;
 
   MooseVariable & _var;
 
-  const MooseArray<Point> & _master_q_point;
-  const QBase * const & _master_qrule;
+  const MooseArray<Point> & _primary_q_point;
+  const QBase * const & _primary_qrule;
 
   /// current node being processed
   const Node * const & _current_node;
@@ -208,35 +208,35 @@ protected:
   VariableTestValue _test_secondary;
 
   /// Master side variable
-  MooseVariable & _master_var;
+  MooseVariable & _primary_var;
 
-  /// Number for the master variable
-  unsigned int _master_var_num;
+  /// Number for the primary variable
+  unsigned int _primary_var_num;
 
   /// Side shape function.
-  const VariablePhiValue & _phi_master;
+  const VariablePhiValue & _phi_primary;
   /// Gradient of side shape function
-  const VariablePhiGradient & _grad_phi_master;
+  const VariablePhiGradient & _grad_phi_primary;
 
   /// Side test function
-  const VariableTestValue & _test_master;
+  const VariableTestValue & _test_primary;
   /// Gradient of side shape function
-  const VariableTestGradient & _grad_test_master;
+  const VariableTestGradient & _grad_test_primary;
 
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_master;
+  const VariableValue & _u_primary;
   /// Holds the old solution at the current quadrature point
-  const VariableValue & _u_master_old;
+  const VariableValue & _u_primary_old;
   /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_master;
+  const VariableGradient & _grad_u_primary;
 
   /// DOF map
   const DofMap & _dof_map;
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
-  /// maps secondary node ids to master element ids
-  std::map<dof_id_type, dof_id_type> _secondary_to_master_map;
+  /// maps secondary node ids to primary element ids
+  std::map<dof_id_type, dof_id_type> _secondary_to_primary_map;
 
   /**
    * Whether or not the secondary's residual should be overwritten.
@@ -250,7 +250,7 @@ public:
   SparseMatrix<Number> * _jacobian;
   /// dofs connected to the secondary node
   std::vector<dof_id_type> _connected_dof_indices;
-  /// stiffness matrix holding master-secondary jacobian
+  /// stiffness matrix holding primary-secondary jacobian
   DenseMatrix<Number> _Kne;
   /// stiffness matrix holding secondary-secondary jacobian
   DenseMatrix<Number> _Kee;

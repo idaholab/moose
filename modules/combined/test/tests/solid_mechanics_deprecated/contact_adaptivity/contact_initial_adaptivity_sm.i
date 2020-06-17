@@ -99,7 +99,7 @@
   [./leftright]
     secondary = 3
     displacements = 'disp_x disp_y'
-    master = 2
+    primary = 2
     model = frictionless
     penalty = 1e+6
     normal_smoothing_distance = 0.1

@@ -26,17 +26,17 @@ validParams<SideSetHeatTransferKernel>()
   params.addParam<MaterialPropertyName>(
       "Tbulk_mat", "gap_Tbulk", "Bulk temperature of gap as material");
   params.addParam<MaterialPropertyName>(
-      "h_master",
-      "gap_h_master",
-      "Convective heat transfer coefficient (master face), convection ignored if not provided");
+      "h_primary",
+      "gap_h_primary",
+      "Convective heat transfer coefficient (primary face), convection ignored if not provided");
   params.addParam<MaterialPropertyName>(
       "h_neighbor",
       "gap_h_neighbor",
       "Convective heat transfer coefficient (neighbor face), convection ignored if not provided");
   params.addParam<MaterialPropertyName>(
-      "emissivity_eff_master",
-      "gap_emissivity_eff_master",
-      "Effective emmissivity of master face, radiation ignored if not provided. "
+      "emissivity_eff_primary",
+      "gap_emissivity_eff_primary",
+      "Effective emmissivity of primary face, radiation ignored if not provided. "
       "This value contains contributions from reflectivity, see SideSetHeatTransferMaterial "
       "for details.");
   params.addParam<MaterialPropertyName>(
@@ -53,9 +53,9 @@ SideSetHeatTransferKernel::SideSetHeatTransferKernel(const InputParameters & par
     _cond(getMaterialProperty<Real>("conductance")),
     _Tbulk_var(isParamValid("Tbulk_var") ? &coupledValue("Tbulk_var") : nullptr),
     _Tbulk_mat(_Tbulk_var ? nullptr : &getMaterialProperty<Real>("Tbulk_mat")),
-    _hp(getMaterialProperty<Real>("h_master")),
+    _hp(getMaterialProperty<Real>("h_primary")),
     _hm(getMaterialProperty<Real>("h_neighbor")),
-    _eps_p(getMaterialProperty<Real>("emissivity_eff_master")),
+    _eps_p(getMaterialProperty<Real>("emissivity_eff_primary")),
     _eps_m(getMaterialProperty<Real>("emissivity_eff_neighbor"))
 {
   if (parameters.isParamSetByUser("Tbulk_mat") && _Tbulk_var)

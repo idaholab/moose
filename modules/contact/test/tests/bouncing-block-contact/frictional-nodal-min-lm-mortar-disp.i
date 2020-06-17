@@ -50,18 +50,18 @@ offset = 1e-2
 [Constraints]
   [normal_lm]
     type = NormalNodalLMMechanicalContact
-    master = 20
+    primary = 20
     secondary = 10
     variable = normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
   []
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_x
@@ -71,9 +71,9 @@ offset = 1e-2
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_y
@@ -83,10 +83,10 @@ offset = 1e-2
   []
   [tangential_lm]
     type = TangentialNodalLMMechanicalContact
-    master = 20
+    primary = 20
     secondary = 10
     variable = tangential_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     contact_pressure = normal_lm
     ncp_function_type = min
@@ -94,9 +94,9 @@ offset = 1e-2
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = tangential_lm
     secondary_variable = disp_x
@@ -106,9 +106,9 @@ offset = 1e-2
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = tangential_lm
     secondary_variable = disp_y

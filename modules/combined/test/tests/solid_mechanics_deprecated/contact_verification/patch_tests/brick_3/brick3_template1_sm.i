@@ -329,7 +329,7 @@
 [Contact]
   [./leftright]
     secondary = 3
-    master = 4
+    primary = 4
     order = SECOND
     normalize_penalty = true
     tangential_tolerance = 1e-3

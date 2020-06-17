@@ -44,7 +44,7 @@
   [./y_top]
     type = EqualValueBoundaryConstraint
     variable = diffused
-    master = '45'    # node on boundary
+    primary = '45'    # node on boundary
     secondary = 'top'    # boundary
     penalty = 10e6
   [../]

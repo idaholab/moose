@@ -28,18 +28,18 @@ MortarConstraintBase::validParams()
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
         rm_params.set<BoundaryName>("secondary_boundary") =
             obj_params.get<BoundaryName>("secondary_boundary");
-        rm_params.set<BoundaryName>("master_boundary") =
-            obj_params.get<BoundaryName>("master_boundary");
+        rm_params.set<BoundaryName>("primary_boundary") =
+            obj_params.get<BoundaryName>("primary_boundary");
         rm_params.set<SubdomainName>("secondary_subdomain") =
             obj_params.get<SubdomainName>("secondary_subdomain");
-        rm_params.set<SubdomainName>("master_subdomain") =
-            obj_params.get<SubdomainName>("master_subdomain");
+        rm_params.set<SubdomainName>("primary_subdomain") =
+            obj_params.get<SubdomainName>("primary_subdomain");
       });
 
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
   params.addParam<VariableName>(
-      "master_variable",
-      "Primal variable on master surface. If this parameter is not provided then the master "
+      "primary_variable",
+      "Primal variable on primary surface. If this parameter is not provided then the primary "
       "variable will be initialized to the secondary variable");
   params.addParam<NonlinearVariableName>(
       "variable",
@@ -69,10 +69,10 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _secondary_var(
         isParamValid("secondary_variable")
             ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_variable"))
-            : _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_variable"))),
-    _master_var(
-        isParamValid("master_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_variable"))
+            : _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))),
+    _primary_var(
+        isParamValid("primary_variable")
+            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))
             : _secondary_var),
 
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
@@ -86,28 +86,28 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _qrule_msm(_assembly.qRuleMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
-    _test_master(_master_var.phiFaceNeighbor()),
+    _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
-    _grad_test_master(_master_var.gradPhiFaceNeighbor()),
+    _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
     _phys_points_secondary(_assembly.qPointsFace()),
-    _phys_points_master(_assembly.qPointsFaceNeighbor())
+    _phys_points_primary(_assembly.qPointsFaceNeighbor())
 {
 }
 
 void
-MortarConstraintBase::computeResidual(bool has_master)
+MortarConstraintBase::computeResidual(bool has_primary)
 {
   // Set this member for potential use by derived classes
-  _has_master = has_master;
+  _has_primary = has_primary;
 
   if (_compute_primal_residuals)
   {
     // Compute the residual for the secondary interior primal dofs
     computeResidual(Moose::MortarType::Slave);
 
-    // Compute the residual for the master interior primal dofs. If we don't have a master element,
-    // then we don't have any master dofs
-    if (_has_master)
+    // Compute the residual for the primary interior primal dofs. If we don't have a primary element,
+    // then we don't have any primary dofs
+    if (_has_primary)
       computeResidual(Moose::MortarType::Master);
   }
 
@@ -117,18 +117,18 @@ MortarConstraintBase::computeResidual(bool has_master)
 }
 
 void
-MortarConstraintBase::computeJacobian(bool has_master)
+MortarConstraintBase::computeJacobian(bool has_primary)
 {
-  _has_master = has_master;
+  _has_primary = has_primary;
 
   if (_compute_primal_residuals)
   {
     // Compute the jacobian for the secondary interior primal dofs
     computeJacobian(Moose::MortarType::Slave);
 
-    // Compute the jacobian for the master interior primal dofs. If we don't have a master element,
-    // then we don't have any master dofs
-    if (_has_master)
+    // Compute the jacobian for the primary interior primal dofs. If we don't have a primary element,
+    // then we don't have any primary dofs
+    if (_has_primary)
       computeJacobian(Moose::MortarType::Master);
   }
 

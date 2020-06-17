@@ -52,7 +52,7 @@ public:
 
   InterfaceKernelBase(const InputParameters & parameters);
 
-  /// The master variable that this interface kernel operates on
+  /// The primary variable that this interface kernel operates on
   virtual MooseVariableFEBase & variable() const = 0;
 
   /// The neighbor variable number that this interface kernel operates on
@@ -81,7 +81,7 @@ public:
    */
   virtual void computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, unsigned int jvar) = 0;
 
-  /// Selects the correct Jacobian type and routine to call for the master variable jacobian
+  /// Selects the correct Jacobian type and routine to call for the primary variable jacobian
   virtual void computeElementOffDiagJacobian(unsigned int jvar) = 0;
 
   /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
@@ -164,20 +164,20 @@ protected:
   unsigned int _i, _j;
 
   /** MultiMooseEnum specifying whether residual save-in
-   * aux variables correspond to master or secondary side
+   * aux variables correspond to primary or secondary side
    */
   MultiMooseEnum _save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in residuals
-   * (includes both master and secondary variable names)
+   * (includes both primary and secondary variable names)
    */
   std::vector<AuxVariableName> _save_in_strings;
 
-  /// Whether there are master residual aux variables
-  bool _has_master_residuals_saved_in;
+  /// Whether there are primary residual aux variables
+  bool _has_primary_residuals_saved_in;
 
-  /// The aux variables to save the master residual contributions to
-  std::vector<MooseVariableFEBase *> _master_save_in_residual_variables;
+  /// The aux variables to save the primary residual contributions to
+  std::vector<MooseVariableFEBase *> _primary_save_in_residual_variables;
 
   /// Whether there are secondary residual aux variables
   bool _has_secondary_residuals_saved_in;
@@ -186,20 +186,20 @@ protected:
   std::vector<MooseVariableFEBase *> _secondary_save_in_residual_variables;
 
   /** MultiMooseEnum specifying whether jacobian save-in
-   * aux variables correspond to master or secondary side
+   * aux variables correspond to primary or secondary side
    */
   MultiMooseEnum _diag_save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in jacobians
-   * (includes both master and secondary variable names)
+   * (includes both primary and secondary variable names)
    */
   std::vector<AuxVariableName> _diag_save_in_strings;
 
-  /// Whether there are master jacobian aux variables
-  bool _has_master_jacobians_saved_in;
+  /// Whether there are primary jacobian aux variables
+  bool _has_primary_jacobians_saved_in;
 
-  /// The aux variables to save the diagonal Jacobian contributions of the master variables to
-  std::vector<MooseVariableFEBase *> _master_save_in_jacobian_variables;
+  /// The aux variables to save the diagonal Jacobian contributions of the primary variables to
+  std::vector<MooseVariableFEBase *> _primary_save_in_jacobian_variables;
 
   /// Whether there are secondary jacobian aux variables
   bool _has_secondary_jacobians_saved_in;

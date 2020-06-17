@@ -153,7 +153,7 @@
       type = 'Exodiff'
       input = 'bouncing-block-ranfs.i'
       exodiff = 'bouncing-block-ranfs_exo.e'
-      detail = 'The system shall be able to detect when a secondary node is ping-ponging back and forth between different master faces and consequently tie the locations of the secondary and corresponding master node using Lagrange Multipliers corresponding to equality constraints, e.g. more RANFS'
+      detail = 'The system shall be able to detect when a secondary node is ping-ponging back and forth between different primary faces and consequently tie the locations of the secondary and corresponding primary node using Lagrange Multipliers corresponding to equality constraints, e.g. more RANFS'
       cli_args = "Postprocessors/active=''"
       custom_cmp = 'bouncing-block-ranfs.cmp'
       heavy = true

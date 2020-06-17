@@ -312,7 +312,7 @@
 [Contact]
   [./leftright]
     secondary = 3
-    master = 4
+    primary = 4
     tangential_tolerance = 1e-3
     penalty = 1e+9
   [../]

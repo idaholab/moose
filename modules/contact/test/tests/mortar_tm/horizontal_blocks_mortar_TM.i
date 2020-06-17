@@ -145,7 +145,7 @@ offset = 0.01
 
     mesh = right_block_sidesets
     secondary = lb_right
-    master = rb_left
+    primary = rb_left
 
     model = frictionless
     formulation = mortar

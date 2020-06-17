@@ -55,9 +55,9 @@ EqualValueBoundaryConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
   params.addParam<unsigned int>(
-      "master",
+      "primary",
       std::numeric_limits<unsigned int>::max(),
-      "The ID of the master node. If no ID is provided, first node of secondary set is chosen.");
+      "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
   params.addParam<BoundaryName>("secondary", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
@@ -66,7 +66,7 @@ EqualValueBoundaryConstraint::validParams()
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
-    _master_node_id(getParam<unsigned int>("master")),
+    _primary_node_id(getParam<unsigned int>("primary")),
     _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
     _secondary_node_set_id(getParam<BoundaryName>("secondary")),
     _penalty(getParam<Real>("penalty"))
@@ -83,7 +83,7 @@ EqualValueBoundaryConstraint::meshChanged()
 void
 EqualValueBoundaryConstraint::updateConstrainedNodes()
 {
-  _master_node_vector.clear();
+  _primary_node_vector.clear();
   _connected_nodes.clear();
 
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
@@ -93,48 +93,48 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
-    // Set master node to first node of the secondary node set if no master node id is provided
-    //_master_node_vector defines master nodes in the base class
-    if (_master_node_id == std::numeric_limits<unsigned int>::max())
+    // Set primary node to first node of the secondary node set if no primary node id is provided
+    //_primary_node_vector defines primary nodes in the base class
+    if (_primary_node_id == std::numeric_limits<unsigned int>::max())
     {
       in = std::min_element(nodelist.begin(), nodelist.end());
       dof_id_type node_id = (in == nodelist.end()) ? DofObject::invalid_id : *in;
       _communicator.min(node_id);
-      _master_node_vector.push_back(node_id);
+      _primary_node_vector.push_back(node_id);
     }
     else
-      _master_node_vector.push_back(_master_node_id);
+      _primary_node_vector.push_back(_primary_node_id);
 
     // Fill in _connected_nodes, which defines secondary nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _master_node_vector[0]) &&
+      if ((*in != _primary_node_vector[0]) &&
           (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
         _connected_nodes.push_back(*in);
     }
   }
   else if ((_secondary_node_ids.size() != 0) && (_secondary_node_set_id == "NaN"))
   {
-    if (_master_node_id == std::numeric_limits<unsigned int>::max())
-      _master_node_vector.push_back(
-          _secondary_node_ids[0]); //_master_node_vector defines master nodes in the base class
+    if (_primary_node_id == std::numeric_limits<unsigned int>::max())
+      _primary_node_vector.push_back(
+          _secondary_node_ids[0]); //_primary_node_vector defines primary nodes in the base class
 
     // Fill in _connected_nodes, which defines secondary nodes in the base class
     for (const auto & dof : _secondary_node_ids)
     {
       if (_mesh.queryNodePtr(dof) &&
           (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) &&
-          (dof != _master_node_vector[0]))
+          (dof != _primary_node_vector[0]))
         _connected_nodes.push_back(dof);
     }
   }
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
-  auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
+  auto node_to_elem_pair = node_to_elem_map.find(_primary_node_vector[0]);
 
   bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
-  // Add elements connected to master node to Ghosted Elements.
+  // Add elements connected to primary node to Ghosted Elements.
 
   // On a distributed mesh, these elements might have already been
   // remoted, in which case we need to gather them back first.
@@ -146,7 +146,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     mooseAssert(someone_found_elems, "Missing entry in node to elem map");
 #endif
 
-    std::set<Elem *, CompareElemsByLevel> master_elems_to_ghost;
+    std::set<Elem *, CompareElemsByLevel> primary_elems_to_ghost;
     std::set<Node *> nodes_to_ghost;
     if (found_elems)
     {
@@ -155,7 +155,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
         Elem * elem = _mesh.queryElemPtr(id);
         if (elem)
         {
-          master_elems_to_ghost.insert(elem);
+          primary_elems_to_ghost.insert(elem);
 
           const unsigned int n_nodes = elem->n_nodes();
           for (unsigned int n = 0; n != n_nodes; ++n)
@@ -171,25 +171,25 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
                                                   mesh_inserter_iterator<Node>(_mesh.getMesh()));
 
     _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
-                                                  master_elems_to_ghost.begin(),
-                                                  master_elems_to_ghost.end(),
+                                                  primary_elems_to_ghost.begin(),
+                                                  primary_elems_to_ghost.end(),
                                                   mesh_inserter_iterator<Elem>(_mesh.getMesh()));
 
     _mesh.update(); // Rebuild node_to_elem_map
 
     // Find elems again now that we know they're there
     const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
-    node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
+    node_to_elem_pair = new_node_to_elem_map.find(_primary_node_vector[0]);
     found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
   }
 
   if (!found_elems)
-    mooseError("Couldn't find any elements connected to master node");
+    mooseError("Couldn't find any elements connected to primary node");
 
   const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
 
   if (elems.size() == 0)
-    mooseError("Couldn't find any elements connected to master node");
+    mooseError("Couldn't find any elements connected to primary node");
   _subproblem.addGhostedElem(elems[0]);
 }
 
@@ -199,9 +199,9 @@ EqualValueBoundaryConstraint::computeQpResidual(Moose::ConstraintType type)
   switch (type)
   {
     case Moose::Slave:
-      return (_u_secondary[_i] - _u_master[_j]) * _penalty;
+      return (_u_secondary[_i] - _u_primary[_j]) * _penalty;
     case Moose::Master:
-      return (_u_master[_j] - _u_secondary[_i]) * _penalty;
+      return (_u_primary[_j] - _u_secondary[_i]) * _penalty;
   }
   return 0.;
 }

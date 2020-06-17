@@ -33,9 +33,9 @@ public:
   static InputParameters validParams();
 
   /**
-   * Returns the master lower dimensional subdomain id
+   * Returns the primary lower dimensional subdomain id
    */
-  SubdomainID masterSubdomain() const { return _master_subdomain_id; }
+  SubdomainID primarySubdomain() const { return _primary_subdomain_id; }
 
 protected:
   const std::set<SubdomainID> & getHigherDimSubdomainIDs() const
@@ -59,16 +59,16 @@ private:
   /// Boundary ID for the secondary surface
   const BoundaryID _secondary_id;
 
-  /// Boundary ID for the master surface
-  const BoundaryID _master_id;
+  /// Boundary ID for the primary surface
+  const BoundaryID _primary_id;
 
   /// Subdomain ID for the secondary surface
   const SubdomainID _secondary_subdomain_id;
 
-  /// Subdomain ID for the master surface
-  const SubdomainID _master_subdomain_id;
+  /// Subdomain ID for the primary surface
+  const SubdomainID _primary_subdomain_id;
 
-  /// the union of the secondary and master boundary ids
+  /// the union of the secondary and primary boundary ids
   std::set<BoundaryID> _boundary_ids;
 
   /// the higher dimensional subdomain ids corresponding to the interior parents

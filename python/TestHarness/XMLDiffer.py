@@ -28,8 +28,8 @@ class XMLDiffer(object):
 
     ##
     # Constructor.
-    # @param file1 The master (gold) file to check against
-    # @param file2 The file to compare to the master file
+    # @param file1 The primary (gold) file to check against
+    # @param file2 The file to compare to the primary file
     #
     # Optional Arguments:
     #   abs_zero: Any value less than this is assumed zero (default: 1e-11)
@@ -143,7 +143,7 @@ class XMLDiffer(object):
         if root[0] == None or root[1] == None:
             return
 
-        # Loop through each tree object in the master file
+        # Loop through each tree object in the primary file
         for elem0 in root[0].getiterator():
 
             # Initialize the result and error storage
@@ -186,8 +186,8 @@ class XMLDiffer(object):
     # Compares XML blocks (private)
     # This function first compares the XML block attributes, if those match
     # then the XML text is also compared.
-    # @param elem0 The master XML element object
-    # @param elem1 The XML element object to compare the master against
+    # @param elem0 The primary XML element object
+    # @param elem1 The XML element object to compare the primary against
     # @return A pair containing the test result (True or False) and an error indicator,
     #         this 'indicator' is None if the result of the match is True or if the
     #         attributes fail to match. When the text fails to match then it contains
@@ -210,14 +210,14 @@ class XMLDiffer(object):
 
     ##
     # Perform attribute comparison (private)
-    # @param elem0 The master XML element object
-    # @param elem1 The XML element object to compare the master against
+    # @param elem0 The primary XML element object
+    # @param elem1 The XML element object to compare the primary against
     def _compareAttributes(self, elem0, elem1):
 
         # Initialize the output (assume match)
         result = True
 
-        # Loop through each attribute of the master object
+        # Loop through each attribute of the primary object
         for key0, value0 in elem0.attrib.items():
 
             # If this key is one of the attributes we're ignoring, then ignore it!
@@ -246,8 +246,8 @@ class XMLDiffer(object):
         return result
 
     ## Perform comparison of text for two XML blocks (private)
-    # @param elem0 The master XML element object
-    # @param elem1 The XML element object to compare the master against
+    # @param elem0 The primary XML element object
+    # @param elem1 The XML element object to compare the primary against
     # @return A pair of items, either True, None or False, XMLError
     def _compareText(self, elem0, elem1):
 

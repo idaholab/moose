@@ -24,16 +24,16 @@
   [../]
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
     input = subdomain1
   [../]
   [./interface_again]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
-    new_boundary = 'master1_interface'
+    new_boundary = 'primary1_interface'
     input = interface
   [../]
 []
@@ -121,14 +121,14 @@
 [BCs]
   [./concentration]
     type = AEFVBC
-    boundary = 'left master0_interface'
+    boundary = 'left primary0_interface'
     variable = u
     component = 'concentration'
     flux = free_outflow_bc
   [../]
   [./v_left]
     type = DirichletBC
-    boundary = 'master1_interface'
+    boundary = 'primary1_interface'
     variable = v
     value = 1
   [../]

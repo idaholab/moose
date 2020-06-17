@@ -47,12 +47,12 @@ protected:
   /// The primal solution on the secondary side
   const ADVariableValue & _u_secondary;
 
-  /// The primal solution on the master side
-  const ADVariableValue & _u_master;
+  /// The primal solution on the primary side
+  const ADVariableValue & _u_primary;
 
   /// The primal solution gradient on the secondary side
   const ADVariableGradient & _grad_u_secondary;
 
-  /// The primal solution gradient on the master side
-  const ADVariableGradient & _grad_u_master;
+  /// The primal solution gradient on the primary side
+  const ADVariableGradient & _grad_u_primary;
 };

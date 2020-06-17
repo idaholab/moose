@@ -50,7 +50,7 @@
 
 [Contact]
   [./fred]
-    master = 2
+    primary = 2
     secondary = 3
   [../]
 []

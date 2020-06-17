@@ -26,9 +26,9 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     _lambda_dummy(),
     _lambda(_var ? _var->slnLower() : _lambda_dummy),
     _u_secondary(_secondary_var.sln()),
-    _u_master(_master_var.slnNeighbor()),
+    _u_primary(_primary_var.slnNeighbor()),
     _grad_u_secondary(_secondary_var.gradSln()),
-    _grad_u_master(_master_var.gradSlnNeighbor()),
+    _grad_u_primary(_primary_var.gradSlnNeighbor()),
     _phi(nullptr),
     _grad_phi(nullptr)
 {
@@ -46,8 +46,8 @@ MortarConstraint::computeResidual(Moose::MortarType mortar_type)
       break;
 
     case Moose::MortarType::Master:
-      prepareVectorTagNeighbor(_assembly, _master_var.number());
-      test_space_size = _test_master.size();
+      prepareVectorTagNeighbor(_assembly, _primary_var.number());
+      test_space_size = _test_primary.size();
       break;
 
     case Moose::MortarType::Lower:
@@ -80,7 +80,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       break;
 
     case MType::Master:
-      test_space_size = _master_var.dofIndicesNeighbor().size();
+      test_space_size = _primary_var.dofIndicesNeighbor().size();
       jacobian_types = {{JType::MasterSlave, JType::MasterMaster, JType::MasterLower}};
       break;
 
@@ -107,7 +107,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
         break;
 
       case MType::Master:
-        if (ivar != _master_var.number())
+        if (ivar != _primary_var.number())
           continue;
         break;
 
@@ -141,11 +141,11 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 
     for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
     {
-      // If we don't have a master element, then we shouldn't be considering derivatives with
-      // respect to master dofs. More practically speaking, the local K matrix will be improperly
-      // sized whenever we don't have a master element because we won't be calling
+      // If we don't have a primary element, then we shouldn't be considering derivatives with
+      // respect to primary dofs. More practically speaking, the local K matrix will be improperly
+      // sized whenever we don't have a primary element because we won't be calling
       // FEProblemBase::reinitNeighborFaceRef from withing ComputeMortarFunctor::operator()
-      if (type_index == 1 && !_has_master)
+      if (type_index == 1 && !_has_primary)
         continue;
 
       prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_types[type_index]);

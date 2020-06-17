@@ -93,7 +93,7 @@ refine = 1
   [leftright]
     mesh = original_file_mesh
     secondary = 10
-    master = 20
+    primary = 20
 
     model = coulomb
     formulation = mortar
@@ -129,7 +129,7 @@ refine = 1
     [./interior]
       type = ContactSplit
       vars = 'disp_x disp_y'
-      uncontact_master   = '20'
+      uncontact_primary   = '20'
       uncontact_secondary    = '10'
       uncontact_displaced = '30'
       blocks              = '1 2'
@@ -141,7 +141,7 @@ refine = 1
     [./contact]
       type = ContactSplit
       vars = 'disp_x disp_y leftright_normal_lm leftright_tangential_lm'
-      contact_master   = '20'
+      contact_primary   = '20'
       contact_secondary    = '10'
       contact_displaced = '30'
       include_all_contact_nodes = 1

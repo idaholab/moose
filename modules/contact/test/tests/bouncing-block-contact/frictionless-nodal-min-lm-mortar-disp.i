@@ -48,16 +48,16 @@ offset = 1e-2
   [./lm]
     type = NormalNodalLMMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
   [../]
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_x
@@ -67,9 +67,9 @@ offset = 1e-2
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_y

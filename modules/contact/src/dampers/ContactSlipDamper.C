@@ -21,7 +21,7 @@ ContactSlipDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
   params.addRequiredParam<std::vector<int>>(
-      "master", "IDs of the master surfaces for which slip reversals should be damped");
+      "primary", "IDs of the primary surfaces for which slip reversals should be damped");
   params.addRequiredParam<std::vector<int>>(
       "secondary", "IDs of the secondary surfaces for which slip reversals should be damped");
   params.addParam<Real>(
@@ -60,18 +60,18 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
   if (!_displaced_problem)
     mooseError("Must have displaced problem to use ContactSlipDamper");
 
-  std::vector<int> master = parameters.get<std::vector<int>>("master");
+  std::vector<int> primary = parameters.get<std::vector<int>>("primary");
   std::vector<int> secondary = parameters.get<std::vector<int>>("secondary");
 
-  unsigned int num_interactions = master.size();
+  unsigned int num_interactions = primary.size();
   if (num_interactions != secondary.size())
-    mooseError("Sizes of master surface and secondary surface lists must match in ContactSlipDamper");
+    mooseError("Sizes of primary surface and secondary surface lists must match in ContactSlipDamper");
   if (num_interactions == 0)
-    mooseError("Must define at least one master/secondary pair in ContactSlipDamper");
+    mooseError("Must define at least one primary/secondary pair in ContactSlipDamper");
 
-  for (unsigned int i = 0; i < master.size(); ++i)
+  for (unsigned int i = 0; i < primary.size(); ++i)
   {
-    std::pair<int, int> ms_pair(master[i], secondary[i]);
+    std::pair<int, int> ms_pair(primary[i], secondary[i]);
     _interactions.insert(ms_pair);
   }
 }
@@ -239,7 +239,7 @@ ContactSlipDamper::operateOnThisInteraction(const PenetrationLocator & pen_loc)
 {
   bool operate_on_this_interaction = false;
   std::set<std::pair<int, int>>::iterator ipit;
-  std::pair<int, int> ms_pair(pen_loc._master_boundary, pen_loc._secondary_boundary);
+  std::pair<int, int> ms_pair(pen_loc._primary_boundary, pen_loc._secondary_boundary);
   ipit = _interactions.find(ms_pair);
   if (ipit != _interactions.end())
     operate_on_this_interaction = true;

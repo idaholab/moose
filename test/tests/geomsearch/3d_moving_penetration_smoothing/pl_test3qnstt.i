@@ -60,7 +60,7 @@
     type = PenetrationAux
     variable = distance
     boundary = 11            #secondary
-    paired_boundary = 12     #master
+    paired_boundary = 12     #primary
     tangential_tolerance = 0.09
     normal_smoothing_distance = 0.2
   [../]
@@ -69,7 +69,7 @@
     type = PenetrationAux
     variable = distance
     boundary = 12            #secondary
-    paired_boundary = 11     #master
+    paired_boundary = 11     #primary
     tangential_tolerance = 0.09
     normal_smoothing_distance = 0.2
   [../]

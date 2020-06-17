@@ -47,9 +47,9 @@ TestControl::TestControl(const InputParameters & parameters)
 
   else if (_test_type == "connection")
   {
-    MooseObjectParameterName master(MooseObjectName("Kernels", "diff"), "coef");
+    MooseObjectParameterName primary(MooseObjectName("Kernels", "diff"), "coef");
     MooseObjectParameterName secondary(MooseObjectName("BCs", "left"), "value");
-    _app.getInputParameterWarehouse().addControllableParameterConnection(master, secondary);
+    _app.getInputParameterWarehouse().addControllableParameterConnection(primary, secondary);
   }
 
   else if (_test_type == "alias")

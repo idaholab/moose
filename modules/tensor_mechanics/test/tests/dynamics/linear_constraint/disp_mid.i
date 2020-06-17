@@ -1,4 +1,4 @@
-# Constraining secondary nodes to move a linear combination of master nodes
+# Constraining secondary nodes to move a linear combination of primary nodes
 #
 # The test consists of a 2D rectangular block divided into two Quad elements
 # (along its height) which have different material properties.
@@ -9,7 +9,7 @@
 
 # LinearNodalConstraint forces the interface nodes to move as a linear combination
 # of the nodes on the top and bottom of the block.
-# master node ids and the corresponding weights are taken as input by the LinearNodalConstraint
+# primary node ids and the corresponding weights are taken as input by the LinearNodalConstraint
 # along with the secondary node set or secondary node ids.
 # The constraint can be applied using either penalty or kinematic formulation.
 
@@ -126,7 +126,7 @@
   [./disp_x_1]
     type = LinearNodalConstraint
     variable = disp_x
-    master = '0 5'
+    primary = '0 5'
     weights = '0.25 0.75'
 #    secondary_node_set = '2'
     secondary_node_ids = '2 3'
@@ -136,7 +136,7 @@
   [./disp_y_1]
     type = LinearNodalConstraint
     variable = disp_y
-    master = '0 5'
+    primary = '0 5'
     weights = '0.25 0.75'
 #    secondary_node_set = '2'
     secondary_node_ids = '2 3'

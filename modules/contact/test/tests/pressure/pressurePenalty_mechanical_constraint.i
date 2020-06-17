@@ -18,7 +18,7 @@
 
 [Contact]
   [./m20_s10]
-    master = 20
+    primary = 20
     secondary = 10
     penalty = 1e8
     formulation = penalty

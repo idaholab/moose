@@ -24,9 +24,9 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -65,7 +65,7 @@
     type = VectorPenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
   [../]
 []

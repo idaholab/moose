@@ -18,7 +18,7 @@ _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action
 
 ## Use with Planar Models
 
-When used with 2D planar models (plane stres, plane strain, or generalized plane strain), 
+When used with 2D planar models (plane stres, plane strain, or generalized plane strain),
 it is used to compute the residuals for the in-plane response. In all of these cases,
 it assumed that the out-of-plane thickness is 1, and the computation of the in-plane
 residuals is identical to that for the 3D case.

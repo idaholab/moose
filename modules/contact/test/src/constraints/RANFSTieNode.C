@@ -79,27 +79,27 @@ RANFSTieNode::shouldApply()
                                             _var_objects[_component]->scalingFactor()));
     else
     {
-      std::vector<dof_id_type> master_cols;
-      std::vector<Number> master_values;
+      std::vector<dof_id_type> primary_cols;
+      std::vector<Number> primary_values;
 
-      _jacobian->get_row(secondary_dof_number, master_cols, master_values);
-      mooseAssert(master_cols.size() == master_values.size(),
+      _jacobian->get_row(secondary_dof_number, primary_cols, primary_values);
+      mooseAssert(primary_cols.size() == primary_values.size(),
                   "The size of the dof container and value container are different");
 
       _dof_number_to_value.clear();
 
-      for (MooseIndex(master_cols) i = 0; i < master_cols.size(); ++i)
+      for (MooseIndex(primary_cols) i = 0; i < primary_cols.size(); ++i)
         _dof_number_to_value.insert(
-            std::make_pair(master_cols[i], master_values[i] / _var.scalingFactor()));
+            std::make_pair(primary_cols[i], primary_values[i] / _var.scalingFactor()));
     }
 
     mooseAssert(_node_to_lm.find(_current_node->id()) != _node_to_lm.end(),
                 "The node " << _current_node->id() << " should map to a lagrange multiplier");
     _lagrange_multiplier = _node_to_lm[_current_node->id()];
 
-    _master_index = _current_master->get_node_index(_nearest_node);
-    mooseAssert(_master_index != libMesh::invalid_uint,
-                "nearest node not a node on the current master element");
+    _primary_index = _current_primary->get_node_index(_nearest_node);
+    mooseAssert(_primary_index != libMesh::invalid_uint,
+                "nearest node not a node on the current primary element");
 
     return true;
   }
@@ -117,7 +117,7 @@ RANFSTieNode::computeQpResidual(Moose::ConstraintType type)
 
     case Moose::ConstraintType::Master:
     {
-      if (_i == _master_index)
+      if (_i == _primary_index)
         return _lagrange_multiplier;
 
       else
@@ -138,13 +138,13 @@ RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
       return _phi_secondary[_j][_qp];
 
     case Moose::ConstraintJacobianType::SlaveMaster:
-      if (_master_index == _j)
+      if (_primary_index == _j)
         return -1;
       else
         return 0;
 
     case Moose::ConstraintJacobianType::MasterSlave:
-      if (_i == _master_index)
+      if (_i == _primary_index)
       {
         mooseAssert(_dof_number_to_value.find(_connected_dof_indices[_j]) !=
                         _dof_number_to_value.end(),

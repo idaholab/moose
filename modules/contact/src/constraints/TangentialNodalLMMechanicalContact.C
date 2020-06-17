@@ -53,10 +53,10 @@ TangentialNodalLMMechanicalContact::TangentialNodalLMMechanicalContact(
   : NodeFaceConstraint(parameters),
     _contact_pressure(getVar("contact_pressure", 0)->nodalValue()),
     _contact_pressure_id(coupled("contact_pressure")),
-    _disp_x_dot(_master_var.nodalValueDot()),
+    _disp_x_dot(_primary_var.nodalValueDot()),
     _disp_y_dot(getVar("disp_y", 0)->nodalValueDot()),
     _disp_y_id(coupled("disp_y")),
-    _du_dot_du(_master_var.dofValuesDuDotDu()),
+    _du_dot_du(_primary_var.dofValuesDuDotDu()),
 
     _mu(getParam<Real>("mu")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
@@ -245,7 +245,7 @@ TangentialNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJa
 
       if (jvar == _contact_pressure_id)
         return ncp_value.derivatives()[2];
-      else if (jvar == _master_var.number())
+      else if (jvar == _primary_var.number())
         return ncp_value.derivatives()[0];
       else if (jvar == _disp_y_id)
         return ncp_value.derivatives()[1];

@@ -1922,11 +1922,11 @@ protected:
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kll;
   /// dlower/dsecondary (or dlower/delement)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kle;
-  /// dlower/dmaster (or dlower/dneighbor)
+  /// dlower/dprimary (or dlower/dneighbor)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kln;
   /// dsecondary/dlower (or delement/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kel;
-  /// dmaster/dlower (or dneighbor/dlower)
+  /// dprimary/dlower (or dneighbor/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knl;
 
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)

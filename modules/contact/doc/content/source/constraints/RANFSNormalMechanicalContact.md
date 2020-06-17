@@ -19,8 +19,8 @@ detects when a secondary node has alternated back and forth between two differen
 element faces a sufficient number of times (currently
 face1-face2-face1-face2-face1) and then fixes the issue by applying more RANFS
 Explicitly, we apply a number of equality constraints equal to the mesh
-dimension tying together the locations of the secondary node and the nearest master
-node (which we assert is a node that both master faces involved in the ping-pong
+dimension tying together the locations of the secondary node and the nearest primary
+node (which we assert is a node that both primary faces involved in the ping-pong
 share). This ping-ponging protection is necessary for solving step 19 of the
 [`full-bouncing-block-ranfs`](bouncing-block-contact/bouncing-block-ranfs.i) test. Without the
 protection the solve does not converge and the time-step gets cut.

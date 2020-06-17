@@ -76,17 +76,17 @@ BreakMeshByBlockBase::findFreeBoundaryId()
 }
 
 std::string
-BreakMeshByBlockBase::generateBoundaryName(const subdomain_id_type & masterBlockID,
+BreakMeshByBlockBase::generateBoundaryName(const subdomain_id_type & primaryBlockID,
                                            const subdomain_id_type & secondaryBlockID)
 {
-  std::string master_block_name = _mesh_ptr->getSubdomainName(masterBlockID);
+  std::string primary_block_name = _mesh_ptr->getSubdomainName(primaryBlockID);
   std::string secondary_block_name = _mesh_ptr->getSubdomainName(secondaryBlockID);
-  if (master_block_name.empty())
-    master_block_name = "Block" + std::to_string(masterBlockID);
+  if (primary_block_name.empty())
+    primary_block_name = "Block" + std::to_string(primaryBlockID);
   if (secondary_block_name.empty())
     secondary_block_name = "Block" + std::to_string(secondaryBlockID);
 
-  return master_block_name + "_" + secondary_block_name;
+  return primary_block_name + "_" + secondary_block_name;
 }
 
 void
@@ -97,7 +97,7 @@ BreakMeshByBlockBase::mapBoundaryIdAndBoundaryName(BoundaryID & boundaryID,
 }
 
 void
-BreakMeshByBlockBase::findBoundaryNameAndInd(const subdomain_id_type & masterBlockID,
+BreakMeshByBlockBase::findBoundaryNameAndInd(const subdomain_id_type & primaryBlockID,
                                              const subdomain_id_type & secondaryBlockID,
                                              std::string & boundaryName,
                                              BoundaryID & boundaryID,
@@ -108,7 +108,7 @@ BreakMeshByBlockBase::findBoundaryNameAndInd(const subdomain_id_type & masterBlo
 
   // mpi barrier
   // first check which boundary name will be created
-  boundaryName = generateBoundaryName(masterBlockID, secondaryBlockID);
+  boundaryName = generateBoundaryName(primaryBlockID, secondaryBlockID);
 
   // check if the boundary name already exist
   bool checkBoundaryAlreadyExist = false;

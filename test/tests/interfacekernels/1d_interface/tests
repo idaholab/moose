@@ -87,7 +87,7 @@
     type = Exodiff
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_other_side_out.e'
-    cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=master_resid Outputs/file_base=ik_save_in_other_side_out'
+    cli_args = 'BCs/middle/variable=u BCs/middle/v=v BCs/middle/save_in=primary_resid Outputs/file_base=ik_save_in_other_side_out'
     issues = '#13232'
     requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side b (block 1) of the interface."

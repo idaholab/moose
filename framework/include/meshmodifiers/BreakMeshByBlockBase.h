@@ -39,9 +39,9 @@ protected:
   /// already used
   void checkInputParameter();
 
-  /// given the master and secondary blocks this method return the appropriate
+  /// given the primary and secondary blocks this method return the appropriate
   /// boundary id and name
-  void findBoundaryNameAndInd(const subdomain_id_type & /*masterBlockID*/,
+  void findBoundaryNameAndInd(const subdomain_id_type & /*primaryBlockID*/,
                               const subdomain_id_type & /*secondaryBlockID*/,
                               std::string & /*boundaryName*/,
                               BoundaryID & /*boundaryID*/,
@@ -54,7 +54,7 @@ protected:
 
 private:
   /// this method generate the boundary name by assembling subdomain names
-  std::string generateBoundaryName(const subdomain_id_type & /*masterBlockID*/,
+  std::string generateBoundaryName(const subdomain_id_type & /*primaryBlockID*/,
                                    const subdomain_id_type & /*secondaryBlockID*/);
 
   /// this method save the boundary name/id pair

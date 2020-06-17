@@ -49,9 +49,9 @@ offset = 1e-2
 [Constraints]
   [normal_lm]
     type = NormalMortarLMMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_x
@@ -62,9 +62,9 @@ offset = 1e-2
   []
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_x
@@ -74,9 +74,9 @@ offset = 1e-2
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
+    primary_boundary = 20
     secondary_boundary = 10
-    master_subdomain = 4
+    primary_subdomain = 4
     secondary_subdomain = 3
     variable = normal_lm
     secondary_variable = disp_y

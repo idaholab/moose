@@ -16,7 +16,7 @@ PenaltyInterfaceDiffusion::validParams()
 {
   InputParameters params = InterfaceKernel::validParams();
   params.addRequiredParam<Real>(
-      "penalty", "The penalty that penalizes jump between master and neighbor variables.");
+      "penalty", "The penalty that penalizes jump between primary and neighbor variables.");
   params.addParam<MaterialPropertyName>(
       "jump_prop_name", "the name of the material property that calculates the jump.");
   return params;

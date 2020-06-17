@@ -25,11 +25,11 @@ MooseEnum InterfaceAverageOptions();
 /*
  * Return scalar quantity across an interface based on the user specified
  * _interface_value_type. First parameter is the average type, the second the value
- * on the master surface, and the third parameter is the value on secondary
+ * on the primary surface, and the third parameter is the value on secondary
  * surface of the interface
  */
 Real getQuantity(const MooseEnum /*interface_value_type*/,
-                 const Real /*value_master*/,
+                 const Real /*value_primary*/,
                  const Real /*value_secondary*/);
 }
 

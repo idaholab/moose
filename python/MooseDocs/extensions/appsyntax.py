@@ -451,7 +451,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
     def createTokenFromSyntax(self, parent, info, page, obj):
 
-        master = SyntaxList(None, **self.attributes)
+        primary = SyntaxList(None, **self.attributes)
 
         groups = self.settings['groups'].split() if self.settings['groups'] else list(obj.groups)
         if 'MooseApp' in groups:
@@ -460,24 +460,24 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
 
         for group in groups:
             if self.settings['group-headings']:
-                header = SyntaxListItem(master,
+                header = SyntaxListItem(primary,
                                         header=True,
                                         string=str(mooseutils.camel_to_space(group)))
 
             count = 0
             if self.settings['actions']:
-                count += self._addItems(master, info, page, group, obj.actions(), 'Action')
+                count += self._addItems(primary, info, page, group, obj.actions(), 'Action')
             if self.settings['objects']:
-                count += self._addItems(master, info, page, group, obj.objects(), 'MooseObject')
+                count += self._addItems(primary, info, page, group, obj.objects(), 'MooseObject')
             if self.settings['subsystems']:
-                count += self._addItems(master, info, page, group, obj.syntax())
+                count += self._addItems(primary, info, page, group, obj.syntax())
 
             if count == 0:
                 header.parent = None
 
-        if master.children:
+        if primary.children:
             self.createHeading(parent, page)
-            master.parent = parent
+            primary.parent = parent
 
         return parent
 

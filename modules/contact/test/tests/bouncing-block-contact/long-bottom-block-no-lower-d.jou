@@ -11,7 +11,7 @@ curve 1 3 interval 49
 
 # secondary boundary
 sideset 10 curve 7
-# master boundary
+# primary boundary
 sideset 20 curve 1
 block 1 surface 1
 block 2 surface 2

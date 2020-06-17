@@ -25,7 +25,7 @@ public:
   PenetrationThread(
       SubProblem & subproblem,
       const MooseMesh & mesh,
-      BoundaryID master_boundary,
+      BoundaryID primary_boundary,
       BoundaryID secondary_boundary,
       std::map<dof_id_type, PenetrationInfo *> & penetration_info,
       bool check_whether_reasonable,
@@ -54,7 +54,7 @@ protected:
   SubProblem & _subproblem;
   // The Mesh
   const MooseMesh & _mesh;
-  BoundaryID _master_boundary;
+  BoundaryID _primary_boundary;
   BoundaryID _secondary_boundary;
 
   // This is the info map we're actually filling here
@@ -136,7 +136,7 @@ protected:
                                           const std::vector<const Node *> & edge_nodes);
   bool restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side);
 
-  bool isFaceReasonableCandidate(const Elem * master_elem,
+  bool isFaceReasonableCandidate(const Elem * primary_elem,
                                  const Elem * side,
                                  FEBase * fe,
                                  const Point * secondary_point,

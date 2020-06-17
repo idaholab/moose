@@ -59,13 +59,13 @@ InterfaceKernelBase::validParams()
       save_in_var_side,
       "This parameter must exist if save_in variables are specified and must have the same length "
       "as save_in. This vector specifies whether the corresponding aux_var should save-in "
-      "residual contributions from the master ('m') or secondary side ('s').");
+      "residual contributions from the primary ('m') or secondary side ('s').");
   params.addParam<MultiMooseEnum>(
       "diag_save_in_var_side",
       save_in_var_side,
       "This parameter must exist if diag_save_in variables are specified and must have the same "
       "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
-      "save-in jacobian contributions from the master ('m') or secondary side ('s').");
+      "save-in jacobian contributions from the primary ('m') or secondary side ('s').");
 
   // InterfaceKernels always need one layer of ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",

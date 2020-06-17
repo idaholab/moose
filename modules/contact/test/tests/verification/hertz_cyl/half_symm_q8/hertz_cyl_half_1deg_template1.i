@@ -403,7 +403,7 @@
 
 [Contact]
   [./interface]
-    master = 2
+    primary = 2
     secondary = 3
     normalize_penalty = true
     tangential_tolerance = 1e-3

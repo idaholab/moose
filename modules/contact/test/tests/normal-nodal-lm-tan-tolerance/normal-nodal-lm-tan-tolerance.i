@@ -39,7 +39,7 @@
   [mortar]
     mesh = file
     secondary = 101
-    master = 100
+    primary = 100
     model = frictionless
     formulation = mortar
     c_normal = 1e4

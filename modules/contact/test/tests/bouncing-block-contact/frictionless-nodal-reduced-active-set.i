@@ -41,17 +41,17 @@ starting_point = .5
   [./disp_x]
     type = RANFSNormalMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = disp_x
-    master_variable = disp_x
+    primary_variable = disp_x
     component = x
   [../]
   [./disp_y]
     type = RANFSNormalMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = disp_y
-    master_variable = disp_y
+    primary_variable = disp_y
     component = y
   [../]
 []

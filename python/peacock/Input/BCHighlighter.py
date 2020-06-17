@@ -28,13 +28,13 @@ def highlightBlock(block, vtkwindow):
     if block.getParamInfo("block"):
         block_param = block.getParamInfo("block").value.split()
 
-    master = block.getParamInfo("master")
+    primary = block.getParamInfo("primary")
     if boundary_param or block_param:
         vtkwindow.onHighlight(boundary=boundary_param, block=block_param)
-    elif master:
+    elif primary:
         secondary = block.getParamInfo("secondary")
         if secondary:
-            vtkwindow.onHighlight(boundary=[master.value, secondary.value])
+            vtkwindow.onHighlight(boundary=[primary.value, secondary.value])
         else:
             vtkwindow.onHighlight()
     else:

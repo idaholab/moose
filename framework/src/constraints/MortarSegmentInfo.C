@@ -23,12 +23,12 @@ MortarSegmentInfo::MortarSegmentInfo()
     xi2_a(invalid_xi),
     xi2_b(invalid_xi),
     secondary_elem(nullptr),
-    master_elem(nullptr)
+    primary_elem(nullptr)
 {
 }
 
 MortarSegmentInfo::MortarSegmentInfo(Real x1a, Real x1b, Real x2a, Real x2b)
-  : xi1_a(x1a), xi1_b(x1b), xi2_a(x2a), xi2_b(x2b), secondary_elem(nullptr), master_elem(nullptr)
+  : xi1_a(x1a), xi1_b(x1b), xi2_a(x2a), xi2_b(x2b), secondary_elem(nullptr), primary_elem(nullptr)
 {
 }
 
@@ -39,8 +39,8 @@ MortarSegmentInfo::print() const
   Moose::out << "xi^(2)_a=" << xi2_a << ", xi^(2)_b=" << xi2_b << std::endl;
   if (secondary_elem)
     Moose::out << "secondary_elem=" << secondary_elem->id() << std::endl;
-  if (master_elem)
-    Moose::out << "master_elem=" << master_elem->id() << std::endl;
+  if (primary_elem)
+    Moose::out << "primary_elem=" << primary_elem->id() << std::endl;
 }
 
 bool
@@ -84,17 +84,17 @@ MortarSegmentInfo::is_valid() const
     return false;
   }
 
-  // If both xi^(2) values are unset, then master_elem should be NULL.
-  if (!xi2_set && master_elem != nullptr)
+  // If both xi^(2) values are unset, then primary_elem should be NULL.
+  if (!xi2_set && primary_elem != nullptr)
   {
-    mooseError("Both xi^(2) are unset, therefore master_elem should be NULL.");
+    mooseError("Both xi^(2) are unset, therefore primary_elem should be NULL.");
     return false;
   }
 
-  // On the other hand, if both xi^(2) values are unset, then make sure master_elem is non-NULL.
-  if (xi2_set && master_elem == nullptr)
+  // On the other hand, if both xi^(2) values are unset, then make sure primary_elem is non-NULL.
+  if (xi2_set && primary_elem == nullptr)
   {
-    mooseError("Both xi^(2) are set, the master_elem cannot be NULL.");
+    mooseError("Both xi^(2) are set, the primary_elem cannot be NULL.");
     return false;
   }
 
@@ -119,12 +119,12 @@ MortarSegmentInfo::is_valid() const
 }
 
 bool
-MortarSegmentInfo::has_master() const
+MortarSegmentInfo::has_primary() const
 {
   bool xi2_set =
       (std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE);
 
-  if (xi2_set && master_elem)
+  if (xi2_set && primary_elem)
     return true;
 
   return false;

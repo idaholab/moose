@@ -15,16 +15,16 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./interface_again]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
-    new_boundary = 'master1_interface'
+    new_boundary = 'primary1_interface'
   [../]
 []
 
@@ -42,11 +42,11 @@
 []
 
 [AuxVariables]
-  [./master_resid]
+  [./primary_resid]
   [../]
   [./secondary_resid]
   [../]
-  [./master_jac]
+  [./primary_jac]
   [../]
   [./secondary_jac]
   [../]
@@ -58,7 +58,7 @@
     variable = u
     D = 4
     block = 0
-    save_in = 'master_resid'
+    save_in = 'primary_resid'
   [../]
   [./diff_v]
     type = CoeffParamDiffusion
@@ -74,13 +74,13 @@
     type = InterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     D = 4
     D_neighbor = 2
     save_in_var_side = 'm s'
-    save_in = 'master_resid secondary_resid'
+    save_in = 'primary_resid secondary_resid'
     diag_save_in_var_side = 'm s'
-    diag_save_in = 'master_jac secondary_jac'
+    diag_save_in = 'primary_jac secondary_jac'
   [../]
 []
 
@@ -90,7 +90,7 @@
     variable = u
     boundary = 'left'
     value = 0
-    save_in = 'master_resid'
+    save_in = 'primary_resid'
   [../]
   [./right]
     type = DirichletBC
@@ -102,7 +102,7 @@
   [./middle]
     type = MatchedValueBC
     variable = v
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     v = u
     save_in = 'secondary_resid'
   [../]

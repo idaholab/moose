@@ -51,7 +51,7 @@ offset = 1e-2
   [leftright]
     mesh = file
     secondary = 10
-    master = 20
+    primary = 20
     model = frictionless
     formulation = mortar
   []

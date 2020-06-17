@@ -160,7 +160,7 @@ MooseMesh::validParams()
       "timesteps the patch for all secondary nodes needs to be updated automatically."
       "'iteration' updates the patch at every nonlinear iteration for a "
       "subset of secondary nodes for which penetration is not detected. If there "
-      "can be substantial relative motion between the master and secondary surfaces "
+      "can be substantial relative motion between the primary and secondary surfaces "
       "during the nonlinear iterations within a timestep, it is advisable to use "
       "'iteration' option to ensure accurate contact detection.");
 

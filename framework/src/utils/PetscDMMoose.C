@@ -723,7 +723,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           // loop over contacts
           for (const auto & it : *(dmm->_contact_names))
           {
-            bc_id_set.insert(it.first.first);  // master
+            bc_id_set.insert(it.first.first);  // primary
             bc_id_set.insert(it.first.second); // secondary
           }
           // loop over boundary elements
@@ -818,10 +818,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                     else
                       cached_indices.insert(edof);
                 }
-                // indices for master element
+                // indices for primary element
                 evindices.clear();
-                const Elem * master_elem = pinfo->_elem;
-                dofmap.dof_indices(master_elem, evindices, v);
+                const Elem * primary_elem = pinfo->_elem;
+                dofmap.dof_indices(primary_elem, evindices, v);
                 for (const auto & edof : evindices)
                   if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
                     indices.insert(edof);
@@ -903,11 +903,11 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 else
                   cached_unindices.insert(dof);
 
-                // indices for master element
+                // indices for primary element
                 evindices.clear();
-                const Elem * master_side = pinfo->_side;
-                dofmap.dof_indices(master_side, evindices, v);
-                // indices of master sides
+                const Elem * primary_side = pinfo->_side;
+                dofmap.dof_indices(primary_side, evindices, v);
+                // indices of primary sides
                 for (const auto & edof : evindices)
                   if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
                     unindices.insert(edof);
@@ -1516,7 +1516,7 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
    The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using
    that info.
    TODO: compute sparsity restricted to this DM's blocks, variables and sides.
-   Even fancier: compute the sparsity of the coupling of a contact secondary to the contact master.
+   Even fancier: compute the sparsity of the coupling of a contact secondary to the contact primary.
    In any event, here we are in control of the matrix type and structure.
    */
   DofMap & dof_map = dmm->_nl->system().get_dof_map();
@@ -1801,13 +1801,13 @@ DMSetUp_Moose_Pre(DM dm)
       catch (...)
       {
         std::ostringstream err;
-        err << "Problem retrieving contact for PenetrationLocator with master " << cpair.first
+        err << "Problem retrieving contact for PenetrationLocator with primary " << cpair.first
             << " and secondary " << cpair.second;
         mooseError(err.str());
       }
-      BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
+      BoundaryID primary_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
       BoundaryID secondary_id = dmm->_nl->mesh().getBoundaryID(cpair.second);
-      DM_Moose::ContactID cid(master_id, secondary_id);
+      DM_Moose::ContactID cid(primary_id, secondary_id);
       dmm->_contact_names->insert(std::make_pair(cid, cpair));
     }
   }
@@ -1829,13 +1829,13 @@ DMSetUp_Moose_Pre(DM dm)
       catch (...)
       {
         std::ostringstream err;
-        err << "Problem retrieving uncontact for PenetrationLocator with master " << cpair.first
+        err << "Problem retrieving uncontact for PenetrationLocator with primary " << cpair.first
             << " and secondary " << cpair.second;
         mooseError(err.str());
       }
-      BoundaryID master_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
+      BoundaryID primary_id = dmm->_nl->mesh().getBoundaryID(cpair.first);
       BoundaryID secondary_id = dmm->_nl->mesh().getBoundaryID(cpair.second);
-      DM_Moose::ContactID cid(master_id, secondary_id);
+      DM_Moose::ContactID cid(primary_id, secondary_id);
       dmm->_uncontact_names->insert(std::make_pair(cid, cpair));
     }
   }
@@ -1949,13 +1949,13 @@ DMSetUp_Moose_Pre(DM dm)
   {
     name += "_contacts";
     for (const auto & cit : *(dmm->_contact_names))
-      name += "_master_" + cit.second.first + "_secondary_" + cit.second.second;
+      name += "_primary_" + cit.second.first + "_secondary_" + cit.second.second;
   }
   if (dmm->_uncontact_names && dmm->_uncontact_names->size())
   {
     name += "_uncontacts";
     for (const auto & cit : *(dmm->_uncontact_names))
-      name += "_master_" + cit.second.first + "_secondary_" + cit.second.second;
+      name += "_primary_" + cit.second.first + "_secondary_" + cit.second.second;
   }
   ierr = PetscObjectSetName((PetscObject)dm, name.c_str());
   CHKERRQ(ierr);
@@ -2219,7 +2219,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   PetscInt ncontacts = 0;
   opt = "-dm_moose_ncontacts";
   help = "Number of contacts to include in DMMoose.  For each <n> < "
-         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<secondary> pair "
+         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
          "defining the contact surfaces"
          "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
          "the displaced mesh or not";
@@ -2235,7 +2235,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   for (PetscInt i = 0; i < ncontacts; ++i)
   {
     {
-      char * master_secondary[2];
+      char * primary_secondary[2];
       PetscInt sz = 2;
       std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_contact_" << i;
@@ -2243,21 +2243,21 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
       ierr = PetscOptionsStringArray(oopt.str().c_str(),
                                      ohelp.str().c_str(),
                                      "DMMooseSetContacts",
-                                     master_secondary,
+                                     primary_secondary,
                                      &sz,
                                      PETSC_NULL);
       CHKERRQ(ierr);
       if (sz != 2)
         SETERRQ2(((PetscObject)dm)->comm,
                  PETSC_ERR_ARG_SIZ,
-                 "Expected 2 sideset IDs (master & secondary) for contact %D, got %D instead",
+                 "Expected 2 sideset IDs (primary & secondary) for contact %D, got %D instead",
                  i,
                  sz);
       contacts.push_back(
-          DM_Moose::ContactName(std::string(master_secondary[0]), std::string(master_secondary[1])));
-      ierr = PetscFree(master_secondary[0]);
+          DM_Moose::ContactName(std::string(primary_secondary[0]), std::string(primary_secondary[1])));
+      ierr = PetscFree(primary_secondary[0]);
       CHKERRQ(ierr);
-      ierr = PetscFree(master_secondary[1]);
+      ierr = PetscFree(primary_secondary[1]);
       CHKERRQ(ierr);
     }
     {
@@ -2299,7 +2299,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   PetscInt nuncontacts = 0;
   opt = "-dm_moose_nuncontacts";
   help = "Number of contacts to exclude from DMMoose.  For each <n> < "
-         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <master>,<secondary> pair "
+         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
          "defining the contact surfaces"
          "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
          "the displaced mesh or not";
@@ -2315,7 +2315,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   for (PetscInt i = 0; i < nuncontacts; ++i)
   {
     {
-      char * master_secondary[2];
+      char * primary_secondary[2];
       PetscInt sz = 2;
       std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_uncontact_" << i;
@@ -2323,21 +2323,21 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
       ierr = PetscOptionsStringArray(oopt.str().c_str(),
                                      ohelp.str().c_str(),
                                      "DMMooseSetUnContacts",
-                                     master_secondary,
+                                     primary_secondary,
                                      &sz,
                                      PETSC_NULL);
       CHKERRQ(ierr);
       if (sz != 2)
         SETERRQ2(((PetscObject)dm)->comm,
                  PETSC_ERR_ARG_SIZ,
-                 "Expected 2 sideset IDs (master & secondary) for uncontact %D, got %D instead",
+                 "Expected 2 sideset IDs (primary & secondary) for uncontact %D, got %D instead",
                  i,
                  sz);
       uncontacts.push_back(
-          DM_Moose::ContactName(std::string(master_secondary[0]), std::string(master_secondary[1])));
-      ierr = PetscFree(master_secondary[0]);
+          DM_Moose::ContactName(std::string(primary_secondary[0]), std::string(primary_secondary[1])));
+      ierr = PetscFree(primary_secondary[0]);
       CHKERRQ(ierr);
-      ierr = PetscFree(master_secondary[1]);
+      ierr = PetscFree(primary_secondary[1]);
       CHKERRQ(ierr);
     }
     {

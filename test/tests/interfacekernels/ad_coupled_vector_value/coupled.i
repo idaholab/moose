@@ -15,9 +15,9 @@
   [./interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -58,7 +58,7 @@
     variable = u
     neighbor_var = v
     var_source = w
-    boundary = master0_interface
+    boundary = primary0_interface
     D = 1
     D_neighbor = 1
   [../]
@@ -80,7 +80,7 @@
   [./middle]
     type = ADVectorMatchedValueBC
     variable = v
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     v = u
   [../]
   [w_left]

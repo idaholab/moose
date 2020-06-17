@@ -48,18 +48,18 @@ offset = 1e-2
   [./disp_x]
     type = RANFSNormalMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = disp_x
-    master_variable = disp_x
+    primary_variable = disp_x
     component = x
     normal_smoothing_distance = 0.1
   [../]
   [./disp_y]
     type = RANFSNormalMechanicalContact
     secondary = 10
-    master = 20
+    primary = 20
     variable = disp_y
-    master_variable = disp_y
+    primary_variable = disp_y
     component = y
     normal_smoothing_distance = 0.1
   [../]

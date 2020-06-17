@@ -27,10 +27,10 @@ namespace Moose
 {
 
 /**
- * Finds the closest point (called the contact point) on the master_elem on side "side" to the
+ * Finds the closest point (called the contact point) on the primary_elem on side "side" to the
  * secondary_point.
  *
- * @param p_info The penetration info object, contains master_elem, side, various other information
+ * @param p_info The penetration info object, contains primary_elem, side, various other information
  * @param fe_elem FE object for the element
  * @param fe_side FE object for the side
  * @param fe_side_type The type of fe_side, needed for inverse_map routines
@@ -51,9 +51,9 @@ findContactPoint(PenetrationInfo & p_info,
                  const Real tangential_tolerance,
                  bool & contact_point_on_side)
 {
-  const Elem * master_elem = p_info._elem;
+  const Elem * primary_elem = p_info._elem;
 
-  unsigned int dim = master_elem->dim();
+  unsigned int dim = primary_elem->dim();
 
   const Elem * side = p_info._side;
 
@@ -72,15 +72,15 @@ findContactPoint(PenetrationInfo & p_info,
     const Node * nearest_node = side->node_ptr(0);
     p_info._closest_point = *nearest_node;
     p_info._closest_point_ref =
-        master_elem->master_point(master_elem->get_node_index(nearest_node));
+        primary_elem->master_point(primary_elem->get_node_index(nearest_node));
     std::vector<Point> elem_points = {p_info._closest_point_ref};
 
     const std::vector<RealGradient> & elem_dxyz_dxi = fe_elem->get_dxyzdxi();
 
-    fe_elem->reinit(master_elem, &elem_points);
+    fe_elem->reinit(primary_elem, &elem_points);
 
     p_info._normal = elem_dxyz_dxi[0];
-    if (nearest_node->id() == master_elem->node_id(0))
+    if (nearest_node->id() == primary_elem->node_id(0))
       p_info._normal *= -1.0;
     p_info._normal /= p_info._normal.norm();
 
@@ -208,7 +208,7 @@ findContactPoint(PenetrationInfo & p_info,
   }
   else
   {
-    const Node * const * elem_nodes = master_elem->get_nodes();
+    const Node * const * elem_nodes = primary_elem->get_nodes();
     const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
     const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
 

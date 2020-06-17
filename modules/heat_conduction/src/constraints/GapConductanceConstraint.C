@@ -34,13 +34,13 @@ GapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case Moose::MortarType::Master:
-      return _lambda[_qp] * _test_master[_i][_qp];
+      return _lambda[_qp] * _test_primary[_i][_qp];
     case Moose::MortarType::Slave:
       return -_lambda[_qp] * _test_secondary[_i][_qp];
     case Moose::MortarType::Lower:
     {
-      auto l = (_phys_points_master[_qp] - _phys_points_secondary[_qp]).norm();
-      return (_k * (_u_master[_qp] - _u_secondary[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
+      auto l = (_phys_points_primary[_qp] - _phys_points_secondary[_qp]).norm();
+      return (_k * (_u_primary[_qp] - _u_secondary[_qp]) / l - _lambda[_qp]) * _test[_i][_qp];
     }
     default:
       return 0;

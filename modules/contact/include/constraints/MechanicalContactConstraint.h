@@ -80,7 +80,7 @@ public:
    */
   bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
 
-  virtual bool addCouplingEntriesToJacobian() override { return _master_secondary_jacobian; }
+  virtual bool addCouplingEntriesToJacobian() override { return _primary_secondary_jacobian; }
 
   bool shouldApply() override;
   void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
@@ -117,8 +117,8 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
 
-  /// Whether to include coupling between the master and secondary nodes in the Jacobian
-  const bool _master_secondary_jacobian;
+  /// Whether to include coupling between the primary and secondary nodes in the Jacobian
+  const bool _primary_secondary_jacobian;
   /// Whether to include coupling terms with the nodes connected to the secondary nodes in the Jacobian
   const bool _connected_secondary_nodes_jacobian;
   /// Whether to include coupling terms with non-displacement variables in the Jacobian
