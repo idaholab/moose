@@ -6,7 +6,9 @@
 
 This material, `ADLevelSetBiMaterialRankFour` determines the global material
 property by switching the two AD Rank-4 tensor material properties with
-different base_name based on the level set values. While the non-AD equivalent,
+different base_name based on the level set values.
+
+While the non-AD equivalent,
 [LevelSetBiMaterialRankFour](LevelSetBiMaterialRankFour.md), is used to compute
 the Jacobian contribution ($\frac{\partial\sigma}{\partial\epsilon}$), this
 value is not required in simulations using automatic differentiation. This class

@@ -4,8 +4,6 @@
 # The matrix and inclusion are glued together
 
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
 []
 
@@ -49,13 +47,6 @@
   [../]
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
 [Functions]
   [./ls_func]
     type = ParsedFunction
@@ -64,18 +55,6 @@
 []
 
 [AuxVariables]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./a_strain_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -102,34 +81,16 @@
   [../]
 []
 
-[Kernels]
-  [./TensorMechanics]
+[Modules/TensorMechanics/Master]
+  [./all]
+    strain = SMALL
     use_automatic_differentiation = true
+    add_variables = true
+    generate_output = 'stress_xx stress_yy stress_xy'
   [../]
 []
 
 [AuxKernels]
-  [./stress_xx]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = stress_xx
-  [../]
-  [./stress_yy]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-    variable = stress_yy
-  [../]
-  [./stress_xy]
-    type = ADRankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 1
-    variable = stress_xy
-  [../]
   [./a_strain_xx]
     type = ADRankTwoAux
     rank_two_tensor = A_total_strain
