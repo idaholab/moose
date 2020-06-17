@@ -1945,7 +1945,9 @@ FEProblemBase::neighborSubdomainSetup(SubdomainID subdomain, THREAD_ID tid)
 }
 
 void
-FEProblemBase::addFunction(std::string type, const std::string & name, InputParameters & parameters)
+FEProblemBase::addFunction(const std::string & type,
+                           const std::string & name,
+                           InputParameters & parameters)
 {
   parameters.set<SubProblem *>("_subproblem") = this;
 
@@ -2024,7 +2026,7 @@ FEProblemBase::getNonlinearSystem()
 }
 
 void
-FEProblemBase::addDistribution(std::string type,
+FEProblemBase::addDistribution(const std::string & type,
                                const std::string & name,
                                InputParameters & parameters)
 {
@@ -2048,7 +2050,9 @@ FEProblemBase::getDistribution(const std::string & name)
 }
 
 void
-FEProblemBase::addSampler(std::string type, const std::string & name, InputParameters & parameters)
+FEProblemBase::addSampler(const std::string & type,
+                          const std::string & name,
+                          InputParameters & parameters)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -3303,13 +3307,14 @@ FEProblemBase::initVectorPostprocessorData(const std::string & name)
 }
 
 void
-FEProblemBase::addPostprocessor(std::string pp_name,
+FEProblemBase::addPostprocessor(const std::string & pp_name,
                                 const std::string & name,
                                 InputParameters & parameters)
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
+    mooseError("A UserObject with the name \"",
+               name,
                "\" already exists.  You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
@@ -3317,13 +3322,14 @@ FEProblemBase::addPostprocessor(std::string pp_name,
 }
 
 void
-FEProblemBase::addVectorPostprocessor(std::string pp_name,
+FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
                                       const std::string & name,
                                       InputParameters & parameters)
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
+    mooseError("A UserObject with the name \"",
+               name,
                "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
@@ -3331,7 +3337,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name,
 }
 
 void
-FEProblemBase::addUserObject(std::string user_object_name,
+FEProblemBase::addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
@@ -3983,7 +3989,7 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 }
 
 void
-FEProblemBase::addDamper(std::string damper_name,
+FEProblemBase::addDamper(const std::string & damper_name,
                          const std::string & name,
                          InputParameters & parameters)
 {
@@ -4001,7 +4007,7 @@ FEProblemBase::setupDampers()
 }
 
 void
-FEProblemBase::addIndicator(std::string indicator_name,
+FEProblemBase::addIndicator(const std::string & indicator_name,
                             const std::string & name,
                             InputParameters & parameters)
 {
@@ -4042,7 +4048,7 @@ FEProblemBase::addIndicator(std::string indicator_name,
 }
 
 void
-FEProblemBase::addMarker(std::string marker_name,
+FEProblemBase::addMarker(const std::string & marker_name,
                          const std::string & name,
                          InputParameters & parameters)
 {

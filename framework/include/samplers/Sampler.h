@@ -216,7 +216,7 @@ private:
    * This init() method is called by FEProblemBase::addSampler; it should not be called elsewhere.
    */
   void init();
-  friend void FEProblemBase::addSampler(std::string type,
+  friend void FEProblemBase::addSampler(const std::string & type,
                                         const std::string & name,
                                         InputParameters & parameters);
 
