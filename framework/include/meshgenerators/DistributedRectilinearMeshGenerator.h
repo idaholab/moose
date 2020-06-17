@@ -303,6 +303,14 @@ protected:
   /// The min/max values for x,y,z component
   Real &_xmin, &_xmax, &_ymin, &_ymax, &_zmin, &_zmax;
 
+  /// Number of cores for partitioning the graph
+  /// The number of cores for the graph partition can be different from that used
+  /// for mesh generation and simulation. Partitioners often become inefficient in
+  /// compute time when the number of cores is large (around 10,0000).
+  /// A possible "fix" is to partition the graph using a small number of cores
+  /// when the mesh generation and the numerical simulation use a large number of processor cores.
+  processor_id_type _num_cores_for_partition;
+
   /// The type of element to build
   ElemType _elem_type;
 
@@ -317,7 +325,7 @@ protected:
   std::string _part_package;
 
   /// Number of cores per compute node if hierarch partitioning is used
-  dof_id_type _num_parts_per_compute_node;
+  processor_id_type _num_parts_per_compute_node;
 };
 
 template <>
