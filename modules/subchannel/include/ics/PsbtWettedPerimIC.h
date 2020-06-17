@@ -3,7 +3,7 @@
 #include "PsbtIC.h"
 
 /**
- * Sets the linear heat rate for the PSBT 01-6232 fluid temperature benchmark.
+ * Sets the wetted permeter of the subchannel
  */
 class PsbtWettedPerimIC : public PsbtIC
 {
