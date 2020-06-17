@@ -45,7 +45,7 @@
                   'the interface location and automatic differentiation '
                   'material properties applied to on each side of the boundary '
                   'determined by a level set function.'
-    design = 'ADLevelSetBiMaterialRankTwo.md ADLevelSetBiMaterialRankFour.md'
+    design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md'
     issues = '#15437'
   [../]
   [./inclusion_ad_bimaterial]
@@ -63,7 +63,7 @@
                   'and material properties applied to the matrix and inclusion '
                   'determined by a prescribed level set function using '
                   'automatic differentiation.'
-    design = 'ADLevelSetBiMaterialRankTwo.md'
+    design = 'LevelSetBiMaterialRankTwo.md'
     issues = '#15437'
   [../]
 []

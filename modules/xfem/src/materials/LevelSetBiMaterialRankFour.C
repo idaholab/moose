@@ -10,9 +10,11 @@
 #include "LevelSetBiMaterialRankFour.h"
 
 registerMooseObject("XFEMApp", LevelSetBiMaterialRankFour);
+registerMooseObject("XFEMApp", ADLevelSetBiMaterialRankFour);
 
+template <bool is_ad>
 InputParameters
-LevelSetBiMaterialRankFour::validParams()
+LevelSetBiMaterialRankFourTempl<is_ad>::validParams()
 {
   InputParameters params = LevelSetBiMaterialBase::validParams();
   params.addClassDescription(
@@ -21,25 +23,32 @@ LevelSetBiMaterialRankFour::validParams()
   return params;
 }
 
-LevelSetBiMaterialRankFour::LevelSetBiMaterialRankFour(const InputParameters & parameters)
+template <bool is_ad>
+LevelSetBiMaterialRankFourTempl<is_ad>::LevelSetBiMaterialRankFourTempl(
+    const InputParameters & parameters)
   : LevelSetBiMaterialBase(parameters),
     _bimaterial_material_prop(2),
-    _material_prop(declareProperty<RankFourTensor>(_base_name + _prop_name))
+    _material_prop(declareGenericProperty<RankFourTensor, is_ad>(_base_name + _prop_name))
 {
-  _bimaterial_material_prop[0] = &getMaterialProperty<RankFourTensor>(
+  _bimaterial_material_prop[0] = &getGenericMaterialProperty<RankFourTensor, is_ad>(
       getParam<std::string>("levelset_positive_base") + "_" + _prop_name);
-  _bimaterial_material_prop[1] = &getMaterialProperty<RankFourTensor>(
+  _bimaterial_material_prop[1] = &getGenericMaterialProperty<RankFourTensor, is_ad>(
       getParam<std::string>("levelset_negative_base") + "_" + _prop_name);
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialRankFour::assignQpPropertiesForLevelSetPositive()
+LevelSetBiMaterialRankFourTempl<is_ad>::assignQpPropertiesForLevelSetPositive()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[0])[_qp];
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialRankFour::assignQpPropertiesForLevelSetNegative()
+LevelSetBiMaterialRankFourTempl<is_ad>::assignQpPropertiesForLevelSetNegative()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[1])[_qp];
 }
+
+template class LevelSetBiMaterialRankFourTempl<false>;
+template class LevelSetBiMaterialRankFourTempl<true>;
