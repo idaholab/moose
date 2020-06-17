@@ -58,6 +58,9 @@ GapHeatConductanceAuxKernel::computeQpResidual(Moose::MortarType type)
       if (_has_master)
       {
         auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
+        mooseAssert(MetaPhysicL::raw_value(gap) > TOLERANCE * TOLERANCE,
+                    "Gap distance is too small in GapHeatConductanceAuxKernel");
+
         heat_transfer_coeff =
             (0.5 * (_slave_gap_conductance[_qp] + _master_gap_conductance[_qp])) / gap;
       }

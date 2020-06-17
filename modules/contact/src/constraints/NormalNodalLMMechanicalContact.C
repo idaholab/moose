@@ -47,7 +47,7 @@ NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParame
     _c(getParam<Real>("c")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _ncp_type(getParam<MooseEnum>("ncp_function_type")),
-    _fe_problem(*getCheckedPointerParam<FEProblem *>("_fe_problem", "Must be using FEProblem.")),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _displaced_problem(_fe_problem.getDisplacedProblem().get())
 {
   _overwrite_slave_residual = false;

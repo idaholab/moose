@@ -42,7 +42,7 @@ protected:
 
   const MooseEnum _ncp_type;
 
-  const FEProblem & _fe_problem;
+  const FEProblemBase & _fe_problem;
 
   const DisplacedProblem * _displaced_problem;
 };
