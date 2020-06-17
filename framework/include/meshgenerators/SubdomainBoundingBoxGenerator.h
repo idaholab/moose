@@ -46,6 +46,9 @@ protected:
   /// Block ID to assign to the region
   subdomain_id_type _block_id;
 
+  /// Whether or not we apply the bounding box only for certain subdomains
+  const bool _has_restriction;
+
   /// Bounding box for testing element centroids against
   BoundingBox _bounding_box;
 };

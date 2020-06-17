@@ -38,6 +38,9 @@ SubdomainBoundingBoxGenerator::validParams()
       "block_name", "Subdomain name to set for inside/outside the bounding box (optional)");
   params.addParam<MooseEnum>(
       "location", location, "Control of where the subdomain id is to be set");
+  params.addParam<std::vector<SubdomainName>>(
+      "restricted_subdomains",
+      "Only reset subdomain ID for given subdomains within the bounding box");
 
   params.addParam<std::string>("integer_name",
                                "Element integer to be assigned (default to subdomain ID)");
@@ -49,6 +52,7 @@ SubdomainBoundingBoxGenerator::SubdomainBoundingBoxGenerator(const InputParamete
     _input(getMesh("input")),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<subdomain_id_type>("block_id")),
+    _has_restriction(isParamValid("restricted_subdomains")),
     _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
                                                parameters.get<RealVectorValue>("top_right")))
 {
@@ -58,6 +62,20 @@ std::unique_ptr<MeshBase>
 SubdomainBoundingBoxGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  std::set<SubdomainID> restricted_ids;
+  if (_has_restriction)
+  {
+    auto names = getParam<std::vector<SubdomainName>>("restricted_subdomains");
+    for (auto & name : names)
+    {
+      SubdomainID id = Moose::INVALID_BLOCK_ID;
+      std::istringstream ss(name);
+      if (!(ss >> id) || !ss.eof())
+        id = mesh->get_id_by_name(name);
+      restricted_ids.insert(id);
+    }
+  }
 
   if (isParamValid("integer_name"))
   {
@@ -71,6 +89,9 @@ SubdomainBoundingBoxGenerator::generate()
     // Loop over the elements
     for (const auto & elem : mesh->active_element_ptr_range())
     {
+      if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
+        continue;
+
       bool contains = _bounding_box.contains_point(elem->centroid());
       if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
         elem->set_extra_integer(id, _block_id);
@@ -81,6 +102,9 @@ SubdomainBoundingBoxGenerator::generate()
     // Loop over the elements
     for (const auto & elem : mesh->active_element_ptr_range())
     {
+      if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
+        continue;
+
       bool contains = _bounding_box.contains_point(elem->centroid());
       if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
         elem->subdomain_id() = _block_id;
