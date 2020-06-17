@@ -56,7 +56,7 @@ FlowChannelAlignment::build(
 }
 
 bool
-FlowChannelAlignment::check(const std::vector<unsigned int> & fch_elem_ids) const
+FlowChannelAlignment::check(const std::vector<dof_id_type> & fch_elem_ids) const
 {
   if (_master_points.size() > 0 && _slave_points.size() > 0)
   {

@@ -26,14 +26,14 @@ public:
    * @param slave_elem_ids[in] List of slave element IDs (i.e. flow channel elements)
    */
   void build(const std::vector<std::tuple<dof_id_type, unsigned short int>> & master_boundary_info,
-             const std::vector<unsigned int> & slave_elem_ids);
+             const std::vector<dof_id_type> & slave_elem_ids);
 
   /**
    * Check the alignment of the flow channel elements with the heat structure elements
    *
    * @param slave_elem_ids[in] The vector of flow channel element IDs
    */
-  bool check(const std::vector<unsigned int> & slave_elem_ids) const;
+  bool check(const std::vector<dof_id_type> & slave_elem_ids) const;
 
   /**
    * Return the boundary info associated with the master side
@@ -46,7 +46,7 @@ public:
   /**
    * Return list of slave side element IDs
    */
-  const std::vector<unsigned int> & getSlaveElementIDs() const { return _slave_elem_ids; }
+  const std::vector<dof_id_type> & getSlaveElementIDs() const { return _slave_elem_ids; }
 
   /**
    * Get the nearest element ID given another element ID
@@ -61,7 +61,7 @@ protected:
   /// List of master element boundary infos
   std::vector<std::tuple<dof_id_type, unsigned short int>> _master_boundary_info;
   /// List of slave element IDs
-  std::vector<unsigned int> _slave_elem_ids;
+  std::vector<dof_id_type> _slave_elem_ids;
   // master element centroids
   std::vector<Point> _master_points;
   // slave element centroids
