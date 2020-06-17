@@ -175,7 +175,7 @@ class ContentOutlineCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build outline.")
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
-        settings['levels'] = (1, 'Heading level(s) to display.')
+        settings['levels'] = ('1', 'Heading level(s) to display.')
 
         # hide setting should accept the `page.md#heading` format, in case theres identical ids in the outline
         settings['hide'] = ('', "A list of heading ids to hide.")
@@ -192,9 +192,6 @@ class ContentOutlineCommand(command.CommandComponent):
         levels = self.settings['levels']
         if isinstance(levels, (str, str)):
             levels = [int(l) for l in levels.split()]
-        else:
-            # still need to convert to a list so that it is iterable
-            levels = [int(levels)]
 
         return ContentOutline(parent,
                               location=self.settings['location'],
@@ -341,6 +338,12 @@ class RenderTableOfContents(components.RenderComponent):
 
 class RenderContentOutline(components.RenderComponent):
     def createHTML(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createMaterialize(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createHTMLHelper(self, parent, token, page):
         if token['location'] is not None:
             func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
             nodes = self.translator.findPages(func)
@@ -388,6 +391,17 @@ class RenderContentOutline(components.RenderComponent):
             # level 3 heading has yet been generated, then that ol tag doesn't exist yet...
             # But to be fair, why would anyone follow a level 1 or 2 heading by a level 4?
             # To be even more fair, I'm probably the only one who is going to use this.
+
+        # It would be cool if we could do something like this for the outline
+        # This reproduced the example from https://materializecss.com/collapsible.html
+        #
+        # ul = html.Tag(parent, 'ul', class_='collapsible')
+        # li = html.Tag(ul, 'li')
+        # div = html.Tag(li, 'div', class_='collapsible-header')
+        # html.Tag(div, 'i', class_='material-icons', string='filter_drama')
+        # html.Tag(div, string=' First')
+        # div = html.Tag(li, 'div', class_='collapsible-body')
+        # span = html.Tag(div, 'span', string='Lorem ipsum dolor sit amet.')
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
