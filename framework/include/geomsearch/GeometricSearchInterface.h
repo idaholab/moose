@@ -29,7 +29,7 @@ public:
    * Retrieve the PentrationLocator associated with the two sides.
    */
   PenetrationLocator &
-  getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order);
+  getPenetrationLocator(const BoundaryName & master, const BoundaryName & secondary, Order order);
 
   /**
    * Retrieve the Quadrature PentrationLocator associated with the two sides.
@@ -38,14 +38,14 @@ public:
    * this boundary
    */
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave,
+                                                       const BoundaryName & secondary,
                                                        Order order);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master,
-                                             const BoundaryName & slave);
+                                             const BoundaryName & secondary);
 
   /**
    * Retrieve a Quadrature NearestNodeLocator associated with the two sides.
@@ -54,7 +54,7 @@ public:
    * on this boundary
    */
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave);
+                                                       const BoundaryName & secondary);
 
 protected:
   GeometricSearchData & _geometric_search_data;

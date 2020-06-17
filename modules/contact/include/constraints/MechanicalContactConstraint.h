@@ -65,7 +65,7 @@ public:
                                         unsigned int jvar) override;
 
   /**
-   * Get the dof indices of the nodes connected to the slave node for a specific variable
+   * Get the dof indices of the nodes connected to the secondary node for a specific variable
    * @param var_num The number of the variable for which dof indices are gathered
    * @return bool indicating whether the coupled variable is one of the displacement variables
    */
@@ -80,7 +80,7 @@ public:
    */
   bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
 
-  virtual bool addCouplingEntriesToJacobian() override { return _master_slave_jacobian; }
+  virtual bool addCouplingEntriesToJacobian() override { return _master_secondary_jacobian; }
 
   bool shouldApply() override;
   void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
@@ -117,10 +117,10 @@ protected:
   SystemBase & _aux_system;
   const NumericVector<Number> * const _aux_solution;
 
-  /// Whether to include coupling between the master and slave nodes in the Jacobian
-  const bool _master_slave_jacobian;
-  /// Whether to include coupling terms with the nodes connected to the slave nodes in the Jacobian
-  const bool _connected_slave_nodes_jacobian;
+  /// Whether to include coupling between the master and secondary nodes in the Jacobian
+  const bool _master_secondary_jacobian;
+  /// Whether to include coupling terms with the nodes connected to the secondary nodes in the Jacobian
+  const bool _connected_secondary_nodes_jacobian;
   /// Whether to include coupling terms with non-displacement variables in the Jacobian
   const bool _non_displacement_vars_jacobian;
 

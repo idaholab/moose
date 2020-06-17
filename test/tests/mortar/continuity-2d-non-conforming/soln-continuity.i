@@ -10,7 +10,7 @@
     sidesets = '2'
     new_block_id = '20'
   [../]
-  [./slave]
+  [./secondary]
     input = master
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
@@ -79,11 +79,11 @@
   [./mortar]
     type = EqualValueConstraint
     master_boundary = 2
-    slave_boundary = 1
+    secondary_boundary = 1
     master_subdomain = 20
-    slave_subdomain = 10
+    secondary_subdomain = 10
     variable = lambda
-    slave_variable = T
+    secondary_variable = T
   [../]
 []
 

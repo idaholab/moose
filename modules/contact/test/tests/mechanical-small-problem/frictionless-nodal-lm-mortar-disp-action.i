@@ -70,7 +70,7 @@
   [frictionless]
     mesh = simple_mesh
     master = 2
-    slave = 1
+    secondary = 1
     formulation = mortar
   []
 []

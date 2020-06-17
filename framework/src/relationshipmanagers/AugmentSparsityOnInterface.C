@@ -28,12 +28,12 @@ AugmentSparsityOnInterface::validParams()
   InputParameters params = RelationshipManager::validParams();
   params.addRequiredParam<BoundaryName>("master_boundary",
                                         "The name of the master boundary sideset.");
-  params.addRequiredParam<BoundaryName>("slave_boundary",
-                                        "The name of the slave boundary sideset.");
+  params.addRequiredParam<BoundaryName>("secondary_boundary",
+                                        "The name of the secondary boundary sideset.");
   params.addRequiredParam<SubdomainName>("master_subdomain",
                                          "The name of the master lower dimensional subdomain.");
-  params.addRequiredParam<SubdomainName>("slave_subdomain",
-                                         "The name of the slave lower dimensional subdomain.");
+  params.addRequiredParam<SubdomainName>("secondary_subdomain",
+                                         "The name of the secondary lower dimensional subdomain.");
   return params;
 }
 
@@ -42,9 +42,9 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
     _amg(nullptr),
     _has_attached_amg(false),
     _master_boundary_name(getParam<BoundaryName>("master_boundary")),
-    _slave_boundary_name(getParam<BoundaryName>("slave_boundary")),
+    _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
     _master_subdomain_name(getParam<SubdomainName>("master_subdomain")),
-    _slave_subdomain_name(getParam<SubdomainName>("slave_subdomain"))
+    _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain"))
 {
 }
 
@@ -91,9 +91,9 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     // geometric relationship managers. Hence we can't do the below in our constructor. Now that
     // we're doing ghosting we've definitely read in the mesh
     auto boundary_pair = std::make_pair(_mesh.getBoundaryID(_master_boundary_name),
-                                        _mesh.getBoundaryID(_slave_boundary_name));
+                                        _mesh.getBoundaryID(_secondary_boundary_name));
     _subdomain_pair.first = _mesh.getSubdomainID(_master_subdomain_name);
-    _subdomain_pair.second = _mesh.getSubdomainID(_slave_subdomain_name);
+    _subdomain_pair.second = _mesh.getSubdomainID(_secondary_subdomain_name);
 
     _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
         boundary_pair, _subdomain_pair, _use_displaced_mesh);
@@ -159,9 +159,9 @@ AugmentSparsityOnInterface::operator==(const RelationshipManager & other) const
   if (auto asoi = dynamic_cast<const AugmentSparsityOnInterface *>(&other))
   {
     if (_master_boundary_name == asoi->_master_boundary_name &&
-        _slave_boundary_name == asoi->_slave_boundary_name &&
+        _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _master_subdomain_name == asoi->_master_subdomain_name &&
-        _slave_subdomain_name == asoi->_slave_subdomain_name)
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name)
       return true;
   }
   return false;

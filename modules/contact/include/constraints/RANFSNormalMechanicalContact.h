@@ -59,7 +59,7 @@ protected:
   Real _contact_lm;
   Real _tied_lm;
   PenetrationInfo * _pinfo;
-  std::unordered_map<dof_id_type, const Node *> _ping_pong_slave_node_to_master_node;
+  std::unordered_map<dof_id_type, const Node *> _ping_pong_secondary_node_to_master_node;
   Real _distance;
   bool _tie_nodes;
   unsigned int _master_index;

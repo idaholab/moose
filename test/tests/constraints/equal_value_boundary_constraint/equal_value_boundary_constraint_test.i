@@ -45,7 +45,7 @@
     type = EqualValueBoundaryConstraint
     variable = diffused
     master = '45'    # node on boundary
-    slave = 'top'    # boundary
+    secondary = 'top'    # boundary
     penalty = 10e6
   [../]
 []

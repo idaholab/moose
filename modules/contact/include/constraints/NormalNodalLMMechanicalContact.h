@@ -25,7 +25,7 @@ public:
   NormalNodalLMMechanicalContact(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

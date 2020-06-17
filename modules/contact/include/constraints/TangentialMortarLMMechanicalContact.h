@@ -21,16 +21,16 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType) final;
 
-  const MooseVariableFE<Real> & _slave_disp_y;
+  const MooseVariableFE<Real> & _secondary_disp_y;
   const MooseVariableFE<Real> & _master_disp_y;
 
   const MooseVariableFE<Real> & _contact_pressure_var;
 
   const ADVariableValue & _contact_pressure;
 
-  const ADVariableValue & _slave_x_dot;
+  const ADVariableValue & _secondary_x_dot;
   const ADVariableValue & _master_x_dot;
-  const ADVariableValue & _slave_y_dot;
+  const ADVariableValue & _secondary_y_dot;
   const ADVariableValue & _master_y_dot;
 
   const Real _friction_coeff;

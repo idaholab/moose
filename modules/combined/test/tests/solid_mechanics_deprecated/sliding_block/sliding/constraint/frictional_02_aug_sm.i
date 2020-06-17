@@ -216,7 +216,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 2
     model = coulomb
     penalty = 1e+7

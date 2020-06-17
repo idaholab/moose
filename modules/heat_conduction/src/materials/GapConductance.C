@@ -87,16 +87,16 @@ GapConductance::actionParameters()
                                     1,
                                     "emissivity_master>=0 & emissivity_master<=1",
                                     "The emissivity of the master surface");
-  params.addRangeCheckedParam<Real>("emissivity_slave",
+  params.addRangeCheckedParam<Real>("emissivity_secondary",
                                     1,
-                                    "emissivity_slave>=0 & emissivity_slave<=1",
-                                    "The emissivity of the slave surface");
+                                    "emissivity_secondary>=0 & emissivity_secondary<=1",
+                                    "The emissivity of the secondary surface");
   params.addDeprecatedParam<Real>("emissivity_1",
                                   "The emissivity of the fuel surface",
                                   "Please use \"emissivity_master\" instead");
   params.addDeprecatedParam<Real>("emissivity_2",
                                   "The emissivity of the cladding surface",
-                                  "Please use \"emissivity_slave\" instead");
+                                  "Please use \"emissivity_secondary\" instead");
   // Common
   params.addRangeCheckedParam<Real>(
       "min_gap", 1e-6, "min_gap>0", "A minimum gap (denominator) size");
@@ -159,19 +159,19 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  emissivity_master);
   }
 
-  Real emissivity_slave = getParam<Real>("emissivity_slave");
+  Real emissivity_secondary = getParam<Real>("emissivity_secondary");
   if (isParamValid("emissivity_2"))
   {
-    emissivity_slave = getParam<Real>("emissivity_2");
+    emissivity_secondary = getParam<Real>("emissivity_2");
 
     // make sure emissivity is physical
-    if (emissivity_slave < 0 || emissivity_slave > 1)
+    if (emissivity_secondary < 0 || emissivity_secondary > 1)
       paramError("emissivity_2",
                  "Emissivities must have values between 0 and 1. You provided: ",
-                 emissivity_slave);
+                 emissivity_secondary);
   }
-  _emissivity = emissivity_master != 0.0 && emissivity_slave != 0.0
-                    ? 1.0 / emissivity_master + 1.0 / emissivity_slave - 1
+  _emissivity = emissivity_master != 0.0 && emissivity_secondary != 0.0
+                    ? 1.0 / emissivity_master + 1.0 / emissivity_secondary - 1
                     : 0.0;
 
   if (_quadrature)
@@ -457,16 +457,16 @@ GapConductance::computeGapValues()
       _gap_distance = pinfo->_distance;
       _has_info = true;
 
-      const Elem * slave_side = pinfo->_side;
-      std::vector<std::vector<Real>> & slave_side_phi = pinfo->_side_phi;
-      std::vector<dof_id_type> slave_side_dof_indices;
+      const Elem * secondary_side = pinfo->_side;
+      std::vector<std::vector<Real>> & secondary_side_phi = pinfo->_side_phi;
+      std::vector<dof_id_type> secondary_side_dof_indices;
 
-      _dof_map->dof_indices(slave_side, slave_side_dof_indices, _temp_var->number());
+      _dof_map->dof_indices(secondary_side, secondary_side_dof_indices, _temp_var->number());
 
-      for (unsigned int i = 0; i < slave_side_dof_indices.size(); ++i)
+      for (unsigned int i = 0; i < secondary_side_dof_indices.size(); ++i)
       {
         // The zero index is because we only have one point that the phis are evaluated at
-        _gap_temp += slave_side_phi[i][0] * (*(*_serialized_solution))(slave_side_dof_indices[i]);
+        _gap_temp += secondary_side_phi[i][0] * (*(*_serialized_solution))(secondary_side_dof_indices[i]);
       }
     }
     else

@@ -144,7 +144,7 @@ offset = 0.01
     disp_y = disp_y
 
     mesh = right_block_sidesets
-    slave = lb_right
+    secondary = lb_right
     master = rb_left
 
     model = frictionless

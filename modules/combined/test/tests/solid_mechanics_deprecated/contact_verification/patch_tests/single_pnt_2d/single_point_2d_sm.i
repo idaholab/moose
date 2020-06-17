@@ -224,7 +224,7 @@
 [Contact]
   [./leftright]
     master = 2
-    slave = 3
+    secondary = 3
     disp_y = disp_y
     disp_x = disp_x
     model = glued

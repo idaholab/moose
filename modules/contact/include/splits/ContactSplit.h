@@ -26,10 +26,10 @@ public:
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
 protected:
   std::vector<std::string> _contact_master;
-  std::vector<std::string> _contact_slave;
+  std::vector<std::string> _contact_secondary;
   std::vector<int> _contact_displaced;
   std::vector<std::string> _uncontact_master;
-  std::vector<std::string> _uncontact_slave;
+  std::vector<std::string> _uncontact_secondary;
   std::vector<int> _uncontact_displaced;
   bool _include_all_contact_nodes;
 #endif // defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)

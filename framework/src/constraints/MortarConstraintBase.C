@@ -26,21 +26,21 @@ MortarConstraintBase::validParams()
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-        rm_params.set<BoundaryName>("slave_boundary") =
-            obj_params.get<BoundaryName>("slave_boundary");
+        rm_params.set<BoundaryName>("secondary_boundary") =
+            obj_params.get<BoundaryName>("secondary_boundary");
         rm_params.set<BoundaryName>("master_boundary") =
             obj_params.get<BoundaryName>("master_boundary");
-        rm_params.set<SubdomainName>("slave_subdomain") =
-            obj_params.get<SubdomainName>("slave_subdomain");
+        rm_params.set<SubdomainName>("secondary_subdomain") =
+            obj_params.get<SubdomainName>("secondary_subdomain");
         rm_params.set<SubdomainName>("master_subdomain") =
             obj_params.get<SubdomainName>("master_subdomain");
       });
 
-  params.addParam<VariableName>("slave_variable", "Primal variable on slave surface.");
+  params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
   params.addParam<VariableName>(
       "master_variable",
       "Primal variable on master surface. If this parameter is not provided then the master "
-      "variable will be initialized to the slave variable");
+      "variable will be initialized to the secondary variable");
   params.addParam<NonlinearVariableName>(
       "variable",
       "The name of the lagrange multiplier variable that this constraint is applied to. This "
@@ -66,14 +66,14 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _var(isParamValid("variable")
              ? &_subproblem.getStandardVariable(_tid, parameters.getMooseType("variable"))
              : nullptr),
-    _slave_var(
-        isParamValid("slave_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_variable"))
+    _secondary_var(
+        isParamValid("secondary_variable")
+            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_variable"))
             : _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_variable"))),
     _master_var(
         isParamValid("master_variable")
             ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("master_variable"))
-            : _slave_var),
+            : _secondary_var),
 
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
     _compute_lm_residuals(!_var ? false : getParam<bool>("compute_lm_residuals")),
@@ -85,11 +85,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _coord(_assembly.mortarCoordTransformation()),
     _qrule_msm(_assembly.qRuleMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
-    _test_slave(_slave_var.phiFace()),
+    _test_secondary(_secondary_var.phiFace()),
     _test_master(_master_var.phiFaceNeighbor()),
-    _grad_test_slave(_slave_var.gradPhiFace()),
+    _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_master(_master_var.gradPhiFaceNeighbor()),
-    _phys_points_slave(_assembly.qPointsFace()),
+    _phys_points_secondary(_assembly.qPointsFace()),
     _phys_points_master(_assembly.qPointsFaceNeighbor())
 {
 }
@@ -102,7 +102,7 @@ MortarConstraintBase::computeResidual(bool has_master)
 
   if (_compute_primal_residuals)
   {
-    // Compute the residual for the slave interior primal dofs
+    // Compute the residual for the secondary interior primal dofs
     computeResidual(Moose::MortarType::Slave);
 
     // Compute the residual for the master interior primal dofs. If we don't have a master element,
@@ -123,7 +123,7 @@ MortarConstraintBase::computeJacobian(bool has_master)
 
   if (_compute_primal_residuals)
   {
-    // Compute the jacobian for the slave interior primal dofs
+    // Compute the jacobian for the secondary interior primal dofs
     computeJacobian(Moose::MortarType::Slave);
 
     // Compute the jacobian for the master interior primal dofs. If we don't have a master element,

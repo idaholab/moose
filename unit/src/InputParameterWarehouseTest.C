@@ -406,8 +406,8 @@ TEST(InputParameterWarehouse, addControllableParameterAlias)
   const InputParameters & params = wh.addInputParameters("Object", in_params);
 
   MooseObjectParameterName alias("not", "a", "param");
-  MooseObjectParameterName slave("Base", "Object", "control");
-  wh.addControllableParameterAlias(alias, slave);
+  MooseObjectParameterName secondary("Base", "Object", "control");
+  wh.addControllableParameterAlias(alias, secondary);
 
   auto cp = wh.getControllableParameter(alias);
 

@@ -31,7 +31,7 @@
 [Constraints]
   [./disp_x]
     type = RANFSTieNode
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_x
     master_variable = disp_x
@@ -39,7 +39,7 @@
   [../]
   [./disp_y]
     type = RANFSTieNode
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_y
     master_variable = disp_y

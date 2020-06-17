@@ -56,14 +56,14 @@ protected:
   /// The LM solution
   const VariableValue & _lambda;
 
-  /// The primal solution on the slave side
-  const VariableValue & _u_slave;
+  /// The primal solution on the secondary side
+  const VariableValue & _u_secondary;
 
   /// The primal solution on the master side
   const VariableValue & _u_master;
 
-  /// The primal solution gradient on the slave side
-  const VariableGradient & _grad_u_slave;
+  /// The primal solution gradient on the secondary side
+  const VariableGradient & _grad_u_secondary;
 
   /// The primal solution gradient on the master side
   const VariableGradient & _grad_u_master;

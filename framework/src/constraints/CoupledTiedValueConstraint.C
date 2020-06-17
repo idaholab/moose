@@ -45,16 +45,16 @@ Real
 CoupledTiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   Real scaling_factor = _var.scalingFactor();
-  Real slave_resid = 0;
+  Real secondary_resid = 0;
   Real retVal = 0;
   switch (type)
   {
     case Moose::Slave:
-      retVal = (_u_slave[_qp] - _u_master[_qp]) * _test_slave[_i][_qp] * _scaling;
+      retVal = (_u_secondary[_qp] - _u_master[_qp]) * _test_secondary[_i][_qp] * _scaling;
       break;
     case Moose::Master:
-      slave_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
-      retVal = slave_resid * _test_master[_i][_qp];
+      secondary_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
+      retVal = secondary_resid * _test_master[_i][_qp];
       break;
     default:
       break;
@@ -66,20 +66,20 @@ Real
 CoupledTiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   Real scaling_factor = _var.scalingFactor();
-  Real slave_jac = 0;
+  Real secondary_jac = 0;
   Real retVal = 0;
   switch (type)
   {
     case Moose::SlaveSlave:
-      retVal = _phi_slave[_j][_qp] * _test_slave[_i][_qp] * _scaling;
+      retVal = _phi_secondary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
     case Moose::SlaveMaster:
       retVal = 0;
       break;
     case Moose::MasterSlave:
-      slave_jac =
+      secondary_jac =
           (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
-      retVal = slave_jac * _test_master[_i][_qp] / scaling_factor;
+      retVal = secondary_jac * _test_master[_i][_qp] / scaling_factor;
       break;
     case Moose::MasterMaster:
       retVal = 0;
@@ -105,7 +105,7 @@ CoupledTiedValueConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianTy
         retVal = 0;
         break;
       case Moose::SlaveMaster:
-        retVal = -_phi_master[_j][_qp] * _test_slave[_i][_qp] * _scaling;
+        retVal = -_phi_master[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
         break;
       case Moose::MasterSlave:
         retVal = 0;

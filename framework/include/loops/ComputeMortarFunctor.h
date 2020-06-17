@@ -68,16 +68,16 @@ private:
   Assembly & _assembly;
 
   /// The mortar quadrature rule. Necessary for sizing the number of custom
-  /// points for re-init'ing the slave interior, master interior, and slave face
+  /// points for re-init'ing the secondary interior, primary interior, and secondary face
   /// elements
   const libMesh::QBase * const & _qrule_msm;
 
-  /// The slave boundary id needed for reiniting the MOOSE systems on the element (slave) face
-  BoundaryID _slave_boundary_id;
+  /// The secondary boundary id needed for reiniting the MOOSE systems on the element (secondary) face
+  BoundaryID _secondary_boundary_id;
 
-  /// The master boundary id needed for reiniting the MOOSE systems on the neighbor (master) face
-  BoundaryID _master_boundary_id;
+  /// The primary boundary id needed for reiniting the MOOSE systems on the neighbor (primary) face
+  BoundaryID _primary_boundary_id;
 
-  /// boolean flag for holding whether our current mortar segment projects onto a master element
-  bool _has_master;
+  /// boolean flag for holding whether our current mortar segment projects onto a primary element
+  bool _has_primary;
 };

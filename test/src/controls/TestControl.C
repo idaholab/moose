@@ -48,14 +48,14 @@ TestControl::TestControl(const InputParameters & parameters)
   else if (_test_type == "connection")
   {
     MooseObjectParameterName master(MooseObjectName("Kernels", "diff"), "coef");
-    MooseObjectParameterName slave(MooseObjectName("BCs", "left"), "value");
-    _app.getInputParameterWarehouse().addControllableParameterConnection(master, slave);
+    MooseObjectParameterName secondary(MooseObjectName("BCs", "left"), "value");
+    _app.getInputParameterWarehouse().addControllableParameterConnection(master, secondary);
   }
 
   else if (_test_type == "alias")
   {
-    MooseObjectParameterName slave(MooseObjectName("BCs", "left"), "value");
-    _app.getInputParameterWarehouse().addControllableParameterAlias(_alias, slave);
+    MooseObjectParameterName secondary(MooseObjectName("BCs", "left"), "value");
+    _app.getInputParameterWarehouse().addControllableParameterAlias(_alias, secondary);
   }
 
   else if (_test_type == "mult")

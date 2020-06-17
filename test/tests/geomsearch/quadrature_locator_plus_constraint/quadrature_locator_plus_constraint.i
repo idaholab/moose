@@ -32,7 +32,7 @@
     type = TiedValueConstraint
     variable = T
     master_variable = T
-    slave = 1
+    secondary = 1
     master = 2
   []
 []

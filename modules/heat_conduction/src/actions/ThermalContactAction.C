@@ -21,7 +21,7 @@ registerMooseAction("HeatConductionApp", ThermalContactAction, "add_aux_variable
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_bc");
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_dirac_kernel");
 registerMooseAction("HeatConductionApp", ThermalContactAction, "add_material");
-registerMooseAction("HeatConductionApp", ThermalContactAction, "add_slave_flux_vector");
+registerMooseAction("HeatConductionApp", ThermalContactAction, "add_secondary_flux_vector");
 
 InputParameters
 ThermalContactAction::validParams()
@@ -37,7 +37,7 @@ ThermalContactAction::validParams()
       "A string representing the Moose object that will be used for computing the gap size");
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addRequiredParam<BoundaryName>("master", "The master surface");
-  params.addRequiredParam<BoundaryName>("slave", "The slave surface");
+  params.addRequiredParam<BoundaryName>("secondary", "The secondary surface");
   params.addRangeCheckedParam<Real>("tangential_tolerance",
                                     "tangential_tolerance>=0",
                                     "Tangential distance to extend edges of contact surfaces");
@@ -111,7 +111,7 @@ ThermalContactAction::act()
     addDiracKernels();
   else if (_current_task == "add_material")
     addMaterials();
-  else if (_current_task == "add_slave_flux_vector")
+  else if (_current_task == "add_secondary_flux_vector")
     addSlaveFluxVector();
 }
 
@@ -130,7 +130,7 @@ ThermalContactAction::addAuxKernels()
                                     "warnings"});
     params.set<AuxVariableName>("variable") = _gap_value_name;
     params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
-    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
     params.set<VariableName>("paired_variable") = getParam<NonlinearVariableName>("variable");
 
@@ -139,7 +139,7 @@ ThermalContactAction::addAuxKernels()
     if (_quadrature)
     {
       params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
-      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("secondary");
 
       _problem->addAuxKernel(
           getParam<std::string>("gap_aux_type"), "gap_value_master_" + name(), params);
@@ -155,7 +155,7 @@ ThermalContactAction::addAuxKernels()
         {"tangential_tolerance", "normal_smoothing_distance", "normal_smoothing_method", "order"});
     params.set<AuxVariableName>("variable") = _penetration_var_name;
     params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
-    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
     params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("master");
 
     _problem->addAuxKernel("PenetrationAux", "penetration_" + name(), params);
@@ -205,15 +205,15 @@ ThermalContactAction::addBCs()
     params.set<std::vector<VariableName>>("gap_temp") = {_gap_value_name};
   }
 
-  params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+  params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
 
   _problem->addBoundaryCondition(object_name, "gap_bc_" + name(), params);
 
   if (_quadrature)
   {
-    // Swap master and slave for this one
+    // Swap master and secondary for this one
     params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
-    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+    params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("secondary");
 
     _problem->addBoundaryCondition(object_name, "gap_bc_master_" + name(), params);
   }
@@ -232,7 +232,7 @@ ThermalContactAction::addDiracKernels()
                                   "normal_smoothing_distance",
                                   "normal_smoothing_method",
                                   "order",
-                                  "slave",
+                                  "secondary",
                                   "variable"});
   params.set<BoundaryName>("boundary") = getParam<BoundaryName>("master");
 
@@ -255,7 +255,7 @@ ThermalContactAction::addMaterials()
     const std::string object_type = "GapConductanceConstant";
     InputParameters params = _factory.getValidParams(object_type);
     params.applyParameters(parameters());
-    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
     _problem->addMaterial(object_type, name() + "_" + "gap_value", params);
 
     if (_quadrature)
@@ -273,7 +273,7 @@ ThermalContactAction::addMaterials()
 
     params.set<std::vector<VariableName>>("variable") = {
         getParam<NonlinearVariableName>("variable")};
-    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
 
     if (_quadrature)
     {
@@ -289,7 +289,7 @@ ThermalContactAction::addMaterials()
 
     if (_quadrature)
     {
-      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("slave");
+      params.set<BoundaryName>("paired_boundary") = getParam<BoundaryName>("secondary");
       params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("master")};
 
       _problem->addMaterial(object_type, name() + "_" + "gap_value_master", params);
@@ -300,8 +300,8 @@ ThermalContactAction::addMaterials()
 void
 ThermalContactAction::addSlaveFluxVector()
 {
-  _problem->getNonlinearSystemBase().addVector("slave_flux", false, GHOSTED);
-  _problem->getNonlinearSystemBase().zeroVectorForResidual("slave_flux");
+  _problem->getNonlinearSystemBase().addVector("secondary_flux", false, GHOSTED);
+  _problem->getNonlinearSystemBase().zeroVectorForResidual("secondary_flux");
 
   // It is risky to apply this optimization to contact problems
   // since the problem configuration may be changed during Jacobian

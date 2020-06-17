@@ -6,7 +6,7 @@
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     expect_out = 'Time Step 12'
     input = ranfs-ping-pong.i
-    requirement = 'The node-face discretization with a RANFS formulation for frictionless mechanical contact shall be susceptible to ping-ponging, specifically in this case to a slave node oscillating back and forth between different master faces'
+    requirement = 'The node-face discretization with a RANFS formulation for frictionless mechanical contact shall be susceptible to ping-ponging, specifically in this case to a secondary node oscillating back and forth between different master faces'
     heavy = True
   []
   [kinematic-ping-pong]
@@ -14,7 +14,7 @@
     expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
     expect_out = 'Time Step 12'
     input = kinematic-ping-pong.i
-    requirement = 'The node-face discretization with a kinematic formulation for frictionless mechanical contact shall be susceptible to ping-ponging, specifically in this case to a slave node oscillating back and forth between different master faces'
+    requirement = 'The node-face discretization with a kinematic formulation for frictionless mechanical contact shall be susceptible to ping-ponging, specifically in this case to a secondary node oscillating back and forth between different master faces'
     heavy = True
   []
   [mortar-no-ping-pong]

@@ -9,5 +9,5 @@
 
 - To use a NearestNodeLocator
     - `#include "NearestNodeLocator.h"`
-    - call `getNearestNodeLocator(master_id, slave_id)` to create the object.
+    - call `getNearestNodeLocator(master_id, secondary_id)` to create the object.
 - The functions `distance()` and `nearestNode()` both take a node ID and return either the distance to the nearest node or a `Node` pointer for the nearest node respectively.

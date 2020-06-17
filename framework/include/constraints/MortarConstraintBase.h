@@ -94,8 +94,8 @@ protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
   const MooseVariable * const _var;
 
-  /// Reference to the slave variable
-  const MooseVariable & _slave_var;
+  /// Reference to the secondary variable
+  const MooseVariable & _secondary_var;
 
   /// Reference to the master variable
   const MooseVariable & _master_var;
@@ -117,10 +117,10 @@ protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 
-  /// the normals along the slave face
+  /// the normals along the secondary face
   const MooseArray<Point> & _normals;
 
-  /// the tangents along the slave face
+  /// the tangents along the secondary face
   const MooseArray<std::vector<Point>> & _tangents;
 
   /// The element Jacobian times weights
@@ -135,20 +135,20 @@ protected:
   /// The shape functions corresponding to the lagrange multiplier variable
   const VariableTestValue & _test;
 
-  /// The shape functions corresponding to the slave interior primal variable
-  const VariableTestValue & _test_slave;
+  /// The shape functions corresponding to the secondary interior primal variable
+  const VariableTestValue & _test_secondary;
 
   /// The shape functions corresponding to the master interior primal variable
   const VariableTestValue & _test_master;
 
-  /// The shape function gradients corresponding to the slave interior primal variable
-  const VariableTestGradient & _grad_test_slave;
+  /// The shape function gradients corresponding to the secondary interior primal variable
+  const VariableTestGradient & _grad_test_secondary;
 
   /// The shape function gradients corresponding to the master interior primal variable
   const VariableTestGradient & _grad_test_master;
 
-  /// The locations of the quadrature points on the interior slave elements
-  const MooseArray<Point> & _phys_points_slave;
+  /// The locations of the quadrature points on the interior secondary elements
+  const MooseArray<Point> & _phys_points_secondary;
 
   /// The locations of the quadrature points on the interior master elements
   const MooseArray<Point> & _phys_points_master;
@@ -156,16 +156,16 @@ protected:
 
 #define usingMortarConstraintBaseMembers                                                           \
   usingConstraintMembers;                                                                          \
-  using ADMortarConstraint::_phys_points_slave;                                                    \
+  using ADMortarConstraint::_phys_points_secondary;                                                    \
   using ADMortarConstraint::_phys_points_master;                                                   \
   using ADMortarConstraint::_has_master;                                                           \
   using ADMortarConstraint::_use_dual;                                                             \
   using ADMortarConstraint::_test;                                                                 \
-  using ADMortarConstraint::_test_slave;                                                           \
+  using ADMortarConstraint::_test_secondary;                                                           \
   using ADMortarConstraint::_test_master;                                                          \
-  using ADMortarConstraint::_grad_test_slave;                                                      \
+  using ADMortarConstraint::_grad_test_secondary;                                                      \
   using ADMortarConstraint::_grad_test_master;                                                     \
   using ADMortarConstraint::_normals;                                                              \
   using ADMortarConstraint::_tangents;                                                             \
-  using ADMortarConstraint::_slave_var;                                                            \
+  using ADMortarConstraint::_secondary_var;                                                            \
   using ADMortarConstraint::_master_var

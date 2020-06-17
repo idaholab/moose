@@ -32,9 +32,9 @@ def highlightBlock(block, vtkwindow):
     if boundary_param or block_param:
         vtkwindow.onHighlight(boundary=boundary_param, block=block_param)
     elif master:
-        slave = block.getParamInfo("slave")
-        if slave:
-            vtkwindow.onHighlight(boundary=[master.value, slave.value])
+        secondary = block.getParamInfo("secondary")
+        if secondary:
+            vtkwindow.onHighlight(boundary=[master.value, secondary.value])
         else:
             vtkwindow.onHighlight()
     else:

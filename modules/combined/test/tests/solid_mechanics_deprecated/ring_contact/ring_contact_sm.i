@@ -43,7 +43,7 @@
 [Contact]
   [./dummy_name]
     master = 3
-    slave = 2
+    secondary = 2
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z

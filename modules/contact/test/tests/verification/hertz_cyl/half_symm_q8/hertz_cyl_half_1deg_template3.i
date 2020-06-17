@@ -404,7 +404,7 @@
 [Contact]
   [./interface]
     master = 2
-    slave = 3
+    secondary = 3
     model = coulomb
     friction_coefficient = 0.0
     formulation = penalty
@@ -418,6 +418,6 @@
   [./contact_slip]
     type = ContactSlipDamper
     master = '2'
-    slave = '3'
+    secondary = '3'
   [../]
 []

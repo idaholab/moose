@@ -51,7 +51,7 @@ offset = 1e-2
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = normal_lm
     master_variable = disp_x
@@ -60,7 +60,7 @@ offset = 1e-2
   [../]
   [./disp_x]
     type = NormalNodalMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_x
     master_variable = disp_x
@@ -69,7 +69,7 @@ offset = 1e-2
   [../]
   [./disp_y]
     type = NormalNodalMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_y
     master_variable = disp_y

@@ -56,19 +56,19 @@ private:
   /// mesh information
   const MortarData & _mortar_data;
 
-  /// Boundary ID for the slave surface
-  const BoundaryID _slave_id;
+  /// Boundary ID for the secondary surface
+  const BoundaryID _secondary_id;
 
   /// Boundary ID for the master surface
   const BoundaryID _master_id;
 
-  /// Subdomain ID for the slave surface
-  const SubdomainID _slave_subdomain_id;
+  /// Subdomain ID for the secondary surface
+  const SubdomainID _secondary_subdomain_id;
 
   /// Subdomain ID for the master surface
   const SubdomainID _master_subdomain_id;
 
-  /// the union of the slave and master boundary ids
+  /// the union of the secondary and master boundary ids
   std::set<BoundaryID> _boundary_ids;
 
   /// the higher dimensional subdomain ids corresponding to the interior parents

@@ -13,7 +13,7 @@
     sidesets = '2'
     new_block_id = '3'
   [../]
-  [./slave]
+  [./secondary]
     type = LowerDBlockFromSidesetGenerator
     input = master
     sidesets = '1'
@@ -24,7 +24,7 @@
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = 1
+    secondary = 1
     master = 2
     variable = frictionless_normal_lm
     master_variable = disp_x
@@ -33,11 +33,11 @@
   [x]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    secondary_boundary = '1'
     master_subdomain = '3'
-    slave_subdomain = '4'
+    secondary_subdomain = '4'
     variable = frictionless_normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -45,11 +45,11 @@
   [y]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    secondary_boundary = '1'
     master_subdomain = '3'
-    slave_subdomain = '4'
+    secondary_subdomain = '4'
     variable = frictionless_normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

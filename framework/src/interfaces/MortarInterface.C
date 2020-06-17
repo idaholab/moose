@@ -25,10 +25,10 @@ MortarInterface::validParams()
 
   params.addRequiredParam<BoundaryName>("master_boundary",
                                         "The name of the master boundary sideset.");
-  params.addRequiredParam<BoundaryName>("slave_boundary",
-                                        "The name of the slave boundary sideset.");
+  params.addRequiredParam<BoundaryName>("secondary_boundary",
+                                        "The name of the secondary boundary sideset.");
   params.addRequiredParam<SubdomainName>("master_subdomain", "The name of the master subdomain.");
-  params.addRequiredParam<SubdomainName>("slave_subdomain", "The name of the slave subdomain.");
+  params.addRequiredParam<SubdomainName>("secondary_subdomain", "The name of the secondary subdomain.");
   params.addParam<bool>(
       "periodic",
       false,
@@ -43,10 +43,10 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
   : _moi_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _moi_mesh(_moi_problem.mesh()),
     _mortar_data(_moi_problem.mortarData()),
-    _slave_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("slave_boundary"))),
+    _secondary_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
     _master_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("master_boundary"))),
-    _slave_subdomain_id(
-        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("slave_subdomain"))),
+    _secondary_subdomain_id(
+        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("secondary_subdomain"))),
     _master_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("master_subdomain")))
 {
@@ -54,20 +54,20 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
     mooseError("Mortar cannot currently be run in three dimensions. It's on the to-do list!");
 
   // Create the mortar interface if it hasn't already been created
-  _moi_problem.createMortarInterface(std::make_pair(_master_id, _slave_id),
-                                     std::make_pair(_master_subdomain_id, _slave_subdomain_id),
+  _moi_problem.createMortarInterface(std::make_pair(_master_id, _secondary_id),
+                                     std::make_pair(_master_subdomain_id, _secondary_subdomain_id),
                                      moose_object->isParamValid("use_displaced_mesh")
                                          ? moose_object->getParam<bool>("use_displaced_mesh")
                                          : false,
                                      moose_object->getParam<bool>("periodic"));
 
-  const auto & slave_set = _mortar_data.getHigherDimSubdomainIDs(_slave_subdomain_id);
+  const auto & secondary_set = _mortar_data.getHigherDimSubdomainIDs(_secondary_subdomain_id);
   const auto & master_set = _mortar_data.getHigherDimSubdomainIDs(_master_subdomain_id);
 
-  std::set_union(slave_set.begin(),
-                 slave_set.end(),
+  std::set_union(secondary_set.begin(),
+                 secondary_set.end(),
                  master_set.begin(),
                  master_set.end(),
                  std::inserter(_higher_dim_subdomain_ids, _higher_dim_subdomain_ids.begin()));
-  _boundary_ids = {_slave_id, _master_id};
+  _boundary_ids = {_secondary_id, _master_id};
 }

@@ -28,8 +28,8 @@ InputParameters validParams<NodeElemConstraint>();
 
 /**
  * A NodeElemConstraint is used when you need to create constraints between
- * a slave node and a master element. It works by allowing you to modify the
- * residual and jacobian entries on the slave node and the master element.
+ * a secondary node and a master element. It works by allowing you to modify the
+ * residual and jacobian entries on the secondary node and the master element.
  */
 class NodeElemConstraint : public Constraint,
                            public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -41,7 +41,7 @@ public:
   NodeElemConstraint(const InputParameters & parameters);
   virtual ~NodeElemConstraint();
 
-  /// Compute the value the slave node should have at the beginning of a timestep.
+  /// Compute the value the secondary node should have at the beginning of a timestep.
   void computeSlaveValue(NumericVector<Number> & current_solution);
 
   /// Computes the residual Nodal residual.
@@ -63,15 +63,15 @@ public:
   virtual bool shouldApply() { return true; }
 
   /**
-   * Whether or not the slave's residual should be overwritten.
-   * @return bool When this returns true the slave's residual as computed by the constraint will
+   * Whether or not the secondary's residual should be overwritten.
+   * @return bool When this returns true the secondary's residual as computed by the constraint will
    * _replace_ the residual previously at that node for that variable.
    */
   virtual bool overwriteSlaveResidual();
 
   /**
-   * Whether or not the slave's Jacobian row should be overwritten.
-   * @return bool When this returns true the slave's Jacobian row as computed by the constraint will
+   * Whether or not the secondary's Jacobian row should be overwritten.
+   * @return bool When this returns true the secondary's Jacobian row as computed by the constraint will
    * _replace_ the residual previously at that node for that variable.
    */
   virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
@@ -88,10 +88,10 @@ public:
   MooseVariable & variable() { return _var; }
 
 protected:
-  /// prepare the _slave_to_master_map
+  /// prepare the _secondary_to_master_map
   virtual void prepareSlaveToMasterMap() = 0;
 
-  /// Compute the value the slave node should have at the beginning of a timestep.
+  /// Compute the value the secondary node should have at the beginning of a timestep.
   virtual Real computeQpSlaveValue() = 0;
 
   /// This is the virtual that derived classes should override for computing the residual.
@@ -184,8 +184,8 @@ protected:
     return coupledNeighborSecond(var_name, comp);
   }
 
-  /// slave block id
-  unsigned short _slave;
+  /// secondary block id
+  unsigned short _secondary;
   /// master block id
   unsigned short _master;
 
@@ -198,14 +198,14 @@ protected:
   const Node * const & _current_node;
   const Elem * const & _current_elem;
 
-  /// Value of the unknown variable on the slave node
-  const VariableValue & _u_slave;
+  /// Value of the unknown variable on the secondary node
+  const VariableValue & _u_secondary;
   /// old solution
-  const VariableValue & _u_slave_old;
-  /// Shape function on the slave side.
-  VariablePhiValue _phi_slave;
-  /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
-  VariableTestValue _test_slave;
+  const VariableValue & _u_secondary_old;
+  /// Shape function on the secondary side.
+  VariablePhiValue _phi_secondary;
+  /// Shape function on the secondary side.  This will always only have one entry and that entry will always be "1"
+  VariableTestValue _test_secondary;
 
   /// Master side variable
   MooseVariable & _master_var;
@@ -235,24 +235,24 @@ protected:
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
-  /// maps slave node ids to master element ids
-  std::map<dof_id_type, dof_id_type> _slave_to_master_map;
+  /// maps secondary node ids to master element ids
+  std::map<dof_id_type, dof_id_type> _secondary_to_master_map;
 
   /**
-   * Whether or not the slave's residual should be overwritten.
+   * Whether or not the secondary's residual should be overwritten.
    *
-   * When this is true the slave's residual as computed by the constraint will _replace_
+   * When this is true the secondary's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  bool _overwrite_slave_residual;
+  bool _overwrite_secondary_residual;
 
 public:
   SparseMatrix<Number> * _jacobian;
-  /// dofs connected to the slave node
+  /// dofs connected to the secondary node
   std::vector<dof_id_type> _connected_dof_indices;
-  /// stiffness matrix holding master-slave jacobian
+  /// stiffness matrix holding master-secondary jacobian
   DenseMatrix<Number> _Kne;
-  /// stiffness matrix holding slave-slave jacobian
+  /// stiffness matrix holding secondary-secondary jacobian
   DenseMatrix<Number> _Kee;
 };
 

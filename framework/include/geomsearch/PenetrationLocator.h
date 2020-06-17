@@ -31,7 +31,7 @@ public:
                      GeometricSearchData & geom_search_data,
                      MooseMesh & mesh,
                      const unsigned int master_id,
-                     const unsigned int slave_id,
+                     const unsigned int secondary_id,
                      Order order,
                      NearestNodeLocator & nearest_node);
   ~PenetrationLocator();
@@ -65,7 +65,7 @@ public:
 
   MooseMesh & _mesh;
   BoundaryID _master_boundary;
-  BoundaryID _slave_boundary;
+  BoundaryID _secondary_boundary;
 
   FEType _fe_type;
 

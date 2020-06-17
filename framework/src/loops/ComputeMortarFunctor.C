@@ -40,8 +40,8 @@ ComputeMortarFunctor::ComputeMortarFunctor(
   for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
 
-  _master_boundary_id = _amg.master_slave_boundary_id_pairs[0].first;
-  _slave_boundary_id = _amg.master_slave_boundary_id_pairs[0].second;
+  _primary_boundary_id = _amg.primary_secondary_boundary_id_pairs[0].first;
+  _secondary_boundary_id = _amg.primary_secondary_boundary_id_pairs[0].second;
 }
 
 void
@@ -56,7 +56,7 @@ ComputeMortarFunctor::operator()()
   }
   _fe_problem.setActiveMaterialProperties(needed_mat_props, /*tid=*/0);
 
-  // Array to hold custom quadrature point locations on the slave and master sides
+  // Array to hold custom quadrature point locations on the secondary and primary sides
   std::vector<Point> custom_xi1_pts, custom_xi2_pts;
 
   unsigned int num_cached = 0;
@@ -87,39 +87,39 @@ ComputeMortarFunctor::operator()()
     // Get a reference to the MortarSegmentInfo for this Elem.
     const MortarSegmentInfo & msinfo = _amg.msm_elem_to_info.at(msm_elem);
 
-    // There may be no contribution from the master side if it is not "in contact".
-    bool has_slave = msinfo.slave_elem ? true : false;
-    _has_master = msinfo.has_master();
+    // There may be no contribution from the primary side if it is not "in contact".
+    bool has_secondary = msinfo.secondary_elem ? true : false;
+    _has_primary = msinfo.has_primary();
 
-    if (!has_slave)
-      mooseError("Error, mortar segment has no slave element associated with it!");
+    if (!has_secondary)
+      mooseError("Error, mortar segment has no secondary element associated with it!");
 
     // Pointer to the interior parent.
-    const Elem * slave_ip = msinfo.slave_elem->interior_parent();
+    const Elem * secondary_ip = msinfo.secondary_elem->interior_parent();
 
     // Look up which side of the interior parent we are.
-    unsigned int slave_side_id = slave_ip->which_side_am_i(msinfo.slave_elem);
+    unsigned int secondary_side_id = secondary_ip->which_side_am_i(msinfo.secondary_elem);
 
-    // The lower-dimensional slave side element associated with this
-    // mortar segment is simply msinfo.slave_elem.
-    const Elem * slave_face_elem = msinfo.slave_elem;
+    // The lower-dimensional secondary side element associated with this
+    // mortar segment is simply msinfo.secondary_elem.
+    const Elem * secondary_face_elem = msinfo.secondary_elem;
 
-    // These only get initialized if there is a master Elem associated to this segment.
-    const Elem * master_ip = libmesh_nullptr;
-    unsigned int master_side_id = libMesh::invalid_uint;
+    // These only get initialized if there is a primary Elem associated to this segment.
+    const Elem * primary_ip = libmesh_nullptr;
+    unsigned int primary_side_id = libMesh::invalid_uint;
 
-    if (_has_master)
+    if (_has_primary)
     {
-      // Set the master interior parent and side ids.
-      master_ip = msinfo.master_elem->interior_parent();
-      master_side_id = master_ip->which_side_am_i(msinfo.master_elem);
+      // Set the primary interior parent and side ids.
+      primary_ip = msinfo.primary_elem->interior_parent();
+      primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
     }
 
     // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
-    // the slave face!)
+    // the secondary face!)
     _subproblem.reinitMortarElem(msm_elem);
 
-    // Compute custom integration points for the slave side
+    // Compute custom integration points for the secondary side
     custom_xi1_pts.resize(_qrule_msm->n_points());
 
     for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
@@ -129,20 +129,23 @@ ComputeMortarFunctor::operator()()
       custom_xi1_pts[qp] = xi1_eta;
     }
 
-    const Elem * reinit_slave_elem = slave_ip;
+    const Elem * reinit_secondary_elem = secondary_ip;
 
     // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
     // calling _fe_problem.reinitElemFaceRef
     if (_displaced)
-      reinit_slave_elem = _fe_problem.mesh().elemPtr(reinit_slave_elem->id());
+      reinit_secondary_elem = _fe_problem.mesh().elemPtr(reinit_secondary_elem->id());
 
-    // reinit the variables/residuals/jacobians on the slave interior
-    _fe_problem.reinitElemFaceRef(
-        reinit_slave_elem, slave_side_id, _slave_boundary_id, TOLERANCE, &custom_xi1_pts);
+    // reinit the variables/residuals/jacobians on the secondary interior
+    _fe_problem.reinitElemFaceRef(reinit_secondary_elem,
+                                  secondary_side_id,
+                                  _secondary_boundary_id,
+                                  TOLERANCE,
+                                  &custom_xi1_pts);
 
-    if (_has_master)
+    if (_has_primary)
     {
-      //  Compute custom integration points for the master side
+      //  Compute custom integration points for the primary side
       custom_xi2_pts.resize(_qrule_msm->n_points());
       for (unsigned int qp = 0; qp < _qrule_msm->n_points(); qp++)
       {
@@ -151,43 +154,45 @@ ComputeMortarFunctor::operator()()
         custom_xi2_pts[qp] = xi2_eta;
       }
 
-      const Elem * reinit_master_elem = master_ip;
+      const Elem * reinit_primary_elem = primary_ip;
 
       // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
       // calling _fe_problem.reinitElemFaceRef
       if (_displaced)
-        reinit_master_elem = _fe_problem.mesh().elemPtr(reinit_master_elem->id());
+        reinit_primary_elem = _fe_problem.mesh().elemPtr(reinit_primary_elem->id());
 
-      // reinit the variables/residuals/jacobians on the master interior
+      // reinit the variables/residuals/jacobians on the primary interior
       _fe_problem.reinitNeighborFaceRef(
-          reinit_master_elem, master_side_id, _master_boundary_id, TOLERANCE, &custom_xi2_pts);
+          reinit_primary_elem, primary_side_id, _primary_boundary_id, TOLERANCE, &custom_xi2_pts);
 
       // reinit neighbor materials, but be careful not to execute stateful materials since
       // conceptually they don't make sense with mortar (they're not interpolary)
-      _fe_problem.reinitMaterialsNeighbor(master_ip->subdomain_id(),
+      _fe_problem.reinitMaterialsNeighbor(primary_ip->subdomain_id(),
                                           /*tid=*/0,
                                           /*swap_stateful=*/false,
                                           /*execute_stateful=*/false);
     }
 
     // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
-    // the slave face. This must be done last after the dof indices have been prepared for the
-    // slave (element) and master (neighbor)
-    _subproblem.reinitLowerDElem(slave_face_elem, /*tid=*/0, &custom_xi1_pts);
+    // the secondary face. This must be done last after the dof indices have been prepared for the
+    // secondary (element) and primary (neighbor)
+    _subproblem.reinitLowerDElem(secondary_face_elem, /*tid=*/0, &custom_xi1_pts);
 
-    // reinit higher-dimensional slave face/boundary materials. Do this after we reinit lower-d
-    // variables in case we want to pull the lower-d variable values into the slave face/boundary
-    // materials. Be careful not to execute stateful materials since conceptually
-    // they don't make sense with mortar (they're not interpolary)
-    _fe_problem.reinitMaterialsFace(
-        slave_ip->subdomain_id(), /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
+    // reinit higher-dimensional secondary face/boundary materials. Do this after we reinit lower-d
+    // variables in case we want to pull the lower-d variable values into the secondary
+    // face/boundary materials. Be careful not to execute stateful materials since conceptually they
+    // don't make sense with mortar (they're not interpolary)
+    _fe_problem.reinitMaterialsFace(secondary_ip->subdomain_id(),
+                                    /*tid=*/0,
+                                    /*swap_stateful=*/false,
+                                    /*execute_stateful=*/false);
     _fe_problem.reinitMaterialsBoundary(
-        _slave_boundary_id, /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
+        _secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
 
     if (!_fe_problem.currentlyComputingJacobian())
     {
       for (auto && mc : _mortar_constraints)
-        mc->computeResidual(_has_master);
+        mc->computeResidual(_has_primary);
 
       _assembly.cacheResidual();
       _assembly.cacheResidualNeighbor();
@@ -201,19 +206,19 @@ ComputeMortarFunctor::operator()()
     else
     {
       for (auto && mc : _mortar_constraints)
-        mc->computeJacobian(_has_master);
+        mc->computeJacobian(_has_primary);
 
-      // Cache SlaveSlave
+      // Cache SecondarySecondary
       _assembly.cacheJacobian();
 
       // It doesn't appears that we have caching functions for these yet, or at least it's not
       // used in ComputeJacobianThread. I'll make sure to add/use them if these methods show up in
       // profiling
       //
-      // Add SlaveMaster, MasterSlave, MasterMaster
+      // Add SecondaryPrimary, PrimarySecondary, PrimaryPrimary
       _assembly.addJacobianNeighbor();
 
-      // Add LowerLower, LowerSlave, LowerMaster, SlaveLower, MasterLower
+      // Add LowerLower, LowerSecondary, LowerPrimary, SecondaryLower, PrimaryLower
       _assembly.addJacobianLower();
 
       num_cached++;

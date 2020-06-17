@@ -28,7 +28,7 @@ ContactMaster::validParams()
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
-  params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
+  params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
@@ -76,7 +76,7 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("boundary"),
-                              getParam<BoundaryName>("slave"),
+                              getParam<BoundaryName>("secondary"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
     _penalty(getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),

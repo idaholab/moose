@@ -44,7 +44,7 @@
 [Contact]
   [./mechanical]
     master = 4
-    slave = 5
+    secondary = 5
     formulation = kinematic
     tangential_tolerance = 1e-1
     penalty = 1e10
@@ -56,9 +56,9 @@
     type = GapHeatTransfer
     variable = temp
     master = 4
-    slave = 5
+    secondary = 5
     emissivity_master = 0
-    emissivity_slave = 0
+    emissivity_secondary = 0
     gap_conductivity = 1e4
     quadrature = true
   [../]

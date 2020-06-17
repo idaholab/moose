@@ -30,7 +30,7 @@ InputParameters validParams<NodeFaceConstraint>();
  * A NodeFaceConstraint is used when you need to create constraints between
  * two surfaces in a mesh.  It works by allowing you to modify the residual
  * and jacobian entries on "this" side (the node side, also referred to as
- * the slave side) and the "other" side (the face side, also referred to as
+ * the secondary side) and the "other" side (the face side, also referred to as
  * the master side)
  *
  * This is common for contact algorithms and other constraints.
@@ -46,7 +46,7 @@ public:
   virtual ~NodeFaceConstraint();
 
   /**
-   * Compute the value the slave node should have at the beginning of a timestep.
+   * Compute the value the secondary node should have at the beginning of a timestep.
    */
   virtual void computeSlaveValue(NumericVector<Number> & current_solution);
 
@@ -73,22 +73,22 @@ public:
   /**
    * Whether or not this constraint should be applied.
    *
-   * Get's called once per slave node.
+   * Get's called once per secondary node.
    */
   virtual bool shouldApply() { return true; }
 
   /**
-   * Whether or not the slave's residual should be overwritten.
+   * Whether or not the secondary's residual should be overwritten.
    *
-   * When this returns true the slave's residual as computed by the constraint will _replace_
+   * When this returns true the secondary's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
   virtual bool overwriteSlaveResidual();
 
   /**
-   * Whether or not the slave's Jacobian row should be overwritten.
+   * Whether or not the secondary's Jacobian row should be overwritten.
    *
-   * When this returns true the slave's Jacobian row as computed by the constraint will _replace_
+   * When this returns true the secondary's Jacobian row as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
   virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
@@ -107,13 +107,13 @@ public:
   // Do the same for all the other public members
   SparseMatrix<Number> * _jacobian;
 
-  Real slaveResidual() const;
+  Real secondaryResidual() const;
 
   void residualSetup() override;
 
 protected:
   /**
-   * Compute the value the slave node should have at the beginning of a timestep.
+   * Compute the value the secondary node should have at the beginning of a timestep.
    */
   virtual Real computeQpSlaveValue() = 0;
 
@@ -215,8 +215,8 @@ protected:
     return coupledNeighborSecond(var_name, comp);
   }
 
-  /// Boundary ID for the slave surface
-  unsigned int _slave;
+  /// Boundary ID for the secondary surface
+  unsigned int _secondary;
   /// Boundary ID for the master surface
   unsigned int _master;
 
@@ -234,11 +234,11 @@ protected:
   const Elem * const & _current_master;
 
   /// Value of the unknown variable this BC is action on
-  const VariableValue & _u_slave;
-  /// Shape function on the slave side.  This will always
-  VariablePhiValue _phi_slave;
-  /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
-  VariableTestValue _test_slave;
+  const VariableValue & _u_secondary;
+  /// Shape function on the secondary side.  This will always
+  VariablePhiValue _phi_secondary;
+  /// Shape function on the secondary side.  This will always only have one entry and that entry will always be "1"
+  VariableTestValue _test_secondary;
 
   /// Master side variable
   MooseVariable & _master_var;
@@ -267,42 +267,42 @@ protected:
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
   /**
-   * Whether or not the slave's residual should be overwritten.
+   * Whether or not the secondary's residual should be overwritten.
    *
-   * When this is true the slave's residual as computed by the constraint will _replace_
+   * When this is true the secondary's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  bool _overwrite_slave_residual;
+  bool _overwrite_secondary_residual;
 
   /// JxW on the master face
   const MooseArray<Real> & _master_JxW;
 
-  /// Whether the slave residual has been computed
-  bool _slave_residual_computed;
+  /// Whether the secondary residual has been computed
+  bool _secondary_residual_computed;
 
-  /// The value of the slave residual
-  Real _slave_residual;
+  /// The value of the secondary residual
+  Real _secondary_residual;
 
 public:
   std::vector<dof_id_type> _connected_dof_indices;
 
   /// The Jacobian corresponding to the derivatives of the neighbor/master residual with respect to
-  /// the elemental/slave degrees of freedom.  We want to manually manipulate Kne because of the
-  /// dependence of the master residuals on dofs from all elements connected to the slave node
+  /// the elemental/secondary degrees of freedom.  We want to manually manipulate Kne because of the
+  /// dependence of the master residuals on dofs from all elements connected to the secondary node
   /// (e.g. those held by _connected_dof_indices)
   DenseMatrix<Number> _Kne;
 
-  /// The Jacobian corresponding to the derivatives of the elemental/slave residual with respect to
-  /// the elemental/slave degrees of freedom.  We want to manually manipulate Kee because of the
-  /// dependence of the slave/master residuals on // dofs from all elements connected to the slave
+  /// The Jacobian corresponding to the derivatives of the elemental/secondary residual with respect to
+  /// the elemental/secondary degrees of freedom.  We want to manually manipulate Kee because of the
+  /// dependence of the secondary/master residuals on // dofs from all elements connected to the secondary
   /// node (e.g. those held by _connected_dof_indices) // and because when we're overwriting the
-  /// slave residual we traditionally want to use a different // scaling factor from the one
+  /// secondary residual we traditionally want to use a different // scaling factor from the one
   /// associated with interior physics
   DenseMatrix<Number> _Kee;
 
-  /// The Jacobian corresponding to the derivatives of the elemental/slave residual with respect to
+  /// The Jacobian corresponding to the derivatives of the elemental/secondary residual with respect to
   /// the neighbor/master degrees of freedom.  We want to manually manipulate Ken because when we're
-  /// overwriting the slave residual we traditionally want to use a different scaling factor from the
+  /// overwriting the secondary residual we traditionally want to use a different scaling factor from the
   /// one associated with interior physics
   DenseMatrix<Number> _Ken;
 };

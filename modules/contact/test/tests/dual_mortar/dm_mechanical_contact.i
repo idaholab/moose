@@ -92,7 +92,7 @@ refine = 0
 [Contact]
   [leftright]
     mesh = original_file_mesh
-    slave = 10
+    secondary = 10
     master = 20
 
     use_dual = true
@@ -156,7 +156,7 @@ refine = 0
   [./contact]
     type = ContactDOFSetSize
     variable = leftright_normal_lm
-    subdomain = leftright_slave_subdomain
+    subdomain = leftright_secondary_subdomain
   []
   [./normal_lm]
     type = ElementAverageValue

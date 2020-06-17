@@ -896,7 +896,7 @@ FEProblemBase::initialSetup()
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
 
-  // We need to move the mesh in order to build a map between mortar slave and master
+  // We need to move the mesh in order to build a map between mortar secondary and master
   // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
   // know which dofs we need ghosted when we call EquationSystems::reinit
   if (_displaced_problem && _mortar_data.hasDisplacedObjects())
@@ -5775,32 +5775,32 @@ FEProblemBase::updateMortarMesh()
 
 void
 FEProblemBase::createMortarInterface(
-    const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-    const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+    const std::pair<BoundaryID, BoundaryID> & master_secondary_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & master_secondary_subdomain_pair,
     bool on_displaced,
     bool periodic)
 {
   _has_mortar = true;
 
   if (on_displaced)
-    return _mortar_data.createMortarInterface(master_slave_boundary_pair,
-                                              master_slave_subdomain_pair,
+    return _mortar_data.createMortarInterface(master_secondary_boundary_pair,
+                                              master_secondary_subdomain_pair,
                                               *_displaced_problem,
                                               on_displaced,
                                               periodic);
   else
     return _mortar_data.createMortarInterface(
-        master_slave_boundary_pair, master_slave_subdomain_pair, *this, on_displaced, periodic);
+        master_secondary_boundary_pair, master_secondary_subdomain_pair, *this, on_displaced, periodic);
 }
 
 const AutomaticMortarGeneration &
 FEProblemBase::getMortarInterface(
-    const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-    const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+    const std::pair<BoundaryID, BoundaryID> & master_secondary_boundary_pair,
+    const std::pair<SubdomainID, SubdomainID> & master_secondary_subdomain_pair,
     bool on_displaced) const
 {
   return _mortar_data.getMortarInterface(
-      master_slave_boundary_pair, master_slave_subdomain_pair, on_displaced);
+      master_secondary_boundary_pair, master_secondary_subdomain_pair, on_displaced);
 }
 
 const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &

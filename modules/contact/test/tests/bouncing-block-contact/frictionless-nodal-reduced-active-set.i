@@ -40,7 +40,7 @@ starting_point = .5
 [Constraints]
   [./disp_x]
     type = RANFSNormalMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_x
     master_variable = disp_x
@@ -48,7 +48,7 @@ starting_point = .5
   [../]
   [./disp_y]
     type = RANFSNormalMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = disp_y
     master_variable = disp_y

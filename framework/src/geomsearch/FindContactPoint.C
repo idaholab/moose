@@ -28,7 +28,7 @@ namespace Moose
 
 /**
  * Finds the closest point (called the contact point) on the master_elem on side "side" to the
- * slave_point.
+ * secondary_point.
  *
  * @param p_info The penetration info object, contains master_elem, side, various other information
  * @param fe_elem FE object for the element
@@ -37,7 +37,7 @@ namespace Moose
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
  * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a
  * side
- * @param slave_point The physical space coordinates of the slave node
+ * @param secondary_point The physical space coordinates of the secondary node
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
  * element.
  */
@@ -46,7 +46,7 @@ findContactPoint(PenetrationInfo & p_info,
                  FEBase * fe_elem,
                  FEBase * fe_side,
                  FEType & fe_side_type,
-                 const Point & slave_point,
+                 const Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
                  bool & contact_point_on_side)
@@ -84,9 +84,9 @@ findContactPoint(PenetrationInfo & p_info,
       p_info._normal *= -1.0;
     p_info._normal /= p_info._normal.norm();
 
-    Point from_slave_to_closest = p_info._closest_point - slave_point;
-    p_info._distance = from_slave_to_closest * p_info._normal;
-    Point tangential = from_slave_to_closest - p_info._distance * p_info._normal;
+    Point from_secondary_to_closest = p_info._closest_point - secondary_point;
+    p_info._distance = from_secondary_to_closest * p_info._normal;
+    Point tangential = from_secondary_to_closest - p_info._distance * p_info._normal;
     p_info._tangential_distance = tangential.norm();
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
@@ -107,7 +107,7 @@ findContactPoint(PenetrationInfo & p_info,
 
   std::vector<Point> points = {ref_point};
   fe_side->reinit(side, &points);
-  RealGradient d = slave_point - phys_point[0];
+  RealGradient d = secondary_point - phys_point[0];
 
   Real update_size = std::numeric_limits<Real>::max();
 
@@ -143,7 +143,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     points[0] = ref_point;
     fe_side->reinit(side, &points);
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     update_size = update.l2_norm();
   }
@@ -155,7 +155,7 @@ findContactPoint(PenetrationInfo & p_info,
   // Newton Loop
   for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
   {
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     DenseMatrix<Real> jac(dim - 1, dim - 1);
 
@@ -187,7 +187,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     points[0] = ref_point;
     fe_side->reinit(side, &points);
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     update_size = update.l2_norm();
   }

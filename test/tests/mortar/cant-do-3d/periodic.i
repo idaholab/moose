@@ -3,15 +3,15 @@
     type = FileMeshGenerator
     file = flow_test.e
   []
-  [slave]
+  [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 11
-    new_block_name = "slave"
+    new_block_name = "secondary"
     sidesets = '1'
   []
   [master]
-    input = slave
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 12
     new_block_name = "master"
@@ -24,7 +24,7 @@
     block = 'bottom middle top'
   []
   [lm]
-    block = 'slave'
+    block = 'secondary'
   []
 []
 
@@ -54,11 +54,11 @@
   [ev]
     type = EqualValueConstraint
     variable = lm
-    slave_variable = u
+    secondary_variable = u
     master_boundary = top
-    slave_boundary = bottom
+    secondary_boundary = bottom
     master_subdomain = 12
-    slave_subdomain = 11
+    secondary_subdomain = 11
 
     periodic = true
   []

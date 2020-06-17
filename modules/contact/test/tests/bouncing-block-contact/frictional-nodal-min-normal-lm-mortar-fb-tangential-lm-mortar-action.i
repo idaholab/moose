@@ -1,6 +1,6 @@
 starting_point = 2e-1
 
-# We offset slightly so we avoid the case where the bottom of the slave block and the top of the
+# We offset slightly so we avoid the case where the bottom of the secondary block and the top of the
 # master block are perfectly vertically aligned which can cause the backtracking line search some
 # issues for a coarse mesh (basic line search handles that fine)
 offset = 1e-2
@@ -46,7 +46,7 @@ offset = 1e-2
   [frictional]
     mesh = revised_file_mesh
     master = 20
-    slave = 10
+    secondary = 10
     formulation = mortar
     model = coulomb
     friction_coefficient = 0.1
@@ -141,7 +141,7 @@ offset = 1e-2
   [contact]
     type = ContactDOFSetSize
     variable = frictional_normal_lm
-    subdomain = frictional_slave_subdomain
+    subdomain = frictional_secondary_subdomain
     execute_on = 'nonlinear timestep_end'
   []
 []

@@ -91,7 +91,7 @@
 [Contact]
   [./dummy_name]
     master = 3
-    slave = 2
+    secondary = 2
     formulation = penalty
     penalty = 1e9
     tangential_tolerance = 1e-5

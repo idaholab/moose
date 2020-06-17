@@ -83,80 +83,80 @@
   [./interface_material_avg]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = average
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
-  [./interface_material_jump_master_minus_slave]
+  [./interface_material_jump_master_minus_secondary]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
-      interface_value_type = jump_master_minus_slave
+      interface_value_type = jump_master_minus_secondary
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
-  [./interface_material_jump_slave_minus_master]
+  [./interface_material_jump_secondary_minus_master]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
-      interface_value_type = jump_slave_minus_master
+      interface_value_type = jump_secondary_minus_master
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
   [./interface_material_jump_abs]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = jump_abs
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
   [./interface_material_master]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       boundary = interface
       interface_value_type = master
       mat_prop_var_out_basename = diff_var
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
-  [./interface_material_slave]
+  [./interface_material_secondary]
       type = InterfaceValueMaterial
       mat_prop_master = diffusivity
-      mat_prop_slave = diffusivity
+      mat_prop_secondary = diffusivity
       var_master = diffusivity_var
-      var_slave = diffusivity_var
+      var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       mat_prop_var_out_basename = diff_var
       boundary = interface
-      interface_value_type = slave
+      interface_value_type = secondary
       nl_var_master = u
-      nl_var_slave = v
+      nl_var_secondary = v
   [../]
 []
 
@@ -167,16 +167,16 @@
     variable = diffusivity_average
     boundary = interface
   []
-  [./interface_material_jump_master_minus_slave]
+  [./interface_material_jump_master_minus_secondary]
     type = MaterialRealAux
-    property = diff_jump_master_minus_slave
-    variable = diffusivity_jump_master_minus_slave
+    property = diff_jump_master_minus_secondary
+    variable = diffusivity_jump_master_minus_secondary
     boundary = interface
   []
-  [./interface_material_jump_slave_minus_master]
+  [./interface_material_jump_secondary_minus_master]
     type = MaterialRealAux
-    property = diff_jump_slave_minus_master
-    variable = diffusivity_jump_slave_minus_master
+    property = diff_jump_secondary_minus_master
+    variable = diffusivity_jump_secondary_minus_master
     boundary = interface
   []
   [./interface_material_jump_abs]
@@ -191,10 +191,10 @@
     variable = diffusivity_master
     boundary = interface
   []
-  [./interface_material_slave]
+  [./interface_material_secondary]
     type = MaterialRealAux
-    property = diff_slave
-    variable = diffusivity_slave
+    property = diff_secondary
+    variable = diffusivity_secondary
     boundary = interface
   []
   [diffusivity_var]
@@ -213,11 +213,11 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./diffusivity_jump_master_minus_slave]
+  [./diffusivity_jump_master_minus_secondary]
     family = MONOMIAL
     order = CONSTANT
   []
-  [./diffusivity_jump_slave_minus_master]
+  [./diffusivity_jump_secondary_minus_master]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -229,7 +229,7 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [./diffusivity_slave]
+  [./diffusivity_secondary]
     family = MONOMIAL
     order = CONSTANT
   []

@@ -1920,11 +1920,11 @@ protected:
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knn;
   /// dlower/dlower
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kll;
-  /// dlower/dslave (or dlower/delement)
+  /// dlower/dsecondary (or dlower/delement)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kle;
   /// dlower/dmaster (or dlower/dneighbor)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kln;
-  /// dslave/dlower (or delement/dlower)
+  /// dsecondary/dlower (or delement/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kel;
   /// dmaster/dlower (or dneighbor/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knl;

@@ -37,13 +37,13 @@ NormalNodalMechanicalContact::NormalNodalMechanicalContact(const InputParameters
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _component(getParam<MooseEnum>("component"))
 {
-  _overwrite_slave_residual = false;
+  _overwrite_secondary_residual = false;
 }
 
 Real
 NormalNodalMechanicalContact::computeQpSlaveValue()
 {
-  return _u_slave[_qp];
+  return _u_secondary[_qp];
 }
 
 void
@@ -87,7 +87,7 @@ NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
       switch (type)
       {
         case Moose::ConstraintType::Slave:
-          // This normal appears to point in the opposite direction of the slave surface so we need
+          // This normal appears to point in the opposite direction of the secondary surface so we need
           // a negative sign
           return _lambda * -pinfo->_normal(_component);
 

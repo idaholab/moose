@@ -155,12 +155,12 @@ MooseMesh::validParams()
       "How often to update the geometric search 'patch'.  The default is to "
       "never update it (which is the most efficient but could be a problem "
       "with lots of relative motion). 'always' will update the patch for all "
-      "slave nodes at the beginning of every timestep which might be time "
+      "secondary nodes at the beginning of every timestep which might be time "
       "consuming. 'auto' will attempt to determine at the start of which "
-      "timesteps the patch for all slave nodes needs to be updated automatically."
+      "timesteps the patch for all secondary nodes needs to be updated automatically."
       "'iteration' updates the patch at every nonlinear iteration for a "
-      "subset of slave nodes for which penetration is not detected. If there "
-      "can be substantial relative motion between the master and slave surfaces "
+      "subset of secondary nodes for which penetration is not detected. If there "
+      "can be substantial relative motion between the master and secondary surfaces "
       "during the nonlinear iterations within a timestep, it is advisable to use "
       "'iteration' option to ensure accurate contact detection.");
 

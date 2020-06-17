@@ -41,11 +41,11 @@ protected:
   /// already used
   void checkInputParameter();
 
-  /// given the master and slave blocks this method return the appropriate
+  /// given the master and secondary blocks this method return the appropriate
   /// boundary id and name
   void findBoundaryNameAndInd(MeshBase & mesh,
                               const subdomain_id_type & /*masterBlockID*/,
-                              const subdomain_id_type & /*slaveBlockID*/,
+                              const subdomain_id_type & /*secondaryBlockID*/,
                               std::string & /*boundaryName*/,
                               boundary_id_type & /*boundaryID*/,
                               BoundaryInfo & /*boundary_info*/);
@@ -59,7 +59,7 @@ private:
   /// this method generate the boundary name by assembling subdomain names
   std::string generateBoundaryName(MeshBase & mesh,
                                    const subdomain_id_type & /*masterBlockID*/,
-                                   const subdomain_id_type & /*slaveBlockID*/);
+                                   const subdomain_id_type & /*secondaryBlockID*/);
 
   /// this method save the boundary name/id pair
   void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,

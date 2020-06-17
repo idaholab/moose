@@ -35,8 +35,8 @@ public:
   std::vector<dof_id_type> & getMasterNodeId() { return _master_node_vector; }
 
   /**
-   * Get the list of connected slave nodes
-   * @return list of slave node IDs
+   * Get the list of connected secondary nodes
+   * @return list of secondary node IDs
    */
   std::vector<dof_id_type> & getSlaveNodeId() { return _connected_nodes; }
 
@@ -76,8 +76,8 @@ protected:
   MooseVariable & _var;
 
   /// Value of the unknown variable this BC is action on
-  const VariableValue & _u_slave;
-  /// node IDs connected to the master node (slave nodes)
+  const VariableValue & _u_secondary;
+  /// node IDs connected to the master node (secondary nodes)
   std::vector<dof_id_type> _connected_nodes;
   /// node IDs of the master node
   std::vector<dof_id_type> _master_node_vector;
@@ -86,11 +86,11 @@ protected:
   /// Specifies formulation type used to apply constraints
   Moose::ConstraintFormulationType _formulation;
   /**
-   * When the slave node is constrained to move as a linear combination of the master nodes,
+   * When the secondary node is constrained to move as a linear combination of the master nodes,
    * the coefficients associated with each master node is stored in _weights.
    */
   std::vector<Real> _weights;
-  /// Counter for master and slave nodes
+  /// Counter for master and secondary nodes
   unsigned int _i;
   unsigned int _j;
 };

@@ -193,7 +193,7 @@
 [Contact]
   [./mech]
     master = 8
-    slave = 2
+    secondary = 2
     penalty = 1e+10
     normalize_penalty = true
     tangential_tolerance = .1
@@ -207,9 +207,9 @@
   [./thermal]
     type = GapHeatTransfer
     master = 8
-    slave = 2
+    secondary = 2
     emissivity_master = 0
-    emissivity_slave = 0
+    emissivity_secondary = 0
     variable = temp
     tangential_tolerance = .1
     normal_smoothing_distance = .1

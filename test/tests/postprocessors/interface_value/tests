@@ -7,8 +7,8 @@
                "By design at the end of the first step we should observe: "
                "an average material property of 7, "
                "an average material property absolute jump fo 6,"
-               "a singed material property jump (master minus slave) of 6, "
-               "a singed material propertyjump (slave minus master) of -6, "
+               "a singed material property jump (master minus secondary) of 6, "
+               "a singed material propertyjump (secondary minus master) of -6, "
                "a material property value on the master side of  10, "
                "a material property value on the master side of  4 "
     design = 'InterfaceAverageVariableValuePostprocessor.md'
@@ -23,8 +23,8 @@
                "By design at the end of the first step we should observe: "
                "an intergal material property of 21, "
                "an intergal material property absolute jump fo 18,"
-               "a singed intergal material property jump (master minus slave) of 18, "
-               "a singed intergal material propertyjump (slave minus master) of -18, "
+               "a singed intergal material property jump (master minus secondary) of 18, "
+               "a singed intergal material propertyjump (secondary minus master) of -18, "
                "a material intergal property value on the master side of  30, "
                "a material intergal property value on the master side of  12 "
     design = 'InterfaceIntegralVariableValuePostprocessor.md'

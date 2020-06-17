@@ -43,9 +43,9 @@
     type = GapHeatTransfer
     variable = temp
     master = 5
-    slave = 10
+    secondary = 10
     emissivity_master = 0
-    emissivity_slave = 0
+    emissivity_secondary = 0
     quadrature = true
   [../]
 []

@@ -24,16 +24,16 @@ from `MortarConstraint`:
 
 - `master_boundary`: the boundary name or ID assigned to the master side of the
   mortar interface
-- `slave_boundary`: the boundary name or ID assigned to the slave side of the
+- `secondary_boundary`: the boundary name or ID assigned to the secondary side of the
   mortar interface
 - `master_subdomain`: the subdomain name or ID assigned to the lower-dimesional
   block on the master side of the mortar interface
-- `slave_boundary`: the subdomain name or ID assigned to the lower-dimensional
-  block on the slave side of the mortar interface
+- `secondary_boundary`: the subdomain name or ID assigned to the lower-dimensional
+  block on the secondary side of the mortar interface
 
 As suggested by the above required parameters, the user must do some mesh work
 before they can use a `MortarConstraint` object. The easiest way to prepare
-the mesh is to assign boundary IDs to the slave and master sides of the
+the mesh is to assign boundary IDs to the secondary and master sides of the
 interface when creating the mesh in their 3rd-party meshing software (e.g. Cubit
 or Gmsh). If these boundary IDs exist, then the lower dimensional blocks can be
 generated automatically using the `LowerDBlockFromSideset` mesh modifiers as
@@ -46,7 +46,7 @@ shown in the below input file snippet:
     sidesets = '2'
     new_block_id = '20'
   [../]
-  [./slave]
+  [./secondary]
     type = LowerDBlockFromSideset
     sidesets = '1'
     new_block_id = '10'
@@ -58,11 +58,11 @@ There are also some optional parameters that can be supplied to
 `MortarConstraints`. They are:
 
 - `variable`: Corresponds to a Lagrange Multipler variable that lives on the
-  lower dimensional block on the slave face
-- `slave_variable`: Primal variable on the slave side of the mortar interface
+  lower dimensional block on the secondary face
+- `secondary_variable`: Primal variable on the secondary side of the mortar interface
   (lives on the interior elements)
 - `master_variable`: Primal variable on the master side of the mortar interface
-  (lives on the interior elements). Most often `slave_variable` and
+  (lives on the interior elements). Most often `secondary_variable` and
   `master_variable` will correspond to the same variable
 - `compute_lm_residuals`: Whether to compute Lagrange Multiplier residuals. This
   will automatically be set to false if a `variable` parameter is not
@@ -80,7 +80,7 @@ There are also some optional parameters that can be supplied to
   condition. This has the effect of changing the normals vector, for mortar
   projection, from outward to inward facing.
 
-At present, either the `slave_variable` or `master_variable` parameter must be supplied.
+At present, either the `secondary_variable` or `master_variable` parameter must be supplied.
 
 ### Limitations
 

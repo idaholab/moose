@@ -35,12 +35,12 @@ protected:
   virtual Real computeQpJacobian() override;
 
   /**
-   * compute the Jacobian contributions from the slave side degrees of freedom
+   * compute the Jacobian contributions from the secondary side degrees of freedom
    */
   Real computeSlaveQpJacobian();
 
   /**
-   * compute the displacement Jacobian contributions from the slave side degrees of freedom
+   * compute the displacement Jacobian contributions from the secondary side degrees of freedom
    */
   Real computeSlaveQpOffDiagJacobian(unsigned int jvar);
 
@@ -55,7 +55,7 @@ protected:
 
   const bool _quadrature;
 
-  NumericVector<Number> * _slave_flux;
+  NumericVector<Number> * _secondary_flux;
 
   const MaterialProperty<Real> & _gap_conductance;
   const MaterialProperty<Real> & _gap_conductance_dT;
@@ -92,13 +92,13 @@ protected:
   /// The current \p PenetratationInfo
   const PenetrationInfo * _pinfo;
 
-  /// The phi values on the slave side
-  const std::vector<std::vector<Real>> * _slave_side_phi;
+  /// The phi values on the secondary side
+  const std::vector<std::vector<Real>> * _secondary_side_phi;
 
-  /// The slave side element (this really is a *side* element, e.g. it has
+  /// The secondary side element (this really is a *side* element, e.g. it has
   /// dimension: mesh_dimension - 1)
-  const Elem * _slave_side;
+  const Elem * _secondary_side;
 
-  /// The slave side shape index
-  unsigned int _slave_j;
+  /// The secondary side shape index
+  unsigned int _secondary_j;
 };

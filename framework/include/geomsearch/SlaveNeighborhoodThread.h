@@ -37,8 +37,8 @@ public:
 
   void join(const SlaveNeighborhoodThread & other);
 
-  /// List of the slave nodes we're actually going to keep track of
-  std::vector<dof_id_type> _slave_nodes;
+  /// List of the secondary nodes we're actually going to keep track of
+  std::vector<dof_id_type> _secondary_nodes;
 
   /// The neighborhood nodes associated with each node
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;

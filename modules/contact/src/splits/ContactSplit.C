@@ -20,14 +20,14 @@ ContactSplit::validParams()
   InputParameters params = Split::validParams();
   params.addParam<std::vector<std::string>>("contact_master",
                                             "Master surface list for included contacts");
-  params.addParam<std::vector<std::string>>("contact_slave",
+  params.addParam<std::vector<std::string>>("contact_secondary",
                                             "Slave surface list for included contacts");
   params.addParam<std::vector<int>>(
       "contact_displaced",
       "List of indicators whether displaced mesh is used to define included contact");
   params.addParam<std::vector<std::string>>("uncontact_master",
                                             "Master surface list for excluded contacts");
-  params.addParam<std::vector<std::string>>("uncontact_slave",
+  params.addParam<std::vector<std::string>>("uncontact_secondary",
                                             "Slave surface list for excluded contacts");
   params.addParam<std::vector<int>>(
       "uncontact_displaced",
@@ -43,18 +43,18 @@ ContactSplit::validParams()
 ContactSplit::ContactSplit(const InputParameters & params)
   : Split(params),
     _contact_master(getParam<std::vector<std::string>>("contact_master")),
-    _contact_slave(getParam<std::vector<std::string>>("contact_slave")),
+    _contact_secondary(getParam<std::vector<std::string>>("contact_secondary")),
     _contact_displaced(getParam<std::vector<int>>("contact_displaced")),
     _uncontact_master(getParam<std::vector<std::string>>("uncontact_master")),
-    _uncontact_slave(getParam<std::vector<std::string>>("uncontact_slave")),
+    _uncontact_secondary(getParam<std::vector<std::string>>("uncontact_secondary")),
     _uncontact_displaced(getParam<std::vector<int>>("uncontact_displaced")),
     _include_all_contact_nodes(getParam<bool>("include_all_contact_nodes"))
 {
-  if (_contact_master.size() != _contact_slave.size())
+  if (_contact_master.size() != _contact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and slave contact lists must have matching sizes: " << _contact_master.size()
-        << " != " << _contact_slave.size();
+    err << "Master and secondary contact lists must have matching sizes: " << _contact_master.size()
+        << " != " << _contact_secondary.size();
     mooseError(err.str());
   }
   if (_contact_displaced.size() && _contact_master.size() != _contact_displaced.size())
@@ -67,11 +67,11 @@ ContactSplit::ContactSplit(const InputParameters & params)
   if (!_contact_displaced.size())
     _contact_displaced.resize(_contact_master.size());
 
-  if (_uncontact_master.size() != _uncontact_slave.size())
+  if (_uncontact_master.size() != _uncontact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and slave uncontact lists must have matching sizes: " << _uncontact_master.size()
-        << " != " << _uncontact_slave.size();
+    err << "Master and secondary uncontact lists must have matching sizes: " << _uncontact_master.size()
+        << " != " << _uncontact_secondary.size();
     mooseError(err.str());
   }
   if (_uncontact_displaced.size() && _uncontact_master.size() != _uncontact_displaced.size())
@@ -115,7 +115,7 @@ ContactSplit::setup(const std::string & prefix)
       std::ostringstream oopt;
       oopt << dmprefix << "contact_" << j;
       opt = oopt.str();
-      val = _contact_master[j] + "," + _contact_slave[j];
+      val = _contact_master[j] + "," + _contact_secondary[j];
       // push back PETSc options
       if (val == "")
         po.flags.push_back(opt);
@@ -161,7 +161,7 @@ ContactSplit::setup(const std::string & prefix)
       std::ostringstream oopt;
       oopt << dmprefix << "uncontact_" << j;
       opt = oopt.str();
-      val = _uncontact_master[j] + "," + _uncontact_slave[j];
+      val = _uncontact_master[j] + "," + _uncontact_secondary[j];
       // push back PETSc options
       if (val == "")
         po.flags.push_back(opt);

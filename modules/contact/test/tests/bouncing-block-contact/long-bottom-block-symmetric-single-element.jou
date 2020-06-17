@@ -8,7 +8,7 @@ surface 2 size 1
 
 curve 1 2 3 4 5 6 7 8 interval 1
 
-# slave boundary
+# secondary boundary
 sideset 10 curve 7
 # master boundary
 sideset 20 curve 1

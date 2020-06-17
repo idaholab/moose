@@ -69,22 +69,22 @@ public:
    * Method for linking control parameters of different names
    */
   void addControllableParameterConnection(const MooseObjectParameterName & master,
-                                          const MooseObjectParameterName & slave,
+                                          const MooseObjectParameterName & secondary,
                                           bool error_on_empty = true);
 
   /**
    * Method for creating alias to an existing controllable parameters.
    *
    * @param alias The new name to serve as an alias.
-   * @param slave The name of the slave parameter to be aliased.
+   * @param secondary The name of the secondary parameter to be aliased.
    */
   void addControllableParameterAlias(const MooseObjectParameterName & alias,
-                                     const MooseObjectParameterName & slave);
+                                     const MooseObjectParameterName & secondary);
 
   /**
    * Method for creating alias for all shared controllable parameters between the two objects.
    */
-  void addControllableObjectAlias(const MooseObjectName & alias, const MooseObjectName & slave);
+  void addControllableObjectAlias(const MooseObjectName & alias, const MooseObjectName & secondary);
 
   /***
    * Helper method for printing controllable items.

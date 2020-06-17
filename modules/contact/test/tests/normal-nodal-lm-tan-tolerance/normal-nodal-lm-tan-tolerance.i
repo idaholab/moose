@@ -38,7 +38,7 @@
 [Contact]
   [mortar]
     mesh = file
-    slave = 101
+    secondary = 101
     master = 100
     model = frictionless
     formulation = mortar

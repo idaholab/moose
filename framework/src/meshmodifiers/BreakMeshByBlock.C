@@ -168,7 +168,7 @@ BreakMeshByBlock::addInterfaceBoundary()
   {
 
     // find the appropriate boundary name and id
-    //  given master and slave block ID
+    //  given master and secondary block ID
     if (_split_interface)
       findBoundaryNameAndInd(boundary_side_map.first.first,
                              boundary_side_map.first.second,

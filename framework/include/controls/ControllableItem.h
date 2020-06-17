@@ -19,7 +19,7 @@
  * input parameters with different names.
  *
  * The name supplied to the constructor is considered the "master" parameter. The parameter(s) added
- * via the connect method are considered the slaves.
+ * via the connect method are considered the secondarys.
  *
  * In general, an ControllableItem will have a one-to-one relationship with an input parameter
  * value, but in some instances it is desirable to connect parameters with different names together.

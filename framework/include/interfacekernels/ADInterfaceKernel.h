@@ -54,7 +54,7 @@ public:
   /// Selects the correct Jacobian type and routine to call for the master variable jacobian
   virtual void computeElementOffDiagJacobian(unsigned int jvar) override;
 
-  /// Selects the correct Jacobian type and routine to call for the slave variable jacobian
+  /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
   virtual void computeNeighborOffDiagJacobian(unsigned int jvar) override;
 
   /// Computes the residual for the current side.

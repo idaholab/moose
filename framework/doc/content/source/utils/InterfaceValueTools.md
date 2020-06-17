@@ -8,10 +8,10 @@ An example of an object using this utility is  [InterfaceAverageVariableValuePos
 
 Available outputs are:
 * average: (value_m-value_s)/2
-* jump_master_minus_slave: value_m-value_s
-* jump_slave_minus_master: value_s-value_m
+* jump_master_minus_secondary: value_m-value_s
+* jump_secondary_minus_master: value_s-value_m
 * jump_abs: abs(value_m-value_s)
 * master: value_m
-* slave: value_s
+* secondary: value_s
 
-where value_m is the value on the master side of the interface (e.g. where the boundary is defined) and value_s is the value on the slave side of the interface.
+where value_m is the value on the master side of the interface (e.g. where the boundary is defined) and value_s is the value on the secondary side of the interface.

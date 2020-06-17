@@ -57,9 +57,9 @@ EqualValueBoundaryConstraint::validParams()
   params.addParam<unsigned int>(
       "master",
       std::numeric_limits<unsigned int>::max(),
-      "The ID of the master node. If no ID is provided, first node of slave set is chosen.");
-  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The IDs of the slave node");
-  params.addParam<BoundaryName>("slave", "NaN", "The boundary ID associated with the slave side");
+      "The ID of the master node. If no ID is provided, first node of secondary set is chosen.");
+  params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
+  params.addParam<BoundaryName>("secondary", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
@@ -67,8 +67,8 @@ EqualValueBoundaryConstraint::validParams()
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
     _master_node_id(getParam<unsigned int>("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
-    _slave_node_set_id(getParam<BoundaryName>("slave")),
+    _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
+    _secondary_node_set_id(getParam<BoundaryName>("secondary")),
     _penalty(getParam<Real>("penalty"))
 {
   updateConstrainedNodes();
@@ -86,14 +86,14 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   _master_node_vector.clear();
   _connected_nodes.clear();
 
-  if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
-    mooseError("Please specify slave node ids or boundary id.");
-  else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
+  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
+    mooseError("Please specify secondary node ids or boundary id.");
+  else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
-    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
+    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
-    // Set master node to first node of the slave node set if no master node id is provided
+    // Set master node to first node of the secondary node set if no master node id is provided
     //_master_node_vector defines master nodes in the base class
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
     {
@@ -105,7 +105,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     else
       _master_node_vector.push_back(_master_node_id);
 
-    // Fill in _connected_nodes, which defines slave nodes in the base class
+    // Fill in _connected_nodes, which defines secondary nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
       if ((*in != _master_node_vector[0]) &&
@@ -113,14 +113,14 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
         _connected_nodes.push_back(*in);
     }
   }
-  else if ((_slave_node_ids.size() != 0) && (_slave_node_set_id == "NaN"))
+  else if ((_secondary_node_ids.size() != 0) && (_secondary_node_set_id == "NaN"))
   {
     if (_master_node_id == std::numeric_limits<unsigned int>::max())
       _master_node_vector.push_back(
-          _slave_node_ids[0]); //_master_node_vector defines master nodes in the base class
+          _secondary_node_ids[0]); //_master_node_vector defines master nodes in the base class
 
-    // Fill in _connected_nodes, which defines slave nodes in the base class
-    for (const auto & dof : _slave_node_ids)
+    // Fill in _connected_nodes, which defines secondary nodes in the base class
+    for (const auto & dof : _secondary_node_ids)
     {
       if (_mesh.queryNodePtr(dof) &&
           (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) &&
@@ -199,9 +199,9 @@ EqualValueBoundaryConstraint::computeQpResidual(Moose::ConstraintType type)
   switch (type)
   {
     case Moose::Slave:
-      return (_u_slave[_i] - _u_master[_j]) * _penalty;
+      return (_u_secondary[_i] - _u_master[_j]) * _penalty;
     case Moose::Master:
-      return (_u_master[_j] - _u_slave[_i]) * _penalty;
+      return (_u_master[_j] - _u_secondary[_i]) * _penalty;
   }
   return 0.;
 }

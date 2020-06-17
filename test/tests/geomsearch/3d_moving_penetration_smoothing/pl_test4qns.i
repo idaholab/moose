@@ -59,7 +59,7 @@
   [./penetrate]
     type = PenetrationAux
     variable = distance
-    boundary = 11            #slave
+    boundary = 11            #secondary
     paired_boundary = 12     #master
     normal_smoothing_distance = 0.2
   [../]
@@ -67,7 +67,7 @@
   [./penetrate2]
     type = PenetrationAux
     variable = distance
-    boundary = 12            #slave
+    boundary = 12            #secondary
     paired_boundary = 11     #master
     normal_smoothing_distance = 0.2
   [../]

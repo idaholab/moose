@@ -25,7 +25,7 @@ That is, the penetration distance (typically referred to as the gap $g$ in the c
 
 ## Node/Face Mechanical Contact
 
-Contact constraints can be enforced through the use of node/face constraints in a manner similar to that detailed by [!cite](heinstein_algorithm_1999)). In this approach, first, a geometric search determines which slave nodes have penetrated master faces. For those nodes, the internal force computed by the divergence of stress is moved to the appropriate master face at the point of contact. Those forces are distributed to master nodes by employing the finite element shape functions. Additionally, the slave nodes are constrained to remain on the master faces, preventing penetration. The module currently supports frictionless, frictional, and glued contact.
+Contact constraints can be enforced through the use of node/face constraints in a manner similar to that detailed by [!cite](heinstein_algorithm_1999)). In this approach, first, a geometric search determines which secondary nodes have penetrated master faces. For those nodes, the internal force computed by the divergence of stress is moved to the appropriate master face at the point of contact. Those forces are distributed to master nodes by employing the finite element shape functions. Additionally, the secondary nodes are constrained to remain on the master faces, preventing penetration. The module currently supports frictionless, frictional, and glued contact.
 
 [](---)
 

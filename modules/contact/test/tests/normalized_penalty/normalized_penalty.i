@@ -41,7 +41,7 @@
 [Contact]
   [./m3_s2]
     master = 3
-    slave = 2
+    secondary = 2
     penalty = 1e10
     normalize_penalty = true
     formulation = penalty

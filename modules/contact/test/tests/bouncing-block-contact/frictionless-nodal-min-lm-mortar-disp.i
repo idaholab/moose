@@ -47,7 +47,7 @@ offset = 1e-2
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = 10
+    secondary = 10
     master = 20
     variable = normal_lm
     master_variable = disp_x
@@ -56,11 +56,11 @@ offset = 1e-2
   [normal_x]
     type = NormalMortarMechanicalContact
     master_boundary = 20
-    slave_boundary = 10
+    secondary_boundary = 10
     master_subdomain = 4
-    slave_subdomain = 3
+    secondary_subdomain = 3
     variable = normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -68,11 +68,11 @@ offset = 1e-2
   [normal_y]
     type = NormalMortarMechanicalContact
     master_boundary = 20
-    slave_boundary = 10
+    secondary_boundary = 10
     master_subdomain = 4
-    slave_subdomain = 3
+    secondary_subdomain = 3
     variable = normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

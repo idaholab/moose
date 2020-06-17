@@ -1,6 +1,6 @@
 # This is a test of the usage of initial adaptivity with contact.
 # It ensures that contact is enforced on the new nodes that are
-# created due to refinement on the slave side of the interface.
+# created due to refinement on the secondary side of the interface.
 
 [GlobalParams]
   volumetric_locking_correction = false
@@ -92,7 +92,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 2
     model = frictionless
     penalty = 1e+6

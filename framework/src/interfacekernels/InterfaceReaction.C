@@ -42,7 +42,7 @@ InterfaceReaction::computeQpResidual(Moose::DGResidualType type)
       r = _test[_i][_qp] * (_kf * _u[_qp] - _kb * _neighbor_value[_qp]);
       break;
 
-    // Similarly, weak form for slave domain is: -(test, kf*u - kb*v),
+    // Similarly, weak form for secondary domain is: -(test, kf*u - kb*v),
     // flip the sign because the direction is opposite.
     case Moose::Neighbor:
       r = -_test_neighbor[_i][_qp] * (_kf * _u[_qp] - _kb * _neighbor_value[_qp]);

@@ -46,7 +46,7 @@ struct MortarSegmentInfo
   // MortarSegmentInfo(const MortarSegmentInfo &) = default;
 
   /**
-   * Prints xi values and slave/master Elem ids.
+   * Prints xi values and secondary/master Elem ids.
    */
   void print() const;
 
@@ -64,7 +64,7 @@ struct MortarSegmentInfo
 
   Real xi1_a, xi1_b;
   Real xi2_a, xi2_b;
-  const Elem * slave_elem;
+  const Elem * secondary_elem;
   const Elem * master_elem;
 
   // A magic number to let us determine when xi values have not been

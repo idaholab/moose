@@ -17,7 +17,7 @@ InputParameters
 EqualValueConstraint::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
-  params.addClassDescription("EqualValueConstraint enforces solution continuity between slave and "
+  params.addClassDescription("EqualValueConstraint enforces solution continuity between secondary and "
                              "master sides of a mortar interface using lagrange multipliers");
   return params;
 }
@@ -33,11 +33,11 @@ EqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case Moose::MortarType::Slave:
-      return -_lambda[_qp] * _test_slave[_i][_qp];
+      return -_lambda[_qp] * _test_secondary[_i][_qp];
     case Moose::MortarType::Master:
       return _lambda[_qp] * _test_master[_i][_qp];
     case Moose::MortarType::Lower:
-      return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
+      return (_u_master[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
     default:
       return 0;
   }

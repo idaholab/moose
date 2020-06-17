@@ -304,7 +304,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 4
     normalize_penalty = true
     tangential_tolerance = 1e-3

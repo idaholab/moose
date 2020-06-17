@@ -23,20 +23,20 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
                                        const unsigned int master_id,
-                                       const unsigned int slave_id,
+                                       const unsigned int secondary_id,
                                        Order order,
                                        NearestNodeLocator & nearest_node)
   : Restartable(subproblem.getMooseApp(),
-                Moose::stringify(master_id) + "to" + Moose::stringify(slave_id),
+                Moose::stringify(master_id) + "to" + Moose::stringify(secondary_id),
                 "PenetrationLocator",
                 0),
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(),
                        "PenetrationLocator_" + Moose::stringify(master_id) + "_" +
-                           Moose::stringify(slave_id)),
+                           Moose::stringify(secondary_id)),
     _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_id),
-    _slave_boundary(slave_id),
+    _secondary_boundary(secondary_id),
     _fe_type(order),
     _nearest_node(nearest_node),
     _penetration_info(declareRestartableDataWithContext<std::map<dof_id_type, PenetrationInfo *>>(
@@ -96,13 +96,13 @@ PenetrationLocator::detectPenetration()
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
       _mesh.buildActiveSideList();
 
-  // Grab the slave nodes we need to worry about from the NearestNodeLocator
-  NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
+  // Grab the secondary nodes we need to worry about from the NearestNodeLocator
+  NodeIdRange & secondary_node_range = _nearest_node.secondaryNodeRange();
 
   PenetrationThread pt(_subproblem,
                        _mesh,
                        _master_boundary,
-                       _slave_boundary,
+                       _secondary_boundary,
                        _penetration_info,
                        _check_whether_reasonable,
                        _update_location,
@@ -116,29 +116,29 @@ PenetrationLocator::detectPenetration()
                        _mesh.nodeToElemMap(),
                        bc_tuples);
 
-  Threads::parallel_reduce(slave_node_range, pt);
+  Threads::parallel_reduce(secondary_node_range, pt);
 
-  std::vector<dof_id_type> recheck_slave_nodes = pt._recheck_slave_nodes;
+  std::vector<dof_id_type> recheck_secondary_nodes = pt._recheck_secondary_nodes;
 
-  // Update the patch for the slave nodes in recheck_slave_nodes and re-run penetration thread on
+  // Update the patch for the secondary nodes in recheck_secondary_nodes and re-run penetration thread on
   // these nodes at every nonlinear iteration if patch update strategy is set to "iteration".
-  if (recheck_slave_nodes.size() > 0 && _patch_update_strategy == Moose::Iteration &&
+  if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy == Moose::Iteration &&
       _subproblem.currentlyComputingJacobian())
   {
-    // Update the patch for this subset of slave nodes and calculate the nearest neighbor_nodes
-    _nearest_node.updatePatch(recheck_slave_nodes);
+    // Update the patch for this subset of secondary nodes and calculate the nearest neighbor_nodes
+    _nearest_node.updatePatch(recheck_secondary_nodes);
 
     // Re-run the penetration thread to see if these nodes are in contact with the updated patch
-    NodeIdRange recheck_slave_node_range(recheck_slave_nodes.begin(), recheck_slave_nodes.end(), 1);
+    NodeIdRange recheck_secondary_node_range(recheck_secondary_nodes.begin(), recheck_secondary_nodes.end(), 1);
 
-    Threads::parallel_reduce(recheck_slave_node_range, pt);
+    Threads::parallel_reduce(recheck_secondary_node_range, pt);
   }
 
-  if (recheck_slave_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
+  if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
       _subproblem.currentlyComputingJacobian())
     mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
-                             "detected for one or more slave nodes. This could be because "
-                             "those slave nodes simply do not project to faces on the master "
+                             "detected for one or more secondary nodes. This could be because "
+                             "those secondary nodes simply do not project to faces on the master "
                              "surface. However, this could also be because contact should be "
                              "enforced on those nodes, but the faces that they project to "
                              "are outside the contact patch, which will give an erroneous "

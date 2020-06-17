@@ -9,6 +9,6 @@
     abs_zero = 1e-6
     superlu = true
     requirement = "The Contact system shall enforce eliminating initial
-                   overclosure between the master and slave surfaces."
+                   overclosure between the master and secondary surfaces."
   [../]
 []

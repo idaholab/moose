@@ -37,7 +37,7 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
-    _u_slave(_var.dofValuesNeighbor()),
+    _u_secondary(_var.dofValuesNeighbor()),
     _u_master(_var.dofValues())
 {
   addMooseVariableDependency(&_var);
@@ -58,14 +58,14 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
     _weights.push_back(1.0);
 
   std::vector<dof_id_type> masterdof = _var.dofIndices();
-  std::vector<dof_id_type> slavedof = _var.dofIndicesNeighbor();
+  std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
   DenseVector<Number> re(masterdof.size());
-  DenseVector<Number> neighbor_re(slavedof.size());
+  DenseVector<Number> neighbor_re(secondarydof.size());
 
   re.zero();
   neighbor_re.zero();
 
-  for (_i = 0; _i < slavedof.size(); ++_i)
+  for (_i = 0; _i < secondarydof.size(); ++_i)
   {
     for (_j = 0; _j < masterdof.size(); ++_j)
     {
@@ -76,8 +76,8 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
           neighbor_re(_i) += computeQpResidual(Moose::Slave) * _var.scalingFactor();
           break;
         case Moose::Kinematic:
-          // Transfer the current residual of the slave node to the master nodes
-          Real res = residual(slavedof[_i]);
+          // Transfer the current residual of the secondary node to the master nodes
+          Real res = residual(secondarydof[_i]);
           re(_j) += res * _weights[_j];
           neighbor_re(_i) += -res / _master_node_vector.size() + computeQpResidual(Moose::Slave);
           break;
@@ -85,7 +85,7 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
     }
   }
   _assembly.cacheResidualNodes(re, masterdof);
-  _assembly.cacheResidualNodes(neighbor_re, slavedof);
+  _assembly.cacheResidualNodes(neighbor_re, secondarydof);
 }
 
 void
@@ -95,20 +95,20 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     _weights.push_back(1.0);
 
   // Calculate Jacobian enteries and cache those entries along with the row and column indices
-  std::vector<dof_id_type> slavedof = _var.dofIndicesNeighbor();
+  std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
   std::vector<dof_id_type> masterdof = _var.dofIndices();
 
   DenseMatrix<Number> Kee(masterdof.size(), masterdof.size());
-  DenseMatrix<Number> Ken(masterdof.size(), slavedof.size());
-  DenseMatrix<Number> Kne(slavedof.size(), masterdof.size());
-  DenseMatrix<Number> Knn(slavedof.size(), slavedof.size());
+  DenseMatrix<Number> Ken(masterdof.size(), secondarydof.size());
+  DenseMatrix<Number> Kne(secondarydof.size(), masterdof.size());
+  DenseMatrix<Number> Knn(secondarydof.size(), secondarydof.size());
 
   Kee.zero();
   Ken.zero();
   Kne.zero();
   Knn.zero();
 
-  for (_i = 0; _i < slavedof.size(); ++_i)
+  for (_i = 0; _i < secondarydof.size(); ++_i)
   {
     for (_j = 0; _j < masterdof.size(); ++_j)
     {
@@ -122,19 +122,19 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
           break;
         case Moose::Kinematic:
           Kee(_j, _j) = 0.;
-          Ken(_j, _i) += jacobian(slavedof[_i], masterdof[_j]) * _weights[_j];
-          Kne(_i, _j) += -jacobian(slavedof[_i], masterdof[_j]) / masterdof.size() +
+          Ken(_j, _i) += jacobian(secondarydof[_i], masterdof[_j]) * _weights[_j];
+          Kne(_i, _j) += -jacobian(secondarydof[_i], masterdof[_j]) / masterdof.size() +
                          computeQpJacobian(Moose::SlaveMaster);
-          Knn(_i, _i) += -jacobian(slavedof[_i], slavedof[_i]) / masterdof.size() +
+          Knn(_i, _i) += -jacobian(secondarydof[_i], secondarydof[_i]) / masterdof.size() +
                          computeQpJacobian(Moose::SlaveSlave);
           break;
       }
     }
   }
   _assembly.cacheJacobianBlock(Kee, masterdof, masterdof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Ken, masterdof, slavedof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Kne, slavedof, masterdof, _var.scalingFactor());
-  _assembly.cacheJacobianBlock(Knn, slavedof, slavedof, _var.scalingFactor());
+  _assembly.cacheJacobianBlock(Ken, masterdof, secondarydof, _var.scalingFactor());
+  _assembly.cacheJacobianBlock(Kne, secondarydof, masterdof, _var.scalingFactor());
+  _assembly.cacheJacobianBlock(Knn, secondarydof, secondarydof, _var.scalingFactor());
 }
 
 void

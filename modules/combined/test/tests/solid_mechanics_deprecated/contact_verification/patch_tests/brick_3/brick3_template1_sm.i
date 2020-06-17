@@ -328,7 +328,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 4
     order = SECOND
     normalize_penalty = true

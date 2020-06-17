@@ -200,7 +200,7 @@
 
 [Contact]
   [./leftright]
-    slave = 4
+    secondary = 4
     disp_y = disp_y
     disp_x = disp_x
     master = 3

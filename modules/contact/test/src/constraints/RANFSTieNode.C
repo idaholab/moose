@@ -70,19 +70,19 @@ RANFSTieNode::shouldApply()
   _nearest_node = nearest_node_loc.nearestNode(_current_node->id());
   if (_nearest_node)
   {
-    auto slave_dof_number = _current_node->dof_number(0, _vars[_component], 0);
-    // We overwrite the slave residual so we cannot use the residual
+    auto secondary_dof_number = _current_node->dof_number(0, _vars[_component], 0);
+    // We overwrite the secondary residual so we cannot use the residual
     // copy for determining the Lagrange multiplier when computing the Jacobian
     if (!_subproblem.currentlyComputingJacobian())
       _node_to_lm.insert(std::make_pair(_current_node->id(),
-                                        _residual_copy(slave_dof_number) /
+                                        _residual_copy(secondary_dof_number) /
                                             _var_objects[_component]->scalingFactor()));
     else
     {
       std::vector<dof_id_type> master_cols;
       std::vector<Number> master_values;
 
-      _jacobian->get_row(slave_dof_number, master_cols, master_values);
+      _jacobian->get_row(secondary_dof_number, master_cols, master_values);
       mooseAssert(master_cols.size() == master_values.size(),
                   "The size of the dof container and value container are different");
 
@@ -135,7 +135,7 @@ RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
   switch (type)
   {
     case Moose::ConstraintJacobianType::SlaveSlave:
-      return _phi_slave[_j][_qp];
+      return _phi_secondary[_j][_qp];
 
     case Moose::ConstraintJacobianType::SlaveMaster:
       if (_master_index == _j)

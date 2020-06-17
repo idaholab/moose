@@ -64,7 +64,7 @@
     variable = disp_x
     component = 0
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
   [./master_y]
@@ -72,7 +72,7 @@
     variable = disp_y
     component = 1
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
   [./master_z]
@@ -80,10 +80,10 @@
     variable = disp_z
     component = 2
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
-  [./slave_x]
+  [./secondary_x]
     type = SlaveConstraint
     variable = disp_x
     component = 0
@@ -91,7 +91,7 @@
     master = 3
   [../]
 
-  [./slave_y]
+  [./secondary_y]
     type = SlaveConstraint
     variable = disp_y
     component = 1
@@ -99,7 +99,7 @@
     master = 3
   [../]
 
-  [./slave_z]
+  [./secondary_z]
     type = SlaveConstraint
     variable = disp_z
     component = 2

@@ -84,7 +84,7 @@ public:
   /// Selects the correct Jacobian type and routine to call for the master variable jacobian
   virtual void computeElementOffDiagJacobian(unsigned int jvar) = 0;
 
-  /// Selects the correct Jacobian type and routine to call for the slave variable jacobian
+  /// Selects the correct Jacobian type and routine to call for the secondary variable jacobian
   virtual void computeNeighborOffDiagJacobian(unsigned int jvar) = 0;
 
   /// Computes the residual for the current side.
@@ -164,12 +164,12 @@ protected:
   unsigned int _i, _j;
 
   /** MultiMooseEnum specifying whether residual save-in
-   * aux variables correspond to master or slave side
+   * aux variables correspond to master or secondary side
    */
   MultiMooseEnum _save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in residuals
-   * (includes both master and slave variable names)
+   * (includes both master and secondary variable names)
    */
   std::vector<AuxVariableName> _save_in_strings;
 
@@ -179,19 +179,19 @@ protected:
   /// The aux variables to save the master residual contributions to
   std::vector<MooseVariableFEBase *> _master_save_in_residual_variables;
 
-  /// Whether there are slave residual aux variables
-  bool _has_slave_residuals_saved_in;
+  /// Whether there are secondary residual aux variables
+  bool _has_secondary_residuals_saved_in;
 
-  /// The aux variables to save the slave contributions to
-  std::vector<MooseVariableFEBase *> _slave_save_in_residual_variables;
+  /// The aux variables to save the secondary contributions to
+  std::vector<MooseVariableFEBase *> _secondary_save_in_residual_variables;
 
   /** MultiMooseEnum specifying whether jacobian save-in
-   * aux variables correspond to master or slave side
+   * aux variables correspond to master or secondary side
    */
   MultiMooseEnum _diag_save_in_var_side;
 
   /** The names of the aux variables that will be used to save-in jacobians
-   * (includes both master and slave variable names)
+   * (includes both master and secondary variable names)
    */
   std::vector<AuxVariableName> _diag_save_in_strings;
 
@@ -201,11 +201,11 @@ protected:
   /// The aux variables to save the diagonal Jacobian contributions of the master variables to
   std::vector<MooseVariableFEBase *> _master_save_in_jacobian_variables;
 
-  /// Whether there are slave jacobian aux variables
-  bool _has_slave_jacobians_saved_in;
+  /// Whether there are secondary jacobian aux variables
+  bool _has_secondary_jacobians_saved_in;
 
-  /// The aux variables to save the diagonal Jacobian contributions of the slave variables to
-  std::vector<MooseVariableFEBase *> _slave_save_in_jacobian_variables;
+  /// The aux variables to save the diagonal Jacobian contributions of the secondary variables to
+  std::vector<MooseVariableFEBase *> _secondary_save_in_jacobian_variables;
 
   /// Mutex that prevents multiple threads from saving into the residual aux_var at the same time
   static Threads::spin_mutex _resid_vars_mutex;

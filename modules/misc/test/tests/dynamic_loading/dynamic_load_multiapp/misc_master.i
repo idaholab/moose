@@ -55,7 +55,7 @@
   [./sub_app]
     positions = '0.5 0.5 0'
     type = TransientMultiApp
-    input_files = 'phase_field_slave.i'
+    input_files = 'phase_field_secondary.i'
 
     # Here we'll attempt to load a different module that's not compiled into this module
     app_type = PhaseFieldApp

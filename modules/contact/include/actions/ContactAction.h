@@ -79,7 +79,7 @@ protected:
   /// Master boundary name for mechanical contact
   const BoundaryName _master;
   /// Slave boundary name for mechanical contact
-  const BoundaryName _slave;
+  const BoundaryName _secondary;
   /// Contact model type enum
   const MooseEnum _model;
   /// Contact formulation type enum

@@ -16,8 +16,8 @@ InputParameters
 TangentialMortarLMMechanicalContact::validParams()
 {
   auto params = MortarConstraintBase::validParams();
-  params.addRequiredParam<NonlinearVariableName>("slave_disp_y",
-                                                 "The y displacement variable on the slave face");
+  params.addRequiredParam<NonlinearVariableName>("secondary_disp_y",
+                                                 "The y displacement variable on the secondary face");
   params.addParam<NonlinearVariableName>("master_disp_y",
                                          "The y displacement variable on the master face");
   params.addRequiredParam<NonlinearVariableName>(
@@ -42,18 +42,18 @@ TangentialMortarLMMechanicalContact::validParams()
 TangentialMortarLMMechanicalContact::TangentialMortarLMMechanicalContact(
     const InputParameters & parameters)
   : ADMortarConstraint(parameters),
-    _slave_disp_y(
-        this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
+    _secondary_disp_y(
+        this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_disp_y"))),
     _master_disp_y(
         isParamValid("master_disp_y")
             ? this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("master_disp_y"))
-            : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("slave_disp_y"))),
+            : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_disp_y"))),
     _contact_pressure_var(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
     _contact_pressure(_contact_pressure_var.adSlnLower()),
-    _slave_x_dot(_slave_var.adUDot()),
+    _secondary_x_dot(_secondary_var.adUDot()),
     _master_x_dot(_master_var.adUDotNeighbor()),
-    _slave_y_dot(_slave_disp_y.adUDot()),
+    _secondary_y_dot(_secondary_disp_y.adUDot()),
     _master_y_dot(_master_disp_y.adUDotNeighbor()),
     _friction_coeff(getParam<Real>("friction_coefficient")),
     _epsilon(std::numeric_limits<Real>::epsilon()),
@@ -77,13 +77,13 @@ TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_
         {
           // Build the velocity vector
           ADRealVectorValue relative_velocity(
-              _slave_x_dot[_qp] - _master_x_dot[_qp], _slave_y_dot[_qp] - _master_y_dot[_qp], 0);
+              _secondary_x_dot[_qp] - _master_x_dot[_qp], _secondary_y_dot[_qp] - _master_y_dot[_qp], 0);
 
           // Get the component in the tangential direction
           auto tangential_velocity = relative_velocity * _tangents[_qp][0];
 
           // NCP part 1: requirement that either there is no slip **or** slip velocity and
-          // frictional force exerted **by** the slave side are in the same direction
+          // frictional force exerted **by** the secondary side are in the same direction
           ADReal a;
           if (tangential_velocity * _lambda[_qp] < 0)
             a = -std::abs(tangential_velocity);

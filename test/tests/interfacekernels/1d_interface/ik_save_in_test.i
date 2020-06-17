@@ -44,11 +44,11 @@
 [AuxVariables]
   [./master_resid]
   [../]
-  [./slave_resid]
+  [./secondary_resid]
   [../]
   [./master_jac]
   [../]
-  [./slave_jac]
+  [./secondary_jac]
   [../]
 []
 
@@ -65,7 +65,7 @@
     variable = v
     D = 2
     block = 1
-    save_in = 'slave_resid'
+    save_in = 'secondary_resid'
   [../]
 []
 
@@ -78,9 +78,9 @@
     D = 4
     D_neighbor = 2
     save_in_var_side = 'm s'
-    save_in = 'master_resid slave_resid'
+    save_in = 'master_resid secondary_resid'
     diag_save_in_var_side = 'm s'
-    diag_save_in = 'master_jac slave_jac'
+    diag_save_in = 'master_jac secondary_jac'
   [../]
 []
 
@@ -97,14 +97,14 @@
     variable = v
     boundary = 'right'
     value = 1
-    save_in = 'slave_resid'
+    save_in = 'secondary_resid'
   [../]
   [./middle]
     type = MatchedValueBC
     variable = v
     boundary = 'master0_interface'
     v = u
-    save_in = 'slave_resid'
+    save_in = 'secondary_resid'
   [../]
 []
 

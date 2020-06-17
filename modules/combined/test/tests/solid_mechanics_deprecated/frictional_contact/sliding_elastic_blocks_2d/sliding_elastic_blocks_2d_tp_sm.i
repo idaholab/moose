@@ -247,7 +247,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 2
     model = coulomb
     formulation = tangential_penalty
@@ -259,7 +259,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    slave = 3
+    secondary = 3
     master = 2
   [../]
 []

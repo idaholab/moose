@@ -93,7 +93,7 @@
 [Contact]
   [./dummy_name]
     master = 2
-    slave = 3
+    secondary = 3
     penalty = 1e8
   [../]
 []

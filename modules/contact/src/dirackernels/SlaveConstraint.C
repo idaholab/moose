@@ -26,7 +26,7 @@ SlaveConstraint::validParams()
   InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The secondary boundary");
   params.addRequiredParam<BoundaryName>("master", "The master boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
@@ -126,13 +126,13 @@ SlaveConstraint::addPoints()
     if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
-    dof_id_type slave_node_num = it->first;
+    dof_id_type secondary_node_num = it->first;
     const Node * node = pinfo->_node;
 
     if (pinfo->isCaptured() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
-      auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
+      auto node_to_elem_pair = node_to_elem_map.find(secondary_node_num);
       mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
       const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
 
@@ -146,7 +146,7 @@ SlaveConstraint::addPoints()
       }
 
       mooseAssert(elem,
-                  "Couldn't find an element on this processor that is attached to the slave node!");
+                  "Couldn't find an element on this processor that is attached to the secondary node!");
 
       addPoint(elem, *node);
       _point_to_info[*node] = pinfo;

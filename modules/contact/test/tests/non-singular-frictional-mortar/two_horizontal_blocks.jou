@@ -10,7 +10,7 @@ curve 1 2 3 4 interval 1
 curve 5 7 interval 1
 curve  6 8 interval 1
 
-# slave boundary
+# secondary boundary
 sideset 10 curve 4
 # master boundary
 sideset 20 curve 6

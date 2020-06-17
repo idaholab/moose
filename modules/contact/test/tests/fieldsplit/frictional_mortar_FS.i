@@ -92,7 +92,7 @@ refine = 1
 [Contact]
   [leftright]
     mesh = original_file_mesh
-    slave = 10
+    secondary = 10
     master = 20
 
     model = coulomb
@@ -130,7 +130,7 @@ refine = 1
       type = ContactSplit
       vars = 'disp_x disp_y'
       uncontact_master   = '20'
-      uncontact_slave    = '10'
+      uncontact_secondary    = '10'
       uncontact_displaced = '30'
       blocks              = '1 2'
       include_all_contact_nodes = 1
@@ -142,7 +142,7 @@ refine = 1
       type = ContactSplit
       vars = 'disp_x disp_y leftright_normal_lm leftright_tangential_lm'
       contact_master   = '20'
-      contact_slave    = '10'
+      contact_secondary    = '10'
       contact_displaced = '30'
       include_all_contact_nodes = 1
       blocks = '4'

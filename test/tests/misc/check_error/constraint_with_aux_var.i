@@ -21,7 +21,7 @@
   [./nope]
     type = CoupledTiedValueConstraint
     variable = v
-    slave = 2
+    secondary = 2
     master = 3
     master_variable = u
   [../]

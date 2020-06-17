@@ -24,7 +24,7 @@
 [Contact]
   [./dummy_name]
     master = 3
-    slave = 2
+    secondary = 2
     penalty = 1e5
     formulation = kinematic
   [../]

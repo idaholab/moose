@@ -20,7 +20,7 @@ OldEqualValueConstraint::validParams()
 {
   InputParameters params = MortarConstraint::validParams();
   params.addClassDescription(
-      "OldEqualValueConstraint enforces solution continuity between slave and "
+      "OldEqualValueConstraint enforces solution continuity between secondary and "
       "master sides of a mortar interface using lagrange multipliers");
   return params;
 }
@@ -36,11 +36,11 @@ OldEqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case Moose::MortarType::Slave:
-      return -_lambda[_qp] * _test_slave[_i][_qp];
+      return -_lambda[_qp] * _test_secondary[_i][_qp];
     case Moose::MortarType::Master:
       return _lambda[_qp] * _test_master[_i][_qp];
     case Moose::MortarType::Lower:
-      return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
+      return (_u_master[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
     default:
       return 0;
   }
@@ -56,7 +56,7 @@ OldEqualValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType jacobia
   {
     case JType::SlaveLower:
       if (jvar == _var->number())
-        return -(*_phi)[_j][_qp] * _test_slave[_i][_qp];
+        return -(*_phi)[_j][_qp] * _test_secondary[_i][_qp];
       break;
 
     case JType::MasterLower:
@@ -65,7 +65,7 @@ OldEqualValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType jacobia
       break;
 
     case JType::LowerSlave:
-      if (jvar == _slave_var.number())
+      if (jvar == _secondary_var.number())
         return -(*_phi)[_j][_qp] * _test[_i][_qp];
       break;
 

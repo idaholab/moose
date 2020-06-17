@@ -203,7 +203,7 @@
 [Contact]
   [./dummy_name]
     master = 1000
-    slave = 100
+    secondary = 100
 
     normalize_penalty = true
     tangential_tolerance = 1e-3

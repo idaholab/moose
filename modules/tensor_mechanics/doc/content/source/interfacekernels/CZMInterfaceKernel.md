@@ -12,7 +12,7 @@ The strong form of the force equilibrium equation in vector form can be written 
 \begin{equation}
   F^- -F^+ = \int_{A^-}{T^- dA^-} - \int_{A^+}{T^+ dA^+} = 0
 \end{equation}
-where superscripts $+$ and $-$ identify the master and slave surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the traction, and $A$ the area.
+where superscripts $+$ and $-$ identify the master and secondary surfaces of the cohesive zone, respectively. Furthermore, $F$ represents the force, $T$ the traction, and $A$ the area.
 The master surface is the one where the interface normal is computed.
 
 By utilizing the principle of virtual work and recognizing that forces are work conjugate of displacements, the weak form of the equilibrium equation can be written as  
@@ -25,7 +25,7 @@ Because of the small deformation assumption $A^-=A^+=A$ and $T^+=T^-=T$. Therefo
 \begin{equation}
   T_i (\psi^- - \psi^+) = 0
 \end{equation}
-Therefore the residual for the master and slave surfaces can be rewritten as
+Therefore the residual for the master and secondary surfaces can be rewritten as
 \begin{equation}
 \begin{aligned}
   R_i^+ & = & - T_i \psi^+ \\
@@ -64,7 +64,7 @@ the Jacobian of the master surface can be rewritten as
   \frac{\partial R_i^+}{\partial u_j^-} & = & -\frac{\partial T_i(\Delta U)}{\partial \Delta U_j} \phi^- \psi^+
 \end{aligned}
 \end{equation}
-Similarly, the Jacobian of the slave surface can be written as
+Similarly, the Jacobian of the secondary surface can be written as
 \begin{equation}
 \begin{aligned}
   \frac{\partial R_i^-}{\partial u_j^+} & = & -\frac{\partial T_i(\Delta U)}{\partial \Delta U_j} \phi^+ \psi^- \\

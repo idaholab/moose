@@ -104,10 +104,10 @@ InterfacialSource::computeElemNeighResidual(Moose::DGResidualType type)
       var->sys().solution().add_vector(_local_re, var->dofIndices());
     }
   }
-  else if (_has_slave_residuals_saved_in && !is_elem)
+  else if (_has_secondary_residuals_saved_in && !is_elem)
   {
     Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
-    for (const auto & var : _slave_save_in_residual_variables)
+    for (const auto & var : _secondary_save_in_residual_variables)
       var->sys().solution().add_vector(_local_re, var->dofIndicesNeighbor());
   }
 }

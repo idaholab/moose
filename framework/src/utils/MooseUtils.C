@@ -217,7 +217,7 @@ checkFileWriteable(const std::string & filename, bool throw_on_unwritable)
 void
 parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
 {
-  processor_id_type slave_processor_id;
+  processor_id_type secondary_processor_id;
 
   if (messaging)
     Moose::out << "Waiting For Other Processors To Finish" << std::endl;
@@ -229,7 +229,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
                  << std::flush;
     for (unsigned int i = 2; i <= comm.size(); ++i)
     {
-      comm.receive(MPI_ANY_SOURCE, slave_processor_id);
+      comm.receive(MPI_ANY_SOURCE, secondary_processor_id);
       if (messaging)
         Moose::out << "Jobs complete: " << i << "/" << comm.size()
                    << (i == comm.size() ? "\n" : "\r") << std::flush;
@@ -237,8 +237,8 @@ parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
   }
   else
   {
-    slave_processor_id = comm.rank();
-    comm.send(0, slave_processor_id);
+    secondary_processor_id = comm.rank();
+    comm.send(0, secondary_processor_id);
   }
 
   comm.barrier();

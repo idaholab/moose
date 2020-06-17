@@ -4,14 +4,14 @@
     type = FileMeshGenerator
     file = sliding_elastic_blocks_2d.e
   []
-  [slave]
+  [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
     new_block_id = '30'
   []
   [master]
-    input = slave
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
@@ -144,7 +144,7 @@
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = 3
+    secondary = 3
     master = 2
     variable = normal_lm
     master_variable = disp_x
@@ -156,11 +156,11 @@
   [normal_x]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '3'
+    secondary_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '30'
+    secondary_subdomain = '30'
     variable = normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -168,11 +168,11 @@
   [normal_y]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '3'
+    secondary_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '30'
+    secondary_subdomain = '30'
     variable = normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -180,12 +180,12 @@
   [tangential_lm]
     type = TangentialMortarLMMechanicalContact
     master_boundary = '2'
-    slave_boundary = '3'
+    secondary_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '30'
+    secondary_subdomain = '30'
     variable = tangential_lm
-    slave_variable = disp_x
-    slave_disp_y = disp_y
+    secondary_variable = disp_x
+    secondary_disp_y = disp_y
     use_displaced_mesh = true
     compute_primal_residuals = false
     contact_pressure = normal_lm
@@ -196,11 +196,11 @@
   [tangential_x]
     type = TangentialMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '3'
+    secondary_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '30'
+    secondary_subdomain = '30'
     variable = tangential_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -208,11 +208,11 @@
   [tangential_y]
     type = TangentialMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '3'
+    secondary_boundary = '3'
     master_subdomain = '20'
-    slave_subdomain = '30'
+    secondary_subdomain = '30'
     variable = tangential_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

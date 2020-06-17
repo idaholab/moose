@@ -90,7 +90,7 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     _gap_geometry_type(declareRestartableData<GapConductance::GAP_GEOMETRY>("gap_geometry_type",
                                                                             GapConductance::PLATE)),
     _quadrature(getParam<bool>("quadrature")),
-    _slave_flux(!_quadrature ? &_sys.getVector("slave_flux") : NULL),
+    _secondary_flux(!_quadrature ? &_sys.getVector("secondary_flux") : NULL),
     _gap_conductance(getMaterialProperty<Real>("gap_conductance" +
                                                getParam<std::string>("appended_property_name"))),
     _gap_conductance_dT(getMaterialProperty<Real>(
@@ -115,9 +115,9 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
     _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
     _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0))),
     _pinfo(nullptr),
-    _slave_side_phi(nullptr),
-    _slave_side(nullptr),
-    _slave_j(0)
+    _secondary_side_phi(nullptr),
+    _secondary_side(nullptr),
+    _secondary_j(0)
 {
   if (isParamValid("displacements"))
   {
@@ -179,8 +179,8 @@ GapHeatTransfer::computeQpResidual()
   if (!_quadrature)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
-    const Real slave_flux = computeSlaveFluxContribution(grad_t);
-    _slave_flux->add(_var.dofIndices()[_i], slave_flux);
+    const Real secondary_flux = computeSlaveFluxContribution(grad_t);
+    _secondary_flux->add(_var.dofIndices()[_i], secondary_flux);
   }
 
   return _test[_i][_qp] * grad_t;
@@ -206,26 +206,26 @@ GapHeatTransfer::computeJacobian()
       for (_j = 0; _j < _phi.size(); _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-    // Ok now do the contribution from the slave side
+    // Ok now do the contribution from the secondary side
     if (_quadrature && _has_info)
     {
-      std::vector<dof_id_type> slave_side_dof_indices;
+      std::vector<dof_id_type> secondary_side_dof_indices;
 
-      _sys.dofMap().dof_indices(_slave_side, slave_side_dof_indices, _var.number());
+      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, _var.number());
 
-      DenseMatrix<Number> K_slave(_var.dofIndices().size(), slave_side_dof_indices.size());
+      DenseMatrix<Number> K_secondary(_var.dofIndices().size(), secondary_side_dof_indices.size());
 
       mooseAssert(
-          _slave_side_phi->size() == slave_side_dof_indices.size(),
-          "The number of shapes does not match the number of dof indices on the slave elem");
+          _secondary_side_phi->size() == secondary_side_dof_indices.size(),
+          "The number of shapes does not match the number of dof indices on the secondary elem");
 
       for (_i = 0; _i < _test.size(); _i++)
-        for (_slave_j = 0; _slave_j < static_cast<unsigned int>(slave_side_dof_indices.size());
-             ++_slave_j)
-          K_slave(_i, _slave_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpJacobian();
+        for (_secondary_j = 0; _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+             ++_secondary_j)
+          K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpJacobian();
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
-          K_slave, _var.dofIndices(), slave_side_dof_indices, _var.scalingFactor());
+          K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
     }
   }
 
@@ -268,26 +268,26 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
       for (_j = 0; _j < phi_size; _j++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 
-    // Ok now do the contribution from the slave side
+    // Ok now do the contribution from the secondary side
     if (_quadrature && _has_info)
     {
-      std::vector<dof_id_type> slave_side_dof_indices;
+      std::vector<dof_id_type> secondary_side_dof_indices;
 
-      _sys.dofMap().dof_indices(_slave_side, slave_side_dof_indices, jvar);
+      _sys.dofMap().dof_indices(_secondary_side, secondary_side_dof_indices, jvar);
 
-      DenseMatrix<Number> K_slave(_var.dofIndices().size(), slave_side_dof_indices.size());
+      DenseMatrix<Number> K_secondary(_var.dofIndices().size(), secondary_side_dof_indices.size());
 
       mooseAssert(
-          _slave_side_phi->size() == slave_side_dof_indices.size(),
-          "The number of shapes does not match the number of dof indices on the slave elem");
+          _secondary_side_phi->size() == secondary_side_dof_indices.size(),
+          "The number of shapes does not match the number of dof indices on the secondary elem");
 
       for (_i = 0; _i < _test.size(); _i++)
-        for (_slave_j = 0; _slave_j < static_cast<unsigned int>(slave_side_dof_indices.size());
-             ++_slave_j)
-          K_slave(_i, _slave_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
+        for (_secondary_j = 0; _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+             ++_secondary_j)
+          K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
-          K_slave, _var.dofIndices(), slave_side_dof_indices, _var.scalingFactor());
+          K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
     }
   }
 
@@ -312,7 +312,7 @@ GapHeatTransfer::computeSlaveQpJacobian()
   return _test[_i][_qp] *
          ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] -
           _edge_multiplier * _gap_conductance[_qp]) *
-         (*_slave_side_phi)[_slave_j][0];
+         (*_secondary_side_phi)[_secondary_j][0];
 }
 
 Real
@@ -397,11 +397,11 @@ GapHeatTransfer::computeSlaveQpOffDiagJacobian(unsigned jvar)
 
     const Real dgap = dgapLength(-normal(coupled_component));
 
-    // The sign of the slave side should presumably be opposite that of the master side
+    // The sign of the secondary side should presumably be opposite that of the master side
     dRdx = (_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance[_qp] *
            GapConductance::gapAttenuation(gapL, _min_gap, _min_gap_order) * dgap;
   }
-  return _test[_i][_qp] * dRdx * (*_slave_side_phi)[_slave_j][0];
+  return _test[_i][_qp] * dRdx * (*_secondary_side_phi)[_secondary_j][0];
 }
 
 Real
@@ -449,9 +449,9 @@ GapHeatTransfer::computeGapValues()
       _gap_distance = _pinfo->_distance;
       _has_info = true;
 
-      _slave_side = _pinfo->_side;
-      _slave_side_phi = &_pinfo->_side_phi;
-      _gap_temp = _variable->getValue(_slave_side, *_slave_side_phi);
+      _secondary_side = _pinfo->_side;
+      _secondary_side_phi = &_pinfo->_side_phi;
+      _gap_temp = _variable->getValue(_secondary_side, *_secondary_side_phi);
 
       Real tangential_tolerance = _penetration_locator->getTangentialTolerance();
       if (tangential_tolerance != 0.0)

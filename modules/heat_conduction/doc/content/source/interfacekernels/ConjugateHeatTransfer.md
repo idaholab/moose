@@ -23,7 +23,7 @@ Note, in general the fluid energy equation does not need to be solved for temper
 Therefore, the parameter `variable` may be tied to internal energy. For these cases, the
 parameter `T_fluid` must be provided.
 
-This class adopts the convection that the master side is the fluid side and the slave side
+This class adopts the convection that the master side is the fluid side and the secondary side
 is the solid side. Therefore, `variable` expects the primary variable of the fluid energy
 equation and `neighbor_var` expects the solid temperature. It is assumed that the solid energy
 equation is solved for the solid temperature.

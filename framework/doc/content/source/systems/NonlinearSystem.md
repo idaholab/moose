@@ -325,10 +325,10 @@ consequently for MOOSE.
 One such routine is `NonlinearSystemBase::augmentSparsity`, which as its name
 suggests augments the sparsity pattern of the matrix. Currently this method adds
 sparsity coming from MOOSE `Constraint` objects. It does this by querying
-geometric connectivity information between slave and master boundary pairs, and
+geometric connectivity information between secondary and master boundary pairs, and
 then querying the `DofMap` attached to the `NonlinearSystemBase` (through the
 libMesh `NonlinearImplicitSystem`) for the dof indices that exist on the
-elements attached to the slave/master nodes. The geometric connectivity
+elements attached to the secondary/master nodes. The geometric connectivity
 information comes from [`NearestNodeLocators`](/NearestNodeLocator.md) held by
 [`GeometricSearchData`](/GeometricSearchData.md) objects in the
 [`FEProblemBase`](/FEProblemBase.md) and

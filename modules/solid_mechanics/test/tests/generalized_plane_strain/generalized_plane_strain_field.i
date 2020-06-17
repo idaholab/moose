@@ -106,7 +106,7 @@
     type = EqualValueBoundaryConstraint
     variable = strain_zz
     master = '8'
-    slave = 10
+    secondary = 10
     penalty = 1e12
   [../]
 []

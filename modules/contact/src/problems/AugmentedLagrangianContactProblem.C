@@ -124,11 +124,11 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
       {
         PenetrationLocator & pen_loc = *(it.second);
 
-        BoundaryID slave_boundary = pen_loc._slave_boundary;
+        BoundaryID secondary_boundary = pen_loc._secondary_boundary;
 
-        if (constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+        if (constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
         {
-          const auto & ncs = constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          const auto & ncs = constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
 
           for (const auto & nc : ncs)
           {

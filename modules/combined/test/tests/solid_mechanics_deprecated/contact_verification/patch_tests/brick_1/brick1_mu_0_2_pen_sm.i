@@ -372,7 +372,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 4
     model = coulomb
     formulation = penalty

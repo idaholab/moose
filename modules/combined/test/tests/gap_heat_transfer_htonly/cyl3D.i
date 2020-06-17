@@ -19,7 +19,7 @@
 #
 # For gapK = 1 (default value)
 #
-# The area is taken as the area of the slave (inner) surface:
+# The area is taken as the area of the secondary (inner) surface:
 #
 # Area = 2 * pi * h * r, where h is the height of the cylinder.
 #
@@ -116,9 +116,9 @@
     type = GapHeatTransfer
     variable = temp
     master = 3
-    slave = 2
+    secondary = 2
     emissivity_master = 0
-    emissivity_slave = 0
+    emissivity_secondary = 0
     gap_conductivity = 1
     quadrature = true
     gap_geometry_type = CYLINDER

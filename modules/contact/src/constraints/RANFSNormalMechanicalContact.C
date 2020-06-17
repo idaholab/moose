@@ -35,14 +35,14 @@ RANFSNormalMechanicalContact::validParams()
   params.addParam<bool>(
       "ping_pong_protection",
       false,
-      "Whether to protect against ping-ponging, e.g. the oscillation of the slave node between two "
-      "different master faces, by tying the slave node to the "
+      "Whether to protect against ping-ponging, e.g. the oscillation of the secondary node between two "
+      "different master faces, by tying the secondary node to the "
       "edge between the involved master faces");
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
   params.addClassDescription("Applies the Reduced Active Nonlinear Function Set scheme in which "
-                             "the slave node's non-linear residual function is replaced by the "
+                             "the secondary node's non-linear residual function is replaced by the "
                              "zero penetration constraint equation when the constraint is active");
   return params;
 }
@@ -88,7 +88,7 @@ void
 RANFSNormalMechanicalContact::timestepSetup()
 {
   _node_to_master_elem_sequence.clear();
-  _ping_pong_slave_node_to_master_node.clear();
+  _ping_pong_secondary_node_to_master_node.clear();
 }
 
 void
@@ -118,7 +118,7 @@ RANFSNormalMechanicalContact::shouldApply()
     _pinfo = found->second;
     if (_pinfo)
     {
-      // We overwrite the slave residual when constraints are active so we cannot use the residual
+      // We overwrite the secondary residual when constraints are active so we cannot use the residual
       // copy for determining the Lagrange multiplier when computing the Jacobian
       if (!_subproblem.currentlyComputingJacobian())
       {
@@ -146,9 +146,9 @@ RANFSNormalMechanicalContact::shouldApply()
                     "Somehow the sizes of our variable containers got out of sync");
         for (MooseIndex(_var_objects) i = 0; i < _var_objects.size(); ++i)
         {
-          auto slave_dof_number = _current_node->dof_number(0, _vars[i], 0);
+          auto secondary_dof_number = _current_node->dof_number(0, _vars[i], 0);
 
-          _jacobian->get_row(slave_dof_number, cols, values);
+          _jacobian->get_row(secondary_dof_number, cols, values);
           mooseAssert(cols.size() == values.size(),
                       "The size of the dof container and value container are different");
 
@@ -168,8 +168,8 @@ RANFSNormalMechanicalContact::shouldApply()
       _tied_lm = _node_to_tied_lm[_current_node->id()];
 
       // Check to see whether we've locked a ping-ponging node
-      if (_ping_pong_slave_node_to_master_node.find(_current_node->id()) ==
-          _ping_pong_slave_node_to_master_node.end())
+      if (_ping_pong_secondary_node_to_master_node.find(_current_node->id()) ==
+          _ping_pong_secondary_node_to_master_node.end())
       {
         if (_contact_lm > -_pinfo->_distance)
         {
@@ -208,7 +208,7 @@ RANFSNormalMechanicalContact::shouldApply()
                               libMesh::invalid_uint,
                           "The master node is not on the other ping-ponging element");
 
-              _ping_pong_slave_node_to_master_node.insert(
+              _ping_pong_secondary_node_to_master_node.insert(
                   std::make_pair(_current_node->id(), master_node));
             }
           }
@@ -221,8 +221,8 @@ RANFSNormalMechanicalContact::shouldApply()
 
       // Determine whether we're going to apply the tied node equality constraint or the contact
       // inequality constraint
-      auto it = _ping_pong_slave_node_to_master_node.find(_current_node->id());
-      if (it != _ping_pong_slave_node_to_master_node.end())
+      auto it = _ping_pong_secondary_node_to_master_node.find(_current_node->id());
+      if (it != _ping_pong_secondary_node_to_master_node.end())
       {
         _tie_nodes = true;
         _nearest_node = it->second;
@@ -319,16 +319,16 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
     case Moose::ConstraintJacobianType::SlaveSlave:
     {
       if (_tie_nodes)
-        return _phi_slave[_j][_qp];
+        return _phi_secondary[_j][_qp];
 
       // doing contact
       else
       {
         // corresponds to gap equation
         if (_largest_component == static_cast<unsigned int>(_component))
-          // _phi_slave has been set such that it is 1 when _j corresponds to the degree of freedom
+          // _phi_secondary has been set such that it is 1 when _j corresponds to the degree of freedom
           // associated with the _current node and 0 otherwise
-          return std::abs(_pinfo->_normal(_component)) * _phi_slave[_j][_qp];
+          return std::abs(_pinfo->_normal(_component)) * _phi_secondary[_j][_qp];
 
         // corresponds to regular residual with Lagrange Multiplier applied
         else
@@ -357,9 +357,9 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
         if (_master_index == _j)
           return -1;
 
-        // We're tying the slave node to only one node on the master side (specified by
+        // We're tying the secondary node to only one node on the master side (specified by
         // _master_index). If the current _j doesn't correspond to that tied master node, then the
-        // slave residual doesn't depend on it
+        // secondary residual doesn't depend on it
         else
           return 0;
       }
@@ -369,9 +369,9 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
           return -std::abs(_pinfo->_normal(_component)) * _phi_master[_j][_qp];
 
         // If we're not applying the gap constraint equation on this _component, then we're
-        // applying a Lagrange multiplier, and consequently there is no dependence of the slave
+        // applying a Lagrange multiplier, and consequently there is no dependence of the secondary
         // residual on the master dofs because the Lagrange multiplier is only a functon of the
-        // slave residuals
+        // secondary residuals
         else
           return 0;
       }

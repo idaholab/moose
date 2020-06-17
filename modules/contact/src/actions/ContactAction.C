@@ -44,7 +44,7 @@ ContactAction::validParams()
   params += ContactAction::commonParameters();
 
   params.addRequiredParam<BoundaryName>("master", "The master surface");
-  params.addRequiredParam<BoundaryName>("slave", "The slave surface");
+  params.addRequiredParam<BoundaryName>("secondary", "The secondary surface");
 
   params.addParam<MeshGeneratorName>("mesh", "", "The mesh generator for mortar method");
 
@@ -83,9 +83,9 @@ ContactAction::validParams()
   params.addParam<bool>("normalize_penalty",
                         false,
                         "Whether to normalize the penalty parameter with the nodal area.");
-  params.addParam<bool>("master_slave_jacobian",
+  params.addParam<bool>("master_secondary_jacobian",
                         true,
-                        "Whether to include Jacobian entries coupling master and slave nodes.");
+                        "Whether to include Jacobian entries coupling master and secondary nodes.");
   params.addParam<Real>("al_penetration_tolerance",
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
@@ -100,8 +100,8 @@ ContactAction::validParams()
   params.addParam<bool>(
       "ping_pong_protection",
       false,
-      "Whether to protect against ping-ponging, e.g. the oscillation of the slave node between two "
-      "different master faces, by tying the slave node to the "
+      "Whether to protect against ping-ponging, e.g. the oscillation of the secondary node between two "
+      "different master faces, by tying the secondary node to the "
       "edge between the involved master faces");
   params.addParam<Real>(
       "normal_lm_scaling", 1., "Scaling factor to apply to the normal LM variable");
@@ -117,7 +117,7 @@ ContactAction::validParams()
 ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
     _master(getParam<BoundaryName>("master")),
-    _slave(getParam<BoundaryName>("slave")),
+    _secondary(getParam<BoundaryName>("secondary")),
     _model(getParam<MooseEnum>("model")),
     _formulation(getParam<MooseEnum>("formulation")),
     _system(getParam<MooseEnum>("system")),
@@ -195,7 +195,7 @@ ContactAction::act()
       InputParameters params = _factory.getValidParams("PenetrationAux");
       params.applyParameters(parameters());
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-      params.set<std::vector<BoundaryName>>("boundary") = {_slave};
+      params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
       params.set<BoundaryName>("paired_boundary") = _master;
       params.set<AuxVariableName>("variable") = "penetration";
 
@@ -209,7 +209,7 @@ ContactAction::act()
       InputParameters params = _factory.getValidParams("ContactPressureAux");
       params.applyParameters(parameters());
 
-      params.set<std::vector<BoundaryName>>("boundary") = {_slave};
+      params.set<std::vector<BoundaryName>>("boundary") = {_secondary};
       params.set<BoundaryName>("paired_boundary") = _master;
       params.set<AuxVariableName>("variable") = "contact_pressure";
       params.addRequiredCoupledVar("nodal_area", "The nodal area");
@@ -257,7 +257,7 @@ ContactAction::act()
   if (_current_task == "add_user_object")
   {
     auto var_params = _factory.getValidParams("NodalArea");
-    var_params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("slave")};
+    var_params.set<std::vector<BoundaryName>>("boundary") = {getParam<BoundaryName>("secondary")};
     var_params.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
 
     mooseAssert(_problem, "Problem pointer is NULL");
@@ -287,7 +287,7 @@ ContactAction::addMortarContact()
 
   // Definitions for mortar contact.
   const std::string master_subdomain_name = action_name + "_master_subdomain";
-  const std::string slave_subdomain_name = action_name + "_slave_subdomain";
+  const std::string secondary_subdomain_name = action_name + "_secondary_subdomain";
   const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm";
   const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
 
@@ -297,30 +297,30 @@ ContactAction::addMortarContact()
     if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
     {
       const MeshGeneratorName master_name = master_subdomain_name + "_generator";
-      const MeshGeneratorName slave_name = slave_subdomain_name + "_generator";
+      const MeshGeneratorName secondary_name = secondary_subdomain_name + "_generator";
 
       auto master_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-      auto slave_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+      auto secondary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
 
       master_params.set<MeshGeneratorName>("input") = _mesh_gen_name;
-      slave_params.set<MeshGeneratorName>("input") = master_name;
+      secondary_params.set<MeshGeneratorName>("input") = master_name;
 
       master_params.set<SubdomainName>("new_block_name") = master_subdomain_name;
-      slave_params.set<SubdomainName>("new_block_name") = slave_subdomain_name;
+      secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
 
       master_params.set<std::vector<BoundaryName>>("sidesets") = {_master};
-      slave_params.set<std::vector<BoundaryName>>("sidesets") = {_slave};
+      secondary_params.set<std::vector<BoundaryName>>("sidesets") = {_secondary};
 
       _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", master_name, master_params);
-      _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", slave_name, slave_params);
+      _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
     }
   }
 
   if (_current_task == "add_mortar_variable")
   {
-    // Add the lagrange multiplier on the slave subdomain.
+    // Add the lagrange multiplier on the secondary subdomain.
     const auto addLagrangeMultiplier =
-        [this, &slave_subdomain_name, &displacements](const std::string & variable_name,
+        [this, &secondary_subdomain_name, &displacements](const std::string & variable_name,
                                                       const int codimension,
                                                       const Real scaling_factor) //
     {
@@ -346,7 +346,7 @@ ContactAction::addMortarContact()
       else
         mooseError("Primal variable type must be either MONOMIAL or LAGRANGE for mortar contact.");
 
-      params.set<std::vector<SubdomainName>>("block") = {slave_subdomain_name};
+      params.set<std::vector<SubdomainName>>("block") = {secondary_subdomain_name};
       params.set<std::vector<Real>>("scaling") = {scaling_factor};
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::determineType(fe_type, 1);
@@ -371,12 +371,12 @@ ContactAction::addMortarContact()
 
   if (_current_task == "add_constraint")
   {
-    // Add the normal Lagrange multiplier constraint on the slave boundary.
+    // Add the normal Lagrange multiplier constraint on the secondary boundary.
     {
       InputParameters params = _factory.getValidParams("NormalNodalLMMechanicalContact");
 
       params.set<BoundaryName>("master") = _master;
-      params.set<BoundaryName>("slave") = _slave;
+      params.set<BoundaryName>("secondary") = _secondary;
       params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<MooseEnum>("ncp_function_type") = "min";
@@ -393,15 +393,15 @@ ContactAction::addMortarContact()
       _problem->addConstraint("NormalNodalLMMechanicalContact", action_name + "_normal_lm", params);
     }
 
-    // Add the tangential Lagrange multiplier constraint on the slave boundary.
+    // Add the tangential Lagrange multiplier constraint on the secondary boundary.
     if (_model == "coulomb")
     {
       InputParameters params = _factory.getValidParams("TangentialMortarLMMechanicalContact");
 
       params.set<BoundaryName>("master_boundary") = _master;
-      params.set<BoundaryName>("slave_boundary") = _slave;
+      params.set<BoundaryName>("secondary_boundary") = _secondary;
       params.set<SubdomainName>("master_subdomain") = master_subdomain_name;
-      params.set<SubdomainName>("slave_subdomain") = slave_subdomain_name;
+      params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = tangential_lagrange_multiplier_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<MooseEnum>("ncp_function_type") = "fb";
@@ -410,17 +410,17 @@ ContactAction::addMortarContact()
       params.set<NonlinearVariableName>("contact_pressure") = normal_lagrange_multiplier_name;
       params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
 
-      params.set<VariableName>("slave_variable") = displacements[0];
+      params.set<VariableName>("secondary_variable") = displacements[0];
       if (ndisp > 1)
-        params.set<NonlinearVariableName>("slave_disp_y") = displacements[1];
-      // slave_disp_z is not implemented for tangential (yet).
+        params.set<NonlinearVariableName>("secondary_disp_y") = displacements[1];
+      // secondary_disp_z is not implemented for tangential (yet).
 
       _problem->addConstraint(
           "TangentialMortarLMMechanicalContact", action_name + "_tangential_lm", params);
     }
 
     const auto addMechanicalContactConstraints =
-        [this, &master_subdomain_name, &slave_subdomain_name, &displacements](
+        [this, &master_subdomain_name, &secondary_subdomain_name, &displacements](
             const std::string & variable_name,
             const std::string & constraint_prefix,
             const std::string & constraint_type) //
@@ -428,9 +428,9 @@ ContactAction::addMortarContact()
       InputParameters params = _factory.getValidParams(constraint_type);
 
       params.set<BoundaryName>("master_boundary") = _master;
-      params.set<BoundaryName>("slave_boundary") = _slave;
+      params.set<BoundaryName>("secondary_boundary") = _secondary;
       params.set<SubdomainName>("master_subdomain") = master_subdomain_name;
-      params.set<SubdomainName>("slave_subdomain") = slave_subdomain_name;
+      params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = variable_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
@@ -439,7 +439,7 @@ ContactAction::addMortarContact()
       {
         std::string constraint_name = constraint_prefix + Moose::stringify(i);
 
-        params.set<VariableName>("slave_variable") = displacements[i];
+        params.set<VariableName>("secondary_variable") = displacements[i];
         params.set<MooseEnum>("component") = i;
 
         _problem->addConstraint(constraint_type, constraint_name, params);

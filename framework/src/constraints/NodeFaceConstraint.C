@@ -26,7 +26,7 @@ NodeFaceConstraint::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = Constraint::validParams();
-  params.addRequiredParam<BoundaryName>("slave", "The boundary ID associated with the slave side");
+  params.addRequiredParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
   params.addRequiredParam<BoundaryName>("master",
                                         "The boundary ID associated with the master side");
   params.addParam<Real>("tangential_tolerance",
@@ -47,12 +47,12 @@ NodeFaceConstraint::validParams()
 
 NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
   : Constraint(parameters),
-    // The slave side is at nodes (hence passing 'true').  The neighbor side is the master side and
+    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the master side and
     // it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _slave(_mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _secondary(_mesh.getBoundaryID(getParam<BoundaryName>("secondary"))),
     _master(_mesh.getBoundaryID(getParam<BoundaryName>("master"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
@@ -61,14 +61,14 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
 
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("master"),
-                              getParam<BoundaryName>("slave"),
+                              getParam<BoundaryName>("secondary"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
 
     _current_node(_var.node()),
     _current_master(_var.neighbor()),
-    _u_slave(_var.dofValues()),
-    _phi_slave(1),  // One entry
-    _test_slave(1), // One entry
+    _u_secondary(_var.dofValues()),
+    _phi_secondary(1),  // One entry
+    _test_secondary(1), // One entry
 
     _master_var(*getVar("master_variable", 0)),
     _master_var_num(_master_var.number()),
@@ -85,7 +85,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
 
-    _overwrite_slave_residual(true),
+    _overwrite_secondary_residual(true),
     _master_JxW(_assembly.JxWNeighbor())
 {
   addMooseVariableDependency(&_var);
@@ -103,15 +103,15 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     _penetration_locator.setNormalSmoothingMethod(
         parameters.get<std::string>("normal_smoothing_method"));
   }
-  // Put a "1" into test_slave
+  // Put a "1" into test_secondary
   // will always only have one entry that is 1
-  _test_slave[0].push_back(1);
+  _test_secondary[0].push_back(1);
 }
 
 NodeFaceConstraint::~NodeFaceConstraint()
 {
-  _phi_slave.release();
-  _test_slave.release();
+  _phi_secondary.release();
+  _test_secondary.release();
 }
 
 void
@@ -125,15 +125,15 @@ NodeFaceConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
 void
 NodeFaceConstraint::residualSetup()
 {
-  _slave_residual_computed = false;
+  _secondary_residual_computed = false;
 }
 
 Real
-NodeFaceConstraint::slaveResidual() const
+NodeFaceConstraint::secondaryResidual() const
 {
-  mooseAssert(_slave_residual_computed,
-              "The slave residual has not yet been computed, so the value will be garbage!");
-  return _slave_residual;
+  mooseAssert(_secondary_residual_computed,
+              "The secondary residual has not yet been computed, so the value will be garbage!");
+  return _secondary_residual;
 }
 
 void
@@ -148,8 +148,8 @@ NodeFaceConstraint::computeResidual()
     neighbor_re(_i) += computeQpResidual(Moose::Master);
 
   _i = 0;
-  _slave_residual = re(0) = computeQpResidual(Moose::Slave);
-  _slave_residual_computed = true;
+  _secondary_residual = re(0) = computeQpResidual(Moose::Slave);
+  _secondary_residual_computed = true;
 }
 
 void
@@ -166,32 +166,32 @@ NodeFaceConstraint::computeJacobian()
   DenseMatrix<Number> & Knn =
       _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
 
-  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
+  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());
 
-  _phi_slave.resize(_connected_dof_indices.size());
+  _phi_secondary.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
   for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
   {
-    _phi_slave[j].resize(1);
+    _phi_secondary[j].resize(1);
 
     if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
+      _phi_secondary[j][_qp] = 1.0;
     else
-      _phi_slave[j][_qp] = 0.0;
+      _phi_secondary[j][_qp] = 0.0;
   }
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
 
   if (_Ken.m() && _Ken.n())
-    for (_i = 0; _i < _test_slave.size(); _i++)
+    for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_master.size(); _j++)
         _Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
 
@@ -211,7 +211,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 {
   getConnectedDofIndices(jvar);
 
-  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
+  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_master.size(), _connected_dof_indices.size());
 
   // Just do a direct assignment here because the Jacobian coming from assembly has already been
@@ -221,30 +221,30 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
   DenseMatrix<Number> & Knn =
       _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
 
-  _phi_slave.resize(_connected_dof_indices.size());
+  _phi_secondary.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
   auto master_jsize = _sys.getVariable(0, jvar).dofIndicesNeighbor().size();
 
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
   for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
   {
-    _phi_slave[j].resize(1);
+    _phi_secondary[j].resize(1);
 
     if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
+      _phi_secondary[j][_qp] = 1.0;
     else
-      _phi_slave[j][_qp] = 0.0;
+      _phi_secondary[j][_qp] = 0.0;
   }
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     for (_j = 0; _j < master_jsize; _j++)
       _Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
 
@@ -289,5 +289,5 @@ NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
 bool
 NodeFaceConstraint::overwriteSlaveResidual()
 {
-  return _overwrite_slave_residual;
+  return _overwrite_secondary_residual;
 }

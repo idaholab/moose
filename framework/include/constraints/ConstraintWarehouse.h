@@ -49,7 +49,7 @@ public:
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
   getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeElemConstraint>> &
-  getActiveNodeElemConstraints(SubdomainID slave_id, SubdomainID master_id, bool displaced) const;
+  getActiveNodeElemConstraints(SubdomainID secondary_id, SubdomainID master_id, bool displaced) const;
   ///@}
 
   ///@{
@@ -60,7 +60,7 @@ public:
   bool hasActiveElemElemConstraints(const InterfaceID interface_id, bool displaced) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   bool
-  hasActiveNodeElemConstraints(SubdomainID slave_id, SubdomainID master_id, bool displaced) const;
+  hasActiveNodeElemConstraints(SubdomainID secondary_id, SubdomainID master_id, bool displaced) const;
   ///@}
 
   /**

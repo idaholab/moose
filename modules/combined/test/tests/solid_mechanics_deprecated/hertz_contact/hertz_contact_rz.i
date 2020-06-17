@@ -191,7 +191,7 @@
 [Contact]
   [./dummy_name]
     master = 1000
-    slave = 100
+    secondary = 100
     disp_x = disp_x
     disp_y = disp_y
     penalty = 1e7

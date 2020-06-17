@@ -93,7 +93,7 @@ refine = 1
 [Contact]
   [leftright]
     mesh = original_file_mesh
-    slave = 10
+    secondary = 10
     master = 20
 
     model = coulomb

@@ -48,7 +48,7 @@
   [./value]
     type = CoupledTiedValueConstraint
     variable = u
-    slave = 2
+    secondary = 2
     master = 3
     master_variable = v
   [../]

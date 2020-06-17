@@ -114,17 +114,17 @@
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_master_slave]
+  [./diffusivity_jump_master_secondary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = jump_master_minus_slave
+    interface_value_type = jump_master_minus_secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_slave_master]
+  [./diffusivity_jump_secondary_master]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = jump_slave_minus_master
+    interface_value_type = jump_secondary_minus_master
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -146,9 +146,9 @@
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_slave]
+  [./diffusivity_secondary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = slave
+    interface_value_type = secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END

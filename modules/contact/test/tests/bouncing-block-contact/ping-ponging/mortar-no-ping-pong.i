@@ -50,7 +50,7 @@ offset = 1e-2
 [Contact]
   [leftright]
     mesh = file
-    slave = 10
+    secondary = 10
     master = 20
     model = frictionless
     formulation = mortar

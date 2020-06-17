@@ -46,7 +46,7 @@ offset = 1e-2
 
 [Contact]
   [leftright]
-    slave = 10
+    secondary = 10
     master = 20
     model = frictionless
     formulation = kinematic

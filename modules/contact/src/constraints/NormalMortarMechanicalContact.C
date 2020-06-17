@@ -44,10 +44,10 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // indicates the momentum will tend to increase at this location with time, which is what we
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
-      return _test_slave[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
 
     case Moose::MortarType::Master:
-      // The normal vector is signed according to the slave face, so we need to introduce a negative
+      // The normal vector is signed according to the secondary face, so we need to introduce a negative
       // sign here
       return -_test_master[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
 

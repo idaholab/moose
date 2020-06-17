@@ -3,15 +3,15 @@
     type = FileMeshGenerator
     file = 2blk-conf.e
   []
-  [slave]
+  [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '101'
     new_block_id = '10001'
-    new_block_name = 'slave_lower'
+    new_block_name = 'secondary_lower'
   []
   [master]
-    input = slave
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '100'
     new_block_id = '10000'
@@ -29,12 +29,12 @@
   [./lmx]
     order = FIRST
     family = LAGRANGE
-    block = 'slave_lower'
+    block = 'secondary_lower'
   [../]
   [./lmy]
     order = FIRST
     family = LAGRANGE
-    block = 'slave_lower'
+    block = 'secondary_lower'
   [../]
 []
 
@@ -67,22 +67,22 @@
 [Constraints]
   [./cedx]
     type = EqualGradientConstraint
-    slave_variable = u
+    secondary_variable = u
     variable = lmx
     master_boundary = 100
     master_subdomain = 10000
-    slave_boundary = 101
-    slave_subdomain = 10001
+    secondary_boundary = 101
+    secondary_subdomain = 10001
     component = 0
   [../]
   [./cedy]
     type = EqualGradientConstraint
-    slave_variable = u
+    secondary_variable = u
     variable = lmy
     master_boundary = 100
     master_subdomain = 10000
-    slave_boundary = 101
-    slave_subdomain = 10001
+    secondary_boundary = 101
+    secondary_subdomain = 10001
     component = 1
   [../]
 []

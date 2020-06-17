@@ -25,9 +25,9 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
   : MortarConstraintBase(parameters),
     _lambda_dummy(),
     _lambda(_var ? _var->slnLower() : _lambda_dummy),
-    _u_slave(_slave_var.sln()),
+    _u_secondary(_secondary_var.sln()),
     _u_master(_master_var.slnNeighbor()),
-    _grad_u_slave(_slave_var.gradSln()),
+    _grad_u_secondary(_secondary_var.gradSln()),
     _grad_u_master(_master_var.gradSlnNeighbor()),
     _phi(nullptr),
     _grad_phi(nullptr)
@@ -41,8 +41,8 @@ MortarConstraint::computeResidual(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case Moose::MortarType::Slave:
-      prepareVectorTag(_assembly, _slave_var.number());
-      test_space_size = _test_slave.size();
+      prepareVectorTag(_assembly, _secondary_var.number());
+      test_space_size = _test_secondary.size();
       break;
 
     case Moose::MortarType::Master:
@@ -75,7 +75,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   switch (mortar_type)
   {
     case MType::Slave:
-      test_space_size = _slave_var.dofIndices().size();
+      test_space_size = _secondary_var.dofIndices().size();
       jacobian_types = {{JType::SlaveSlave, JType::SlaveMaster, JType::SlaveLower}};
       break;
 
@@ -102,7 +102,7 @@ MortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     switch (mortar_type)
     {
       case MType::Slave:
-        if (ivar != _slave_var.number())
+        if (ivar != _secondary_var.number())
           continue;
         break;
 

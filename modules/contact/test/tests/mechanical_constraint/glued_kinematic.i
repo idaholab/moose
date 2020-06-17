@@ -156,7 +156,7 @@
 [Contact]
   [./leftright]
     master = 2
-    slave = 3
+    secondary = 3
     model = glued
     penalty = 1e+6
   [../]

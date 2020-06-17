@@ -20,8 +20,8 @@ InterfaceIntegralVariableValuePostprocessor::validParams()
   params.addRequiredCoupledVar("variable",
                                "The name of the variable on the master side of the interface");
   params.addCoupledVar("neighbor_variable",
-                       "The name of the variable on the slave side of the interface. By default "
-                       "the same variable name is used for the slave side");
+                       "The name of the variable on the secondary side of the interface. By default "
+                       "the same variable name is used for the secondary side");
   params.addClassDescription("Add access to variables and their gradient on an interface.");
   params.addParam<MooseEnum>("interface_value_type",
                              InterfaceValueTools::InterfaceAverageOptions(),

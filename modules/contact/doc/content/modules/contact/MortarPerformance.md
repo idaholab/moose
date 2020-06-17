@@ -24,7 +24,7 @@ satisfied. Min indicates the canonical min function (see
 [std::min](https://en.cppreference.com/w/cpp/algorithm/min)); FB represents the
 Fischer-Burmeister function. `RANFS` denotes the Reduced Active Nonlinear
 Function Set scheme in which no Lagrange Multipliers are used, and instead the
-non-linear residual equations at the slave nodes are replaced with the gap
+non-linear residual equations at the secondary nodes are replaced with the gap
 function. The fourth column in the table is the simulation time in
 arbitrary units (since timings will be different across machines). The fifth
 column is the number of time steps required to reach the simulation end

@@ -286,13 +286,13 @@ NonlinearSystemBase::initialSetup()
         _fe_problem.getMortarInterfaces(/*displaced=*/false);
     for (const auto & mortar_interface : undisplaced_mortar_interfaces)
     {
-      auto master_slave_boundary_pair = mortar_interface.first;
+      auto master_secondary_boundary_pair = mortar_interface.first;
       const auto & mortar_generation_object = mortar_interface.second;
 
       auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/false);
+          _constraints.getActiveMortarConstraints(master_secondary_boundary_pair, /*displaced=*/false);
 
-      _undisplaced_mortar_functors.emplace(master_slave_boundary_pair,
+      _undisplaced_mortar_functors.emplace(master_secondary_boundary_pair,
                                            ComputeMortarFunctor(mortar_constraints,
                                                                 mortar_generation_object,
                                                                 _fe_problem,
@@ -305,13 +305,13 @@ NonlinearSystemBase::initialSetup()
     {
       mooseAssert(_fe_problem.getDisplacedProblem(),
                   "Cannot create displaced mortar functors when the displaced problem is null");
-      auto master_slave_boundary_pair = mortar_interface.first;
+      auto master_secondary_boundary_pair = mortar_interface.first;
       const auto & mortar_generation_object = mortar_interface.second;
 
       auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(master_slave_boundary_pair, /*displaced=*/true);
+          _constraints.getActiveMortarConstraints(master_secondary_boundary_pair, /*displaced=*/true);
 
-      _displaced_mortar_functors.emplace(master_slave_boundary_pair,
+      _displaced_mortar_functors.emplace(master_secondary_boundary_pair,
                                          ComputeMortarFunctor(mortar_constraints,
                                                               mortar_generation_object,
                                                               *_fe_problem.getDisplacedProblem(),
@@ -777,7 +777,7 @@ NonlinearSystemBase::setInitialSolution()
     update();
   }
 
-  // Set constraint slave values
+  // Set constraint secondary values
   setConstraintSlaveValues(initial_solution, false);
 
   if (_fe_problem.getDisplacedProblem())
@@ -864,13 +864,13 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
       std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-      if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+      if ((secondary_node_ids.size() > 0) && (master_node_ids.size() > 0))
       {
         _fe_problem.reinitNodes(master_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
         nc->computeResidual(residual);
       }
     }
@@ -893,13 +893,13 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
       std::vector<dof_id_type> & master_node_ids = nc->getMasterNodeId();
 
-      if ((slave_node_ids.size() > 0) && (master_node_ids.size() > 0))
+      if ((secondary_node_ids.size() > 0) && (master_node_ids.size() > 0))
       {
         _fe_problem.reinitNodes(master_node_ids, tid);
-        _fe_problem.reinitNodesNeighbor(slave_node_ids, tid);
+        _fe_problem.reinitNodesNeighbor(secondary_node_ids, tid);
         nc->computeJacobian(jacobian);
       }
     }
@@ -932,31 +932,31 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
   {
     PenetrationLocator & pen_loc = *(it.second);
 
-    std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+    std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
-    BoundaryID slave_boundary = pen_loc._slave_boundary;
+    BoundaryID secondary_boundary = pen_loc._secondary_boundary;
 
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
 
-      for (unsigned int i = 0; i < slave_nodes.size(); i++)
+      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
-        dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        dof_id_type secondary_node_num = secondary_nodes[i];
+        Node & secondary_node = _mesh.nodeRef(secondary_node_num);
 
-        if (slave_node.processor_id() == processor_id())
+        if (secondary_node.processor_id() == processor_id())
         {
-          if (pen_loc._penetration_info[slave_node_num])
+          if (pen_loc._penetration_info[secondary_node_num])
           {
-            PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
             const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
-            _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
 
             _fe_problem.prepareAssembly(0);
 
@@ -980,39 +980,39 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
   }
 
   // go over NodeELemConstraints
-  std::set<dof_id_type> unique_slave_node_ids;
+  std::set<dof_id_type> unique_secondary_node_ids;
 
-  for (const auto & slave_id : _mesh.meshSubdomains())
+  for (const auto & secondary_id : _mesh.meshSubdomains())
   {
     for (const auto & master_id : _mesh.meshSubdomains())
     {
-      if (_constraints.hasActiveNodeElemConstraints(slave_id, master_id, displaced))
+      if (_constraints.hasActiveNodeElemConstraints(secondary_id, master_id, displaced))
       {
         const auto & constraints =
-            _constraints.getActiveNodeElemConstraints(slave_id, master_id, displaced);
+            _constraints.getActiveNodeElemConstraints(secondary_id, master_id, displaced);
 
         // get unique set of ids of all nodes on current block
-        unique_slave_node_ids.clear();
+        unique_secondary_node_ids.clear();
         const MeshBase & meshhelper = _mesh.getMesh();
-        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(slave_id),
-                                          meshhelper.active_subdomain_elements_end(slave_id)))
+        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(secondary_id),
+                                          meshhelper.active_subdomain_elements_end(secondary_id)))
         {
           for (auto & n : elem->node_ref_range())
-            unique_slave_node_ids.insert(n.id());
+            unique_secondary_node_ids.insert(n.id());
         }
 
-        for (auto slave_node_id : unique_slave_node_ids)
+        for (auto secondary_node_id : unique_secondary_node_ids)
         {
-          Node & slave_node = _mesh.nodeRef(slave_node_id);
+          Node & secondary_node = _mesh.nodeRef(secondary_node_id);
 
-          // check if slave node is on current processor
-          if (slave_node.processor_id() == processor_id())
+          // check if secondary node is on current processor
+          if (secondary_node.processor_id() == processor_id())
           {
-            // This reinits the variables that exist on the slave node
-            _fe_problem.reinitNodeFace(&slave_node, slave_id, 0);
+            // This reinits the variables that exist on the secondary node
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_id, 0);
 
             // This will set aside residual and jacobian space for the variables that have dofs
-            // on the slave node
+            // on the secondary node
             _fe_problem.prepareAssembly(0);
 
             for (const auto & nec : constraints)
@@ -1074,36 +1074,36 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
     PenetrationLocator & pen_loc = *(it.second);
 
-    std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+    std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
-    BoundaryID slave_boundary = pen_loc._slave_boundary;
+    BoundaryID secondary_boundary = pen_loc._secondary_boundary;
 
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
 
-      for (unsigned int i = 0; i < slave_nodes.size(); i++)
+      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
-        dof_id_type slave_node_num = slave_nodes[i];
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        dof_id_type secondary_node_num = secondary_nodes[i];
+        Node & secondary_node = _mesh.nodeRef(secondary_node_num);
 
-        if (slave_node.processor_id() == processor_id())
+        if (secondary_node.processor_id() == processor_id())
         {
-          if (pen_loc._penetration_info[slave_node_num])
+          if (pen_loc._penetration_info[secondary_node_num])
           {
-            PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
             const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // *These next steps MUST be done in this order!*
 
-            // This reinits the variables that exist on the slave node
-            _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            // This reinits the variables that exist on the secondary node
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
 
             // This will set aside residual and jacobian space for the variables that have dofs on
-            // the slave node
+            // the secondary node
             _fe_problem.prepareAssembly(0);
 
             std::vector<Point> points;
@@ -1125,19 +1125,19 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                   // on the node. We definitely don't want to do that!
                   // _fe_problem.setResidual(residual, 0);
 
-                  const auto & slave_var = nfc->variable();
-                  const auto & slave_dofs = slave_var.dofIndices();
-                  mooseAssert(slave_dofs.size() == slave_var.count(),
+                  const auto & secondary_var = nfc->variable();
+                  const auto & secondary_dofs = secondary_var.dofIndices();
+                  mooseAssert(secondary_dofs.size() == secondary_var.count(),
                               "We are on a node so there should only be one dof per variable (for "
                               "an ArrayVariable we should have a number of dofs equal to the "
                               "number of components");
 
-                  // Assume that if the user is overwriting the slave residual, then they are
+                  // Assume that if the user is overwriting the secondary residual, then they are
                   // supplying residuals that do not correspond to their other physics
                   // (e.g. Kernels), hence we should not apply a scalingFactor that is normally
                   // based on the order of their other physics (e.g. Kernels)
-                  std::vector<Number> values = {nfc->slaveResidual()};
-                  residual.insert(values, slave_dofs);
+                  std::vector<Number> values = {nfc->secondaryResidual()};
+                  residual.insert(values, secondary_dofs);
                   residual_has_inserted_values = true;
                 }
                 else
@@ -1150,9 +1150,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     }
     if (_assemble_constraints_separately)
     {
-      // Make sure that slave contribution to master are assembled, and ghosts have been
-      // exchanged, as current masters might become slaves on next iteration and will need to
-      // contribute their former slaves' contributions to the future masters. See if constraints
+      // Make sure that secondary contribution to master are assembled, and ghosts have been
+      // exchanged, as current masters might become secondarys on next iteration and will need to
+      // contribute their former secondarys' contributions to the future masters. See if constraints
       // were applied anywhere
       _communicator.max(constraints_applied);
 
@@ -1257,40 +1257,40 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   }
 
   // go over NodeELemConstraints
-  std::set<dof_id_type> unique_slave_node_ids;
+  std::set<dof_id_type> unique_secondary_node_ids;
 
   constraints_applied = false;
   residual_has_inserted_values = false;
-  for (const auto & slave_id : _mesh.meshSubdomains())
+  for (const auto & secondary_id : _mesh.meshSubdomains())
   {
     for (const auto & master_id : _mesh.meshSubdomains())
     {
-      if (_constraints.hasActiveNodeElemConstraints(slave_id, master_id, displaced))
+      if (_constraints.hasActiveNodeElemConstraints(secondary_id, master_id, displaced))
       {
         const auto & constraints =
-            _constraints.getActiveNodeElemConstraints(slave_id, master_id, displaced);
+            _constraints.getActiveNodeElemConstraints(secondary_id, master_id, displaced);
 
         // get unique set of ids of all nodes on current block
-        unique_slave_node_ids.clear();
+        unique_secondary_node_ids.clear();
         const MeshBase & meshhelper = _mesh.getMesh();
-        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(slave_id),
-                                          meshhelper.active_subdomain_elements_end(slave_id)))
+        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(secondary_id),
+                                          meshhelper.active_subdomain_elements_end(secondary_id)))
         {
           for (auto & n : elem->node_ref_range())
-            unique_slave_node_ids.insert(n.id());
+            unique_secondary_node_ids.insert(n.id());
         }
 
-        for (auto slave_node_id : unique_slave_node_ids)
+        for (auto secondary_node_id : unique_secondary_node_ids)
         {
-          Node & slave_node = _mesh.nodeRef(slave_node_id);
-          // check if slave node is on current processor
-          if (slave_node.processor_id() == processor_id())
+          Node & secondary_node = _mesh.nodeRef(secondary_node_id);
+          // check if secondary node is on current processor
+          if (secondary_node.processor_id() == processor_id())
           {
-            // This reinits the variables that exist on the slave node
-            _fe_problem.reinitNodeFace(&slave_node, slave_id, 0);
+            // This reinits the variables that exist on the secondary node
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_id, 0);
 
             // This will set aside residual and jacobian space for the variables that have dofs
-            // on the slave node
+            // on the secondary node
             _fe_problem.prepareAssembly(0);
 
             for (const auto & nec : constraints)
@@ -1630,14 +1630,14 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   for (const auto & it : nearest_node_locators)
   {
-    std::vector<dof_id_type> & slave_nodes = it.second->_slave_nodes;
+    std::vector<dof_id_type> & secondary_nodes = it.second->_secondary_nodes;
 
-    for (const auto & slave_node : slave_nodes)
+    for (const auto & secondary_node : secondary_nodes)
     {
-      std::set<dof_id_type> unique_slave_indices;
+      std::set<dof_id_type> unique_secondary_indices;
       std::set<dof_id_type> unique_master_indices;
 
-      auto node_to_elem_pair = node_to_elem_map.find(slave_node);
+      auto node_to_elem_pair = node_to_elem_map.find(secondary_node);
       if (node_to_elem_pair != node_to_elem_map.end())
       {
         const std::vector<dof_id_type> & elems = node_to_elem_pair->second;
@@ -1649,11 +1649,11 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
           dofMap().dof_indices(_mesh.elemPtr(cur_elem), dof_indices);
 
           for (const auto & dof : dof_indices)
-            unique_slave_indices.insert(dof);
+            unique_secondary_indices.insert(dof);
         }
       }
 
-      std::vector<dof_id_type> master_nodes = it.second->_neighbor_nodes[slave_node];
+      std::vector<dof_id_type> master_nodes = it.second->_neighbor_nodes[secondary_node];
 
       for (const auto & master_node : master_nodes)
       {
@@ -1673,11 +1673,11 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
         }
       }
 
-      for (const auto & slave_id : unique_slave_indices)
+      for (const auto & secondary_id : unique_secondary_indices)
         for (const auto & master_id : unique_master_indices)
         {
-          graph[slave_id].push_back(master_id);
-          graph[master_id].push_back(slave_id);
+          graph[secondary_id].push_back(master_id);
+          graph[master_id].push_back(secondary_id);
         }
     }
   }
@@ -1699,24 +1699,24 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
 
     _communicator.allgather(master_dofs);
 
-    std::vector<dof_id_type> slave_dofs;
-    std::vector<dof_id_type> & slave_node_ids = nc->getSlaveNodeId();
-    for (const auto & node_id : slave_node_ids)
+    std::vector<dof_id_type> secondary_dofs;
+    std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
+    for (const auto & node_id : secondary_node_ids)
     {
       Node * node = _mesh.queryNodePtr(node_id);
       if (node && node->processor_id() == this->processor_id())
       {
-        getNodeDofs(node_id, slave_dofs);
+        getNodeDofs(node_id, secondary_dofs);
       }
     }
 
-    _communicator.allgather(slave_dofs);
+    _communicator.allgather(secondary_dofs);
 
     for (const auto & master_id : master_dofs)
-      for (const auto & slave_id : slave_dofs)
+      for (const auto & secondary_id : secondary_dofs)
       {
-        graph[master_id].push_back(slave_id);
-        graph[slave_id].push_back(master_id);
+        graph[master_id].push_back(secondary_id);
+        graph[secondary_id].push_back(master_id);
       }
   }
 
@@ -1802,31 +1802,31 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     }
     PenetrationLocator & pen_loc = *(it.second);
 
-    std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+    std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
-    BoundaryID slave_boundary = pen_loc._slave_boundary;
+    BoundaryID secondary_boundary = pen_loc._secondary_boundary;
 
     zero_rows.clear();
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (_constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          _constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
 
-      for (const auto & slave_node_num : slave_nodes)
+      for (const auto & secondary_node_num : secondary_nodes)
       {
-        Node & slave_node = _mesh.nodeRef(slave_node_num);
+        Node & secondary_node = _mesh.nodeRef(secondary_node_num);
 
-        if (slave_node.processor_id() == processor_id())
+        if (secondary_node.processor_id() == processor_id())
         {
-          if (pen_loc._penetration_info[slave_node_num])
+          if (pen_loc._penetration_info[secondary_node_num])
           {
-            PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+            PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
 
             const Elem * master_elem = info._elem;
             unsigned int master_side = info._side_num;
 
             // reinit variables at the node
-            _fe_problem.reinitNodeFace(&slave_node, slave_boundary, 0);
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_boundary, 0);
 
             _fe_problem.prepareAssembly(0);
             _fe_problem.reinitOffDiagScalars(0);
@@ -1856,27 +1856,27 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   zero_rows.push_back(nfc->variable().nodalDofIndex());
                 }
 
-                std::vector<dof_id_type> slave_dofs(1, nfc->variable().nodalDofIndex());
+                std::vector<dof_id_type> secondary_dofs(1, nfc->variable().nodalDofIndex());
 
-                // Assume that if the user is overwriting the slave Jacobian, then they are
+                // Assume that if the user is overwriting the secondary Jacobian, then they are
                 // supplying Jacobians that do not correspond to their other physics
                 // (e.g. Kernels), hence we should not apply a scalingFactor that is normally
                 // based on the order of their other physics (e.g. Kernels)
                 Real scaling_factor =
                     nfc->overwriteSlaveJacobian() ? 1. : nfc->variable().scalingFactor();
 
-                // Cache the jacobian block for the slave side
+                // Cache the jacobian block for the secondary side
                 _fe_problem.assembly(0).cacheJacobianBlock(
-                    nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, scaling_factor);
+                    nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                 // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
                 {
                   // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
-                  // factor when we're overwriting slave stuff)
+                  // factor when we're overwriting secondary stuff)
                   _fe_problem.assembly(0).cacheJacobianBlock(
                       nfc->_Ken,
-                      slave_dofs,
+                      secondary_dofs,
                       nfc->masterVariable().dofIndicesNeighbor(),
                       scaling_factor);
 
@@ -1913,17 +1913,17 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                   nfc->computeOffDiagJacobian(jvar->number());
 
-                  // Cache the jacobian block for the slave side
+                  // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kee, slave_dofs, nfc->_connected_dof_indices, scaling_factor);
+                      nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                   // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
                   {
                     // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
-                    // factor when we're overwriting slave stuff)
+                    // factor when we're overwriting secondary stuff)
                     _fe_problem.assembly(0).cacheJacobianBlock(
-                        nfc->_Ken, slave_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
+                        nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
 
                     // Use _connected_dof_indices to get all the correct columns
                     _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne,
@@ -2066,38 +2066,38 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   }
 
   // go over NodeELemConstraints
-  std::set<dof_id_type> unique_slave_node_ids;
+  std::set<dof_id_type> unique_secondary_node_ids;
   constraints_applied = false;
-  for (const auto & slave_id : _mesh.meshSubdomains())
+  for (const auto & secondary_id : _mesh.meshSubdomains())
   {
     for (const auto & master_id : _mesh.meshSubdomains())
     {
-      if (_constraints.hasActiveNodeElemConstraints(slave_id, master_id, displaced))
+      if (_constraints.hasActiveNodeElemConstraints(secondary_id, master_id, displaced))
       {
         const auto & constraints =
-            _constraints.getActiveNodeElemConstraints(slave_id, master_id, displaced);
+            _constraints.getActiveNodeElemConstraints(secondary_id, master_id, displaced);
 
         // get unique set of ids of all nodes on current block
-        unique_slave_node_ids.clear();
+        unique_secondary_node_ids.clear();
         const MeshBase & meshhelper = _mesh.getMesh();
-        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(slave_id),
-                                          meshhelper.active_subdomain_elements_end(slave_id)))
+        for (const auto & elem : as_range(meshhelper.active_subdomain_elements_begin(secondary_id),
+                                          meshhelper.active_subdomain_elements_end(secondary_id)))
         {
           for (auto & n : elem->node_ref_range())
-            unique_slave_node_ids.insert(n.id());
+            unique_secondary_node_ids.insert(n.id());
         }
 
-        for (auto slave_node_id : unique_slave_node_ids)
+        for (auto secondary_node_id : unique_secondary_node_ids)
         {
-          const Node & slave_node = _mesh.nodeRef(slave_node_id);
-          // check if slave node is on current processor
-          if (slave_node.processor_id() == processor_id())
+          const Node & secondary_node = _mesh.nodeRef(secondary_node_id);
+          // check if secondary node is on current processor
+          if (secondary_node.processor_id() == processor_id())
           {
-            // This reinits the variables that exist on the slave node
-            _fe_problem.reinitNodeFace(&slave_node, slave_id, 0);
+            // This reinits the variables that exist on the secondary node
+            _fe_problem.reinitNodeFace(&secondary_node, secondary_id, 0);
 
             // This will set aside residual and jacobian space for the variables that have dofs
-            // on the slave node
+            // on the secondary node
             _fe_problem.prepareAssembly(0);
             _fe_problem.reinitOffDiagScalars(0);
 
@@ -2119,11 +2119,11 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   zero_rows.push_back(nec->variable().nodalDofIndex());
                 }
 
-                std::vector<dof_id_type> slave_dofs(1, nec->variable().nodalDofIndex());
+                std::vector<dof_id_type> secondary_dofs(1, nec->variable().nodalDofIndex());
 
-                // Cache the jacobian block for the slave side
+                // Cache the jacobian block for the secondary side
                 _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                           slave_dofs,
+                                                           secondary_dofs,
                                                            nec->_connected_dof_indices,
                                                            nec->variable().scalingFactor());
 
@@ -2159,9 +2159,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                   nec->computeOffDiagJacobian(jvar->number());
 
-                  // Cache the jacobian block for the slave side
+                  // Cache the jacobian block for the secondary side
                   _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                             slave_dofs,
+                                                             secondary_dofs,
                                                              nec->_connected_dof_indices,
                                                              nec->variable().scalingFactor());
 
@@ -3206,8 +3206,8 @@ NonlinearSystemBase::mortarConstraints(bool displaced)
 
     mooseAssert(
         it != end_it,
-        "No ComputeMortarFunctor exists for the specified master-slave boundary pair, master "
-            << mortar_interface.first.first << " and slave " << mortar_interface.first.second);
+        "No ComputeMortarFunctor exists for the specified master-secondary boundary pair, master "
+            << mortar_interface.first.first << " and secondary " << mortar_interface.first.second);
     it->second();
   }
 }

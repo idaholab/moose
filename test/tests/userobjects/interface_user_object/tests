@@ -12,8 +12,8 @@
                  "By design at the end of the first step we should observe: "
                  "an average material property of 7, "
                  "an average material property absolute jump fo 6, "
-                 "a singed material property jump (master-slave) of 6 "
-                 "a singed material propertyjump (slave-master) of -6 "
+                 "a singed material property jump (master-secondary) of 6 "
+                 "a singed material propertyjump (secondary-master) of -6 "
                  "a material property value on the master side of  10 "
                  "a material property value on the master side of  4 "
       issues = '#11647'

@@ -34,10 +34,10 @@
 [Contact]
   [./dummy_name]
     master = 3
-    slave = 2
+    secondary = 2
     penalty = 5e6
     formulation = penalty
-    master_slave_jacobian = false
+    master_secondary_jacobian = false
     normalize_penalty = true
   [../]
 []

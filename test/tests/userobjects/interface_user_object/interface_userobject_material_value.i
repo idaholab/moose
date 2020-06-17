@@ -110,7 +110,7 @@
   [./interface_material_uo]
     type = InterfaceUserObjectTestGetMaterialProperty
     property = 'master_prop'
-    property_neighbor = 'slave_prop'
+    property_neighbor = 'secondary_prop'
     property_boundary = 'boundary_prop'
     property_interface = 'interface_prop'
     boundary = 'master0_interface'
@@ -125,11 +125,11 @@
     prefactor = 1
     prop_name = 'master_prop'
   [../]
-  [./mat_slave]
+  [./mat_secondary]
     type = LinearNonLinearIterationMaterial
     block = 1
     prefactor = 2
-    prop_name = 'slave_prop'
+    prop_name = 'secondary_prop'
   [../]
   [./mat_boundary]
     type = LinearNonLinearIterationMaterial

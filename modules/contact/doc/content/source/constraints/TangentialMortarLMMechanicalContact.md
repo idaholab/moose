@@ -13,12 +13,12 @@ Karush-Kuhn-Tucker conditions of Coulomb frictional contact are satisfied:
 
 where $\mu$ is the coefficient of friction, $\lambda_N$ is the Lagrange
 multiplier variable representing the contact pressure, $v_T$ is the slip
-velocity of the slave face relative to the master face, and $\lambda_T$ is the
+velocity of the secondary face relative to the master face, and $\lambda_T$ is the
 Lagrange multiplier variable representing the tangential stress. The above
-conditions require that either the slave face is sticking to the master face, or
-the slave face is slipping and the tangential stress is equal in magnitude to
+conditions require that either the secondary face is sticking to the master face, or
+the secondary face is slipping and the tangential stress is equal in magnitude to
 the coefficient of friction times the normal contact pressure. Additionally, if
-the face is slipping, then the force exerted by the slave face is in the same
+the face is slipping, then the force exerted by the secondary face is in the same
 direction as the slip.
 
 The `ncp_function_type` parameter specifies the type of nonlinear

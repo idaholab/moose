@@ -50,7 +50,7 @@ NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParame
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _displaced_problem(_fe_problem.getDisplacedProblem().get())
 {
-  _overwrite_slave_residual = false;
+  _overwrite_secondary_residual = false;
 
   // Make sure interpolation orders are consistent
   const auto & disp_names = _displaced_problem->getDisplacementVarNames();
@@ -61,13 +61,13 @@ NormalNodalLMMechanicalContact::NormalNodalLMMechanicalContact(const InputParame
   if (disp_type.order.get_order() != lm_type.order.get_order())
     paramError(_var.name(),
                "The mechanical contact Lagrange multiplier has to be the same order as the mesh. "
-               "NormalNodalLMMechanicalContact is applied pointwise at every slave node.");
+               "NormalNodalLMMechanicalContact is applied pointwise at every secondary node.");
 }
 
 Real
-NormalNodalLMMechanicalContact::computeQpSlaveValue()
+NormalNodalLMMechanicalContact::computeQpSecondaryValue()
 {
-  return _u_slave[_qp];
+  return _u_secondary[_qp];
 }
 
 void
@@ -77,7 +77,7 @@ NormalNodalLMMechanicalContact::computeResidual()
 
   _qp = 0;
 
-  re(0) = computeQpResidual(Moose::Slave);
+  re(0) = computeQpResidual(Moose::Secondary);
 }
 
 void
@@ -89,7 +89,7 @@ NormalNodalLMMechanicalContact::computeJacobian()
 
   _qp = 0;
 
-  _Kee(0, 0) += computeQpJacobian(Moose::SlaveSlave);
+  _Kee(0, 0) += computeQpJacobian(Moose::SecondarySecondary);
 }
 
 void
@@ -108,13 +108,13 @@ NormalNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
 
   DenseMatrix<Number> & Ken =
       _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
 
-  for (_j = 0; _j < _phi_master.size(); ++_j)
-    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+  for (_j = 0; _j < _phi_primary.size(); ++_j)
+    Ken(0, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
 }
 
 Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)
@@ -128,10 +128,10 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
     {
       Real a = -pinfo->_distance * _c;
       mooseAssert(
-          _qp < _u_slave.size(),
-          "qp is greater than the size of u_slave in NormalNodalLMMechanicalContact. Check and "
+          _qp < _u_secondary.size(),
+          "qp is greater than the size of u_secondary in NormalNodalLMMechanicalContact. Check and "
           "make sure that your Lagrange multiplier variable has the same order as the mesh");
-      Real b = _u_slave[_qp];
+      Real b = _u_secondary[_qp];
 
       if (_ncp_type == "fb")
         return a + b - std::sqrt(a * a + b * b + _epsilon);
@@ -139,7 +139,7 @@ Real NormalNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*t
         return std::min(a, b);
     }
   }
-  return _u_slave[_qp];
+  return _u_secondary[_qp];
 }
 
 // Note that the Jacobians below are inexact. To really make them exact, the most algorithmically
@@ -154,11 +154,11 @@ Real NormalNodalLMMechanicalContact::computeQpJacobian(Moose::ConstraintJacobian
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      DualNumber<Real, Real> dual_u_slave(_u_slave[_qp]);
-      dual_u_slave.derivatives() = 1.;
+      DualNumber<Real, Real> dual_u_secondary(_u_secondary[_qp]);
+      dual_u_secondary.derivatives() = 1.;
 
       auto a = -pinfo->_distance * _c;
-      auto b = dual_u_slave;
+      auto b = dual_u_secondary;
 
       if (_ncp_type == "fb")
         return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();
@@ -183,7 +183,7 @@ NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobi
       DualNumber<Real, Real> gap(-pinfo->_distance);
 
       unsigned comp;
-      if (jvar == _master_var_num)
+      if (jvar == _primary_var_num)
         comp = 0;
       else if (jvar == _disp_y_id)
         comp = 1;
@@ -196,18 +196,18 @@ NormalNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobi
 
       switch (type)
       {
-        case Moose::SlaveSlave:
+        case Moose::SecondarySecondary:
           gap.derivatives() *= 1;
           break;
-        case Moose::SlaveMaster:
-          gap.derivatives() *= -_phi_master[_j][_qp];
+        case Moose::SecondaryPrimary:
+          gap.derivatives() *= -_phi_primary[_j][_qp];
           break;
         default:
-          mooseError("LMs do not have a master contribution.");
+          mooseError("LMs do not have a primary contribution.");
       }
 
       auto a = gap * _c;
-      auto b = _u_slave[_qp];
+      auto b = _u_secondary[_qp];
 
       if (_ncp_type == "fb")
         return (a + b - std::sqrt(a * a + b * b + _epsilon)).derivatives();

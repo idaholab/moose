@@ -224,11 +224,11 @@ class XMLDiffer(object):
             if key0 in self._ignored_attributes:
                 continue
 
-            # Attribute is missing from the slave object, match fails
+            # Attribute is missing from the secondary object, match fails
             if key0 not in elem1.attrib:
                 return  False
 
-            # If the slave object has the same attribute, perform a comparison
+            # If the secondary object has the same attribute, perform a comparison
             elif key0 in elem1.attrib:
                 value1 = elem1.attrib[key0]
 

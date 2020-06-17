@@ -10,7 +10,7 @@
     new_block_id = '20'
     input = file
   [../]
-  [./slave]
+  [./secondary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
@@ -84,23 +84,23 @@
   [lm]
     type = NormalMortarLMMechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    secondary_boundary = '1'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    secondary_subdomain = '10'
     variable = lambda
-    slave_variable = disp_x
-    slave_disp_y = disp_y
+    secondary_variable = disp_x
+    secondary_disp_y = disp_y
     use_displaced_mesh = true
     compute_primal_residuals = false
   []
   [x]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    secondary_boundary = '1'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    secondary_subdomain = '10'
     variable = lambda
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -108,11 +108,11 @@
   [y]
     type = NormalMortarMechanicalContact
     master_boundary = '2'
-    slave_boundary = '1'
+    secondary_boundary = '1'
     master_subdomain = '20'
-    slave_subdomain = '10'
+    secondary_subdomain = '10'
     variable = lambda
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

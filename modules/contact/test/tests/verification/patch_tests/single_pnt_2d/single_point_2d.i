@@ -231,7 +231,7 @@
 [Contact]
   [./leftright]
     master = 2
-    slave = 3
+    secondary = 3
     model = glued
     formulation = kinematic
     penalty = 1e12

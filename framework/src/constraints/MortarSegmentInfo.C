@@ -22,13 +22,13 @@ MortarSegmentInfo::MortarSegmentInfo()
     xi1_b(invalid_xi),
     xi2_a(invalid_xi),
     xi2_b(invalid_xi),
-    slave_elem(nullptr),
+    secondary_elem(nullptr),
     master_elem(nullptr)
 {
 }
 
 MortarSegmentInfo::MortarSegmentInfo(Real x1a, Real x1b, Real x2a, Real x2b)
-  : xi1_a(x1a), xi1_b(x1b), xi2_a(x2a), xi2_b(x2b), slave_elem(nullptr), master_elem(nullptr)
+  : xi1_a(x1a), xi1_b(x1b), xi2_a(x2a), xi2_b(x2b), secondary_elem(nullptr), master_elem(nullptr)
 {
 }
 
@@ -37,8 +37,8 @@ MortarSegmentInfo::print() const
 {
   Moose::out << "xi^(1)_a=" << xi1_a << ", xi^(1)_b=" << xi1_b << std::endl;
   Moose::out << "xi^(2)_a=" << xi2_a << ", xi^(2)_b=" << xi2_b << std::endl;
-  if (slave_elem)
-    Moose::out << "slave_elem=" << slave_elem->id() << std::endl;
+  if (secondary_elem)
+    Moose::out << "secondary_elem=" << secondary_elem->id() << std::endl;
   if (master_elem)
     Moose::out << "master_elem=" << master_elem->id() << std::endl;
 }
@@ -70,8 +70,8 @@ MortarSegmentInfo::is_valid() const
     return false;
   }
 
-  // Must have a valid slave Elem to have a valid segment.
-  if (slave_elem == nullptr)
+  // Must have a valid secondary Elem to have a valid segment.
+  if (secondary_elem == nullptr)
   {
     mooseError("Slave Elem was not set.");
     return false;

@@ -42,21 +42,21 @@ public:
   virtual ~GeometricSearchData();
 
   PenetrationLocator & getPenetrationLocator(const BoundaryName & master,
-                                             const BoundaryName & slave,
+                                             const BoundaryName & secondary,
                                              Order order = FIRST);
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave,
+                                                       const BoundaryName & secondary,
                                                        Order order = FIRST);
 
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master,
-                                             const BoundaryName & slave);
+                                             const BoundaryName & secondary);
   NearestNodeLocator & getNearestNodeLocator(const unsigned int master_id,
-                                             const unsigned int slave_id);
+                                             const unsigned int secondary_id);
 
   NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave);
+                                                       const BoundaryName & secondary);
   NearestNodeLocator & getQuadratureNearestNodeLocator(const unsigned int master_id,
-                                                       const unsigned int slave_id);
+                                                       const unsigned int secondary_id);
 
   const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> &
   getPenetrationLocators() const
@@ -106,30 +106,30 @@ protected:
   /// These are _real_ boundaries that have quadrature nodes on them.
   std::set<unsigned int> _quadrature_boundaries;
 
-  /// A mapping of the real boundary id to the slave boundary ids
-  std::map<unsigned int, unsigned int> _slave_to_qslave;
+  /// A mapping of the real boundary id to the secondary boundary ids
+  std::map<unsigned int, unsigned int> _secondary_to_qsecondary;
 
 private:
   /**
    * Add Quadrature Nodes to the Mesh in support of Quadrature based penetration location and
    * nearest node searching.
    *
-   * @param slave_id The actual slave_id (the one in the mesh)
-   * @param qslave_id The "fictitious" slave_id that is going to be used for this quadrature nodeset
+   * @param secondary_id The actual secondary_id (the one in the mesh)
+   * @param qsecondary_id The "fictitious" secondary_id that is going to be used for this quadrature nodeset
    * @param reiniting Whether we are reinitializing, e.g. whether we need to re-generate q-nodes
    */
   void
-  generateQuadratureNodes(unsigned int slave_id, unsigned int qslave_id, bool reiniting = false);
+  generateQuadratureNodes(unsigned int secondary_id, unsigned int qsecondary_id, bool reiniting = false);
 
   /**
    * Update the positions of the quadrature nodes.
    */
-  void updateQuadratureNodes(unsigned int slave_id);
+  void updateQuadratureNodes(unsigned int secondary_id);
 
   /**
    * Completely redo quadrature nodes
    */
-  void reinitQuadratureNodes(unsigned int slave_id);
+  void reinitQuadratureNodes(unsigned int secondary_id);
 
   /**
    * Denotes whether this is the first time the geometric search objects have been updated.

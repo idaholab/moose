@@ -20,11 +20,11 @@ LinearNodalConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
   params.addClassDescription(
-      "Constrains slave node to move as a linear combination of master nodes.");
+      "Constrains secondary node to move as a linear combination of master nodes.");
   params.addRequiredParam<std::vector<unsigned int>>("master", "The master node IDs.");
-  params.addParam<std::vector<unsigned int>>("slave_node_ids", "The list of slave node ids");
+  params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The list of secondary node ids");
   params.addParam<BoundaryName>(
-      "slave_node_set", "NaN", "The boundary ID associated with the slave side");
+      "secondary_node_set", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   params.addRequiredParam<std::vector<Real>>(
       "weights",
@@ -35,8 +35,8 @@ LinearNodalConstraint::validParams()
 LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
     _master_node_ids(getParam<std::vector<unsigned int>>("master")),
-    _slave_node_ids(getParam<std::vector<unsigned int>>("slave_node_ids")),
-    _slave_node_set_id(getParam<BoundaryName>("slave_node_set")),
+    _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
+    _secondary_node_set_id(getParam<BoundaryName>("secondary_node_set")),
     _penalty(getParam<Real>("penalty"))
 {
   _weights = getParam<std::vector<Real>>("weights");
@@ -44,22 +44,22 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   if (_master_node_ids.size() != _weights.size())
     mooseError("master and weights should be of equal size.");
 
-  if ((_slave_node_ids.size() == 0) && (_slave_node_set_id == "NaN"))
-    mooseError("Please specify slave_node_ids or slave_node_set.");
-  else if ((_slave_node_ids.size() == 0) && (_slave_node_set_id != "NaN"))
+  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
+    mooseError("Please specify secondary_node_ids or secondary_node_set.");
+  else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
-    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_slave_node_set_id));
+    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
       if (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id())
-        _connected_nodes.push_back(*in); // defining slave nodes in the base class
+        _connected_nodes.push_back(*in); // defining secondary nodes in the base class
     }
   }
-  else if ((_slave_node_ids.size() > 0) && (_slave_node_set_id == "NaN"))
+  else if ((_secondary_node_ids.size() > 0) && (_secondary_node_set_id == "NaN"))
   {
-    for (const auto & dof : _slave_node_ids)
+    for (const auto & dof : _secondary_node_ids)
       if (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(dof);
   }
@@ -85,10 +85,10 @@ Real
 LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   /**
-   * Slave residual is u_slave - weights[1]*u_master[1]-weights[2]*u_master[2] ...
+   * Slave residual is u_secondary - weights[1]*u_master[1]-weights[2]*u_master[2] ...
    *-u_master[n]*weights[n]
-   * However, computeQPresidual is calculated for only a combination of one master and one slave
-   *node at a time. To get around this, the residual is split up such that the final slave residual
+   * However, computeQPresidual is calculated for only a combination of one master and one secondary
+   *node at a time. To get around this, the residual is split up such that the final secondary residual
    *resembles the above expression.
    **/
 
@@ -97,9 +97,9 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
   switch (type)
   {
     case Moose::Master:
-      return (_u_master[_j] * _weights[_j] - _u_slave[_i] / master_size) * _penalty;
+      return (_u_master[_j] * _weights[_j] - _u_secondary[_i] / master_size) * _penalty;
     case Moose::Slave:
-      return (_u_slave[_i] / master_size - _u_master[_j] * _weights[_j]) * _penalty;
+      return (_u_secondary[_i] / master_size - _u_master[_j] * _weights[_j]) * _penalty;
   }
   return 0.;
 }

@@ -192,7 +192,7 @@
 
 [Contact]
   [./leftright]
-    slave = 3
+    secondary = 3
     master = 2
     model = frictionless
     penalty = 1e+6
