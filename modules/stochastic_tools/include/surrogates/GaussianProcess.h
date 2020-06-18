@@ -11,6 +11,7 @@
 
 #include "SurrogateModel.h"
 #include "GaussianProcessTrainer.h"
+#include <Eigen/Dense>
 
 class GaussianProcess : public SurrogateModel
 {
@@ -31,26 +32,21 @@ private:
 
   //const std::vector<Real> & _length_factor;
 
-  ///
-  const DenseMatrix<Real> & _parameter_mat;
+  ///Paramaters (x) used for training
+  const RealEigenMatrix & _training_params;
+  const RealEigenMatrix & _training_params_mean;
+  const RealEigenMatrix & _training_params_var;
 
-  /// An _n_sample vector containg results of traing runs
-  const DenseMatrix<Real> & _training_results;
-
-  /// An _n_sample vector containg results of traing runs
-  const DenseMatrix<Real> & _training_mean;
-
-  /// An _n_sample vector containg results of traing runs
-  const DenseMatrix<Real> & _training_variance;
+  /// Data (y) used for training
+  const RealEigenMatrix & _training_data;
+  const Real & _training_data_mean;
+  const Real & _training_data_var;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  const DenseMatrix<Real> & _K;
+  const RealEigenMatrix & _K;
 
   /// A solve of Ax=b via Cholesky.
-  const DenseMatrix<Real> & _K_results_solve;
-
-  ///
-  const DenseMatrix<Real> & _K_cho_decomp;
+  const RealEigenMatrix & _K_results_solve;
 
   ///
   const std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
