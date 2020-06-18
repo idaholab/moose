@@ -114,6 +114,16 @@ public:
   /**
    * Get the amount of memory added by this node
    */
+  long int selfMemory();
+
+  /**
+   * Get the amount of memory added by this node
+   */
+  long int childrenMemory();
+
+  /**
+   * Get the amount of memory added by this node
+   */
   long int totalMemory() { return _total_memory; }
 
 protected:

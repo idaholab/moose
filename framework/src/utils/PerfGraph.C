@@ -138,6 +138,10 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
       return 100. * (section_it->second._children / app_time);
     case TOTAL_PERCENT:
       return 100. * (section_it->second._total / app_time);
+    case SELF_MEMORY:
+      return section_it->second._self_memory;
+    case CHILDREN_MEMORY:
+      return section_it->second._children_memory;
     case TOTAL_MEMORY:
       return section_it->second._total_memory;
     default:
@@ -215,6 +219,8 @@ PerfGraph::updateTiming()
     section_time._self = 0.;
     section_time._children = 0.;
     section_time._total = 0.;
+    section_time._self_memory = 0;
+    section_time._children_memory = 0;
     section_time._total_memory = 0.;
   }
 
@@ -242,6 +248,9 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
   auto num_calls = current_node->numCalls();
+
+  auto self_memory = current_node->selfMemory();
+  auto children_memory = current_node->childrenMemory();
   auto total_memory = current_node->totalMemory();
 
   // RHS insertion on purpose
@@ -251,6 +260,9 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   section_time._children += children;
   section_time._total += total;
   section_time._num_calls += num_calls;
+
+  section_time._self_memory += self_memory;
+  section_time._children_memory += children_memory;
   section_time._total_memory += total_memory;
 
   for (auto & child_it : current_node->children())
@@ -294,20 +306,22 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto total_avg = total / static_cast<Real>(num_calls);
     auto total_percent = 100. * total / total_root_time;
 
+    auto self_memory = current_node->selfMemory();
     auto total_memory = current_node->totalMemory();
 
     vtable.addRow(section,
                   num_calls,
-                  total_memory,
                   self,
                   self_avg,
                   self_percent,
-                  children,
-                  children_avg,
-                  children_percent,
+                  self_memory,
+                  //                  children,
+                  //                  children_avg,
+                  //                  children_percent,
                   total,
                   total_avg,
-                  total_percent);
+                  total_percent,
+                  total_memory);
 
     current_depth++;
   }
@@ -344,20 +358,22 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto total_avg = total / static_cast<Real>(num_calls);
   auto total_percent = 100. * total / total_root_time;
 
+  auto self_memory = current_node->selfMemory();
   auto total_memory = current_node->totalMemory();
 
   vtable.addRow(section,
                 num_calls,
-                total_memory,
                 self,
                 self_avg,
                 self_percent,
-                children,
-                children_avg,
-                children_percent,
+                self_memory,
+                //                children,
+                //                children_avg,
+                //                children_percent,
                 total,
                 total_avg,
-                total_percent);
+                total_percent,
+                total_memory);
 
   current_depth++;
 
@@ -385,32 +401,47 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
   console << "\nPerformance Graph:\n";
   FullTable vtable({"Section",
                     "Calls",
-                    "Mem(MB)",
                     "Self(s)",
                     "Avg(s)",
                     "%",
-                    "Children(s)",
-                    "Avg(s)",
-                    "%",
+                    "Mem(MB)",
+                    // "Children(s)",
+                    // "Avg(s)",
+                    // "%",
                     "Total(s)",
                     "Avg(s)",
-                    "%"},
+                    "%",
+                    "Mem(MB)"},
                    10);
 
-  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
-                          VariadicTableColumnFormat::AUTO,      // Calls
-                          VariadicTableColumnFormat::AUTO,      // Memory
-                          VariadicTableColumnFormat::FIXED,     // Self
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT,   // %
-                          VariadicTableColumnFormat::FIXED,     // Children
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT,   // %
-                          VariadicTableColumnFormat::FIXED,     // Total
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT}); // %
+  vtable.setColumnFormat({
+      VariadicTableColumnFormat::AUTO,    // Section Name
+      VariadicTableColumnFormat::AUTO,    // Calls
+      VariadicTableColumnFormat::FIXED,   // Self
+      VariadicTableColumnFormat::FIXED,   // Avg.
+      VariadicTableColumnFormat::PERCENT, // %
+      VariadicTableColumnFormat::AUTO,    // Memory
+      // VariadicTableColumnFormat::FIXED,     // Children
+      // VariadicTableColumnFormat::FIXED,     // Avg.
+      // VariadicTableColumnFormat::PERCENT,   // %
+      VariadicTableColumnFormat::FIXED,   // Total
+      VariadicTableColumnFormat::FIXED,   // Avg.
+      VariadicTableColumnFormat::PERCENT, // %
+      VariadicTableColumnFormat::AUTO,    // Memory
+  });                                     // %
 
-  vtable.setColumnPrecision({1, 0, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
+  vtable.setColumnPrecision({
+      1, // Section Name
+      0, // Calls
+      3, // Self
+      3, // Avg.
+      2, // %
+      0, // Memory
+      3, // Total
+      3, // Avg.
+      2, // %
+      0, // Memory
+  });
 
   recursivelyPrintGraph(_root_node.get(), vtable, level);
   vtable.print(console);
@@ -424,32 +455,45 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
   console << "\nHeaviest Branch:\n";
   FullTable vtable({"Section",
                     "Calls",
-                    "Mem(MB)",
                     "Self(s)",
                     "Avg(s)",
                     "%",
-                    "Children(s)",
-                    "Avg(s)",
-                    "%",
+                    "Mem(MB)",
+                    // "Children(s)",
+                    // "Avg(s)",
+                    // "%",
                     "Total(s)",
                     "Avg(s)",
-                    "%"},
+                    "%",
+                    "Mem(MB)"},
                    10);
 
-  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
-                          VariadicTableColumnFormat::AUTO,      // Calls
-                          VariadicTableColumnFormat::AUTO,      // Memory
-                          VariadicTableColumnFormat::FIXED,     // Self
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT,   // %
-                          VariadicTableColumnFormat::FIXED,     // Children
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT,   // %
-                          VariadicTableColumnFormat::FIXED,     // Total
-                          VariadicTableColumnFormat::FIXED,     // Avg.
-                          VariadicTableColumnFormat::PERCENT}); // %
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,    // Section Name
+                          VariadicTableColumnFormat::AUTO,    // Calls
+                          VariadicTableColumnFormat::FIXED,   // Self
+                          VariadicTableColumnFormat::FIXED,   // Avg.
+                          VariadicTableColumnFormat::PERCENT, // %
+                          VariadicTableColumnFormat::AUTO,    // Memory
+                          // VariadicTableColumnFormat::FIXED,     // Children
+                          // VariadicTableColumnFormat::FIXED,     // Avg.
+                          // VariadicTableColumnFormat::PERCENT,   // %
+                          VariadicTableColumnFormat::FIXED,   // Total
+                          VariadicTableColumnFormat::FIXED,   // Avg.
+                          VariadicTableColumnFormat::PERCENT, // %
+                          VariadicTableColumnFormat::AUTO});  // Memory
 
-  vtable.setColumnPrecision({1, 0, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
+  vtable.setColumnPrecision({
+      1, // Section Name
+      0, // Calls
+      3, // Self
+      3, // Avg.
+      2, // %
+      0, // Memory
+      3, // Total
+      3, // Avg.
+      2, // %
+      0, // Memory
+  });
 
   recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
   vtable.print(console);
@@ -479,16 +523,16 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                         return false;
                       });
 
-  HeaviestTable vtable({"Section", "Calls", "Mem(MB)", "Self(s)", "Avg.", "%"}, 10);
+  HeaviestTable vtable({"Section", "Calls", "Self(s)", "Avg.", "%", "Mem(MB)"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
                           VariadicTableColumnFormat::AUTO,
-                          VariadicTableColumnFormat::AUTO,
                           VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT});
+                          VariadicTableColumnFormat::PERCENT,
+                          VariadicTableColumnFormat::AUTO});
 
-  vtable.setColumnPrecision({1, 1, 1, 3, 3, 2});
+  vtable.setColumnPrecision({1, 1, 3, 3, 2, 1});
 
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before printHeaviestSections()!");

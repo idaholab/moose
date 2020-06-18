@@ -100,21 +100,21 @@ The `print()` method prints out an indented set of section names and shows their
 
 ```
 Performance Graph:
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-|                  Section                 | Calls | Mem(MB) |   Self(s)  |   Avg(s)   |    %   | Children(s) |   Avg(s)   |    %   |  Total(s)  |   Avg(s)   |    %   |
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| MooseTestApp (main)                      |     1 |     769 |      0.008 |      0.008 |   0.04 |      23.127 |     23.127 |  99.96 |     23.135 |     23.135 | 100.00 |
-|   FEProblem::outputStep                  |     2 |      72 |      0.001 |      0.001 |   0.01 |       1.284 |      0.642 |   5.55 |      1.285 |      0.642 |   5.55 |
-|   Steady::PicardSolve                    |     1 |     287 |      0.000 |      0.000 |   0.00 |      12.635 |     12.635 |  54.61 |     12.635 |     12.635 |  54.61 |
-|     FEProblem::solve                     |     1 |     287 |      2.525 |      2.525 |  10.92 |      10.108 |     10.108 |  43.69 |     12.634 |     12.634 |  54.61 |
-|       FEProblem::computeResidualInternal |    15 |       0 |      0.000 |      0.000 |   0.00 |       7.980 |      0.532 |  34.49 |      7.980 |      0.532 |  34.49 |
-|       FEProblem::computeJacobianInternal |     2 |      15 |      0.000 |      0.000 |   0.00 |       2.128 |      1.064 |   9.20 |      2.128 |      1.064 |   9.20 |
-|     FEProblem::outputStep                |     1 |       0 |      0.001 |      0.001 |   0.00 |       0.000 |      0.000 |   0.00 |      0.001 |      0.001 |   0.00 |
-|   Steady::final                          |     1 |       0 |      0.000 |      0.000 |   0.00 |       0.001 |      0.001 |   0.00 |      0.001 |      0.001 |   0.00 |
-|     FEProblem::outputStep                |     1 |       0 |      0.001 |      0.001 |   0.00 |       0.000 |      0.000 |   0.00 |      0.001 |      0.001 |   0.00 |
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------
+|                  Section                 | Calls |   Self(s)  |   Avg(s)   |    %   | Mem(MB) |  Total(s)  |   Avg(s)   |    %   | Mem(MB) |
+----------------------------------------------------------------------------------------------------------------------------------------------
+| MooseTestApp (main)                      |     1 |      0.008 |      0.008 |   0.66 |       1 |      1.259 |      1.259 | 100.00 |      67 |
+|   FEProblem::outputStep                  |     2 |      0.001 |      0.000 |   0.04 |       0 |      0.064 |      0.032 |   5.09 |       8 |
+|   Steady::PicardSolve                    |     1 |      0.000 |      0.000 |   0.01 |       0 |      0.717 |      0.717 |  56.92 |      32 |
+|     FEProblem::solve                     |     1 |      0.134 |      0.134 |  10.61 |      29 |      0.716 |      0.716 |  56.89 |      32 |
+|       FEProblem::computeResidualInternal |    14 |      0.000 |      0.000 |   0.01 |       0 |      0.458 |      0.033 |  36.34 |       1 |
+|       FEProblem::computeJacobianInternal |     2 |      0.000 |      0.000 |   0.00 |       0 |      0.125 |      0.062 |   9.91 |       2 |
+|     FEProblem::outputStep                |     1 |      0.000 |      0.000 |   0.02 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+|   Steady::final                          |     1 |      0.000 |      0.000 |   0.00 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+|     FEProblem::outputStep                |     1 |      0.000 |      0.000 |   0.01 |       0 |      0.000 |      0.000 |   0.02 |       0 |
+----------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
-`Calls` is the number of times that section was run. `Mem` is the total memory (in Megabytes) created within and underneath that section. `Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `Avg` and `%` columns represent the average and percent of the total run-time of the app for the number in the column to the left.
+`Calls` is the number of times that section was run. `Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `Avg` and `%` columns represent the average and percent of the total run-time of the app for the number in the column to the left. `Mem` is the memory (in Megabytes) for the column to the left (Self or Total).
 
 There are also two other ways to print information out about the graph using `printHeaviestBranch()` and `printHeaviestSections()`.  These are described well over on the [/PerfGraphOutput.md] page.
