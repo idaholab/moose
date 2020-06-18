@@ -187,6 +187,19 @@ InputParameters::addCoupledVar(const std::string & name, const std::string & doc
 }
 
 void
+InputParameters::addDeprecatedCoupledVar(const std::string & name,
+                                         const std::string & doc_string,
+                                         const std::string & deprecation_message)
+{
+  _show_deprecated_message = false;
+  addParam<std::vector<VariableName>>(name, doc_string);
+  _coupled_vars.insert(name);
+
+  _params[name]._deprecation_message = deprecation_message;
+  _show_deprecated_message = true;
+}
+
+void
 InputParameters::addCoupledVarWithAutoBuild(const std::string & name,
                                             const std::string & base_name,
                                             const std::string & num_name,

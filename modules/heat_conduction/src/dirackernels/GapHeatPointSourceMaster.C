@@ -22,8 +22,13 @@ GapHeatPointSourceMaster::validParams()
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = DiracKernel::validParams();
-  params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
-  params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");
+  params.addParam<BoundaryName>("boundary", "The primary boundary");
+  params.addParam<BoundaryName>("secondary", "The secondary boundary");
+  params.addDeprecatedParam<BoundaryName>(
+      "slave",
+      "The secondary boundary",
+      "The 'slave' parameter is deprecated and will be removed on July 1, 2020. Please use the "
+      "'secondary' parameter instead");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance",
@@ -41,7 +46,8 @@ GapHeatPointSourceMaster::GapHeatPointSourceMaster(const InputParameters & param
   : DiracKernel(parameters),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("boundary"),
-                              getParam<BoundaryName>("secondary"),
+                              isParamValid("secondary") ? getParam<BoundaryName>("secondary")
+                                                        : getParam<BoundaryName>("slave"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
     _secondary_flux(_sys.getVector("secondary_flux"))
 {

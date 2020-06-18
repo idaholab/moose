@@ -91,6 +91,12 @@ GapConductance::actionParameters()
                                     1,
                                     "emissivity_secondary>=0 & emissivity_secondary<=1",
                                     "The emissivity of the secondary surface");
+  params.addDeprecatedParam<Real>("emissivity_master",
+                                  "The emissivity of the primary surface",
+                                  "Please use \"emissivity_primary\" instead");
+  params.addDeprecatedParam<Real>("emissivity_slave",
+                                  "The emissivity of the secondary surface",
+                                  "Please use \"emissivity_secondary\" instead");
   params.addDeprecatedParam<Real>("emissivity_1",
                                   "The emissivity of the fuel surface",
                                   "Please use \"emissivity_primary\" instead");
@@ -147,7 +153,9 @@ GapConductance::GapConductance(const InputParameters & parameters)
 {
   // set emissivity but allow legacy naming; legacy names are used if they
   // are present
-  Real emissivity_primary = getParam<Real>("emissivity_primary");
+  Real emissivity_primary = parameters.isParamSetByUser("emissivity_master")
+                                ? getParam<Real>("emissivity_master")
+                                : getParam<Real>("emissivity_primary");
   if (isParamValid("emissivity_1"))
   {
     emissivity_primary = getParam<Real>("emissivity_1");
@@ -158,8 +166,12 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  "Emissivities must have values between 0 and 1. You provided: ",
                  emissivity_primary);
   }
+  // Need this for backwards compatability with BISON
+  const_cast<InputParameters &>(_pars).set<Real>("emissivity_master") = emissivity_primary;
 
-  Real emissivity_secondary = getParam<Real>("emissivity_secondary");
+  Real emissivity_secondary = parameters.isParamSetByUser("emissivity_slave")
+                                  ? getParam<Real>("emissivity_slave")
+                                  : getParam<Real>("emissivity_secondary");
   if (isParamValid("emissivity_2"))
   {
     emissivity_secondary = getParam<Real>("emissivity_2");
@@ -170,6 +182,9 @@ GapConductance::GapConductance(const InputParameters & parameters)
                  "Emissivities must have values between 0 and 1. You provided: ",
                  emissivity_secondary);
   }
+  // Need this for backwards compatability with BISON
+  const_cast<InputParameters &>(_pars).set<Real>("emissivity_slave") = emissivity_secondary;
+
   _emissivity = emissivity_primary != 0.0 && emissivity_secondary != 0.0
                     ? 1.0 / emissivity_primary + 1.0 / emissivity_secondary - 1
                     : 0.0;

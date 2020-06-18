@@ -39,7 +39,9 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   if (nfc)
   {
     MooseMesh & mesh = nfc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
-    unsigned int secondary = mesh.getBoundaryID(nfc->getParam<BoundaryName>("secondary"));
+    unsigned int secondary =
+        mesh.getBoundaryID(nfc->isParamValid("secondary") ? nfc->getParam<BoundaryName>("secondary")
+                                                          : nfc->getParam<BoundaryName>("slave"));
     bool displaced = nfc->parameters().have_parameter<bool>("use_displaced_mesh") &&
                      nfc->getParam<bool>("use_displaced_mesh");
 

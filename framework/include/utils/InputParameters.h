@@ -308,6 +308,18 @@ public:
   void addCoupledVar(const std::string & name, const std::string & doc_string);
 
   /**
+   * This method adds a deprecated coupled variable name pair.  The parser will look for variable
+   * name pair in the input file and can return a reference to the storage location
+   * for the coupled variable if found
+   * @param name The name of the coupled variable
+   * @param doc_string A description of what the coupled variable should be
+   * @param deprecation_message The deprecation message to convey to the user
+   */
+  void addDeprecatedCoupledVar(const std::string & name,
+                               const std::string & doc_string,
+                               const std::string & deprecation_message);
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found

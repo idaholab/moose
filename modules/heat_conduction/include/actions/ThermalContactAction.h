@@ -34,4 +34,7 @@ protected:
   const AuxVariableName _penetration_var_name;
   const AuxVariableName _gap_value_name;
   const AuxVariableName _gap_conductivity_name;
+
+  BoundaryName _primary_name;
+  BoundaryName _secondary_name;
 };

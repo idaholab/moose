@@ -58,18 +58,39 @@ EqualValueBoundaryConstraint::validParams()
       "primary",
       std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
+  params.addDeprecatedParam<unsigned int>(
+      "master",
+      std::numeric_limits<unsigned int>::max(),
+      "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.",
+      "The 'master' param is deprecated and will be removed on July 1, 2020. Please use the "
+      "'primary' parameter instead.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
   params.addParam<BoundaryName>(
       "secondary", "NaN", "The boundary ID associated with the secondary side");
+  params.addDeprecatedParam<std::vector<unsigned int>>(
+      "slave_node_ids",
+      "The IDs of the slave node",
+      "The 'slave_node_ids' param is deprecated and will be removed on July 1, 2020. Please use "
+      "the 'secondary_node_ids' param instead");
+  params.addDeprecatedParam<BoundaryName>("slave",
+                                          "NaN",
+                                          "The boundary ID associated with the slave side",
+                                          "The 'slave' param is deprecated and will be removed on "
+                                          "July 1, 2020. Please use the 'secondary' param instead");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters),
-    _primary_node_id(getParam<unsigned int>("primary")),
-    _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
-    _secondary_node_set_id(getParam<BoundaryName>("secondary")),
+    _primary_node_id(parameters.isParamSetByUser("master") ? getParam<unsigned int>("master")
+                                                           : getParam<unsigned int>("primary")),
+    _secondary_node_ids(isParamValid("secondary_node_ids")
+                            ? getParam<std::vector<unsigned int>>("secondary_node_ids")
+                            : getParam<std::vector<unsigned int>>("slave_node_ids")),
+    _secondary_node_set_id(parameters.isParamSetByUser("slave")
+                               ? getParam<BoundaryName>("slave")
+                               : getParam<BoundaryName>("secondary")),
     _penalty(getParam<Real>("penalty"))
 {
   updateConstrainedNodes();

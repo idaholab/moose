@@ -20,10 +20,20 @@ InputParameters
 ContactSlipDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
-  params.addRequiredParam<std::vector<int>>(
+  params.addParam<std::vector<int>>(
       "primary", "IDs of the primary surfaces for which slip reversals should be damped");
-  params.addRequiredParam<std::vector<int>>(
+  params.addParam<std::vector<int>>(
       "secondary", "IDs of the secondary surfaces for which slip reversals should be damped");
+  params.addDeprecatedParam<std::vector<int>>(
+      "master",
+      "IDs of the primary surfaces for which slip reversals should be damped",
+      "The 'master' param is deprecated and will be removed on July 1, 2020. Please use the "
+      "'primary' parameter instead.");
+  params.addDeprecatedParam<std::vector<int>>(
+      "slave",
+      "IDs of the secondary surfaces for which slip reversals should be damped",
+      "The 'slave' param is deprecated and will be removed on "
+      "July 1, 2020. Please use the 'secondary' param instead");
   params.addParam<Real>(
       "max_iterative_slip", std::numeric_limits<Real>::max(), "Maximum iterative slip");
   params.addRangeCheckedParam<Real>("min_damping_factor",
@@ -60,8 +70,10 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
   if (!_displaced_problem)
     mooseError("Must have displaced problem to use ContactSlipDamper");
 
-  std::vector<int> primary = parameters.get<std::vector<int>>("primary");
-  std::vector<int> secondary = parameters.get<std::vector<int>>("secondary");
+  std::vector<int> primary = isParamValid("primary") ? getParam<std::vector<int>>("primary")
+                                                     : getParam<std::vector<int>>("master");
+  std::vector<int> secondary = isParamValid("secondary") ? getParam<std::vector<int>>("secondary")
+                                                         : getParam<std::vector<int>>("slave");
 
   unsigned int num_interactions = primary.size();
   if (num_interactions != secondary.size())

@@ -26,10 +26,16 @@ NodeFaceConstraint::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = Constraint::validParams();
-  params.addRequiredParam<BoundaryName>("secondary",
-                                        "The boundary ID associated with the secondary side");
-  params.addRequiredParam<BoundaryName>("primary",
-                                        "The boundary ID associated with the primary side");
+  params.addParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
+  params.addParam<BoundaryName>("primary", "The boundary ID associated with the primary side");
+  params.addDeprecatedParam<BoundaryName>(
+      "slave",
+      "The boundary ID associated with the secondary side",
+      "This parameter is deprecated in favor of 'secondary' and will be removed on July 1st, 2020");
+  params.addDeprecatedParam<BoundaryName>(
+      "master",
+      "The boundary ID associated with the primary side",
+      "This parameter is deprecated in favor of 'primary' and will be removed on July 1st, 2020");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
@@ -39,8 +45,11 @@ NodeFaceConstraint::validParams()
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
-  params.addRequiredCoupledVar("primary_variable",
-                               "The variable on the primary side of the domain");
+  params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
+  params.addDeprecatedCoupledVar("master_variable",
+                                 "The variable on the primary side of the domain",
+                                 "This parameter is deprecated in favor of 'primary_variable' and "
+                                 "will be removed on July 1st, 2020");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 
@@ -54,16 +63,20 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _secondary(_mesh.getBoundaryID(getParam<BoundaryName>("secondary"))),
-    _primary(_mesh.getBoundaryID(getParam<BoundaryName>("primary"))),
+    _secondary(isParamValid("secondary") ? _mesh.getBoundaryID(getParam<BoundaryName>("secondary"))
+                                         : _mesh.getBoundaryID(getParam<BoundaryName>("slave"))),
+    _primary(isParamValid("primary") ? _mesh.getBoundaryID(getParam<BoundaryName>("primary"))
+                                     : _mesh.getBoundaryID(getParam<BoundaryName>("master"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
     _primary_q_point(_assembly.qPointsFace()),
     _primary_qrule(_assembly.qRuleFace()),
 
     _penetration_locator(
-        getPenetrationLocator(getParam<BoundaryName>("primary"),
-                              getParam<BoundaryName>("secondary"),
+        getPenetrationLocator(isParamValid("primary") ? getParam<BoundaryName>("primary")
+                                                      : getParam<BoundaryName>("master"),
+                              isParamValid("secondary") ? getParam<BoundaryName>("secondary")
+                                                        : getParam<BoundaryName>("slave"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
 
     _current_node(_var.node()),
@@ -72,7 +85,8 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
     _phi_secondary(1),  // One entry
     _test_secondary(1), // One entry
 
-    _primary_var(*getVar("primary_variable", 0)),
+    _primary_var(isCoupled("primary_variable") ? *getVar("primary_variable", 0)
+                                               : *getVar("master_variable", 0)),
     _primary_var_num(_primary_var.number()),
 
     _phi_primary(_assembly.phiFaceNeighbor(_primary_var)),
