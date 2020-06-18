@@ -24,11 +24,12 @@ class SecondaryNeighborhoodThread
 public:
   KDTree & _kd_tree;
 
-  SecondaryNeighborhoodThread(const MooseMesh & mesh,
-                          const std::vector<dof_id_type> & trial_primary_nodes,
-                          const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-                          const unsigned int patch_size,
-                          KDTree & _kd_tree);
+  SecondaryNeighborhoodThread(
+      const MooseMesh & mesh,
+      const std::vector<dof_id_type> & trial_primary_nodes,
+      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      const unsigned int patch_size,
+      KDTree & _kd_tree);
 
   /// Splitting Constructor
   SecondaryNeighborhoodThread(SecondaryNeighborhoodThread & x, Threads::split split);
@@ -59,4 +60,3 @@ protected:
   /// The number of nodes to keep
   unsigned int _patch_size;
 };
-

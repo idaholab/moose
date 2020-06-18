@@ -32,7 +32,7 @@ SecondaryNeighborhoodThread::SecondaryNeighborhoodThread(
 
 // Splitting Constructor
 SecondaryNeighborhoodThread::SecondaryNeighborhoodThread(SecondaryNeighborhoodThread & x,
-                                                 Threads::split /*split*/)
+                                                         Threads::split /*split*/)
   : _kd_tree(x._kd_tree),
     _mesh(x._mesh),
     _trial_primary_nodes(x._trial_primary_nodes),

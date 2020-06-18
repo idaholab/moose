@@ -226,8 +226,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   // communication
   try
   {
-    // We may need to re-run geometric operations like SecondaryNeighborhoodTread if, for instance, we
-    // have performed mesh adaptivity
+    // We may need to re-run geometric operations like SecondaryNeighborhoodTread if, for instance,
+    // we have performed mesh adaptivity
     if (mesh_changing)
       _geometric_search_data.reinit();
     else

@@ -2088,14 +2088,11 @@ DMSetUp_Moose(DM dm)
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-PetscErrorCode
-DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
+PetscErrorCode DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
 #elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
-PetscErrorCode
-DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
+PetscErrorCode DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #else
-PetscErrorCode
-DMSetFromOptions_Moose(DM dm) // < 3.6.0
+PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
 #endif
 {
   PetscErrorCode ierr;
