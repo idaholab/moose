@@ -124,5 +124,14 @@
       turn_off_exodus_output = False
       detail = 'returning an exact jacobian.'
     []
+    [derivative_jacobian]
+      type = 'PetscJacobianTester'
+      input = 'ad_derivative_parsed_material.i'
+      ratio_tol = 1e-8
+      difference_tol = 1e-7
+      run_sim = True
+      turn_off_exodus_output = False
+      detail = 'returning an exact jacobian in derivative materials.'
+    []
   []
 []

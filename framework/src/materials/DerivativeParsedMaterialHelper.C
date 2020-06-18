@@ -239,7 +239,7 @@ DerivativeParsedMaterialHelperTempl<is_ad>::computeQpProperties()
       _func_params[i] = (*_args[i])[_qp];
     else
     {
-      Real a = (*_args[i])[_qp];
+      auto a = (*_args[i])[_qp];
       _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
   }
@@ -260,4 +260,4 @@ DerivativeParsedMaterialHelperTempl<is_ad>::computeQpProperties()
 
 // explicit instantiation
 template class DerivativeParsedMaterialHelperTempl<false>;
-// template class DerivativeParsedMaterialHelperTempl<true>;
+template class DerivativeParsedMaterialHelperTempl<true>;
