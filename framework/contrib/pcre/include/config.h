@@ -206,7 +206,7 @@ them both to 0; an emulation function will be used. */
 #endif
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+ */
 #ifndef LT_OBJDIR
 #define LT_OBJDIR ".libs/"
 #endif
@@ -312,8 +312,11 @@ them both to 0; an emulation function will be used. */
    in the C sense, but which are internal to the library. */
 /* #undef PCRE_EXP_DEFN */
 
-/* Define to any value if linking statically (TODO: make nice with Libtool) */
-/* #undef PCRE_STATIC */
+/* Define to any value if linking statically - which we tell users to do on Windows
+   (TODO: make nice with Libtool) */
+#ifdef __WIN32__
+#define PCRE_STATIC 1
+#endif
 
 /* When calling PCRE via the POSIX interface, additional working storage is
    required for holding the pointers to capturing substrings because PCRE

@@ -139,7 +139,7 @@ Start the configure and build process with...
 ```
 mkdir build
 cd build
-../configure --with-methods='opt' --prefix=$HOME/projects/libmesh/installed --with-static=yes --with-shared=no --enable-static --disable-shared --enable-netcdf-required NETCDF_DIR=C:/msys64/mingw64
+../configure --with-methods='opt' --prefix=$HOME/projects/libmesh/installed --with-static=yes --with-shared=no --enable-static --disable-shared --enable-unique-id --disable-maintainer-mode --enable-petsc-hypre-required --enable-metaphysicl-required --enable-netcdf-required NETCDF_DIR=C:/msys64/mingw64
 make && make install
 ```
 
@@ -153,9 +153,6 @@ METHOD=opt scripts/update_and_rebuild_libmesh.sh --enable-static --disable-share
 This will take a few minutes.
 
 # MOOSE
-
-!alert note
-On Windows `MOOSE_HEADER_SYMLINKS` and `MOOSE_UNITY` are automatically set to false.
 
 Now it is finally time to build MOOSE. We'll start with the framework and the
 tests. (adjust the `-j` option to you number of available cores)
