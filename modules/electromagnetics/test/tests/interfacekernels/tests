@@ -24,4 +24,10 @@
     input = 'contact_resistance.i'
     exodiff = 'contact_resistance_out.e'
   [../]
+  [./electrostatic_contact_resistance_jacobian]
+    type = PetscJacobianTester
+    input = 'contact_resistance.i'
+    run_sim = false
+    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15e-8
+  [../]
 []
