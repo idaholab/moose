@@ -158,6 +158,7 @@
     input = '13.i'
     exodiff = '13_out.e'
     threading = '!pthreads'
+    mumps = True
     issues = '#10959'
     design = 'tutorial_13.md'
     requirement = 'PorousFlow tutorial shall explain how to include precipitation-dissolution and equilibrium chemical systems in PorousFlow simulations'
