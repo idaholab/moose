@@ -1,9 +1,9 @@
-#include "ElectrostaticContactResistance.h"
+#include "ElectrostaticContactCondition.h"
 
-registerMooseObject("ElkApp", ElectrostaticContactResistance);
+registerMooseObject("ElkApp", ElectrostaticContactCondition);
 
 InputParameters
-ElectrostaticContactResistance::validParams()
+ElectrostaticContactCondition::validParams()
 {
   InputParameters params = ADInterfaceKernel::validParams();
   params.addParam<MaterialPropertyName>(
@@ -20,7 +20,7 @@ ElectrostaticContactResistance::validParams()
   return params;
 }
 
-ElectrostaticContactResistance::ElectrostaticContactResistance(const InputParameters & parameters)
+ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParameters & parameters)
   : ADInterfaceKernel(parameters),
     _conductivity_master(getMaterialProperty<Real>("master_conductivity")),
     _conductivity_neighbor(getNeighborMaterialProperty<Real>("neighbor_conductivity")),
@@ -29,7 +29,7 @@ ElectrostaticContactResistance::ElectrostaticContactResistance(const InputParame
 }
 
 ADReal
-ElectrostaticContactResistance::computeQpResidual(Moose::DGResidualType type)
+ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal res = 0.0;
 

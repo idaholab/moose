@@ -2,12 +2,12 @@
 
 #include "ADInterfaceKernel.h"
 
-class ElectrostaticContactResistance : public ADInterfaceKernel
+class ElectrostaticContactCondition : public ADInterfaceKernel
 {
 public:
   static InputParameters validParams();
 
-  ElectrostaticContactResistance(const InputParameters & parameters);
+  ElectrostaticContactCondition(const InputParameters & parameters);
 
 protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
