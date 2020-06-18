@@ -19,15 +19,35 @@
     input = 'combined_props.i'
     exodiff = 'combined_props_out.e'
   [../]
-  [./electrostatic_contact_resistance]
+  [./electrostatic_contact_resistance_supplied]
     type = Exodiff
-    input = 'contact_resistance.i'
-    exodiff = 'contact_resistance_out.e'
+    input = 'contact_resistance_supplied.i'
+    exodiff = 'contact_resistance_supplied_out.e'
   [../]
-  [./electrostatic_contact_resistance_jacobian]
+  [./electrostatic_contact_resistance_supplied_jacobian]
     type = PetscJacobianTester
-    input = 'contact_resistance.i'
+    input = 'contact_resistance_supplied.i'
     run_sim = false
-    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15e-8
+    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15647e-8
+    prereq = electrostatic_contact_resistance_supplied
+  [../]
+  [./electrostatic_contact_resistance_error]
+    type = RunException
+    input = 'contact_resistance_supplied.i'
+    cli_args = 'InterfaceKernels/contact_resistance/mean_hardness=1.0'
+    expect_err = 'In contact_resistance, both user-supplied electrical contact resistance'
+    prereq = electrostatic_contact_resistance_supplied
+  [../]
+  [./electrostatic_contact_resistance_calculated]
+    type = Exodiff
+    input = 'contact_resistance_calculated.i'
+    exodiff = 'contact_resistance_calculated_out.e'
+  [../]
+  [./electrostatic_contact_resistance_calculated_jacobian]
+    type = PetscJacobianTester
+    input = 'contact_resistance_calculated.i'
+    run_sim = false
+    difference_tol = 2e-8   #default = 1e-8, first evaluation is 1.15647e-8
+    prereq = electrostatic_contact_resistance_calculated
   [../]
 []
