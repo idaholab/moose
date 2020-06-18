@@ -27,10 +27,10 @@ protected:
   virtual void computeQpProperties();
 
   /// raw tensor values as passed in from the input file
-  std::vector<Real> _mobility_values;
+  const std::vector<Real> & _mobility_values;
 
   /// Name of the mobility tensor material property
-  MaterialPropertyName _mobility_name;
+  const MaterialPropertyName & _mobility_name;
   GenericMaterialProperty<RealTensorValue, is_ad> & _mobility;
 };
 

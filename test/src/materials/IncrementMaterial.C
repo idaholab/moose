@@ -17,6 +17,7 @@ IncrementMaterial::validParams()
   InputParameters params = GenericConstantMaterial::validParams();
   params.addClassDescription(
       "Material that tracks the number of times computeQpProperties has been called.");
+  params.set<MooseEnum>("constant_on") = "NONE";
   return params;
 }
 

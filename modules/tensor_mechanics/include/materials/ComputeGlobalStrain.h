@@ -26,9 +26,9 @@ public:
   ComputeGlobalStrain(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
 
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
   ///Base name prepended to material property name
   const std::string _base_name;

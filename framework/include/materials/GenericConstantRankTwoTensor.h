@@ -33,4 +33,3 @@ protected:
   RankTwoTensor _tensor;
   MaterialProperty<RankTwoTensor> & _prop;
 };
-
