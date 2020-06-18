@@ -71,7 +71,7 @@ NormalNodalMechanicalContact::computeOffDiagJacobian(unsigned jvar)
   _Kne.resize(_test_primary.size(), 1);
 
   for (_i = 0; _i < _test_primary.size(); ++_i)
-    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::MasterSecondary, jvar);
+    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
 }
 
 Real
@@ -91,7 +91,7 @@ NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
           // need a negative sign
           return _lambda * -pinfo->_normal(_component);
 
-        case Moose::ConstraintType::Master:
+        case Moose::ConstraintType::Primary:
           return _test_primary[_i][_qp] * _lambda * pinfo->_normal(_component);
 
         default:
@@ -125,7 +125,7 @@ NormalNodalMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobian
       {
         case Moose::SecondarySecondary:
           return -pinfo->_normal(_component);
-        case Moose::MasterSecondary:
+        case Moose::PrimarySecondary:
           return _test_primary[_i][_qp] * pinfo->_normal(_component);
         default:
           return 0;

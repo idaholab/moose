@@ -19,14 +19,14 @@ ContactSplit::validParams()
 {
   InputParameters params = Split::validParams();
   params.addParam<std::vector<std::string>>("contact_primary",
-                                            "Master surface list for included contacts");
+                                            "Primary surface list for included contacts");
   params.addParam<std::vector<std::string>>("contact_secondary",
                                             "Secondary surface list for included contacts");
   params.addParam<std::vector<int>>(
       "contact_displaced",
       "List of indicators whether displaced mesh is used to define included contact");
   params.addParam<std::vector<std::string>>("uncontact_primary",
-                                            "Master surface list for excluded contacts");
+                                            "Primary surface list for excluded contacts");
   params.addParam<std::vector<std::string>>("uncontact_secondary",
                                             "Secondary surface list for excluded contacts");
   params.addParam<std::vector<int>>(
@@ -53,14 +53,14 @@ ContactSplit::ContactSplit(const InputParameters & params)
   if (_contact_primary.size() != _contact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and secondary contact lists must have matching sizes: "
+    err << "Primary and secondary contact lists must have matching sizes: "
         << _contact_primary.size() << " != " << _contact_secondary.size();
     mooseError(err.str());
   }
   if (_contact_displaced.size() && _contact_primary.size() != _contact_displaced.size())
   {
     std::ostringstream err;
-    err << "Master and displaced contact lists must have matching sizes: "
+    err << "Primary and displaced contact lists must have matching sizes: "
         << _contact_primary.size() << " != " << _contact_displaced.size();
     mooseError(err.str());
   }
@@ -70,14 +70,14 @@ ContactSplit::ContactSplit(const InputParameters & params)
   if (_uncontact_primary.size() != _uncontact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and secondary uncontact lists must have matching sizes: "
+    err << "Primary and secondary uncontact lists must have matching sizes: "
         << _uncontact_primary.size() << " != " << _uncontact_secondary.size();
     mooseError(err.str());
   }
   if (_uncontact_displaced.size() && _uncontact_primary.size() != _uncontact_displaced.size())
   {
     std::ostringstream err;
-    err << "Master and displaced uncontact lists must have matching sizes: "
+    err << "Primary and displaced uncontact lists must have matching sizes: "
         << _uncontact_primary.size() << " != " << _uncontact_displaced.size();
     mooseError(err.str());
   }

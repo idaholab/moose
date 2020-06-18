@@ -98,7 +98,7 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 
   switch (type)
   {
-    case Moose::Master:
+    case Moose::Primary:
       return (_u_primary[_j] * _weights[_j] - _u_secondary[_i] / primary_size) * _penalty;
     case Moose::Secondary:
       return (_u_secondary[_i] / primary_size - _u_primary[_j] * _weights[_j]) * _penalty;
@@ -113,13 +113,13 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 
   switch (type)
   {
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       return _penalty * _weights[_j];
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       return -_penalty / primary_size;
     case Moose::SecondarySecondary:
       return _penalty / primary_size;
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       return -_penalty * _weights[_j];
     default:
       mooseError("Unsupported type");

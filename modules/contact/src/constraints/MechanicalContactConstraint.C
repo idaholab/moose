@@ -838,7 +838,7 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
       }
       return _test_secondary[_i][_qp] * resid;
 
-    case Moose::Master:
+    case Moose::Primary:
       return _test_primary[_i][_qp] * -resid;
   }
 
@@ -984,7 +984,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1123,7 +1123,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1247,7 +1247,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1417,7 +1417,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1497,7 +1497,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1619,7 +1619,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           mooseError("Invalid or unavailable contact model");
       }
 
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       switch (_model)
       {
         case ContactModel::FRICTIONLESS:
@@ -1748,19 +1748,19 @@ MechanicalContactConstraint::computeJacobian()
     if (Ken.m() && Ken.n())
       for (_i = 0; _i < _test_secondary.size(); _i++)
         for (_j = 0; _j < _phi_primary.size(); _j++)
-          Ken(_i, _j) += computeQpJacobian(Moose::SecondaryMaster);
+          Ken(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
 
     _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-        _Kne(_i, _j) += computeQpJacobian(Moose::MasterSecondary);
+        _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
   }
 
   if (Knn.m() && Knn.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Knn(_i, _j) += computeQpJacobian(Moose::MasterMaster);
+        Knn(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
 }
 
 void
@@ -1784,19 +1784,19 @@ MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
         _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryMaster, jvar);
+        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
 
     _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
     if (_Kne.m() && _Kne.n())
       for (_i = 0; _i < _test_primary.size(); _i++)
         // Loop over the connected dof indices so we can get all the jacobian contributions
         for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-          _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSecondary, jvar);
+          _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
   }
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar);
 }
 
 void

@@ -34,8 +34,9 @@ public:
    */
   std::vector<dof_id_type> & getMasterNodeId()
   {
-    mooseDeprecated("'getMasterNodeId' is deprecated and will be removed on July 1st, 2020. Please "
-                    "use 'getPrimaryNodeId' instead.");
+    mooseDeprecated(
+        "'getPrimaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
+        "use 'getPrimaryNodeId' instead.");
     return _master_node_vector;
   }
 
@@ -59,10 +60,11 @@ public:
    * Get the list of connected secondary nodes
    * @return list of secondary node IDs
    */
-  std::vector<dof_id_type> & getSecondaryNodeId()
+  std::vector<dof_id_type> & getSlaveNodeId()
   {
-    mooseDeprecated("'getSecondaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
-                    "use 'getSecondaryNodeId' instead.");
+    mooseDeprecated(
+        "'getSecondaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
+        "use 'getSecondaryNodeId' instead.");
     return _connected_nodes;
   }
 

@@ -94,7 +94,7 @@ public:
   virtual bool overwriteSecondaryJacobian() { return overwriteSecondaryResidual(); };
 
   /**
-   * The variable on the Master side of the domain.
+   * The variable on the Primary side of the domain.
    */
   virtual MooseVariable & primaryVariable() { return _primary_var; }
 
@@ -140,77 +140,77 @@ protected:
 
   /// coupling interface:
   virtual const VariableValue & coupledSecondaryValue(const std::string & var_name,
-                                                  unsigned int comp = 0)
+                                                      unsigned int comp = 0)
   {
     return coupledValue(var_name, comp);
   }
   virtual const VariableValue & coupledSecondaryValueOld(const std::string & var_name,
-                                                     unsigned int comp = 0)
+                                                         unsigned int comp = 0)
   {
     return coupledValueOld(var_name, comp);
   }
   virtual const VariableValue & coupledSecondaryValueOlder(const std::string & var_name,
-                                                       unsigned int comp = 0)
+                                                           unsigned int comp = 0)
   {
     return coupledValueOlder(var_name, comp);
   }
 
   virtual const VariableGradient & coupledSecondaryGradient(const std::string & var_name,
-                                                        unsigned int comp = 0)
+                                                            unsigned int comp = 0)
   {
     return coupledGradient(var_name, comp);
   }
   virtual const VariableGradient & coupledSecondaryGradientOld(const std::string & var_name,
-                                                           unsigned int comp = 0)
+                                                               unsigned int comp = 0)
   {
     return coupledGradientOld(var_name, comp);
   }
   virtual const VariableGradient & coupledSecondaryGradientOlder(const std::string & var_name,
-                                                             unsigned int comp = 0)
+                                                                 unsigned int comp = 0)
   {
     return coupledGradientOlder(var_name, comp);
   }
 
   virtual const VariableSecond & coupledSecondarySecond(const std::string & var_name,
-                                                    unsigned int comp = 0)
+                                                        unsigned int comp = 0)
   {
     return coupledSecond(var_name, comp);
   }
 
-  virtual const VariableValue & coupledMasterValue(const std::string & var_name,
-                                                   unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValue(const std::string & var_name,
+                                                    unsigned int comp = 0)
   {
     return coupledNeighborValue(var_name, comp);
   }
-  virtual const VariableValue & coupledMasterValueOld(const std::string & var_name,
-                                                      unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValueOld(const std::string & var_name,
+                                                       unsigned int comp = 0)
   {
     return coupledNeighborValueOld(var_name, comp);
   }
-  virtual const VariableValue & coupledMasterValueOlder(const std::string & var_name,
-                                                        unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValueOlder(const std::string & var_name,
+                                                         unsigned int comp = 0)
   {
     return coupledNeighborValueOlder(var_name, comp);
   }
 
-  virtual const VariableGradient & coupledMasterGradient(const std::string & var_name,
-                                                         unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradient(const std::string & var_name,
+                                                          unsigned int comp = 0)
   {
     return coupledNeighborGradient(var_name, comp);
   }
-  virtual const VariableGradient & coupledMasterGradientOld(const std::string & var_name,
-                                                            unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradientOld(const std::string & var_name,
+                                                             unsigned int comp = 0)
   {
     return coupledNeighborGradientOld(var_name, comp);
   }
-  virtual const VariableGradient & coupledMasterGradientOlder(const std::string & var_name,
-                                                              unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradientOlder(const std::string & var_name,
+                                                               unsigned int comp = 0)
   {
     return coupledNeighborGradientOlder(var_name, comp);
   }
 
-  virtual const VariableSecond & coupledMasterSecond(const std::string & var_name,
-                                                     unsigned int comp = 0)
+  virtual const VariableSecond & coupledPrimarySecond(const std::string & var_name,
+                                                      unsigned int comp = 0)
   {
     return coupledNeighborSecond(var_name, comp);
   }
@@ -240,7 +240,7 @@ protected:
   /// Shape function on the secondary side.  This will always only have one entry and that entry will always be "1"
   VariableTestValue _test_secondary;
 
-  /// Master side variable
+  /// Primary side variable
   MooseVariable & _primary_var;
 
   /// Number for the primary variable

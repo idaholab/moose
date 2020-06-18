@@ -32,7 +32,7 @@ InterfaceValueMaterial::validParams()
       "A variable on the secondary side of the interface that should be equivalent to the value of "
       "the secondary material property (through MaterialRealAux for example");
   params.addRequiredCoupledVar("nl_var_primary",
-                               "Master side non-linear variable for jump computation");
+                               "Primary side non-linear variable for jump computation");
   params.addRequiredCoupledVar("nl_var_secondary",
                                "Secondary side non-linear variable for jump computation");
   params.addRequiredParam<std::string>("mat_prop_var_out_basename",

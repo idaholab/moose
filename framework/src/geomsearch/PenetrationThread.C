@@ -1643,13 +1643,13 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
 {
   std::vector<unsigned int> sides;
   // TODO: After libMesh update, add this line to MooseMesh.h, call sidesWithBoundaryID,  delete
-  // getSidesOnMasterBoundary, and delete vectors used by it
+  // getSidesOnPrimaryBoundary, and delete vectors used by it
   //  void sidesWithBoundaryID(std::vector<unsigned int>& sides, const Elem * const elem, const
   //  BoundaryID boundary_id) const
   // {
   //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
   // }
-  getSidesOnMasterBoundary(sides, elem);
+  getSidesOnPrimaryBoundary(sides, elem);
   // _mesh.sidesWithBoundaryID(sides, elem, _primary_boundary);
 
   for (unsigned int i = 0; i < sides.size(); ++i)
@@ -1759,8 +1759,8 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
 // TODO: After libMesh update, replace this with a call to sidesWithBoundaryID, delete vectors used
 // by this method
 void
-PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> & sides,
-                                            const Elem * const elem)
+PenetrationThread::getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides,
+                                             const Elem * const elem)
 {
   // For each tuple, the fields are (0=elem_id, 1=side_id, 2=bc_id)
   sides.clear();

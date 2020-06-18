@@ -865,7 +865,7 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     for (const auto & nc : ncs)
     {
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
-      std::vector<dof_id_type> & primary_node_ids = nc->getMasterNodeId();
+      std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
@@ -894,7 +894,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
     for (const auto & nc : ncs)
     {
       std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
-      std::vector<dof_id_type> & primary_node_ids = nc->getMasterNodeId();
+      std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
       {
@@ -1687,7 +1687,7 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
   for (const auto & nc : ncs)
   {
     std::vector<dof_id_type> primary_dofs;
-    std::vector<dof_id_type> & primary_node_ids = nc->getMasterNodeId();
+    std::vector<dof_id_type> & primary_node_ids = nc->getPrimaryNodeId();
     for (const auto & node_id : primary_node_ids)
     {
       Node * node = _mesh.queryNodePtr(node_id);

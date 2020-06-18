@@ -115,7 +115,7 @@ RANFSTieNode::computeQpResidual(Moose::ConstraintType type)
     case Moose::ConstraintType::Secondary:
       return (*_current_node - *_nearest_node)(_component);
 
-    case Moose::ConstraintType::Master:
+    case Moose::ConstraintType::Primary:
     {
       if (_i == _primary_index)
         return _lagrange_multiplier;
@@ -137,13 +137,13 @@ RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::ConstraintJacobianType::SecondarySecondary:
       return _phi_secondary[_j][_qp];
 
-    case Moose::ConstraintJacobianType::SecondaryMaster:
+    case Moose::ConstraintJacobianType::SecondaryPrimary:
       if (_primary_index == _j)
         return -1;
       else
         return 0;
 
-    case Moose::ConstraintJacobianType::MasterSecondary:
+    case Moose::ConstraintJacobianType::PrimarySecondary:
       if (_i == _primary_index)
       {
         mooseAssert(_dof_number_to_value.find(_connected_dof_indices[_j]) !=
@@ -168,5 +168,6 @@ RANFSTieNode::computeSecondaryValue(NumericVector<Number> &)
 Real
 RANFSTieNode::computeQpSecondaryValue()
 {
-  mooseError("We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
+  mooseError(
+      "We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
 }

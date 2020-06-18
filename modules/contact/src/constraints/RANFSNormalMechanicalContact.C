@@ -293,7 +293,7 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
       }
     }
 
-    case Moose::ConstraintType::Master:
+    case Moose::ConstraintType::Primary:
     {
       if (_tie_nodes)
       {
@@ -350,7 +350,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
     }
 
-    case Moose::ConstraintJacobianType::SecondaryMaster:
+    case Moose::ConstraintJacobianType::SecondaryPrimary:
     {
       if (_tie_nodes)
       {
@@ -377,7 +377,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
     }
 
-    case Moose::ConstraintJacobianType::MasterSecondary:
+    case Moose::ConstraintJacobianType::PrimarySecondary:
     {
       if (_tie_nodes)
       {
@@ -415,7 +415,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       // The only primary-primary dependence would come from the dependence of the normal and also
       // the location of the integration (quadrature) points. We assume (valid or not) that this
       // dependence is weak
-      // case MooseConstraintJacobianType::MasterMaster
+      // case MooseConstraintJacobianType::PrimaryPrimary
 
     default:
       return 0;
@@ -430,5 +430,6 @@ RANFSNormalMechanicalContact::computeSecondaryValue(NumericVector<Number> &)
 Real
 RANFSNormalMechanicalContact::computeQpSecondaryValue()
 {
-  mooseError("We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
+  mooseError(
+      "We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
 }

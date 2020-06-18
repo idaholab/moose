@@ -45,7 +45,7 @@ ADMortarConstraint::computeResidual(Moose::MortarType mortar_type)
       test_space_size = _test_secondary.size();
       break;
 
-    case Moose::MortarType::Master:
+    case Moose::MortarType::Primary:
       prepareVectorTagNeighbor(_assembly, _primary_var.number());
       test_space_size = _test_primary.size();
       break;
@@ -77,17 +77,17 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   {
     case MType::Secondary:
       test_space_size = _secondary_var.dofIndices().size();
-      jacobian_types = {JType::SecondarySecondary, JType::SecondaryMaster, JType::SecondaryLower};
+      jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
       break;
 
-    case MType::Master:
+    case MType::Primary:
       test_space_size = _primary_var.dofIndicesNeighbor().size();
-      jacobian_types = {JType::MasterSecondary, JType::MasterMaster, JType::MasterLower};
+      jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
       break;
 
     case MType::Lower:
       test_space_size = _var ? _var->dofIndicesLower().size() : 0;
-      jacobian_types = {JType::LowerSecondary, JType::LowerMaster, JType::LowerLower};
+      jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
       break;
   }
 
@@ -112,7 +112,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
           continue;
         break;
 
-      case MType::Master:
+      case MType::Primary:
         if (ivar != _primary_var.number())
           continue;
         break;

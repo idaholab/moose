@@ -586,7 +586,7 @@ enum DGJacobianType
 enum ConstraintType
 {
   Secondary = Element,
-  Master = Neighbor
+  Primary = Neighbor
 };
 
 enum class ElementType : unsigned int
@@ -599,7 +599,7 @@ enum class ElementType : unsigned int
 enum class MortarType : unsigned int
 {
   Secondary = static_cast<unsigned int>(Moose::ElementType::Element),
-  Master = static_cast<unsigned int>(Moose::ElementType::Neighbor),
+  Primary = static_cast<unsigned int>(Moose::ElementType::Neighbor),
   Lower = static_cast<unsigned int>(Moose::ElementType::Lower)
 };
 
@@ -615,14 +615,14 @@ enum class RESTARTABLE_FILTER : unsigned char
 enum ConstraintJacobianType
 {
   SecondarySecondary = ElementElement,
-  SecondaryMaster = ElementNeighbor,
-  MasterSecondary = NeighborElement,
-  MasterMaster = NeighborNeighbor,
+  SecondaryPrimary = ElementNeighbor,
+  PrimarySecondary = NeighborElement,
+  PrimaryPrimary = NeighborNeighbor,
   LowerLower,
   LowerSecondary,
-  LowerMaster,
+  LowerPrimary,
   SecondaryLower,
-  MasterLower
+  PrimaryLower
 };
 
 enum CoordinateSystemType
@@ -672,12 +672,12 @@ enum SolveType
  */
 enum EigenSolveType
 {
-  EST_POWER,              ///< Power / Inverse / RQI
-  EST_ARNOLDI,            ///< Arnoldi
-  EST_KRYLOVSCHUR,        ///< Krylov-Schur
-  EST_JACOBI_DAVIDSON,    ///< Jacobi-Davidson
-  EST_NONLINEAR_POWER,    ///< Nonlinear inverse power
-  EST_NEWTON,             ///< Newton-based eigen solver
+  EST_POWER,           ///< Power / Inverse / RQI
+  EST_ARNOLDI,         ///< Arnoldi
+  EST_KRYLOVSCHUR,     ///< Krylov-Schur
+  EST_JACOBI_DAVIDSON, ///< Jacobi-Davidson
+  EST_NONLINEAR_POWER, ///< Nonlinear inverse power
+  EST_NEWTON,          ///< Newton-based eigen solver
 };
 
 /**

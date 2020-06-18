@@ -52,7 +52,7 @@ TiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
     case Moose::Secondary:
       retVal = (_u_secondary[_qp] - _u_primary[_qp]) * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::Master:
+    case Moose::Primary:
       secondary_resid =
           _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
       retVal = secondary_resid * _test_primary[_i][_qp];
@@ -74,15 +74,15 @@ TiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
     case Moose::SecondarySecondary:
       retVal = _phi_secondary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       retVal = -_phi_primary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       secondary_jac =
           (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
       retVal = secondary_jac * _test_primary[_i][_qp] / scaling_factor;
       break;
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       retVal = 0;
       break;
     default:

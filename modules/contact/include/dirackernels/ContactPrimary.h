@@ -17,12 +17,12 @@
 enum class ContactModel;
 enum class ContactFormulation;
 
-class ContactMaster : public DiracKernel
+class ContactPrimary : public DiracKernel
 {
 public:
   static InputParameters validParams();
 
-  ContactMaster(const InputParameters & parameters);
+  ContactPrimary(const InputParameters & parameters);
 
   virtual void timestepSetup() override;
 

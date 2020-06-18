@@ -327,7 +327,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       mooseError("We must have either 1 or 2 primary side nodal neighbors, but we had ",
                  primary_node_neighbors.size());
 
-    // Master Elem pointers which we will eventually assign to the
+    // Primary Elem pointers which we will eventually assign to the
     // mortar segments being created.  We start by assuming
     // primary_node_neighbor[0] is on the "left" and
     // primary_node_neighbor[1]/"nothing" is on the "right" and then
@@ -874,16 +874,16 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 // Inverse map primary nodes onto their corresponding secondary elements for each primary/secondary
 // pair.
 void
-AutomaticMortarGeneration::projectMasterNodes()
+AutomaticMortarGeneration::projectPrimaryNodes()
 {
   // For each primary/secondary boundary id pair, call the
   // project_primary_nodes_single_pair() helper function.
   for (const auto & pr : primary_secondary_subdomain_id_pairs)
-    projectMasterNodesSinglePair(pr.first, pr.second);
+    projectPrimaryNodesSinglePair(pr.first, pr.second);
 }
 
 void
-AutomaticMortarGeneration::projectMasterNodesSinglePair(
+AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
     subdomain_id_type lower_dimensional_primary_subdomain_id,
     subdomain_id_type lower_dimensional_secondary_subdomain_id)
 {

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "ContactMaster.h"
+#include "ContactPrimary.h"
 #include "NodalArea.h"
 #include "SystemBase.h"
 #include "PenetrationInfo.h"
@@ -19,10 +19,10 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseObject("ContactApp", ContactMaster);
+registerMooseObject("ContactApp", ContactPrimary);
 
 InputParameters
-ContactMaster::validParams()
+ContactPrimary::validParams()
 {
   InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
@@ -68,7 +68,7 @@ ContactMaster::validParams()
   return params;
 }
 
-ContactMaster::ContactMaster(const InputParameters & parameters)
+ContactPrimary::ContactPrimary(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
@@ -128,14 +128,14 @@ ContactMaster::ContactMaster(const InputParameters & parameters)
 }
 
 void
-ContactMaster::timestepSetup()
+ContactPrimary::timestepSetup()
 {
   if (_component == 0)
     updateContactStatefulData();
 }
 
 void
-ContactMaster::updateContactStatefulData()
+ContactPrimary::updateContactStatefulData()
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator
       it = _penetration_locator._penetration_info.begin(),
@@ -159,7 +159,7 @@ ContactMaster::updateContactStatefulData()
 }
 
 void
-ContactMaster::addPoints()
+ContactPrimary::addPoints()
 {
   _point_to_info.clear();
 
@@ -190,7 +190,7 @@ ContactMaster::addPoints()
 }
 
 void
-ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_set)
+ContactPrimary::computeContactForce(PenetrationInfo * pinfo, bool update_contact_set)
 {
   const Node * node = pinfo->_node;
 
@@ -330,7 +330,7 @@ ContactMaster::computeContactForce(PenetrationInfo * pinfo, bool update_contact_
 }
 
 Real
-ContactMaster::computeQpResidual()
+ContactPrimary::computeQpResidual()
 {
   PenetrationInfo * pinfo = _point_to_info[_current_point];
   Real resid = -pinfo->_contact_force(_component);
@@ -338,7 +338,7 @@ ContactMaster::computeQpResidual()
 }
 
 Real
-ContactMaster::computeQpJacobian()
+ContactPrimary::computeQpJacobian()
 {
 
   PenetrationInfo * pinfo = _point_to_info[_current_point];
@@ -408,7 +408,7 @@ ContactMaster::computeQpJacobian()
 }
 
 Real
-ContactMaster::nodalArea(PenetrationInfo & pinfo)
+ContactPrimary::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 
@@ -426,7 +426,7 @@ ContactMaster::nodalArea(PenetrationInfo & pinfo)
 }
 
 Real
-ContactMaster::getPenalty(PenetrationInfo & pinfo)
+ContactPrimary::getPenalty(PenetrationInfo & pinfo)
 {
   Real penalty = _penalty;
   if (_normalize_penalty)

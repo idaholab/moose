@@ -2088,11 +2088,14 @@ DMSetUp_Moose(DM dm)
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-PetscErrorCode DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
+PetscErrorCode
+DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
 #elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
-PetscErrorCode DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
+PetscErrorCode
+DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #else
-PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
+PetscErrorCode
+DMSetFromOptions_Moose(DM dm) // < 3.6.0
 #endif
 {
   PetscErrorCode ierr;
@@ -2240,7 +2243,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
       PetscInt sz = 2;
       std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_contact_" << i;
-      ohelp << "Master and secondary for contact " << i;
+      ohelp << "Primary and secondary for contact " << i;
       ierr = PetscOptionsStringArray(oopt.str().c_str(),
                                      ohelp.str().c_str(),
                                      "DMMooseSetContacts",
@@ -2321,7 +2324,7 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
       PetscInt sz = 2;
       std::ostringstream oopt, ohelp;
       oopt << "-dm_moose_uncontact_" << i;
-      ohelp << "Master and secondary for uncontact " << i;
+      ohelp << "Primary and secondary for uncontact " << i;
       ierr = PetscOptionsStringArray(oopt.str().c_str(),
                                      ohelp.str().c_str(),
                                      "DMMooseSetUnContacts",
@@ -2543,8 +2546,8 @@ DMCreate_Moose(DM dm)
   dm->ops->creatematrix = DMCreateMatrix_Moose;
   dm->ops->createinterpolation = 0; // DMCreateInterpolation_Moose;
 
-  dm->ops->refine = 0;        // DMRefine_Moose;
-  dm->ops->coarsen = 0;       // DMCoarsen_Moose;
+  dm->ops->refine = 0;  // DMRefine_Moose;
+  dm->ops->coarsen = 0; // DMCoarsen_Moose;
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   dm->ops->getinjection = 0;  // DMGetInjection_Moose;
   dm->ops->getaggregates = 0; // DMGetAggregates_Moose;

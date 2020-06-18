@@ -170,7 +170,7 @@ protected:
                          const std::vector<const Node *> & nodes_that_must_be_on_side,
                          const bool check_whether_reasonable = false);
 
-  void getSidesOnMasterBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
+  void getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
 
   void computeSlip(FEBase & fe, PenetrationInfo & info);
 
@@ -193,4 +193,3 @@ protected:
     std::vector<RidgeData> _ridge_data_vec;
   };
 };
-

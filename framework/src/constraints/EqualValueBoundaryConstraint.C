@@ -223,7 +223,7 @@ EqualValueBoundaryConstraint::computeQpResidual(Moose::ConstraintType type)
   {
     case Moose::Secondary:
       return (_u_secondary[_i] - _u_primary[_j]) * _penalty;
-    case Moose::Master:
+    case Moose::Primary:
       return (_u_primary[_j] - _u_secondary[_i]) * _penalty;
   }
   return 0.;
@@ -236,11 +236,11 @@ EqualValueBoundaryConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
   {
     case Moose::SecondarySecondary:
       return _penalty;
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       return -_penalty;
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       return _penalty;
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       return -_penalty;
     default:
       mooseError("Unsupported type");

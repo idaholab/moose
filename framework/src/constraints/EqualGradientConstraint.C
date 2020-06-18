@@ -36,7 +36,7 @@ EqualGradientConstraint::computeQpResidual(Moose::MortarType mortar_type)
   {
     case Moose::MortarType::Secondary:
       return -_lambda[_qp] * _grad_test_secondary[_i][_qp](_component);
-    case Moose::MortarType::Master:
+    case Moose::MortarType::Primary:
       return _lambda[_qp] * _grad_test_primary[_i][_qp](_component);
     case Moose::MortarType::Lower:
       return (_grad_u_primary[_qp](_component) - _grad_u_secondary[_qp](_component)) *

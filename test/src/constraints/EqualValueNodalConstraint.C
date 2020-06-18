@@ -25,7 +25,7 @@ EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & par
   : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
   _connected_nodes.push_back(getParam<unsigned int>("secondary"));
-  _primary_node_vector.push_back(getParam<unsigned int>("primary"));
+  _master_node_vector.push_back(getParam<unsigned int>("primary"));
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint() {}
@@ -35,7 +35,7 @@ EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-    case Moose::Master:
+    case Moose::Primary:
       return (_u_primary[_j] - _u_secondary[_i]) * _penalty;
 
     case Moose::Secondary:
@@ -50,16 +50,16 @@ EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   switch (type)
   {
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       return _penalty;
 
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       return -_penalty;
 
     case Moose::SecondarySecondary:
       return _penalty;
 
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       return -_penalty;
 
     default:

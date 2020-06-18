@@ -124,7 +124,7 @@ public:
    *
    * Defined in the file project_primary_nodes.C.
    */
-  void projectMasterNodes();
+  void projectPrimaryNodes();
 
   /**
    * Builds the mortar segment mesh once the secondary and primary node
@@ -192,8 +192,8 @@ public:
   std::unordered_map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
       secondary_node_and_elem_to_xi2_primary_elem;
 
-  // Same type of container, but for mapping (Master Node ID, Master Node,
-  // Master Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
+  // Same type of container, but for mapping (Primary Node ID, Primary Node,
+  // Primary Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
   // the nodal normal direction. Note that the first item of the key, the primary
   // node ID, is important for storing the key-value pairs in a consistent order
   // across processes, e.g. this container has to be ordered!
@@ -250,13 +250,13 @@ private:
    * AutomaticMortarGeneration::project_secondary_nodes().
    */
   void projectSecondaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
-                                   subdomain_id_type lower_dimensional_secondary_subdomain_id);
+                                       subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
   /**
    * Helper function used internally by AutomaticMortarGeneration::project_primary_nodes().
    */
-  void projectMasterNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
-                                    subdomain_id_type lower_dimensional_secondary_subdomain_id);
+  void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
+                                     subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
 private:
   /// Whether to print debug output

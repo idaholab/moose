@@ -222,7 +222,7 @@ NodalFrictionalConstraint::computeResidual(NumericVector<Number> &
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
     _j = _primary_conn[_i];
-    re(_j) += computeQpResidual(Moose::Master);
+    re(_j) += computeQpResidual(Moose::Primary);
     neighbor_re(_i) += computeQpResidual(Moose::Secondary);
     break;
   }
@@ -251,7 +251,7 @@ NodalFrictionalConstraint::computeQpResidual(Moose::ConstraintType type)
   {
     case Moose::Secondary:
       return current_force;
-    case Moose::Master:
+    case Moose::Primary:
       return -current_force;
   }
   return 0;
@@ -277,9 +277,9 @@ NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
   for (_i = 0; _i < secondarydof.size(); ++_i)
   {
     _j = _primary_conn[_i];
-    Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
-    Ken(_j, _i) += computeQpJacobian(Moose::MasterSecondary);
-    Kne(_i, _j) += computeQpJacobian(Moose::SecondaryMaster);
+    Kee(_j, _j) += computeQpJacobian(Moose::PrimaryPrimary);
+    Ken(_j, _i) += computeQpJacobian(Moose::PrimarySecondary);
+    Kne(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
     Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
   }
   _assembly.cacheJacobianBlock(Kee, primarydof, primarydof, _var.scalingFactor());
@@ -311,11 +311,11 @@ NodalFrictionalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   {
     case Moose::SecondarySecondary:
       return jac;
-    case Moose::SecondaryMaster:
+    case Moose::SecondaryPrimary:
       return -jac;
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       return jac;
-    case Moose::MasterSecondary:
+    case Moose::PrimarySecondary:
       return -jac;
     default:
       mooseError("Invalid type");

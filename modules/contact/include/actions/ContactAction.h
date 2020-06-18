@@ -76,7 +76,7 @@ public:
   static InputParameters commonParameters();
 
 protected:
-  /// Master boundary name for mechanical contact
+  /// Primary boundary name for mechanical contact
   const BoundaryName _primary;
   /// Secondary boundary name for mechanical contact
   const BoundaryName _secondary;

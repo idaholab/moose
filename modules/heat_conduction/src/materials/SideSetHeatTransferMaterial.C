@@ -33,10 +33,10 @@ validParams<SideSetHeatTransferMaterial>()
       "h_primary", 0.0, "Convective heat transfer coefficient (primary face) in W/m^2/K.");
   params.addParam<FunctionName>(
       "h_neighbor", 0.0, "Convective heat transfer coefficient (neighbor face) in W/m^2/K.");
-  params.addParam<FunctionName>("emissivity_primary", 0.0, "Master face emissivity.");
+  params.addParam<FunctionName>("emissivity_primary", 0.0, "Primary face emissivity.");
   params.addParam<FunctionName>("emissivity_neighbor", 0.0, "Neighbor face emissivity.");
   params.addParam<FunctionName>("reflectivity_primary",
-                                "Master face reflectivity, uses (1-emissivity) if not provided.");
+                                "Primary face reflectivity, uses (1-emissivity) if not provided.");
   params.addParam<FunctionName>("reflectivity_neighbor",
                                 "Neighbor face reflectivity, uses (1-emissivity) if not provided.");
   return params;

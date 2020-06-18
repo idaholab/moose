@@ -9,5 +9,5 @@
 - /Contact/ContactPressureVarAction
 - /Contact/NodalAreaAction
 - /Contact/NodalAreaVarAction
-- /DiracKernels/ContactMaster
+- /DiracKernels/ContactPrimary
 - /DiracKernels/SecondaryConstraint

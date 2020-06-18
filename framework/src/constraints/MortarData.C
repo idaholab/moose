@@ -149,7 +149,7 @@ MortarData::update(AutomaticMortarGeneration & amg)
   amg.projectSecondaryNodes();
 
   // Project primary nodes (find xi^(1) values).
-  amg.projectMasterNodes();
+  amg.projectPrimaryNodes();
 
   // Build the mortar segment mesh on the secondary boundary.
   amg.buildMortarSegmentMesh();
