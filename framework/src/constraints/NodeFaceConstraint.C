@@ -26,7 +26,8 @@ NodeFaceConstraint::validParams()
 {
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   InputParameters params = Constraint::validParams();
-  params.addRequiredParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
+  params.addRequiredParam<BoundaryName>("secondary",
+                                        "The boundary ID associated with the secondary side");
   params.addRequiredParam<BoundaryName>("primary",
                                         "The boundary ID associated with the primary side");
   params.addParam<Real>("tangential_tolerance",
@@ -38,7 +39,8 @@ NodeFaceConstraint::validParams()
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
-  params.addRequiredCoupledVar("primary_variable", "The variable on the primary side of the domain");
+  params.addRequiredCoupledVar("primary_variable",
+                               "The variable on the primary side of the domain");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 
@@ -47,8 +49,8 @@ NodeFaceConstraint::validParams()
 
 NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
   : Constraint(parameters),
-    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side and
-    // it is not at nodes (so passing false)
+    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side
+    // and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
@@ -163,8 +165,8 @@ NodeFaceConstraint::computeJacobian()
 
   //  DenseMatrix<Number> & Kne = _assembly.jacobianBlockNeighbor(Moose::NeighborElement,
   //  _var.number(), _var.number());
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());

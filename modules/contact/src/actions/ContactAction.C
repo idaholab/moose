@@ -83,9 +83,10 @@ ContactAction::validParams()
   params.addParam<bool>("normalize_penalty",
                         false,
                         "Whether to normalize the penalty parameter with the nodal area.");
-  params.addParam<bool>("primary_secondary_jacobian",
-                        true,
-                        "Whether to include Jacobian entries coupling primary and secondary nodes.");
+  params.addParam<bool>(
+      "primary_secondary_jacobian",
+      true,
+      "Whether to include Jacobian entries coupling primary and secondary nodes.");
   params.addParam<Real>("al_penetration_tolerance",
                         "The tolerance of the penetration for augmented Lagrangian method.");
   params.addParam<Real>("al_incremental_slip_tolerance",
@@ -97,12 +98,12 @@ ContactAction::validParams()
       "c_normal", 1, "Parameter for balancing the size of the gap and contact pressure");
   params.addParam<Real>(
       "c_tangential", 1, "Parameter for balancing the contact pressure and velocity");
-  params.addParam<bool>(
-      "ping_pong_protection",
-      false,
-      "Whether to protect against ping-ponging, e.g. the oscillation of the secondary node between two "
-      "different primary faces, by tying the secondary node to the "
-      "edge between the involved primary faces");
+  params.addParam<bool>("ping_pong_protection",
+                        false,
+                        "Whether to protect against ping-ponging, e.g. the oscillation of the "
+                        "secondary node between two "
+                        "different primary faces, by tying the secondary node to the "
+                        "edge between the involved primary faces");
   params.addParam<Real>(
       "normal_lm_scaling", 1., "Scaling factor to apply to the normal LM variable");
   params.addParam<Real>(
@@ -321,8 +322,8 @@ ContactAction::addMortarContact()
     // Add the lagrange multiplier on the secondary subdomain.
     const auto addLagrangeMultiplier =
         [this, &secondary_subdomain_name, &displacements](const std::string & variable_name,
-                                                      const int codimension,
-                                                      const Real scaling_factor) //
+                                                          const int codimension,
+                                                          const Real scaling_factor) //
     {
       InputParameters params = _factory.getValidParams("MooseVariableBase");
       params.set<bool>("use_dual") = _use_dual;

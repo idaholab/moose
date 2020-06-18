@@ -466,7 +466,8 @@ GapConductance::computeGapValues()
       for (unsigned int i = 0; i < secondary_side_dof_indices.size(); ++i)
       {
         // The zero index is because we only have one point that the phis are evaluated at
-        _gap_temp += secondary_side_phi[i][0] * (*(*_serialized_solution))(secondary_side_dof_indices[i]);
+        _gap_temp +=
+            secondary_side_phi[i][0] * (*(*_serialized_solution))(secondary_side_dof_indices[i]);
       }
     }
     else

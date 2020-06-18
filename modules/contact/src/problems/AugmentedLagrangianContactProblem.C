@@ -128,7 +128,8 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
 
         if (constraints.hasActiveNodeFaceConstraints(secondary_boundary, displaced))
         {
-          const auto & ncs = constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
+          const auto & ncs =
+              constraints.getActiveNodeFaceConstraints(secondary_boundary, displaced);
 
           for (const auto & nc : ncs)
           {

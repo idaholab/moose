@@ -239,9 +239,10 @@ NodalFrictionalConstraint::computeQpResidual(Moose::ConstraintType type)
                                            _friction_coefficient * _normal_force))
     old_force = _friction_coefficient * _normal_force * old_force / std::abs(old_force);
 
-  Real current_force = ((_u_secondary[_i] - _u_secondary_old[_i]) - (_u_primary[_j] - _u_primary_old[_j])) *
-                           _tangential_penalty +
-                       old_force;
+  Real current_force =
+      ((_u_secondary[_i] - _u_secondary_old[_i]) - (_u_primary[_j] - _u_primary_old[_j])) *
+          _tangential_penalty +
+      old_force;
   if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force),
                                            _friction_coefficient * _normal_force))
     current_force = _friction_coefficient * _normal_force * current_force / std::abs(current_force);
@@ -298,9 +299,10 @@ NodalFrictionalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
                                            _friction_coefficient * _normal_force))
     old_force = _friction_coefficient * _normal_force * old_force / std::abs(old_force);
 
-  Real current_force = ((_u_secondary[_i] - _u_secondary_old[_i]) - (_u_primary[_j] - _u_primary_old[_j])) *
-                           _tangential_penalty +
-                       old_force;
+  Real current_force =
+      ((_u_secondary[_i] - _u_secondary_old[_i]) - (_u_primary[_j] - _u_primary_old[_j])) *
+          _tangential_penalty +
+      old_force;
   if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(current_force),
                                            _friction_coefficient * _normal_force))
     jac = 0.0;

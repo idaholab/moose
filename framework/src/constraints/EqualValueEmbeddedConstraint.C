@@ -203,7 +203,7 @@ EqualValueEmbeddedConstraint::computeQpJacobian(Moose::ConstraintJacobianType ty
       {
         case Formulation::KINEMATIC:
           secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                   _connected_dof_indices[_j]);
+                                       _connected_dof_indices[_j]);
           return secondary_jac * _test_primary[_i][_qp];
         case Formulation::PENALTY:
           return -_phi_secondary[_j][_qp] * penalty * _test_primary[_i][_qp];
@@ -251,7 +251,7 @@ EqualValueEmbeddedConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobian
       {
         case Formulation::KINEMATIC:
           secondary_jac = (*_jacobian)(_current_node->dof_number(sys_num, _var.number(), 0),
-                                   _connected_dof_indices[_j]);
+                                       _connected_dof_indices[_j]);
           return secondary_jac * _test_primary[_i][_qp];
         case Formulation::PENALTY:
           return 0.0;
@@ -275,8 +275,8 @@ EqualValueEmbeddedConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 

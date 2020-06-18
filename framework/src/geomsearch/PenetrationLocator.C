@@ -120,8 +120,9 @@ PenetrationLocator::detectPenetration()
 
   std::vector<dof_id_type> recheck_secondary_nodes = pt._recheck_secondary_nodes;
 
-  // Update the patch for the secondary nodes in recheck_secondary_nodes and re-run penetration thread on
-  // these nodes at every nonlinear iteration if patch update strategy is set to "iteration".
+  // Update the patch for the secondary nodes in recheck_secondary_nodes and re-run penetration
+  // thread on these nodes at every nonlinear iteration if patch update strategy is set to
+  // "iteration".
   if (recheck_secondary_nodes.size() > 0 && _patch_update_strategy == Moose::Iteration &&
       _subproblem.currentlyComputingJacobian())
   {
@@ -129,7 +130,8 @@ PenetrationLocator::detectPenetration()
     _nearest_node.updatePatch(recheck_secondary_nodes);
 
     // Re-run the penetration thread to see if these nodes are in contact with the updated patch
-    NodeIdRange recheck_secondary_node_range(recheck_secondary_nodes.begin(), recheck_secondary_nodes.end(), 1);
+    NodeIdRange recheck_secondary_node_range(
+        recheck_secondary_nodes.begin(), recheck_secondary_nodes.end(), 1);
 
     Threads::parallel_reduce(recheck_secondary_node_range, pt);
   }

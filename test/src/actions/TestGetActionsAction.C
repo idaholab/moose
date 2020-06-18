@@ -62,9 +62,10 @@ TestGetActionsAction::act()
         std::string action_name;
         comm.receive(pid, action_name);
         if (action_name != actions[i]->name())
-          mooseError("error occurs during getting actions, action names are inconsistent on primary "
-                     "and rank ",
-                     pid);
+          mooseError(
+              "error occurs during getting actions, action names are inconsistent on primary "
+              "and rank ",
+              pid);
       }
     }
   }

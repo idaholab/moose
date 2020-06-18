@@ -135,7 +135,8 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // Clear exiting data
   amg.clear();
 
-  // Construct maps from nodes -> lower dimensional elements on the primary and secondary boundaries.
+  // Construct maps from nodes -> lower dimensional elements on the primary and secondary
+  // boundaries.
   amg.buildNodeToElemMaps();
 
   // Compute nodal normals.

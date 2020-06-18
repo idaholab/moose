@@ -17,10 +17,10 @@ InterfaceValueMaterial::validParams()
 {
   InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("Calculates a variable's jump value across an interface.");
-  params.addRequiredParam<std::string>("mat_prop_primary",
-                                       "The material property on the primary side of the interface");
-  params.addRequiredParam<std::string>("mat_prop_secondary",
-                                       "The material property on the secondary side of the interface");
+  params.addRequiredParam<std::string>(
+      "mat_prop_primary", "The material property on the primary side of the interface");
+  params.addRequiredParam<std::string>(
+      "mat_prop_secondary", "The material property on the secondary side of the interface");
   params.addRequiredParam<std::string>("mat_prop_out_basename",
                                        "The base name for the output material property");
   params.addRequiredCoupledVar(
@@ -58,18 +58,18 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
     _nl_var_secondary(coupledNeighborValue("nl_var_secondary")),
     _couple_old_values_and_properties(getParam<bool>("couple_old_values_and_properties")),
     _mp_primary_old(_couple_old_values_and_properties
-                       ? &getMaterialPropertyOldByName<Real>(_mp_primary_name)
-                       : nullptr),
+                        ? &getMaterialPropertyOldByName<Real>(_mp_primary_name)
+                        : nullptr),
     _mp_secondary_old(_couple_old_values_and_properties
-                      ? &getNeighborMaterialPropertyOld<Real>(_mp_secondary_name)
-                      : nullptr),
+                          ? &getNeighborMaterialPropertyOld<Real>(_mp_secondary_name)
+                          : nullptr),
     _var_primary_old(_couple_old_values_and_properties ? &coupledValueOld("var_primary") : nullptr),
     _var_secondary_old(_couple_old_values_and_properties ? &coupledNeighborValueOld("var_secondary")
-                                                     : nullptr),
-    _nl_var_primary_old(_couple_old_values_and_properties ? &coupledValueOld("nl_var_primary")
                                                          : nullptr),
-    _nl_var_secondary_old(_couple_old_values_and_properties ? &coupledNeighborValueOld("nl_var_secondary")
-                                                        : nullptr),
+    _nl_var_primary_old(_couple_old_values_and_properties ? &coupledValueOld("nl_var_primary")
+                                                          : nullptr),
+    _nl_var_secondary_old(
+        _couple_old_values_and_properties ? &coupledNeighborValueOld("nl_var_secondary") : nullptr),
     _interface_value_type(parameters.get<MooseEnum>("interface_value_type")),
     _mp_out_base_name(getParam<std::string>("mat_prop_out_basename")),
     _mp_var_out_base_name(getParam<std::string>("mat_prop_var_out_basename")),
@@ -101,8 +101,8 @@ InterfaceValueMaterial::computeQpProperties()
 
   _interface_value[_qp] =
       InterfaceValueTools::getQuantity(_interface_value_type, _mp_primary[_qp], _mp_secondary[_qp]);
-  _interface_value_2[_qp] =
-      InterfaceValueTools::getQuantity(_interface_value_type, _var_primary[_qp], _var_secondary[_qp]);
+  _interface_value_2[_qp] = InterfaceValueTools::getQuantity(
+      _interface_value_type, _var_primary[_qp], _var_secondary[_qp]);
   _jump[_qp] = _nl_var_primary[_qp] - _nl_var_secondary[_qp];
 
   if (_couple_old_values_and_properties)

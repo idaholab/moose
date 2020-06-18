@@ -289,8 +289,8 @@ NonlinearSystemBase::initialSetup()
       auto primary_secondary_boundary_pair = mortar_interface.first;
       const auto & mortar_generation_object = mortar_interface.second;
 
-      auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, /*displaced=*/false);
+      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
+          primary_secondary_boundary_pair, /*displaced=*/false);
 
       _undisplaced_mortar_functors.emplace(primary_secondary_boundary_pair,
                                            ComputeMortarFunctor(mortar_constraints,
@@ -308,8 +308,8 @@ NonlinearSystemBase::initialSetup()
       auto primary_secondary_boundary_pair = mortar_interface.first;
       const auto & mortar_generation_object = mortar_interface.second;
 
-      auto & mortar_constraints =
-          _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, /*displaced=*/true);
+      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
+          primary_secondary_boundary_pair, /*displaced=*/true);
 
       _displaced_mortar_functors.emplace(primary_secondary_boundary_pair,
                                          ComputeMortarFunctor(mortar_constraints,
@@ -1152,8 +1152,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     {
       // Make sure that secondary contribution to primary are assembled, and ghosts have been
       // exchanged, as current primarys might become secondarys on next iteration and will need to
-      // contribute their former secondarys' contributions to the future primarys. See if constraints
-      // were applied anywhere
+      // contribute their former secondarys' contributions to the future primarys. See if
+      // constraints were applied anywhere
       _communicator.max(constraints_applied);
 
       if (constraints_applied)

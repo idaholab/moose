@@ -161,9 +161,10 @@ InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
 }
 
 void
-InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & primary,
-                                                            const MooseObjectParameterName & secondary,
-                                                            bool error_on_empty /*=true*/)
+InputParameterWarehouse::addControllableParameterConnection(
+    const MooseObjectParameterName & primary,
+    const MooseObjectParameterName & secondary,
+    bool error_on_empty /*=true*/)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {

@@ -115,11 +115,13 @@ private:
    * nearest node searching.
    *
    * @param secondary_id The actual secondary_id (the one in the mesh)
-   * @param qsecondary_id The "fictitious" secondary_id that is going to be used for this quadrature nodeset
+   * @param qsecondary_id The "fictitious" secondary_id that is going to be used for this quadrature
+   * nodeset
    * @param reiniting Whether we are reinitializing, e.g. whether we need to re-generate q-nodes
    */
-  void
-  generateQuadratureNodes(unsigned int secondary_id, unsigned int qsecondary_id, bool reiniting = false);
+  void generateQuadratureNodes(unsigned int secondary_id,
+                               unsigned int qsecondary_id,
+                               bool reiniting = false);
 
   /**
    * Update the positions of the quadrature nodes.

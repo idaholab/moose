@@ -174,7 +174,8 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 void
 SlaveNeighborhoodThread::join(const SlaveNeighborhoodThread & other)
 {
-  _secondary_nodes.insert(_secondary_nodes.end(), other._secondary_nodes.begin(), other._secondary_nodes.end());
+  _secondary_nodes.insert(
+      _secondary_nodes.end(), other._secondary_nodes.begin(), other._secondary_nodes.end());
   _ghosted_elems.insert(other._ghosted_elems.begin(), other._ghosted_elems.end());
   _neighbor_nodes.insert(other._neighbor_nodes.begin(), other._neighbor_nodes.end());
 }

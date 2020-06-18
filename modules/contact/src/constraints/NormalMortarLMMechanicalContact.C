@@ -32,15 +32,17 @@ NormalMortarLMMechanicalContact::validParams()
 
 NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputParameters & parameters)
   : ADMortarConstraint(parameters),
-    _secondary_disp_y(isParamValid("secondary_disp_y") ? &this->_subproblem.getStandardVariable(
-                                                     _tid, parameters.getMooseType("secondary_disp_y"))
-                                               : nullptr),
-    _primary_disp_y(
-        isParamValid("primary_disp_y")
-            ? &this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_disp_y"))
-            : isParamValid("secondary_disp_y") ? &this->_subproblem.getStandardVariable(
-                                                 _tid, parameters.getMooseType("secondary_disp_y"))
-                                           : nullptr),
+    _secondary_disp_y(isParamValid("secondary_disp_y")
+                          ? &this->_subproblem.getStandardVariable(
+                                _tid, parameters.getMooseType("secondary_disp_y"))
+                          : nullptr),
+    _primary_disp_y(isParamValid("primary_disp_y")
+                        ? &this->_subproblem.getStandardVariable(
+                              _tid, parameters.getMooseType("primary_disp_y"))
+                        : isParamValid("secondary_disp_y")
+                              ? &this->_subproblem.getStandardVariable(
+                                    _tid, parameters.getMooseType("secondary_disp_y"))
+                              : nullptr),
     _computing_gap_dependence(false),
     _secondary_disp_y_sln(nullptr),
     _primary_disp_y_sln(nullptr),
@@ -49,9 +51,10 @@ NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputPara
 {
   if (_secondary_disp_y)
   {
-    mooseAssert(_primary_disp_y,
-                "It doesn't make any sense that we have a secondary displacement variable and not a "
-                "primary displacement variable");
+    mooseAssert(
+        _primary_disp_y,
+        "It doesn't make any sense that we have a secondary displacement variable and not a "
+        "primary displacement variable");
     _computing_gap_dependence = true;
     _secondary_disp_y_sln = &_secondary_disp_y->adSln();
     _primary_disp_y_sln = &_primary_disp_y->adSlnNeighbor();
@@ -72,9 +75,10 @@ NormalMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_type
         {
           // Here we're assuming that the user provided the x-component as the secondary/primary
           // variable!
-          gap_vec(0).derivatives() = _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
-          gap_vec(1).derivatives() =
-              (*_primary_disp_y_sln)[_qp].derivatives() - (*_secondary_disp_y_sln)[_qp].derivatives();
+          gap_vec(0).derivatives() =
+              _u_primary[_qp].derivatives() - _u_secondary[_qp].derivatives();
+          gap_vec(1).derivatives() = (*_primary_disp_y_sln)[_qp].derivatives() -
+                                     (*_secondary_disp_y_sln)[_qp].derivatives();
         }
 
         auto gap = gap_vec * _normals[_qp];

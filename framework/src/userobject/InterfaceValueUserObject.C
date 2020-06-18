@@ -29,7 +29,8 @@ InterfaceValueUserObject::InterfaceValueUserObject(const InputParameters & param
 }
 
 Real
-InterfaceValueUserObject::computeInterfaceValueType(const Real value_primary, const Real value_secondary)
+InterfaceValueUserObject::computeInterfaceValueType(const Real value_primary,
+                                                    const Real value_secondary)
 {
   return InterfaceValueTools::getQuantity(_interface_value_type, value_primary, value_secondary);
 }

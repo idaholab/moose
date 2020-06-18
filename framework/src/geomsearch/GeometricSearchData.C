@@ -205,7 +205,8 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
 }
 
 NearestNodeLocator &
-GeometricSearchData::getNearestNodeLocator(const BoundaryName & primary, const BoundaryName & secondary)
+GeometricSearchData::getNearestNodeLocator(const BoundaryName & primary,
+                                           const BoundaryName & secondary)
 {
   unsigned int primary_id = _mesh.getBoundaryID(primary);
   unsigned int secondary_id = _mesh.getBoundaryID(secondary);

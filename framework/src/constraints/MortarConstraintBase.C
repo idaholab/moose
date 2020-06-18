@@ -105,8 +105,8 @@ MortarConstraintBase::computeResidual(bool has_primary)
     // Compute the residual for the secondary interior primal dofs
     computeResidual(Moose::MortarType::Slave);
 
-    // Compute the residual for the primary interior primal dofs. If we don't have a primary element,
-    // then we don't have any primary dofs
+    // Compute the residual for the primary interior primal dofs. If we don't have a primary
+    // element, then we don't have any primary dofs
     if (_has_primary)
       computeResidual(Moose::MortarType::Master);
   }
@@ -126,8 +126,8 @@ MortarConstraintBase::computeJacobian(bool has_primary)
     // Compute the jacobian for the secondary interior primal dofs
     computeJacobian(Moose::MortarType::Slave);
 
-    // Compute the jacobian for the primary interior primal dofs. If we don't have a primary element,
-    // then we don't have any primary dofs
+    // Compute the jacobian for the primary interior primal dofs. If we don't have a primary
+    // element, then we don't have any primary dofs
     if (_has_primary)
       computeJacobian(Moose::MortarType::Master);
   }

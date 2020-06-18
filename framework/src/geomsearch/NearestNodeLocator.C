@@ -133,7 +133,8 @@ NearestNodeLocator::findNodes()
     // primary nodes.
     KDTree kd_tree(primary_points, _mesh.getMaxLeafSize());
 
-    NodeIdRange trial_secondary_node_range(trial_secondary_nodes.begin(), trial_secondary_nodes.end(), 1);
+    NodeIdRange trial_secondary_node_range(
+        trial_secondary_nodes.begin(), trial_secondary_nodes.end(), 1);
 
     SlaveNeighborhoodThread snt(
         _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
@@ -315,7 +316,8 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
   for (const auto & node_id : tracked_secondary_nodes)
     _neighbor_nodes[node_id] = snt._neighbor_nodes[node_id];
 
-  NodeIdRange tracked_secondary_node_range(tracked_secondary_nodes.begin(), tracked_secondary_nodes.end(), 1);
+  NodeIdRange tracked_secondary_node_range(
+      tracked_secondary_nodes.begin(), tracked_secondary_nodes.end(), 1);
 
   NearestNodeThread nnt(_mesh, snt._neighbor_nodes);
 

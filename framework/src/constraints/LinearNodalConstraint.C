@@ -22,13 +22,14 @@ LinearNodalConstraint::validParams()
   params.addClassDescription(
       "Constrains secondary node to move as a linear combination of primary nodes.");
   params.addRequiredParam<std::vector<unsigned int>>("primary", "The primary node IDs.");
-  params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The list of secondary node ids");
+  params.addParam<std::vector<unsigned int>>("secondary_node_ids",
+                                             "The list of secondary node ids");
   params.addParam<BoundaryName>(
       "secondary_node_set", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
-  params.addRequiredParam<std::vector<Real>>(
-      "weights",
-      "The weights associated with the primary node ids. Must be of the same size as primary nodes");
+  params.addRequiredParam<std::vector<Real>>("weights",
+                                             "The weights associated with the primary node ids. "
+                                             "Must be of the same size as primary nodes");
   return params;
 }
 
@@ -48,7 +49,8 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
     mooseError("Please specify secondary_node_ids or secondary_node_set.");
   else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
-    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
+    std::vector<dof_id_type> nodelist =
+        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
@@ -87,9 +89,9 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
   /**
    * Slave residual is u_secondary - weights[1]*u_primary[1]-weights[2]*u_primary[2] ...
    *-u_primary[n]*weights[n]
-   * However, computeQPresidual is calculated for only a combination of one primary and one secondary
-   *node at a time. To get around this, the residual is split up such that the final secondary residual
-   *resembles the above expression.
+   * However, computeQPresidual is calculated for only a combination of one primary and one
+   *secondary node at a time. To get around this, the residual is split up such that the final
+   *secondary residual resembles the above expression.
    **/
 
   unsigned int primary_size = _primary_node_ids.size();

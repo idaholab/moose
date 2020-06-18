@@ -145,8 +145,9 @@ SlaveConstraint::addPoints()
           elem = cur_elem;
       }
 
-      mooseAssert(elem,
-                  "Couldn't find an element on this processor that is attached to the secondary node!");
+      mooseAssert(
+          elem,
+          "Couldn't find an element on this processor that is attached to the secondary node!");
 
       addPoint(elem, *node);
       _point_to_info[*node] = pinfo;

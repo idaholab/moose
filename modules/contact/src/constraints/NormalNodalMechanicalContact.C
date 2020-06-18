@@ -87,8 +87,8 @@ NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
       switch (type)
       {
         case Moose::ConstraintType::Slave:
-          // This normal appears to point in the opposite direction of the secondary surface so we need
-          // a negative sign
+          // This normal appears to point in the opposite direction of the secondary surface so we
+          // need a negative sign
           return _lambda * -pinfo->_normal(_component);
 
         case Moose::ConstraintType::Master:

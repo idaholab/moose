@@ -485,8 +485,8 @@ protected:
 
   /**
    * Calls buildLocalToGlobalIndices to build the individual local to global indicies for each rank
-   * and scatters that information to all ranks. Finally, the non-primary ranks update their own data
-   * structures to reflect the global mappings.
+   * and scatters that information to all ranks. Finally, the non-primary ranks update their own
+   * data structures to reflect the global mappings.
    */
   void scatterAndUpdateRanks();
 

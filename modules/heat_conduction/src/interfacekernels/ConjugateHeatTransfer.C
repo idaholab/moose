@@ -25,7 +25,8 @@ ConjugateHeatTransfer::validParams()
                                "e.g. when the fluid heat equation is solved for internal energy");
   params.addClassDescription(
       "This InterfaceKernel models conjugate heat transfer. Fluid side must "
-      "be primary side and solid side must be secondary side. T_fluid is provided in case that variable "
+      "be primary side and solid side must be secondary side. T_fluid is provided in case that "
+      "variable "
       "(== fluid energy variable) is not temperature but e.g. internal energy.");
   return params;
 }

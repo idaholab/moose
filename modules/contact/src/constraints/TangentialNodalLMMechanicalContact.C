@@ -205,9 +205,9 @@ TangentialNodalLMMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJa
       if (_contact_pressure < _epsilon)
         return 0.;
 
-      // Our local dual number is going to depend on only three degrees of freedom: the secondary nodal
-      // dofs for disp_x (index 0), disp_y (index 1), and the contact pressure (index 2). The latter
-      // of course exists only on the secondary side
+      // Our local dual number is going to depend on only three degrees of freedom: the secondary
+      // nodal dofs for disp_x (index 0), disp_y (index 1), and the contact pressure (index 2). The
+      // latter of course exists only on the secondary side
       typedef DualNumber<Real, DNDerivativeSize<3>> LocalDN;
 
       RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);

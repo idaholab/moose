@@ -53,15 +53,15 @@ ContactSplit::ContactSplit(const InputParameters & params)
   if (_contact_primary.size() != _contact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and secondary contact lists must have matching sizes: " << _contact_primary.size()
-        << " != " << _contact_secondary.size();
+    err << "Master and secondary contact lists must have matching sizes: "
+        << _contact_primary.size() << " != " << _contact_secondary.size();
     mooseError(err.str());
   }
   if (_contact_displaced.size() && _contact_primary.size() != _contact_displaced.size())
   {
     std::ostringstream err;
-    err << "Master and displaced contact lists must have matching sizes: " << _contact_primary.size()
-        << " != " << _contact_displaced.size();
+    err << "Master and displaced contact lists must have matching sizes: "
+        << _contact_primary.size() << " != " << _contact_displaced.size();
     mooseError(err.str());
   }
   if (!_contact_displaced.size())
@@ -70,8 +70,8 @@ ContactSplit::ContactSplit(const InputParameters & params)
   if (_uncontact_primary.size() != _uncontact_secondary.size())
   {
     std::ostringstream err;
-    err << "Master and secondary uncontact lists must have matching sizes: " << _uncontact_primary.size()
-        << " != " << _uncontact_secondary.size();
+    err << "Master and secondary uncontact lists must have matching sizes: "
+        << _uncontact_primary.size() << " != " << _uncontact_secondary.size();
     mooseError(err.str());
   }
   if (_uncontact_displaced.size() && _uncontact_primary.size() != _uncontact_displaced.size())

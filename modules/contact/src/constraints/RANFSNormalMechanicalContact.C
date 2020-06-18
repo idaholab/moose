@@ -32,12 +32,12 @@ RANFSNormalMechanicalContact::validParams()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<bool>(
-      "ping_pong_protection",
-      false,
-      "Whether to protect against ping-ponging, e.g. the oscillation of the secondary node between two "
-      "different primary faces, by tying the secondary node to the "
-      "edge between the involved primary faces");
+  params.addParam<bool>("ping_pong_protection",
+                        false,
+                        "Whether to protect against ping-ponging, e.g. the oscillation of the "
+                        "secondary node between two "
+                        "different primary faces, by tying the secondary node to the "
+                        "edge between the involved primary faces");
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
@@ -118,8 +118,8 @@ RANFSNormalMechanicalContact::shouldApply()
     _pinfo = found->second;
     if (_pinfo)
     {
-      // We overwrite the secondary residual when constraints are active so we cannot use the residual
-      // copy for determining the Lagrange multiplier when computing the Jacobian
+      // We overwrite the secondary residual when constraints are active so we cannot use the
+      // residual copy for determining the Lagrange multiplier when computing the Jacobian
       if (!_subproblem.currentlyComputingJacobian())
       {
         // Build up residual vector corresponding to contact forces
@@ -326,8 +326,8 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       {
         // corresponds to gap equation
         if (_largest_component == static_cast<unsigned int>(_component))
-          // _phi_secondary has been set such that it is 1 when _j corresponds to the degree of freedom
-          // associated with the _current node and 0 otherwise
+          // _phi_secondary has been set such that it is 1 when _j corresponds to the degree of
+          // freedom associated with the _current node and 0 otherwise
           return std::abs(_pinfo->_normal(_component)) * _phi_secondary[_j][_qp];
 
         // corresponds to regular residual with Lagrange Multiplier applied
@@ -412,8 +412,8 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
     }
 
-      // The only primary-primary dependence would come from the dependence of the normal and also the
-      // location of the integration (quadrature) points. We assume (valid or not) that this
+      // The only primary-primary dependence would come from the dependence of the normal and also
+      // the location of the integration (quadrature) points. We assume (valid or not) that this
       // dependence is weak
       // case MooseConstraintJacobianType::MasterMaster
 

@@ -26,7 +26,8 @@ NodeElemConstraint::validParams()
   InputParameters params = Constraint::validParams();
   params.addRequiredParam<SubdomainName>("secondary", "secondary block id");
   params.addRequiredParam<SubdomainName>("primary", "primary block id");
-  params.addRequiredCoupledVar("primary_variable", "The variable on the primary side of the domain");
+  params.addRequiredCoupledVar("primary_variable",
+                               "The variable on the primary side of the domain");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 
@@ -35,8 +36,8 @@ NodeElemConstraint::validParams()
 
 NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
   : Constraint(parameters),
-    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side and
-    // it is not at nodes (so passing false)
+    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side
+    // and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
@@ -119,8 +120,8 @@ NodeElemConstraint::computeJacobian()
   DenseMatrix<Number> & Ken =
       _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
   _Kne.resize(_test_primary.size(), _connected_dof_indices.size());

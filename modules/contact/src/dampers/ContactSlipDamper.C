@@ -65,7 +65,8 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
 
   unsigned int num_interactions = primary.size();
   if (num_interactions != secondary.size())
-    mooseError("Sizes of primary surface and secondary surface lists must match in ContactSlipDamper");
+    mooseError(
+        "Sizes of primary surface and secondary surface lists must match in ContactSlipDamper");
   if (num_interactions == 0)
     mooseError("Must define at least one primary/secondary pair in ContactSlipDamper");
 

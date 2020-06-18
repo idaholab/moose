@@ -473,8 +473,8 @@ void
 PenetrationThread::join(const PenetrationThread & other)
 {
   _recheck_secondary_nodes.insert(_recheck_secondary_nodes.end(),
-                              other._recheck_secondary_nodes.begin(),
-                              other._recheck_secondary_nodes.end());
+                                  other._recheck_secondary_nodes.begin(),
+                                  other._recheck_secondary_nodes.end());
 }
 
 void
@@ -1601,7 +1601,8 @@ PenetrationThread::getInfoForFacesWithCommonNodes(
         break;
       }
 
-      createInfoForElem(thisElemInfo, p_info, secondary_node, elems_connected_to_edge[i], edge_nodes);
+      createInfoForElem(
+          thisElemInfo, p_info, secondary_node, elems_connected_to_edge[i], edge_nodes);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)

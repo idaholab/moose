@@ -17,8 +17,9 @@ InputParameters
 EqualValueConstraint::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
-  params.addClassDescription("EqualValueConstraint enforces solution continuity between secondary and "
-                             "primary sides of a mortar interface using lagrange multipliers");
+  params.addClassDescription(
+      "EqualValueConstraint enforces solution continuity between secondary and "
+      "primary sides of a mortar interface using lagrange multipliers");
   return params;
 }
 

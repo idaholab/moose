@@ -72,9 +72,10 @@ MechanicalContactConstraint::validParams()
       "normalize_penalty",
       false,
       "Whether to normalize the penalty parameter with the nodal area for penalty contact.");
-  params.addParam<bool>("primary_secondary_jacobian",
-                        true,
-                        "Whether to include jacobian entries coupling primary and secondary nodes.");
+  params.addParam<bool>(
+      "primary_secondary_jacobian",
+      true,
+      "Whether to include jacobian entries coupling primary and secondary nodes.");
   params.addParam<bool>(
       "connected_secondary_nodes_jacobian",
       true,
@@ -102,10 +103,11 @@ MechanicalContactConstraint::validParams()
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
 
-  params.addClassDescription("Apply non-penetration constraints on the mechanical deformation "
-                             "using a node on face, primary/secondary algorithm, and multiple options "
-                             "for the physical behavior on the interface and the mathematical "
-                             "formulation for constraint enforcement");
+  params.addClassDescription(
+      "Apply non-penetration constraints on the mechanical deformation "
+      "using a node on face, primary/secondary algorithm, and multiple options "
+      "for the physical behavior on the interface and the mathematical "
+      "formulation for constraint enforcement");
 
   return params;
 }
@@ -266,7 +268,8 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
     if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
-    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num));
+    const Real distance =
+        pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num));
 
     if (beginning_of_step && _model == ContactModel::COULOMB)
     {
@@ -346,7 +349,8 @@ MechanicalContactConstraint::AugmentedLagrangianContactConverged()
     if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
-    const Real distance = pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num));
+    const Real distance =
+        pinfo->_normal * (pinfo->_closest_point - _mesh.nodeRef(secondary_node_num));
 
     if (pinfo->isCaptured())
     {
@@ -1021,9 +1025,10 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
                 for (unsigned int i = 0; i < _mesh_dimension; ++i)
                 {
                   dof_id_type dof_number = _current_node->dof_number(0, _vars[i], 0);
-                  jac_vec(i) = (*_jacobian)(dof_number,
-                                            curr_primary_node->dof_number(0, _vars[_component], 0)) /
-                               _var_objects[i]->scalingFactor();
+                  jac_vec(i) =
+                      (*_jacobian)(dof_number,
+                                   curr_primary_node->dof_number(0, _vars[_component], 0)) /
+                      _var_objects[i]->scalingFactor();
                 }
                 return -pinfo->_normal(_component) * (pinfo->_normal * jac_vec) -
                        (_phi_primary[_j][_qp] * penalty * _test_secondary[_i][_qp]) *
@@ -1721,8 +1726,8 @@ MechanicalContactConstraint::computeJacobian()
 {
   getConnectedDofIndices(_var.number());
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
   _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
 

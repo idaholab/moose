@@ -53,7 +53,8 @@ CoupledTiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
       retVal = (_u_secondary[_qp] - _u_primary[_qp]) * _test_secondary[_i][_qp] * _scaling;
       break;
     case Moose::Master:
-      secondary_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
+      secondary_resid =
+          _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
       retVal = secondary_resid * _test_primary[_i][_qp];
       break;
     default:

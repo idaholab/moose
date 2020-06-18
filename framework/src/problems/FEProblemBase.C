@@ -5789,8 +5789,11 @@ FEProblemBase::createMortarInterface(
                                               on_displaced,
                                               periodic);
   else
-    return _mortar_data.createMortarInterface(
-        primary_secondary_boundary_pair, primary_secondary_subdomain_pair, *this, on_displaced, periodic);
+    return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
+                                              primary_secondary_subdomain_pair,
+                                              *this,
+                                              on_displaced,
+                                              periodic);
 }
 
 const AutomaticMortarGeneration &

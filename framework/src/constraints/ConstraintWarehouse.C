@@ -55,7 +55,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     MooseMesh & mesh = mc->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
     bool displaced = mc->getParam<bool>("use_displaced_mesh");
 
-    auto secondary_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("secondary_boundary"));
+    auto secondary_boundary_id =
+        mesh.getBoundaryID(mc->getParam<BoundaryName>("secondary_boundary"));
     auto primary_boundary_id = mesh.getBoundaryID(mc->getParam<BoundaryName>("primary_boundary"));
     auto key = std::make_pair(primary_boundary_id, secondary_boundary_id);
 
@@ -149,9 +150,10 @@ ConstraintWarehouse::getActiveMortarConstraints(
     end_it = _mortar_constraints.end();
   }
 
-  mooseAssert(it != end_it,
-              "No MortarConstraints exist for the specified primary-secondary boundary pair, primary "
-                  << mortar_interface_key.first << " and secondary " << mortar_interface_key.second);
+  mooseAssert(
+      it != end_it,
+      "No MortarConstraints exist for the specified primary-secondary boundary pair, primary "
+          << mortar_interface_key.first << " and secondary " << mortar_interface_key.second);
 
   return it->second.getActiveObjects();
 }
@@ -319,8 +321,8 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
 
-      // Mortar constraints require the creation of a primary lower dimensional subdomain in order to
-      // create the mortar segment mesh. We don't need any computing objects on it
+      // Mortar constraints require the creation of a primary lower dimensional subdomain in order
+      // to create the mortar segment mesh. We don't need any computing objects on it
       subdomains_covered.insert(mc->primarySubdomain());
     }
   }
@@ -339,8 +341,8 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
         subdomains_covered.insert(lm_subdomains.begin(), lm_subdomains.end());
       }
 
-      // Mortar constraints require the creation of a primary lower dimensional subdomain in order to
-      // create the mortar segment mesh. We don't need any computing objects on it
+      // Mortar constraints require the creation of a primary lower dimensional subdomain in order
+      // to create the mortar segment mesh. We don't need any computing objects on it
       subdomains_covered.insert(mc->primarySubdomain());
     }
   }

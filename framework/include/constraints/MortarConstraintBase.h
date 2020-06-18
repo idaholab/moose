@@ -156,16 +156,16 @@ protected:
 
 #define usingMortarConstraintBaseMembers                                                           \
   usingConstraintMembers;                                                                          \
-  using ADMortarConstraint::_phys_points_secondary;                                                    \
-  using ADMortarConstraint::_phys_points_primary;                                                   \
-  using ADMortarConstraint::_has_primary;                                                           \
+  using ADMortarConstraint::_phys_points_secondary;                                                \
+  using ADMortarConstraint::_phys_points_primary;                                                  \
+  using ADMortarConstraint::_has_primary;                                                          \
   using ADMortarConstraint::_use_dual;                                                             \
   using ADMortarConstraint::_test;                                                                 \
-  using ADMortarConstraint::_test_secondary;                                                           \
-  using ADMortarConstraint::_test_primary;                                                          \
-  using ADMortarConstraint::_grad_test_secondary;                                                      \
-  using ADMortarConstraint::_grad_test_primary;                                                     \
+  using ADMortarConstraint::_test_secondary;                                                       \
+  using ADMortarConstraint::_test_primary;                                                         \
+  using ADMortarConstraint::_grad_test_secondary;                                                  \
+  using ADMortarConstraint::_grad_test_primary;                                                    \
   using ADMortarConstraint::_normals;                                                              \
   using ADMortarConstraint::_tangents;                                                             \
-  using ADMortarConstraint::_secondary_var;                                                            \
+  using ADMortarConstraint::_secondary_var;                                                        \
   using ADMortarConstraint::_primary_var

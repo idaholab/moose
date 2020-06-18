@@ -102,7 +102,8 @@ MortarPeriodicAction::act()
           primary_params.set<std::vector<BoundaryID>>("sidesets") = {primary_boundary_id};
           primary_params.set<MooseMesh *>("_mesh") = _mesh.get();
 
-          _app.addMeshModifier("LowerDBlockFromSideset", axis[i] + "_secondary_lower_d", secondary_params);
+          _app.addMeshModifier(
+              "LowerDBlockFromSideset", axis[i] + "_secondary_lower_d", secondary_params);
           _app.addMeshModifier(
               "LowerDBlockFromSideset", axis[i] + "_primary_lower_d", primary_params);
         }

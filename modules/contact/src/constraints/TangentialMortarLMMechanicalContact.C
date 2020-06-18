@@ -16,8 +16,8 @@ InputParameters
 TangentialMortarLMMechanicalContact::validParams()
 {
   auto params = MortarConstraintBase::validParams();
-  params.addRequiredParam<NonlinearVariableName>("secondary_disp_y",
-                                                 "The y displacement variable on the secondary face");
+  params.addRequiredParam<NonlinearVariableName>(
+      "secondary_disp_y", "The y displacement variable on the secondary face");
   params.addParam<NonlinearVariableName>("primary_disp_y",
                                          "The y displacement variable on the primary face");
   params.addRequiredParam<NonlinearVariableName>(
@@ -47,7 +47,8 @@ TangentialMortarLMMechanicalContact::TangentialMortarLMMechanicalContact(
     _primary_disp_y(
         isParamValid("primary_disp_y")
             ? this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_disp_y"))
-            : this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_disp_y"))),
+            : this->_subproblem.getStandardVariable(_tid,
+                                                    parameters.getMooseType("secondary_disp_y"))),
     _contact_pressure_var(
         this->_subproblem.getStandardVariable(_tid, parameters.getMooseType("contact_pressure"))),
     _contact_pressure(_contact_pressure_var.adSlnLower()),
@@ -76,8 +77,9 @@ TangentialMortarLMMechanicalContact::computeQpResidual(Moose::MortarType mortar_
         if (_contact_pressure[_qp] > TOLERANCE * TOLERANCE)
         {
           // Build the velocity vector
-          ADRealVectorValue relative_velocity(
-              _secondary_x_dot[_qp] - _primary_x_dot[_qp], _secondary_y_dot[_qp] - _primary_y_dot[_qp], 0);
+          ADRealVectorValue relative_velocity(_secondary_x_dot[_qp] - _primary_x_dot[_qp],
+                                              _secondary_y_dot[_qp] - _primary_y_dot[_qp],
+                                              0);
 
           // Get the component in the tangential direction
           auto tangential_velocity = relative_velocity * _tangents[_qp][0];

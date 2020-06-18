@@ -2218,11 +2218,12 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   std::vector<PetscBool> contact_displaced;
   PetscInt ncontacts = 0;
   opt = "-dm_moose_ncontacts";
-  help = "Number of contacts to include in DMMoose.  For each <n> < "
-         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
-         "defining the contact surfaces"
-         "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
-         "the displaced mesh or not";
+  help =
+      "Number of contacts to include in DMMoose.  For each <n> < "
+      "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
+      "defining the contact surfaces"
+      "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
+      "the displaced mesh or not";
   ierr = PetscOptionsInt(
       opt.c_str(), help.c_str(), "DMMooseSetContacts", ncontacts, &ncontacts, PETSC_NULL);
   CHKERRQ(ierr);
@@ -2253,8 +2254,8 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
                  "Expected 2 sideset IDs (primary & secondary) for contact %D, got %D instead",
                  i,
                  sz);
-      contacts.push_back(
-          DM_Moose::ContactName(std::string(primary_secondary[0]), std::string(primary_secondary[1])));
+      contacts.push_back(DM_Moose::ContactName(std::string(primary_secondary[0]),
+                                               std::string(primary_secondary[1])));
       ierr = PetscFree(primary_secondary[0]);
       CHKERRQ(ierr);
       ierr = PetscFree(primary_secondary[1]);
@@ -2298,11 +2299,12 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
   std::vector<PetscBool> uncontact_displaced;
   PetscInt nuncontacts = 0;
   opt = "-dm_moose_nuncontacts";
-  help = "Number of contacts to exclude from DMMoose.  For each <n> < "
-         "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
-         "defining the contact surfaces"
-         "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
-         "the displaced mesh or not";
+  help =
+      "Number of contacts to exclude from DMMoose.  For each <n> < "
+      "dm_moose_contacts\n\t-dm_moose_contact_<n> is a comma-separated <primary>,<secondary> pair "
+      "defining the contact surfaces"
+      "\t-dm_moose_contact_<n>_displaced <bool> determines whether the contact is defined on "
+      "the displaced mesh or not";
   ierr = PetscOptionsInt(
       opt.c_str(), help.c_str(), "DMMooseSetUnContacts", nuncontacts, &nuncontacts, PETSC_NULL);
   CHKERRQ(ierr);
@@ -2333,8 +2335,8 @@ PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
                  "Expected 2 sideset IDs (primary & secondary) for uncontact %D, got %D instead",
                  i,
                  sz);
-      uncontacts.push_back(
-          DM_Moose::ContactName(std::string(primary_secondary[0]), std::string(primary_secondary[1])));
+      uncontacts.push_back(DM_Moose::ContactName(std::string(primary_secondary[0]),
+                                                 std::string(primary_secondary[1])));
       ierr = PetscFree(primary_secondary[0]);
       CHKERRQ(ierr);
       ierr = PetscFree(primary_secondary[1]);

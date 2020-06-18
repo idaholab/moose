@@ -88,8 +88,8 @@ public:
   /**
    * Whether or not the secondary's Jacobian row should be overwritten.
    *
-   * When this returns true the secondary's Jacobian row as computed by the constraint will _replace_
-   * the residual previously at that node for that variable.
+   * When this returns true the secondary's Jacobian row as computed by the constraint will
+   * _replace_ the residual previously at that node for that variable.
    */
   virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
 

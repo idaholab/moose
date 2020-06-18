@@ -47,8 +47,8 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
 
     case Moose::MortarType::Master:
-      // The normal vector is signed according to the secondary face, so we need to introduce a negative
-      // sign here
+      // The normal vector is signed according to the secondary face, so we need to introduce a
+      // negative sign here
       return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
 
     default:

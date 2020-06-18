@@ -220,7 +220,8 @@ GapHeatTransfer::computeJacobian()
           "The number of shapes does not match the number of dof indices on the secondary elem");
 
       for (_i = 0; _i < _test.size(); _i++)
-        for (_secondary_j = 0; _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+        for (_secondary_j = 0;
+             _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpJacobian();
 
@@ -282,9 +283,11 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
           "The number of shapes does not match the number of dof indices on the secondary elem");
 
       for (_i = 0; _i < _test.size(); _i++)
-        for (_secondary_j = 0; _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
+        for (_secondary_j = 0;
+             _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
-          K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
+          K_secondary(_i, _secondary_j) +=
+              _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
           K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());

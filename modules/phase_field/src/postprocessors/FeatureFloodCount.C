@@ -1183,7 +1183,8 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
    * features and find the max local index seen on any processor
    * Note: This is all occurring on rank 0 only!
    */
-  mooseAssert(_is_primary, "cosolidateMergedFeatures() may only be called on the primary processor");
+  mooseAssert(_is_primary,
+              "cosolidateMergedFeatures() may only be called on the primary processor");
 
   // Offset where the current set of features with the same variable id starts in the flat vector
   unsigned int feature_offset = 0;

@@ -218,7 +218,8 @@ NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
         Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]);
         Kne(_i, _j) +=
             -jacobian(secondarydof[_i], primarydof[_j]) + computeQpJacobian(Moose::SlaveMaster);
-        Knn(_i, _i) += -jacobian(secondarydof[_i], secondarydof[_i]) + computeQpJacobian(Moose::SlaveSlave);
+        Knn(_i, _i) +=
+            -jacobian(secondarydof[_i], secondarydof[_i]) + computeQpJacobian(Moose::SlaveSlave);
         break;
     }
   }

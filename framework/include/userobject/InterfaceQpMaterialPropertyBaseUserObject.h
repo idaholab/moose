@@ -94,11 +94,11 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned in
     if (_dt != 0)
     {
       value_primary = (computeScalarMaterialProperty(&_prop, qp) -
-                      computeScalarMaterialProperty(_prop_old, qp)) /
-                     _dt;
+                       computeScalarMaterialProperty(_prop_old, qp)) /
+                      _dt;
       value_secondary = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
-                     computeScalarMaterialProperty(_prop_neighbor_old, qp)) /
-                    _dt;
+                         computeScalarMaterialProperty(_prop_neighbor_old, qp)) /
+                        _dt;
     }
   }
   else if (_value_type == 2) /*increment*/
@@ -106,7 +106,7 @@ InterfaceQpMaterialPropertyBaseUserObject<T>::computeRealValue(const unsigned in
     value_primary =
         (computeScalarMaterialProperty(&_prop, qp) - computeScalarMaterialProperty(_prop_old, qp));
     value_secondary = (computeScalarMaterialProperty(&_prop_neighbor, qp) -
-                   computeScalarMaterialProperty(_prop_neighbor_old, qp));
+                       computeScalarMaterialProperty(_prop_neighbor_old, qp));
   }
   else
     mooseError("InterfaceQpMaterialPropertyBaseUserObject::computeRealValue the supplied "

@@ -25,7 +25,8 @@ protected:
   /**
    * method computing an interface value give two Real quantities
    **/
-  virtual Real computeInterfaceValueType(const Real /*value_primary*/, const Real /*value_secondary*/);
+  virtual Real computeInterfaceValueType(const Real /*value_primary*/,
+                                         const Real /*value_secondary*/);
 
   /// the average type to be computed across the interface
   const MooseEnum _interface_value_type;

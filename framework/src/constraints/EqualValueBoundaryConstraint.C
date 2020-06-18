@@ -59,7 +59,8 @@ EqualValueBoundaryConstraint::validParams()
       std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
-  params.addParam<BoundaryName>("secondary", "NaN", "The boundary ID associated with the secondary side");
+  params.addParam<BoundaryName>(
+      "secondary", "NaN", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
@@ -90,7 +91,8 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     mooseError("Please specify secondary node ids or boundary id.");
   else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
-    std::vector<dof_id_type> nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
+    std::vector<dof_id_type> nodelist =
+        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
     std::vector<dof_id_type>::iterator in;
 
     // Set primary node to first node of the secondary node set if no primary node id is provided

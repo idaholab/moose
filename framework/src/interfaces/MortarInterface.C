@@ -28,7 +28,8 @@ MortarInterface::validParams()
   params.addRequiredParam<BoundaryName>("secondary_boundary",
                                         "The name of the secondary boundary sideset.");
   params.addRequiredParam<SubdomainName>("primary_subdomain", "The name of the primary subdomain.");
-  params.addRequiredParam<SubdomainName>("secondary_subdomain", "The name of the secondary subdomain.");
+  params.addRequiredParam<SubdomainName>("secondary_subdomain",
+                                         "The name of the secondary subdomain.");
   params.addParam<bool>(
       "periodic",
       false,
@@ -43,7 +44,8 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
   : _moi_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _moi_mesh(_moi_problem.mesh()),
     _mortar_data(_moi_problem.mortarData()),
-    _secondary_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
+    _secondary_id(
+        _moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
     _primary_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("primary_boundary"))),
     _secondary_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("secondary_subdomain"))),
