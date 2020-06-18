@@ -49,6 +49,8 @@ public:
     SELF_PERCENT,
     CHILDREN_PERCENT,
     TOTAL_PERCENT,
+    SELF_MEMORY,
+    CHILDREN_MEMORY,
     TOTAL_MEMORY
   };
 
@@ -152,6 +154,28 @@ public:
   }
 
   /**
+   * Get a reference to the self memory usage for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anyting updateTiming() is called
+   */
+  const long int & getSelfMemory(const std::string & section_name)
+  {
+    return _section_time[section_name]._self_memory;
+  }
+
+  /**
+   * Get a reference to the children memory usage for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anyting updateTiming() is called
+   */
+  const long int & getChildrenMemory(const std::string & section_name)
+  {
+    return _section_time[section_name]._children_memory;
+  }
+
+  /**
    * Get a reference to the total memory usage for a section
    *
    * This reference can be held onto and the value
@@ -170,19 +194,17 @@ public:
 protected:
   typedef VariadicTable<std::string,
                         unsigned long int,
+                        Real,
+                        Real,
+                        Real,
                         long int,
                         Real,
                         Real,
                         Real,
-                        Real,
-                        Real,
-                        Real,
-                        Real,
-                        Real,
-                        Real>
+                        long int>
       FullTable;
 
-  typedef VariadicTable<std::string, unsigned long int, long int, Real, Real, Real> HeaviestTable;
+  typedef VariadicTable<std::string, unsigned long int, Real, Real, Real, long int> HeaviestTable;
 
   /**
    * Use to hold the time for each section
@@ -195,6 +217,8 @@ protected:
     Real _children = 0.;
     Real _total = 0.;
     unsigned long int _num_calls = 0;
+    long int _self_memory = 0;
+    long int _children_memory = 0;
     long int _total_memory = 0;
   };
 

@@ -33,3 +33,20 @@ PerfNode::childrenTime() const
 
   return children_time;
 }
+
+long int
+PerfNode::selfMemory()
+{
+  return _total_memory - childrenMemory();
+}
+
+long int
+PerfNode::childrenMemory()
+{
+  long int children_memory = 0;
+
+  for (auto & child_it : _children)
+    children_memory += child_it.second->totalMemory();
+
+  return children_memory;
+}
