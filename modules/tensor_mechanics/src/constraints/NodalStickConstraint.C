@@ -209,17 +209,17 @@ NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
     {
       case Moose::Penalty:
         Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
-        Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
-        Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
-        Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
+        Ken(_j, _i) += computeQpJacobian(Moose::MasterSecondary);
+        Kne(_i, _j) += computeQpJacobian(Moose::SecondaryMaster);
+        Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
         break;
       case Moose::Kinematic:
         Kee(_j, _j) = 0.;
         Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]);
         Kne(_i, _j) +=
-            -jacobian(secondarydof[_i], primarydof[_j]) + computeQpJacobian(Moose::SlaveMaster);
+            -jacobian(secondarydof[_i], primarydof[_j]) + computeQpJacobian(Moose::SecondaryMaster);
         Knn(_i, _i) +=
-            -jacobian(secondarydof[_i], secondarydof[_i]) + computeQpJacobian(Moose::SlaveSlave);
+            -jacobian(secondarydof[_i], secondarydof[_i]) + computeQpJacobian(Moose::SecondarySecondary);
         break;
     }
   }
@@ -246,13 +246,13 @@ NodalStickConstraint::computeResidual(NumericVector<Number> & residual)
     {
       case Moose::Penalty:
         re(_j) += computeQpResidual(Moose::Master) * _var.scalingFactor();
-        neighbor_re(_i) += computeQpResidual(Moose::Slave) * _var.scalingFactor();
+        neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var.scalingFactor();
         break;
       case Moose::Kinematic:
         // Transfer the current residual of the secondary node to the primary nodes
         Real res = residual(secondarydof[_i]);
         re(_j) += res;
-        neighbor_re(_i) += -res + computeQpResidual(Moose::Slave);
+        neighbor_re(_i) += -res + computeQpResidual(Moose::Secondary);
         break;
     }
   }
@@ -265,7 +265,7 @@ NodalStickConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-    case Moose::Slave:
+    case Moose::Secondary:
       return (_u_secondary[_i] - _u_primary[_j]) * _penalty;
     case Moose::Master:
       return (_u_primary[_j] - _u_secondary[_i]) * _penalty;
@@ -278,13 +278,13 @@ NodalStickConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   switch (type)
   {
-    case Moose::SlaveSlave:
+    case Moose::SecondarySecondary:
       return _penalty;
-    case Moose::SlaveMaster:
+    case Moose::SecondaryMaster:
       return -_penalty;
     case Moose::MasterMaster:
       return _penalty;
-    case Moose::MasterSlave:
+    case Moose::MasterSecondary:
       return -_penalty;
     default:
       mooseError("Invalid type");

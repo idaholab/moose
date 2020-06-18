@@ -35,11 +35,11 @@ InputParameters validParams<MortarConstraintBase>();
  *
  *              T_m             T_s         lambda
  *         +--------------+-------------+-------------+
- * T_m     |  K_1         |             | SlaveMaster |
+ * T_m     |  K_1         |             | SecondaryMaster |
  *         +--------------+-------------+-------------+
- * T_s     |              |  K_2        | SlaveSlave  |
+ * T_s     |              |  K_2        | SecondarySecondary  |
  *         +--------------+-------------+-------------+
- * lambda  | MasterMaster | MasterSlave |             |
+ * lambda  | MasterMaster | MasterSecondary |             |
  *         +--------------+-------------+-------------+
  *
  */

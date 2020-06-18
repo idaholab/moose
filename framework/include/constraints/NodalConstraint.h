@@ -59,9 +59,9 @@ public:
    * Get the list of connected secondary nodes
    * @return list of secondary node IDs
    */
-  std::vector<dof_id_type> & getSlaveNodeId()
+  std::vector<dof_id_type> & getSecondaryNodeId()
   {
-    mooseDeprecated("'getSlaveNodeId' is deprecated and will be removed on July 1st, 2020. Please "
+    mooseDeprecated("'getSecondaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
                     "use 'getSecondaryNodeId' instead.");
     return _connected_nodes;
   }

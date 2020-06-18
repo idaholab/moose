@@ -2633,9 +2633,9 @@ Assembly::prepareLowerD()
          tag++)
     {
       // To cover all possible cases we should have 9 combinations below for every 2-permutation of
-      // Lower,Slave,Master. However, 4 cases will in general be covered by calls to prepare() and
-      // prepareNeighbor(). These calls will cover SlaveSlave (ElementElement), SlaveMaster
-      // (ElementNeighbor), MasterSlave (NeighborElement), and MasterMaster (NeighborNeighbor). With
+      // Lower,Secondary,Master. However, 4 cases will in general be covered by calls to prepare() and
+      // prepareNeighbor(). These calls will cover SecondarySecondary (ElementElement), SecondaryMaster
+      // (ElementNeighbor), MasterSecondary (NeighborElement), and MasterMaster (NeighborNeighbor). With
       // these covered we only need to prepare the 5 remaining below
 
       // derivatives w.r.t. lower dimensional residuals
@@ -2643,7 +2643,7 @@ Assembly::prepareLowerD()
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jcount);
 
-      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
+      jacobianBlockLower(Moose::LowerSecondary, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndices().size() * jvar.count());
 
@@ -2652,7 +2652,7 @@ Assembly::prepareLowerD()
                   jvar.dofIndicesNeighbor().size() * jvar.count());
 
       // derivatives w.r.t. interior secondary residuals
-      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag)
+      jacobianBlockLower(Moose::SecondaryLower, vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
@@ -2932,19 +2932,19 @@ Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
       default:
       case Moose::LowerLower:
         return _sub_Kll[tag][ivar][0];
-      case Moose::LowerSlave:
+      case Moose::LowerSecondary:
         return _sub_Kle[tag][ivar][0];
       case Moose::LowerMaster:
         return _sub_Kln[tag][ivar][0];
-      case Moose::SlaveLower:
+      case Moose::SecondaryLower:
         return _sub_Kel[tag][ivar][0];
-      case Moose::SlaveSlave:
+      case Moose::SecondarySecondary:
         return _sub_Kee[tag][ivar][0];
-      case Moose::SlaveMaster:
+      case Moose::SecondaryMaster:
         return _sub_Ken[tag][ivar][0];
       case Moose::MasterLower:
         return _sub_Knl[tag][ivar][0];
-      case Moose::MasterSlave:
+      case Moose::MasterSecondary:
         return _sub_Kne[tag][ivar][0];
       case Moose::MasterMaster:
         return _sub_Knn[tag][ivar][0];
@@ -2957,19 +2957,19 @@ Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
       default:
       case Moose::LowerLower:
         return _sub_Kll[tag][ivar][jvar];
-      case Moose::LowerSlave:
+      case Moose::LowerSecondary:
         return _sub_Kle[tag][ivar][jvar];
       case Moose::LowerMaster:
         return _sub_Kln[tag][ivar][jvar];
-      case Moose::SlaveLower:
+      case Moose::SecondaryLower:
         return _sub_Kel[tag][ivar][jvar];
-      case Moose::SlaveSlave:
+      case Moose::SecondarySecondary:
         return _sub_Kee[tag][ivar][jvar];
-      case Moose::SlaveMaster:
+      case Moose::SecondaryMaster:
         return _sub_Ken[tag][ivar][jvar];
       case Moose::MasterLower:
         return _sub_Knl[tag][ivar][jvar];
-      case Moose::MasterSlave:
+      case Moose::MasterSecondary:
         return _sub_Kne[tag][ivar][jvar];
       case Moose::MasterMaster:
         return _sub_Knn[tag][ivar][jvar];
@@ -3698,7 +3698,7 @@ Assembly::addJacobianLower()
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerSlave, i, j, tag),
+                         jacobianBlockLower(Moose::LowerSecondary, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
@@ -3712,7 +3712,7 @@ Assembly::addJacobianLower()
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::SlaveLower, i, j, tag),
+                         jacobianBlockLower(Moose::SecondaryLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),

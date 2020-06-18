@@ -37,18 +37,18 @@ protected:
   /**
    * compute the Jacobian contributions from the secondary side degrees of freedom
    */
-  Real computeSlaveQpJacobian();
+  Real computeSecondaryQpJacobian();
 
   /**
    * compute the displacement Jacobian contributions from the secondary side degrees of freedom
    */
-  Real computeSlaveQpOffDiagJacobian(unsigned int jvar);
+  Real computeSecondaryQpOffDiagJacobian(unsigned int jvar);
 
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
   virtual Real gapLength() const;
   virtual Real dgapLength(Real normalComponent) const;
-  virtual Real computeSlaveFluxContribution(Real grad_t);
+  virtual Real computeSecondaryFluxContribution(Real grad_t);
   virtual void computeGapValues();
 
   GapConductance::GAP_GEOMETRY & _gap_geometry_type;

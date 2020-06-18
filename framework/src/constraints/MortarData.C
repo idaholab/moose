@@ -146,7 +146,7 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // amg.writeNodalNormalsToFile();
 
   // Project secondary nodes (find xi^(2) values).
-  amg.projectSlaveNodes();
+  amg.projectSecondaryNodes();
 
   // Project primary nodes (find xi^(1) values).
   amg.projectMasterNodes();

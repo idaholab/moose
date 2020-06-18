@@ -41,7 +41,7 @@
   [../]
 
   [./secondary_x]
-    type = SlaveConstraint
+    type = SecondaryConstraint
     variable = disp_x
     component = 0
     boundary = 2
@@ -49,7 +49,7 @@
   [../]
 
   [./secondary_y]
-    type = SlaveConstraint
+    type = SecondaryConstraint
     variable = disp_y
     component = 1
     boundary = 2
@@ -57,7 +57,7 @@
   [../]
 
   [./secondary_z]
-    type = SlaveConstraint
+    type = SecondaryConstraint
     variable = disp_z
     component = 2
     boundary = 2

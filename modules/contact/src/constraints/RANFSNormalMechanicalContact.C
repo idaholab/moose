@@ -100,7 +100,7 @@ RANFSNormalMechanicalContact::residualSetup()
 }
 
 bool
-RANFSNormalMechanicalContact::overwriteSlaveResidual()
+RANFSNormalMechanicalContact::overwriteSecondaryResidual()
 {
   if (_tie_nodes)
     return true;
@@ -272,7 +272,7 @@ RANFSNormalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-    case Moose::ConstraintType::Slave:
+    case Moose::ConstraintType::Secondary:
     {
       if (_tie_nodes)
         return (*_current_node - *_nearest_node)(_component);
@@ -316,7 +316,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
 {
   switch (type)
   {
-    case Moose::ConstraintJacobianType::SlaveSlave:
+    case Moose::ConstraintJacobianType::SecondarySecondary:
     {
       if (_tie_nodes)
         return _phi_secondary[_j][_qp];
@@ -350,7 +350,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
     }
 
-    case Moose::ConstraintJacobianType::SlaveMaster:
+    case Moose::ConstraintJacobianType::SecondaryMaster:
     {
       if (_tie_nodes)
       {
@@ -377,7 +377,7 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
       }
     }
 
-    case Moose::ConstraintJacobianType::MasterSlave:
+    case Moose::ConstraintJacobianType::MasterSecondary:
     {
       if (_tie_nodes)
       {
@@ -423,12 +423,12 @@ RANFSNormalMechanicalContact::computeQpJacobian(Moose::ConstraintJacobianType ty
 }
 
 void
-RANFSNormalMechanicalContact::computeSlaveValue(NumericVector<Number> &)
+RANFSNormalMechanicalContact::computeSecondaryValue(NumericVector<Number> &)
 {
 }
 
 Real
-RANFSNormalMechanicalContact::computeQpSlaveValue()
+RANFSNormalMechanicalContact::computeQpSecondaryValue()
 {
-  mooseError("We overrode commputeSlaveValue so computeQpSlaveValue should never get called");
+  mooseError("We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
 }

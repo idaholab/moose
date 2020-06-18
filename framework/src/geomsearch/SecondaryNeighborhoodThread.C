@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SlaveNeighborhoodThread.h"
+#include "SecondaryNeighborhoodThread.h"
 
 #include "AuxiliarySystem.h"
 #include "Problem.h"
@@ -16,7 +16,7 @@
 
 #include "libmesh/threads.h"
 
-SlaveNeighborhoodThread::SlaveNeighborhoodThread(
+SecondaryNeighborhoodThread::SecondaryNeighborhoodThread(
     const MooseMesh & mesh,
     const std::vector<dof_id_type> & trial_primary_nodes,
     const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
@@ -31,7 +31,7 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(
 }
 
 // Splitting Constructor
-SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x,
+SecondaryNeighborhoodThread::SecondaryNeighborhoodThread(SecondaryNeighborhoodThread & x,
                                                  Threads::split /*split*/)
   : _kd_tree(x._kd_tree),
     _mesh(x._mesh),
@@ -48,7 +48,7 @@ SlaveNeighborhoodThread::SlaveNeighborhoodThread(SlaveNeighborhoodThread & x,
  * then it may be time to update
  */
 void
-SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
+SecondaryNeighborhoodThread::operator()(const NodeIdRange & range)
 {
   unsigned int patch_size =
       std::min(_patch_size, static_cast<unsigned int>(_trial_primary_nodes.size()));
@@ -172,7 +172,7 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 }
 
 void
-SlaveNeighborhoodThread::join(const SlaveNeighborhoodThread & other)
+SecondaryNeighborhoodThread::join(const SecondaryNeighborhoodThread & other)
 {
   _secondary_nodes.insert(
       _secondary_nodes.end(), other._secondary_nodes.begin(), other._secondary_nodes.end());

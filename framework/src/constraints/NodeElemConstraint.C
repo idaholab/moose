@@ -90,11 +90,11 @@ NodeElemConstraint::~NodeElemConstraint()
 }
 
 void
-NodeElemConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
+NodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_solution)
 {
   const dof_id_type & dof_idx = _var.nodalDofIndex();
   _qp = 0;
-  current_solution.set(dof_idx, computeQpSlaveValue());
+  current_solution.set(dof_idx, computeQpSecondaryValue());
 }
 
 void
@@ -109,7 +109,7 @@ NodeElemConstraint::computeResidual()
     primary_re(_i) += computeQpResidual(Moose::Master);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
-    secondary_re(_i) += computeQpResidual(Moose::Slave);
+    secondary_re(_i) += computeQpResidual(Moose::Secondary);
 }
 
 void
@@ -145,17 +145,17 @@ NodeElemConstraint::computeJacobian()
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
+      _Kee(_i, _j) += computeQpJacobian(Moose::SecondarySecondary);
 
   if (Ken.m() && Ken.n())
     for (_i = 0; _i < _test_secondary.size(); _i++)
       for (_j = 0; _j < _phi_primary.size(); _j++)
-        Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
+        Ken(_i, _j) += computeQpJacobian(Moose::SecondaryMaster);
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
+      _Kne(_i, _j) += computeQpJacobian(Moose::MasterSecondary);
 
   if (Knn.m() && Knn.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
@@ -195,17 +195,17 @@ NodeElemConstraint::computeOffDiagJacobian(unsigned int jvar)
   for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
 
   for (_i = 0; _i < _test_secondary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
-      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryMaster, jvar);
 
   if (_Kne.m() && _Kne.n())
     for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSecondary, jvar);
 
   for (_i = 0; _i < _test_primary.size(); _i++)
     for (_j = 0; _j < _phi_primary.size(); _j++)
@@ -240,7 +240,7 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
 }
 
 bool
-NodeElemConstraint::overwriteSlaveResidual()
+NodeElemConstraint::overwriteSecondaryResidual()
 {
   return _overwrite_secondary_residual;
 }

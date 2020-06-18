@@ -778,10 +778,10 @@ NonlinearSystemBase::setInitialSolution()
   }
 
   // Set constraint secondary values
-  setConstraintSlaveValues(initial_solution, false);
+  setConstraintSecondaryValues(initial_solution, false);
 
   if (_fe_problem.getDisplacedProblem())
-    setConstraintSlaveValues(initial_solution, true);
+    setConstraintSecondaryValues(initial_solution, true);
 }
 
 void
@@ -864,7 +864,7 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getMasterNodeId();
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
@@ -893,7 +893,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
     const auto & ncs = _constraints.getActiveNodalConstraints();
     for (const auto & nc : ncs)
     {
-      std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
+      std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
       std::vector<dof_id_type> & primary_node_ids = nc->getMasterNodeId();
 
       if ((secondary_node_ids.size() > 0) && (primary_node_ids.size() > 0))
@@ -909,7 +909,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
 }
 
 void
-NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced)
+NonlinearSystemBase::setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced)
 {
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
@@ -971,7 +971,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
               if (nfc->shouldApply())
               {
                 constraints_applied = true;
-                nfc->computeSlaveValue(solution);
+                nfc->computeSecondaryValue(solution);
               }
           }
         }
@@ -1020,7 +1020,7 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
               if (nec->shouldApply())
               {
                 constraints_applied = true;
-                nec->computeSlaveValue(solution);
+                nec->computeSecondaryValue(solution);
               }
             }
           }
@@ -1119,7 +1119,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                 constraints_applied = true;
                 nfc->computeResidual();
 
-                if (nfc->overwriteSlaveResidual())
+                if (nfc->overwriteSecondaryResidual())
                 {
                   // The below will actually overwrite the residual for every single dof that lives
                   // on the node. We definitely don't want to do that!
@@ -1300,7 +1300,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
                 constraints_applied = true;
                 nec->computeResidual();
 
-                if (nec->overwriteSlaveResidual())
+                if (nec->overwriteSecondaryResidual())
                 {
                   _fe_problem.setResidual(residual, 0);
                   residual_has_inserted_values = true;
@@ -1700,7 +1700,7 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
     _communicator.allgather(primary_dofs);
 
     std::vector<dof_id_type> secondary_dofs;
-    std::vector<dof_id_type> & secondary_node_ids = nc->getSlaveNodeId();
+    std::vector<dof_id_type> & secondary_node_ids = nc->getSecondaryNodeId();
     for (const auto & node_id : secondary_node_ids)
     {
       Node * node = _mesh.queryNodePtr(node_id);
@@ -1850,7 +1850,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                 nfc->computeJacobian();
 
-                if (nfc->overwriteSlaveJacobian())
+                if (nfc->overwriteSecondaryJacobian())
                 {
                   // Add this variable's dof's row to be zeroed
                   zero_rows.push_back(nfc->variable().nodalDofIndex());
@@ -1863,7 +1863,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 // (e.g. Kernels), hence we should not apply a scalingFactor that is normally
                 // based on the order of their other physics (e.g. Kernels)
                 Real scaling_factor =
-                    nfc->overwriteSlaveJacobian() ? 1. : nfc->variable().scalingFactor();
+                    nfc->overwriteSecondaryJacobian() ? 1. : nfc->variable().scalingFactor();
 
                 // Cache the jacobian block for the secondary side
                 _fe_problem.assembly(0).cacheJacobianBlock(
@@ -2113,7 +2113,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
                 nec->computeJacobian();
 
-                if (nec->overwriteSlaveJacobian())
+                if (nec->overwriteSecondaryJacobian())
                 {
                   // Add this variable's dof's row to be zeroed
                   zero_rows.push_back(nec->variable().nodalDofIndex());

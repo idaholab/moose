@@ -10,7 +10,7 @@
 #include "NearestNodeLocator.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
-#include "SlaveNeighborhoodThread.h"
+#include "SecondaryNeighborhoodThread.h"
 #include "NearestNodeThread.h"
 #include "Moose.h"
 #include "KDTree.h"
@@ -136,7 +136,7 @@ NearestNodeLocator::findNodes()
     NodeIdRange trial_secondary_node_range(
         trial_secondary_nodes.begin(), trial_secondary_nodes.end(), 1);
 
-    SlaveNeighborhoodThread snt(
+    SecondaryNeighborhoodThread snt(
         _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
     Threads::parallel_reduce(trial_secondary_node_range, snt);
@@ -151,7 +151,7 @@ NearestNodeLocator::findNodes()
     // secondary and neighboring primary nodes.
     if (_patch_update_strategy == Moose::Iteration)
     {
-      SlaveNeighborhoodThread snt_ghosting(
+      SecondaryNeighborhoodThread snt_ghosting(
           _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
       Threads::parallel_reduce(trial_secondary_node_range, snt_ghosting);
@@ -295,13 +295,13 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
 
   NodeIdRange secondary_node_range(secondary_nodes.begin(), secondary_nodes.end(), 1);
 
-  SlaveNeighborhoodThread snt(
+  SecondaryNeighborhoodThread snt(
       _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
   Threads::parallel_reduce(secondary_node_range, snt);
 
   // Calculate new ghosting patch for the secondary_node_range
-  SlaveNeighborhoodThread snt_ghosting(
+  SecondaryNeighborhoodThread snt_ghosting(
       _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
   Threads::parallel_reduce(secondary_node_range, snt_ghosting);

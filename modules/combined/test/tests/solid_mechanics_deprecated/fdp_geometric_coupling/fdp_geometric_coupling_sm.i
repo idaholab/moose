@@ -1,5 +1,5 @@
 [Mesh]
-  file = twoBlocksContactDiceSlave2OffsetGap.e
+  file = twoBlocksContactDiceSecondary2OffsetGap.e
 []
 
 [GlobalParams]

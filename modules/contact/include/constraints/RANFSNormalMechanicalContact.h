@@ -37,11 +37,11 @@ public:
   void residualSetup() override;
   void timestepSetup() override;
   void initialSetup() override;
-  bool overwriteSlaveResidual() override;
-  void computeSlaveValue(NumericVector<Number> & solution) override;
+  bool overwriteSecondaryResidual() override;
+  void computeSecondaryValue(NumericVector<Number> & solution) override;
 
 protected:
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;

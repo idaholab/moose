@@ -585,7 +585,7 @@ enum DGJacobianType
 
 enum ConstraintType
 {
-  Slave = Element,
+  Secondary = Element,
   Master = Neighbor
 };
 
@@ -598,7 +598,7 @@ enum class ElementType : unsigned int
 
 enum class MortarType : unsigned int
 {
-  Slave = static_cast<unsigned int>(Moose::ElementType::Element),
+  Secondary = static_cast<unsigned int>(Moose::ElementType::Element),
   Master = static_cast<unsigned int>(Moose::ElementType::Neighbor),
   Lower = static_cast<unsigned int>(Moose::ElementType::Lower)
 };
@@ -614,14 +614,14 @@ enum class RESTARTABLE_FILTER : unsigned char
 
 enum ConstraintJacobianType
 {
-  SlaveSlave = ElementElement,
-  SlaveMaster = ElementNeighbor,
-  MasterSlave = NeighborElement,
+  SecondarySecondary = ElementElement,
+  SecondaryMaster = ElementNeighbor,
+  MasterSecondary = NeighborElement,
   MasterMaster = NeighborNeighbor,
   LowerLower,
-  LowerSlave,
+  LowerSecondary,
   LowerMaster,
-  SlaveLower,
+  SecondaryLower,
   MasterLower
 };
 

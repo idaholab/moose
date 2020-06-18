@@ -36,7 +36,7 @@ TiedValueConstraint::TiedValueConstraint(const InputParameters & parameters)
 }
 
 Real
-TiedValueConstraint::computeQpSlaveValue()
+TiedValueConstraint::computeQpSecondaryValue()
 {
   return _u_primary[_qp];
 }
@@ -49,7 +49,7 @@ TiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
   Real retVal = 0;
   switch (type)
   {
-    case Moose::Slave:
+    case Moose::Secondary:
       retVal = (_u_secondary[_qp] - _u_primary[_qp]) * _test_secondary[_i][_qp] * _scaling;
       break;
     case Moose::Master:
@@ -71,13 +71,13 @@ TiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   Real retVal = 0;
   switch (type)
   {
-    case Moose::SlaveSlave:
+    case Moose::SecondarySecondary:
       retVal = _phi_secondary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::SlaveMaster:
+    case Moose::SecondaryMaster:
       retVal = -_phi_primary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::MasterSlave:
+    case Moose::MasterSecondary:
       secondary_jac =
           (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
       retVal = secondary_jac * _test_primary[_i][_qp] / scaling_factor;

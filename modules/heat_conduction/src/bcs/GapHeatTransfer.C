@@ -179,7 +179,7 @@ GapHeatTransfer::computeQpResidual()
   if (!_quadrature)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mutex);
-    const Real secondary_flux = computeSlaveFluxContribution(grad_t);
+    const Real secondary_flux = computeSecondaryFluxContribution(grad_t);
     _secondary_flux->add(_var.dofIndices()[_i], secondary_flux);
   }
 
@@ -187,7 +187,7 @@ GapHeatTransfer::computeQpResidual()
 }
 
 Real
-GapHeatTransfer::computeSlaveFluxContribution(Real grad_t)
+GapHeatTransfer::computeSecondaryFluxContribution(Real grad_t)
 {
   return _coord[_qp] * _JxW[_qp] * _test[_i][_qp] * grad_t;
 }
@@ -223,7 +223,7 @@ GapHeatTransfer::computeJacobian()
         for (_secondary_j = 0;
              _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
-          K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSlaveQpJacobian();
+          K_secondary(_i, _secondary_j) += _JxW[_qp] * _coord[_qp] * computeSecondaryQpJacobian();
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
           K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
@@ -287,7 +287,7 @@ GapHeatTransfer::computeJacobianBlock(unsigned int jvar)
              _secondary_j < static_cast<unsigned int>(secondary_side_dof_indices.size());
              ++_secondary_j)
           K_secondary(_i, _secondary_j) +=
-              _JxW[_qp] * _coord[_qp] * computeSlaveQpOffDiagJacobian(jvar);
+              _JxW[_qp] * _coord[_qp] * computeSecondaryQpOffDiagJacobian(jvar);
 
       _subproblem.assembly(_tid).cacheJacobianBlock(
           K_secondary, _var.dofIndices(), secondary_side_dof_indices, _var.scalingFactor());
@@ -310,7 +310,7 @@ GapHeatTransfer::computeQpJacobian()
 }
 
 Real
-GapHeatTransfer::computeSlaveQpJacobian()
+GapHeatTransfer::computeSecondaryQpJacobian()
 {
   return _test[_i][_qp] *
          ((_u[_qp] - _gap_temp) * _edge_multiplier * _gap_conductance_dT[_qp] -
@@ -377,7 +377,7 @@ GapHeatTransfer::computeQpOffDiagJacobian(unsigned jvar)
 }
 
 Real
-GapHeatTransfer::computeSlaveQpOffDiagJacobian(unsigned jvar)
+GapHeatTransfer::computeSecondaryQpOffDiagJacobian(unsigned jvar)
 {
   if (!_has_info)
     return 0.0;

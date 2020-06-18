@@ -39,7 +39,7 @@ public:
 
   virtual void updateContactStatefulData(bool beginning_of_step = false);
 
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
 

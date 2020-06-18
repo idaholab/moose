@@ -21,14 +21,14 @@ ContactSplit::validParams()
   params.addParam<std::vector<std::string>>("contact_primary",
                                             "Master surface list for included contacts");
   params.addParam<std::vector<std::string>>("contact_secondary",
-                                            "Slave surface list for included contacts");
+                                            "Secondary surface list for included contacts");
   params.addParam<std::vector<int>>(
       "contact_displaced",
       "List of indicators whether displaced mesh is used to define included contact");
   params.addParam<std::vector<std::string>>("uncontact_primary",
                                             "Master surface list for excluded contacts");
   params.addParam<std::vector<std::string>>("uncontact_secondary",
-                                            "Slave surface list for excluded contacts");
+                                            "Secondary surface list for excluded contacts");
   params.addParam<std::vector<int>>(
       "uncontact_displaced",
       "List of indicators whether displaced mesh is used to define excluded contact");

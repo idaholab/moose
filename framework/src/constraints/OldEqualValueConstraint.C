@@ -35,7 +35,7 @@ OldEqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {
-    case Moose::MortarType::Slave:
+    case Moose::MortarType::Secondary:
       return -_lambda[_qp] * _test_secondary[_i][_qp];
     case Moose::MortarType::Master:
       return _lambda[_qp] * _test_primary[_i][_qp];
@@ -54,7 +54,7 @@ OldEqualValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType jacobia
 
   switch (jacobian_type)
   {
-    case JType::SlaveLower:
+    case JType::SecondaryLower:
       if (jvar == _var->number())
         return -(*_phi)[_j][_qp] * _test_secondary[_i][_qp];
       break;
@@ -64,7 +64,7 @@ OldEqualValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType jacobia
         return (*_phi)[_j][_qp] * _test_primary[_i][_qp];
       break;
 
-    case JType::LowerSlave:
+    case JType::LowerSecondary:
       if (jvar == _secondary_var.number())
         return -(*_phi)[_j][_qp] * _test[_i][_qp];
       break;

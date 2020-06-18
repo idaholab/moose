@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SlaveConstraint.h"
+#include "SecondaryConstraint.h"
 
 // Moose includes
 #include "SystemBase.h"
@@ -18,10 +18,10 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseObject("ContactApp", SlaveConstraint);
+registerMooseObject("ContactApp", SecondaryConstraint);
 
 InputParameters
-SlaveConstraint::validParams()
+SecondaryConstraint::validParams()
 {
   InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
@@ -58,7 +58,7 @@ SlaveConstraint::validParams()
   return params;
 }
 
-SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
+SecondaryConstraint::SecondaryConstraint(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
@@ -109,7 +109,7 @@ SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
 }
 
 void
-SlaveConstraint::addPoints()
+SecondaryConstraint::addPoints()
 {
   _point_to_info.clear();
 
@@ -156,7 +156,7 @@ SlaveConstraint::addPoints()
 }
 
 Real
-SlaveConstraint::computeQpResidual()
+SecondaryConstraint::computeQpResidual()
 {
   PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
@@ -183,7 +183,7 @@ SlaveConstraint::computeQpResidual()
 }
 
 Real
-SlaveConstraint::computeQpJacobian()
+SecondaryConstraint::computeQpJacobian()
 {
 
   // TODO: for the default formulation,
@@ -304,7 +304,7 @@ SlaveConstraint::computeQpJacobian()
 }
 
 Real
-SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
+SecondaryConstraint::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 

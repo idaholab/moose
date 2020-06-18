@@ -108,7 +108,7 @@ public:
    *
    * Defined in the file project_secondary_nodes.C.
    */
-  void projectSlaveNodes();
+  void projectSecondaryNodes();
 
   /**
    * (Inverse) project primary nodes to the points on the secondary surface
@@ -172,7 +172,7 @@ public:
   std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_secondary_elem_map;
   std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_primary_elem_map;
 
-  // Similar to the map above, but associates a (Slave Node, Slave Elem)
+  // Similar to the map above, but associates a (Secondary Node, Secondary Elem)
   // pair to a (xi^(2), primary Elem) pair. This allows a single secondary node, which is
   // potentially connected to two elements on the secondary side, to be associated with
   // multiple primary Elem/xi^(2) values to handle the case where the primary and secondary
@@ -193,7 +193,7 @@ public:
       secondary_node_and_elem_to_xi2_primary_elem;
 
   // Same type of container, but for mapping (Master Node ID, Master Node,
-  // Master Elem) -> (xi^(1), Slave Elem) where they are inverse-projected along
+  // Master Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
   // the nodal normal direction. Note that the first item of the key, the primary
   // node ID, is important for storing the key-value pairs in a consistent order
   // across processes, e.g. this container has to be ordered!
@@ -249,7 +249,7 @@ private:
    * onto primary elements for a single primary/secondary pair. Called by the class member
    * AutomaticMortarGeneration::project_secondary_nodes().
    */
-  void projectSlaveNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
+  void projectSecondaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                    subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
   /**

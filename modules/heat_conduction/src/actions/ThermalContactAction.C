@@ -147,7 +147,7 @@ ThermalContactAction::act()
   else if (_current_task == "add_material")
     addMaterials();
   else if (_current_task == "add_secondary_flux_vector")
-    addSlaveFluxVector();
+    addSecondaryFluxVector();
 }
 
 void
@@ -335,7 +335,7 @@ ThermalContactAction::addMaterials()
 }
 
 void
-ThermalContactAction::addSlaveFluxVector()
+ThermalContactAction::addSecondaryFluxVector()
 {
   _problem->getNonlinearSystemBase().addVector("secondary_flux", false, GHOSTED);
   _problem->getNonlinearSystemBase().zeroVectorForResidual("secondary_flux");

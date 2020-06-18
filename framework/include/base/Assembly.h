@@ -799,7 +799,7 @@ public:
                                 const std::vector<dof_id_type> & jdof_indices);
 
   /**
-   * Add LowerLower, LowerSlave (LowerElement), LowerMaster (LowerNeighbor), SlaveLower
+   * Add LowerLower, LowerSecondary (LowerElement), LowerMaster (LowerNeighbor), SecondaryLower
    * (ElementLower), and MasterLower (NeighborLower) portions of the Jacobian for compute objects
    * like MortarConstraints
    */

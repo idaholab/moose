@@ -35,7 +35,7 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
-    case Moose::MortarType::Slave:
+    case Moose::MortarType::Secondary:
       // If normals is positive, then this residual is positive, indicating that we have an outflow
       // of momentum, which in turn indicates that the momentum will tend to decrease at this
       // location with time, which is what we want because the force vector is in the negative

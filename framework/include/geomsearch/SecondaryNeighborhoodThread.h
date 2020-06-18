@@ -19,23 +19,23 @@ class MooseMesh;
 class NearestNodeLocator;
 class KDTree;
 
-class SlaveNeighborhoodThread
+class SecondaryNeighborhoodThread
 {
 public:
   KDTree & _kd_tree;
 
-  SlaveNeighborhoodThread(const MooseMesh & mesh,
+  SecondaryNeighborhoodThread(const MooseMesh & mesh,
                           const std::vector<dof_id_type> & trial_primary_nodes,
                           const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
                           const unsigned int patch_size,
                           KDTree & _kd_tree);
 
   /// Splitting Constructor
-  SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split);
+  SecondaryNeighborhoodThread(SecondaryNeighborhoodThread & x, Threads::split split);
 
   void operator()(const NodeIdRange & range);
 
-  void join(const SlaveNeighborhoodThread & other);
+  void join(const SecondaryNeighborhoodThread & other);
 
   /// List of the secondary nodes we're actually going to keep track of
   std::vector<dof_id_type> _secondary_nodes;

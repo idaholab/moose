@@ -36,7 +36,7 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
-    case Moose::MortarType::Slave:
+    case Moose::MortarType::Secondary:
       // We have taken the convention the lagrange multiplier must have the same sign as the
       // relative slip velocity of the secondary face. So positive lambda indicates that force is
       // being applied in the negative direction, so we want to decrease the momentum in the system,

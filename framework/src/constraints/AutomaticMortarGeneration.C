@@ -578,16 +578,16 @@ AutomaticMortarGeneration::computeNodalNormals()
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
 // pair.
 void
-AutomaticMortarGeneration::projectSlaveNodes()
+AutomaticMortarGeneration::projectSecondaryNodes()
 {
   // For each primary/secondary boundary id pair, call the
   // project_secondary_nodes_single_pair() helper function.
   for (const auto & pr : primary_secondary_subdomain_id_pairs)
-    projectSlaveNodesSinglePair(pr.first, pr.second);
+    projectSecondaryNodesSinglePair(pr.first, pr.second);
 }
 
 void
-AutomaticMortarGeneration::projectSlaveNodesSinglePair(
+AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
     subdomain_id_type lower_dimensional_primary_subdomain_id,
     subdomain_id_type lower_dimensional_secondary_subdomain_id)
 {

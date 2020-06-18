@@ -47,8 +47,8 @@ public:
   void reinitConstraint();
 
 protected:
-  virtual void prepareSlaveToMasterMap() override;
-  virtual Real computeQpSlaveValue() override;
+  virtual void prepareSecondaryToMasterMap() override;
+  virtual Real computeQpSecondaryValue() override;
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,

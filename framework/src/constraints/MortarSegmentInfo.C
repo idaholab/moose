@@ -73,7 +73,7 @@ MortarSegmentInfo::is_valid() const
   // Must have a valid secondary Elem to have a valid segment.
   if (secondary_elem == nullptr)
   {
-    mooseError("Slave Elem was not set.");
+    mooseError("Secondary Elem was not set.");
     return false;
   }
 

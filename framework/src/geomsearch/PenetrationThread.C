@@ -124,7 +124,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
         const Point contact_ref = info->_closest_point_ref;
         bool contact_point_on_side(false);
 
-        // Slave position must be the previous contact point
+        // Secondary position must be the previous contact point
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;

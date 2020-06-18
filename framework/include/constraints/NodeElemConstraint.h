@@ -42,7 +42,7 @@ public:
   virtual ~NodeElemConstraint();
 
   /// Compute the value the secondary node should have at the beginning of a timestep.
-  void computeSlaveValue(NumericVector<Number> & current_solution);
+  void computeSecondaryValue(NumericVector<Number> & current_solution);
 
   /// Computes the residual Nodal residual.
   virtual void computeResidual();
@@ -67,14 +67,14 @@ public:
    * @return bool When this returns true the secondary's residual as computed by the constraint will
    * _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSlaveResidual();
+  virtual bool overwriteSecondaryResidual();
 
   /**
    * Whether or not the secondary's Jacobian row should be overwritten.
    * @return bool When this returns true the secondary's Jacobian row as computed by the constraint
    * will _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
+  virtual bool overwriteSecondaryJacobian() { return overwriteSecondaryResidual(); };
 
   /**
    * The variable on the primary elem.
@@ -89,10 +89,10 @@ public:
 
 protected:
   /// prepare the _secondary_to_primary_map
-  virtual void prepareSlaveToMasterMap() = 0;
+  virtual void prepareSecondaryToMasterMap() = 0;
 
   /// Compute the value the secondary node should have at the beginning of a timestep.
-  virtual Real computeQpSlaveValue() = 0;
+  virtual Real computeQpSecondaryValue() = 0;
 
   /// This is the virtual that derived classes should override for computing the residual.
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
@@ -108,39 +108,39 @@ protected:
   }
 
   // coupling interface:
-  virtual const VariableValue & coupledSlaveValue(const std::string & var_name,
+  virtual const VariableValue & coupledSecondaryValue(const std::string & var_name,
                                                   unsigned int comp = 0)
   {
     return coupledValue(var_name, comp);
   }
-  virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name,
+  virtual const VariableValue & coupledSecondaryValueOld(const std::string & var_name,
                                                      unsigned int comp = 0)
   {
     return coupledValueOld(var_name, comp);
   }
-  virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name,
+  virtual const VariableValue & coupledSecondaryValueOlder(const std::string & var_name,
                                                        unsigned int comp = 0)
   {
     return coupledValueOlder(var_name, comp);
   }
 
-  virtual const VariableGradient & coupledSlaveGradient(const std::string & var_name,
+  virtual const VariableGradient & coupledSecondaryGradient(const std::string & var_name,
                                                         unsigned int comp = 0)
   {
     return coupledGradient(var_name, comp);
   }
-  virtual const VariableGradient & coupledSlaveGradientOld(const std::string & var_name,
+  virtual const VariableGradient & coupledSecondaryGradientOld(const std::string & var_name,
                                                            unsigned int comp = 0)
   {
     return coupledGradientOld(var_name, comp);
   }
-  virtual const VariableGradient & coupledSlaveGradientOlder(const std::string & var_name,
+  virtual const VariableGradient & coupledSecondaryGradientOlder(const std::string & var_name,
                                                              unsigned int comp = 0)
   {
     return coupledGradientOlder(var_name, comp);
   }
 
-  virtual const VariableSecond & coupledSlaveSecond(const std::string & var_name,
+  virtual const VariableSecond & coupledSecondarySecond(const std::string & var_name,
                                                     unsigned int comp = 0)
   {
     return coupledSecond(var_name, comp);

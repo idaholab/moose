@@ -27,7 +27,7 @@ protected:
   virtual void addBCs();
   virtual void addDiracKernels();
   virtual void addMaterials();
-  virtual void addSlaveFluxVector();
+  virtual void addSecondaryFluxVector();
 
   const bool _quadrature;
   const MooseEnum _order;

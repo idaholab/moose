@@ -73,13 +73,13 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
       {
         case Moose::Penalty:
           re(_j) += computeQpResidual(Moose::Master) * _var.scalingFactor();
-          neighbor_re(_i) += computeQpResidual(Moose::Slave) * _var.scalingFactor();
+          neighbor_re(_i) += computeQpResidual(Moose::Secondary) * _var.scalingFactor();
           break;
         case Moose::Kinematic:
           // Transfer the current residual of the secondary node to the primary nodes
           Real res = residual(secondarydof[_i]);
           re(_j) += res * _weights[_j];
-          neighbor_re(_i) += -res / _master_node_vector.size() + computeQpResidual(Moose::Slave);
+          neighbor_re(_i) += -res / _master_node_vector.size() + computeQpResidual(Moose::Secondary);
           break;
       }
     }
@@ -116,17 +116,17 @@ NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
       {
         case Moose::Penalty:
           Kee(_j, _j) += computeQpJacobian(Moose::MasterMaster);
-          Ken(_j, _i) += computeQpJacobian(Moose::MasterSlave);
-          Kne(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
-          Knn(_i, _i) += computeQpJacobian(Moose::SlaveSlave);
+          Ken(_j, _i) += computeQpJacobian(Moose::MasterSecondary);
+          Kne(_i, _j) += computeQpJacobian(Moose::SecondaryMaster);
+          Knn(_i, _i) += computeQpJacobian(Moose::SecondarySecondary);
           break;
         case Moose::Kinematic:
           Kee(_j, _j) = 0.;
           Ken(_j, _i) += jacobian(secondarydof[_i], primarydof[_j]) * _weights[_j];
           Kne(_i, _j) += -jacobian(secondarydof[_i], primarydof[_j]) / primarydof.size() +
-                         computeQpJacobian(Moose::SlaveMaster);
+                         computeQpJacobian(Moose::SecondaryMaster);
           Knn(_i, _i) += -jacobian(secondarydof[_i], secondarydof[_i]) / primarydof.size() +
-                         computeQpJacobian(Moose::SlaveSlave);
+                         computeQpJacobian(Moose::SecondarySecondary);
           break;
       }
     }

@@ -66,7 +66,7 @@ TangentialNodalLMMechanicalContact::TangentialNodalLMMechanicalContact(
 }
 
 Real
-TangentialNodalLMMechanicalContact::computeQpSlaveValue()
+TangentialNodalLMMechanicalContact::computeQpSecondaryValue()
 {
   return _u_secondary[_qp];
 }
@@ -78,7 +78,7 @@ TangentialNodalLMMechanicalContact::computeResidual()
 
   _qp = 0;
 
-  re(0) = computeQpResidual(Moose::Slave);
+  re(0) = computeQpResidual(Moose::Secondary);
 }
 
 void
@@ -90,7 +90,7 @@ TangentialNodalLMMechanicalContact::computeJacobian()
 
   _qp = 0;
 
-  _Kee(0, 0) += computeQpJacobian(Moose::SlaveSlave);
+  _Kee(0, 0) += computeQpJacobian(Moose::SecondarySecondary);
 }
 
 void
@@ -109,7 +109,7 @@ TangentialNodalLMMechanicalContact::computeOffDiagJacobian(unsigned jvar)
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+  _Kee(0, 0) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
 }
 
 Real TangentialNodalLMMechanicalContact::computeQpResidual(Moose::ConstraintType /*type*/)

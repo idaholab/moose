@@ -34,7 +34,7 @@ InterfaceValueMaterial::validParams()
   params.addRequiredCoupledVar("nl_var_primary",
                                "Master side non-linear variable for jump computation");
   params.addRequiredCoupledVar("nl_var_secondary",
-                               "Slave side non-linear variable for jump computation");
+                               "Secondary side non-linear variable for jump computation");
   params.addRequiredParam<std::string>("mat_prop_var_out_basename",
                                        "The base name for the output material property");
   params.addParam<MooseEnum>("interface_value_type",

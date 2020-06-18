@@ -87,7 +87,7 @@ Real
 LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   /**
-   * Slave residual is u_secondary - weights[1]*u_primary[1]-weights[2]*u_primary[2] ...
+   * Secondary residual is u_secondary - weights[1]*u_primary[1]-weights[2]*u_primary[2] ...
    *-u_primary[n]*weights[n]
    * However, computeQPresidual is calculated for only a combination of one primary and one
    *secondary node at a time. To get around this, the residual is split up such that the final
@@ -100,7 +100,7 @@ LinearNodalConstraint::computeQpResidual(Moose::ConstraintType type)
   {
     case Moose::Master:
       return (_u_primary[_j] * _weights[_j] - _u_secondary[_i] / primary_size) * _penalty;
-    case Moose::Slave:
+    case Moose::Secondary:
       return (_u_secondary[_i] / primary_size - _u_primary[_j] * _weights[_j]) * _penalty;
   }
   return 0.;
@@ -115,11 +115,11 @@ LinearNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
   {
     case Moose::MasterMaster:
       return _penalty * _weights[_j];
-    case Moose::MasterSlave:
+    case Moose::MasterSecondary:
       return -_penalty / primary_size;
-    case Moose::SlaveSlave:
+    case Moose::SecondarySecondary:
       return _penalty / primary_size;
-    case Moose::SlaveMaster:
+    case Moose::SecondaryMaster:
       return -_penalty * _weights[_j];
     default:
       mooseError("Unsupported type");
