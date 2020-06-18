@@ -32,8 +32,12 @@ PerfGraph::PerfGraph(const std::string & root_name)
   // Not done in the initialization list on purpose because this object needs to be complete first
   _root_node = libmesh_make_unique<PerfNode>(registerSection(ROOT_NAME, 0));
 
+  MemoryUtils::Stats stats;
+  MemoryUtils::getMemoryStats(stats);
+  auto start_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+
   // Set the initial time
-  _root_node->setStartTime(std::chrono::steady_clock::now());
+  _root_node->setStartTimeAndMemory(std::chrono::steady_clock::now(), start_memory);
 
   // Add a call
   _root_node->incrementNumCalls();
@@ -121,6 +125,8 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
       return 100. * (section_it->second._children / app_time);
     case TOTAL_PERCENT:
       return 100. * (section_it->second._total / app_time);
+    case TOTAL_MEMORY:
+      return section_it->second._total_memory;
     default:
       ::mooseError("Unknown TimeType");
   }
@@ -134,8 +140,12 @@ PerfGraph::push(const PerfID id)
 
   auto new_node = _stack[_current_position]->getChild(id);
 
+  MemoryUtils::Stats stats;
+  MemoryUtils::getMemoryStats(stats);
+  auto start_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+
   // Set the start time
-  new_node->setStartTime(std::chrono::steady_clock::now());
+  new_node->setStartTimeAndMemory(std::chrono::steady_clock::now(), start_memory);
 
   // Increment the number of calls
   new_node->incrementNumCalls();
@@ -154,7 +164,11 @@ PerfGraph::pop()
   if (!_active)
     return;
 
-  _stack[_current_position]->addTime(std::chrono::steady_clock::now());
+  MemoryUtils::Stats stats;
+  MemoryUtils::getMemoryStats(stats);
+  auto now_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+
+  _stack[_current_position]->addTimeAndMemory(std::chrono::steady_clock::now(), now_memory);
 
   _current_position--;
 }
@@ -164,11 +178,16 @@ PerfGraph::updateTiming()
 {
   // First update all of the currently running nodes
   auto now = std::chrono::steady_clock::now();
+
+  MemoryUtils::Stats stats;
+  MemoryUtils::getMemoryStats(stats);
+  auto now_memory =  MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+
   for (unsigned int i = 0; i <= _current_position; i++)
   {
     auto node = _stack[i];
-    node->addTime(now);
-    node->setStartTime(now);
+    node->addTimeAndMemory(now, now_memory);
+    node->setStartTimeAndMemory(now, now_memory);
   }
 
   // Zero out the entries
@@ -180,6 +199,7 @@ PerfGraph::updateTiming()
     section_time._self = 0.;
     section_time._children = 0.;
     section_time._total = 0.;
+    section_time._total_memory = 0.;
   }
 
   recursivelyFillTime(_root_node.get());
@@ -206,6 +226,7 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
   auto num_calls = current_node->numCalls();
+  auto total_memory = current_node->totalMemory();
 
   // RHS insertion on purpose
   auto & section_time = _section_time[_id_to_section_name[id]];
@@ -214,6 +235,7 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   section_time._children += children;
   section_time._total += total;
   section_time._num_calls += num_calls;
+  section_time._total_memory += total_memory;
 
   for (auto & child_it : current_node->children())
     recursivelyFillTime(child_it.second.get());
@@ -256,8 +278,11 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto total_avg = total / static_cast<Real>(num_calls);
     auto total_percent = 100. * total / total_root_time;
 
+    auto total_memory = current_node->totalMemory();
+
     vtable.addRow(section,
                   num_calls,
+                  total_memory,
                   self,
                   self_avg,
                   self_percent,
@@ -303,8 +328,11 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto total_avg = total / static_cast<Real>(num_calls);
   auto total_percent = 100. * total / total_root_time;
 
+  auto total_memory = current_node->totalMemory();
+
   vtable.addRow(section,
                 num_calls,
+                total_memory,
                 self,
                 self_avg,
                 self_percent,
@@ -341,6 +369,7 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
   console << "\nPerformance Graph:\n";
   FullTable vtable({"Section",
                     "Calls",
+                    "Mem(MB)",
                     "Self(s)",
                     "Avg(s)",
                     "%",
@@ -354,6 +383,7 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
                           VariadicTableColumnFormat::AUTO,      // Calls
+                          VariadicTableColumnFormat::AUTO,      // Memory
                           VariadicTableColumnFormat::FIXED,     // Self
                           VariadicTableColumnFormat::FIXED,     // Avg.
                           VariadicTableColumnFormat::PERCENT,   // %
@@ -364,7 +394,7 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
                           VariadicTableColumnFormat::FIXED,     // Avg.
                           VariadicTableColumnFormat::PERCENT}); // %
 
-  vtable.setColumnPrecision({1, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
+  vtable.setColumnPrecision({1, 0, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
 
   recursivelyPrintGraph(_root_node.get(), vtable, level);
   vtable.print(console);
@@ -378,6 +408,7 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
   console << "\nHeaviest Branch:\n";
   FullTable vtable({"Section",
                     "Calls",
+                    "Mem(MB)",
                     "Self(s)",
                     "Avg(s)",
                     "%",
@@ -391,6 +422,7 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
                           VariadicTableColumnFormat::AUTO,      // Calls
+                          VariadicTableColumnFormat::AUTO,      // Memory
                           VariadicTableColumnFormat::FIXED,     // Self
                           VariadicTableColumnFormat::FIXED,     // Avg.
                           VariadicTableColumnFormat::PERCENT,   // %
@@ -401,7 +433,7 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
                           VariadicTableColumnFormat::FIXED,     // Avg.
                           VariadicTableColumnFormat::PERCENT}); // %
 
-  vtable.setColumnPrecision({1, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
+  vtable.setColumnPrecision({1, 0, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
 
   recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
   vtable.print(console);
@@ -431,15 +463,16 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                         return false;
                       });
 
-  HeaviestTable vtable({"Section", "Calls", "Self(s)", "Avg.", "%"}, 10);
+  HeaviestTable vtable({"Section", "Calls", "Mem(MB)", "Self(s)", "Avg.", "%"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
+                          VariadicTableColumnFormat::AUTO,
                           VariadicTableColumnFormat::AUTO,
                           VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::PERCENT});
 
-  vtable.setColumnPrecision({1, 1, 3, 3, 2});
+  vtable.setColumnPrecision({1, 1, 1, 3, 3, 2});
 
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before printHeaviestSections()!");
@@ -454,6 +487,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
 
     vtable.addRow(id == 0 ? _root_name : _id_to_section_name[id],
                   _section_time_ptrs[id]->_num_calls,
+                  _section_time_ptrs[id]->_total_memory,
                   _section_time_ptrs[id]->_self,
                   _section_time_ptrs[id]->_self /
                       static_cast<Real>(_section_time_ptrs[id]->_num_calls),
