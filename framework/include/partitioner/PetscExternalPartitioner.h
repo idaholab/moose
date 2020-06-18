@@ -67,5 +67,5 @@ private:
   std::string _part_package;
   bool _apply_element_weight;
   bool _apply_side_weight;
-  dof_id_type _num_parts_per_compute_node;
+  processor_id_type _num_parts_per_compute_node;
 };
