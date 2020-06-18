@@ -1,8 +1,8 @@
 #pragma once
 
-#include "InterfaceKernel.h"
+#include "ADInterfaceKernel.h"
 
-class ElectrostaticContactResistance : public InterfaceKernel
+class ElectrostaticContactResistance : public ADInterfaceKernel
 {
 public:
   static InputParameters validParams();
@@ -10,8 +10,7 @@ public:
   ElectrostaticContactResistance(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(Moose::DGResidualType type) override;
-  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   const MaterialProperty<Real> & _conductivity_master;
   const MaterialProperty<Real> & _conductivity_neighbor;

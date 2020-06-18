@@ -5,7 +5,7 @@ registerMooseObject("ElkApp", ElectrostaticContactResistance);
 InputParameters
 ElectrostaticContactResistance::validParams()
 {
-  InputParameters params = InterfaceKernel::validParams();
+  InputParameters params = ADInterfaceKernel::validParams();
   params.addParam<MaterialPropertyName>(
       "master_conductivity", "electrical_conductivity", "Conductivity on the master block.");
   params.addParam<MaterialPropertyName>(
@@ -21,17 +21,17 @@ ElectrostaticContactResistance::validParams()
 }
 
 ElectrostaticContactResistance::ElectrostaticContactResistance(const InputParameters & parameters)
-  : InterfaceKernel(parameters),
+  : ADInterfaceKernel(parameters),
     _conductivity_master(getMaterialProperty<Real>("master_conductivity")),
     _conductivity_neighbor(getNeighborMaterialProperty<Real>("neighbor_conductivity")),
     _contact_resistance(getParam<Real>("electrical_contact_resistance"))
 {
 }
 
-Real
+ADReal
 ElectrostaticContactResistance::computeQpResidual(Moose::DGResidualType type)
 {
-  Real res = 0.0;
+  ADReal res = 0.0;
 
   switch (type)
   {
@@ -48,35 +48,4 @@ ElectrostaticContactResistance::computeQpResidual(Moose::DGResidualType type)
   }
 
   return res;
-}
-
-Real
-ElectrostaticContactResistance::computeQpJacobian(Moose::DGJacobianType type)
-{
-  Real jac = 0.0;
-
-  switch (type)
-  {
-    case Moose::ElementElement:
-      jac = 0.5 * _contact_resistance * _phi[_j][_qp] * _test[_i][_qp];
-      break;
-
-    case Moose::NeighborNeighbor:
-      jac = 0.0;
-      break;
-
-    case Moose::NeighborElement:
-      jac =
-          _conductivity_master[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
-      break;
-
-    case Moose::ElementNeighbor:
-      jac = 0.5 *
-            (_conductivity_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] -
-             _contact_resistance * _phi_neighbor[_j][_qp]) *
-            _test[_i][_qp];
-      break;
-  }
-
-  return jac;
 }
