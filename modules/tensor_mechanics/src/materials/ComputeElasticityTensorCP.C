@@ -21,7 +21,6 @@ ComputeElasticityTensorCP::validParams()
                                   "The ElementReadPropertyFile "
                                   "GeneralUserObject to read element "
                                   "specific property values from file");
-  params.set<MooseEnum>("constant_on") = "NONE";
   return params;
 }
 

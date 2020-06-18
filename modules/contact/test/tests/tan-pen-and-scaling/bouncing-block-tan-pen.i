@@ -38,6 +38,7 @@ offset = 1e-2
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e3
     poissons_ratio = 0.3
+    constant_on = SUBDOMAIN
   []
   [stress]
     type = ADComputeLinearElasticStress

@@ -22,7 +22,6 @@ ComputeElasticityTensorTempl<is_ad>::validParams()
   params.addRequiredParam<std::vector<Real>>("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>(
       "fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
-  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 

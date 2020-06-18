@@ -75,6 +75,7 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 2e11
     poissons_ratio = 0.3
+    constant_on = SUBDOMAIN
   [../]
   [./radial_return_stress]
     type = ADComputeMultipleInelasticStress
