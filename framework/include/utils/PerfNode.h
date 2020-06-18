@@ -60,11 +60,6 @@ public:
   void incrementNumCalls() { _num_calls++; }
 
   /**
-   * Add some time into this Node
-   */
-  void addTimeAndMemory(const std::chrono::steady_clock::duration time) { _total_time += time; }
-
-  /**
    * Get a child node with the unique id given
    *
    * Note: this will automatically create the Node internally if it needs to.
