@@ -37,7 +37,8 @@ public:
   /**
    * Set the current start time
    */
-  void setStartTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time, const long int memory)
+  void setStartTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time,
+                             const long int memory)
   {
     _start_time = time;
     _start_memory = memory;
@@ -46,7 +47,8 @@ public:
   /**
    * Add some time into this Node by taking the difference with the time passed in
    */
-  void addTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time, const long int memory)
+  void addTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time,
+                        const long int memory)
   {
     _total_time += time - _start_time;
     _total_memory += memory - _start_memory;
