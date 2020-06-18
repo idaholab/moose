@@ -54,7 +54,7 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
 void
 NodalConstraint::computeResidual(NumericVector<Number> & residual)
 {
-  if ((_weights.size() == 0) && (_primary_node_vector.size() == 1))
+  if ((_weights.size() == 0) && (_master_node_vector.size() == 1))
     _weights.push_back(1.0);
 
   std::vector<dof_id_type> primarydof = _var.dofIndices();
@@ -79,7 +79,7 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
           // Transfer the current residual of the secondary node to the primary nodes
           Real res = residual(secondarydof[_i]);
           re(_j) += res * _weights[_j];
-          neighbor_re(_i) += -res / _primary_node_vector.size() + computeQpResidual(Moose::Slave);
+          neighbor_re(_i) += -res / _master_node_vector.size() + computeQpResidual(Moose::Slave);
           break;
       }
     }
@@ -91,7 +91,7 @@ NodalConstraint::computeResidual(NumericVector<Number> & residual)
 void
 NodalConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 {
-  if ((_weights.size() == 0) && (_primary_node_vector.size() == 1))
+  if ((_weights.size() == 0) && (_master_node_vector.size() == 1))
     _weights.push_back(1.0);
 
   // Calculate Jacobian enteries and cache those entries along with the row and column indices

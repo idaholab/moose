@@ -72,7 +72,7 @@ LinearNodalConstraint::LinearNodalConstraint(const InputParameters & parameters)
   for (const auto & dof : _primary_node_ids)
   {
     // defining primary nodes in base class
-    _primary_node_vector.push_back(dof);
+    _master_node_vector.push_back(dof);
 
     auto node_to_elem_pair = node_to_elem_map.find(dof);
     mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");

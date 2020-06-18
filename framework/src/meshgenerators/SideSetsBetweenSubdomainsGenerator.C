@@ -25,8 +25,13 @@ SideSetsBetweenSubdomainsGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addRequiredParam<std::vector<SubdomainName>>(
+  params.addParam<std::vector<SubdomainName>>(
       "primary_block", "The primary set of blocks for which to draw a sideset between");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "master_block",
+      "The primary set of blocks for which to draw a sideset between",
+      "The 'master_block' param is deprecated and will be removed on January 1, 2021. Please use "
+      "the 'primary_block' parameter instead.");
   params.addRequiredParam<std::vector<SubdomainName>>(
       "paired_block", "The paired set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
@@ -48,8 +53,10 @@ SideSetsBetweenSubdomainsGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  std::vector<subdomain_id_type> vec_primary_ids =
-      MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("primary_block"));
+  std::vector<subdomain_id_type> vec_primary_ids = MooseMeshUtils::getSubdomainIDs(
+      *mesh,
+      isParamValid("primary_block") ? getParam<std::vector<SubdomainName>>("primary_block")
+                                    : getParam<std::vector<SubdomainName>>("master_block"));
   std::set<subdomain_id_type> primary_ids(vec_primary_ids.begin(), vec_primary_ids.end());
 
   std::vector<subdomain_id_type> vec_paired_ids =

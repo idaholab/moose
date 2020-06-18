@@ -105,7 +105,7 @@ EqualValueBoundaryConstraint::meshChanged()
 void
 EqualValueBoundaryConstraint::updateConstrainedNodes()
 {
-  _primary_node_vector.clear();
+  _master_node_vector.clear();
   _connected_nodes.clear();
 
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
@@ -117,21 +117,21 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     std::vector<dof_id_type>::iterator in;
 
     // Set primary node to first node of the secondary node set if no primary node id is provided
-    //_primary_node_vector defines primary nodes in the base class
+    //_master_node_vector defines primary nodes in the base class
     if (_primary_node_id == std::numeric_limits<unsigned int>::max())
     {
       in = std::min_element(nodelist.begin(), nodelist.end());
       dof_id_type node_id = (in == nodelist.end()) ? DofObject::invalid_id : *in;
       _communicator.min(node_id);
-      _primary_node_vector.push_back(node_id);
+      _master_node_vector.push_back(node_id);
     }
     else
-      _primary_node_vector.push_back(_primary_node_id);
+      _master_node_vector.push_back(_primary_node_id);
 
     // Fill in _connected_nodes, which defines secondary nodes in the base class
     for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _primary_node_vector[0]) &&
+      if ((*in != _master_node_vector[0]) &&
           (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
         _connected_nodes.push_back(*in);
     }
@@ -139,21 +139,21 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   else if ((_secondary_node_ids.size() != 0) && (_secondary_node_set_id == "NaN"))
   {
     if (_primary_node_id == std::numeric_limits<unsigned int>::max())
-      _primary_node_vector.push_back(
-          _secondary_node_ids[0]); //_primary_node_vector defines primary nodes in the base class
+      _master_node_vector.push_back(
+          _secondary_node_ids[0]); //_master_node_vector defines primary nodes in the base class
 
     // Fill in _connected_nodes, which defines secondary nodes in the base class
     for (const auto & dof : _secondary_node_ids)
     {
       if (_mesh.queryNodePtr(dof) &&
           (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) &&
-          (dof != _primary_node_vector[0]))
+          (dof != _master_node_vector[0]))
         _connected_nodes.push_back(dof);
     }
   }
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
-  auto node_to_elem_pair = node_to_elem_map.find(_primary_node_vector[0]);
+  auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[0]);
 
   bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
@@ -202,7 +202,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
 
     // Find elems again now that we know they're there
     const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
-    node_to_elem_pair = new_node_to_elem_map.find(_primary_node_vector[0]);
+    node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
     found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
   }
 

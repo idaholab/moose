@@ -73,7 +73,7 @@ NodalFrictionalConstraint::meshChanged()
 void
 NodalFrictionalConstraint::updateConstrainedNodes()
 {
-  _primary_node_vector.clear();
+  _master_node_vector.clear();
   _connected_nodes.clear();
   _primary_conn.clear();
 
@@ -89,12 +89,12 @@ NodalFrictionalConstraint::updateConstrainedNodes()
       _connected_nodes.push_back(in);
   }
 
-  // Fill in _primary_node_vector, which defines secondary nodes in the base class
+  // Fill in _master_node_vector, which defines secondary nodes in the base class
   for (auto in : primary_nodelist)
-    _primary_node_vector.push_back(in);
+    _master_node_vector.push_back(in);
 
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
-  std::vector<std::vector<dof_id_type>> elems(_primary_node_vector.size());
+  std::vector<std::vector<dof_id_type>> elems(_master_node_vector.size());
 
   // Add elements connected to primary node to Ghosted Elements.
 
@@ -107,7 +107,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
 
     for (unsigned int i = 0; i < primary_nodelist.size(); ++i)
     {
-      auto node_to_elem_pair = node_to_elem_map.find(_primary_node_vector[i]);
+      auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[i]);
 
       bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
@@ -149,20 +149,20 @@ NodalFrictionalConstraint::updateConstrainedNodes()
 
     // Find elems again now that we know they're there
     const auto & new_node_to_elem_map = _mesh.nodeToElemMap();
-    auto node_to_elem_pair = new_node_to_elem_map.find(_primary_node_vector[0]);
+    auto node_to_elem_pair = new_node_to_elem_map.find(_master_node_vector[0]);
     bool found_elems = (node_to_elem_pair != new_node_to_elem_map.end());
 
     if (!found_elems)
       mooseError("Colundn't find any elements connected to primary node.");
 
-    for (unsigned int i = 0; i < _primary_node_vector.size(); ++i)
+    for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
       elems[i] = node_to_elem_pair->second;
   }
   else // serial mesh
   {
-    for (unsigned int i = 0; i < _primary_node_vector.size(); ++i)
+    for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
     {
-      auto node_to_elem_pair = node_to_elem_map.find(_primary_node_vector[i]);
+      auto node_to_elem_pair = node_to_elem_map.find(_master_node_vector[i]);
       bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
       if (!found_elems)
@@ -172,7 +172,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
     }
   }
 
-  for (unsigned int i = 0; i < _primary_node_vector.size(); ++i)
+  for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
   {
     if (elems[i].size() == 0)
       mooseError("Couldn't find any elements connected to primary node");
@@ -189,9 +189,9 @@ NodalFrictionalConstraint::updateConstrainedNodes()
     if (_mesh.nodeRef(secondary_nodelist[j]).processor_id() == _subproblem.processor_id())
     {
       Node & secondary_node = _mesh.nodeRef(secondary_nodelist[j]);
-      for (unsigned int i = 0; i < _primary_node_vector.size(); ++i)
+      for (unsigned int i = 0; i < _master_node_vector.size(); ++i)
       {
-        Node & primary_node = _mesh.nodeRef(_primary_node_vector[i]);
+        Node & primary_node = _mesh.nodeRef(_master_node_vector[i]);
         Real d = (secondary_node - primary_node).norm();
         if (MooseUtils::absoluteFuzzyEqual(d, 0.0))
         {
@@ -204,7 +204,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
   }
 
   _console << "total secondary nodes, primary nodes: " << _primary_conn.size() << ", "
-           << _primary_node_vector.size() << '\n';
+           << _master_node_vector.size() << '\n';
 }
 
 void
