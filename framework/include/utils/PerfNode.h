@@ -17,6 +17,7 @@
 
 
 #include "MooseTypes.h"
+#include "MemoryUtils.h"
 
 #include <chrono>
 #include <map>
@@ -27,7 +28,7 @@ public:
   /**
    * Create a PerfNode with the given ID
    */
-  PerfNode(const PerfID id) : _id(id), _total_time(0), _num_calls(0) {}
+  PerfNode(const PerfID id) : _id(id), _total_time(0), _num_calls(0), _total_memory(0) {}
 
   /**
    * Get the ID of this Node
@@ -37,17 +38,21 @@ public:
   /**
    * Set the current start time
    */
-  void setStartTime(const std::chrono::time_point<std::chrono::steady_clock> time)
+  void setStartTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time,
+                             const long int memory)
   {
     _start_time = time;
+    _start_memory = memory;
   }
 
   /**
    * Add some time into this Node by taking the difference with the time passed in
    */
-  void addTime(const std::chrono::time_point<std::chrono::steady_clock> time)
+  void addTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time,
+                        const long int memory)
   {
     _total_time += time - _start_time;
+    _total_memory += memory - _start_memory;
   }
 
   /**
@@ -58,7 +63,7 @@ public:
   /**
    * Add some time into this Node
    */
-  void addTime(const std::chrono::steady_clock::duration time) { _total_time += time; }
+  void addTimeAndMemory(const std::chrono::steady_clock::duration time) { _total_time += time; }
 
   /**
    * Get a child node with the unique id given
@@ -106,6 +111,11 @@ public:
    */
   unsigned long int numCalls() { return _num_calls; }
 
+  /**
+   * Get the amount of memory added by this node
+   */
+  long int totalMemory() { return _total_memory; }
+
 protected:
   /// The unique ID for the section this Node corresponds to
   PerfID _id;
@@ -116,8 +126,14 @@ protected:
   /// The total elapsed time for this node
   std::chrono::steady_clock::duration _total_time;
 
+  /// The starting memory for this node
+  long unsigned int _start_memory;
+
   /// Number of times this node has been called
   long unsigned int _num_calls;
+
+  /// The total memory added while this node is active
+  long unsigned int _total_memory;
 
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;

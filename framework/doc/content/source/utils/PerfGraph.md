@@ -99,22 +99,22 @@ Some other capability the `PerfGraph` has is the ability to print formatted tabl
 The `print()` method prints out an indented set of section names and shows their timing like so:
 
 ```
--------------------------------------------------------------------------------------------------------------
-|                 Section                |   Self(s)  |    %   | Children(s) |    %   |  Total(s)  |    %   |
--------------------------------------------------------------------------------------------------------------
-| App                                    |      0.004 |   1.95 |       0.207 |  98.05 |      0.212 | 100.00 |
-|   FEProblem::computeUserObjects        |      0.000 |   0.07 |       0.000 |   0.00 |      0.000 |   0.07 |
-|   FEProblem::solve                     |      0.014 |   6.59 |       0.119 |  56.44 |      0.133 |  63.03 |
-|     FEProblem::computeResidualInternal |      0.000 |   0.01 |       0.079 |  37.45 |      0.079 |  37.45 |
-|     FEProblem::computeJacobianInternal |      0.000 |   0.01 |       0.040 |  18.83 |      0.040 |  18.84 |
-|     Console::outputStep                |      0.000 |   0.12 |       0.000 |   0.00 |      0.000 |   0.12 |
-|   FEProblem::outputStep                |      0.000 |   0.04 |       0.001 |   0.42 |      0.001 |   0.46 |
-|     PerfGraphOutput::outputStep        |      0.000 |   0.00 |       0.000 |   0.00 |      0.000 |   0.00 |
-|     Console::outputStep                |      0.001 |   0.32 |       0.000 |   0.00 |      0.001 |   0.32 |
-|     CSV::outputStep                    |      0.000 |   0.10 |       0.000 |   0.00 |      0.000 |   0.10 |
--------------------------------------------------------------------------------------------------------------
+Performance Graph:
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|                  Section                 | Calls | Mem(MB) |   Self(s)  |   Avg(s)   |    %   | Children(s) |   Avg(s)   |    %   |  Total(s)  |   Avg(s)   |    %   |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| MooseTestApp (main)                      |     1 |     769 |      0.008 |      0.008 |   0.04 |      23.127 |     23.127 |  99.96 |     23.135 |     23.135 | 100.00 |
+|   FEProblem::outputStep                  |     2 |      72 |      0.001 |      0.001 |   0.01 |       1.284 |      0.642 |   5.55 |      1.285 |      0.642 |   5.55 |
+|   Steady::PicardSolve                    |     1 |     287 |      0.000 |      0.000 |   0.00 |      12.635 |     12.635 |  54.61 |     12.635 |     12.635 |  54.61 |
+|     FEProblem::solve                     |     1 |     287 |      2.525 |      2.525 |  10.92 |      10.108 |     10.108 |  43.69 |     12.634 |     12.634 |  54.61 |
+|       FEProblem::computeResidualInternal |    15 |       0 |      0.000 |      0.000 |   0.00 |       7.980 |      0.532 |  34.49 |      7.980 |      0.532 |  34.49 |
+|       FEProblem::computeJacobianInternal |     2 |      15 |      0.000 |      0.000 |   0.00 |       2.128 |      1.064 |   9.20 |      2.128 |      1.064 |   9.20 |
+|     FEProblem::outputStep                |     1 |       0 |      0.001 |      0.001 |   0.00 |       0.000 |      0.000 |   0.00 |      0.001 |      0.001 |   0.00 |
+|   Steady::final                          |     1 |       0 |      0.000 |      0.000 |   0.00 |       0.001 |      0.001 |   0.00 |      0.001 |      0.001 |   0.00 |
+|     FEProblem::outputStep                |     1 |       0 |      0.001 |      0.001 |   0.00 |       0.000 |      0.000 |   0.00 |      0.001 |      0.001 |   0.00 |
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
 
-`Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `%` columns represent the percent of the total run-time of the app for the number in the column to the left.
+`Calls` is the number of times that section was run. `Mem` is the total memory (in Megabytes) created within and underneath that section. `Self` time is the time actually taken by the section while `Children` time is the cumulative time of all of the sub-sections below that section and `Total` is the sum of the two.  The `Avg` and `%` columns represent the average and percent of the total run-time of the app for the number in the column to the left.
 
 There are also two other ways to print information out about the graph using `printHeaviestBranch()` and `printHeaviestSections()`.  These are described well over on the [/PerfGraphOutput.md] page.

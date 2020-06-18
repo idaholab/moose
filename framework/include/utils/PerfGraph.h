@@ -15,6 +15,7 @@
 #include "IndirectSort.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
+#include "MemoryUtils.h"
 
 // System Includes
 #include <array>
@@ -47,7 +48,8 @@ public:
     TOTAL_AVG,
     SELF_PERCENT,
     CHILDREN_PERCENT,
-    TOTAL_PERCENT
+    TOTAL_PERCENT,
+    TOTAL_MEMORY
   };
 
   /**
@@ -150,6 +152,17 @@ public:
   }
 
   /**
+   * Get a reference to the total memory usage for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anyting updateTiming() is called
+   */
+  const long int & getTotalMemory(const std::string & section_name)
+  {
+    return _section_time[section_name]._total_memory;
+  }
+
+  /**
    * Udates the time section_time and time for all currently running nodes
    */
   void updateTiming();
@@ -157,6 +170,7 @@ public:
 protected:
   typedef VariadicTable<std::string,
                         unsigned long int,
+                        long int,
                         Real,
                         Real,
                         Real,
@@ -168,7 +182,7 @@ protected:
                         Real>
       FullTable;
 
-  typedef VariadicTable<std::string, unsigned long int, Real, Real, Real> HeaviestTable;
+  typedef VariadicTable<std::string, unsigned long int, long int, Real, Real, Real> HeaviestTable;
 
   /**
    * Use to hold the time for each section
@@ -181,6 +195,7 @@ protected:
     Real _children = 0.;
     Real _total = 0.;
     unsigned long int _num_calls = 0;
+    long int _total_memory = 0;
   };
 
   /**
