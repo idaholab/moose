@@ -113,17 +113,17 @@ public:
   /**
    * Get the amount of memory added by this node
    */
-  long int selfMemory();
+  long int selfMemory() const;
 
   /**
    * Get the amount of memory added by this node
    */
-  long int childrenMemory();
+  long int childrenMemory() const;
 
   /**
    * Get the amount of memory added by this node
    */
-  long int totalMemory() { return _total_memory; }
+  long int totalMemory() const { return _total_memory; }
 
 protected:
   /// The unique ID for the section this Node corresponds to
