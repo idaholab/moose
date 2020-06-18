@@ -61,7 +61,7 @@ SubChannelSolver::SubChannelSolver(const InputParameters & params)
 void
 SubChannelSolver::initialize()
 {
-  _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
+  _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
   if (!_mesh)
   {
     mooseError("Must use a SubChannelMesh");
@@ -467,15 +467,21 @@ SubChannelSolver::execute()
   double houtMdotout = 0.0;
   double Total_crossflow_in = 0.0;
   double Total_crossflow_out = 0.0;
-  double Total_crossflow_20 = 0.0;
 
   for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
   {
+<<<<<<< HEAD
     auto * node_out = _mesh->nodes_[i_ch][_mesh->nz_];
     auto * node_in = _mesh->nodes_[i_ch][0];
     auto * node_20 = _mesh->nodes_[i_ch][20];
     int i = (i_ch / _mesh->nx_);           // row
     int j = i_ch - i * _mesh->nx_;         // column
+=======
+    auto * node_out = _mesh->_nodes[i_ch][_mesh->_nz];
+    auto * node_in = _mesh->_nodes[i_ch][0];
+    int i = (i_ch / _mesh->_nx);           // row
+    int j = i_ch - i * _mesh->_nx;         // column
+>>>>>>> 5fa1cd3... some more editing
     Temp_out(i, j) = T_soln(node_out);     // Kelvin
     Temp_in(i, j) = T_soln(node_in);       // Kelvin
     rho_in(i, j) = rho_soln(node_in);      // Kg/m3
@@ -493,7 +499,6 @@ SubChannelSolver::execute()
     houtMdotout += mdot_soln(node_out) * h_soln(node_out);
     Total_crossflow_out += SumWij_soln(node_out);
     Total_crossflow_in += SumWij_soln(node_in);
-    Total_crossflow_20 += SumWij_soln(node_20);
   }
 
   for (int iz = 0; iz < _mesh->nz_ + 1; iz++)
@@ -501,8 +506,13 @@ SubChannelSolver::execute()
     double Total_crossflow = 0.0;
     for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
     {
+<<<<<<< HEAD
       auto * node = _mesh->nodes_[i_ch][iz];
       Total_crossflow += SumWij_soln(node);
+=======
+      auto * node = _mesh->_nodes[i_ch][iz];
+      Total_crossflow += SumWij_soln(node); //for single phase, Total of sum Crossflows per channel per level should be zero
+>>>>>>> 5fa1cd3... some more editing
     }
   }
 
