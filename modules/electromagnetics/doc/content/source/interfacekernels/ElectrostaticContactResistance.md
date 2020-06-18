@@ -1,1 +1,1 @@
-!template load file=stubs/moose_object.md.template name=ElectrostaticContactResistance syntax=/InterfaceKernels/ElectrostaticContactResistance
+!template load file=stubs/moose_object.md.template name=ElectrostaticContactCondition syntax=/InterfaceKernels/ElectrostaticContactCondition

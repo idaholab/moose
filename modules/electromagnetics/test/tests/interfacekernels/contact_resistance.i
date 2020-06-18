@@ -75,7 +75,7 @@
 
 [InterfaceKernels]
   [./contact_resistance]
-    type = ElectrostaticContactResistance
+    type = ElectrostaticContactCondition
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
     boundary = ssg_interface
