@@ -17,6 +17,14 @@ class DumpObjectsNonlinearSystem;
 template <>
 InputParameters validParams<FEProblem>();
 
+#define captureDump(method_name, path)                                                             \
+  void method_name(                                                                                \
+      const std::string & type, const std::string & name, InputParameters & parameters) override   \
+  {                                                                                                \
+    dumpObjectHelper(path, type, name, parameters);                                                \
+    FEProblemBase::method_name(type, name, parameters);                                            \
+  }
+
 /**
  * Specialization of SubProblem for dumping generated objects as input file syntax
  */
@@ -27,55 +35,8 @@ public:
 
   DumpObjectsProblem(const InputParameters & parameters);
 
-  using FEProblemBase::addVariable;
-  void addVariable(const std::string & var_type,
-                   const std::string & var_name,
-                   InputParameters & params) override;
-
   using FEProblemBase::addAuxVariable;
-  void addAuxVariable(const std::string & var_type,
-                      const std::string & var_name,
-                      InputParameters & params) override;
-
-  void
-  addFunction(std::string type, const std::string & name, InputParameters & parameters) override;
-
-  void addKernel(const std::string & type,
-                 const std::string & name,
-                 InputParameters & parameters) override;
-  void addNodalKernel(const std::string & type,
-                      const std::string & name,
-                      InputParameters & parameters) override;
-  void addScalarKernel(const std::string & type,
-                       const std::string & name,
-                       InputParameters & parameters) override;
-  void addBoundaryCondition(const std::string & type,
-                            const std::string & name,
-                            InputParameters & parameters) override;
-  void addConstraint(const std::string & type,
-                     const std::string & name,
-                     InputParameters & parameters) override;
-  void addAuxKernel(const std::string & type,
-                    const std::string & name,
-                    InputParameters & parameters) override;
-  void addAuxScalarKernel(const std::string & type,
-                          const std::string & name,
-                          InputParameters & parameters) override;
-  void addDiracKernel(const std::string & type,
-                      const std::string & name,
-                      InputParameters & parameters) override;
-  void addDGKernel(const std::string & type,
-                   const std::string & name,
-                   InputParameters & parameters) override;
-  void addInterfaceKernel(const std::string & type,
-                          const std::string & name,
-                          InputParameters & parameters) override;
-  void addInitialCondition(const std::string & type,
-                           const std::string & name,
-                           InputParameters & parameters) override;
-  void addMaterial(const std::string & type,
-                   const std::string & name,
-                   InputParameters & parameters) override;
+  using FEProblemBase::addVariable;
 
   /// output input blocks for a given action path
   void dumpGeneratedSyntax(const std::string path);
@@ -119,4 +80,34 @@ protected:
   std::map<std::string, std::map<std::string, std::string>> _generated_syntax;
 
   std::shared_ptr<DumpObjectsNonlinearSystem> _nl_sys;
+
+public:
+  // clang-format off
+  captureDump(addAuxKernel,           "AuxKernels")
+  captureDump(addAuxScalarKernel,     "AuxScalarKernels")
+  captureDump(addAuxVariable,         "AuxVariables")
+  captureDump(addBoundaryCondition,   "BCs")
+  captureDump(addConstraint,          "Constraints")
+  captureDump(addDamper,              "Dampers")
+  captureDump(addDGKernel,            "DGKernels")
+  captureDump(addDiracKernel,         "DiracKernels")
+  captureDump(addDistribution,        "Distributions")
+  captureDump(addFunction,            "Functions")
+  captureDump(addFVKernel,            "FVKernels")
+  captureDump(addIndicator,           "Adaptivity/Indicators")
+  captureDump(addInitialCondition,    "ICs")
+  captureDump(addInterfaceKernel,     "InterfaceKernels")
+  captureDump(addKernel,              "Kernels")
+  captureDump(addMarker,              "Adaptivity/Markers")
+  captureDump(addMaterial,            "Materials")
+  captureDump(addMultiApp,            "MultiApps")
+  captureDump(addNodalKernel,         "NodalKernels")
+  captureDump(addPostprocessor,       "Postprocessors")
+  captureDump(addPredictor,           "Executioner/Predictor")
+  captureDump(addSampler,             "Samplers")
+  captureDump(addScalarKernel,        "ScalarKernels")
+  captureDump(addTransfer,            "Transfers")
+  captureDump(addVariable,            "Variables")
+  captureDump(addVectorPostprocessor, "VectorPostprocessors")
+  // clang-format off
 };

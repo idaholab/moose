@@ -41,141 +41,6 @@ DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   createTagVectors();
 }
 
-void
-DumpObjectsProblem::addVariable(const std::string & var_type,
-                                const std::string & var_name,
-                                InputParameters & params)
-{
-  dumpObjectHelper("Variables", var_type, var_name, params);
-  FEProblemBase::addVariable(var_type, var_name, params);
-}
-
-void
-DumpObjectsProblem::addAuxVariable(const std::string & var_type,
-                                   const std::string & var_name,
-                                   InputParameters & params)
-{
-  dumpObjectHelper("AuxVariables", var_type, var_name, params);
-  FEProblemBase::addAuxVariable(var_type, var_name, params);
-}
-
-void
-DumpObjectsProblem::addFunction(std::string type,
-                                const std::string & name,
-                                InputParameters & parameters)
-{
-  dumpObjectHelper("Functions", type, name, parameters);
-  FEProblemBase::addFunction(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addKernel(const std::string & type,
-                              const std::string & name,
-                              InputParameters & parameters)
-{
-  dumpObjectHelper("Kernels", type, name, parameters);
-  FEProblemBase::addKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addNodalKernel(const std::string & type,
-                                   const std::string & name,
-                                   InputParameters & parameters)
-{
-  dumpObjectHelper("NodalKernel", type, name, parameters);
-  FEProblemBase::addNodalKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addScalarKernel(const std::string & type,
-                                    const std::string & name,
-                                    InputParameters & parameters)
-{
-  dumpObjectHelper("ScalarKernels", type, name, parameters);
-  FEProblemBase::addScalarKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addBoundaryCondition(const std::string & type,
-                                         const std::string & name,
-                                         InputParameters & parameters)
-{
-  dumpObjectHelper("BCs", type, name, parameters);
-  FEProblemBase::addBoundaryCondition(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addConstraint(const std::string & type,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  dumpObjectHelper("Constraints", type, name, parameters);
-  FEProblemBase::addConstraint(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addAuxKernel(const std::string & type,
-                                 const std::string & name,
-                                 InputParameters & parameters)
-{
-  dumpObjectHelper("AuxKernels", type, name, parameters);
-  FEProblemBase::addAuxKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addAuxScalarKernel(const std::string & type,
-                                       const std::string & name,
-                                       InputParameters & parameters)
-{
-  dumpObjectHelper("AuxScalarKernels", type, name, parameters);
-  FEProblemBase::addAuxScalarKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addDiracKernel(const std::string & type,
-                                   const std::string & name,
-                                   InputParameters & parameters)
-{
-  dumpObjectHelper("DiracKernels", type, name, parameters);
-  FEProblemBase::addDiracKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addDGKernel(const std::string & type,
-                                const std::string & name,
-                                InputParameters & parameters)
-{
-  dumpObjectHelper("DGKernels", type, name, parameters);
-  FEProblemBase::addDGKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addInterfaceKernel(const std::string & type,
-                                       const std::string & name,
-                                       InputParameters & parameters)
-{
-  dumpObjectHelper("InterfaceKernels", type, name, parameters);
-  FEProblemBase::addInterfaceKernel(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addInitialCondition(const std::string & type,
-                                        const std::string & name,
-                                        InputParameters & parameters)
-{
-  dumpObjectHelper("ICs", type, name, parameters);
-  FEProblemBase::addInitialCondition(type, name, parameters);
-}
-
-void
-DumpObjectsProblem::addMaterial(const std::string & type,
-                                const std::string & name,
-                                InputParameters & parameters)
-{
-  dumpObjectHelper("Materials", type, name, parameters);
-  FEProblemBase::addMaterial(type, name, parameters);
-}
-
 std::string
 DumpObjectsProblem::deduceNecessaryParameters(const std::string & type,
                                               const InputParameters & parameters)
@@ -276,8 +141,10 @@ DumpObjectsProblem::dumpGeneratedSyntax(const std::string path)
   if (pathit == _generated_syntax.end())
     return;
 
+  Moose::out << "**START DUMP DATA**\n";
   for (const auto & system_pair : pathit->second)
     Moose::out << '[' << system_pair.first << "]\n" << system_pair.second << "[]\n\n";
+  Moose::out << "**END DUMP DATA**\n";
 }
 
 std::map<std::string, std::string>
@@ -321,8 +188,8 @@ DumpObjectsProblem::stringifyParameters(const InputParameters & parameters)
         if (param_value.back() == ' ')
           param_value.pop_back();
 
-        // add quotes if the parameter contains spaces
-        if (param_value.find_first_of(" ") != std::string::npos)
+        // add quotes if the parameter contains spaces or is empty
+        if (param_value.find_first_of(" ") != std::string::npos || param_value.length() == 0)
           param_value = "'" + param_value + "'";
 
         parameter_map[param_name] = param_value;
