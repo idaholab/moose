@@ -67,8 +67,8 @@ AllSideSetsByNormalsGenerator::generate()
       if (elem->neighbor_ptr(side))
         continue;
 
-      _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
+      _fe_face->reinit(elem, side);
 
       {
         // See if we've seen this normal before (linear search)

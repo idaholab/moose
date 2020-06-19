@@ -114,8 +114,8 @@ ParsedAddSideset::modify()
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
-      _fe_face->reinit(elem, side);
       const std::vector<Point> & normals = _fe_face->get_normals();
+      _fe_face->reinit(elem, side);
 
       // check normal if requested
       if (_check_normal && std::abs(1.0 - _normal * normals[0]) > _variance)
