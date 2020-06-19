@@ -10,6 +10,7 @@
 #include "DerivativeParsedMaterial.h"
 
 registerMooseObject("MooseApp", DerivativeParsedMaterial);
+registerMooseObject("MooseApp", ADDerivativeParsedMaterial);
 
 template <bool is_ad>
 InputParameters
@@ -40,3 +41,4 @@ DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
 
 // explicit instantiation
 template class DerivativeParsedMaterialTempl<false>;
+template class DerivativeParsedMaterialTempl<true>;
