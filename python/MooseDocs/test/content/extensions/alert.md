@@ -34,5 +34,5 @@ int x;
 !alert-end!
 
 
-!alert note title=[Google](https://google.com)
+!alert tip title=[Google](https://google.com)
 Title with link.
