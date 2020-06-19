@@ -252,7 +252,7 @@ PatchMeshGenerator::generate()
     boundary_info.nodeset_name(107) = "top_front_left";
   }
 
-  mesh->prepare_for_use(false, false);
+  mesh->prepare_for_use();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

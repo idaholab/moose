@@ -85,7 +85,7 @@ SphereSurfaceMeshGenerator::generate()
 
   // we need to prepare distributed meshes before using refinement
   if (!mesh->is_replicated())
-    mesh->prepare_for_use(/*skip_renumber =*/false, /*skip_find_neighbors=*/false);
+    mesh->prepare_for_use();
 
   // Now we have the beginnings of a sphere.
   // Add some more elements by doing uniform refinements and

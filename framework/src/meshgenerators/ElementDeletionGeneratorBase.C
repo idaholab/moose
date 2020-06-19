@@ -225,7 +225,7 @@ ElementDeletionGeneratorBase::generate()
    * Action that we need to re-prepare the mesh.
    */
   mesh->contract();
-  mesh->prepare_for_use(false, false);
+  mesh->prepare_for_use();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

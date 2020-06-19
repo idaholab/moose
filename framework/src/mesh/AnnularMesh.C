@@ -292,5 +292,5 @@ AnnularMesh::buildMesh()
     }
   }
 
-  mesh.prepare_for_use(false);
+  mesh.prepare_for_use();
 }

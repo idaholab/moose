@@ -638,7 +638,7 @@ protected:
   std::vector<std::map<dof_id_type, int>> _var_index_maps;
 
   /// The data structure used to find neighboring elements give a node ID
-  std::vector<std::vector<const Elem *>> _nodes_to_elem_map;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> _nodes_to_elem_map;
 
   /// The number of features seen by this object per map
   std::vector<unsigned int> _feature_counts_per_map;

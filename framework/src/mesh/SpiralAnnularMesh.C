@@ -237,7 +237,7 @@ SpiralAnnularMesh::buildMesh()
   mesh.boundary_info->sideset_name(_exterior_bid) = "exterior";
 
   // Find neighbors, etc.
-  mesh.prepare_for_use(false, false);
+  mesh.prepare_for_use();
 
   if (_use_tri6)
   {
