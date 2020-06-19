@@ -523,7 +523,7 @@ public:
 
   // Function /////
   virtual void
-  addFunction(std::string type, const std::string & name, InputParameters & parameters);
+  addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
@@ -549,13 +549,14 @@ public:
    * The following functions will enable MOOSE to have the capability to import distributions
    */
   virtual void
-  addDistribution(std::string type, const std::string & name, InputParameters & parameters);
+  addDistribution(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Distribution & getDistribution(const std::string & name);
 
   /**
    * The following functions will enable MOOSE to have the capability to import Samplers
    */
-  virtual void addSampler(std::string type, const std::string & name, InputParameters & parameters);
+  virtual void
+  addSampler(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Sampler & getSampler(const std::string & name, THREAD_ID tid = 0);
 
   // NL /////
@@ -767,11 +768,12 @@ public:
   virtual void swapBackMaterialsNeighborGhost(THREAD_ID tid);
 
   // Postprocessors /////
-  virtual void
-  addPostprocessor(std::string pp_name, const std::string & name, InputParameters & parameters);
+  virtual void addPostprocessor(const std::string & pp_name,
+                                const std::string & name,
+                                InputParameters & parameters);
 
   // VectorPostprocessors /////
-  virtual void addVectorPostprocessor(std::string pp_name,
+  virtual void addVectorPostprocessor(const std::string & pp_name,
                                       const std::string & name,
                                       InputParameters & parameters);
 
@@ -785,7 +787,7 @@ public:
   void initVectorPostprocessorData(const std::string & name);
 
   // UserObjects /////
-  virtual void addUserObject(std::string user_object_name,
+  virtual void addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
 
@@ -984,8 +986,9 @@ public:
   getVectorPostprocessorVectors(const std::string & vpp_name);
 
   // Dampers /////
-  virtual void
-  addDamper(std::string damper_name, const std::string & name, InputParameters & parameters);
+  virtual void addDamper(const std::string & damper_name,
+                         const std::string & name,
+                         InputParameters & parameters);
   void setupDampers();
 
   /**
@@ -994,12 +997,14 @@ public:
   bool hasDampers() { return _has_dampers; }
 
   // Indicators /////
-  void
-  addIndicator(std::string indicator_name, const std::string & name, InputParameters & parameters);
+  virtual void addIndicator(const std::string & indicator_name,
+                            const std::string & name,
+                            InputParameters & parameters);
 
   // Markers //////
-  virtual void
-  addMarker(std::string marker_name, const std::string & name, InputParameters & parameters);
+  virtual void addMarker(const std::string & marker_name,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /**
    * Add a MultiApp to the problem.
