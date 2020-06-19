@@ -27,7 +27,7 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
-ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), levels=list(), hide=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6, hide=[])
 NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None)
 
 LATEX_CONTENTLIST = """
@@ -175,7 +175,7 @@ class ContentOutlineCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['location'] = (None, "The markdown content directory to build outline.")
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
-        settings['levels'] = ('1', 'Heading level(s) to display.')
+        settings['max_level'] = (1, 'Maximum heading level to display.')
 
         # hide setting should accept the `page.md#heading` format, in case theres identical ids in the outline
         settings['hide'] = ('', "A list of heading ids to hide.")
@@ -189,14 +189,14 @@ class ContentOutlineCommand(command.CommandComponent):
             msg = "The 'location' and 'pages' may not be specified simultaneously."
             raise exceptions.MooseDocsException(msg)
 
-        levels = self.settings['levels']
-        if isinstance(levels, (str, str)):
-            levels = [int(l) for l in levels.split()]
+        for p in self.settings['pages'].split():
+            p_node = self.translator.findPage(p)
+            page['dependencies'].add(p_node.uid)
 
         return ContentOutline(parent,
                               location=self.settings['location'],
                               pages=self.settings['pages'].split(),
-                              levels=levels,
+                              max_level=int(self.settings['max_level']),
                               hide=self.settings['hide'].split())
 
 class NextAndPreviousCommand(command.CommandComponent):
@@ -350,47 +350,48 @@ class RenderContentOutline(components.RenderComponent):
         elif token['pages']: # should I even check? It would have to be pages option at this point
             nodes = [self.translator.findPage(p) for p in token['pages']]
 
-        ul = html.Tag(parent, 'ul', class_='moose-outline')
+        # Define convenience variables
+        hide = token['hide']
+        max_level = token['max_level']
+        if max_level > 6 or max_level < 1:
+            raise exceptions.ooseDocsException("The 'max_level' must be set in range of 1 to 6.")
+
+        # Create the outline from the headings of each node.
+        # This initializes the html tags to contain this list, where the previous heading level
+        # starts at zero thus will always trigger the creation of <ol><li>...</li></ol> within
+        # the "li" tag created here.
+        previous = 0 # initialize the previous heading level to zero to trigger creation of <ol><li> initially
+        li = html.Tag(parent, 'div', class_='moose-outline')
         for node in nodes:
             pageref = str(node.relativeDestination(page))
 
-            # this loop produces a KeyError: 'headings' when it re-renders after changing
-            # a markdown file while already serving, but not on the first build --serve.
-            # can we fix this?
-            for k, v in node['headings'].items():
-                if v['level'] in token['levels'] and k not in token['hide']:
-                    classref = 'moose-outline-{}'.format(v['level'])
+            for key, head in node['headings'].items():
+                current = head['level']
+                if current <= max_level and key not in hide:
+                    diff = current - previous # change in heading number
 
-                    if v['level'] is 1:
-                        ol1 = html.Tag(ul, 'ol', class_=classref)
-                        li = html.Tag(ol1, 'li')
-                    elif v['level'] is 2:
-                        ol2 = html.Tag(ol1, 'ol', class_=classref)
-                        li = html.Tag(ol2, 'li')
-                    elif v['level'] is 3:
-                        ol3 = html.Tag(ol2, 'ol', class_=classref)
-                        li = html.Tag(ol3, 'li')
-                    elif v['level'] is 4:
-                        ol4 = html.Tag(ol3, 'ol', class_=classref)
-                        li = html.Tag(ol4, 'li')
-                    elif v['level'] is 5:
-                        ol5 = html.Tag(ol4, 'ol', class_=classref)
-                        li = html.Tag(ol5, 'li')
-                    elif v['level'] is 6:
-                        ol6 = html.Tag(ol5, 'ol', class_=classref)
-                        li = html.Tag(ol6, 'li')
-                    # else: error? is this even possible?
+                    # At the same level, so add another <li> to the list
+                    if diff == 0:
+                        li = html.Tag(li.parent, 'li')
 
-                    url = pageref + '#{}'.format(k)
-                    head = heading.find_heading(node, k)
+                    # Heading level is less, so this heading goes within the current li
+                    elif diff > 0:
+                        for j in range(diff):
+                            li = html.Tag(html.Tag(li, 'ol'), 'li')
+
+                    # Heading level is more, so this heading goes above the current li
+                    else:
+                        ol = li.parent
+                        for i in range(-diff):
+                            ol = ol.parent.parent
+                        li = html.Tag(ol, 'li')
+
+                    url = pageref + '#{}'.format(key)
                     link = core.Link(None, url=url)
                     head.copyToToken(link)
                     self.renderer.render(li, link, page)
+                    previous = current
 
-            # There is a hidden bug here... if someone creates a level 4 heading, but no
-            # level 3 heading has yet been generated, then that ol tag doesn't exist yet...
-            # But to be fair, why would anyone follow a level 1 or 2 heading by a level 4?
-            # To be even more fair, I'm probably the only one who is going to use this.
 
         # It would be cool if we could do something like this for the outline
         # This reproduced the example from https://materializecss.com/collapsible.html

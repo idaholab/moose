@@ -50,58 +50,18 @@ ul.moose-a-to-z a{
   top: 48px;
 }
 
-/* MOOSE Outline Counters */
-ul.moose-outline {
-  counter-reset: h1count;
-  margin-left: 0;
+/* MOOSE Outline Counters
+http://jsfiddle.net/PTbGc/
+*/
+div.moose-outline ol {
+    counter-reset: item;
+    padding-left: 10px;
 }
-ol.moose-outline-1 {
-  counter-reset: h2count;
-  list-style-type: none;
+div.moose-outline li {
+    display: block
 }
-.moose-outline-1 li::before {
-  counter-increment: h1count;
-  content: counter(h1count) ".\00a0\00a0\00a0\00a0";
-}
-ol.moose-outline-2 {
-  counter-reset: h3count;
-  list-style-type: none;
-}
-.moose-outline-2 li::before {
-  counter-increment: h2count;
-  content: counter(h1count) "." counter(h2count) ".\00a0\00a0\00a0\00a0";
-}
-.moose-outline-3 {
-  counter-reset: h4count;
-  list-style-type: none;
-}
-.moose-outline-3 li::before {
-  counter-increment: h3count;
-  content: counter(h1count) "." counter(h2count) "." counter(h3count) ".\00a0\00a0\00a0\00a0";
-}
-.moose-outline-4 {
-  counter-reset: h5count;
-  list-style-type: none;
-}
-.moose-outline-4 li::before {
-  counter-increment: h4count;
-  content: counter(h1count) "." counter(h2count) "." counter(h3count) "."
-           counter(h4count) ".\00a0\00a0\00a0\00a0";
-}
-.moose-outline-5 {
-  counter-reset: h6count;
-  list-style-type: none;
-}
-.moose-outline-5 li::before {
-  counter-increment: h5count;
-  content: counter(h1count) "." counter(h2count) "." counter(h3count) "."
-           counter(h4count) "." counter(h5count) ".\00a0\00a0\00a0\00a0";
-}
-.moose-outline-6 {
-  list-style-type: none;
-}
-.moose-outline-6 li::before {
-  counter-increment: h6count;
-  content: counter(h1count) "." counter(h2count) "." counter(h3count) "."
-           counter(h4count) "." counter(h5count) "." counter(h6count) ".\00a0\00a0\00a0\00a0";
+div.moose-outline li:before {
+    content: counters(item, ".") ".   ";
+    counter-increment: item;
+    padding-right:8px;
 }

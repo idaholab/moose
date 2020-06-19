@@ -26,7 +26,7 @@ The following is a list of markdown pages within the "extensions" directory.
 
 The following is a list of all headings in the "extensions" directory, except this section's heading, in the order in which they appear on the [main index page](/).
 
-!content outline levels=1 2 3 4 5 6
+!content outline max_level=6
                  hide=outline-pages
                  pages=core.md
                        autolink.md
@@ -58,7 +58,7 @@ The following is a list of all headings in the "extensions" directory, except th
 
 The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in alphabetical order.
 
-!content outline location=extensions levels=1 2 hide=outline-directory
+!content outline location=extensions max_level=2 hide=outline-directory
 
 ## Next/Previous Buttons
 
