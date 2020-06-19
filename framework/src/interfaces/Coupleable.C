@@ -1490,7 +1490,7 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) cons
 }
 
 const ADVariableValue &
-Coupleable::adCoupledValueLower(const std::string & var_name, unsigned int comp) const
+Coupleable::adCoupledLowerValue(const std::string & var_name, unsigned int comp) const
 {
   auto var = getVarHelper<MooseVariableFE<Real>>(var_name, comp);
 
@@ -1499,7 +1499,7 @@ Coupleable::adCoupledValueLower(const std::string & var_name, unsigned int comp)
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
   if (!_c_is_implicit)
-    mooseError("adCoupledValueLower cannot be called in a coupleable neighbor object");
+    mooseError("adCoupledLowerValue cannot be called in a coupleable neighbor object");
 
   if (_c_nodal)
     return var->adDofValues();

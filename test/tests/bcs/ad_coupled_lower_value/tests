@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#13080'
+  design = 'Coupleable.md'
+  [couple_lower]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    requirement = 'The system shall be able to couple a lower-dimensional variable into a boundary condition for a higher-dimensional variable.'
+    mesh_mode = 'REPLICATED' # LowerDBlockFromSidesetGenerator does not yet work in distributed mode
+  []
+[]

@@ -170,7 +170,7 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a ADVariableValue for the coupled variable
    */
-  const ADVariableValue & adCoupledValueLower(const std::string & var_name,
+  const ADVariableValue & adCoupledLowerValue(const std::string & var_name,
                                               unsigned int comp = 0) const;
 
   /**
