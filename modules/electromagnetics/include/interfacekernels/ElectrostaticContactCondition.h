@@ -30,17 +30,17 @@ protected:
   /// Mechanical pressure uniformly applied at the contact surface area (user-supplied for now)
   const Real & _mechanical_pressure;
 
-  /// User-provided electrical contact resistance constant value
-  const Real & _user_contact_resistance;
+  /// User-provided electrical contact conductance constant value
+  const Real & _user_contact_conductance;
 
-  /// Experimental proportional fit parameter for contact resistance parameter (set using Cincotti et al DOI:10.1002/aic.11102)
+  /// Experimental proportional fit parameter for contact conductance parameter (set using Cincotti et al DOI:10.1002/aic.11102)
   const Real _alpha_electric;
 
-  /// Experimental power fit parameter for contact resistance parameter (set using Cincotti et al DOI:10.1002/aic.11102)
+  /// Experimental power fit parameter for contact conductance parameter (set using Cincotti et al DOI:10.1002/aic.11102)
   const Real _beta_electric;
 
-  /// Check parameter for user-provided electrical contact resistance value
-  bool _resistance_was_set;
+  /// Check parameter for user-provided electrical contact conductance value
+  bool _conductance_was_set;
 
   /// Check parameter for material-provided mean hardness value
   bool _mean_hardness_was_set;

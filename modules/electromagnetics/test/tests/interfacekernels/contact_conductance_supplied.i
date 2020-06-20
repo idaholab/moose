@@ -74,13 +74,12 @@
 []
 
 [InterfaceKernels]
-  [./contact_resistance]
+  [./electrostatic_contact]
     type = ElectrostaticContactCondition
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
     boundary = ssg_interface
-    mean_hardness = mean_hardness
-    mechanical_pressure = 8.52842e10  # resulting contact resistance should be ~1.47e5 as described in Cincotti et al (https://doi.org/10.1002/aic.11102)
+    user_electrical_contact_conductance = 1.47e5 # as described in Cincotti et al (https://doi.org/10.1002/aic.11102)
   [../]
 []
 
@@ -99,13 +98,6 @@
     prop_names = 'electrical_conductivity'
     prop_values = 1.429e6
     block = stainless_steel
-  [../]
-
-  #mean hardness
-  [./harmonic_mean_hardness]
-    type = ADGenericConstantMaterial
-    prop_names = 'mean_hardness'
-    prop_values = 2.4797e9
   [../]
 []
 
