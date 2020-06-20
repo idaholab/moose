@@ -408,7 +408,7 @@ MooseMesh::prepare(bool force)
     {
       CONSOLE_TIMED_PRINT("Preparing for use");
 
-      getMesh().prepare_for_use(false, false);
+      getMesh().prepare_for_use();
     }
   }
   else
@@ -418,7 +418,7 @@ MooseMesh::prepare(bool force)
     // Call prepare_for_use() and DO NOT allow renumbering
     getMesh().allow_renumbering(false);
     if (force || _needs_prepare_for_use)
-      getMesh().prepare_for_use(false, false);
+      getMesh().prepare_for_use();
   }
 
   // Collect (local) subdomain IDs

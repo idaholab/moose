@@ -226,7 +226,7 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
     std::unique_ptr<Node> new_node =
         Node::build(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
 
-    new_node->set_unique_id() = nx + node_offset;
+    new_node->set_unique_id(nx + node_offset);
     new_node->processor_id() = pid;
 
     node0_ptr = mesh.add_node(std::move(new_node));
@@ -238,7 +238,7 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
     std::unique_ptr<Node> new_node =
         Node::build(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
 
-    new_node->set_unique_id() = nx + node_offset + 1;
+    new_node->set_unique_id(nx + node_offset + 1);
     new_node->processor_id() = pid;
 
     node1_ptr = mesh.add_node(std::move(new_node));
@@ -247,7 +247,7 @@ DistributedRectilinearMeshGenerator::addElement<Edge2>(const dof_id_type nx,
   Elem * elem = new Edge2;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
+  elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
@@ -437,7 +437,7 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
     std::unique_ptr<Node> new_node =
         Node::build(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0), node0_id);
 
-    new_node->set_unique_id() = nx * ny + node0_id;
+    new_node->set_unique_id(nx * ny + node0_id);
     new_node->processor_id() = pid;
 
     node0_ptr = mesh.add_node(std::move(new_node));
@@ -451,7 +451,7 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
     std::unique_ptr<Node> new_node =
         Node::build(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0), node1_id);
 
-    new_node->set_unique_id() = nx * ny + node1_id;
+    new_node->set_unique_id(nx * ny + node1_id);
     new_node->processor_id() = pid;
 
     node1_ptr = mesh.add_node(std::move(new_node));
@@ -465,7 +465,7 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
     std::unique_ptr<Node> new_node = Node::build(
         Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0), node2_id);
 
-    new_node->set_unique_id() = nx * ny + node2_id;
+    new_node->set_unique_id(nx * ny + node2_id);
     new_node->processor_id() = pid;
 
     node2_ptr = mesh.add_node(std::move(new_node));
@@ -479,7 +479,7 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
     std::unique_ptr<Node> new_node =
         Node::build(Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0), node3_id);
 
-    new_node->set_unique_id() = nx * ny + node3_id;
+    new_node->set_unique_id(nx * ny + node3_id);
     new_node->processor_id() = pid;
 
     node3_ptr = mesh.add_node(std::move(new_node));
@@ -488,7 +488,7 @@ DistributedRectilinearMeshGenerator::addElement<Quad4>(const dof_id_type nx,
   Elem * elem = new Quad4;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
+  elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
@@ -666,7 +666,7 @@ DistributedRectilinearMeshGenerator::addPoint<Hex8>(const dof_id_type nx,
     std::unique_ptr<Node> new_node = Node::build(
         Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, static_cast<Real>(k) / nz), id);
 
-    new_node->set_unique_id() = nx * ny * nz + id;
+    new_node->set_unique_id(nx * ny * nz + id);
 
     node_ptr = mesh.add_node(std::move(new_node));
   }
@@ -710,7 +710,7 @@ DistributedRectilinearMeshGenerator::addElement<Hex8>(const dof_id_type nx,
   Elem * elem = new Hex8;
   elem->set_id(elem_id);
   elem->processor_id() = pid;
-  elem->set_unique_id() = elem_id;
+  elem->set_unique_id(elem_id);
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
@@ -1011,8 +1011,15 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   // Already partitioned!
   mesh.skip_partitioning(true);
 
-  // No need to renumber or find neighbors - done did it.
-  mesh.prepare_for_use(true, true);
+  // No need to renumber or find neighbors this time - done did it.
+  bool old_allow_renumbering = mesh.allow_renumbering();
+  mesh.allow_renumbering(false);
+  mesh.allow_find_neighbors(false);
+  mesh.prepare_for_use();
+
+  // But we'll want to at least find neighbors after any future mesh changes!
+  mesh.allow_find_neighbors(true);
+  mesh.allow_renumbering(old_allow_renumbering);
 
   // Scale the nodal positions
   scaleNodalPositions<T>(nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax, mesh);

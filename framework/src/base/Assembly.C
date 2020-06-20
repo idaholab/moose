@@ -1295,7 +1295,7 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       if (_calculate_face_xyz)
       {
         side_point = side->point(0);
-        auto element_node_number = elem->which_node_am_i(side_number, 0);
+        auto element_node_number = elem->local_side_node(side_number, 0);
 
         unsigned dimension = 0;
         if (_computing_jacobian)
@@ -1341,7 +1341,7 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
         VectorValue<DualReal> side_point = side->point(i);
-        auto element_node_number = elem->which_node_am_i(side_number, i);
+        auto element_node_number = elem->local_side_node(side_number, i);
 
         unsigned dimension = 0;
         if (_computing_jacobian)
@@ -1409,7 +1409,7 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
         VectorValue<DualReal> side_point = side->point(i);
-        auto element_node_number = elem->which_node_am_i(side_number, i);
+        auto element_node_number = elem->local_side_node(side_number, i);
 
         unsigned dimension = 0;
         if (_computing_jacobian)

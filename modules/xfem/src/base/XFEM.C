@@ -236,9 +236,7 @@ XFEM::updateHeal()
     //    _mesh->contract();
     _mesh->allow_renumbering(false);
     _mesh->skip_partitioning(true);
-    _mesh->prepare_for_use(false, false);
-    //    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates
-    //    warning
+    _mesh->prepare_for_use();
 
     if (_displaced_mesh)
     {
@@ -247,8 +245,7 @@ XFEM::updateHeal()
       MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
       _displaced_mesh->allow_renumbering(false);
       _displaced_mesh->skip_partitioning(true);
-      _displaced_mesh->prepare_for_use(false, false);
-      //      _displaced_mesh->prepare_for_use(true,true);
+      _displaced_mesh->prepare_for_use();
     }
   }
 
@@ -286,16 +283,13 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
     //    _mesh->contract();
     _mesh->allow_renumbering(false);
     _mesh->skip_partitioning(true);
-    _mesh->prepare_for_use(false, false);
-    //    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates
-    //    warning
+    _mesh->prepare_for_use();
 
     if (_displaced_mesh)
     {
       _displaced_mesh->allow_renumbering(false);
       _displaced_mesh->skip_partitioning(true);
-      _displaced_mesh->prepare_for_use(false, false);
-      //      _displaced_mesh->prepare_for_use(true,true);
+      _displaced_mesh->prepare_for_use();
     }
   }
 

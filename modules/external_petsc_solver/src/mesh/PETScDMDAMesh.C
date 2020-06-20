@@ -153,7 +153,7 @@ add_element_Quad4(DM da,
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
                                   node_id_Quad4(nx, 0, i, j, 0));
-  node0_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j, 0);
+  node0_ptr->set_unique_id(node_id_Quad4(nx, 0, i, j, 0));
   node0_ptr->set_id() = node0_ptr->unique_id();
   // xpid + ypid * xp is the global processor ID
   node0_ptr->processor_id() = xpid + ypid * xp;
@@ -162,7 +162,7 @@ add_element_Quad4(DM da,
   auto node1_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j) / ny, 0),
                      node_id_Quad4(nx, 0, i + 1, j, 0));
-  node1_ptr->set_unique_id() = node_id_Quad4(nx, 0, i + 1, j, 0);
+  node1_ptr->set_unique_id(node_id_Quad4(nx, 0, i + 1, j, 0));
   node1_ptr->set_id() = node1_ptr->unique_id();
   node1_ptr->processor_id() = xpidplus + ypid * xp;
 
@@ -170,7 +170,7 @@ add_element_Quad4(DM da,
   auto node2_ptr =
       mesh.add_point(Point(static_cast<Real>(i + 1) / nx, static_cast<Real>(j + 1) / ny, 0),
                      node_id_Quad4(nx, 0, i + 1, j + 1, 0));
-  node2_ptr->set_unique_id() = node_id_Quad4(nx, 0, i + 1, j + 1, 0);
+  node2_ptr->set_unique_id(node_id_Quad4(nx, 0, i + 1, j + 1, 0));
   node2_ptr->set_id() = node2_ptr->unique_id();
   node2_ptr->processor_id() = xpidplus + ypidplus * xp;
 
@@ -178,7 +178,7 @@ add_element_Quad4(DM da,
   auto node3_ptr =
       mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j + 1) / ny, 0),
                      node_id_Quad4(nx, 0, i, j + 1, 0));
-  node3_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j + 1, 0);
+  node3_ptr->set_unique_id(node_id_Quad4(nx, 0, i, j + 1, 0));
   node3_ptr->set_id() = node3_ptr->unique_id();
   node3_ptr->processor_id() = xpid + ypidplus * xp;
 
@@ -187,7 +187,7 @@ add_element_Quad4(DM da,
   elem->set_id(elem_id);
   elem->processor_id() = pid;
   // Make sure our unique_id doesn't overlap any nodes'
-  elem->set_unique_id() = elem_id + (nx + 1) * (ny + 1);
+  elem->set_unique_id(elem_id + (nx + 1) * (ny + 1));
   elem = mesh.add_elem(elem);
   elem->set_node(0) = node0_ptr;
   elem->set_node(1) = node1_ptr;
@@ -313,7 +313,7 @@ add_node_Qua4(dof_id_type nx,
   // Bottom Left
   auto node0_ptr = mesh.add_point(Point(static_cast<Real>(i) / nx, static_cast<Real>(j) / ny, 0),
                                   node_id_Quad4(nx, 0, i, j, 0));
-  node0_ptr->set_unique_id() = node_id_Quad4(nx, 0, i, j, 0);
+  node0_ptr->set_unique_id(node_id_Quad4(nx, 0, i, j, 0));
   node0_ptr->processor_id() = pid;
 }
 
@@ -393,13 +393,10 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
   mesh.set_next_unique_id(Mx * My + (Mx - 1) * (My - 1));
 
   // No need to renumber or find neighbors - done did it.
-  // Avoid deprecation message/error by _also_ setting
-  // allow_renumbering(false). This is a bit silly, but we want to
-  // catch cases where people are purely using the old "skip"
-  // interface and not the new flag setting one.
   mesh.allow_renumbering(false);
-  mesh.prepare_for_use(/*skip_renumber (ignored!) = */ false,
-                       /*skip_find_neighbors = */ true);
+  mesh.allow_find_neighbors(false);
+  mesh.prepare_for_use();
+  mesh.allow_find_neighbors(true);
 }
 
 void

@@ -74,7 +74,7 @@ FileMesh::buildMesh()
     // file.
     bool skip_partitioning_later = getMesh().skip_partitioning();
     getMesh().skip_partitioning(true);
-    getMesh().prepare_for_use(false, false);
+    getMesh().prepare_for_use();
     getMesh().skip_partitioning(skip_partitioning_later);
   }
   else // not reading Nemesis files
@@ -92,7 +92,7 @@ FileMesh::buildMesh()
       _exreader->read(_file_name);
 
       getMesh().allow_renumbering(false);
-      getMesh().prepare_for_use(false, false);
+      getMesh().prepare_for_use();
     }
     else
     {

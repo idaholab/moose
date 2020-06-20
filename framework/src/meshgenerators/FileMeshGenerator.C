@@ -55,7 +55,7 @@ FileMeshGenerator::generate()
       io.read(_file_name);
     }
     MeshCommunication().broadcast(*mesh);
-    mesh->prepare_for_use(false, false);
+    mesh->prepare_for_use();
   }
   else if (!has_exodus_integers)
     mesh->read(_file_name);
