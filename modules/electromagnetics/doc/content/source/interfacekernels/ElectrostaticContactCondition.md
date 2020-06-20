@@ -7,7 +7,7 @@
 This interface kernel models the conductivity of electric field across a specified
 boundary between two dissimilar materials, as described by [!citep](cincotti2007sps).
 It accounts for the influence of electrostatic potential differences across the
-interface, with appropriate electrical contact conductance / resistance coefficient
+interface, with appropriate electrical contact conductance coefficient
 being provided either by the user as a constant scalar number or via a combination
 of material properties and constants for calculation. The condition being applied is:
 
@@ -49,7 +49,7 @@ For reference, the harmonic mean calculation for two values, $V_a$ and $V_b$, is
 
 ## Example Input File Syntax
 
-!listing contact_resistance_calculated.i block=InterfaceKernels/contact_resistance
+!listing contact_conductance_calculated.i block=InterfaceKernels/electrostatic_contact
 
 
 !syntax parameters /InterfaceKernels/ElectrostaticContactCondition
