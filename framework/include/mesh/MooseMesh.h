@@ -15,6 +15,7 @@
 #include "Restartable.h"
 #include "MooseEnum.h"
 #include "PerfGraphInterface.h"
+#include "MooseHashing.h"
 
 #include <memory> //std::unique_ptr
 #include <unordered_map>
@@ -43,7 +44,6 @@ class Partitioner;
 class GhostingFunctor;
 class BoundingBox;
 }
-
 // Useful typedefs
 typedef StoredRange<std::set<Node *>::iterator, Node *> SemiLocalNodeRange;
 
@@ -302,6 +302,14 @@ public:
    */
   std::vector<BoundaryID> getBoundaryIDs(const Elem * const elem,
                                          const unsigned short int side) const;
+
+  /**
+   * Returns a const pointer to a lower dimensional element that
+   * corresponds to a side of a higher dimensional element. This
+   * relationship is established through an internal_parent; if there is
+   * no lowerDElem, nullptr is returned.
+   */
+  const Elem * getLowerDElem(const Elem *, unsigned short int) const;
 
   /**
    * Returns a const reference to a set of all user-specified
@@ -1366,6 +1374,10 @@ private:
 
   /// Holds a map from neighbor subomdain ids to the boundary ids that are attached to it
   std::unordered_map<SubdomainID, std::set<BoundaryID>> _neighbor_subdomain_boundary_ids;
+
+  /// Holds a map from a high-order element side to its corresponding lower-d element
+  std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
+      _higher_d_elem_side_to_lower_d_elem;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;

@@ -1744,6 +1744,19 @@ FEProblemBase::reinitElemFace(const Elem * elem,
 }
 
 void
+FEProblemBase::reinitLowerDElem(const Elem * lower_d_elem,
+                                THREAD_ID tid,
+                                const std::vector<Point> * const pts,
+                                const std::vector<Real> * const weights)
+{
+  SubProblem::reinitLowerDElem(lower_d_elem, tid, pts, weights);
+
+  if (_displaced_problem && _displaced_mesh)
+    _displaced_problem->reinitLowerDElem(
+        _displaced_mesh->elemPtr(lower_d_elem->id()), tid, pts, weights);
+}
+
+void
 FEProblemBase::reinitNode(const Node * node, THREAD_ID tid)
 {
   _assembly[tid]->reinit(node);

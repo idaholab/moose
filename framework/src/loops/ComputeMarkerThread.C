@@ -81,7 +81,10 @@ ComputeMarkerThread::onElement(const Elem * elem)
 }
 
 void
-ComputeMarkerThread::onBoundary(const Elem * /*elem*/, unsigned int /*side*/, BoundaryID /*bnd_id*/)
+ComputeMarkerThread::onBoundary(const Elem * /*elem*/,
+                                unsigned int /*side*/,
+                                BoundaryID /*bnd_id*/,
+                                const Elem * /*lower_d_elem = nullptr*/)
 {
 }
 

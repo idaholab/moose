@@ -1,0 +1,20 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [gap-conductance-bnd-aux-kernel]
+    type = Exodiff
+    input = 'gap-conductance-bnd-aux-kernel.i'
+    exodiff = 'gap-conductance-bnd-aux-kernel_out.e'
+    custom_cmp = 'exodiff.cmp'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to couple variables between boundary auxiliary kernels and mortar constraints.'
+  [../]
+  [gap-conductance-bnd-material]
+    type = Exodiff
+    input = 'gap-conductance-bnd-material.i'
+    exodiff = 'gap-conductance-bnd-material_out.e'
+    custom_cmp = 'exodiff_mat.cmp'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to use boundary-restricted material properties in mortar constraints.'
+  [../]
+[]

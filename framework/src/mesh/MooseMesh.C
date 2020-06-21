@@ -898,16 +898,30 @@ MooseMesh::cacheInfo()
   _subdomain_boundary_ids.clear();
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
+  _higher_d_elem_side_to_lower_d_elem.clear();
 
   // TODO: Thread this!
   for (const auto & elem : getMesh().element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
+    const Elem * ip_elem = elem->interior_parent();
+
+    if (ip_elem)
+    {
+      unsigned int ip_side = ip_elem->which_side_am_i(elem);
+
+      // For some grid sequencing tests: ip_side == libMesh::invalid_uint
+      if (ip_side != libMesh::invalid_uint)
+      {
+        auto pair = std::make_pair(ip_elem, ip_side);
+        _higher_d_elem_side_to_lower_d_elem.insert(
+            std::pair<std::pair<const Elem *, unsigned short int>, const Elem *>(pair, elem));
+      }
+    }
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
       std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
-
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
       subdomain_set.insert(boundaryids.begin(), boundaryids.end());
@@ -1105,6 +1119,17 @@ MooseMesh::getBoundaryID(const BoundaryName & boundary_name) const
     id = getMesh().get_boundary_info().get_id_by_name(boundary_name);
 
   return id;
+}
+
+const Elem *
+MooseMesh::getLowerDElem(const Elem * elem, unsigned short int side) const
+{
+  auto it = _higher_d_elem_side_to_lower_d_elem.find(std::make_pair(elem, side));
+
+  if (it != _higher_d_elem_side_to_lower_d_elem.end())
+    return it->second;
+  else
+    return nullptr;
 }
 
 std::vector<BoundaryID>

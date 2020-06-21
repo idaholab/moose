@@ -370,6 +370,10 @@ public:
                               bool suppress_displaced_init = false) override;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
+  virtual void reinitLowerDElem(const Elem * lower_d_elem,
+                                THREAD_ID tid,
+                                const std::vector<Point> * const pts = nullptr,
+                                const std::vector<Real> * const weights = nullptr) override;
   virtual void reinitNode(const Node * node, THREAD_ID tid) override;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) override;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) override;
@@ -1324,6 +1328,10 @@ public:
 
   // Displaced problem /////
   virtual void addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem);
+  virtual std::shared_ptr<const DisplacedProblem> getDisplacedProblem() const
+  {
+    return _displaced_problem;
+  }
   virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
 
   virtual void updateGeomSearch(

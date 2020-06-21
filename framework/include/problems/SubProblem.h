@@ -373,6 +373,10 @@ public:
                               bool suppress_displaced_init = false) = 0;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) = 0;
+  virtual void reinitLowerDElem(const Elem * lower_d_elem,
+                                THREAD_ID tid,
+                                const std::vector<Point> * const pts = nullptr,
+                                const std::vector<Real> * const weights = nullptr);
   virtual void reinitNode(const Node * node, THREAD_ID tid) = 0;
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid) = 0;
   virtual void reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid) = 0;
@@ -424,16 +428,6 @@ public:
                                      const std::vector<Point> * const pts,
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0);
-
-  /**
-   * reinitialize a lower dimensional FE object at a given set of reference points and then compute
-   * variable data. Note that this method makes no assumptions about what's been called beforehand,
-   * e.g. you don't have to call some prepare method before this one. This is an all-in-one reinit
-   */
-  void reinitLowerDElemRef(const Elem * elem,
-                           const std::vector<Point> * const pts,
-                           const std::vector<Real> * const weights = nullptr,
-                           THREAD_ID tid = 0);
 
   /**
    * Reinit a mortar element to obtain a valid JxW

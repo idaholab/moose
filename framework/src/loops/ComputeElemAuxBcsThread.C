@@ -78,6 +78,10 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         _problem.prepare(elem, _tid);
         _problem.reinitElemFace(elem, side, boundary_id, _tid);
 
+        const Elem * lower_d_elem = _problem.mesh().getLowerDElem(elem, side);
+        if (lower_d_elem)
+          _problem.reinitLowerDElem(lower_d_elem, _tid);
+
         const Elem * neighbor = elem->neighbor_ptr(side);
 
         // The last check here is absolutely necessary otherwise we will attempt to evaluate
