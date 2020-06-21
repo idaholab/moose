@@ -13,6 +13,14 @@ ADFParser::ADFParser() : FunctionParserAD(), _epsilon(1e-12) {}
 
 ADFParser::ADFParser(const ADFParser & cpy) : FunctionParserAD(cpy), _epsilon(1e-12) {}
 
+#ifndef ADFPARSER_INCLUDES
+#error ... \
+       The ADFPARSER_INCLUDES macro is not defined. A possible reason is that you       \
+       are compiling MOOSE from a custom application. Please check your application     \
+       Makefile and make sure that you are appending options to ADDITIONAL_CPPFLAGS     \
+       using the += operator, rather than overwriting the variable with the := operator.
+#endif
+
 bool
 ADFParser::JITCompile()
 {
