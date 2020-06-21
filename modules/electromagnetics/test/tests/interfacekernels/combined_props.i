@@ -36,7 +36,7 @@
     input = break_boundary
     master_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -89,15 +89,15 @@
     type = PerpendicularElectricFieldInterface
     variable = u
     neighbor_var = v
-    boundary = master0_interface
-    master_epsilon = 1.0
-    neighbor_epsilon = 10.0
+    boundary = primary0_interface
+    primary_epsilon = 1.0
+    secondary_epsilon = 10.0
   [../]
   [./parallel]
     type = ParallelElectricFieldInterface
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
   [../]
 []
 

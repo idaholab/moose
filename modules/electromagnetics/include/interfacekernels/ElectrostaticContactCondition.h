@@ -19,10 +19,10 @@ protected:
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   /// Electrical conductivity property for the primary side
-  const MaterialProperty<Real> & _conductivity_master;
+  const MaterialProperty<Real> & _conductivity_primary;
 
   /// Electrical conductivity property for the secondary side
-  const MaterialProperty<Real> & _conductivity_neighbor;
+  const MaterialProperty<Real> & _conductivity_secondary;
 
   /// Geometric mean of the hardness from both sides of the boundary, taken in as a material property
   const ADMaterialProperty<Real> & _mean_hardness;
