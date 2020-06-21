@@ -7,9 +7,9 @@ ElectrostaticContactCondition::validParams()
 {
   InputParameters params = ADInterfaceKernel::validParams();
   params.addParam<MaterialPropertyName>(
-      "master_conductivity", "electrical_conductivity", "Conductivity on the master block.");
+      "primary_conductivity", "electrical_conductivity", "Conductivity on the primary block.");
   params.addParam<MaterialPropertyName>(
-      "neighbor_conductivity", "electrical_conductivity", "Conductivity on the neighbor block.");
+      "secondary_conductivity", "electrical_conductivity", "Conductivity on the secondary block.");
   params.addParam<MaterialPropertyName>(
       "mean_hardness",
       "mean_hardness",
@@ -28,8 +28,8 @@ ElectrostaticContactCondition::validParams()
 
 ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParameters & parameters)
   : ADInterfaceKernel(parameters),
-    _conductivity_master(getMaterialProperty<Real>("master_conductivity")),
-    _conductivity_neighbor(getNeighborMaterialProperty<Real>("neighbor_conductivity")),
+    _conductivity_primary(getMaterialProperty<Real>("primary_conductivity")),
+    _conductivity_secondary(getNeighborMaterialProperty<Real>("secondary_conductivity")),
     _mean_hardness(isParamValid("user_electrical_contact_conductance")
                        ? getGenericZeroMaterialProperty<Real, true>("mean_hardness")
                        : getADMaterialProperty<Real>("mean_hardness")),
@@ -51,8 +51,8 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
   ADReal res = 0.0;
   ADReal contact_conductance = 0.0;
 
-  ADReal mean_conductivity = 2 * _conductivity_master[_qp] * _conductivity_neighbor[_qp] /
-                             (_conductivity_master[_qp] + _conductivity_neighbor[_qp]);
+  ADReal mean_conductivity = 2 * _conductivity_primary[_qp] * _conductivity_secondary[_qp] /
+                             (_conductivity_primary[_qp] + _conductivity_secondary[_qp]);
 
   if (_conductance_was_set && !_mean_hardness_was_set)
   {
@@ -77,13 +77,13 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
   {
     case Moose::Element:
       res = 0.5 *
-            (_conductivity_neighbor[_qp] * _grad_neighbor_value[_qp] * _normals[_qp] -
+            (_conductivity_secondary[_qp] * _grad_neighbor_value[_qp] * _normals[_qp] -
              contact_conductance * (_neighbor_value[_qp] - _u[_qp])) *
             _test[_i][_qp];
       break;
 
     case Moose::Neighbor:
-      res = _conductivity_master[_qp] * _grad_u[_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+      res = _conductivity_primary[_qp] * _grad_u[_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
       break;
   }
 
