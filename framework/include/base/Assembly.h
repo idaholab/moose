@@ -458,6 +458,16 @@ public:
    */
   void setFaceQRule(QBase * qrule, unsigned int dim);
 
+private:
+  /**
+   * Set the qrule to be used for lower dimensional integration.
+   *
+   * @param qrule The qrule you want to set
+   * @param dim The spatial dimension of the qrule
+   */
+  void setLowerQRule(QBase * qrule, unsigned int dim);
+
+public:
   /**
    * Set the qrule to be used for neighbor integration.
    *
@@ -498,9 +508,9 @@ public:
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
    */
-  void reinitLowerDElemRef(const Elem * elem,
-                           const std::vector<Point> * const pts,
-                           const std::vector<Real> * const weights = nullptr);
+  void reinitLowerDElem(const Elem * elem,
+                        const std::vector<Point> * const pts = nullptr,
+                        const std::vector<Real> * const weights = nullptr);
 
   /**
    * reinitialize a mortar segment mesh element in order to get a proper JxW
@@ -1678,7 +1688,10 @@ private:
   std::map<unsigned int, FEBase **> _holder_fe_helper;
   /// The current helper object for transforming coordinates
   FEBase * _current_fe_helper;
-  /// The current current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
+  /// The current current quadrature rule being used (could be either volumetric or arbitrary - for
+  /// dirac kernels). Note that this const version is required because our getter APIs return a
+  /// const QBase * const &. Without the const QBase * member we would be casting the non-const
+  /// version, which creates a temporary, and we cannot return a reference to a temporary
   const QBase * _const_current_qrule;
   /// The current current quadrature rule being used (could be either volumetric or arbitrary - for dirac kernels)
   QBase * _current_qrule;
@@ -1726,7 +1739,9 @@ private:
   std::map<unsigned int, FEBase **> _holder_fe_face_helper;
   /// helper object for transforming coordinates
   FEBase * _current_fe_face_helper;
-  /// quadrature rule used on faces
+  /// quadrature rule used on faces. Note that this const version is required because our getter
+  /// APIs return a const QBase * const &. Without the const QBase * member we would be casting the
+  /// non-const version, which creates a temporary, and we cannot return a reference to a temporary
   const QBase * _const_current_qrule_face;
   /// quadrature rule used on faces
   QBase * _current_qrule_face;
@@ -1779,7 +1794,9 @@ private:
   /// Vector FE objects for lower dimensional elements
   mutable std::map<unsigned int, std::map<FEType, const FEVectorBase *>> _const_vector_fe_lower;
 
-  /// quadrature rule used on neighbors
+  /// quadrature rule used on neighbors. Note that this const version is required because our getter
+  /// APIs return a const QBase * const &. Without the const QBase * member we would be casting the
+  /// non-const version, which creates a temporary, and we cannot return a reference to a temporary
   const QBase * _const_current_qrule_neighbor;
   /// quadrature rule used on neighbors
   QBase * _current_qrule_neighbor;
@@ -1809,6 +1826,17 @@ private:
   /// A pointer to const qrule_msm
   const QBase * _const_qrule_msm;
 
+private:
+  /// quadrature rule used on lower dimensional elements. This should always be the same as the face
+  /// qrule. Note that this const version is required because our getter APIs return a const QBase *
+  /// const &. Without the const QBase * member we would be casting the non-const version, which
+  /// creates a temporary, and we cannot return a reference to a temporary
+  const QBase * _const_current_qrule_lower;
+  /// quadrature rule used on lower dimensional elements. This should always be
+  /// the same as the face qrule
+  QBase * _current_qrule_lower;
+
+protected:
   /// The current "element" we are currently on.
   const Elem * _current_elem;
   /// The current subdomain ID

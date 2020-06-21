@@ -433,14 +433,14 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp) const
 
 template <>
 const GenericVariableValue<false> &
-Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericValue<false>(const std::string & var_name, unsigned int comp) const
 {
   return coupledValue(var_name, comp);
 }
 
 template <>
 const GenericVariableValue<true> &
-Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int comp) const
 {
   return adCoupledValue(var_name, comp);
 }
@@ -467,6 +467,23 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
     else
       return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
   }
+}
+
+const VariableValue &
+Coupleable::coupledValueLower(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVar(var_name, comp);
+  if (!var)
+    return *getDefaultValue(var_name, comp);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (_coupleable_neighbor)
+    mooseError("coupledValueLower cannot be called in a coupleable neighbor object");
+
+  if (_c_nodal)
+    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
+  else
+    return (_c_is_implicit) ? var->slnLower() : var->slnLowerOld();
 }
 
 const VariableValue &
@@ -1461,14 +1478,33 @@ Coupleable::adCoupledValue(const std::string & var_name, unsigned int comp) cons
     return *getADDefaultValue(var_name);
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  if (_c_nodal)
-    mooseError("Not implemented");
   if (!_c_is_implicit)
     mooseError("Not implemented");
+
+  if (_c_nodal)
+    return var->adDofValues();
 
   if (!_coupleable_neighbor)
     return var->adSln();
   return var->adSlnNeighbor();
+}
+
+const ADVariableValue &
+Coupleable::adCoupledLowerValue(const std::string & var_name, unsigned int comp) const
+{
+  auto var = getVarHelper<MooseVariableFE<Real>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("adCoupledLowerValue cannot be called in a coupleable neighbor object");
+
+  if (_c_nodal)
+    return var->adDofValues();
+  else
+    return var->adSlnLower();
 }
 
 const ADVariableGradient &
@@ -1694,14 +1730,14 @@ Coupleable::genericZeroSecond<true>()
 
 template <>
 const GenericVariableGradient<false> &
-Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericGradient<false>(const std::string & var_name, unsigned int comp) const
 {
   return coupledGradient(var_name, comp);
 }
 
 template <>
 const GenericVariableGradient<true> &
-Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp)
+Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned int comp) const
 {
   return adCoupledGradient(var_name, comp);
 }

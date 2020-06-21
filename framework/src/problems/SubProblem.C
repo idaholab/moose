@@ -864,14 +864,14 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
 }
 
 void
-SubProblem::reinitLowerDElemRef(const Elem * elem,
-                                const std::vector<Point> * const pts,
-                                const std::vector<Real> * const weights,
-                                THREAD_ID tid)
+SubProblem::reinitLowerDElem(const Elem * elem,
+                             THREAD_ID tid,
+                             const std::vector<Point> * const pts,
+                             const std::vector<Real> * const weights)
 {
   // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
   // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
-  assembly(tid).reinitLowerDElemRef(elem, pts, weights);
+  assembly(tid).reinitLowerDElem(elem, pts, weights);
 
   // Actually get the dof indices in the moose variables
   systemBaseNonlinear().prepareLowerD(tid);

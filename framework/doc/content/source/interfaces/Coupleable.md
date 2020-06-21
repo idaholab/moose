@@ -21,6 +21,7 @@ coupledDotDu | Derivative of a time derivative of a coupled variable
 coupledNodalDot | Nodal value of the time derivative of a coupled variable
 coupledVectorDot | Time derivative of a coupled vector variable
 coupledVectorDotDu | Derivative of a time derivative of a coupled vector variable
+adCoupledLowerValue | Value a coupled lower-dimensional variable with automatic differentiation info
 
 For values, gradients and second derivatives, users can request old and older values in case they are running a transient simulation.
 In case of old and older values, the methods are called `coupledValueOld` and `coupledValueOlder`, respectively.

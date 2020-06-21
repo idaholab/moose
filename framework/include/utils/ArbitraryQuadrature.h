@@ -27,7 +27,15 @@ public:
 
   QuadratureType type() const override;
 
+  /**
+   * Set the quadrature points. Note that this also sets the quadrature weights to unity
+   */
   void setPoints(const std::vector<Point> & points);
+
+  /**
+   * Set the quadrature weights
+   */
+  void setWeights(const std::vector<Real> & weights);
 
   virtual bool shapes_need_reinit() override { return true; }
 
@@ -41,4 +49,3 @@ private:
   void init_2D(const ElemType _type = INVALID_ELEM, unsigned int p_level = 0) override;
   void init_3D(const ElemType _type = INVALID_ELEM, unsigned int p_level = 0) override;
 };
-

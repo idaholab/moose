@@ -427,6 +427,7 @@ public:
   /// lower-d element solution
   const ADTemplateVariableValue<OutputType> & adSlnLower() const { return _lower_data->adSln(); }
   const FieldVariableValue & slnLower() const { return _lower_data->sln(Moose::Current); }
+  const FieldVariableValue & slnLowerOld() const { return _lower_data->sln(Moose::Old); }
 
   /// Actually compute variable values from the solution vectors
   virtual void computeElemValues() override;
@@ -526,7 +527,7 @@ public:
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues() const;
+  const MooseArray<ADReal> & adDofValues() const override;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec

@@ -124,4 +124,9 @@ public:
    * AD neighbor time derivative getter
    */
   virtual const ADTemplateVariableValue<OutputType> & adUDotNeighbor() const = 0;
+
+  /**
+   * Return the AD dof values
+   */
+  virtual const MooseArray<ADReal> & adDofValues() const = 0;
 };

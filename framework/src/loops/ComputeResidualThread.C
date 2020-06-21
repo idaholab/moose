@@ -165,13 +165,20 @@ ComputeResidualThread::onElement(const Elem * elem)
 }
 
 void
-ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+ComputeResidualThread::onBoundary(const Elem * elem,
+                                  unsigned int side,
+                                  BoundaryID bnd_id,
+                                  const Elem * lower_d_elem /*=nullptr*/)
 {
   if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
     const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
+
+    // Needed to use lower-dimensional variables on Materials
+    if (lower_d_elem)
+      _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
     // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
     // still remember to swap back during stack unwinding.

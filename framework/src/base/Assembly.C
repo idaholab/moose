@@ -74,6 +74,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qface_arbitrary(nullptr),
     _current_qrule_neighbor(nullptr),
     _qrule_msm(nullptr),
+    _current_qrule_lower(nullptr),
 
     _current_elem(nullptr),
     _current_elem_volume(0),
@@ -615,6 +616,19 @@ Assembly::setFaceQRule(QBase * qrule, unsigned int dim)
   for (auto & it : _fe_face[dim])
     it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face[dim])
+    it.second->attach_quadrature_rule(qrule);
+}
+
+void
+Assembly::setLowerQRule(QBase * qrule, unsigned int dim)
+{
+  // The lower-dimensional quadrature rule matches the face quadrature rule
+  _const_current_qrule_face = _const_current_qrule_lower = _current_qrule_face =
+      _current_qrule_lower = qrule;
+
+  for (auto & it : _fe_lower[dim])
+    it.second->attach_quadrature_rule(qrule);
+  for (auto & it : _vector_fe_lower[dim])
     it.second->attach_quadrature_rule(qrule);
 }
 
@@ -2116,26 +2130,38 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 }
 
 void
-Assembly::reinitLowerDElemRef(const Elem * elem,
-                              const std::vector<Point> * const pts,
-                              const std::vector<Real> * const weights)
+Assembly::reinitLowerDElem(const Elem * elem,
+                           const std::vector<Point> * const pts,
+                           const std::vector<Real> * const weights)
 {
-  mooseAssert(pts->size(),
-              "Currently reinitialization of lower d elements is only supported with custom "
-              "quadrature points; there is no fall-back quadrature rule. Consequently make sure "
-              "you never try to use JxW coming from a fe_lower object unless you are also passing "
-              "a weights argument");
-
   _current_lower_d_elem = elem;
 
   unsigned int elem_dim = elem->dim();
+  mooseAssert(elem_dim < _mesh_dimension,
+              "The lower dimensional element should truly be a lower dimensional element");
+
+  if (pts)
+  {
+    // Lower rule matches the face rule for the higher dimensional element
+    ArbitraryQuadrature * lower_rule = _holder_qrule_arbitrary_face[elem_dim + 1];
+
+    // This also sets the quadrature weights to unity
+    lower_rule->setPoints(*pts);
+
+    if (weights)
+      lower_rule->setWeights(*weights);
+
+    setLowerQRule(lower_rule, elem_dim);
+  }
+  else if (_current_qrule_lower != _holder_qrule_face[elem_dim + 1])
+    setLowerQRule(_holder_qrule_face[elem_dim + 1], elem_dim);
 
   for (const auto & it : _fe_lower[elem_dim])
   {
     FEBase * fe_lower = it.second;
     FEType fe_type = it.first;
 
-    fe_lower->reinit(elem, pts, weights);
+    fe_lower->reinit(elem);
 
     if (FEShapeData * fesd = _fe_shape_data_lower[fe_type])
     {

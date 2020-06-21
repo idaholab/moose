@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GapHeatConductanceTest.h"
+#include "GapHeatConductanceMaterial.h"
 
-registerMooseObject("MooseTestApp", GapHeatConductanceTest);
+registerMooseObject("MooseTestApp", GapHeatConductanceMaterial);
 
 InputParameters
-GapHeatConductanceTest::validParams()
+GapHeatConductanceMaterial::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
   params.addParam<Real>("gap_conductance_constant",
@@ -26,18 +26,24 @@ GapHeatConductanceTest::validParams()
       "master_gap_conductance",
       "gap_conductance",
       "The material property name providing the gap conductance on the master side");
+  params.addParam<MaterialPropertyName>(
+      "material_property",
+      "layer_modifier",
+      "The boundary-restricted material property name providing a flux modifier");
+
   return params;
 }
 
-GapHeatConductanceTest::GapHeatConductanceTest(const InputParameters & parameters)
+GapHeatConductanceMaterial::GapHeatConductanceMaterial(const InputParameters & parameters)
   : ADMortarConstraint(parameters),
     _slave_gap_conductance(getADMaterialProperty<Real>("slave_gap_conductance")),
-    _master_gap_conductance(getNeighborADMaterialProperty<Real>("master_gap_conductance"))
+    _master_gap_conductance(getNeighborADMaterialProperty<Real>("master_gap_conductance")),
+    _layer_modifier(getADMaterialProperty<Real>("layer_modifier"))
 {
 }
 
 ADReal
-GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
+GapHeatConductanceMaterial::computeQpResidual(Moose::MortarType type)
 {
   switch (type)
   {
@@ -54,11 +60,15 @@ GapHeatConductanceTest::computeQpResidual(Moose::MortarType type)
       {
         auto gap = (_phys_points_slave[_qp] - _phys_points_master[_qp]).norm();
         mooseAssert(MetaPhysicL::raw_value(gap) > TOLERANCE * TOLERANCE,
-                    "Gap distance is too small in GapHeatConductanceTest");
+                    "Gap distance is too small in GapHeatConductanceMaterial");
 
         heat_transfer_coeff =
             (0.5 * (_slave_gap_conductance[_qp] + _master_gap_conductance[_qp])) / gap;
       }
+
+      // Modify heat transfer coefficient with boundary-restricted material property
+      heat_transfer_coeff *= 0.5 * _layer_modifier[_qp];
+
       return _test[_i][_qp] *
              (_lambda[_qp] -
               heat_transfer_coeff * (_u_slave[_qp] - (_has_master ? _u_master[_qp] : 0)));

@@ -68,8 +68,12 @@ public:
    * @param elem - The element we are checking is on the boundary.
    * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
+   * @param lower_d_elem - Lower dimensional element (e.g. Mortar)
    */
-  virtual void preBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id);
+  virtual void preBoundary(const Elem * elem,
+                           unsigned int side,
+                           BoundaryID bnd_id,
+                           const Elem * lower_d_elem = nullptr);
 
   /**
    * Called when doing boundary assembling
@@ -77,8 +81,12 @@ public:
    * @param elem - The element we are checking is on the boundary.
    * @param side - The side of the element in question.
    * @param bnd_id - ID of the boundary we are at
+   * @param lower_d_elem - Lower dimensional element (e.g. Mortar)
    */
-  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id);
+  virtual void onBoundary(const Elem * elem,
+                          unsigned int side,
+                          BoundaryID bnd_id,
+                          const Elem * lower_d_elem = nullptr);
 
   /**
    * Called before evaluations on an element internal side
@@ -211,14 +219,15 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
         for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
           std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+          const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
 
           if (boundary_ids.size() > 0)
             for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
                  it != boundary_ids.end();
                  ++it)
             {
-              preBoundary(elem, side, *it);
-              onBoundary(elem, side, *it);
+              preBoundary(elem, side, *it, lower_d_elem);
+              onBoundary(elem, side, *it, lower_d_elem);
             }
 
           const Elem * neighbor = elem->neighbor_ptr(side);
@@ -293,7 +302,8 @@ template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::preBoundary(const Elem * /*elem*/,
                                                 unsigned int /*side*/,
-                                                BoundaryID /*bnd_id*/)
+                                                BoundaryID /*bnd_id*/,
+                                                const Elem * /*lower_d_elem = nullptr*/)
 {
 }
 
@@ -301,7 +311,8 @@ template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::onBoundary(const Elem * /*elem*/,
                                                unsigned int /*side*/,
-                                               BoundaryID /*bnd_id*/)
+                                               BoundaryID /*bnd_id*/,
+                                               const Elem * /*lower_d_elem = nullptr*/)
 {
 }
 
