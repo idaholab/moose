@@ -32,7 +32,12 @@ MooseEnum kernels = CovarianceFunction::makeCovarianceKernelEnum();
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
   params.addRequiredParam<std::vector<Real> >("length_factor", "Length Factor to use for Covariance Kernel");
+  params.addParam<Real>("signal_variance",1, "Signal Variance (sigma_f^2) to use for kernel calculation.");
+  params.addParam<Real>("noise_variance",0, "Noise Variance (sigma_n^2) to use for kernel calculation.");
   params.addParam<Real>("gamma", "Gamma to use for Exponential Covariance Kernel");
+  params.addParam<unsigned int>("p", "Integer p to use for Matern Hald Integer Covariance Kernel");
+  params.addParam<bool>("standardize_params", true ,"Standardize (center and scale) training parameters (x values)");
+  params.addParam<bool>("standardize_data", true ,"Standardize (center and scale) training data (y values)");
 
   return params;
 }
@@ -41,14 +46,16 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   : SurrogateTrainer(parameters),
     _kernel_type(getParam<MooseEnum>("kernel_function")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _training_params_mean(declareModelData<RealEigenMatrix>("_training_params_mean")),
-    _training_params_var(declareModelData<RealEigenMatrix>("_training_params_var")),
+    _training_params_mean(declareModelData<RealEigenVector>("_training_params_mean")),
+    _training_params_var(declareModelData<RealEigenVector>("_training_params_var")),
     _training_data(declareModelData<RealEigenMatrix>("_training_data")),
-    _training_data_mean(declareModelData<Real>("_training_data_mean")),
-    _training_data_var(declareModelData<Real>("_training_data_var")),
+    _training_data_mean(declareModelData<RealEigenVector>("_training_data_mean")),
+    _training_data_var(declareModelData<RealEigenVector>("_training_data_var")),
     _K(declareModelData<RealEigenMatrix>("_K")),
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_function(declareModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel> >("_covar_function"))
+    _covar_function(declareModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel> >("_covar_function")),
+    _standardize_params(getParam<bool>("standardize_params")),
+    _standardize_data(getParam<bool>("standardize_data"))
 {
 }
 
@@ -78,44 +85,6 @@ GaussianProcessTrainer::initialSetup()
   _covar_function = CovarianceFunction::makeCovarianceKernel(_kernel_type, this);
 }
 
-RealEigenMatrix
-GaussianProcessTrainer::cholesky_back_substitute(const RealEigenMatrix & A, const RealEigenMatrix & b)
-{
-  unsigned int n_cols=A.cols();
-  //verify A.n == A.m == b.n
-  unsigned int n_solves=b.cols();
-  //std::cout << n_cols << A.m() << b.n() << n_solves <<'\n';
-  RealEigenMatrix x(n_cols,n_solves);
-
-
-  //loosly modified
-  for (unsigned int s=0; s<n_solves; ++s){
-    // Solve for Ly=b
-    //std::cout << "s " << s << '\n';
-    for (unsigned int i=0; i<n_cols; ++i)
-    {
-      //std::cout << "i " << i << '\n';
-      Real temp = b(i,s);
-      for (unsigned int k=0; k<i; ++k){
-        temp -= A(i,k)*x(k,s);
-      }
-      x(i,s) = temp / A(i,i);
-    }
-
-    // Solve for L^T x = y
-    for (unsigned int i=0; i<n_cols; ++i)
-    {
-      //std::cout << "i " << i << '\n';
-      const unsigned int ib = (n_cols-1)-i;
-      for (unsigned int k=(ib+1); k<n_cols; ++k){
-        x(ib,s) -= A(k,ib) * x(k,s);
-      }
-      x(ib,s) /= A(ib,ib);
-    }
-  }
-  return x;
-}
-
 void
 GaussianProcessTrainer::execute()
 {
@@ -125,18 +94,11 @@ GaussianProcessTrainer::execute()
   mooseAssert(num_rows == _values_ptr->size(),
               "Sampler number of rows does not match number of results from vector postprocessor.");
 
-  // Initialize covariance matrix
   unsigned int _num_samples = _values_ptr->size();
 
-  //std::cout << "_covariance_mat " << '\n' << _covariance_mat << '\n' << '\n';
-  //
-
-  //TODO:figure this out
   // Offset for replicated/distributed result data
   dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
 
-  //load this into matrix for the time being, optimize later with proper Calls.
-  //Arbitary access is helpfor for initial dev.
   //May load a very large matrix, which could be bad.
   DenseMatrix<Real> params = _sampler->getLocalSamples();
   _training_params.resize(params.m(),params.n());
@@ -146,42 +108,47 @@ GaussianProcessTrainer::execute()
     }
   }
 
-  std::cout << _training_params << '\n';
-  _training_params_mean=_training_params.colwise().mean();
-  std::cout << "mean" <<'\n' << _training_params.colwise().mean() << '\n';
-  //_training_data_var = (_training_params.array().colwise() - _training_params_mean.array()).squaredNorm() / _num_samples;
-  //_training_data_var = _training_params.array().colwise() - _training_params_mean.array()
-  Eigen::Map<Eigen::VectorXd> tmp(_training_params_mean.data(),_training_params_mean.size());
-  std::cout << "var" <<'\n' << (_training_params.rowwise() - tmp.transpose()).colwise().squaredNorm() / _num_samples << '\n';
+  if (_standardize_params){
+    //comptue mean
+    _training_params_mean=_training_params.colwise().mean();
+    //center params
+    _training_params=_training_params.rowwise() - _training_params_mean.transpose();
+    //compute variance
+    _training_params_var = _training_params.colwise().squaredNorm() / _num_samples;
+    //scale params using std
+    _training_params = _training_params.array().rowwise() /  _training_params_var.transpose().array().sqrt();
+  }
+  else{
+    //if not standardizing data set mean=0, std=1 for use in surrogate
+    _training_params_mean = RealEigenVector::Zero(_n_params);
+    _training_params_var = RealEigenVector::Ones(_n_params);
+  }
 
-  //Get training data
+  //Load training data into Eigen::Vector for easy manipulation
   _training_data.resize(_num_samples,1);
-  //_training_data_mean.resize(1,1);
-  //_training_data_var.resize(1,1);
   for (unsigned int ii=0; ii<_num_samples; ii++){
     _training_data(ii,0) =   (*_values_ptr)[ii - offset];
   }
-  //compute mean
-  _training_data_mean = _training_data.mean();
-  RealEigenMatrix training_resutls_centered = _training_data.array()-_training_data_mean;
 
+  if (_standardize_data){
+    //comptue mean
+    _training_data_mean=_training_data.colwise().mean();
+    //center data
+    _training_data=_training_data.rowwise() - _training_data_mean.transpose();
+    //compute variance
+    _training_data_var = _training_data.colwise().squaredNorm() / _num_samples;
+    //scale data using std
+    _training_data = _training_data.array().rowwise() /  _training_data_var.transpose().array().sqrt();
+  }
+  else{
+    //if not standardizing data set mean=0, std=1 for use in surrogate
+    _training_data_mean = RealEigenVector::Zero(1);
+    _training_data_var = RealEigenVector::Ones(1);
+  }
 
-  // std::cout << "Results" << '\n';
-  // std::cout << _training_data << '\n';
-  // std::cout << "Mean" << '\n';
-  // std::cout << _training_data_mean << '\n';
-  // std::cout << "Centered" << '\n';
-  // std::cout << training_resutls_centered << '\n';
-
-  _training_data_var= training_resutls_centered.squaredNorm() / _num_samples;
-
-  _covar_function->set_signal_variance(_training_data_var);
-  _K = _covar_function->compute_matrix(_training_params,_training_params);
+  _K = _covar_function->compute_K(_training_params,_training_params,true);
   _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve( training_resutls_centered );
-  //std::cout << _K_results_solve  << '\n';
-  //std::cout << _K << '\n';
-
+  _K_results_solve = _K_cho_decomp.solve( _training_data );
 
 }
 

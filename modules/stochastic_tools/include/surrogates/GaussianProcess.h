@@ -22,25 +22,21 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real* std) const;
 
-  //static DenseMatrix<Real> cholesky_back_substitute(const DenseMatrix<Real> & A, const DenseMatrix<Real> & b);
-
 protected:
   /// Array containing sample points and the results
   const std::vector<std::vector<Real>> & _sample_points;
 
 private:
 
-  //const std::vector<Real> & _length_factor;
-
-  ///Paramaters (x) used for training
+  ///Paramaters (x) used for training, along with statistics
   const RealEigenMatrix & _training_params;
-  const RealEigenMatrix & _training_params_mean;
-  const RealEigenMatrix & _training_params_var;
+  const RealEigenVector & _training_params_mean;
+  const RealEigenVector & _training_params_var;
 
-  /// Data (y) used for training
+  /// Data (y) used for training, along with statistics
   const RealEigenMatrix & _training_data;
-  const Real & _training_data_mean;
-  const Real & _training_data_var;
+  const RealEigenVector & _training_data_mean;
+  const RealEigenVector & _training_data_var;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   const RealEigenMatrix & _K;
@@ -48,7 +44,7 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  ///
+  ///Pointer to covariance function used for K matrix
   const std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 
 };
