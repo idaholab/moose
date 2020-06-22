@@ -50,6 +50,6 @@ For convenience, the source code for ``PorousFlow``, https://github.com/idaholab
 
 # Acknowledgements
 
-The authors wish to acknowledge other developers who have contributed to the ``PorousFlow`` module, especially Heather Sheldon and Philipp Sch{\"a}dle.  Funding for the development was obtained through CSIRO strategic funds, sourced by Jonathan Ennis-King, Deepak Adhikary and Qingdong Qu, as well as funds from the Idaho National Laboratory through Robert Podgorney.  The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc).
+The authors wish to acknowledge other developers who have contributed to the ``PorousFlow`` module, especially Heather Sheldon and Philipp Schaedle.  Funding for the development was obtained through CSIRO strategic funds, sourced by Jonathan Ennis-King, Deepak Adhikary and Qingdong Qu, as well as funds from the Idaho National Laboratory through Robert Podgorney.  The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc).
 
 # References
