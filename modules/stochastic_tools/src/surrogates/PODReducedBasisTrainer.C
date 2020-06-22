@@ -18,19 +18,25 @@ PODReducedBasisTrainer::validParams()
 
   params.addClassDescription("Computes the reduced subspace plus the reduced operators for "
                              "POD-RB surrogate.");
-  params.addRequiredParam<MultiAppName>("trainer_name", "Trainer object that contains the solutions for different samples.");
+  params.addRequiredParam<std::vector<std::string>>("var_names", "Trainer object that contains the solutions for different samples.");
 
   return params;
 }
 
 PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameters)
-  : SurrogateTrainer(parameters)
+  : SurrogateTrainer(parameters),
+  _var_names(getParam<std::vector<std::string>>("var_names"))
 {
 }
 
 void
 PODReducedBasisTrainer::initialSetup()
 {
+  _snapshots.clear();
+  for (auto var_name : _var_names)
+  {
+    _snapshots[var_name] =  std::vector<DenseVector<Real>>(0);
+  }
 }
 
 void
@@ -41,10 +47,6 @@ PODReducedBasisTrainer::initialize()
 void
 PODReducedBasisTrainer::execute()
 {
-  _no_snaps = _solution_vectors.size();
-  _corr_mx.resize(_no_snaps, _no_snaps);
-  _eigenvalues.resize(_no_snaps);
-  _eigenvectors.resize(_no_snaps, _no_snaps);
 
   computeCorrelationMatrix();
 
@@ -57,38 +59,51 @@ PODReducedBasisTrainer::execute()
 void
 PODReducedBasisTrainer::finalize()
 {
-  // To make sure that the pointers go out of scope before the multiapp object
-    _solution_vectors.clear();
 }
 
 void
-PODReducedBasisTrainer::addSnapshot(std::unique_ptr<NumericVector<Number>> new_vector)
+PODReducedBasisTrainer::addSnapshot(std::string var_name, DenseVector<Real>& snapshot)
 {
-  _solution_vectors.push_back(std::move(new_vector));
+  _snapshots[var_name].push_back(snapshot);
+}
+
+unsigned int
+PODReducedBasisTrainer::getSumBaseSize()
+{
+  unsigned int sum = 0;
+  for (auto it : _base)
+  {
+    sum += it.second.size();
+  }
+  return sum;
 }
 
 void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
-  //_communicator.allgather(_solution_vectors);
-
-  // Computing the correlation matrix and using the fact that it is
-  // symmetric
-  for (unsigned int i=0; i<_no_snaps; ++i)
+  for (auto it : _snapshots)
   {
-    for (unsigned int j=0; j<_no_snaps; ++j)
+    const std::string& var_name = it.first;
+    unsigned int no_snaps = it.second.size();
+
+    _corr_mx[var_name] = DenseMatrix<Real>(no_snaps, no_snaps);
+
+    for (unsigned int j=0; j<no_snaps; ++j)
     {
-      if (i>=j)
-        _corr_mx(i,j)=_solution_vectors[i]->dot(*_solution_vectors[j]);
+      for (unsigned int k=0; k<no_snaps; ++k)
+      {
+        if (j>=k)
+          _corr_mx[var_name](j,k)=it.second[j].dot(it.second[k]);
+      }
     }
-  }
 
-  for (unsigned int i=0; i<_no_snaps; ++i)
-  {
-    for (unsigned int j=0; j<_no_snaps; ++j)
+    for (unsigned int j=0; j<no_snaps; ++j)
     {
-      if (i<j)
-        _corr_mx(i,j) = _corr_mx(j,i);
+      for (unsigned int k=0; k<no_snaps; ++k)
+      {
+        if (j<k)
+          _corr_mx[var_name](j,k) = _corr_mx[var_name](k,j);
+      }
     }
   }
 }
@@ -96,49 +111,66 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 void
 PODReducedBasisTrainer::computeEigenDecomposition()
 {
-  //Creating a temporary placeholder for the imaginary parts of the eigenvalues
-  DenseVector<Real> eigenvalues_imag(_no_snaps);
-
-  // Performing the eigenvalue decomposition
-  _corr_mx.evd_left(_eigenvalues, eigenvalues_imag, _eigenvectors);
-
-  // Sorting the eigenvectors and eigenvalues based on the magnitude of
-  // the eigenvalues
-  std::vector<unsigned int> idx(_eigenvalues.size());
-  std::iota(idx.begin(), idx.end(), 0);
-  std::vector<Real>& v = _eigenvalues.get_values();
-
-  std::stable_sort(idx.begin(),
-                   idx.end(),
-                   [&v](unsigned int i, unsigned int j){return v[i]>v[j];});
-
-  DenseVector<Real> tmpVector(_eigenvalues.size());
-  DenseMatrix<Real> tmpMatrix(_eigenvalues.size(), _eigenvalues.size());
-  for (unsigned int i=0; i<_eigenvalues.size(); ++i)
+  for (auto it : _corr_mx)
   {
-    tmpVector(i)=_eigenvalues(idx[i]);
-    for (unsigned int j=0; j<_eigenvalues.size(); ++j)
+    const std::string& var_name = it.first;
+    unsigned int no_snaps = it.second.n();
+
+    DenseVector<Real> eigenvalues(no_snaps);
+    DenseMatrix<Real> eigenvectors(no_snaps, no_snaps);
+
+    //Creating a temporary placeholder for the imaginary parts of the eigenvalues
+    DenseVector<Real> eigenvalues_imag(no_snaps);
+
+    // Performing the eigenvalue decomposition
+    it.second.evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
+
+    // Sorting the eigenvectors and eigenvalues based on the magnitude of
+    // the eigenvalues
+    std::vector<unsigned int> idx(eigenvalues.size());
+    std::iota(idx.begin(), idx.end(), 0);
+    std::vector<Real>& v = eigenvalues.get_values();
+
+    std::stable_sort(idx.begin(),
+                     idx.end(),
+                     [&v](unsigned int i, unsigned int j){return v[i]>v[j];});
+
+    _eigenvalues[var_name] = DenseVector<Real>(eigenvalues.size());
+    _eigenvectors[var_name] = DenseMatrix<Real>(eigenvalues.size(), eigenvalues.size());
+
+    for (unsigned int j=0; j<_eigenvalues[var_name].size(); ++j)
     {
-      tmpMatrix(j,i) = _eigenvectors(j,idx[i]);
+      _eigenvalues[var_name](j) = eigenvalues(idx[j]);
+      for (unsigned int k=0; k<_eigenvalues[var_name].size(); ++k)
+      {
+        _eigenvectors[var_name](k,j) = eigenvectors(k,idx[j]);
+      }
     }
   }
-
-  _eigenvalues = tmpVector;
-  _eigenvectors = tmpMatrix;
 }
 
 void
 PODReducedBasisTrainer::computeBasisVectors()
 {
-  _base.resize(_no_snaps);
-  for (unsigned int i=0; i<_base.size(); ++i)
+  for (auto it : _eigenvectors)
   {
-    _base[i]=_solution_vectors[i]->clone();
-    _base[i]->zero();
-    for (unsigned int j=0; j<_solution_vectors.size(); ++j)
+    const std::string& var_name = it.first;
+    unsigned int no_bases = it.second.n();
+
+    _base[var_name] = std::vector<DenseVector<Real>>(no_bases);
+
+    for (unsigned int j=0; j<no_bases; ++j)
     {
-      _base[i]->add(_eigenvectors(j,i), *_solution_vectors[j]);
+      _base[var_name][j].resize(_snapshots[var_name][0].size());
+
+      for (unsigned int k=0; k<_snapshots[var_name].size(); ++k)
+      {
+        DenseVector<Real> tmp(_snapshots[var_name][k]);
+        tmp.scale(_eigenvectors[var_name](k,j));
+
+        _base[var_name][j] += tmp;
+      }
+      _base[var_name][j] *= (1.0/sqrt(_eigenvalues[var_name](j)));
     }
-    _base[i]->scale(1.0/sqrt(_eigenvalues(i)));
   }
 }

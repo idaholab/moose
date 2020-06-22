@@ -19,7 +19,7 @@
     type = MonteCarlo
     num_rows = 4
     distributions = 'D_dist sig_dist'
-    execute_on = timestep_end
+    execute_on = 'timestep_begin'
   []
 []
 
@@ -28,6 +28,7 @@
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
+    execute_on = 'timestep_begin'
   []
 []
 
@@ -38,19 +39,23 @@
     sampler = sample
     parameters = 'Materials/diffusivity/prop_values Materials/xs/prop_values'
     to_control = 'stochastic'
+    execute_on = 'timestep_begin'
   []
   [data]
     type = SamplerSolutionTransfer
     multi_app = sub
     sampler = sample
     trainer_name = "pod_rb"
+    execute_on = 'timestep_begin'
+    direction = "from_multiapp"
   []
 []
 
 [Trainers]
   [pod_rb]
     type = PODReducedBasisTrainer
-    execute_on = timestep_end
+    execute_on = 'timestep_begin timestep_end'
+    var_names = 'u'
   []
 []
 
