@@ -444,6 +444,13 @@ public:
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   /**
+   * Increase the elemennt/volume quadrature order for the specified mesh
+   * block if and only if the current volume quadrature order is lower.  This
+   * can only cause the quadrature level to increase.
+   */
+  void bumpVolumeQRuleOrder(Order volume_order, SubdomainID block);
+
+  /**
    * Set the qrule to be used for volume integration.
    *
    * Note: This is normally set internally, only use if you know what you are doing!
@@ -1398,6 +1405,9 @@ public:
       diag(i) = ke(i, i % cols);
     return diag;
   }
+
+  inline QBase * qruleElem(unsigned int dim) { return qrules(dim).vol.get(); }
+  inline QBase * qruleFace(unsigned int dim) { return qrules(dim).face.get(); }
 
 protected:
   /**

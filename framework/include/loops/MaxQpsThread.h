@@ -27,7 +27,7 @@ class FEProblemBase;
 class MaxQpsThread
 {
 public:
-  MaxQpsThread(FEProblemBase & fe_problem, QuadratureType type, Order order, Order face_order);
+  MaxQpsThread(FEProblemBase & fe_problem);
 
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
@@ -42,10 +42,6 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
-
-  QuadratureType _qtype;
-  Order _order;
-  Order _face_order;
 
   THREAD_ID _tid;
 

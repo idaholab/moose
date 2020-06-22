@@ -543,6 +543,29 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
 }
 
 void
+Assembly::bumpVolumeQRuleOrder(Order volume_order, SubdomainID block)
+{
+  auto & qdefault = _qrules[Moose::ANY_BLOCK_ID];
+  mooseAssert(qdefault.size() > 0, "default quadrature must be initialized before order bumps");
+
+  unsigned int ndims = _mesh_dimension + 1; // must account for 0-dimensional quadrature.
+  auto & qvec = _qrules[block];
+  if (qvec.size() != ndims || !qvec[0].vol)
+    createQRules(qdefault[0].vol->type(),
+                 qdefault[0].arbitrary_vol->get_order(),
+                 volume_order,
+                 qdefault[0].face->get_order(),
+                 block);
+  else if (qvec[0].vol->get_order() < volume_order)
+    createQRules(qvec[0].vol->type(),
+                 qvec[0].arbitrary_vol->get_order(),
+                 volume_order,
+                 qvec[0].face->get_order(),
+                 block);
+  // otherwise do nothing - quadrature order is already as high as requested
+}
+
+void
 Assembly::createQRules(
     QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
 {

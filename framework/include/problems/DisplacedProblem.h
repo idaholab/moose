@@ -63,6 +63,8 @@ public:
   virtual void createQRules(
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
+  void bumpVolumeQRuleOrder(Order order, SubdomainID block);
+
   virtual void init() override;
   virtual void solve() override;
   virtual bool converged() override;

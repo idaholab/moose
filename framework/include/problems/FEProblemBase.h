@@ -293,6 +293,8 @@ public:
                             Order face_order = INVALID_ORDER,
                             SubdomainID block = Moose::ANY_BLOCK_ID);
 
+  void bumpVolumeQRuleOrder(Order order, SubdomainID block);
+
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
    */
@@ -2131,6 +2133,8 @@ protected:
   bool _using_ad_mat_props;
 
 private:
+  void updateMaxQps();
+
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
 
   bool _error_on_jacobian_nonzero_reallocation;
