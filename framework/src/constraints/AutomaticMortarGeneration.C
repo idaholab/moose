@@ -385,7 +385,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       throw MooseException(
           "AutomaticMortarGeneration: Both orientations cannot simultaneously be invalid.");
 
-    // If orientation 2 was valid, swap the left and right primarys.
+    // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
       std::swap(left_primary_elem, right_primary_elem);
 

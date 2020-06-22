@@ -168,20 +168,20 @@ InputParameterWarehouse::addControllableParameterConnection(
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> primarys = getControllableItems(primary, tid);
-    if (primarys.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+    std::vector<ControllableItem *> primaries = getControllableItems(primary, tid);
+    if (primaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to locate primary parameter with name ", primary);
-    else if (primarys.empty())
+    else if (primaries.empty())
       return;
 
-    std::vector<ControllableItem *> secondarys = getControllableItems(secondary, tid);
-    if (secondarys.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+    std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
+    if (secondaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to locate secondary parameter with name ", secondary);
-    else if (secondarys.empty())
+    else if (secondaries.empty())
       return;
 
-    for (auto primary_ptr : primarys)
-      for (auto secondary_ptr : secondarys)
+    for (auto primary_ptr : primaries)
+      for (auto secondary_ptr : secondaries)
         if (primary_ptr != secondary_ptr)
           primary_ptr->connect(secondary_ptr);
   }
@@ -193,9 +193,9 @@ InputParameterWarehouse::addControllableObjectAlias(const MooseObjectName & alia
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> secondarys =
+    std::vector<ControllableItem *> secondaries =
         getControllableItems(MooseObjectParameterName(secondary, "*"), tid);
-    for (auto secondary_ptr : secondarys)
+    for (auto secondary_ptr : secondaries)
     {
       MooseObjectParameterName alias_param(alias, secondary_ptr->name().parameter());
       MooseObjectParameterName secondary_param(secondary, secondary_ptr->name().parameter());
@@ -210,11 +210,11 @@ InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParamete
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> secondarys = getControllableItems(secondary, tid);
-    if (secondarys.empty() && tid == 0) // some objects only exist on tid 0
+    std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
+    if (secondaries.empty() && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to locate secondary parameter with name ", secondary);
 
-    for (auto secondary_ptr : secondarys)
+    for (auto secondary_ptr : secondaries)
       _controllable_items[tid].emplace_back(
           libmesh_make_unique<ControllableAlias>(alias, secondary_ptr));
   }

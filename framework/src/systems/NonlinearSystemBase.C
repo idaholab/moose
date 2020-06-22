@@ -1151,8 +1151,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     if (_assemble_constraints_separately)
     {
       // Make sure that secondary contribution to primary are assembled, and ghosts have been
-      // exchanged, as current primarys might become secondarys on next iteration and will need to
-      // contribute their former secondarys' contributions to the future primarys. See if
+      // exchanged, as current primaries might become secondaries on next iteration and will need to
+      // contribute their former secondaries' contributions to the future primaries. See if
       // constraints were applied anywhere
       _communicator.max(constraints_applied);
 
