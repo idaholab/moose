@@ -25,7 +25,7 @@ EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & par
   : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
   _connected_nodes.push_back(getParam<unsigned int>("secondary"));
-  _master_node_vector.push_back(getParam<unsigned int>("primary"));
+  _primary_node_vector.push_back(getParam<unsigned int>("primary"));
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint() {}

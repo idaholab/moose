@@ -37,25 +37,15 @@ public:
     mooseDeprecated(
         "'getPrimaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
         "use 'getPrimaryNodeId' instead.");
-    return _master_node_vector;
+    return _primary_node_vector;
   }
 
   /**
    * Get the list of primary nodes
    * @return list of primary nodes IDs
    */
-  std::vector<dof_id_type> & getPrimaryNodeId() { return _master_node_vector; }
+  std::vector<dof_id_type> & getPrimaryNodeId() { return _primary_node_vector; }
 
-protected:
-  /**
-   * Set the list of primary nodes
-   */
-  void setPrimaryNodeId(const std::vector<dof_id_type> & primary_node_vector)
-  {
-    _master_node_vector = primary_node_vector;
-  }
-
-public:
   /**
    * Get the list of connected secondary nodes
    * @return list of secondary node IDs
@@ -114,7 +104,7 @@ protected:
   /// node IDs connected to the primary node (secondary nodes)
   std::vector<dof_id_type> _connected_nodes;
   /// node IDs of the primary node
-  std::vector<dof_id_type> _master_node_vector;
+  std::vector<dof_id_type> _primary_node_vector;
   /// Holds the current solution at the current quadrature point
   const VariableValue & _u_primary;
   /// Specifies formulation type used to apply constraints
