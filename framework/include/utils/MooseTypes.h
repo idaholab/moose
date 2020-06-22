@@ -565,8 +565,8 @@ enum CouplingType
 
 enum ConstraintSideType
 {
-  SIDE_MASTER,
-  SIDE_SLAVE
+  SIDE_PRIMARY,
+  SIDE_SECONDARY
 };
 
 enum DGResidualType
