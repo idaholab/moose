@@ -11,6 +11,8 @@
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
+#include "MultiApp.h"
+#include "MooseTypes.h"
 
 class PODReducedBasisTrainer : public SurrogateTrainer
 {
@@ -27,7 +29,26 @@ public:
 
   virtual void finalize() override;
 
-  void addSnapshot(std::unique_ptr<NumericVector<Number>> new_vector);
+  void addSnapshot(std::string var_name, DenseVector<Real>& snapshot);
+
+  const std::vector<std::string>& varNames() const
+  {
+    return _var_names;
+  }
+
+  unsigned int getBaseSize(std::string var_name)
+  {
+    return _base[var_name].size();
+  }
+
+  const DenseVector<Real>& getBasisVector(std::string var_name, unsigned int base_i) const
+  {
+    return _base.at(var_name)[base_i];
+  }
+
+  unsigned int getSumBaseSize();
+
+  const DenseVector<Real>& getBasisVector(std::string var_name, unsigned int base_i);
 
 protected:
 
@@ -37,27 +58,24 @@ protected:
 
   void computeBasisVectors();
 
+  std::vector<std::string> _var_names;
+
   /// The snapshots contained for this problem
-  std::vector<std::unique_ptr<NumericVector<Number>>> _solution_vectors;
+  std::map<std::string, std::vector<DenseVector<Real>>> _snapshots;
 
   /// The reduced basis for the variables
-  std::vector<std::unique_ptr<NumericVector<Number>>> _base;
+  std::map<std::string, std::vector<DenseVector<Real>>> _base;
 
   /// The correlation matrices for the variables
-  DenseMatrix<Real> _corr_mx;
+  std::map<std::string, DenseMatrix<Real>> _corr_mx;
 
   /// Vector containing the eigenvvalues of the correlation matrix
-  DenseVector<Real> _eigenvalues;
+  std::map<std::string, DenseVector<Real>> _eigenvalues;
 
   /// Matirx containing the eigenvectors of the correlation matrix
-  DenseMatrix<Real> _eigenvectors;
-
-  /// Pointer to a multi-app
-  std::shared_ptr<MultiApp> _multi_app; 
+  std::map<std::string, DenseMatrix<Real>> _eigenvectors;
 
 private:
-
-  unsigned int _no_snaps;
 
   /// True when _sampler data is distributed
   // bool _values_distributed = false; // default to false; set in initialSetup

@@ -1,7 +1,12 @@
+[Problem]
+  type = FEProblem
+  extra_tag_vectors  = 'diff react bodyf'
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 20
+  nx = 30
   xmax = 10
 []
 
@@ -15,16 +20,19 @@
     type = MatDiffusion
     variable = u
     diffusivity = D
+    extra_vector_tags = 'diff'
   []
   [absorption]
     type = MaterialReaction
     variable = u
     coefficient = sig
+    extra_vector_tags = 'react'
   []
   [source]
     type = BodyForce
     variable = u
     value = 1.0
+    extra_vector_tag = 'bodyf'
   []
 []
 
@@ -32,12 +40,12 @@
   [diffusivity]
     type = GenericConstantMaterial
     prop_names = D
-    prop_values = 2.0
+    prop_values = 1.0
   []
   [xs]
     type = GenericConstantMaterial
     prop_names = sig
-    prop_values = 2.0
+    prop_values = 1.0
   []
 []
 
