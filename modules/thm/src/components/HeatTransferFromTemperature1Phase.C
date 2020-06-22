@@ -1,25 +1,28 @@
 #include "HeatTransferFromTemperature1Phase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowModelTwoPhase.h"
-#include "HeatConductionModel.h"
 
 InputParameters
 HeatTransferFromTemperature1Phase::validParams()
 {
   InputParameters params = HeatTransfer1PhaseBase::validParams();
+  MooseEnum var_type("nodal elemental", "nodal", false);
+  params.addParam<MooseEnum>(
+      "var_type", var_type, "The type of wall temperature variable (nodal, elemental).");
   return params;
 }
 
 HeatTransferFromTemperature1Phase::HeatTransferFromTemperature1Phase(
     const InputParameters & parameters)
-  : HeatTransfer1PhaseBase(parameters)
+  : HeatTransfer1PhaseBase(parameters),
+    _fe_type(getParam<MooseEnum>("var_type") == 0 ? FEType(FIRST, LAGRANGE)
+                                                  : FEType(CONSTANT, MONOMIAL))
 {
 }
 
 const FEType &
 HeatTransferFromTemperature1Phase::getFEType()
 {
-  return HeatConductionModel::feType();
+  return _fe_type;
 }
 
 void
@@ -27,9 +30,8 @@ HeatTransferFromTemperature1Phase::addVariables()
 {
   HeatTransfer1PhaseBase::addVariables();
 
-  const FEType & fe_type = getFEType();
-  _sim.addSimVariable(false, FlowModel::TEMPERATURE_WALL, fe_type, _flow_channel_subdomains);
-  _sim.addSimVariable(false, _T_wall_name, fe_type, _flow_channel_subdomains);
+  _sim.addSimVariable(false, FlowModel::TEMPERATURE_WALL, getFEType(), _flow_channel_subdomains);
+  _sim.addSimVariable(false, _T_wall_name, getFEType(), _flow_channel_subdomains);
 }
 
 void
