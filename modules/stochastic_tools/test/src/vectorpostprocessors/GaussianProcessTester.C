@@ -64,7 +64,7 @@ GaussianProcessTester::execute()
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
     Real std;
-    _mean_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data, & std);
+    _mean_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data, &std);
     _std_vector[p - _sampler.getLocalRowBegin()] = std;
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)

@@ -18,16 +18,15 @@ class GaussianProcess : public SurrogateModel
 public:
   static InputParameters validParams();
   GaussianProcess(const InputParameters & parameters);
-  //virtual void initialize();
+  // virtual void initialize();
   virtual Real evaluate(const std::vector<Real> & x) const override;
-  virtual Real evaluate(const std::vector<Real> & x, Real* std) const;
+  virtual Real evaluate(const std::vector<Real> & x, Real * std) const;
 
 protected:
   /// Array containing sample points and the results
   const std::vector<std::vector<Real>> & _sample_points;
 
 private:
-
   ///Paramaters (x) used for training, along with statistics
   const RealEigenMatrix & _training_params;
   const RealEigenVector & _training_params_mean;
@@ -46,5 +45,4 @@ private:
 
   ///Pointer to covariance function used for K matrix
   const std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
-
 };

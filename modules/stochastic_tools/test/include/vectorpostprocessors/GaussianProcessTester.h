@@ -15,11 +15,12 @@
 #include "SurrogateModelInterface.h"
 #include "GaussianProcess.h"
 
-
 /**
- * A tool for output Sampler data.
+ * A tool for output Gaussian Process Surrogate data.
  */
-class GaussianProcessTester : public GeneralVectorPostprocessor, SamplerInterface, SurrogateModelInterface
+class GaussianProcessTester : public GeneralVectorPostprocessor,
+                              SamplerInterface,
+                              SurrogateModelInterface
 {
 public:
   static InputParameters validParams();

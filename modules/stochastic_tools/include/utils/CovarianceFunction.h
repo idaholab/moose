@@ -14,28 +14,30 @@
 #include "DataIO.h"
 #include "MooseEnum.h"
 
-
 class GaussianProcessTrainer;
 
 namespace CovarianceFunction
 {
 class CovarianceKernel;
 
-std::unique_ptr<CovarianceKernel> makeCovarianceKernel(const MooseEnum & kernel_type, const GaussianProcessTrainer * gp);
+std::unique_ptr<CovarianceKernel> makeCovarianceKernel(const MooseEnum & kernel_type,
+                                                       const GaussianProcessTrainer * gp);
 
 MooseEnum makeCovarianceKernelEnum();
 
 /**
- * General Covariacne Kernel Function class with operators necessary for evaluation and alering hyperparameters
+ * General Covariacne Kernel Function class with operators necessary for evaluation and alering
+ * hyperparameters
  */
 class CovarianceKernel
 {
 public:
-  CovarianceKernel() {};
+  CovarianceKernel(){};
   virtual ~CovarianceKernel() = default;
   virtual void store(std::ostream & stream, void * context) const;
-  //Generates the Covariance Matrix given two points
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const;
+  // Generates the Covariance Matrix given two points
+  virtual RealEigenMatrix
+  compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const;
   virtual void set_signal_variance(const Real sigma_f_squared);
   virtual void set_noise_variance(const Real sigma_n_squared);
   virtual void set_length_factor(const std::vector<Real> length_factor);
@@ -43,9 +45,9 @@ public:
   virtual void set_p(const unsigned int p);
 
 protected:
-    Real _sigma_f_squared;
-    Real _sigma_n_squared;
-    std::vector<Real> _length_factor;
+  Real _sigma_f_squared;
+  Real _sigma_n_squared;
+  std::vector<Real> _length_factor;
 };
 
 class SquaredExponential : public CovarianceKernel
@@ -55,8 +57,9 @@ public:
   virtual void store(std::ostream & stream, void * context) const override;
 
   ///
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
-
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
+                                    const RealEigenMatrix xp,
+                                    const bool is_self_covariance) const override;
 };
 
 class Exponential : public CovarianceKernel
@@ -67,11 +70,12 @@ public:
   virtual void set_gamma(const Real gamma) override;
 
   ///
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
+                                    const RealEigenMatrix xp,
+                                    const bool is_self_covariance) const override;
 
 private:
-    Real _gamma;
-
+  Real _gamma;
 };
 
 class MaternHalfInt : public CovarianceKernel
@@ -82,16 +86,15 @@ public:
   virtual void set_p(const unsigned int p) override;
 
   ///
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
+                                    const RealEigenMatrix xp,
+                                    const bool is_self_covariance) const override;
 
 private:
-    unsigned int _p;
-
+  unsigned int _p;
 };
 
-
-
-}
+} // end namespace
 
 template <>
 void dataStore(std::ostream & stream,

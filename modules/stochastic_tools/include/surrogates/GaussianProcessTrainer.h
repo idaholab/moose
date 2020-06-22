@@ -25,9 +25,7 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-
 protected:
-
 private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
@@ -41,7 +39,7 @@ private:
   /// Total number of parameters/dimensions
   unsigned int _n_params;
 
-  //Type of kernel function to be used. See CovarianceFunction for options
+  // Type of kernel function to be used. See CovarianceFunction for options
   const MooseEnum & _kernel_type;
 
   ///Paramaters (x) used for training, along with statistics
@@ -64,10 +62,9 @@ private:
   std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 
   ///Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix>  _K_cho_decomp;
+  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
 
   ///Switches for training param (x) and data(y) standardization
   bool _standardize_params;
   bool _standardize_data;
-
 };
