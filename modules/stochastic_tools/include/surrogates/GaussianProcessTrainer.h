@@ -25,13 +25,10 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-  static RealEigenMatrix cholesky_back_substitute(const RealEigenMatrix & A, const RealEigenMatrix & b);
 
 protected:
 
 private:
-  // TODO: Move as much of these to constructor initialization
-
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
 
@@ -41,26 +38,21 @@ private:
   /// True when _sampler data is distributed
   bool _values_distributed;
 
-  // The following items are stored using declareModelData for use as a trained model.
-
   /// Total number of parameters/dimensions
   unsigned int _n_params;
 
-  // /// Vector of length factors. Main hyper-parameters for squared exponential kernel
-  // std::vector<Real> & _length_factor;
-
-  //
+  //Type of kernel function to be used. See CovarianceFunction for options
   const MooseEnum & _kernel_type;
 
-  ///Paramaters (x) used for training
+  ///Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
-  RealEigenMatrix & _training_params_mean;
-  RealEigenMatrix & _training_params_var;
+  RealEigenVector & _training_params_mean;
+  RealEigenVector & _training_params_var;
 
-  /// Data (y) used for training
+  /// Data (y) used for training, along with statistics
   RealEigenMatrix & _training_data;
-  Real & _training_data_mean;
-  Real & _training_data_var;
+  RealEigenVector & _training_data_mean;
+  RealEigenVector & _training_data_var;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   RealEigenMatrix & _K;
@@ -68,10 +60,14 @@ private:
   /// A solve of Ax=b via Cholesky.
   RealEigenMatrix & _K_results_solve;
 
-  ///
+  ///Pointer to covariance function used for K matrix
   std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 
-  ///
+  ///Cholesky decomposition Eigen object
   Eigen::LLT<RealEigenMatrix>  _K_cho_decomp;
+
+  ///Switches for training param (x) and data(y) standardization
+  bool _standardize_params;
+  bool _standardize_data;
 
 };

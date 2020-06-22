@@ -13,14 +13,7 @@
 
 #include "DataIO.h"
 #include "MooseEnum.h"
-//#include "Uniform.h"
-//#include "Normal.h"
-//#include "BoostNormal.h"
-//#include "CartesianProduct.h"
 
-/**
- * Polynomials and quadratures based on defined distributions for Polynomial Chaos
- */
 
 class GaussianProcessTrainer;
 
@@ -33,8 +26,7 @@ std::unique_ptr<CovarianceKernel> makeCovarianceKernel(const MooseEnum & kernel_
 MooseEnum makeCovarianceKernelEnum();
 
 /**
- * General polynomial class with function for evaluating a polynomial of a given
- * order at a given point
+ * General Covariacne Kernel Function class with operators necessary for evaluation and alering hyperparameters
  */
 class CovarianceKernel
 {
@@ -43,31 +35,19 @@ public:
   virtual ~CovarianceKernel() = default;
   virtual void store(std::ostream & stream, void * context) const;
   //Generates the Covariance Matrix given two points
-  virtual RealEigenMatrix compute_matrix(const RealEigenMatrix x, const RealEigenMatrix xp) const;
-  virtual void set_signal_variance(const Real sig_f);
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const;
+  virtual void set_signal_variance(const Real sigma_f_squared);
+  virtual void set_noise_variance(const Real sigma_n_squared);
   virtual void set_length_factor(const std::vector<Real> length_factor);
   virtual void set_gamma(const Real gamma);
-  // /// Computes the mth derivative of polynomial: d^mP_n/dx^m
-  // virtual Real
-  // computeDerivative(const unsigned int order, const Real x, const unsigned int m = 1) const;
-  // virtual Real innerProduct(const unsigned int order) const = 0;
-  //
-  // virtual void gaussQuadrature(const unsigned int order,
-  //                              std::vector<Real> & points,
-  //                              std::vector<Real> & weights) const = 0;
-  // virtual void clenshawQuadrature(const unsigned int order,
-  //                                 std::vector<Real> & points,
-  //                                 std::vector<Real> & weights) const;
-  // Real productIntegral(const std::vector<unsigned int> order) const;
+  virtual void set_p(const unsigned int p);
+
 protected:
-    Real _sigma_f=1;
-    Real _sigma_n=0;
+    Real _sigma_f_squared;
+    Real _sigma_n_squared;
     std::vector<Real> _length_factor;
 };
 
-/**
- * Uniform distributions use Legendre polynomials
- */
 class SquaredExponential : public CovarianceKernel
 {
 public:
@@ -75,13 +55,10 @@ public:
   virtual void store(std::ostream & stream, void * context) const override;
 
   ///
-  virtual RealEigenMatrix compute_matrix(const RealEigenMatrix x, const RealEigenMatrix xp) const override;
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
 
 };
 
-/**
- * Uniform distributions use Legendre polynomials
- */
 class Exponential : public CovarianceKernel
 {
 public:
@@ -90,10 +67,25 @@ public:
   virtual void set_gamma(const Real gamma) override;
 
   ///
-  virtual RealEigenMatrix compute_matrix(const RealEigenMatrix x, const RealEigenMatrix xp) const override;
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
 
 private:
     Real _gamma;
+
+};
+
+class MaternHalfInt : public CovarianceKernel
+{
+public:
+  MaternHalfInt();
+  virtual void store(std::ostream & stream, void * context) const override;
+  virtual void set_p(const unsigned int p) override;
+
+  ///
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const override;
+
+private:
+    unsigned int _p;
 
 };
 

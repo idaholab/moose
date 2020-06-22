@@ -17,34 +17,40 @@ registerMooseObject("StochasticToolsTestApp", GaussianProcessTester);
 InputParameters
 GaussianProcessTester::validParams()
 {
-  InputParameters params = SurrogateTester::validParams();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
+  params += SamplerInterface::validParams();
+  params += SurrogateModelInterface::validParams();
+  params.addClassDescription("Tool for sampling surrogate model.");
+  params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
+  params += SamplerInterface::validParams();
+  params.addRequiredParam<SamplerName>(
+      "sampler", "Sampler to use for evaluating PCE model (mainly for testing).");
+  params.addParam<bool>("output_samples",
+                        false,
+                        "True to output value of samples from sampler (this may be VERY large).");
   return params;
 }
 
 GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
-  : SurrogateTester(parameters)
+  : GeneralVectorPostprocessor(parameters),
+    SamplerInterface(this),
+    SurrogateModelInterface(this),
+    _sampler(getSampler("sampler")),
+    _output_samples(getParam<bool>("output_samples")),
+    _model(getSurrogateModel<GaussianProcess>("model")),
+    _mean_vector(declareVector("mean")),
+    _std_vector(declareVector("std"))
 {
-  const auto & model_names = getParam<std::vector<UserObjectName>>("model");
-  _GP_model.resize(_model.size());
-  _std_vector.reserve(model_names.size());
-  unsigned int ii = 0;
-  for (const auto & nm : model_names)
-  {
-    _GP_model[ii] = dynamic_cast<const GaussianProcess *>(_model[ii]);
-    _std_vector.push_back(&declareVector(nm + "_std"));
-    ++ii;
-  }
+  if (_output_samples)
+    for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
+      _sample_vector.push_back(&declareVector("sample_p" + std::to_string(d)));
 }
 
 void
 GaussianProcessTester::initialize()
 {
-  for (auto & vec : _value_vector)
-    vec->resize(_sampler.getNumberOfLocalRows(), 0);
-
-  for (auto & vec : _std_vector)
-    vec->resize(_sampler.getNumberOfLocalRows(), 0);
-
+  _mean_vector.resize(_sampler.getNumberOfLocalRows(), 0);
+  _std_vector.resize(_sampler.getNumberOfLocalRows(), 0);
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
@@ -57,12 +63,9 @@ GaussianProcessTester::execute()
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
-    for (unsigned int m = 0; m < _GP_model.size(); ++m)
-    {
-      Real std;
-      (*_value_vector[m])[p - _sampler.getLocalRowBegin()] = _GP_model[m]->evaluate(data, std);
-      (*_std_vector[m])[p - _sampler.getLocalRowBegin()] = std;
-    }
+    Real std;
+    _mean_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data, & std);
+    _std_vector[p - _sampler.getLocalRowBegin()] = std;
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       {
@@ -74,10 +77,8 @@ GaussianProcessTester::execute()
 void
 GaussianProcessTester::finalize()
 {
-  for (auto & vec : _value_vector)
-    _communicator.gather(0, *vec);
-  for (auto & vec : _std_vector)
-    _communicator.gather(0, *vec);
+  _communicator.gather(0, _mean_vector);
+  _communicator.gather(0, _std_vector);
   if (_output_samples)
     for (auto & ppv_ptr : _sample_vector)
       _communicator.gather(0, *ppv_ptr);
