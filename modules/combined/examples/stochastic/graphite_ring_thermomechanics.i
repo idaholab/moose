@@ -32,12 +32,12 @@
   [T]
     initial_condition = 300
   []
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
@@ -45,9 +45,9 @@
     type = HeatConduction
     variable = T
   []
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-  [../]
+  []
 []
 
 [BCs]
@@ -105,49 +105,49 @@
     prop_names = thermal_conductivity
     prop_values = 100
   []
-  [./elasticity_tensor_inner]
+  [elasticity_tensor_inner]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
     block = 2
-  [../]
-  [./elasticity_tensor_outer]
+  []
+  [elasticity_tensor_outer]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 3.1e5
     poissons_ratio = 0.2
     block = 3
-  [../]
-  [./thermal_strain_inner]
-    type= ComputeThermalExpansionEigenstrain
+  []
+  [thermal_strain_inner]
+    type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 2e-6
     temperature = T
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain_inner
     block = 2
-  [../]
-  [./thermal_strain_outer]
-    type= ComputeThermalExpansionEigenstrain
+  []
+  [thermal_strain_outer]
+    type = ComputeThermalExpansionEigenstrain
     thermal_expansion_coeff = 1e-6
     temperature = T
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain_outer
     block = 3
-  [../]
-  [./strain_inner] #We use small deformation mechanics
+  []
+  [strain_inner] #We use small deformation mechanics
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = 'eigenstrain_inner'
     block = 2
-  [../]
-  [./strain_outer] #We use small deformation mechanics
+  []
+  [strain_outer] #We use small deformation mechanics
     type = ComputeSmallStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = 'eigenstrain_outer'
     block = 3
-  [../]
-  [./stress] #We use linear elasticity
+  []
+  [stress] #We use linear elasticity
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Functions]
@@ -174,10 +174,10 @@
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Controls]

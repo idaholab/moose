@@ -125,7 +125,6 @@
   []
 []
 
-
 [Outputs]
   csv = true
   execute_on = TIMESTEP_END

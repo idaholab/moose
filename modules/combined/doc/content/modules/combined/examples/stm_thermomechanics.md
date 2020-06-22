@@ -1,10 +1,10 @@
 # Using Stochastic Tools with Multiphysics Models
 
-The purpose of this document is to present a multiphysics example using the [Stochastic Tools Module](modules/stochastic_tools/index.md) in MOOSE. The intention is to showcase the capabilities of the module to produce statistically relevant results including uncertainty propagation and sensitivity, as well as the module's surrogate modeling infrastructure. The problem of interest is a thermomechanics model using a combination of the [Heat Conduction](modules/heat_conduction/index.md) and [Tensor Mechanics](modules/tensor_mechanics/index.md) modules. The problem involves multiple uncertain material properties and multiple quantities of interest (QoI). Using both Monte Carlo sampling and polynomial chaos surrogate modeling, the effect of these properties' uncertainties are quantified with uncertainty propagation and global sensitivity analysis.
+The purpose of this document is to present a multiphysics example using the [Stochastic Tools Module](modules/stochastic_tools/index.md). The intention is to showcase the capabilities of the module to produce statistically relevant results including uncertainty propagation and sensitivity, as well as the module's surrogate modeling infrastructure. The problem of interest is a thermomechanics model using a combination of the [Heat Conduction](modules/heat_conduction/index.md) and [Tensor Mechanics](modules/tensor_mechanics/index.md) modules. The problem involves multiple uncertain material properties and multiple quantities of interest (QoI). Using both Monte Carlo sampling and polynomial chaos surrogate modeling, the effect of these properties' uncertainties are quantified with uncertainty propagation and global sensitivity analysis.
 
 ## Problem Description
 
-The problem of interest involves a steady-state thermomechanics model. The geometry is a 3-D finite hollow cylinder with two concentric layers of different material properties, seen in [fig:geom]. Due to symmetry, only 1/8 of the cylinder is represented by the mesh. The inner surface of the ring is exposed to a surface heat source that has a cosine shape along the axis of the cylinder with its peak being at the center. The end and outside of the cylinder have convective boundary conditions. The cylinder is free to displace in all directions due to the thermal expansion. The relevant material and geometric properties are listed in [tab:mat_prop]. Note that some of the values of these properties are listed as "uncertain", this will be described in the following section. For reference, the temperature and displacement profiles are shown in [fig:sol_temp]-[fig:sol_dispz] where the uncertain properties are set to some arbitrary values. The full input file for this model is shown in [list:thermo].
+The problem of interest involves a steady-state thermomechanics model. The geometry is a 3-D finite hollow cylinder with two concentric layers of different material properties, seen in [fig:geom]. Due to symmetry, only 1/8 of the cylinder is represented by the mesh. The inner surface of the ring is exposed to a surface heat source that has a cosine shape along the axis of the cylinder with its peak being at the center. The end and outside of the cylinder have convective boundary conditions. The cylinder is free to displace in all directions due to the thermal expansion. The relevant material and geometric properties are listed in [tab:mat_prop]. This table also lists the "uncertain" parameters that will be described in the following section. For reference, the temperature and displacement profiles are shown in [fig:sol_temp] to [fig:sol_dispz] where the uncertain properties are set to some arbitrary values. The full input file for this model is shown in [list:thermo].
 
 !media combined/geom.png caption=Model Problem Geometry id=fig:geom style=width:50%
 
@@ -67,34 +67,34 @@ A total of nine properties of the model are not known exactly, but with some kno
 
 There are a total of ten QoIs for the model, which involve temperature and displacement:
 
-1. Temperature at center of inner surface -- $T_{1,c}$
-1. Temperature at center of outer surface -- $T_{2,c}$
-1. Temperature at end of inner surface -- $T_{1,e}$
-1. Temperature at end of outer surface -- $T_{2,e}$
-1. x-displacement at center of inner surface -- $\delta_{x,1,c}$
-1. x-displacement at center of outer surface -- $\delta_{x,2,c}$
-1. x-displacement at end of inner surface -- $\delta_{x,1,e}$
-1. x-displacement at end of outer surface -- $\delta_{x,2,e}$
-1. z-displacement at end of inner surface -- $\delta_{z,1}$
-1. z-displacement at end of outer surface -- $\delta_{z,2}$
+1. Temperature at center of inner surface --- $T_{1,c}$
+1. Temperature at center of outer surface --- $T_{2,c}$
+1. Temperature at end of inner surface --- $T_{1,e}$
+1. Temperature at end of outer surface --- $T_{2,e}$
+1. x-displacement at center of inner surface --- $\delta_{x,1,c}$
+1. x-displacement at center of outer surface --- $\delta_{x,2,c}$
+1. x-displacement at end of inner surface --- $\delta_{x,1,e}$
+1. x-displacement at end of outer surface --- $\delta_{x,2,e}$
+1. z-displacement at end of inner surface --- $\delta_{z,1}$
+1. z-displacement at end of outer surface --- $\delta_{z,2}$
 
 
-[fig:qoi] shows geometrically where these QoI's are located in the model.
+[fig:qoi] shows geometrically where these QoIs are located in the model.
 
 !media combined/qoi.png caption=Geometric description of quantities of interest id=fig:qoi style=width:75%
 
 ## Results
 
-In this exercise, we will use the [statistics](Statistics.md) and [Sobol sensitivity](PolynomialChaosSobolStatistics.md) capabilities available in the stochastic tools module. Two methods are used to perform this analysis. First is using the sampler system to perturb the uncertain properties and retrieve the QoIs which will undergo the analysis. The second is training a [polynomial chaos surrogate](PolynomialChaos.md) and using that reduced order model to sample and perform the analysis.
+In this exercise, we will use the [statistics](Statistics.md) and [Sobol sensitivity](PolynomialChaosSobolStatistics.md) capabilities available in the stochastic tools module. The goal of this exercise is to understand how the uncertainty in the parameters affects the the resulting QoIs. This is done through sampling the model at different perturbations of the parameters and performing statistical calculations on resulting QoI values. Two methods are used to perform this analysis. First is using the sampler system to perturb the uncertain properties and retrieve the QoIs which will undergo the analysis. The second is training a [polynomial chaos surrogate](PolynomialChaos.md) and using that reduced order model to sample and perform the analysis. The idea is that many evaluations of the model are necessary to compute accurate statistical quantities and surrogate modeling speeds up this computation by requiring much fewer full model evaluations for training and is significantly faster to evaluate once trained.
 
-Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics model was run with a total of 100,000 samples, the input file is shown by [list:lhs]. A order four polynomial chaos surrogate was training using a Smolyak sparse quadrature for a total of 7,344 runs of the full model. [tab:rt] shows the run-time for sampling the full order model and training and evaluating the surrogate. The training input is shown by [list:train] and the evaluation input is shwon by [list:eval].
+Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics model was run with a total of 100,000 samples, the input file is shown by [list:lhs]. A order four polynomial chaos surrogate was training using a Smolyak sparse quadrature for a total of 7,344 runs of the full model. The training input is shown by [list:train] and the evaluation input is shown by [list:eval]. [tab:rt] shows the run-time for sampling the full order model and training and evaluating the surrogate. We see here that cumulative time for training and evaluating the surrogate is much smaller than just sampling the full order model, this is because building the surrogate required far fewer evaluations of the full model and evaluating the surrogate is much faster than evaluating the full model.
 
 !table caption=Stochastic run-time results id=tab:rt
 | Simulation | Samples | CPU Time |
 | :- | :- | :- |
 | Full-Order Sampling | 100,000 | 176 hr  |
-| Polynomial Chaos -- Training | 7,344 | 13.7 hr  |
-| Polynomial Chaos -- Evaluation | 100,000 | 6.8 s  |
+| Polynomial Chaos --- Training | 7,344 | 13.7 hr  |
+| Polynomial Chaos --- Evaluation | 100,000 | 6.8 s  |
 
 !listing combined/examples/stochastic/lhs_uniform.i id=list:lhs caption=Latin hypercube sampling and statistics input file
 
@@ -104,7 +104,7 @@ Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics 
 
 ### Statistics
 
-[tab:stat] shows the statistical results of sampling the thermomechanis model and the polynomial chaos surrogate. $\mu$ and $\sigma$ represent the mean and standard deviation of the QoI, and CI is the confidence interval. Note that the confidence interval for the polynomial chaos statistics is not relevant since these values were found analytically using integration techniques. [fig:hist_temp]-[fig:hist_dispz] compares several of the probability distributions of the QoIs between sampling the full-order model and the polynomial chaos surrogate.
+[tab:stat] shows the statistical results of sampling the thermomechanis model and the polynomial chaos surrogate. $\mu$ and $\sigma$ represent the mean and standard deviation of the QoI, and CI is the confidence interval. Note that the confidence interval for the polynomial chaos statistics is not relevant since these values were found analytically using integration techniques. [fig:hist_temp] to [fig:hist_dispz] compares several of the probability distributions of the QoIs between sampling the full-order model and the polynomial chaos surrogate.
 
 !table caption=Statistics Results id=tab:stat
 | QoI | $\mu$ | 95% CI | $\sigma$ | 95% CI | PC -- $\mu$ | PC -- $\sigma$ |
@@ -132,7 +132,7 @@ Using [latin hypercube sampling](LatinHypercubeSampler.md), the thermomechanics 
 
 ### Sobol Sensitivities
 
-Sobol sensitivities, or Sobol indicies, are a metric to compare the global sensitivity a parameter has on a QoI. This examples demonstrates several different types of the sensitivities. The first is total sensitivity, which measure the total sensitivity from a parameter, [fig:sobol_total] shows these values for each QoI and parameter. The second is a correlative sensitivity, which measures the sensitivity due to a combination of parameters, [fig:heat_temp]-[fig:heat_dispz] show heat maps of these values for several QoIs.
+Sobol sensitivities, or Sobol indicies, are a metric to compare the global sensitivity a parameter has on a QoI. This examples demonstrates several different types of the sensitivities. The first is total sensitivity, which measure the total sensitivity from a parameter, [fig:sobol_total] shows these values for each QoI and parameter. The second is a correlative sensitivity, which measures the sensitivity due to a combination of parameters, [fig:heat_temp] to [fig:heat_dispz] show heat maps of these values for several QoIs.
 
 !media combined/sobol_total.png caption=Total Sobol sensitivities id=fig:sobol_total style=width:100%
 
@@ -145,10 +145,6 @@ Sobol sensitivities, or Sobol indicies, are a metric to compare the global sensi
 !media combined/dispz_inner_sobol.png caption=$\delta_{z,1}$ Sobol sensitivities id=fig:heat_dispz style=width:50%;float:left
 
 !row-end!
-
-## On Going Work
-
-There are three main avenues of work that would significantly improve surrogate modeling in the stochastic tools module. First is the ability create surrogate models for data types other than postprocessor values. We see in this example that QoI were based on point values on the inner and outer surface of the cylinder, it would also be relevant to gain more information on the temperature and displacment from the their distribution across the thickness of the rings. This would entail creating a surrogate of a vector postprocessor. Second, this example can be posed as a one-way coupled problem, where the temperature can be solved initially and fed in as a variable for the mechanics simulation. It would be beneficial to be a to create surrogate of the temperature, so we can then solve the mechanics without the burden of simultaneously solving the temperature. Finally, the module is not well equipped to handle parameters based on uncertainties in the geometric description. Currently, when a mesh or geometry parameter is perturbed, the mesh has to be completely rebuilt, which makes the highly efficient batch-restore system impossible. Although, improving this functionality might require significant changes to the way the framework sets up the underlying mesh.
 
 ## Supplementary Figures
 
