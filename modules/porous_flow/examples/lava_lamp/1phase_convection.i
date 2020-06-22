@@ -7,6 +7,8 @@
 #
 # The instability is seeded by a random perturbation to the porosity field.
 # Mesh adaptivity is used to refine the mesh as the fingers form.
+#
+# Note: this model is computationally expensive, so should be run with multiple cores.
 
 [GlobalParams]
   PorousFlowDictator = 'dictator'
@@ -117,21 +119,12 @@
     value = 0
     variable = zi
   [../]
-  # [./zi]
-  #   type = BoundingBoxIC
-  #   variable = zi
-  #   x1 = 0
-  #   x2 = 2
-  #   y1 = 1.95
-  #   y2 = 2
-  #   inside = 0.1
-  #   outside = 0
-  # [../]
   [./porosity]
     type = RandomIC
     variable = porosity
     min = 0.25
     max = 0.275
+    seed = 0
   [../]
 []
 
