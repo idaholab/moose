@@ -9,6 +9,7 @@
 
 #include "MaxQpsThread.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/threads.h"
