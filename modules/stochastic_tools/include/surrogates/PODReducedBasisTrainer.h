@@ -48,8 +48,6 @@ public:
 
   unsigned int getSumBaseSize();
 
-  const DenseVector<Real>& getBasisVector(std::string var_name, unsigned int base_i);
-
 protected:
 
   void computeEigenDecomposition();
