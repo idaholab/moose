@@ -28,7 +28,7 @@ ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6, hide=[])
-NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None)
+NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None, use_title=False)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -177,7 +177,7 @@ class ContentOutlineCommand(command.CommandComponent):
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
         settings['max_level'] = (1, 'Maximum heading level to display.')
 
-        # hide setting should accept the `page.md#heading` format, in case theres identical ids in the outline
+        # TODO: hide setting should accept `page.md#heading` format, in case theres identical ids in the outline
         settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
@@ -207,6 +207,7 @@ class NextAndPreviousCommand(command.CommandComponent):
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
         settings['destination'] = (None, "The markdown page to navigate to.")
+        settings['use_title'] = (False, "Use the title of the page for the button text.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -214,7 +215,10 @@ class NextAndPreviousCommand(command.CommandComponent):
             msg = "The 'destination' setting is required for the !content next and !content previous commands."
             raise exceptions.MooseDocsException(msg)
 
-        return NextAndPrevious(parent, direction=info['subcommand'], destination=self.settings['destination'])
+        return NextAndPrevious(parent,
+                               direction=info['subcommand'],
+                               destination=self.settings['destination'],
+                               use_title=self.settings['use_title'])
 
 class RenderContentToken(components.RenderComponent):
 
@@ -344,17 +348,20 @@ class RenderContentOutline(components.RenderComponent):
         self.createHTMLHelper(parent, token, page)
 
     def createHTMLHelper(self, parent, token, page):
-        if token['location'] is not None:
+        if token['location'] is not None and not token['pages']:
             func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
             nodes = self.translator.findPages(func)
-        elif token['pages']: # should I even check? It would have to be pages option at this point
+        elif token['pages'] and token['location'] is None:
             nodes = [self.translator.findPage(p) for p in token['pages']]
+        else:
+            msg = "The 'location' and 'pages' tokens must be used exclusively."
+            raise exceptions.MooseDocsException(msg)
 
         # Define convenience variables
         hide = token['hide']
         max_level = token['max_level']
         if max_level > 6 or max_level < 1:
-            raise exceptions.ooseDocsException("The 'max_level' must be set in range of 1 to 6.")
+            raise exceptions.MooseDocsException("The 'max_level' must be set in range of 1 to 6.")
 
         # Create the outline from the headings of each node.
         # This initializes the html tags to contain this list, where the previous heading level
@@ -392,9 +399,8 @@ class RenderContentOutline(components.RenderComponent):
                     self.renderer.render(li, link, page)
                     previous = current
 
-
-        # It would be cool if we could do something like this for the outline
-        # This reproduced the example from https://materializecss.com/collapsible.html
+        # TODO: It would be cool if we could do something like this for the outline
+        # The folowing reproduced an example from https://materializecss.com/collapsible.html
         #
         # ul = html.Tag(parent, 'ul', class_='collapsible')
         # li = html.Tag(ul, 'li')
@@ -406,10 +412,23 @@ class RenderContentOutline(components.RenderComponent):
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createMaterialize(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createHTMLHelper(self, parent, token, page):
         # there are a lot of settings for the findPage() func, I should enable them
         node = self.translator.findPage(token['destination'])
-        url = str(node.relativeDestination(page))
+
+        if token['use_title']:
+            # TODO: use left and right arrow icons for the use_title option
+            # also, render a shortened string followed by '...' for long titles
+            string = heading.find_heading(node).text()
+        else:
+            string = token['direction']
+
         div = html.Tag(parent, 'a',
-                       string=token['direction'],
+                       string=string,
                        class_='btn moose-content-{}'.format(token['direction']),
-                       href=url)
+                       href=str(node.relativeDestination(page)))

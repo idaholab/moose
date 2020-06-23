@@ -67,3 +67,11 @@ The following is a list of all level 1 & 2 headings in the "extensions" director
 !content previous destination=materialicon.md
 
 !content next destination=config.md
+
+## Next/Previous Buttons with Page Titles
+
+These buttons use the destination page's title as their text.
+
+!content previous destination=materialicon.md use_title=True
+
+!content next destination=config.md use_title=True

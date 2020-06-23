@@ -39,15 +39,16 @@ ul.moose-a-to-z a{
   white-space: nowrap;
 }
 
+/* TODO: Make it so the Next/Previous buttons always render at bottom of page */
 .moose-content-next{
   float: right;
   position: relative;
-  top: 48px; /* this is the spacing of the h1:first-of-type */
+  /* top: 48px; /* this is the spacing of the h1:first-of-type */
 }
 
 .moose-content-previous{
   position: relative;
-  top: 48px;
+  /* top: 48px; */
 }
 
 /* MOOSE Outline Counters
