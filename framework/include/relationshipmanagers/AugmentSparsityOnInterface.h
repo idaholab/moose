@@ -85,8 +85,6 @@ protected:
   SubdomainName _primary_subdomain_name;
   SubdomainName _secondary_subdomain_name;
 
-  std::pair<SubdomainID, SubdomainID> _subdomain_pair;
-
   /// Whether this relationship manager is called when coupling functors are called when building
   /// the matrix sparsity pattern
   const bool _is_coupling_functor;

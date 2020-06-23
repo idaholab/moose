@@ -38,7 +38,7 @@ MortarConstraintBase::validParams()
       });
 
   // Whether on a displaced or undisplaced mesh, coupling ghosting will only happen for
-  // cross-interface elements determined during the initial problem setup
+  // cross-interface elements
   params.addRelationshipManager(
       "AugmentSparsityOnInterface",
       Moose::RelationshipManagerType::COUPLING,
