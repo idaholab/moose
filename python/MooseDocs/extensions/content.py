@@ -189,10 +189,6 @@ class ContentOutlineCommand(command.CommandComponent):
             msg = "The 'location' and 'pages' may not be specified simultaneously."
             raise exceptions.MooseDocsException(msg)
 
-        for p in self.settings['pages'].split():
-            p_node = self.translator.findPage(p)
-            page['dependencies'].add(p_node.uid)
-
         return ContentOutline(parent,
                               location=self.settings['location'],
                               pages=self.settings['pages'].split(),
@@ -410,6 +406,9 @@ class RenderContentOutline(components.RenderComponent):
         # div = html.Tag(li, 'div', class_='collapsible-body')
         # span = html.Tag(div, 'span', string='Lorem ipsum dolor sit amet.')
 
+    def createLatex(self, parent, token, page):
+        return None
+
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
         self.createHTMLHelper(parent, token, page)
@@ -432,3 +431,6 @@ class RenderNextAndPrevious(components.RenderComponent):
                        string=string,
                        class_='btn moose-content-{}'.format(token['direction']),
                        href=str(node.relativeDestination(page)))
+
+    def createLatex(self, parent, token, page):
+        return None
