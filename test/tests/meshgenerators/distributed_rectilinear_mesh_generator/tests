@@ -66,4 +66,11 @@
     cli_args = 'Mesh/gmg/num_cores_for_partition=10 Mesh/gmg/dim=3 Mesh/gmg/nx=20 Mesh/gmg/ny=20 Mesh/gmg/nz=20 Outputs/hide="pid npid" '
     requirement = 'MOOSE shall error out if the number of cores for partition is larger than the total number of cores.'
   [../]
+
+  [./distributed_rectilinear_mesh_generator_mesh_adaptivity]
+    type = 'Exodiff'
+    input = 'distributed_rectilinear_mesh_generator_adaptivity.i'
+    exodiff = 'distributed_rectilinear_mesh_generator_adaptivity_out.e'
+    requirement = 'The system shall be able to adapt a mesh generated in parallel.'
+  [../]
 []

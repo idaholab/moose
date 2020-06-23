@@ -29,4 +29,5 @@ public:
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override;
+  virtual void meshChanged() override {}
 };
