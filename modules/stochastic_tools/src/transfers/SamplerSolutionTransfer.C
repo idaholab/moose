@@ -22,8 +22,8 @@ InputParameters
 SamplerSolutionTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
-  params.addClassDescription("Transfers solution vectors from the sub-application to a "
-                             "a container in the Transfer object.");
+  params.addClassDescription("Transfers solution vectors from the sub-applications to a "
+                             "a container in the Trainer object and back.");
   params.addRequiredParam<std::string>("trainer_name", "Trainer object that contains the solutions for different samples.");
   return params;
 }
@@ -115,15 +115,15 @@ SamplerSolutionTransfer::execute()
         NonlinearSystemBase& nl = app_problem.getNonlinearSystemBase();
         NumericVector<Number>& solution = nl.solution();
 
-        for (auto var_name : var_names)
+        for (unsigned int v_index=0; v_index<var_names.size(); ++v_index)
         {
-          nl.setVariableGlobalDoFs(var_name);
+          nl.setVariableGlobalDoFs(var_names[v_index]);
           const std::vector<dof_id_type>& var_dofs = nl.getVariableGlobalDoFs();
 
           DenseVector<Real> tmp;
           solution.get(var_dofs, tmp.get_values());
 
-          _trainer->addSnapshot(var_name, tmp);
+          _trainer->addSnapshot(v_index, tmp);
         }
       }
       break;
@@ -132,9 +132,9 @@ SamplerSolutionTransfer::execute()
 
       unsigned int counter = 0;
 
-      for (auto var_name : var_names)
+      for (unsigned int var_i=0; var_i<var_names.size(); ++var_i)
       {
-        unsigned int var_base_num = _trainer->getBaseSize(var_name);
+        unsigned int var_base_num = _trainer->getBaseSize(var_i);
 
         for(unsigned int base_i=0; base_i<var_base_num; ++base_i)
         {
@@ -144,14 +144,21 @@ SamplerSolutionTransfer::execute()
 
           solution.zero();
 
-          nl.setVariableGlobalDoFs(var_name);
+          nl.setVariableGlobalDoFs(var_names[var_i]);
           const std::vector<dof_id_type>& var_dofs = nl.getVariableGlobalDoFs();
 
-          const DenseVector<Real>& base_vector = _trainer->getBasisVector(var_name, base_i);
+          const DenseVector<Real>& base_vector = _trainer->getBasisVector(var_i, base_i);
 
           solution.insert(base_vector, var_dofs);
 
           solution.close();
+
+          nl.setSolution(solution);
+
+          // for(unsigned int i=0; i<solution.size(); ++i)
+          // {
+          //   std::cout << solution(i) << std::endl;
+          // }
 
           counter++;
         }

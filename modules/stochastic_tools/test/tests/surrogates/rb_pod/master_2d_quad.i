@@ -58,14 +58,22 @@
     execute_on = 'final'
     direction = 'to_multiapp'
   []
+  [res]
+    type = ResidualTransfer
+    multi_app = sub
+    sampler = sample
+    trainer_name = "pod_rb"
+    execute_on = 'final'
+    direction = 'from_multiapp'
+  []
 []
 
 [Trainers]
   [pod_rb]
     type = PODReducedBasisTrainer
-    execute_on = 'timestep_begin' # final'
+    execute_on = 'timestep_begin final' # final'
     var_names = 'u'
-    tag_names = 'react diff'
+    tag_names = 'react diff bodyf'
   []
 []
 
