@@ -65,6 +65,7 @@
     type = PODReducedBasisTrainer
     execute_on = 'timestep_begin' # final'
     var_names = 'u'
+    tag_names = 'react diff'
   []
 []
 

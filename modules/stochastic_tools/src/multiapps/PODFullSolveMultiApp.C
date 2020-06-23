@@ -9,8 +9,9 @@
 
 // StochasticTools includes
 #include "PODFullSolveMultiApp.h"
+#include "NonlinearSystemBase.h"
 #include "Sampler.h"
-#include "StochasticToolsTransfer.h"
+#include "Executioner.h"
 
 registerMooseObject("StochasticToolsApp", PODFullSolveMultiApp);
 
@@ -29,7 +30,8 @@ PODFullSolveMultiApp::validParams()
 PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
   :
   SamplerFullSolveMultiApp(parameters),
-  _trainer_name(getParam<std::string>("trainer_name"))
+  _trainer_name(getParam<std::string>("trainer_name")),
+  _snapshot_generation(true)
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
@@ -56,10 +58,12 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   bool last_solve_converged = true;
 
-  const ExecFlagType& execute = _fe_problem.getCurrentExecuteOnFlag();
-
-  std::cout << _fe_problem.getCurrentExecuteOnFlag() << std::endl;
-  if (execute == EXEC_FINAL)
+  if (_snapshot_generation)
+  {
+    last_solve_converged = SamplerFullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+    _snapshot_generation = false;
+  }
+  else
   {
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
         _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
@@ -71,10 +75,7 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         computeResidual();
     }
   }
-  else
-  {
-    last_solve_converged = SamplerFullSolveMultiApp::solveStep(dt, target_time, auto_advance);
-  }
+
 
   return last_solve_converged;
 }
@@ -82,9 +83,10 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 void
 PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
 {
-  const ExecFlagType& execute = _fe_problem.getCurrentExecuteOnFlag();
-  if (execute == EXEC_FINAL)
+  if (!_snapshot_generation)
+  {
     init(_trainer->getSumBaseSize());
+  }
 
   SamplerFullSolveMultiApp::preTransfer(dt, target_time);
 }
@@ -92,6 +94,8 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
 void
 PODFullSolveMultiApp::computeResidual()
 {
+  if (!_has_an_app)
+    return;
 
   Moose::ScopedCommSwapper swapper(_my_comm);
 
@@ -102,6 +106,22 @@ PODFullSolveMultiApp::computeResidual()
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
-    std::cout << "Hello world" << std::endl;
+    // Getting the local problem
+    FEProblemBase & problem = _apps[i]->getExecutioner()->feProblem();
+
+    // Converting vegtor tags to tag IDs for the residual evaluation
+    const std::vector<VectorTag>& sub_app_tags = problem.getVectorTags();
+    for (unsigned i=0; i<sub_app_tags.size(); ++i)
+    {
+      std::cout << sub_app_tags[i]._id << " "<< sub_app_tags[i]._name << std::endl;
+    }
+
+    std::set<TagID> tags_to_compute;
+    for (auto& tag : sub_app_tags)
+    {
+      tags_to_compute.insert(tag._id);
+    }
+
+    problem.computeResidualTags(tags_to_compute);
   }
 }
