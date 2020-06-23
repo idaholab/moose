@@ -154,7 +154,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         node._AutoPropertyMixin__mutable = value
 
-    def __call__(self, nodes, num_threads=1):
+    def __call__(self, page_ids, num_threads=1):
         """
         Called by Translator object, this executes the steps listed in the class description.
         """
@@ -162,7 +162,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self.assertInitialized()
         self.translator.executeMethod('preExecute', log=True)
 
-        nodes = nodes or self.getPages()
+        nodes = [n for n in self.getPages() if n in page_ids] if page_ids is not None else self.getPages()
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
 
