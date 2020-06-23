@@ -22,6 +22,7 @@ GenericConstantRankTwoTensor::validParams()
       "tensor_values", "Vector of values defining the constant rank two tensor");
   params.addRequiredParam<MaterialPropertyName>(
       "tensor_name", "Name of the tensor material property to be created");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 

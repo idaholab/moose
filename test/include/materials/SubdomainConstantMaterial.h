@@ -22,7 +22,7 @@ public:
   SubdomainConstantMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeSubdomainProperties();
+  void computeQpProperties() override;
 
   const MaterialPropertyName & _mat_prop_name;
   MaterialProperty<Real> & _mat_prop;

@@ -44,7 +44,7 @@ SubdomainConstantMaterial::SubdomainConstantMaterial(const InputParameters & par
 }
 
 void
-SubdomainConstantMaterial::computeSubdomainProperties()
+SubdomainConstantMaterial::computeQpProperties()
 {
   auto it = _mapped_values.find(_current_subdomain_id);
   if (it != _mapped_values.end())

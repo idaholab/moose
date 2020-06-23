@@ -92,6 +92,13 @@ public:
   }
   virtual void subdomainSetup() override;
 
+  enum class ConstantTypeEnum
+  {
+    NONE,
+    ELEMENT,
+    SUBDOMAIN
+  };
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -113,15 +120,11 @@ protected:
   /// current side of the current element
   const unsigned int & _current_side;
 
-  enum ConstantTypeEnum
-  {
-    NONE,
-    ELEMENT,
-    SUBDOMAIN
-  };
-
   /// Options of the constantness level of the material
   const ConstantTypeEnum _constant_option;
+
+private:
+  ConstantTypeEnum computeConstantOption();
 };
 
 template <typename T>
