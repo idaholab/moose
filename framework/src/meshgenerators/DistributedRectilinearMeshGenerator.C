@@ -134,9 +134,19 @@ DistributedRectilinearMeshGenerator::getNeighbors<Edge2>(const dof_id_type nx,
                                                          const dof_id_type /*j*/,
                                                          const dof_id_type /*k*/,
                                                          std::vector<dof_id_type> & neighbors,
-                                                         const bool /*corner*/)
+                                                         const bool corner)
 
 {
+  if (corner)
+  {
+    // The elements on the opposite of the current boundary are required
+    // for periodic boundary conditions
+    neighbors[0] = (i - 1 + nx) % nx;
+    neighbors[1] = (i + 1 + nx) % nx;
+
+    return;
+  }
+
   neighbors[0] = i - 1;
   neighbors[1] = i + 1;
 
@@ -169,26 +179,17 @@ DistributedRectilinearMeshGenerator::getGhostNeighbors<Edge2>(const dof_id_type 
                                                               const MeshBase & mesh,
                                                               std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.get_boundary_info();
-
   std::vector<dof_id_type> neighbors(2);
 
   for (auto elem_ptr : mesh.element_ptr_range())
   {
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-    {
-      // No current neighbor
-      if (!elem_ptr->neighbor_ptr(s))
-      {
-        // Not on a boundary
-        if (!boundary_info.n_boundary_ids(elem_ptr, s))
-        {
-          getNeighbors<Edge2>(nx, 0, 0, elem_ptr->id(), 0, 0, neighbors, false);
+    auto elem_id = elem_ptr->id();
 
-          ghost_elems.insert(neighbors[s]);
-        }
-      }
-    }
+    getNeighbors<Edge2>(nx, 0, 0, elem_id, 0, 0, neighbors, true);
+
+    for (auto neighbor : neighbors)
+      if (neighbor != Elem::invalid_id && !mesh.query_elem_ptr(neighbor))
+        ghost_elems.insert(neighbor);
   }
 }
 
@@ -337,11 +338,14 @@ DistributedRectilinearMeshGenerator::getNeighbors<Quad4>(const dof_id_type nx,
   if (corner)
   {
     // libMesh dof_id_type looks like unsigned int
+    // We add one layer of point neighbors by default. Besides,
+    // The elements on the opposite side of the current boundary are included
+    // for, in case, periodic boundary conditions. The overhead is negligible
+    // since you could consider every element has the same number of neighbors
     unsigned int nnb = 0;
     for (unsigned int ii = 0; ii <= 2; ii++)
       for (unsigned int jj = 0; jj <= 2; jj++)
-        if ((i + ii >= 1) && (i + ii <= nx) && (j + jj >= 1) && (j + jj <= ny))
-          neighbors[nnb++] = elemId<Quad4>(nx, 0, i + ii - 1, j + jj - 1, 0);
+        neighbors[nnb++] = elemId<Quad4>(nx, 0, (i + ii - 1 + nx) % nx, (j + jj - 1 + ny) % ny, 0);
 
     return;
   }
@@ -600,13 +604,17 @@ DistributedRectilinearMeshGenerator::getNeighbors<Hex8>(const dof_id_type nx,
 
   if (corner)
   {
+    // We collect one layer of point neighbors
+    // We add one layer of point neighbors by default. Besides,
+    // The elements on the opposite side of the current boundary are included
+    // for, in case, periodic boundary conditions. The overhead is negligible
+    // since you could consider every element has the same number of neighbors
     unsigned int nnb = 0;
     for (unsigned int ii = 0; ii <= 2; ii++)
       for (unsigned int jj = 0; jj <= 2; jj++)
         for (unsigned int kk = 0; kk <= 2; kk++)
-          if ((i + ii >= 1) && (i + ii <= nx) && (j + jj >= 1) && (j + jj <= ny) && (k + kk >= 1) &&
-              (k + kk <= nz))
-            neighbors[nnb++] = elemId<Hex8>(nx, ny, i + ii - 1, j + jj - 1, k + kk - 1);
+          neighbors[nnb++] = elemId<Hex8>(
+              nx, ny, (i + ii - 1 + nx) % nx, (j + jj - 1 + ny) % ny, (k + kk - 1 + nz) % nz);
 
     return;
   }
@@ -1015,6 +1023,10 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   bool old_allow_renumbering = mesh.allow_renumbering();
   mesh.allow_renumbering(false);
   mesh.allow_find_neighbors(false);
+  // No, I do not want to remove anything in case periodic boundary conditions
+  // are required late. We  stop libMesh from deleting the valuable remote
+  // elements paired with the local elements
+  mesh.allow_remote_element_removal(false);
   mesh.prepare_for_use();
 
   // But we'll want to at least find neighbors after any future mesh changes!
@@ -1030,6 +1042,10 @@ DistributedRectilinearMeshGenerator::generate()
 {
   // DistributedRectilinearMeshGenerator always generates a distributed mesh
   _mesh->setParallelType(MooseMesh::ParallelType::DISTRIBUTED);
+  // We will set up boundaries accordingly. We do not want to call
+  // ghostGhostedBoundaries in which allgather_packed_range  is unscalable.
+  // ghostGhostedBoundaries will gather all boundaries to every single processor
+  _mesh->needGhostGhostedBoundaries(false);
   auto mesh = _mesh->buildMeshBaseObject(MooseMesh::ParallelType::DISTRIBUTED);
 
   MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
