@@ -37,15 +37,20 @@ MaxQpsThread::operator()(const ConstElemRange & range)
 
   auto & assem = _fe_problem.assembly(_tid);
 
-  // For short circuiting reinit
+  // For short circuiting reinit.  With potential block-specific qrules we
+  // need to track "seen" element types by their subdomains as well.
   std::set<std::pair<ElemType, SubdomainID>> seen_it;
+
   for (const auto & elem : range)
   {
     // Only reinit if the element type has not previously been seen
     if (!seen_it.insert(std::make_pair(elem->type(), elem->subdomain_id())).second)
       continue;
 
+    // This ensures we can access the correct qrules if any block-specific
+    // qrules have been created.
     assem.setCurrentSubdomainID(elem->subdomain_id());
+
     FEType fe_type(FIRST, LAGRANGE);
     unsigned int dim = elem->dim();
     unsigned int side = 0; // we assume that any element will have at least one side ;)

@@ -58,8 +58,10 @@ SetupQuadratureAction::act()
   if (_problem.get() == nullptr)
     return;
 
+  // add default/global quadrature rules
   _problem->createQRules(_type, _order, _element_order, _side_order);
 
+  // add custom block-specific quadrature rules
   for (unsigned int i = 0; i < _custom_blocks.size(); i++)
     _problem->createQRules(_type,
                            _order,

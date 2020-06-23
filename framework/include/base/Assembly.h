@@ -437,16 +437,26 @@ public:
   const Node * const & nodeNeighbor() const { return _current_neighbor_node; }
 
   /**
-   * Creates the volume, face and arbitrary qrules based on the orders passed in.
+   * Creates volume, face and arbitrary qrules based on the orders passed in
+   * that apply to all subdomains.
    */
   void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
+
+  /**
+   * Creates block-specific volume, face and arbitrary qrules based on the
+   * orders passed in.  Any quadrature rules specified using this function
+   * override those created via in the non-block-specific/global createQRules
+   * function.
+   */
   void createQRules(
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   /**
-   * Increase the elemennt/volume quadrature order for the specified mesh
+   * Increases the elemennt/volume quadrature order for the specified mesh
    * block if and only if the current volume quadrature order is lower.  This
-   * can only cause the quadrature level to increase.
+   * can only cause the quadrature level to increase.  If volume_order is
+   * lower than or equal to the current volume/elem quadrature rule order,
+   * then nothing is done (i.e. this function is idempotent).
    */
   void bumpVolumeQRuleOrder(Order volume_order, SubdomainID block);
 
@@ -1406,7 +1416,15 @@ public:
     return diag;
   }
 
+  /**
+   * Returns the current elem/volume quadrature rule.  The current subdomain
+   * (as set via setCurrentSubdomainID is used to determine the correct rule.
+   */
   inline QBase * qruleElem(unsigned int dim) { return qrules(dim).vol.get(); }
+  /**
+   * Returns the current face/area quadrature rule.  The current subdomain
+   * (as set via setCurrentSubdomainID is used to determine the correct rule.
+   */
   inline QBase * qruleFace(unsigned int dim) { return qrules(dim).face.get(); }
 
 protected:
@@ -1727,6 +1745,8 @@ private:
   /// The AD version of the current coordinate transformation coefficients
   MooseArray<DualReal> _ad_coord;
 
+  /// Data structure for tracking/grouping a set of quadrature rules for a
+  /// particular dimensionality of mesh element.
   struct QRules
   {
     QRules()
@@ -1738,17 +1758,29 @@ private:
     {
     }
 
+    /// volume/elem (meshdim) quadrature rule
     std::unique_ptr<QBase> vol;
+    /// area/face (meshdim-1) quadrature rule
     std::unique_ptr<QBase> face;
+    /// finite volume face/flux quadrature rule (meshdim-1)
     std::unique_ptr<QBase> fv_face;
+    /// volume/elem (meshdim) custom points quadrature rule
     std::unique_ptr<ArbitraryQuadrature> arbitrary_vol;
+    /// area/face (meshdim-1) custom points quadrature rule
     std::unique_ptr<ArbitraryQuadrature> arbitrary_face;
+    /// area/face (meshdim-1) custom points quadrature rule for DG
     std::unique_ptr<ArbitraryQuadrature> neighbor;
   };
 
-  /// Holds qrules for each dimension
+  /// Holds quadrature rules for each dimension.  These are created up front
+  /// at the start of the simulation and reused/referenced for the remainder of
+  /// the sim.  This data structure should generally be read/accessed via the
+  /// qrules() function.
   std::unordered_map<SubdomainID, std::vector<QRules>> _qrules;
 
+  /// This is a helper function for accessing quadrature rules for a
+  /// particular dimensionality of element.  All access to quadrature rules in
+  /// Assembly should be done via this accessor function.
   inline QRules & qrules(unsigned int dim)
   {
     auto block = _current_subdomain_id;
