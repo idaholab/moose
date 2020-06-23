@@ -9,6 +9,7 @@
     cli_args = 'Samplers/sample/num_rows=10'
     csvdiff = 'lhs_uniform_out_stats_0001.csv lhs_uniform_out_storage_0001.csv'
     detail = "sample and compute statistics, "
+    method = opt # a bit too slow for debug
   []
   [poly_chaos_train_uniform]
     type = CheckFiles
