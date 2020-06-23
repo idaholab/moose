@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeochemicalDatabaseReader.h"
-#include "KineticRateUserDescription.h"
+#include "GeochemistryKineticRateCalculator.h"
 #include <unordered_map>
 #include "DenseMatrix.h"
 #include <libmesh/dense_vector.h>

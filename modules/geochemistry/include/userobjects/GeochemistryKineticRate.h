@@ -10,7 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
-#include "KineticRateUserDescription.h"
+#include "GeochemistryKineticRateCalculator.h"
 
 /**
  * User object that defines a kinetic rate

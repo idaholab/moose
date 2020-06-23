@@ -2,7 +2,7 @@
   [./except1]
     type = RunException
     input = except1.i
-    expect_err = 'Na does not appear in the model\'s geochemical system either as a basis or equilibrium species, but you requested an Aux involving it'
+    expect_err = 'Na does not appear in the model\'s geochemical system either as a basis or equilibrium or kinetic species, but you requested an Aux involving it'
     requirement = 'An error will be thrown when trying to set AuxVariable information for species that do not exist'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -43,11 +43,29 @@
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
+  [./except2e]
+    type = RunException
+    input = except2.i
+    cli_args = 'AuxKernels/error/quantity=kinetic_moles'
+    expect_err = 'the kinetic_moles and kinetic_additions quantities are only available for kinetic species'
+    requirement = 'An error will be thrown when trying to set kinetic-moles AuxVariable information for a non-kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except2f]
+    type = RunException
+    input = except2.i
+    cli_args = 'AuxKernels/error/quantity=kinetic_additions'
+    expect_err = 'the kinetic_moles and kinetic_additions quantities are only available for kinetic species'
+    requirement = 'An error will be thrown when trying to set kinetic-rate AuxVariable information for a non-kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
   [./except3a]
     type = RunException
     input = except3.i
     cli_args = 'AuxKernels/error/quantity=molal'
-    expect_err = 'the molal and mg_per_kg quantities are only available for non-mineral species'
+    expect_err = 'the molal and mg_per_kg quantities are only available for non-kinetic, non-mineral species'
     requirement = 'An error will be thrown when trying to set molal AuxVariable information for a mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -56,7 +74,7 @@
     type = RunException
     input = except3.i
     cli_args = 'AuxKernels/error/quantity=mg_per_kg'
-    expect_err = 'the molal and mg_per_kg quantities are only available for non-mineral species'
+    expect_err = 'the molal and mg_per_kg quantities are only available for non-kinetic, non-mineral species'
     requirement = 'An error will be thrown when trying to set mg/kg AuxVariable information for a mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -76,6 +94,51 @@
     cli_args = 'AuxKernels/error/quantity=surface_potential'
     expect_err = 'cannot record surface charge or surface potential for a species that is not involved in surface sorption'
     requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a mineral species not involved in sorption'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except5a]
+    type = RunException
+    input = except5.i
+    cli_args = 'AuxKernels/error/quantity=molal'
+    expect_err = 'the molal and mg_per_kg quantities are only available for non-kinetic, non-mineral species'
+    requirement = 'An error will be thrown when trying to set molal AuxVariable information for a kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except5b]
+    type = RunException
+    input = except5.i
+    cli_args = 'AuxKernels/error/quantity=mg_per_kg'
+    expect_err = 'the molal and mg_per_kg quantities are only available for non-kinetic, non-mineral species'
+    requirement = 'An error will be thrown when trying to set mg/kg AuxVariable information for a kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except5c]
+    type = RunException
+    input = except5.i
+    cli_args = 'AuxKernels/error/quantity=neglog10a'
+    expect_err = 'cannot record activity, neglog10a or bulk_moles for a kinetic species'
+    requirement = 'An error will be thrown when trying to set log10activity AuxVariable information for a kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except5d]
+    type = RunException
+    input = except5.i
+    cli_args = 'AuxKernels/error/quantity=activity'
+    expect_err = 'cannot record activity, neglog10a or bulk_moles for a kinetic species'
+    requirement = 'An error will be thrown when trying to set activity AuxVariable information for a kinetic species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except5e]
+    type = RunException
+    input = except5.i
+    cli_args = 'AuxKernels/error/quantity=bulk_moles'
+    expect_err = 'cannot record activity, neglog10a or bulk_moles for a kinetic species'
+    requirement = 'An error will be thrown when trying to set bulk-moles AuxVariable information for a kinetic species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
   [../]
@@ -159,6 +222,40 @@
     csvdiff = 'temperature_out.csv'
     requirement = 'It shall be possible to set an AuxVariable corresponding to aqueous-solution temperature'
     issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./kinetic_moles]
+    type = 'CSVDiff'
+    input = 'kinetic_moles.i'
+    csvdiff = 'kinetic_moles_out.csv'
+    requirement = 'It shall be possible to set an AuxVariable corresponding to kinetic mole number'
+    issues = '#15489'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./kinetic_free_mg]
+    type = 'CSVDiff'
+    input = 'kinetic_moles.i'
+    cli_args = 'AuxKernels/the_aux/quantity=free_mg Outputs/file_base=kinetic_free_mg_out Postprocessors/value_from_action/variable="free_mg_Fe(OH)3(ppd)"'
+    csvdiff = 'kinetic_free_mg_out.csv'
+    requirement = 'It shall be possible to set an AuxVariable corresponding to free mg for kinetic species'
+    issues = '#15489'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./kinetic_free_cm3]
+    type = 'CSVDiff'
+    input = 'kinetic_moles.i'
+    cli_args = 'AuxKernels/the_aux/quantity=free_cm3 Outputs/file_base=kinetic_free_cm3_out Postprocessors/value_from_action/variable="free_cm3_Fe(OH)3(ppd)"'
+    csvdiff = 'kinetic_free_cm3_out.csv'
+    requirement = 'It shall be possible to set an AuxVariable corresponding to free cm3 for kinetic species
+    issues = '#15489'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./kinetic_rate]
+    type = 'CSVDiff'
+    input = 'kinetic_rate.i'
+    csvdiff = 'kinetic_rate_out.csv'
+    requirement = 'It shall be possible to set an AuxVariable corresponding to the kinetic-rate for kinetic species
+    issues = '#15489'
     design = 'GeochemistryQuantityAux.md'
   [../]
 []

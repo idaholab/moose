@@ -105,11 +105,12 @@ GeochemistryReactorBase::validParams()
       "configuration.  Usually only a handful of swaps are used: this parameter prevents endless "
       "cyclic swapping that prevents the algorithm from progressing");
   params.addParam<unsigned>(
-      "ramp_max_ionic_strength",
+      "ramp_max_ionic_strength_initial",
       20,
       "The number of iterations over which to progressively increase the maximum ionic strength "
-      "(from zero to max_ionic_strength).  Increasing this can help in convergence of the Newton "
-      "process, at the cost of spending more time finding the aqueous configuration.");
+      "(from zero to max_ionic_strength) during the initial equilibration.  Increasing this can "
+      "help in convergence of the Newton process, at the cost of spending more time finding the "
+      "aqueous configuration.");
   params.addParam<bool>(
       "ionic_str_using_basis_only",
       false,
@@ -130,7 +131,7 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
     _num_basis(_mgd.basis_species_name.size()),
     _num_eqm(_mgd.eqm_species_name.size()),
     _initial_max_ionic_str(getParam<Real>("max_ionic_strength") /
-                           (1.0 + getParam<unsigned>("ramp_max_ionic_strength"))),
+                           (1.0 + getParam<unsigned>("ramp_max_ionic_strength_initial"))),
     _is(_initial_max_ionic_str,
         _initial_max_ionic_str,
         getParam<bool>("ionic_str_using_basis_only")),

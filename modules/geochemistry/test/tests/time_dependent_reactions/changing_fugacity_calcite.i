@@ -8,11 +8,11 @@
   constraint_species = "H2O Calcite CO2(g)       Na+  Cl-  HCO3-"
   constraint_value = "  1.0 0.01354  3.162E-4 1E-2 1E-2     0.0"
   constraint_meaning = "kg_solvent_water free_moles_mineral_species fugacity moles_bulk_species moles_bulk_species moles_bulk_species"
-  ramp_max_ionic_strength = 10
+  ramp_max_ionic_strength_initial = 10
   close_system_at_time = 0
   controlled_activity_name = 'CO2(g)'
   controlled_activity_value = fug_co2
-  execute_console_output_on = 'initial final'
+  execute_console_output_on = 'initial final timestep_end'
 []
 
 [AuxVariables]

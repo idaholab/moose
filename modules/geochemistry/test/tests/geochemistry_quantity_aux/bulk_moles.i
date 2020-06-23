@@ -5,7 +5,7 @@
   constraint_species = "H2O H+ Cl-"
   constraint_value = "  1.0 1.0E-2 1.0E-2"
   constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species"
-  ramp_max_ionic_strength = 0
+  ramp_max_ionic_strength_initial = 0
 []
 
 [UserObjects]
@@ -36,6 +36,11 @@
     type = PointValue
     point = '0 0 0'
     variable = the_aux
+  [../]
+  [./value_from_action]
+    type = PointValue
+    point = '0 0 0'
+    variable = "bulk_moles_Cl-"
   [../]
 []
 

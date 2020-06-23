@@ -45,6 +45,9 @@ public:
    * @param ramp_max_ionic_strength The maximum ionic strength is ramped from 0 to
    * max_ionic_strength over the course of the first ramp_max_ionic_strength Newton iterations. This
    * can help with convergence.
+   * @param evaluate_kin_always If true then evaluate the kinetic rates before each residual
+   * calculation, otherwise evaluate them only at the start of the solve process (which will be
+   * using the molalities, etc from the previous time-step)
    */
   GeochemicalSolver(const ModelGeochemicalDatabase & mgd,
                     GeochemicalSystem & egs,
@@ -57,7 +60,8 @@ public:
                     unsigned max_swaps_allowed,
                     const std::vector<std::string> & prevent_precipitation,
                     Real max_ionic_strength,
-                    unsigned ramp_max_ionic_strength);
+                    unsigned ramp_max_ionic_strength,
+                    bool evaluate_kin_always);
 
   /**
    * Solve the system
@@ -80,11 +84,18 @@ public:
   void solveSystem(std::stringstream & ss,
                    unsigned & tot_iter,
                    Real & abs_residual,
+                   Real dt,
                    DenseVector<Real> & mole_additions,
                    DenseMatrix<Real> & dmole_additions);
 
   /// Set value for max_initial_residual
   void setMaxInitialResidual(Real max_initial_residual);
+
+  /// Sets the value of _ramp_max_ionic_strength
+  void setRampMaxIonicStrength(unsigned ramp_max_ionic_strength);
+
+  /// Gets the value of _ramp_max_ionic_strength
+  unsigned getRampMaxIonicStrength() const;
 
 private:
   /// The database for the user-defined model
@@ -130,7 +141,12 @@ private:
   /// Maximum ionic strength allowed
   const Real _max_ionic_strength;
   /// Number of iterations over which to increase the maximum ionic strength to _max_ionic_strength
-  const unsigned _ramp_max_ionic_strength;
+  unsigned _ramp_max_ionic_strength;
+  /**
+   * When to compute the kinetic rates: if true then evaluate before every residual calculation,
+   * otherwise evaluate only at the start of the solve process (using, eg, the old molality values)
+   */
+  bool _evaluate_kin_always;
 
   /**
    * Builds the residual of the algebraic system
@@ -169,9 +185,13 @@ private:
   /**
    * Progressively alter the initial-guess molalities for the algebraic system to attempt to reduce
    * the residual
+   * @param dt time-step size (used for determining kinetic rates)
    * @param mole_additions the increment of mole number of each basis species and kinetic species
    * since the last timestep.  This may change during this function as kinetic rates depend on
    * molalities
+   * @param dmole_additions d(mole_additions)/(molality and kinetic moles)
    */
-  bool reduceInitialResidual(DenseVector<Real> & mole_additions);
+  bool reduceInitialResidual(Real dt,
+                             DenseVector<Real> & mole_additions,
+                             DenseMatrix<Real> & dmole_additions);
 };

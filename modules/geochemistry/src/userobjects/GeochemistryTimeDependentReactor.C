@@ -6,6 +6,12 @@ InputParameters
 GeochemistryTimeDependentReactor::validParams()
 {
   InputParameters params = GeochemistryReactorBase::validParams();
+  params.addParam<unsigned>(
+      "ramp_max_ionic_strength_subsequent",
+      0,
+      "The number of iterations over which to progressively increase the maximum ionic strength "
+      "(from zero to max_ionic_strength) during time-stepping.  Unless a great deal occurs in each "
+      "time step, this parameter can be set quite small");
   params.addCoupledVar(
       "mode",
       0.0,
@@ -14,10 +20,10 @@ GeochemistryTimeDependentReactor::validParams()
       "(ie, removal occurs at the beginning of the time step).  If mode=2 then 'flow-through' mode "
       "is used, which means all mimeral masses are removed from the system after it the equilbrium "
       "solution has been found (ie, at the end of a time step).  If mode=3 then 'flush' mode is "
-      "used, thenbefore the equilibrium solution is sought (ie, at the start of a time step) "
-      "water+species is removed from the system at the same rate as pure water is entering the "
-      "system (specified in source_species_rates).  If mode is any other number, no special mode "
-      "is active (the system simply responds to the source_species_rates, "
+      "used, then before the equilibrium solution is sought (ie, at the start of a time step) "
+      "water+species is removed from the system at the same rate as pure water + non-mineral "
+      "solutes are entering the system (specified in source_species_rates).  If mode is any other "
+      "number, no special mode is active (the system simply responds to the source_species_rates, "
       "controlled_activity_value, etc).");
   params.addCoupledVar(
       "temperature",
@@ -65,8 +71,21 @@ GeochemistryTimeDependentReactor::validParams()
   params.addCoupledVar("controlled_activity_value",
                        "Values of the activity or fugacity of the species in "
                        "controlled_activity_name list.  These should always be positive");
+  params.addParam<bool>(
+      "evaluate_kinetic_rates_always",
+      true,
+      "If true, then, evaluate the kinetic rates at every Newton step during the solve using the "
+      "current values of molality, activity, etc (ie, implement an implicit solve).  If false, "
+      "then evaluate the kinetic rates using the values of molality, activity, etc, at the start "
+      "of the current time step (ie, implement an explicit solve)");
   params.addClassDescription("UserObject that controls the time-dependent geochemistry reaction "
                              "processes.  Spatial dependence is not possible using this class");
+  params.addParam<std::vector<std::string>>(
+      "kinetic_species_name",
+      "Names of the kinetic species given initial values in kinetic_species_initial_moles");
+  params.addParam<std::vector<Real>>(
+      "kinetic_species_initial_moles",
+      "Initial number of moles for each of the species named in kinetic_species_name");
   return params;
 }
 
@@ -88,8 +107,8 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
          _previous_temperature,
          getParam<unsigned>("extra_iterations_to_make_consistent"),
          getParam<Real>("min_initial_molality"),
-         {},
-         {}),
+         getParam<std::vector<std::string>>("kinetic_species_name"),
+         getParam<std::vector<Real>>("kinetic_species_initial_moles")),
     _solver(_mgd,
             _egs,
             _is,
@@ -101,7 +120,8 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
             _max_swaps_allowed,
             getParam<std::vector<std::string>>("prevent_precipitation"),
             getParam<Real>("max_ionic_strength"),
-            getParam<unsigned>("ramp_max_ionic_strength")),
+            getParam<unsigned>("ramp_max_ionic_strength_initial"),
+            getParam<bool>("evaluate_kinetic_rates_always")),
     _num_kin(_egs.getNumKinetic()),
     _close_system_at_time(getParam<Real>("close_system_at_time")),
     _closed_system(false),
@@ -119,7 +139,8 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     _mole_additions(_num_basis + _num_kin),
     _dmole_additions(_num_basis + _num_kin, _num_basis + _num_kin),
     _mode(coupledValue("mode")),
-    _minerals_dumped()
+    _minerals_dumped(),
+    _ramp_subsequent(getParam<unsigned>("ramp_max_ionic_strength_subsequent"))
 {
   // check sources and set the rates
   if (coupledComponents("source_species_rates") != _num_source_species)
@@ -191,10 +212,11 @@ GeochemistryTimeDependentReactor::finalize()
 void
 GeochemistryTimeDependentReactor::initialSetup()
 {
-  // solve the geochemical system with its initial composition
+  // solve the geochemical system with its initial composition and with dt=0 so no kinetic additions
   _mole_additions.zero();
   _dmole_additions.zero();
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, _mole_additions, _dmole_additions);
+  _solver.solveSystem(
+      _solver_output, _tot_iter, _abs_residual, 0.0, _mole_additions, _dmole_additions);
 }
 
 void
@@ -202,6 +224,8 @@ GeochemistryTimeDependentReactor::execute()
 {
   if (_current_node->id() != 0)
     return;
+
+  _solver.setRampMaxIonicStrength(_ramp_subsequent);
 
   _mole_additions.zero();
   _dmole_additions.zero();
@@ -272,26 +296,42 @@ GeochemistryTimeDependentReactor::execute()
     // Here we conserve mass, so compute the mass of the solution, without the free mineral moles.
     // We don't include the free mineral moles because users of GeochemistWorkbench will want
     // "flush" to operate like Bethke Eqn(13.14)
-    const Real kg_in = _mole_additions(0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+    // I assume we also don't include kinetic-mineral moles
+    Real kg_in = _mole_additions(0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+    for (unsigned i = 1; i < _num_basis; ++i)
+      if (!_mgd.basis_species_mineral[i])
+        kg_in += _mole_additions(i) * _mgd.basis_species_molecular_weight[i] / 1000.0;
+
     const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
     const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+    const std::vector<Real> & kin_moles = _egs.getKineticMoles();
+
+    // compute the current mass, without moles from free minerals and without kinetic minerals
     Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
     for (unsigned i = 1; i < _num_basis; ++i)
     {
+      Real kinetic_contribution = 0.0;
+      for (unsigned k = 0; k < _num_kin; ++k)
+        kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
       if (_mgd.basis_species_mineral[i])
-        current_kg +=
-            (current_bulk[i] - current_molal[i]) * _mgd.basis_species_molecular_weight[i] / 1000.0;
+        current_kg += (current_bulk[i] - current_molal[i] - kinetic_contribution) *
+                      _mgd.basis_species_molecular_weight[i] / 1000.0;
       else
-
-        current_kg += current_bulk[i] * _mgd.basis_species_molecular_weight[i] / 1000.0;
+        current_kg += (current_bulk[i] - kinetic_contribution) *
+                      _mgd.basis_species_molecular_weight[i] / 1000.0;
     }
+
     const Real fraction_to_remove = kg_in / current_kg;
     for (unsigned i = 0; i < _num_basis; ++i)
     {
+      Real kinetic_contribution = 0.0;
+      for (unsigned k = 0; k < _num_kin; ++k)
+        kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
       if (_mgd.basis_species_mineral[i])
-        _mole_additions(i) -= fraction_to_remove * (current_bulk[i] - current_molal[i]);
+        _mole_additions(i) -=
+            fraction_to_remove * (current_bulk[i] - current_molal[i] - kinetic_contribution);
       else
-        _mole_additions(i) -= fraction_to_remove * current_bulk[i];
+        _mole_additions(i) -= fraction_to_remove * (current_bulk[i] - kinetic_contribution);
     }
   }
 
@@ -368,7 +408,8 @@ GeochemistryTimeDependentReactor::execute()
   _previous_temperature = new_temperature;
 
   // solve the geochemical system
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, _mole_additions, _dmole_additions);
+  _solver.solveSystem(
+      _solver_output, _tot_iter, _abs_residual, _dt, _mole_additions, _dmole_additions);
 
   if (_mode[0] == 2.0) // flow-through
   {
@@ -393,6 +434,18 @@ const GeochemicalSystem &
 GeochemistryTimeDependentReactor::getGeochemicalSystem(unsigned /*node_id*/) const
 {
   return _egs;
+}
+
+const DenseVector<Real> &
+GeochemistryTimeDependentReactor::getMoleAdditions(unsigned /*node_id*/) const
+{
+  return _mole_additions;
+}
+
+const DenseVector<Real> &
+GeochemistryTimeDependentReactor::getMoleAdditions(const Point & /*point*/) const
+{
+  return _mole_additions;
 }
 
 const std::stringstream &

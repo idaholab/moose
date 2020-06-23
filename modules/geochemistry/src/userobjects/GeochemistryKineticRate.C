@@ -19,7 +19,7 @@ GeochemistryKineticRate::validParams()
       "kinetic_species_name",
       "The name of the kinetic species that will be controlled by this rate");
   params.addRequiredRangeCheckedParam<Real>("intrinsic_rate_constant",
-                                            "intrinsic_rate_constant > 0.0",
+                                            "intrinsic_rate_constant >= 0.0",
                                             "The intrinsic rate constant for the reaction");
   params.addRangeCheckedParam<Real>(
       "area_quantity",

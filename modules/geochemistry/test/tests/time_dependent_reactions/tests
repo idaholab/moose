@@ -167,4 +167,36 @@
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
+  [./flushing_equilibrium_at70degC]
+    type = 'RunApp'
+    input = 'flushing_equilibrium_at70degC.i'
+    expect_out = 'Quartz;  bulk_moles'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
+  [./flushing_case1]
+    type = 'RunApp'
+    input = 'flushing_case1.i'
+    expect_out = 'Mass of solvent water = 1.905kg'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
+  [./flushing_case2]
+    type = 'RunApp'
+    input = 'flushing_case2.i'
+    expect_out = 'Mass of solvent water = 1.356kg'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
+  [./flushing_case3]
+    type = 'RunApp'
+    input = 'flushing_case3.i'
+    expect_out = 'Mass of solvent water = 1.068kg'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
 []

@@ -1,20 +1,29 @@
 # An example of manually adding a GeochemistryConsoleOutput
-[TimeIndependentReactionSolver]
+[TimeDependentReactionSolver]
   model_definition = definition
   geochemistry_reactor_name = reactor_name
   charge_balance_species = "Cl-"
-  constraint_species = "H2O H+ Cl-"
-  constraint_value = "  1.0 1.0E-2 1.0E-2"
-  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species"
-  ramp_max_ionic_strength = 1 # so can see the solver_info in the GeochemistryConsoleOutput
+  constraint_species = "H2O H+ Cl- Fe+++"
+  constraint_value = "  1.0 1.0E-2 1.3E-2 1.0E-3"
+  constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species moles_bulk_species"
+  ramp_max_ionic_strength_initial = 0
+  ramp_max_ionic_strength_subsequent = 1 # so can see the solver_info in the GeochemistryConsoleOutput
+  kinetic_species_name = "Fe(OH)3(ppd)_nosorb"
+  kinetic_species_initial_moles = "1.0E-6"
+  execute_console_output_on = 'final' # can compare with the specially_added one, below
 []
 
 [UserObjects]
   [./definition]
     type = GeochemicalModelDefinition
     database_file = "../../database/ferric_hydroxide_sorption.json"
-    basis_species = "H2O H+ Cl-"
+    basis_species = "H2O H+ Cl- Fe+++"
+    kinetic_minerals = "Fe(OH)3(ppd)_nosorb"
   [../]
+[]
+
+[Executioner]
+  type = Steady
 []
 
 [Outputs]

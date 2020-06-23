@@ -21,7 +21,8 @@ GeochemicalSolver::GeochemicalSolver(const ModelGeochemicalDatabase & mgd,
                                      unsigned max_swaps_allowed,
                                      const std::vector<std::string> & prevent_precipitation,
                                      Real max_ionic_strength,
-                                     unsigned ramp_max_ionic_strength)
+                                     unsigned ramp_max_ionic_strength,
+                                     bool evaluate_kin_always)
   : _mgd(mgd),
     _egs(egs),
     _is(is),
@@ -43,7 +44,8 @@ GeochemicalSolver::GeochemicalSolver(const ModelGeochemicalDatabase & mgd,
     _max_swaps_allowed(max_swaps_allowed),
     _prevent_precipitation(prevent_precipitation),
     _max_ionic_strength(max_ionic_strength),
-    _ramp_max_ionic_strength(ramp_max_ionic_strength)
+    _ramp_max_ionic_strength(ramp_max_ionic_strength),
+    _evaluate_kin_always(evaluate_kin_always)
 {
   if (_ramp_max_ionic_strength > _max_iter)
     mooseError("GeochemicalSolver: ramp_max_ionic_strength must be less than max_iter");
@@ -227,7 +229,9 @@ GeochemicalSolver::swapNeeded(unsigned & swap_out_of_basis,
 }
 
 bool
-GeochemicalSolver::reduceInitialResidual(DenseVector<Real> & mole_additions)
+GeochemicalSolver::reduceInitialResidual(Real dt,
+                                         DenseVector<Real> & mole_additions,
+                                         DenseMatrix<Real> & dmole_additions)
 {
   const Real initial_r = _abs_residual;
 
@@ -260,7 +264,8 @@ GeochemicalSolver::reduceInitialResidual(DenseVector<Real> & mole_additions)
     // try using the multiplier
     new_molality_and_pot(a) = multiplier * original_molality_and_pot[a];
     _egs.setAlgebraicVariables(new_molality_and_pot);
-    // future: compute kinetic rates (end of mole_additions and dmole_additions) here
+    if (_evaluate_kin_always)
+      _egs.setKineticRates(dt, mole_additions, dmole_additions);
     _abs_residual = computeResidual(_residual, mole_additions);
     if (_abs_residual < initial_r)
       return true; // success: found a new molality that decreases the initial |R|
@@ -268,7 +273,8 @@ GeochemicalSolver::reduceInitialResidual(DenseVector<Real> & mole_additions)
     // the above approach did not decrease |R|, so try using 1/multiplier
     new_molality_and_pot(a) = original_molality_and_pot[a] / multiplier;
     _egs.setAlgebraicVariables(new_molality_and_pot);
-    // future: compute kinetic rates (end of mole_additions and dmole_additions) here
+    if (_evaluate_kin_always)
+      _egs.setKineticRates(dt, mole_additions, dmole_additions);
     _abs_residual = computeResidual(_residual, mole_additions);
     if (_abs_residual < initial_r)
       return true; // success: found a new molality that decreases the initial |R|
@@ -277,7 +283,8 @@ GeochemicalSolver::reduceInitialResidual(DenseVector<Real> & mole_additions)
     // next-biggest residual component
     new_molality_and_pot(a) = original_molality_and_pot[a];
     _egs.setAlgebraicVariables(new_molality_and_pot);
-    // future: compute kinetic rates (end of mole_additions and dmole_additions) here
+    if (_evaluate_kin_always)
+      _egs.setKineticRates(dt, mole_additions, dmole_additions);
     _abs_residual = computeResidual(_residual, mole_additions);
   }
   return false;
@@ -287,6 +294,7 @@ void
 GeochemicalSolver::solveSystem(std::stringstream & ss,
                                unsigned & tot_iter,
                                Real & abs_residual,
+                               Real dt,
                                DenseVector<Real> & mole_additions,
                                DenseMatrix<Real> & dmole_additions)
 {
@@ -308,7 +316,7 @@ GeochemicalSolver::solveSystem(std::stringstream & ss,
         std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) * _max_ionic_strength;
     _is.setMaxIonicStrength(max_is0);
     _is.setMaxStoichiometricIonicStrength(max_is0);
-    // future: compute kinetic rates (end of mole_additions and dmole_additions) here
+    _egs.setKineticRates(dt, mole_additions, dmole_additions);
     _abs_residual = computeResidual(_residual, mole_additions);
     bool reducing_initial_molalities = (_abs_residual > _max_initial_residual);
     const unsigned max_tries =
@@ -319,7 +327,7 @@ GeochemicalSolver::solveSystem(std::stringstream & ss,
                             // by about 1.1, but that the correct basis species has to be chosen
     unsigned tries = 0;
     while (reducing_initial_molalities && ++tries <= max_tries)
-      reducing_initial_molalities = reduceInitialResidual(mole_additions);
+      reducing_initial_molalities = reduceInitialResidual(dt, mole_additions, dmole_additions);
 
     ss << "iter = " << iter << " |R| = " << _abs_residual << std::endl;
     _res0_times_rel = _abs_residual * _rel_tol;
@@ -338,7 +346,8 @@ GeochemicalSolver::solveSystem(std::stringstream & ss,
       if (_egs.alterChargeBalanceSpecies(_swap_threshold))
         ss << "Changed change balance species to "
            << _mgd.basis_species_name[_egs.getChargeBalanceBasisIndex()] << std::endl;
-      // future: compute kinetic rates (end of mole_additions and dmole_additions) here
+      if (_evaluate_kin_always)
+        _egs.setKineticRates(dt, mole_additions, dmole_additions);
       _abs_residual = computeResidual(_residual, mole_additions);
       ss << "iter = " << iter << " |R| = " << _abs_residual << std::endl;
     }
@@ -398,4 +407,18 @@ GeochemicalSolver::solveSystem(std::stringstream & ss,
     _egs.updateOldWithCurrent(mole_additions);
     _egs.enforceChargeBalance();
   }
+}
+
+void
+GeochemicalSolver::setRampMaxIonicStrength(unsigned ramp_max_ionic_strength)
+{
+  if (ramp_max_ionic_strength > _max_iter)
+    mooseError("GeochemicalSolver: ramp_max_ionic_strength must be less than max_iter");
+  _ramp_max_ionic_strength = ramp_max_ionic_strength;
+}
+
+unsigned
+GeochemicalSolver::getRampMaxIonicStrength() const
+{
+  return _ramp_max_ionic_strength;
 }

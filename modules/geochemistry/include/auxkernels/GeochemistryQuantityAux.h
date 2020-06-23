@@ -40,7 +40,9 @@ protected:
     BULK_MOLES,
     SURFACE_CHARGE,
     SURFACE_POTENTIAL,
-    TEMPERATURE
+    TEMPERATURE,
+    KINETIC_MOLES,
+    KINETIC_ADDITIONS
   } _quantity_choice;
 
   /**
