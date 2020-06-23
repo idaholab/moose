@@ -31,25 +31,23 @@ SamplerSolutionTransfer::validParams()
 SamplerSolutionTransfer::SamplerSolutionTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters),
   _trainer_name(getParam<std::string>("trainer_name"))
-{}
-
-void
-SamplerSolutionTransfer::initialSetup()
 {
-  // Getting a pointer to the requested trainer object
-  FEProblemBase & problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
   std::vector<PODReducedBasisTrainer *> obj;
 
-  problem.theWarehouse()
-             .query()
-             .condition<AttribName>(_trainer_name)
-             .queryInto(obj);
+  _fe_problem.theWarehouse()
+               .query()
+               .condition<AttribName>(_trainer_name)
+               .queryInto(obj);
 
   if (obj.empty())
     mooseError("Unable to find Trainer with name '"+ _trainer_name + "'!");
 
   _trainer = obj[0];
+}
 
+void
+SamplerSolutionTransfer::initialSetup()
+{
   // Checking if the subapplication has the requested variables
   const std::vector<std::string>& var_names = _trainer->varNames();
   const dof_id_type n = _multi_app->numGlobalApps();
@@ -152,6 +150,8 @@ SamplerSolutionTransfer::execute()
           const DenseVector<Real>& base_vector = _trainer->getBasisVector(var_name, base_i);
 
           solution.insert(base_vector, var_dofs);
+
+          solution.close();
 
           counter++;
         }

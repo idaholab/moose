@@ -25,10 +25,11 @@
 
 [MultiApps]
   [sub]
-    type = SamplerFullSolveMultiApp
+    type = PODFullSolveMultiApp
     input_files = sub.i
     sampler = sample
-    execute_on = 'timestep_begin'
+    execute_on = 'timestep_begin final'
+    trainer_name = "pod_rb"
   []
 []
 
@@ -47,14 +48,22 @@
     sampler = sample
     trainer_name = "pod_rb"
     execute_on = 'timestep_begin'
-    direction = "from_multiapp"
+    direction = 'from_multiapp'
+  []
+  [mode]
+    type = SamplerSolutionTransfer
+    multi_app = sub
+    sampler = sample
+    trainer_name = "pod_rb"
+    execute_on = 'final'
+    direction = 'to_multiapp'
   []
 []
 
 [Trainers]
   [pod_rb]
     type = PODReducedBasisTrainer
-    execute_on = 'timestep_begin timestep_end'
+    execute_on = 'timestep_begin' # final'
     var_names = 'u'
   []
 []
