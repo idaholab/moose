@@ -86,6 +86,7 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
   if (!_snapshot_generation)
   {
     init(_trainer->getSumBaseSize());
+    initialSetup();
   }
 
   SamplerFullSolveMultiApp::preTransfer(dt, target_time);
@@ -104,24 +105,18 @@ PODFullSolveMultiApp::computeResidual()
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
+  const std::vector<std::string>& trainer_tags = _trainer->getTagNames();
+
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
     // Getting the local problem
     FEProblemBase & problem = _apps[i]->getExecutioner()->feProblem();
 
-    // Converting vegtor tags to tag IDs for the residual evaluation
-    const std::vector<VectorTag>& sub_app_tags = problem.getVectorTags();
-    for (unsigned i=0; i<sub_app_tags.size(); ++i)
-    {
-      std::cout << sub_app_tags[i]._id << " "<< sub_app_tags[i]._name << std::endl;
-    }
-
     std::set<TagID> tags_to_compute;
-    for (auto& tag : sub_app_tags)
+    for (auto& tag_name : trainer_tags)
     {
-      tags_to_compute.insert(tag._id);
+      tags_to_compute.insert(problem.getVectorTagID(tag_name));
     }
-
     problem.computeResidualTags(tags_to_compute);
   }
 }

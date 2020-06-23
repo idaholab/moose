@@ -29,26 +29,30 @@ public:
 
   virtual void finalize() override;
 
-  void addSnapshot(std::string var_name, DenseVector<Real>& snapshot);
+  void initReducedOperators();
+
+  void addSnapshot(unsigned int v_ind, DenseVector<Real>& snapshot);
+
+  void addToReducedOperator(unsigned int base_i, unsigned int tag_i, std::vector<DenseVector<Real>>& residual);
 
   const std::vector<std::string>& getVarNames() const
   {
     return _var_names;
   }
 
-  const std::vector<std::string>& geTagNames() const
+  const std::vector<std::string>& getTagNames() const
   {
     return _tag_names;
   }
 
-  unsigned int getBaseSize(std::string var_name)
+  unsigned int getBaseSize(unsigned int v_ind)
   {
-    return _base[var_name].size();
+    return _base[v_ind].size();
   }
 
-  const DenseVector<Real>& getBasisVector(std::string var_name, unsigned int base_i) const
+  const DenseVector<Real>& getBasisVector(unsigned int v_index, unsigned int base_i) const
   {
-    return _base.at(var_name)[base_i];
+    return _base[v_index][base_i];
   }
 
   unsigned int getSumBaseSize();
@@ -61,24 +65,31 @@ protected:
 
   void computeBasisVectors();
 
+  void printReducedOperators();
+
   std::vector<std::string> _var_names;
 
   std::vector<std::string> _tag_names;
 
   /// The snapshots contained for this problem
-  std::map<std::string, std::vector<DenseVector<Real>>> _snapshots;
+  std::vector<std::vector<DenseVector<Real>>> _snapshots;
+
+  /// The reduced operators which will be assembled
+  std::vector<DenseMatrix<Real>> _red_operators;
 
   /// The reduced basis for the variables
-  std::map<std::string, std::vector<DenseVector<Real>>> _base;
+  std::vector<std::vector<DenseVector<Real>>> _base;
 
   /// The correlation matrices for the variables
-  std::map<std::string, DenseMatrix<Real>> _corr_mx;
+  std::vector<DenseMatrix<Real>> _corr_mx;
 
   /// Vector containing the eigenvvalues of the correlation matrix
-  std::map<std::string, DenseVector<Real>> _eigenvalues;
+  std::vector<DenseVector<Real>> _eigenvalues;
 
   /// Matirx containing the eigenvectors of the correlation matrix
-  std::map<std::string, DenseMatrix<Real>> _eigenvectors;
+  std::vector<DenseMatrix<Real>> _eigenvectors;
+
+  bool _base_completed;
 
 private:
 

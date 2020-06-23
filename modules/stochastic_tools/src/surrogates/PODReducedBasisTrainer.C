@@ -18,14 +18,17 @@ PODReducedBasisTrainer::validParams()
 
   params.addClassDescription("Computes the reduced subspace plus the reduced operators for "
                              "POD-RB surrogate.");
-  params.addRequiredParam<std::vector<std::string>>("var_names", "Trainer object that contains the solutions for different samples.");
+  params.addRequiredParam<std::vector<std::string>>("var_names", "Names of variables we want to extract from solution vectors.");
+  params.addRequiredParam<std::vector<std::string>>("tag_names", "Names of tags for the reduced operators.");
 
   return params;
 }
 
 PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-  _var_names(getParam<std::vector<std::string>>("var_names"))
+  _var_names(getParam<std::vector<std::string>>("var_names")),
+  _tag_names(getParam<std::vector<std::string>>("tag_names")),
+  _base_completed(false)
 {
 }
 
@@ -33,10 +36,20 @@ void
 PODReducedBasisTrainer::initialSetup()
 {
   _snapshots.clear();
-  for (auto var_name : _var_names)
-  {
-    _snapshots[var_name] =  std::vector<DenseVector<Real>>(0);
-  }
+  _snapshots.resize(_var_names.size());
+
+  _base.clear();
+  _base.resize(_var_names.size());
+
+  _corr_mx.clear();
+  _corr_mx.resize(_var_names.size());
+
+  _eigenvalues.clear();
+  _eigenvalues.resize(_var_names.size());
+
+  _eigenvectors.clear();
+  _eigenvectors.resize(_var_names.size());
+
 }
 
 void
@@ -47,12 +60,18 @@ PODReducedBasisTrainer::initialize()
 void
 PODReducedBasisTrainer::execute()
 {
+  if (!_base_completed)
+  {
+    computeCorrelationMatrix();
 
-  computeCorrelationMatrix();
+    computeEigenDecomposition();
 
-  computeEigenDecomposition();
+    computeBasisVectors();
 
-  computeBasisVectors();
+    _base_completed = true;
+  }
+
+  printReducedOperators();
 
 }
 
@@ -62,18 +81,39 @@ PODReducedBasisTrainer::finalize()
 }
 
 void
-PODReducedBasisTrainer::addSnapshot(std::string var_name, DenseVector<Real>& snapshot)
+PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i, unsigned int tag_i, std::vector<DenseVector<Real>>& residual)
 {
-  _snapshots[var_name].push_back(snapshot);
+  if (residual.size() != _base.size())
+    mooseError("The number of residual blocks is not equal to the number of variables!");
+
+  unsigned int counter = 0;
+  for (unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+  {
+    if (residual[var_i].size() != _base[var_i][0].size())
+      mooseError("The size of the component residual is not the same as the size of the basis vector!",
+                 residual[var_i].size()," != ",_base[var_i][0].size());
+
+    for (unsigned int base_j=0; base_j<_base[var_i].size(); ++base_j)
+    {
+      _red_operators[tag_i](counter, base_i) = residual[var_i].dot(_base[var_i][base_j]);
+      counter++;
+    }
+  }
+}
+
+void
+PODReducedBasisTrainer::addSnapshot(unsigned int v_ind, DenseVector<Real>& snapshot)
+{
+  _snapshots[v_ind].push_back(snapshot);
 }
 
 unsigned int
 PODReducedBasisTrainer::getSumBaseSize()
 {
   unsigned int sum = 0;
-  for (auto it : _base)
+  for (unsigned int i=0; i<_base.size(); ++i)
   {
-    sum += it.second.size();
+    sum += _base[i].size();
   }
   return sum;
 }
@@ -81,19 +121,18 @@ PODReducedBasisTrainer::getSumBaseSize()
 void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
-  for (auto it : _snapshots)
+  for (unsigned int v_ind=0; v_ind<_snapshots.size(); ++v_ind)
   {
-    const std::string& var_name = it.first;
-    unsigned int no_snaps = it.second.size();
+    unsigned int no_snaps = _snapshots[v_ind].size();
 
-    _corr_mx[var_name] = DenseMatrix<Real>(no_snaps, no_snaps);
+    _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
 
     for (unsigned int j=0; j<no_snaps; ++j)
     {
       for (unsigned int k=0; k<no_snaps; ++k)
       {
         if (j>=k)
-          _corr_mx[var_name](j,k)=it.second[j].dot(it.second[k]);
+          _corr_mx[v_ind](j,k)=_snapshots[v_ind][j].dot(_snapshots[v_ind][k]);
       }
     }
 
@@ -102,7 +141,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       for (unsigned int k=0; k<no_snaps; ++k)
       {
         if (j<k)
-          _corr_mx[var_name](j,k) = _corr_mx[var_name](k,j);
+          _corr_mx[v_ind](j,k) = _corr_mx[v_ind](k,j);
       }
     }
   }
@@ -111,10 +150,9 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 void
 PODReducedBasisTrainer::computeEigenDecomposition()
 {
-  for (auto it : _corr_mx)
+  for (unsigned int v_ind=0; v_ind<_corr_mx.size(); ++v_ind)
   {
-    const std::string& var_name = it.first;
-    unsigned int no_snaps = it.second.n();
+    unsigned int no_snaps = _corr_mx[v_ind].n();
 
     DenseVector<Real> eigenvalues(no_snaps);
     DenseMatrix<Real> eigenvectors(no_snaps, no_snaps);
@@ -123,7 +161,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     DenseVector<Real> eigenvalues_imag(no_snaps);
 
     // Performing the eigenvalue decomposition
-    it.second.evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
+    _corr_mx[v_ind].evd_left(eigenvalues, eigenvalues_imag, eigenvectors);
 
     // Sorting the eigenvectors and eigenvalues based on the magnitude of
     // the eigenvalues
@@ -135,15 +173,15 @@ PODReducedBasisTrainer::computeEigenDecomposition()
                      idx.end(),
                      [&v](unsigned int i, unsigned int j){return v[i]>v[j];});
 
-    _eigenvalues[var_name] = DenseVector<Real>(eigenvalues.size());
-    _eigenvectors[var_name] = DenseMatrix<Real>(eigenvalues.size(), eigenvalues.size());
+    _eigenvalues[v_ind] = DenseVector<Real>(eigenvalues.size());
+    _eigenvectors[v_ind] = DenseMatrix<Real>(eigenvalues.size(), eigenvalues.size());
 
-    for (unsigned int j=0; j<_eigenvalues[var_name].size(); ++j)
+    for (unsigned int j=0; j<_eigenvalues[v_ind].size(); ++j)
     {
-      _eigenvalues[var_name](j) = eigenvalues(idx[j]);
-      for (unsigned int k=0; k<_eigenvalues[var_name].size(); ++k)
+      _eigenvalues[v_ind](j) = eigenvalues(idx[j]);
+      for (unsigned int k=0; k<_eigenvalues[v_ind].size(); ++k)
       {
-        _eigenvectors[var_name](k,j) = eigenvectors(k,idx[j]);
+        _eigenvectors[v_ind](k,j) = eigenvectors(k,idx[j]);
       }
     }
   }
@@ -152,25 +190,44 @@ PODReducedBasisTrainer::computeEigenDecomposition()
 void
 PODReducedBasisTrainer::computeBasisVectors()
 {
-  for (auto it : _eigenvectors)
+  for (unsigned int v_ind=0; v_ind<_eigenvectors.size(); ++v_ind)
   {
-    const std::string& var_name = it.first;
-    unsigned int no_bases = it.second.n();
+    unsigned int no_bases = _eigenvectors[v_ind].n();
 
-    _base[var_name] = std::vector<DenseVector<Real>>(no_bases);
+    _base[v_ind] = std::vector<DenseVector<Real>>(no_bases);
 
     for (unsigned int j=0; j<no_bases; ++j)
     {
-      _base[var_name][j].resize(_snapshots[var_name][0].size());
+      _base[v_ind][j].resize(_snapshots[v_ind][0].size());
 
-      for (unsigned int k=0; k<_snapshots[var_name].size(); ++k)
+      for (unsigned int k=0; k<_snapshots[v_ind].size(); ++k)
       {
-        DenseVector<Real> tmp(_snapshots[var_name][k]);
-        tmp.scale(_eigenvectors[var_name](k,j));
+        DenseVector<Real> tmp(_snapshots[v_ind][k]);
+        tmp.scale(_eigenvectors[v_ind](k,j));
 
-        _base[var_name][j] += tmp;
+        _base[v_ind][j] += tmp;
       }
-      _base[var_name][j] *= (1.0/sqrt(_eigenvalues[var_name](j)));
+      _base[v_ind][j] *= (1.0/sqrt(_eigenvalues[v_ind](j)));
     }
+  }
+}
+
+void
+PODReducedBasisTrainer::initReducedOperators()
+{
+  _red_operators.resize(_tag_names.size());
+  unsigned int base_num = getSumBaseSize();
+  for(unsigned int op_i=0; op_i<_red_operators.size(); ++op_i)
+  {
+    _red_operators[op_i] = DenseMatrix<Real>(base_num, base_num);
+  }
+}
+
+void
+PODReducedBasisTrainer::printReducedOperators()
+{
+  for(unsigned int op_i=0; op_i<_red_operators.size(); ++op_i)
+  {
+    std::cout << _red_operators[op_i] << std::endl;
   }
 }

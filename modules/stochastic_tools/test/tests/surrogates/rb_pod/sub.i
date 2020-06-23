@@ -32,7 +32,7 @@
     type = BodyForce
     variable = u
     value = 1.0
-    extra_vector_tag = 'bodyf'
+    extra_vector_tags = 'bodyf'
   []
 []
 
