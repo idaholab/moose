@@ -22,7 +22,7 @@ PolynomialChaosSobolStatistics::validParams()
   params.addClassDescription(
       "Compute SOBOL statistics values of a trained PolynomialChaos surrogate.");
 
-  params.addRequiredParam<UserObjectName>("pc_name", "Name of PolynomialChaos.");
+  params.addRequiredParam<std::vector<UserObjectName>>("pc_name", "Name of PolynomialChaos.");
 
   MultiMooseEnum stats("first second all total");
   params.addRequiredParam<MultiMooseEnum>(
@@ -35,31 +35,44 @@ PolynomialChaosSobolStatistics::validParams()
 PolynomialChaosSobolStatistics::PolynomialChaosSobolStatistics(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SurrogateModelInterface(this),
-    _pc_uo(getSurrogateModel<PolynomialChaos>("pc_name")),
-    _order(getParam<MultiMooseEnum>("sensitivity_order")),
-    _stats(declareVector("value")),
-    _total_ind(_order.contains("total") ? &declareVector("i_T") : nullptr)
+    _order(getParam<MultiMooseEnum>("sensitivity_order"))
 {
+  const auto & pc_names = getParam<std::vector<UserObjectName>>("pc_name");
+  _pc_uo.reserve(pc_names.size());
+  _stats.reserve(pc_names.size());
+  for (const auto & nm : pc_names)
+  {
+    _pc_uo.push_back(&getSurrogateModelByName<PolynomialChaos>(nm));
+    _stats.push_back(&declareVector(nm));
+  }
+
+  if (_order.contains("total"))
+    _total_ind = &declareVector("i_T");
 }
 
 void
 PolynomialChaosSobolStatistics::initialSetup()
 {
+  _ndim = _pc_uo[0]->getNumberOfParameters();
+  for (unsigned int m = 1; m < _pc_uo.size(); ++m)
+    if (_pc_uo[m]->getNumberOfParameters() != _ndim)
+      mooseError(
+          "All inputted PolynomialChaos surrogates must have the same number of parameters.");
+
   _nind = 0;
   _nval = 0;
 
   if (_order.contains("all"))
   {
-    _nind = _pc_uo.getNumberOfParameters();
+    _nind = _ndim;
     _nval = 1;
-    for (unsigned int j = 0; j < _pc_uo.getNumberOfParameters(); ++j)
+    for (unsigned int j = 0; j < _ndim; ++j)
       _nval *= 2;
     _nval -= 1;
 
     for (unsigned int i = 1; i <= _nind; ++i)
     {
-      std::set<std::set<unsigned int>> indi =
-          buildSobolIndices(i, _pc_uo.getNumberOfParameters(), 0);
+      std::set<std::set<unsigned int>> indi = buildSobolIndices(i, _ndim, 0);
       _ind.insert(indi.begin(), indi.end());
     }
   }
@@ -68,17 +81,15 @@ PolynomialChaosSobolStatistics::initialSetup()
     if (_order.contains("first"))
     {
       _nind = 1;
-      _nval = _pc_uo.getNumberOfParameters();
-      std::set<std::set<unsigned int>> indi =
-          buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
+      _nval = _ndim;
+      std::set<std::set<unsigned int>> indi = buildSobolIndices(_nind, _ndim, 0);
       _ind.insert(indi.begin(), indi.end());
     }
     if (_order.contains("second"))
     {
       _nind = 2;
-      _nval += Utility::binomial(_pc_uo.getNumberOfParameters(), static_cast<std::size_t>(2));
-      std::set<std::set<unsigned int>> indi =
-          buildSobolIndices(_nind, _pc_uo.getNumberOfParameters(), 0);
+      _nval += Utility::binomial(_ndim, static_cast<unsigned int>(2));
+      std::set<std::set<unsigned int>> indi = buildSobolIndices(_nind, _ndim, 0);
       _ind.insert(indi.begin(), indi.end());
     }
   }
@@ -88,13 +99,14 @@ PolynomialChaosSobolStatistics::initialSetup()
     _ind_vector.push_back(&declareVector("i_" + std::to_string(i + 1)));
 
   if (_order.contains("total"))
-    _nval += _pc_uo.getNumberOfParameters();
+    _nval += _ndim;
 }
 
 void
 PolynomialChaosSobolStatistics::initialize()
 {
-  _stats.reserve(_nval);
+  for (auto & vec : _stats)
+    vec->reserve(_nval);
 
   if (_total_ind)
     _total_ind->reserve(_nval);
@@ -107,14 +119,19 @@ void
 PolynomialChaosSobolStatistics::execute()
 {
   // Compute standard deviation
-  Real sig = _pc_uo.computeStandardDeviation();
-  Real var = sig * sig;
+  std::vector<Real> var(_pc_uo.size());
+  for (unsigned int m = 0; m < _pc_uo.size(); ++m)
+  {
+    Real sig = _pc_uo[m]->computeStandardDeviation();
+    var[m] = sig * sig;
+  }
 
   if (_order.contains("total"))
   {
-    for (unsigned int d = 0; d < _pc_uo.getNumberOfParameters(); ++d)
+    for (unsigned int d = 0; d < _ndim; ++d)
     {
-      _stats.push_back(_pc_uo.computeSobolTotal(d) / var);
+      for (unsigned int m = 0; m < _pc_uo.size(); ++m)
+        _stats[m]->push_back(_pc_uo[m]->computeSobolTotal(d) / var[m]);
       _total_ind->push_back(d);
       for (unsigned int i = 0; i < _ind_vector.size(); ++i)
         _ind_vector[i]->push_back(0);
@@ -123,7 +140,8 @@ PolynomialChaosSobolStatistics::execute()
 
   for (const auto & it : _ind)
   {
-    _stats.push_back(_pc_uo.computeSobolIndex(it) / var);
+    for (unsigned int m = 0; m < _pc_uo.size(); ++m)
+      _stats[m]->push_back(_pc_uo[m]->computeSobolIndex(it) / var[m]);
 
     unsigned int i = 0;
     for (const auto & jt : it)
@@ -139,7 +157,8 @@ PolynomialChaosSobolStatistics::execute()
 void
 PolynomialChaosSobolStatistics::finalize()
 {
-  gatherSum(_stats);
+  for (auto & vec : _stats)
+    gatherSum(*vec);
 }
 
 std::set<std::set<unsigned int>>

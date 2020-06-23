@@ -26,6 +26,13 @@ ComputePlaneStressIsotropicElasticityTensor::ComputePlaneStressIsotropicElastici
     const InputParameters & parameters)
   : ComputeIsotropicElasticityTensor(parameters)
 {
+}
+
+void
+ComputePlaneStressIsotropicElasticityTensor::residualSetup()
+{
+  ComputeIsotropicElasticityTensor::residualSetup();
+
   // Retrieve youngs_modulus and poissons_ratio from the general 3D elasticity_tensor
   Real youngs_modulus = ElasticityTensorTools::getIsotropicYoungsModulus(_Cijkl);
   Real poissons_ratio = ElasticityTensorTools::getIsotropicPoissonsRatio(_Cijkl);

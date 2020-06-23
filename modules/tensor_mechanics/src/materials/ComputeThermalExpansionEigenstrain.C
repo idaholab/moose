@@ -18,6 +18,7 @@ ComputeThermalExpansionEigenstrain::validParams()
   params.addClassDescription("Computes eigenstrain due to thermal expansion "
                              "with a constant coefficient");
   params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
+  params.declareControllable("thermal_expansion_coeff");
 
   return params;
 }
