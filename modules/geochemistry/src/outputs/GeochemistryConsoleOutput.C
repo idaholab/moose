@@ -63,6 +63,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   const GeochemicalSystem & egs = _reactor.getGeochemicalSystem(_point);
   const unsigned num_basis = egs.getNumInBasis();
   const unsigned num_eqm = egs.getNumInEquilibrium();
+  const unsigned num_kin = egs.getNumKinetic();
   const std::vector<Real> & basis_molality = egs.getSolventMassAndFreeMolalityAndMineralMoles();
   const std::vector<Real> & basis_activity = egs.getBasisActivity();
   const std::vector<Real> & basis_act_coef = egs.getBasisActivityCoefficient();
@@ -70,6 +71,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   const std::vector<Real> & eqm_molality = egs.getEquilibriumMolality();
   const std::vector<Real> & eqm_act_coef = egs.getEquilibriumActivityCoefficient();
   const std::vector<Real> & eqm_SI = egs.getSaturationIndices();
+  const std::vector<Real> & kin_moles = egs.getKineticMoles();
   const ModelGeochemicalDatabase & mgd = egs.getModelGeochemicalDatabase();
 
   _console << std::setprecision(_precision);
@@ -88,7 +90,17 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   Real mass = bulk_moles[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
   for (unsigned i = 1; i < num_basis; ++i) // do not loop over water
     mass += bulk_moles[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
-  _console << "Mass of aqueous solution = " << mass << "kg\n";
+  _console << "Mass of aqueous solution = " << mass << "kg";
+  if (num_kin == 0)
+    _console << "\n";
+  else
+  {
+    _console << " (including kinetic species and free minerals)\n";
+    for (unsigned k = 0; k < num_kin; ++k)
+      mass -= kin_moles[k] * mgd.kin_species_molecular_weight[k] / 1000.0;
+    _console << "Mass of aqueous solution = " << mass
+             << "kg (without kinetic species, but with free minerals)\n";
+  }
 
   // Output the aqueous solution pH, if relevant
   if (mgd.basis_species_index.count("H+"))
@@ -181,6 +193,25 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
                       mgd.eqm_stoichiometry, i, mgd.basis_species_name, _stoi_tol, _precision)
                << ";  log10K = " << egs.getLog10K(i) << "\n";
     }
+
+  // Output the kinetic species information, sorted by mole number
+  std::vector<unsigned> kin_order = GeochemistrySortedIndices::sortedIndices(kin_moles, false);
+  _console << "\nKinetic Species:\n";
+  for (const auto & k : kin_order)
+  {
+    _console << mgd.kin_species_name[k] << ";  moles = " << kin_moles[k]
+             << ";  mass = " << kin_moles[k] * mgd.kin_species_molecular_weight[k] * 1000.0
+             << "mg;  ";
+    if (mgd.kin_species_mineral[k])
+      _console << "volume = " << kin_moles[k] * mgd.kin_species_molecular_volume[k] << "cm^3;  ";
+    _console << mgd.kin_species_name[k] << " = "
+             << GeochemistryFormattedOutput::reaction(
+                    mgd.kin_stoichiometry, k, mgd.basis_species_name, _stoi_tol, _precision)
+             << ";  log10(Q) = " << egs.log10KineticActivityProduct(k)
+             << ";  log10K = " << egs.getKineticLog10K(k)
+             << ";  dissolution_rate*dt = " << -_reactor.getMoleAdditions(_point)(num_basis + k)
+             << "\n";
+  }
 
   // Output the mineral info, sorted by saturation indices
   std::vector<unsigned> mineral_order = GeochemistrySortedIndices::sortedIndices(eqm_SI, false);

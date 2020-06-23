@@ -18,19 +18,24 @@ GeochemistryQuantityAux::validParams()
   params.addClassDescription(
       "Extracts information from the Reactor and records it in the AuxVariable");
   params.addRequiredParam<std::string>("species", "Species name");
-  MooseEnum quantity_choice("molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
-                            "surface_charge surface_potential temperature",
-                            "molal");
+  MooseEnum quantity_choice(
+      "molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
+      "surface_charge surface_potential temperature kinetic_moles kinetic_additions",
+      "molal");
   params.addParam<MooseEnum>(
       "quantity",
       quantity_choice,
-      "Type of quantity to output.  These are available for all species: activity (which equals "
+      "Type of quantity to output.  These are available for non-kinetic species: activity (which "
+      "equals "
       "fugacity for gases); bulk moles (this will be zero if the species is not in the basis); "
-      "neglog10a = -log10(activity).  These are available only for non-minerals: molal = "
+      "neglog10a = -log10(activity).  These are available only for non-kinetic non-minerals: molal "
+      "= "
       "mol(species)/kg(solvent_water); mg_per_kg = mg(species)/kg(solvent_water).  These are "
       "available only for minerals: "
       "free_mg = free mg; free_cm3 = free cubic-centimeters.  These are available for minerals "
-      "that host sorbing sites: surface_charge (C/m^2); surface_potential (V).  If "
+      "that host sorbing sites: surface_charge (C/m^2); surface_potential (V).  These are "
+      "available for kinetic species: kinetic_moles; kinetic_additions (-dt * rate = mole "
+      "increment in kinetic species for this timestep).  If "
       "quantity=temperature, then the 'species' is ignored and the AuxVariable will record the "
       "aqueous solution temperature in degC");
   params.addRequiredParam<UserObjectName>("reactor",
@@ -48,17 +53,23 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
 {
   const ModelGeochemicalDatabase & mgd =
       _reactor.getGeochemicalSystem(0).getModelGeochemicalDatabase();
-  if (!(mgd.basis_species_index.count(_species) == 1 || mgd.eqm_species_index.count(_species) == 1))
+  if (!(mgd.basis_species_index.count(_species) == 1 ||
+        mgd.eqm_species_index.count(_species) == 1 || mgd.kin_species_index.count(_species) == 1))
     paramError(
         "species",
         _species,
         " does not appear in the model's geochemical system either as a basis or equilibrium "
-        "species, but you requested an Aux involving it");
+        "or kinetic species, but you requested an Aux involving it");
+
   bool is_mineral = false;
   if (mgd.basis_species_index.count(_species) == 1)
     is_mineral = mgd.basis_species_mineral[mgd.basis_species_index.at(_species)];
-  else
+  else if (mgd.eqm_species_index.count(_species) == 1)
     is_mineral = mgd.eqm_species_mineral[mgd.eqm_species_index.at(_species)];
+  else
+    is_mineral = mgd.kin_species_mineral[mgd.kin_species_index.at(_species)];
+  bool is_kinetic = (mgd.kin_species_index.count(_species) == 1);
+
   if (!is_mineral && (_quantity_choice == QuantityChoiceEnum::FREE_CM3 ||
                       _quantity_choice == QuantityChoiceEnum::FREE_MG ||
                       _quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE ||
@@ -66,11 +77,11 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
     paramError("quantity",
                "the free_mg, free_cm3 and surface-related quantities are only available for "
                "mineral species");
-  if (is_mineral && (_quantity_choice == QuantityChoiceEnum::MOLAL ||
-                     _quantity_choice == QuantityChoiceEnum::MG_PER_KG))
+  if ((is_mineral || is_kinetic) && (_quantity_choice == QuantityChoiceEnum::MOLAL ||
+                                     _quantity_choice == QuantityChoiceEnum::MG_PER_KG))
     paramError("quantity",
                "the molal and mg_per_kg quantities are only available for "
-               "non-mineral species");
+               "non-kinetic, non-mineral species");
   if (_quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE ||
       _quantity_choice == QuantityChoiceEnum::SURFACE_POTENTIAL)
   {
@@ -82,6 +93,15 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
                  "cannot record surface charge or surface potential for a species that is not "
                  "involved in surface sorption");
   }
+  if (!is_kinetic && (_quantity_choice == QuantityChoiceEnum::KINETIC_MOLES ||
+                      _quantity_choice == QuantityChoiceEnum::KINETIC_ADDITIONS))
+    paramError("quantity",
+               "the kinetic_moles and kinetic_additions quantities are only available for kinetic "
+               "species");
+  if (is_kinetic && (_quantity_choice == QuantityChoiceEnum::NEGLOG10A ||
+                     _quantity_choice == QuantityChoiceEnum::ACTIVITY ||
+                     _quantity_choice == QuantityChoiceEnum::BULK_MOLES))
+    paramError("species", "cannot record activity, neglog10a or bulk_moles for a kinetic species");
 }
 
 Real
@@ -128,7 +148,7 @@ GeochemistryQuantityAux::computeValue()
           ret = egs.getSolventMassAndFreeMolalityAndMineralMoles()[basis_ind];
       }
     }
-    else
+    else if (mgd.eqm_species_index.count(_species) == 1)
     {
       const unsigned eqm_ind = mgd.eqm_species_index.at(_species);
       switch (_quantity_choice)
@@ -155,6 +175,24 @@ GeochemistryQuantityAux::computeValue()
           break;
         default:
           ret = egs.getEquilibriumMolality(eqm_ind);
+      }
+    }
+    else
+    {
+      const unsigned kin_ind = mgd.kin_species_index.at(_species);
+      switch (_quantity_choice)
+      {
+        case QuantityChoiceEnum::FREE_CM3:
+          ret = egs.getKineticMoles(kin_ind) * mgd.kin_species_molecular_volume[kin_ind];
+          break;
+        case QuantityChoiceEnum::FREE_MG:
+          ret = egs.getKineticMoles(kin_ind) * mgd.kin_species_molecular_weight[kin_ind] * 1000.0;
+          break;
+        case QuantityChoiceEnum::KINETIC_ADDITIONS:
+          ret = _reactor.getMoleAdditions(_current_node->id())(kin_ind + egs.getNumInBasis());
+          break;
+        default:
+          ret = egs.getKineticMoles(kin_ind);
       }
     }
   }

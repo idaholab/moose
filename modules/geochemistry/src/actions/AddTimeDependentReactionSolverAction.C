@@ -25,6 +25,12 @@ InputParameters
 AddTimeDependentReactionSolverAction::validParams()
 {
   InputParameters params = AddGeochemistrySolverAction::validParams();
+  params.addParam<unsigned>(
+      "ramp_max_ionic_strength_subsequent",
+      0,
+      "The number of iterations over which to progressively increase the maximum ionic strength "
+      "(from zero to max_ionic_strength) during time-stepping.  Unless a great deal occurs in each "
+      "time step, this parameter can be set quite small");
   params.addParam<Real>("initial_temperature",
                         25.0,
                         "The initial aqueous solution is equilibrated at this system before adding "
@@ -70,16 +76,29 @@ AddTimeDependentReactionSolverAction::validParams()
   params.addCoupledVar(
       "mode",
       0.0,
-      "This may vary spatially and temporally.  If mode=1 then 'dump' mode is used, which means "
+      "This may vary temporally.  If mode=1 then 'dump' mode is used, which means "
       "all mineral masses are removed from the system before the equilibrium solution is sought "
       "(ie, removal occurs at the beginning of the time step).  If mode=2 then 'flow-through' mode "
       "is used, which means all mimeral masses are removed from the system after it the equilbrium "
       "solution has been found (ie, at the end of a time step).  If mode=3 then 'flush' mode is "
-      "used, thenbefore the equilibrium solution is sought (ie, at the start of a time step) "
-      "water+species is removed from the system at the same rate as pure water is entering the "
-      "system (specified in source_species_rates).  If mode is any other number, no special mode "
-      "is active (the system simply responds to the source_species_rates, "
+      "used, then before the equilibrium solution is sought (ie, at the start of a time step) "
+      "water+species is removed from the system at the same rate as pure water + non-mineral "
+      "solutes are entering the system (specified in source_species_rates).  If mode is any other "
+      "number, no special mode is active (the system simply responds to the source_species_rates, "
       "controlled_activity_value, etc).");
+  params.addParam<bool>(
+      "evaluate_kinetic_rates_always",
+      true,
+      "If true, then, evaluate the kinetic rates at every Newton step during the solve using the "
+      "current values of molality, activity, etc (ie, implement an implicit solve).  If false, "
+      "then evaluate the kinetic rates using the values of molality, activity, etc, at the start "
+      "of the current time step (ie, implement an explicit solve)");
+  params.addParam<std::vector<std::string>>(
+      "kinetic_species_name",
+      "Names of the kinetic species given initial values in kinetic_species_initial_moles");
+  params.addParam<std::vector<Real>>(
+      "kinetic_species_initial_moles",
+      "Initial number of moles for each of the species named in kinetic_species_name");
   params.addClassDescription(
       "Action that sets up a time-dependent equilibrium reaction solver.  This creates creates a "
       "time-dependent geochemistry solver, and adds AuxVariables corresonding to the molalities, "
@@ -158,7 +177,10 @@ AddTimeDependentReactionSolverAction::act()
     params.set<Real>("max_initial_residual") = getParam<Real>("max_initial_residual");
     params.set<Real>("swap_threshold") = getParam<Real>("swap_threshold");
     params.set<unsigned>("max_swaps_allowed") = getParam<unsigned>("max_swaps_allowed");
-    params.set<unsigned>("ramp_max_ionic_strength") = getParam<unsigned>("ramp_max_ionic_strength");
+    params.set<unsigned>("ramp_max_ionic_strength_initial") =
+        getParam<unsigned>("ramp_max_ionic_strength_initial");
+    params.set<unsigned>("ramp_max_ionic_strength_subsequent") =
+        getParam<unsigned>("ramp_max_ionic_strength_subsequent");
     params.set<bool>("ionic_str_using_basis_only") = getParam<bool>("ionic_str_using_basis_only");
     params.set<Real>("close_system_at_time") = getParam<Real>("close_system_at_time");
     if (isParamValid("remove_fixed_activity_name"))
@@ -179,6 +201,14 @@ AddTimeDependentReactionSolverAction::act()
       params.applySpecificParameters(parameters(), {"controlled_activity_value"});
     params.applySpecificParameters(parameters(), {"mode"});
     params.set<Real>("initial_temperature") = getParam<Real>("initial_temperature");
+    params.set<bool>("evaluate_kinetic_rates_always") =
+        getParam<bool>("evaluate_kinetic_rates_always");
+    if (isParamValid("kinetic_species_name"))
+      params.set<std::vector<std::string>>("kinetic_species_name") =
+          getParam<std::vector<std::string>>("kinetic_species_name");
+    if (isParamValid("kinetic_species_initial_moles"))
+      params.set<std::vector<Real>>("kinetic_species_initial_moles") =
+          getParam<std::vector<Real>>("kinetic_species_initial_moles");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
     _problem->addUserObject(
         class_name, getParam<UserObjectName>("geochemistry_reactor_name"), params);

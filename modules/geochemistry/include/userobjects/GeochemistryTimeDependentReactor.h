@@ -32,6 +32,8 @@ public:
   virtual unsigned getSolverIterations(const Point & point) const override;
   virtual Real getSolverResidual(const Point & point) const override;
   virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
+  virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const override;
+  virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const override;
 
 protected:
   /// Temperature specified by user
@@ -76,4 +78,6 @@ protected:
   const VariableValue & _mode;
   /// Moles of mineral removed by dump and flow-through
   std::map<std::string, Real> _minerals_dumped;
+  /// the ramp_max_ionic_strength to use during time-stepping
+  const unsigned _ramp_subsequent;
 };

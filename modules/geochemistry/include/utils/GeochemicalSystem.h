@@ -98,8 +98,8 @@ public:
                     Real initial_temperature,
                     unsigned iters_to_make_consistent,
                     Real min_initial_molality,
-                    std::vector<std::string> kin_name,
-                    std::vector<Real> kin_initial_moles);
+                    const std::vector<std::string> & kin_name,
+                    const std::vector<Real> & kin_initial_moles);
 
   GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                     GeochemistryActivityCoefficients & gac,
@@ -114,8 +114,8 @@ public:
                     Real initial_temperature,
                     unsigned iters_to_make_consistent,
                     Real min_initial_molality,
-                    std::vector<std::string> kin_name,
-                    std::vector<Real> kin_initial_moles);
+                    const std::vector<std::string> & kin_name,
+                    const std::vector<Real> & kin_initial_moles);
 
   /// returns the number of species in the basis
   unsigned getNumInBasis() const;
@@ -376,6 +376,9 @@ public:
    * Compute the Jacobian for the algebraic system and put it in jac
    * @param res The residual of the algebraic system.  This is used to speed up computations of the
    * jacobian
+   * @param jac The jacobian entries are placed here
+   * @param mole_additions The molar additions to the basis species and the kinetic species
+   * @param dmole_additions d(mole_additions)/d(molality or kinetic_moles)
    */
   void computeJacobian(const DenseVector<Real> & res,
                        DenseMatrix<Real> & jac,
@@ -666,6 +669,18 @@ public:
    */
   Real getEquilibriumActivity(unsigned eqm_ind) const;
 
+  /**
+   * Computes the kinetic rates and their derivatives based on the current values of molality, mole
+   * number, etc, and places them (multiplied by dt) in the num_kin final slots of mole_additions
+   * and dmole_additions.  This method is not const because it modifies _eqm_activity for
+   * equilibrium gases and eqm species H+ and OH- (if there are any).
+   * @param dt time-step size
+   * @param mole_additions The kinetic rates multiplied by dt get placed in the last num_kin slots
+   * @param dmole_additions d(mole_additions)/d(molality or kinetic_moles)
+   */
+  void
+  setKineticRates(Real dt, DenseVector<Real> & mole_additions, DenseMatrix<Real> & dmole_additions);
+
 private:
   /// The minimal geochemical database
   ModelGeochemicalDatabase & _mgd;
@@ -741,6 +756,7 @@ private:
   /**
    * equilibrium activities.  NOTE: for computational efficiency, these are not computed until
    * computeAndGetEqmActivity is called, and they are currently only ever used for output purposes
+   * and computing kinetic rates
    */
   std::vector<Real> _eqm_activity;
   /**
@@ -766,7 +782,7 @@ private:
    * approximations anyway.
    */
   const unsigned _iters_to_make_consistent;
-  /// The temperature
+  /// The temperature in degC
   Real _temperature;
   /// Minimum molality ever used in an initial guess
   const Real _min_initial_molality;
@@ -915,15 +931,4 @@ private:
    * BULK-type), then sets _bulk_moles_old, and free mineral moles appropriately
    */
   void alterSystemBecauseBulkChanged();
-
-  /**
-   * Computes the kinetic rates and their derivatives based on the current values of molality, mole
-   * number, etc
-   * @param kin_rates the rate for each kinetic species: should be sized to _num_kin before this
-   * method is called
-   * @param dkin_rates dkin_rates(a, b) = derivative of kin_rates[a] wrt: basis molality (first
-   * _num_basis slots); surface_pot_expr (next _num_surface_pot slots); _kin_moles (last _num_kin)
-   * slots
-   */
-  void computeKineticRates(std::vector<Real> & kin_rates, DenseMatrix<Real> & dkin_rates) const;
 };

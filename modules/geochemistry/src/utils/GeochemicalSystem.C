@@ -9,6 +9,7 @@
 
 #include "GeochemicalSystem.h"
 #include "GeochemistryActivityCalculators.h"
+#include "GeochemistryKineticRateCalculator.h"
 
 GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      GeochemistryActivityCoefficients & gac,
@@ -23,8 +24,8 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      Real initial_temperature,
                                      unsigned iters_to_make_consistent,
                                      Real min_initial_molality,
-                                     std::vector<std::string> kin_name,
-                                     std::vector<Real> kin_initial_moles)
+                                     const std::vector<std::string> & kin_name,
+                                     const std::vector<Real> & kin_initial_moles)
   : _mgd(mgd),
     _num_basis(mgd.basis_species_index.size()),
     _num_eqm(mgd.eqm_species_index.size()),
@@ -86,8 +87,8 @@ GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      Real initial_temperature,
                                      unsigned iters_to_make_consistent,
                                      Real min_initial_molality,
-                                     std::vector<std::string> kin_name,
-                                     std::vector<Real> kin_initial_moles)
+                                     const std::vector<std::string> & kin_name,
+                                     const std::vector<Real> & kin_initial_moles)
   : _mgd(mgd),
     _num_basis(mgd.basis_species_index.size()),
     _num_eqm(mgd.eqm_species_index.size()),
@@ -141,7 +142,12 @@ GeochemicalSystem::checkAndInitialize(const std::vector<std::string> & kin_name,
   // initialize every the kinetic species
   const unsigned num_kin_name = kin_name.size();
   if (!(_num_kin == num_kin_name && _num_kin == kin_initial_moles.size()))
-    mooseError("Initial mole number must be provided for each kinetic species");
+    mooseError("Initial mole number must be provided for each kinetic species ",
+               _num_kin,
+               " ",
+               num_kin_name,
+               " ",
+               kin_initial_moles.size());
   for (const auto & name_index : _mgd.kin_species_index)
   {
     const unsigned ind = std::distance(
@@ -336,83 +342,6 @@ GeochemicalSystem::computeConsistentConfiguration()
   computeBulk(_bulk_moles_old);
   computeFreeMineralMoles(_basis_molality);
   computeSorbingSurfaceArea(_sorbing_surface_area);
-}
-
-void
-GeochemicalSystem::computeKineticRates(std::vector<Real> & kin_rates,
-                                       DenseMatrix<Real> & dkin_rates) const
-{
-  std::fill(kin_rates.begin(), kin_rates.end(), 0.0);
-  dkin_rates.resize(_num_kin, _num_basis + _num_surface_pot + _num_kin);
-  for (const auto & rd : _mgd.kin_rate)
-  {
-    const unsigned kin = rd.kinetic_species_index;
-    Real rate = rd.description.intrinsic_rate_constant;
-    rate *= rd.description.area_quantity;
-    if (rd.description.multiply_by_mass)
-      rate *= _kin_moles[kin] * _mgd.kin_species_molecular_weight[kin];
-    for (unsigned i = 0; i < _num_basis; ++i)
-    {
-      if (rd.promoting_indices[i] == 0.0)
-        continue;
-      if (_mgd.basis_species_gas[i] || _mgd.basis_species_name[i] == "H+" ||
-          _mgd.basis_species_name[i] == "OH-")
-        rate *= std::pow(_basis_activity[i], rd.promoting_indices[i]);
-      else
-        rate *= std::pow(_basis_molality[i], rd.promoting_indices[i]);
-    }
-    for (unsigned j = 0; j < _num_eqm; ++j)
-    {
-      const unsigned index = _num_basis + j;
-      if (rd.promoting_indices[index] == 0.0)
-        continue;
-      if (_mgd.eqm_species_gas[j] || _mgd.eqm_species_name[j] == "H+" ||
-          _mgd.eqm_species_name[j] == "OH-")
-        rate *= std::pow(getEquilibriumActivity(j), rd.promoting_indices[index]);
-      else
-        rate *= std::pow(_eqm_molality[j], rd.promoting_indices[index]);
-    }
-    const Real ap_over_k = std::pow(10.0, log10KineticActivityProduct(kin) - getKineticLog10K(kin));
-    rate *= std::pow(std::abs(1.0 - std::pow(ap_over_k, rd.description.theta)), rd.description.eta);
-    rate *= std::exp(rd.description.activation_energy / GeochemistryConstants::GAS_CONSTANT *
-                     (rd.description.one_over_T0 -
-                      1.0 / (_temperature + GeochemistryConstants::CELSIUS_TO_KELVIN)));
-    if (ap_over_k > 1.0)
-      rate = -rate;
-    kin_rates[kin] += rate;
-
-    if (rd.description.multiply_by_mass)
-      dkin_rates(kin, _num_basis + _num_surface_pot + kin) += rate / _kin_moles[kin];
-    for (unsigned i = 0; i < _num_basis; ++i)
-    {
-      if (rd.promoting_indices[i] == 0.0)
-        continue;
-      if (_mgd.basis_species_gas[i] || _mgd.basis_species_name[i] == "H+" ||
-          _mgd.basis_species_name[i] == "OH-")
-        continue;
-      else
-        dkin_rates(kin, i) += rd.promoting_indices[i] * rate / _basis_molality[i];
-    }
-    for (unsigned j = 0; j < _num_eqm; ++j)
-    {
-      const unsigned index = _num_basis + j;
-      if (rd.promoting_indices[index] == 0.0)
-        continue;
-      if (_mgd.eqm_species_gas[j] || _mgd.eqm_species_name[j] == "H+" ||
-          _mgd.eqm_species_name[j] == "OH-")
-        continue;                               // derivatives of activity are ignored
-      for (unsigned i = 1; i < _num_basis; ++i) // deriv of water activity is ignored
-        if (!_basis_activity_known[i] && _mgd.eqm_stoichiometry(j, i) != 0.0)
-        {
-          // basis_activity_known=true for all minerals and gases and basis species with
-          // user-specified activity.  derivatives of activity are ignored
-          const Real deqmj_dbasisi =
-              _mgd.eqm_stoichiometry(j, i) * _eqm_molality[j] / _basis_molality[i];
-          dkin_rates(kin, i) +=
-              rd.promoting_indices[index] * rate / _eqm_molality[j] * deqmj_dbasisi;
-        }
-    }
-  }
 }
 
 unsigned
@@ -2241,4 +2170,74 @@ GeochemicalSystem::updateOldWithCurrent(const DenseVector<Real> & mole_additions
 
   // It is possible that the user would also like to enforceChargeBalance() now, and that is fine -
   // there will be no negative consequences
+}
+
+void
+GeochemicalSystem::setKineticRates(Real dt,
+                                   DenseVector<Real> & mole_additions,
+                                   DenseMatrix<Real> & dmole_additions)
+{
+  if (_num_kin == 0)
+    return;
+
+  // check sizes
+  const unsigned tot = mole_additions.size();
+  if (!(tot == _num_kin + _num_basis && dmole_additions.m() == tot && dmole_additions.n() == tot))
+    mooseError("setKineticRates: incorrectly sized additions: ",
+               tot,
+               " ",
+               dmole_additions.m(),
+               " ",
+               dmole_additions.n());
+
+  // zero the relevant slots
+  for (unsigned kin = 0; kin < _num_kin; ++kin)
+  {
+    const unsigned ind = kin + _num_basis;
+    mole_additions(ind) = 0.0;
+    for (unsigned i = 0; i < tot; ++i)
+      dmole_additions(ind, i) = 0.0;
+  }
+
+  // construct eqm_activity for species that we need
+  for (unsigned j = 0; j < _num_eqm; ++j)
+    if (_mgd.eqm_species_gas[j] || _mgd.eqm_species_name[j] == "H+" ||
+        _mgd.eqm_species_name[j] == "OH-")
+      _eqm_activity[j] = getEquilibriumActivity(j);
+
+  // calculate the rates and put into appropriate slots
+  Real rate;
+  Real drate_dkin;
+  std::vector<Real> drate_dmol(_num_basis);
+  for (const auto & krd : _mgd.kin_rate)
+  {
+    const unsigned kin = krd.kinetic_species_index;
+    GeochemistryKineticRateCalculator::calculateRate(krd.promoting_indices,
+                                                     krd.description,
+                                                     _mgd.basis_species_name,
+                                                     _mgd.basis_species_gas,
+                                                     _basis_molality,
+                                                     _basis_activity,
+                                                     _basis_activity_known,
+                                                     _mgd.eqm_species_name,
+                                                     _mgd.eqm_species_gas,
+                                                     _eqm_molality,
+                                                     _eqm_activity,
+                                                     _mgd.eqm_stoichiometry,
+                                                     _kin_moles[kin],
+                                                     _mgd.kin_species_molecular_weight[kin],
+                                                     _kin_log10K[kin],
+                                                     log10KineticActivityProduct(kin),
+                                                     _mgd.kin_stoichiometry,
+                                                     kin,
+                                                     _temperature,
+                                                     rate,
+                                                     drate_dkin,
+                                                     drate_dmol);
+    const unsigned ind = kin + _num_basis;
+    mole_additions(ind) -= rate * dt;
+    dmole_additions(ind, ind) -= drate_dkin * dt;
+    for (unsigned i = 0; i < _num_basis; ++i)
+      dmole_additions(ind, i) -= drate_dmol[i] * dt;
+  }
 }

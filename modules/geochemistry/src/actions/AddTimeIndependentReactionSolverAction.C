@@ -119,7 +119,8 @@ AddTimeIndependentReactionSolverAction::act()
     params.set<Real>("max_initial_residual") = getParam<Real>("max_initial_residual");
     params.set<Real>("swap_threshold") = getParam<Real>("swap_threshold");
     params.set<unsigned>("max_swaps_allowed") = getParam<unsigned>("max_swaps_allowed");
-    params.set<unsigned>("ramp_max_ionic_strength") = getParam<unsigned>("ramp_max_ionic_strength");
+    params.set<unsigned>("ramp_max_ionic_strength_initial") =
+        getParam<unsigned>("ramp_max_ionic_strength_initial");
     params.set<bool>("ionic_str_using_basis_only") = getParam<bool>("ionic_str_using_basis_only");
     params.set<Real>("temperature") = getParam<Real>("temperature");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};

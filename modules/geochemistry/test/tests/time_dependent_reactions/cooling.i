@@ -8,7 +8,7 @@
   constraint_species = "H2O Muscovite Na+ Cl- Albite  Maximum Quartz"
   constraint_value = "  1.0 0.03553   1.0 1.0 0.19986 0.09196 0.08815"
   constraint_meaning = "kg_solvent_water free_moles_mineral_species moles_bulk_species moles_bulk_species free_moles_mineral_species free_moles_mineral_species free_moles_mineral_species"
-  ramp_max_ionic_strength = 0
+  ramp_max_ionic_strength_initial = 0
   close_system_at_time = 0
   initial_temperature = 300
   temperature = temperature

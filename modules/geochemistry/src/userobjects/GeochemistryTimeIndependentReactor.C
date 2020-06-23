@@ -43,7 +43,9 @@ GeochemistryTimeIndependentReactor::GeochemistryTimeIndependentReactor(
             _max_swaps_allowed,
             getParam<std::vector<std::string>>("prevent_precipitation"),
             getParam<Real>("max_ionic_strength"),
-            getParam<unsigned>("ramp_max_ionic_strength"))
+            getParam<unsigned>("ramp_max_ionic_strength_initial"),
+            false),
+    _mole_additions(DenseVector<Real>(_num_basis, 0.0))
 {
 }
 
@@ -67,9 +69,9 @@ GeochemistryTimeIndependentReactor::execute()
 void
 GeochemistryTimeIndependentReactor::initialSetup()
 {
-  DenseVector<Real> mole_additions(_egs.getNumInBasis());
-  DenseMatrix<Real> dmole_additions(_egs.getNumInBasis(), _egs.getNumInBasis());
-  _solver.solveSystem(_solver_output, _tot_iter, _abs_residual, mole_additions, dmole_additions);
+  DenseMatrix<Real> dmole_additions(_num_basis, _num_basis);
+  _solver.solveSystem(
+      _solver_output, _tot_iter, _abs_residual, 0.0, _mole_additions, dmole_additions);
 }
 
 const GeochemicalSystem &
@@ -100,4 +102,16 @@ Real
 GeochemistryTimeIndependentReactor::getSolverResidual(const Point & /*point*/) const
 {
   return _abs_residual;
+}
+
+const DenseVector<Real> &
+GeochemistryTimeIndependentReactor::getMoleAdditions(unsigned /*node_id*/) const
+{
+  return _mole_additions;
+}
+
+const DenseVector<Real> &
+GeochemistryTimeIndependentReactor::getMoleAdditions(const Point & /*point*/) const
+{
+  return _mole_additions;
 }

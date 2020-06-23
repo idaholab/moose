@@ -10,7 +10,7 @@
   constraint_meaning = "kg_solvent_water free_moles_mineral_species activity moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species fugacity"
   source_species_names = "Pyrite"
   source_species_rates = 8.336E-3 # = 1g(pyrite)/second, 1g(pyrite) = 8.34E-3
-  ramp_max_ionic_strength = 0
+  ramp_max_ionic_strength_initial = 0
   close_system_at_time = 0
   remove_fixed_activity_name = "H+"
   remove_fixed_activity_time = '0 '

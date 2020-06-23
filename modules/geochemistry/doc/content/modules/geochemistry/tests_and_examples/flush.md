@@ -16,7 +16,7 @@ The initial configuration is given by:
 
 - 1 molal Na$^{+}$;
 - 0.2 molal Ca$^{2+}$;
-- 1 molal H$^{+}$;
+- 1 molal Cl$^{-}$ (charge-balance species);
 - $T=70^{\circ}$C;
 - pH $=5$.
 
@@ -30,33 +30,46 @@ The initial minerals are:
 
 In addition the following minerals are prevented from precipitating: Albite, Albite-high, Albite-low, Maximum Microcline, K-feldspar, Sanidine-high.
 
+This is run in MOOSE using a 2-stage approach.  The first stage finds the initial equilibrium configuration while preventing precipitation of any minerals (apart from those mentioned above).  The most important is the free molality of SiO2(aq) that is in equilibrium with the mineral assemblage given above, which is required for the second stage.  The first stage is a time-independent simulation:
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing_equilibrium_at70degC.i
+
 ### Case 1
 
-Ten times, over the course of 20 days, the following is flushed through the system:
+Over the course of 20 days, the following is flushed through the system:
 
-- 0.1$\,$kg of H$_{2}$O;
-- 0.05$\,$moles of Na$^{+}$;
-- 0.05$\,$moles of OH$^{-}$.
+- 10$\,$kg of H$_{2}$O;
+- 5$\,$moles of Na$^{+}$;
+- 5$\,$moles of OH$^{-}$.
+
+The MOOSE simulation is:
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing_case1.i
 
 ### Case 2
 
-Ten times, over the course of 20 days, the following is flushed through the system:
+Over the course of 20 days, the following is flushed through the system:
 
-- 0.1$\,$kg of H$_{2}$O;
-- 0.05$\,$moles of Na$^{+}$;
-- 0.025$\,$moles of CO$_{3}^{2-}$.
+- 10$\,$kg of H$_{2}$O;
+- 5$\,$moles of Na$^{+}$;
+- 2.5$\,$moles of CO$_{3}^{2-}$.
 
-I believe [!cite](bethke_2007) performs this by removing all OH$^{-}$ from the final result of Case 1 and replacing it with 0.25$\,$moles of CO$_{3}^{2-}$.
+The MOOSE simulation differs only in the `source_species`:
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing_case2.i start=source_species_names end=[]
+
 
 ### Case 3
 
-Ten times, over the course of 20 days, the following is flushed through the system:
+Over the course of 20 days, the following is flushed through the system:
 
-- 0.1$\,$kg of H$_{2}$O;
-- 0.025$\,$moles of Na$_{2}$O;
-- 0.025$\,$moles of SiO$_{2}$(aq).
+- 10$\,$kg of H$_{2}$O;
+- 2.5$\,$moles of Na$_{2}$O;
+- 2.5$\,$moles of SiO$_{2}$(aq).
 
-I believe [!cite](bethke_2007) performs this by removing all CO$_{3}^{-}$ and Na${+}$ from the final result of Case 2 and replacing it with 0.025$\,$moles of Na$_{2}$O and 0.025$\,$moles of SiO$_{2}$(aq).
+The MOOSE simulation differs only in the `source_species`:
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/flushing_case3.i start=source_species_names end=[]
 
 ### Results
 

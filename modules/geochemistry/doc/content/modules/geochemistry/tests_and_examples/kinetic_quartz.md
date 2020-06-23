@@ -17,7 +17,12 @@ It is assumed that:
 - the rate constant is $k=2\times 10^{-15}\,$mol.cm$^{-2}$.s$^{-1}$;
 - the initial concentration of SiO$_{2}$(aq) is $10^{-6}\,$mmolal.
 
-[!cite](bethke_2007) presents the results in Figure 16.1 for a reaction time of 5 days.  The MOOSE results are ????
+[!cite](bethke_2007) presents the results in Figure 16.1 for a reaction time of 5 days.
+
+The MOOSE input file is:
+
+!listing modules/geochemistry/test/tests/kinetics/quartz_dissolution.i
+
 
 
 !bibtex bibliography

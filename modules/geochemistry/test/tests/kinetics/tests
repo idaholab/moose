@@ -1,0 +1,38 @@
+[Tests]
+  [./quartz_dissolution]
+    type = 'RunApp'
+    input = 'quartz_dissolution.i'
+
+    expect_out = 'Quartz;  moles'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions such as dissolution"
+    issues = '#15330'
+    design = 'kinetic_quartz.md'
+  [../]
+  [./kinetic_albite]
+    type = 'RunApp'
+    input = 'kinetic_albite.i'
+
+    expect_out = 'Albite;  moles'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with promoting species"
+    issues = '#15330'
+    design = 'kinetic_albite.md'
+  [../]
+  [./quartz_equilibrium_at300degC]
+    type = 'RunApp'
+    input = 'quartz_equilibrium_at300degC.i'
+
+    expect_out = 'Temperature = 300'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    issues = '#15330'
+    design = 'kinetic_quartz_arrhenius.md'
+  [../]
+  [./quartz_deposition]
+    type = 'RunApp'
+    input = 'quartz_deposition.i'
+
+    expect_out = 'Temperature = 25'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    issues = '#15330'
+    design = 'kinetic_quartz_arrhenius.md'
+  [../]
+[]

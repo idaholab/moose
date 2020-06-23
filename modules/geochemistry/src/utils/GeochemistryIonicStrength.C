@@ -95,12 +95,6 @@ GeochemistryIonicStrength::stoichiometricIonicStrength(
       if (mgd.kin_species_charge[i] != 0.0)
         ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i] /
                           basis_species_molality[0];
-      else
-      {
-        for (unsigned j = 0; j < num_basis; ++j)
-          ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) * kin_species_molality[i] *
-                            mgd.kin_stoichiometry(i, j) / basis_species_molality[0];
-      }
   }
 
   return std::max(0.0, std::min(_max_stoichiometric_ionic_strength, 0.5 * ionic_strength));

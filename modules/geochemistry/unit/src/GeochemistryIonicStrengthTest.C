@@ -229,9 +229,9 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
 
   std::vector<Real> kin_m(3);
   kin_m[mgd.kin_species_index.at("Calcite_asdf")] = -1.1;
-  gold_ionic_str += -1.1 * (2 * 4 + 1 - 1);
+  gold_ionic_str += 0.0;
   kin_m[mgd.kin_species_index.at("CH4(aq)")] = -2.2;
-  gold_ionic_str += -2.2 * (1 + 1);
+  gold_ionic_str += 0.0;
   kin_m[mgd.kin_species_index.at(">(s)FeOCa+")] = -3.3;
   gold_ionic_str += -3.3 * (1);
 

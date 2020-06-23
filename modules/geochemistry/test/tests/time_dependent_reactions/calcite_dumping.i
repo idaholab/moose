@@ -8,7 +8,7 @@
   constraint_species = "H2O Calcite Ca++ Na+ Cl-  H+"
   constraint_value = "  1.0 0.2708  0.01 0.1 0.11 1E-8"
   constraint_meaning = "kg_solvent_water free_moles_mineral_species moles_bulk_species moles_bulk_species moles_bulk_species activity"
-  ramp_max_ionic_strength = 10
+  ramp_max_ionic_strength_initial = 10
   close_system_at_time = 0
   remove_fixed_activity_name = 'H+'
   remove_fixed_activity_time = 0

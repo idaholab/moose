@@ -116,11 +116,12 @@ AddGeochemistrySolverAction::validParams()
       "configuration.  Usually only a handful of swaps are used: this parameter prevents endless "
       "cyclic swapping that prevents the algorithm from progressing");
   params.addParam<unsigned>(
-      "ramp_max_ionic_strength",
+      "ramp_max_ionic_strength_initial",
       20,
       "The number of iterations over which to progressively increase the maximum ionic strength "
-      "(from zero to max_ionic_strength).  Increasing this can help in convergence of the Newton "
-      "process, at the cost of spending more time finding the aqueous configuration.");
+      "(from zero to max_ionic_strength) during the initial equilibration.  Increasing this can "
+      "help in convergence of the Newton process, at the cost of spending more time finding the "
+      "aqueous configuration.");
   params.addParam<bool>(
       "ionic_str_using_basis_only",
       false,
@@ -198,6 +199,16 @@ AddGeochemistrySolverAction::validParams()
                         true,
                         "Add AuxVariable, called solution_temperature, that records the "
                         "temperature of the aqueous solution in degC");
+  params.addParam<bool>(
+      "add_aux_kinetic_moles",
+      true,
+      "Add AuxVariables that record the number of moles for all kinetic species.  These are called "
+      "moles_name where 'name' is the species name.");
+  params.addParam<bool>("add_aux_kinetic_additions",
+                        true,
+                        "Add AuxVariables that record the rate-of-change (-reaction_rate * dt) for "
+                        "all kinetic species.  These are called "
+                        "mol_change_name where 'name' is the species name.");
   params.addClassDescription("Base class for an Action that sets up a reaction solver.  This class "
                              "adds a GeochemistryConsoleOutput and AuxVariables corresponding to "
                              "molalities, etc.  Derived classes will create the solver.");
@@ -281,6 +292,20 @@ AddGeochemistrySolverAction::act()
       if (getParam<bool>("add_aux_bulk_moles"))
         addAuxSpecies(
             "bulk_moles_" + mgd.eqm_species_name[j], mgd.eqm_species_name[j], "bulk_moles");
+    }
+    // add the kinetic aux variables
+    const unsigned num_kin = mgd.kin_species_name.size();
+    for (unsigned k = 0; k < num_kin; ++k)
+    {
+      if (getParam<bool>("add_aux_free_cm3") && mgd.kin_species_mineral[k])
+        addAuxSpecies("free_cm3_" + mgd.kin_species_name[k], mgd.kin_species_name[k], "free_cm3");
+      if (getParam<bool>("add_aux_free_mg") && mgd.kin_species_mineral[k])
+        addAuxSpecies("free_mg_" + mgd.kin_species_name[k], mgd.kin_species_name[k], "free_mg");
+      if (getParam<bool>("add_aux_kinetic_moles"))
+        addAuxSpecies("moles_" + mgd.kin_species_name[k], mgd.kin_species_name[k], "kinetic_moles");
+      if (getParam<bool>("add_aux_kinetic_additions"))
+        addAuxSpecies(
+            "mol_change_" + mgd.kin_species_name[k], mgd.kin_species_name[k], "kinetic_additions");
     }
 
     // add surface stuff

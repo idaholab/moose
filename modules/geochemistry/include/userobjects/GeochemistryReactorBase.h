@@ -57,6 +57,22 @@ public:
    */
   virtual Real getSolverResidual(const Point & point) const = 0;
 
+  /**
+   * @return the mole additions (the first num_basis of these are additions to the bulk composition
+   * of the equilibrium system, the last num_kin of these are -dt*kinetic_reaction_rate, ie
+   * dt*dissolution_rate)
+   * @param node_id the node ID
+   */
+  virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const = 0;
+
+  /**
+   * @return the mole additions (the first num_basis of these are additions to the bulk composition
+   * of the equilibrium system, the last num_kin of these are -dt*kinetic_reaction_rate, ie
+   * dt*dissolution_rate)
+   * @param point the point of interest
+   */
+  virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const = 0;
+
 protected:
   /// my copy of the underlying ModelGeochemicalDatabase
   ModelGeochemicalDatabase _mgd;

@@ -32,6 +32,8 @@ public:
   virtual unsigned getSolverIterations(const Point & point) const override;
   virtual Real getSolverResidual(const Point & point) const override;
   virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
+  virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const override;
+  virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const override;
 
 protected:
   const Real _temperature;
@@ -39,4 +41,6 @@ protected:
   GeochemicalSystem _egs;
   /// The solver
   GeochemicalSolver _solver;
+  /// mole additions: these are always zero but are used in getMoleAdditions and the solve
+  DenseVector<Real> _mole_additions;
 };

@@ -12,7 +12,7 @@
   source_species_names = "H2O"
   source_species_rates = "-1.0" # 1kg H2O = 55.51 moles, each time step removes 1 mole
   max_ionic_strength = 100
-  ramp_max_ionic_strength = 0
+  ramp_max_ionic_strength_initial = 0
   mode = mode
   execute_console_output_on = 'initial final'
 []

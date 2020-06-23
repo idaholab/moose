@@ -17,12 +17,17 @@ It is assumed that:
   - $10^{-6}$ molal SiO$_{2}$(aq),
   - $10^{-6}$ molal Al$^{3+}$;
 - the temperature is 70$^{\circ}$C;
-- initially 500$\,$g of "albite low" is added to the water;
+- initially 250$\,$g of "albite low" is added to the water;
 - the specific surface area is $A_{s} = 1000\,$cm$^{2}$/g(albite low);
 - the rate constant is $k=6.3\times 10^{-13}\,$mol.cm$^{-2}$.s$^{-1}$;
 - the pH is fixed at 1.5
 
-[!cite](bethke_2007) presents the results in Figure 16.1 for a simulation time of 30 days.  The MOOSE results are ????
+[!cite](bethke_2007) presents the results in Figure 16.1 for a simulation time of 30 days.
+
+The MOOSE input file is:
+
+!listing modules/geochemistry/test/tests/kinetics/kinetic_albite.i
+
 
 
 !bibtex bibliography
