@@ -49,7 +49,7 @@ void
 SamplerSolutionTransfer::initialSetup()
 {
   // Checking if the subapplication has the requested variables
-  const std::vector<std::string>& var_names = _trainer->varNames();
+  const std::vector<std::string>& var_names = _trainer->getVarNames();
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
@@ -102,7 +102,7 @@ SamplerSolutionTransfer::finalizeFromMultiapp()
 void
 SamplerSolutionTransfer::execute()
 {
-  const std::vector<std::string>& var_names = _trainer->varNames();
+  const std::vector<std::string>& var_names = _trainer->getVarNames();
 
   switch(_direction)
   {

@@ -40,6 +40,8 @@ protected:
 
   void computeResidualBatch();
 
+  bool _snapshot_generation;
+
 private:
 
 };

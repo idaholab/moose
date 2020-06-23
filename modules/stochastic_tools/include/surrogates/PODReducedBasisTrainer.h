@@ -31,9 +31,14 @@ public:
 
   void addSnapshot(std::string var_name, DenseVector<Real>& snapshot);
 
-  const std::vector<std::string>& varNames() const
+  const std::vector<std::string>& getVarNames() const
   {
     return _var_names;
+  }
+
+  const std::vector<std::string>& geTagNames() const
+  {
+    return _tag_names;
   }
 
   unsigned int getBaseSize(std::string var_name)
@@ -57,6 +62,8 @@ protected:
   void computeBasisVectors();
 
   std::vector<std::string> _var_names;
+
+  std::vector<std::string> _tag_names;
 
   /// The snapshots contained for this problem
   std::map<std::string, std::vector<DenseVector<Real>>> _snapshots;
