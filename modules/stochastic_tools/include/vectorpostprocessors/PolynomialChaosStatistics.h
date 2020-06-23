@@ -26,12 +26,12 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// Reference to PolynomialChaos
-  const PolynomialChaos & _pc_uo;
   /// The selected statistics to compute
   const MultiMooseEnum & _type;
   /// Vector containing types of statistical values
   VectorPostprocessorValue & _stat_type;
-  /// Vector containing statistical values
-  VectorPostprocessorValue & _stats;
+  /// Pointers to PolynomialChaos
+  std::vector<const PolynomialChaos *> _pc_uo;
+  /// Vectors containing statistical values
+  std::vector<VectorPostprocessorValue *> _stats;
 };

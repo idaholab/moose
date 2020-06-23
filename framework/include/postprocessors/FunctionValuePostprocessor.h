@@ -36,5 +36,5 @@ public:
 protected:
   const Function & _function;
   const Point & _point;
-  const Real _scale_factor;
+  const Real & _scale_factor;
 };

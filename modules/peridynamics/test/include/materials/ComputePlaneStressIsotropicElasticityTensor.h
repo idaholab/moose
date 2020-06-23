@@ -20,4 +20,6 @@ public:
   static InputParameters validParams();
 
   ComputePlaneStressIsotropicElasticityTensor(const InputParameters & parameters);
+
+  virtual void residualSetup() override;
 };

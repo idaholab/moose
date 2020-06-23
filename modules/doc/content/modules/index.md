@@ -28,3 +28,9 @@ modules are organized so that your application can link against only those which
 
 !alert warning
 No export controlled physics (e.g., neutronics) should be put into the modules.
+
+## Combined Examples
+
+Below contains a list of examples that utilize a combination of the physics modules listed above.
+
+- [modules/combined/examples/stm_thermomechanics.md]
