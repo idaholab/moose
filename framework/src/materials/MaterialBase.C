@@ -163,14 +163,6 @@ MaterialBase::getOutputs()
 }
 
 void
-MaterialBase::computeSubdomainProperties()
-{
-  mooseError("MaterialBase::computeSubdomainQpProperties in Material '",
-             name(),
-             "' needs to be implemented");
-}
-
-void
 MaterialBase::subdomainSetup()
 {
   mooseError("MaterialBase::subdomainSetup in Material'", name(), "' needs to be implemented");

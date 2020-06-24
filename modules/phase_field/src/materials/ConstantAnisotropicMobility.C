@@ -22,6 +22,7 @@ ConstantAnisotropicMobilityTempl<is_ad>::validParams()
                                                 "Name of the mobility tensor property to generate");
   params.addRequiredRangeCheckedParam<std::vector<Real>>(
       "tensor", "tensor_size=9", "Tensor values");
+  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 
@@ -29,21 +30,19 @@ template <bool is_ad>
 ConstantAnisotropicMobilityTempl<is_ad>::ConstantAnisotropicMobilityTempl(
     const InputParameters & parameters)
   : Material(parameters),
-    _M_values(getParam<std::vector<Real>>("tensor")),
-    _M_name(getParam<MaterialPropertyName>("M_name")),
-    _M(declareGenericProperty<RealTensorValue, is_ad>(_M_name))
+    _mobility_values(getParam<std::vector<Real>>("tensor")),
+    _mobility_name(getParam<MaterialPropertyName>("M_name")),
+    _mobility(declareGenericProperty<RealTensorValue, is_ad>(_mobility_name))
 {
 }
 
 template <bool is_ad>
 void
-ConstantAnisotropicMobilityTempl<is_ad>::initialSetup()
+ConstantAnisotropicMobilityTempl<is_ad>::computeQpProperties()
 {
-  _M.resize(_fe_problem.getMaxQps());
-  for (unsigned int qp = 0; qp < _M.size(); ++qp)
-    for (unsigned int a = 0; a < LIBMESH_DIM; ++a)
-      for (unsigned int b = 0; b < LIBMESH_DIM; ++b)
-        _M[qp](a, b) = _M_values[a * 3 + b];
+  for (unsigned int a = 0; a < LIBMESH_DIM; ++a)
+    for (unsigned int b = 0; b < LIBMESH_DIM; ++b)
+      _mobility[_qp](a, b) = _mobility_values[a * 3 + b];
 }
 
 template class ConstantAnisotropicMobilityTempl<false>;

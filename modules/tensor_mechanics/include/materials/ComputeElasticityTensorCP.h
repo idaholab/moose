@@ -25,7 +25,7 @@ public:
   ComputeElasticityTensorCP(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() override;
 
   virtual void assignEulerAngles();
 

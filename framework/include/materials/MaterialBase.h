@@ -180,11 +180,6 @@ public:
 
 protected:
   /**
-   * Evaluate material properties on subdomain
-   */
-  virtual void computeSubdomainProperties();
-
-  /**
    * Users must override this method.
    */
   virtual void computeQpProperties();

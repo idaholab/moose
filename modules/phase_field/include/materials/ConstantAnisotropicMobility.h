@@ -24,15 +24,14 @@ public:
   ConstantAnisotropicMobilityTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties(){};
-  virtual void initialSetup();
+  virtual void computeQpProperties();
 
   /// raw tensor values as passed in from the input file
-  std::vector<Real> _M_values;
+  const std::vector<Real> & _mobility_values;
 
   /// Name of the mobility tensor material property
-  MaterialPropertyName _M_name;
-  GenericMaterialProperty<RealTensorValue, is_ad> & _M;
+  const MaterialPropertyName & _mobility_name;
+  GenericMaterialProperty<RealTensorValue, is_ad> & _mobility;
 };
 
 typedef ConstantAnisotropicMobilityTempl<false> ConstantAnisotropicMobility;

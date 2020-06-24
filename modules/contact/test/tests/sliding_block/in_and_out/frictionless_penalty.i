@@ -136,6 +136,7 @@
     block = '1 2'
     youngs_modulus = 1e6
     poissons_ratio = 0.3
+    constant_on = SUBDOMAIN
   [../]
   [./stress]
     type = ComputeFiniteStrainElasticStress
