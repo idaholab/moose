@@ -1,92 +1,60 @@
-#include <iostream>
-#include <Eigen/Dense>
-#include <cmath>
-#include "SubChannelSolver.h"
-#include "SinglePhaseFluidProperties.h"
-#include "SolutionHandle.h"
 
-using namespace Eigen;
+#include "SubChannel1PhaseProblem.h"
+#include "SystemBase.h"
+#include "libmesh/petsc_vector.h"
+#include <petscdm.h>
+#include <petscdmda.h>
+#include <petscksp.h>
+#include <petscsys.h>
+#include <petscvec.h>
 
-registerMooseObject("SubChannelApp", SubChannelSolver);
+registerMooseObject("SubChannelApp", SubChannel1PhaseProblem);
 
+template <>
 InputParameters
-SubChannelSolver::validParams()
+validParams<SubChannel1PhaseProblem>()
 {
-  InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredCoupledVar("mdot", "axial mass flow rate");
-  params.addRequiredCoupledVar("SumWij", "Sum of cross flows for each channel");
-  params.addRequiredCoupledVar("SumWijh", "Sum of enthaly crossflow flux for each channel");
-  params.addRequiredCoupledVar("SumWijPrimeDhij",
-                               "Sum of enthaly turbulent crossflow flux for each channel");
-  params.addRequiredCoupledVar("SumWijPrimeDUij",
-                               "Sum of velocity turbulent crossflow flux for each channel");
-  params.addRequiredCoupledVar("P", "pressure");
-  params.addRequiredCoupledVar("h", "specific enthalpy");
-  params.addRequiredCoupledVar("T", "fluid temperature");
-  params.addRequiredCoupledVar("rho", "density");
-  params.addRequiredCoupledVar("flow_area", "");
-  params.addRequiredCoupledVar("cross_flow_area", "");
-  params.addRequiredCoupledVar("wetted_perimeter", "");
-  params.addRequiredCoupledVar("q_prime", "linear heat rate [W/m]");
+  InputParameters params = validParams<ExternalProblem>(); //read in values from input file
   params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
   params.addRequiredParam<Real>("T_in", 566.3, "Inlet coolant temperature in [K]");
   params.addRequiredParam<Real>("P_out", "Outlet coolant pressure in [Pa]");
-  params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
 }
 
-SubChannelSolver::SubChannelSolver(const InputParameters & params)
-  : GeneralUserObject(params),
-    Coupleable(this, "true"),
-    _mdot_var(*getFieldVar("mdot", 0)),
-    _SumWij_var(*getFieldVar("SumWij", 0)),
-    _SumWijh_var(*getFieldVar("SumWijh", 0)),
-    _SumWijPrimeDhij_var(*getFieldVar("SumWijPrimeDhij", 0)),
-    _SumWijPrimeDUij_var(*getFieldVar("SumWijPrimeDUij", 0)),
-    _P_var(*getFieldVar("P", 0)),
-    _h_var(*getFieldVar("h", 0)),
-    _T_var(*getFieldVar("T", 0)),
-    _rho_var(*getFieldVar("rho", 0)),
-    _S_flow_var(*getFieldVar("flow_area", 0)),
-    _S_crossflow_var(*getFieldVar("cross_flow_area", 0)),
-    _w_perim_var(*getFieldVar("wetted_perimeter", 0)),
-    _q_prime_var(*getFieldVar("q_prime", 0)),
-    _mflux_in(getParam<Real>("mflux_in")),
-    _T_in(getParam<Real>("T_in")),
-    _P_out(getParam<Real>("P_out")),
-    _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
+SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
+  : ExternalProblem(params)
 {
+  // Constructor initialization for single phase subchannel solver
+  _mflux_in(getParam<Real>("mflux_in")),
+  _T_in(getParam<Real>("T_in")),
+  _P_out(getParam<Real>("P_out")),
+}
+
+SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
+{
+ // Implement destructor
 }
 
 void
-SubChannelSolver::initialize()
-{
-  _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
-  if (!_mesh)
-  {
-    mooseError("Must use a SubChannelMesh");
-  }
-}
-
-void
-SubChannelSolver::execute()
+SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
 
-  // Get handles for each variable's part of the solution vector.
-  auto mdot_soln = SolutionHandle(_mdot_var);
-  auto SumWij_soln = SolutionHandle(_SumWij_var);
-  auto SumWijh_soln = SolutionHandle(_SumWijh_var);
-  auto SumWijPrimeDhij_soln = SolutionHandle(_SumWijPrimeDhij_var);
-  auto SumWijPrimeDUij_soln = SolutionHandle(_SumWijPrimeDUij_var);
-  auto P_soln = SolutionHandle(_P_var);
-  auto h_soln = SolutionHandle(_h_var);
-  auto T_soln = SolutionHandle(_T_var);
-  auto rho_soln = SolutionHandle(_rho_var);
-  auto S_flow_soln = SolutionHandle(_S_flow_var);
-  auto S_crossflow_soln = SolutionHandle(_S_crossflow_var);
-  auto w_perim_soln = SolutionHandle(_w_perim_var);
-  auto q_prime_soln = SolutionHandle(_q_prime_var);
+  const SinglePhaseFluidProperties & fp = getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
+
+  auto mdot_soln = SolutionHandle(getVariable(0, "mdot"));
+  auto SumWij_soln = SolutionHandle(getVariable(0, "SumWij"));
+  auto SumWijh_soln = SolutionHandle(getVariable(0, "SumWijh"));
+  auto SumWijPrimeDhij_soln = SolutionHandle(getVariable(0, "SumWijPrimeDhij"));
+  auto SumWijPrimeDUij_soln = SolutionHandle(getVariable(0, "SumWijPrimeDUij"));
+  auto P_soln = SolutionHandle(getVariable(0, "P"));
+  auto h_soln = SolutionHandle(getVariable(0, "h"));
+  auto T_soln = SolutionHandle(getVariable(0, "T"));
+  auto rho_soln = SolutionHandle(getVariable(0, "rho"));
+  auto S_flow_soln = SolutionHandle(getVariable(0, "S_flow"));
+  auto S_crossflow_soln = SolutionHandle(getVariable(0, "S_crossflow"));
+  auto w_perim_soln = SolutionHandle(getVariable(0, "w_perim"));
+  auto q_prime_soln = SolutionHandle(getVariable(0, "q_prime"));
 
   constexpr Real g_grav = 9.87; // m/sec^2
 
@@ -509,7 +477,10 @@ SubChannelSolver::execute()
   _console << "Finished executing subchannel solver\n";
 }
 
+
 void
-SubChannelSolver::finalize()
+SubChannel1PhaseProblem::syncSolutions(Direction direction)
 {
+#if LIBMESH_HAVE_PETSC
+#endif
 }
