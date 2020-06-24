@@ -20,7 +20,7 @@ GaussianProcessTester::validParams()
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
-  params.addClassDescription("Tool for sampling surrogate model.");
+  params.addClassDescription("Tool for sampling Gaussian Process surrogate models.");
   params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
   params += SamplerInterface::validParams();
   params.addRequiredParam<SamplerName>(
@@ -64,7 +64,7 @@ GaussianProcessTester::execute()
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
     Real std;
-    _mean_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data, &std);
+    _mean_vector[p - _sampler.getLocalRowBegin()] = _model.evaluate(data, std);
     _std_vector[p - _sampler.getLocalRowBegin()] = std;
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)

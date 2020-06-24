@@ -38,6 +38,7 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples"))
 {
+<<<<<<< HEAD
   const auto & model_names = getParam<std::vector<UserObjectName>>("model");
   _model.reserve(model_names.size());
   _value_vector.reserve(model_names.size());
@@ -47,6 +48,8 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
     _value_vector.push_back(&declareVector(nm));
   }
 
+=======
+>>>>>>> Added test cases #15482
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector.push_back(&declareVector("sample_p" + std::to_string(d)));
@@ -66,6 +69,7 @@ SurrogateTester::initialize()
 void
 SurrogateTester::execute()
 {
+  // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
