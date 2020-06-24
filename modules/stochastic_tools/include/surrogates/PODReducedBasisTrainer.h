@@ -17,6 +17,7 @@
 class PODReducedBasisTrainer : public SurrogateTrainer
 {
 public:
+
   static InputParameters validParams();
 
   PODReducedBasisTrainer(const InputParameters & parameters);
@@ -29,70 +30,90 @@ public:
 
   virtual void finalize() override;
 
+  /// Initializing the reduced operators.
   void initReducedOperators();
 
+  /// Adding a snapshot for a variable.
   void addSnapshot(unsigned int v_ind, DenseVector<Real>& snapshot);
 
-  void addToReducedOperator(unsigned int base_i, unsigned int tag_i, std::vector<DenseVector<Real>>& residual);
+  /// Adding the contribution of a residual to the reduced operators.
+  void addToReducedOperator(unsigned int base_i,
+                            unsigned int tag_i,
+                            std::vector<DenseVector<Real>>& residual);
 
-  const std::vector<std::string>& getVarNames() const
-  {
-    return _var_names;
-  }
 
-  const std::vector<std::string>& getTagNames() const
-  {
-    return _tag_names;
-  }
+  const std::vector<std::string>& getVarNames() const {return _var_names;}
 
-  unsigned int getBaseSize(unsigned int v_ind)
-  {
-    return _base[v_ind].size();
-  }
+  const std::vector<std::string>& getTagNames() const {return _tag_names;}
 
+  const std::vector<unsigned int>& getIndependent() const {return _independent;}
+
+  unsigned int getBaseSize(unsigned int v_ind) {return _base[v_ind].size();}
+
+  // Getting the overall base size, which is the sum of the individial bases.
+  unsigned int getSumBaseSize();
+
+  // Getting a basis vector for a given variable.
   const DenseVector<Real>& getBasisVector(unsigned int v_index, unsigned int base_i) const
   {
     return _base[v_index][base_i];
   }
 
-  unsigned int getSumBaseSize();
-
 protected:
 
-  void computeEigenDecomposition();
-
+  /// Computes the correlation matrices using the snapshots.
   void computeCorrelationMatrix();
 
+  /// Computes the eigen-decomposition of the stored correlation matrices.
+  void computeEigenDecomposition();
+
+  /// Computes the number of bases necessary for a given error indicator. This
+  /// needs a sorted vector as input.
+  unsigned int determineNumberOfModes(Real limit, std::vector<Real>& inp_vec);
+
+  /// Generates the basis vectors using the snapshots together with the
+  /// eigendecomposition of the correlation matrices
   void computeBasisVectors();
 
-  void printReducedOperators();
-
+  /// Vector containing the names of the variables we want to use for constructing
+  /// the surrogates.
   std::vector<std::string> _var_names;
 
+  /// Energy limits that define how many basis functions will be kept for each variable.
+  std::vector<Real> _en_limits;
+
+  /// Names of the tags that should be used to fetch residuals from the MultiApp.
   std::vector<std::string> _tag_names;
 
-  /// The snapshots contained for this problem
+  /// list of bools describing which tag is indepedent of the solution.
+  std::vector<unsigned int> _independent;
+
+  /// The snapshot containers for each variable.
   std::vector<std::vector<DenseVector<Real>>> _snapshots;
 
-  /// The reduced operators which will be assembled
-  std::vector<DenseMatrix<Real>> _red_operators;
-
-  /// The reduced basis for the variables
-  std::vector<std::vector<DenseVector<Real>>> _base;
-
-  /// The correlation matrices for the variables
+  /// The correlation matrices for the variables.
   std::vector<DenseMatrix<Real>> _corr_mx;
 
-  /// Vector containing the eigenvvalues of the correlation matrix
+  /// The eigenvalues of the correalation matrix for each variable.
   std::vector<DenseVector<Real>> _eigenvalues;
 
-  /// Matirx containing the eigenvectors of the correlation matrix
+  /// The eigenvectors of the correalation matrix for each variable.
   std::vector<DenseMatrix<Real>> _eigenvectors;
 
+  /// The reduced operators that should be transferred to the surrogate.
+  std::vector<DenseMatrix<Real>> _red_operators;
+
+  /// The reduced basis for the variables.
+  std::vector<std::vector<DenseVector<Real>>> _base;
+
+  /// Switch that tells if the object has already computed the necessary basis
+  /// vectors. This switch is used in execute() to determine if we want to compute
+  /// basis vectors or do something else.
   bool _base_completed;
 
 private:
 
-  /// True when _sampler data is distributed
-  // bool _values_distributed = false; // default to false; set in initialSetup
+  /// Printing the reduced operators on the terminal (for testing purposes).
+  void printReducedOperators();
+
 };

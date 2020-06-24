@@ -19,9 +19,8 @@ class SamplerFullSolveMultiApp;
 class StochasticResults;
 
 /**
- * Transfer Postprocessor from sub-applications to a VectorPostprocessor on the master application.
- *
- * This object transfers the distributed data to a StochasticResults object.
+ * Transfer solutions from sub-applications to a container in a Trainer.
+ * This object also transfers artificial solution vectors back to sub-applications.
  */
 class SamplerSolutionTransfer : public StochasticToolsTransfer
 {
@@ -32,13 +31,16 @@ public:
 
 protected:
 
+  /** Name of the trainer object which contains the container for the solutions
+   * of the subapp or contains the artificial solution vectors.
+   */
   std::string _trainer_name;
 
-  /// The trainer object to save the solution into
-  PODReducedBasisTrainer * _trainer = nullptr;
-  /**
-   * Traditional Transfer callback
+  /** The trainer object to save the solution vector into or to fetch the
+   * artificial solution vectors from.
    */
+  PODReducedBasisTrainer * _trainer = nullptr;
+
   virtual void execute() override;
 
   ///@{

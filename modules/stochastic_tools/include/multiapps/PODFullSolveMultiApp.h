@@ -27,19 +27,28 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
+  /// Overriding preTransfer to reinit the subappliations if the object needs to be
+  /// executed twice.
   virtual void preTransfer(Real dt, Real target_time) override;
 
 protected:
 
+  /// Name of the trainer object which this MultiApp generates snaphots/residuals
+  /// for.
   std::string _trainer_name;
 
-  /// The trainer object to save the solution into
+  /// Pointer to the trainer object itself.
   PODReducedBasisTrainer * _trainer = nullptr;
 
+  /// Evaluating the residuals for every tag in the trainer.
   void computeResidual();
 
+  /// Evaluating the residuals for every tag in the trainer in batch mode.
   void computeResidualBatch();
 
+  /// Switch used to differentiate between snapshot generation and residual
+  /// computation. Residual generation is only possible after the snapshot generation
+  /// part is gone.
   bool _snapshot_generation;
 
 private:

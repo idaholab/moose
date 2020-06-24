@@ -33,6 +33,7 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
   _trainer_name(getParam<std::string>("trainer_name")),
   _snapshot_generation(true)
 {
+  // Initializing the subapps
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     init(n_processors());
@@ -53,11 +54,25 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
   _trainer = obj[0];
 }
 
+void
+PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
+{
+  // Reinitialize the problem only if the snapshot generation part is done.
+  if (!_snapshot_generation)
+  {
+    init(_trainer->getSumBaseSize());
+    initialSetup();
+  }
+  SamplerFullSolveMultiApp::preTransfer(dt, target_time);
+}
+
 bool
 PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
   bool last_solve_converged = true;
 
+  // If snapshot generation phase, solve the subapplications in a regular manner.
+  // Otherwise, compute the residuals only.
   if (_snapshot_generation)
   {
     last_solve_converged = SamplerFullSolveMultiApp::solveStep(dt, target_time, auto_advance);
@@ -67,34 +82,19 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   {
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
         _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-    {
-        computeResidualBatch();
-    }
+      computeResidualBatch();
     else
-    {
-        computeResidual();
-    }
+      computeResidual();
   }
-
 
   return last_solve_converged;
 }
 
 void
-PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
-{
-  if (!_snapshot_generation)
-  {
-    init(_trainer->getSumBaseSize());
-    initialSetup();
-  }
-
-  SamplerFullSolveMultiApp::preTransfer(dt, target_time);
-}
-
-void
 PODFullSolveMultiApp::computeResidual()
 {
+  // Doing the regual computation but instead of solving the subapplication,
+  // the residuals for different tags are evaluated.
   if (!_has_an_app)
     return;
 
@@ -105,18 +105,20 @@ PODFullSolveMultiApp::computeResidual()
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
+  // Getting the necessary tag names.
   const std::vector<std::string>& trainer_tags = _trainer->getTagNames();
 
+  // Looping over the subapplications and computing residuals.
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
     // Getting the local problem
     FEProblemBase & problem = _apps[i]->getExecutioner()->feProblem();
 
+    // Extracting the TagIDs based on tag names from the current subapp.
     std::set<TagID> tags_to_compute;
     for (auto& tag_name : trainer_tags)
-    {
       tags_to_compute.insert(problem.getVectorTagID(tag_name));
-    }
+
     problem.computeResidualTags(tags_to_compute);
   }
 }
