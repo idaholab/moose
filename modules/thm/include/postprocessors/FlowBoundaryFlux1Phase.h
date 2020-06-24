@@ -2,7 +2,7 @@
 
 #include "SideIntegralPostprocessor.h"
 
-class BoundaryFlux3EqnGhostBase;
+class BoundaryFluxBase;
 
 /**
  * Retrieves an entry of a flux vector for a 1-phase boundary
@@ -24,7 +24,7 @@ protected:
   /// Boundary user object name
   const std::string _boundary_uo_name;
   /// Boundary user object
-  const BoundaryFlux3EqnGhostBase & _boundary_uo;
+  const BoundaryFluxBase & _boundary_uo;
   /// Index within flux vector to query
   const unsigned int _equation_index;
 
