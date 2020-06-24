@@ -23,7 +23,7 @@ FlowBoundaryFlux1Phase::FlowBoundaryFlux1Phase(const InputParameters & parameter
     _n_components(3),
     _boundary_name(getParam<std::vector<BoundaryName>>("boundary")[0]),
     _boundary_uo_name(_boundary_name + ":boundary_uo"),
-    _boundary_uo(getUserObjectByName<BoundaryFlux3EqnGhostBase>(_boundary_uo_name)),
+    _boundary_uo(getUserObjectByName<BoundaryFluxBase>(_boundary_uo_name)),
     _equation_index(getParam<MooseEnum>("equation"))
 {
   for (unsigned int i = 0; i < _n_components; i++)
