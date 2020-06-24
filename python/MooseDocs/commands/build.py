@@ -111,12 +111,13 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
         MooseDocs.PROJECT_FILES.add(self.filepath)
 
         # Build a list of pages to be translated including the dependencies
-        page_uids = [page.uid]
+        nodes = [page]
         for node in self._translator.getPages():
             uids = node['dependencies'] if 'dependencies' in node else set()
             if page.uid in uids:
-                page_uids.append(node.uid())
-        self._translator.execute(page_uids, num_threads=self._options.num_threads)
+                nodes.append(node)
+
+        self._translator.execute(nodes, self._options.num_threads)
 
     def _getPage(self, source):
         """Search the existing content for pages, if it doesn't exist create it."""
@@ -218,11 +219,10 @@ def main(options):
 
     # Perform build
     if options.files:
-        page_uids = []
+        nodes = []
         for filename in options.files:
             nodes += translator.findPages(filename)
-            page_uids += [n.uid() for n in nodes]
-        translator.execute(page_uids, options.num_threads)
+        translator.execute(nodes, options.num_threads)
     else:
         translator.execute(None, options.num_threads)
 

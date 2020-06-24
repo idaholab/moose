@@ -211,6 +211,8 @@ class NextAndPreviousCommand(command.CommandComponent):
             msg = "The 'destination' setting is required for the !content next and !content previous commands."
             raise exceptions.MooseDocsException(msg)
 
+        p_node = self.translator.findPage(self.settings['destination'])
+        page['dependencies'].add(p_node.uid)
         return NextAndPrevious(parent,
                                direction=info['subcommand'],
                                destination=self.settings['destination'],

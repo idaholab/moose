@@ -154,7 +154,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         node._AutoPropertyMixin__mutable = value
 
-    def __call__(self, page_ids, num_threads=1):
+    def __call__(self, nodes, num_threads=1):
         """
         Called by Translator object, this executes the steps listed in the class description.
         """
@@ -162,7 +162,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self.assertInitialized()
         self.translator.executeMethod('preExecute', log=True)
 
-        nodes = [n for n in self.getPages() if n in page_ids] if page_ids is not None else self.getPages()
+        nodes = nodes or self.getPages()
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         other_nodes = [n for n in nodes if not isinstance(n, pages.Source)]
 
@@ -234,7 +234,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         for node in other_nodes:
             self.translator.renderer.write(node)
         return time.time() - start
-
 
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging."""
@@ -419,6 +418,10 @@ class ParallelBarrier(Executioner):
         barrier = multiprocessing.Barrier(num_threads)
         manager = multiprocessing.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
+        for i in range(len(page_attributes)):
+            Executioner.setMutable(self._page_objects[i], True)
+            page_attributes[i] = self._page_objects[i].attributes
+            Executioner.setMutable(self._page_objects[i], False)
 
         jobs = []
         random.shuffle(nodes)
@@ -428,6 +431,7 @@ class ParallelBarrier(Executioner):
             p.start()
 
         for job in jobs:
+            self._updateAttributes(page_attributes) # run local updates one last time before finalizing
             job.join()
 
     def _target(self, nodes, barrier, page_attributes):

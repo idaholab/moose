@@ -6,9 +6,12 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+import logging
 import moosetree
 from ..base import Extension
 from . import core
+
+LOG = logging.getLogger('MooseDocs.HeadingExtension')
 
 def make_extension(**kwargs):
     return HeadingExtension(**kwargs)
@@ -34,7 +37,7 @@ class HeadingExtension(Extension):
         config = Extension.defaultConfig()
         return config
 
-    def preTokenize(self, page, ast):
+    def initPage(self, page):
         page['title'] = None
         page['headings'] = dict()
 
