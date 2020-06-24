@@ -211,8 +211,6 @@ class NextAndPreviousCommand(command.CommandComponent):
             msg = "The 'destination' setting is required for the !content next and !content previous commands."
             raise exceptions.MooseDocsException(msg)
 
-        p_node = self.translator.findPage(self.settings['destination'])
-        page['dependencies'].add(p_node.uid)
         return NextAndPrevious(parent,
                                direction=info['subcommand'],
                                destination=self.settings['destination'],
@@ -397,7 +395,7 @@ class RenderContentOutline(components.RenderComponent):
                     self.renderer.render(li, link, page)
                     previous = current
 
-        # TODO: It would be cool if we could do something like this for the outline
+        # TODO: Make nested lists collapsible at their parent level
         # The folowing reproduced an example from https://materializecss.com/collapsible.html
         #
         # ul = html.Tag(parent, 'ul', class_='collapsible')
@@ -409,6 +407,7 @@ class RenderContentOutline(components.RenderComponent):
         # span = html.Tag(div, 'span', string='Lorem ipsum dolor sit amet.')
 
     def createLatex(self, parent, token, page):
+        # TODO: Write Latex renderer - this capability will be useful for PDFs with several pages
         return None
 
 class RenderNextAndPrevious(components.RenderComponent):
@@ -419,20 +418,32 @@ class RenderNextAndPrevious(components.RenderComponent):
         self.createHTMLHelper(parent, token, page)
 
     def createHTMLHelper(self, parent, token, page):
-        # there are a lot of settings for the findPage() func, I should enable them
         node = self.translator.findPage(token['destination'])
 
-        if token['use_title']:
-            # TODO: use left and right arrow icons for the use_title option
-            # also, render a shortened string followed by '...' for long titles
-            string = heading.find_heading(node).text()
-        else:
-            string = token['direction']
-
-        div = html.Tag(parent, 'a',
-                       string=string,
+        btn = html.Tag(parent, 'a',
                        class_='btn moose-content-{}'.format(token['direction']),
                        href=str(node.relativeDestination(page)))
 
+        # Determine button style.
+        if token['use_title']:
+            string = heading.find_heading(node).text()
+
+            # Hide text overflow and append ellipses to long page titles.
+            if len(string) > 18:
+                print(string, "\n")
+                string = string[:18] + '. . .'
+
+            # Use left and right arrows with page title format
+            if token['direction'] == 'previous':
+                html.Tag(btn, 'i', class_='material-icons left', string='arrow_back')
+            elif token['direction'] == 'next':
+                html.Tag(btn, 'i', class_='material-icons right', string='arrow_forward')
+
+        else:
+            string = token['direction'].capitalize()
+
+        html.Tag(btn, string=string)
+
     def createLatex(self, parent, token, page):
+        # This capability is probably not necessary for PDFs
         return None

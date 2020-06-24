@@ -42,18 +42,22 @@ ul.moose-a-to-z a{
 /* TODO: Make it so the Next/Previous buttons always render at bottom of page */
 .moose-content-next{
   float: right;
-  position: relative;
-  /* top: 48px; /* this is the spacing of the h1:first-of-type */
+  margin-top: 24px;
+  margin-bottom: 24px;
+  text-transform: none;
 }
 
 .moose-content-previous{
-  position: relative;
-  /* top: 48px; */
+  margin-top: 24px;
+  margin-bottom: 24px;
+  text-transform: none;
 }
 
 /* MOOSE Outline Counters
 http://jsfiddle.net/PTbGc/
 */
+
+/* TODO: Make it so that cerain levels may use a ul tag, add setting "skip_numbering_on_levels" */
 div.moose-outline ol {
     counter-reset: item;
     padding-left: 10px;

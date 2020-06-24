@@ -54,6 +54,13 @@ The following is a list of all headings in the "extensions" directory, except th
                        sqa.md
                        acronym.md
 
+!alert note title=Rebuilding the Outline
+If new headings are created or deleted during a live serve, the outline won't update until rebuilding. Although, for the case of a deleted header, its link will stop working. It will also start working again if it is deleted and then recreated.
+
+*TODO: find a way to check, in content.py, RenderContentOutline(), that a heading link actually works. For the case where it doesn't (because it was deleted during a live serve), remove it from the list, i.e., don't add it in the first place.*
+
+*Also, find a way to handle newly created headings - this would be much more tricky, since the complete heading list remains static following the initial build. For now, the simplest way to handle creation/deletion is to just re-serve.*
+
 ## Outline Directory id=outline-directory
 
 The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in alphabetical order.
@@ -62,7 +69,9 @@ The following is a list of all level 1 & 2 headings in the "extensions" director
 
 ## Next/Previous Buttons
 
-"Next" and "Previous" buttons are designed to be the last element of a page. The buttons were configured to link to those pages which appear before and after this one on the [main index page](/).
+"Next" and "Previous" buttons are designed to be the last element of a page. However, for the case where more markdown content is added afterwards, the same margin is enforced below the buttons as are above. They need to appear as items which are distinct from page's main body, similar to how the breadcrumbs navigation is separated, and so this why the margins are enforced.
+
+The following buttons were configured to link to those pages which appear before and after this one on the [main index page](/).
 
 !content previous destination=materialicon.md
 
@@ -70,7 +79,7 @@ The following is a list of all level 1 & 2 headings in the "extensions" director
 
 ## Next/Previous Buttons with Page Titles
 
-These buttons use the destination page's title as their text.
+The following buttons were configured to link to those pages which appear before and after this one on the [main index page](/) and to use those page's title as their text.
 
 !content previous destination=materialicon.md use_title=True
 
