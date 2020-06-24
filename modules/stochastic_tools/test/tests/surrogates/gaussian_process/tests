@@ -1,0 +1,46 @@
+[Tests]
+  issues = "#15482"
+  #design = "PolynomialRegressionTrainer.md PolynomialRegressionSurrogate.md"
+  requirement = 'The system shall demonstrate a gaussian process surrogate by '
+  [GP_training]
+    type = CheckFiles
+    input = GP_squared_exponential_training.i
+    check_files = 'gauss_process_training_GP_avg_trainer.rd'
+    allow_test_objects = true
+    detail = 'Testing Gaussian Process Training Phase'
+    max_parallel = 1
+  []
+  [GP_testing]
+    type = CSVDiff
+    input = GP_squared_exponential_testing.i
+    allow_test_objects = true
+    csvdiff = 'GP_squared_exponential_testing_out_samp_avg_0002.csv'
+    detail = 'Testing Gaussian Process Testing Phase'
+    max_parallel = 1
+    prereq = GP_training
+  []
+  [GP_squared_exponential]
+    type = CSVDiff
+    input = GP_squared_exponential.i
+    allow_test_objects = true
+    csvdiff = 'GP_squared_exponential_out_samp_avg_0002.csv GP_squared_exponential_out_results_0002.csv'
+    detail = 'Testing Gaussian Process Squared Exponential Kernel'
+    max_parallel = 1
+  []
+  [GP_exponential]
+    type = CSVDiff
+    input = GP_exponential.i
+    allow_test_objects = true
+    csvdiff = 'GP_exponential_out_samp_avg_0002.csv GP_exponential_out_results_0002.csv'
+    detail = 'Testing Gaussian Process Exponential Kernel'
+    max_parallel = 1
+  []
+  [GP_Matern_half_int]
+    type = CSVDiff
+    input = GP_Matern_half_int.i
+    allow_test_objects = true
+    csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
+    detail = 'Testing Gaussian Process Matern Half Integer Kernel'
+    max_parallel = 1
+  []
+[]

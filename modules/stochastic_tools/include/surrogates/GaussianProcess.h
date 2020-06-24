@@ -20,7 +20,7 @@ public:
   GaussianProcess(const InputParameters & parameters);
   // virtual void initialize();
   virtual Real evaluate(const std::vector<Real> & x) const override;
-  virtual Real evaluate(const std::vector<Real> & x, Real * std) const;
+  virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
 protected:
   /// Array containing sample points and the results

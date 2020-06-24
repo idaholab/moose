@@ -41,11 +41,11 @@ GaussianProcess::evaluate(const std::vector<Real> & x) const
 {
   // overlaod for evaluate to maintain general compatibility. Only returns mean
   Real dummy = 0;
-  return this->evaluate(x, &dummy);
+  return this->evaluate(x, dummy);
 }
 
 Real
-GaussianProcess::evaluate(const std::vector<Real> & x, Real * std_dev) const
+GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
   unsigned int _n_params = _training_params.cols();
   unsigned int _num_tests = 1;
@@ -73,7 +73,7 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real * std_dev) const
       K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  *std_dev = std::sqrt(test_std(0, 0)) * _training_data_var.array().sqrt()(0);
+  std_dev = std::sqrt(test_std(0, 0)) * _training_data_var.array().sqrt()(0);
 
   return mean_value;
 }
