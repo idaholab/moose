@@ -72,8 +72,7 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     side_fe->get_xyz();
 
     // figure out the number of qps for volume
-    auto qrule = assem.qruleElem(dim);
-    fe->attach_quadrature_rule(qrule);
+    auto qrule = assem.attachQRuleElem(dim, *fe);
     fe->reinit(elem);
     if (qrule->n_points() > _max)
       _max = qrule->n_points();
@@ -85,8 +84,7 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     // figure out the number of qps for the face
     // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
     // than in the volume
-    auto qrule_face = assem.qruleFace(dim);
-    side_fe->attach_quadrature_rule(qrule_face);
+    auto qrule_face = assem.attachQRuleFace(dim, *side_fe);
     side_fe->reinit(elem, side);
     if (qrule_face->n_points() > _max)
       _max = qrule_face->n_points();

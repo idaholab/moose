@@ -19,6 +19,7 @@
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_base.h"
 
 #include "DualRealOps.h"
 
@@ -1417,15 +1418,28 @@ public:
   }
 
   /**
-   * Returns the current elem/volume quadrature rule.  The current subdomain
-   * (as set via setCurrentSubdomainID is used to determine the correct rule.
+   * Attaches the current elem/volume quadrature rule to the given fe.  The
+   * current subdomain (as set via setCurrentSubdomainID is used to determine
+   * the correct rule.  The attached quadrature rule is also returned.
    */
-  inline QBase * qruleElem(unsigned int dim) { return qrules(dim).vol.get(); }
+  inline const QBase * attachQRuleElem(unsigned int dim, FEBase & fe)
+  {
+    auto qrule = qrules(dim).vol.get();
+    fe.attach_quadrature_rule(qrule);
+    return qrule;
+  }
+
   /**
-   * Returns the current face/area quadrature rule.  The current subdomain
-   * (as set via setCurrentSubdomainID is used to determine the correct rule.
+   * Attaches the current face/area quadrature rule to the given fe.  The
+   * current subdomain (as set via setCurrentSubdomainID is used to determine
+   * the correct rule.  The attached quadrature rule is also returned.
    */
-  inline QBase * qruleFace(unsigned int dim) { return qrules(dim).face.get(); }
+  inline const QBase * attachQRuleFace(unsigned int dim, FEBase & fe)
+  {
+    auto qrule = qrules(dim).face.get();
+    fe.attach_quadrature_rule(qrule);
+    return qrule;
+  }
 
 protected:
   /**
