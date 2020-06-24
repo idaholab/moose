@@ -17,7 +17,6 @@
 #include "libmesh/id_types.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/elem.h"
-#include "libmesh/replicated_mesh.h"
 
 // C++ includes
 #include <set>
@@ -41,7 +40,6 @@ using libMesh::MeshBase;
 using libMesh::Node;
 using libMesh::Point;
 using libMesh::Real;
-using libMesh::ReplicatedMesh;
 using libMesh::subdomain_id_type;
 
 typedef boundary_id_type BoundaryID;
@@ -202,7 +200,7 @@ public:
 
   // 1D Mesh of mortar segment elements which gets built by the call
   // to build_mortar_segment_mesh().
-  ReplicatedMesh mortar_segment_mesh;
+  std::unique_ptr<MeshBase> mortar_segment_mesh;
 
   // Map between Elems in the mortar segment mesh and their info
   // structs. This gets filled in by the call to
@@ -267,4 +265,7 @@ private:
 
   /// Whether this object will be generating a mortar segment mesh for periodic constraints
   const bool _periodic;
+
+  /// Whether the mortar segment mesh is distributed
+  const bool _distributed;
 };

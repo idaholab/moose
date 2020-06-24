@@ -82,9 +82,7 @@ LowerDBlockFromSidesetGenerator::generate()
     }
   }
 
-  bool distributed = false;
-  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
-    distributed = true;
+  bool distributed = !mesh->is_replicated();
 
   auto side_list = mesh->get_boundary_info().build_side_list();
   std::sort(side_list.begin(),
@@ -115,8 +113,12 @@ LowerDBlockFromSidesetGenerator::generate()
       element_sides_on_boundary.push_back(
           ElemSideDouble(mesh->elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
 
+  // max_elem_id should be consistent across procs assuming we've prepared our mesh previously
+  mooseAssert(mesh->is_prepared(),
+              "We are assuming that the mesh has been prepared previously in order to avoid a "
+              "communication to determine the max elem id");
   dof_id_type max_elem_id = mesh->max_elem_id();
-  mesh->comm().max(max_elem_id);
+
   auto max_elems_to_add = element_sides_on_boundary.size();
   mesh->comm().max(max_elems_to_add);
 
@@ -152,6 +154,8 @@ LowerDBlockFromSidesetGenerator::generate()
   // Assign block name, if provided
   if (isParamValid("new_block_name"))
     mesh->subdomain_name(new_block_id) = getParam<SubdomainName>("new_block_name");
+
+  mesh->prepare_for_use();
 
   return mesh;
 }

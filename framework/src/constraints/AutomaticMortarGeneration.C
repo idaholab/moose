@@ -25,6 +25,8 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/quadrature_trap.h"
+#include "libmesh/distributed_mesh.h"
+#include "libmesh/replicated_mesh.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -44,11 +46,11 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     bool periodic)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
-    mortar_segment_mesh(mesh_in.comm()),
     h_max(0.),
     _debug(false),
     _on_displaced(on_displaced),
-    _periodic(periodic)
+    _periodic(periodic),
+    _distributed(!mesh.is_replicated())
 {
   primary_secondary_boundary_id_pairs.push_back(boundary_key);
   primary_requested_boundary_ids.insert(boundary_key.first);
@@ -56,12 +58,17 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
   primary_secondary_subdomain_id_pairs.push_back(subdomain_key);
   primary_boundary_subdomain_ids.insert(subdomain_key.first);
   secondary_boundary_subdomain_ids.insert(subdomain_key.second);
+
+  if (_distributed)
+    mortar_segment_mesh = libmesh_make_unique<DistributedMesh>(mesh.comm());
+  else
+    mortar_segment_mesh = libmesh_make_unique<ReplicatedMesh>(mesh.comm());
 }
 
 void
 AutomaticMortarGeneration::clear()
 {
-  mortar_segment_mesh.clear();
+  mortar_segment_mesh->clear();
   nodes_to_secondary_elem_map.clear();
   nodes_to_primary_elem_map.clear();
   secondary_node_and_elem_to_xi2_primary_elem.clear();
@@ -98,7 +105,7 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   for (const auto & primary_elem :
        as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
   {
-    // If this is not one of the lower-dimensional primary side elements, go on to the next one.
+    // If this is not onne of the lower-dimensional primary side elements, go on to the next one.
     if (!this->primary_boundary_subdomain_ids.count(primary_elem->subdomain_id()))
       continue;
 
@@ -119,6 +126,23 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // split.
   std::map<const Elem *, std::set<Elem *>> secondary_elems_to_mortar_segments;
 
+  dof_id_type local_id_index = 0;
+  std::size_t node_unique_id_offset = 0;
+
+  // Create an offset by the maximum number of mortar segment elements that can be created. Recall
+  // that the number of mortar segments created is a function of node projection
+  for (const auto & pr : primary_secondary_boundary_id_pairs)
+  {
+    const auto primary_bnd_id = pr.first;
+    const auto secondary_bnd_id = pr.second;
+    const auto num_primary_nodes =
+        std::distance(mesh.bid_nodes_begin(primary_bnd_id), mesh.bid_nodes_end(primary_bnd_id));
+    const auto num_secondary_nodes =
+        std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
+
+    node_unique_id_offset += num_primary_nodes + num_secondary_nodes;
+  }
+
   // 1.) Add all lower-dimensional secondary side elements as the "initial" mortar segments.
   for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
                                         end_el = mesh.active_elements_end();
@@ -133,21 +157,29 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     std::vector<Node *> new_nodes;
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
-      new_nodes.push_back(
-          mortar_segment_mesh.add_point(secondary_elem->point(n), secondary_elem->node_id(n)));
+    {
+      new_nodes.push_back(mortar_segment_mesh->add_point(
+          secondary_elem->point(n), secondary_elem->node_id(n), secondary_elem->processor_id()));
+      Node * const new_node = new_nodes.back();
+      new_node->set_unique_id(new_node->id() + node_unique_id_offset);
+    }
 
     Elem * new_elem;
     if (secondary_elem->default_order() == SECOND)
-      new_elem = mortar_segment_mesh.add_elem(new Edge3);
+      new_elem = new Edge3;
     else
-      new_elem = mortar_segment_mesh.add_elem(new Edge2);
+      new_elem = new Edge2;
 
     new_elem->processor_id() = secondary_elem->processor_id();
+    new_elem->set_id(local_id_index++);
+    new_elem->set_unique_id(new_elem->id());
     new_elem->set_parent(const_cast<Elem *>(secondary_elem->parent()));
     new_elem->set_interior_parent(const_cast<Elem *>(secondary_elem->interior_parent()));
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
+
+    mortar_segment_mesh->add_elem(new_elem);
 
     // The xi^(1) values for this mortar segment are initially -1 and 1.
     MortarSegmentInfo msinfo;
@@ -244,15 +276,23 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (current_mortar_segment == nullptr)
       mooseError("Unable to find appropriate mortar segment during linear search!");
 
-    Node * new_node = mortar_segment_mesh.add_point(new_pt);
+    const auto new_id = mortar_segment_mesh->max_node_id() + 1;
+    mooseAssert(mortar_segment_mesh->comm().verify(new_id),
+                "new_id must be the same on all processes");
+    Node * const new_node =
+        mortar_segment_mesh->add_point(new_pt, new_id, secondary_elem->processor_id());
+    new_node->set_unique_id(new_id + node_unique_id_offset);
 
     // Make an Elem on the left
     Elem * new_elem_left;
     if (order == SECOND)
-      new_elem_left = mortar_segment_mesh.add_elem(new Edge3);
+      new_elem_left = new Edge3;
     else
-      new_elem_left = mortar_segment_mesh.add_elem(new Edge2);
+      new_elem_left = new Edge2;
+
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
+    new_elem_left->set_id(local_id_index++);
+    new_elem_left->set_unique_id(new_elem_left->id());
     new_elem_left->set_interior_parent(current_mortar_segment->interior_parent());
     new_elem_left->set_parent(current_mortar_segment->parent());
     new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
@@ -272,16 +312,28 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
            ++n)
         left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
                                current_mortar_segment->point(n);
-      new_elem_left->set_node(2) = mortar_segment_mesh.add_point(left_interior_point);
+
+      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node = mortar_segment_mesh->add_point(
+          left_interior_point, new_interior_id, new_elem_left->processor_id());
+      new_elem_left->set_node(2) = new_interior_node;
+      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
     }
+
+    mortar_segment_mesh->add_elem(new_elem_left);
 
     // Make an Elem on the right
     Elem * new_elem_right;
     if (order == SECOND)
-      new_elem_right = mortar_segment_mesh.add_elem(new Edge3);
+      new_elem_right = new Edge3;
     else
-      new_elem_right = mortar_segment_mesh.add_elem(new Edge2);
+      new_elem_right = new Edge2;
+
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
+    new_elem_right->set_id(local_id_index++);
+    new_elem_right->set_unique_id(new_elem_right->id());
     new_elem_right->set_interior_parent(current_mortar_segment->interior_parent());
     new_elem_right->set_parent(current_mortar_segment->parent());
     new_elem_right->set_node(0) = new_node;
@@ -300,8 +352,17 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
            ++n)
         right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
                                 current_mortar_segment->point(n);
-      new_elem_right->set_node(2) = mortar_segment_mesh.add_point(right_interior_point);
+
+      const auto new_interior_id = mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id),
+                  "new_id must be the same on all processes");
+      Node * const new_interior_node = mortar_segment_mesh->add_point(
+          right_interior_point, new_interior_id, new_elem_right->processor_id());
+      new_elem_right->set_node(2) = new_interior_node;
+      new_interior_node->set_unique_id(new_interior_id + node_unique_id_offset);
     }
+
+    mortar_segment_mesh->add_elem(new_elem_right);
 
     // Reconstruct the nodal normal at xi1. This will help us
     // determine the orientation of the primary elems relative to the
@@ -437,7 +498,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // The original mortar segment has been split, so erase it from
     // the mortar segment mesh.
-    mortar_segment_mesh.delete_elem(current_mortar_segment);
+    mortar_segment_mesh->delete_elem(current_mortar_segment);
 
     // We need to insert new_elem_left and new_elem_right in
     // the mortar_segment_set for this secondary_elem.
@@ -446,16 +507,16 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 
   // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh.allow_renumbering(true);
-  mortar_segment_mesh.skip_partitioning(true);
-  mortar_segment_mesh.allow_find_neighbors(false);
-  mortar_segment_mesh.prepare_for_use();
-  mortar_segment_mesh.allow_find_neighbors(true);
+  mortar_segment_mesh->allow_renumbering(true);
+  mortar_segment_mesh->skip_partitioning(true);
+  mortar_segment_mesh->allow_find_neighbors(false);
+  mortar_segment_mesh->prepare_for_use();
+  mortar_segment_mesh->allow_find_neighbors(true);
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
   {
-    ExodusII_IO mortar_segment_mesh_writer(mortar_segment_mesh);
+    ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
   }
 
