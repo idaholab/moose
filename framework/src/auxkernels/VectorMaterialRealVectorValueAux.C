@@ -18,7 +18,12 @@ template <bool is_ad>
 InputParameters
 VectorMaterialRealVectorValueAuxTempl<is_ad>::validParams()
 {
-  return MaterialAuxBaseTempl<RealVectorValue, is_ad, RealVectorValue>::validParams();
+  auto params = MaterialAuxBaseTempl<RealVectorValue, is_ad, RealVectorValue>::validParams();
+
+  params.addClassDescription(
+      "Converts a vector-quantity material property into a vector auxiliary variable");
+
+  return params;
 }
 
 template <bool is_ad>
