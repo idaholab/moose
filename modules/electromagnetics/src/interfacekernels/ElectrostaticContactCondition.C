@@ -28,8 +28,8 @@ ElectrostaticContactCondition::validParams()
 
 ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParameters & parameters)
   : ADInterfaceKernel(parameters),
-    _conductivity_primary(getMaterialProperty<Real>("primary_conductivity")),
-    _conductivity_secondary(getNeighborMaterialProperty<Real>("secondary_conductivity")),
+    _conductivity_primary(getADMaterialProperty<Real>("primary_conductivity")),
+    _conductivity_secondary(getNeighborADMaterialProperty<Real>("secondary_conductivity")),
     _mean_hardness(isParamValid("user_electrical_contact_conductance")
                        ? getGenericZeroMaterialProperty<Real, true>("mean_hardness")
                        : getADMaterialProperty<Real>("mean_hardness")),

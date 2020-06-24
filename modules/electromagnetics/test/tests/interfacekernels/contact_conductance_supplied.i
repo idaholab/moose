@@ -78,6 +78,8 @@
     type = ElectrostaticContactCondition
     variable = potential_stainless_steel
     neighbor_var = potential_graphite
+    primary_conductivity = ad_electrical_conductivity
+    secondary_conductivity = ad_electrical_conductivity
     boundary = ssg_interface
     user_electrical_contact_conductance = 1.47e5 # as described in Cincotti et al (https://doi.org/10.1002/aic.11102)
   [../]
@@ -91,12 +93,24 @@
     prop_values = 3.33e2
     block = graphite
   [../]
+  [./ad_conversion_graphite]
+    type = MaterialConverter
+    reg_props_in = 'electrical_conductivity'
+    ad_props_out = 'ad_electrical_conductivity'
+    block = graphite
+  [../]
 
   #stainless_steel
   [./sigma_stainless_steel]
     type = GenericConstantMaterial
     prop_names = 'electrical_conductivity'
     prop_values = 1.429e6
+    block = stainless_steel
+  [../]
+  [./ad_conversion_stainless_steel]
+    type = MaterialConverter
+    reg_props_in = 'electrical_conductivity'
+    ad_props_out = 'ad_electrical_conductivity'
     block = stainless_steel
   [../]
 []
