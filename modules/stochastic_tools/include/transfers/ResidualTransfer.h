@@ -32,7 +32,8 @@ public:
 
 protected:
   /**
-   * Traditional Transfer callback
+   * Transfer callback that will transfer residuls with given tags from the
+   * subapplication.
    */
   virtual void execute() override;
 

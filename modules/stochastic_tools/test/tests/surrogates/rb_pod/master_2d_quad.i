@@ -16,10 +16,9 @@
 
 [Samplers]
   [sample]
-    type = MonteCarlo
-    num_rows = 4
-    distributions = 'D_dist sig_dist'
-    execute_on = 'timestep_begin'
+    type = CartesianProduct
+    linear_space_items = '1 1 2
+                          1 1 2'
   []
 []
 
@@ -64,7 +63,6 @@
     sampler = sample
     trainer_name = "pod_rb"
     execute_on = 'final'
-    direction = 'from_multiapp'
   []
 []
 
@@ -73,7 +71,9 @@
     type = PODReducedBasisTrainer
     execute_on = 'timestep_begin final' # final'
     var_names = 'u'
+    en_limits = '0.9999999'
     tag_names = 'react diff bodyf'
+    independent = '0 0 1'
   []
 []
 
