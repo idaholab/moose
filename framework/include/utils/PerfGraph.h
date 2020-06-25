@@ -14,11 +14,14 @@
 #include "PerfNode.h"
 #include "IndirectSort.h"
 #include "ConsoleStream.h"
+#include "ConsoleStreamInterface.h"
 #include "MooseError.h"
 #include "MemoryUtils.h"
 
 // System Includes
 #include <array>
+#include <atomic>
+#include <thread>
 
 // Forward Declarations
 class PerfGuard;
@@ -27,12 +30,13 @@ template <class... Ts>
 class VariadicTable;
 
 #define MAX_STACK_SIZE 100
+#define MAX_EXECUTION_LIST_SIZE 10000
 
 /**
  * The PerfGraph will hold the master list of all registered performance segments and
  * the head PerfNode
  */
-class PerfGraph
+class PerfGraph : protected ConsoleStreamInterface
 {
 public:
   /**
@@ -57,7 +61,7 @@ public:
   /**
    * Create a new PerfGraph
    */
-  PerfGraph(const std::string & root_name);
+  PerfGraph(const std::string & root_name, MooseApp & app);
 
   /**
    * Destructor
@@ -222,6 +226,51 @@ protected:
     long int _total_memory = 0;
   };
 
+  // Whether or not an increment is the start of the finish increment
+  enum IncrementState { started, finished };
+
+  /**
+   * Use to hold an increment of time and memory for a section
+   * This is used in the TimedPrint capability.
+   */
+  struct SectionIncrement
+  {
+    PerfID _id;
+
+    /// Whether or not this increment is the start of an increment or
+    /// the finishing of an increment.
+    IncrementState _state;
+    std::chrono::time_point<std::chrono::steady_clock> _time;
+    long int _memory;
+  };
+
+  /**
+   * Add the information to the execution list
+   *
+   * Should only be called by push() and pop()
+   */
+  inline void addToExecutionList(const PerfID id, const IncrementState state, const std::chrono::time_point<std::chrono::steady_clock> time, const long int memory)
+  {
+    auto & section_increment = _execution_list[_execution_list_end];
+
+    section_increment._id = id;
+    section_increment._state = state;
+    section_increment._time = time;
+    section_increment._memory = memory;
+
+    // This will synchronize the above memory changes with the
+    // atomic_thread_fence in the printing thread
+    std::atomic_thread_fence(std::memory_order_release);
+
+    // All of the above memory operations will be seen by the
+    // printing thread before the printing thread sees this new value
+    auto next_execution_list_end = _execution_list_end.fetch_add(1, std::memory_order_relaxed);
+
+    // Are we at the end of our circular buffer?
+    if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
+      _execution_list_end.store(0, std::memory_order_relaxed);
+  }
+
   /**
    * Add a Node onto the end of the end of the current callstack
    *
@@ -291,6 +340,15 @@ protected:
   /// The full callstack.  Currently capped at a depth of 100
   std::array<PerfNode *, MAX_STACK_SIZE> _stack;
 
+  /// A circular buffer for holding the execution list, this is read by the printing loop
+  std::array<SectionIncrement, MAX_EXECUTION_LIST_SIZE> _execution_list;
+
+  /// Where the print thread should start reading the execution list
+  std::atomic<unsigned int> _execution_list_begin;
+
+  /// Where the print thread should stop reading the execution list
+  std::atomic<unsigned int> _execution_list_end;
+
   /// Map of section names to IDs
   std::map<std::string, PerfID> _section_name_to_id;
 
@@ -319,6 +377,9 @@ protected:
 
   /// Whether or not timing is active
   bool _active;
+
+  /// The thread for printing sections as they execute
+  std::thread _print_thread;
 
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;

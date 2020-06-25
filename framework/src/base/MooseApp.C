@@ -298,7 +298,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _pars(parameters),
     _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
-    _perf_graph(type() + " (" + name() + ')'),
+    _perf_graph(type() + " (" + name() + ')', *this),
     _rank_map(*_comm, _perf_graph),
     _file_base_set_by_user(false),
     _output_position_set(false),

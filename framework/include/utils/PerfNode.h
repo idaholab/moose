@@ -46,6 +46,18 @@ public:
   }
 
   /**
+   * Get the currnet start time
+   * Only makes sense if this node is running.
+   */
+  const std::chrono::time_point<std::chrono::steady_clock> & startTime() { return _start_time; }
+
+  /**
+   * Get the current start memory
+   * Only makes sense if this node is running.
+   */
+  const long unsigned int & startMemory() { return _start_memory; }
+
+  /**
    * Add some time into this Node by taking the difference with the time passed in
    */
   void addTimeAndMemory(const std::chrono::time_point<std::chrono::steady_clock> time,
