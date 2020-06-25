@@ -62,7 +62,7 @@ EqualValueBoundaryConstraint::validParams()
       "master",
       std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.",
-      "The 'master' param is deprecated and will be removed on July 1, 2020. Please use the "
+      "The 'master' param is deprecated and will be removed on September 1, 2020. Please use the "
       "'primary' parameter instead.");
   params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
   params.addParam<BoundaryName>(
@@ -70,13 +70,15 @@ EqualValueBoundaryConstraint::validParams()
   params.addDeprecatedParam<std::vector<unsigned int>>(
       "slave_node_ids",
       "The IDs of the slave node",
-      "The 'slave_node_ids' param is deprecated and will be removed on July 1, 2020. Please use "
+      "The 'slave_node_ids' param is deprecated and will be removed on September 1, 2020. Please "
+      "use "
       "the 'secondary_node_ids' param instead");
-  params.addDeprecatedParam<BoundaryName>("slave",
-                                          "NaN",
-                                          "The boundary ID associated with the slave side",
-                                          "The 'slave' param is deprecated and will be removed on "
-                                          "July 1, 2020. Please use the 'secondary' param instead");
+  params.addDeprecatedParam<BoundaryName>(
+      "slave",
+      "NaN",
+      "The boundary ID associated with the slave side",
+      "The 'slave' param is deprecated and will be removed on "
+      "September 1, 2020. Please use the 'secondary' param instead");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }

@@ -38,14 +38,16 @@ ThermalContactAction::validParams()
   params.addRequiredParam<NonlinearVariableName>("variable", "The variable for thermal contact");
   params.addParam<BoundaryName>("primary", "The primary surface");
   params.addParam<BoundaryName>("secondary", "The secondary surface");
-  params.addDeprecatedParam<BoundaryName>("master",
-                                          "The primary surface",
-                                          "The 'master' parameter will be removed on July 1, 2020. "
-                                          "Please use the 'primary' parameter instead.");
-  params.addDeprecatedParam<BoundaryName>("slave",
-                                          "The secondary surface",
-                                          "The 'slave' parameter will be removed on July 1, 2020. "
-                                          "Please use the 'secondary' parameter instead.");
+  params.addDeprecatedParam<BoundaryName>(
+      "master",
+      "The primary surface",
+      "The 'master' parameter will be removed on September 1, 2020. "
+      "Please use the 'primary' parameter instead.");
+  params.addDeprecatedParam<BoundaryName>(
+      "slave",
+      "The secondary surface",
+      "The 'slave' parameter will be removed on September 1, 2020. "
+      "Please use the 'secondary' parameter instead.");
   params.addRangeCheckedParam<Real>("tangential_tolerance",
                                     "tangential_tolerance>=0",
                                     "Tangential distance to extend edges of contact surfaces");

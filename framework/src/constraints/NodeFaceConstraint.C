@@ -28,14 +28,14 @@ NodeFaceConstraint::validParams()
   InputParameters params = Constraint::validParams();
   params.addParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
   params.addParam<BoundaryName>("primary", "The boundary ID associated with the primary side");
-  params.addDeprecatedParam<BoundaryName>(
-      "slave",
-      "The boundary ID associated with the secondary side",
-      "This parameter is deprecated in favor of 'secondary' and will be removed on July 1st, 2020");
-  params.addDeprecatedParam<BoundaryName>(
-      "master",
-      "The boundary ID associated with the primary side",
-      "This parameter is deprecated in favor of 'primary' and will be removed on July 1st, 2020");
+  params.addDeprecatedParam<BoundaryName>("slave",
+                                          "The boundary ID associated with the secondary side",
+                                          "This parameter is deprecated in favor of 'secondary' "
+                                          "and will be removed on September 1st, 2020");
+  params.addDeprecatedParam<BoundaryName>("master",
+                                          "The boundary ID associated with the primary side",
+                                          "This parameter is deprecated in favor of 'primary' and "
+                                          "will be removed on September 1st, 2020");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>(
@@ -47,9 +47,10 @@ NodeFaceConstraint::validParams()
 
   params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
   params.addDeprecatedCoupledVar("master_variable",
+                                 "primary_variable",
                                  "The variable on the primary side of the domain",
                                  "This parameter is deprecated in favor of 'primary_variable' and "
-                                 "will be removed on July 1st, 2020");
+                                 "will be removed on September 1st, 2020");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 

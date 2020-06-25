@@ -27,13 +27,13 @@ ContactSlipDamper::validParams()
   params.addDeprecatedParam<std::vector<int>>(
       "master",
       "IDs of the primary surfaces for which slip reversals should be damped",
-      "The 'master' param is deprecated and will be removed on July 1, 2020. Please use the "
+      "The 'master' param is deprecated and will be removed on September 1, 2020. Please use the "
       "'primary' parameter instead.");
   params.addDeprecatedParam<std::vector<int>>(
       "slave",
       "IDs of the secondary surfaces for which slip reversals should be damped",
       "The 'slave' param is deprecated and will be removed on "
-      "July 1, 2020. Please use the 'secondary' param instead");
+      "September 1, 2020. Please use the 'secondary' param instead");
   params.addParam<Real>(
       "max_iterative_slip", std::numeric_limits<Real>::max(), "Maximum iterative slip");
   params.addRangeCheckedParam<Real>("min_damping_factor",

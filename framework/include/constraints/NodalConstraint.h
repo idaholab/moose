@@ -35,7 +35,7 @@ public:
   std::vector<dof_id_type> & getMasterNodeId()
   {
     mooseDeprecated(
-        "'getPrimaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
+        "'getPrimaryNodeId' is deprecated and will be removed on September 1st, 2020. Please "
         "use 'getPrimaryNodeId' instead.");
     return _primary_node_vector;
   }
@@ -53,7 +53,7 @@ public:
   std::vector<dof_id_type> & getSlaveNodeId()
   {
     mooseDeprecated(
-        "'getSecondaryNodeId' is deprecated and will be removed on July 1st, 2020. Please "
+        "'getSecondaryNodeId' is deprecated and will be removed on September 1st, 2020. Please "
         "use 'getSecondaryNodeId' instead.");
     return _connected_nodes;
   }
