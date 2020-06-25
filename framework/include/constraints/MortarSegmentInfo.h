@@ -55,12 +55,12 @@ struct MortarSegmentInfo
    * otherwise. The segment can be "invalid" for a host of different
    * reasons, see the list below.
    */
-  bool is_valid() const;
+  bool isValid() const;
 
   /**
    * Returns true if this segment has a valid primary, false otherwise.
    */
-  bool has_primary() const;
+  bool hasPrimary() const;
 
   Real xi1_a, xi1_b;
   Real xi2_a, xi2_b;

@@ -36,7 +36,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
                            Moose::stringify(boundary2)),
     _subproblem(subproblem),
     _mesh(mesh),
-    _secondary_node_range(NULL),
+    _secondary_node_range(nullptr),
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
@@ -213,7 +213,7 @@ NearestNodeLocator::reinit()
 
   // Reset all data
   delete _secondary_node_range;
-  _secondary_node_range = NULL;
+  _secondary_node_range = nullptr;
   _nearest_node_info.clear();
 
   _first = true;
@@ -370,6 +370,6 @@ NearestNodeLocator::updateGhostedElems()
 }
 //===================================================================
 NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()
-  : _nearest_node(NULL), _distance(std::numeric_limits<Real>::max())
+  : _nearest_node(nullptr), _distance(std::numeric_limits<Real>::max())
 {
 }

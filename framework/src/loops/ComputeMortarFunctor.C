@@ -89,7 +89,7 @@ ComputeMortarFunctor::operator()()
 
     // There may be no contribution from the primary side if it is not "in contact".
     bool has_secondary = msinfo.secondary_elem ? true : false;
-    _has_primary = msinfo.has_primary();
+    _has_primary = msinfo.hasPrimary();
 
     if (!has_secondary)
       mooseError("Error, mortar segment has no secondary element associated with it!");

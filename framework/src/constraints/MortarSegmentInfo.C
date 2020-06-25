@@ -44,7 +44,7 @@ MortarSegmentInfo::print() const
 }
 
 bool
-MortarSegmentInfo::is_valid() const
+MortarSegmentInfo::isValid() const
 {
   bool b1 = (std::abs(xi1_a) < 1. + TOLERANCE) && (std::abs(xi1_b) < 1. + TOLERANCE);
   bool b2 = (std::abs(xi2_a) < 1. + TOLERANCE) && (std::abs(xi2_b) < 1. + TOLERANCE);
@@ -119,7 +119,7 @@ MortarSegmentInfo::is_valid() const
 }
 
 bool
-MortarSegmentInfo::has_primary() const
+MortarSegmentInfo::hasPrimary() const
 {
   bool xi2_set =
       (std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE);
