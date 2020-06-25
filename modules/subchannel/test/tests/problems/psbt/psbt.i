@@ -46,28 +46,12 @@
   []
 []
 
-[UserObjects]
-  [subchannel_solver]
-    type = SubChannelSolver
-    execute_on = "INITIAL"
-    mdot = mdot
-    SumWij = SumWij
-    SumWijh = SumWijh
-    SumWijPrimeDhij = SumWijPrimeDhij
-    SumWijPrimeDUij = SumWijPrimeDUij
-    P = P
-    h = h
-    T = T
-    rho = rho
-    flow_area = S
-    cross_flow_area = Sij
-    wetted_perimeter = w_perim
-    q_prime = q_prime
-    T_in = 359.15 # K
-    P_out = 4.923e6 # Pa
-    mflux_in = ${fparse 1e+6 * 17.00 / 3600.} #Inlet coolant mass flux [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-    fp = water
-  []
+[Problem]
+  type = SubChannel1PhaseProblem
+  T_in = 359.15 # K
+  P_out = 4.923e6 # Pa
+  mflux_in = ${fparse 1e+6 * 17.00 / 3600.} #Inlet coolant mass flux [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+  fp = water
 []
 
 [ICs]
@@ -99,31 +83,4 @@
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
-[]
-
-[Variables]
-  [dummy_var]
-  []
-[]
-
-[Kernels]
-  [dummy_kern]
-    type = Diffusion
-    variable = dummy_var
-  []
-[]
-
-[BCs]
-  [dummy_bc1]
-    variable = dummy_var
-    boundary = 'bottom'
-    type = DirichletBC
-    value = 0
-  []
-  [dummy_bc2]
-    variable = dummy_var
-    boundary = 'top'
-    type = DirichletBC
-    value = 1
-  []
 []

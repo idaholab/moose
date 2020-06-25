@@ -184,7 +184,6 @@ SubChannelMesh::buildMesh()
   mesh.reserve_elem(nz_ * ny_ * nx_);
   mesh.reserve_nodes((nz_ + 1) * ny_ * nx_);
   nodes_.resize(nx_ * ny_);
-
   // Add the points in the shape of a rectilinear grid.  The grid is regular
   // on the xy-plane with a spacing of `pitch` between points.  The grid along
   // z is irregular to account for rod spacers.  Store pointers in the nodes_
