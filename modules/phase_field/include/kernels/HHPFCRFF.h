@@ -33,6 +33,6 @@ protected:
   const MaterialProperty<Real> & _prop;
 
   const bool _has_coupled_var;
-  const VariableValue * _coupled_var;
+  const VariableValue * const _coupled_var;
   const unsigned int _coupled_var_var;
 };

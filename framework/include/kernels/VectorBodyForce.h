@@ -37,7 +37,7 @@ protected:
   const Real & _scale;
 
   /// Optional vectorValue function
-  const Function * _function;
+  const Function * const _function;
 
   /// Optional component function value
   const Function & _function_x;

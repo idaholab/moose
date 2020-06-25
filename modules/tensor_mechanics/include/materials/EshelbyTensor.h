@@ -44,5 +44,5 @@ protected:
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;
   const VariableGradient & _grad_temp;
   const bool _has_temp;
-  const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
+  const MaterialProperty<RankTwoTensor> * const _total_deigenstrain_dT;
 };

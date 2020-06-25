@@ -28,5 +28,5 @@ protected:
   const Real _penalty;
 
   std::string _jump_prop_name;
-  const MaterialProperty<Real> * _jump;
+  const MaterialProperty<Real> * const _jump;
 };

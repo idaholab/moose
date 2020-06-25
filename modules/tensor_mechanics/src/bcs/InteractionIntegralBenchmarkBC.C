@@ -40,7 +40,7 @@ InteractionIntegralBenchmarkBC::validParams()
 InteractionIntegralBenchmarkBC::InteractionIntegralBenchmarkBC(const InputParameters & parameters)
   : DirichletBCBase(parameters),
     _component(getParam<MooseEnum>("component")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _crack_front_definition(getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _crack_front_point_index(getParam<unsigned int>("crack_front_point_index")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
@@ -60,7 +60,7 @@ InteractionIntegralBenchmarkBC::computeQpValue()
   const Real kiii_val = _kiii_function.value(_t, *_current_node);
 
   const Point p(*_current_node);
-  _crack_front_definition->calculateRThetaToCrackFront(p, _crack_front_point_index, _r, _theta);
+  _crack_front_definition.calculateRThetaToCrackFront(p, _crack_front_point_index, _r, _theta);
 
   if (_r == 0)
     _theta = 0;

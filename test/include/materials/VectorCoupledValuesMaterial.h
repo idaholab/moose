@@ -30,9 +30,9 @@ protected:
   const VectorVariableValue & _value;
   const ADVectorVariableValue & _ad_value;
   const VectorVariableValue & _dot;
-  const VectorVariableValue * _dot_dot;
+  const VectorVariableValue * const _dot_dot;
   const VariableValue & _dot_du;
-  const VariableValue * _dot_dot_du;
+  const VariableValue * const _dot_dot_du;
 
   const std::string & _var_name;
   MaterialProperty<RealVectorValue> & _value_prop;

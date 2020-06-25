@@ -50,7 +50,7 @@ protected:
   const bool _out_of_plane_strain_coupled;
 
   /// Pointer to the out-of-plane strain variable
-  const ADVariableValue * _out_of_plane_strain;
+  const ADVariableValue * const _out_of_plane_strain;
 
   /// Flag for volumetric locking correction
   const bool _volumetric_locking_correction;

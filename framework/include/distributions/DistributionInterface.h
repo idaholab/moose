@@ -28,7 +28,6 @@ InputParameters validParams<DistributionInterface>();
 class DistributionInterface
 {
 public:
-
   static InputParameters validParams();
 
   DistributionInterface(const MooseObject * moose_object);
@@ -65,7 +64,7 @@ private:
   FEProblemBase & _dni_feproblem;
 
   /// Pointer to the MooseObject
-  const MooseObject * _dni_moose_object_ptr;
+  const MooseObject * const _dni_moose_object_ptr;
 };
 
 template <typename T>

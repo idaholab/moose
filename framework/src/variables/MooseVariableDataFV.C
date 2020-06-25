@@ -87,7 +87,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_dof_values_dotdot_old(false),
     _need_dof_du_dot_du(false),
     _need_dof_du_dotdot_du(false),
-    _time_integrator(nullptr),
+    _time_integrator(_sys.getTimeIntegrator()),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false)
 {
@@ -106,8 +106,6 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
 
   _need_matrix_tag_u.resize(num_matrix_tags);
   _matrix_tag_u.resize(num_matrix_tags);
-
-  _time_integrator = _sys.getTimeIntegrator();
 }
 
 template <typename OutputType>

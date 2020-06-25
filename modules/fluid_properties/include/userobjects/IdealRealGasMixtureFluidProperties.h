@@ -537,7 +537,7 @@ public:
 
 protected:
   /// Primary vapor fluid properties
-  const SinglePhaseFluidProperties * _fp_primary;
+  const SinglePhaseFluidProperties * const _fp_primary;
   /// Secondary vapor fluid properties
   std::vector<const SinglePhaseFluidProperties *> _fp_secondary;
   /// Names of secondary vapor fluid properties

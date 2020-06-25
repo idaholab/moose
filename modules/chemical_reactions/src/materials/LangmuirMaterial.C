@@ -38,16 +38,14 @@ LangmuirMaterial::validParams()
 
 LangmuirMaterial::LangmuirMaterial(const InputParameters & parameters)
   : Material(parameters),
-    // coupledValue returns a reference (an alias) to a VariableValue, and the & turns it into a
-    // pointer
-    _one_over_de_time_const(&coupledValue("one_over_desorption_time_const")),
-    _one_over_ad_time_const(&coupledValue("one_over_adsorption_time_const")),
+    _one_over_de_time_const(coupledValue("one_over_desorption_time_const")),
+    _one_over_ad_time_const(coupledValue("one_over_adsorption_time_const")),
 
     _langmuir_dens(getParam<Real>("langmuir_density")),
     _langmuir_p(getParam<Real>("langmuir_pressure")),
 
-    _conc(&coupledValue("conc_var")),
-    _pressure(&coupledValue("pressure_var")),
+    _conc(coupledValue("conc_var")),
+    _pressure(coupledValue("pressure_var")),
 
     _mass_rate_from_matrix(declareProperty<Real>("mass_rate_from_matrix")),
     _dmass_rate_from_matrix_dC(declareProperty<Real>("dmass_rate_from_matrix_dC")),
@@ -58,27 +56,27 @@ LangmuirMaterial::LangmuirMaterial(const InputParameters & parameters)
 void
 LangmuirMaterial::computeQpProperties()
 {
-  Real equilib_conc = _langmuir_dens * ((*_pressure)[_qp]) / (_langmuir_p + (*_pressure)[_qp]);
+  Real equilib_conc = _langmuir_dens * (_pressure[_qp]) / (_langmuir_p + _pressure[_qp]);
   Real dequilib_conc_dp =
-      _langmuir_dens / (_langmuir_p + (*_pressure)[_qp]) -
-      _langmuir_dens * ((*_pressure)[_qp]) / Utility::pow<2>(_langmuir_p + (*_pressure)[_qp]);
+      _langmuir_dens / (_langmuir_p + _pressure[_qp]) -
+      _langmuir_dens * (_pressure[_qp]) / Utility::pow<2>(_langmuir_p + _pressure[_qp]);
 
   // form the base rate and derivs without the appropriate time const
-  _mass_rate_from_matrix[_qp] = (*_conc)[_qp] - equilib_conc;
+  _mass_rate_from_matrix[_qp] = _conc[_qp] - equilib_conc;
   _dmass_rate_from_matrix_dC[_qp] = 1.0;
   _dmass_rate_from_matrix_dp[_qp] = -dequilib_conc_dp;
 
   // multiply by the appropriate time const
-  if ((*_conc)[_qp] > equilib_conc)
+  if (_conc[_qp] > equilib_conc)
   {
-    _mass_rate_from_matrix[_qp] *= (*_one_over_de_time_const)[_qp];
-    _dmass_rate_from_matrix_dC[_qp] *= (*_one_over_de_time_const)[_qp];
-    _dmass_rate_from_matrix_dp[_qp] *= (*_one_over_de_time_const)[_qp];
+    _mass_rate_from_matrix[_qp] *= _one_over_de_time_const[_qp];
+    _dmass_rate_from_matrix_dC[_qp] *= _one_over_de_time_const[_qp];
+    _dmass_rate_from_matrix_dp[_qp] *= _one_over_de_time_const[_qp];
   }
   else
   {
-    _mass_rate_from_matrix[_qp] *= (*_one_over_ad_time_const)[_qp];
-    _dmass_rate_from_matrix_dC[_qp] *= (*_one_over_ad_time_const)[_qp];
-    _dmass_rate_from_matrix_dp[_qp] *= (*_one_over_ad_time_const)[_qp];
+    _mass_rate_from_matrix[_qp] *= _one_over_ad_time_const[_qp];
+    _dmass_rate_from_matrix_dC[_qp] *= _one_over_ad_time_const[_qp];
+    _dmass_rate_from_matrix_dp[_qp] *= _one_over_ad_time_const[_qp];
   }
 }

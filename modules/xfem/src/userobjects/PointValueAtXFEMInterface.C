@@ -41,7 +41,7 @@ PointValueAtXFEMInterface::PointValueAtXFEMInterface(const InputParameters & par
     _level_set_var_number(
         _subproblem.getVariable(_tid, parameters.get<VariableName>("level_set_var")).number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
-    _solution(_system.current_local_solution.get())
+    _solution(*_system.current_local_solution.get())
 {
 }
 
@@ -147,7 +147,7 @@ PointValueAtXFEMInterface::getElemContainingPoint(const Point & p, bool positive
 
   dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
 
-  Number ls_node_value = (*_solution)(ls_dof_id);
+  Number ls_node_value = _solution(ls_dof_id);
 
   bool positive = false;
 

@@ -31,6 +31,6 @@ protected:
 
   const ADVariableValue & _u;
   const ADVariableValue & _v;
-  const MooseVariable * _u_var;
-  const MooseVariable * _v_var;
+  const MooseVariable & _u_var;
+  const MooseVariable & _v_var;
 };

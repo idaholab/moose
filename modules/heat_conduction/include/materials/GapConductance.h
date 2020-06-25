@@ -103,7 +103,7 @@ protected:
 
   const Real _gap_conductivity;
   const Function * const _gap_conductivity_function;
-  const VariableValue * _gap_conductivity_function_variable;
+  const VariableValue * const _gap_conductivity_function_variable;
 
   const Real _stefan_boltzmann;
   Real _emissivity;

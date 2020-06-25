@@ -35,7 +35,7 @@ protected:
   virtual Real computeHardeningValue(Real scalar);
   virtual Real computeHardeningDerivative(Real scalar);
 
-  const Function * _yield_stress_function;
+  const Function * const _yield_stress_function;
   Real _yield_stress;
   const Real _hardening_constant;
   const PiecewiseLinear * const _hardening_function;

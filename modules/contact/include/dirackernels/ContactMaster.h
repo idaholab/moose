@@ -58,5 +58,5 @@ protected:
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
-  const NumericVector<Number> * _aux_solution;
+  const NumericVector<Number> * const _aux_solution;
 };

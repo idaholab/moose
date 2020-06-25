@@ -63,13 +63,13 @@ protected:
   const MaterialProperty<Real> & _porosity_old;
 
   /// The userobject that computes effective saturation (as a function of porepressure(s)) for this variable
-  const RichardsSeff * _seff_UO;
+  const RichardsSeff & _seff_UO;
 
   /// The userobject that computes saturation (as a function of effective saturation) for this variable
-  const RichardsSat * _sat_UO;
+  const RichardsSat & _sat_UO;
 
   /// The userobject that computes fluid density (as a function of the porepressure)
-  const RichardsDensity * _density_UO;
+  const RichardsDensity & _density_UO;
 
   /**
    * Holds the values of pressures at all the nodes of the element

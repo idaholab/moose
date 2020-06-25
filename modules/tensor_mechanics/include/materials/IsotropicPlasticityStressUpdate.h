@@ -54,10 +54,10 @@ protected:
   /// a string to prepend to the plastic strain Material Property name
   const std::string _plastic_prepend;
 
-  const Function * _yield_stress_function;
+  const Function * const _yield_stress_function;
   Real _yield_stress;
   const Real _hardening_constant;
-  const Function * _hardening_function;
+  const Function * const _hardening_function;
 
   Real _yield_condition;
   Real _hardening_slope;

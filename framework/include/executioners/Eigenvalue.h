@@ -46,5 +46,5 @@ public:
 protected:
   EigenProblem & _eigen_problem;
   /// Postprocessor value that scales solution when eigensolve is finished
-  const PostprocessorValue * _normalization;
+  const PostprocessorValue * const _normalization;
 };

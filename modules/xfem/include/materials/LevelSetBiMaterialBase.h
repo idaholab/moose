@@ -55,7 +55,7 @@ protected:
   const System & _system;
 
   /// the subproblem solution vector
-  const NumericVector<Number> * _solution;
+  const NumericVector<Number> & _solution;
 
   /// use the positive level set region's material properties
   bool _use_positive_property;

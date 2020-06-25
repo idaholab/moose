@@ -56,7 +56,7 @@ protected:
   Real _poissons_ratio;
   Real _youngs_modulus;
   std::size_t _ring_index;
-  const MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
+  const MaterialProperty<Real> * const _current_instantaneous_thermal_expansion_coef;
   std::vector<Real> _q_curr_elem;
   const std::vector<std::vector<Real>> * _phi_curr_elem;
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;

@@ -27,5 +27,5 @@ protected:
   virtual Real computeValue();
 
   // Lower dimensional variable from a Mortar constraint
-  const MooseArray<Real> * _flux;
+  const MooseArray<Real> & _flux;
 };

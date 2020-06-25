@@ -139,7 +139,7 @@ protected:
   std::vector<std::vector<double>> _data;
 
   /// Communicator
-  const libMesh::Parallel::Communicator * _communicator;
+  const libMesh::Parallel::Communicator * const _communicator;
 
   /// Format "rows" vs "columns"
   FormatFlag _format_flag;
@@ -189,4 +189,3 @@ private:
   bool header(const std::string & line);
 };
 }
-

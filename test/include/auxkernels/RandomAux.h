@@ -29,6 +29,6 @@ public:
 protected:
   virtual Real computeValue();
 
-  const RandomElementalUserObject * _random_uo;
+  const RandomElementalUserObject * const _random_uo;
   bool _generate_ints;
 };

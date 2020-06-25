@@ -39,12 +39,11 @@ IdealRealGasMixtureFluidProperties::IdealRealGasMixtureFluidProperties(
     const InputParameters & parameters)
   : VaporMixtureFluidProperties(parameters),
     NaNInterface(this),
+    _fp_primary(&getUserObject<SinglePhaseFluidProperties>("fp_primary")),
     _fp_secondary_names(getParam<std::vector<UserObjectName>>("fp_secondary")),
     _n_secondary_vapors(_fp_secondary_names.size()),
     _T_mix_max(getParam<Real>("_T_mix_max"))
 {
-  _fp_primary = &getUserObject<SinglePhaseFluidProperties>("fp_primary");
-
   _fp_secondary.resize(_n_secondary_vapors);
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
     _fp_secondary[i] = &getUserObjectByName<SinglePhaseFluidProperties>(_fp_secondary_names[i]);

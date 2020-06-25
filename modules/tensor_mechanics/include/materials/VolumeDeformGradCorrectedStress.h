@@ -33,9 +33,9 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _pre_stress;
   const MaterialProperty<RankTwoTensor> & _deformation_gradient;
-  const MaterialProperty<RankFourTensor> * _pre_Jacobian_mult;
+  const MaterialProperty<RankFourTensor> * const _pre_Jacobian_mult;
 
   /// The stress tensor transformed to the current configuration
   MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<RankFourTensor> * _Jacobian_mult;
+  MaterialProperty<RankFourTensor> * const _Jacobian_mult;
 };

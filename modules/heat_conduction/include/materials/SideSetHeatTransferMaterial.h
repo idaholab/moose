@@ -27,7 +27,7 @@ protected:
   /// Material conductivity
   const Function & _kgap;
   /// Variable to compute conductivity
-  const VariableValue * _Tk;
+  const VariableValue * const _Tk;
   /// Gap width
   const Function & _dgap;
   /// Gap bulk temperature
@@ -39,8 +39,8 @@ protected:
   const Function & _eps_p;
   const Function & _eps_m;
   /// Surface reflectivities
-  const Function * _rho_p;
-  const Function * _rho_m;
+  const Function * const _rho_p;
+  const Function * const _rho_m;
 
   /// Material property handles
   MaterialProperty<Real> & _cond;

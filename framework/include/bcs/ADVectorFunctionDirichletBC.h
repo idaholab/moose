@@ -27,7 +27,7 @@ protected:
   virtual ADRealVectorValue computeQpResidual() override;
 
   /// Optional vectorValue function
-  const Function * _function;
+  const Function * const _function;
 
   /// x component function
   const Function & _function_x;

@@ -30,7 +30,7 @@ protected:
 private:
   const MaterialProperty<Real> & _M;
   const bool _has_MJac;
-  const MaterialProperty<Real> * _DM;
+  const MaterialProperty<Real> * const _DM;
 
   const MooseEnum _log_approach;
   const Real _tol;
