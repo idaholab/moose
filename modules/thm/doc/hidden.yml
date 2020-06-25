@@ -122,8 +122,6 @@
 - /Components/PipeConnectable
 - /Components/PrescribedReactorPower
 - /Components/TotalPower
-- /Components/Shaft
-- /Components/ShaftConnectedMotor
 - /Components/SolidWall
 - /Components/SupersonicInlet
 - /Components/SimpleTurbine1Phase
