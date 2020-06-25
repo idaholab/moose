@@ -13,17 +13,18 @@
 #include "AuxKernel.h"
 
 // Forward declarations
-template <typename T = Real, bool is_ad = false>
+template <typename T = Real, bool is_ad = false, typename RT = Real>
 class MaterialAuxBaseTempl;
 
 template <>
 InputParameters validParams<MaterialAuxBaseTempl<>>();
 
 /**
- * A base class for the various Material related AuxKernal objects
+ * A base class for the various Material related AuxKernal objects.
+ * \p RT is short for return type
  */
-template <typename T, bool is_ad>
-class MaterialAuxBaseTempl : public AuxKernel
+template <typename T, bool is_ad, typename RT>
+class MaterialAuxBaseTempl : public AuxKernelTempl<RT>
 {
 public:
   static InputParameters validParams();
@@ -35,10 +36,10 @@ public:
   MaterialAuxBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue() override;
+  virtual RT computeValue() override;
 
   /// Returns material property values at quadrature points
-  virtual Real getRealValue() = 0;
+  virtual RT getRealValue() = 0;
 
   /// Reference to the material property for this AuxKernel
   const GenericMaterialProperty<T, is_ad> & _prop;
@@ -48,37 +49,36 @@ private:
   const Real _factor;
 
   /// Value to be added to the material property
-  const Real _offset;
+  const RT _offset;
 };
 
-template <typename T, bool is_ad>
+template <typename T, bool is_ad, typename RT>
 InputParameters
-MaterialAuxBaseTempl<T, is_ad>::validParams()
+MaterialAuxBaseTempl<T, is_ad, RT>::validParams()
 {
-  InputParameters params = AuxKernel::validParams();
+  InputParameters params = AuxKernelTempl<RT>::validParams();
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
   params.addParam<Real>(
       "factor", 1, "The factor by which to multiply your material property for visualization");
-  params.addParam<Real>(
-      "offset", 0, "The offset to add to your material property for visualization");
+  params.addParam<RT>("offset", 0, "The offset to add to your material property for visualization");
   return params;
 }
 
-template <typename T, bool is_ad>
-MaterialAuxBaseTempl<T, is_ad>::MaterialAuxBaseTempl(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _prop(getGenericMaterialProperty<T, is_ad>("property")),
-    _factor(getParam<Real>("factor")),
-    _offset(getParam<Real>("offset"))
+template <typename T, bool is_ad, typename RT>
+MaterialAuxBaseTempl<T, is_ad, RT>::MaterialAuxBaseTempl(const InputParameters & parameters)
+  : AuxKernelTempl<RT>(parameters),
+    _prop(this->template getGenericMaterialProperty<T, is_ad>("property")),
+    _factor(this->template getParam<Real>("factor")),
+    _offset(this->template getParam<RT>("offset"))
 {
 }
 
-template <typename T, bool is_ad>
-Real
-MaterialAuxBaseTempl<T, is_ad>::computeValue()
+template <typename T, bool is_ad, typename RT>
+RT
+MaterialAuxBaseTempl<T, is_ad, RT>::computeValue()
 {
   return _factor * getRealValue() + _offset;
 }
 
 template <typename T = Real>
-using MaterialAuxBase = MaterialAuxBaseTempl<T, false>;
+using MaterialAuxBase = MaterialAuxBaseTempl<T, false, Real>;
