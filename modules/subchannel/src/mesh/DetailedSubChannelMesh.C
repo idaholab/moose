@@ -2,7 +2,6 @@
 
 #include <array>
 #include <cmath>
-
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
