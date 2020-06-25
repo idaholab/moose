@@ -71,8 +71,8 @@ protected:
   Real _shear_modulus;
   Real _youngs_modulus;
 
-  const Function * const _youngs_modulus_function;
-  const Function * const _poissons_ratio_function;
+  const Function * _youngs_modulus_function;
+  const Function * _poissons_ratio_function;
 
   const CRACKING_RELEASE _cracking_release;
   Real _cracking_stress;
@@ -93,7 +93,7 @@ protected:
   const VariableValue & _temperature_old;
   const VariableGradient & _temp_grad;
   const Real _alpha;
-  const Function * const _alpha_function;
+  const Function * _alpha_function;
   PiecewiseLinear * _piecewise_linear_alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;

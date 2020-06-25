@@ -47,7 +47,7 @@ protected:
   const VariableValue & _temperature;
   const VariableValue & _temperature_old;
   const Real _alpha;
-  const Function * const _alpha_function;
+  const Function * _alpha_function;
   bool _has_stress_free_temp;
   Real _stress_free_temp;
   bool _mean_alpha_function;
