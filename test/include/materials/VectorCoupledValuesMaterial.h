@@ -25,14 +25,18 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
+  const bool _request_dotdot;
+
   const VectorVariableValue & _value;
+  const ADVectorVariableValue & _ad_value;
   const VectorVariableValue & _dot;
-  const VectorVariableValue & _dot_dot;
+  const VectorVariableValue * _dot_dot;
   const VariableValue & _dot_du;
-  const VariableValue & _dot_dot_du;
+  const VariableValue * _dot_dot_du;
 
   const std::string & _var_name;
   MaterialProperty<RealVectorValue> & _value_prop;
+  ADMaterialProperty<RealVectorValue> & _ad_value_prop;
   MaterialProperty<RealVectorValue> & _dot_prop;
   MaterialProperty<RealVectorValue> & _dot_dot_prop;
   MaterialProperty<Real> & _dot_du_prop;

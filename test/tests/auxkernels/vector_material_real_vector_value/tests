@@ -1,0 +1,10 @@
+[Tests]
+  [exo]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to output vector auxiliary variables based on the values of vector material properties, regardless of whether the material properties are computed using automatic differentiation or not.'
+    design = 'VectorMaterialRealVectorValueAux.md'
+    issues = '#15495'
+  []
+[]
