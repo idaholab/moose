@@ -9,21 +9,17 @@
 
 #pragma once
 
-#include "ADKernelValue.h"
+#include "ADTimeDerivative.h"
 
-/**
- * This class computes the residual and Jacobian contributions for
- * temperature advection
- */
-class INSADTemperatureAdvection : public ADKernelValue
+class INSADHeatConductionTimeDerivative : public ADTimeDerivative
 {
 public:
   static InputParameters validParams();
 
-  INSADTemperatureAdvection(const InputParameters & parameters);
+  INSADHeatConductionTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual ADReal precomputeQpResidual() override;
+  ADReal precomputeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _temperature_convective_strong_residual;
+  const ADMaterialProperty<Real> & _temperature_td_strong_residual;
 };

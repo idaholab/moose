@@ -9,21 +9,21 @@
 
 #pragma once
 
-#include "ADKernelValue.h"
+#include "ADKernelSUPG.h"
 
 /**
  * This class computes the residual and Jacobian contributions for
- * temperature advection
+ * temperature/energy equation SUPG stabilization
  */
-class INSADTemperatureAdvection : public ADKernelValue
+class INSADTemperatureSUPG : public ADKernelSUPG
 {
 public:
   static InputParameters validParams();
 
-  INSADTemperatureAdvection(const InputParameters & parameters);
+  INSADTemperatureSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADReal precomputeQpResidual() override;
+  ADReal precomputeQpStrongResidual() override;
 
-  const ADMaterialProperty<Real> & _temperature_convective_strong_residual;
+  const ADMaterialProperty<Real> & _temperature_strong_residual;
 };

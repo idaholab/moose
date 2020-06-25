@@ -8,7 +8,6 @@
     ymax = 1.0
     nx = 16
     ny = 16
-    elem_type = QUAD9
   []
   [./corner_node]
     type = ExtraNodesetGenerator
@@ -18,46 +17,22 @@
   [../]
 []
 
-[AuxVariables]
-  [vel_x]
-    order = SECOND
-  []
-  [vel_y]
-    order = SECOND
-  []
-[]
-
-[AuxKernels]
-  [vel_x]
-    type = VectorVariableComponentAux
-    variable = vel_x
-    vector_variable = velocity
-    component = 'x'
-  []
-  [vel_y]
-    type = VectorVariableComponentAux
-    variable = vel_y
-    vector_variable = velocity
-    component = 'y'
-  []
-[]
-
 [Variables]
   [./velocity]
-    order = SECOND
     family = LAGRANGE_VEC
   [../]
-
-  [./T]
-    order = SECOND
-    [./InitialCondition]
-      type = ConstantIC
-      value = 1.0
-    [../]
-  [../]
-
   [./p]
   [../]
+  [temperature][]
+[]
+
+[ICs]
+  [velocity]
+    type = VectorConstantIC
+    x_value = 1e-15
+    y_value = 1e-15
+    variable = velocity
+  []
 []
 
 [Kernels]
@@ -65,10 +40,9 @@
     type = INSADMass
     variable = p
   [../]
-
-  [./momentum_time]
-    type = INSADMomentumTimeDerivative
-    variable = velocity
+  [./mass_pspg]
+    type = INSADMassPSPG
+    variable = p
   [../]
 
   [./momentum_convection]
@@ -88,21 +62,28 @@
     integrate_p_by_parts = true
   [../]
 
- [./temperature_time]
-   type = INSADHeatConductionTimeDerivative
-   variable = T
- [../]
+  [./momentum_supg]
+    type = INSADMomentumSUPG
+    variable = velocity
+    velocity = velocity
+  [../]
 
  [./temperature_advection]
    type = INSADTemperatureAdvection
-   variable = T
+   variable = temperature
  [../]
 
  [./temperature_conduction]
    type = ADHeatConduction
-   variable = T
+   variable = temperature
    thermal_conductivity = 'k'
  [../]
+
+  [temperature_supg]
+    type = INSADTemperatureSUPG
+    variable = temperature
+    velocity = velocity
+  []
 []
 
 [BCs]
@@ -119,24 +100,24 @@
     function_x = 'lid_function'
   [../]
 
-  [./T_hot]
-    type = DirichletBC
-    variable = T
-    boundary = 'bottom'
-    value = 1
-  [../]
-
-  [./T_cold]
-    type = DirichletBC
-    variable = T
-    boundary = 'top'
-    value = 0
-  [../]
-
   [./pressure_pin]
     type = DirichletBC
     variable = p
     boundary = 'pinned_node'
+    value = 0
+  [../]
+
+  [./temperature_hot]
+    type = DirichletBC
+    variable = temperature
+    boundary = 'bottom'
+    value = 1
+  [../]
+
+  [./temperature_cold]
+    type = DirichletBC
+    variable = temperature
+    boundary = 'top'
     value = 0
   [../]
 []
@@ -148,10 +129,10 @@
     prop_values = '1  1  1  .01'
   [../]
   [ins_mat]
-    type = INSAD3Eqn
+    type = INSADStabilized3Eqn
     velocity = velocity
     pressure = p
-    temperature = T
+    temperature = temperature
   []
 []
 
@@ -165,32 +146,16 @@
   [../]
 []
 
-[Preconditioning]
-  [./SMP]
-    type = SMP
-    full = true
-    solve_type = 'NEWTON'
-  [../]
-[]
-
 [Executioner]
-  type = Transient
-  # Run for 100+ timesteps to reach steady state.
-  num_steps = 5
-  dt = .5
-  dtmin = .5
-  petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -sub_pc_factor_levels'
-  petsc_options_value = 'asm      2               ilu          4'
+  type = Steady
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -sub_pc_factor_levels -ksp_gmres_restart'
+  petsc_options_value = 'asm      6                     200'
   line_search = 'none'
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-13
   nl_max_its = 6
-  l_tol = 1e-6
-  l_max_its = 500
 []
 
 [Outputs]
-  file_base = lid_driven_out
   exodus = true
-  perf_graph = true
 []

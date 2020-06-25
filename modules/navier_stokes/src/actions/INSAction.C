@@ -116,8 +116,11 @@ INSAction::validParams()
       "velocity_scaling", RealVectorValue(1, 1, 1), "Scaling for the velocity variables");
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure, assumed constant everywhere");
+
+  // We perturb slightly from zero to avoid divide by zero exceptions from stabilization terms
+  // involving a velocity norm in the denominator
   params.addParam<RealVectorValue>("initial_velocity",
-                                   RealVectorValue(0, 0, 0),
+                                   RealVectorValue(1e-15, 1e-15, 1e-15),
                                    "The initial velocity, assumed constant everywhere");
 
   params.addParamNamesToGroup(
@@ -281,8 +284,10 @@ INSAction::act()
     }
 
     // for non-stablized form, the FE order for pressure need to be at least one order lower
-    if (!getParam<bool>("supg"))
-      params.set<MooseEnum>("order") = _fe_type.order.get_order() - 1;
+    int order = _fe_type.order.get_order();
+    if (!getParam<bool>("pspg"))
+      order -= 1;
+    params.set<MooseEnum>("order") = order;
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("pressure_scaling")};
     _problem->addVariable(var_type, NS::pressure, params);
   }
@@ -303,7 +308,7 @@ INSAction::act()
           params.set<Real>("y_value") = vvalue(1);
         if (_dim >= 3)
           params.set<Real>("z_value") = vvalue(2);
-        _problem->addInitialCondition("VectorConstantIC", "pressure_ic", params);
+        _problem->addInitialCondition("VectorConstantIC", "velocity_ic", params);
       }
     }
     else
@@ -386,35 +391,56 @@ INSAction::act()
     }
   }
 
-  if (_current_task == "add_material")
+  if (_current_task == "add_material" && _use_ad)
   {
-    if (_use_ad)
+    auto set_common_parameters = [&](InputParameters & params) {
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<CoupledName>("velocity") = {NS::velocity};
+      params.set<CoupledName>("pressure") = {NS::pressure};
+      params.set<MaterialPropertyName>("mu_name") =
+          getParam<MaterialPropertyName>("dynamic_viscosity_name");
+      params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
+    };
+
+    auto set_common_3eqn_parameters = [&](InputParameters & params) {
+      set_common_parameters(params);
+      params.set<CoupledName>("temperature") = {_temperature_variable_name};
+      params.set<MaterialPropertyName>("cp_name") =
+          getParam<MaterialPropertyName>("specific_heat_name");
+      params.set<MaterialPropertyName>("k_name") =
+          getParam<MaterialPropertyName>("thermal_conductivity_name");
+    };
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      if (getParam<bool>("supg") || getParam<bool>("pspg"))
+      {
+        InputParameters params = _factory.getValidParams("INSADStabilized3Eqn");
+        set_common_3eqn_parameters(params);
+        params.set<Real>("alpha") = getParam<Real>("alpha");
+        _problem->addMaterial("INSADStabilized3Eqn", "ins_ad_material", params);
+      }
+      else
+      {
+        InputParameters params = _factory.getValidParams("INSAD3Eqn");
+        set_common_3eqn_parameters(params);
+        _problem->addMaterial("INSAD3Eqn", "ins_ad_material", params);
+      }
+    }
+    else
     {
       if (getParam<bool>("supg") || getParam<bool>("pspg"))
       {
         InputParameters params = _factory.getValidParams("INSADTauMaterial");
-        if (_blocks.size() > 0)
-          params.set<std::vector<SubdomainName>>("block") = _blocks;
-        params.set<CoupledName>("velocity") = {NS::velocity};
-        params.set<CoupledName>("pressure") = {NS::pressure};
-        params.set<MaterialPropertyName>("mu_name") =
-            getParam<MaterialPropertyName>("dynamic_viscosity_name");
-        params.set<MaterialPropertyName>("rho_name") =
-            getParam<MaterialPropertyName>("density_name");
+        set_common_parameters(params);
         params.set<Real>("alpha") = getParam<Real>("alpha");
         _problem->addMaterial("INSADTauMaterial", "ins_ad_material", params);
       }
       else
       {
         InputParameters params = _factory.getValidParams("INSADMaterial");
-        if (_blocks.size() > 0)
-          params.set<std::vector<SubdomainName>>("block") = _blocks;
-        params.set<CoupledName>("velocity") = {NS::velocity};
-        params.set<CoupledName>("pressure") = {NS::pressure};
-        params.set<MaterialPropertyName>("mu_name") =
-            getParam<MaterialPropertyName>("dynamic_viscosity_name");
-        params.set<MaterialPropertyName>("rho_name") =
-            getParam<MaterialPropertyName>("density_name");
+        set_common_parameters(params);
         _problem->addMaterial("INSADMaterial", "ins_ad_material", params);
       }
     }
@@ -435,15 +461,11 @@ INSAction::addINSTimeKernels()
 
     if (getParam<bool>("add_temperature_equation"))
     {
-      const std::string kernel_type = "ADHeatConductionTimeDerivative";
+      const std::string kernel_type = "INSADHeatConductionTimeDerivative";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<MaterialPropertyName>("density_name") =
-          getParam<MaterialPropertyName>("density_name");
-      params.set<MaterialPropertyName>("specific_heat") =
-          getParam<MaterialPropertyName>("specific_heat_name");
       _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
     }
   }
@@ -638,7 +660,6 @@ INSAction::addINSTemperature()
       const std::string kernel_type = "INSADTemperatureAdvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
-      params.set<std::vector<VariableName>>("velocity") = {NS::velocity};
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addKernel(kernel_type, "ins_temperature_convection", params);
@@ -652,6 +673,18 @@ INSAction::addINSTemperature()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addKernel(kernel_type, "ins_temperature_conduction", params);
+    }
+
+    if (getParam<bool>("supg"))
+    {
+      const std::string kernel_type = "INSADTemperatureSUPG";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<CoupledName>("velocity") = {NS::velocity};
+      params.set<MaterialPropertyName>("tau_name") = "tau";
+      _problem->addKernel(kernel_type, "ins_temperature_supg", params);
     }
   }
   else
