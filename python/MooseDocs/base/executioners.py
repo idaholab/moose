@@ -431,8 +431,16 @@ class ParallelBarrier(Executioner):
             p.start()
 
         for job in jobs:
-            self._updateAttributes(page_attributes) # run local updates one last time before finalizing
             job.join()
+
+        # This is needed to maintain the page attributes during live serving. In parallel, when the
+        # Executioner executes each process created above gets a copy of self._page_objects. Each
+        # process is running the _target method and keeping the attributes of the pages up to date
+        # across the processes. This call updates the attributes of the original pages that
+        # were copied when the processes start. Thus, when new processes are started during a
+        # live reload the attributes are correct when the copy is performed again for the new
+        # processes.
+        self._updateAttributes(page_attributes)
 
     def _target(self, nodes, barrier, page_attributes):
         """Target function for multiprocessing.Process calls."""
