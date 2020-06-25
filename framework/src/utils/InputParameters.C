@@ -58,6 +58,7 @@ InputParameters::clear()
   Parameters::clear();
   _params.clear();
   _coupled_vars.clear();
+  _new_to_deprecated_coupled_vars.clear();
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
@@ -131,6 +132,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
   _coupled_vars = rhs._coupled_vars;
+  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _allow_copy = rhs._allow_copy;
   _block_fullpath = rhs._block_fullpath;
   _block_location = rhs._block_location;
@@ -155,6 +157,8 @@ InputParameters::operator+=(const InputParameters & rhs)
 
   // Collapse nesting and moose object syntax hiding are not modified with +=
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
+  _new_to_deprecated_coupled_vars.insert(rhs._new_to_deprecated_coupled_vars.begin(),
+                                         rhs._new_to_deprecated_coupled_vars.end());
   return *this;
 }
 
@@ -187,15 +191,17 @@ InputParameters::addCoupledVar(const std::string & name, const std::string & doc
 }
 
 void
-InputParameters::addDeprecatedCoupledVar(const std::string & name,
+InputParameters::addDeprecatedCoupledVar(const std::string & old_name,
+                                         const std::string & new_name,
                                          const std::string & doc_string,
                                          const std::string & deprecation_message)
 {
   _show_deprecated_message = false;
-  addParam<std::vector<VariableName>>(name, doc_string);
-  _coupled_vars.insert(name);
+  addParam<std::vector<VariableName>>(old_name, doc_string);
+  _coupled_vars.insert(old_name);
+  _new_to_deprecated_coupled_vars.emplace(new_name, old_name);
 
-  _params[name]._deprecation_message = deprecation_message;
+  _params[old_name]._deprecation_message = deprecation_message;
   _show_deprecated_message = true;
 }
 

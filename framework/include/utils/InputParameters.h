@@ -29,6 +29,7 @@ class FunctionParserBase
 #endif
 
 #include <tuple>
+#include <unordered_map>
 
 // Forward declarations
 class Action;
@@ -311,11 +312,13 @@ public:
    * This method adds a deprecated coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found
-   * @param name The name of the coupled variable
+   * @param old_name The deprecated name of the coupled variable
+   * @param new_name The new name of the coupled variable
    * @param doc_string A description of what the coupled variable should be
    * @param deprecation_message The deprecation message to convey to the user
    */
-  void addDeprecatedCoupledVar(const std::string & name,
+  void addDeprecatedCoupledVar(const std::string & old_name,
+                               const std::string & new_name,
                                const std::string & doc_string,
                                const std::string & deprecation_message);
 
@@ -581,6 +584,14 @@ public:
    * Return the coupled variable parameter names.
    */
   const std::set<std::string> & getCoupledVariableParamNames() const { return _coupled_vars; }
+
+  /**
+   * Return the new to deprecated variable name map
+   */
+  const std::unordered_map<std::string, std::string> & getNewToDeprecatedVarMap() const
+  {
+    return _new_to_deprecated_coupled_vars;
+  }
 
   /**
    * Return whether or not the coupled variable exists
@@ -994,6 +1005,9 @@ private:
 
   /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
+
+  /// A map from deprecated coupled variable names to the new blessed name
+  std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
