@@ -74,7 +74,7 @@ protected:
   std::vector<const MaterialProperty<RankTwoTensor> *> _deigenstrain_dT;
 
   const bool _out_of_plane_strain_coupled;
-  const VariableValue * _out_of_plane_strain;
+  const VariableValue * const _out_of_plane_strain;
   const unsigned int _out_of_plane_strain_var;
   const unsigned int _out_of_plane_direction;
 

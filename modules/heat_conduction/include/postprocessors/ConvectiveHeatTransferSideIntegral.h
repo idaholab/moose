@@ -20,16 +20,16 @@ protected:
   const VariableValue & _T_wall;
 
   /// fluid temperature variable
-  const VariableValue * _T_fluid;
+  const VariableValue * const _T_fluid;
 
   /// fluid temperature variable
-  const GenericMaterialProperty<Real, is_ad> * _T_fluid_mat;
+  const GenericMaterialProperty<Real, is_ad> * const _T_fluid_mat;
 
   /// the heat transfer coefficient variable
-  const VariableValue * _hw;
+  const VariableValue * const _hw;
 
   /// the heat transfer coefficient material, either variable or matprop need to be provided
-  const GenericMaterialProperty<Real, is_ad> * _hw_mat;
+  const GenericMaterialProperty<Real, is_ad> * const _hw_mat;
 };
 
 typedef ConvectiveHeatTransferSideIntegralTempl<false> ConvectiveHeatTransferSideIntegral;

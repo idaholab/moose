@@ -33,8 +33,7 @@ protected:
   virtual Real computeValue() override;
 
   const VariableValue & _src;
-  const Real * _pp_on_source;
-  const Real * _shift;
+  const Real * const _pp_on_source;
+  const Real * const _shift;
   Real _normal_factor;
 };
-

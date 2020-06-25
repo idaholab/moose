@@ -42,8 +42,8 @@ protected:
   ///@{
   const MaterialProperty<T> & _prop;
   const MaterialProperty<T> & _prop_neighbor;
-  const MaterialProperty<T> * _prop_old;
-  const MaterialProperty<T> * _prop_neighbor_old;
+  const MaterialProperty<T> * const _prop_old;
+  const MaterialProperty<T> * const _prop_neighbor_old;
   ///@}
 };
 

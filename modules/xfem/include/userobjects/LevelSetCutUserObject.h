@@ -46,5 +46,5 @@ protected:
   const System & _system;
 
   /// the subproblem solution vector
-  const NumericVector<Number> * _solution;
+  const NumericVector<Number> & _solution;
 };

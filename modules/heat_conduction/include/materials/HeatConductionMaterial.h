@@ -38,10 +38,10 @@ protected:
 
   GenericMaterialProperty<Real, is_ad> & _thermal_conductivity;
   MaterialProperty<Real> & _thermal_conductivity_dT;
-  const Function * _thermal_conductivity_temperature_function;
+  const Function * const _thermal_conductivity_temperature_function;
 
   GenericMaterialProperty<Real, is_ad> & _specific_heat;
-  const Function * _specific_heat_temperature_function;
+  const Function * const _specific_heat_temperature_function;
 
 private:
   void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);

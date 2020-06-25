@@ -34,7 +34,7 @@ protected:
   };
 
   /// A Userobject that carries the subblock ID for all elements
-  const SubblockIndexProvider * _subblock_id_provider;
+  const SubblockIndexProvider * const _subblock_id_provider;
 
 private:
   /// Whether out-of-plane strain scalar variables are coupled

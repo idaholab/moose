@@ -48,5 +48,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
 
   /// Current value of the strain increment for incremental models
-  const MaterialProperty<RankTwoTensor> * _strain_increment;
+  const MaterialProperty<RankTwoTensor> * const _strain_increment;
 };

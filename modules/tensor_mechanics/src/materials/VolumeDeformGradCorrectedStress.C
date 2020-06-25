@@ -32,14 +32,15 @@ VolumeDeformGradCorrectedStress::VolumeDeformGradCorrectedStress(const InputPara
   : DerivativeMaterialInterface<Material>(parameters),
     _pre_stress(getMaterialProperty<RankTwoTensor>("pre_stress_name")),
     _deformation_gradient(getMaterialProperty<RankTwoTensor>("deform_grad_name")),
-    _stress(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("stress_name")))
+    _pre_Jacobian_mult(isParamValid("pre_jacobian_name")
+                           ? &getMaterialProperty<RankFourTensor>("pre_jacobian_name")
+                           : nullptr),
+    _stress(declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("stress_name"))),
+    _Jacobian_mult(
+        isParamValid("jacobian_name")
+            ? &declareProperty<RankFourTensor>(getParam<MaterialPropertyName>("jacobian_name"))
+            : nullptr)
 {
-  if (isParamValid("pre_jacobian_name"))
-    _pre_Jacobian_mult = &getMaterialProperty<RankFourTensor>("pre_jacobian_name");
-
-  if (isParamValid("jacobian_name"))
-    _Jacobian_mult =
-        &declareProperty<RankFourTensor>(getParam<MaterialPropertyName>("jacobian_name"));
 }
 
 void
@@ -60,6 +61,6 @@ VolumeDeformGradCorrectedStress::computeQpStress()
   _stress[_qp] = _deformation_gradient[_qp] * _pre_stress[_qp] *
                  _deformation_gradient[_qp].transpose() / _deformation_gradient[_qp].det();
 
-  if (isParamValid("pre_jacobian_name") && isParamValid("jacobian_name"))
+  if (_Jacobian_mult && _pre_Jacobian_mult)
     (*_Jacobian_mult)[_qp] = (*_pre_Jacobian_mult)[_qp];
 }

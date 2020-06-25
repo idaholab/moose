@@ -20,7 +20,7 @@ StatefulAuxLowerD::validParams()
 }
 
 StatefulAuxLowerD::StatefulAuxLowerD(const InputParameters & parameters)
-  : AuxKernel(parameters), _flux(&coupledValueLower("coupled_variable"))
+  : AuxKernel(parameters), _flux(coupledValueLower("coupled_variable"))
 {
   if (!this->_bnd)
     mooseError("StatefulAuxLowerD can only be applied to boundaries (set boundary = something).");
@@ -30,7 +30,7 @@ Real
 StatefulAuxLowerD::computeValue()
 {
   Real coef;
-  Real flux = (*_flux)[_qp];
+  Real flux = _flux[_qp];
 
   if (std::abs(flux) > TOLERANCE * TOLERANCE)
     coef = 1 / std::sqrt(std::abs(flux));

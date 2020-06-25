@@ -29,7 +29,7 @@ protected:
   //  yield stress and hardening property input
   Real _yield_stress;
   const Real _hardening_constant;
-  const Function * _hardening_function;
+  const Function * const _hardening_function;
 
   /// convergence tolerance
   Real _absolute_tolerance;

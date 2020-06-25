@@ -31,7 +31,7 @@ protected:
   const bool _use_material_timestep_limit;
 
   /// Pointer to the material property containing the time step limit
-  const MaterialProperty<Real> * _matl_time_step;
+  const MaterialProperty<Real> * const _matl_time_step;
 
   /// Current time step limit from the material properties
   Real _matl_value;
@@ -40,8 +40,8 @@ protected:
   const bool _use_elements_changed;
 
   ///@{ Material property used to determine if elements have changed
-  const MaterialProperty<Real> * _changed_property;
-  const MaterialProperty<Real> * _changed_property_old;
+  const MaterialProperty<Real> * const _changed_property;
+  const MaterialProperty<Real> * const _changed_property_old;
   ///@}
 
   /// Target number of changed elements used to determine if we need to change the time step

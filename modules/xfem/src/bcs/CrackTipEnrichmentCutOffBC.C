@@ -27,7 +27,7 @@ CrackTipEnrichmentCutOffBC::validParams()
 CrackTipEnrichmentCutOffBC::CrackTipEnrichmentCutOffBC(const InputParameters & parameters)
   : DirichletBC(parameters),
     _cut_off_radius(getParam<Real>("cut_off_radius")),
-    _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition"))
+    _crack_front_definition(getUserObject<CrackFrontDefinition>("crack_front_definition"))
 {
 }
 
@@ -35,7 +35,7 @@ bool
 CrackTipEnrichmentCutOffBC::shouldApply()
 {
   Real r, theta;
-  _crack_front_definition->calculateRThetaToCrackFront((*_current_node), r, theta);
+  _crack_front_definition.calculateRThetaToCrackFront((*_current_node), r, theta);
 
   if (r > _cut_off_radius)
     return true;

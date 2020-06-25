@@ -210,7 +210,7 @@ protected:
   std::vector<FeatureData> _feature_sets_old;
 
   /// An optional IC UserObject which can provide initial data structures to this object.
-  const PolycrystalUserObjectBase * _poly_ic_uo;
+  const PolycrystalUserObjectBase * const _poly_ic_uo;
 
   /**
    * Verbosity level controlling the amount of information printed to the console.

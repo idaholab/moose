@@ -11,8 +11,8 @@
 
 EnrichmentFunctionCalculation::EnrichmentFunctionCalculation(
     const CrackFrontDefinition * crack_front_definition)
+  : _crack_front_definition(*crack_front_definition)
 {
-  _crack_front_definition = crack_front_definition;
 }
 
 unsigned int
@@ -20,7 +20,7 @@ EnrichmentFunctionCalculation::crackTipEnrichementFunctionAtPoint(const Point & 
                                                                   std::vector<Real> & B)
 {
   unsigned int crack_front_point_index =
-      _crack_front_definition->calculateRThetaToCrackFront(point, _r, _theta);
+      _crack_front_definition.calculateRThetaToCrackFront(point, _r, _theta);
 
   if (MooseUtils::absoluteFuzzyEqual(_r, 0.0))
     mooseError("EnrichmentFunctionCalculation: the distance between a point and the crack "
@@ -44,7 +44,7 @@ EnrichmentFunctionCalculation::crackTipEnrichementFunctionDerivativeAtPoint(
     const Point & point, std::vector<RealVectorValue> & dB)
 {
   unsigned int crack_front_point_index =
-      _crack_front_definition->calculateRThetaToCrackFront(point, _r, _theta);
+      _crack_front_definition.calculateRThetaToCrackFront(point, _r, _theta);
 
   if (MooseUtils::absoluteFuzzyEqual(_r, 0.0))
     mooseError("EnrichmentFunctionCalculation: the distance between a point and the crack "
@@ -79,5 +79,5 @@ EnrichmentFunctionCalculation::rotateFromCrackFrontCoordsToGlobal(const RealVect
                                                                   RealVectorValue & rotated_vector,
                                                                   const unsigned int point_index)
 {
-  rotated_vector = _crack_front_definition->rotateFromCrackFrontCoordsToGlobal(vector, point_index);
+  rotated_vector = _crack_front_definition.rotateFromCrackFrontCoordsToGlobal(vector, point_index);
 }

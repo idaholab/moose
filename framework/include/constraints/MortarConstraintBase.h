@@ -92,7 +92,7 @@ private:
 
 protected:
   /// Pointer to the lagrange multipler variable. nullptr if none
-  const MooseVariable * _var;
+  const MooseVariable * const _var;
 
   /// Reference to the slave variable
   const MooseVariable & _slave_var;

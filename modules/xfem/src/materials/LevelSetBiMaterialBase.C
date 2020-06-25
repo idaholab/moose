@@ -41,7 +41,7 @@ LevelSetBiMaterialBase::LevelSetBiMaterialBase(const InputParameters & parameter
                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
                               .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
-    _solution(_system.current_local_solution.get()),
+    _solution(*_system.current_local_solution.get()),
     _use_positive_property(false)
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
@@ -58,7 +58,7 @@ LevelSetBiMaterialBase::computeProperties()
   const Node * node = _current_elem->node_ptr(0);
 
   dof_id_type ls_dof_id = node->dof_number(_system.number(), _level_set_var_number, 0);
-  Number ls_node_value = (*_solution)(ls_dof_id);
+  Number ls_node_value = _solution(ls_dof_id);
 
   _use_positive_property = false;
 

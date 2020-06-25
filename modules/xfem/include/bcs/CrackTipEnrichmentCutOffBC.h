@@ -29,5 +29,5 @@ protected:
   const Real _cut_off_radius;
 
 private:
-  const CrackFrontDefinition * _crack_front_definition;
+  const CrackFrontDefinition & _crack_front_definition;
 };

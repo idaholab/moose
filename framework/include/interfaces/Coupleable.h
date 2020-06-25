@@ -1217,7 +1217,7 @@ private:
   const bool _is_fv;
 
 private:
-  const MooseObject * _obj;
+  const MooseObject * const _obj;
 };
 
 template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::value, int>::type>

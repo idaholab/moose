@@ -31,13 +31,9 @@ EFieldAdvection::EFieldAdvection(const InputParameters & parameters)
     _efield_coupled(isCoupled("efield")),
     _efield_var(_efield_coupled ? getVectorVar("efield", 0) : nullptr),
     _vector_phi(_efield_coupled ? &_assembly.phi(*_efield_var) : nullptr),
-    _mobility(getParam<Real>("mobility"))
+    _mobility(getParam<Real>("mobility")),
+    _sgn(getParam<MooseEnum>("charge") == "positive" ? 1. : -1.)
 {
-  MooseEnum charge = getParam<MooseEnum>("charge");
-  if (charge == "positive")
-    _sgn = 1.;
-  else
-    _sgn = -1.;
 }
 
 Real

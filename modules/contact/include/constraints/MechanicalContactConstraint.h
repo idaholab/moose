@@ -115,7 +115,7 @@ protected:
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
-  const NumericVector<Number> * _aux_solution;
+  const NumericVector<Number> * const _aux_solution;
 
   /// Whether to include coupling between the master and slave nodes in the Jacobian
   const bool _master_slave_jacobian;

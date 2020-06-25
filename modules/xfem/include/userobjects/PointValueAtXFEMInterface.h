@@ -104,7 +104,7 @@ protected:
   const System & _system;
 
   /// The subproblem solution vector
-  const NumericVector<Number> * _solution;
+  const NumericVector<Number> & _solution;
 
   /// Mapping from point index and its values at the positive level set side
   std::map<unsigned int, Real> _values_positive_level_set_side;

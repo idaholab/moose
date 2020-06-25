@@ -23,5 +23,5 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _vel;
 
   /// The advected quantity
-  const MooseArray<ADReal> * _adv_quant;
+  const MooseArray<ADReal> * const _adv_quant;
 };

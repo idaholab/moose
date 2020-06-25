@@ -61,7 +61,7 @@ protected:
   PerfID registerTimedSection(const std::string & section_name, const unsigned int level);
 
   /// Params
-  const InputParameters * _pg_params;
+  const InputParameters * const _pg_params;
 
   /// The performance graph to add to
   PerfGraph & _perf_graph;

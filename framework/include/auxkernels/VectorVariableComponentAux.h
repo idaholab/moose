@@ -37,10 +37,10 @@ protected:
 
 private:
   /// Pointer to nodal variable value
-  const RealVectorValue * _nodal_variable_value;
+  const RealVectorValue * const _nodal_variable_value;
 
   /// Pointer to elemental variable value
-  const VectorVariableValue * _elemental_variable_value;
+  const VectorVariableValue * const _elemental_variable_value;
 
   /// Desired component
   const int _component;

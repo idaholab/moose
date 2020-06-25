@@ -251,8 +251,8 @@ protected:
   /// Name of the eigenstrain that drives the additional creep strain
   std::string _driving_eigenstrain_name;
   ///@{ Pointer to the value of the driving eigenstrain
-  const MaterialProperty<RankTwoTensor> * _driving_eigenstrain;
-  const MaterialProperty<RankTwoTensor> * _driving_eigenstrain_old;
+  const MaterialProperty<RankTwoTensor> * const _driving_eigenstrain;
+  const MaterialProperty<RankTwoTensor> * const _driving_eigenstrain_old;
   ///@}
 
   /**

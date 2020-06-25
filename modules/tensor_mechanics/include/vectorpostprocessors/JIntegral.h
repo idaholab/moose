@@ -47,7 +47,7 @@ protected:
                          const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
   const MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
-  const MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
+  const MaterialProperty<RealVectorValue> * const _J_thermal_term_vec;
   /// Whether to convert the J-Integral to a stress intensity factor (K)
   bool _convert_J_to_K;
   /// Whether to treat a 3D model as 2D for computation of fracture integrals

@@ -1024,10 +1024,10 @@ private:
   unsigned int _multiapp_number;
 
   /// The mesh from master app
-  const MooseMesh * _master_mesh;
+  const MooseMesh * const _master_mesh;
 
   /// The displaced mesh from master app
-  const MooseMesh * _master_displaced_mesh;
+  const MooseMesh * const _master_displaced_mesh;
 
   /// Holds the mesh modifiers until they have completed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshModifier>> _mesh_modifiers;
