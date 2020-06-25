@@ -1,13 +1,8 @@
 #pragma once
 
-#include "Kernel.h"
+#include "ADKernel.h"
 
-class ConductivityLaplacian;
-
-template <>
-InputParameters validParams<ConductivityLaplacian>();
-
-class ConductivityLaplacian : public Kernel
+class ConductivityLaplacian : public ADKernel
 {
 public:
   static InputParameters validParams();
@@ -15,10 +10,8 @@ public:
   ConductivityLaplacian(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
-  const MaterialProperty<Real> & _conductivity;
-  const MaterialProperty<Real> * const _conductivity_dT;
+  const ADMaterialProperty<Real> & _conductivity;
 };
