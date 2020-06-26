@@ -54,7 +54,7 @@
     type = Exodiff
     input = edge_crack_3d_propagation.i
     exodiff = 'edge_crack_3d_propagation_out.e edge_crack_3d_propagation_out.e-s002 edge_crack_3d_propagation_out.e-s003'
-    abs_zero = 1e-8
+    abs_zero = 1e-7
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
