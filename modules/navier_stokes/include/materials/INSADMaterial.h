@@ -51,8 +51,8 @@ protected:
   /// The strong residual of the mass continuity equation
   ADMaterialProperty<Real> & _mass_strong_residual;
 
-  /// Strong residual corresponding to the momentum convective term
-  ADMaterialProperty<RealVectorValue> & _convective_strong_residual;
+  /// Strong residual corresponding to the momentum advective term
+  ADMaterialProperty<RealVectorValue> & _advective_strong_residual;
 
   /// Strong residual corresponding to the momentum viscous term. This is only used by stabilization
   /// kernels

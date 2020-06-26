@@ -23,6 +23,11 @@ template <typename>
 class MaterialProperty;
 
 /**
+ * Global for adding wall convection parameters
+ */
+void addWallConvectionParams(InputParameters & params);
+
+/**
  * Object for tracking what kernels have been added to an INSAD simulation. This is used to
  * determine what properties to calculate in the INSADMaterial, which is important particularly for
  * ensuring that we have consistenly included all the strong terms for stabilization methods like

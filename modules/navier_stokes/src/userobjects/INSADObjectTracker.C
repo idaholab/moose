@@ -40,4 +40,19 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
                  false,
                  "Whether the simulation has a gravity force imposed on the momentum equation");
   addParam<bool>("has_transient", false, "Whether the simulation is transient");
+
+  addWallConvectionParams(*this);
+}
+
+void
+addWallConvectionParams(InputParameters & params)
+{
+  params.addParam<bool>(
+      "has_wall_convection",
+      false,
+      "Whether for the energy equation there is a heat source/sink due to convection "
+      "from ambient walls/surroundings");
+  params.addParam<Real>("wall_convection_alpha",
+                        "The heat transfer coefficient from from ambient walls/surroundings");
+  params.addParam<Real>("wall_temperature", "The wall/ambient temperature");
 }

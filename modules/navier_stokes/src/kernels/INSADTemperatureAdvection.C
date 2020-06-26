@@ -22,13 +22,13 @@ INSADTemperatureAdvection::validParams()
 
 INSADTemperatureAdvection::INSADTemperatureAdvection(const InputParameters & parameters)
   : ADKernelValue(parameters),
-    _temperature_convective_strong_residual(
-        getADMaterialProperty<Real>("temperature_convective_strong_residual"))
+    _temperature_advective_strong_residual(
+        getADMaterialProperty<Real>("temperature_advective_strong_residual"))
 {
 }
 
 ADReal
 INSADTemperatureAdvection::precomputeQpResidual()
 {
-  return _temperature_convective_strong_residual[_qp];
+  return _temperature_advective_strong_residual[_qp];
 }

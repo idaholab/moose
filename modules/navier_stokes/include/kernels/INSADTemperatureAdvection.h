@@ -25,5 +25,5 @@ public:
 protected:
   virtual ADReal precomputeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _temperature_convective_strong_residual;
+  const ADMaterialProperty<Real> & _temperature_advective_strong_residual;
 };

@@ -31,6 +31,7 @@ INSAD3Eqn::validParams()
 
 INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
   : INSADMaterial(parameters),
+    _temperature(adCoupledValue("temperature")),
     _grad_temperature(adCoupledGradient("temperature")),
     _second_temperature(adCoupledSecond("temperature")),
     _temperature_dot(nullptr),
@@ -40,9 +41,11 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
                 ? &getADMaterialProperty<RealVectorValue>("grad_k_name")
                 : nullptr),
     _temperature_strong_residual(declareADProperty<Real>("temperature_strong_residual")),
-    _temperature_convective_strong_residual(
-        declareADProperty<Real>("temperature_convective_strong_residual")),
-    _temperature_td_strong_residual(declareADProperty<Real>("temperature_td_strong_residual"))
+    _temperature_advective_strong_residual(
+        declareADProperty<Real>("temperature_advective_strong_residual")),
+    _temperature_td_strong_residual(declareADProperty<Real>("temperature_td_strong_residual")),
+    _temperature_wall_convection_strong_residual(
+        declareADProperty<Real>("temperature_wall_convection_strong_residual"))
 {
 }
 
@@ -53,6 +56,12 @@ INSAD3Eqn::initialSetup()
 
   if (_has_transient)
     _temperature_dot = &adCoupledDot("temperature");
+
+  if ((_has_wall_convection = _object_tracker->get<bool>("has_wall_convection")))
+  {
+    _wall_convection_alpha = _object_tracker->get<Real>("wall_convection_alpha");
+    _wall_temperature = _object_tracker->get<Real>("wall_temperature");
+  }
 }
 
 void
@@ -71,14 +80,21 @@ INSAD3Eqn::computeQpProperties()
   // contribution is integrated by parts and hence there is no double calculation (the 'weak' and
   // 'strong' terms are diferent in this case)
 
-  _temperature_convective_strong_residual[_qp] =
+  _temperature_advective_strong_residual[_qp] =
       _rho[_qp] * _cp[_qp] * _velocity[_qp] * _grad_temperature[_qp];
-  _temperature_strong_residual[_qp] += _temperature_convective_strong_residual[_qp];
+  _temperature_strong_residual[_qp] += _temperature_advective_strong_residual[_qp];
 
   if (_has_transient)
   {
     mooseAssert(_temperature_dot, "The temperature time derivative is null");
     _temperature_td_strong_residual[_qp] = _cp[_qp] * _rho[_qp] * (*_temperature_dot)[_qp];
     _temperature_strong_residual[_qp] += _temperature_td_strong_residual[_qp];
+  }
+
+  if (_has_wall_convection)
+  {
+    _temperature_wall_convection_strong_residual[_qp] =
+        _wall_convection_alpha * (_temperature[_qp] - _wall_temperature);
+    _temperature_strong_residual[_qp] += _temperature_wall_convection_strong_residual[_qp];
   }
 }

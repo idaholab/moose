@@ -27,6 +27,7 @@ public:
 protected:
   void computeQpProperties() override;
 
+  const ADVariableValue & _temperature;
   const ADVariableGradient & _grad_temperature;
   const ADVariableSecond & _second_temperature;
   const ADVariableValue * _temperature_dot;
@@ -35,6 +36,11 @@ protected:
   const ADMaterialProperty<RealVectorValue> * const _grad_k;
 
   ADMaterialProperty<Real> & _temperature_strong_residual;
-  ADMaterialProperty<Real> & _temperature_convective_strong_residual;
+  ADMaterialProperty<Real> & _temperature_advective_strong_residual;
   ADMaterialProperty<Real> & _temperature_td_strong_residual;
+  ADMaterialProperty<Real> & _temperature_wall_convection_strong_residual;
+
+  bool _has_wall_convection;
+  Real _wall_convection_alpha;
+  Real _wall_temperature;
 };

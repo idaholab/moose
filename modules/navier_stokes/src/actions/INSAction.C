@@ -13,6 +13,7 @@
 #include "NS.h"
 #include "AddVariableAction.h"
 #include "MooseObject.h"
+#include "INSADObjectTracker.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -41,6 +42,7 @@ INSAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
 
+  // temperature equation parameters
   params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
   params.addParam<MaterialPropertyName>(
       "reference_temperature_name", "temp_ref", "Material property name for reference temperature");
@@ -65,6 +67,7 @@ INSAction::validParams()
                                              "Dirichlet boundaries for temperature equation");
   params.addParam<std::vector<FunctionName>>(
       "temperature_function", std::vector<FunctionName>(), "Temperature on Dirichlet boundaries");
+  addWallConvectionParams(params);
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
@@ -176,6 +179,17 @@ INSAction::INSAction(InputParameters parameters)
   {
     if (getParam<bool>("boussinesq_approximation"))
       mooseError("Boussinesq approximation has not been implemented for non-AD");
+  }
+
+  if (getParam<bool>("has_wall_convection"))
+  {
+    if (!isParamValid("wall_convection_alpha"))
+      paramError("wall_convection_alpha",
+                 "If 'has_wall_convection' is true, then 'wall_convection_alpha' must be set.");
+
+    if (!isParamValid("wall_temperature"))
+      paramError("wall_temperature",
+                 "If 'has_wall_convection' is true, then 'wall_temperature' must be set.");
   }
 }
 
@@ -685,6 +699,18 @@ INSAction::addINSTemperature()
       params.set<CoupledName>("velocity") = {NS::velocity};
       params.set<MaterialPropertyName>("tau_name") = "tau";
       _problem->addKernel(kernel_type, "ins_temperature_supg", params);
+    }
+
+    if (getParam<bool>("has_wall_convection"))
+    {
+      const std::string kernel_type = "INSADTemperatureWallConvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<Real>("alpha") = getParam<Real>("wall_convection_alpha");
+      params.set<Real>("T_wall") = getParam<Real>("wall_temperature");
+      _problem->addKernel(kernel_type, "ins_temperature_wall_convection", params);
     }
   }
   else
