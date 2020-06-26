@@ -92,12 +92,12 @@ SubChannelSolver::execute()
 
   // Set the inlet/outlet/guess for each channel.
   {
-    for (int iz = 0; iz < _mesh->nz_ + 1; iz++) // nz + 1 nodes
+    for (int iz = 0; iz < _mesh->_nz + 1; iz++) // nz + 1 nodes
     {
-      for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++) // n_channels_ = number of channels
+      for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++) // _n_channels = number of channels
       {
         // creates node
-        auto * node = _mesh->nodes_[i_ch][iz];
+        auto * node = _mesh->_nodes[i_ch][iz];
         // Initial enthalpy same everywhere
         h_soln.set(node, _fp.h_from_p_T(_P_out, _T_in));
         T_soln.set(node, _T_in);
@@ -115,33 +115,33 @@ SubChannelSolver::execute()
   }
 
   // Initialize  crossflow / Pressure matrixes and vectors to use in calculation set
-  Eigen::VectorXd Wij(_mesh->n_gaps_);                        // Crossflow vector
-  Eigen::VectorXd WijPrime(_mesh->n_gaps_);                   // turbulent Crossflow vector
-  Eigen::VectorXd Wij_old(_mesh->n_gaps_);                    // Crossflow vector
-  Eigen::MatrixXd Wij_global(_mesh->n_gaps_, _mesh->nz_ + 1); // Crossflow Matrix nz + 1 axial nodes
-  Eigen::VectorXd mdot(_mesh->n_channels_);                   // Mass Flow Vector
-  Eigen::VectorXd mdot_old(_mesh->n_channels_);               // Mass Flow Vector
-  Eigen::MatrixXd mdot_global(_mesh->n_channels_,
-                              _mesh->nz_ + 1); // Mass Flow Matrix nz + 1 axial nodes
-  Eigen::VectorXd P(_mesh->n_channels_);       // Pressure Vector
-  Eigen::MatrixXd P_global_old(_mesh->n_channels_,
-                               _mesh->nz_ + 1); // Pressure Matrix nz + 1 axial nodes
-  Eigen::MatrixXd P_global(_mesh->n_channels_, _mesh->nz_ + 1); // Pressure Matrix nz + 1 axial
+  Eigen::VectorXd Wij(_mesh->_n_gaps);                        // Crossflow vector
+  Eigen::VectorXd WijPrime(_mesh->_n_gaps);                   // turbulent Crossflow vector
+  Eigen::VectorXd Wij_old(_mesh->_n_gaps);                    // Crossflow vector
+  Eigen::MatrixXd Wij_global(_mesh->_n_gaps, _mesh->_nz + 1); // Crossflow Matrix nz + 1 axial nodes
+  Eigen::VectorXd mdot(_mesh->_n_channels);                   // Mass Flow Vector
+  Eigen::VectorXd mdot_old(_mesh->_n_channels);               // Mass Flow Vector
+  Eigen::MatrixXd mdot_global(_mesh->_n_channels,
+                              _mesh->_nz + 1); // Mass Flow Matrix nz + 1 axial nodes
+  Eigen::VectorXd P(_mesh->_n_channels);       // Pressure Vector
+  Eigen::MatrixXd P_global_old(_mesh->_n_channels,
+                               _mesh->_nz + 1); // Pressure Matrix nz + 1 axial nodes
+  Eigen::MatrixXd P_global(_mesh->_n_channels, _mesh->_nz + 1); // Pressure Matrix nz + 1 axial
                                                                 // nodes
-  Eigen::MatrixXd PCYCLES(_mesh->nz_, 2);
-  Eigen::MatrixXd Temp_out(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Temp_in(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Enthalpy_out(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Pressure_out(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd mdotin(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd mdotout(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Pressure_in(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Enthalpy_in(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd rho_in(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd rho_out(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Area(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Gin(_mesh->ny_, _mesh->nx_);
-  Eigen::MatrixXd Gout(_mesh->ny_, _mesh->nx_);
+  Eigen::MatrixXd PCYCLES(_mesh->_nz, 2);
+  Eigen::MatrixXd Temp_out(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Temp_in(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Enthalpy_out(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Pressure_out(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd mdotin(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd mdotout(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Pressure_in(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Enthalpy_in(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd rho_in(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd rho_out(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Area(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Gin(_mesh->_ny, _mesh->_nx);
+  Eigen::MatrixXd Gout(_mesh->_ny, _mesh->_nx);
 
   PCYCLES.setZero();
   Area.setZero();
@@ -169,14 +169,14 @@ SubChannelSolver::execute()
   P_global_old *= _P_out;
   mdot.setOnes();
   // flow profile same as the inlet on all axial levels
-  mdot *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
+  mdot *= _mflux_in * S_flow_soln(_mesh->_nodes[_mesh->_nx + 1][0]);
   mdot_old.setOnes();
-  mdot_old *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
+  mdot_old *= _mflux_in * S_flow_soln(_mesh->_nodes[_mesh->_nx + 1][0]);
   mdot_global.setOnes();
-  mdot_global *= _mflux_in * S_flow_soln(_mesh->nodes_[_mesh->nx_ + 1][0]);
-  // _mesh->nz_ + 1
+  mdot_global *= _mflux_in * S_flow_soln(_mesh->_nodes[_mesh->_nx + 1][0]);
+  // _mesh->_nz + 1
 
-  for (int axial_level = 1; axial_level < _mesh->nz_ + 1; axial_level++) // nz level calculations
+  for (int axial_level = 1; axial_level < _mesh->_nz + 1; axial_level++) // nz level calculations
   {
     _console << "AXIAL LEVEL: " << axial_level << std::endl;
 
@@ -202,7 +202,7 @@ SubChannelSolver::execute()
       for (int iz = bottom_limiter; iz < axial_level + 1; iz++)
       {
         // Compute the height of this element.
-        auto dz = _mesh->z_grid_[iz] - _mesh->z_grid_[iz - 1];
+        auto dz = _mesh->_z_grid[iz] - _mesh->_z_grid[iz - 1];
         double WError = 1.0;
         double MError = 1.0;
         int level_cycles = 0;
@@ -216,14 +216,14 @@ SubChannelSolver::execute()
           Wij_old = Wij;
           mdot_old = mdot;
           // Calculate crossflow between channel i-j using crossflow momentum equation
-          for (int i_gap = 0; i_gap < _mesh->n_gaps_; i_gap++) // number of gaps = _mesh->n_gaps_
+          for (int i_gap = 0; i_gap < _mesh->_n_gaps; i_gap++) // number of gaps = _mesh->_n_gaps
           {
-            int i_ch = _mesh->gap_to_chan_map_[i_gap].first;
-            int j_ch = _mesh->gap_to_chan_map_[i_gap].second;
-            auto * node_in_i = _mesh->nodes_[i_ch][iz - 1];
-            auto * node_out_i = _mesh->nodes_[i_ch][iz];
-            auto * node_in_j = _mesh->nodes_[j_ch][iz - 1];
-            auto * node_out_j = _mesh->nodes_[j_ch][iz];
+            int i_ch = _mesh->_gap_to_chan_map[i_gap].first;
+            int j_ch = _mesh->_gap_to_chan_map[i_gap].second;
+            auto * node_in_i = _mesh->_nodes[i_ch][iz - 1];
+            auto * node_out_i = _mesh->_nodes[i_ch][iz];
+            auto * node_in_j = _mesh->_nodes[j_ch][iz - 1];
+            auto * node_out_j = _mesh->_nodes[j_ch][iz];
 
             auto rho_i = rho_soln(node_in_i);
             auto rho_j = rho_soln(node_in_j);
@@ -235,13 +235,13 @@ SubChannelSolver::execute()
             // area of channel j
             auto Sj = S_flow_soln(node_in_j);
             // crossflow area between channels i,j dz*(pitch - rod diameter)
-            auto Sij = dz * _mesh->gij_map_[i_gap];
+            auto Sij = dz * _mesh->_gij_map[i_gap];
             // hydraulic diameter in the ij direction
             auto Dh_ij = 4.0 * Sij / (2 * dz);
-            auto Lij = _mesh->pitch_;
+            auto Lij = _mesh->_pitch;
             // local form loss in the ij direction
             auto kij =
-                2.0 * std::pow((1 - std::pow(Lij, 2) / std::pow(Lij - _mesh->rod_diameter_, 2)), 2);
+                2.0 * std::pow((1 - std::pow(Lij, 2) / std::pow(Lij - _mesh->_rod_diameter, 2)), 2);
             // assumed symmetry (that's why there is a two in the denominator)
             auto Mass_Termi = ((mdot_soln(node_out_i) - mdot_soln(node_in_i)) * Lij) / (2 * Si);
             auto Mass_Termj = ((mdot_soln(node_out_j) - mdot_soln(node_in_j)) * Lij) / (2 * Sj);
@@ -308,10 +308,10 @@ SubChannelSolver::execute()
 
           Wij_global.col(iz) = Wij;
           double SumSumWij = 0.0;
-          for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
+          for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
           {
-            auto * node_out = _mesh->nodes_[i_ch][iz];
-            auto * node_in = _mesh->nodes_[i_ch][iz - 1];
+            auto * node_out = _mesh->_nodes[i_ch][iz];
+            auto * node_in = _mesh->_nodes[i_ch][iz - 1];
             auto rho = rho_soln(node_in);
             auto S = S_flow_soln(node_in);
             double SumWij = 0.0;
@@ -320,15 +320,15 @@ SubChannelSolver::execute()
             double SumWijPrimeDUij = 0.0;
             // Calculate sum of crossflow into channel i from channels j around i
             unsigned int counter = 0;
-            for (auto i_gap : _mesh->chan_to_gap_map_[i_ch])
+            for (auto i_gap : _mesh->_chan_to_gap_map[i_ch])
             {
-              int ii_ch = _mesh->gap_to_chan_map_[i_gap].first;
+              int ii_ch = _mesh->_gap_to_chan_map[i_gap].first;
               // i is always the smallest and first index in the mapping
-              int jj_ch = _mesh->gap_to_chan_map_[i_gap].second;
-              auto * node_in_i = _mesh->nodes_[ii_ch][iz - 1];
-              auto * node_in_j = _mesh->nodes_[jj_ch][iz - 1];
-              auto * node_out_i = _mesh->nodes_[ii_ch][iz];
-              auto * node_out_j = _mesh->nodes_[jj_ch][iz];
+              int jj_ch = _mesh->_gap_to_chan_map[i_gap].second;
+              auto * node_in_i = _mesh->_nodes[ii_ch][iz - 1];
+              auto * node_in_j = _mesh->_nodes[jj_ch][iz - 1];
+              auto * node_out_i = _mesh->_nodes[ii_ch][iz];
+              auto * node_out_j = _mesh->_nodes[jj_ch][iz];
 
               auto rho_i = rho_soln(node_in_i);
               auto rho_j = rho_soln(node_in_j);
@@ -336,9 +336,9 @@ SubChannelSolver::execute()
               auto Sj = S_flow_soln(node_in_j); // area of channel j
 
               // apply local sign to crossflow
-              SumWij += _mesh->sign_id_crossflow_map_[i_ch][counter] * Wij(i_gap);
+              SumWij += _mesh->_sign_id_crossflow_map[i_ch][counter] * Wij(i_gap);
               // take care of the sign by applying the map, use donor cell
-              SumWijh += _mesh->sign_id_crossflow_map_[i_ch][counter] * Wij(i_gap) *
+              SumWijh += _mesh->_sign_id_crossflow_map[i_ch][counter] * Wij(i_gap) *
                          (h_soln(node_in_i) + h_soln(node_in_j) + h_soln(node_out_i) +
                           h_soln(node_out_j)) /
                          4;
@@ -363,12 +363,12 @@ SubChannelSolver::execute()
           }
 
           // go through the channels of the level.
-          for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
+          for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
           {
             // Start with applying mass-conservation equation & energy - conservation equation
             // Find the nodes for the top and bottom of this element.
-            auto * node_in = _mesh->nodes_[i_ch][iz - 1];
-            auto * node_out = _mesh->nodes_[i_ch][iz];
+            auto * node_in = _mesh->_nodes[i_ch][iz - 1];
+            auto * node_out = _mesh->_nodes[i_ch][iz];
             // Copy the variables at the inlet (bottom) of this element.
             auto mdot_in = mdot_soln(node_in);
             auto h_in = h_soln(node_in); // J/kg
@@ -394,7 +394,7 @@ SubChannelSolver::execute()
         }
       }
 
-      if (axial_level == _mesh->nz_)
+      if (axial_level == _mesh->_nz)
       {
         bottom_limiter = 1;
       }
@@ -403,13 +403,13 @@ SubChannelSolver::execute()
       // Sweep downwards through the channels. level by level
       for (int iz = axial_level; iz > bottom_limiter - 1; iz--) // nz calculations
       {
-        auto dz = _mesh->z_grid_[iz] - _mesh->z_grid_[iz - 1];
+        auto dz = _mesh->_z_grid[iz] - _mesh->_z_grid[iz - 1];
         // Sweep through the channels of level
-        for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
+        for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
         {
           // Find the nodes for the top and bottom of this element.
-          auto * node_in = _mesh->nodes_[i_ch][iz - 1];
-          auto * node_out = _mesh->nodes_[i_ch][iz];
+          auto * node_in = _mesh->_nodes[i_ch][iz - 1];
+          auto * node_out = _mesh->_nodes[i_ch][iz];
           auto rho_i = rho_soln(node_in);
           auto T_i = T_soln(node_in);
           auto Si = S_flow_soln(node_in);
@@ -420,16 +420,16 @@ SubChannelSolver::execute()
                            std::pow(mdot_soln(node_in), 2) / (Si * rho_soln(node_in));
           double SumCrossflow = 0.0;
           unsigned int counter = 0;
-          for (auto i_gap : _mesh->chan_to_gap_map_[i_ch])
+          for (auto i_gap : _mesh->_chan_to_gap_map[i_ch])
           {
-            int ii_ch = _mesh->gap_to_chan_map_[i_gap].first;
-            int jj_ch = _mesh->gap_to_chan_map_[i_gap].second;
-            auto * node_in_i = _mesh->nodes_[ii_ch][iz - 1];
-            auto * node_in_j = _mesh->nodes_[jj_ch][iz - 1];
-            auto * node_out_i = _mesh->nodes_[ii_ch][iz];
-            auto * node_out_j = _mesh->nodes_[jj_ch][iz];
+            int ii_ch = _mesh->_gap_to_chan_map[i_gap].first;
+            int jj_ch = _mesh->_gap_to_chan_map[i_gap].second;
+            auto * node_in_i = _mesh->_nodes[ii_ch][iz - 1];
+            auto * node_in_j = _mesh->_nodes[jj_ch][iz - 1];
+            auto * node_out_i = _mesh->_nodes[ii_ch][iz];
+            auto * node_out_j = _mesh->_nodes[jj_ch][iz];
             SumCrossflow +=
-                0.25 * _mesh->sign_id_crossflow_map_[i_ch][counter] * Wij_global(i_gap, iz) *
+                0.25 * _mesh->_sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz) *
                 (mdot_soln(node_in_i) / S_flow_soln(node_in_i) / rho_soln(node_in_i) +
                  mdot_soln(node_out_i) / S_flow_soln(node_out_i) / rho_soln(node_out_i) +
                  mdot_soln(node_in_j) / S_flow_soln(node_in_j) / rho_soln(node_in_j) +
@@ -468,20 +468,12 @@ SubChannelSolver::execute()
   double Total_crossflow_in = 0.0;
   double Total_crossflow_out = 0.0;
 
-  for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
+  for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
   {
-<<<<<<< HEAD
-    auto * node_out = _mesh->nodes_[i_ch][_mesh->nz_];
-    auto * node_in = _mesh->nodes_[i_ch][0];
-    auto * node_20 = _mesh->nodes_[i_ch][20];
-    int i = (i_ch / _mesh->nx_);           // row
-    int j = i_ch - i * _mesh->nx_;         // column
-=======
     auto * node_out = _mesh->_nodes[i_ch][_mesh->_nz];
     auto * node_in = _mesh->_nodes[i_ch][0];
     int i = (i_ch / _mesh->_nx);           // row
     int j = i_ch - i * _mesh->_nx;         // column
->>>>>>> 5fa1cd3... some more editing
     Temp_out(i, j) = T_soln(node_out);     // Kelvin
     Temp_in(i, j) = T_soln(node_in);       // Kelvin
     rho_in(i, j) = rho_soln(node_in);      // Kg/m3
@@ -501,18 +493,13 @@ SubChannelSolver::execute()
     Total_crossflow_in += SumWij_soln(node_in);
   }
 
-  for (int iz = 0; iz < _mesh->nz_ + 1; iz++)
+  for (int iz = 0; iz < _mesh->_nz + 1; iz++)
   {
     double Total_crossflow = 0.0;
-    for (int i_ch = 0; i_ch < _mesh->n_channels_; i_ch++)
+    for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
     {
-<<<<<<< HEAD
-      auto * node = _mesh->nodes_[i_ch][iz];
-      Total_crossflow += SumWij_soln(node);
-=======
       auto * node = _mesh->_nodes[i_ch][iz];
       Total_crossflow += SumWij_soln(node); //for single phase, Total of sum Crossflows per channel per level should be zero
->>>>>>> 5fa1cd3... some more editing
     }
   }
 

@@ -19,7 +19,7 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
   _power = getParam<Real>("power");
   _filename = getParam<std::string>("filename");
-  _power_dis.resize((_mesh->ny_ - 1) * (_mesh->nx_ - 1), 1);
+  _power_dis.resize((_mesh->_ny - 1) * (_mesh->_nx - 1), 1);
   _power_dis.setZero();
   _numberoflines = 0;
   double vin;
@@ -52,12 +52,12 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   }
   inFile.close();
 
-  _power_dis.resize(_mesh->ny_ - 1, _mesh->nx_ - 1);
+  _power_dis.resize(_mesh->_ny - 1, _mesh->_nx - 1);
   auto sum = _power_dis.sum();
   auto fpin_power = _power / sum;           // W
   auto ref_power = _power_dis * fpin_power; // W
   // Convert the reference power to a linear heat rate.
-  auto heated_length = _mesh->heated_length_; // in m
+  auto heated_length = _mesh->_heated_length; // in m
   _ref_qprime = ref_power / heated_length; // in W/m
 }
 
@@ -72,20 +72,20 @@ Real PsbtPowerIC::value(const Point & p)
   // Corners contact 1/4 of a  one pin
   if (i == 0 && j == 0)
     return 0.25 * _ref_qprime(j, i);
-  else if (i == 0 && j == _mesh->ny_ - 1)
+  else if (i == 0 && j == _mesh->_ny - 1)
     return 0.25 * _ref_qprime(j - 1, i);
-  else if (i == _mesh->nx_ - 1 && j == 0)
+  else if (i == _mesh->_nx - 1 && j == 0)
     return 0.25 * _ref_qprime(j, i - 1);
-  else if (i == _mesh->nx_ - 1 && j == _mesh->ny_ - 1)
+  else if (i == _mesh->_nx - 1 && j == _mesh->_ny - 1)
     return 0.25 * _ref_qprime(j - 1, i - 1);
   // Sides contact 1/4 of  two pins
   else if (i == 0)
     return 0.25 * (_ref_qprime(j - 1, i) + _ref_qprime(j, i));
-  else if (i == _mesh->nx_ - 1)
+  else if (i == _mesh->_nx - 1)
     return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j, i - 1));
   else if (j == 0)
     return 0.25 * (_ref_qprime(j, i - 1) + _ref_qprime(j, i));
-  else if (j == _mesh->ny_ - 1)
+  else if (j == _mesh->_ny - 1)
     return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j - 1, i));
   // interior contacts 1/4 of 4 pins
   else
