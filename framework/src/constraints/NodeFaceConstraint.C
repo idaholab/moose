@@ -46,11 +46,7 @@ NodeFaceConstraint::validParams()
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
   params.addCoupledVar("primary_variable", "The variable on the primary side of the domain");
-  params.addDeprecatedCoupledVar("master_variable",
-                                 "primary_variable",
-                                 "The variable on the primary side of the domain",
-                                 "This parameter is deprecated in favor of 'primary_variable' and "
-                                 "will be removed on September 1st, 2020");
+  params.addDeprecatedCoupledVar("master_variable", "primary_variable", "September 1st, 2020");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 

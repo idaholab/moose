@@ -35,9 +35,5 @@ variable names called `addDeprecatedCoupledVar`. The method takes four
 arguments. The first corresponds to the deprecated name; the second argument is
 the new, blessed name that users should use. This name should have a
 corresponding `params.addCoupledVar('blessed_name', 'blessed_name_doc_string')`
-in the relevant `Class::validParams()` block. The third argument to
-`InputParameters::addDeprecatedCoupledVar` is the documentation string
-describing what the coupled variable is used for. We recommend that this
-documentation string match the 'blessed_name_doc_string'. The final argument is
-the deprecation message that should be conveyed to users who use the deprecated
-coupled variable name in their input file.
+in the relevant `Class::validParams()` block. The final optional argument is the
+date that the deprecated variable name will be removed.

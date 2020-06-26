@@ -16,10 +16,7 @@ DeprecatedCoupledVarKernel::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addCoupledVar("source", "A variable representing a source term");
-  params.addDeprecatedCoupledVar("stupid_name",
-                                 "source",
-                                 "A variable representing a source term",
-                                 "'stupid_name' is deprecated. Please use 'source' instead");
+  params.addDeprecatedCoupledVar("stupid_name", "source", "never because this is a dummy test");
   return params;
 }
 

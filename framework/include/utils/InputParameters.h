@@ -311,16 +311,13 @@ public:
   /**
    * This method adds a deprecated coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
-   * for the coupled variable if found
-   * @param old_name The deprecated name of the coupled variable
-   * @param new_name The new name of the coupled variable
-   * @param doc_string A description of what the coupled variable should be
-   * @param deprecation_message The deprecation message to convey to the user
+   * for the coupled variable if found. The doc string for the deprecated variable will be
+   * constructed from the doc string for the new variable. A deprecation message will also be
+   * automatically generated
    */
   void addDeprecatedCoupledVar(const std::string & old_name,
                                const std::string & new_name,
-                               const std::string & doc_string,
-                               const std::string & deprecation_message);
+                               const std::string & removal_date = "");
 
   /**
    * This method adds a coupled variable name pair.  The parser will look for variable
@@ -858,6 +855,11 @@ public:
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
+
+  /**
+   * Private method for setting deprecated coupled variable documentation strings
+   */
+  void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
 
   struct Metadata
   {
