@@ -42,6 +42,10 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
   addParam<bool>("has_transient", false, "Whether the simulation is transient");
 
   addWallConvectionParams(*this);
+
+  addParam<bool>(
+      "has_heat_source", false, "Whether there is a heat source function object in the simulation");
+  addParam<const Function *>("heat_source_function", "The function describing the heat source");
 }
 
 void

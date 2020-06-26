@@ -39,8 +39,11 @@ protected:
   ADMaterialProperty<Real> & _temperature_advective_strong_residual;
   ADMaterialProperty<Real> & _temperature_td_strong_residual;
   ADMaterialProperty<Real> & _temperature_wall_convection_strong_residual;
+  ADMaterialProperty<Real> & _temperature_source_strong_residual;
 
   bool _has_wall_convection;
   Real _wall_convection_alpha;
   Real _wall_temperature;
+  bool _has_heat_source;
+  const Function * _heat_source_function;
 };

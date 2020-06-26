@@ -68,6 +68,9 @@ INSAction::validParams()
   params.addParam<std::vector<FunctionName>>(
       "temperature_function", std::vector<FunctionName>(), "Temperature on Dirichlet boundaries");
   addWallConvectionParams(params);
+  params.addParam<bool>(
+      "has_heat_source", false, "Whether there is a heat source function object in the simulation");
+  params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
@@ -184,13 +187,14 @@ INSAction::INSAction(InputParameters parameters)
   if (getParam<bool>("has_wall_convection"))
   {
     if (!isParamValid("wall_convection_alpha"))
-      paramError("wall_convection_alpha",
-                 "If 'has_wall_convection' is true, then 'wall_convection_alpha' must be set.");
+      mooseError("If 'has_wall_convection' is true, then 'wall_convection_alpha' must be set.");
 
     if (!isParamValid("wall_temperature"))
-      paramError("wall_temperature",
-                 "If 'has_wall_convection' is true, then 'wall_temperature' must be set.");
+      mooseError("If 'has_wall_convection' is true, then 'wall_temperature' must be set.");
   }
+
+  if (getParam<bool>("has_heat_source") && !isParamValid("heat_source_function"))
+    mooseError("If 'has_heat_source' is true, then 'heat_source_function' must be set.");
 }
 
 void
@@ -711,6 +715,17 @@ INSAction::addINSTemperature()
       params.set<Real>("alpha") = getParam<Real>("wall_convection_alpha");
       params.set<Real>("T_wall") = getParam<Real>("wall_temperature");
       _problem->addKernel(kernel_type, "ins_temperature_wall_convection", params);
+    }
+
+    if (getParam<bool>("has_heat_source"))
+    {
+      const std::string kernel_type = "INSADTemperatureSource";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      params.set<FunctionName>("source_function") = getParam<FunctionName>("heat_source_function");
+      _problem->addKernel(kernel_type, "ins_temperature_source", params);
     }
   }
   else

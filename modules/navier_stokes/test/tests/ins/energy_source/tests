@@ -1,0 +1,18 @@
+[Tests]
+  [steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The system shall be able to model a volumetric heat source and included it in stabilization terms.'
+    design = 'INSADTemperatureSource.md'
+    issues = '#15500'
+  []
+  [steady-action]
+    type = 'Exodiff'
+    input = 'steady-action.i'
+    exodiff = 'steady-action_out.e'
+    requirement = 'The system shall be able to build a volumetric heat source model using an automatic action syntax.'
+    design = 'INSADTemperatureSource.md'
+    issues = '#15500'
+  []
+[]

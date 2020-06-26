@@ -9,6 +9,7 @@
 
 #include "INSAD3Eqn.h"
 #include "INSADObjectTracker.h"
+#include "Function.h"
 
 registerMooseObject("NavierStokesApp", INSAD3Eqn);
 
@@ -45,7 +46,9 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
         declareADProperty<Real>("temperature_advective_strong_residual")),
     _temperature_td_strong_residual(declareADProperty<Real>("temperature_td_strong_residual")),
     _temperature_wall_convection_strong_residual(
-        declareADProperty<Real>("temperature_wall_convection_strong_residual"))
+        declareADProperty<Real>("temperature_wall_convection_strong_residual")),
+    _temperature_source_strong_residual(
+        declareADProperty<Real>("temperature_source_strong_residual"))
 {
 }
 
@@ -62,6 +65,9 @@ INSAD3Eqn::initialSetup()
     _wall_convection_alpha = _object_tracker->get<Real>("wall_convection_alpha");
     _wall_temperature = _object_tracker->get<Real>("wall_temperature");
   }
+
+  if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source")))
+    _heat_source_function = _object_tracker->get<const Function *>("heat_source_function");
 }
 
 void
@@ -96,5 +102,11 @@ INSAD3Eqn::computeQpProperties()
     _temperature_wall_convection_strong_residual[_qp] =
         _wall_convection_alpha * (_temperature[_qp] - _wall_temperature);
     _temperature_strong_residual[_qp] += _temperature_wall_convection_strong_residual[_qp];
+  }
+
+  if (_has_heat_source)
+  {
+    _temperature_source_strong_residual[_qp] = -_heat_source_function->value(_t, _q_point[_qp]);
+    _temperature_strong_residual[_qp] += _temperature_source_strong_residual[_qp];
   }
 }
