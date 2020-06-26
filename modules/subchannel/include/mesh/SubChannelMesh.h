@@ -12,20 +12,20 @@ public:
 
   virtual void buildMesh() override;
 
-  unsigned int nx_, ny_, nz_, n_channels_, n_gaps_;
-  Real pitch_, rod_diameter_, gap_, heated_length_;
-  std::vector<Real> z_grid_;
-  std::vector<std::vector<Node *>> nodes_;
-  std::vector<std::vector<Node *>> gapnodes_;
-  std::vector<std::pair<unsigned int, unsigned int>> gap_to_chan_map_;
-  std::vector<std::vector<unsigned int>> chan_to_gap_map_;
+  unsigned int _nx, _ny, _nz, _n_channels, _n_gaps;
+  Real _pitch, _rod_diameter, _gap, _heated_length;
+  std::vector<Real> _z_grid;
+  std::vector<std::vector<Node *>> _nodes;
+  std::vector<std::vector<Node *>> _gapnodes;
+  std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
+  std::vector<std::vector<unsigned int>> _chan_to_gap_map;
   /// matrix
-  std::vector<std::vector<double>> sign_id_crossflow_map_;
+  std::vector<std::vector<double>> _sign_id_crossflow_map;
   // vector map of gap size (m)
-  std::vector<double> gij_map_;
+  std::vector<double> _gij_map;
 
 protected:
-  Real max_dz_;
+  Real _max_dz;
 
 public:
   static InputParameters validParams();

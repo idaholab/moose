@@ -41,10 +41,10 @@ DetailedSubChannelMesh::buildMesh()
   const int points_per_plane = points_per_quad * 4 + 1;
 
   // Compute the total number of points and elements.
-  const int points_per_ch = points_per_plane * (nz_ + 1);
-  const int n_points = points_per_ch * n_channels_;
+  const int points_per_ch = points_per_plane * (_nz + 1);
+  const int n_points = points_per_ch * _n_channels;
   const int elems_per_level = theta_res + 4;
-  const int n_elems = elems_per_level * nz_ * n_channels_;
+  const int n_elems = elems_per_level * _nz * _n_channels;
 
   mesh.reserve_nodes(n_points);
   mesh.reserve_elem(n_elems);
@@ -68,10 +68,10 @@ DetailedSubChannelMesh::buildMesh()
   // neighboring subchannel cells.  That allows us to easily map a solution to
   // this detailed mesh with a nearest-neighbor search.
   std::array<Point, 4> quadrant_centers;
-  quadrant_centers[0] = Point(pitch_ * 0.5 * 0.99999, pitch_ * 0.5 * 0.99999, 0);
-  quadrant_centers[1] = Point(-pitch_ * 0.5 * 0.99999, pitch_ * 0.5 * 0.99999, 0);
-  quadrant_centers[2] = Point(-pitch_ * 0.5 * 0.99999, -pitch_ * 0.5 * 0.99999, 0);
-  quadrant_centers[3] = Point(pitch_ * 0.5 * 0.99999, -pitch_ * 0.5 * 0.99999, 0);
+  quadrant_centers[0] = Point(_pitch * 0.5 * 0.99999, _pitch * 0.5 * 0.99999, 0);
+  quadrant_centers[1] = Point(-_pitch * 0.5 * 0.99999, _pitch * 0.5 * 0.99999, 0);
+  quadrant_centers[2] = Point(-_pitch * 0.5 * 0.99999, -_pitch * 0.5 * 0.99999, 0);
+  quadrant_centers[3] = Point(_pitch * 0.5 * 0.99999, -_pitch * 0.5 * 0.99999, 0);
 
   // Build an array of points that represent an axial slice of a subchannel
   // cell.  The points are ordered in this fashion:
@@ -108,13 +108,13 @@ DetailedSubChannelMesh::buildMesh()
 
   // Add the points to the mesh.
   unsigned int node_id = 0;
-  for (unsigned int iy = 0; iy < ny_; iy++)
+  for (unsigned int iy = 0; iy < _ny; iy++)
   {
-    Point y0 = {0, pitch_ * iy, 0};
-    for (unsigned int ix = 0; ix < nx_; ix++)
+    Point y0 = {0, _pitch * iy, 0};
+    for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      Point x0 = {pitch_ * ix, 0, 0};
-      for (auto z : z_grid_)
+      Point x0 = {_pitch * ix, 0, 0};
+      for (auto z : _z_grid)
       {
         Point z0{0, 0, z};
         for (int i = 0; i < points_per_plane; i++)
@@ -129,12 +129,12 @@ DetailedSubChannelMesh::buildMesh()
   // bases of these prisms form a triangulated representation of an axial
   // slice of a subchannel.
   unsigned int elem_id = 0;
-  for (unsigned int iy = 0; iy < ny_; iy++)
+  for (unsigned int iy = 0; iy < _ny; iy++)
   {
-    for (unsigned int ix = 0; ix < nx_; ix++)
+    for (unsigned int ix = 0; ix < _nx; ix++)
     {
-      int i_ch = nx_ * iy + ix;
-      for (unsigned int iz = 0; iz < nz_; iz++)
+      int i_ch = _nx * iy + ix;
+      for (unsigned int iz = 0; iz < _nz; iz++)
       {
         for (int i = 0; i < elems_per_level; i++)
         {
@@ -168,7 +168,7 @@ DetailedSubChannelMesh::buildMesh()
 
           if (iz == 0)
             boundary_info.add_side(elem, 0, 0);
-          if (iz == nz_ - 1)
+          if (iz == _nz - 1)
             boundary_info.add_side(elem, 4, 1);
         }
       }
