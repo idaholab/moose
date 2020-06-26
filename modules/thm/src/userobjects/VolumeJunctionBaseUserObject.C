@@ -65,7 +65,7 @@ VolumeJunctionBaseUserObject::initialize()
 }
 
 void
-VolumeJunctionBaseUserObject::execute()
+VolumeJunctionBaseUserObject::storeConnectionData()
 {
   // Get the connection index
   const unsigned int c = getBoundaryIDIndex();
@@ -86,8 +86,14 @@ VolumeJunctionBaseUserObject::execute()
     for (unsigned int k = 0; k < phi.size(); k++)
       _phi_face_values[c][j][k] = phi[k][0];
   }
+}
 
-  // Perform the computations
+void
+VolumeJunctionBaseUserObject::execute()
+{
+  storeConnectionData();
+
+  const unsigned int c = getBoundaryIDIndex();
   computeFluxesAndResiduals(c);
 }
 
