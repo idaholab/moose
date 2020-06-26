@@ -94,7 +94,7 @@
  [../]
 
  [./temperature_advection]
-   type = INSADTemperatureAdvection
+   type = INSADEnergyAdvection
    variable = T
  [../]
 

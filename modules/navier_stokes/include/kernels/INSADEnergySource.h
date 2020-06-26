@@ -12,17 +12,17 @@
 #include "ADKernelValue.h" // Provides AD(Vector)KernelValue
 
 /**
- * Computes a heat source/sink due to convection from ambient walls/surroundings
+ * Computes an arbitrary volumetric heat source (or sink).
  */
-class INSADTemperatureWallConvection : public ADKernelValue
+class INSADEnergySource : public ADKernelValue
 {
 public:
-  INSADTemperatureWallConvection(const InputParameters & parameters);
+  INSADEnergySource(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
   ADReal precomputeQpResidual() override;
 
-  const ADMaterialProperty<Real> & _temperature_wall_convection_strong_residual;
+  const ADMaterialProperty<Real> & _temperature_source_strong_residual;
 };

@@ -111,7 +111,7 @@
     integrate_p_by_parts = true
   []
   [temp_advection]
-    type = INSADTemperatureAdvection
+    type = INSADEnergyAdvection
     variable = temp
   []
   [temp_conduction]

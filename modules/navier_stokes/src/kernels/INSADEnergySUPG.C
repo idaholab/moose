@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADTemperatureSUPG.h"
+#include "INSADEnergySUPG.h"
 
-registerMooseObject("NavierStokesApp", INSADTemperatureSUPG);
+registerMooseObject("NavierStokesApp", INSADEnergySUPG);
 
 InputParameters
-INSADTemperatureSUPG::validParams()
+INSADEnergySUPG::validParams()
 {
   InputParameters params = ADKernelSUPG::validParams();
   params.addClassDescription("Adds the supg stabilization to the INS temperature/energy equation");
   return params;
 }
 
-INSADTemperatureSUPG::INSADTemperatureSUPG(const InputParameters & parameters)
+INSADEnergySUPG::INSADEnergySUPG(const InputParameters & parameters)
   : ADKernelSUPG(parameters),
     _temperature_strong_residual(getADMaterialProperty<Real>("temperature_strong_residual"))
 {
 }
 
 ADReal
-INSADTemperatureSUPG::precomputeQpStrongResidual()
+INSADEnergySUPG::precomputeQpStrongResidual()
 {
   return _temperature_strong_residual[_qp];
 }

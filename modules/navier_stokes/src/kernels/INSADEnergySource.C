@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADTemperatureSource.h"
+#include "INSADEnergySource.h"
 #include "INSADObjectTracker.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("NavierStokesApp", INSADTemperatureSource);
+registerMooseObject("NavierStokesApp", INSADEnergySource);
 
 InputParameters
-INSADTemperatureSource::validParams()
+INSADEnergySource::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Computes an arbitrary volumetric heat source (or sink).");
@@ -25,7 +25,7 @@ INSADTemperatureSource::validParams()
   return params;
 }
 
-INSADTemperatureSource::INSADTemperatureSource(const InputParameters & parameters)
+INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
   : ADKernelValue(parameters),
     _temperature_source_strong_residual(
         getADMaterialProperty<Real>("temperature_source_strong_residual"))
@@ -39,7 +39,7 @@ INSADTemperatureSource::INSADTemperatureSource(const InputParameters & parameter
 }
 
 ADReal
-INSADTemperatureSource::precomputeQpResidual()
+INSADEnergySource::precomputeQpResidual()
 {
   return _temperature_source_strong_residual[_qp];
 }

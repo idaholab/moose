@@ -675,7 +675,7 @@ INSAction::addINSTemperature()
   if (_use_ad)
   {
     {
-      const std::string kernel_type = "INSADTemperatureAdvection";
+      const std::string kernel_type = "INSADEnergyAdvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
@@ -695,7 +695,7 @@ INSAction::addINSTemperature()
 
     if (getParam<bool>("supg"))
     {
-      const std::string kernel_type = "INSADTemperatureSUPG";
+      const std::string kernel_type = "INSADEnergySUPG";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
@@ -707,7 +707,7 @@ INSAction::addINSTemperature()
 
     if (getParam<bool>("has_wall_convection"))
     {
-      const std::string kernel_type = "INSADTemperatureWallConvection";
+      const std::string kernel_type = "INSADEnergyWallConvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
@@ -719,7 +719,7 @@ INSAction::addINSTemperature()
 
     if (getParam<bool>("has_heat_source"))
     {
-      const std::string kernel_type = "INSADTemperatureSource";
+      const std::string kernel_type = "INSADEnergySource";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)

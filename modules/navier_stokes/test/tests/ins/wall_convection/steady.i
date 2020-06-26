@@ -69,7 +69,7 @@
   [../]
 
  [./temperature_advection]
-   type = INSADTemperatureAdvection
+   type = INSADEnergyAdvection
    variable = temperature
  [../]
 
@@ -80,14 +80,14 @@
   [../]
 
   [temperature_wall_convection]
-    type = INSADTemperatureWallConvection
+    type = INSADEnergyWallConvection
     variable = temperature
     alpha = 1
     T_wall = 0.5
   []
 
   [temperature_supg]
-    type = INSADTemperatureSUPG
+    type = INSADEnergySUPG
     variable = temperature
     velocity = velocity
   []

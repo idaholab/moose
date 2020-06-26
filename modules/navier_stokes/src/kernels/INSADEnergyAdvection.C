@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADTemperatureAdvection.h"
+#include "INSADEnergyAdvection.h"
 
-registerMooseObject("NavierStokesApp", INSADTemperatureAdvection);
+registerMooseObject("NavierStokesApp", INSADEnergyAdvection);
 
 InputParameters
-INSADTemperatureAdvection::validParams()
+INSADEnergyAdvection::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("This class computes the residual and Jacobian contributions for "
@@ -20,7 +20,7 @@ INSADTemperatureAdvection::validParams()
   return params;
 }
 
-INSADTemperatureAdvection::INSADTemperatureAdvection(const InputParameters & parameters)
+INSADEnergyAdvection::INSADEnergyAdvection(const InputParameters & parameters)
   : ADKernelValue(parameters),
     _temperature_advective_strong_residual(
         getADMaterialProperty<Real>("temperature_advective_strong_residual"))
@@ -28,7 +28,7 @@ INSADTemperatureAdvection::INSADTemperatureAdvection(const InputParameters & par
 }
 
 ADReal
-INSADTemperatureAdvection::precomputeQpResidual()
+INSADEnergyAdvection::precomputeQpResidual()
 {
   return _temperature_advective_strong_residual[_qp];
 }

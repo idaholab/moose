@@ -69,7 +69,7 @@
   [../]
 
  [./temperature_advection]
-   type = INSADTemperatureAdvection
+   type = INSADEnergyAdvection
    variable = temperature
  [../]
 
@@ -80,7 +80,7 @@
  [../]
 
   [temperature_supg]
-    type = INSADTemperatureSUPG
+    type = INSADEnergySUPG
     variable = temperature
     velocity = velocity
   []

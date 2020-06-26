@@ -139,7 +139,7 @@
   []
 
   [temp_advection]
-    type = INSADTemperatureAdvection
+    type = INSADEnergyAdvection
     variable = temp
   []
   [temp_conduction]
@@ -148,7 +148,7 @@
     thermal_conductivity = 'k'
   [../]
   [temp_supg]
-    type = INSADTemperatureSUPG
+    type = INSADEnergySUPG
     variable = temp
     velocity = velocity
   []

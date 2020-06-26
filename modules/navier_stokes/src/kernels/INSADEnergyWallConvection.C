@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "INSADTemperatureWallConvection.h"
+#include "INSADEnergyWallConvection.h"
 #include "INSADObjectTracker.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("NavierStokesApp", INSADTemperatureWallConvection);
+registerMooseObject("NavierStokesApp", INSADEnergyWallConvection);
 
 InputParameters
-INSADTemperatureWallConvection::validParams()
+INSADEnergyWallConvection::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription(
@@ -25,7 +25,7 @@ INSADTemperatureWallConvection::validParams()
   return params;
 }
 
-INSADTemperatureWallConvection::INSADTemperatureWallConvection(const InputParameters & parameters)
+INSADEnergyWallConvection::INSADEnergyWallConvection(const InputParameters & parameters)
   : ADKernelValue(parameters),
     _temperature_wall_convection_strong_residual(
         getADMaterialProperty<Real>("temperature_wall_convection_strong_residual"))
@@ -40,7 +40,7 @@ INSADTemperatureWallConvection::INSADTemperatureWallConvection(const InputParame
 }
 
 ADReal
-INSADTemperatureWallConvection::precomputeQpResidual()
+INSADEnergyWallConvection::precomputeQpResidual()
 {
   return _temperature_wall_convection_strong_residual[_qp];
 }
