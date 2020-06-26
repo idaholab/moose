@@ -8,6 +8,7 @@
     heavy = true
     max_time = 1000
     threading = '!pthreads'
+    mumps = true
     issues = '#11110'
     design = 'thm_example.md'
     requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
