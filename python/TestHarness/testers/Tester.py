@@ -29,6 +29,7 @@ class Tester(MooseObject):
         params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
+        params.addParam('unique_test_id', "The unique hash given to a test")
 
         params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
         params.addParam('group',       [], "A list of groups for which this test belongs.")
@@ -57,7 +58,7 @@ class Tester(MooseObject):
         params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
         params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('unique_ids',    ['ALL'], "A test that runs only if UNIQUE_IDs are enabled ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('unique_ids',    ['ALL'], "Deprecated. Use unique_id instead.")
         params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
         params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
@@ -215,6 +216,10 @@ class Tester(MooseObject):
     def getMaxTime(self):
         """ return maximum time elapse before reporting a 'timeout' status """
         return float(self.specs['max_time'])
+
+    def getUniqueTestID(self):
+        """ return unique hash for test """
+        return self.specs['unique_test_id']
 
     def getRunnable(self, options):
         """ return bool and cache results, if this test can run """
