@@ -3,7 +3,7 @@
 ################################################################################
 
 [Mesh]
-  type = DetailedSubchannelMesh
+  type = DetailedSubChannelMesh
   # nx = 6 #subchannel number in the x direction
   # ny = 6
   # max_dz = 0.02
