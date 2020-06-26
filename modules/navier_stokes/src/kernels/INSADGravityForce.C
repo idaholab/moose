@@ -31,8 +31,8 @@ INSADGravityForce::INSADGravityForce(const InputParameters & parameters)
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.setHasGravity(true);
-  obj_tracker.setGravityVector(getParam<RealVectorValue>("gravity"));
+  obj_tracker.set("has_gravity", true);
+  obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"));
 }
 
 ADRealVectorValue

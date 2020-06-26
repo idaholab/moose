@@ -39,11 +39,11 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.setHasBoussinesq(true);
-  obj_tracker.setAlpha(&getADMaterialProperty<Real>("alpha_name"));
-  obj_tracker.setTRef(&getMaterialProperty<Real>("ref_temp"));
-  obj_tracker.setT(&adCoupledValue("temperature"));
-  obj_tracker.setGravityVector(getParam<RealVectorValue>("gravity"));
+  obj_tracker.set("has_boussinesq", true);
+  obj_tracker.set("alpha", &getADMaterialProperty<Real>("alpha_name"));
+  obj_tracker.set("ref_temp", &getMaterialProperty<Real>("ref_temp"));
+  obj_tracker.set("temperature", &adCoupledValue("temperature"));
+  obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"));
 }
 
 ADRealVectorValue

@@ -147,6 +147,11 @@
     variable = temp
     thermal_conductivity = 'k'
   [../]
+  [temp_supg]
+    type = INSADTemperatureSUPG
+    variable = temp
+    velocity = velocity
+  []
 []
 
 [Materials]

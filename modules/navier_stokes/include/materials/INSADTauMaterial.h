@@ -12,7 +12,6 @@
 #include "InputParameters.h"
 #include "NonlinearSystemBase.h"
 #include "FEProblemBase.h"
-#include "INSADObjectTracker.h"
 #include "MaterialProperty.h"
 #include "MooseArray.h"
 #include "INSADMaterial.h"
@@ -45,6 +44,7 @@ protected:
   using T::_displacements;
   using T::_dt;
   using T::_fe_problem;
+  using T::_has_transient;
   using T::_mu;
   using T::_object_tracker;
   using T::_qp;
@@ -123,7 +123,7 @@ INSADTauMaterialTempl<T>::computeQpProperties()
   T::computeQpProperties();
 
   auto && nu = _mu[_qp] / _rho[_qp];
-  auto && transient_part = _object_tracker->hasTransient() ? 4. / (_dt * _dt) : 0.;
+  auto && transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
   _tau[_qp] = _alpha / std::sqrt(transient_part +
                                  (2. * _velocity[_qp].norm() / _hmax) *
                                      (2. * _velocity[_qp].norm() / _hmax) +

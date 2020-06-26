@@ -40,7 +40,7 @@ INSADMomentumViscous::INSADMomentumViscous(const InputParameters & parameters)
 {
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.setViscousForm(_form);
+  obj_tracker.set("viscous_form", _form);
 }
 
 ADRealTensorValue

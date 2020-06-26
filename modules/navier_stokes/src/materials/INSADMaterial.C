@@ -68,8 +68,21 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
 void
 INSADMaterial::initialSetup()
 {
-  if (_object_tracker->hasTransient())
+  if ((_has_transient = _object_tracker->get<bool>("has_transient")))
     _velocity_dot = &adCoupledVectorDot("velocity");
+
+  if ((_has_boussinesq = _object_tracker->get<bool>("has_boussinesq")))
+  {
+    _boussinesq_alpha = _object_tracker->get<const ADMaterialProperty<Real> *>("alpha");
+    _temperature = _object_tracker->get<const ADVariableValue *>("temperature");
+    _ref_temp = _object_tracker->get<const MaterialProperty<Real> *>("ref_temp");
+  }
+
+  _has_gravity = _object_tracker->get<bool>("has_gravity");
+  if (_has_gravity || _has_boussinesq)
+    _gravity_vector = _object_tracker->get<RealVectorValue>("gravity");
+
+  _viscous_form = static_cast<std::string>(_object_tracker->get<MooseEnum>("viscous_form"));
 }
 
 void
@@ -82,14 +95,13 @@ INSADMaterial::computeQpProperties()
         _velocity[_qp](0) / (_use_displaced_mesh ? _ad_q_point[_qp](0) : _q_point[_qp](0));
 
   _convective_strong_residual[_qp] = _rho[_qp] * _grad_velocity[_qp] * _velocity[_qp];
-  if (_object_tracker->hasTransient())
+  if (_has_transient)
     _td_strong_residual[_qp] = _rho[_qp] * (*_velocity_dot)[_qp];
-  if (_object_tracker->hasGravity())
-    _gravity_strong_residual[_qp] = -_rho[_qp] * _object_tracker->gravityVector();
-  if (_object_tracker->hasBoussinesq())
-    _boussinesq_strong_residual[_qp] =
-        (*_object_tracker->alpha())[_qp] * _object_tracker->gravityVector() * _rho[_qp] *
-        ((*_object_tracker->t())[_qp] - (*_object_tracker->tRef())[_qp]);
+  if (_has_gravity)
+    _gravity_strong_residual[_qp] = -_rho[_qp] * _gravity_vector;
+  if (_has_boussinesq)
+    _boussinesq_strong_residual[_qp] = (*_boussinesq_alpha)[_qp] * _gravity_vector * _rho[_qp] *
+                                       ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
 
   // // Future Addition
   // _mms_function_strong_residual[_qp] = -RealVectorValue(_x_vel_fn.value(_t, _q_point[_qp]),
@@ -113,13 +125,13 @@ INSADMaterial::computeQpProperties()
   if (_coord_sys == Moose::COORD_RZ)
     _momentum_strong_residual[_qp] += _viscous_strong_residual[_qp];
 
-  if (_object_tracker->hasTransient())
+  if (_has_transient)
     _momentum_strong_residual[_qp] += _td_strong_residual[_qp];
 
-  if (_object_tracker->hasGravity())
+  if (_has_gravity)
     _momentum_strong_residual[_qp] += _gravity_strong_residual[_qp];
 
-  if (_object_tracker->hasBoussinesq())
+  if (_has_boussinesq)
     _momentum_strong_residual[_qp] += _boussinesq_strong_residual[_qp];
 
   // // Future addition
@@ -143,7 +155,7 @@ INSADMaterial::viscousTermRZ()
   {
     ADReal r = _ad_q_point[_qp](0);
 
-    if (_object_tracker->viscousForm() == "laplace")
+    if (_viscous_form == "laplace")
       _viscous_strong_residual[_qp] = ADRealVectorValue(
           // u_r
           // Additional term from vector Laplacian
@@ -163,7 +175,7 @@ INSADMaterial::viscousTermRZ()
   else
   {
     Real r = _q_point[_qp](0);
-    if (_object_tracker->viscousForm() == "laplace")
+    if (_viscous_form == "laplace")
       _viscous_strong_residual[_qp] =
           // u_r
           // Additional term from vector Laplacian

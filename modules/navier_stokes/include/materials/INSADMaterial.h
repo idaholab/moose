@@ -81,5 +81,32 @@ protected:
   /// of freedom
   const MooseArray<ADPoint> & _ad_q_point;
 
+  /// A user object that consumes information from INSAD residual objects and feeds it into this
+  /// material
   static const INSADObjectTracker * _object_tracker;
+
+  /// Whether the simulation is transient
+  bool _has_transient;
+
+  /// Whether there is a gravity force in the momentum equation
+  bool _has_gravity;
+
+  /// Whether natural convection forces via the Boussinesq approximation are added to the momentum
+  /// equation
+  bool _has_boussinesq;
+
+  /// The Boussinesq coefficient
+  const ADMaterialProperty<Real> * _boussinesq_alpha;
+
+  /// The temperature
+  const ADVariableValue * _temperature;
+
+  /// The reference temperature
+  const MaterialProperty<Real> * _ref_temp;
+
+  /// The viscous form of the equations. This is either "laplace" or "traction"
+  std::string _viscous_form;
+
+  /// The gravity vector
+  RealVectorValue _gravity_vector;
 };

@@ -51,7 +51,7 @@ INSAD3Eqn::initialSetup()
 {
   INSADMaterial::initialSetup();
 
-  if (_object_tracker->hasTransient())
+  if (_has_transient)
     _temperature_dot = &adCoupledDot("temperature");
 }
 
@@ -75,7 +75,7 @@ INSAD3Eqn::computeQpProperties()
       _rho[_qp] * _cp[_qp] * _velocity[_qp] * _grad_temperature[_qp];
   _temperature_strong_residual[_qp] += _temperature_convective_strong_residual[_qp];
 
-  if (_object_tracker->hasTransient())
+  if (_has_transient)
   {
     mooseAssert(_temperature_dot, "The temperature time derivative is null");
     _temperature_td_strong_residual[_qp] = _cp[_qp] * _rho[_qp] * (*_temperature_dot)[_qp];
