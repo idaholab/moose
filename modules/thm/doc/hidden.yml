@@ -309,6 +309,8 @@
 
 - /ScalarKernels/ODECoefTimeDerivative
 - /ScalarKernels/VolumeJunction2PhaseVolumeFractionTimeDerivative
+- /ScalarKernels/ShaftComponentTorqueScalarKernel
+- /ScalarKernels/ShaftTimeDerivativeScalarKernel
 
 - /UserObjects/BoundaryFlux7EqnNCGGhostWall
 - /UserObjects/BoundaryFlux7EqnNCGGhostDensityVelocity
@@ -326,6 +328,7 @@
 - /UserObjects/RDGInterfacialVariablesSideNCGHLLC
 - /UserObjects/SimpleTurbine1PhaseUserObject
 - /UserObjects/SimpleTurbine2PhaseUserObject
+- /UserObjects/ShaftConnectedMotorUserObject
 - /UserObjects/SolidMaterialProperties
 - /UserObjects/SpecificInterfacialAreaCurve
 - /UserObjects/RiemannSolver7EqnNCGHLLC
