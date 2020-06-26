@@ -38,5 +38,5 @@ protected:
   const bool _has_coupled_c;
   const unsigned int _c_var;
 
-  const MaterialProperty<RealTensorValue> * _dmobility_dc;
+  const MaterialProperty<RealTensorValue> * const _dmobility_dc;
 };

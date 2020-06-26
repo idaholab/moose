@@ -57,7 +57,7 @@ protected:
   const Function * _yield_stress_function;
   Real _yield_stress;
   const Real _hardening_constant;
-  const Function * _hardening_function;
+  const Function * const _hardening_function;
 
   Real _yield_condition;
   Real _hardening_slope;

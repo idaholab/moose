@@ -30,11 +30,11 @@ protected:
 
   virtual void computeFluxGradTensor();
 
-  const VariableGradient * _grad_jx;
+  const VariableGradient * const _grad_jx;
   bool _has_yflux;
   bool _has_zflux;
-  const VariableGradient * _grad_jy;
-  const VariableGradient * _grad_jz;
+  const VariableGradient * const _grad_jy;
+  const VariableGradient * const _grad_jz;
 
   const VariableValue & _gb;
 

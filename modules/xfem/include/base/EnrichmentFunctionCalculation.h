@@ -40,7 +40,7 @@ public:
                                           const unsigned int point_index);
 
 private:
-  const CrackFrontDefinition * _crack_front_definition;
+  const CrackFrontDefinition & _crack_front_definition;
   Real _r;
   Real _theta;
 };

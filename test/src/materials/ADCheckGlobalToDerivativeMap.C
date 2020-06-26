@@ -32,8 +32,8 @@ ADCheckGlobalToDerivativeMap::ADCheckGlobalToDerivativeMap(const InputParameters
     _mat_prop(declareADProperty<Real>(getParam<MaterialPropertyName>("mat_prop"))),
     _u(adCoupledValue("u")),
     _v(adCoupledValue("v")),
-    _u_var(getVar("u", 0)),
-    _v_var(getVar("v", 0))
+    _u_var(*getVar("u", 0)),
+    _v_var(*getVar("v", 0))
 {
 }
 
@@ -54,8 +54,8 @@ ADCheckGlobalToDerivativeMap::computeProperties()
     const DofMap & dof_map = moose_nl_system.system().get_dof_map();
 
     std::vector<dof_id_type> u_dof_indices, v_dof_indices;
-    dof_map.dof_indices(_current_elem, u_dof_indices, _u_var->number());
-    dof_map.dof_indices(_current_elem, v_dof_indices, _v_var->number());
+    dof_map.dof_indices(_current_elem, u_dof_indices, _u_var.number());
+    dof_map.dof_indices(_current_elem, v_dof_indices, _v_var.number());
 
     const auto nqp = _qrule->n_points();
     mooseAssert(global_index_to_deriv_map.size() == nqp,
@@ -63,8 +63,8 @@ ADCheckGlobalToDerivativeMap::computeProperties()
 
     auto max_dofs_per_elem = moose_nl_system.getMaxVarNDofsPerElem();
 
-    const auto u_offset = Moose::adOffset(_u_var->number(), max_dofs_per_elem);
-    const auto v_offset = Moose::adOffset(_v_var->number(), max_dofs_per_elem);
+    const auto u_offset = Moose::adOffset(_u_var.number(), max_dofs_per_elem);
+    const auto v_offset = Moose::adOffset(_v_var.number(), max_dofs_per_elem);
 
     for (MooseIndex(nqp) qp = 0; qp < nqp; ++qp)
     {

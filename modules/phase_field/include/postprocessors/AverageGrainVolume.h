@@ -48,5 +48,5 @@ private:
   const QBase * const & _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
-  const FeatureFloodCount * _feature_counter;
+  const FeatureFloodCount * const _feature_counter;
 };

@@ -151,19 +151,19 @@ protected:
   bool _cosserat;
 
   /// The Cosserat curvature strain
-  const MaterialProperty<RankTwoTensor> * _curvature;
+  const MaterialProperty<RankTwoTensor> * const _curvature;
 
   /// The Cosserat elastic flexural rigidity tensor
-  const MaterialProperty<RankFourTensor> * _elastic_flexural_rigidity_tensor;
+  const MaterialProperty<RankFourTensor> * const _elastic_flexural_rigidity_tensor;
 
   /// the Cosserat couple-stress
-  MaterialProperty<RankTwoTensor> * _couple_stress;
+  MaterialProperty<RankTwoTensor> * const _couple_stress;
 
   /// the old value of Cosserat couple-stress
-  const MaterialProperty<RankTwoTensor> * _couple_stress_old;
+  const MaterialProperty<RankTwoTensor> * const _couple_stress_old;
 
   /// derivative of couple-stress w.r.t. curvature
-  MaterialProperty<RankFourTensor> * _Jacobian_mult_couple;
+  MaterialProperty<RankFourTensor> * const _Jacobian_mult_couple;
 
   /// Elasticity tensor that can be rotated by this class (ie, its not const)
   RankFourTensor _my_elasticity_tensor;

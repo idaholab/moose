@@ -81,13 +81,13 @@ protected:
   const unsigned int _pvar;
 
   /// user object defining the density.  Only used if _fully_upwind = true
-  const RichardsDensity * _density_UO;
+  const RichardsDensity * const _density_UO;
 
   /// user object defining the effective saturation.  Only used if _fully_upwind = true
-  const RichardsSeff * _seff_UO;
+  const RichardsSeff * const _seff_UO;
 
   /// user object defining the relative permeability.  Only used if _fully_upwind = true
-  const RichardsRelPerm * _relperm_UO;
+  const RichardsRelPerm * const _relperm_UO;
 
   /// number of nodes in this element.  Only used if _fully_upwind = true
   unsigned int _num_nodes;

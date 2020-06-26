@@ -73,7 +73,7 @@ protected:
   bool _adaptive_timestepping;
 
   /// if specified, the postprocessor value is an upper limit for the time step length
-  const PostprocessorValue * _pps_value;
+  const PostprocessorValue * const _pps_value;
 
   const Function * _timestep_limiting_function;
   const PiecewiseBase * _piecewise_timestep_limiting_function;

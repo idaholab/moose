@@ -29,9 +29,9 @@ protected:
   virtual RealEigenMatrix computeQpOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   /// scalar diffusion coefficient
-  const MaterialProperty<Real> * _r;
+  const MaterialProperty<Real> * const _r;
   /// array diffusion coefficient
-  const MaterialProperty<RealEigenVector> * _r_array;
+  const MaterialProperty<RealEigenVector> * const _r_array;
   /// matrix diffusion coefficient
-  const MaterialProperty<RealEigenMatrix> * _r_2d_array;
+  const MaterialProperty<RealEigenMatrix> * const _r_2d_array;
 };

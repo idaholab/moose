@@ -43,7 +43,7 @@ PerfGraphInterface::PerfGraphInterface(const MooseObject * moose_object, const s
 }
 
 PerfGraphInterface::PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix)
-  : _perf_graph(perf_graph), _prefix(prefix)
+  : _pg_params(nullptr), _perf_graph(perf_graph), _prefix(prefix)
 {
 }
 

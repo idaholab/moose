@@ -50,7 +50,7 @@ protected:
   const VariableValue & _disp_old_0;
 
   /// A Userobject that carries the subblock ID for all elements
-  const SubblockIndexProvider * _subblock_id_provider;
+  const SubblockIndexProvider * const _subblock_id_provider;
 
   /// Whether an out-of-plane strain variable is coupled
   bool _has_out_of_plane_strain;

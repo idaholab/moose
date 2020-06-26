@@ -53,13 +53,13 @@ protected:
   bool _use_relperm;
 
   /// fluid density, optional
-  const RichardsDensity * _density;
+  const RichardsDensity * const _density;
 
   /// fluid viscosity, optional
   Real _viscosity;
 
   /// fluid relative permeaility, optional
-  const RichardsRelPerm * _relperm;
+  const RichardsRelPerm * const _relperm;
 
   /// saturation variable, optional
   const VariableValue & _sat;

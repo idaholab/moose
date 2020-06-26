@@ -48,7 +48,7 @@ protected:
   const EulerAngleProvider & _euler;
 
   /// EBSDReader Object
-  const EBSDReader * _ebsd_reader;
+  const EBSDReader * const _ebsd_reader;
 
   /// Grain tracker object
   const GrainTrackerInterface & _grain_tracker;

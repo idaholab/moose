@@ -44,5 +44,5 @@ protected:
 
   const FEProblemBase & _fe_problem;
 
-  const DisplacedProblem * _displaced_problem;
+  const DisplacedProblem * const _displaced_problem;
 };

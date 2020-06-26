@@ -34,7 +34,7 @@ protected:
     NAN_MESSAGE_ERROR = 2
   };
 
-  const MooseObject * _moose_object;
+  const MooseObject * const _moose_object;
 
   /// Raise mooseWarning or mooseError?
   const enum NaNMessage _emit_on_nan;

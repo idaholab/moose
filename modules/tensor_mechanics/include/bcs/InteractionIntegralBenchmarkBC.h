@@ -36,7 +36,7 @@ protected:
   virtual Real computeQpValue();
 
   const int _component;
-  const CrackFrontDefinition * _crack_front_definition;
+  const CrackFrontDefinition & _crack_front_definition;
   const unsigned int _crack_front_point_index;
 
   Real _r;

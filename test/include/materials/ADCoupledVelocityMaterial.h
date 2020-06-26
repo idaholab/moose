@@ -27,7 +27,7 @@ protected:
   ADMaterialProperty<Real> & _rho_w;
 
   const ADVariableValue & _vel_x;
-  const ADVariableValue * _vel_y;
-  const ADVariableValue * _vel_z;
+  const ADVariableValue * const _vel_y;
+  const ADVariableValue * const _vel_z;
   const ADVariableValue & _rho;
 };

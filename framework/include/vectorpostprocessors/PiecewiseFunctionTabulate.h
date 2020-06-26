@@ -34,7 +34,7 @@ public:
 
 protected:
   /// The piecewise function to tabulate
-  const PiecewiseBase * _piecewise_function;
+  const PiecewiseBase * const _piecewise_function;
 
   /// function argument (x) column
   VectorPostprocessorValue & _x_col;

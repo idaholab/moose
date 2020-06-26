@@ -458,7 +458,7 @@ private:
   VariableValue _du_dotdot_du, _du_dotdot_du_bak;
 
   /// Pointer to time integrator
-  const TimeIntegrator * _time_integrator;
+  const TimeIntegrator * const _time_integrator;
 
   /// The current elem. This has to be a reference because the current elem will be constantly
   /// changing. If we initialized this to point to one elem, then in the next calculation we would

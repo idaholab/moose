@@ -30,8 +30,8 @@ NaNInterface::validParams()
 }
 
 NaNInterface::NaNInterface(const MooseObject * moose_object)
-  : _emit_on_nan(
-        moose_object->getParam<MooseEnum>("emit_on_nan").getEnum<NaNInterface::NaNMessage>())
+  : _moose_object(moose_object),
+    _emit_on_nan(
+        _moose_object->getParam<MooseEnum>("emit_on_nan").getEnum<NaNInterface::NaNMessage>())
 {
-  _moose_object = moose_object;
 }

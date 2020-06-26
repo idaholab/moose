@@ -33,7 +33,7 @@ LevelSetCutUserObject::LevelSetCutUserObject(const InputParameters & parameters)
                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
                               .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
-    _solution(_system.current_local_solution.get())
+    _solution(*_system.current_local_solution.get())
 {
 }
 
@@ -63,8 +63,8 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
     dof_id_type ls_dof_id_1 = node1->dof_number(_system.number(), _level_set_var_number, 0);
     dof_id_type ls_dof_id_2 = node2->dof_number(_system.number(), _level_set_var_number, 0);
 
-    Number ls_node_1 = (*_solution)(ls_dof_id_1);
-    Number ls_node_2 = (*_solution)(ls_dof_id_2);
+    Number ls_node_1 = _solution(ls_dof_id_1);
+    Number ls_node_2 = _solution(ls_dof_id_2);
 
     if (ls_node_1 * ls_node_2 < 0)
     {
@@ -116,8 +116,8 @@ LevelSetCutUserObject::cutElementByGeometry(const Elem * elem,
       dof_id_type ls_dof_id_1 = node1->dof_number(_system.number(), _level_set_var_number, 0);
       dof_id_type ls_dof_id_2 = node2->dof_number(_system.number(), _level_set_var_number, 0);
 
-      Number ls_node_1 = (*_solution)(ls_dof_id_1);
-      Number ls_node_2 = (*_solution)(ls_dof_id_2);
+      Number ls_node_1 = _solution(ls_dof_id_1);
+      Number ls_node_2 = _solution(ls_dof_id_2);
 
       if (ls_node_1 * ls_node_2 < 0)
       {

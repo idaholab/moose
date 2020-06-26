@@ -82,9 +82,9 @@ protected:
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
   /// Pointer to the stress tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> * _stress;
+  const MaterialProperty<RankTwoTensor> * const _stress;
   /// Pointer to the strain tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> * _strain;
+  const MaterialProperty<RankTwoTensor> * const _strain;
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// FEType object defining order and family of displacement variables
@@ -106,7 +106,7 @@ protected:
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature
-  const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
+  const MaterialProperty<RankTwoTensor> * const _total_deigenstrain_dT;
   /// Vector of q function values for the nodes in the current element
   std::vector<Real> _q_curr_elem;
   /// Vector of shape function values for the current element

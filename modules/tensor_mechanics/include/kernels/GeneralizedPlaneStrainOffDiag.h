@@ -47,7 +47,7 @@ protected:
   unsigned int _scalar_out_of_plane_strain_var;
 
   /// A Userobject that carries the subblock ID for all elements
-  const SubblockIndexProvider * _subblock_id_provider;
+  const SubblockIndexProvider * const _subblock_id_provider;
   const unsigned int _scalar_var_id;
 
   MooseVariable * _temp_var;

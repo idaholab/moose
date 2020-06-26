@@ -27,18 +27,14 @@ FVMatAdvection::validParams()
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel"))
+    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
+    _adv_quant_elem(isParamValid("advected_quantity")
+                        ? &getADMaterialProperty<Real>("advected_quantity").get()
+                        : &_u_elem),
+    _adv_quant_neighbor(isParamValid("advected_quantity")
+                            ? &getNeighborADMaterialProperty<Real>("advected_quantity").get()
+                            : &_u_neighbor)
 {
-  if (isParamValid("advected_quantity"))
-  {
-    _adv_quant_elem = &getADMaterialProperty<Real>("advected_quantity").get();
-    _adv_quant_neighbor = &getNeighborADMaterialProperty<Real>("advected_quantity").get();
-  }
-  else
-  {
-    _adv_quant_elem = &_u_elem;
-    _adv_quant_neighbor = &_u_neighbor;
-  }
 }
 
 ADReal

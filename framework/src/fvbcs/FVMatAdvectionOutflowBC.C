@@ -27,12 +27,12 @@ FVMatAdvectionOutflowBC::validParams()
 }
 
 FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
-  : FVFluxBC(params), _vel(getADMaterialProperty<RealVectorValue>("vel"))
+  : FVFluxBC(params),
+    _vel(getADMaterialProperty<RealVectorValue>("vel")),
+    _adv_quant(isParamValid("advected_quantity")
+                   ? &getADMaterialProperty<Real>("advected_quantity").get()
+                   : &_u)
 {
-  if (isParamValid("advected_quantity"))
-    _adv_quant = &getADMaterialProperty<Real>("advected_quantity").get();
-  else
-    _adv_quant = &_u;
 }
 
 ADReal

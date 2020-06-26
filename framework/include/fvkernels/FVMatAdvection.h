@@ -24,8 +24,8 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _vel_neighbor;
 
   /// The advected quantity on the elem
-  const MooseArray<ADReal> * _adv_quant_elem;
+  const MooseArray<ADReal> * const _adv_quant_elem;
 
   /// The advected quantity on the neighbor
-  const MooseArray<ADReal> * _adv_quant_neighbor;
+  const MooseArray<ADReal> * const _adv_quant_neighbor;
 };

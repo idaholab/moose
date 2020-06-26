@@ -37,7 +37,7 @@ protected:
                                    const ADReal & scalar) override;
 
   /// Temperature variable value
-  const ADVariableValue * _temperature;
+  const ADVariableValue * const _temperature;
 
   /// Leading coefficient
   const Real _coefficient;
