@@ -63,7 +63,7 @@ If new headings are created or deleted during a live serve, the outline won't up
 
 ## Outline Directory id=outline-directory
 
-The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in alphabetical order.
+The following is a list of all level 1 & 2 headings in the "extensions" directory, except this section's heading, in alphabetical order of the names of MooseDown files which create those headings.
 
 !content outline location=extensions max_level=2 hide=outline-directory
 
@@ -71,13 +71,16 @@ The following is a list of all level 1 & 2 headings in the "extensions" director
 
 "Next" and "Previous" buttons are designed to be the last element of a page. However, for the case where more markdown content is added afterwards, the same margin is enforced below the buttons as are above. They need to appear as items which are distinct from page's main body, similar to how the breadcrumbs navigation is separated, and so this why the margins are enforced.
 
+!alert warning title=Materialize Support Required
+The "Next" and "Previous" buttons require [MaterializeCSS](https://materializecss.com/) compatibility. Supported browsers include the following: Chrome 35\+, Firefox 31\+, Safari 9\+, Opera, Edge, and IE 11\+.
+
 The following buttons were configured to link to those pages which appear before and after this one on the [main index page](/).
 
 !content previous destination=materialicon.md
 
 !content next destination=config.md
 
-## Next/Previous Buttons with Page Titles
+### Buttons with Page Titles
 
 The following buttons were configured to link to those pages which appear before and after this one on the [main index page](/) and to use those page's title as their text.
 

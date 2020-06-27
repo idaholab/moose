@@ -412,14 +412,11 @@ class RenderContentOutline(components.RenderComponent):
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        self.createHTMLHelper(parent, token, page)
+        # This command requires Materialize libraries
+        return None
 
     def createMaterialize(self, parent, token, page):
-        self.createHTMLHelper(parent, token, page)
-
-    def createHTMLHelper(self, parent, token, page):
         node = self.translator.findPage(token['destination'])
-
         btn = html.Tag(parent, 'a',
                        class_='btn moose-content-{}'.format(token['direction']),
                        href=str(node.relativeDestination(page)))
@@ -442,7 +439,7 @@ class RenderNextAndPrevious(components.RenderComponent):
         else:
             string = token['direction'].capitalize()
 
-        html.Tag(btn, string=string)
+        html.String(btn, content=string)
 
     def createLatex(self, parent, token, page):
         # This capability is probably not necessary for PDFs
