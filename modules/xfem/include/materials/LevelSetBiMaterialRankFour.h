@@ -12,27 +12,28 @@
 #include "LevelSetBiMaterialBase.h"
 #include "RankFourTensor.h"
 
-// Forward Declarations
-
 /**
- * Compute a RankFourTensor material property for bi-materials problem (consisting of two different
- * materials) defined by a level set function
- *
+ * Compute a RankFourTensor material property for bi-materials problem
+ * (consisting of two different materials) defined by a level set function
  */
-class LevelSetBiMaterialRankFour : public LevelSetBiMaterialBase
+template <bool is_ad>
+class LevelSetBiMaterialRankFourTempl : public LevelSetBiMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  LevelSetBiMaterialRankFour(const InputParameters & parameters);
+  LevelSetBiMaterialRankFourTempl(const InputParameters & parameters);
 
 protected:
   virtual void assignQpPropertiesForLevelSetPositive() override;
   virtual void assignQpPropertiesForLevelSetNegative() override;
 
   /// RankFourTensor Material properties for the two separate materials in the bi-material system
-  std::vector<const MaterialProperty<RankFourTensor> *> _bimaterial_material_prop;
+  std::vector<const GenericMaterialProperty<RankFourTensor, is_ad> *> _bimaterial_material_prop;
 
   /// Global RankFourTensor material property (switch bi-material diffusion coefficient based on level set values)
-  MaterialProperty<RankFourTensor> & _material_prop;
+  GenericMaterialProperty<RankFourTensor, is_ad> & _material_prop;
 };
+
+typedef LevelSetBiMaterialRankFourTempl<false> LevelSetBiMaterialRankFour;
+typedef LevelSetBiMaterialRankFourTempl<true> ADLevelSetBiMaterialRankFour;

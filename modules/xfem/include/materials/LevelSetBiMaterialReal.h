@@ -11,27 +11,28 @@
 
 #include "LevelSetBiMaterialBase.h"
 
-// Forward Declarations
-
 /**
- * Compute a Real material property for bi-materials problem (consisting of two different materials)
- * defined by a level set function
- *
+ * Compute a Real material property for bi-materials problem (consisting of two
+ * different materials) defined by a level set function
  */
-class LevelSetBiMaterialReal : public LevelSetBiMaterialBase
+template <bool is_ad>
+class LevelSetBiMaterialRealTempl : public LevelSetBiMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  LevelSetBiMaterialReal(const InputParameters & parameters);
+  LevelSetBiMaterialRealTempl(const InputParameters & parameters);
 
 protected:
-  virtual void assignQpPropertiesForLevelSetPositive();
-  virtual void assignQpPropertiesForLevelSetNegative();
+  virtual void assignQpPropertiesForLevelSetPositive() override;
+  virtual void assignQpPropertiesForLevelSetNegative() override;
 
   /// Real Material properties for the two separate materials in the bi-material system
-  std::vector<const MaterialProperty<Real> *> _bimaterial_material_prop;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _bimaterial_material_prop;
 
   /// Global Real material property (switch bi-material diffusion coefficient based on level set values)
-  MaterialProperty<Real> & _material_prop;
+  GenericMaterialProperty<Real, is_ad> & _material_prop;
 };
+
+typedef LevelSetBiMaterialRealTempl<false> LevelSetBiMaterialReal;
+typedef LevelSetBiMaterialRealTempl<true> ADLevelSetBiMaterialReal;

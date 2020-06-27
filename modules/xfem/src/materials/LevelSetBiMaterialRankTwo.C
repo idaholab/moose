@@ -10,9 +10,11 @@
 #include "LevelSetBiMaterialRankTwo.h"
 
 registerMooseObject("XFEMApp", LevelSetBiMaterialRankTwo);
+registerMooseObject("XFEMApp", ADLevelSetBiMaterialRankTwo);
 
+template <bool is_ad>
 InputParameters
-LevelSetBiMaterialRankTwo::validParams()
+LevelSetBiMaterialRankTwoTempl<is_ad>::validParams()
 {
   InputParameters params = LevelSetBiMaterialBase::validParams();
   params.addClassDescription(
@@ -21,25 +23,32 @@ LevelSetBiMaterialRankTwo::validParams()
   return params;
 }
 
-LevelSetBiMaterialRankTwo::LevelSetBiMaterialRankTwo(const InputParameters & parameters)
+template <bool is_ad>
+LevelSetBiMaterialRankTwoTempl<is_ad>::LevelSetBiMaterialRankTwoTempl(
+    const InputParameters & parameters)
   : LevelSetBiMaterialBase(parameters),
     _bimaterial_material_prop(2),
-    _material_prop(declareProperty<RankTwoTensor>(_base_name + _prop_name))
+    _material_prop(declareGenericProperty<RankTwoTensor, is_ad>(_base_name + _prop_name))
 {
-  _bimaterial_material_prop[0] = &getMaterialProperty<RankTwoTensor>(
+  _bimaterial_material_prop[0] = &getGenericMaterialProperty<RankTwoTensor, is_ad>(
       getParam<std::string>("levelset_positive_base") + "_" + _prop_name);
-  _bimaterial_material_prop[1] = &getMaterialProperty<RankTwoTensor>(
+  _bimaterial_material_prop[1] = &getGenericMaterialProperty<RankTwoTensor, is_ad>(
       getParam<std::string>("levelset_negative_base") + "_" + _prop_name);
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialRankTwo::assignQpPropertiesForLevelSetPositive()
+LevelSetBiMaterialRankTwoTempl<is_ad>::assignQpPropertiesForLevelSetPositive()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[0])[_qp];
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialRankTwo::assignQpPropertiesForLevelSetNegative()
+LevelSetBiMaterialRankTwoTempl<is_ad>::assignQpPropertiesForLevelSetNegative()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[1])[_qp];
 }
+
+template class LevelSetBiMaterialRankTwoTempl<false>;
+template class LevelSetBiMaterialRankTwoTempl<true>;
