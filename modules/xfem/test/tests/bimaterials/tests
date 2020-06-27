@@ -27,8 +27,43 @@
                   'mechanical response in a composite material matrix with an '
                   'inclusion with the location of the inclusion boundary '
                   'and material properties applied to the matrix and inclusion '
-                  'determined by a prescribed level set function.' 
+                  'determined by a prescribed level set function.'
     design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
     issues = '#10421'
+  [../]
+  [./glued_ad_bimaterial]
+    type = Exodiff
+    input = glued_ad_bimaterials_2d.i
+    exodiff = 'glued_bimaterials_2d_out.e'
+    abs_zero = 1e-8
+    use_old_floor = true
+    map = false
+    unique_id = true
+    prereq = glued_bimaterial
+    requirement = 'The system shall have the capability to calculate the '
+                  'mechanical response in two glued, layered materials with '
+                  'the interface location and automatic differentiation '
+                  'material properties applied to on each side of the boundary '
+                  'determined by a level set function.'
+    design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md'
+    issues = '#15437'
+  [../]
+  [./inclusion_ad_bimaterial]
+    type = Exodiff
+    input = inclusion_ad_bimaterials_2d.i
+    exodiff = 'inclusion_bimaterials_2d_out.e'
+    abs_zero = 1e-8
+    use_old_floor = true
+    map = false
+    unique_id = true
+    prereq = inclusion_bimaterial
+    requirement = 'The XFEM module shall have the capability to calculate '
+                  'mechanical response in a composite material matrix with an '
+                  'inclusion with the location of the inclusion boundary '
+                  'and material properties applied to the matrix and inclusion '
+                  'determined by a prescribed level set function using '
+                  'automatic differentiation.'
+    design = 'LevelSetBiMaterialRankTwo.md'
+    issues = '#15437'
   [../]
 []

@@ -12,27 +12,28 @@
 #include "LevelSetBiMaterialBase.h"
 #include "RankTwoTensor.h"
 
-// Forward Declarations
-
 /**
- * Compute a RankTwoTensor material property for bi-materials problem (consisting of two different
- * materials) defined by a level set function
- *
+ * Compute a RankTwoTensor material property for bi-materials problem
+ * (consisting of two different materials) defined by a level set function
  */
-class LevelSetBiMaterialRankTwo : public LevelSetBiMaterialBase
+template <bool is_ad>
+class LevelSetBiMaterialRankTwoTempl : public LevelSetBiMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  LevelSetBiMaterialRankTwo(const InputParameters & parameters);
+  LevelSetBiMaterialRankTwoTempl(const InputParameters & parameters);
 
 protected:
   virtual void assignQpPropertiesForLevelSetPositive() override;
   virtual void assignQpPropertiesForLevelSetNegative() override;
 
   /// RankTwoTensor Material properties for the two separate materials in the bi-material system
-  std::vector<const MaterialProperty<RankTwoTensor> *> _bimaterial_material_prop;
+  std::vector<const GenericMaterialProperty<RankTwoTensor, is_ad> *> _bimaterial_material_prop;
 
   /// Global RankTwoTensor material property (switch bi-material diffusion coefficient based on level set values)
-  MaterialProperty<RankTwoTensor> & _material_prop;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _material_prop;
 };
+
+typedef LevelSetBiMaterialRankTwoTempl<false> LevelSetBiMaterialRankTwo;
+typedef LevelSetBiMaterialRankTwoTempl<true> ADLevelSetBiMaterialRankTwo;

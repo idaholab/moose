@@ -15,19 +15,20 @@
 class XFEM;
 
 /**
- * Base class for switching between materials in a bi-material system where the interface is defined
- * by a level set function.
+ * Base class for switching between materials in a bi-material system where the
+ * interface is defined by a level set function.
  */
-class LevelSetBiMaterialBase : public Material
+template <bool is_ad>
+class LevelSetBiMaterialBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  LevelSetBiMaterialBase(const InputParameters & parameters);
+  LevelSetBiMaterialBaseTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
-  virtual void computeQpProperties();
+  virtual void computeProperties() override;
+  virtual void computeQpProperties() override;
 
   /**
    * assign the material properties for the negative level set region.
@@ -60,3 +61,6 @@ protected:
   /// use the positive level set region's material properties
   bool _use_positive_property;
 };
+
+typedef LevelSetBiMaterialBaseTempl<false> LevelSetBiMaterialBase;
+typedef LevelSetBiMaterialBaseTempl<true> ADLevelSetBiMaterialBase;

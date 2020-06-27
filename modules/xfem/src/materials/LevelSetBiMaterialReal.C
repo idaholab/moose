@@ -10,9 +10,11 @@
 #include "LevelSetBiMaterialReal.h"
 
 registerMooseObject("XFEMApp", LevelSetBiMaterialReal);
+registerMooseObject("XFEMApp", ADLevelSetBiMaterialReal);
 
+template <bool is_ad>
 InputParameters
-LevelSetBiMaterialReal::validParams()
+LevelSetBiMaterialRealTempl<is_ad>::validParams()
 {
   InputParameters params = LevelSetBiMaterialBase::validParams();
   params.addClassDescription(
@@ -21,25 +23,31 @@ LevelSetBiMaterialReal::validParams()
   return params;
 }
 
-LevelSetBiMaterialReal::LevelSetBiMaterialReal(const InputParameters & parameters)
+template <bool is_ad>
+LevelSetBiMaterialRealTempl<is_ad>::LevelSetBiMaterialRealTempl(const InputParameters & parameters)
   : LevelSetBiMaterialBase(parameters),
     _bimaterial_material_prop(2),
-    _material_prop(declareProperty<Real>(_base_name + _prop_name))
+    _material_prop(declareGenericProperty<Real, is_ad>(_base_name + _prop_name))
 {
-  _bimaterial_material_prop[0] = &getMaterialProperty<Real>(
+  _bimaterial_material_prop[0] = &getGenericMaterialProperty<Real, is_ad>(
       getParam<std::string>("levelset_positive_base") + "_" + _prop_name);
-  _bimaterial_material_prop[1] = &getMaterialProperty<Real>(
+  _bimaterial_material_prop[1] = &getGenericMaterialProperty<Real, is_ad>(
       getParam<std::string>("levelset_negative_base") + "_" + _prop_name);
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialReal::assignQpPropertiesForLevelSetPositive()
+LevelSetBiMaterialRealTempl<is_ad>::assignQpPropertiesForLevelSetPositive()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[0])[_qp];
 }
 
+template <bool is_ad>
 void
-LevelSetBiMaterialReal::assignQpPropertiesForLevelSetNegative()
+LevelSetBiMaterialRealTempl<is_ad>::assignQpPropertiesForLevelSetNegative()
 {
   _material_prop[_qp] = (*_bimaterial_material_prop[1])[_qp];
 }
+
+template class LevelSetBiMaterialRealTempl<false>;
+template class LevelSetBiMaterialRealTempl<true>;
