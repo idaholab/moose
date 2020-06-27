@@ -334,9 +334,9 @@ EFAFragment2D::split()
   // new fragments and return them.
   // N.B. each boundary each can only have 1 cut at most
   std::vector<EFAFragment2D *> new_fragments;
-  std::vector<std::vector<EFANode *>> fragment_nodes; // vectors of EFA nodes for the two fragments
-  fragment_nodes.resize(2);
-  unsigned int frag_number = 0; // fragment number in vector of vectors either 0 or 1
+  std::vector<std::vector<EFANode *>> fragment_nodes(
+      2);                       // vectors of EFA nodes in the two fragments
+  unsigned int frag_number = 0; // Index of the current fragment that we are assmbling nodes into
   unsigned int edge_cut_count = 0;
   unsigned int node_cut_count = 0;
   for (unsigned int iedge = 0; iedge < _boundary_edges.size(); ++iedge)
@@ -347,10 +347,7 @@ EFAFragment2D::split()
         EFANode::N_CATEGORY_EMBEDDED_PERMANENT) // if current node has been cut change fragment
     {
       ++node_cut_count;
-      if (frag_number == 0)
-        frag_number = 1;
-      else
-        frag_number = 0;
+      frag_number = 1 - frag_number; // Toggle between 0 and 1
       fragment_nodes[frag_number].push_back(_boundary_edges[iedge]->getNode(0));
     }
 
@@ -361,40 +358,27 @@ EFAFragment2D::split()
     {
       fragment_nodes[frag_number].push_back(_boundary_edges[iedge]->getEmbeddedNode(0));
       ++edge_cut_count;
-      if (frag_number == 0)
-        frag_number = 1;
-      else
-        frag_number = 0;
+      frag_number = 1 - frag_number; // Toggle between 0 and 1
       fragment_nodes[frag_number].push_back(_boundary_edges[iedge]->getEmbeddedNode(0));
     }
   }
 
   if ((edge_cut_count + node_cut_count) > 1) // any two cuts case
   {
-    EFAFragment2D * new_frag0 = new EFAFragment2D(_host_elem, false, NULL);
-    EFAFragment2D * new_frag1 = new EFAFragment2D(_host_elem, false, NULL);
-    if (fragment_nodes[0].size() >= 3)
-    { // check to make sure an edge wasn't cut
-      for (unsigned int inode = 0; inode < fragment_nodes[0].size() - 1;
-           inode++) // assemble fragment 1 (0)
-        new_frag0->addEdge(new EFAEdge(fragment_nodes[0][inode], fragment_nodes[0][inode + 1]));
+    for (unsigned int frag_idx = 0; frag_idx < 2; ++frag_idx) // Create 2 fragments
+    {
+      EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
+      auto & this_frag_nodes = fragment_nodes[frag_idx];
+      if (this_frag_nodes.size() >= 3)
+      { // check to make sure an edge wasn't cut
+        for (unsigned int inode = 0; inode < this_frag_nodes.size() - 1; inode++)
+          new_frag->addEdge(new EFAEdge(this_frag_nodes[inode], this_frag_nodes[inode + 1]));
 
-      new_frag0->addEdge(
-          new EFAEdge(fragment_nodes[0][fragment_nodes[0].size() - 1], fragment_nodes[0][0]));
+        new_frag->addEdge(
+            new EFAEdge(this_frag_nodes[this_frag_nodes.size() - 1], this_frag_nodes[0]));
 
-      new_fragments.push_back(new_frag0);
-    }
-
-    if (fragment_nodes[1].size() >= 3)
-    { // check to make sure the cut wasn't straight on an edge
-      for (unsigned int inode = 0; inode < fragment_nodes[1].size() - 1;
-           inode++) // assemble fragment 2 (1)
-        new_frag1->addEdge(new EFAEdge(fragment_nodes[1][inode], fragment_nodes[1][inode + 1]));
-
-      new_frag1->addEdge(
-          new EFAEdge(fragment_nodes[1][fragment_nodes[1].size() - 1], fragment_nodes[1][0]));
-
-      new_fragments.push_back(new_frag1);
+        new_fragments.push_back(new_frag);
+      }
     }
   }
   else if (edge_cut_count == 1) // single edge cut case
