@@ -418,6 +418,8 @@ class ParallelBarrier(Executioner):
         barrier = multiprocessing.Barrier(num_threads)
         manager = multiprocessing.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
+
+        # Initialize the page attributes container using the existing list of Page node objects
         for i in range(len(page_attributes)):
             Executioner.setMutable(self._page_objects[i], True)
             page_attributes[i] = self._page_objects[i].attributes

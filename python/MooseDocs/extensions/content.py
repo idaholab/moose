@@ -176,8 +176,6 @@ class ContentOutlineCommand(command.CommandComponent):
         settings['location'] = (None, "The markdown content directory to build outline.")
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
         settings['max_level'] = (1, 'Maximum heading level to display.')
-
-        # TODO: hide setting should accept `page.md#heading` format, in case theres identical ids in the outline
         settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
@@ -395,24 +393,12 @@ class RenderContentOutline(components.RenderComponent):
                     self.renderer.render(li, link, page)
                     previous = current
 
-        # TODO: Make nested lists collapsible at their parent level
-        # The folowing reproduced an example from https://materializecss.com/collapsible.html
-        #
-        # ul = html.Tag(parent, 'ul', class_='collapsible')
-        # li = html.Tag(ul, 'li')
-        # div = html.Tag(li, 'div', class_='collapsible-header')
-        # html.Tag(div, 'i', class_='material-icons', string='filter_drama')
-        # html.Tag(div, string=' First')
-        # div = html.Tag(li, 'div', class_='collapsible-body')
-        # span = html.Tag(div, 'span', string='Lorem ipsum dolor sit amet.')
-
     def createLatex(self, parent, token, page):
-        # TODO: Write Latex renderer - this capability will be useful for PDFs with several pages
-        return None
+        msg = "Warning: The Content Extension\'s 'outline' command is not supported for LaTex documents."
+        latex.String(parent, content=msg)
 
 class RenderNextAndPrevious(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        # This command requires Materialize libraries
         return None
 
     def createMaterialize(self, parent, token, page):
@@ -427,7 +413,6 @@ class RenderNextAndPrevious(components.RenderComponent):
 
             # Hide text overflow and append ellipses to long page titles.
             if len(string) > 18:
-                print(string, "\n")
                 string = string[:18] + '. . .'
 
             # Use left and right arrows with page title format
@@ -442,5 +427,5 @@ class RenderNextAndPrevious(components.RenderComponent):
         html.String(btn, content=string)
 
     def createLatex(self, parent, token, page):
-        # This capability is probably not necessary for PDFs
-        return None
+        msg = "Warning: The Content Extension\'s '{}' command is not supported for LaTex documents."
+        latex.String(parent, content=msg.format(token['direction']))
