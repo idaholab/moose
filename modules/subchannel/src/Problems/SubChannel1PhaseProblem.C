@@ -70,9 +70,9 @@ SubChannel1PhaseProblem::externalSolve()
 
   // Set the inlet/outlet/guess for each channel.
   {
-    for (int iz = 0; iz < _subchannel_mesh._nz + 1; iz++) // nz + 1 nodes
+    for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++) // nz + 1 nodes
     {
-      for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++) // _n_channels = number of channels
+      for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++) // _n_channels = number of channels
       {
         // creates node
         auto * node = _subchannel_mesh._nodes[i_ch][iz];
@@ -154,7 +154,7 @@ SubChannel1PhaseProblem::externalSolve()
   mdot_global *= _mflux_in * S_flow_soln(_subchannel_mesh._nodes[_subchannel_mesh._nx + 1][0]);
   // _subchannel_mesh._nz + 1
 
-  for (int axial_level = 1; axial_level < _subchannel_mesh._nz + 1; axial_level++) // nz level calculations
+  for (unsigned int axial_level = 1; axial_level < _subchannel_mesh._nz + 1; axial_level++) // nz level calculations
   {
     _console << "AXIAL LEVEL: " << axial_level << std::endl;
 
@@ -171,7 +171,7 @@ SubChannel1PhaseProblem::externalSolve()
       axial_cycles++;
       PCYCLES(axial_level - 1, 0) = axial_cycles;
       // Sweep upwards through the channels.
-      for (int iz = bottom_limiter; iz < axial_level + 1; iz++)
+      for (unsigned int iz = bottom_limiter; iz < axial_level + 1; iz++)
       {
         // Compute the height of this element.
         auto dz = _subchannel_mesh._z_grid[iz] - _subchannel_mesh._z_grid[iz - 1];
@@ -188,10 +188,10 @@ SubChannel1PhaseProblem::externalSolve()
           Wij_old = Wij;
           mdot_old = mdot;
           // Calculate crossflow between channel i-j using crossflow momentum equation
-          for (int i_gap = 0; i_gap < _subchannel_mesh._n_gaps; i_gap++) // number of gaps = _subchannel_mesh._n_gaps
+          for (unsigned int i_gap = 0; i_gap < _subchannel_mesh._n_gaps; i_gap++) // number of gaps = _subchannel_mesh._n_gaps
           {
-            int i_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
-            int j_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
+            unsigned int i_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
+            unsigned int j_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
             auto * node_in_i = _subchannel_mesh._nodes[i_ch][iz - 1];
             auto * node_out_i = _subchannel_mesh._nodes[i_ch][iz];
             auto * node_in_j = _subchannel_mesh._nodes[j_ch][iz - 1];
@@ -273,7 +273,7 @@ SubChannel1PhaseProblem::externalSolve()
 
           Wij_global.col(iz) = Wij;
           double SumSumWij = 0.0;
-          for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+          for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
           {
             auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
             auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
@@ -287,9 +287,9 @@ SubChannel1PhaseProblem::externalSolve()
             unsigned int counter = 0;
             for (auto i_gap : _subchannel_mesh._chan_to_gap_map[i_ch])
             {
-              int ii_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
+              unsigned int ii_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
               // i is always the smallest and first index in the mapping
-              int jj_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
+              unsigned int jj_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
               auto * node_in_i = _subchannel_mesh._nodes[ii_ch][iz - 1];
               auto * node_in_j = _subchannel_mesh._nodes[jj_ch][iz - 1];
               auto * node_out_i = _subchannel_mesh._nodes[ii_ch][iz];
@@ -327,7 +327,7 @@ SubChannel1PhaseProblem::externalSolve()
           }
 
           // go through the channels of the level.
-          for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+          for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
           {
             // Start with applying mass-conservation equation & energy - conservation equation
             // Find the nodes for the top and bottom of this element.
@@ -365,7 +365,7 @@ SubChannel1PhaseProblem::externalSolve()
       {
         auto dz = _subchannel_mesh._z_grid[iz] - _subchannel_mesh._z_grid[iz - 1];
         // Sweep through the channels of level
-        for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+        for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
         {
           // Find the nodes for the top and bottom of this element.
           auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
@@ -382,8 +382,8 @@ SubChannel1PhaseProblem::externalSolve()
           unsigned int counter = 0;
           for (auto i_gap : _subchannel_mesh._chan_to_gap_map[i_ch])
           {
-            int ii_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
-            int jj_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
+            unsigned int ii_ch = _subchannel_mesh._gap_to_chan_map[i_gap].first;
+            unsigned int jj_ch = _subchannel_mesh._gap_to_chan_map[i_gap].second;
             auto * node_in_i = _subchannel_mesh._nodes[ii_ch][iz - 1];
             auto * node_in_j = _subchannel_mesh._nodes[jj_ch][iz - 1];
             auto * node_out_i = _subchannel_mesh._nodes[ii_ch][iz];
@@ -429,13 +429,13 @@ SubChannel1PhaseProblem::externalSolve()
   double Total_crossflow_out = 0.0;
   double Total_crossflow_20 = 0.0;
 
-  for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
   {
     auto * node_out = _subchannel_mesh._nodes[i_ch][_subchannel_mesh._nz];
     auto * node_in = _subchannel_mesh._nodes[i_ch][0];
     auto * node_20 = _subchannel_mesh._nodes[i_ch][20];
-    int i = (i_ch / _subchannel_mesh._nx);           // row
-    int j = i_ch - i * _subchannel_mesh._nx;         // column
+    unsigned int i = (i_ch / _subchannel_mesh._nx);           // row
+    unsigned int j = i_ch - i * _subchannel_mesh._nx;         // column
     Temp_out(i, j) = T_soln(node_out);     // Kelvin
     Temp_in(i, j) = T_soln(node_in);       // Kelvin
     rho_in(i, j) = rho_soln(node_in);      // Kg/m3
@@ -456,10 +456,10 @@ SubChannel1PhaseProblem::externalSolve()
     Total_crossflow_20 += SumWij_soln(node_20);
   }
 
-  for (int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
+  for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
   {
     double Total_crossflow = 0.0;
-    for (int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
+    for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
     {
       auto * node = _subchannel_mesh._nodes[i_ch][iz];
       Total_crossflow += SumWij_soln(node);
@@ -471,7 +471,7 @@ SubChannel1PhaseProblem::externalSolve()
 
 
 void
-SubChannel1PhaseProblem::syncSolutions(Direction direction)
+SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
 {
 #if LIBMESH_HAVE_PETSC
 #endif

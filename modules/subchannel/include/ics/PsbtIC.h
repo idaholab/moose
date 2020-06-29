@@ -14,7 +14,7 @@ protected:
   /**
    * Find the (row, column) indices of the subchannel containing a given point.
    */
-  std::pair<int, int> index_point(const Point & p) const;
+  std::pair<unsigned int, unsigned int> index_point(const Point & p) const;
 
 public:
   static InputParameters validParams();
