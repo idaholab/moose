@@ -29,7 +29,7 @@ SubChannelSolver::validParams()
   params.addRequiredCoupledVar("wetted_perimeter", "");
   params.addRequiredCoupledVar("q_prime", "linear heat rate [W/m]");
   params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
-  params.addRequiredParam<Real>("T_in", 566.3, "Inlet coolant temperature in [K]");
+  params.addRequiredParam<Real>("T_in", "Inlet coolant temperature in [K]");
   params.addRequiredParam<Real>("P_out", "Outlet coolant pressure in [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;

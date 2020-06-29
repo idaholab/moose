@@ -18,7 +18,7 @@ registerMooseObject("SubChannelApp", SubChannel1PhaseProblem);
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
-  InputParameters params = ExternalProblem::validParams(); //read in values from input file
+  InputParameters params = ExternalProblem::validParams();
   params.addRequiredParam<Real>("mflux_in", "Inlet coolant mass flux [kg/m^2-s]");
   params.addRequiredParam<Real>("T_in", "Inlet coolant temperature in [K]");
   params.addRequiredParam<Real>("P_out", "Outlet coolant pressure in [Pa]");
@@ -28,18 +28,11 @@ SubChannel1PhaseProblem::validParams()
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
-  // Constructor initialization for single phase subchannel solver
   _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
   _mflux_in(getParam<Real>("mflux_in")),
   _T_in(getParam<Real>("T_in")),
   _P_out(getParam<Real>("P_out"))
-
 {
-}
-
-SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
-{
- // Implement destructor body
 }
 
 bool
@@ -473,6 +466,4 @@ SubChannel1PhaseProblem::externalSolve()
 void
 SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
 {
-#if LIBMESH_HAVE_PETSC
-#endif
 }
