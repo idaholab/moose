@@ -2,12 +2,17 @@
 []
 
 [Distributions]
-  [D_dist]
+  [k_dist]
     type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
   []
-  [sig_dist]
+  [alpha_dist]
+    type = Uniform
+    lower_bound = 2.5
+    upper_bound = 7.5
+  []
+  [S_dist]
     type = Uniform
     lower_bound = 2.5
     upper_bound = 7.5
@@ -16,9 +21,11 @@
 
 [Samplers]
   [sample]
-    type = CartesianProduct
-    linear_space_items = '1 1 2
-                          1 1 2'
+    type = LatinHypercube
+    distributions = 'k_dist alpha_dist S_dist'
+    num_rows = 100
+    num_bins = 10
+    execute_on = PRE_MULTIAPP_SETUP
   []
 []
 
@@ -27,8 +34,8 @@
     type = PODFullSolveMultiApp
     input_files = sub.i
     sampler = sample
+    trainer_name = 'pod_rb'
     execute_on = 'timestep_begin final'
-    trainer_name = "pod_rb"
   []
 []
 
@@ -37,7 +44,7 @@
     type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
-    parameters = 'Materials/diffusivity/prop_values Materials/xs/prop_values'
+    parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
     to_control = 'stochastic'
     execute_on = 'timestep_begin'
   []
@@ -45,17 +52,17 @@
     type = SamplerSolutionTransfer
     multi_app = sub
     sampler = sample
-    trainer_name = "pod_rb"
-    execute_on = 'timestep_begin'
+    trainer_name = 'pod_rb'
     direction = 'from_multiapp'
+    execute_on = 'timestep_begin'
   []
   [mode]
     type = SamplerSolutionTransfer
     multi_app = sub
     sampler = sample
-    trainer_name = "pod_rb"
-    execute_on = 'final'
+    trainer_name = 'pod_rb'
     direction = 'to_multiapp'
+    execute_on = 'final'
   []
   [res]
     type = ResidualTransfer
@@ -69,11 +76,11 @@
 [Trainers]
   [pod_rb]
     type = PODReducedBasisTrainer
-    execute_on = 'timestep_begin final' # final'
     var_names = 'u'
-    en_limits = '0.9999999'
-    tag_names = 'react diff bodyf'
+    en_limits = '0.999'
+    tag_names = 'diff react bodyf'
     independent = '0 0 1'
+    execute_on = 'timestep_begin final'
   []
 []
 

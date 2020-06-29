@@ -45,6 +45,4 @@ protected:
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
   ///@}
-
-
 };

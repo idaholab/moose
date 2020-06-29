@@ -77,7 +77,7 @@ protected:
 
   /// Vector containing the names of the variables we want to use for constructing
   /// the surrogates.
-  std::vector<std::string> _var_names;
+  std::vector<std::string>& _var_names;
 
   /// Energy limits that define how many basis functions will be kept for each variable.
   std::vector<Real> _en_limits;
@@ -86,7 +86,7 @@ protected:
   std::vector<std::string> _tag_names;
 
   /// list of bools describing which tag is indepedent of the solution.
-  std::vector<unsigned int> _independent;
+  std::vector<unsigned int>& _independent;
 
   /// The snapshot containers for each variable.
   std::vector<std::vector<DenseVector<Real>>> _snapshots;
@@ -100,11 +100,11 @@ protected:
   /// The eigenvectors of the correalation matrix for each variable.
   std::vector<DenseMatrix<Real>> _eigenvectors;
 
-  /// The reduced operators that should be transferred to the surrogate.
-  std::vector<DenseMatrix<Real>> _red_operators;
-
   /// The reduced basis for the variables.
-  std::vector<std::vector<DenseVector<Real>>> _base;
+  std::vector<std::vector<DenseVector<Real>>>& _base;
+
+  /// The reduced operators that should be transferred to the surrogate.
+  std::vector<DenseMatrix<Real>>& _red_operators;
 
   /// Switch that tells if the object has already computed the necessary basis
   /// vectors. This switch is used in execute() to determine if we want to compute
