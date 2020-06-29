@@ -23,17 +23,17 @@ public:
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
 private:
-  ///Paramaters (x) used for training, along with statistics
+  ///Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
-  const StochasticTools::Standardizer & _param_standardizer;
-  //const RealEigenVector & _training_params_mean;
-  //const RealEigenVector & _training_params_var;
 
-  /// Data (y) used for training, along with statistics
+  /// Standardizer for use with params (x)
+  const StochasticTools::Standardizer & _param_standardizer;
+
+  /// Data (y) used for training
   const RealEigenMatrix & _training_data;
+
+  /// Standardizer for use with data (y)
   const StochasticTools::Standardizer & _data_standardizer;
-  //const RealEigenVector & _training_data_mean;
-  //const RealEigenVector & _training_data_var;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   const RealEigenMatrix & _K;
