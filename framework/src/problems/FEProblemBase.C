@@ -4635,31 +4635,11 @@ FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 }
 
 void
-FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
+FEProblemBase::updateMaxQps()
 {
-  if (order == INVALID_ORDER)
-  {
-    // automatically determine the integration order
-    order = _nl->getMinQuadratureOrder();
-    if (order < _aux->getMinQuadratureOrder())
-      order = _aux->getMinQuadratureOrder();
-  }
-
-  if (volume_order == INVALID_ORDER)
-    volume_order = order;
-
-  if (face_order == INVALID_ORDER)
-    face_order = order;
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, order, volume_order, face_order);
-
-  if (_displaced_problem)
-    _displaced_problem->createQRules(type, order, volume_order, face_order);
-
   // Find the maximum number of quadrature points
   {
-    MaxQpsThread mqt(*this, type, std::max(order, volume_order), face_order);
+    MaxQpsThread mqt(*this);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mqt);
     _max_qps = mqt.max();
     _max_shape_funcs = mqt.max_shape_funcs();
@@ -4685,6 +4665,45 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _vector_zero[tid].resize(max_qpts, RealGradient(0.));
     _vector_curl_zero[tid].resize(max_qpts, RealGradient(0.));
   }
+}
+
+void
+FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpVolumeQRuleOrder(order, block);
+
+  if (_displaced_problem)
+    _displaced_problem->bumpVolumeQRuleOrder(order, block);
+
+  updateMaxQps();
+}
+
+void
+FEProblemBase::createQRules(
+    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
+{
+  if (order == INVALID_ORDER)
+  {
+    // automatically determine the integration order
+    order = _nl->getMinQuadratureOrder();
+    if (order < _aux->getMinQuadratureOrder())
+      order = _aux->getMinQuadratureOrder();
+  }
+
+  if (volume_order == INVALID_ORDER)
+    volume_order = order;
+
+  if (face_order == INVALID_ORDER)
+    face_order = order;
+
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->createQRules(type, order, volume_order, face_order, block);
+
+  if (_displaced_problem)
+    _displaced_problem->createQRules(type, order, volume_order, face_order, block);
+
+  updateMaxQps();
 }
 
 void

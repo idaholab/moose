@@ -13,13 +13,17 @@
 #include "MooseArray.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "ArbitraryQuadrature.h"
 
 #include "libmesh/dense_vector.h"
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/point.h"
+#include "libmesh/fe_base.h"
 
 #include "DualRealOps.h"
+
+#include <unordered_map>
 
 // libMesh forward declarations
 namespace libMesh
@@ -434,9 +438,32 @@ public:
   const Node * const & nodeNeighbor() const { return _current_neighbor_node; }
 
   /**
-   * Creates the volume, face and arbitrary qrules based on the orders passed in.
+   * Creates volume, face and arbitrary qrules based on the orders passed in
+   * that apply to all subdomains. order is used for arbitrary volume
+   * quadrature rules, while volume_order and face_order are for elem and face
+   * quadrature respectively.
    */
   void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
+
+  /**
+   * Creates block-specific volume, face and arbitrary qrules based on the
+   * orders passed in.  Any quadrature rules specified using this function
+   * override those created via in the non-block-specific/global createQRules
+   * function. order is used for arbitrary volume quadrature rules, while
+   * volume_order and face_order are for elem and face quadrature
+   * respectively.
+   */
+  void createQRules(
+      QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
+
+  /**
+   * Increases the elemennt/volume quadrature order for the specified mesh
+   * block if and only if the current volume quadrature order is lower.  This
+   * can only cause the quadrature level to increase.  If volume_order is
+   * lower than or equal to the current volume/elem quadrature rule order,
+   * then nothing is done (i.e. this function is idempotent).
+   */
+  void bumpVolumeQRuleOrder(Order volume_order, SubdomainID block);
 
   /**
    * Set the qrule to be used for volume integration.
@@ -1394,6 +1421,30 @@ public:
     return diag;
   }
 
+  /**
+   * Attaches the current elem/volume quadrature rule to the given fe.  The
+   * current subdomain (as set via setCurrentSubdomainID is used to determine
+   * the correct rule.  The attached quadrature rule is also returned.
+   */
+  inline const QBase * attachQRuleElem(unsigned int dim, FEBase & fe)
+  {
+    auto qrule = qrules(dim).vol.get();
+    fe.attach_quadrature_rule(qrule);
+    return qrule;
+  }
+
+  /**
+   * Attaches the current face/area quadrature rule to the given fe.  The
+   * current subdomain (as set via setCurrentSubdomainID is used to determine
+   * the correct rule.  The attached quadrature rule is also returned.
+   */
+  inline const QBase * attachQRuleFace(unsigned int dim, FEBase & fe)
+  {
+    auto qrule = qrules(dim).face.get();
+    fe.attach_quadrature_rule(qrule);
+    return qrule;
+  }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -1712,18 +1763,58 @@ private:
   /// The AD version of the current coordinate transformation coefficients
   MooseArray<DualReal> _ad_coord;
 
-  std::vector<std::unique_ptr<QBase>> _holder_qrule_fv_face;
+  /// Data structure for tracking/grouping a set of quadrature rules for a
+  /// particular dimensionality of mesh element.
+  struct QRules
+  {
+    QRules()
+      : vol(nullptr),
+        face(nullptr),
+        arbitrary_vol(nullptr),
+        arbitrary_face(nullptr),
+        neighbor(nullptr)
+    {
+    }
 
-  /// Holds volume qrules for each dimension
-  std::map<unsigned int, QBase *> _holder_qrule_volume;
-  /// Holds arbitrary qrules for each dimension
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary;
-  /// Holds arbitrary qrules for each dimension for faces
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_arbitrary_face;
-  /// Holds pointers to the dimension's q_points
-  std::map<unsigned int, const std::vector<Point> *> _holder_q_points;
-  /// Holds pointers to the dimension's transformed jacobian weights
-  std::map<unsigned int, const std::vector<Real> *> _holder_JxW;
+    /// volume/elem (meshdim) quadrature rule
+    std::unique_ptr<QBase> vol;
+    /// area/face (meshdim-1) quadrature rule
+    std::unique_ptr<QBase> face;
+    /// finite volume face/flux quadrature rule (meshdim-1)
+    std::unique_ptr<QBase> fv_face;
+    /// volume/elem (meshdim) custom points quadrature rule
+    std::unique_ptr<ArbitraryQuadrature> arbitrary_vol;
+    /// area/face (meshdim-1) custom points quadrature rule
+    std::unique_ptr<ArbitraryQuadrature> arbitrary_face;
+    /// area/face (meshdim-1) custom points quadrature rule for DG
+    std::unique_ptr<ArbitraryQuadrature> neighbor;
+  };
+
+  /// Holds quadrature rules for each dimension.  These are created up front
+  /// at the start of the simulation and reused/referenced for the remainder of
+  /// the sim.  This data structure should generally be read/accessed via the
+  /// qrules() function.
+  std::unordered_map<SubdomainID, std::vector<QRules>> _qrules;
+
+  /// This is a helper function for accessing quadrature rules for a
+  /// particular dimensionality of element.  All access to quadrature rules in
+  /// Assembly should be done via this accessor function.
+  inline QRules & qrules(unsigned int dim)
+  {
+    auto block = _current_subdomain_id;
+    if (_qrules.find(block) == _qrules.end())
+    {
+      mooseAssert(_qrules.find(Moose::ANY_BLOCK_ID) != _qrules.end(),
+                  "missing quadrature rules for specified block");
+      mooseAssert(_qrules[Moose::ANY_BLOCK_ID].size() > dim,
+                  "quadrature rules not sized property for dimension");
+      return _qrules[Moose::ANY_BLOCK_ID][dim];
+    }
+    mooseAssert(_qrules.find(block) != _qrules.end(),
+                "missing quadrature rules for specified block");
+    mooseAssert(_qrules[block].size() > dim, "quadrature rules not sized property for dimension");
+    return _qrules[block][dim];
+  }
 
   /**** Face Stuff ****/
 
@@ -1757,14 +1848,9 @@ private:
   std::vector<Eigen::Map<RealDIMValue>> _mapped_normals;
   /// The current tangent vectors at the quadrature points
   MooseArray<std::vector<Point>> _current_tangents;
+
   /// Extra element IDs
   std::vector<dof_id_type> _extra_elem_ids;
-  /// Holds face qrules for each dimension
-  std::map<unsigned int, QBase *> _holder_qrule_face;
-  /// Holds pointers to the dimension's q_points on a face
-  std::map<unsigned int, const std::vector<Point> *> _holder_q_points_face;
-  /// Holds pointers to the dimension's transformed jacobian weights on a face
-  std::map<unsigned int, const std::vector<Real> *> _holder_JxW_face;
   /// Holds pointers to the dimension's normal vectors
   std::map<unsigned int, const std::vector<Point> *> _holder_normals;
 
@@ -1802,8 +1888,6 @@ private:
   QBase * _current_qrule_neighbor;
   /// The current quadrature points on the neighbor face
   MooseArray<Point> _current_q_points_face_neighbor;
-  /// Holds arbitrary qrules for each dimension
-  std::map<unsigned int, ArbitraryQuadrature *> _holder_qrule_neighbor;
   /// The current transformed jacobian weights on a neighbor's face
   MooseArray<Real> _current_JxW_neighbor;
   /// The current coordinate transformation coefficients

@@ -5,8 +5,28 @@
     csvdiff = 'order5_out.csv'
 
     requirement = 'The system shall support the ability to manually increase'
-                  ' the quadrature order used for numerical integration.'
+                  ' the quadrature order used for numerical integration on the entire mesh.'
     issues = '#3380'
+    design = 'Quadrature/index.md'
+  [../]
+  [./per-block-order]
+    type = CSVDiff
+    input = 'block-order.i'
+    csvdiff = 'block-order_out.csv'
+
+    requirement = 'The system shall support the ability to manually specify'
+                  ' the quadrature order used for numerical integration on a per-block basis.'
+    issues = '#14055'
+    design = 'Quadrature/index.md'
+  [../]
+  [./code-order-bump]
+    type = CSVDiff
+    input = 'code-order-bump.i'
+    csvdiff = 'code-order-bump_out.csv'
+
+    requirement = 'The system shall support the ability for objects to increase quadrature order'
+                  ' in code during runtime.'
+    issues = '#14055'
     design = 'Quadrature/index.md'
   [../]
   [./elem5_side7]
@@ -16,7 +36,7 @@
 
     requirement = 'The system shall support the ability to control the'
                   ' volumetric and side quadrature orders used for'
-                  ' numerical integration.'
+                  ' numerical integration on the entire mesh.'
     issues = '#3380'
     design = 'Quadrature/index.md'
   [../]
