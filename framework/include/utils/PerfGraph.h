@@ -25,6 +25,7 @@
 
 // Forward Declarations
 class PerfGuard;
+class PerfGraphLivePrint;
 
 template <class... Ts>
 class VariadicTable;
@@ -66,7 +67,7 @@ public:
   /**
    * Destructor
    */
-  ~PerfGraph() = default;
+  ~PerfGraph();
 
   /**
    * Registers a named section of code
@@ -88,7 +89,7 @@ public:
    * @param print_dots Whether or not progress dots should be printed for this section
    * @return The unique ID to use for that section
    */
-  PerfID registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots);
+  PerfID registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots = true);
 
   /**
    * Print the tree out
@@ -254,7 +255,7 @@ protected:
   };
 
   // Whether or not an increment is the start of the finish increment
-  enum IncrementState { started, finished };
+  enum IncrementState { started, printed, continued, finished };
 
   /**
    * Use to hold an increment of time and memory for a section
@@ -267,6 +268,8 @@ protected:
     /// Whether or not this increment is the start of an increment or
     /// the finishing of an increment.
     IncrementState _state;
+    unsigned int _print_stack_level;
+    unsigned int _num_dots;
     std::chrono::time_point<std::chrono::steady_clock> _time;
     long int _memory;
   };
@@ -402,9 +405,13 @@ protected:
   /// Whether or not timing is active
   bool _active;
 
+  /// The object that is doing live printing
+  std::unique_ptr<PerfGraphLivePrint> _live_print;
+
   /// The thread for printing sections as they execute
   std::thread _print_thread;
 
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
+  friend class PerfGraphLivePrint;
 };

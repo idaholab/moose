@@ -162,8 +162,6 @@ Output::solveSetup()
 void
 Output::outputStep(const ExecFlagType & type)
 {
-  CONSOLE_TIMED_PRINT("Outputting ", name());
-
   // Output is not allowed
   if (!_allow_output && type != EXEC_FORCED)
     return;

@@ -324,26 +324,26 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solve_timer(registerTimedSection("solve", 1, "Solving", false)),
     _check_exception_and_stop_solve_timer(registerTimedSection("checkExceptionAndStopSolve", 5)),
     _advance_state_timer(registerTimedSection("advanceState", 5)),
-    _restore_solutions_timer(registerTimedSection("restoreSolutions", 5)),
-    _save_old_solutions_timer(registerTimedSection("saveOldSolutions", 5)),
-    _restore_old_solutions_timer(registerTimedSection("restoreOldSolutions", 5)),
+    _restore_solutions_timer(registerTimedSection("restoreSolutions", 5, "Restoring Solutions")),
+    _save_old_solutions_timer(registerTimedSection("saveOldSolutions", 5, "Saving Old Solutions")),
+    _restore_old_solutions_timer(registerTimedSection("restoreOldSolutions", 5, "Restoring Old Solutions")),
     _output_step_timer(registerTimedSection("outputStep", 1, "Outputting", false)),
     _on_timestep_begin_timer(registerTimedSection("onTimestepBegin", 2)),
-    _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm", 2)),
+    _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm", 2, "Computing L2 Norm of Residual")),
     _compute_residual_sys_timer(registerTimedSection("computeResidualSys", 5)),
     _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 1)),
     _compute_residual_type_timer(registerTimedSection("computeResidualType", 5)),
     _compute_transient_implicit_residual_timer(
         registerTimedSection("computeTransientImplicitResidual", 2)),
-    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 5)),
+    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 5/*, "Computing Residual"*/)),
     _compute_jacobian_internal_timer(registerTimedSection("computeJacobianInternal", 1)),
-    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
+    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5/*, "Computing Jacobian"*/)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeTransientImplicitJacobian", 2)),
-    _compute_bounds_timer(registerTimedSection("computeBounds", 1)),
-    _compute_post_check_timer(registerTimedSection("computePostCheck", 2)),
-    _compute_damping_timer(registerTimedSection("computeDamping", 1)),
+    _compute_bounds_timer(registerTimedSection("computeBounds", 1, "Computing Bounds")),
+    _compute_post_check_timer(registerTimedSection("computePostCheck", 2, "Computing Post Check")),
+    _compute_damping_timer(registerTimedSection("computeDamping", 1, "Computing Damping")),
     _possibly_rebuild_geom_search_patches_timer(
-        registerTimedSection("possiblyRebuildGeomSearchPatches", 5)),
+      registerTimedSection("possiblyRebuildGeomSearchPatches", 5, "Rebuilding Geometric Search Patches")),
     _initial_adapt_mesh_timer(registerTimedSection("initialAdaptMesh", 2, "Performing Initial Adaptivity")),
     _adapt_mesh_timer(registerTimedSection("adaptMesh", 3, "Adapting Mesh")),
     _update_mesh_xfem_timer(registerTimedSection("updateMeshXFEM", 5, "Updating XFEM")),
@@ -356,6 +356,20 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3, "Updating Geometric Search")),
     _exec_multi_apps_timer(registerTimedSection("execMultiApps", 1, "Executing MultiApps", false)),
     _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5, "Backing Up MultiApp")),
+    _computing_max_dofs_per_elem_timer(registerTimedSection("computingMaxDofs", 3, "Computing Max Dofs Per Element")),
+    _copy_solutions_back_timer(registerTimedSection("copySolutionsBackwards", 3, "Copying Solutions Backward")),
+    _computing_initial_residual_timer(registerTimedSection("computingInitialResidual", 3, "Computing Initial Residual")),
+    _restarting_from_file_timer(registerTimedSection("restartFromFile", 3, "Restarting From File")),
+    _copying_variables_from_exodus_timer(registerTimedSection("copyingFromExodus", 3, "Copying Variables From Exodus")),
+    _ghost_ghosted_boundaries_timer(registerTimedSection("ghostGhostedBoundaries", 3, "Ghosting Ghosted Boundaries")),
+    _material_initial_setup_timer(registerTimedSection("materialInitialSetup", 3, "Setting Up Materials")),
+    _computing_initial_stateful_properties_timer(registerTimedSection("computeInitialStatefulProps", 3, "Computing Initial Stateful Properties")),
+    _restore_restart_data_timer(registerTimedSection("restoreRestartData", 3, "Restoring Restart Data")),
+    _reprojecting_initial_conditions_timer(registerTimedSection("reprojectInitialConditions", 3, "Reprojecting Initial Conditions")),
+    _filling_coupling_matrix_timer(registerTimedSection("fillCouplingMatrix", 3, "Filling Coupling Matrix")),
+    _update_mortar_mesh_timer(registerTimedSection("updateMortarMesh", 5, "Updating Mortar Mesh")),
+    _update_nl_system_timer(registerTimedSection("nlUpdate", 3, "Updating Nonlinear System")),
+
     _u_dot_requested(false),
     _u_dotdot_requested(false),
     _u_dot_old_requested(false),
@@ -684,7 +698,7 @@ FEProblemBase::initialSetup()
   dof_id_type max_var_n_dofs_per_elem;
   dof_id_type max_var_n_dofs_per_node;
   {
-    CONSOLE_TIMED_PRINT("Computing max dofs per elem/node");
+    TIME_SECTION(_computing_max_dofs_per_elem_timer);
 
     MaxVarNDofsPerElem mvndpe(*this, *_nl);
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), mvndpe);
@@ -733,7 +747,7 @@ FEProblemBase::initialSetup()
 
   if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
   {
-    CONSOLE_TIMED_PRINT("Restarting from file");
+    TIME_SECTION(_restarting_from_file_timer);
 
     _restart_io->readRestartableDataHeader(true);
     _restart_io->restartEquationSystemsObject();
@@ -752,7 +766,8 @@ FEProblemBase::initialSetup()
 
     if (reader)
     {
-      CONSOLE_TIMED_PRINT("Copying variables from Exodus");
+      TIME_SECTION(_copying_variables_from_exodus_timer);
+
       _nl->copyVars(*reader);
       _aux->copyVars(*reader);
     }
@@ -842,13 +857,14 @@ FEProblemBase::initialSetup()
       _ics.initialSetup(tid);
     _scalar_ics.initialSetup();
 
-    CONSOLE_TIMED_PRINT("Projecting initial condition");
     projectSolution();
   }
 
   // Materials
   if (_all_materials.hasActiveObjects(0))
   {
+    TIME_SECTION(_material_initial_setup_timer);
+
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
     {
       // Sort the Material objects, these will be actually computed by MOOSE in reinit methods.
@@ -859,28 +875,31 @@ FEProblemBase::initialSetup()
       _all_materials.initialSetup(tid);
     }
 
-    CONSOLE_TIMED_PRINT("Computing initial stateful property values");
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeMaterialsObjectThread cmt(*this,
-                                     _material_data,
-                                     _bnd_material_data,
-                                     _neighbor_material_data,
-                                     _material_props,
-                                     _bnd_material_props,
-                                     _neighbor_material_props,
-                                     _assembly);
-    /**
-     * The ComputeMaterialObjectThread object now allocates memory as needed for the material
-     * storage system.
-     * This cannot be done with threads. The first call to this object bypasses threading by calling
-     * the object
-     * directly. The subsequent call can be called with threads.
-     */
-    cmt(elem_range, true);
+    {
+      TIME_SECTION(_computing_initial_stateful_properties_timer);
 
-    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-        _neighbor_material_props.hasStatefulProperties())
-      _has_initialized_stateful = true;
+      ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+      ComputeMaterialsObjectThread cmt(*this,
+                                       _material_data,
+                                       _bnd_material_data,
+                                       _neighbor_material_data,
+                                       _material_props,
+                                       _bnd_material_props,
+                                       _neighbor_material_props,
+                                       _assembly);
+      /**
+       * The ComputeMaterialObjectThread object now allocates memory as needed for the material
+       * storage system.
+       * This cannot be done with threads. The first call to this object bypasses threading by calling
+       * the object
+       * directly. The subsequent call can be called with threads.
+       */
+      cmt(elem_range, true);
+
+      if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+          _neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
+    }
   }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
@@ -907,17 +926,13 @@ FEProblemBase::initialSetup()
   if (!_app.isRecovering() && !_app.isRestarting())
   {
     // During initial setup the solution is copied to the older solution states (old, older, etc)
-    CONSOLE_TIMED_PRINT("Copying soultions back");
     copySolutionsBackwards();
   }
 
   if (!_app.isRecovering())
   {
     if (haveXFEM())
-    {
-      CONSOLE_TIMED_PRINT("Updating XFEM");
       updateMeshXFEM();
-    }
   }
 
   // Call initialSetup on the nonlinear system
@@ -973,14 +988,10 @@ FEProblemBase::initialSetup()
   {
     if (_app.hasCachedBackup()) // This happens when this app is a sub-app and has been given a
                                 // Backup
-    {
-      CONSOLE_TIMED_PRINT("Restoring cached backup");
-
       _app.restoreCachedBackup();
-    }
     else
     {
-      CONSOLE_TIMED_PRINT("Restoring restart data");
+      TIME_SECTION(_restore_restart_data_timer);
 
       _restart_io->readRestartableData(_app.getRestartableData(), _app.getRecoverableData());
     }
@@ -990,7 +1001,7 @@ FEProblemBase::initialSetup()
     // for some of the variables which should override what's coming from the restart file
     if (!_app.isRecovering())
     {
-      CONSOLE_TIMED_PRINT("Reprojecting initial conditions after restoring restart data");
+      TIME_SECTION(_reprojecting_initial_conditions_timer);
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
         _ics.initialSetup(tid);
@@ -1718,6 +1729,8 @@ FEProblemBase::addGhostedBoundary(BoundaryID boundary_id)
 void
 FEProblemBase::ghostGhostedBoundaries()
 {
+  TIME_SECTION(_ghost_ghosted_boundaries_timer);
+
   _mesh.ghostGhostedBoundaries();
 
   if (_displaced_problem)
@@ -4044,7 +4057,6 @@ void
 FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 {
   TIME_SECTION(_reinit_because_of_ghosting_or_new_geom_objects_timer);
-  CONSOLE_TIMED_PRINT("Reiniting because of ghosting");
 
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
@@ -4919,7 +4931,8 @@ FEProblemBase::init()
 
   unsigned int n_vars = _nl->nVariables();
   {
-    CONSOLE_TIMED_PRINT("Filling coupling matrix");
+    TIME_SECTION(_filling_coupling_matrix_timer);
+
     switch (_coupling)
     {
       case Moose::COUPLING_DIAG:
@@ -4978,7 +4991,6 @@ FEProblemBase::init()
 
   {
     TIME_SECTION(_eq_init_timer);
-    CONSOLE_TIMED_PRINT("Initializing equation system")
     _eq.init();
   }
 
@@ -5132,12 +5144,16 @@ FEProblemBase::finalNonlinearResidual() const
 bool
 FEProblemBase::computingInitialResidual() const
 {
+  TIME_SECTION(_computing_initial_residual_timer);
+
   return _nl->computingInitialResidual();
 }
 
 void
 FEProblemBase::copySolutionsBackwards()
 {
+  TIME_SECTION(_copy_solutions_back_timer);
+
   _nl->copySolutionsBackwards();
   _aux->copySolutionsBackwards();
 }
@@ -5925,7 +5941,6 @@ void
 FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 {
   TIME_SECTION(_update_geometric_search_timer);
-  CONSOLE_TIMED_PRINT("Updating geometric search objects");
 
   _geometric_search_data.update(type);
 
@@ -5936,7 +5951,7 @@ FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 void
 FEProblemBase::updateMortarMesh()
 {
-  CONSOLE_TIMED_PRINT("Updating mortar mesh");
+  TIME_SECTION(_update_mortar_mesh_timer);
 
   _mortar_data.update();
 }
@@ -6057,7 +6072,6 @@ FEProblemBase::initialAdaptMesh()
 
     for (unsigned int i = 0; i < n; i++)
     {
-      CONSOLE_TIMED_PRINT("Initial adaptivity step ", i + 1, " of ", n);
       computeIndicators();
       computeMarkers();
 
@@ -6105,12 +6119,7 @@ FEProblemBase::adaptMesh()
       computeMarkers();
 
     bool mesh_changed_this_step;
-    {
-      // scope this here instead of at the top of the method to prevent race conditions to console
-      // output
-      CONSOLE_TIMED_PRINT("Adaptivity step ", i + 1, " of ", cycles_per_step);
-      mesh_changed_this_step = _adaptivity.adaptMesh();
-    }
+    mesh_changed_this_step = _adaptivity.adaptMesh();
 
     if (mesh_changed_this_step)
     {
@@ -6194,19 +6203,12 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
-  {
-    CONSOLE_TIMED_PRINT("Caching changed lists");
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
                                // properties
-  }
 
   // Clear these out because they corresponded to the old mesh
   _ghosted_elems.clear();
-
-  {
-    CONSOLE_TIMED_PRINT("Ghosting ghosted boundaries");
-    ghostGhostedBoundaries();
-  }
+  ghostGhostedBoundaries();
 
   // The mesh changed.  We notify the MooseMesh first, because
   // callbacks (e.g. for sparsity calculations) triggered by the

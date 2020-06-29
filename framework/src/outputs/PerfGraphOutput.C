@@ -71,6 +71,8 @@ PerfGraphOutput::output(const ExecFlagType & /*type*/)
 {
   if (!_app.getParam<bool>("no_timing"))
   {
+    _console << '\n';
+
     _app.perfGraph().print(_console, _level);
 
     if (_heaviest_branch)

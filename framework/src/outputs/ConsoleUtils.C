@@ -66,7 +66,7 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     bool pre_split = problem.getMooseApp().isUseSplit();
 
     // clang-format off
-    oss << "Mesh: " << '\n'
+    oss << "\n\nMesh: " << '\n'
         << std::setw(console_field_width)
         << "  Parallel Type: " << (moose_mesh.isDistributedMesh() ? "distributed" : "replicated")
         << (forced || pre_split ? " (" : "")

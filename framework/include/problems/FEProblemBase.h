@@ -2288,6 +2288,19 @@ private:
   const PerfID _update_geometric_search_timer;
   const PerfID _exec_multi_apps_timer;
   const PerfID _backup_multi_apps_timer;
+  const PerfID _computing_max_dofs_per_elem_timer;
+  const PerfID _copy_solutions_back_timer;
+  const PerfID _computing_initial_residual_timer;
+  const PerfID _restarting_from_file_timer;
+  const PerfID _copying_variables_from_exodus_timer;
+  const PerfID _ghost_ghosted_boundaries_timer;
+  const PerfID _material_initial_setup_timer;
+  const PerfID _computing_initial_stateful_properties_timer;
+  const PerfID _restore_restart_data_timer;
+  const PerfID _reprojecting_initial_conditions_timer;
+  const PerfID _filling_coupling_matrix_timer;
+  const PerfID _update_mortar_mesh_timer;
+  const PerfID _update_nl_system_timer;
 
   /// Whether solution time derivative needs to be stored
   bool _u_dot_requested;

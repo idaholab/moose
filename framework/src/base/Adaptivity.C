@@ -49,10 +49,10 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _use_new_system(false),
     _max_h_level(0),
     _recompute_markers_during_cycles(false),
-    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3)),
-    _uniform_refine_timer(registerTimedSection("uniformRefine", 2)),
-    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection", 2)),
-    _update_error_vectors(registerTimedSection("updateErrorVectors", 5))
+    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3, "Adapting Mesh")),
+    _uniform_refine_timer(registerTimedSection("uniformRefine", 2, "Uniformly Refining")),
+    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection", 2, "Uniformly Refining and Reprojecting")),
+    _update_error_vectors(registerTimedSection("updateErrorVectors", 5, "Updating Error Vectors"))
 {
 }
 
@@ -275,8 +275,6 @@ void
 Adaptivity::uniformRefineWithProjection()
 {
   TIME_SECTION(_uniform_refine_with_projection);
-
-  CONSOLE_TIMED_PRINT("Uniformly refining mesh and reprojecting");
 
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements

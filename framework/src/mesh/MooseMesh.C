@@ -2911,6 +2911,7 @@ MooseMesh::getMesh() const
 void
 MooseMesh::printInfo(std::ostream & os, const unsigned int verbosity /* = 0 */) const
 {
+  os << '\n';
   getMesh().print_info(os, verbosity);
 }
 

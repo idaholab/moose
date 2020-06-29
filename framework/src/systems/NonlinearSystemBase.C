@@ -159,16 +159,22 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_nodalbc_diag_save_in(false),
     _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 5)),
     _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 3)),
-    _kernels_timer(registerTimedSection("Kernels", 3)),
-    _scalar_kernels_timer(registerTimedSection("ScalarKernels", 3)),
-    _nodal_kernels_timer(registerTimedSection("NodalKernels", 3)),
-    _nodal_kernel_bcs_timer(registerTimedSection("NodalKernelBCs", 3)),
-    _nodal_bcs_timer(registerTimedSection("NodalBCs", 3)),
+    _kernels_timer(registerTimedSection("Kernels", 3/*, "Computing Kernels"*/)),
+    _scalar_kernels_timer(registerTimedSection("ScalarKernels", 3/*, "Computing ScalarKernels"*/)),
+    _nodal_kernels_timer(registerTimedSection("NodalKernels", 3/*, "Computing NodalKernels"*/)),
+    _nodal_kernel_bcs_timer(registerTimedSection("NodalKernelBCs", 3/*, "Computing NodalKernelBCs"*/)),
+    _nodal_bcs_timer(registerTimedSection("NodalBCs", 3/*, "Computing NodalBCs"*/)),
     _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
-    _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
-    _compute_dirac_timer(registerTimedSection("computeDirac", 3)),
-    _compute_scaling_timer(registerTimedSection("computeScaling", 2)),
+    _compute_dampers_timer(registerTimedSection("computeDampers", 3, "Computing Dampers")),
+    _compute_dirac_timer(registerTimedSection("computeDirac", 3, "Computing DiracKernels")),
+    _compute_scaling_timer(registerTimedSection("computeScaling", 2, "ComputingScaling")),
+    _nl_initial_setup_timer(registerTimedSection("nlInitialSetup", 2, "Setting Up Nonlinear System")),
+    _kernels_initial_setup_timer(registerTimedSection("kernelsInitialSetup", 2, "Setting Up Kernels/BCs/Constraints")),
+    _mortar_initialization_timer(registerTimedSection("mortarSetup", 2, "Initializing Mortar Interfaces")),
+    _predictor_application_timer(registerTimedSection("applyPredictor", 2, "Applying Predictor")),
+    _initial_apply_bcs_timer(registerTimedSection("initialBCs", 2, "Applying BCs To Initial Condition")),
+
     _computed_scaling(false),
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0),
@@ -253,8 +259,10 @@ NonlinearSystemBase::initialSetup()
 {
   SystemBase::initialSetup();
 
+  TIME_SECTION(_nl_initial_setup_timer);
+
   {
-    CONSOLE_TIMED_PRINT("Initializing Kernels, BCs and Constraints");
+    TIME_SECTION(_kernels_initial_setup_timer);
 
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
     {
@@ -300,7 +308,7 @@ NonlinearSystemBase::initialSetup()
   }
 
   {
-    CONSOLE_TIMED_PRINT("Initializing mortar interfaces");
+    TIME_SECTION(_mortar_initialization_timer);
 
     // go over mortar interfaces and construct functors
     const auto & undisplaced_mortar_interfaces =
@@ -795,10 +803,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
     if (_has_nodalbc_save_in)
       _fe_problem.getAuxiliarySystem().solution().close();
     if (hasSaveIn())
-    {
-      CONSOLE_TIMED_PRINT("Updating auxiliary system for save_in")
       _fe_problem.getAuxiliarySystem().update();
-    }
   }
   catch (MooseException & e)
   {
@@ -830,7 +835,7 @@ NonlinearSystemBase::setInitialSolution()
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
-    CONSOLE_TIMED_PRINT("Applying predictor")
+    TIME_SECTION(_predictor_application_timer);
 
     _predictor->apply(initial_solution);
     _fe_problem.predictorCleanup(initial_solution);
@@ -838,7 +843,7 @@ NonlinearSystemBase::setInitialSolution()
 
   // do nodal BC
   {
-    CONSOLE_TIMED_PRINT("Applying BCs to initial condition");
+    TIME_SECTION(_initial_apply_bcs_timer);
 
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
@@ -868,10 +873,7 @@ NonlinearSystemBase::setInitialSolution()
   }
 
   _sys.solution->close();
-  {
-    CONSOLE_TIMED_PRINT("Updating ", name(), " after setting initial condition");
-    update();
-  }
+  update();
 
   // Set constraint secondary values
   setConstraintSecondaryValues(initial_solution, false);

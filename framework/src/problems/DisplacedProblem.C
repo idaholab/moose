@@ -57,10 +57,11 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
                    "displaced_" + _mproblem.getAuxiliarySystem().name(),
                    Moose::VAR_AUXILIARY),
     _geometric_search_data(*this, _mesh),
-    _eq_init_timer(registerTimedSection("eq::init", 2)),
-    _update_mesh_timer(registerTimedSection("updateMesh", 3)),
-    _sync_solutions_timer(registerTimedSection("syncSolutions", 5)),
-    _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3))
+    _eq_init_timer(registerTimedSection("eq::init", 2, "Initializing Displaced Equation System")),
+    _update_mesh_timer(registerTimedSection("updateMesh", 3, "Updating Displaced Mesh")),
+    _sync_solutions_timer(registerTimedSection("syncSolutions", 5, "Syncing Displaced Solutions")),
+    _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3, "Updating Displaced GeometricSearch"))
+
 {
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
   unsigned int n_threads = libMesh::n_threads();
@@ -203,7 +204,6 @@ void
 DisplacedProblem::updateMesh(bool mesh_changing)
 {
   TIME_SECTION(_update_mesh_timer);
-  CONSOLE_TIMED_PRINT("Updating displaced mesh");
 
   if (mesh_changing)
   {
@@ -275,7 +275,6 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
                              const NumericVector<Number> & aux_soln)
 {
   TIME_SECTION(_update_mesh_timer);
-  CONSOLE_TIMED_PRINT("Updating displaced mesh");
 
   syncSolutions(soln, aux_soln);
 
