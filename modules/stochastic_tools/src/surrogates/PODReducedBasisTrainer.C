@@ -33,13 +33,14 @@ PODReducedBasisTrainer::validParams()
 
 PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-  _var_names(getParam<std::vector<std::string>>("var_names")),
+  _var_names(declareModelData<std::vector<std::string>>("_var_names", getParam<std::vector<std::string>>("var_names"))),
   _en_limits(getParam<std::vector<Real>>("en_limits")),
   _tag_names(getParam<std::vector<std::string>>("tag_names")),
-  _independent(getParam<std::vector<unsigned int>>("independent")),
+  _independent(declareModelData<std::vector<unsigned int>>("_independent", getParam<std::vector<unsigned int>>("independent"))),
+  _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
+  _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
   _base_completed(false)
 {
-
   if (_en_limits.size() != _var_names.size())
       paramError("en_limits",
                  "The number of elements is not equal to the number"
@@ -248,9 +249,9 @@ PODReducedBasisTrainer::initReducedOperators()
   for(unsigned int tag_i=0; tag_i<_red_operators.size(); ++tag_i)
   {
     if(_independent[tag_i])
-      _red_operators[tag_i] = DenseMatrix<Real>(base_num, 1);
+      _red_operators[tag_i].resize(base_num, 1);
     else
-      _red_operators[tag_i] = DenseMatrix<Real>(base_num, base_num);
+      _red_operators[tag_i].resize(base_num, base_num);
   }
 }
 

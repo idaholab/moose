@@ -6,7 +6,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 30
+  nx = 100
   xmax = 10
 []
 
@@ -19,13 +19,13 @@
   [diffusion]
     type = MatDiffusion
     variable = u
-    diffusivity = D
+    diffusivity = k
     extra_vector_tags = 'diff'
   []
-  [absorption]
+  [reaction]
     type = MaterialReaction
     variable = u
-    coefficient = sig
+    coefficient = alpha
     extra_vector_tags = 'react'
   []
   [source]
@@ -37,14 +37,14 @@
 []
 
 [Materials]
-  [diffusivity]
+  [k]
     type = GenericConstantMaterial
-    prop_names = D
+    prop_names = k
     prop_values = 1.0
   []
-  [xs]
+  [alpha]
     type = GenericConstantMaterial
-    prop_names = sig
+    prop_names = alpha
     prop_values = 1.0
   []
 []
@@ -74,6 +74,13 @@
 [Controls]
   [stochastic]
     type = SamplerReceiver
+  []
+[]
+
+[Postprocessors]
+  [max]
+    type = NodalExtremeValue
+    variable = u
   []
 []
 
