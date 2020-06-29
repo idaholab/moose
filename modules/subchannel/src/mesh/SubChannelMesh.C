@@ -73,7 +73,7 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
   {
     block_sizes.push_back(spacer_z[0]);
   }
-  for (int i = 1; i < spacer_z.size(); i++)
+  for (unsigned int i = 1; i < spacer_z.size(); i++)
   {
     block_sizes.push_back(spacer_z[i] - spacer_z[i - 1]);
   }
