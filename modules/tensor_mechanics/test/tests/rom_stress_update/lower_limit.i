@@ -112,8 +112,8 @@ disp = 1.0053264195e6
   [./rom_stress_prediction]
     type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
-    initial_mobile_dislocation_density = 6.0e12
-    initial_immobile_dislocation_density = 4.4e11
+    initial_cell_dislocation_density = 6.0e12
+    initial_wall_dislocation_density = 4.4e11
     outputs = all
     apply_strain = false
   [../]
@@ -150,13 +150,13 @@ disp = 1.0053264195e6
     type = ElementAverageValue
     variable = temperature
   [../]
-  [./mobile_dislocations]
+  [./cell_dislocations]
     type = ElementAverageValue
-    variable = mobile_dislocations
+    variable = cell_dislocations
   [../]
-  [./immobile_disloactions]
+  [./wall_disloactions]
     type = ElementAverageValue
-    variable = immobile_dislocations
+    variable = wall_dislocations
   [../]
   [./vonmises_stress]
     type = ElementAverageValue

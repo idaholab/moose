@@ -1,4 +1,4 @@
-time,effective_strain_avg,immobile_disloactions,mobile_dislocations,temperature,vonmises_stress
+time,effective_strain_avg,wall_disloactions,cell_dislocations,temperature,vonmises_stress
 0,0,0,0,0,0
 2,1.5910121498256e-11,439999997857.22,5999999135424,900,633699.99993032
 4,9.4384236053193e-11,439999987288.22,5999994871021.9,900,1267399.9999922

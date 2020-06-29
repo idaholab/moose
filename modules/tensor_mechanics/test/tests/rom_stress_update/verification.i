@@ -187,8 +187,8 @@
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true
     outputs = all
-    immobile_dislocation_density_forcing_function = rhoi_fcn
-    mobile_dislocation_density_forcing_function = rhom_fcn
+    wall_dislocation_density_forcing_function = rhoi_fcn
+    cell_dislocation_density_forcing_function = rhom_fcn
     old_creep_strain_forcing_function = evm_fcn
   [../]
 []
@@ -224,11 +224,11 @@
   [../]
   [./rhom]
     type = ElementAverageValue
-    variable = mobile_dislocations
+    variable = cell_dislocations
   [../]
   [./rhoi]
     type = ElementAverageValue
-    variable = immobile_dislocations
+    variable = wall_dislocations
   [../]
   [./vonmises_stress]
     type = ElementAverageValue
