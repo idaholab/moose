@@ -84,3 +84,88 @@
   nl_rel_tol = 0.9
   l_tol = 0.9
 []
+
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [prettyMesh]
+    type = FullSolveMultiApp
+    input_files = "prettyMesh.i"
+    execute_on = "timestep_end"
+  []
+[]
+
+[Transfers]
+  [xfer_mdot]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = mdot
+    variable = mdot
+  []
+  [xfer_SumWij]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = SumWij
+    variable = SumWij
+  []
+  [xfer_SumWijh]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = SumWijh
+    variable = SumWijh
+  []
+  [xfer_SumWijPrimeDhij]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = SumWijPrimeDhij
+    variable = SumWijPrimeDhij
+  []
+  [xfer_SumWijPrimeDUij]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = SumWijPrimeDUij
+    variable = SumWijPrimeDUij
+  []
+  [xfer_P]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = P
+    variable = P
+  []
+  [xfer_h]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = h
+    variable = h
+  []
+  [xfer_T]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = T
+    variable = T
+  []
+  [xfer_rho]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = rho
+    variable = rho
+  []
+  [xfer_q_prime]
+    type = MultiAppNearestNodeTransfer
+    multi_app = prettyMesh
+    direction = to_multiapp
+    source_variable = q_prime
+    variable = q_prime
+  []
+[]
