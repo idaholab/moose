@@ -55,3 +55,12 @@ PerfGraphInterface::registerTimedSection(const std::string & section_name, const
   else
     return _perf_graph.registerSection(section_name, level);
 }
+
+PerfID
+PerfGraphInterface::registerTimedSection(const std::string & section_name, const unsigned int level, const std::string & live_message, const bool print_dots)
+{
+  if (_prefix != "")
+    return _perf_graph.registerSection(_prefix + "::" + section_name, level, live_message, print_dots);
+  else
+    return _perf_graph.registerSection(section_name, level, live_message, print_dots);
+}

@@ -71,9 +71,24 @@ public:
   /**
    * Registers a named section of code
    *
+   * Note: this will automatically set the section_name to what will print out
+   * during a live print.  It will only be printed out if live printing is forced.
+   * It will also dissallow the printing of progress dots.
+   *
    * @return The unique ID to use for that section
    */
   PerfID registerSection(const std::string & section_name, unsigned int level);
+
+  /**
+   * Registers a named section of code
+   *
+   * @param section_name The name of the section as it will be printed in the PerfGraph
+   * @param level The verbosity level
+   * @param live_message The message to be printed to the screen during execution
+   * @param print_dots Whether or not progress dots should be printed for this section
+   * @return The unique ID to use for that section
+   */
+  PerfID registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots);
 
   /**
    * Print the tree out
@@ -209,6 +224,18 @@ protected:
       FullTable;
 
   typedef VariadicTable<std::string, unsigned long int, Real, Real, Real, long int> HeaviestTable;
+
+  /**
+   * Used to hold metadata about the registered sections
+   */
+  struct SectionInfo
+  {
+    PerfID _id;
+    std::string _name;
+    unsigned int _level;
+    std::string _live_message;
+    bool _print_dots;
+  };
 
   /**
    * Use to hold the time for each section
@@ -352,11 +379,8 @@ protected:
   /// Map of section names to IDs
   std::map<std::string, PerfID> _section_name_to_id;
 
-  /// Map of IDs to section names
-  std::map<PerfID, std::string> _id_to_section_name;
-
-  /// Map of IDs to level
-  std::map<PerfID, unsigned int> _id_to_level;
+  /// Map of IDs to section information
+  std::map<PerfID, SectionInfo> _id_to_section_info;
 
   /// The time for each section.  This is updated on updateTiming()
   /// Note that this is _total_ cumulative time across every place

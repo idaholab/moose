@@ -60,6 +60,17 @@ protected:
    */
   PerfID registerTimedSection(const std::string & section_name, const unsigned int level);
 
+  /**
+   * Call to register a named section for timing.
+   *
+   * @param section_name The name of the code section to be timed
+   * @param level The importance of the timer - lower is more important (0 will always come out)
+   * @param live_message The message to be printed to the screen during execution
+   * @param print_dots Whether or not progress dots should be printed for this section
+   * @return The ID of the section - use when starting timing
+   */
+  PerfID registerTimedSection(const std::string & section_name, const unsigned int level, const std::string & live_message, const bool print_dots = true);
+
   /// Params
   const InputParameters * const _pg_params;
 

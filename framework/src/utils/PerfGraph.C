@@ -35,7 +35,7 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
 
     auto & execution_list = this->_execution_list;
 
-    auto & id_to_section_name = this->_id_to_section_name;
+    auto & id_to_section_info = this->_id_to_section_info;
 
     // This is one beyond the last thing on the stack
     unsigned int stack_level = 0;
@@ -72,6 +72,10 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
       // reads, will be reading synchronized memory
       std::atomic_thread_fence(std::memory_order_acquire);
 
+      // Only happens if nothing has been added
+      if (current_execution_list_end == 0 && last_execution_list_end == current_execution_list_end)
+        continue;
+
       // Iterate from the last thing printed (begin) to the last thing in the list (end)
       // If the time or memory of any section is above the threshold, print everything inbetween and
       // update begin
@@ -89,31 +93,36 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
             // We need to print out everything on the stack before this that hasn't already been printed...
             for (unsigned int s = printed_stack_level_end; s < stack_level - 1; s++)
             {
-              console << std::string(s * 2, ' ') << id_to_section_name[print_thread_stack[s]._id] << '\n';
+              console << std::string(s * 2, ' ') << id_to_section_info[print_thread_stack[s]._id]._live_message << '\n';
               printed_stack_level_end++;
             }
 
-            console << std::string(2 * (stack_level -1), ' ') << id_to_section_name[last_section_increment._id];
+            console << std::string(2 * (stack_level -1), ' ') << id_to_section_info[last_section_increment._id]._live_message;
 
             printed_name_of_current_section = true;
 
             printed_stack_level_end++;
           }
           else // Need to print dots
-            console << " .";
+            if (id_to_section_info[last_section_increment._id]._print_dots)
+              console << " .";
         }
         else // If it's not, then we need to continue the section _before_ this
         {
-          auto & last_stack_section = print_thread_stack[stack_level - 1];
-
-          if (!printed_name_of_current_section)
+          if (stack_level > 0)
           {
-            console << "Still " << id_to_section_name[last_stack_section._id];
+            auto & last_stack_section = print_thread_stack[stack_level - 1];
 
-            printed_name_of_current_section = true;
+            if (!printed_name_of_current_section)
+            {
+              console << "Still " << id_to_section_info[last_stack_section._id]._live_message;
+
+              printed_name_of_current_section = true;
+            }
+            else // Need to print dots
+              if (id_to_section_info[last_stack_section._id]._print_dots)
+                console << " .";
           }
-          else // Need to print dots
-            console << " .";
         }
       }
 
@@ -161,13 +170,13 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
                 printed_name_of_current_section = false;
               }
 
-              console << std::string(s * 2, ' ') << id_to_section_name[print_thread_stack[s]._id] << '\n';
+              console << std::string(s * 2, ' ') << id_to_section_info[print_thread_stack[s]._id]._live_message << '\n';
               printed_stack_level_end++;
             }
 
             // Now print this thing
-            if (!printed_name_of_current_section)
-              console << std::string(2 * (stack_level - 1), ' ') << "Finishing: " << id_to_section_name[section_increment._id];
+            if (!printed_name_of_current_section || !id_to_section_info[section_increment._id]._print_dots)
+              console << std::string(2 * (stack_level - 1), ' ') << "Finishing: " << id_to_section_info[section_increment._id]._live_message;
 
             console << ": " << time_increment << ", " << memory_increment << '\n';
 
@@ -218,8 +227,44 @@ PerfGraph::registerSection(const std::string & section_name, unsigned int level)
   // It's not...
   auto id = _section_name_to_id.size();
   _section_name_to_id.emplace_hint(it, section_name, id);
-  _id_to_section_name[id] = section_name;
-  _id_to_level[id] = level;
+
+  auto & section_info = _id_to_section_info[id];
+
+  section_info._id = id;
+  section_info._name = section_name;
+  section_info._level = level;
+  section_info._live_message = "";
+  section_info._print_dots = false;
+
+  return id;
+}
+
+PerfID
+PerfGraph::registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots)
+{
+  if (section_name == "")
+    mooseError("Section name not provided when registering timed section!");
+
+  if (live_message == "")
+    mooseError("Live message not provided when registering timed section!");
+
+  auto it = _section_name_to_id.lower_bound(section_name);
+
+  // Is it already registered?
+  if (it != _section_name_to_id.end() && it->first == section_name)
+    return it->second;
+
+  // It's not...
+  auto id = _section_name_to_id.size();
+  _section_name_to_id.emplace_hint(it, section_name, id);
+
+  auto & section_info = _id_to_section_info[id];
+
+  section_info._id = id;
+  section_info._name = section_name;
+  section_info._level = level;
+  section_info._live_message = live_message;
+  section_info._print_dots = print_dots;
 
   return id;
 }
@@ -227,12 +272,12 @@ PerfGraph::registerSection(const std::string & section_name, unsigned int level)
 const std::string &
 PerfGraph::sectionName(const PerfID id) const
 {
-  auto find_it = _id_to_section_name.find(id);
+  auto find_it = _id_to_section_info.find(id);
 
-  if (find_it == _id_to_section_name.end())
+  if (find_it == _id_to_section_info.end())
     mooseError("PerfGraph cannot find a section name associated with id: ", id);
 
-  return find_it->second;
+  return find_it->second._name;
 }
 
 unsigned long int
@@ -338,7 +383,8 @@ PerfGraph::push(const PerfID id)
   _stack[_current_position] = new_node;
 
   // Add this to the exection list
-  addToExecutionList(id, IncrementState::started, current_time, start_memory);
+  if (!_id_to_section_info[id]._live_message.empty())
+    addToExecutionList(id, IncrementState::started, current_time, start_memory);
 }
 
 void
@@ -361,7 +407,8 @@ PerfGraph::pop()
   _current_position--;
 
   // Add this to the exection list
-  addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);
+  if (!_id_to_section_info[current_node->id()]._live_message.empty())
+    addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);
 }
 
 void
@@ -401,7 +448,7 @@ PerfGraph::updateTiming()
   // Update vector pointing to section times
   // Note: we are doing this _after_ recursively filling
   // because new entries may have been created
-  _section_time_ptrs.resize(_id_to_section_name.size());
+  _section_time_ptrs.resize(_id_to_section_info.size());
 
   for (auto & section_time_it : _section_time)
   {
@@ -426,7 +473,7 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto total_memory = current_node->totalMemory();
 
   // RHS insertion on purpose
-  auto & section_time = _section_time[_id_to_section_name[id]];
+  auto & section_time = _section_time[_id_to_section_info[id]._name];
 
   section_time._self += self;
   section_time._children += children;
@@ -447,13 +494,13 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
                                  unsigned int level,
                                  unsigned int current_depth)
 {
-  mooseAssert(_id_to_section_name.find(current_node->id()) != _id_to_section_name.end(),
+  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
               "Unable to find section name!");
 
-  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_name[current_node->id()];
+  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
 
-  mooseAssert(_id_to_level.find(current_node->id()) != _id_to_level.end(), "Unable to find level!");
-  auto & node_level = _id_to_level[current_node->id()];
+  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(), "Unable to find level!");
+  auto & node_level = _id_to_section_info[current_node->id()]._level;
 
   if (node_level <= level)
   {
@@ -470,9 +517,9 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto self_avg = self / static_cast<Real>(num_calls);
     auto self_percent = 100. * self / total_root_time;
 
-    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-    auto children_avg = children / static_cast<Real>(num_calls);
-    auto children_percent = 100. * children / total_root_time;
+//    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+//    auto children_avg = children / static_cast<Real>(num_calls);
+//    auto children_percent = 100. * children / total_root_time;
 
     auto total = std::chrono::duration<double>(current_node->totalTime()).count();
     auto total_avg = total / static_cast<Real>(num_calls);
@@ -510,7 +557,7 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
 
-  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_name[current_node->id()];
+  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
@@ -522,9 +569,9 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto self_avg = self / static_cast<Real>(num_calls);
   auto self_percent = 100. * self / total_root_time;
 
-  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-  auto children_avg = children / static_cast<Real>(num_calls);
-  auto children_percent = 100. * children / total_root_time;
+//  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+//  auto children_avg = children / static_cast<Real>(num_calls);
+//  auto children_percent = 100. * children / total_root_time;
 
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
   auto total_avg = total / static_cast<Real>(num_calls);
@@ -717,7 +764,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   {
     auto id = sorted[i];
 
-    vtable.addRow(id == 0 ? _root_name : _id_to_section_name[id],
+    vtable.addRow(id == 0 ? _root_name : _id_to_section_info[id]._name,
                   _section_time_ptrs[id]->_num_calls,
                   _section_time_ptrs[id]->_total_memory,
                   _section_time_ptrs[id]->_self,
