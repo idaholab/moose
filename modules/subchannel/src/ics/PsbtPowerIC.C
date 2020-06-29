@@ -10,7 +10,7 @@ PsbtPowerIC::validParams()
 {
   InputParameters params = PsbtIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
-  params.addParam<std::string>("filename", 413.0, "Location of power profile .txt file (should be a single column)");
+  params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column)");
   return params;
 }
 

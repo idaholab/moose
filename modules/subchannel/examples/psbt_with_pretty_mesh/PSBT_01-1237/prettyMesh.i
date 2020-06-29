@@ -4,7 +4,7 @@
 
 [Mesh]
   type = DetailedSubChannelMesh
-  nx = 6 #subchannel number in the x direction
+  nx = 6
   ny = 6
   max_dz = 0.02
   pitch = 0.0126
@@ -39,14 +39,6 @@
   [Sij]
   []
   [w_perim]
-  []
-[]
-
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
   []
 []
 

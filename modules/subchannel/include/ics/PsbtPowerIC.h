@@ -4,17 +4,14 @@
 #include <Eigen/Dense>
 
 /**
- * This class Sets the linear heat rate for the PSBT mixing fluid temperature benchmark.
-  Thus far there is only a radial distribution and not an axial one.
+ * Sets the linear heat rate for the PSBT mixing fluid temperature benchmark.
+  Thus far there is only a radial distribution and not an axial one i.e : constant axial linear heat flux
+  value is the method in InitialConditions that returns the linear heat flux per subchannel cell
  */
 class PsbtPowerIC : public PsbtIC
 {
 public:
   PsbtPowerIC(const InputParameters & params);
-
-  /**
-  * This function is used to calculate the axial heat rate per subchannel cell
-  */
   Real value(const Point & p) override;
 
 protected:

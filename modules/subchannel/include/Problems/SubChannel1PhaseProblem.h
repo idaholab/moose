@@ -6,29 +6,21 @@
 
 class SubChannel1PhaseProblem;
 
-//template <>
-//InputParameters validParams<SubChannel1PhaseProblem>();
-
 /**
- * This is an interface to call my single phase sub channel Solver through
- an external problem interface
+ * This class implements the 1-phase sub channel solver.
  */
-class SubChannel1PhaseProblem : public ExternalProblem //This class inherits from ExternalProblem
+
+class SubChannel1PhaseProblem : public ExternalProblem
 {
 public:
-  SubChannel1PhaseProblem(const InputParameters & params); //Constructor
-  ~SubChannel1PhaseProblem(); //Destructor
+  SubChannel1PhaseProblem(const InputParameters & params);
   static InputParameters validParams();
-
   virtual void externalSolve() override;
-  virtual void syncSolutions(Direction /*direction*/) override;
+  virtual void syncSolutions(Direction direction) override;
   virtual bool converged() override;
 
 protected:
-  //SubChannelMesh * _mesh;
   SubChannelMesh & _subchannel_mesh;
-
-private:
   Real _mflux_in;
   Real _T_in;
   Real _P_out;

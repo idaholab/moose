@@ -3,7 +3,7 @@
 #include "PsbtIC.h"
 
 /**
- * Sets the wetted permeter of the subchannel
+ * Sets the wetted perimeter of the subchannel
  */
 class PsbtWettedPerimIC : public PsbtIC
 {
