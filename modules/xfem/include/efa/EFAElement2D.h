@@ -81,7 +81,7 @@ public:
                    std::map<unsigned int, EFANode *> & TempNodes,
                    std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap,
                    bool merge_phantom_edges);
-  virtual void printElement(std::ostream & ostream);
+  virtual void printElement(std::ostream & ostream) const;
 
   // EFAelement2D specific methods
   EFAFragment2D * getFragment(unsigned int frag_id) const;

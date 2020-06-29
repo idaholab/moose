@@ -110,7 +110,7 @@ public:
                    std::map<unsigned int, EFANode *> & TempNodes,
                    std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap,
                    bool merge_phantom_edges) = 0;
-  virtual void printElement(std::ostream & ostream) = 0;
+  virtual void printElement(std::ostream & ostream) const = 0;
 
 protected:
   // common methods
