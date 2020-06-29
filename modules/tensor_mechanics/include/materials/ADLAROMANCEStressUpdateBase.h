@@ -43,12 +43,6 @@ protected:
 
   virtual void computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment) override;
   virtual ADReal maximumPermissibleValue(const ADReal & effective_trial_stress) const override;
-
-  /**
-   * Compute the limiting value of the time step for this material
-   *
-   * @return Limiting time step
-   */
   virtual Real computeTimeStepLimit() override;
 
   /// Enum to error, warn, ignore, or extrapolate if input is outside of window of applicability
@@ -64,40 +58,38 @@ protected:
    * Precompute the ROM strain rate information for all inputs except for strain. Strain will be
    * computed in the radial return algorithm several times, while the remainder of the inputs remain
    * constant.
-   * @param out_idx Ouput index
+   * @param out_index Output index
    */
-  void precomputeROM(const unsigned out_idx);
+  void precomputeROM(const unsigned out_index);
 
   /**
-   *Computes the ROM calcualted increment a given output.
-   * @param out_idx Ouput index
-   * @param derivative Flag to return derivative of ROM increment with respect to stress.
+   * Computes the ROM calculated increment for a given output and tile.
+   * @param tile Tile index
+   * @param out_index Output index
+   * @param derivative Optional flag to return derivative of ROM increment with respect to stress.
    * @return ROM computed increment
    */
-  ADReal computeROM(const unsigned int tile, const unsigned out_idx, const bool derivative = false);
+  ADReal
+  computeROM(const unsigned int tile, const unsigned out_index, const bool derivative = false);
 
   /**
-   * Method to check input values against applicability windows set by ROM data set. In addition,
-   * extrapolation is performed if the WindowFailure behavior == extraploation. The returned value
-   * is an extrapolated value multiplied by the ROM computed increment if extrapolation occurs.
+   * Method to check input values against applicability windows set by ROM data set.
    * @param input Input value
-   * @param limits Vector of lower and upper limits of the input
-   * @param behavior WindowFailure MooseEnum indicating what to do if input is outside of limits
-   * @param derivative Flag to return derivative of extrapolation with respect to stress.
-   * @return Extrapolation value
+   * @param behavior WindowFailure enum indicating what to do if input is outside of limits
+   * @param global_limits Vector of lower and upper global limits of the input
    */
   void checkInputWindow(const ADReal & input,
                         const WindowFailure behavior,
                         const std::vector<Real> & global_limits);
 
   /**
-   * Convert the input variables into the form expected by the ROM Legendre polynomials
-   * to have a normalized space from [-1, 1] so that every variable has equal weight
+   * Convert the input variables into the form expected by the ROM Legendre polynomials to have a
+   * normalized space from [-1, 1] so that every variable has equal weight
    * @param input Input value
-   * @param transform ROMInputTransform enum indicating how the input is transformed
+   * @param transform ROMInputTransform enum indicating how the input is to be transformed
    * @param transform_coef Transform coefficient for the given input
    * @param transformed_limits Transformed limits for the given input
-   * @param derivative Flag to return derivative of converted input with respect to stress.
+   * @param derivative Optional flag to return derivative of converted input with respect to stress.
    * @return Converted input
    */
   ADReal normalizeInput(const ADReal & input,
@@ -109,9 +101,9 @@ protected:
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
    * @param rom_input ROM input
-   * @param polynomial_inputs Vector of Legendre polynomial transformation
-   * @param drom_input Derivative of ROM input with respect to stress
-   * @param derivative Flag to return derivative of converted input with respect to stress.
+   * @param polynomial_inputs Vector of transformed Legendre polynomials
+   * @param drom_input Optional derivative of ROM input with respect to stress
+   * @param derivative Optional flag to return derivative of converted input with respect to stress.
    */
   void buildPolynomials(const ADReal & rom_input,
                         std::vector<ADReal> & polynomial_inputs,
@@ -119,12 +111,11 @@ protected:
                         const bool derivative = false);
 
   /**
-   * Arranges the calculated Legendre polynomials into the order expected by the
-   * ROM coefficients and ultiplies the Legendre polynomials by the ROM coefficients to compute the
-   * the predicted output values. This method only manipulates all inputs besides stress, with
-   * stress handled in computeValues
+   * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
+   * polynomials by the ROM coefficients to compute the predicted output values. This method works
+   * with all inputs besides stress, while stress is handled by computeValues
    * @param coefs Legendre polynomial coefficients
-   * @param polynomial_inputs Vector of Legendre polynomial transformation
+   * @param polynomial_inputs Vector of transformed Legendre polynomial
    * @param precomputed Vector that holds the precomputed ROM values
    */
   void precomputeValues(const std::vector<Real> & coefs,
@@ -132,17 +123,16 @@ protected:
                         std::vector<ADReal> & precomputed);
 
   /**
-   * Arranges the calculated Legendre polynomials into the order expected by the
-   * ROM coefficients and ultiplies the Legendre polynomials by the ROM coefficients to compute the
-   * the predicted output values. This method only manipulates the stress input, with all others
-   * handled in precomputeValues
+   * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
+   * polynomials by the ROM coefficients to compute the predicted output values. This method only
+   * manipulates the stress input, with all others handled in precomputeValues
    * @param precomputed Precomputed multiplication of polynomials
    * @param polynomial_inputs Vector of Legendre polynomial transformation
    * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
    * respect to stress
-   * @param derivative Flag to return derivative of converted computed values with respect to
-   * stress.
-   * @return rom_outputs Outputs from ROM
+   * @param derivative Optional flag to return derivative of converted computed values with respect
+   * to stress.
+   * @return ROM output
    */
   ADReal computeValues(const std::vector<ADReal> & precomputed,
                        const std::vector<std::vector<ADReal>> & polynomial_inputs,
@@ -153,15 +143,15 @@ protected:
    * Computes the output variable increments from the ROM predictions by bringing out of the
    * normalized map to the actual physical values
    * @param old_input_values Previous timestep values of ROM inputs
-   * @param rom_outputs Outputs from ROM
-   * @param out_idx Output index
+   * @param rom_output Outputs from ROM
+   * @param out_index Output index
    * @param drom_output Derivative of output with respect to stress
-   * @param drom_outputs Derivative of outputs from ROM with respect to stress
-   * @param derivative Flag to return derivative of output with respect to stress.
+   * @param derivative Optional flag to return derivative of output with respect to stress.
+   * @return Converted ROM output
    */
   ADReal convertOutput(const std::vector<Real> & old_input_values,
                        const ADReal & rom_output,
-                       const unsigned out_idx,
+                       const unsigned out_index,
                        const ADReal & drom_output = 0.0,
                        const bool derivative = false);
 
@@ -169,29 +159,74 @@ protected:
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
    * @param value Input to Legendre polynomial
    * @param degree Degree of Legendre polynomial
-   * @param derivative Flag to return derivative of Legendre polynomial Legendre
+   * @param derivative Optional flag to return derivative of Legendre polynomial Legendre
    * @return Computed value from Legendre polynomial
    */
   ADReal
   computePolynomial(const ADReal & value, const unsigned int degree, const bool derivative = false);
 
-  /*
-   * Calculates and returns the transformed limits for the ROM calculations
-   * Indexes are [tile][ouput][input].
-   * Inputs ordering is
-   * input[0]: mobile_old
-   * input[1]: immobile_old
-   * input[2]: trial stress,
-   * input[3]: effective strain old,
-   * input[4]: temperature
-   * input[5]: environmental factor (optional)
-   * output ordering is:
-   * output[0]: mobile dislocations increment
-   * output[1]: immobile dislocations increment
-   * output[2]: strain increment
-   * @return Multi-dimentional vector of transformed limits
+  /**
+   * Calculate the sigmoid function weighting for the input based on the limits
+   * @param lower Lower limit
+   * @param upper Upper limit
+   * @param val Input value
+   * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
+   * @return weight
    */
-  std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformedLimits();
+  ADReal
+  sigmoid(const Real lower, const Real upper, const ADReal & val, const bool derivative = false);
+
+  /**
+   * Compute the weight for applied to each tile based on the location in input-space
+   * @param weights Weights for each tile
+   * @param input Input value
+   * @param in_index Input index
+   * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
+   */
+  void computeTileWeight(std::vector<ADReal> & weights,
+                         ADReal & input,
+                         const unsigned int in_index,
+                         const bool derivative = false);
+
+  /**
+   * Convert input based on the transform type
+   * @param x Input value
+   * @param transform Enum declaring transform to be performed
+   * @param coef Coefficient applied during transformation
+   * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
+   */
+  template <typename T>
+  void convertValue(T & x,
+                    const ROMInputTransform transform,
+                    const Real coef,
+                    const bool derivative = false)
+  {
+    if (transform == ROMInputTransform::EXP)
+    {
+      if (derivative)
+        x = std::exp(x / coef) / coef;
+      else
+        x = std::exp(x / coef);
+    }
+    else if (transform == ROMInputTransform::LOG)
+    {
+      mooseAssert(x + coef > 0, "Sum must be greater than 0.");
+      if (derivative)
+        x = 1.0 / (x + coef);
+      else
+        x = std::log(x + coef);
+    }
+    else if (transform == ROMInputTransform::INVERSE)
+    {
+      mooseAssert(x + coef != 0, "Sum must not equal zero.");
+      if (derivative)
+        x = -1.0 / Utility::pow<2>(x + coef);
+      else
+        x = 1.0 / (x + coef);
+    }
+    else if (derivative)
+      x = 1.0;
+  }
 
   /*
    * Calculates and returns vector utilized in assign values
@@ -200,18 +235,36 @@ protected:
   std::vector<unsigned int> getMakeFrameHelper() const;
 
   /*
-   * Returns vector of the functions to use for the conversion of input variables.
-   * Indexes are [tile][ouput][input].
+   * Calculates and returns the transformed limits for the ROM calculations
+   * Indexes are [tile][output][input].
    * Inputs ordering is
-   * input[0]: mobile_old
-   * input[1]: immobile_old
+   * input[0]: cell_old
+   * input[1]: wall_old
    * input[2]: trial stress,
    * input[3]: effective strain old,
    * input[4]: temperature
    * input[5]: environmental factor (optional)
    * output ordering is:
-   * output[0]: mobile dislocations increment
-   * output[1]: immobile dislocations increment
+   * output[0]: cell dislocations increment
+   * output[1]: wall dislocations increment
+   * output[2]: strain increment
+   * @return Multi-dimentional vector of transformed limits
+   */
+  std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformedLimits();
+
+  /*
+   * Returns vector of the functions to use for the conversion of input variables.
+   * Indexes are [tile][output][input].
+   * Inputs ordering is
+   * input[0]: cell_old
+   * input[1]: wall_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * output ordering is:
+   * output[0]: cell dislocations increment
+   * output[1]: wall dislocations increment
    * output[2]: strain increment
    * @return vector of the functions to use for the conversion of input variables.
    */
@@ -219,35 +272,31 @@ protected:
 
   /*
    * Returns factors for the functions for the conversion functions given in getTransform
-   * Indexes are [tile][ouput][input].
+   * Indexes are [tile][output][input].
    * Inputs ordering is
-   * input[0]: mobile_old
-   * input[1]: immobile_old
+   * input[0]: cell_old
+   * input[1]: wall_old
    * input[2]: trial stress,
    * input[3]: effective strain old,
    * input[4]: temperature
    * input[5]: environmental factor (optional)
    * output ordering is:
-   * output[0]: mobile dislocations increment
-   * output[1]: immobile dislocations increment
+   * output[0]: cell dislocations increment
+   * output[1]: wall dislocations increment
    * output[2]: strain increment
    * @return factors for the functions for the conversion functions given in getTransform
    */
   virtual std::vector<std::vector<std::vector<Real>>> getTransformCoefs() = 0;
 
   /* Returns human-readable limits for the inputs.
-   * Indexes are [tile][ouput][input].
+   * Indexes are [tile][input][upper/lower].
    * Inputs ordering is
-   * input[0]: mobile_old
-   * input[1]: immobile_old
+   * input[0]: cell_old
+   * input[1]: wall_old
    * input[2]: trial stress,
    * input[3]: effective strain old,
    * input[4]: temperature
    * input[5]: environmental factor (optional)
-   * output ordering is:
-   * output[0]: mobile dislocations increment
-   * output[1]: immobile dislocations increment
-   * output[2]: strain increment
    * @return human-readable limits for the inputs
    */
   virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() = 0;
@@ -258,6 +307,18 @@ protected:
    * @return Legendre polynomial coefficients
    */
   virtual std::vector<std::vector<std::vector<Real>>> getCoefs() = 0;
+
+  /*
+   * Material specific orientations of tiling
+   * variables
+   * @return Vector declaring tiling orientation
+   */
+  virtual std::vector<unsigned int> getTilings()
+  {
+    if (_environmental)
+      return {1, 1, 1, 1, 1, 1};
+    return {1, 1, 1, 1, 1};
+  };
 
   /// Coupled temperature variable
   const ADVariableValue & _temperature;
@@ -271,75 +332,75 @@ protected:
   /// Flag to output verbose infromation
   const bool _verbose;
 
-  ///@{Material properties for mobile (glissile) dislocation densities (1/m^2)
-  ADMaterialProperty<Real> & _mobile_dislocations;
-  const MaterialProperty<Real> & _mobile_dislocations_old;
+  ///@{Material properties for cell (glissile) dislocation densities (1/m^2)
+  ADMaterialProperty<Real> & _cell_dislocations;
+  const MaterialProperty<Real> & _cell_dislocations_old;
   ///@}
 
-  /// Initial mobile dislocation value
-  const Real _initial_mobile_dislocations;
+  /// Initial cell dislocation value
+  const Real _initial_cell_dislocations;
 
-  /// Maximum mobile dislocation increment
-  const Real _max_mobile_increment;
+  /// Maximum cell dislocation increment
+  const Real _max_cell_increment;
 
-  /// Optional mobile dislocation forcing function
-  const Function * const _mobile_function;
+  /// Optional cell dislocation forcing function
+  const Function * const _cell_function;
 
-  /// Container for mobile dislocation increment
-  ADReal _mobile_dislocation_increment;
+  /// Container for cell dislocation increment
+  ADReal _cell_dislocation_increment;
 
-  /// Container for old mobile dislocation value
-  Real _mobile_old;
+  /// Container for old cell dislocation value
+  Real _cell_old;
 
-  ///@{Material properties for immobile (locked) dislocation densities (1/m^2)
-  ADMaterialProperty<Real> & _immobile_dislocations;
-  const MaterialProperty<Real> & _immobile_dislocations_old;
+  ///@{Material properties for wall (locked) dislocation densities (1/m^2)
+  ADMaterialProperty<Real> & _wall_dislocations;
+  const MaterialProperty<Real> & _wall_dislocations_old;
   ///@}
 
-  /// Initial immobile dislocation value
-  const Real _initial_immobile_dislocations;
+  /// Initial wall dislocation value
+  const Real _initial_wall_dislocations;
 
-  /// Maximum immobile dislocation increment
-  const Real _max_immobile_increment;
+  /// Maximum wall dislocation increment
+  const Real _max_wall_increment;
 
-  /// Optional immobile dislocation forcing function
-  const Function * const _immobile_function;
+  /// Optional wall dislocation forcing function
+  const Function * const _wall_function;
 
-  /// Container for immobile dislocation increment
-  ADReal _immobile_dislocation_increment;
+  /// Container for wall dislocation increment
+  ADReal _wall_dislocation_increment;
 
-  /// Container for old immobile dislocation value
-  Real _immobile_old;
+  /// Container for old wall dislocation value
+  Real _wall_old;
 
   /// Container for old effective strain
   Real _effective_strain_old;
 
-  /// Index corresponding to the position for the mobile disloations in the input vector
-  const unsigned int _mobile_input_idx;
+  /// Index corresponding to the position for the dislocations with in the cell in the input vector
+  const unsigned int _cell_input_index;
 
-  /// Index corresponding to the position for the immobile disloations in the input vector
-  const unsigned int _immobile_input_idx;
+  /// Index corresponding to the position for the dislocations within the cell wall in the input vector
+  const unsigned int _wall_input_index;
 
   /// Index corresponding to the position for the stress in the input vector
-  const unsigned int _stress_input_idx;
+  const unsigned int _stress_input_index;
 
   /// Index corresponding to the position for the old strain in the input vector
-  const unsigned int _old_strain_input_idx;
+  const unsigned int _old_strain_input_index;
 
   /// Index corresponding to the position for the tempeature in the input vector
-  const unsigned int _temperature_input_idx;
+  const unsigned int _temperature_input_index;
 
   /// Index corresponding to the position for the environmental factor in the input vector
-  const unsigned int _environmental_input_idx;
+  const unsigned int _environmental_input_index;
 
-  /// Index corresponding to the position for mobile dislocations increment in the output vector
-  const unsigned int _mobile_output_idx;
+  /// Index corresponding to the position for cell dislocations increment in the output vector
+  const unsigned int _cell_output_index;
 
-  /// Index corresponding to the position for immobile dislocations increment in the output vector
-  const unsigned int _immobile_output_idx;
+  /// Index corresponding to the position for wall dislocations increment in the output vector
+  const unsigned int _wall_output_index;
 
   /// Index corresponding to the position for strain increment in the output vector
-  const unsigned int _strain_output_idx;
+  const unsigned int _strain_output_index;
 
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
@@ -380,16 +441,16 @@ protected:
   /// Creep rate material property
   ADMaterialProperty<Real> & _creep_rate;
 
-  /// Mobile dislocations rate
-  ADMaterialProperty<Real> & _mobile_rate;
+  /// Cell dislocations rate of change
+  ADMaterialProperty<Real> & _cell_rate;
 
-  /// Immobile dislocations rate
-  ADMaterialProperty<Real> & _immobile_rate;
+  /// Wall dislocations rate of change
+  ADMaterialProperty<Real> & _wall_rate;
 
   /// Material property to hold smootherstep applied in order to extrapolate.
   ADMaterialProperty<Real> & _extrapolation;
 
-  /// Container for derivative of creep rate with respect to strain
+  /// Container for derivative of creep increment with respect to strain
   ADReal _derivative;
 
   /// Container for input values
@@ -407,55 +468,15 @@ protected:
   /// Container for ROM precomputed values
   std::vector<std::vector<ADReal>> _precomputed_vals;
 
-  ADReal
-  sigmoid(const Real lower, const Real upper, const ADReal & val, const bool derivative = false);
-  void computeTileWeight(std::vector<ADReal> & weights,
-                         ADReal & input,
-                         const unsigned int in_idx,
-                         const bool derivative = false);
-
+  /// Container for global limits
   std::vector<std::vector<Real>> _global_limits;
+
+  /// Container for weights for each tile as computed for all input values beside stress
   std::vector<ADReal> _non_stress_weights;
+
+  /// Container for weights for each tile as computed for all input values beside stress
   std::vector<ADReal> _weights;
+
+  /// Container for tiling orientations
   std::vector<unsigned int> _tiling;
-
-  virtual std::vector<unsigned int> getTilings()
-  {
-    if (_environmental)
-      return {1, 1, 1, 1, 1, 1};
-    return {1, 1, 1, 1, 1};
-  };
-
-  template <typename T>
-  void convertValue(T & x,
-                    const ROMInputTransform transform,
-                    const Real coef,
-                    const bool derivative = false)
-  {
-    if (transform == ROMInputTransform::EXP)
-    {
-      if (derivative)
-        x = std::exp(x / coef) / coef;
-      else
-        x = std::exp(x / coef);
-    }
-    else if (transform == ROMInputTransform::LOG)
-    {
-      mooseAssert(x + coef > 0, "Sum must be greater than 0.");
-      if (derivative)
-        x = 1.0 / (x + coef);
-      else
-        x = std::log(x + coef);
-    }
-    else if (transform == ROMInputTransform::INVERSE)
-    {
-      mooseAssert(input + transform_coef != 0, "Sum must not equal zero.");
-      if (derivative)
-        x = -1.0 / Utility::pow<2>(x + coef);
-      else
-        x = 1.0 / (x + coef);
-    }
-    else if (derivative)
-      x = 1.0;
-  }
 };

@@ -26,13 +26,13 @@ ADLAROMANCEStressUpdateBase::validParams()
                                         "Optional coupled environmental factor");
   MooseEnum window_failure_extrapolate("ERROR WARN IGNORE EXTRAPOLATE", "EXTRAPOLATE");
   MooseEnum window_failure_error("ERROR WARN IGNORE EXTRAPOLATE", "ERROR");
-  params.addParam<MooseEnum>("mobile_input_window_failure",
+  params.addParam<MooseEnum>("cell_input_window_failure",
                              window_failure_error,
-                             "What to do if mobile dislocation concentration is outside the global "
+                             "What to do if cell dislocation concentration is outside the global "
                              "window of applicability.");
-  params.addParam<MooseEnum>("immobile_input_window_failure",
+  params.addParam<MooseEnum>("wall_input_window_failure",
                              window_failure_error,
-                             "What to do if immobile dislocation concentration is outside the "
+                             "What to do if wall dislocation concentration is outside the "
                              "global window of applicability.");
   params.addParam<MooseEnum>("stress_input_window_failure",
                              window_failure_extrapolate,
@@ -50,32 +50,32 @@ ADLAROMANCEStressUpdateBase::validParams()
       window_failure_extrapolate,
       "What to do if environmental factor is outside the global window of applicability.");
 
-  params.addRangeCheckedParam<Real>("initial_mobile_dislocation_density",
+  params.addRangeCheckedParam<Real>("initial_cell_dislocation_density",
                                     0.0,
-                                    "initial_mobile_dislocation_density >= 0.0",
-                                    "Initial density of mobile (glissile) dislocations (1/m^2)");
+                                    "initial_cell_dislocation_density >= 0.0",
+                                    "Initial density of cell (glissile) dislocations (1/m^2)");
   params.addRangeCheckedParam<Real>(
-      "max_relative_mobile_dislocation_increment",
+      "max_relative_cell_dislocation_increment",
       0.5,
-      "max_relative_mobile_dislocation_increment > 0.0",
-      "Maximum increment of density of mobile (glissile) dislocations.");
+      "max_relative_cell_dislocation_increment > 0.0",
+      "Maximum increment of density of cell (glissile) dislocations.");
   params.addParam<FunctionName>(
-      "mobile_dislocation_density_forcing_function",
-      "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
+      "cell_dislocation_density_forcing_function",
+      "Optional forcing function for wall dislocation. If provided, the wall dislocation "
       "density will be reset to the function value at the beginning of the timestep. Used for "
       "testing purposes only.");
-  params.addRangeCheckedParam<Real>("initial_immobile_dislocation_density",
+  params.addRangeCheckedParam<Real>("initial_wall_dislocation_density",
                                     0.0,
-                                    "initial_immobile_dislocation_density >= 0.0",
-                                    "Immobile (locked) dislocation density initial value (1/m^2).");
+                                    "initial_wall_dislocation_density >= 0.0",
+                                    "wall (locked) dislocation density initial value (1/m^2).");
   params.addRangeCheckedParam<Real>(
-      "max_relative_immobile_dislocation_increment",
+      "max_relative_wall_dislocation_increment",
       0.5,
-      "max_relative_immobile_dislocation_increment > 0.0",
-      "Maximum increment of immobile (locked) dislocation density initial value (1/m^2).");
+      "max_relative_wall_dislocation_increment > 0.0",
+      "Maximum increment of wall (locked) dislocation density initial value (1/m^2).");
   params.addParam<FunctionName>(
-      "immobile_dislocation_density_forcing_function",
-      "Optional forcing function for immobile dislocation. If provided, the immobile dislocation "
+      "wall_dislocation_density_forcing_function",
+      "Optional forcing function for wall dislocation. If provided, the wall dislocation "
       "density will be reset to the function value at the beginning of the timestep. Used for "
       "testing purposes only.");
 
@@ -88,7 +88,7 @@ ADLAROMANCEStressUpdateBase::validParams()
   params.addParam<bool>("verbose", false, "Flag to add verbose output");
 
   params.addParamNamesToGroup(
-      "mobile_dislocation_density_forcing_function immobile_dislocation_density_forcing_function "
+      "cell_dislocation_density_forcing_function wall_dislocation_density_forcing_function "
       "old_creep_strain_forcing_function",
       "Advanced");
   return params;
@@ -103,42 +103,42 @@ ADLAROMANCEStressUpdateBase::ADLAROMANCEStressUpdateBase(const InputParameters &
     _window_failure(6),
 
     _verbose(getParam<bool>("verbose")),
-    _mobile_dislocations(declareADProperty<Real>(_base_name + "mobile_dislocations")),
-    _mobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "mobile_dislocations")),
-    _initial_mobile_dislocations(getParam<Real>("initial_mobile_dislocation_density")),
-    _max_mobile_increment(getParam<Real>("max_relative_mobile_dislocation_increment")),
-    _mobile_function(isParamValid("mobile_dislocation_density_forcing_function")
-                         ? &getFunction("mobile_dislocation_density_forcing_function")
-                         : NULL),
-    _mobile_dislocation_increment(0.0),
-    _mobile_old(0.0),
-    _immobile_dislocations(declareADProperty<Real>(_base_name + "immobile_dislocations")),
-    _immobile_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "immobile_dislocations")),
-    _initial_immobile_dislocations(getParam<Real>("initial_immobile_dislocation_density")),
-    _max_immobile_increment(getParam<Real>("max_relative_immobile_dislocation_increment")),
-    _immobile_function(isParamValid("immobile_dislocation_density_forcing_function")
-                           ? &getFunction("immobile_dislocation_density_forcing_function")
-                           : NULL),
-    _immobile_dislocation_increment(0.0),
-    _immobile_old(0.0),
+    _cell_dislocations(declareADProperty<Real>(_base_name + "cell_dislocations")),
+    _cell_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "cell_dislocations")),
+    _initial_cell_dislocations(getParam<Real>("initial_cell_dislocation_density")),
+    _max_cell_increment(getParam<Real>("max_relative_cell_dislocation_increment")),
+    _cell_function(isParamValid("cell_dislocation_density_forcing_function")
+                       ? &getFunction("cell_dislocation_density_forcing_function")
+                       : NULL),
+    _cell_dislocation_increment(0.0),
+    _cell_old(0.0),
+    _wall_dislocations(declareADProperty<Real>(_base_name + "wall_dislocations")),
+    _wall_dislocations_old(getMaterialPropertyOld<Real>(_base_name + "wall_dislocations")),
+    _initial_wall_dislocations(getParam<Real>("initial_wall_dislocation_density")),
+    _max_wall_increment(getParam<Real>("max_relative_wall_dislocation_increment")),
+    _wall_function(isParamValid("wall_dislocation_density_forcing_function")
+                       ? &getFunction("wall_dislocation_density_forcing_function")
+                       : NULL),
+    _wall_dislocation_increment(0.0),
+    _wall_old(0.0),
     _effective_strain_old(0.0),
-    _mobile_input_idx(0),
-    _immobile_input_idx(1),
-    _stress_input_idx(2),
-    _old_strain_input_idx(3),
-    _temperature_input_idx(4),
-    _environmental_input_idx(5),
-    _mobile_output_idx(0),
-    _immobile_output_idx(1),
-    _strain_output_idx(2),
+    _cell_input_index(0),
+    _wall_input_index(1),
+    _stress_input_index(2),
+    _old_strain_input_index(3),
+    _temperature_input_index(4),
+    _environmental_input_index(5),
+    _cell_output_index(0),
+    _wall_output_index(1),
+    _strain_output_index(2),
 
     _creep_strain_old_forcing_function(isParamValid("old_creep_strain_forcing_function")
                                            ? &getFunction("old_creep_strain_forcing_function")
                                            : NULL),
 
     _creep_rate(declareADProperty<Real>(_base_name + "creep_rate")),
-    _mobile_rate(declareADProperty<Real>(_base_name + "mobile_dislocation_rate")),
-    _immobile_rate(declareADProperty<Real>(_base_name + "immobile_dislocation_rate")),
+    _cell_rate(declareADProperty<Real>(_base_name + "cell_dislocation_rate")),
+    _wall_rate(declareADProperty<Real>(_base_name + "wall_dislocation_rate")),
     _extrapolation(declareADProperty<Real>("ROM_extrapolation")),
 
     _derivative(0.0),
@@ -146,17 +146,17 @@ ADLAROMANCEStressUpdateBase::ADLAROMANCEStressUpdateBase(const InputParameters &
 {
   _check_range = true;
 
-  _window_failure[_mobile_input_idx] =
-      parameters.get<MooseEnum>("mobile_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_immobile_input_idx] =
-      parameters.get<MooseEnum>("immobile_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_stress_input_idx] =
+  _window_failure[_cell_input_index] =
+      parameters.get<MooseEnum>("cell_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_wall_input_index] =
+      parameters.get<MooseEnum>("wall_input_window_failure").getEnum<WindowFailure>();
+  _window_failure[_stress_input_index] =
       parameters.get<MooseEnum>("stress_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_old_strain_input_idx] =
+  _window_failure[_old_strain_input_index] =
       parameters.get<MooseEnum>("old_strain_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_temperature_input_idx] =
+  _window_failure[_temperature_input_index] =
       parameters.get<MooseEnum>("temperature_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_environmental_input_idx] =
+  _window_failure[_environmental_input_index] =
       parameters.get<MooseEnum>("environment_input_window_failure").getEnum<WindowFailure>();
 }
 
@@ -302,19 +302,19 @@ ADLAROMANCEStressUpdateBase::initialSetup()
     Moose::err << " number of inputs: " << _num_inputs << "\n";
     Moose::err << " degree (max Legendre degree + constant): " << _degree << "\n";
     Moose::err << " number of coefficients: " << _num_coefs << "\n";
-    Moose::err << " Global limits:\n  mobile dislocations (" << _global_limits[_mobile_input_idx][0]
-               << " - " << _global_limits[_mobile_input_idx][1] << ")\n";
-    Moose::err << "  immobile dislocations (" << _global_limits[_immobile_input_idx][0] << " - "
-               << _global_limits[_immobile_input_idx][1] << ")\n";
-    Moose::err << "  Stress (" << _global_limits[_stress_input_idx][0] << " - "
-               << _global_limits[_stress_input_idx][1] << ")\n";
-    Moose::err << "  Old strain (" << _global_limits[_old_strain_input_idx][0] << " - "
-               << _global_limits[_old_strain_input_idx][1] << ")\n";
-    Moose::err << "  Temperature (" << _global_limits[_temperature_input_idx][0] << " - "
-               << _global_limits[_temperature_input_idx][1] << ")\n";
+    Moose::err << " Global limits:\n  cell dislocations (" << _global_limits[_cell_input_index][0]
+               << " - " << _global_limits[_cell_input_index][1] << ")\n";
+    Moose::err << "  wall dislocations (" << _global_limits[_wall_input_index][0] << " - "
+               << _global_limits[_wall_input_index][1] << ")\n";
+    Moose::err << "  Stress (" << _global_limits[_stress_input_index][0] << " - "
+               << _global_limits[_stress_input_index][1] << ")\n";
+    Moose::err << "  Old strain (" << _global_limits[_old_strain_input_index][0] << " - "
+               << _global_limits[_old_strain_input_index][1] << ")\n";
+    Moose::err << "  Temperature (" << _global_limits[_temperature_input_index][0] << " - "
+               << _global_limits[_temperature_input_index][1] << ")\n";
     if (_environmental)
-      Moose::err << "  Environmental factor (" << _global_limits[_environmental_input_idx][0]
-                 << " - " << _global_limits[_environmental_input_idx][1] << ")\n";
+      Moose::err << "  Environmental factor (" << _global_limits[_environmental_input_index][0]
+                 << " - " << _global_limits[_environmental_input_index][1] << ")\n";
     Moose::err << std::endl;
   }
 }
@@ -322,8 +322,8 @@ ADLAROMANCEStressUpdateBase::initialSetup()
 void
 ADLAROMANCEStressUpdateBase::initQpStatefulProperties()
 {
-  _mobile_dislocations[_qp] = _initial_mobile_dislocations;
-  _immobile_dislocations[_qp] = _initial_immobile_dislocations;
+  _cell_dislocations[_qp] = _initial_cell_dislocations;
+  _wall_dislocations[_qp] = _initial_wall_dislocations;
 
   ADRadialReturnCreepStressUpdateBase::initQpStatefulProperties();
 }
@@ -338,99 +338,103 @@ ADLAROMANCEStressUpdateBase::maximumPermissibleValue(const ADReal & effective_tr
 
 void
 ADLAROMANCEStressUpdateBase::computeStressInitialize(const ADReal & effective_trial_stress,
-                                         const ADRankFourTensor & elasticity_tensor)
+                                                     const ADRankFourTensor & elasticity_tensor)
 {
   ADRadialReturnCreepStressUpdateBase::computeStressInitialize(effective_trial_stress,
                                                                elasticity_tensor);
 
-  _immobile_old = _immobile_function ? _immobile_function->value(_t, _q_point[_qp])
-                                     : _immobile_dislocations_old[_qp];
-  _mobile_old =
-      _mobile_function ? _mobile_function->value(_t, _q_point[_qp]) : _mobile_dislocations_old[_qp];
+  _wall_old =
+      _wall_function ? _wall_function->value(_t, _q_point[_qp]) : _wall_dislocations_old[_qp];
+  _cell_old =
+      _cell_function ? _cell_function->value(_t, _q_point[_qp]) : _cell_dislocations_old[_qp];
   _effective_strain_old =
       _creep_strain_old_forcing_function
           ? _creep_strain_old_forcing_function->value(_t, _q_point[_qp])
           : std::sqrt(_creep_strain_old[_qp].doubleContraction(_creep_strain_old[_qp]) / 1.5);
 
   // Prepare input
-  _input_values[_mobile_input_idx] = _mobile_old;
-  _input_values[_immobile_input_idx] = _immobile_old;
-  _input_values[_stress_input_idx] = effective_trial_stress * 1.0e-6;
-  _input_values[_old_strain_input_idx] = _effective_strain_old;
-  _input_values[_temperature_input_idx] = _temperature[_qp];
+  _input_values[_cell_input_index] = _cell_old;
+  _input_values[_wall_input_index] = _wall_old;
+  _input_values[_stress_input_index] = effective_trial_stress * 1.0e-6;
+  _input_values[_old_strain_input_index] = _effective_strain_old;
+  _input_values[_temperature_input_index] = _temperature[_qp];
   if (_environmental)
-    _input_values[_environmental_input_idx] = (*_environmental)[_qp];
+    _input_values[_environmental_input_index] = (*_environmental)[_qp];
 
-  _old_input_values[_mobile_output_idx] = _mobile_old;
-  _old_input_values[_immobile_output_idx] = _immobile_old;
-  _old_input_values[_strain_output_idx] = _effective_strain_old;
+  _old_input_values[_cell_output_index] = _cell_old;
+  _old_input_values[_wall_output_index] = _wall_old;
+  _old_input_values[_strain_output_index] = _effective_strain_old;
 
   // Determine tile mixing weight
   std::fill(_non_stress_weights.begin(), _non_stress_weights.end(), 1.0);
   for (unsigned int i = 0; i < _num_inputs; i++)
-    if (i != _stress_input_idx)
+    if (i != _stress_input_index)
       computeTileWeight(_non_stress_weights, _input_values[i], i);
 
   // Check to see if input is in range
   for (unsigned int i = 0; i < _num_inputs; i++)
-    if (i != _stress_input_idx)
+    if (i != _stress_input_index)
       checkInputWindow(_input_values[i], _window_failure[i], _global_limits[i]);
 
   // Precompute transformed input and prebuild polynomials for inputs other than strain
-  precomputeROM(_strain_output_idx);
+  precomputeROM(_strain_output_index);
 }
 
 void
 ADLAROMANCEStressUpdateBase::computeTileWeight(std::vector<ADReal> & weights,
-                                   ADReal & input,
-                                   const unsigned int in_idx,
-                                   const bool derivative)
+                                               ADReal & input,
+                                               const unsigned int in_index,
+                                               const bool derivative)
 {
   bool extrapolated = false;
   for (unsigned int t = 0; t < _num_tiles; ++t)
   {
-    if (_tiling[in_idx] < 2)
+    if (_tiling[in_index] < 2)
     {
-      if (_window_failure[in_idx] == WindowFailure::EXTRAPOLATE &&
-          _input_limits[t][in_idx][0] == _global_limits[in_idx][0] &&
-          input < _input_limits[t][in_idx][0])
+      if (_window_failure[in_index] == WindowFailure::EXTRAPOLATE &&
+          _input_limits[t][in_index][0] == _global_limits[in_index][0] &&
+          input < _input_limits[t][in_index][0])
       {
         extrapolated = true;
         if (derivative)
-          weights[t] *= -sigmoid(0.0, _global_limits[in_idx][0], input, true);
+          weights[t] *= -sigmoid(0.0, _global_limits[in_index][0], input, true);
         else
-          weights[t] *= (1.0 - sigmoid(0.0, _global_limits[in_idx][0], input));
+          weights[t] *= (1.0 - sigmoid(0.0, _global_limits[in_index][0], input));
       }
     }
     else
     {
-      if (input >= _input_limits[t][in_idx][0] && input < _input_limits[t][in_idx][1])
+      if (input >= _input_limits[t][in_index][0] && input < _input_limits[t][in_index][1])
       {
         bool overlap = false;
         for (unsigned int tt = 0; tt < _num_tiles; ++tt)
         {
           if (!overlap && t != tt)
           {
-            if ((_input_limits[t][in_idx][0] != _input_limits[tt][in_idx][0] ||
-                 _input_limits[t][in_idx][1] != _input_limits[tt][in_idx][1]) &&
-                input >= _input_limits[tt][in_idx][0] && input < _input_limits[tt][in_idx][1])
+            if ((_input_limits[t][in_index][0] != _input_limits[tt][in_index][0] ||
+                 _input_limits[t][in_index][1] != _input_limits[tt][in_index][1]) &&
+                input >= _input_limits[tt][in_index][0] && input < _input_limits[tt][in_index][1])
             {
-              if (_input_limits[t][in_idx][0] < _input_limits[tt][in_idx][0] &&
-                  _input_limits[t][in_idx][1] > _input_limits[tt][in_idx][0])
+              if (_input_limits[t][in_index][0] < _input_limits[tt][in_index][0] &&
+                  _input_limits[t][in_index][1] > _input_limits[tt][in_index][0])
               {
-                weights[t] *= sigmoid(
-                    _input_limits[tt][in_idx][0], _input_limits[t][in_idx][1], input, derivative);
+                weights[t] *= sigmoid(_input_limits[tt][in_index][0],
+                                      _input_limits[t][in_index][1],
+                                      input,
+                                      derivative);
               }
-              else if (_input_limits[t][in_idx][0] > _input_limits[tt][in_idx][0] &&
-                       _input_limits[t][in_idx][0] < _input_limits[tt][in_idx][1])
+              else if (_input_limits[t][in_index][0] > _input_limits[tt][in_index][0] &&
+                       _input_limits[t][in_index][0] < _input_limits[tt][in_index][1])
               {
                 if (derivative)
-                  weights[t] *= -sigmoid(
-                      _input_limits[t][in_idx][0], _input_limits[tt][in_idx][1], input, derivative);
+                  weights[t] *= -sigmoid(_input_limits[t][in_index][0],
+                                         _input_limits[tt][in_index][1],
+                                         input,
+                                         derivative);
                 else
-                  weights[t] *=
-                      (1.0 -
-                       sigmoid(_input_limits[t][in_idx][0], _input_limits[tt][in_idx][1], input));
+                  weights[t] *= (1.0 - sigmoid(_input_limits[t][in_index][0],
+                                               _input_limits[tt][in_index][1],
+                                               input));
               }
               overlap = true;
             }
@@ -444,11 +448,12 @@ ADLAROMANCEStressUpdateBase::computeTileWeight(std::vector<ADReal> & weights,
     }
   }
   if (extrapolated)
-    input = _global_limits[in_idx][0];
+    input = _global_limits[in_index][0];
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stress, const ADReal & scalar)
+ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stress,
+                                             const ADReal & scalar)
 {
   // Update new stress
   ADReal trial_stress_mpa = effective_trial_stress * 1.0e-6;
@@ -458,18 +463,19 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
     trial_stress_mpa -= _three_shear_modulus * scalar * 1.0e-6;
     dtrial_stress_dscalar -= _three_shear_modulus * 1.0e-6;
   }
-  _input_values[_stress_input_idx] = trial_stress_mpa;
+  _input_values[_stress_input_index] = trial_stress_mpa;
 
   // Update weights with new stress
   _weights = _non_stress_weights;
   auto dweights_dstress = _non_stress_weights;
-  computeTileWeight(_weights, _input_values[_stress_input_idx], _stress_input_idx);
-  computeTileWeight(dweights_dstress, _input_values[_stress_input_idx], _stress_input_idx, true);
+  computeTileWeight(_weights, _input_values[_stress_input_index], _stress_input_index);
+  computeTileWeight(
+      dweights_dstress, _input_values[_stress_input_index], _stress_input_index, true);
 
   // Check window with new stress
-  checkInputWindow(_input_values[_stress_input_idx],
-                   _window_failure[_stress_input_idx],
-                   _global_limits[_stress_input_idx]);
+  checkInputWindow(_input_values[_stress_input_index],
+                   _window_failure[_stress_input_index],
+                   _global_limits[_stress_input_index]);
 
   _extrapolation[_qp] = 0.0;
   for (unsigned int t = 0; t < _num_tiles; ++t)
@@ -483,10 +489,10 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
   {
     if (_weights[t])
     {
-      const ADReal rom = computeROM(t, _strain_output_idx);
+      const ADReal rom = computeROM(t, _strain_output_index);
       total_rom_effective_strain_inc += _weights[t] * rom;
       dtotal_rom_effective_strain_inc_dstress +=
-          _weights[t] * computeROM(t, _strain_output_idx, true);
+          _weights[t] * computeROM(t, _strain_output_index, true);
       dtotal_rom_effective_strain_inc_dstress += dweights_dstress[t] * rom;
     }
   }
@@ -498,8 +504,8 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
       environmental = (*_environmental)[_qp];
     Moose::err << "Verbose information from " << _name << ": \n";
     Moose::err << "  dt: " << _dt << "\n";
-    Moose::err << "  old mobile disl: " << _mobile_old << "\n";
-    Moose::err << "  old immobile disl: " << _immobile_old << "\n";
+    Moose::err << "  old cell disl: " << _cell_old << "\n";
+    Moose::err << "  old wall disl: " << _wall_old << "\n";
     Moose::err << "  initial stress (MPa): "
                << MetaPhysicL::raw_value(effective_trial_stress) * 1.0e-6 << "\n";
     Moose::err << "  temperature: " << MetaPhysicL::raw_value(_temperature[_qp]) << "\n";
@@ -521,19 +527,6 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
                << MetaPhysicL::raw_value(total_rom_effective_strain_inc) << std::endl;
   }
 
-  // Print out relevant verbose information, and quit creep stress calculation
-  if (!_extrapolation[_qp])
-  {
-    if (scalar)
-      mooseError("In ", _name, ": Internal error: Scalar (", scalar, ") isn't zero!");
-    if (_verbose)
-      Moose::err << "    ROM evalulation skipped due to out-of-range input!" << std::endl;
-
-    _creep_rate[_qp] = 0.0;
-    _derivative = 1.0;
-    return 0.0;
-  }
-
   _creep_rate[_qp] = total_rom_effective_strain_inc / _dt;
   _derivative = dtotal_rom_effective_strain_inc_dstress * dtrial_stress_dscalar - 1.0;
 
@@ -548,7 +541,7 @@ ADLAROMANCEStressUpdateBase::computeResidual(const ADReal & effective_trial_stre
 }
 
 void
-ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_idx)
+ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_index)
 {
   for (unsigned int t = 0; t < _num_tiles; ++t)
   {
@@ -556,57 +549,59 @@ ADLAROMANCEStressUpdateBase::precomputeROM(const unsigned out_idx)
     {
       for (unsigned int i = 0; i < _num_inputs; ++i)
       {
-        if (i != _stress_input_idx)
+        if (i != _stress_input_index)
         {
           _rom_inputs[t][i] = normalizeInput(_input_values[i],
-                                             _transform[t][out_idx][i],
-                                             _transform_coefs[t][out_idx][i],
-                                             _transformed_limits[t][out_idx][i]);
+                                             _transform[t][out_index][i],
+                                             _transform_coefs[t][out_index][i],
+                                             _transformed_limits[t][out_index][i]);
           buildPolynomials(_rom_inputs[t][i], _polynomial_inputs[t][i]);
         }
       }
-      precomputeValues(_coefs[t][out_idx], _polynomial_inputs[t], _precomputed_vals[t]);
+      precomputeValues(_coefs[t][out_index], _polynomial_inputs[t], _precomputed_vals[t]);
     }
   }
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeROM(const unsigned int t, const unsigned out_idx, const bool derivative)
+ADLAROMANCEStressUpdateBase::computeROM(const unsigned int t,
+                                        const unsigned out_index,
+                                        const bool derivative)
 {
   // Update due to new stress
-  _rom_inputs[t][_stress_input_idx] =
-      normalizeInput(_input_values[_stress_input_idx],
-                     _transform[t][out_idx][_stress_input_idx],
-                     _transform_coefs[t][out_idx][_stress_input_idx],
-                     _transformed_limits[t][out_idx][_stress_input_idx]);
-  buildPolynomials(_rom_inputs[t][_stress_input_idx], _polynomial_inputs[t][_stress_input_idx]);
+  _rom_inputs[t][_stress_input_index] =
+      normalizeInput(_input_values[_stress_input_index],
+                     _transform[t][out_index][_stress_input_index],
+                     _transform_coefs[t][out_index][_stress_input_index],
+                     _transformed_limits[t][out_index][_stress_input_index]);
+  buildPolynomials(_rom_inputs[t][_stress_input_index], _polynomial_inputs[t][_stress_input_index]);
 
   // Compute ROM values
   const ADReal rom_output = computeValues(_precomputed_vals[t], _polynomial_inputs[t]);
 
   // Return converted output if not derivative
   if (!derivative)
-    return convertOutput(_old_input_values, rom_output, out_idx);
+    return convertOutput(_old_input_values, rom_output, out_index);
 
-  const ADReal drom_input = normalizeInput(_input_values[_stress_input_idx],
-                                           _transform[t][out_idx][_stress_input_idx],
-                                           _transform_coefs[t][out_idx][_stress_input_idx],
-                                           _transformed_limits[t][out_idx][_stress_input_idx],
+  const ADReal drom_input = normalizeInput(_input_values[_stress_input_index],
+                                           _transform[t][out_index][_stress_input_index],
+                                           _transform_coefs[t][out_index][_stress_input_index],
+                                           _transformed_limits[t][out_index][_stress_input_index],
                                            derivative);
 
   std::vector<ADReal> dpolynomial_inputs(_degree, 0.0);
-  buildPolynomials(_rom_inputs[t][_stress_input_idx], dpolynomial_inputs, drom_input, derivative);
+  buildPolynomials(_rom_inputs[t][_stress_input_index], dpolynomial_inputs, drom_input, derivative);
 
   const ADReal drom_output =
       computeValues(_precomputed_vals[t], _polynomial_inputs[t], dpolynomial_inputs, derivative);
 
-  return convertOutput(_old_input_values, rom_output, out_idx, drom_output, derivative);
+  return convertOutput(_old_input_values, rom_output, out_index, drom_output, derivative);
 }
 
 void
 ADLAROMANCEStressUpdateBase::checkInputWindow(const ADReal & input,
-                                  const WindowFailure behavior,
-                                  const std::vector<Real> & global_limits)
+                                              const WindowFailure behavior,
+                                              const std::vector<Real> & global_limits)
 {
   if (behavior != WindowFailure::WARN || behavior != WindowFailure::ERROR)
     return;
@@ -626,10 +621,10 @@ ADLAROMANCEStressUpdateBase::checkInputWindow(const ADReal & input,
 
 ADReal
 ADLAROMANCEStressUpdateBase::normalizeInput(const ADReal & input,
-                                const ROMInputTransform transform,
-                                const Real transform_coef,
-                                const std::vector<Real> & transformed_limits,
-                                const bool derivative)
+                                            const ROMInputTransform transform,
+                                            const Real transform_coef,
+                                            const std::vector<Real> & transformed_limits,
+                                            const bool derivative)
 {
   ADReal x = input;
   convertValue(x, transform, transform_coef, derivative);
@@ -642,9 +637,9 @@ ADLAROMANCEStressUpdateBase::normalizeInput(const ADReal & input,
 
 void
 ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
-                                  std::vector<ADReal> & polynomial_inputs,
-                                  const ADReal & drom_input,
-                                  const bool derivative)
+                                              std::vector<ADReal> & polynomial_inputs,
+                                              const ADReal & drom_input,
+                                              const bool derivative)
 {
   for (unsigned int d = 0; d < _degree; ++d)
   {
@@ -656,49 +651,52 @@ ADLAROMANCEStressUpdateBase::buildPolynomials(const ADReal & rom_input,
 }
 
 void
-ADLAROMANCEStressUpdateBase::precomputeValues(const std::vector<Real> & coefs,
-                                  const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                                  std::vector<ADReal> & precomputed)
+ADLAROMANCEStressUpdateBase::precomputeValues(
+    const std::vector<Real> & coefs,
+    const std::vector<std::vector<ADReal>> & polynomial_inputs,
+    std::vector<ADReal> & precomputed)
 {
   for (unsigned int c = 0; c < _num_coefs; ++c)
   {
     precomputed[c] = coefs[c];
     for (unsigned int i = 0; i < _num_inputs; ++i)
-      if (i != _stress_input_idx)
+      if (i != _stress_input_index)
         precomputed[c] *= polynomial_inputs[i][_makeframe_helper[c + _num_coefs * i]];
   }
 }
 
 ADReal
-ADLAROMANCEStressUpdateBase::computeValues(const std::vector<ADReal> & precomputed,
-                               const std::vector<std::vector<ADReal>> & polynomial_inputs,
-                               const std::vector<ADReal> & dpolynomial_inputs,
-                               const bool derivative)
+ADLAROMANCEStressUpdateBase::computeValues(
+    const std::vector<ADReal> & precomputed,
+    const std::vector<std::vector<ADReal>> & polynomial_inputs,
+    const std::vector<ADReal> & dpolynomial_inputs,
+    const bool derivative)
 {
   ADReal rom_output = 0.0;
   ADReal val;
   for (unsigned int j = 0; j < _num_coefs; ++j)
   {
-    val =
-        precomputed[j] *
-        polynomial_inputs[_stress_input_idx][_makeframe_helper[j + _num_coefs * _stress_input_idx]];
+    val = precomputed[j] *
+          polynomial_inputs[_stress_input_index]
+                           [_makeframe_helper[j + _num_coefs * _stress_input_index]];
 
     if (!derivative)
       rom_output += val;
     else
-      rom_output += dpolynomial_inputs[_makeframe_helper[j + _num_coefs * _stress_input_idx]] * val;
+      rom_output +=
+          dpolynomial_inputs[_makeframe_helper[j + _num_coefs * _stress_input_index]] * val;
   }
   return rom_output;
 }
 
 ADReal
 ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_values,
-                               const ADReal & rom_output,
-                               const unsigned out_idx,
-                               const ADReal & drom_output,
-                               const bool derivative)
+                                           const ADReal & rom_output,
+                                           const unsigned out_index,
+                                           const ADReal & drom_output,
+                                           const bool derivative)
 {
-  if (out_idx == _strain_output_idx)
+  if (out_index == _strain_output_index)
   {
     if (derivative)
       return std::exp(rom_output) * _dt * drom_output;
@@ -715,13 +713,13 @@ ADLAROMANCEStressUpdateBase::convertOutput(const std::vector<Real> & old_input_v
   else
     expout = -1.0E-10 * 1.0E-10 / expout + 1.0E-10;
 
-  return -expout * old_input_values[out_idx] * _dt;
+  return -expout * old_input_values[out_index] * _dt;
 }
 
 ADReal
 ADLAROMANCEStressUpdateBase::computePolynomial(const ADReal & value,
-                                   const unsigned int degree,
-                                   const bool derivative)
+                                               const unsigned int degree,
+                                               const bool derivative)
 {
   if (degree == 0)
   {
@@ -791,23 +789,23 @@ ADLAROMANCEStressUpdateBase::getMakeFrameHelper() const
 void
 ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment)
 {
-  _mobile_dislocation_increment = 0.0;
-  _immobile_dislocation_increment = 0.0;
+  _cell_dislocation_increment = 0.0;
+  _wall_dislocation_increment = 0.0;
 
-  precomputeROM(_mobile_output_idx);
+  precomputeROM(_cell_output_index);
   for (unsigned int t = 0; t < _num_tiles; ++t)
     if (_weights[t])
-      _mobile_dislocation_increment += _weights[t] * computeROM(t, _mobile_output_idx);
+      _cell_dislocation_increment += _weights[t] * computeROM(t, _cell_output_index);
 
-  precomputeROM(_immobile_output_idx);
+  precomputeROM(_wall_output_index);
   for (unsigned int t = 0; t < _num_tiles; ++t)
     if (_weights[t])
-      _immobile_dislocation_increment += _weights[t] * computeROM(t, _immobile_output_idx);
+      _wall_dislocation_increment += _weights[t] * computeROM(t, _wall_output_index);
 
-  _mobile_rate[_qp] = _mobile_dislocation_increment / _dt;
-  _immobile_rate[_qp] = _immobile_dislocation_increment / _dt;
-  _mobile_dislocations[_qp] = _mobile_old + _mobile_dislocation_increment;
-  _immobile_dislocations[_qp] = _immobile_old + _immobile_dislocation_increment;
+  _cell_rate[_qp] = _cell_dislocation_increment / _dt;
+  _wall_rate[_qp] = _wall_dislocation_increment / _dt;
+  _cell_dislocations[_qp] = _cell_old + _cell_dislocation_increment;
+  _wall_dislocations[_qp] = _wall_old + _wall_dislocation_increment;
 
   for (unsigned int i = 0; i < _num_inputs; i++)
     checkInputWindow(_input_values[i], _window_failure[i], _global_limits[i]);
@@ -826,14 +824,12 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
                                 _creep_strain[_qp].doubleContraction(_creep_strain[_qp])))
                << "\n";
     Moose::err << "  creep rate: " << MetaPhysicL::raw_value(_creep_rate[_qp]) << "\n";
-    Moose::err << "  mobile dislocation rate: " << MetaPhysicL::raw_value(_mobile_rate[_qp])
+    Moose::err << "  cell dislocation rate: " << MetaPhysicL::raw_value(_cell_rate[_qp]) << "\n";
+    Moose::err << "  wall dislocation rate: " << MetaPhysicL::raw_value(_wall_rate[_qp]) << "\n";
+    Moose::err << "  new cell dislocations: " << MetaPhysicL::raw_value(_cell_dislocations[_qp])
                << "\n";
-    Moose::err << "  immobile dislocation rate: " << MetaPhysicL::raw_value(_immobile_rate[_qp])
-               << "\n";
-    Moose::err << "  new mobile dislocations: " << MetaPhysicL::raw_value(_mobile_dislocations[_qp])
-               << "\n";
-    Moose::err << "  new immobile dislocations: "
-               << MetaPhysicL::raw_value(_immobile_dislocations[_qp]) << "\n"
+    Moose::err << "  new wall dislocations: " << MetaPhysicL::raw_value(_wall_dislocations[_qp])
+               << "\n"
                << std::endl;
   }
 
@@ -845,23 +841,21 @@ ADLAROMANCEStressUpdateBase::computeTimeStepLimit()
 {
   Real limited_dt = ADRadialReturnStressUpdate::computeTimeStepLimit();
 
-  Real mobile_strain_inc = std::abs(MetaPhysicL::raw_value(_mobile_dislocation_increment));
-  if (mobile_strain_inc && _mobile_old)
-    limited_dt =
-        std::min(limited_dt, _dt * _max_mobile_increment * _mobile_old / mobile_strain_inc);
-  Real immobile_strain_inc = std::abs(MetaPhysicL::raw_value(_immobile_dislocation_increment));
-  if (immobile_strain_inc && _immobile_old)
-    limited_dt =
-        std::min(limited_dt, _dt * _max_immobile_increment * _immobile_old / immobile_strain_inc);
+  Real cell_strain_inc = std::abs(MetaPhysicL::raw_value(_cell_dislocation_increment));
+  if (cell_strain_inc && _cell_old)
+    limited_dt = std::min(limited_dt, _dt * _max_cell_increment * _cell_old / cell_strain_inc);
+  Real wall_strain_inc = std::abs(MetaPhysicL::raw_value(_wall_dislocation_increment));
+  if (wall_strain_inc && _wall_old)
+    limited_dt = std::min(limited_dt, _dt * _max_wall_increment * _wall_old / wall_strain_inc);
 
   return limited_dt;
 }
 
 ADReal
 ADLAROMANCEStressUpdateBase::sigmoid(const Real lower,
-                         const Real upper,
-                         const ADReal & val,
-                         const bool derivative)
+                                     const Real upper,
+                                     const ADReal & val,
+                                     const bool derivative)
 {
   ADReal x = (val - lower) / (upper - lower);
   x = 2.0 * x - 1.0;

@@ -9,8 +9,8 @@ utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) inclu
 return method implemented in [ADRadialReturnStressUpdate](/ADRadialReturnStressUpdate.md), however
 in place of a traditional power-law creep model, a ROM is sampled to determine the creep rate as a
 function of temperature, defect concentrations, the von Mises trial stress, and an environmental
-factor. In addition, lower-length scale information, here mobile defect dislocations and immobile
-defect dislocations, are evolved as determined by the ROM.
+factor. In addition, lower-length scale information, here cell dislocations and cell wall dislocations,
+are evolved as determined by the ROM.
 
 `ADLAROMANCEStressUpdateBase` provides the necessary math and implementation for ROMs provided in
 the correct `LAROMANCE` model format, which essentially includes the necessary material specific
@@ -176,7 +176,7 @@ that allow for error handling or extrapolation.
 If the input values are to be extrapolated, a sigmoidal function is utilized
 to extrapolate from the lower limit of the out-of-bound input to zero strain. Extrapolation can only
 be performed for temperature, stress, and the environmental factor state variables. The remaining
-ROM inputs (mobile dislocations, immobile dislocations, and previous strain) are calculated internally,
+ROM inputs (cell dislocations, cell wall dislocations, and previous strain) are calculated internally,
 and thus must be within the window of applicability at the start of the simulation.
 
 ## Writing a LAROMANCE Stress Update Material
@@ -202,10 +202,10 @@ A fifth virtual method needs to be overridden if a tiled ROM is implemented:
 
 Additionally, new `LAROMANCE` models can override four input parameter defaults to ensure correct ROM implementation:
 
-- +initial_mobile_dislocation_density+: Initial density of mobile (glissile) dislocations.
-- +max_relative_mobile_dislocation_increment+: Maximum increment of density of mobile (glissile) dislocations.
-- +initial_immobile_dislocation_density+: Immobile (locked) dislocation density initial value.
-- +max_relative_immobile_dislocation_increment+: Maximum increment of immobile (locked) dislocation density initial value.
+- +initial_cell_dislocation_density+: Initial density of cell (glissile) dislocations.
+- +max_relative_cell_dislocation_increment+: Maximum increment of density of cell (glissile) dislocations.
+- +initial_wall_dislocation_density+: Cell wall (locked) dislocation density initial value.
+- +max_relative_wall_dislocation_increment+: Maximum increment of cell wall (locked) dislocation density initial value.
 
 `ADLAROMANCEStressUpdateBase` derived classes must be run in conjunction with an inelastic strain return mapping stress
 calculator such as [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md).

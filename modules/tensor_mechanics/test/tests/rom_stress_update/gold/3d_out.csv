@@ -1,4 +1,4 @@
-time,effective_strain_avg,immobile_disloactions,mobile_dislocations,temperature
+time,effective_strain_avg,wall_disloactions,cell_dislocations,temperature
 0,0,0,0,0
 1,1.99257492218e-11,440000008780.87,5999998298848,900
 2,3.9851463024745e-11,440000017561.74,5999996597699,900
