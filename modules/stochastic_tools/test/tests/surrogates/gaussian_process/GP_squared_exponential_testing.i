@@ -41,7 +41,6 @@
   []
 []
 
-
 [Outputs]
   [out]
     type = CSV

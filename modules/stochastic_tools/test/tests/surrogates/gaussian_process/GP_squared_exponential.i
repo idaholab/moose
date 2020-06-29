@@ -80,12 +80,12 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    kernel_function = 'squared_exponential'
-    standardize_params = 'true'
-    standardize_data = 'true'
-    signal_variance = 1
-    noise_variance = 1e-6
-    length_factor = '0.38971 0.38971'
+    kernel_function = 'squared_exponential'   #Choose a squared exponential for the kernel
+    standardize_params = 'true'               #Center and scale the training params
+    standardize_data = 'true'                 #Center and scale the training data
+    signal_variance = 1                       #Use a signal variance of 1 in the kernel
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
     distributions = 'k_dist q_dist'
     sampler = train_sample
     results_vpp = results
@@ -93,15 +93,12 @@
   []
 []
 
-
 [Surrogates]
   [GP_avg]
     type = GaussianProcess
     trainer = GP_avg_trainer
   []
 []
-
-
 
 [Outputs]
   [out]

@@ -136,32 +136,24 @@ SquaredExponential::compute_K(const RealEigenMatrix x,
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
-  unsigned int num_params_xp = xp.cols();
 
-  if (num_params_x != num_params_xp)
-  {
-    ::mooseError("Number of parameters do not match in covariance kernel calculation");
-  }
+  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
+
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
-  for (unsigned int ii = 0; ii < num_samples_x; ii++)
+  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
-    for (unsigned int jj = 0; jj < num_samples_xp; jj++)
+    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
     {
-      Real val = 0;
-      for (unsigned int kk = 0; kk < num_params_x; kk++)
-      {
-        // Compute distance per parameter, scaled by length factor
-        val += std::pow((x(ii, kk) - xp(jj, kk)), 2) / (std::pow(_length_factor.at(kk), 2));
-      }
-      val = _sigma_f_squared * std::exp(-val / 2.0);
-      K(ii, jj) = val;
+      // Compute distance per parameter, scaled by length factor
+      Real r_squared_scaled = 0;
+      for (unsigned int kk = 0; kk < num_params_x; ++kk)
+        r_squared_scaled += std::pow((x(ii, kk) - xp(jj, kk))/_length_factor[kk], 2);
+      K(ii, jj)  = _sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
     }
     if (is_self_covariance)
-    {
       K(ii, ii) += _sigma_n_squared;
-    }
   }
 
   return K;
@@ -176,10 +168,8 @@ SquaredExponential::store(std::ostream & stream, void * context) const
   dataStore(stream, _sigma_n_squared, context);
   unsigned int n = _length_factor.size();
   dataStore(stream, n, context);
-  for (unsigned int ii = 0; ii < n; ii++)
-  {
-    dataStore(stream, _length_factor.at(ii), context);
-  }
+  for (unsigned int ii = 0; ii < n; ++ii)
+    dataStore(stream, _length_factor[ii], context);
 }
 // end squared_exponential
 
@@ -194,32 +184,24 @@ Exponential::compute_K(const RealEigenMatrix x,
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
-  unsigned int num_params_xp = xp.cols();
 
-  if (num_params_x != num_params_xp)
-  {
-    ::mooseError("Number of parameters do not match in covariance kernel calculation");
-  }
+  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
-  for (unsigned int ii = 0; ii < num_samples_x; ii++)
+  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
-    for (unsigned int jj = 0; jj < num_samples_xp; jj++)
+    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
     {
-      Real r_scaled = 0;
       // Compute distance per parameter, scaled by length factor
-      for (unsigned int kk = 0; kk < num_params_x; kk++)
-      {
-        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / _length_factor.at(kk), 2);
-      }
+      Real r_scaled = 0;
+      for (unsigned int kk = 0; kk < num_params_x; ++kk)
+        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / _length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
       K(ii, jj) = _sigma_f_squared * std::exp(-pow(r_scaled, _gamma));
     }
     if (is_self_covariance)
-    {
       K(ii, ii) += _sigma_n_squared;
-    }
   }
 
   return K;
@@ -234,10 +216,8 @@ Exponential::store(std::ostream & stream, void * context) const
   dataStore(stream, _sigma_n_squared, context);
   unsigned int n = _length_factor.size();
   dataStore(stream, n, context);
-  for (unsigned int ii = 0; ii < n; ii++)
-  {
-    dataStore(stream, _length_factor.at(ii), context);
-  }
+  for (unsigned int ii = 0; ii < n; ++ii)
+    dataStore(stream, _length_factor[ii], context);
   dataStore(stream, _gamma, context);
 }
 
@@ -259,44 +239,34 @@ MaternHalfInt::compute_K(const RealEigenMatrix x,
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
-  unsigned int num_params_xp = xp.cols();
 
-  if (num_params_x != num_params_xp)
-  {
-    ::mooseError("Number of parameters do not match in covariance kernel calculation");
-  }
+  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
   // This factor is used over and over, don't calculate each time
   Real factor = sqrt(2 * _p + 1);
 
-  for (unsigned int ii = 0; ii < num_samples_x; ii++)
+  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
-    for (unsigned int jj = 0; jj < num_samples_xp; jj++)
+    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
     {
-      Real r_scaled = 0;
       // Compute distance per parameter, scaled by length factor
-      for (unsigned int kk = 0; kk < num_params_x; kk++)
-      {
-        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / _length_factor.at(kk), 2);
-      }
+      Real r_scaled = 0;
+      for (unsigned int kk = 0; kk < num_params_x; ++kk)
+        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / _length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
       Real summation = 0;
       // tgamma(x+1) == x! when x is a natural number, which should always be the case for
       // MaternHalfInt
-      for (unsigned int tt = 0; tt < _p + 1; tt++)
-      {
+      for (unsigned int tt = 0; tt < _p + 1; ++tt)
         summation += (tgamma(_p + tt + 1) / (tgamma(tt + 1) * tgamma(_p - tt + 1))) *
                      pow(2 * factor * r_scaled, _p - tt);
-      }
       K(ii, jj) = _sigma_f_squared * std::exp(-factor * r_scaled) *
                   (tgamma(_p + 1) / (tgamma(2 * _p + 1))) * summation;
     }
     if (is_self_covariance)
-    {
       K(ii, ii) += _sigma_n_squared;
-    }
   }
   return K;
 }
@@ -310,10 +280,8 @@ MaternHalfInt::store(std::ostream & stream, void * context) const
   dataStore(stream, _sigma_n_squared, context);
   unsigned int n = _length_factor.size();
   dataStore(stream, n, context);
-  for (unsigned int ii = 0; ii < n; ii++)
-  {
-    dataStore(stream, _length_factor.at(ii), context);
-  }
+  for (unsigned int ii = 0; ii < n; ++ii)
+    dataStore(stream, _length_factor[ii], context);
   dataStore(stream, _p, context);
 }
 
@@ -343,34 +311,22 @@ dataLoad(std::istream & stream,
 {
   std::string covar_type;
   dataLoad(stream, covar_type, context);
+  Real sigma_f_squared, sigma_n_squared;
+  dataLoad(stream, sigma_f_squared, context);
+  dataLoad(stream, sigma_n_squared, context);
+  unsigned int n;
+  dataLoad(stream, n, context);
+  std::vector<Real> length_factor(n);
+  for (unsigned int ii = 0; ii < n; ++ii)
+    dataLoad(stream, length_factor[ii], context);
   if (covar_type == "Squared Exponential")
   {
-    Real sigma_f_squared, sigma_n_squared;
-    dataLoad(stream, sigma_f_squared, context);
-    dataLoad(stream, sigma_n_squared, context);
-    unsigned int n;
-    dataLoad(stream, n, context);
-    std::vector<Real> length_factor(n);
-    for (unsigned int ii = 0; ii < n; ii++)
-    {
-      dataLoad(stream, length_factor.at(ii), context);
-    }
     ptr = libmesh_make_unique<CovarianceFunction::SquaredExponential>();
     ptr->set_length_factor(length_factor);
     ptr->set_signal_variance(sigma_f_squared);
   }
   else if (covar_type == "Exponential")
   {
-    Real sigma_f_squared, sigma_n_squared;
-    dataLoad(stream, sigma_f_squared, context);
-    dataLoad(stream, sigma_n_squared, context);
-    unsigned int n;
-    dataLoad(stream, n, context);
-    std::vector<Real> length_factor(n);
-    for (unsigned int ii = 0; ii < n; ii++)
-    {
-      dataLoad(stream, length_factor.at(ii), context);
-    }
     ptr = libmesh_make_unique<CovarianceFunction::Exponential>();
     ptr->set_length_factor(length_factor);
     ptr->set_signal_variance(sigma_f_squared);
@@ -380,16 +336,6 @@ dataLoad(std::istream & stream,
   }
   else if (covar_type == "MaternHalfInt")
   {
-    Real sigma_f_squared, sigma_n_squared;
-    dataLoad(stream, sigma_f_squared, context);
-    dataLoad(stream, sigma_n_squared, context);
-    unsigned int n;
-    dataLoad(stream, n, context);
-    std::vector<Real> length_factor(n);
-    for (unsigned int ii = 0; ii < n; ii++)
-    {
-      dataLoad(stream, length_factor.at(ii), context);
-    }
     ptr = libmesh_make_unique<CovarianceFunction::MaternHalfInt>();
     ptr->set_length_factor(length_factor);
     ptr->set_signal_variance(sigma_f_squared);

@@ -11,6 +11,7 @@
 
 #include "SurrogateModel.h"
 #include "GaussianProcessTrainer.h"
+#include "Standardizer.h"
 #include <Eigen/Dense>
 
 class GaussianProcess : public SurrogateModel
@@ -18,24 +19,21 @@ class GaussianProcess : public SurrogateModel
 public:
   static InputParameters validParams();
   GaussianProcess(const InputParameters & parameters);
-  // virtual void initialize();
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
-
-protected:
-  /// Array containing sample points and the results
-  const std::vector<std::vector<Real>> & _sample_points;
 
 private:
   ///Paramaters (x) used for training, along with statistics
   const RealEigenMatrix & _training_params;
-  const RealEigenVector & _training_params_mean;
-  const RealEigenVector & _training_params_var;
+  const StochasticTools::Standardizer & _param_standardizer;
+  //const RealEigenVector & _training_params_mean;
+  //const RealEigenVector & _training_params_var;
 
   /// Data (y) used for training, along with statistics
   const RealEigenMatrix & _training_data;
-  const RealEigenVector & _training_data_mean;
-  const RealEigenVector & _training_data_var;
+  const StochasticTools::Standardizer & _data_standardizer;
+  //const RealEigenVector & _training_data_mean;
+  //const RealEigenVector & _training_data_var;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
   const RealEigenMatrix & _K;
@@ -43,6 +41,6 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  ///Pointer to covariance function used for K matrix
+  /// Pointer to covariance function used for K matrix
   const std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
 };

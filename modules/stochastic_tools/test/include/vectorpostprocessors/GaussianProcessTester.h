@@ -13,14 +13,13 @@
 #include "GeneralVectorPostprocessor.h"
 #include "SamplerInterface.h"
 #include "SurrogateModelInterface.h"
+#include "SurrogateTester.h"
 #include "GaussianProcess.h"
 
 /**
  * A tool for output Gaussian Process Surrogate data.
  */
-class GaussianProcessTester : public GeneralVectorPostprocessor,
-                              SamplerInterface,
-                              SurrogateModelInterface
+class GaussianProcessTester : public SurrogateTester
 {
 public:
   static InputParameters validParams();
@@ -31,16 +30,8 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// Sampler for evaluating surrogate model
-  Sampler & _sampler;
-  /// Where or not to output all the samples used
-  const bool _output_samples;
-  /// Reference to surrogate model
-  GaussianProcess & _model;
-  /// Vector containing results of sampling GP model mean
-  VectorPostprocessorValue & _mean_vector;
-  /// Vector containing results of sampling PCE model std_dev
-  VectorPostprocessorValue & _std_vector;
-  /// Vector containing all the sample points for each parameter
-  std::vector<VectorPostprocessorValue *> _sample_vector;
+    /// Pointers to surrogate model
+    std::vector<const GaussianProcess *> _GP_model;
+    /// Vectors containing standard deviation of the results of sampling model
+    std::vector<VectorPostprocessorValue *> _std_vector;
 };
