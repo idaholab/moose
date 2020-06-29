@@ -4,13 +4,13 @@
 
 [Mesh]
   type = DetailedSubChannelMesh
-  # nx = 6 #subchannel number in the x direction
-  # ny = 6
-  # max_dz = 0.02
-  # pitch = 0.0126
-  # rod_diameter = 0.00950
-  # gap = 0.00095
-  # heated_length = 3.658
+  nx = 6 #subchannel number in the x direction
+  ny = 6
+  max_dz = 0.02
+  pitch = 0.0126
+  rod_diameter = 0.00950
+  gap = 0.00095
+  heated_length = 3.658
 []
 
 [AuxVariables]
@@ -34,6 +34,24 @@
   []
   [q_prime]
   []
+  [S]
+  []
+  [Sij]
+  []
+  [w_perim]
+  []
+[]
+
+[Modules]
+  [FluidProperties]
+    [water]
+      type = Water97FluidProperties
+    []
+  []
+[]
+
+[Problem]
+  type = NoSolveProblem
 []
 
 [Outputs]
