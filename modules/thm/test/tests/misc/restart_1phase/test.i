@@ -75,6 +75,7 @@
     n_part_elems = 1
     materials = 'mat1'
     widths = 0.1
+    initial_T = Ts_init
   [../]
 
   [./temp_outside]
@@ -104,23 +105,19 @@
   [../]
 []
 
-[Problem]
-  restart_file_base = part1_checkpoint_cp/0005
-[]
-
 [Executioner]
   type = Transient
   scheme = 'bdf2'
 
   dt = 1e-5
-  num_steps = 10
+  num_steps = 5
   abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
   line_search = 'basic'
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
-  nl_max_its = 30
+  nl_max_its = 10
 
   l_tol = 1e-3
   l_max_its = 100
