@@ -106,3 +106,22 @@ The $T$-stress is the first second-order parameter in Williams' expansion of str
 The MOOSE implementation of the capability to compute these fracture integrals is provided using a variety of MOOSE objects, which are quite complex to define manually, especially for 3D simulations. For this reason, the to compute $J$-integrals or interaction integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects.
 
 !listing modules/tensor_mechanics/test/tests/j_integral/j_integral_3d.i block=DomainIntegral
+
+
+## C-Integral
+
+The C(t) integral can be described as a path integral that is obtained by replacing displacements and strains with displacement rates and strain rates
+
+\begin{equation}
+{C}(t)=\int_{\Gamma}\biggl(
+P_{ji}\frac{\partial \dot{u}_i}{X_k}ds -\dot{W}dy
+\biggr) d\Gamma
+\end{equation}
+ 
+This integral is computed in an analogous way to the J-integral: A domain integral is solved on the crack front geometry defined in the mesh. This integral becomes the $C^{*}$ integral as creep behavior becomes steady state. Then, creep crack growth behavior during secondary creep can be obtained from this integral.
+
+### Usage
+
+To compute $C$-integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects. In particular, two additional inputs are required `output_type = C` and `n_exponent`. The former refers to the type of integral requested ('C') and the latter is the matching exponent of the creep deformation material model.
+
+!listing modules/tensor_mechanics/test/tests/j_integral/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral

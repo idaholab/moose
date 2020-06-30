@@ -56,8 +56,12 @@ DomainIntegralAction::validParams()
                                 "The last ring of elements for volume integral domain");
   params.addParam<std::vector<VariableName>>(
       "output_variable", "Variable values to be reported along the crack front");
-  params.addParam<bool>(
-      "convert_J_to_K", false, "Convert J-integral to stress intensity factor K.");
+  MooseEnum output_type("J K C", "J");
+  params.addParam<MooseEnum>("output_type",
+                             output_type,
+                             "Select J-integral, stress intensity factor K from J-integral, or "
+                             "C(t) integral. Options are: " +
+                                 output_type.getRawNames());
   params.addParam<Real>("poissons_ratio", "Poisson's ratio");
   params.addParam<Real>("youngs_modulus", "Young's modulus");
   params.addParam<std::vector<SubdomainName>>("block", "The block ids where integrals are defined");
@@ -93,6 +97,8 @@ DomainIntegralAction::validParams()
       "incremental", "Flag to indicate whether an incremental or total model is being used.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains applied in the strain calculation");
+  params.addParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
+
   return params;
 }
 
@@ -118,7 +124,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
                                       : 0.0),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
-    _convert_J_to_K(false),
+    _output_type(getParam<MooseEnum>("output_type")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane")
                                         : std::numeric_limits<unsigned int>::max()),
@@ -128,7 +134,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _use_displaced_mesh(false),
     _output_q(getParam<bool>("output_q")),
     _solid_mechanics(getParam<bool>("solid_mechanics")),
-    _incremental(getParam<bool>("incremental"))
+    _incremental(getParam<bool>("incremental")),
+    _n_exponent(isParamValid("n_exponent") ? getParam<Real>("n_exponent") : -1)
 {
   if (_q_function_type == GEOMETRY)
   {
@@ -260,9 +267,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
                  "'output_variables' not yet supported with 'crack_front_points'");
   }
 
-  if (isParamValid("convert_J_to_K"))
-    _convert_J_to_K = getParam<bool>("convert_J_to_K");
-  if (_convert_J_to_K)
+  if (_output_type == K)
   {
     if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
       mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio for "
@@ -443,16 +448,22 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_postprocessor")
   {
+    MooseEnum output_type_K("K");
+    MooseEnum output_type_J("J");
+    MooseEnum output_type_C("C");
+
     for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
     {
       std::string pp_base_name;
       switch (*sit)
       {
         case J_INTEGRAL:
-          if (_convert_J_to_K)
+          if (_output_type == K)
             pp_base_name = "K";
-          else
+          else if (_output_type == J)
             pp_base_name = "J";
+          else if (_output_type == C)
+            pp_base_name = "C";
           break;
 
         case INTERACTION_INTEGRAL_KI:
@@ -566,28 +577,38 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_vector_postprocessor")
   {
+    MooseEnum output_type_K("K");
+    MooseEnum output_type_J("J");
+    MooseEnum output_type_C("C");
+
     if (_integrals.count(J_INTEGRAL) != 0)
     {
       std::string vpp_base_name;
-      if (_convert_J_to_K)
+      if (_output_type == K)
         vpp_base_name = "K";
-      else
+      else if (_output_type == J)
         vpp_base_name = "J";
+      else if (_output_type == C)
+        vpp_base_name = "C";
+
       if (_treat_as_2d)
         vpp_base_name += "_2DVPP";
       const std::string vpp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<bool>("convert_J_to_K") = _convert_J_to_K;
+      params.set<MooseEnum>("output_type") = _output_type;
       params.set<MooseEnum>("position_type") = _position_type;
-      if (_convert_J_to_K)
+
+      if (_output_type == K)
       {
         params.set<Real>("youngs_modulus") = _youngs_modulus;
         params.set<Real>("poissons_ratio") = _poissons_ratio;
       }
+
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+
       params.set<std::vector<VariableName>>("displacements") = _displacements;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
@@ -782,11 +803,28 @@ DomainIntegralAction::act()
       _displacements = getParam<std::vector<VariableName>>("displacements");
       params2.set<std::vector<VariableName>>("displacements") = _displacements;
       params2.set<std::vector<SubdomainName>>("block") = {_blocks};
+      if (_output_type == C)
+        params2.set<bool>("compute_dissipation") = true;
+
       if (_temp != "")
       {
         params2.set<std::vector<VariableName>>("temperature") = {_temp};
       }
       _problem->addMaterial(mater_type_name2, mater_name2, params2);
+
+      // Strain energy rate density needed for C(t)/C* integral
+      if (_output_type == C)
+      {
+        std::string mater_name;
+        const std::string mater_type_name("StrainEnergyRateDensity");
+        mater_name = "StrainEnergyRateDensity";
+
+        InputParameters params = _factory.getValidParams(mater_type_name);
+        params.set<std::vector<SubdomainName>>("block") = {_blocks};
+        params.set<Real>("n_exponent") = {_n_exponent};
+
+        _problem->addMaterial(mater_type_name, mater_name, params);
+      }
     }
   }
 }
