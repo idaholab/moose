@@ -67,12 +67,12 @@ protected:
   /// Strong residual corresponding to the momentum boussinesq term
   ADMaterialProperty<RealVectorValue> & _boussinesq_strong_residual;
 
+  /// Strong residual corresponding to coupled force term
+  ADMaterialProperty<RealVectorValue> & _coupled_force_strong_residual;
+
   // /// Future addition pending addition of INSADMMSKernel.
   // /// Strong residual corresponding to the mms function term
   // MaterialProperty<RealVectorValue> & _mms_function_strong_residual;
-
-  /// The strong residual of the momentum equation
-  ADMaterialProperty<RealVectorValue> & _momentum_strong_residual;
 
   /// Whether we are on the displaced mesh
   const bool _use_displaced_mesh;
@@ -95,6 +95,9 @@ protected:
   /// equation
   bool _has_boussinesq;
 
+  /// Whether there is a force from a coupled vector variable or vector function
+  bool _has_coupled_force;
+
   /// The Boussinesq coefficient
   const ADMaterialProperty<Real> * _boussinesq_alpha;
 
@@ -109,4 +112,10 @@ protected:
 
   /// The gravity vector
   RealVectorValue _gravity_vector;
+
+  /// An optionally copuled vector var
+  const ADVectorVariableValue * _coupled_force_var;
+
+  /// An optional vector function
+  const Function * _coupled_force_vector_function;
 };

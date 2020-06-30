@@ -47,10 +47,13 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
     _td_strong_residual(declareADProperty<RealVectorValue>("td_strong_residual")),
     _gravity_strong_residual(declareADProperty<RealVectorValue>("gravity_strong_residual")),
     _boussinesq_strong_residual(declareADProperty<RealVectorValue>("boussinesq_strong_residual")),
+    _coupled_force_strong_residual(
+        declareADProperty<RealVectorValue>("coupled_force_strong_residual")),
     // _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
-    _momentum_strong_residual(declareADProperty<RealVectorValue>("momentum_strong_residual")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints())
+    _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints()),
+    _coupled_force_var(nullptr),
+    _coupled_force_vector_function(nullptr)
 {
   if (!_object_tracker)
   {
@@ -83,6 +86,15 @@ INSADMaterial::initialSetup()
     _gravity_vector = _object_tracker->get<RealVectorValue>("gravity");
 
   _viscous_form = static_cast<std::string>(_object_tracker->get<MooseEnum>("viscous_form"));
+
+  if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force")))
+  {
+    if (_object_tracker->isTrackerParamValid("coupled_force_var"))
+      _coupled_force_var = _object_tracker->get<const ADVectorVariableValue *>("coupled_force_var");
+    else if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
+      _coupled_force_vector_function =
+          _object_tracker->get<const Function *>("coupled_force_vector_function");
+  }
 }
 
 void
@@ -102,6 +114,19 @@ INSADMaterial::computeQpProperties()
   if (_has_boussinesq)
     _boussinesq_strong_residual[_qp] = (*_boussinesq_alpha)[_qp] * _gravity_vector * _rho[_qp] *
                                        ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
+  if (_has_coupled_force)
+  {
+    if (_coupled_force_var)
+      _coupled_force_strong_residual[_qp] = (*_coupled_force_var)[_qp];
+    else
+    {
+      mooseAssert(_coupled_force_vector_function,
+                  "Either the coupled force var or the coupled force vector function must be "
+                  "non-null in 'INSADMaterial'");
+      _coupled_force_strong_residual[_qp] =
+          _coupled_force_vector_function->vectorValue(_t, _q_point[_qp]);
+    }
+  }
 
   // // Future Addition
   // _mms_function_strong_residual[_qp] = -RealVectorValue(_x_vel_fn.value(_t, _q_point[_qp]),
@@ -117,26 +142,6 @@ INSADMaterial::computeQpProperties()
 
   if (_coord_sys == Moose::COORD_RZ)
     viscousTermRZ();
-
-  _momentum_strong_residual[_qp] = _advective_strong_residual[_qp] + _grad_p[_qp];
-
-  // Since we can't current compute vector Laplacians we only have strong residual contributions
-  // from the viscous term in the RZ coordinate system
-  if (_coord_sys == Moose::COORD_RZ)
-    _momentum_strong_residual[_qp] += _viscous_strong_residual[_qp];
-
-  if (_has_transient)
-    _momentum_strong_residual[_qp] += _td_strong_residual[_qp];
-
-  if (_has_gravity)
-    _momentum_strong_residual[_qp] += _gravity_strong_residual[_qp];
-
-  if (_has_boussinesq)
-    _momentum_strong_residual[_qp] += _boussinesq_strong_residual[_qp];
-
-  // // Future addition
-  // if (_object_tracker->hasMMS())
-  //   _momentum_strong_residual[_qp] += _mms_function_strong_residual[_qp];
 }
 
 void

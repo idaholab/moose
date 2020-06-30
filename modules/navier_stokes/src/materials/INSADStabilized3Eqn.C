@@ -18,11 +18,24 @@ INSADStabilized3Eqn::validParams()
   InputParameters params = INSADTauMaterialTempl<INSAD3Eqn>::validParams();
   params.addClassDescription("This is the material class used to compute the stabilization "
                              "parameter tau for momentum and tau_energy for the energy equation.");
+  params.addParam<MaterialPropertyName>(
+      "k_name", "k", "the name of the thermal conductivity material property");
+  params.addParam<MaterialPropertyName>(
+      "grad_k_name",
+      "grad_k",
+      "the name of the gradient of the thermal conductivity material property");
   return params;
 }
 
 INSADStabilized3Eqn::INSADStabilized3Eqn(const InputParameters & parameters)
-  : INSADTauMaterialTempl<INSAD3Eqn>(parameters), _tau_energy(declareADProperty<Real>("tau_energy"))
+  : INSADTauMaterialTempl<INSAD3Eqn>(parameters),
+    _second_temperature(adCoupledSecond("temperature")),
+    _k(getADMaterialProperty<Real>("k_name")),
+    _grad_k(hasADMaterialProperty<RealVectorValue>("grad_k_name")
+                ? &getADMaterialProperty<RealVectorValue>("grad_k_name")
+                : nullptr),
+    _tau_energy(declareADProperty<Real>("tau_energy")),
+    _temperature_strong_residual(declareADProperty<Real>("temperature_strong_residual"))
 {
 }
 
@@ -38,4 +51,21 @@ INSADStabilized3Eqn::computeQpProperties()
                                             (2. * _velocity[_qp].norm() / _hmax) +
                                         9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
                                             (4. * dissipation_coefficient / (_hmax * _hmax)));
+
+  // Start with the conductive term
+  _temperature_strong_residual[_qp] = -_k[_qp] * _second_temperature[_qp].tr();
+  if (_grad_k)
+    _temperature_strong_residual[_qp] -= (*_grad_k)[_qp] * _grad_temperature[_qp];
+
+  // advective
+  _temperature_strong_residual[_qp] += _temperature_advective_strong_residual[_qp];
+
+  if (_has_transient)
+    _temperature_strong_residual[_qp] += _temperature_td_strong_residual[_qp];
+
+  if (_has_wall_convection)
+    _temperature_strong_residual[_qp] += _temperature_wall_convection_strong_residual[_qp];
+
+  if (_has_heat_source)
+    _temperature_strong_residual[_qp] += _temperature_source_strong_residual[_qp];
 }

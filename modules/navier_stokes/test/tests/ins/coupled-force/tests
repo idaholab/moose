@@ -1,0 +1,68 @@
+[Tests]
+  design = 'INSADMomentumCoupledForce.md'
+  issues = '#15500'
+  [steady]
+    type = Exodiff
+    input = steady.i
+    exodiff = steady_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a coupled variable.'
+  []
+  [steady-jac]
+    type = PetscJacobianTester
+    input = steady.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a coupled variable.'
+  []
+  [steady-function]
+    type = Exodiff
+    input = steady-function.i
+    exodiff = steady-function_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a vector function.'
+  []
+  [steady-function-jac]
+    type = PetscJacobianTester
+    input = steady-function.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a vector function.'
+  []
+  [steady-action]
+    type = Exodiff
+    input = steady-action.i
+    exodiff = steady-action_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a coupled variable, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-jac]
+    type = PetscJacobianTester
+    input = steady-action.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a coupled variable, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-function]
+    type = Exodiff
+    input = steady-action-function.i
+    exodiff = steady-action-function_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a vector function, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-function-jac]
+    type = PetscJacobianTester
+    input = steady-action-function.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a vector function, with the problem setup through automatic action syntax.'
+  []
+[]

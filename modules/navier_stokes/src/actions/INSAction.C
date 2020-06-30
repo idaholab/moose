@@ -94,6 +94,13 @@ INSAction::validParams()
   params.addParam<bool>("add_standard_velocity_variables_for_ad",
                         true,
                         "True to convert vector velocity variables into standard aux variables");
+  params.addParam<bool>(
+      "has_coupled_force",
+      false,
+      "Whether the simulation has a force due to a coupled vector variable/vector function");
+  params.addCoupledVar("coupled_force_var", "The variable providing the coupled force");
+  params.addParam<FunctionName>("coupled_force_vector_function",
+                                "The function standing in as a coupled force");
 
   params.addParam<std::vector<BoundaryName>>(
       "velocity_boundary", std::vector<BoundaryName>(), "Boundaries with given velocities");
@@ -195,6 +202,20 @@ INSAction::INSAction(InputParameters parameters)
 
   if (getParam<bool>("has_heat_source") && !isParamValid("heat_source_function"))
     mooseError("If 'has_heat_source' is true, then 'heat_source_function' must be set.");
+
+  if (getParam<bool>("has_coupled_force"))
+  {
+    bool has_coupled = isParamValid("coupled_force_var");
+    bool has_function = isParamValid("coupled_force_vector_function");
+    if (!has_coupled && !has_function)
+      mooseError("Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
+                 "set for the "
+                 "'INSADMomentumCoupledForce' object");
+    else if (has_coupled && has_function)
+      mooseError(
+          "Both the 'coupled_force_var' or 'coupled_force_vector_function' param are set for the "
+          "'INSADMomentumCoupledForce' object. Please use one or the other.");
+  }
 }
 
 void
@@ -426,8 +447,6 @@ INSAction::act()
       params.set<CoupledName>("temperature") = {_temperature_variable_name};
       params.set<MaterialPropertyName>("cp_name") =
           getParam<MaterialPropertyName>("specific_heat_name");
-      params.set<MaterialPropertyName>("k_name") =
-          getParam<MaterialPropertyName>("thermal_conductivity_name");
     };
 
     if (getParam<bool>("add_temperature_equation"))
@@ -437,6 +456,8 @@ INSAction::act()
         InputParameters params = _factory.getValidParams("INSADStabilized3Eqn");
         set_common_3eqn_parameters(params);
         params.set<Real>("alpha") = getParam<Real>("alpha");
+        params.set<MaterialPropertyName>("k_name") =
+            getParam<MaterialPropertyName>("thermal_conductivity_name");
         _problem->addMaterial("INSADStabilized3Eqn", "ins_ad_material", params);
       }
       else
@@ -627,6 +648,7 @@ INSAction::addINSMomentum()
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addKernel(kernel_type, "ins_momentum_supg", params);
     }
+
     if (getParam<bool>("boussinesq_approximation"))
     {
       const std::string kernel_type = "INSADBoussinesqBodyForce";
@@ -642,6 +664,27 @@ INSAction::addINSMomentum()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addKernel(kernel_type, "ins_momentum_boussinesq_force", params);
+    }
+
+    if (getParam<bool>("has_coupled_force"))
+    {
+      const std::string kernel_type = "INSADMomentumCoupledForce";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = NS::velocity;
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+      if (isParamValid("coupled_force_var"))
+        params.set<CoupledName>("coupled_vector_var") = getParam<CoupledName>("coupled_force_var");
+      else if (isParamValid("coupled_force_vector_function"))
+        params.set<FunctionName>("vector_function") =
+            getParam<FunctionName>("coupled_force_vector_function");
+      else
+        mooseError(
+            "Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
+            "set for the "
+            "'INSADMomentumCoupledForce' object");
+
+      _problem->addKernel(kernel_type, "ins_momentum_coupled_force", params);
     }
   }
   else

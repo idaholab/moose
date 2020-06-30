@@ -29,13 +29,9 @@ protected:
 
   const ADVariableValue & _temperature;
   const ADVariableGradient & _grad_temperature;
-  const ADVariableSecond & _second_temperature;
   const ADVariableValue * _temperature_dot;
   const ADMaterialProperty<Real> & _cp;
-  const ADMaterialProperty<Real> & _k;
-  const ADMaterialProperty<RealVectorValue> * const _grad_k;
 
-  ADMaterialProperty<Real> & _temperature_strong_residual;
   ADMaterialProperty<Real> & _temperature_advective_strong_residual;
   ADMaterialProperty<Real> & _temperature_td_strong_residual;
   ADMaterialProperty<Real> & _temperature_wall_convection_strong_residual;

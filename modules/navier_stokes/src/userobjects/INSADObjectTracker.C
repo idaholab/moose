@@ -50,6 +50,15 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   _tracker_params.addParam<const Function *>("heat_source_function",
                                              "The function describing the heat source");
+
+  _tracker_params.addParam<bool>(
+      "has_coupled_force",
+      false,
+      "Whether the simulation has a force due to a coupled vector variable/vector function");
+  _tracker_params.addParam<const ADVectorVariableValue *>(
+      "coupled_force_var", "The variable providing the coupled force");
+  _tracker_params.addParam<const Function *>("coupled_force_vector_function",
+                                             "The function standing in as a coupled force");
 }
 
 void

@@ -59,6 +59,11 @@ public:
   virtual void execute() final {}
   virtual void finalize() final {}
 
+  bool isTrackerParamValid(const std::string & name) const
+  {
+    return _tracker_params.isParamValid(name);
+  }
+
 private:
   InputParameters _tracker_params;
 };
