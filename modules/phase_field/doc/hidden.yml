@@ -60,7 +60,6 @@
 - /InterfaceKernels/InterfaceDiffusionBoundaryTerm
 - /InterfaceKernels/InterfaceDiffusionFluxMatch
 - /Kernels/ACGrGrElasticDrivingForce
-- /Kernels/ACInterfaceKobayashi2
 - /Kernels/ACSEDGPoly
 - /Kernels/CHPFCRFF
 - /Kernels/CHSplitChemicalPotential
@@ -99,7 +98,6 @@
 - /Materials/GBEvolution
 - /Materials/GBWidthAnisotropy
 - /Materials/GrainAdvectionVelocity
-- /Materials/InterfaceOrientationMaterial
 - /Materials/KKSXeVacSolidMaterial
 - /Materials/PFCRFFMaterial
 - /Materials/PFCTradMaterial
