@@ -28,7 +28,8 @@ OutputWarehouse::OutputWarehouse(MooseApp & app)
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
     _logging_requested(false),
-    _last_message_ended_in_newline(true)
+    _last_message_ended_in_newline(true),
+    _num_printed(0)
 {
   // Set the reserved names
   _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
@@ -208,6 +209,8 @@ OutputWarehouse::mooseConsole()
       _last_message_ended_in_newline = this_message_ends_in_newline;
     }
   }
+
+  _num_printed++;
 }
 
 void

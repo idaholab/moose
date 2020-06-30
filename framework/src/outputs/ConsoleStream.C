@@ -13,7 +13,7 @@
 #include "OutputWarehouse.h"
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
-  : _output_warehouse(output_warehouse), _oss(output_warehouse.consoleBuffer())
+    : _output_warehouse(output_warehouse), _oss(output_warehouse.consoleBuffer())
 {
 }
 
@@ -58,4 +58,10 @@ std::ios_base::fmtflags
 ConsoleStream::flags(std::ios_base::fmtflags new_flags) const
 {
   return _oss.flags(new_flags);
+}
+
+unsigned long long int
+ConsoleStream::numPrinted() const
+{
+  return _output_warehouse.numPrinted();
 }

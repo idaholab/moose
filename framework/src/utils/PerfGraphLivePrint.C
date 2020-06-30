@@ -59,6 +59,8 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   section_increment._state = PerfGraph::IncrementState::printed;
 
   _last_printed_increment = &section_increment;
+
+  _printed = true;
 }
 
 void
@@ -89,6 +91,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
     _console << '\n';
 
   _last_printed_increment = &section_increment_start;
+
+  _printed = true;
 }
 
 
@@ -138,9 +142,13 @@ PerfGraphLivePrint::printStackUpToLast()
 void
 PerfGraphLivePrint::inSamePlace()
 {
-  printStackUpToLast();
+  // Only print if nothing else has been printed in the meantime
+  if (_last_num_printed == _console.numPrinted())
+  {
+    printStackUpToLast();
 
-  printLiveMessage(*_print_thread_stack[_stack_level - 1]);
+    printLiveMessage(*_print_thread_stack[_stack_level - 1]);
+  }
 }
 
 void
@@ -220,6 +228,8 @@ PerfGraphLivePrint::start()
     if (_current_execution_list_end == 0 && _last_execution_list_end == _current_execution_list_end)
       continue;
 
+    _printed = false;
+
     // Iterate from the last thing printed (begin) to the last thing in the list (end)
     // If the time or memory of any section is above the threshold, print everything inbetween and
     // update begin
@@ -232,7 +242,11 @@ PerfGraphLivePrint::start()
     iterateThroughExecutionList();
 
     // Make sure that everything comes out on the console
-    _console << std::flush;
+    if (_printed)
+    {
+      _console << std::flush;
+      _last_num_printed = _console.numPrinted();
+    }
 
     _last_execution_list_end = _current_execution_list_end;
   }

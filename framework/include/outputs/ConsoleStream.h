@@ -80,6 +80,11 @@ public:
    */
   std::ios_base::fmtflags flags(std::ios_base::fmtflags new_flags) const;
 
+  /**
+   * The number of times something has been printed
+   */
+  unsigned long long int numPrinted() const;
+
 private:
   /// Reference to the OutputWarhouse that contains the Console output objects
   OutputWarehouse & _output_warehouse;

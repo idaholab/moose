@@ -229,18 +229,6 @@ protected:
   typedef VariadicTable<std::string, unsigned long int, Real, Real, Real, long int> HeaviestTable;
 
   /**
-   * Used to hold metadata about the registered sections
-   */
-  struct SectionInfo
-  {
-    PerfID _id;
-    std::string _name;
-    unsigned int _level;
-    std::string _live_message;
-    bool _print_dots;
-  };
-
-  /**
    * Use to hold the time for each section
    *
    * These will be filled by updateTiming()
@@ -385,10 +373,10 @@ protected:
   std::atomic<unsigned int> _execution_list_end;
 
   /// Map of section names to IDs
-  std::map<std::string, PerfID> _section_name_to_id;
+  std::map<std::string, PerfID> & _section_name_to_id;
 
   /// Map of IDs to section information
-  std::map<PerfID, SectionInfo> _id_to_section_info;
+  std::map<PerfID, SectionInfo> & _id_to_section_info;
 
   /// The time for each section.  This is updated on updateTiming()
   /// Note that this is _total_ cumulative time across every place

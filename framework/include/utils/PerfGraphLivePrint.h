@@ -61,4 +61,10 @@ protected:
   unsigned int _last_execution_list_end;
 
   PerfGraph::SectionIncrement * _last_printed_increment;
+
+  /// The output count from the console the last time we printed
+  unsigned long long int _last_num_printed;
+
+  /// Whether or not printing happened in this iteration
+  bool _printed;
 };

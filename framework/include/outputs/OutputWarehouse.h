@@ -12,6 +12,9 @@
 // MOOSE includes
 #include "Output.h"
 
+// System includes
+#include <atomic>
+
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
@@ -205,6 +208,9 @@ public:
    */
   void solveSetup();
 
+  /// The number of times something has been printed
+  unsigned long long int numPrinted() const { return _num_printed; }
+
 private:
   /**
    * Calls the outputStep method for each output object
@@ -354,6 +360,9 @@ private:
 
   /// Whether or not the last thing output by mooseConsole had a newline as the last character
   bool _last_message_ended_in_newline;
+
+  /// Number of times the stream has been printed to
+  std::atomic<unsigned long long int> _num_printed;
 
   // Allow complete access:
   // FEProblemBase for calling initial, timestepSetup, outputStep, etc. methods
