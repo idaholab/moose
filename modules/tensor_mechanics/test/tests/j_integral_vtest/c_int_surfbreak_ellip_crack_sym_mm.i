@@ -6,7 +6,7 @@
 []
 
 [Mesh]
-  file = ellip_crack_4sym_norad_mm.e
+  file = c_integral_coarse.e
   partitioner = centroid
   centroid_partitioner_direction = z
 []
@@ -23,10 +23,15 @@
 [Functions]
   [./rampConstantUp]
     type = PiecewiseLinear
-    x = '0. 1.'
-    y = '0. 1'
+    x = '0. 0.1 100.0'
+    y = '0. 1 1'
     scale_factor = -68.95 #MPa
   [../]
+  [./dts]
+  type = PiecewiseLinear
+  x = '0   1'
+  y = '1   400000'
+[../]
 []
 
 [DomainIntegral]
@@ -41,6 +46,8 @@
   intersecting_boundary = '1 2'
   symmetry_plane = 2
   incremental = true
+  output_type = C
+  n_exponent = 4.0
 []
 
 [Modules/TensorMechanics/Master]
@@ -89,13 +96,30 @@
 [] # BCs
 
 [Materials]
+#  [./elasticity_tensor]
+#    type = ComputeIsotropicElasticityTensor
+#    youngs_modulus = 206800
+#    poissons_ratio = 0.0
+#  [../]
+#  [./elastic_stress]
+#    type = ComputeFiniteStrainElasticStress
+#  [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
-    poissons_ratio = 0.3
+    poissons_ratio = 0.0
   [../]
-  [./elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+  [./radial_return_stress]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'powerlawcrp'
+  [../]
+  [./powerlawcrp]
+    type = PowerLawCreepStressUpdate
+    coefficient = 3.125e-21 # 7.04e-17 #
+    n_exponent = 4.0
+    m_exponent = 0.0
+    activation_energy = 0.0
+    # max_inelastic_increment = 0.01
   [../]
 []
 
@@ -104,7 +128,7 @@
    type = Transient
   # Two sets of linesearch options are for petsc 3.1 and 3.3 respectively
   #Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 
 #  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
@@ -113,15 +137,18 @@
 
    l_max_its = 50
    nl_max_its = 20
-   nl_abs_tol = 1e-5
+   nl_abs_tol = 1e-3
    nl_rel_tol = 1e-11
    l_tol = 1e-2
 
    start_time = 0.0
-   dt = 1
+   end_time = 401
 
-   end_time = 1
-   num_steps = 1
+   [./TimeStepper]
+     type = FunctionDT
+     function = dts
+     min_dt = 1.0
+   [../]
 []
 
 [Postprocessors]
@@ -143,7 +170,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = j_int_surfbreak_ellip_crack_sym_mm_out
   exodus = true
   csv = true
 []
