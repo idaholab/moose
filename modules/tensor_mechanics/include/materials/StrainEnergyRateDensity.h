@@ -42,5 +42,4 @@ private:
 
   /// Exponent on the effective stress
   const Real _n_exponent;
-
 };

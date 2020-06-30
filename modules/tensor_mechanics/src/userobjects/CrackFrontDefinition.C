@@ -881,7 +881,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
       _rot_matrix.push_back(rot_mat);
     }
 
-    _console << "Summary of J-Integral crack front geometry:" << std::endl;
+    _console << "Summary of crack front geometry (used for fracture integrals):" << std::endl;
     _console << "index   node id   x coord       y coord       z coord       x dir         y dir   "
                 "       z dir        angle        position     seg length"
              << std::endl;
