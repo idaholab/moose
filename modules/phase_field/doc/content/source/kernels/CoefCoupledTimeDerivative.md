@@ -8,6 +8,9 @@
 \end{equation}
 where $v$ (`v`) is a coupled variable.
 
+See [`ADCoefCoupledTimeDerivative`](/ADCoefCoupledTimeDerivative.md) for an AD
+version of this object.
+
 !syntax parameters /Kernels/CoefCoupledTimeDerivative
 
 !syntax inputs /Kernels/CoefCoupledTimeDerivative

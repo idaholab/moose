@@ -17,6 +17,7 @@ InputParameters
 ADInterfaceOrientationMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("2D interfacial anisotropy");
   params.addParam<Real>(
       "anisotropy_strength", 0.04, "Strength of the anisotropy (typically < 0.05)");
   params.addParam<unsigned int>("mode_number", 6, "Mode number for anisotropy");
