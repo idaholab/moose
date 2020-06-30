@@ -38,8 +38,8 @@
 [Contact]
   [mortar]
     mesh = file
-    slave = 101
-    master = 100
+    secondary = 101
+    primary = 100
     model = frictionless
     formulation = mortar
     c_normal = 1e4

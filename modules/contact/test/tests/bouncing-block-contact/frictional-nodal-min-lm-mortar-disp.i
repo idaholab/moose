@@ -50,43 +50,43 @@ offset = 1e-2
 [Constraints]
   [normal_lm]
     type = NormalNodalLMMechanicalContact
-    master = 20
-    slave = 10
+    primary = 20
+    secondary = 10
     variable = normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
   []
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
     variable = normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
     variable = normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
   [tangential_lm]
     type = TangentialNodalLMMechanicalContact
-    master = 20
-    slave = 10
+    primary = 20
+    secondary = 10
     variable = tangential_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     contact_pressure = normal_lm
     ncp_function_type = min
@@ -94,24 +94,24 @@ offset = 1e-2
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
     variable = tangential_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
-    master_boundary = 20
-    slave_boundary = 10
-    master_subdomain = 4
-    slave_subdomain = 3
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
     variable = tangential_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

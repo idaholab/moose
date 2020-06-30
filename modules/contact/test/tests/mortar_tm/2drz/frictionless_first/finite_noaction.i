@@ -71,19 +71,19 @@ name = 'finite_noaction'
     new_boundary = 'block_bottom block_right block_top block_left'
   [../]
 
-  [./slave]
+  [./secondary]
     input = block_sidesets
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'block_left'
     new_block_id = '30'
-    new_block_name = 'frictionless_slave_subdomain'
+    new_block_name = 'frictionless_secondary_subdomain'
   [../]
-  [./master]
-    input = slave
+  [./primary]
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = 'plank_right'
     new_block_id = '20'
-    new_block_name = 'frictionless_master_subdomain'
+    new_block_name = 'frictionless_primary_subdomain'
   [../]
 []
 
@@ -104,7 +104,7 @@ name = 'finite_noaction'
   [../]
   [./frictionless_normal_lm]
     order = ${order}
-    block = 'frictionless_slave_subdomain'
+    block = 'frictionless_secondary_subdomain'
   [../]
 []
 
@@ -125,34 +125,34 @@ name = 'finite_noaction'
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = block_left
-    master = plank_right
+    secondary = block_left
+    primary = plank_right
     variable = frictionless_normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
   [../]
   [./normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = plank_right
-    slave_boundary = block_left
-    master_subdomain = frictionless_master_subdomain
-    slave_subdomain = frictionless_slave_subdomain
+    primary_boundary = plank_right
+    secondary_boundary = block_left
+    primary_subdomain = frictionless_primary_subdomain
+    secondary_subdomain = frictionless_secondary_subdomain
     variable = frictionless_normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
   [../]
   [./normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = plank_right
-    slave_boundary = block_left
-    master_subdomain = frictionless_master_subdomain
-    slave_subdomain = frictionless_slave_subdomain
+    primary_boundary = plank_right
+    secondary_boundary = block_left
+    primary_subdomain = frictionless_primary_subdomain
+    secondary_subdomain = frictionless_secondary_subdomain
     variable = frictionless_normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
@@ -256,7 +256,7 @@ name = 'finite_noaction'
   [./contact]
     type = ContactDOFSetSize
     variable = frictionless_normal_lm
-    subdomain = frictionless_slave_subdomain
+    subdomain = frictionless_secondary_subdomain
   [../]
   [./avg_hydro]
     type = ElementAverageValue

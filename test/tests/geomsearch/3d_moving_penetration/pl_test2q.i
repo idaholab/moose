@@ -59,15 +59,15 @@
   [./penetrate]
     type = PenetrationAux
     variable = distance
-    boundary = 11            #slave
-    paired_boundary = 12     #master
+    boundary = 11            #secondary
+    paired_boundary = 12     #primary
   [../]
 
   [./penetrate2]
     type = PenetrationAux
     variable = distance
-    boundary = 12            #slave
-    paired_boundary = 11     #master
+    boundary = 12            #secondary
+    paired_boundary = 11     #primary
   [../]
 
   [./penetrate3]

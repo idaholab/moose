@@ -93,8 +93,8 @@ refine = 1
 [Contact]
   [leftright]
     mesh = original_file_mesh
-    slave = 10
-    master = 20
+    secondary = 10
+    primary = 20
 
     model = coulomb
     formulation = mortar

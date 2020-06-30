@@ -37,13 +37,13 @@ NormalNodalMechanicalContact::NormalNodalMechanicalContact(const InputParameters
     _epsilon(std::numeric_limits<Real>::epsilon()),
     _component(getParam<MooseEnum>("component"))
 {
-  _overwrite_slave_residual = false;
+  _overwrite_secondary_residual = false;
 }
 
 Real
-NormalNodalMechanicalContact::computeQpSlaveValue()
+NormalNodalMechanicalContact::computeQpSecondaryValue()
 {
-  return _u_slave[_qp];
+  return _u_secondary[_qp];
 }
 
 void
@@ -66,12 +66,12 @@ NormalNodalMechanicalContact::computeOffDiagJacobian(unsigned jvar)
   _qp = 0;
 
   _Kee.resize(1, 1);
-  _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+  _Kee(0, 0) = computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
 
-  _Kne.resize(_test_master.size(), 1);
+  _Kne.resize(_test_primary.size(), 1);
 
-  for (_i = 0; _i < _test_master.size(); ++_i)
-    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+  for (_i = 0; _i < _test_primary.size(); ++_i)
+    _Kne(_i, 0) = computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
 }
 
 Real
@@ -86,13 +86,13 @@ NormalNodalMechanicalContact::computeQpResidual(Moose::ConstraintType type)
     {
       switch (type)
       {
-        case Moose::ConstraintType::Slave:
-          // This normal appears to point in the opposite direction of the slave surface so we need
-          // a negative sign
+        case Moose::ConstraintType::Secondary:
+          // This normal appears to point in the opposite direction of the secondary surface so we
+          // need a negative sign
           return _lambda * -pinfo->_normal(_component);
 
-        case Moose::ConstraintType::Master:
-          return _test_master[_i][_qp] * _lambda * pinfo->_normal(_component);
+        case Moose::ConstraintType::Primary:
+          return _test_primary[_i][_qp] * _lambda * pinfo->_normal(_component);
 
         default:
           return 0;
@@ -123,10 +123,10 @@ NormalNodalMechanicalContact::computeQpOffDiagJacobian(Moose::ConstraintJacobian
     {
       switch (type)
       {
-        case Moose::SlaveSlave:
+        case Moose::SecondarySecondary:
           return -pinfo->_normal(_component);
-        case Moose::MasterSlave:
-          return _test_master[_i][_qp] * pinfo->_normal(_component);
+        case Moose::PrimarySecondary:
+          return _test_primary[_i][_qp] * pinfo->_normal(_component);
         default:
           return 0;
       }

@@ -15,7 +15,7 @@
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = split
-    master_block = 1
+    primary_block = 1
     paired_block = 0
     new_boundary = 'interface0'
   []
@@ -134,9 +134,9 @@
     # Variable to evaluate conductivity with
     gap_temperature = Tbulk
     gap_length = 1.0
-    h_master = 1
+    h_primary = 1
     h_neighbor = 1
-    emissivity_master = 1
+    emissivity_primary = 1
     emissivity_neighbor = 1
   []
 []

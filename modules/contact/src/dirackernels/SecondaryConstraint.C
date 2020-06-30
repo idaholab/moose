@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SlaveConstraint.h"
+#include "SecondaryConstraint.h"
 
 // Moose includes
 #include "SystemBase.h"
@@ -18,16 +18,16 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseObject("ContactApp", SlaveConstraint);
+registerMooseObject("ContactApp", SecondaryConstraint);
 
 InputParameters
-SlaveConstraint::validParams()
+SecondaryConstraint::validParams()
 {
   InputParameters params = DiracKernel::validParams();
   params += ContactAction::commonParameters();
 
-  params.addRequiredParam<BoundaryName>("boundary", "The slave boundary");
-  params.addRequiredParam<BoundaryName>("master", "The master boundary");
+  params.addRequiredParam<BoundaryName>("boundary", "The secondary boundary");
+  params.addRequiredParam<BoundaryName>("primary", "The primary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
                                         "the variable this kernel acts in. (0 for x, "
@@ -58,14 +58,14 @@ SlaveConstraint::validParams()
   return params;
 }
 
-SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
+SecondaryConstraint::SecondaryConstraint(const InputParameters & parameters)
   : DiracKernel(parameters),
     _component(getParam<unsigned int>("component")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penetration_locator(
-        getPenetrationLocator(getParam<BoundaryName>("master"),
+        getPenetrationLocator(getParam<BoundaryName>("primary"),
                               getParam<BoundaryName>("boundary"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
     _penalty(getParam<Real>("penalty")),
@@ -109,7 +109,7 @@ SlaveConstraint::SlaveConstraint(const InputParameters & parameters)
 }
 
 void
-SlaveConstraint::addPoints()
+SecondaryConstraint::addPoints()
 {
   _point_to_info.clear();
 
@@ -126,13 +126,13 @@ SlaveConstraint::addPoints()
     if (!pinfo || pinfo->_node->n_comp(_sys.number(), _vars[_component]) < 1)
       continue;
 
-    dof_id_type slave_node_num = it->first;
+    dof_id_type secondary_node_num = it->first;
     const Node * node = pinfo->_node;
 
     if (pinfo->isCaptured() && node->processor_id() == processor_id())
     {
       // Find an element that is connected to this node that and that is also on this processor
-      auto node_to_elem_pair = node_to_elem_map.find(slave_node_num);
+      auto node_to_elem_pair = node_to_elem_map.find(secondary_node_num);
       mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing node in node to elem map");
       const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
 
@@ -145,8 +145,9 @@ SlaveConstraint::addPoints()
           elem = cur_elem;
       }
 
-      mooseAssert(elem,
-                  "Couldn't find an element on this processor that is attached to the slave node!");
+      mooseAssert(
+          elem,
+          "Couldn't find an element on this processor that is attached to the secondary node!");
 
       addPoint(elem, *node);
       _point_to_info[*node] = pinfo;
@@ -155,7 +156,7 @@ SlaveConstraint::addPoints()
 }
 
 Real
-SlaveConstraint::computeQpResidual()
+SecondaryConstraint::computeQpResidual()
 {
   PenetrationInfo * pinfo = _point_to_info[_current_point];
   const Node * node = pinfo->_node;
@@ -182,7 +183,7 @@ SlaveConstraint::computeQpResidual()
 }
 
 Real
-SlaveConstraint::computeQpJacobian()
+SecondaryConstraint::computeQpJacobian()
 {
 
   // TODO: for the default formulation,
@@ -303,7 +304,7 @@ SlaveConstraint::computeQpJacobian()
 }
 
 Real
-SlaveConstraint::nodalArea(PenetrationInfo & pinfo)
+SecondaryConstraint::nodalArea(PenetrationInfo & pinfo)
 {
   const Node * node = pinfo._node;
 

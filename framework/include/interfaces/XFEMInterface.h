@@ -58,7 +58,7 @@ public:
   virtual ~XFEMInterface() {}
 
   /**
-   * Set the pointer to the primary mesh that is modified by XFEM
+   * Set the pointer to the master mesh that is modified by XFEM
    */
   void setMesh(MooseMesh * mesh)
   {
@@ -144,4 +144,3 @@ protected:
   MeshBase * _mesh;
   MeshBase * _displaced_mesh;
 };
-

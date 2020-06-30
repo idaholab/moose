@@ -7,7 +7,7 @@
   [./extrude]
     type = SideSetsBetweenSubdomainsGenerator
     input = fmg
-    master_block = 'left'
+    primary_block = 'left'
     paired_block = 'right'
     new_boundary = 'in_between'
   [../]

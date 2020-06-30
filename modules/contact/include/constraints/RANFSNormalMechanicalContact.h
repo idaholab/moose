@@ -37,11 +37,11 @@ public:
   void residualSetup() override;
   void timestepSetup() override;
   void initialSetup() override;
-  bool overwriteSlaveResidual() override;
-  void computeSlaveValue(NumericVector<Number> & solution) override;
+  bool overwriteSecondaryResidual() override;
+  void computeSecondaryValue(NumericVector<Number> & solution) override;
 
 protected:
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
@@ -55,14 +55,14 @@ protected:
   std::vector<MooseVariable *> _var_objects;
   std::unordered_map<dof_id_type, Real> _node_to_contact_lm;
   std::unordered_map<dof_id_type, Real> _node_to_tied_lm;
-  std::unordered_map<dof_id_type, std::vector<const Elem *>> _node_to_master_elem_sequence;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> _node_to_primary_elem_sequence;
   Real _contact_lm;
   Real _tied_lm;
   PenetrationInfo * _pinfo;
-  std::unordered_map<dof_id_type, const Node *> _ping_pong_slave_node_to_master_node;
+  std::unordered_map<dof_id_type, const Node *> _ping_pong_secondary_node_to_primary_node;
   Real _distance;
   bool _tie_nodes;
-  unsigned int _master_index;
+  unsigned int _primary_index;
   RealVectorValue _res_vec;
   const Node * _nearest_node;
   std::vector<std::unordered_map<dof_id_type, Number>> _dof_number_to_value;

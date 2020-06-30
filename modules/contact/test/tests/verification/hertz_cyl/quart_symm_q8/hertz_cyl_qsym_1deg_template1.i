@@ -338,8 +338,8 @@
 
 [Contact]
   [./interface]
-    master = 3
-    slave = 4
+    primary = 3
+    secondary = 4
     normalize_penalty = true
     tangential_tolerance = 1e-3
     penalty = 1e+11

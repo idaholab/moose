@@ -63,10 +63,10 @@
   [./left_to_right]
     type = GapHeatTransfer
     variable = temp
-    master = rightleft
-    slave = leftright
-    emissivity_master = 0
-    emissivity_slave = 0
+    primary = rightleft
+    secondary = leftright
+    emissivity_primary = 0
+    emissivity_secondary = 0
     quadrature = true
   [../]
 []

@@ -47,18 +47,18 @@ offset = 1e-2
 [Constraints]
   [./disp_x]
     type = RANFSNormalMechanicalContact
-    slave = 10
-    master = 20
+    secondary = 10
+    primary = 20
     variable = disp_x
-    master_variable = disp_x
+    primary_variable = disp_x
     component = x
   [../]
   [./disp_y]
     type = RANFSNormalMechanicalContact
-    slave = 10
-    master = 20
+    secondary = 10
+    primary = 20
     variable = disp_y
-    master_variable = disp_y
+    primary_variable = disp_y
     component = y
   [../]
 []

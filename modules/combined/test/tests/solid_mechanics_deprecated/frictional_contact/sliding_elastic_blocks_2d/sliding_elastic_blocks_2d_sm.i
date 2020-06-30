@@ -247,8 +247,8 @@
 
 [Contact]
   [./leftright]
-    slave = 3
-    master = 2
+    secondary = 3
+    primary = 2
     model = coulomb
     friction_coefficient = '0.25'
     penalty = 1e6
@@ -258,7 +258,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    slave = 3
-    master = 2
+    secondary = 3
+    primary = 2
   [../]
 []

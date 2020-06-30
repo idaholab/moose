@@ -94,8 +94,8 @@
 
 [Contact]
   [./fred]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
   [../]
 []
 

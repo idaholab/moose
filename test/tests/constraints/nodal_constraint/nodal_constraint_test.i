@@ -36,8 +36,8 @@
   [./c1]
     type = EqualValueNodalConstraint
     variable = u
-    master = 0
-    slave = 4
+    primary = 0
+    secondary = 4
     penalty = 100000
   [../]
 []

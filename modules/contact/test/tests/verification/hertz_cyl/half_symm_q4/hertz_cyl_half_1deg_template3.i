@@ -406,8 +406,8 @@
 
 [Contact]
   [./interface]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
     disp_x = disp_x
     disp_y = disp_y
     model = coulomb
@@ -422,7 +422,7 @@
 [Dampers]
   [./contact_slip]
     type = ContactSlipDamper
-    master = '2'
-    slave = '3'
+    primary = '2'
+    secondary = '3'
   [../]
 []

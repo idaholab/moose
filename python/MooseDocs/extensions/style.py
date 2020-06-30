@@ -82,19 +82,19 @@ class RenderStyleToken(components.RenderComponent):
         return html.Tag(parent, tag_type, token, style=';'.join(style))
 
     def createLatex(self, parent, token, page):
-        master = parent
+        primary = parent
 
         if token['halign']:
             halign = token['halign']
             if halign != 'center':
                 halign = 'flush{}'.format(halign)
-            master = latex.Environment(master, halign)
+            primary = latex.Environment(primary, halign)
 
         if token['border']:
-            master = latex.Environment(master, 'fbox')
+            primary = latex.Environment(primary, 'fbox')
 
         if token['color']:
-            master = latex.Brace(master)
-            latex.Command(master, 'color', string=token['color'])
+            primary = latex.Brace(primary)
+            latex.Command(primary, 'color', string=token['color'])
 
-        return master
+        return primary

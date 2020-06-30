@@ -183,8 +183,8 @@
 
 [Contact]
   [./dummy_name]
-    master = 1000
-    slave = 100
+    primary = 1000
+    secondary = 100
     # normal_smoothing_distance = 0.01
     normalize_penalty = true
     tangential_tolerance = 1e-3

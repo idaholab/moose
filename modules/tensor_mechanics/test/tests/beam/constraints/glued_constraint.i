@@ -84,42 +84,42 @@
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = disp_y
   [../]
   [./tie_x_fuel]
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = disp_x
   [../]
   [./tie_z_fuel]
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = disp_z
   [../]
   [./tie_rot_y_fuel]
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = rot_y
   [../]
   [./tie_rot_x_fuel]
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = rot_x
   [../]
   [./tie_rot_z_fuel]
     type = NodalStickConstraint
     penalty = 1.2e14
     boundary = 1005
-    slave = 1004
+    secondary = 1004
     variable = rot_z
   [../]
 []

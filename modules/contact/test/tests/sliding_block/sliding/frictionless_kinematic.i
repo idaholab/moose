@@ -178,8 +178,8 @@
 
 [Contact]
   [./leftright]
-    slave = 3
-    master = 2
+    secondary = 3
+    primary = 2
     model = frictionless
     penalty = 1e+6
     normal_smoothing_distance = 0.1

@@ -25,33 +25,33 @@
     coord = '0.0 0.5'
     new_boundary = 101
   [../]
-  [slave_x]
+  [secondary_x]
     input = anode
     type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
     new_block_id = 10
-    new_block_name = "slave_x"
+    new_block_name = "secondary_x"
   []
-  [master_x]
-    input = slave_x
+  [primary_x]
+    input = secondary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = 12
-    new_block_name = "master_x"
+    new_block_name = "primary_x"
   []
-  [slave_y]
-    input = master_x
+  [secondary_y]
+    input = primary_x
     type = LowerDBlockFromSidesetGenerator
     sidesets = '0'
     new_block_id = 11
-    new_block_name = "slave_y"
+    new_block_name = "secondary_y"
   []
-  [master_y]
-    input = slave_y
+  [primary_y]
+    input = secondary_y
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = 13
-    new_block_name = "master_y"
+    new_block_name = "primary_y"
   []
 []
 
@@ -106,43 +106,43 @@
   [./lm_left_right_xx]
     order = FIRST
     family = LAGRANGE
-    block = slave_x
+    block = secondary_x
   [../]
   [./lm_left_right_xy]
     order = FIRST
     family = LAGRANGE
-    block = slave_x
+    block = secondary_x
   [../]
   [./lm_left_right_yx]
     order = FIRST
     family = LAGRANGE
-    block = slave_x
+    block = secondary_x
   [../]
   [./lm_left_right_yy]
     order = FIRST
     family = LAGRANGE
-    block = slave_x
+    block = secondary_x
   [../]
 
   [./lm_up_down_xx]
     order = FIRST
     family = LAGRANGE
-    block = slave_y
+    block = secondary_y
   [../]
   [./lm_up_down_xy]
     order = FIRST
     family = LAGRANGE
-    block = slave_y
+    block = secondary_y
   [../]
   [./lm_up_down_yx]
     order = FIRST
     family = LAGRANGE
-    block = slave_y
+    block = secondary_y
   [../]
   [./lm_up_down_yy]
     order = FIRST
     family = LAGRANGE
-    block = slave_y
+    block = secondary_y
   [../]
 []
 
@@ -151,44 +151,44 @@
     type = EqualGradientConstraint
     variable = lm_up_down_xx
     component = 0
-    slave_variable = disp_x
-    slave_boundary = bottom
-    master_boundary = top
-    slave_subdomain = slave_y
-    master_subdomain = master_y
+    secondary_variable = disp_x
+    secondary_boundary = bottom
+    primary_boundary = top
+    secondary_subdomain = secondary_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_xy
     component = 1
-    slave_variable = disp_x
-    slave_boundary = bottom
-    master_boundary = top
-    slave_subdomain = slave_y
-    master_subdomain = master_y
+    secondary_variable = disp_x
+    secondary_boundary = bottom
+    primary_boundary = top
+    secondary_subdomain = secondary_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_up_down_yx
     component = 0
-    slave_variable = disp_y
-    slave_boundary = bottom
-    master_boundary = top
-    slave_subdomain = slave_y
-    master_subdomain = master_y
+    secondary_variable = disp_y
+    secondary_boundary = bottom
+    primary_boundary = top
+    secondary_subdomain = secondary_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
   [./ud_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_up_down_yy
     component = 1
-    slave_variable = disp_y
-    slave_boundary = bottom
-    master_boundary = top
-    slave_subdomain = slave_y
-    master_subdomain = master_y
+    secondary_variable = disp_y
+    secondary_boundary = bottom
+    primary_boundary = top
+    secondary_subdomain = secondary_y
+    primary_subdomain = primary_y
     periodic = true
   [../]
 
@@ -196,44 +196,44 @@
     type = EqualGradientConstraint
     variable = lm_left_right_xx
     component = 0
-    slave_variable = disp_x
-    slave_boundary = left
-    master_boundary = right
-    slave_subdomain = slave_x
-    master_subdomain = master_x
+    secondary_variable = disp_x
+    secondary_boundary = left
+    primary_boundary = right
+    secondary_subdomain = secondary_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_x_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_xy
     component = 1
-    slave_variable = disp_x
-    slave_boundary = left
-    master_boundary = right
-    slave_subdomain = slave_x
-    master_subdomain = master_x
+    secondary_variable = disp_x
+    secondary_boundary = left
+    primary_boundary = right
+    secondary_subdomain = secondary_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_y_grad_x]
     type = EqualGradientConstraint
     variable = lm_left_right_yx
     component = 0
-    slave_variable = disp_y
-    slave_boundary = left
-    master_boundary = right
-    slave_subdomain = slave_x
-    master_subdomain = master_x
+    secondary_variable = disp_y
+    secondary_boundary = left
+    primary_boundary = right
+    secondary_subdomain = secondary_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
   [./lr_disp_y_grad_y]
     type = EqualGradientConstraint
     variable = lm_left_right_yy
     component = 1
-    slave_variable = disp_y
-    slave_boundary = left
-    master_boundary = right
-    slave_subdomain = slave_x
-    master_subdomain = master_x
+    secondary_variable = disp_y
+    secondary_boundary = left
+    primary_boundary = right
+    secondary_subdomain = secondary_x
+    primary_subdomain = primary_x
     periodic = true
   [../]
 []

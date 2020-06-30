@@ -22,7 +22,7 @@
   [../]
   [./add_sidesets_between]
     type = SideSetsBetweenSubdomains
-    master_block = 1
+    primary_block = 1
     paired_block = 0
     depends_on = add_subdomain
     new_boundary = 10

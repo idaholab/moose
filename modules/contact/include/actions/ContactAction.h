@@ -76,10 +76,10 @@ public:
   static InputParameters commonParameters();
 
 protected:
-  /// Master boundary name for mechanical contact
-  const BoundaryName _master;
-  /// Slave boundary name for mechanical contact
-  const BoundaryName _slave;
+  /// Primary boundary name for mechanical contact
+  const BoundaryName _primary;
+  /// Secondary boundary name for mechanical contact
+  const BoundaryName _secondary;
   /// Contact model type enum
   const MooseEnum _model;
   /// Contact formulation type enum

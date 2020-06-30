@@ -130,7 +130,7 @@
   [../]
   [./roof]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = 3
+    primary_block = 3
     paired_block = 1
     input = excav
     new_boundary = roof

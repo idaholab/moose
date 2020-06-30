@@ -27,8 +27,8 @@ Threads::spin_mutex pinfo_mutex;
 PenetrationThread::PenetrationThread(
     SubProblem & subproblem,
     const MooseMesh & mesh,
-    BoundaryID master_boundary,
-    BoundaryID slave_boundary,
+    BoundaryID primary_boundary,
+    BoundaryID secondary_boundary,
     std::map<dof_id_type, PenetrationInfo *> & penetration_info,
     bool check_whether_reasonable,
     bool update_location,
@@ -43,8 +43,8 @@ PenetrationThread::PenetrationThread(
     const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples)
   : _subproblem(subproblem),
     _mesh(mesh),
-    _master_boundary(master_boundary),
-    _slave_boundary(slave_boundary),
+    _primary_boundary(primary_boundary),
+    _secondary_boundary(secondary_boundary),
     _penetration_info(penetration_info),
     _check_whether_reasonable(check_whether_reasonable),
     _update_location(update_location),
@@ -67,8 +67,8 @@ PenetrationThread::PenetrationThread(
 PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/)
   : _subproblem(x._subproblem),
     _mesh(x._mesh),
-    _master_boundary(x._master_boundary),
-    _slave_boundary(x._slave_boundary),
+    _primary_boundary(x._primary_boundary),
+    _secondary_boundary(x._secondary_boundary),
     _penetration_info(x._penetration_info),
     _check_whether_reasonable(x._check_whether_reasonable),
     _update_location(x._update_location),
@@ -124,11 +124,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
         const Point contact_ref = info->_closest_point_ref;
         bool contact_point_on_side(false);
 
-        // Slave position must be the previous contact point
+        // Secondary position must be the previous contact point
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
-        const std::vector<Point> & slave_pos = fe_side->get_xyz();
+        const std::vector<Point> & secondary_pos = fe_side->get_xyz();
 
         // Prerequest other data we'll need in findContactPoint
         fe_side->get_phi();
@@ -145,7 +145,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
                                 fe_elem,
                                 fe_side,
                                 _fe_type,
-                                slave_pos[0],
+                                secondary_pos[0],
                                 false,
                                 _tangential_tolerance,
                                 contact_point_on_side);
@@ -442,11 +442,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
     if (!info_set)
     {
       // If penetration is not detected within the saved patch, it is possible
-      // that the slave node has moved outside the saved patch. So, the patch
-      // for the slave nodes saved in _recheck_slave_nodes has to be updated
+      // that the secondary node has moved outside the saved patch. So, the patch
+      // for the secondary nodes saved in _recheck_secondary_nodes has to be updated
       // and the penetration detection has to be re-run on the updated patch.
 
-      _recheck_slave_nodes.push_back(node_id);
+      _recheck_secondary_nodes.push_back(node_id);
 
       delete info;
       info = NULL;
@@ -472,9 +472,9 @@ PenetrationThread::operator()(const NodeIdRange & range)
 void
 PenetrationThread::join(const PenetrationThread & other)
 {
-  _recheck_slave_nodes.insert(_recheck_slave_nodes.end(),
-                              other._recheck_slave_nodes.begin(),
-                              other._recheck_slave_nodes.end());
+  _recheck_secondary_nodes.insert(_recheck_secondary_nodes.end(),
+                                  other._recheck_secondary_nodes.begin(),
+                                  other._recheck_secondary_nodes.end());
 }
 
 void
@@ -713,7 +713,7 @@ PenetrationThread::findRidgeContactPoint(Point & contact_point,
   // TODO:
   // We have the parametric coordinates of the closest intersection point for both faces.
   // We need to find a point somewhere in the middle of them so there's not an abrupt jump.
-  // Find that point by taking dot products of vector from contact point to slave node point
+  // Find that point by taking dot products of vector from contact point to secondary node point
   // with face normal vectors to see which face we're closer to.
   //  }
 
@@ -1152,13 +1152,13 @@ PenetrationThread::restrictPointToFace(Point & p, const Node *& closest_node, co
 }
 
 bool
-PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
+PenetrationThread::isFaceReasonableCandidate(const Elem * primary_elem,
                                              const Elem * side,
                                              FEBase * fe,
-                                             const Point * slave_point,
+                                             const Point * secondary_point,
                                              const Real tangential_tolerance)
 {
-  unsigned int dim = master_elem->dim();
+  unsigned int dim = primary_elem->dim();
 
   const std::vector<Point> & phys_point = fe->get_xyz();
 
@@ -1171,7 +1171,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
 
   fe->reinit(side, &points);
 
-  RealGradient d = *slave_point - phys_point[0];
+  RealGradient d = *secondary_point - phys_point[0];
 
   const Real twosqrt2 = 2.8284; // way more precision than we actually need here
   Real max_face_length = side->hmax() + twosqrt2 * tangential_tolerance;
@@ -1183,7 +1183,7 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
   }
   else if (dim - 1 == 1)
   {
-    const Node * const * elem_nodes = master_elem->get_nodes();
+    const Node * const * elem_nodes = primary_elem->get_nodes();
     const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
     const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
 
@@ -1220,8 +1220,8 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
 void
 PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
 {
-  // Slip is current projected position of slave node minus
-  //   original projected position of slave node
+  // Slip is current projected position of secondary node minus
+  //   original projected position of secondary node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
   std::unique_ptr<const Elem> side =
@@ -1303,7 +1303,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
   const Point & p = info->_closest_point_ref;
   std::set<dof_id_type> elems_to_exclude;
   elems_to_exclude.insert(info->_elem->id());
-  const Node * slave_node = info->_node;
+  const Node * secondary_node = info->_node;
 
   std::vector<std::vector<const Node *>> edge_nodes;
 
@@ -1321,7 +1321,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
 
     std::vector<PenetrationInfo *> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(
-        slave_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
+        secondary_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
 
     if (face_info_comm_edge.size() == 0)
       edges_without_neighbors.push_back(i);
@@ -1363,7 +1363,7 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
 
     std::vector<PenetrationInfo *> face_info_comm_edge;
     getInfoForFacesWithCommonNodes(
-        slave_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
+        secondary_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
 
     unsigned int num_corner_neighbors = face_info_comm_edge.size();
 
@@ -1530,7 +1530,7 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(
 
 void
 PenetrationThread::getInfoForFacesWithCommonNodes(
-    const Node * slave_node,
+    const Node * secondary_node,
     const std::set<dof_id_type> & elems_to_exclude,
     const std::vector<const Node *> edge_nodes,
     std::vector<PenetrationInfo *> & face_info_comm_edge,
@@ -1601,7 +1601,8 @@ PenetrationThread::getInfoForFacesWithCommonNodes(
         break;
       }
 
-      createInfoForElem(thisElemInfo, p_info, slave_node, elems_connected_to_edge[i], edge_nodes);
+      createInfoForElem(
+          thisElemInfo, p_info, secondary_node, elems_connected_to_edge[i], edge_nodes);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
@@ -1635,21 +1636,21 @@ PenetrationThread::getInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
 void
 PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
                                      std::vector<PenetrationInfo *> & p_info,
-                                     const Node * slave_node,
+                                     const Node * secondary_node,
                                      const Elem * elem,
                                      const std::vector<const Node *> & nodes_that_must_be_on_side,
                                      const bool check_whether_reasonable)
 {
   std::vector<unsigned int> sides;
   // TODO: After libMesh update, add this line to MooseMesh.h, call sidesWithBoundaryID,  delete
-  // getSidesOnMasterBoundary, and delete vectors used by it
+  // getSidesOnPrimaryBoundary, and delete vectors used by it
   //  void sidesWithBoundaryID(std::vector<unsigned int>& sides, const Elem * const elem, const
   //  BoundaryID boundary_id) const
   // {
   //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
   // }
-  getSidesOnMasterBoundary(sides, elem);
-  // _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
+  getSidesOnPrimaryBoundary(sides, elem);
+  // _mesh.sidesWithBoundaryID(sides, elem, _primary_boundary);
 
   for (unsigned int i = 0; i < sides.size(); ++i)
   {
@@ -1703,7 +1704,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     // Optionally check to see whether face is reasonable candidate based on an
     // estimate of how closely it is likely to project to the face
     if (check_whether_reasonable)
-      if (!isFaceReasonableCandidate(elem, side, fe_side, slave_node, _tangential_tolerance))
+      if (!isFaceReasonableCandidate(elem, side, fe_side, secondary_node, _tangential_tolerance))
       {
         delete side;
         break;
@@ -1723,7 +1724,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationInfo * pen_info = new PenetrationInfo(slave_node,
+    PenetrationInfo * pen_info = new PenetrationInfo(secondary_node,
                                                      elem,
                                                      side,
                                                      sides[i],
@@ -1744,7 +1745,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
                             fe_elem,
                             fe_side,
                             _fe_type,
-                            *slave_node,
+                            *secondary_node,
                             true,
                             _tangential_tolerance,
                             contact_point_on_side);
@@ -1758,13 +1759,13 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
 // TODO: After libMesh update, replace this with a call to sidesWithBoundaryID, delete vectors used
 // by this method
 void
-PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> & sides,
-                                            const Elem * const elem)
+PenetrationThread::getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides,
+                                             const Elem * const elem)
 {
   // For each tuple, the fields are (0=elem_id, 1=side_id, 2=bc_id)
   sides.clear();
   for (const auto & t : _bc_tuples)
     if (std::get<0>(t) == elem->id() &&
-        std::get<2>(t) == static_cast<boundary_id_type>(_master_boundary))
+        std::get<2>(t) == static_cast<boundary_id_type>(_primary_boundary))
       sides.push_back(std::get<1>(t));
 }

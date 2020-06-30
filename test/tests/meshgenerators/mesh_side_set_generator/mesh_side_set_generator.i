@@ -29,7 +29,7 @@
   [./center_side_set]
     type = SideSetsBetweenSubdomainsGenerator
     input = right_block
-    master_block = left_block
+    primary_block = left_block
     paired_block = right_block
     new_boundary = center_side_set
   []

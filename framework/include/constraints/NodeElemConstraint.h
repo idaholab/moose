@@ -28,8 +28,8 @@ InputParameters validParams<NodeElemConstraint>();
 
 /**
  * A NodeElemConstraint is used when you need to create constraints between
- * a slave node and a master element. It works by allowing you to modify the
- * residual and jacobian entries on the slave node and the master element.
+ * a secondary node and a primary element. It works by allowing you to modify the
+ * residual and jacobian entries on the secondary node and the primary element.
  */
 class NodeElemConstraint : public Constraint,
                            public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
@@ -41,8 +41,8 @@ public:
   NodeElemConstraint(const InputParameters & parameters);
   virtual ~NodeElemConstraint();
 
-  /// Compute the value the slave node should have at the beginning of a timestep.
-  void computeSlaveValue(NumericVector<Number> & current_solution);
+  /// Compute the value the secondary node should have at the beginning of a timestep.
+  void computeSecondaryValue(NumericVector<Number> & current_solution);
 
   /// Computes the residual Nodal residual.
   virtual void computeResidual();
@@ -63,24 +63,24 @@ public:
   virtual bool shouldApply() { return true; }
 
   /**
-   * Whether or not the slave's residual should be overwritten.
-   * @return bool When this returns true the slave's residual as computed by the constraint will
+   * Whether or not the secondary's residual should be overwritten.
+   * @return bool When this returns true the secondary's residual as computed by the constraint will
    * _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSlaveResidual();
+  virtual bool overwriteSecondaryResidual();
 
   /**
-   * Whether or not the slave's Jacobian row should be overwritten.
-   * @return bool When this returns true the slave's Jacobian row as computed by the constraint will
-   * _replace_ the residual previously at that node for that variable.
+   * Whether or not the secondary's Jacobian row should be overwritten.
+   * @return bool When this returns true the secondary's Jacobian row as computed by the constraint
+   * will _replace_ the residual previously at that node for that variable.
    */
-  virtual bool overwriteSlaveJacobian() { return overwriteSlaveResidual(); };
+  virtual bool overwriteSecondaryJacobian() { return overwriteSecondaryResidual(); };
 
   /**
-   * The variable on the master elem.
-   * @return MooseVariable & a reference to the master variable
+   * The variable on the primary elem.
+   * @return MooseVariable & a reference to the primary variable
    */
-  virtual MooseVariable & masterVariable() { return _master_var; }
+  virtual MooseVariable & primaryVariable() { return _primary_var; }
 
   /**
    * The variable number that this object operates on.
@@ -88,11 +88,11 @@ public:
   MooseVariable & variable() { return _var; }
 
 protected:
-  /// prepare the _slave_to_master_map
-  virtual void prepareSlaveToMasterMap() = 0;
+  /// prepare the _secondary_to_primary_map
+  virtual void prepareSecondaryToPrimaryMap() = 0;
 
-  /// Compute the value the slave node should have at the beginning of a timestep.
-  virtual Real computeQpSlaveValue() = 0;
+  /// Compute the value the secondary node should have at the beginning of a timestep.
+  virtual Real computeQpSecondaryValue() = 0;
 
   /// This is the virtual that derived classes should override for computing the residual.
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
@@ -108,151 +108,150 @@ protected:
   }
 
   // coupling interface:
-  virtual const VariableValue & coupledSlaveValue(const std::string & var_name,
-                                                  unsigned int comp = 0)
+  virtual const VariableValue & coupledSecondaryValue(const std::string & var_name,
+                                                      unsigned int comp = 0)
   {
     return coupledValue(var_name, comp);
   }
-  virtual const VariableValue & coupledSlaveValueOld(const std::string & var_name,
-                                                     unsigned int comp = 0)
+  virtual const VariableValue & coupledSecondaryValueOld(const std::string & var_name,
+                                                         unsigned int comp = 0)
   {
     return coupledValueOld(var_name, comp);
   }
-  virtual const VariableValue & coupledSlaveValueOlder(const std::string & var_name,
-                                                       unsigned int comp = 0)
+  virtual const VariableValue & coupledSecondaryValueOlder(const std::string & var_name,
+                                                           unsigned int comp = 0)
   {
     return coupledValueOlder(var_name, comp);
   }
 
-  virtual const VariableGradient & coupledSlaveGradient(const std::string & var_name,
-                                                        unsigned int comp = 0)
+  virtual const VariableGradient & coupledSecondaryGradient(const std::string & var_name,
+                                                            unsigned int comp = 0)
   {
     return coupledGradient(var_name, comp);
   }
-  virtual const VariableGradient & coupledSlaveGradientOld(const std::string & var_name,
-                                                           unsigned int comp = 0)
+  virtual const VariableGradient & coupledSecondaryGradientOld(const std::string & var_name,
+                                                               unsigned int comp = 0)
   {
     return coupledGradientOld(var_name, comp);
   }
-  virtual const VariableGradient & coupledSlaveGradientOlder(const std::string & var_name,
-                                                             unsigned int comp = 0)
+  virtual const VariableGradient & coupledSecondaryGradientOlder(const std::string & var_name,
+                                                                 unsigned int comp = 0)
   {
     return coupledGradientOlder(var_name, comp);
   }
 
-  virtual const VariableSecond & coupledSlaveSecond(const std::string & var_name,
-                                                    unsigned int comp = 0)
+  virtual const VariableSecond & coupledSecondarySecond(const std::string & var_name,
+                                                        unsigned int comp = 0)
   {
     return coupledSecond(var_name, comp);
   }
 
-  virtual const VariableValue & coupledMasterValue(const std::string & var_name,
-                                                   unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValue(const std::string & var_name,
+                                                    unsigned int comp = 0)
   {
     return coupledNeighborValue(var_name, comp);
   }
-  virtual const VariableValue & coupledMasterValueOld(const std::string & var_name,
-                                                      unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValueOld(const std::string & var_name,
+                                                       unsigned int comp = 0)
   {
     return coupledNeighborValueOld(var_name, comp);
   }
-  virtual const VariableValue & coupledMasterValueOlder(const std::string & var_name,
-                                                        unsigned int comp = 0)
+  virtual const VariableValue & coupledPrimaryValueOlder(const std::string & var_name,
+                                                         unsigned int comp = 0)
   {
     return coupledNeighborValueOlder(var_name, comp);
   }
 
-  virtual const VariableGradient & coupledMasterGradient(const std::string & var_name,
-                                                         unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradient(const std::string & var_name,
+                                                          unsigned int comp = 0)
   {
     return coupledNeighborGradient(var_name, comp);
   }
-  virtual const VariableGradient & coupledMasterGradientOld(const std::string & var_name,
-                                                            unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradientOld(const std::string & var_name,
+                                                             unsigned int comp = 0)
   {
     return coupledNeighborGradientOld(var_name, comp);
   }
-  virtual const VariableGradient & coupledMasterGradientOlder(const std::string & var_name,
-                                                              unsigned int comp = 0)
+  virtual const VariableGradient & coupledPrimaryGradientOlder(const std::string & var_name,
+                                                               unsigned int comp = 0)
   {
     return coupledNeighborGradientOlder(var_name, comp);
   }
 
-  virtual const VariableSecond & coupledMasterSecond(const std::string & var_name,
-                                                     unsigned int comp = 0)
+  virtual const VariableSecond & coupledPrimarySecond(const std::string & var_name,
+                                                      unsigned int comp = 0)
   {
     return coupledNeighborSecond(var_name, comp);
   }
 
-  /// slave block id
-  unsigned short _slave;
-  /// master block id
-  unsigned short _master;
+  /// secondary block id
+  unsigned short _secondary;
+  /// primary block id
+  unsigned short _primary;
 
   MooseVariable & _var;
 
-  const MooseArray<Point> & _master_q_point;
-  const QBase * const & _master_qrule;
+  const MooseArray<Point> & _primary_q_point;
+  const QBase * const & _primary_qrule;
 
   /// current node being processed
   const Node * const & _current_node;
   const Elem * const & _current_elem;
 
-  /// Value of the unknown variable on the slave node
-  const VariableValue & _u_slave;
+  /// Value of the unknown variable on the secondary node
+  const VariableValue & _u_secondary;
   /// old solution
-  const VariableValue & _u_slave_old;
-  /// Shape function on the slave side.
-  VariablePhiValue _phi_slave;
-  /// Shape function on the slave side.  This will always only have one entry and that entry will always be "1"
-  VariableTestValue _test_slave;
+  const VariableValue & _u_secondary_old;
+  /// Shape function on the secondary side.
+  VariablePhiValue _phi_secondary;
+  /// Shape function on the secondary side.  This will always only have one entry and that entry will always be "1"
+  VariableTestValue _test_secondary;
 
-  /// Master side variable
-  MooseVariable & _master_var;
+  /// Primary side variable
+  MooseVariable & _primary_var;
 
-  /// Number for the master variable
-  unsigned int _master_var_num;
+  /// Number for the primary variable
+  unsigned int _primary_var_num;
 
   /// Side shape function.
-  const VariablePhiValue & _phi_master;
+  const VariablePhiValue & _phi_primary;
   /// Gradient of side shape function
-  const VariablePhiGradient & _grad_phi_master;
+  const VariablePhiGradient & _grad_phi_primary;
 
   /// Side test function
-  const VariableTestValue & _test_master;
+  const VariableTestValue & _test_primary;
   /// Gradient of side shape function
-  const VariableTestGradient & _grad_test_master;
+  const VariableTestGradient & _grad_test_primary;
 
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_master;
+  const VariableValue & _u_primary;
   /// Holds the old solution at the current quadrature point
-  const VariableValue & _u_master_old;
+  const VariableValue & _u_primary_old;
   /// Holds the current solution gradient at the current quadrature point
-  const VariableGradient & _grad_u_master;
+  const VariableGradient & _grad_u_primary;
 
   /// DOF map
   const DofMap & _dof_map;
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
-  /// maps slave node ids to master element ids
-  std::map<dof_id_type, dof_id_type> _slave_to_master_map;
+  /// maps secondary node ids to primary element ids
+  std::map<dof_id_type, dof_id_type> _secondary_to_primary_map;
 
   /**
-   * Whether or not the slave's residual should be overwritten.
+   * Whether or not the secondary's residual should be overwritten.
    *
-   * When this is true the slave's residual as computed by the constraint will _replace_
+   * When this is true the secondary's residual as computed by the constraint will _replace_
    * the residual previously at that node for that variable.
    */
-  bool _overwrite_slave_residual;
+  bool _overwrite_secondary_residual;
 
 public:
   SparseMatrix<Number> * _jacobian;
-  /// dofs connected to the slave node
+  /// dofs connected to the secondary node
   std::vector<dof_id_type> _connected_dof_indices;
-  /// stiffness matrix holding master-slave jacobian
+  /// stiffness matrix holding primary-secondary jacobian
   DenseMatrix<Number> _Kne;
-  /// stiffness matrix holding slave-slave jacobian
+  /// stiffness matrix holding secondary-secondary jacobian
   DenseMatrix<Number> _Kee;
 };
-

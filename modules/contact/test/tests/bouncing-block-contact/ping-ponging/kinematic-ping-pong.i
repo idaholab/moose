@@ -47,8 +47,8 @@ offset = 1e-2
 
 [Contact]
   [leftright]
-    slave = 10
-    master = 20
+    secondary = 10
+    primary = 20
     model = frictionless
     formulation = kinematic
     penalty = 1e0

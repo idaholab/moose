@@ -29,14 +29,14 @@
   [../]
   [./iface_u]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = 1
+    primary_block = 1
     paired_block = 2
     new_boundary = 10
     input = box2
   [../]
   [./iface_v]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = 2
+    primary_block = 2
     paired_block = 1
     new_boundary = 11
     input = iface_u

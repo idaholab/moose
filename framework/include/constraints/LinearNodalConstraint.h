@@ -17,11 +17,11 @@ template <>
 InputParameters validParams<LinearNodalConstraint>();
 
 /**
- * The slave node variable is programmed as a linear combination of
- * the master node variables (i.e, slave_var = a_1*master_var_1+
- * a_2*master_var_2+... + a_n*master_var_n).  The master nodes ids and
+ * The secondary node variable is programmed as a linear combination of
+ * the primary node variables (i.e, secondary_var = a_1*primary_var_1+
+ * a_2*primary_var_2+... + a_n*primary_var_n).  The primary nodes ids and
  * corresponding weights are required as input.  The same linear
- * combination applies to all slave nodes.
+ * combination applies to all secondary nodes.
  */
 class LinearNodalConstraint : public NodalConstraint
 {
@@ -32,7 +32,7 @@ public:
 
 protected:
   /**
-   * Computes the residual for the current slave node
+   * Computes the residual for the current secondary node
    */
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
 
@@ -41,12 +41,12 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  // Holds the master node ids
-  std::vector<unsigned int> _master_node_ids;
-  // Holds the list of slave node ids
-  std::vector<unsigned int> _slave_node_ids;
-  // Holds the slave node set or side set
-  std::string _slave_node_set_id;
+  // Holds the primary node ids
+  std::vector<unsigned int> _primary_node_ids;
+  // Holds the list of secondary node ids
+  std::vector<unsigned int> _secondary_node_ids;
+  // Holds the secondary node set or side set
+  std::string _secondary_node_set_id;
   // Penalty if constraint is not satisfied
   Real _penalty;
 };

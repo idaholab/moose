@@ -29,6 +29,7 @@ class FunctionParserBase
 #endif
 
 #include <tuple>
+#include <unordered_map>
 
 // Forward declarations
 class Action;
@@ -308,6 +309,17 @@ public:
   void addCoupledVar(const std::string & name, const std::string & doc_string);
 
   /**
+   * This method adds a deprecated coupled variable name pair.  The parser will look for variable
+   * name pair in the input file and can return a reference to the storage location
+   * for the coupled variable if found. The doc string for the deprecated variable will be
+   * constructed from the doc string for the new variable. A deprecation message will also be
+   * automatically generated
+   */
+  void addDeprecatedCoupledVar(const std::string & old_name,
+                               const std::string & new_name,
+                               const std::string & removal_date = "");
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable if found
@@ -569,6 +581,14 @@ public:
    * Return the coupled variable parameter names.
    */
   const std::set<std::string> & getCoupledVariableParamNames() const { return _coupled_vars; }
+
+  /**
+   * Return the new to deprecated variable name map
+   */
+  const std::unordered_map<std::string, std::string> & getNewToDeprecatedVarMap() const
+  {
+    return _new_to_deprecated_coupled_vars;
+  }
 
   /**
    * Return whether or not the coupled variable exists
@@ -836,6 +856,11 @@ private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
 
+  /**
+   * Private method for setting deprecated coupled variable documentation strings
+   */
+  void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
+
   struct Metadata
   {
     std::string _doc_string;
@@ -982,6 +1007,9 @@ private:
 
   /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
+
+  /// A map from deprecated coupled variable names to the new blessed name
+  std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();

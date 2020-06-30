@@ -23,9 +23,9 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -75,7 +75,7 @@
 [AuxKernels]
   [jump_aux]
     type = MaterialRealAux
-    boundary = master0_interface
+    boundary = primary0_interface
     property = jump
     variable = jump_var
   []
@@ -87,7 +87,7 @@
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
     jump_prop_name = jump
   [../]
@@ -98,7 +98,7 @@
     type = JumpInterfaceMaterial
     var = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
   [../]
 []
 
@@ -132,7 +132,7 @@
     variable = u
     neighbor_variable = v
     execute_on = TIMESTEP_END
-    boundary = master0_interface
+    boundary = primary0_interface
   []
 []
 

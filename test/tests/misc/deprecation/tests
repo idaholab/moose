@@ -41,4 +41,25 @@
 
     requirement = 'The system shall produce a warning indicating a possible replacement when deprecated code is superseded.'
   [../]
+
+  [deprecated_coupled_var]
+    type = 'Exodiff'
+    input = 'deprecated_coupled_var.i'
+    exodiff = 'deprecated_coupled_var_out.e'
+    requirement = 'The system shall be able to deprecate coupled variable names, while enabling user code to only use the new, blessed name'
+    design = 'InputParameters.md'
+    issues = '#15497'
+    no_error_deprecated = True
+    expect_out = "The coupled variable parameter 'stupid_name' has been deprecated and will be removed never because this is a dummy test\. Please use the 'source' coupled variable parameter instead\."
+  []
+
+  [blessed_coupled_var]
+    type = 'Exodiff'
+    input = 'deprecated_coupled_var.i'
+    exodiff = 'blessed_coupled_var_out.e'
+    cli_args = "Kernels/active='diff_u coupled_u diff_v blessed_coupled_v' Outputs/file_base=blessed_coupled_var_out"
+    requirement = 'The system shall not give a deprecation warning if the user uses the blessed coupled variable name instead of the deprecated coupled variable name.'
+    design = 'InputParameters.md'
+    issues = '#15497'
+  []
 []

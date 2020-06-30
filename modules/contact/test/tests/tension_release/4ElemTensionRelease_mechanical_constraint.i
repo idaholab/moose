@@ -26,8 +26,8 @@
 
 [Contact]
   [./dummy_name]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
     penalty = 1e6
     model = frictionless
     tangential_tolerance = 0.01

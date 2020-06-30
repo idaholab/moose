@@ -25,22 +25,22 @@ protected:
   virtual void computeQpProperties() override;
   virtual void initQpStatefulProperties() override;
 
-  const std::string _mp_master_name;
-  const std::string _mp_slave_name;
-  const MaterialProperty<Real> & _mp_master;
-  const MaterialProperty<Real> & _mp_slave;
-  const VariableValue & _var_master;
-  const VariableValue & _var_slave;
-  const VariableValue & _nl_var_master;
-  const VariableValue & _nl_var_slave;
+  const std::string _mp_primary_name;
+  const std::string _mp_secondary_name;
+  const MaterialProperty<Real> & _mp_primary;
+  const MaterialProperty<Real> & _mp_secondary;
+  const VariableValue & _var_primary;
+  const VariableValue & _var_secondary;
+  const VariableValue & _nl_var_primary;
+  const VariableValue & _nl_var_secondary;
   /// old values
   const bool _couple_old_values_and_properties;
-  const MaterialProperty<Real> * const _mp_master_old;
-  const MaterialProperty<Real> * const _mp_slave_old;
-  const VariableValue * const _var_master_old;
-  const VariableValue * const _var_slave_old;
-  const VariableValue * const _nl_var_master_old;
-  const VariableValue * const _nl_var_slave_old;
+  const MaterialProperty<Real> * const _mp_primary_old;
+  const MaterialProperty<Real> * const _mp_secondary_old;
+  const VariableValue * const _var_primary_old;
+  const VariableValue * const _var_secondary_old;
+  const VariableValue * const _nl_var_primary_old;
+  const VariableValue * const _nl_var_secondary_old;
   /// the value type to be computed across the interface
   const MooseEnum _interface_value_type;
   const std::string _mp_out_base_name;

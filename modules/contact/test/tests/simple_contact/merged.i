@@ -16,52 +16,52 @@
 []
 
 [DiracKernels]
-  [./master_x]
-    type = ContactMaster
+  [./primary_x]
+    type = ContactPrimary
     variable = disp_x
     component = 0
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
-  [./master_y]
-    type = ContactMaster
+  [./primary_y]
+    type = ContactPrimary
     variable = disp_y
     component = 1
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
-  [./master_z]
-    type = ContactMaster
+  [./primary_z]
+    type = ContactPrimary
     variable = disp_z
     component = 2
     boundary = 3
-    slave = 2
+    secondary = 2
   [../]
 
-  [./slave_x]
-    type = SlaveConstraint
+  [./secondary_x]
+    type = SecondaryConstraint
     variable = disp_x
     component = 0
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 
-  [./slave_y]
-    type = SlaveConstraint
+  [./secondary_y]
+    type = SecondaryConstraint
     variable = disp_y
     component = 1
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 
-  [./slave_z]
-    type = SlaveConstraint
+  [./secondary_z]
+    type = SecondaryConstraint
     variable = disp_z
     component = 2
     boundary = 2
-    master = 3
+    primary = 3
   [../]
 []
 

@@ -52,7 +52,7 @@ ControllableItem::dump(unsigned int indent /*=0*/) const
   {
     if (index == 0) // master parameter
       oss << ConsoleUtils::indent(indent) << COLOR_GREEN << pair.first << COLOR_DEFAULT << " = ";
-    else // slave parameters
+    else // secondary parameters
       oss << ConsoleUtils::indent(indent + 2) << COLOR_YELLOW << pair.first << COLOR_DEFAULT
           << " = ";
 

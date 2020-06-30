@@ -184,8 +184,8 @@
 
 [Contact]
   [./leftright]
-    slave = 3
-    master = 2
+    secondary = 3
+    primary = 2
     model = coulomb
     penalty = 1e+7
     friction_coefficient = 0.2

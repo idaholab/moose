@@ -14,15 +14,15 @@
     top_right = '1 1 0'
     block_id = 1
   [../]
-  [./master0_interface]
+  [./primary0_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./break_boundary]
-    input = master0_interface
+    input = primary0_interface
     type = BreakBoundaryOnSubdomainGenerator
   [../]
 []
@@ -63,11 +63,11 @@
 []
 
 [InterfaceKernels]
-  [./master0_interface]
+  [./primary0_interface]
     type = PenaltyInterfaceDiffusionDot
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
   [../]
 []
@@ -110,7 +110,7 @@
     type = InterfaceQpValueUserObject
     var = v1
     var_neighbor = v2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
   [../]
@@ -118,7 +118,7 @@
     type = InterfaceQpValueUserObject
     var = v1
     var_neighbor = v2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
     value_type = rate
@@ -127,7 +127,7 @@
     type = InterfaceQpValueUserObject
     var = v1
     var_neighbor = v2
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
     interface_value_type = average
     value_type = increment
@@ -148,21 +148,21 @@
   [./interface_avg_value_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_avg_value_uo
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
   []
   [./interface_avg_value_rate_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_rate_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_avg_value_rate_uo
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
   []
   [./interface_avg_value_increment_aux]
     type = InterfaceValueUserObjectAux
     variable = avg_increment_qp
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     interface_uo_name = interface_avg_value_increment_uo
     execute_on = 'INITIAL LINEAR NONLINEAR TIMESTEP_BEGIN TIMESTEP_END FINAL'
   []

@@ -20,14 +20,14 @@
   [./interface]
     type = SideSetsBetweenSubdomains
     depends_on = 'subdomain_id'
-    master_block = '0 1'
+    primary_block = '0 1'
     paired_block = '2 3'
     new_boundary = 'in_between'
   [../]
   [./emperty_interface]
     type = SideSetsBetweenSubdomains
     depends_on = 'subdomain_id'
-    master_block = '0'
+    primary_block = '0'
     paired_block = '2'
     new_boundary = 'not_in_mesh'
   [../]

@@ -32,5 +32,5 @@ Real
 InterfaceAverageVariableValuePostprocessor::getValue()
 {
   Real integral = InterfaceIntegralVariableValuePostprocessor::getValue();
-  return integral / _interface_master_area;
+  return integral / _interface_primary_area;
 }

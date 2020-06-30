@@ -3,18 +3,18 @@
     type = FileMeshGenerator
     file = square.msh
   []
-  [slave]
+  [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 11
-    new_block_name = "slave"
+    new_block_name = "secondary"
     sidesets = '101'
   []
-  [master]
-    input = slave
+  [primary]
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     new_block_id = 12
-    new_block_name = "master"
+    new_block_name = "primary"
     sidesets = '103'
   []
 []
@@ -25,7 +25,7 @@
     block = 'domain'
   []
   [lm]
-    block = 'slave'
+    block = 'secondary'
   []
 []
 
@@ -55,11 +55,11 @@
   [ev]
     type = EqualValueConstraint
     variable = lm
-    slave_variable = u
-    master_boundary = 103
-    slave_boundary = 101
-    master_subdomain = 12
-    slave_subdomain = 11
+    secondary_variable = u
+    primary_boundary = 103
+    secondary_boundary = 101
+    primary_subdomain = 12
+    secondary_subdomain = 11
     periodic = true
   []
 []

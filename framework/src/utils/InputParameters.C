@@ -58,6 +58,7 @@ InputParameters::clear()
   Parameters::clear();
   _params.clear();
   _coupled_vars.clear();
+  _new_to_deprecated_coupled_vars.clear();
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
@@ -131,6 +132,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
   _coupled_vars = rhs._coupled_vars;
+  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _allow_copy = rhs._allow_copy;
   _block_fullpath = rhs._block_fullpath;
   _block_location = rhs._block_location;
@@ -155,7 +157,27 @@ InputParameters::operator+=(const InputParameters & rhs)
 
   // Collapse nesting and moose object syntax hiding are not modified with +=
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
+  _new_to_deprecated_coupled_vars.insert(rhs._new_to_deprecated_coupled_vars.begin(),
+                                         rhs._new_to_deprecated_coupled_vars.end());
   return *this;
+}
+
+void
+InputParameters::setDeprecatedVarDocString(const std::string & new_name,
+                                           const std::string & doc_string)
+{
+  auto coupled_vars_it = _new_to_deprecated_coupled_vars.find(new_name);
+  if (coupled_vars_it != _new_to_deprecated_coupled_vars.end())
+  {
+    auto params_it = _params.find(coupled_vars_it->second);
+    if (params_it == _params.end())
+      mooseError("There must have been a mistake in the construction of the new to deprecated "
+                 "coupled vars map because the old name ",
+                 coupled_vars_it->second,
+                 " doesn't exist in the parameters data.");
+
+    params_it->second._doc_string = doc_string;
+  }
 }
 
 void
@@ -165,6 +187,9 @@ InputParameters::addCoupledVar(const std::string & name, Real value, const std::
   _coupled_vars.insert(name);
   _params[name]._coupled_default.assign(1, value);
   _params[name]._have_coupled_default = true;
+
+  // Set the doc string for any associated deprecated coupled var
+  setDeprecatedVarDocString(name, doc_string);
 }
 
 void
@@ -177,6 +202,9 @@ InputParameters::addCoupledVar(const std::string & name,
   _coupled_vars.insert(name);
   _params[name]._coupled_default = value;
   _params[name]._have_coupled_default = true;
+
+  // Set the doc string for any associated deprecated coupled var
+  setDeprecatedVarDocString(name, doc_string);
 }
 
 void
@@ -184,6 +212,35 @@ InputParameters::addCoupledVar(const std::string & name, const std::string & doc
 {
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
+
+  // Set the doc string for any associated deprecated coupled var
+  setDeprecatedVarDocString(name, doc_string);
+}
+
+void
+InputParameters::addDeprecatedCoupledVar(const std::string & old_name,
+                                         const std::string & new_name,
+                                         const std::string & removal_date /*=""*/)
+{
+  _show_deprecated_message = false;
+
+  // Set the doc string if we are adding the deprecated var after the new var has already been added
+  auto params_it = _params.find(new_name);
+  std::string doc_string;
+  if (params_it != _params.end())
+    doc_string = params_it->second._doc_string;
+
+  addParam<std::vector<VariableName>>(old_name, doc_string);
+  _coupled_vars.insert(old_name);
+  _new_to_deprecated_coupled_vars.emplace(new_name, old_name);
+
+  std::string deprecation_message =
+      "The coupled variable parameter '" + old_name + "' has been deprecated";
+  if (!removal_date.empty())
+    deprecation_message += " and will be removed " + removal_date;
+  deprecation_message += ". Please use the '" + new_name + "' coupled variable parameter instead.";
+  _params[old_name]._deprecation_message = deprecation_message;
+  _show_deprecated_message = true;
 }
 
 void

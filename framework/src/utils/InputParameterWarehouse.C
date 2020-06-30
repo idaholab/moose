@@ -161,61 +161,62 @@ InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
 }
 
 void
-InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & master,
-                                                            const MooseObjectParameterName & slave,
-                                                            bool error_on_empty /*=true*/)
+InputParameterWarehouse::addControllableParameterConnection(
+    const MooseObjectParameterName & primary,
+    const MooseObjectParameterName & secondary,
+    bool error_on_empty /*=true*/)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> masters = getControllableItems(master, tid);
-    if (masters.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
-      mooseError("Unable to locate master parameter with name ", master);
-    else if (masters.empty())
+    std::vector<ControllableItem *> primaries = getControllableItems(primary, tid);
+    if (primaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate primary parameter with name ", primary);
+    else if (primaries.empty())
       return;
 
-    std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
-    if (slaves.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
-      mooseError("Unable to locate slave parameter with name ", slave);
-    else if (slaves.empty())
+    std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
+    if (secondaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate secondary parameter with name ", secondary);
+    else if (secondaries.empty())
       return;
 
-    for (auto master_ptr : masters)
-      for (auto slave_ptr : slaves)
-        if (master_ptr != slave_ptr)
-          master_ptr->connect(slave_ptr);
+    for (auto primary_ptr : primaries)
+      for (auto secondary_ptr : secondaries)
+        if (primary_ptr != secondary_ptr)
+          primary_ptr->connect(secondary_ptr);
   }
 }
 
 void
 InputParameterWarehouse::addControllableObjectAlias(const MooseObjectName & alias,
-                                                    const MooseObjectName & slave)
+                                                    const MooseObjectName & secondary)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> slaves =
-        getControllableItems(MooseObjectParameterName(slave, "*"), tid);
-    for (auto slave_ptr : slaves)
+    std::vector<ControllableItem *> secondaries =
+        getControllableItems(MooseObjectParameterName(secondary, "*"), tid);
+    for (auto secondary_ptr : secondaries)
     {
-      MooseObjectParameterName alias_param(alias, slave_ptr->name().parameter());
-      MooseObjectParameterName slave_param(slave, slave_ptr->name().parameter());
-      addControllableParameterAlias(alias_param, slave_param);
+      MooseObjectParameterName alias_param(alias, secondary_ptr->name().parameter());
+      MooseObjectParameterName secondary_param(secondary, secondary_ptr->name().parameter());
+      addControllableParameterAlias(alias_param, secondary_param);
     }
   }
 }
 
 void
 InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParameterName & alias,
-                                                       const MooseObjectParameterName & slave)
+                                                       const MooseObjectParameterName & secondary)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
-    if (slaves.empty() && tid == 0) // some objects only exist on tid 0
-      mooseError("Unable to locate slave parameter with name ", slave);
+    std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
+    if (secondaries.empty() && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate secondary parameter with name ", secondary);
 
-    for (auto slave_ptr : slaves)
+    for (auto secondary_ptr : secondaries)
       _controllable_items[tid].emplace_back(
-          libmesh_make_unique<ControllableAlias>(alias, slave_ptr));
+          libmesh_make_unique<ControllableAlias>(alias, secondary_ptr));
   }
 }
 

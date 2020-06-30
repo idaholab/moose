@@ -12,8 +12,8 @@ g\lambda &= 0
 \end{equation}
 
 where $g$ is the gap and $\lambda$ is the contact pressure, a Lagrange multipler
-variable living on the slave face. This object enforces constraints nodally so
-that zero penetration of nodes is observed into the master face.
+variable living on the secondary face. This object enforces constraints nodally so
+that zero penetration of nodes is observed into the primary face.
 
 The `ncp_function_type` parameter specifies the type of nonlinear
 complimentarity problem (NCP) function to use. The options are either `min`, which is just the

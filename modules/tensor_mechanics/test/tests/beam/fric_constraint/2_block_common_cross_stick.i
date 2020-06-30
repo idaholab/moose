@@ -133,7 +133,7 @@
     type = NodalStickConstraint
     penalty = 1e8
     boundary = 6
-    slave = 4
+    secondary = 4
     variable = disp_z
     formulation = kinematic
   [../]
@@ -141,7 +141,7 @@
     type = NodalStickConstraint
     penalty = 1e8
     boundary = 6
-    slave = 5
+    secondary = 5
     variable = disp_z
     formulation = kinematic
   [../]

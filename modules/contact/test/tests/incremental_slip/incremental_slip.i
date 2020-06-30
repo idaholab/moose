@@ -16,33 +16,33 @@
 []
 
 [Functions]
-  [./slave_x]
+  [./secondary_x]
     type = PiecewiseLinear
     x = '0 1 2   3 4 5  6    7 8   9'
     y = '0 0 0.5 0 0 0 -0.25 0 0.5 0'
   [../]
-  [./slave_y]
+  [./secondary_y]
     type = PiecewiseLinear
     x = '0  1     9'
     y = '0 -0.15 -0.15'
   [../]
-  [./slave_z]
+  [./secondary_z]
     type = PiecewiseLinear
     x = '0 1  2   3 4 5 6    7  8   9'
     y = '0 0 -0.5 0 0 0 0.25 0 -0.5 0'
   [../]
 
-  [./master_x]
+  [./primary_x]
     type = PiecewiseLinear
     x = '0 1  2 3 4   5 6    7 8   9'
     y = '0 0  0 0 0.5 0 0.25 0 0.5 0'
   [../]
-  [./master_y]
+  [./primary_y]
     type = PiecewiseLinear
     x = '0 9'
     y = '0 0'
   [../]
-  [./master_z]
+  [./primary_z]
     type = PiecewiseLinear
     x = '0 1  2 3 4   5  6    7  8   9'
     y = '0 0  0 0 0.5 0 -0.25 0 -0.5 0'
@@ -90,52 +90,52 @@
 
 [Contact]
   [./dummy_name]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
     penalty = 1e7
   [../]
 []
 
 [BCs]
-  [./slave_x]
+  [./secondary_x]
     type = FunctionDirichletBC
     variable = disp_x
     preset = false
     boundary = 4
-    function = slave_x
+    function = secondary_x
   [../]
-  [./slave_y]
+  [./secondary_y]
     type = FunctionDirichletBC
     variable = disp_y
     preset = false
     boundary = 4
-    function = slave_y
+    function = secondary_y
   [../]
-  [./slave_z]
+  [./secondary_z]
     type = FunctionDirichletBC
     variable = disp_z
     preset = false
     boundary = 4
-    function = slave_z
+    function = secondary_z
   [../]
 
-  [./master_x]
+  [./primary_x]
     type = FunctionDirichletBC
     variable = disp_x
     boundary = '1 2'
-    function = master_x
+    function = primary_x
   [../]
-  [./master_y]
+  [./primary_y]
     type = FunctionDirichletBC
     variable = disp_y
     boundary = '1 2'
-    function = master_y
+    function = primary_y
   [../]
-  [./master_z]
+  [./primary_z]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = '1 2'
-    function = master_z
+    function = primary_z
   [../]
 [] # BCs
 

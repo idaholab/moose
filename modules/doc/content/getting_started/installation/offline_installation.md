@@ -78,9 +78,9 @@ As an example, the above command, should return something like this:
 
 ```pre
 ===============================================================================
-             Configuring PETSc to compile on your system                       
+             Configuring PETSc to compile on your system
 ===============================================================================
-Download the following packages to /home/you/offline/downloads 
+Download the following packages to /home/you/offline/downloads
 
 fblaslapack ['git://https://bitbucket.org/petsc/pkg-fblaslapack', 'https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p2.tar.gz']
 hypre ['git://https://github.com/hypre-space/hypre', 'https://github.com/hypre-space/hypre/archive/93baaa8c9.tar.gz']
@@ -233,4 +233,4 @@ export LIBMESH_DIR=$HOME/libs/libmesh
 export MOOSE_DIR=$HOME/offline/moose
 ```
 
-You will need to perform the above, each and every time you log into the target machine and wish to perform development on your application. To that end, creating a special profile you can source in one command is recommended. 
+You will need to perform the above, each and every time you log into the target machine and wish to perform development on your application. To that end, creating a special profile you can source in one command is recommended.

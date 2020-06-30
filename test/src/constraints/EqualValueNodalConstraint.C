@@ -15,8 +15,8 @@ InputParameters
 EqualValueNodalConstraint::validParams()
 {
   InputParameters params = NodalConstraint::validParams();
-  params.addRequiredParam<unsigned int>("master", "The ID of the master node");
-  params.addRequiredParam<unsigned int>("slave", "The ID of the slave node");
+  params.addRequiredParam<unsigned int>("primary", "The ID of the primary node");
+  params.addRequiredParam<unsigned int>("secondary", "The ID of the secondary node");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
@@ -24,8 +24,8 @@ EqualValueNodalConstraint::validParams()
 EqualValueNodalConstraint::EqualValueNodalConstraint(const InputParameters & parameters)
   : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
-  _connected_nodes.push_back(getParam<unsigned int>("slave"));
-  _master_node_vector.push_back(getParam<unsigned int>("master"));
+  _connected_nodes.push_back(getParam<unsigned int>("secondary"));
+  _primary_node_vector.push_back(getParam<unsigned int>("primary"));
 }
 
 EqualValueNodalConstraint::~EqualValueNodalConstraint() {}
@@ -35,11 +35,11 @@ EqualValueNodalConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-    case Moose::Master:
-      return (_u_master[_j] - _u_slave[_i]) * _penalty;
+    case Moose::Primary:
+      return (_u_primary[_j] - _u_secondary[_i]) * _penalty;
 
-    case Moose::Slave:
-      return (_u_slave[_i] - _u_master[_j]) * _penalty;
+    case Moose::Secondary:
+      return (_u_secondary[_i] - _u_primary[_j]) * _penalty;
   }
 
   return 0.;
@@ -50,16 +50,16 @@ EqualValueNodalConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   switch (type)
   {
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       return _penalty;
 
-    case Moose::MasterSlave:
+    case Moose::PrimarySecondary:
       return -_penalty;
 
-    case Moose::SlaveSlave:
+    case Moose::SecondarySecondary:
       return _penalty;
 
-    case Moose::SlaveMaster:
+    case Moose::SecondaryPrimary:
       return -_penalty;
 
     default:

@@ -15,9 +15,9 @@
   [./interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
 []
 
@@ -57,7 +57,7 @@
     type = InterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     D = 'D'
     D_neighbor = 'D'
   [../]
@@ -65,7 +65,7 @@
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     penalty = 1e6
   [../]
 []
@@ -87,7 +87,7 @@
   [./middle]
     type = MatchedValueBC
     variable = v
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     v = u
   [../]
 []
@@ -96,7 +96,7 @@
   [./stateful]
     type = StatefulMaterial
     initial_diffusivity = 1
-    boundary = master0_interface
+    boundary = primary0_interface
   [../]
   [./block0]
     type = GenericConstantMaterial

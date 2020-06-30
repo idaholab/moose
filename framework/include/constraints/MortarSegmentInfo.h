@@ -46,7 +46,7 @@ struct MortarSegmentInfo
   // MortarSegmentInfo(const MortarSegmentInfo &) = default;
 
   /**
-   * Prints xi values and slave/master Elem ids.
+   * Prints xi values and secondary/primary Elem ids.
    */
   void print() const;
 
@@ -55,17 +55,17 @@ struct MortarSegmentInfo
    * otherwise. The segment can be "invalid" for a host of different
    * reasons, see the list below.
    */
-  bool is_valid() const;
+  bool isValid() const;
 
   /**
-   * Returns true if this segment has a valid master, false otherwise.
+   * Returns true if this segment has a valid primary, false otherwise.
    */
-  bool has_master() const;
+  bool hasPrimary() const;
 
   Real xi1_a, xi1_b;
   Real xi2_a, xi2_b;
-  const Elem * slave_elem;
-  const Elem * master_elem;
+  const Elem * secondary_elem;
+  const Elem * primary_elem;
 
   // A magic number to let us determine when xi values have not been
   // initialized yet.

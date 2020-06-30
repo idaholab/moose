@@ -108,8 +108,8 @@ name = 'finite'
 [Contact]
   [./frictionless]
     mesh = block_sidesets
-    master = plank_right
-    slave = block_left
+    primary = plank_right
+    secondary = block_left
     formulation = mortar
   [../]
 []
@@ -215,7 +215,7 @@ name = 'finite'
   [./contact]
     type = ContactDOFSetSize
     variable = frictionless_normal_lm
-    subdomain = frictionless_slave_subdomain
+    subdomain = frictionless_secondary_subdomain
   [../]
   [./avg_hydro]
     type = ElementAverageValue

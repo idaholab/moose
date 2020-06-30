@@ -188,8 +188,8 @@
 
 [Contact]
   [./dummy_name]
-    master = 1000
-    slave = 100
+    primary = 1000
+    secondary = 100
     model = coulomb
     formulation = penalty
     normalize_penalty = true

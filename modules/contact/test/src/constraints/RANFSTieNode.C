@@ -58,7 +58,7 @@ RANFSTieNode::residualSetup()
 }
 
 bool
-RANFSTieNode::overwriteSlaveResidual()
+RANFSTieNode::overwriteSecondaryResidual()
 {
   return _nearest_node;
 }
@@ -70,36 +70,36 @@ RANFSTieNode::shouldApply()
   _nearest_node = nearest_node_loc.nearestNode(_current_node->id());
   if (_nearest_node)
   {
-    auto slave_dof_number = _current_node->dof_number(0, _vars[_component], 0);
-    // We overwrite the slave residual so we cannot use the residual
+    auto secondary_dof_number = _current_node->dof_number(0, _vars[_component], 0);
+    // We overwrite the secondary residual so we cannot use the residual
     // copy for determining the Lagrange multiplier when computing the Jacobian
     if (!_subproblem.currentlyComputingJacobian())
       _node_to_lm.insert(std::make_pair(_current_node->id(),
-                                        _residual_copy(slave_dof_number) /
+                                        _residual_copy(secondary_dof_number) /
                                             _var_objects[_component]->scalingFactor()));
     else
     {
-      std::vector<dof_id_type> master_cols;
-      std::vector<Number> master_values;
+      std::vector<dof_id_type> primary_cols;
+      std::vector<Number> primary_values;
 
-      _jacobian->get_row(slave_dof_number, master_cols, master_values);
-      mooseAssert(master_cols.size() == master_values.size(),
+      _jacobian->get_row(secondary_dof_number, primary_cols, primary_values);
+      mooseAssert(primary_cols.size() == primary_values.size(),
                   "The size of the dof container and value container are different");
 
       _dof_number_to_value.clear();
 
-      for (MooseIndex(master_cols) i = 0; i < master_cols.size(); ++i)
+      for (MooseIndex(primary_cols) i = 0; i < primary_cols.size(); ++i)
         _dof_number_to_value.insert(
-            std::make_pair(master_cols[i], master_values[i] / _var.scalingFactor()));
+            std::make_pair(primary_cols[i], primary_values[i] / _var.scalingFactor()));
     }
 
     mooseAssert(_node_to_lm.find(_current_node->id()) != _node_to_lm.end(),
                 "The node " << _current_node->id() << " should map to a lagrange multiplier");
     _lagrange_multiplier = _node_to_lm[_current_node->id()];
 
-    _master_index = _current_master->get_node_index(_nearest_node);
-    mooseAssert(_master_index != libMesh::invalid_uint,
-                "nearest node not a node on the current master element");
+    _primary_index = _current_primary->get_node_index(_nearest_node);
+    mooseAssert(_primary_index != libMesh::invalid_uint,
+                "nearest node not a node on the current primary element");
 
     return true;
   }
@@ -112,12 +112,12 @@ RANFSTieNode::computeQpResidual(Moose::ConstraintType type)
 {
   switch (type)
   {
-    case Moose::ConstraintType::Slave:
+    case Moose::ConstraintType::Secondary:
       return (*_current_node - *_nearest_node)(_component);
 
-    case Moose::ConstraintType::Master:
+    case Moose::ConstraintType::Primary:
     {
-      if (_i == _master_index)
+      if (_i == _primary_index)
         return _lagrange_multiplier;
 
       else
@@ -134,17 +134,17 @@ RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   switch (type)
   {
-    case Moose::ConstraintJacobianType::SlaveSlave:
-      return _phi_slave[_j][_qp];
+    case Moose::ConstraintJacobianType::SecondarySecondary:
+      return _phi_secondary[_j][_qp];
 
-    case Moose::ConstraintJacobianType::SlaveMaster:
-      if (_master_index == _j)
+    case Moose::ConstraintJacobianType::SecondaryPrimary:
+      if (_primary_index == _j)
         return -1;
       else
         return 0;
 
-    case Moose::ConstraintJacobianType::MasterSlave:
-      if (_i == _master_index)
+    case Moose::ConstraintJacobianType::PrimarySecondary:
+      if (_i == _primary_index)
       {
         mooseAssert(_dof_number_to_value.find(_connected_dof_indices[_j]) !=
                         _dof_number_to_value.end(),
@@ -161,12 +161,13 @@ RANFSTieNode::computeQpJacobian(Moose::ConstraintJacobianType type)
 }
 
 void
-RANFSTieNode::computeSlaveValue(NumericVector<Number> &)
+RANFSTieNode::computeSecondaryValue(NumericVector<Number> &)
 {
 }
 
 Real
-RANFSTieNode::computeQpSlaveValue()
+RANFSTieNode::computeQpSecondaryValue()
 {
-  mooseError("We overrode commputeSlaveValue so computeQpSlaveValue should never get called");
+  mooseError(
+      "We overrode commputeSecondaryValue so computeQpSecondaryValue should never get called");
 }

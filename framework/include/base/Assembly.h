@@ -826,8 +826,8 @@ public:
                                 const std::vector<dof_id_type> & jdof_indices);
 
   /**
-   * Add LowerLower, LowerSlave (LowerElement), LowerMaster (LowerNeighbor), SlaveLower
-   * (ElementLower), and MasterLower (NeighborLower) portions of the Jacobian for compute objects
+   * Add LowerLower, LowerSecondary (LowerElement), LowerPrimary (LowerNeighbor), SecondaryLower
+   * (ElementLower), and PrimaryLower (NeighborLower) portions of the Jacobian for compute objects
    * like MortarConstraints
    */
   void addJacobianLower();
@@ -2004,13 +2004,13 @@ protected:
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knn;
   /// dlower/dlower
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kll;
-  /// dlower/dslave (or dlower/delement)
+  /// dlower/dsecondary (or dlower/delement)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kle;
-  /// dlower/dmaster (or dlower/dneighbor)
+  /// dlower/dprimary (or dlower/dneighbor)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kln;
-  /// dslave/dlower (or delement/dlower)
+  /// dsecondary/dlower (or delement/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kel;
-  /// dmaster/dlower (or dneighbor/dlower)
+  /// dprimary/dlower (or dneighbor/dlower)
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knl;
 
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)

@@ -40,8 +40,8 @@
 
 [Contact]
   [./fred]
-    master = 1
-    slave = 2
+    primary = 1
+    secondary = 2
     displacements = 'disp_x disp_y disp_z'
   [../]
 []

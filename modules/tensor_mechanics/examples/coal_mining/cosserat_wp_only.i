@@ -107,7 +107,7 @@
   [roof]
     type = SideSetsBetweenSubdomainsGenerator
     new_boundary = 21
-    master_block = 0
+    primary_block = 0
     paired_block = 1
     input = excav
   []

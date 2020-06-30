@@ -10,7 +10,7 @@
 #include "NearestNodeLocator.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
-#include "SlaveNeighborhoodThread.h"
+#include "SecondaryNeighborhoodThread.h"
 #include "NearestNodeThread.h"
 #include "Moose.h"
 #include "KDTree.h"
@@ -36,7 +36,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
                            Moose::stringify(boundary2)),
     _subproblem(subproblem),
     _mesh(mesh),
-    _slave_node_range(NULL),
+    _secondary_node_range(nullptr),
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
@@ -61,7 +61,7 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
   */
 }
 
-NearestNodeLocator::~NearestNodeLocator() { delete _slave_node_range; }
+NearestNodeLocator::~NearestNodeLocator() { delete _secondary_node_range; }
 
 void
 NearestNodeLocator::findNodes()
@@ -70,7 +70,7 @@ NearestNodeLocator::findNodes()
 
   /**
    * If this is the first time through we're going to build up a "neighborhood" of nodes
-   * surrounding each of the slave nodes.  This will speed searching later.
+   * surrounding each of the secondary nodes.  This will speed searching later.
    */
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
 
@@ -78,12 +78,12 @@ NearestNodeLocator::findNodes()
   {
     _first = false;
 
-    // Trial slave nodes are all the nodes on the slave side
+    // Trial secondary nodes are all the nodes on the secondary side
     // We only keep the ones that are either on this processor or are likely
     // to interact with elements on this processor (ie nodes owned by this processor
-    // are in the "neighborhood" of the slave node
-    std::vector<dof_id_type> trial_slave_nodes;
-    std::vector<dof_id_type> trial_master_nodes;
+    // are in the "neighborhood" of the secondary node
+    std::vector<dof_id_type> trial_secondary_nodes;
+    std::vector<dof_id_type> trial_primary_nodes;
 
     // Build a bounding box.  No reason to consider nodes outside of our inflated BB
     std::unique_ptr<BoundingBox> my_inflated_box = nullptr;
@@ -114,46 +114,47 @@ NearestNodeLocator::findNodes()
       if (!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
       {
         if (boundary_id == _boundary1)
-          trial_master_nodes.push_back(node_id);
+          trial_primary_nodes.push_back(node_id);
         else if (boundary_id == _boundary2)
-          trial_slave_nodes.push_back(node_id);
+          trial_secondary_nodes.push_back(node_id);
       }
     }
 
-    // Convert trial master nodes to a vector of Points. This will be used to
+    // Convert trial primary nodes to a vector of Points. This will be used to
     // construct the Kdtree.
-    std::vector<Point> master_points(trial_master_nodes.size());
-    for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
+    std::vector<Point> primary_points(trial_primary_nodes.size());
+    for (unsigned int i = 0; i < trial_primary_nodes.size(); ++i)
     {
-      const Node & node = _mesh.nodeRef(trial_master_nodes[i]);
-      master_points[i] = node;
+      const Node & node = _mesh.nodeRef(trial_primary_nodes[i]);
+      primary_points[i] = node;
     }
 
     // Create object kd_tree of class KDTree using the coordinates of trial
-    // master nodes.
-    KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
+    // primary nodes.
+    KDTree kd_tree(primary_points, _mesh.getMaxLeafSize());
 
-    NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
+    NodeIdRange trial_secondary_node_range(
+        trial_secondary_nodes.begin(), trial_secondary_nodes.end(), 1);
 
-    SlaveNeighborhoodThread snt(
-        _mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
+    SecondaryNeighborhoodThread snt(
+        _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
-    Threads::parallel_reduce(trial_slave_node_range, snt);
+    Threads::parallel_reduce(trial_secondary_node_range, snt);
 
-    _slave_nodes = snt._slave_nodes;
+    _secondary_nodes = snt._secondary_nodes;
     _neighbor_nodes = snt._neighbor_nodes;
 
     // If 'iteration' patch update strategy is used, a second neighborhood
     // search using the ghosting_patch_size, which is larger than the regular
     // patch_size used for contact search, is conducted. The ghosted element set
     // given by this search is used for ghosting the elements connected to the
-    // slave and neighboring master nodes.
+    // secondary and neighboring primary nodes.
     if (_patch_update_strategy == Moose::Iteration)
     {
-      SlaveNeighborhoodThread snt_ghosting(
-          _mesh, trial_master_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
+      SecondaryNeighborhoodThread snt_ghosting(
+          _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
-      Threads::parallel_reduce(trial_slave_node_range, snt_ghosting);
+      Threads::parallel_reduce(trial_secondary_node_range, snt_ghosting);
 
       for (const auto & dof : snt_ghosting._ghosted_elems)
         _subproblem.addGhostedElem(dof);
@@ -164,15 +165,15 @@ NearestNodeLocator::findNodes()
         _subproblem.addGhostedElem(dof);
     }
 
-    // Cache the slave_node_range so we don't have to build it each time
-    _slave_node_range = new NodeIdRange(_slave_nodes.begin(), _slave_nodes.end(), 1);
+    // Cache the secondary_node_range so we don't have to build it each time
+    _secondary_node_range = new NodeIdRange(_secondary_nodes.begin(), _secondary_nodes.end(), 1);
   }
 
   _nearest_node_info.clear();
 
   NearestNodeThread nnt(_mesh, _neighbor_nodes);
 
-  Threads::parallel_reduce(*_slave_node_range, nnt);
+  Threads::parallel_reduce(*_secondary_node_range, nnt);
 
   _max_patch_percentage = nnt._max_patch_percentage;
 
@@ -183,7 +184,7 @@ NearestNodeLocator::findNodes()
     // Get the set of elements that are currently being ghosted
     std::set<dof_id_type> ghost = _subproblem.ghostedElems();
 
-    for (const auto & node_id : *_slave_node_range)
+    for (const auto & node_id : *_secondary_node_range)
     {
       const Node * nearest_node = _nearest_node_info[node_id]._nearest_node;
 
@@ -211,13 +212,13 @@ NearestNodeLocator::reinit()
   TIME_SECTION(_reinit_timer);
 
   // Reset all data
-  delete _slave_node_range;
-  _slave_node_range = NULL;
+  delete _secondary_node_range;
+  _secondary_node_range = nullptr;
   _nearest_node_info.clear();
 
   _first = true;
 
-  _slave_nodes.clear();
+  _secondary_nodes.clear();
   _neighbor_nodes.clear();
 
   _new_ghosted_elems.clear();
@@ -239,11 +240,11 @@ NearestNodeLocator::nearestNode(dof_id_type node_id)
 }
 
 void
-NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
+NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
 {
   TIME_SECTION(_update_patch_timer);
 
-  std::vector<dof_id_type> trial_master_nodes;
+  std::vector<dof_id_type> trial_primary_nodes;
 
   // Build a bounding box.  No reason to consider nodes outside of our inflated BB
   std::unique_ptr<BoundingBox> my_inflated_box = nullptr;
@@ -274,60 +275,61 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
     if (!my_inflated_box || (my_inflated_box->contains_point(*bnode->_node)))
     {
       if (boundary_id == _boundary1)
-        trial_master_nodes.push_back(node_id);
+        trial_primary_nodes.push_back(node_id);
     }
   }
 
-  // Convert trial master nodes to a vector of Points. This will be used to construct the KDTree.
-  std::vector<Point> master_points(trial_master_nodes.size());
-  for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
+  // Convert trial primary nodes to a vector of Points. This will be used to construct the KDTree.
+  std::vector<Point> primary_points(trial_primary_nodes.size());
+  for (unsigned int i = 0; i < trial_primary_nodes.size(); ++i)
   {
-    const Node & node = _mesh.nodeRef(trial_master_nodes[i]);
-    master_points[i] = node;
+    const Node & node = _mesh.nodeRef(trial_primary_nodes[i]);
+    primary_points[i] = node;
   }
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
 
   // Create object kd_tree of class KDTree using the coordinates of trial
-  // master nodes.
-  KDTree kd_tree(master_points, _mesh.getMaxLeafSize());
+  // primary nodes.
+  KDTree kd_tree(primary_points, _mesh.getMaxLeafSize());
 
-  NodeIdRange slave_node_range(slave_nodes.begin(), slave_nodes.end(), 1);
+  NodeIdRange secondary_node_range(secondary_nodes.begin(), secondary_nodes.end(), 1);
 
-  SlaveNeighborhoodThread snt(
-      _mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
+  SecondaryNeighborhoodThread snt(
+      _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
-  Threads::parallel_reduce(slave_node_range, snt);
+  Threads::parallel_reduce(secondary_node_range, snt);
 
-  // Calculate new ghosting patch for the slave_node_range
-  SlaveNeighborhoodThread snt_ghosting(
-      _mesh, trial_master_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
+  // Calculate new ghosting patch for the secondary_node_range
+  SecondaryNeighborhoodThread snt_ghosting(
+      _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
-  Threads::parallel_reduce(slave_node_range, snt_ghosting);
+  Threads::parallel_reduce(secondary_node_range, snt_ghosting);
 
   // Add the new set of elements that need to be ghosted into _new_ghosted_elems
   for (const auto & dof : snt_ghosting._ghosted_elems)
     _new_ghosted_elems.push_back(dof);
 
-  std::vector<dof_id_type> tracked_slave_nodes = snt._slave_nodes;
+  std::vector<dof_id_type> tracked_secondary_nodes = snt._secondary_nodes;
 
-  // Update the neighbor nodes (patch) for these tracked slave nodes
-  for (const auto & node_id : tracked_slave_nodes)
+  // Update the neighbor nodes (patch) for these tracked secondary nodes
+  for (const auto & node_id : tracked_secondary_nodes)
     _neighbor_nodes[node_id] = snt._neighbor_nodes[node_id];
 
-  NodeIdRange tracked_slave_node_range(tracked_slave_nodes.begin(), tracked_slave_nodes.end(), 1);
+  NodeIdRange tracked_secondary_node_range(
+      tracked_secondary_nodes.begin(), tracked_secondary_nodes.end(), 1);
 
   NearestNodeThread nnt(_mesh, snt._neighbor_nodes);
 
-  Threads::parallel_reduce(tracked_slave_node_range, nnt);
+  Threads::parallel_reduce(tracked_secondary_node_range, nnt);
 
   _max_patch_percentage = nnt._max_patch_percentage;
 
   // Get the set of elements that are currently being ghosted
   std::set<dof_id_type> ghost = _subproblem.ghostedElems();
 
-  // Update the nearest node information corresponding to these tracked slave nodes
-  for (const auto & node_id : tracked_slave_node_range)
+  // Update the nearest node information corresponding to these tracked secondary nodes
+  for (const auto & node_id : tracked_secondary_node_range)
   {
     _nearest_node_info[node_id] = nnt._nearest_node_info[node_id];
 
@@ -368,6 +370,6 @@ NearestNodeLocator::updateGhostedElems()
 }
 //===================================================================
 NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()
-  : _nearest_node(NULL), _distance(std::numeric_limits<Real>::max())
+  : _nearest_node(nullptr), _distance(std::numeric_limits<Real>::max())
 {
 }

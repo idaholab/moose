@@ -1348,15 +1348,15 @@ public:
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual void updateMortarMesh();
 
-  void
-  createMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-                        const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
-                        bool on_displaced,
-                        bool periodic);
+  void createMortarInterface(
+      const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+      const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+      bool on_displaced,
+      bool periodic);
 
   const AutomaticMortarGeneration &
-  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-                     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                      bool on_displaced) const;
 
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &

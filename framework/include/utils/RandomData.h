@@ -63,4 +63,3 @@ private:
 
   std::unordered_map<dof_id_type, unsigned int> _seeds;
 };
-

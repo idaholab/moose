@@ -25,8 +25,8 @@ public:
   PenetrationThread(
       SubProblem & subproblem,
       const MooseMesh & mesh,
-      BoundaryID master_boundary,
-      BoundaryID slave_boundary,
+      BoundaryID primary_boundary,
+      BoundaryID secondary_boundary,
       std::map<dof_id_type, PenetrationInfo *> & penetration_info,
       bool check_whether_reasonable,
       bool update_location,
@@ -47,15 +47,15 @@ public:
 
   void join(const PenetrationThread & other);
 
-  /// List of slave nodes for which penetration was not detected in the current patch and for which patch has to be updated.
-  std::vector<dof_id_type> _recheck_slave_nodes;
+  /// List of secondary nodes for which penetration was not detected in the current patch and for which patch has to be updated.
+  std::vector<dof_id_type> _recheck_secondary_nodes;
 
 protected:
   SubProblem & _subproblem;
   // The Mesh
   const MooseMesh & _mesh;
-  BoundaryID _master_boundary;
-  BoundaryID _slave_boundary;
+  BoundaryID _primary_boundary;
+  BoundaryID _secondary_boundary;
 
   // This is the info map we're actually filling here
   std::map<dof_id_type, PenetrationInfo *> & _penetration_info;
@@ -136,10 +136,10 @@ protected:
                                           const std::vector<const Node *> & edge_nodes);
   bool restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side);
 
-  bool isFaceReasonableCandidate(const Elem * master_elem,
+  bool isFaceReasonableCandidate(const Elem * primary_elem,
                                  const Elem * side,
                                  FEBase * fe,
-                                 const Point * slave_point,
+                                 const Point * secondary_point,
                                  const Real tangential_tolerance);
 
   void smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info);
@@ -153,7 +153,7 @@ protected:
                                        std::vector<std::vector<const Node *>> & edge_nodes,
                                        std::vector<Real> & edge_face_weights);
 
-  void getInfoForFacesWithCommonNodes(const Node * slave_node,
+  void getInfoForFacesWithCommonNodes(const Node * secondary_node,
                                       const std::set<dof_id_type> & elems_to_exclude,
                                       const std::vector<const Node *> edge_nodes,
                                       std::vector<PenetrationInfo *> & face_info_comm_edge,
@@ -165,12 +165,12 @@ protected:
 
   void createInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
                          std::vector<PenetrationInfo *> & p_info,
-                         const Node * slave_node,
+                         const Node * secondary_node,
                          const Elem * elem,
                          const std::vector<const Node *> & nodes_that_must_be_on_side,
                          const bool check_whether_reasonable = false);
 
-  void getSidesOnMasterBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
+  void getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides, const Elem * const elem);
 
   void computeSlip(FEBase & fe, PenetrationInfo & info);
 
@@ -193,4 +193,3 @@ protected:
     std::vector<RidgeData> _ridge_data_vec;
   };
 };
-

@@ -30,7 +30,7 @@ public:
   CoupledTiedValueConstraint(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
 

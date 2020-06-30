@@ -27,17 +27,17 @@ namespace Moose
 {
 
 /**
- * Finds the closest point (called the contact point) on the master_elem on side "side" to the
- * slave_point.
+ * Finds the closest point (called the contact point) on the primary_elem on side "side" to the
+ * secondary_point.
  *
- * @param p_info The penetration info object, contains master_elem, side, various other information
+ * @param p_info The penetration info object, contains primary_elem, side, various other information
  * @param fe_elem FE object for the element
  * @param fe_side FE object for the side
  * @param fe_side_type The type of fe_side, needed for inverse_map routines
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
  * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a
  * side
- * @param slave_point The physical space coordinates of the slave node
+ * @param secondary_point The physical space coordinates of the secondary node
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
  * element.
  */
@@ -46,14 +46,14 @@ findContactPoint(PenetrationInfo & p_info,
                  FEBase * fe_elem,
                  FEBase * fe_side,
                  FEType & fe_side_type,
-                 const Point & slave_point,
+                 const Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
                  bool & contact_point_on_side)
 {
-  const Elem * master_elem = p_info._elem;
+  const Elem * primary_elem = p_info._elem;
 
-  unsigned int dim = master_elem->dim();
+  unsigned int dim = primary_elem->dim();
 
   const Elem * side = p_info._side;
 
@@ -72,21 +72,21 @@ findContactPoint(PenetrationInfo & p_info,
     const Node * nearest_node = side->node_ptr(0);
     p_info._closest_point = *nearest_node;
     p_info._closest_point_ref =
-        master_elem->master_point(master_elem->get_node_index(nearest_node));
+        primary_elem->master_point(primary_elem->get_node_index(nearest_node));
     std::vector<Point> elem_points = {p_info._closest_point_ref};
 
     const std::vector<RealGradient> & elem_dxyz_dxi = fe_elem->get_dxyzdxi();
 
-    fe_elem->reinit(master_elem, &elem_points);
+    fe_elem->reinit(primary_elem, &elem_points);
 
     p_info._normal = elem_dxyz_dxi[0];
-    if (nearest_node->id() == master_elem->node_id(0))
+    if (nearest_node->id() == primary_elem->node_id(0))
       p_info._normal *= -1.0;
     p_info._normal /= p_info._normal.norm();
 
-    Point from_slave_to_closest = p_info._closest_point - slave_point;
-    p_info._distance = from_slave_to_closest * p_info._normal;
-    Point tangential = from_slave_to_closest - p_info._distance * p_info._normal;
+    Point from_secondary_to_closest = p_info._closest_point - secondary_point;
+    p_info._distance = from_secondary_to_closest * p_info._normal;
+    Point tangential = from_secondary_to_closest - p_info._distance * p_info._normal;
     p_info._tangential_distance = tangential.norm();
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
@@ -107,7 +107,7 @@ findContactPoint(PenetrationInfo & p_info,
 
   std::vector<Point> points = {ref_point};
   fe_side->reinit(side, &points);
-  RealGradient d = slave_point - phys_point[0];
+  RealGradient d = secondary_point - phys_point[0];
 
   Real update_size = std::numeric_limits<Real>::max();
 
@@ -143,7 +143,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     points[0] = ref_point;
     fe_side->reinit(side, &points);
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     update_size = update.l2_norm();
   }
@@ -155,7 +155,7 @@ findContactPoint(PenetrationInfo & p_info,
   // Newton Loop
   for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
   {
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     DenseMatrix<Real> jac(dim - 1, dim - 1);
 
@@ -187,7 +187,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     points[0] = ref_point;
     fe_side->reinit(side, &points);
-    d = slave_point - phys_point[0];
+    d = secondary_point - phys_point[0];
 
     update_size = update.l2_norm();
   }
@@ -208,7 +208,7 @@ findContactPoint(PenetrationInfo & p_info,
   }
   else
   {
-    const Node * const * elem_nodes = master_elem->get_nodes();
+    const Node * const * elem_nodes = primary_elem->get_nodes();
     const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
     const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
 

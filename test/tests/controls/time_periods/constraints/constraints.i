@@ -42,16 +42,16 @@
   [./complete]
     type = TiedValueConstraint
     variable = u
-    slave = 2
-    master = 3
-    master_variable = u
+    secondary = 2
+    primary = 3
+    primary_variable = u
   [../]
   [./lower]
     type = TiedValueConstraint
     variable = u
-    slave = inside_right_lower
-    master = inside_left_lower
-    master_variable = u
+    secondary = inside_right_lower
+    primary = inside_left_lower
+    primary_variable = u
   [../]
 []
 

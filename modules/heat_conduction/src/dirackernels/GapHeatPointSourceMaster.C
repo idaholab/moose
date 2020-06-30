@@ -22,8 +22,13 @@ GapHeatPointSourceMaster::validParams()
   MooseEnum orders("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST");
 
   InputParameters params = DiracKernel::validParams();
-  params.addRequiredParam<BoundaryName>("boundary", "The master boundary");
-  params.addRequiredParam<BoundaryName>("slave", "The slave boundary");
+  params.addParam<BoundaryName>("boundary", "The primary boundary");
+  params.addParam<BoundaryName>("secondary", "The secondary boundary");
+  params.addDeprecatedParam<BoundaryName>("slave",
+                                          "The secondary boundary",
+                                          "The 'slave' parameter is deprecated and will be removed "
+                                          "on September 1, 2020. Please use the "
+                                          "'secondary' parameter instead");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.set<bool>("use_displaced_mesh") = true;
   params.addParam<Real>("tangential_tolerance",
@@ -41,9 +46,10 @@ GapHeatPointSourceMaster::GapHeatPointSourceMaster(const InputParameters & param
   : DiracKernel(parameters),
     _penetration_locator(
         getPenetrationLocator(getParam<BoundaryName>("boundary"),
-                              getParam<BoundaryName>("slave"),
+                              isParamValid("secondary") ? getParam<BoundaryName>("secondary")
+                                                        : getParam<BoundaryName>("slave"),
                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")))),
-    _slave_flux(_sys.getVector("slave_flux"))
+    _secondary_flux(_sys.getVector("secondary_flux"))
 {
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
@@ -60,7 +66,7 @@ void
 GapHeatPointSourceMaster::addPoints()
 {
   point_to_info.clear();
-  _slave_flux.close();
+  _secondary_flux.close();
 
   std::map<dof_id_type, PenetrationInfo *>::iterator
       it = _penetration_locator._penetration_info.begin(),
@@ -86,7 +92,7 @@ GapHeatPointSourceMaster::computeQpResidual()
   const Node * node = pinfo->_node;
   long int dof_number = node->dof_number(_sys.number(), _var.number(), 0);
 
-  return -_test[_i][_qp] * _slave_flux(dof_number);
+  return -_test[_i][_qp] * _secondary_flux(dof_number);
 }
 
 Real

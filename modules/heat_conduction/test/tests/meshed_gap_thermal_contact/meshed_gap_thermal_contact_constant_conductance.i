@@ -46,10 +46,10 @@
   [./gap_conductance]
     type = GapHeatTransfer
     variable = temp
-    master = 2
-    slave = 3
-    emissivity_master = 0
-    emissivity_slave = 0
+    primary = 2
+    secondary = 3
+    emissivity_primary = 0
+    emissivity_secondary = 0
     gap_conductance = 2.5
   [../]
 []
