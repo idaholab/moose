@@ -44,6 +44,8 @@ protected:
 
   std::array<PerfGraph::SectionIncrement, MAX_EXECUTION_LIST_SIZE> & _execution_list;
 
+  std::future<bool> _done_future;
+
   std::map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
   /// This is one beyond the last thing on the stack

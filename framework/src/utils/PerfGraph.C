@@ -13,6 +13,7 @@
 #include "PerfGuard.h"
 #include "MooseError.h"
 #include "PerfGraphLivePrint.h"
+#include "MooseApp.h"
 
 // Note: do everything we can to make sure this only gets #included
 // in the .C file... this is a heavily templated header that we
@@ -27,11 +28,14 @@
 
 const std::string PerfGraph::ROOT_NAME = "Root";
 
-PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
-    : ConsoleStreamInterface(app), _root_name(root_name), _current_position(0),_execution_list_begin(0), _execution_list_end(0),  _active(true), _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
+PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app)
+    : ConsoleStreamInterface(app), _pid(app.processor_id()), _current_position(0), _execution_list_begin(0), _execution_list_end(0),  _active(true), _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
-  // Start the printing thread
-  _print_thread = std::thread([this] { this->_live_print->start(); });
+  if (_pid == 0)
+  {
+    // Start the printing thread
+    _print_thread = std::thread([this] { this->_live_print->start(); });
+  }
 
   // Not done in the initialization list on purpose because this object needs to be complete first
   _root_node = libmesh_make_unique<PerfNode>(registerSection(ROOT_NAME, 0));
@@ -52,6 +56,12 @@ PerfGraph::PerfGraph(const std::string & root_name, MooseApp & app)
 
 PerfGraph::~PerfGraph()
 {
+  if (_pid == 0)
+  {
+    _done.set_value(true);
+
+    _print_thread.join();
+  }
 }
 
 unsigned int
@@ -222,7 +232,7 @@ PerfGraph::push(const PerfID id)
   _stack[_current_position] = new_node;
 
   // Add this to the exection list
-  if (!_id_to_section_info[id]._live_message.empty())
+  if (_pid == 0 && !_id_to_section_info[id]._live_message.empty())
     addToExecutionList(id, IncrementState::started, current_time, start_memory);
 }
 
@@ -246,8 +256,19 @@ PerfGraph::pop()
   _current_position--;
 
   // Add this to the exection list
-  if (!_id_to_section_info[current_node->id()]._live_message.empty())
+  if (_pid == 0 && !_id_to_section_info[current_node->id()]._live_message.empty())
+  {
     addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);
+
+    // Tell the printing thread that a section has finished
+    //
+    // Note: no mutex is needed here because we're using an atomic
+    // in the predacate of the condition_variable in the thread
+    // This is technically correct - but there is a chance of missing a signal
+    // For us - that chance is low and doesn't matter (the timeout will just be hit
+    // instead). So - I would rather not have an extra lock here in the main thread.
+    _finished_section.notify_one();
+  }
 }
 
 void

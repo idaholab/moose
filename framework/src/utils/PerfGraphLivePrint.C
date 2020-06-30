@@ -12,6 +12,7 @@
 PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app) : ConsoleStreamInterface(app), _perf_graph(perf_graph),
 
                                                                  _execution_list(perf_graph._execution_list),
+                                                                                 _done_future(perf_graph._done.get_future()),
                                                                  _id_to_section_info(perf_graph._id_to_section_info),
                                                                  _stack_level(0),
                                                                                  _last_execution_list_end(0),
@@ -191,12 +192,22 @@ PerfGraphLivePrint::iterateThroughExecutionList()
 void
 PerfGraphLivePrint::start()
 {
-  while(true)
+  // Keep going until we're signaled to end
+  while(_done_future.wait_for(std::chrono::duration<Real>(0.)) == std::future_status::timeout)
   {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::unique_lock<std::mutex> lock(_perf_graph._print_thread_mutex);
 
-    // The end will be one past the last
-    _current_execution_list_end = _perf_graph._execution_list_end.load(std::memory_order_relaxed);
+    // Wait for one second, or until notified that a section is finished
+    // For a section to have finished the execution list has to have been appended to
+    // This keeps spurious wakeups from happening
+    _perf_graph._finished_section.wait_for(lock, std::chrono::duration<Real>(1.), [this]{
+
+        // The end will be one past the last
+        this->_current_execution_list_end = _perf_graph._execution_list_end.load(std::memory_order_relaxed);
+
+        return this->_last_execution_list_end != this->_current_execution_list_end;
+
+      });
 
     // The last entry in the current execution list for convenience
     _current_execution_list_last = _current_execution_list_end - 1 >= 0 ? _current_execution_list_end - 1 : MAX_EXECUTION_LIST_SIZE;

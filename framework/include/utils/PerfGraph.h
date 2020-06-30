@@ -22,6 +22,8 @@
 #include <array>
 #include <atomic>
 #include <thread>
+#include <future>
+#include <mutex>
 
 // Forward Declarations
 class PerfGuard;
@@ -355,6 +357,9 @@ protected:
    */
   void printHeaviestSections(const ConsoleStream & console);
 
+  /// This processor id
+  processor_id_type _pid;
+
   /// The name (handle) of the root node
   static const std::string ROOT_NAME;
 
@@ -405,11 +410,20 @@ protected:
   /// Whether or not timing is active
   bool _active;
 
+  /// The promise to the print thread that will signal when to stop
+  std::promise<bool> _done;
+
   /// The object that is doing live printing
   std::unique_ptr<PerfGraphLivePrint> _live_print;
 
   /// The thread for printing sections as they execute
   std::thread _print_thread;
+
+  /// The mutex to use with a condition_variable for waking up the print thread
+  std::mutex _print_thread_mutex;
+
+  /// The condition_variable to wake the print thread
+  std::condition_variable _finished_section;
 
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
