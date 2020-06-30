@@ -35,6 +35,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./SERD]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
   [./temp]
     order = FIRST
     family = LAGRANGE
@@ -57,7 +61,7 @@
   axis_2d = 2
   radius_inner = '60.0 80.0 100.0 120.0'
   radius_outer = '80.0 100.0 120.0 140.0'
-  output_type = K
+  output_type = C
   symmetry_plane = 1
   incremental = true
 
@@ -87,6 +91,12 @@
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
+    execute_on = timestep_end
+  [../]
+  [./SERD]
+    type = MaterialRealAux
+    variable = SERD
+    property = strain_energy_rate_density
     execute_on = timestep_end
   [../]
   [./tempfuncaux]
@@ -163,7 +173,6 @@
 []
 
 [Outputs]
-  file_base = interaction_integral_2d_out
   exodus = true
   csv = true
 []
