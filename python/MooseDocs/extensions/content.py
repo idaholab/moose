@@ -28,7 +28,7 @@ ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
 ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6, hide=[])
-NextAndPrevious = tokens.newToken('NextAndPrevious', direction='', destination=None, use_title=False)
+PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -53,13 +53,13 @@ class ContentExtension(command.CommandExtension):
         self.addCommand(reader, AtoZCommand())
         self.addCommand(reader, TableOfContentsCommand())
         self.addCommand(reader, ContentOutlineCommand())
-        self.addCommand(reader, NextAndPreviousCommand())
+        self.addCommand(reader, PaginationCommand())
 
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
         renderer.add('TableOfContents', RenderTableOfContents())
         renderer.add('ContentOutline', RenderContentOutline())
-        renderer.add('NextAndPrevious', RenderNextAndPrevious())
+        renderer.add('PaginationToken', RenderPagination())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
@@ -193,25 +193,26 @@ class ContentOutlineCommand(command.CommandComponent):
                               max_level=int(self.settings['max_level']),
                               hide=self.settings['hide'].split())
 
-class NextAndPreviousCommand(command.CommandComponent):
+class PaginationCommand(command.CommandComponent):
     COMMAND = 'content'
-    SUBCOMMAND = ('next', 'previous')
+    SUBCOMMAND = 'pagination'
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['destination'] = (None, "The markdown page to navigate to.")
-        settings['use_title'] = (False, "Use the title of the page for the button text.")
+        settings['previous'] = (None, "The previous markdown page to navigate to.")
+        settings['next'] = (None, "The next markdown page to navigate to.")
+        settings['use_title'] = (False, "Use the title of the page for the hyperlink text.")
         return settings
 
     def createToken(self, parent, info, page):
-        if self.settings['destination'] is None:
-            msg = "The 'destination' setting is required for the !content next and !content previous commands."
+        if self.settings['previous'] is None and self.settings['next'] is None:
+            msg = "At least one: a 'previous' page or a 'next' page is required for the !content pagination command."
             raise exceptions.MooseDocsException(msg)
 
-        return NextAndPrevious(parent,
-                               direction=info['subcommand'],
-                               destination=self.settings['destination'],
+        return PaginationToken(parent,
+                               previous=self.settings['previous'],
+                               next=self.settings['next'],
                                use_title=self.settings['use_title'])
 
 class RenderContentToken(components.RenderComponent):
@@ -397,35 +398,43 @@ class RenderContentOutline(components.RenderComponent):
         msg = "Warning: The Content Extension\'s 'outline' command is not supported for LaTex documents."
         latex.String(parent, content=msg)
 
-class RenderNextAndPrevious(components.RenderComponent):
+class RenderPagination(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        return None
+        div = html.Tag(parent, 'div', class_='moose-content-pagination')
+
+        if token['previous'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'previous')
+        if token['next'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'next')
 
     def createMaterialize(self, parent, token, page):
-        node = self.translator.findPage(token['destination'])
-        btn = html.Tag(parent, 'a',
-                       class_='btn moose-content-{}'.format(token['direction']),
-                       href=str(node.relativeDestination(page)))
+        div = html.Tag(parent, 'div', class_='moose-content-pagination')
 
-        # Determine button style.
+        if token['previous'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'previous')
+            link.addClass('btn')
+            html.Tag(link, 'i', class_='material-icons left', string='arrow_back')
+        if token['next'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'next')
+            link.addClass('btn')
+            html.Tag(link, 'i', class_='material-icons right', string='arrow_forward')
+
+    def createHTMLHelper(self, parent, token, page, direction):
+        node = self.translator.findPage(token[direction])
+
+        # Determine hyperlink style.
         if token['use_title']:
             string = heading.find_heading(node).text()
-
-            # Hide text overflow and append ellipses to long page titles.
             if len(string) > 18:
                 string = string[:18] + '. . .'
-
-            # Use left and right arrows with page title format
-            if token['direction'] == 'previous':
-                html.Tag(btn, 'i', class_='material-icons left', string='arrow_back')
-            elif token['direction'] == 'next':
-                html.Tag(btn, 'i', class_='material-icons right', string='arrow_forward')
-
         else:
-            string = token['direction'].capitalize()
+            string = direction.capitalize()
 
-        html.String(btn, content=string)
+        return html.Tag(parent, 'a',
+                        class_='moose-content-{}'.format(direction),
+                        href=str(node.relativeDestination(page)),
+                        string=string)
 
     def createLatex(self, parent, token, page):
-        msg = "Warning: The Content Extension\'s '{}' command is not supported for LaTex documents."
-        latex.String(parent, content=msg.format(token['direction']))
+        msg = "Warning: The Content Extension\'s 'pagination' command is not supported for LaTex documents."
+        latex.String(parent, content=msg)

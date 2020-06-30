@@ -258,7 +258,7 @@ class TestContentOutline(MooseDocsTestCase):
         'Page List': {'page': 'content', 'id': 'page-list', 'level': 2},
         'Some Content for TOC': {'page': 'content', 'id': 'some-content-for-toc', 'level': 2},
         'Outline Pages': {'page': 'content', 'id': 'outline-pages', 'level': 2},
-        'Next/Previous Buttons': {'page': 'content', 'id': 'next-previous-buttons', 'level': 2},
+        'Next/Previous (Pagination)': {'page': 'content', 'id': 'next-previous-pagination', 'level': 2},
         'Core Extension': {'page': 'core', 'id': 'core-extension', 'level': 1},
         'Code Blocks': {'page': 'core', 'id': 'code-blocks', 'level': 2},
         'Quotations': {'page': 'core', 'id': 'quotations', 'level': 2},
@@ -312,7 +312,7 @@ class TestContentOutline(MooseDocsTestCase):
         'TOC 1': {'page': 'content', 'id': 'toc-1', 'level': 3},
         'TOC 2': {'page': 'content', 'id': 'toc-2', 'level': 3},
         'Outline Directory': {'page': 'content', 'id': 'outline-directory', 'level': 2},
-        'Next/Previous Buttons': {'page': 'content', 'id': 'next-previous-buttons', 'level': 2},
+        'Next/Previous (Pagination)': {'page': 'content', 'id': 'next-previous-pagination', 'level': 2},
         'Buttons with Page Titles': {'page': 'content', 'id': 'buttons-with-page-titles', 'level': 3},
     })
     # Added '`' character to identical headings to indicate distrinct items, but ignore it in regex
@@ -405,14 +405,12 @@ class TestContentOutline(MooseDocsTestCase):
     def testLatex(self):
         return None
 
-class testNextandPrevious(MooseDocsTestCase):
+class testContentPagination(MooseDocsTestCase):
     EXTENSIONS = [extensions.core, extensions.command, extensions.heading, extensions.content,
                   extensions.materialicon, extensions.config]
     PREV = 'materialicon.md'; NEXT = 'config.md'
-    TEXT = ('!content previous destination=' + PREV + '\n\n'
-            '!content next destination=' + NEXT + '\n\n'
-            '!content previous destination=' + PREV + ' use_title=True\n\n'
-            '!content next destination=' + NEXT + ' use_title=True')
+    TEXT = ('!content pagination previous=' + PREV + ' next=' + NEXT + '\n\n'
+            '!content pagination previous=' + PREV + ' next=' + NEXT + ' use_title=True')
 
     def setupContent(self):
         config = [dict(root_dir='python/MooseDocs/test/content',
@@ -426,36 +424,56 @@ class testNextandPrevious(MooseDocsTestCase):
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
-        self.assertSize(ast, 4)
-        tok = 'NextAndPrevious';
-        self.assertToken(ast(0), tok, direction='previous', destination=self.PREV, use_title=False)
-        self.assertToken(ast(1), tok, direction='next', destination=self.NEXT, use_title=False)
-        self.assertToken(ast(2), tok, direction='previous', destination=self.PREV, use_title=True)
-        self.assertToken(ast(3), tok, direction='next', destination=self.NEXT, use_title=True)
+        self.assertSize(ast, 2)
+        tok = 'PaginationToken'
+        self.assertToken(ast(0), tok, previous=self.PREV, next=self.NEXT, use_title=False)
+        self.assertToken(ast(1), tok, previous=self.PREV, next=self.NEXT, use_title=True)
 
     def testHTML(self):
-        # this sholdn't produce any tags except 'body', this feature requires the materialize renderer
         _, res = self.execute(self.TEXT)
-        self.assertHTMLTag(res, 'body', size=0)
+        self.assertHTMLTag(res, 'body', size=2)
+
+        prev = 'extensions/' + self.PREV[:-2] + 'html'
+        next = 'extensions/' + self.NEXT[:-2] + 'html'
+
+        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(0)(0), 'a', size=1, class_='moose-content-previous', href=prev)
+        self.assertHTMLString(res(0)(0)(0), content='Previous')
+        self.assertHTMLTag(res(0)(1), 'a', size=1, class_='moose-content-next', href=next)
+        self.assertHTMLString(res(0)(1)(0), content='Next')
+
+        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(1)(0), 'a', size=1, class_='moose-content-previous', href=prev)
+        self.assertHTMLString(res(1)(0)(0), content='Material Icon')
+        self.assertHTMLTag(res(1)(1), 'a', size=1, class_='moose-content-next', href=next)
+        self.assertHTMLString(res(1)(1)(0), content='Config Extension')
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
-        self.assertHTMLTag(res, 'div', size=4, class_='moose-content')
+        self.assertHTMLTag(res, 'div', size=2, class_='moose-content')
 
-        prev = 'extensions/' + self.PREV[:-2] + 'html'; next = 'extensions/' + self.NEXT[:-2] + 'html'
-        self.assertHTMLTag(res(0), 'a', class_='btn moose-content-previous', size=1, href=prev)
-        self.assertHTMLString(res(0)(0), content='Previous')
-        self.assertHTMLTag(res(1), 'a', class_='btn moose-content-next', size=1, href=next)
-        self.assertHTMLString(res(1)(0), content='Next')
+        prev = 'extensions/' + self.PREV[:-2] + 'html'
+        next = 'extensions/' + self.NEXT[:-2] + 'html'
 
-        self.assertHTMLTag(res(2), 'a', class_='btn moose-content-previous', size=2, href=prev)
-        self.assertHTMLTag(res(2)(0), 'i', class_='material-icons left', size=1)
-        self.assertHTMLString(res(2)(0)(0), content='arrow_back')
-        self.assertHTMLString(res(2)(1), content='Material Icon')
-        self.assertHTMLTag(res(3), 'a', class_='btn moose-content-next', size=2, href=next)
-        self.assertHTMLTag(res(3)(0), 'i', class_='material-icons right', size=1)
-        self.assertHTMLString(res(3)(0)(0), content='arrow_forward')
-        self.assertHTMLString(res(3)(1), content='Config Extension')
+        self.assertHTMLTag(res(0), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(0)(0), 'a', size=2, class_='moose-content-previous btn', href=prev)
+        self.assertHTMLString(res(0)(0)(0), content='Previous')
+        self.assertHTMLTag(res(0)(0)(1), 'i', size=1, class_='material-icons left')
+        self.assertHTMLString(res(0)(0)(1)(0), content='arrow_back')
+        self.assertHTMLTag(res(0)(1), 'a', size=2, class_='moose-content-next btn', href=next)
+        self.assertHTMLString(res(0)(1)(0), content='Next')
+        self.assertHTMLTag(res(0)(1)(1), 'i', size=1, class_='material-icons right')
+        self.assertHTMLString(res(0)(1)(1)(0), content='arrow_forward')
+
+        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-content-pagination')
+        self.assertHTMLTag(res(1)(0), 'a', size=2, class_='moose-content-previous btn', href=prev)
+        self.assertHTMLString(res(1)(0)(0), content='Material Icon')
+        self.assertHTMLTag(res(1)(0)(1), 'i', size=1, class_='material-icons left')
+        self.assertHTMLString(res(1)(0)(1)(0), content='arrow_back')
+        self.assertHTMLTag(res(1)(1), 'a', size=2, class_='moose-content-next btn', href=next)
+        self.assertHTMLString(res(1)(1)(0), content='Config Extension')
+        self.assertHTMLTag(res(1)(1)(1), 'i', size=1, class_='material-icons right')
+        self.assertHTMLString(res(1)(1)(1)(0), content='arrow_forward')
 
 
 if __name__ == '__main__':

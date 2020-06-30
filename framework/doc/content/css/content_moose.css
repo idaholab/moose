@@ -39,16 +39,19 @@ ul.moose-a-to-z a{
   white-space: nowrap;
 }
 
-.moose-content-next{
-  float: right;
-  margin-top: 24px;
-  margin-bottom: 24px;
-  text-transform: none;
+/* MOOSE Pagination (Next/Previous Buttons) Formatting */
+.moose-content-pagination{
+  display: inline-block;
+  width: 100%;
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
 
-.moose-content-previous{
-  margin-top: 24px;
-  margin-bottom: 24px;
+.moose-content-next{
+  float: right;
+}
+
+.moose-content-previous.btn, .moose-content-next.btn{
   text-transform: none;
 }
 
