@@ -94,4 +94,12 @@
       detail = 'the nodal kernel system.'
     []
   []
+
+  [controls-tagging]
+    type = 'Exodiff'
+    input = 'controls-tagging.i'
+    exodiff = 'controls-tagging_out.e'
+    requirement = 'Cached Active object state will be maintained correctly even when objects\' active state changes during runtime.'
+    issues = '#15515'
+  []
 []
