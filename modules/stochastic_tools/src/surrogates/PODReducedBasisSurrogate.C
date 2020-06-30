@@ -17,34 +17,92 @@ PODReducedBasisSurrogate::validParams()
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Evaluates POD-RB surrogate model with reduced operators "
                              "computed from PODReducedBasisTrainer.");
+  params.addParam<std::vector<std::string>>("change_rank",
+                                            std::vector<std::string>(0),
+                                            "Names of variables whose rank should be changed.");
+  params.addParam<std::vector<unsigned int>>("new_ranks",
+                                             std::vector<unsigned int>(0),
+                                             "The new ranks that each variable in 'change_rank' shall have.");
   return params;
 }
 
 PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
+    _change_rank(getParam<std::vector<std::string>>("change_rank")),
+    _new_ranks(getParam<std::vector<unsigned int>>("new_ranks")),
     _var_names(getModelData<std::vector<std::string>>("_var_names")),
     _independent(getModelData<std::vector<unsigned int>>("_independent")),
     _base(getModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(getModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
     _initialized(false)
-{}
+{
+  if(_change_rank.size() != _new_ranks.size())
+    paramError("new_ranks",
+               "The size of 'new_ranks' is not equal to the ",
+               "size of 'change_rank' ",
+               _new_ranks.size(),
+               " != ",
+               _change_rank.size());
+
+  for (unsigned int var_i=0; var_i<_new_ranks.size(); ++var_i)
+    if (_new_ranks[var_i] == 0)
+      paramError("new_ranks", "The values should be greater than 0!");
+}
 
 void
 PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params)
 {
+  // The containers are initialized (if needed).
   initializeReducedSystem();
+
+  // Assembling and solving the reduced equation system.
   solveReducedSystem(params);
+
+  // Reconstructing the approximate solutions for every variable.
   reconstructApproximateSolution();
 }
 
 void
 PODReducedBasisSurrogate::initializeReducedSystem()
 {
+  // It initializes the container sizes at the first call only. This way we can
+  // new memory allocation at every solve.
   if(!_initialized)
   {
-    _sys_mx = DenseMatrix<Real>(_red_operators[0].m(), _red_operators[0].m());
-    _rhs = DenseVector<Real>(_red_operators[0].m());
-    _coeffs = DenseVector<Real>(_red_operators[0].m());
+    // Storing important indices for the assemly loops.
+    _final_ranks.resize(_var_names.size());
+    _comulative_ranks.resize(_var_names.size());
+    unsigned int sum_ranks = 0;
+
+    // Checking if the user wants to overwrite the original ranks for the
+    // variables.
+    for (unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+    {
+      _final_ranks[var_i] = _base[var_i].size();
+      for (unsigned int var_j=0; var_j<_change_rank.size(); ++var_j)
+      {
+        if(_change_rank[var_j] == _var_names[var_i])
+        {
+          if(_new_ranks[var_j] > _base[var_i].size())
+            paramError("new_ranks",
+                       "The specified new rank (",
+                       _new_ranks[var_j],
+                       ") for variable '",
+                       _var_names[var_i],
+                       "' is higher than the original rank (",
+                       _base[var_i].size(),
+                       ")! Only lower ranks are allowed.");
+          _final_ranks[var_i] = _new_ranks[var_j];
+        }
+      }
+      sum_ranks += _final_ranks[var_i];
+      _comulative_ranks[var_i] = sum_ranks;
+    }
+
+    // Resizing containers to match the newly prescribed ranks.
+    _sys_mx = DenseMatrix<Real>(sum_ranks, sum_ranks);
+    _rhs = DenseVector<Real>(sum_ranks);
+    _coeffs = DenseVector<Real>(sum_ranks);
 
     _approx_solution.resize(_var_names.size());
     for(unsigned int var_i=0; var_i<_var_names.size(); var_i++)
@@ -55,49 +113,57 @@ PODReducedBasisSurrogate::initializeReducedSystem()
   }
 }
 
-Real
-PODReducedBasisSurrogate::getMax(std::string var_name) const
-{
-  Real val = 0.0;
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-  {
-    val = _approx_solution[it-_var_names.begin()].max();
-  }
-  else
-    mooseError("Variable '",var_name,"' not found!");
-
-  return(val);
-}
-
 void
 PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
 {
+  // Cleaning the containers of the system matrix and right hand side.
+  _sys_mx.zero();
+  _rhs.zero();
+
   // The assumption here is that the reduced operators in the trainer were
   // assembled in the order of the parameters. Also, if the number of
   // parameters is fewer than the number of operators, the operator will
   // just be added without scaling.
-  _sys_mx.zero();
-  _rhs.zero();
-  for(unsigned int i=0; i<params.size(); ++i)
+  for(unsigned int i=0; i<_red_operators.size(); ++i)
   {
-      for(unsigned int row_i=0; row_i<_red_operators[i].m(); row_i++)
+    unsigned int row_start = 0;
+
+    // If the user decreased the rank of the reduced bases manually, some parts
+    // of the initial reduced operators have to be omited.
+    for(unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+    {
+      for(unsigned int row_i=row_start; row_i<_comulative_ranks[var_i]; row_i++)
+      {
         if (!_independent[i])
-          for(unsigned int col_i=0; col_i<_red_operators[i].n(); col_i++)
-            _sys_mx(row_i, col_i) += params[i] * _red_operators[i](row_i, col_i);
+        {
+          unsigned int col_start = 0;
+
+          for(unsigned int var_j=0; var_j<_var_names.size(); ++var_j)
+          {
+            for(unsigned int col_i=col_start; col_i<_comulative_ranks[var_j]; col_i++)
+            {
+              if (i < params.size())
+                _sys_mx(row_i, col_i) += params[i] * _red_operators[i](row_i, col_i);
+              else
+                _sys_mx(row_i, col_i) += _red_operators[i](row_i, col_i);
+            }
+
+            col_start = _comulative_ranks[var_j];
+          }
+        }
         else
-          _rhs(row_i) -= params[i] * _red_operators[i](row_i, 0);
+        {
+          if (i < params.size())
+            _rhs(row_i) -= params[i] * _red_operators[i](row_i, 0);
+          else
+            _rhs(row_i) -= _red_operators[i](row_i, 0);
+        }
+        row_start = _comulative_ranks[var_i];
+      }
+    }
   }
 
-  for(unsigned int i=params.size(); i<_red_operators.size(); ++i)
-  {
-    if (!_independent[i])
-      _sys_mx += _red_operators[i];
-    else
-      for(unsigned int row_i=0; row_i<_red_operators[i].m(); row_i++)
-        _rhs(row_i) -= _red_operators[i](row_i, 0);
-  }
-
+  // Solving the reduced system.
   _sys_mx.lu_solve(_rhs, _coeffs);
 }
 
@@ -108,13 +174,86 @@ PODReducedBasisSurrogate::reconstructApproximateSolution()
   for(unsigned int var_i=0; var_i<_var_names.size(); var_i++)
   {
     _approx_solution[var_i].zero();
-    for(unsigned int base_i=0; base_i<_base[var_i].size(); ++base_i)
+
+    // This also takes into account the potential truncation of the bases by
+    // the user.
+    for(unsigned int base_i=0; base_i<_final_ranks[var_i]; ++base_i)
     {
       for (unsigned int dof_i=0; dof_i<_base[var_i][base_i].size(); ++dof_i)
         _approx_solution[var_i](dof_i) += _coeffs(counter) * _base[var_i][base_i](dof_i);
       counter++;
     }
   }
+}
+
+Real
+PODReducedBasisSurrogate::getNodalMax(std::string var_name) const
+{
+  Real val = 0.0;
+
+  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
+  if (it != _var_names.end())
+    val = _approx_solution[it-_var_names.begin()].max();
+  else
+    mooseError("Variable '",var_name,"' not found!");
+
+  return(val);
+}
+
+Real
+PODReducedBasisSurrogate::getNodalMin(std::string var_name) const
+{
+  Real val = 0.0;
+
+  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
+  if (it != _var_names.end())
+    val = _approx_solution[it-_var_names.begin()].min();
+  else
+    mooseError("Variable '",var_name,"' not found!");
+
+  return(val);
+}
+
+Real
+PODReducedBasisSurrogate::getNodalL1(std::string var_name) const
+{
+  Real val = 0.0;
+
+  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
+  if (it != _var_names.end())
+    val = _approx_solution[it-_var_names.begin()].l1_norm();
+  else
+    mooseError("Variable '",var_name,"' not found!");
+
+  return(val);
+}
+
+Real
+PODReducedBasisSurrogate::getNodalL2(std::string var_name) const
+{
+  Real val = 0.0;
+
+  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
+  if (it != _var_names.end())
+    val = _approx_solution[it-_var_names.begin()].l2_norm();
+  else
+    mooseError("Variable '",var_name,"' not found!");
+
+  return(val);
+}
+
+Real
+PODReducedBasisSurrogate::getNodalLinf(std::string var_name) const
+{
+  Real val = 0.0;
+
+  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
+  if (it != _var_names.end())
+    val = _approx_solution[it-_var_names.begin()].linfty_norm();
+  else
+    mooseError("Variable '",var_name,"' not found!");
+
+  return(val);
 }
 
 Real

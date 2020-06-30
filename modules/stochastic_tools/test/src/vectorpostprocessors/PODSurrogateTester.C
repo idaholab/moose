@@ -31,7 +31,7 @@ PODSurrogateTester::validParams()
   params.addRequiredParam<std::string>(
       "variable_name",
       "The name of the variable this prostprocessor is supposed to operate on.");
-  MooseEnum pptype("nodal_max=0 nodal_avg=1");
+  MooseEnum pptype("nodal_max=0 nodal_min=1 nodal_l1=2 nodal_l2=3 nodal_linf=4");
   params.addRequiredParam<MooseEnum>(
       "to_compute", pptype,
       "The global data the postprocessor should compute.");
@@ -86,10 +86,31 @@ PODSurrogateTester::execute()
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
-    // _model->initializeReducedSystem();
+
     _model->evaluateSolution(data);
-    if(_to_compute == "nodal_max")
-      _value_vector[p - _sampler.getLocalRowBegin()] = _model->getMax(_variable_name);
+    switch(_to_compute)
+    {
+      case 0 :
+        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalMax(_variable_name);
+        break;
+
+      case 1 :
+        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalMin(_variable_name);
+        break;
+
+      case 2 :
+        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalL1(_variable_name);
+        break;
+
+      case 3 :
+        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalL2(_variable_name);
+        break;
+
+      case 4 :
+        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalLinf(_variable_name);
+        break;
+    }
+
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       {

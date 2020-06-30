@@ -33,7 +33,9 @@
 [Surrogates]
   [rbpod]
     type = PODReducedBasisSurrogate
-    filename = 'trainer_out_pod_rb_999_2.rd'
+    filename = 'trainer_out_pod_rb_999999999_4.rd'
+    change_rank = 'u'
+    new_ranks = '2'
   []
 []
 
