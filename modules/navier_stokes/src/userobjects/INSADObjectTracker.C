@@ -21,31 +21,35 @@ INSADObjectTracker::validParams()
 }
 
 INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
-  : GeneralUserObject(parameters), InputParameters(emptyInputParameters())
+  : GeneralUserObject(parameters), _tracker_params(emptyInputParameters())
 {
-  addParam<bool>("integrate_p_by_parts", "Whether to integrate the pressure by parts");
+  _tracker_params.addParam<bool>("integrate_p_by_parts",
+                                 "Whether to integrate the pressure by parts");
   MooseEnum viscous_form("traction laplace", "laplace");
-  addParam<MooseEnum>("viscous_form",
-                      viscous_form,
-                      "The form of the viscous term. Options are 'traction' or 'laplace'");
-  addParam<bool>(
+  _tracker_params.addParam<MooseEnum>(
+      "viscous_form",
+      viscous_form,
+      "The form of the viscous term. Options are 'traction' or 'laplace'");
+  _tracker_params.addParam<bool>(
       "has_boussinesq", false, "Whether the simulation has the boussinesq approximation");
-  addParam<const ADMaterialProperty<Real> *>(
+  _tracker_params.addParam<const ADMaterialProperty<Real> *>(
       "alpha", "The alpha material property for the boussinesq approximation");
-  addParam<const MaterialProperty<Real> *>("ref_temp",
-                                           "The reference temperature material property");
-  addParam<const ADVariableValue *>("temperature", "The temperature variable");
-  addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  addParam<bool>("has_gravity",
-                 false,
-                 "Whether the simulation has a gravity force imposed on the momentum equation");
-  addParam<bool>("has_transient", false, "Whether the simulation is transient");
+  _tracker_params.addParam<const MaterialProperty<Real> *>(
+      "ref_temp", "The reference temperature material property");
+  _tracker_params.addParam<const ADVariableValue *>("temperature", "The temperature variable");
+  _tracker_params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+  _tracker_params.addParam<bool>(
+      "has_gravity",
+      false,
+      "Whether the simulation has a gravity force imposed on the momentum equation");
+  _tracker_params.addParam<bool>("has_transient", false, "Whether the simulation is transient");
 
-  addWallConvectionParams(*this);
+  addWallConvectionParams(_tracker_params);
 
-  addParam<bool>(
+  _tracker_params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
-  addParam<const Function *>("heat_source_function", "The function describing the heat source");
+  _tracker_params.addParam<const Function *>("heat_source_function",
+                                             "The function describing the heat source");
 }
 
 void

@@ -33,16 +33,12 @@ void addWallConvectionParams(InputParameters & params);
  * ensuring that we have consistenly included all the strong terms for stabilization methods like
  * PSPG and SUPG
  */
-class INSADObjectTracker : public GeneralUserObject, public InputParameters
+class INSADObjectTracker : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   INSADObjectTracker(const InputParameters & parameters);
-
-  // GeneralUserObject implicitly deletes operator=
-  INSADObjectTracker & operator=(const INSADObjectTracker &) = delete;
-  using InputParameters::operator=;
 
   /**
    * Set the internal parameter \p name to \p value. This will check whether \p name has already
@@ -62,30 +58,33 @@ public:
   virtual void initialize() final {}
   virtual void execute() final {}
   virtual void finalize() final {}
+
+private:
+  InputParameters _tracker_params;
 };
 
 template <typename T>
 void
 INSADObjectTracker::set(const std::string & name, const T & value)
 {
-  if (isParamSetByUser(name))
+  if (_tracker_params.isParamSetByUser(name))
   {
-    const T & current_value = get<T>(name);
+    const T & current_value = _tracker_params.get<T>(name);
     if (current_value != value)
       mooseError("Two INSADObjects set different values for the parameter", name);
   }
-  else if (!have_parameter<T>(name))
+  else if (!_tracker_params.have_parameter<T>(name))
     mooseError("Attempting to set parameter ", name, " that is not a valid param");
   else
-    InputParameters::template set<T>(name) = value;
+    _tracker_params.set<T>(name) = value;
 }
 
 template <typename T>
 const T &
 INSADObjectTracker::get(const std::string & name) const
 {
-  if (!InputParameters::isParamValid(name))
+  if (!_tracker_params.isParamValid(name))
     mooseError("The parameter ", name, " is being retrieved before being set");
 
-  return InputParameters::template get<T>(name);
+  return _tracker_params.get<T>(name);
 }
