@@ -1,4 +1,4 @@
-## Acronym Extension
+# Acronym Extension
 
 [!ac](MTU)
 

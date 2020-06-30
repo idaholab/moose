@@ -388,8 +388,6 @@ class RenderHeading(components.RenderComponent):
                       'subparagraph']
 
     def createHTML(self, parent, token, page):
-        if not token.get('id'):
-            token['id'] = token.text('-').lower()
         return html.Tag(parent, 'h{}'.format(token['level']), token)
 
     def createLatex(self, parent, token, page):
@@ -400,8 +398,6 @@ class RenderHeading(components.RenderComponent):
         id_ = token.get('id')
         if id_:
             latex.Command(sec, 'label', string=id_)
-        else:
-            latex.Command(sec, 'label', string=token.text('-').lower())
         return sec
 
 class RenderCode(components.RenderComponent):

@@ -29,7 +29,7 @@ class TestShortcutLink(MooseDocsTestCase):
         ast = self.tokenize('[core.md]')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark='', exact=False, optional=False, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark=None, exact=False, optional=False, page='core.md')
 
         ast = self.tokenize('[core.md#bookmark]')
         self.assertSize(ast, 1)
@@ -39,12 +39,12 @@ class TestShortcutLink(MooseDocsTestCase):
         ast = self.tokenize('[core.md exact=True]')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark='', exact=True, optional=False, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark=None, exact=True, optional=False, page='core.md')
 
         ast = self.tokenize('[core.md optional=True]')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark='', exact=False, optional=True, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=0, bookmark=None, exact=False, optional=True, page='core.md')
 
         ast = self.tokenize('[core.md#bookmark optional=True exact=True]')
         self.assertSize(ast, 1)
@@ -96,7 +96,7 @@ class TestLink(MooseDocsTestCase):
         ast = self.tokenize('[core](core.md)')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark='', exact=False, optional=False, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark=None, exact=False, optional=False, page='core.md')
         self.assertToken(ast(0)(0)(0), 'Word', size=0, content='core')
 
         ast = self.tokenize('[core](core.md#bookmark)')
@@ -108,13 +108,13 @@ class TestLink(MooseDocsTestCase):
         ast = self.tokenize('[core](core.md exact=True)')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark='', exact=True, optional=False, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark=None, exact=True, optional=False, page='core.md')
         self.assertToken(ast(0)(0)(0), 'Word', size=0, content='core')
 
         ast = self.tokenize('[core](core.md optional=True)')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark='', exact=False, optional=True, page='core.md')
+        self.assertToken(ast(0)(0), 'AutoLink', size=1, bookmark=None, exact=False, optional=True, page='core.md')
         self.assertToken(ast(0)(0)(0), 'Word', size=0, content='core')
 
         ast = self.tokenize('[core](core.md#bookmark optional=True exact=True)')
