@@ -46,10 +46,17 @@ protected:
                          const Real scalar_q,
                          const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
-  const MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
   const MaterialProperty<RealVectorValue> * const _J_thermal_term_vec;
-  /// Whether to convert the J-Integral to a stress intensity factor (K)
-  bool _convert_J_to_K;
+
+  /// Output type: J-integral, K intensity factor, or C(t) integral
+  const enum class OutputType { J, K, C } _output_type;
+
+  /// Eshelby tensor for J integral and K stress intensity factor
+  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
+
+  /// Eshelby tensor rate for computing the C(t) integral
+  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor_rate;
+
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
   /// Vector of all coupled variables

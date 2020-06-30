@@ -30,16 +30,23 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
+  /// Whether to also compute Eshelby tensor's dissipation for C(t) integral
+  const bool _compute_dissipation;
+
   const MaterialProperty<Real> & _sed;
+  const MaterialProperty<Real> * _serd;
+
   MaterialProperty<RankTwoTensor> & _eshelby_tensor;
+  MaterialProperty<RankTwoTensor> & _eshelby_tensor_rate;
 
   /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  /// The odl stress tensor
+  /// The old stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
 
   std::vector<const VariableGradient *> _grad_disp;
+  std::vector<const VariableGradient *> _grad_disp_old;
 
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;
   const VariableGradient & _grad_temp;
