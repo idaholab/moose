@@ -23,7 +23,7 @@ public:
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
 private:
-  ///Paramaters (x) used for training
+  /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
 
   /// Standardizer for use with params (x)

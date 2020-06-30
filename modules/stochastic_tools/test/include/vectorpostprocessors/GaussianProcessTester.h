@@ -30,8 +30,8 @@ public:
   virtual void finalize() override;
 
 protected:
-    /// Pointers to surrogate model
-    std::vector<const GaussianProcess *> _GP_model;
-    /// Vectors containing standard deviation of the results of sampling model
-    std::vector<VectorPostprocessorValue *> _std_vector;
+  /// Pointers to surrogate model
+  std::vector<const GaussianProcess *> _GP_model;
+  /// Vectors containing standard deviation of the results of sampling model
+  std::vector<VectorPostprocessorValue *> _std_vector;
 };

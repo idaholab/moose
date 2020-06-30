@@ -47,7 +47,9 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   unsigned int _n_params = _training_params.cols();
   unsigned int _num_tests = 1;
 
-  mooseAssert(x.size() == _n_params, "Number of parameters provided for evaluation does not match number of parameters used for training.");
+  mooseAssert(x.size() == _n_params,
+              "Number of parameters provided for evaluation does not match number of parameters "
+              "used for training.");
 
   RealEigenMatrix test_points(_num_tests, _n_params);
   for (unsigned int ii = 0; ii < _n_params; ++ii)
@@ -60,7 +62,7 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);
-    // De-center/scale the value and store for return
+  // De-center/scale the value and store for return
   pred_value = _data_standardizer.getDestandardized(pred_value);
 
   // Compute standard deviation
@@ -69,7 +71,7 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
       K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  std_dev =_data_standardizer.getDescaled(pred_var.array().sqrt())(0,0);
+  std_dev = _data_standardizer.getDescaled(pred_var.array().sqrt())(0, 0);
 
-  return pred_value(0,0);
+  return pred_value(0, 0);
 }

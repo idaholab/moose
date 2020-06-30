@@ -26,7 +26,6 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-protected:
 private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
