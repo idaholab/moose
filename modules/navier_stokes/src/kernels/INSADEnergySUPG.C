@@ -16,6 +16,7 @@ INSADEnergySUPG::validParams()
 {
   InputParameters params = ADKernelSUPG::validParams();
   params.addClassDescription("Adds the supg stabilization to the INS temperature/energy equation");
+  params.set<MaterialPropertyName>("tau_name") = "tau_energy";
   return params;
 }
 

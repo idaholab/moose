@@ -701,7 +701,7 @@ INSAction::addINSTemperature()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       params.set<CoupledName>("velocity") = {NS::velocity};
-      params.set<MaterialPropertyName>("tau_name") = "tau";
+      params.set<MaterialPropertyName>("tau_name") = "tau_energy";
       _problem->addKernel(kernel_type, "ins_temperature_supg", params);
     }
 

@@ -53,7 +53,6 @@ protected:
 };
 
 typedef INSADTauMaterialTempl<INSADMaterial> INSADTauMaterial;
-typedef INSADTauMaterialTempl<INSAD3Eqn> INSADStabilized3Eqn;
 
 template <typename T>
 InputParameters

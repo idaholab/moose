@@ -13,8 +13,6 @@
 #include "INSAD3Eqn.h"
 
 registerMooseObject("NavierStokesApp", INSADTauMaterial);
-registerMooseObject("NavierStokesApp", INSADStabilized3Eqn);
 
 // Make sure all symbols are generated
 template class INSADTauMaterialTempl<INSADMaterial>;
-template class INSADTauMaterialTempl<INSAD3Eqn>;
