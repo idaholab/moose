@@ -33,16 +33,22 @@ protected:
 
   /// Sampler for evaluating surrogate model
   Sampler & _sampler;
+
   /// Where or not to output all the samples used
   const bool _output_samples;
+
   /// Reference to surrogate model
   PODReducedBasisSurrogate * _model;
-  /// Vector containing results of sampling PCE model
+
+  /// Vector containing results of sampling surrogate model
   VectorPostprocessorValue & _value_vector;
+
   /// Vector containing all the sample points for each parameter
   std::vector<VectorPostprocessorValue *> _sample_vector;
 
+  /// Name of the variable this tester operates on.
   std::string _variable_name;
 
+  /// The type of the post-processor value which needs to be extracted.
   MooseEnum _to_compute;
 };

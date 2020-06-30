@@ -18,32 +18,54 @@ public:
 
   PODReducedBasisSurrogate(const InputParameters & parameters);
 
+  /// Initialize reduced matrices, vectors and additional containers.
   void initializeReducedSystem();
 
+  /// Get the reduced solution for a given parameter sample.
   void evaluateSolution(const std::vector<Real> & params);
 
+  /// Assemble and solve the reduced equation system.
   void solveReducedSystem(const std::vector<Real> & params);
 
+  /// Reconstruct the approximate solution vector using the stored
+  /// coefficients.
   void reconstructApproximateSolution();
 
+  /// Get a reference to the approximate solutions.
   std::vector<DenseVector<Real>>& getApproximateSolution(){return _approx_solution;}
 
+  /// Get the nodal maximum of the reconstructed solution for a given variable.
+  Real getNodalMax(std::string var_name) const;
+
+  /// Get the nodal minimum of the reconstructed solution for a given variable.
+  Real getNodalMin(std::string var_name) const;
+
+  /// Get the nodal L1 norm (l1) of the reconstructed solution for a given variable.
+  Real getNodalL1(std::string var_name) const;
+
+  /// Get the nodal L2 norm (l2) of the reconstructed solution for a given variable.
+  Real getNodalL2(std::string var_name) const;
+
+  /// Get the nodal Linf norm (linf) of the reconstructed solution for a given variable.
+  Real getNodalLinf(std::string var_name) const;
+
+  /// Must have function, not used in this object.
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
-  Real getMax(std::string var_name) const;
-
 protected:
-  /// Coefficients of the reduced order model.
-  DenseVector<Real> _coeffs;
 
-  /// The reduced system matrix.
-  DenseMatrix<Real> _sys_mx;
+  /// A vector containing the number of basis functions each variable should use.
+  /// This is optional, used only to override the base numbers from the RD input.
+  std::vector<std::string> _change_rank;
 
-  /// The reduced right hand side.
-  DenseVector<Real> _rhs;
+  /// The new rank the variable should have.
+  std::vector<unsigned int> _new_ranks;
 
-  /// Reconstructed solution for each variable
-  std::vector<DenseVector<Real>> _approx_solution;
+  /// The final rank that should be used for every variable.
+  std::vector<unsigned int> _final_ranks;
+
+  /// Commulative ranks of the system. Used for indexing only.
+  std::vector<unsigned int> _comulative_ranks;
 
   /// Vector containing the names of the variables we want to reconstruct.
   const std::vector<std::string>& _var_names;
@@ -57,9 +79,19 @@ protected:
   /// The power matrix for the terms in the polynomial expressions.
   const std::vector<DenseMatrix<Real>>& _red_operators;
 
+  /// Coefficients of the reduced order model.
+  DenseVector<Real> _coeffs;
+
+  /// The reduced system matrix.
+  DenseMatrix<Real> _sys_mx;
+
+  /// The reduced right hand side.
+  DenseVector<Real> _rhs;
+
+  /// Reconstructed solution for each variable
+  std::vector<DenseVector<Real>> _approx_solution;
+
   /// Switch that is set to see if the ROM matrices and vectors are initialized.
   bool _initialized;
-
-private:
 
 };
