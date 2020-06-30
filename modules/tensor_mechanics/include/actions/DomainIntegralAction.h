@@ -49,6 +49,14 @@ protected:
     TOPOLOGY
   };
 
+  /// Enum for output type
+  enum OUTPUT_TYPE
+  {
+    J,
+    K,
+    C
+  };
+
   /**
    * Compute the number of points on the crack front. This is either the number of
    * points in the crack front nodeset, or the number of points from the crack
@@ -121,8 +129,8 @@ protected:
   std::vector<VariableName> _displacements;
   /// Temperature variable
   VariableName _temp;
-  /// Whether to convert the J-integral to a stress intensity factor (K)
-  bool _convert_J_to_K;
+  /// Output type: J-integral, K intensity factor, or C(t) integral
+  MooseEnum _output_type;
   /// Whether the model has a symmetry plane passing through the plane of the crack
   bool _has_symmetry_plane;
   /// Identifier for which plane is the symmetry plane
@@ -143,4 +151,6 @@ protected:
   bool _solid_mechanics;
   /// Whether the constitutive models for the mechanics calculations use an incremental form
   bool _incremental;
+  /// Exponent on the effective stress
+  const Real _n_exponent;
 };
