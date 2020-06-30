@@ -12,11 +12,12 @@ Activate the moose environment +(do this for any new terminal opened)+:
 conda activate moose
 ```
 
-Some folks may receive additional instructions when attempting to activate a profile. Follow those instructions, and try to activate the moose environment again.
+You may receive an error, accompanied by additional instructions when attempting to activate a profile. Follow those on-screen instructions, and try to activate the moose environment again. If you are unsure how to proceed, please see `conda activate moose` section in our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
 
-You will have successfully activated the moose environment when you see 'moose' within your prompt.
+You will have successfully activated the moose environment when you see (moose) prefixed within your prompt.
 
-If you close, and re-open this terminal window, know that you will need to `conda activate moose` again. You will need to do this for each terminal you open. If you wish to make this automatic, you may append `conda activate moose` to your bash or zsh profiles.
+!alert note
+Know that you will need to `conda activate moose` again for +each terminal window you open+. If you wish to make this automatic, you can add that command to the end of your shell profile.
 
 ## Keeping Conda up to date
 
