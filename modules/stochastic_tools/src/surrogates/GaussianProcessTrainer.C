@@ -17,7 +17,8 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params.addClassDescription("Provides data preperation and training for a Gaussian Process surrogate model.");
+  params.addClassDescription(
+      "Provides data preperation and training for a Gaussian Process surrogate model.");
   params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
   params.addRequiredParam<VectorPostprocessorName>(
       "results_vpp", "Vectorpostprocessor with results of samples created by trainer.");
@@ -62,24 +63,6 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
 }
 
 void
-GaussianProcessTrainer::initialize()
-{
-  // Check if results of samples matches number of samples
-  __attribute__((unused)) dof_id_type num_rows =
-      _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
-
-  if (num_rows != _values_ptr->size())
-    paramError("results_vpp",
-               "The number of elements in '",
-               getParam<VectorPostprocessorName>("results_vpp"),
-               "/",
-               getParam<std::string>("results_vector"),
-               "' is not equal to the number of samples in '",
-               getParam<SamplerName>("sampler"),
-               "'!");
-}
-
-void
 GaussianProcessTrainer::initialSetup()
 {
 
@@ -96,6 +79,24 @@ GaussianProcessTrainer::initialSetup()
   std::vector<DistributionName> dname = getParam<std::vector<DistributionName>>("distributions");
   if (dname.size() != _n_params)
     mooseError("Sampler number of columns does not match number of inputted distributions.");
+}
+
+void
+GaussianProcessTrainer::initialize()
+{
+  // Check if results of samples matches number of samples
+  __attribute__((unused)) dof_id_type num_rows =
+      _values_distributed ? _sampler->getNumberOfLocalRows() : _sampler->getNumberOfRows();
+
+  if (num_rows != _values_ptr->size())
+    paramError("results_vpp",
+               "The number of elements in '",
+               getParam<VectorPostprocessorName>("results_vpp"),
+               "/",
+               getParam<std::string>("results_vector"),
+               "' is not equal to the number of samples in '",
+               getParam<SamplerName>("sampler"),
+               "'!");
 
   _covar_function = CovarianceFunction::makeCovarianceKernel(_kernel_type, this);
 
@@ -106,44 +107,43 @@ GaussianProcessTrainer::initialSetup()
 
   // Load training parameters into Eigen::Matrix for easier liner algebra manipulation
   // Load training data into Eigen::Vector for easier liner algebra manipulation
-  mooseAssert(_sampler->getLocalSamples().m() == num_samples, "Number of saampler rows not equal to number of results in selected VPP.");
+  mooseAssert(_sampler->getLocalSamples().m() == num_samples,
+              "Number of sampler rows not equal to number of results in selected VPP.");
 
   // Consider the possibility of a very large matrix load.
   _training_params.resize(_sampler->getLocalSamples().m(), _sampler->getLocalSamples().n());
   _training_data.resize(num_samples, 1);
-  int row_num=0;
+  int row_num = 0;
   for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p, ++row_num)
   {
     // Loading parameters from sampler
     std::vector<Real> data = _sampler->getNextLocalRow();
     for (unsigned int d = 0; d < data.size(); ++d)
-        _training_params(row_num, d) = data[d];
+      _training_params(row_num, d) = data[d];
 
     // Loading result data from VPP
     _training_data(row_num, 0) = (*_values_ptr)[row_num - offset];
   }
 
-
   // Standardize (center and scale) training params
   if (_standardize_params)
   {
     _param_standardizer.computeSet(_training_params);
-    _training_params=_param_standardizer.getStandardized(_training_params);
+    _training_params = _param_standardizer.getStandardized(_training_params);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0,1,_n_params);
+    _param_standardizer.set(0, 1, _n_params);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
   {
     _data_standardizer.computeSet(_training_data);
-    _training_data=_data_standardizer.getStandardized(_training_data);
+    _training_data = _data_standardizer.getStandardized(_training_data);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0,1,_n_params);
-
+    _param_standardizer.set(0, 1, _n_params);
 }
 
 void

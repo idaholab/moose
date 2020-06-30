@@ -37,9 +37,9 @@ makeCovarianceKernel(const MooseEnum & kernel_type, const GaussianProcessTrainer
   if (kernel_type == 0)
   {
     std::unique_ptr<CovarianceKernel> ptr = libmesh_make_unique<SquaredExponential>();
-    ptr->set_signal_variance(signal_variance);
-    ptr->set_noise_variance(noise_variance);
-    ptr->set_length_factor(length_factor);
+    ptr->setSignalVariance(signal_variance);
+    ptr->setNoiseVariance(noise_variance);
+    ptr->setLengthFactor(length_factor);
     return ptr;
   }
 
@@ -47,10 +47,10 @@ makeCovarianceKernel(const MooseEnum & kernel_type, const GaussianProcessTrainer
   {
     std::unique_ptr<CovarianceKernel> ptr = libmesh_make_unique<Exponential>();
     Real gamma = gp->getParam<Real>("gamma");
-    ptr->set_signal_variance(signal_variance);
-    ptr->set_noise_variance(noise_variance);
-    ptr->set_length_factor(length_factor);
-    ptr->set_gamma(gamma);
+    ptr->setSignalVariance(signal_variance);
+    ptr->setNoiseVariance(noise_variance);
+    ptr->setLengthFactor(length_factor);
+    ptr->setExponentialGamma(gamma);
     return ptr;
   }
 
@@ -65,10 +65,10 @@ makeCovarianceKernel(const MooseEnum & kernel_type, const GaussianProcessTrainer
   {
     std::unique_ptr<CovarianceKernel> ptr = libmesh_make_unique<MaternHalfInt>();
     unsigned int p = gp->getParam<unsigned int>("p");
-    ptr->set_signal_variance(signal_variance);
-    ptr->set_noise_variance(noise_variance);
-    ptr->set_length_factor(length_factor);
-    ptr->set_p(p);
+    ptr->setSignalVariance(signal_variance);
+    ptr->setNoiseVariance(noise_variance);
+    ptr->setLengthFactor(length_factor);
+    ptr->setHalfIntP(p);
     return ptr;
   }
 
@@ -84,8 +84,8 @@ CovarianceKernel::store(std::ostream & /*stream*/, void * /*context*/) const
 }
 
 RealEigenMatrix
-CovarianceKernel::compute_K(const RealEigenMatrix /*x*/,
-                            const RealEigenMatrix /*xp*/,
+CovarianceKernel::compute_K(const RealEigenMatrix & /*x*/,
+                            const RealEigenMatrix & /*xp*/,
                             const bool /*is_self_covariance*/) const
 {
   ::mooseError("Covariance function has not been implemented.");
@@ -94,32 +94,32 @@ CovarianceKernel::compute_K(const RealEigenMatrix /*x*/,
 }
 
 void
-CovarianceKernel::set_signal_variance(const Real sigma_f_squared)
+CovarianceKernel::setSignalVariance(const Real & sigma_f_squared)
 {
   _sigma_f_squared = sigma_f_squared;
 }
 
 void
-CovarianceKernel::set_noise_variance(const Real sigma_n_squared)
+CovarianceKernel::setNoiseVariance(const Real & sigma_n_squared)
 {
   _sigma_n_squared = sigma_n_squared;
 }
 
 void
-CovarianceKernel::set_length_factor(const std::vector<Real> length_factor)
+CovarianceKernel::setLengthFactor(const std::vector<Real> & length_factor)
 {
   _length_factor = length_factor;
 }
 
 void
-CovarianceKernel::set_gamma(const Real /*gamma*/)
+CovarianceKernel::setExponentialGamma(const Real & /*gamma*/)
 {
   ::mooseError(
       "Attempting to set gamma hyper parameter for covariance function which does not utilize.");
 }
 
 void
-CovarianceKernel::set_p(const unsigned int /*p*/)
+CovarianceKernel::setHalfIntP(const unsigned int & /*p*/)
 {
   ::mooseError(
       "Attempting to set p hyper parameter for covariance function which does not utilize.");
@@ -129,16 +129,16 @@ CovarianceKernel::set_p(const unsigned int /*p*/)
 SquaredExponential::SquaredExponential() : CovarianceKernel() {}
 
 RealEigenMatrix
-SquaredExponential::compute_K(const RealEigenMatrix x,
-                              const RealEigenMatrix xp,
+SquaredExponential::compute_K(const RealEigenMatrix & x,
+                              const RealEigenMatrix & xp,
                               const bool is_self_covariance) const
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
 
-  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
-
+  mooseAssert(num_params_x == xp.cols(),
+              "Number of parameters do not match in covariance kernel calculation");
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
@@ -149,8 +149,8 @@ SquaredExponential::compute_K(const RealEigenMatrix x,
       // Compute distance per parameter, scaled by length factor
       Real r_squared_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_squared_scaled += std::pow((x(ii, kk) - xp(jj, kk))/_length_factor[kk], 2);
-      K(ii, jj)  = _sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
+        r_squared_scaled += std::pow((x(ii, kk) - xp(jj, kk)) / _length_factor[kk], 2);
+      K(ii, jj) = _sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
     }
     if (is_self_covariance)
       K(ii, ii) += _sigma_n_squared;
@@ -177,15 +177,16 @@ SquaredExponential::store(std::ostream & stream, void * context) const
 Exponential::Exponential() : CovarianceKernel() {}
 
 RealEigenMatrix
-Exponential::compute_K(const RealEigenMatrix x,
-                       const RealEigenMatrix xp,
+Exponential::compute_K(const RealEigenMatrix & x,
+                       const RealEigenMatrix & xp,
                        const bool is_self_covariance) const
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
 
-  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
+  mooseAssert(num_params_x == xp.cols(),
+              "Number of parameters do not match in covariance kernel calculation");
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
@@ -222,7 +223,7 @@ Exponential::store(std::ostream & stream, void * context) const
 }
 
 void
-Exponential::set_gamma(const Real gamma)
+Exponential::setExponentialGamma(const Real & gamma)
 {
   _gamma = gamma;
 }
@@ -232,15 +233,16 @@ Exponential::set_gamma(const Real gamma)
 MaternHalfInt::MaternHalfInt() : CovarianceKernel() {}
 
 RealEigenMatrix
-MaternHalfInt::compute_K(const RealEigenMatrix x,
-                         const RealEigenMatrix xp,
+MaternHalfInt::compute_K(const RealEigenMatrix & x,
+                         const RealEigenMatrix & xp,
                          const bool is_self_covariance) const
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
 
-  mooseAssert(num_params_x == xp.cols(),"Number of parameters do not match in covariance kernel calculation");
+  mooseAssert(num_params_x == xp.cols(),
+              "Number of parameters do not match in covariance kernel calculation");
 
   RealEigenMatrix K(num_samples_x, num_samples_xp);
 
@@ -286,7 +288,7 @@ MaternHalfInt::store(std::ostream & stream, void * context) const
 }
 
 void
-MaternHalfInt::set_p(const unsigned int p)
+MaternHalfInt::setHalfIntP(const unsigned int & p)
 {
   _p = p;
 }
@@ -322,26 +324,26 @@ dataLoad(std::istream & stream,
   if (covar_type == "Squared Exponential")
   {
     ptr = libmesh_make_unique<CovarianceFunction::SquaredExponential>();
-    ptr->set_length_factor(length_factor);
-    ptr->set_signal_variance(sigma_f_squared);
+    ptr->setLengthFactor(length_factor);
+    ptr->setSignalVariance(sigma_f_squared);
   }
   else if (covar_type == "Exponential")
   {
     ptr = libmesh_make_unique<CovarianceFunction::Exponential>();
-    ptr->set_length_factor(length_factor);
-    ptr->set_signal_variance(sigma_f_squared);
+    ptr->setLengthFactor(length_factor);
+    ptr->setSignalVariance(sigma_f_squared);
     Real gamma;
     dataLoad(stream, gamma, context);
-    ptr->set_gamma(gamma);
+    ptr->setExponentialGamma(gamma);
   }
   else if (covar_type == "MaternHalfInt")
   {
     ptr = libmesh_make_unique<CovarianceFunction::MaternHalfInt>();
-    ptr->set_length_factor(length_factor);
-    ptr->set_signal_variance(sigma_f_squared);
+    ptr->setLengthFactor(length_factor);
+    ptr->setSignalVariance(sigma_f_squared);
     unsigned int p;
     dataLoad(stream, p, context);
-    ptr->set_p(p);
+    ptr->setHalfIntP(p);
   }
   else
     ::mooseError("Unknown Covariance Function: ", covar_type);

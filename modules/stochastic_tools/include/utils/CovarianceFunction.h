@@ -39,26 +39,26 @@ public:
   virtual void store(std::ostream & stream, void * context) const;
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  virtual RealEigenMatrix
-  compute_K(const RealEigenMatrix x, const RealEigenMatrix xp, const bool is_self_covariance) const;
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix & x,
+                                    const RealEigenMatrix & xp,
+                                    const bool is_self_covariance) const;
 
   /// Sets the signal variance (\sigma_f^2) for the kernel
-  virtual void set_signal_variance(const Real sigma_f_squared);
+  virtual void setSignalVariance(const Real & sigma_f_squared);
 
   /// Sets the noise variance (\sigma_n^2) for the kernel
-  virtual void set_noise_variance(const Real sigma_n_squared);
+  virtual void setNoiseVariance(const Real & sigma_n_squared);
 
   /// Sets the lengh factor (\ell) for the kernel. In vector form
-  virtual void set_length_factor(const std::vector<Real> length_factor);
+  virtual void setLengthFactor(const std::vector<Real> & length_factor);
 
   /// Sets the exponential factor \gamma for use in Exponential kernel
-  virtual void set_gamma(const Real gamma);
+  virtual void setExponentialGamma(const Real & gamma);
 
   /// Sets the p integer (p>=0) for used with Matern Half Integer kernel
-  virtual void set_p(const unsigned int p);
+  virtual void setHalfIntP(const unsigned int & p);
 
 protected:
-
   /// signal variance (\sigma_f^2)
   Real _sigma_f_squared;
 
@@ -67,7 +67,6 @@ protected:
 
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   std::vector<Real> _length_factor;
-
 };
 
 class SquaredExponential : public CovarianceKernel
@@ -79,8 +78,8 @@ public:
   virtual void store(std::ostream & stream, void * context) const override;
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
-                                    const RealEigenMatrix xp,
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix & x,
+                                    const RealEigenMatrix & xp,
                                     const bool is_self_covariance) const override;
 };
 
@@ -93,15 +92,14 @@ public:
   virtual void store(std::ostream & stream, void * context) const override;
 
   /// Sets the exponential factor \gamma for use in Exponential kernel
-  virtual void set_gamma(const Real gamma) override;
+  virtual void setExponentialGamma(const Real & gamma) override;
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
-                                    const RealEigenMatrix xp,
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix & x,
+                                    const RealEigenMatrix & xp,
                                     const bool is_self_covariance) const override;
 
 private:
-
   /// gamma exponential factor for use in kernel
   Real _gamma;
 };
@@ -115,11 +113,11 @@ public:
   virtual void store(std::ostream & stream, void * context) const override;
 
   /// Sets the p integer (p>=0) for used with Matern Half Integer kernel
-  virtual void set_p(const unsigned int p) override;
+  virtual void setHalfIntP(const unsigned int & p) override;
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  virtual RealEigenMatrix compute_K(const RealEigenMatrix x,
-                                    const RealEigenMatrix xp,
+  virtual RealEigenMatrix compute_K(const RealEigenMatrix & x,
+                                    const RealEigenMatrix & xp,
                                     const bool is_self_covariance) const override;
 
 private:

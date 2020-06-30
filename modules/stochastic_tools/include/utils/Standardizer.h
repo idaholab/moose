@@ -25,36 +25,38 @@ public:
   Standardizer(){};
 
   /// Methods for setting mean and standard deviation directly
-  void set(Real n);
-  void set(Real mean, Real stdev);
-  void set(Real mean, Real stdev, Real n);
-  void set(std::vector<Real> mean, std::vector<Real> stdev);
+  /// Sets mean=0, std=1 for n variables
+  void set(const Real & n);
+  /// Sets mean and std for a single variable
+  void set(const Real & mean, const Real & stdev);
+  /// Sets mean and std for a n variables variable
+  void set(const Real & mean, const Real & stdev, const Real & n);
+  /// Sets mean and std directly using provided vectors
+  void set(const std::vector<Real> & mean, const std::vector<Real> & stdev);
 
   /// Methods for computing and setting mean and standard
-  void computeSet(RealEigenMatrix input);
+  void computeSet(const RealEigenMatrix & input);
 
   /// Helper for dataStore
   void storeHelper(std::ostream & stream, void * context) const;
 
-  RealEigenMatrix getStandardized(const RealEigenMatrix input) const;
+  /// Returns the standardized (centered and scaled) of the provided input
+  RealEigenMatrix getStandardized(const RealEigenMatrix & input) const;
 
-  RealEigenMatrix getDestandardized(const RealEigenMatrix input) const;
+  /// De-standardizes (de-centered and de-scaled) the assumed standardized input
+  RealEigenMatrix getDestandardized(const RealEigenMatrix & input) const;
 
-  RealEigenMatrix getDescaled(const RealEigenMatrix input) const;
+  /// De-scales the assumed scaled input
+  RealEigenMatrix getDescaled(const RealEigenMatrix & input) const;
 
 protected:
-    std::vector<Real> _mean;
-    std::vector<Real> _stdev;
-
+  std::vector<Real> _mean;
+  std::vector<Real> _stdev;
 };
 
 } // namespace
 
 template <>
-void dataStore(std::ostream & stream,
-               StochasticTools::Standardizer & standardizer,
-               void * context);
+void dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context);
 template <>
-void dataLoad(std::istream & stream,
-              StochasticTools::Standardizer & standardizer,
-              void * context);
+void dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, void * context);
