@@ -56,8 +56,6 @@ public:
   const std::vector<unsigned int> & rankHardwareIds() const { return _rank_to_hardware_id; }
 
 protected:
-  const PerfID _construct_timer;
-
   /// Map of hardware_id -> ranks on that node
   std::unordered_map<unsigned int, std::vector<processor_id_type>> _hardware_id_to_ranks;
 

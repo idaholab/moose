@@ -24,7 +24,8 @@ protected:
   void printLiveMessage(PerfGraph::SectionIncrement & section_increment);
 
   // Print the stats
-  void printStats(PerfGraph::SectionIncrement & section_increment_start, PerfGraph::SectionIncrement & section_increment_finish);
+  void printStats(PerfGraph::SectionIncrement & section_increment_start,
+                  PerfGraph::SectionIncrement & section_increment_finish);
 
   // Print everything in the stack
   void printStack();
@@ -46,7 +47,7 @@ protected:
 
   std::future<bool> _done_future;
 
-  std::map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
+  std::unordered_map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
   /// This is one beyond the last thing on the stack
   unsigned int _stack_level;

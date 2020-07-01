@@ -16,7 +16,7 @@ getPerfGraphRegistry()
 unsigned int
 PerfGraphRegistry::registerSection(const std::string & section_name, unsigned int level)
 {
-  auto it = _section_name_to_id.lower_bound(section_name);
+  auto it = _section_name_to_id.find(section_name);
 
   // Is it already registered?
   if (it != _section_name_to_id.end() && it->first == section_name)
@@ -24,7 +24,7 @@ PerfGraphRegistry::registerSection(const std::string & section_name, unsigned in
 
   // It's not...
   auto id = _section_name_to_id.size();
-  _section_name_to_id.emplace_hint(it, section_name, id);
+  _section_name_to_id.emplace(section_name, id);
 
   auto & section_info = _id_to_section_info[id];
 
@@ -49,7 +49,7 @@ PerfGraphRegistry::registerSection(const std::string & section_name,
   if (live_message == "")
     mooseError("Live message not provided when registering timed section!");
 
-  auto it = _section_name_to_id.lower_bound(section_name);
+  auto it = _section_name_to_id.find(section_name);
 
   // Is it already registered?
   if (it != _section_name_to_id.end() && it->first == section_name)
@@ -57,7 +57,7 @@ PerfGraphRegistry::registerSection(const std::string & section_name,
 
   // It's not...
   auto id = _section_name_to_id.size();
-  _section_name_to_id.emplace_hint(it, section_name, id);
+  _section_name_to_id.emplace(section_name, id);
 
   auto & section_info = _id_to_section_info[id];
 

@@ -48,11 +48,7 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _cycles_per_step(1),
     _use_new_system(false),
     _max_h_level(0),
-    _recompute_markers_during_cycles(false),
-    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3, "Adapting Mesh")),
-    _uniform_refine_timer(registerTimedSection("uniformRefine", 2, "Uniformly Refining")),
-    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection", 2, "Uniformly Refining and Reprojecting")),
-    _update_error_vectors(registerTimedSection("updateErrorVectors", 5, "Updating Error Vectors"))
+    _recompute_markers_during_cycles(false)
 {
 }
 
@@ -127,7 +123,7 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 bool
 Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 {
-  TIME_SECTION(_adapt_mesh_timer);
+  TIME_SECTION("adaptMesh", 3, "Adapting Mesh");
 
   // If the marker name is supplied, use it. Otherwise, use the one in _marker_variable_name
   if (marker_name.empty())
@@ -274,7 +270,7 @@ Adaptivity::uniformRefine(MooseMesh * mesh, unsigned int level /*=libMesh::inval
 void
 Adaptivity::uniformRefineWithProjection()
 {
-  TIME_SECTION(_uniform_refine_with_projection);
+  TIME_SECTION("uniformRefineWithProjection", 2, "Uniformly Refining and Reprojecting");
 
   // NOTE: we are using a separate object here, since adaptivity may not be on, but we need to be
   // able to do refinements
@@ -344,7 +340,7 @@ Adaptivity::getErrorVector(const std::string & indicator_field)
 void
 Adaptivity::updateErrorVectors()
 {
-  TIME_SECTION(_update_error_vectors);
+  TIME_SECTION("updateErrorVectors", 5, "Updating Error Vectors");
 
   // Resize all of the ErrorVectors in case the mesh has changed
   for (const auto & it : _indicator_field_to_error_vector)

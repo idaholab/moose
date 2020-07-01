@@ -36,8 +36,7 @@ Steady::Steady(const InputParameters & parameters)
     _feproblem_solve(*this),
     _system_time(getParam<Real>("time")),
     _time_step(_problem.timeStep()),
-    _time(_problem.time()),
-    _final_timer(registerTimedSection("final", 1))
+    _time(_problem.time())
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -112,7 +111,7 @@ Steady::execute()
 #endif
 
   {
-    TIME_SECTION(_final_timer)
+    TIME_SECTION("final", 1, "Executing Final Objects")
     _problem.execMultiApps(EXEC_FINAL);
     _problem.finalizeMultiApps();
     _problem.postExecute();

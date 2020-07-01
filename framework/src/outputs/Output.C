@@ -119,8 +119,7 @@ Output::Output(const InputParameters & parameters)
     _sync_only(getParam<bool>("sync_only")),
     _allow_output(true),
     _is_advanced(false),
-    _advanced_execute_on(_execute_on, parameters),
-    _output_step_timer(registerTimedSection("outputStep", 2))
+    _advanced_execute_on(_execute_on, parameters)
 {
   if (_use_displaced)
   {
@@ -177,7 +176,7 @@ Output::outputStep(const ExecFlagType & type)
   // Call the output method
   if (shouldOutput(type))
   {
-    TIME_SECTION(_output_step_timer);
+    TIME_SECTION("outputStep", 2, "Outputting Step");
     output(type);
   }
 }

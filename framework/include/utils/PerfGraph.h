@@ -68,7 +68,7 @@ public:
   /**
    * Create a new PerfGraph
    */
-  PerfGraph(const std::string & root_name, MooseApp & app);
+  PerfGraph(const std::string & root_name, MooseApp & app, const bool live_all);
 
   /**
    * Destructor
@@ -113,6 +113,16 @@ public:
    * Turn on or off timing
    */
   void setActive(bool active) { _active = active; }
+
+  /**
+   * Turn on or off live printing (if timing is off then live printing will be off too)
+   */
+  void setLivePrintActive(bool active) { _live_print_active = active; }
+
+  /**
+   * Forces all sections to be output live
+   */
+  void setLivePrintAll(bool active) { _live_print_all = active; }
 
   /**
    * Get the number of calls for a section
@@ -336,6 +346,9 @@ protected:
    */
   void printHeaviestSections(const ConsoleStream & console);
 
+  /// Whether or not to put everything in the perf graph
+  bool _live_print_all;
+
   /// The PerfGraphRegistry
   PerfGraphRegistry & _perf_graph_registry;
 
@@ -351,8 +364,11 @@ protected:
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
 
+  /// The id for the root node
+  PerfID _root_node_id;
+
   /// The current node position in the stack
-  unsigned int _current_position;
+  int _current_position;
 
   /// The full callstack.  Currently capped at a depth of 100
   std::array<PerfNode *, MAX_STACK_SIZE> _stack;
@@ -367,10 +383,10 @@ protected:
   std::atomic<unsigned int> _execution_list_end;
 
   /// Map of section names to IDs
-  std::map<std::string, PerfID> & _section_name_to_id;
+  std::unordered_map<std::string, PerfID> & _section_name_to_id;
 
   /// Map of IDs to section information
-  std::map<PerfID, SectionInfo> & _id_to_section_info;
+  std::unordered_map<PerfID, SectionInfo> & _id_to_section_info;
 
   /// The time for each section.  This is updated on updateTiming()
   /// Note that this is _total_ cumulative time across every place
@@ -381,7 +397,7 @@ protected:
   /// The map is on std::string because we might need to be able to retrieve
   /// timing values in a "late binding" situation _before_ the section
   /// has been registered.
-  std::map<std::string, SectionTime> _section_time;
+  std::unordered_map<std::string, SectionTime> _section_time;
 
   /// Pointers into _section_time indexed on PerfID
   /// This is here for convenience and speed so we don't need
@@ -391,6 +407,9 @@ protected:
 
   /// Whether or not timing is active
   bool _active;
+
+  /// Whether or not live printing is active
+  bool _live_print_active;
 
   /// The promise to the print thread that will signal when to stop
   std::promise<bool> _done;

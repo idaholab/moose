@@ -96,7 +96,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
     _use_coloring_finite_difference(false)
-    _initial_residual_timer(registerTimedSection("nlInitialResidual", 3, "Computing Initial Residual"))
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -140,7 +139,7 @@ NonlinearSystem::solve()
 
   if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
   {
-    TIME_SECTION(_initial_residual_timer);
+    TIME_SECTION("nlInitialResidual", 3, "Computing Initial Residual");
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
     _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
@@ -192,7 +191,7 @@ NonlinearSystem::solve()
 
   solver.set_snesmf_reuse_base(_fe_problem.useSNESMFReuseBase());
 
-//  _console << "\n\n" << std::endl;
+  //  _console << "\n\n" << std::endl;
 
   if (_time_integrator)
   {

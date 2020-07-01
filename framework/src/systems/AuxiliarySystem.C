@@ -49,14 +49,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
     _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
     _nodal_array_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum()),
-    _compute_scalar_vars_timer(registerTimedSection("computeScalarVars", 1)),
-    _compute_nodal_vars_timer(registerTimedSection("computeNodalVars", 1)),
-    _compute_nodal_vec_vars_timer(registerTimedSection("computeNodalVecVars", 1)),
-    _compute_nodal_array_vars_timer(registerTimedSection("computeNodalArrayVars", 1)),
-    _compute_elemental_vars_timer(registerTimedSection("computeElementalVars", 1)),
-    _compute_elemental_vec_vars_timer(registerTimedSection("computeElementalVecVars", 1)),
-    _compute_elemental_array_vars_timer(registerTimedSection("computeElementalArrayVars", 1))
+    _elemental_array_aux_storage(_app.getExecuteOnEnum())
 {
   _nodal_vars.resize(libMesh::n_threads());
   _nodal_std_vars.resize(libMesh::n_threads());
@@ -619,7 +612,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 
   if (storage.hasActiveObjects())
   {
-    TIME_SECTION(_compute_scalar_vars_timer);
+    TIME_SECTION("computeScalarVars", 1);
 
     PARALLEL_TRY
     {
@@ -653,15 +646,19 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 void
 AuxiliarySystem::computeNodalVars(ExecFlagType type)
 {
+  TIME_SECTION("computeNodalVars", 3);
+
   const MooseObjectWarehouse<AuxKernel> & nodal = _nodal_aux_storage[type];
-  computeNodalVarsHelper<AuxKernel>(nodal, _nodal_std_vars, _compute_nodal_vars_timer);
+  computeNodalVarsHelper<AuxKernel>(nodal, _nodal_std_vars);
 }
 
 void
 AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
 {
+  TIME_SECTION("computeNodalVecVars", 3);
+
   const MooseObjectWarehouse<VectorAuxKernel> & nodal = _nodal_vec_aux_storage[type];
-  computeNodalVarsHelper<VectorAuxKernel>(nodal, _nodal_vec_vars, _compute_nodal_vec_vars_timer);
+  computeNodalVarsHelper<VectorAuxKernel>(nodal, _nodal_vec_vars);
 }
 
 void
@@ -674,16 +671,19 @@ AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
 void
 AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
+  TIME_SECTION("computeElementalVars", 3);
+
   const MooseObjectWarehouse<AuxKernel> & elemental = _elemental_aux_storage[type];
-  computeElementalVarsHelper<AuxKernel>(elemental, _elem_std_vars, _compute_elemental_vars_timer);
+  computeElementalVarsHelper<AuxKernel>(elemental, _elem_std_vars);
 }
 
 void
 AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
 {
+  TIME_SECTION("computeElementalVecVars", 3);
+
   const MooseObjectWarehouse<VectorAuxKernel> & elemental = _elemental_vec_aux_storage[type];
-  computeElementalVarsHelper<VectorAuxKernel>(
-      elemental, _elem_vec_vars, _compute_elemental_vec_vars_timer);
+  computeElementalVarsHelper<VectorAuxKernel>(elemental, _elem_vec_vars);
 }
 
 void
@@ -737,13 +737,10 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeElementalVarsHelper(
     const MooseObjectWarehouse<AuxKernelType> & warehouse,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
-    const PerfID timer)
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
 {
   if (warehouse.hasActiveBlockObjects())
   {
-    TIME_SECTION(timer);
-
     // Block Elemental AuxKernels
     PARALLEL_TRY
     {
@@ -769,7 +766,7 @@ AuxiliarySystem::computeElementalVarsHelper(
   // Boundary Elemental AuxKernels
   if (warehouse.hasActiveBoundaryObjects())
   {
-    TIME_SECTION(_compute_elemental_vec_vars_timer);
+    TIME_SECTION("computeElementalVecVars", 3);
 
     PARALLEL_TRY
     {
@@ -797,13 +794,10 @@ template <typename AuxKernelType>
 void
 AuxiliarySystem::computeNodalVarsHelper(
     const MooseObjectWarehouse<AuxKernelType> & warehouse,
-    const std::vector<std::vector<MooseVariableFEBase *>> & vars,
-    const PerfID timer)
+    const std::vector<std::vector<MooseVariableFEBase *>> & vars)
 {
   if (warehouse.hasActiveBlockObjects())
   {
-    TIME_SECTION(timer);
-
     // Block Nodal AuxKernels
     PARALLEL_TRY
     {
@@ -819,7 +813,7 @@ AuxiliarySystem::computeNodalVarsHelper(
 
   if (warehouse.hasActiveBoundaryObjects())
   {
-    TIME_SECTION(timer);
+    TIME_SECTION("computeBoundaryObjects", 3);
 
     // Boundary Nodal AuxKernels
     PARALLEL_TRY
@@ -837,17 +831,13 @@ AuxiliarySystem::computeNodalVarsHelper(
 
 template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
-    const std::vector<std::vector<MooseVariableFEBase *>> &,
-    const PerfID);
+    const std::vector<std::vector<MooseVariableFEBase *>> &);
 template void AuxiliarySystem::computeElementalVarsHelper<VectorAuxKernel>(
     const MooseObjectWarehouse<VectorAuxKernel> &,
-    const std::vector<std::vector<MooseVariableFEBase *>> &,
-    const PerfID);
+    const std::vector<std::vector<MooseVariableFEBase *>> &);
 template void AuxiliarySystem::computeNodalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
-    const std::vector<std::vector<MooseVariableFEBase *>> &,
-    const PerfID);
+    const std::vector<std::vector<MooseVariableFEBase *>> &);
 template void AuxiliarySystem::computeNodalVarsHelper<VectorAuxKernel>(
     const MooseObjectWarehouse<VectorAuxKernel> &,
-    const std::vector<std::vector<MooseVariableFEBase *>> &,
-    const PerfID);
+    const std::vector<std::vector<MooseVariableFEBase *>> &);

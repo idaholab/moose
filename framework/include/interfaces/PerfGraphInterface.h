@@ -14,10 +14,30 @@
 #include "InputParameters.h"
 
 #ifndef MOOSE_NO_PERF_GRAPH
-#define TIME_SECTION(id) PerfGuard time_guard(_perf_graph, id);
+#define TIME_SECTION1(id) PerfGuard time_guard(_perf_graph, id);
 #else
-#define TIME_SECTION(id)
+#define TIME_SECTION1(id)
 #endif
+
+#define TIME_SECTION2(section_name, level)                                                         \
+  static const PerfID __perf_id =                                                                  \
+      moose::internal::getPerfGraphRegistry().registerSection(section_name, level);                \
+  TIME_SECTION1(__perf_id);
+
+#define TIME_SECTION3(section_name, level, live_message)                                           \
+  static const PerfID __perf_id =                                                                  \
+      moose::internal::getPerfGraphRegistry().registerSection(section_name, level, live_message);  \
+  TIME_SECTION1(__perf_id);
+
+#define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
+  static const PerfID __perf_id = moose::internal::getPerfGraphRegistry().registerSection(         \
+      section_name, level, live_message, print_dots);                                              \
+  TIME_SECTION1(__perf_id);
+
+// Overloading solution from https://stackoverflow.com/a/11763277
+#define GET_MACRO(_1, _2, _3, _4, NAME, ...) NAME
+#define TIME_SECTION(...)                                                                          \
+  GET_MACRO(__VA_ARGS__, TIME_SECTION4, TIME_SECTION3, TIME_SECTION2, TIME_SECTION1)(__VA_ARGS__)
 
 // Forward declarations
 class PerfGraphInterface;
@@ -69,7 +89,10 @@ protected:
    * @param print_dots Whether or not progress dots should be printed for this section
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerTimedSection(const std::string & section_name, const unsigned int level, const std::string & live_message, const bool print_dots = true);
+  PerfID registerTimedSection(const std::string & section_name,
+                              const unsigned int level,
+                              const std::string & live_message,
+                              const bool print_dots = true);
 
   /// Params
   const InputParameters * const _pg_params;

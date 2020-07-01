@@ -28,39 +28,32 @@
 
 const std::string PerfGraph::ROOT_NAME = "Root";
 
-PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app)
+PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app, const bool live_all)
   : ConsoleStreamInterface(app),
+    _live_print_all(live_all),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _pid(app.processor_id()),
-    _current_position(0),
+    _current_position(-1),
+    _stack(),
     _execution_list_begin(0),
     _execution_list_end(0),
     _section_name_to_id(_perf_graph_registry._section_name_to_id),
     _id_to_section_info(_perf_graph_registry._id_to_section_info),
     _active(true),
+    _live_print_active(true),
     _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
   if (_pid == 0)
   {
     // Start the printing thread
-    _print_thread = std::thread([this] { this->_live_print->start(); });
+    _print_thread = std::thread([this] {
+        this->_live_print->start();
+    });
   }
 
-  // Not done in the initialization list on purpose because this object needs to be complete first
-  _root_node = libmesh_make_unique<PerfNode>(_perf_graph_registry.registerSection(ROOT_NAME, 0));
+  _root_node_id = _perf_graph_registry.registerSection(ROOT_NAME, 0);
 
-  MemoryUtils::Stats stats;
-  MemoryUtils::getMemoryStats(stats);
-  auto start_memory =
-      MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
-
-  // Set the initial time
-  _root_node->setStartTimeAndMemory(std::chrono::steady_clock::now(), start_memory);
-
-  // Add a call
-  _root_node->incrementNumCalls();
-
-  _stack[0] = _root_node.get();
+  push(_root_node_id);
 }
 
 PerfGraph::~PerfGraph()
@@ -161,10 +154,18 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
 void
 PerfGraph::push(const PerfID id)
 {
-  if (!_active)
+  if (!_active && !_live_print_active)
     return;
 
-  auto new_node = _stack[_current_position]->getChild(id);
+  PerfNode * new_node = nullptr;
+
+  if (_current_position == -1) // Must be the root node - need to makew it
+  {
+    _root_node = libmesh_make_unique<PerfNode>(id);
+    new_node = _root_node.get();
+  }
+  else
+    new_node = _stack[_current_position]->getChild(id);
 
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
@@ -187,14 +188,15 @@ PerfGraph::push(const PerfID id)
   _stack[_current_position] = new_node;
 
   // Add this to the exection list
-  if (_pid == 0 && !_id_to_section_info[id]._live_message.empty())
+  if ((_live_print_active || _live_print_all) && _pid == 0 &&
+      (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
     addToExecutionList(id, IncrementState::started, current_time, start_memory);
 }
 
 void
 PerfGraph::pop()
 {
-  if (!_active)
+  if (!_active && !_live_print_active)
     return;
 
   MemoryUtils::Stats stats;
@@ -211,7 +213,8 @@ PerfGraph::pop()
   _current_position--;
 
   // Add this to the exection list
-  if (_pid == 0 && !_id_to_section_info[current_node->id()]._live_message.empty())
+  if ((_live_print_active || _live_print_all) && _pid == 0 &&
+      (!_id_to_section_info[current_node->id()]._live_message.empty() || _live_print_all))
   {
     addToExecutionList(current_node->id(), IncrementState::finished, current_time, current_memory);
 
@@ -237,7 +240,7 @@ PerfGraph::updateTiming()
   auto now_memory =
       MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
 
-  for (unsigned int i = 0; i <= _current_position; i++)
+  for (int i = 0; i <= _current_position; i++)
   {
     auto node = _stack[i];
     node->addTimeAndMemory(now, now_memory);
@@ -327,7 +330,7 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto section = std::string(current_depth * 2, ' ') + name;
 
     // The total time of the root node
-    auto total_root_time = _section_time_ptrs[0]->_total;
+    auto total_root_time = std::chrono::duration<double>(_root_node->totalTime()).count();
 
     auto num_calls = current_node->numCalls();
     auto self = std::chrono::duration<double>(current_node->selfTime()).count();

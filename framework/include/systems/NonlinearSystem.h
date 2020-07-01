@@ -97,7 +97,4 @@ private:
   void setupColoringFiniteDifferencedPreconditioner();
 
   bool _use_coloring_finite_difference;
-
-  /// Performance Timers
-  const PerfID _initial_residual_timer;
 };

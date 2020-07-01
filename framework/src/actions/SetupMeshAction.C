@@ -101,12 +101,7 @@ SetupMeshAction::validParams()
   return params;
 }
 
-SetupMeshAction::SetupMeshAction(InputParameters params) : MooseObjectAction(params),
-                                                           _setup_mesh_timer(registerTimedSection("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true)),
-                                                           _set_mesh_base_timer(registerTimedSection("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true)),
-                                                           _init_mesh_timer(registerTimedSection("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true))
-
-                    {}
+SetupMeshAction::SetupMeshAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 SetupMeshAction::setupMesh(MooseMesh * mesh)
@@ -235,7 +230,7 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
-    TIME_SECTION(_setup_mesh_timer);
+    TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
     if (_app.masterMesh())
       _mesh = _app.masterMesh()->safeClone();
@@ -288,7 +283,7 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
-    TIME_SECTION(_set_mesh_base_timer);
+    TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
 
     if (!_app.masterMesh() && !_mesh->hasMeshBase())
     {
@@ -333,7 +328,7 @@ SetupMeshAction::act()
 
   else if (_current_task == "init_mesh")
   {
-    TIME_SECTION(_init_mesh_timer);
+    TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
 
     if (_app.masterMesh())
     {

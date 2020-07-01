@@ -212,19 +212,13 @@ protected:
   /// Which eigenvalue is used to compute residual. By default the zeroth eigenvalue
   /// is used.
   unsigned int _active_eigen_index;
+
   /// Whether or not we are doing free power iteration. Free power iteration is
   /// often used to compute initial guess for Newton eigen solver. It is automatically
   /// triggered by Eigenvalue Executioner
   bool _do_free_power_iteration;
   /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvalue.
   bool _output_inverse_eigenvalue;
-  /// Timers
-  PerfID _compute_jacobian_tag_timer;
-  PerfID _compute_jacobian_ab_timer;
-  PerfID _compute_residual_tag_timer;
-  PerfID _compute_residual_ab_timer;
-  PerfID _solve_timer;
-  PerfID _compute_jacobian_blocks_timer;
 
   /// Whether or not we normalize eigenvector
   bool _has_normalization;

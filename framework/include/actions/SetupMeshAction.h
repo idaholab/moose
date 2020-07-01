@@ -35,9 +35,4 @@ private:
    * @return The new type of object that will be built.
    */
   std::string modifyParamsForUseSplit(InputParameters & moose_object_params) const;
-
-  /// Timers
-  PerfID _setup_mesh_timer;
-  PerfID _set_mesh_base_timer;
-  PerfID _init_mesh_timer;
 };

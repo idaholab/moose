@@ -316,14 +316,6 @@ private:
 
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;
-
-  ///@{
-  /// PrefGraph timers
-  const PerfID _perf_get_global_samples;
-  const PerfID _perf_get_local_samples;
-  const PerfID _perf_local_sample_matrix;
-  const PerfID _perf_sample_matrix;
-  ///@}
 };
 
 template <typename T>

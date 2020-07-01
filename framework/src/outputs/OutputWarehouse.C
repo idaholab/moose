@@ -173,9 +173,13 @@ OutputWarehouse::meshChanged()
     obj->meshChanged();
 }
 
+static std::mutex moose_console_mutex;
+
 void
 OutputWarehouse::mooseConsole()
 {
+  std::lock_guard<std::mutex> lock(moose_console_mutex);
+
   // Loop through all Console Output objects and pass the current output buffer
   std::vector<Console *> objects = getOutputs<Console>();
   if (!objects.empty())

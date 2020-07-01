@@ -261,6 +261,9 @@ MooseApp::validParams()
                                            30,
                                            "Pauses the application during startup for the "
                                            "specified time to allow for connection of debuggers.");
+
+  params.addCommandLineParam<bool>("perf_graph_live_all", "--perf-graph-live-all", false, "Forces printing of ALL progress messages.");
+
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default.");
 
@@ -298,7 +301,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _pars(parameters),
     _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
-    _perf_graph(type() + " (" + name() + ')', *this),
     _rank_map(*_comm, _perf_graph),
     _file_base_set_by_user(false),
     _output_position_set(false),
@@ -306,6 +308,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _start_time(0.0),
     _global_time_offset(0.0),
     _output_warehouse(*this),
+    _perf_graph(type() + " (" + name() + ')', *this, getParam<bool>("perf_graph_live_all")),
     _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
@@ -340,27 +343,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
-    _setup_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::setup", 2, "Setting Up")),
-    _setup_options_timer(
-        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::setupOptions", 5)),
-    _run_input_file_timer(
-        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::runInputFile", 3)),
-    _execute_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::execute", 2, "Starting")),
-    _execute_executioner_timer(
-        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::executeExecutioner", 3)),
-    _restore_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::restore", 2, "Restoring Application")),
-    _run_timer(moose::internal::getPerfGraphRegistry().registerSection("MooseApp::run", 3)),
-    _execute_mesh_modifiers_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::executeMeshModifiers", 1, "Executing Mesh Modifiers")),
-    _execute_mesh_generators_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::executeMeshGenerators", 1, "Executing Mesh Generators")),
-    _restore_cached_backup_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::restoreCachedBackup", 2, "Restoring Cached Backup")),
-    _create_minimal_app_timer(moose::internal::getPerfGraphRegistry().registerSection(
-        "MooseApp::createMinimalApp", 3, "Creating Minimal App")),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
@@ -608,7 +590,7 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
-  TIME_SECTION(_setup_options_timer);
+  TIME_SECTION("MooseApp::setupOptions", 5, "Setting Up Options");
 
   // MOOSE was updated to have the ability to register execution flags in similar fashion as
   // objects. However, this change requires all *App.C/h files to be updated with the new
@@ -987,7 +969,7 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 void
 MooseApp::runInputFile()
 {
-  TIME_SECTION(_run_input_file_timer);
+  TIME_SECTION("MooseApp::runInputFile", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1026,7 +1008,7 @@ MooseApp::errorCheck()
 void
 MooseApp::executeExecutioner()
 {
-  TIME_SECTION(_execute_executioner_timer);
+  TIME_SECTION("MooseApp::executeExecutioner", 3);
 
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
@@ -1111,7 +1093,7 @@ MooseApp::backup()
 void
 MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
 {
-  TIME_SECTION(_restore_timer);
+  TIME_SECTION("MooseApp::restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
   FEProblemBase & fe_problem = _executioner->feProblem();
@@ -1150,7 +1132,7 @@ MooseApp::setErrorOverridden()
 void
 MooseApp::run()
 {
-  TIME_SECTION(_run_timer);
+  TIME_SECTION("MooseApp::run", 3);
   if (isParamValid("show_docs") && getParam<bool>("show_docs"))
   {
     auto binname = appBinaryName();
@@ -1255,7 +1237,7 @@ MooseApp::run()
 
   try
   {
-    TIME_SECTION(_setup_timer);
+    TIME_SECTION("MooseApp::setup", 2, "Setting Up");
     setupOptions();
     runInputFile();
   }
@@ -1266,7 +1248,7 @@ MooseApp::run()
 
   if (!_check_input)
   {
-    TIME_SECTION(_execute_timer);
+    TIME_SECTION("MooseApp::execute", 2, "Executing");
     executeExecutioner();
   }
   else
@@ -1721,7 +1703,7 @@ MooseApp::createMeshGeneratorOrder()
   if (_ordered_generators.size() > 0)
     return;
 
-  TIME_SECTION(_execute_mesh_generators_timer);
+  TIME_SECTION("MooseApp::executeMeshGenerators", 1, "Executing Mesh Generators");
 
   DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
 
@@ -1955,7 +1937,7 @@ MooseApp::restoreCachedBackup()
   if (!_cached_backup.get())
     mooseError("No cached Backup to restore!");
 
-  TIME_SECTION(_restore_cached_backup_timer);
+  TIME_SECTION("MooseApp::restoreCachedBackup", 2, "Restoring Cached Backup");
 
   restore(_cached_backup, isRestarting());
 
@@ -1966,7 +1948,7 @@ MooseApp::restoreCachedBackup()
 void
 MooseApp::createMinimalApp()
 {
-  TIME_SECTION(_create_minimal_app_timer);
+  TIME_SECTION("MooseApp::createMinimalApp", 3, "Creating Minimal App");
 
   // SetupMeshAction
   {

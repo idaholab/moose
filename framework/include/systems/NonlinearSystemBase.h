@@ -909,25 +909,6 @@ protected:
 
   std::vector<dof_id_type> _var_all_dof_indices;
 
-  /// Timers
-  const PerfID _compute_residual_tags_timer;
-  const PerfID _compute_residual_internal_timer;
-  const PerfID _kernels_timer;
-  const PerfID _scalar_kernels_timer;
-  const PerfID _nodal_kernels_timer;
-  const PerfID _nodal_kernel_bcs_timer;
-  const PerfID _nodal_bcs_timer;
-  const PerfID _compute_jacobian_tags_timer;
-  const PerfID _compute_jacobian_blocks_timer;
-  const PerfID _compute_dampers_timer;
-  const PerfID _compute_dirac_timer;
-  const PerfID _compute_scaling_timer;
-  const PerfID _nl_initial_setup_timer;
-  const PerfID _kernels_initial_setup_timer;
-  const PerfID _mortar_initialization_timer;
-  const PerfID _predictor_application_timer;
-  const PerfID _initial_apply_bcs_timer;
-
   /// Flag used to indicate whether we have already computed the scaling Jacobian
   bool _computed_scaling;
 

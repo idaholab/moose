@@ -882,9 +882,6 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
 
-  /// The PerfGraph object for this applciation
-  PerfGraph _perf_graph;
-
   /// The RankMap is a useful object for determining how
   const RankMap _rank_map;
 
@@ -920,6 +917,9 @@ protected:
 
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
+
+  /// The PerfGraph object for this applciation
+  PerfGraph _perf_graph;
 
   /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
   InputParameterWarehouse * _input_parameter_warehouse;
@@ -1096,18 +1096,6 @@ private:
 
   /// Execution flags for this App
   ExecFlagEnum _execute_flags;
-
-  /// Timers
-  const PerfID _setup_timer;
-  const PerfID _setup_options_timer;
-  const PerfID _run_input_file_timer;
-  const PerfID _execute_timer;
-  const PerfID _execute_executioner_timer;
-  const PerfID _restore_timer;
-  const PerfID _run_timer;
-  const PerfID _execute_mesh_generators_timer;
-  const PerfID _restore_cached_backup_timer;
-  const PerfID _create_minimal_app_timer;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;

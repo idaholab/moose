@@ -93,10 +93,14 @@ private:
   std::ostringstream & _oss;
 };
 
+extern std::mutex _stream_mutex;
+
 template <typename StreamType>
 const ConsoleStream &
 ConsoleStream::operator<<(const StreamType & s) const
 {
+  std::lock_guard<std::mutex> lock(_stream_mutex);
+
   _oss << s;
   return *this;
 }

@@ -72,10 +72,10 @@ protected:
   ~PerfGraphRegistry(){};
 
   /// Map of section names to IDs
-  std::map<std::string, PerfID> _section_name_to_id;
+  std::unordered_map<std::string, PerfID> _section_name_to_id;
 
   /// Map of IDs to section information
-  std::map<PerfID, SectionInfo> _id_to_section_info;
+  std::unordered_map<PerfID, SectionInfo> _id_to_section_info;
 
   /// So it can be constructed
   friend PerfGraphRegistry & getPerfGraphRegistry();

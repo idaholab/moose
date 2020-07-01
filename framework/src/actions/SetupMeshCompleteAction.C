@@ -34,10 +34,7 @@ SetupMeshCompleteAction::validParams()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params)
-    : Action(params), _uniform_refine_timer(registerTimedSection("uniformRefine", 2, "Uniformly Refining"))
-{
-}
+SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) : Action(params) {}
 
 void
 SetupMeshCompleteAction::act()
@@ -64,7 +61,7 @@ SetupMeshCompleteAction::act()
      */
     if (_app.getExodusFileRestart() == false && _app.isRecovering() == false)
     {
-      TIME_SECTION(_uniform_refine_timer);
+      TIME_SECTION("uniformRefine", 2, "Uniformly Refining");
 
       if (_mesh->uniformRefineLevel())
       {
@@ -89,6 +86,8 @@ SetupMeshCompleteAction::act()
   }
   else if (_current_task == "delete_remote_elements_after_late_geometric_ghosting")
   {
+    TIME_SECTION("deleteRemoteElems", 2, "Deleting Remote Elements");
+
     if (_displaced_mesh &&
         (_mesh->needsRemoteElemDeletion() != _displaced_mesh->needsRemoteElemDeletion()))
       mooseError("Our reference and displaced meshes are not in sync with respect to whether we "
@@ -105,6 +104,8 @@ SetupMeshCompleteAction::act()
   }
   else
   {
+    TIME_SECTION("completeSetup", 2, "Completing Mesh Setup");
+
     // Prepare the mesh (may occur multiple times)
     _mesh->prepare();
 
