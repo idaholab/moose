@@ -4,17 +4,17 @@ This page will function as a collection of libraries and other software packages
 
 ## MOOSE
 
-- [Python](www.python.org)
-- [LLVM](llvm.org)
-- [GCC](gcc.gnu.org)
-- [MPICH](www.mpich.org)
+- [Python](https://www.python.org)
+- [LLVM](https://llvm.org)
+- [GCC](https://gcc.gnu.org)
+- [MPICH](https://www.mpich.org)
 - [PETSc](https://www.mcs.anl.gov/petsc/)
 - [libMesh](https://libmesh.github.io/)
 
 ## MooseDocs
 
-- [Python](www.python.org)
-- [pandas](pandas.pydata.org/)
+- [Python](https://www.python.org)
+- [pandas](https://pandas.pydata.org/)
 - [LiveReload](https://livereload.readthedocs.io/en/latest/)
 - [YAML](https://yaml.org/)
 - [PyYAML](https://pyyaml.org/)
@@ -27,7 +27,7 @@ This page will function as a collection of libraries and other software packages
 
 ## Peacock
 
-- [Python](www.python.org)
+- [Python](https://www.python.org)
 - [Qt](https://www.qt.io/)
 - [VTK](https://vtk.org/)
 - [PyQt](https://www.riverbankcomputing.com/software/pyqt/)
