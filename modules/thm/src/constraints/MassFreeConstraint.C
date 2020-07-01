@@ -21,9 +21,9 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
     _rhouA(coupledValue("rhouA")),
     _rhouA_var_number(coupled("rhouA"))
 {
-  _master_node_vector = getParam<std::vector<dof_id_type>>("nodes");
+  _primary_node_vector = getParam<std::vector<dof_id_type>>("nodes");
   // just a dummy value that is never used
-  _connected_nodes.push_back(*_master_node_vector.begin());
+  _connected_nodes.push_back(*_primary_node_vector.begin());
 }
 
 void
