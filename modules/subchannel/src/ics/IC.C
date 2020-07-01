@@ -1,15 +1,15 @@
-#include "PsbtIC.h"
+#include "IC.h"
 
 InputParameters
-PsbtIC::validParams()
+IC::validParams()
 {
   return InitialCondition::validParams();
 }
 
-PsbtIC::PsbtIC(const InputParameters & params) : InitialCondition(params) {}
+IC::IC(const InputParameters & params) : InitialCondition(params) {}
 
 std::pair<unsigned int, unsigned int>
-PsbtIC::index_point(const Point & p) const
+IC::index_point(const Point & p) const
 {
   constexpr Real pitch{0.0126}; // in m
   unsigned int i = (p(0) + 0.5 * pitch) / pitch;

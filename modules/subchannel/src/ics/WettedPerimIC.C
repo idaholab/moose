@@ -1,17 +1,17 @@
-#include "PsbtWettedPerimIC.h"
+#include "WettedPerimIC.h"
 
-registerMooseObject("SubChannelApp", PsbtWettedPerimIC);
+registerMooseObject("SubChannelApp", WettedPerimIC);
 
 InputParameters
-PsbtWettedPerimIC::validParams()
+WettedPerimIC::validParams()
 {
-  return PsbtIC::validParams();
+  return IC::validParams();
 }
 
-PsbtWettedPerimIC::PsbtWettedPerimIC(const InputParameters & params) : PsbtIC(params) {}
+WettedPerimIC::WettedPerimIC(const InputParameters & params) : IC(params) {}
 
 Real
-PsbtWettedPerimIC::value(const Point & p)
+WettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
   _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
