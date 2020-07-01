@@ -2,6 +2,7 @@
 
 #include "InitialCondition.h"
 
+class SubChannelMesh;
 /**
  * An abstract class for ICs relating to the PSBT fluid temperature benchmarks
  */
@@ -15,6 +16,7 @@ protected:
    * Find the (row, column) indices of the subchannel containing a given point.
    */
   std::pair<unsigned int, unsigned int> index_point(const Point & p) const;
+  SubChannelMesh & _mesh;
 
 public:
   static InputParameters validParams();
