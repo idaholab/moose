@@ -50,6 +50,10 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   _tracker_params.addParam<const Function *>("heat_source_function",
                                              "The function describing the heat source");
+  _tracker_params.addParam<const ADVariableValue *>(
+      "heat_source_var",
+      "Variable describing the volumetric heat source. Note that if this variable evaluates to a "
+      "negative number, then this object will be an energy sink");
 
   _tracker_params.addParam<bool>(
       "has_coupled_force",

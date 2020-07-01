@@ -71,6 +71,7 @@ INSAction::validParams()
   params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
+  params.addCoupledVar("heat_source_var", "The coupled variable describing the heat source");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
@@ -200,8 +201,18 @@ INSAction::INSAction(InputParameters parameters)
       mooseError("If 'has_wall_convection' is true, then 'wall_temperature' must be set.");
   }
 
-  if (getParam<bool>("has_heat_source") && !isParamValid("heat_source_function"))
-    mooseError("If 'has_heat_source' is true, then 'heat_source_function' must be set.");
+  if (getParam<bool>("has_heat_source"))
+  {
+    bool has_coupled = isParamValid("heat_source_var");
+    bool has_function = isParamValid("heat_source_function");
+    if (!has_coupled && !has_function)
+      mooseError("Either the 'heat_source_var' or 'heat_source_function' param must be "
+                 "set for the "
+                 "'INSADEnergySource' object");
+    else if (has_coupled && has_function)
+      mooseError("Both the 'heat_source_var' or 'heat_source_function' param are set for the "
+                 "'INSADEnergySource' object. Please use one or the other.");
+  }
 
   if (getParam<bool>("has_coupled_force"))
   {
@@ -681,8 +692,8 @@ INSAction::addINSMomentum()
       else
         mooseError(
             "Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
-            "set for the "
-            "'INSADMomentumCoupledForce' object");
+            "set if adding the 'INSADMomentumCoupledForce' object throught the incompressible "
+            "Navier-Stokes action.");
 
       _problem->addKernel(kernel_type, "ins_momentum_coupled_force", params);
     }
@@ -767,7 +778,15 @@ INSAction::addINSTemperature()
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<FunctionName>("source_function") = getParam<FunctionName>("heat_source_function");
+      if (isParamValid("heat_source_var"))
+        params.set<CoupledName>("source_variable") = getParam<CoupledName>("heat_source_var");
+      else if (isParamValid("heat_source_function"))
+        params.set<FunctionName>("source_function") =
+            getParam<FunctionName>("heat_source_function");
+      else
+        mooseError("Either the 'heat_source_var' or 'heat_source_function' param must be "
+                   "set if adding the 'INSADEnergySource' through the incompressible Navier-Stokes "
+                   "action.");
       _problem->addKernel(kernel_type, "ins_temperature_source", params);
     }
   }

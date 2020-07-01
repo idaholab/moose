@@ -117,14 +117,14 @@ INSADMaterial::computeQpProperties()
   if (_has_coupled_force)
   {
     if (_coupled_force_var)
-      _coupled_force_strong_residual[_qp] = (*_coupled_force_var)[_qp];
+      _coupled_force_strong_residual[_qp] = -(*_coupled_force_var)[_qp];
     else
     {
       mooseAssert(_coupled_force_vector_function,
                   "Either the coupled force var or the coupled force vector function must be "
                   "non-null in 'INSADMaterial'");
       _coupled_force_strong_residual[_qp] =
-          _coupled_force_vector_function->vectorValue(_t, _q_point[_qp]);
+          -_coupled_force_vector_function->vectorValue(_t, _q_point[_qp]);
     }
   }
 

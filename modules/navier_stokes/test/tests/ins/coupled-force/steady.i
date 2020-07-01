@@ -100,16 +100,16 @@
     type = VectorFunctionDirichletBC
     variable = u
     boundary = 'left'
-    function_x = -1
-    function_y = -1
+    function_x = 1
+    function_y = 1
   []
 
   [u_right]
     type = VectorFunctionDirichletBC
     variable = u
     boundary = 'right'
-    function_x = 1
-    function_y = 1
+    function_x = -1
+    function_y = -1
   []
 []
 

@@ -18,7 +18,11 @@ INSADEnergySource::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Computes an arbitrary volumetric heat source (or sink).");
-  params.addRequiredParam<FunctionName>(
+  params.addCoupledVar(
+      "source_variable",
+      "Variable describing the volumetric heat source. Note that if this variable evaluates to a "
+      "negative number, then this object will be an energy sink");
+  params.addParam<FunctionName>(
       "source_function",
       "Function describing the volumetric heat source. Note that if this function evaluates to a "
       "negative number, then this object will be an energy sink");
@@ -30,12 +34,24 @@ INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
     _temperature_source_strong_residual(
         getADMaterialProperty<Real>("temperature_source_strong_residual"))
 {
+  bool has_coupled = isCoupled("source_variable");
+  bool has_function = isParamValid("source_function");
+  if (!has_coupled && !has_function)
+    mooseError("Either the 'source_variable' or 'source_function' param must be set for the "
+               "'INSADMomentumCoupledForce' object");
+  else if (has_coupled && has_function)
+    mooseError("Both the 'source_variable' or 'source_function' param are set for the "
+               "'INSADMomentumCoupledForce' object. Please use one or the other.");
+
   // Bypass the UserObjectInterface method because it requires a UserObjectName param which we
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
   obj_tracker.set("has_heat_source", true);
-  obj_tracker.set("heat_source_function", &getFunction("source_function"));
+  if (has_coupled)
+    obj_tracker.set("heat_source_var", &adCoupledValue("source_variable"));
+  else if (has_function)
+    obj_tracker.set("heat_source_function", &getFunction("source_function"));
 }
 
 ADReal

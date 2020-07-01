@@ -41,5 +41,6 @@ protected:
   Real _wall_convection_alpha;
   Real _wall_temperature;
   bool _has_heat_source;
+  const ADVariableValue * _heat_source_var;
   const Function * _heat_source_function;
 };

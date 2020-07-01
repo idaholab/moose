@@ -55,16 +55,16 @@
     type = VectorFunctionDirichletBC
     variable = u
     boundary = 'left'
-    function_x = -1
-    function_y = -1
+    function_x = 1
+    function_y = 1
   []
 
   [u_right]
     type = VectorFunctionDirichletBC
     variable = u
     boundary = 'right'
-    function_x = 1
-    function_y = 1
+    function_x = -1
+    function_y = -1
   []
 []
 
@@ -100,7 +100,7 @@
 [Functions]
   [vector_func]
     type = ParsedVectorFunction
-    value_x = '2*x - 1'
-    value_y = '2*x - 1'
+    value_x = '-2*x + 1'
+    value_y = '-2*x + 1'
   []
 []

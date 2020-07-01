@@ -36,7 +36,9 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
     _temperature_wall_convection_strong_residual(
         declareADProperty<Real>("temperature_wall_convection_strong_residual")),
     _temperature_source_strong_residual(
-        declareADProperty<Real>("temperature_source_strong_residual"))
+        declareADProperty<Real>("temperature_source_strong_residual")),
+    _heat_source_var(nullptr),
+    _heat_source_function(nullptr)
 {
 }
 
@@ -55,7 +57,12 @@ INSAD3Eqn::initialSetup()
   }
 
   if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source")))
-    _heat_source_function = _object_tracker->get<const Function *>("heat_source_function");
+  {
+    if (_object_tracker->isTrackerParamValid("heat_source_var"))
+      _heat_source_var = _object_tracker->get<const ADVariableValue *>("heat_source_var");
+    else if (_object_tracker->isTrackerParamValid("heat_source_function"))
+      _heat_source_function = _object_tracker->get<const Function *>("heat_source_function");
+  }
 }
 
 void
@@ -83,5 +90,15 @@ INSAD3Eqn::computeQpProperties()
         _wall_convection_alpha * (_temperature[_qp] - _wall_temperature);
 
   if (_has_heat_source)
-    _temperature_source_strong_residual[_qp] = -_heat_source_function->value(_t, _q_point[_qp]);
+  {
+    if (_heat_source_var)
+      _temperature_source_strong_residual[_qp] = -(*_heat_source_var)[_qp];
+    else
+    {
+      mooseAssert(_heat_source_function,
+                  "Either the heat source var or the heat source function must be non-null in "
+                  "'INSAD3Eqn'");
+      _temperature_source_strong_residual[_qp] = -_heat_source_function->value(_t, _q_point[_qp]);
+    }
+  }
 }

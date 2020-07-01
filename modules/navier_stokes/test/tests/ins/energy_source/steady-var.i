@@ -17,15 +17,19 @@
   [../]
 []
 
+[AuxVariables]
+  [u]
+    initial_condition = 1
+  []
+[]
+
 [Variables]
   [./velocity]
     family = LAGRANGE_VEC
   [../]
   [./p]
   [../]
-  [u]
-    family = LAGRANGE_VEC
-  []
+  [temperature][]
 []
 
 [ICs]
@@ -64,21 +68,33 @@
     integrate_p_by_parts = true
   [../]
 
-  [momentum_coupled_force]
-    type = INSADMomentumCoupledForce
-    variable = velocity
-    vector_function = vector_func
-  []
-
   [./momentum_supg]
     type = INSADMomentumSUPG
     variable = velocity
     velocity = velocity
   [../]
 
-  [u_diff]
-    type = VectorDiffusion
-    variable = u
+ [./temperature_advection]
+   type = INSADEnergyAdvection
+   variable = temperature
+ [../]
+
+  [./temperature_conduction]
+    type = ADHeatConduction
+    variable = temperature
+    thermal_conductivity = 'k'
+  [../]
+
+  [temperature_source]
+    type = INSADEnergySource
+    variable = temperature
+    source_variable = u
+  []
+
+  [temperature_supg]
+    type = INSADEnergySUPG
+    variable = temperature
+    velocity = velocity
   []
 []
 
@@ -86,7 +102,14 @@
   [./no_slip]
     type = VectorFunctionDirichletBC
     variable = velocity
-    boundary = 'bottom right left top'
+    boundary = 'bottom right left'
+  [../]
+
+  [./lid]
+    type = VectorFunctionDirichletBC
+    variable = velocity
+    boundary = 'top'
+    function_x = 'lid_function'
   [../]
 
   [./pressure_pin]
@@ -96,34 +119,43 @@
     value = 0
   [../]
 
-  [u_left]
-    type = VectorFunctionDirichletBC
-    variable = u
-    boundary = 'left'
-    function_x = 1
-    function_y = 1
-  []
+  [./temperature_hot]
+    type = DirichletBC
+    variable = temperature
+    boundary = 'bottom'
+    value = 1
+  [../]
 
-  [u_right]
-    type = VectorFunctionDirichletBC
-    variable = u
-    boundary = 'right'
-    function_x = -1
-    function_y = -1
-  []
+  [./temperature_cold]
+    type = DirichletBC
+    variable = temperature
+    boundary = 'top'
+    value = 0
+  [../]
 []
 
 [Materials]
   [./const]
     type = ADGenericConstantMaterial
-    prop_names = 'rho mu'
-    prop_values = '1  1'
+    prop_names = 'rho mu cp k'
+    prop_values = '1  1  1  .01'
   [../]
   [ins_mat]
-    type = INSADTauMaterial
+    type = INSADStabilized3Eqn
     velocity = velocity
     pressure = p
+    temperature = temperature
   []
+[]
+
+[Functions]
+  [./lid_function]
+    # We pick a function that is exactly represented in the velocity
+    # space so that the Dirichlet conditions are the same regardless
+    # of the mesh spacing.
+    type = ParsedFunction
+    value = '4*x*(1-x)'
+  [../]
 []
 
 [Executioner]
@@ -137,13 +169,8 @@
 []
 
 [Outputs]
-  exodus = true
-[]
-
-[Functions]
-  [vector_func]
-    type = ParsedVectorFunction
-    value_x = '-2*x + 1'
-    value_y = '-2*x + 1'
+  [out]
+    type = Exodus
+    hide = 'u'
   []
 []
