@@ -15,8 +15,7 @@ enum class ROMInputTransform
 {
   LINEAR,
   LOG,
-  EXP,
-  INVERSE
+  EXP
 };
 
 class ADLAROMANCEStressUpdateBase : public ADRadialReturnCreepStressUpdateBase
@@ -203,6 +202,7 @@ protected:
   {
     if (transform == ROMInputTransform::EXP)
     {
+      mooseAssert(coef != 0, "Coefficient must not be zero.");
       if (derivative)
         x = std::exp(x / coef) / coef;
       else
@@ -216,16 +216,12 @@ protected:
       else
         x = std::log(x + coef);
     }
-    else if (transform == ROMInputTransform::INVERSE)
+    else if (transform == ROMInputTransform::LINEAR)
     {
-      mooseAssert(x + coef != 0, "Sum must not equal zero.");
+      mooseAssert(coef == 0, "Coefficient cannot be supplied with linear transformation");
       if (derivative)
-        x = -1.0 / Utility::pow<2>(x + coef);
-      else
-        x = 1.0 / (x + coef);
+        x = 1.0;
     }
-    else if (derivative)
-      x = 1.0;
   }
 
   /*
@@ -248,9 +244,11 @@ protected:
    * output[0]: cell dislocations increment
    * output[1]: wall dislocations increment
    * output[2]: strain increment
+   * @param limits Human readable limits
    * @return Multi-dimentional vector of transformed limits
    */
-  std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformedLimits();
+  std::vector<std::vector<std::vector<std::vector<Real>>>>
+  getTransformedLimits(const std::vector<std::vector<std::vector<Real>>> limits);
 
   /*
    * Returns vector of the functions to use for the conversion of input variables.
@@ -288,6 +286,23 @@ protected:
    */
   virtual std::vector<std::vector<std::vector<Real>>> getTransformCoefs() = 0;
 
+  /* Optional method that returns human-readable limits used for normalization. Default is to just
+   * use the input limits.
+   * Indexes are [tile][input][upper/lower].
+   * Inputs ordering is
+   * input[0]: cell_old
+   * input[1]: wall_old
+   * input[2]: trial stress,
+   * input[3]: effective strain old,
+   * input[4]: temperature
+   * input[5]: environmental factor (optional)
+   * @return human-readable limits for the normalization limits
+   */
+  virtual std::vector<std::vector<std::vector<Real>>> getNormalizationLimits()
+  {
+    return getInputLimits();
+  }
+
   /* Returns human-readable limits for the inputs.
    * Indexes are [tile][input][upper/lower].
    * Inputs ordering is
@@ -297,7 +312,7 @@ protected:
    * input[3]: effective strain old,
    * input[4]: temperature
    * input[5]: environmental factor (optional)
-   * @return human-readable limits for the inputs
+   * @return human-readable limits for the input limits
    */
   virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() = 0;
 
@@ -349,9 +364,6 @@ protected:
   /// Container for cell dislocation increment
   ADReal _cell_dislocation_increment;
 
-  /// Container for old cell dislocation value
-  Real _cell_old;
-
   ///@{Material properties for wall (locked) dislocation densities (1/m^2)
   ADMaterialProperty<Real> & _wall_dislocations;
   const MaterialProperty<Real> & _wall_dislocations_old;
@@ -368,12 +380,6 @@ protected:
 
   /// Container for wall dislocation increment
   ADReal _wall_dislocation_increment;
-
-  /// Container for old wall dislocation value
-  Real _wall_old;
-
-  /// Container for old effective strain
-  Real _effective_strain_old;
 
   /// Index corresponding to the position for the dislocations with in the cell in the input vector
   const unsigned int _cell_input_index;
@@ -429,11 +435,14 @@ protected:
   /// Input limits defined by the ROM data set
   std::vector<std::vector<std::vector<Real>>> _input_limits;
 
+  /// Normalization limits defined by the ROM data set
+  std::vector<std::vector<std::vector<Real>>> _normalization_limits;
+
   /// Coefficients used with Legendre polynomials defined by the ROM data set
   std::vector<std::vector<std::vector<Real>>> _coefs;
 
-  /// Limits transformed from readabile input to ROM readable limits
-  std::vector<std::vector<std::vector<std::vector<Real>>>> _transformed_limits;
+  /// Limits transformed from readabile input to ROM readable limits for normalization
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _transformed_normalization_limits;
 
   /// Helper container defined by the ROM data set
   std::vector<unsigned int> _makeframe_helper;
@@ -448,7 +457,7 @@ protected:
   ADMaterialProperty<Real> & _wall_rate;
 
   /// Material property to hold smootherstep applied in order to extrapolate.
-  ADMaterialProperty<Real> & _extrapolation;
+  MaterialProperty<Real> & _extrapolation;
 
   /// Container for derivative of creep increment with respect to strain
   ADReal _derivative;
