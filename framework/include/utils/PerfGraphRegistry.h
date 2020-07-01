@@ -11,6 +11,10 @@
 
 #include "MooseTypes.h"
 
+// Forward Declarations
+class PerfGraph;
+class PerfGraphLivePrint;
+class PerfNode;
 
 namespace moose
 {
@@ -47,7 +51,7 @@ public:
    * @param level The importance of the timer - lower is more important (0 will always come out)
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerTimedSection(const std::string & section_name, const unsigned int level);
+  PerfID registerSection(const std::string & section_name, const unsigned int level);
 
   /**
    * Call to register a named section for timing.
@@ -58,11 +62,14 @@ public:
    * @param print_dots Whether or not progress dots should be printed for this section
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerSection(const std::string & section_name, const unsigned int level, const std::string & live_message, const bool print_dots = true);
+  PerfID registerSection(const std::string & section_name,
+                         const unsigned int level,
+                         const std::string & live_message,
+                         const bool print_dots = true);
 
 protected:
-  PerfGraphRegistry();
-  ~PerfGraphRegistry();
+  PerfGraphRegistry(){};
+  ~PerfGraphRegistry(){};
 
   /// Map of section names to IDs
   std::map<std::string, PerfID> _section_name_to_id;
@@ -70,9 +77,14 @@ protected:
   /// Map of IDs to section information
   std::map<PerfID, SectionInfo> _id_to_section_info;
 
+  /// So it can be constructed
   friend PerfGraphRegistry & getPerfGraphRegistry();
-};
 
+  /// For access from the PerfGraph system
+  friend class ::PerfGraph;
+  friend class ::PerfGraphLivePrint;
+  friend class ::PerfNode;
+};
 
 }
 }

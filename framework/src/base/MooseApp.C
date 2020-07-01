@@ -340,18 +340,27 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
-    _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2, "Setting Up")),
-    _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
-    _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
-    _execute_timer(_perf_graph.registerSection("MooseApp::execute", 2, "Starting")),
-    _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
-    _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2, "Restoring Application")),
-    _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
-    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers", 1, "Executing Mesh Modifiers")),
-    _execute_mesh_generators_timer(
-      _perf_graph.registerSection("MooseApp::executeMeshGenerators", 1, "Executing Mesh Generators")),
-    _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2, "Restoring Cached Backup")),
-    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3, "Creating Minimal App")),
+    _setup_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::setup", 2, "Setting Up")),
+    _setup_options_timer(
+        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::setupOptions", 5)),
+    _run_input_file_timer(
+        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::runInputFile", 3)),
+    _execute_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::execute", 2, "Starting")),
+    _execute_executioner_timer(
+        moose::internal::getPerfGraphRegistry().registerSection("MooseApp::executeExecutioner", 3)),
+    _restore_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::restore", 2, "Restoring Application")),
+    _run_timer(moose::internal::getPerfGraphRegistry().registerSection("MooseApp::run", 3)),
+    _execute_mesh_modifiers_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::executeMeshModifiers", 1, "Executing Mesh Modifiers")),
+    _execute_mesh_generators_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::executeMeshGenerators", 1, "Executing Mesh Generators")),
+    _restore_cached_backup_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::restoreCachedBackup", 2, "Restoring Cached Backup")),
+    _create_minimal_app_timer(moose::internal::getPerfGraphRegistry().registerSection(
+        "MooseApp::createMinimalApp", 3, "Creating Minimal App")),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)

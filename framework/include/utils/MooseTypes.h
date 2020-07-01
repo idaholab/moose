@@ -513,6 +513,7 @@ extern const TagID INVALID_TAG_ID;
 extern const TagTypeID INVALID_TAG_TYPE_ID;
 const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
 const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
+extern const PerfID INVALID_PerfID;
 
 /**
  * MaterialData types

@@ -29,7 +29,16 @@
 const std::string PerfGraph::ROOT_NAME = "Root";
 
 PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app)
-    : ConsoleStreamInterface(app), _pid(app.processor_id()), _current_position(0), _execution_list_begin(0), _execution_list_end(0),  _active(true), _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
+  : ConsoleStreamInterface(app),
+    _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
+    _pid(app.processor_id()),
+    _current_position(0),
+    _execution_list_begin(0),
+    _execution_list_end(0),
+    _section_name_to_id(_perf_graph_registry._section_name_to_id),
+    _id_to_section_info(_perf_graph_registry._id_to_section_info),
+    _active(true),
+    _live_print(std::make_unique<PerfGraphLivePrint>(*this, app))
 {
   if (_pid == 0)
   {
@@ -38,7 +47,7 @@ PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app)
   }
 
   // Not done in the initialization list on purpose because this object needs to be complete first
-  _root_node = libmesh_make_unique<PerfNode>(registerSection(ROOT_NAME, 0));
+  _root_node = libmesh_make_unique<PerfNode>(_perf_graph_registry.registerSection(ROOT_NAME, 0));
 
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
@@ -62,60 +71,6 @@ PerfGraph::~PerfGraph()
 
     _print_thread.join();
   }
-}
-
-unsigned int
-PerfGraph::registerSection(const std::string & section_name, unsigned int level)
-{
-  auto it = _section_name_to_id.lower_bound(section_name);
-
-  // Is it already registered?
-  if (it != _section_name_to_id.end() && it->first == section_name)
-    return it->second;
-
-  // It's not...
-  auto id = _section_name_to_id.size();
-  _section_name_to_id.emplace_hint(it, section_name, id);
-
-  auto & section_info = _id_to_section_info[id];
-
-  section_info._id = id;
-  section_info._name = section_name;
-  section_info._level = level;
-  section_info._live_message = "";
-  section_info._print_dots = false;
-
-  return id;
-}
-
-PerfID
-PerfGraph::registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots)
-{
-  if (section_name == "")
-    mooseError("Section name not provided when registering timed section!");
-
-  if (live_message == "")
-    mooseError("Live message not provided when registering timed section!");
-
-  auto it = _section_name_to_id.lower_bound(section_name);
-
-  // Is it already registered?
-  if (it != _section_name_to_id.end() && it->first == section_name)
-    return it->second;
-
-  // It's not...
-  auto id = _section_name_to_id.size();
-  _section_name_to_id.emplace_hint(it, section_name, id);
-
-  auto & section_info = _id_to_section_info[id];
-
-  section_info._id = id;
-  section_info._name = section_name;
-  section_info._level = level;
-  section_info._live_message = live_message;
-  section_info._print_dots = print_dots;
-
-  return id;
 }
 
 const std::string &
@@ -357,9 +312,11 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
   mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
               "Unable to find section name!");
 
-  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
+  auto & name =
+      current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
 
-  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(), "Unable to find level!");
+  mooseAssert(_id_to_section_info.find(current_node->id()) != _id_to_section_info.end(),
+              "Unable to find level!");
   auto & node_level = _id_to_section_info[current_node->id()]._level;
 
   if (node_level <= level)
@@ -377,9 +334,9 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto self_avg = self / static_cast<Real>(num_calls);
     auto self_percent = 100. * self / total_root_time;
 
-//    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-//    auto children_avg = children / static_cast<Real>(num_calls);
-//    auto children_percent = 100. * children / total_root_time;
+    //    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+    //    auto children_avg = children / static_cast<Real>(num_calls);
+    //    auto children_percent = 100. * children / total_root_time;
 
     auto total = std::chrono::duration<double>(current_node->totalTime()).count();
     auto total_avg = total / static_cast<Real>(num_calls);
@@ -417,7 +374,8 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
 
-  auto & name = current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
+  auto & name =
+      current_node->id() == 0 ? _root_name : _id_to_section_info[current_node->id()]._name;
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
@@ -429,9 +387,9 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   auto self_avg = self / static_cast<Real>(num_calls);
   auto self_percent = 100. * self / total_root_time;
 
-//  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
-//  auto children_avg = children / static_cast<Real>(num_calls);
-//  auto children_percent = 100. * children / total_root_time;
+  //  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+  //  auto children_avg = children / static_cast<Real>(num_calls);
+  //  auto children_percent = 100. * children / total_root_time;
 
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
   auto total_avg = total / static_cast<Real>(num_calls);

@@ -17,6 +17,7 @@
 #include "ConsoleStreamInterface.h"
 #include "MooseError.h"
 #include "MemoryUtils.h"
+#include "PerfGraphRegistry.h"
 
 // System Includes
 #include <array>
@@ -42,6 +43,9 @@ class VariadicTable;
 class PerfGraph : protected ConsoleStreamInterface
 {
 public:
+  using PerfGraphRegistry = moose::internal::PerfGraphRegistry;
+  using SectionInfo = PerfGraphRegistry::SectionInfo;
+
   /**
    * For retrieving values
    */
@@ -70,28 +74,6 @@ public:
    * Destructor
    */
   ~PerfGraph();
-
-  /**
-   * Registers a named section of code
-   *
-   * Note: this will automatically set the section_name to what will print out
-   * during a live print.  It will only be printed out if live printing is forced.
-   * It will also dissallow the printing of progress dots.
-   *
-   * @return The unique ID to use for that section
-   */
-  PerfID registerSection(const std::string & section_name, unsigned int level);
-
-  /**
-   * Registers a named section of code
-   *
-   * @param section_name The name of the section as it will be printed in the PerfGraph
-   * @param level The verbosity level
-   * @param live_message The message to be printed to the screen during execution
-   * @param print_dots Whether or not progress dots should be printed for this section
-   * @return The unique ID to use for that section
-   */
-  PerfID registerSection(const std::string & section_name, unsigned int level, const std::string & live_message, const bool print_dots = true);
 
   /**
    * Print the tree out
@@ -245,7 +227,13 @@ protected:
   };
 
   // Whether or not an increment is the start of the finish increment
-  enum IncrementState { started, printed, continued, finished };
+  enum IncrementState
+  {
+    started,
+    printed,
+    continued,
+    finished
+  };
 
   /**
    * Use to hold an increment of time and memory for a section
@@ -269,7 +257,10 @@ protected:
    *
    * Should only be called by push() and pop()
    */
-  inline void addToExecutionList(const PerfID id, const IncrementState state, const std::chrono::time_point<std::chrono::steady_clock> time, const long int memory)
+  inline void addToExecutionList(const PerfID id,
+                                 const IncrementState state,
+                                 const std::chrono::time_point<std::chrono::steady_clock> time,
+                                 const long int memory)
   {
     auto & section_increment = _execution_list[_execution_list_end];
 
@@ -344,6 +335,9 @@ protected:
    * @param console Where to print to
    */
   void printHeaviestSections(const ConsoleStream & console);
+
+  /// The PerfGraphRegistry
+  PerfGraphRegistry & _perf_graph_registry;
 
   /// This processor id
   processor_id_type _pid;
