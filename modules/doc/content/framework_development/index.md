@@ -63,3 +63,7 @@ For development of MOOSE-based applications see [Application Development](applic
 ## Build System
 
 [Working with MOOSE build system](build_system.md)
+
+## Third Party Libraries
+
+[Third Party Library List](sqa/library_requirements.md)

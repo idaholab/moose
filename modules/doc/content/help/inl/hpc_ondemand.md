@@ -13,13 +13,8 @@ One of the more exciting features of HPC OnDemand, is having a terminal-like win
 
 With this prompt, you can access the PBS job scheduler, obtain a Civet-like testing environment, and basically anything else a traditional terminal window would otherwise allow.
 
- shell prompt is obtained, by clicking on 'Clusters' and selecting any of the desired HPC machines. Each machine is reachable by the other via SSH. The terminal window is text based, making it very responsive, and simple to cut and paste command results.
+You can obtain a shell prompt, by clicking on 'Clusters' and selecting any of the desired HPC machines. Each machine is reachable by the other via SSH.
 
+## Civet-like Environment
 
-## Linux Desktop
-
-WIP
-
-## Jobs
-
-WIP
+Often times your code works on your machine, but fails Civet... drat!

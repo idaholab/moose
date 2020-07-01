@@ -1,6 +1,6 @@
 # Third Party Library List
 
-This page will function as a collection of libraries the MOOSE Framework uses. The page will be structured around key components that make up the entire framework.
+This page will function as a collection of libraries and other software packages the MOOSE Framework uses. The page will be structured around key components that make up the entire MOOSE Framework suite.
 
 ## MOOSE
 
