@@ -102,7 +102,7 @@ class JobDAG(object):
         if self.__job_dag.size():
 
             self._doMakeDependencies()
-            self._doSkippedDependencies()
+            self._doLast()
 
             # If there are race conditions, then there may be more skipped jobs
             if self._doRaceConditions():
@@ -110,23 +110,38 @@ class JobDAG(object):
 
         return self.__job_dag
 
+    def _addEdge(self, child, parent):
+        try:
+            self.__job_dag.add_edge(child, parent)
+        # Cyclic errors
+        except dag.DAGValidationError:
+            err_output = self._printDownstreams(parent)
+            err_output += ' %s <--> %s' % (parent.getTestName().split('.')[1],
+                                           child.getTestName().split('.')[1])
+
+            parent.setOutput('Cyclic dependency error!\n\t' + err_output)
+            parent.setStatus(parent.error, 'Cyclic or Invalid Dependency Detected!')
+
+    def _doLast(self):
+        for job in self.__job_dag.topological_sort():
+            if 'ALL' in job.getPrereqs():
+                for a_job in self.__job_dag.topological_sort():
+                    if a_job != job and not a_job.isSkip():
+                        if '.ALL' in a_job.getTestName():
+                            a_job.setStatus(a_job.error, 'Test named ALL when "prereq = ALL" elsewhere in test spec file!')
+                        self._addEdge(a_job, job)
+        self._doSkippedDependencies()
+
     def _doMakeDependencies(self):
         """ Setup dependencies within the current Job DAG """
         for job in self.__job_dag.ind_nodes():
             prereq_jobs = job.getPrereqs()
+            if prereq_jobs == ['ALL']:
+                prereq_jobs = []
             for prereq_job in prereq_jobs:
                 try:
                     self.__name_to_job[prereq_job]
-                    self.__job_dag.add_edge(self.__name_to_job[prereq_job], job)
-
-                # Cyclic errors
-                except dag.DAGValidationError:
-                    err_output = self._printDownstreams(job)
-                    err_output += ' %s <--> %s' % (job.getTestName().split('.')[1],
-                                                 self.__name_to_job[prereq_job].getTestName().split('.')[1])
-
-                    job.setOutput('Cyclic dependency error!\n\t' + err_output)
-                    job.setStatus(job.error, 'Cyclic or Invalid Dependency Detected!')
+                    self._addEdge(self.__name_to_job[prereq_job], job)
 
                 # test file has invalid prereq set
                 except KeyError:

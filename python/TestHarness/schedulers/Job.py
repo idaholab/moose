@@ -112,6 +112,10 @@ class Job(object):
         """ Return the tester object """
         return self.__tester
 
+    def getSpecs(self):
+        """ Return tester spec params """
+        return self.getTester().specs
+
     def getTestName(self):
         """ Wrapper method to return the testers test name """
         return self.__tester.getTestName()
