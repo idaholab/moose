@@ -114,14 +114,14 @@ The C(t) integral can be described as a path integral that is obtained by replac
 
 \begin{equation}
 {C}(t)=\int_{\Gamma}\biggl(
-P_{ji}\frac{\partial \dot{u}_i}{X_k}ds -\dot{W}dy
+P_{ji}\frac{\partial \dot{u}_i}{\partial X_k}ds -\dot{W}dy
 \biggr) d\Gamma
 \end{equation}
  
-This integral is computed in an analogous way to the J-integral: A domain integral is solved on the crack front geometry defined in the mesh. This integral becomes the $C^{*}$ integral as creep behavior becomes steady state. Then, creep crack growth behavior during secondary creep can be obtained from this integral.
+This integral is computed in an analogous way to the J-integral: A domain integral is solved on the crack front geometry defined in the mesh. This integral becomes the $C^{*}$ integral as creep behavior becomes steady state. Then, creep crack growth behavior during secondary creep can be obtained from this integral. A number of approximate expressions for $C^{*}$ are available in the literature [!citep](bongyoon_2003).
 
 ### Usage
 
 To compute $C$-integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects. In particular, two additional inputs are required `output_type = C` and `n_exponent`. The former refers to the type of integral requested ('C') and the latter is the matching exponent of the creep deformation material model.
 
-!listing modules/tensor_mechanics/test/tests/j_integral/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral
+!listing modules/tensor_mechanics/test/tests/j_integral_vtest/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral

@@ -53,7 +53,7 @@
   block = 0
   crack_front_points_provider = circle_cut_uo
   number_points_from_provider = 10
-  convert_J_to_K = true
+  output_type = K
   closed_loop = true
   incremental = true
 []
