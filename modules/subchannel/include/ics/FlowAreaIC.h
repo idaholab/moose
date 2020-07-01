@@ -1,16 +1,16 @@
 #pragma once
 
-#include "PsbtIC.h"
+#include "IC.h"
 #include "SolutionHandle.h"
 #include "SubChannelMesh.h"
 
 /**
  * This class calculates the area of the subchannel
  */
-class PsbtFlowAreaIC : public PsbtIC
+class FlowAreaIC : public IC
 {
 public:
-  PsbtFlowAreaIC(const InputParameters & params);
+  FlowAreaIC(const InputParameters & params);
 
   Real value(const Point & p) override;
 

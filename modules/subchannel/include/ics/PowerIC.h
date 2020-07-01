@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PsbtIC.h"
+#include "IC.h"
 #include <Eigen/Dense>
 
 /**
@@ -8,10 +8,10 @@
   Thus far there is only a radial distribution and not an axial one i.e : constant axial linear heat flux
   value is the method in InitialConditions that returns the linear heat flux per subchannel cell
  */
-class PsbtPowerIC : public PsbtIC
+class PowerIC : public IC
 {
 public:
-  PsbtPowerIC(const InputParameters & params);
+  PowerIC(const InputParameters & params);
   Real value(const Point & p) override;
 
 protected:

@@ -1,18 +1,18 @@
-#include "PsbtFlowAreaIC.h"
+#include "FlowAreaIC.h"
 
-registerMooseObject("SubChannelApp", PsbtFlowAreaIC);
+registerMooseObject("SubChannelApp", FlowAreaIC);
 
 InputParameters
-PsbtFlowAreaIC::validParams()
+FlowAreaIC::validParams()
 {
-  InputParameters params = PsbtIC::validParams();
+  InputParameters params = IC::validParams();
   return params;
 }
 
-PsbtFlowAreaIC::PsbtFlowAreaIC(const InputParameters & params) : PsbtIC(params) {}
+FlowAreaIC::FlowAreaIC(const InputParameters & params) : IC(params) {}
 
 Real
-PsbtFlowAreaIC::value(const Point & p)
+FlowAreaIC::value(const Point & p)
 {
   _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
   auto pitch = _mesh->_pitch;

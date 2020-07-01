@@ -56,15 +56,15 @@
 
 [ICs]
   [S_IC]
-    type = PsbtFlowAreaIC
+    type = FlowAreaIC
     variable = S
   []
   [w_perim_IC]
-    type = PsbtWettedPerimIC
+    type = WettedPerimIC
     variable = w_perim
   []
   [q_prime_IC]
-    type = PsbtPowerIC
+    type = PowerIC
     variable = q_prime
     power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile

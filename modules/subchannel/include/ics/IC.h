@@ -5,10 +5,10 @@
 /**
  * An abstract class for ICs relating to the PSBT fluid temperature benchmarks
  */
-class PsbtIC : public InitialCondition
+class IC : public InitialCondition
 {
 public:
-  PsbtIC(const InputParameters & params);
+  IC(const InputParameters & params);
 
 protected:
   /**

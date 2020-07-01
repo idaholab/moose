@@ -1,20 +1,20 @@
-#include "PsbtPowerIC.h"
+#include "PowerIC.h"
 
 using namespace std;
 using namespace Eigen;
 
-registerMooseObject("SubChannelApp", PsbtPowerIC);
+registerMooseObject("SubChannelApp", PowerIC);
 
 InputParameters
-PsbtPowerIC::validParams()
+PowerIC::validParams()
 {
-  InputParameters params = PsbtIC::validParams();
+  InputParameters params = IC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
   params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column)");
   return params;
 }
 
-PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
+PowerIC::PowerIC(const InputParameters & params) : IC(params)
 {
   _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
   _power = getParam<Real>("power");
@@ -61,7 +61,7 @@ PsbtPowerIC::PsbtPowerIC(const InputParameters & params) : PsbtIC(params)
   _ref_qprime = ref_power / heated_length; // in W/m
 }
 
-Real PsbtPowerIC::value(const Point & p)
+Real PowerIC::value(const Point & p)
 {
   _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
   auto inds = index_point(p); // Determine which channel this point is in.
