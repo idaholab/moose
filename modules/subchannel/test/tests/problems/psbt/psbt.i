@@ -1,3 +1,8 @@
+T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
+
 [Mesh]
   type = SubChannelMesh
   nx = 6
@@ -48,9 +53,6 @@
 
 [Problem]
   type = SubChannel1PhaseProblem
-  T_in = 359.15 # K
-  P_out = 4.923e6 # Pa
-  mflux_in = ${fparse 1e+6 * 17.00 / 3600.} #Inlet coolant mass flux [1e+6 kg/m^2-hour] turns into kg/m^2-sec
   fp = water
 []
 
@@ -68,6 +70,41 @@
     variable = q_prime
     power = 3.44e6 # W
     filename = "power_profile.txt" #type in name of file that describes power profile
+  []
+
+  [T_ic]
+    type = ConstantIC
+    variable = T
+    value = ${T_in}
+  []
+
+  [P_ic]
+    type = ConstantIC
+    variable = P
+    value = ${P_out}
+  []
+
+  [rho_ic]
+    type = RhoFromPressureTemperatureIC
+    variable = rho
+    p = P
+    T = T
+    fp = water
+  []
+
+  [h_ic]
+    type = SpecificEnthalpyFromPressureTemperatureIC
+    variable = h
+    p = P
+    T = T
+    fp = water
+  []
+
+  [mdot_ic]
+    type = MassFlowRateIC
+    variable = mdot
+    area = S
+    mass_flux = ${mass_flux_in}
   []
 []
 
