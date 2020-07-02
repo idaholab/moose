@@ -19,6 +19,7 @@ public:
 
   virtual Real p_critical() const override;
   virtual Real T_triple() const override;
+  virtual Real L_fusion() const override;
   virtual Real T_sat(Real pressure) const override;
   virtual Real p_sat(Real temperature) const override;
   virtual Real dT_sat_dp(Real pressure) const override;
@@ -68,6 +69,8 @@ protected:
   const Real & _p_c;
   /// Triple-point temperature
   const Real & _T_triple;
+  /// Latent heat of fusion
+  const Real & _L_fusion;
 
   /// 'A' constant used in surface tension correlation
   const Real & _sigma_A;

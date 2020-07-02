@@ -55,4 +55,5 @@ TEST_F(StiffenedGasTwoPhaseFluidPropertiesTest, test)
   }
 
   EXPECT_NEAR(_fp->T_triple(), _T_triple, 1e-14);
+  EXPECT_NEAR(_fp->L_fusion(), _L_fusion, 1e-14);
 }

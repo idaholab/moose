@@ -79,6 +79,11 @@ public:
   virtual DualReal h_lat(const DualReal & p, const DualReal & T) const;
 
   /**
+   * Returns the latent heat of fusion
+   */
+  virtual Real L_fusion() const;
+
+  /**
    * Computes surface tension sigma of
    * saturated liquid in contact with saturated vapor
    *
