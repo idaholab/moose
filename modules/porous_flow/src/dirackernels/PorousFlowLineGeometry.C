@@ -18,6 +18,7 @@ PorousFlowLineGeometry::validParams()
   InputParameters params = DiracKernel::validParams();
   params.addParam<std::string>(
       "point_file",
+      "",
       "The file containing the coordinates of the points and their weightings that approximate the "
       "line sink.  The physical meaning of the weightings depend on the scenario, eg, they may be "
       "borehole radii.  Each line in the file must contain a space-separated weight and "
@@ -93,7 +94,7 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
                  "PorousFlowLineGeometry: wrong number of arguments - got ",
                  base.size(),
                  ", expected ",
-                 _mesh.dimension(),
+                 _mesh.dimension() + 1,
                  " '<weight> <x> [<y> [z]]'");
 
     for (int i = base.size(); i < 4; i++)
