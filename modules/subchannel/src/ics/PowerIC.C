@@ -1,4 +1,5 @@
 #include "PowerIC.h"
+#include "Function.h"
 
 using namespace std;
 using namespace Eigen;
@@ -58,38 +59,88 @@ _axial_heat_rate(getFunction("axial_heat_rate"))
   _power_dis.resize(_mesh._ny - 1, _mesh._nx - 1);
   auto sum = _power_dis.sum();
   auto fpin_power = _power / sum;           // full pin power W
-  auto ref_power = _power_dis * fpin_power; // W
-  // Convert the reference power to a linear heat rate.
+  auto ref_power = _power_dis * fpin_power; // actual pin power W
+  // Convert the actual pin power to a linear heat rate.
   auto heated_length = _mesh._heated_length; // in m
-  _ref_qprime = ref_power / heated_length; // in W/m
+  _ref_qprime = ref_power / heated_length; // average linear heat rate in W/m
+
+  _estimate_power.resize(_mesh._ny - 1, _mesh._nx - 1);
+  _estimate_power.setZero();
+  for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++) // nz cells
+  {
+    // Compute the height of this element.
+    auto dz = _mesh._z_grid[iz] - _mesh._z_grid[iz - 1];
+    // Compute axial location of nodes.
+    auto z2 = _mesh._z_grid[iz];
+    auto z1 = _mesh._z_grid[iz - 1];
+    Point p1(0 , 0, z1);
+    Point p2(0 , 0, z2);
+    for (unsigned int i_pin = 0; i_pin <  (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++) //cycle through pins
+    {
+      unsigned int j = (i_pin / (_mesh._nx - 1));           // row
+      unsigned int i = i_pin - j * (_mesh._nx - 1);         // column
+      _estimate_power(j , i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0; //trapezoidal rule
+    }
+  }
+
+  _pin_power_correction = ref_power.cwiseQuotient(_estimate_power); // I want a division element by element
 }
 
 Real PowerIC::value(const Point & p)
 {
-  auto inds = index_point(p); // Determine which channel this point is in.
+  auto inds = index_point(p); // Determine which subchannel this point is in.
   auto i = inds.first;  // x index
   auto j = inds.second; // y index
-
-  // Compute and return the channel axial heat rate per channel.
+  // Compute and return the estimated channel axial heat rate per channel
   // Corners contact 1/4 of a  one pin
   if (i == 0 && j == 0)
-    return 0.25 * _ref_qprime(j, i);
+    return 0.25 * _ref_qprime(j, i) * _pin_power_correction(j , i) * _axial_heat_rate.value(_t, p);
   else if (i == 0 && j == _mesh._ny - 1)
-    return 0.25 * _ref_qprime(j - 1, i);
+    return 0.25 * _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) * _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1 && j == 0)
-    return 0.25 * _ref_qprime(j, i - 1);
+    return 0.25 * _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) * _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1 && j == _mesh._ny - 1)
-    return 0.25 * _ref_qprime(j - 1, i - 1);
+    return 0.25 * _ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) * _axial_heat_rate.value(_t, p);
   // Sides contact 1/4 of  two pins
   else if (i == 0)
-    return 0.25 * (_ref_qprime(j - 1, i) + _ref_qprime(j, i));
+    return 0.25 * (_ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) + _ref_qprime(j, i) * _pin_power_correction(j, i) ) * _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1)
-    return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j, i - 1));
+    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1)+ _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) * _axial_heat_rate.value(_t, p);
   else if (j == 0)
-    return 0.25 * (_ref_qprime(j, i - 1) + _ref_qprime(j, i));
+    return 0.25 * (_ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) + _ref_qprime(j, i) * _pin_power_correction(j, i)) * _axial_heat_rate.value(_t, p);
   else if (j == _mesh._ny - 1)
-    return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j - 1, i));
+    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i)) * _axial_heat_rate.value(_t, p);
   // interior contacts 1/4 of 4 pins
   else
-    return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j, i - 1) + _ref_qprime(j - 1, i) + _ref_qprime(j, i));
+    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) \
+    + _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) + _ref_qprime(j, i) * _pin_power_correction(j, i)) * _axial_heat_rate.value(_t, p);
 }
+
+// Real PowerIC::value(const Point & p)
+// {
+//   auto inds = index_point(p); // Determine which channel this point is in.
+//   auto i = inds.first;  // x index
+//   auto j = inds.second; // y index
+//   // Compute and return the channel axial heat rate per channel.
+//   // Corners contact 1/4 of a  one pin
+//   if (i == 0 && j == 0)
+//     return 0.25 * _ref_qprime(j, i);
+//   else if (i == 0 && j == _mesh._ny - 1)
+//     return 0.25 * _ref_qprime(j - 1, i);
+//   else if (i == _mesh._nx - 1 && j == 0)
+//     return 0.25 * _ref_qprime(j, i - 1);
+//   else if (i == _mesh._nx - 1 && j == _mesh._ny - 1)
+//     return 0.25 * _ref_qprime(j - 1, i - 1);
+//   // Sides contact 1/4 of  two pins
+//   else if (i == 0)
+//     return 0.25 * (_ref_qprime(j - 1, i) + _ref_qprime(j, i));
+//   else if (i == _mesh._nx - 1)
+//     return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j, i - 1));
+//   else if (j == 0)
+//     return 0.25 * (_ref_qprime(j, i - 1) + _ref_qprime(j, i));
+//   else if (j == _mesh._ny - 1)
+//     return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j - 1, i));
+//   // interior contacts 1/4 of 4 pins
+//   else
+//     return 0.25 * (_ref_qprime(j - 1, i - 1) + _ref_qprime(j, i - 1) + _ref_qprime(j - 1, i) + _ref_qprime(j, i));
+// }

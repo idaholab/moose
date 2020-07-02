@@ -334,7 +334,7 @@ SubChannel1PhaseProblem::externalSolve()
             auto mdot_out = mdot_in - SumWij_soln(node_out);
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
-                          q_prime_soln(node_out) * dz);
+                          q_prime_soln(node_out) * dz); //need to think about this
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
