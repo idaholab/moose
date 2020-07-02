@@ -25,9 +25,12 @@ PODReducedBasisTrainer::validParams()
                                              "List of energy retention limits for each variable.");
   params.addRequiredParam<std::vector<std::string>>("tag_names",
                                                     "Names of tags for the reduced operators.");
+  params.addParam<std::vector<std::string>>("dir_tag_names",
+                                            std::vector<std::string>(0),
+                                            "Names of tags for reduced operators corresponding to dirichlet BCs.");
   params.addRequiredParam<std::vector<unsigned int>>("independent",
-                                                    "List of bools describing if the tags"
-                                                    " correspond to and independent operator or not.");
+                                                     "List of bools describing if the tags"
+                                                     " correspond to and independent operator or not.");
   return params;
 }
 
@@ -35,7 +38,8 @@ PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameter
   : SurrogateTrainer(parameters),
   _var_names(declareModelData<std::vector<std::string>>("_var_names", getParam<std::vector<std::string>>("var_names"))),
   _en_limits(getParam<std::vector<Real>>("en_limits")),
-  _tag_names(getParam<std::vector<std::string>>("tag_names")),
+  _tag_names(declareModelData<std::vector<std::string>>("_tag_names", getParam<std::vector<std::string>>("tag_names"))),
+  _dir_tag_names(declareModelData<std::vector<std::string>>("_dir_tag_names", getParam<std::vector<std::string>>("dir_tag_names"))),
   _independent(declareModelData<std::vector<unsigned int>>("_independent", getParam<std::vector<unsigned int>>("independent"))),
   _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
   _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
@@ -71,7 +75,6 @@ PODReducedBasisTrainer::initialSetup()
 
   _eigenvectors.clear();
   _eigenvectors.resize(_var_names.size());
-
 }
 
 void
@@ -82,7 +85,7 @@ PODReducedBasisTrainer::initialize()
 void
 PODReducedBasisTrainer::execute()
 {
-  // If the base is not ready yet, crete it be performing the POD on the
+  // If the base is not ready yet, create it by performing the POD on the
   // snapshot matrices.
   if (!_base_completed)
   {
@@ -91,7 +94,6 @@ PODReducedBasisTrainer::execute()
     computeBasisVectors();
     _base_completed = true;
   }
-  printReducedOperators();
 }
 
 void
@@ -304,5 +306,8 @@ void
 PODReducedBasisTrainer::printReducedOperators()
 {
   for(unsigned int op_i=0; op_i<_red_operators.size(); ++op_i)
+  {
+    std::cout << _tag_names[op_i] << std::endl << std::endl;
     std::cout << _red_operators[op_i] << std::endl;
+  }
 }

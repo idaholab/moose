@@ -18,18 +18,8 @@ public:
 
   PODReducedBasisSurrogate(const InputParameters & parameters);
 
-  /// Initialize reduced matrices, vectors and additional containers.
-  void initializeReducedSystem();
-
   /// Get the reduced solution for a given parameter sample.
   void evaluateSolution(const std::vector<Real> & params);
-
-  /// Assemble and solve the reduced equation system.
-  void solveReducedSystem(const std::vector<Real> & params);
-
-  /// Reconstruct the approximate solution vector using the stored
-  /// coefficients.
-  void reconstructApproximateSolution();
 
   /// Get a reference to the approximate solutions.
   std::vector<DenseVector<Real>>& getApproximateSolution(){return _approx_solution;}
@@ -54,6 +44,16 @@ public:
 
 protected:
 
+  /// Initialize reduced matrices, vectors and additional containers.
+  void initializeReducedSystem();
+
+  /// Assemble and solve the reduced equation system.
+  void solveReducedSystem(const std::vector<Real> & params);
+
+  /// Reconstruct the approximate solution vector using the stored
+  /// coefficients.
+  void reconstructApproximateSolution();
+
   /// A vector containing the number of basis functions each variable should use.
   /// This is optional, used only to override the base numbers from the RD input.
   std::vector<std::string> _change_rank;
@@ -69,6 +69,12 @@ protected:
 
   /// Vector containing the names of the variables we want to reconstruct.
   const std::vector<std::string>& _var_names;
+
+  /// Names of the tags that should be used to fetch residuals from the MultiApp.
+  const std::vector<std::string>& _tag_names;
+
+  /// Tag names that show which tags correspond to dirichlet boundaries.
+  const std::vector<std::string>& _dir_tag_names;
 
   /// Bools describing which operator is indepedent of the solution.
   const std::vector<unsigned int>& _independent;
@@ -90,6 +96,9 @@ protected:
 
   /// Reconstructed solution for each variable
   std::vector<DenseVector<Real>> _approx_solution;
+
+  /// Penalty parameter for Dirichlet BCs.
+  Real _penalty;
 
   /// Switch that is set to see if the ROM matrices and vectors are initialized.
   bool _initialized;

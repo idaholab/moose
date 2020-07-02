@@ -40,7 +40,7 @@
 []
 
 [VectorPostprocessors]
-  [pc_max_res]
+  [res]
     type = PODSurrogateTester
     model = rbpod
     sampler = sample
