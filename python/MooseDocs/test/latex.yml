@@ -15,12 +15,17 @@ Content:
 Renderer:
     type: MooseDocs.base.LatexRenderer
 
+Executioner:
+    type: MooseDocs.base.Serial
+
 Extensions:
+    disable_defaults: True
     MooseDocs.extensions.pdf: default
+    MooseDocs.extensions.config: default
     MooseDocs.extensions.core: default
     MooseDocs.extensions.floats: default
-    MooseDocs.extensions.command: default
     MooseDocs.extensions.style: default
+    MooseDocs.extensions.command: default
     MooseDocs.extensions.include: default
     MooseDocs.extensions.media: default
     MooseDocs.extensions.listing: default
@@ -36,22 +41,13 @@ Extensions:
     MooseDocs.extensions.bibtex: default
     MooseDocs.extensions.materialicon: default
     MooseDocs.extensions.layout: default
-    MooseDocs.extensions.config: default
-    MooseDocs.extensions.content: default
-    MooseDocs.extensions.graph:
-        draft: True
+    MooseDocs.extensions.content: disable
+    MooseDocs.extensions.graph: default
     MooseDocs.extensions.heading: default
     MooseDocs.extensions.gallery: disable
+    MooseDocs.extensions.pdf: default
     MooseDocs.extensions.template:
         active: True
-    MooseDocs.extensions.civet:
-        active: False
-        test_results_cache: '/tmp/civet/jobs'
-        generate_test_reports: False
-        remotes:
-            moose:
-                url: https://civet.inl.gov
-                repo: idaholab/moose
     MooseDocs.extensions.sqa:
         active: True
         categories:
@@ -66,10 +62,20 @@ Extensions:
                     - python/MooseDocs/test
                 specs:
                     - demo
+    MooseDocs.extensions.civet:
+        active: False
+        test_results_cache: '/tmp/civet/jobs'
+        remotes:
+            moose:
+                url: https://civet.inl.gov
+                repo: idaholab/moose
+
     MooseDocs.extensions.navigation:
+        active: True
         name: MOOSEDocs
         repo: https://github.com/idaholab/moose
         home: https://www.mooseframework.org
+        search: False
         menu:
             Direct: core.md
             Mega: mega.menu.md
@@ -77,14 +83,17 @@ Extensions:
                 Core: core.md
                 AutoLink: autolink.md
     MooseDocs.extensions.acronym:
+        active: True
         acronyms:
             INL: Idaho National Laboratory
             MTU: Michigan Technological University
     MooseDocs.extensions.common:
+        active: True
         shortcuts:
             MOOSE: https:://mooseframework.org
             libMesh: https://libmesh.github.io/
     MooseDocs.extensions.appsyntax:
+        active: True
         executable: ${MOOSE_DIR}/test
         hide: !include framework/doc/hidden.yml
         remove: !include framework/doc/remove.yml

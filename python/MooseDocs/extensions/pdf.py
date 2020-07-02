@@ -70,8 +70,14 @@ class PDFExtension(command.CommandExtension):
     def postExecute(self):
         """
         Combines all the LaTeX files into a single file.
+
+
+        TODO:
+        - Add "-file-line-error" and update the warning/error handler to detect this format.
+        - The the running of pdflatex (or whatever TeX to PDF method) should be handled by
+          a stand-alone utility that can be unit tested. This class then can take the error report
+          from the utility and connect it to the markdown line(s) causing the error/warning.
         """
-        return
 
         files = []
         for page in self.translator.getPages():
@@ -87,10 +93,10 @@ class PDFExtension(command.CommandExtension):
 
         main_tex = os.path.join(loc, 'main.tex')
         LOG.info("Building complete LaTeX document: %s", main_tex)
-        commands = [['pdflatex', '-halt-on-error', 'main'],
+        commands = [['pdflatex', '-halt-on-error', '-interaction=nonstopmode', 'main'],
                     ['bibtex', 'main'],
-                    ['pdflatex', '-halt-on-error', 'main'],
-                    ['pdflatex', '-halt-on-error', 'main']]
+                    ['pdflatex', '-halt-on-error', '-interaction=nonstopmode', 'main'],
+                    ['pdflatex', '-halt-on-error', '-interaction=nonstopmode', 'main']]
         for cmd in commands:
             try:
                 output = subprocess.check_output(cmd, cwd=loc, stderr=subprocess.STDOUT, encoding='utf8')
@@ -99,10 +105,10 @@ class PDFExtension(command.CommandExtension):
                 raise exceptions.MooseDocsException(msg, ' '.join(cmd), e.output)
 
         # Process output
-        root = self.processLatexOutput(output, content)
+        root = self.processLatexOutput(output, self.translator.getPages())
         for node in moosetree.iterate(root):
             if node['warnings']:
-                self._reportLatexWarnings(node, content)
+                self._reportLatexWarnings(node, self.translator.getPages())
 
     def _processPages(self, root):
         """

@@ -455,6 +455,8 @@ def generate_filebase(string, replace='_', lowercase=True):
 
 def recursive_update(d, u):
     """Recursive update nested dict(), see https://stackoverflow.com/a/3233356/1088076"""
+    if not isinstance(d, dict):
+        return d
     for k, v in u.items():
         d[k] = recursive_update(d.get(k, dict()), v) if isinstance(v, dict) else v
     return d

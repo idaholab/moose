@@ -61,28 +61,42 @@
 
     [serial]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial --disable MooseDocs.extensions.pdf'
       detail = "using a serial scheme;"
     []
     [barrier]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
+      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier --disable MooseDocs.extensions.pdf'
       detail = "using a barrier-based parallel scheme;"
       prereq = latex/serial
+      skip = 'WIP'
     []
     [pipe]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
+      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe --disable MooseDocs.extensions.pdf'
       prereq = latex/barrier
       detail = "using a pipe-based parallel scheme; and"
       skip = 'WIP'
     []
     [queue]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
+      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue --disable MooseDocs.extensions.pdf'
       detail = "using a queue-based parallel scheme."
       prereq = latex/pipe
       skip = 'WIP'
     []
   []
+
+  [pdf]
+    requirement = "The system shall support PDF creation from markdown documentation:"
+    [serial]
+      type = RunCommand
+      #type = CheckFiles # this fails to run the command for some reason
+      #check_files = 'output/latex/main.pdf'
+      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+      detail = "using a serial scheme;"
+      requires = pdflatex
+    []
+  []
+
 []

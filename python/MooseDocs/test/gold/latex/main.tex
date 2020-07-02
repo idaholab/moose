@@ -1,4 +1,6 @@
 \documentclass{report}
+\usepackage[margin=1in]{geometry}
+\usepackage{parskip}
 \usepackage{amsmath}
 \usepackage{soul}
 \usepackage[linkcolor=blue,citecolor=blue,filecolor=blue,urlcolor=blue,colorlinks=true]{hyperref}
@@ -15,9 +17,7 @@
 \usepackage{amsfonts}
 \usepackage[round]{natbib}
 \usepackage{fontawesome}
-\usepackage[content={Draft mode enabled in the graph extension.}]{draftfigure}
-\usepackage[margin=1in]{geometry}
-\usepackage{parskip}\setlength{\parindent}{0pt}
+\usepackage[content={Draft mode enabled, plotly package failed to load, install with 'conda install plolty plotly-orca'}]{draftfigure}\setlength{\parindent}{0pt}
 \lstset{basicstyle=\ttfamily,columns=fullflexible,frame=single,breaklines=true,showstringspaces=false,showspaces=false,postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},}
 \tcbuselibrary{skins}
 
@@ -40,6 +40,28 @@ title=Example~\thetcbcounter: #2,#1}
   \begin{tcolorbox}[arc=0mm,fonttitle=\bfseries,colback=alert-#2!5,colframe=alert-#2,coltitle=#4]
 }{%
   \end{tcolorbox}
+}
+
+
+\DeclareDocumentCommand{\ContentItem}{mmm}{#3 (\texttt{\small #1})\dotfill \pageref{#2}\\}
+
+\definecolor{card-frame}{RGB}{0,88,151}
+\NewDocumentEnvironment{card}{mm}{ %
+  \tcbset{width=#1,title=#2}
+  \begin{tcolorbox}[fonttitle=\bfseries, colback=white, colframe=card-frame]
+}{ %
+  \end{tcolorbox}
+}
+
+
+\DeclareDocumentEnvironment{Requirement}{m}{%
+  \begin{minipage}[t]{0.08\textwidth}%
+    #1
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.9\textwidth}%
+}{%
+  \end{minipage}
 }
 
 
@@ -75,28 +97,6 @@ title=Example~\thetcbcounter: #2,#1}
   \end{minipage}
 }
 
-
-\DeclareDocumentCommand{\ContentItem}{mmm}{#3 (\texttt{\small #1})\dotfill \pageref{#2}\\}
-
-\definecolor{card-frame}{RGB}{0,88,151}
-\NewDocumentEnvironment{card}{mm}{ %
-  \tcbset{width=#1,title=#2}
-  \begin{tcolorbox}[fonttitle=\bfseries, colback=white, colframe=card-frame]
-}{ %
-  \end{tcolorbox}
-}
-
-
-\DeclareDocumentEnvironment{Requirement}{m}{%
-  \begin{minipage}[t]{0.08\textwidth}%
-    #1
-  \end{minipage}
-  \hfill
-  \begin{minipage}[t]{0.9\textwidth}%
-}{%
-  \end{minipage}
-}
-
 \NewDocumentCommand{\RR}{}{\mathbb{R}}
 \NewDocumentCommand{\pf}{mm}{\frac{\partial #1}{\partial #2}}
 \begin{document}
@@ -129,5 +129,5 @@ title=Example~\thetcbcounter: #2,#1}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/template.tex}
 \input{${MOOSE_DIR}/python/MooseDocs/test/output/latex/extensions/folder/index.tex}
 \bibliographystyle{unsrtnat}
-\bibliography{${MOOSE_DIR}/framework/doc/content/bib/moose.bib,${MOOSE_DIR}/framework/doc/content/bib/sqa_framework.bib}
+\bibliography{${MOOSE_DIR}/framework/doc/content/bib/external_papers_citing_moose.bib,${MOOSE_DIR}/framework/doc/content/bib/external_papers_using_moose.bib,${MOOSE_DIR}/framework/doc/content/bib/inl_papers_citing_moose.bib,${MOOSE_DIR}/framework/doc/content/bib/inl_papers_using_moose.bib,${MOOSE_DIR}/framework/doc/content/bib/moose.bib,${MOOSE_DIR}/framework/doc/content/bib/sqa_framework.bib}
 \end{document}
