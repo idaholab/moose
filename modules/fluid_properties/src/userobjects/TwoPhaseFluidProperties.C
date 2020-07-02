@@ -100,6 +100,12 @@ TwoPhaseFluidProperties::h_lat(const DualReal & p, const DualReal & T) const
   return _fp_vapor->h_from_p_T(p, T) - _fp_liquid->h_from_p_T(p, T);
 }
 
+Real
+TwoPhaseFluidProperties::L_fusion() const
+{
+  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+}
+
 Real TwoPhaseFluidProperties::sigma_from_T(Real /*T*/) const
 {
   mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");

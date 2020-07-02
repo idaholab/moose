@@ -8,7 +8,7 @@ class StiffenedGasTwoPhaseFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
   StiffenedGasTwoPhaseFluidPropertiesTest()
-    : MooseObjectUnitTest("FluidPropertiesApp"), _T_triple(300.0)
+    : MooseObjectUnitTest("FluidPropertiesApp"), _T_triple(300.0), _L_fusion(0.5)
   {
     buildObjects();
   }
@@ -18,6 +18,7 @@ protected:
   {
     InputParameters uo_pars = _factory.getValidParams("StiffenedGasTwoPhaseFluidProperties");
     uo_pars.set<Real>("T_triple") = _T_triple;
+    uo_pars.set<Real>("L_fusion") = _L_fusion;
     _fe_problem->addUserObject("StiffenedGasTwoPhaseFluidProperties", "fp", uo_pars);
     _fp = &_fe_problem->getUserObject<StiffenedGasTwoPhaseFluidProperties>("fp");
     _fp_liquid = &_fe_problem->getUserObject<StiffenedGasFluidProperties>(_fp->getLiquidName());
@@ -29,4 +30,5 @@ protected:
   const StiffenedGasFluidProperties * _fp_vapor;
 
   const Real _T_triple;
+  const Real _L_fusion;
 };
