@@ -13,7 +13,7 @@ public:
   Real value(const Point & p) override;
 
 protected:
-  SubChannelMesh * _mesh;
+  SubChannelMesh & _mesh;
 
 public:
   static InputParameters validParams();

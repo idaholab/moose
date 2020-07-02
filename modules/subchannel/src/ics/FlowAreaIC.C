@@ -9,15 +9,15 @@ FlowAreaIC::validParams()
   return params;
 }
 
-FlowAreaIC::FlowAreaIC(const InputParameters & params) : IC(params) {}
+FlowAreaIC::FlowAreaIC(const InputParameters & params) : IC(params),
+_mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
 
 Real
 FlowAreaIC::value(const Point & p)
 {
-  _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
-  auto pitch = _mesh->_pitch;
-  auto rod_diameter = _mesh->_rod_diameter;
-  auto gap = _mesh->_gap;
+  auto pitch = _mesh._pitch;
+  auto rod_diameter = _mesh._rod_diameter;
+  auto gap = _mesh._gap;
 
   // Compute the flow area for a standard channel (one that touches 4 pins).
   auto rod_area = 0.25 * M_PI * rod_diameter * rod_diameter;
@@ -28,9 +28,9 @@ FlowAreaIC::value(const Point & p)
   auto inds = index_point(p);
   auto i = inds.first;
   auto j = inds.second;
-  bool is_corner = (i == 0 && j == 0) || (i == _mesh->_nx - 1 && j == 0) ||
-                   (i == 0 && j == _mesh->_ny - 1) || (i == _mesh->_nx - 1 && j == _mesh->_ny - 1);
-  bool is_edge = (i == 0 || j == 0 || i == _mesh->_nx - 1 || j == _mesh->_ny - 1);
+  bool is_corner = (i == 0 && j == 0) || (i == _mesh._nx - 1 && j == 0) ||
+                   (i == 0 && j == _mesh._ny - 1) || (i == _mesh._nx - 1 && j == _mesh._ny - 1);
+  bool is_edge = (i == 0 || j == 0 || i == _mesh._nx - 1 || j == _mesh._ny - 1);
 
   // Compute and return the channel area.
   if (is_corner)
