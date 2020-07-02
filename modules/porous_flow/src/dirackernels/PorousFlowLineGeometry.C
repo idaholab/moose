@@ -16,7 +16,7 @@ InputParameters
 PorousFlowLineGeometry::validParams()
 {
   InputParameters params = DiracKernel::validParams();
-  params.addRequiredParam<std::string>(
+  params.addParam<std::string>(
       "point_file",
       "The file containing the coordinates of the points and their weightings that approximate the "
       "line sink.  The physical meaning of the weightings depend on the scenario, eg, they may be "
@@ -34,6 +34,10 @@ PorousFlowLineGeometry::validParams()
       "line_direction",
       RealVectorValue(0.0, 0.0, 1.0),
       "Line direction.  Note this is only used if there is only one point in the point_file.");
+  params.addParam<std::vector<Real>>(
+      "line_base",
+      "Line base point x,y,z coordinates.  This is the same format as a single-line point_file. "
+      "Note this is only used if there is no point file specified.");
   params.addClassDescription("Approximates a polyline sink in the mesh using a number of Dirac "
                              "point sinks with given weightings that are read from a file");
   return params;
@@ -47,31 +51,58 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
 {
   statefulPropertiesAllowed(true);
 
-  // open file
-  std::ifstream file(_point_file.c_str());
-  if (!file.good())
-    mooseError("PorousFlowLineGeometry: Error opening file " + _point_file);
+  if (isParamValid("line_base") && !_point_file.empty())
+    paramError("point_file",
+               "PorousFlowLineGeometry: must specify only one of 'point_file' and 'line_base'");
+  if (!isParamValid("line_base") && !isParamValid("point_file"))
+    paramError("point_file",
+               "PorousFlowLineGeometry: must specify at least one of 'point_file' and 'line_base'");
 
-  // construct the arrays of weight, x, y and z
-  std::vector<Real> scratch;
-  while (parseNextLineReals(file, scratch))
+  if (!_point_file.empty())
   {
-    if (scratch.size() >= 2)
-    {
-      _rs.push_back(scratch[0]);
-      _xs.push_back(scratch[1]);
-      if (scratch.size() >= 3)
-        _ys.push_back(scratch[2]);
-      else
-        _ys.push_back(0.0);
-      if (scratch.size() >= 4)
-        _zs.push_back(scratch[3]);
-      else
-        _zs.push_back(0.0);
-    }
-  }
+    // open file
+    std::ifstream file(_point_file.c_str());
+    if (!file.good())
+      paramError("point_file", "PorousFlowLineGeometry: Error opening file " + _point_file);
 
-  file.close();
+    // construct the arrays of weight, x, y and z
+    std::vector<Real> scratch;
+    while (parseNextLineReals(file, scratch))
+    {
+      if (scratch.size() >= 2)
+      {
+        _rs.push_back(scratch[0]);
+        _xs.push_back(scratch[1]);
+        if (scratch.size() >= 3)
+          _ys.push_back(scratch[2]);
+        else
+          _ys.push_back(0.0);
+        if (scratch.size() >= 4)
+          _zs.push_back(scratch[3]);
+        else
+          _zs.push_back(0.0);
+      }
+    }
+    file.close();
+  }
+  else
+  {
+    auto base = getParam<std::vector<Real>>("line_base");
+    if (base.size() != _mesh.dimension() + 1)
+      paramError("line_base",
+                 "PorousFlowLineGeometry: wrong number of arguments - got ",
+                 base.size(),
+                 ", expected ",
+                 _mesh.dimension(),
+                 " '<weight> <x> [<y> [z]]'");
+
+    for (int i = base.size(); i < 4; i++)
+      base.push_back(0); // fill out zeros up to 3 dimensions
+    _rs.push_back(base[0]);
+    _xs.push_back(base[1]);
+    _ys.push_back(base[2]);
+    _zs.push_back(base[3]);
+  }
 
   const int num_pts = _zs.size();
   _bottom_point(0) = _xs[num_pts - 1];
