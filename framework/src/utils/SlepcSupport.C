@@ -492,7 +492,7 @@ moosePetscSNESFormMatricesTags(
 PetscErrorCode
 mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
-  PetscBool jissell, pissell;
+  PetscBool jisshell, pisshell;
   PetscBool jismffd;
   PetscErrorCode ierr;
 
@@ -503,13 +503,13 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   // If both jacobian and preconditioning are shell matrices,
   // and then assemble them and return
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jissell);
+  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jisshell);
   CHKERRQ(ierr);
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
   CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pissell);
+  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pisshell);
   CHKERRQ(ierr);
-  if ((jissell || jismffd) && pissell)
+  if ((jisshell || jismffd) && pisshell)
   {
     // Just assemble matrices and return
     ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
@@ -527,21 +527,21 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
   // Jacobian and precond matrix are the same
   if (jac == pc)
   {
-    if (!pissell)
+    if (!pisshell)
       moosePetscSNESFormMatrixTag(snes, x, pc, ctx, eigen_nl.precondMatrixTag());
 
     PetscFunctionReturn(0);
   }
   else
   {
-    if (!jissell && !jismffd && !pissell) // We need to form both Jacobian and precond matrix
+    if (!jisshell && !jismffd && !pisshell) // We need to form both Jacobian and precond matrix
     {
       std::vector<Mat> mats = {jac, pc};
       moosePetscSNESFormMatricesTags(
           snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.precondMatrixTag()});
       PetscFunctionReturn(0);
     }
-    if (!pissell) // We need to form only precond matrix
+    if (!pisshell) // We need to form only precond matrix
     {
       moosePetscSNESFormMatrixTag(snes, x, pc, ctx, eigen_nl.precondMatrixTag());
       ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
@@ -550,7 +550,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
       CHKERRQ(ierr);
       PetscFunctionReturn(0);
     }
-    if (!jissell && !jismffd) // We need to form only Jacobian matrix
+    if (!jisshell && !jismffd) // We need to form only Jacobian matrix
     {
       moosePetscSNESFormMatrixTag(snes, x, jac, ctx, eigen_nl.nonEigenMatrixTag());
       ierr = MatAssemblyBegin(pc, MAT_FINAL_ASSEMBLY);
@@ -566,7 +566,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 PetscErrorCode
 mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
-  PetscBool jsell, psell;
+  PetscBool jshell, pshell;
   PetscBool jismffd;
   PetscErrorCode ierr;
 
@@ -577,13 +577,13 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 
   // If both jacobian and preconditioning are shell matrices,
   // and then assemble them and return
-  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jsell);
+  ierr = PetscObjectTypeCompare((PetscObject)jac, MATSHELL, &jshell);
   CHKERRQ(ierr);
   ierr = PetscObjectTypeCompare((PetscObject)jac, MATMFFD, &jismffd);
   CHKERRQ(ierr);
-  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &psell);
+  ierr = PetscObjectTypeCompare((PetscObject)pc, MATSHELL, &pshell);
   CHKERRQ(ierr);
-  if ((jsell || jismffd) && psell)
+  if ((jshell || jismffd) && pshell)
   {
     // Just assemble matrices and return
     ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
@@ -598,7 +598,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     PetscFunctionReturn(0);
   }
 
-  if (jac != pc && (!jsell && !jsell))
+  if (jac != pc && (!jshell && !jshell))
     SETERRQ(PetscObjectComm((PetscObject)snes),
             PETSC_ERR_ARG_INCOMP,
             "Jacobian and precond matrices should be the same for eigen kernels \n");

@@ -20,6 +20,7 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/linear_solver.h"
+#include "libmesh/diagonal_matrix.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -300,7 +301,7 @@ public:
   /**
    * Method used to obtain scaling factors for variables
    */
-  virtual void computeScaling();
+  void computeScaling();
 
   /**
    * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
@@ -722,6 +723,16 @@ protected:
    */
   void mortarConstraints(bool displaced);
 
+  /**
+   * Compute a "Jacobian" for automatic scaling purposes
+   */
+  virtual void computeScalingJacobian() = 0;
+
+  /**
+   * Compute a "residual" for automatic scaling purposes
+   */
+  virtual void computeScalingResidual() = 0;
+
 protected:
   NumericVector<Number> & solutionInternal() const override { return *_sys.solution; }
 
@@ -924,7 +935,15 @@ protected:
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
+  /// A diagonal matrix used for computing scaling
+  DiagonalMatrix<Number> _scaling_matrix;
+
 private:
+  /**
+   * Setup group scaling containers
+   */
+  void setupScalingGrouping();
+
   /// Functors for computing undisplaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
       _undisplaced_mortar_functors;
@@ -940,4 +959,13 @@ private:
 
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
+
+  /// Whether we've initialized the automatic scaling data structures
+  bool _auto_scaling_initd;
+
+  /// A map from variable index to group variable index and it's associated (inverse) scaling factor
+  std::unordered_map<unsigned int, unsigned int> _var_to_group_var;
+
+  /// The number of scaling groups
+  std::size_t _num_scaling_groups;
 };

@@ -215,6 +215,22 @@ NonlinearEigenSystem::solve()
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 
+  // Now that the initial solution has ben set, potentially perform a residual/Jacobian evaluation
+  // to determine variable scaling factors
+  if (_automatic_scaling)
+  {
+    if (_compute_scaling_once)
+    {
+      if (!_computed_scaling)
+      {
+        computeScaling();
+        _computed_scaling = true;
+      }
+    }
+    else
+      computeScaling();
+  }
+
 // In DEBUG mode, Libmesh will check the residual automatically. This may cause
 // an error because B does not need to assembly by default.
 // When PETSc is older than 3.13, we always need to do an extra assembly,
@@ -440,6 +456,18 @@ void
 NonlinearEigenSystem::turnOffJacobian()
 {
   // Let us do nothing at the current moment
+}
+
+void
+NonlinearEigenSystem::computeScalingJacobian()
+{
+  _eigen_problem.computeJacobianTag(*_current_solution, _scaling_matrix, precondMatrixTag());
+}
+
+void
+NonlinearEigenSystem::computeScalingResidual()
+{
+  _eigen_problem.computeResidualTag(*_current_solution, RHS(), nonEigenVectorTag());
 }
 
 #else
