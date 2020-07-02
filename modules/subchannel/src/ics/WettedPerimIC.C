@@ -8,16 +8,16 @@ WettedPerimIC::validParams()
   return IC::validParams();
 }
 
-WettedPerimIC::WettedPerimIC(const InputParameters & params) : IC(params) {}
+WettedPerimIC::WettedPerimIC(const InputParameters & params) : IC(params),
+_mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
 
 Real
 WettedPerimIC::value(const Point & p)
 {
   // Define geometry parameters.
-  _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
-  auto pitch = _mesh->_pitch;
-  auto rod_diameter = _mesh->_rod_diameter;
-  auto gap = _mesh->_gap;
+  auto pitch = _mesh._pitch;
+  auto rod_diameter = _mesh._rod_diameter;
+  auto gap = _mesh._gap;
   auto rod_circumference = M_PI * rod_diameter;
 
   // Determine which channel this point is in and if that channel lies at an
@@ -25,9 +25,9 @@ WettedPerimIC::value(const Point & p)
   auto inds = index_point(p);
   auto i = inds.first;
   auto j = inds.second;
-  bool is_corner = (i == 0 && j == 0) || (i == _mesh->_nx - 1 && j == 0) ||
-                   (i == 0 && j == _mesh->_ny - 1) || (i == _mesh->_nx - 1 && j == _mesh->_ny - 1);
-  bool is_edge = (i == 0 || j == 0 || i == _mesh->_nx - 1 || j == _mesh->_ny - 1);
+  bool is_corner = (i == 0 && j == 0) || (i == _mesh._nx - 1 && j == 0) ||
+                   (i == 0 && j == _mesh._ny - 1) || (i == _mesh._nx - 1 && j == _mesh._ny - 1);
+  bool is_edge = (i == 0 || j == 0 || i == _mesh._nx - 1 || j == _mesh._ny - 1);
 
   // Compute and return the wetted perimeter.
   if (is_corner)
