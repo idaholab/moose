@@ -23,6 +23,7 @@ PODReducedBasisSurrogate::validParams()
   params.addParam<std::vector<unsigned int>>("new_ranks",
                                              std::vector<unsigned int>(0),
                                              "The new ranks that each variable in 'change_rank' shall have.");
+  params.addParam<Real>("penalty", 1e5, "The penalty parameter for Dirichlet BCs.");
   return params;
 }
 
@@ -31,9 +32,12 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
     _change_rank(getParam<std::vector<std::string>>("change_rank")),
     _new_ranks(getParam<std::vector<unsigned int>>("new_ranks")),
     _var_names(getModelData<std::vector<std::string>>("_var_names")),
+    _tag_names(getModelData<std::vector<std::string>>("_tag_names")),
+    _dir_tag_names(getModelData<std::vector<std::string>>("_dir_tag_names")),
     _independent(getModelData<std::vector<unsigned int>>("_independent")),
     _base(getModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(getModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
+    _penalty(getParam<Real>("penalty")),
     _initialized(false)
 {
   if(_change_rank.size() != _new_ranks.size())
@@ -128,6 +132,13 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
   {
     unsigned int row_start = 0;
 
+    // Checking if the reduced operator corresponds to a Dirichlet BC, if
+    // yes introduce the penalty factor.
+    Real factor = 1.0;
+    auto it = std::find(_dir_tag_names.begin(), _dir_tag_names.end(), _tag_names[i]);
+    if (it != _dir_tag_names.end())
+      factor = _penalty;
+
     // If the user decreased the rank of the reduced bases manually, some parts
     // of the initial reduced operators have to be omited.
     for(unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
@@ -143,9 +154,9 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
             for(unsigned int col_i=col_start; col_i<_comulative_ranks[var_j]; col_i++)
             {
               if (i < params.size())
-                _sys_mx(row_i, col_i) += params[i] * _red_operators[i](row_i, col_i);
+                _sys_mx(row_i, col_i) += params[i] * factor * _red_operators[i](row_i, col_i);
               else
-                _sys_mx(row_i, col_i) += _red_operators[i](row_i, col_i);
+                _sys_mx(row_i, col_i) += factor * _red_operators[i](row_i, col_i);
             }
 
             col_start = _comulative_ranks[var_j];
@@ -154,9 +165,9 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
         else
         {
           if (i < params.size())
-            _rhs(row_i) -= params[i] * _red_operators[i](row_i, 0);
+            _rhs(row_i) -= params[i] * factor * _red_operators[i](row_i, 0);
           else
-            _rhs(row_i) -= _red_operators[i](row_i, 0);
+            _rhs(row_i) -= factor * _red_operators[i](row_i, 0);
         }
         row_start = _comulative_ranks[var_i];
       }

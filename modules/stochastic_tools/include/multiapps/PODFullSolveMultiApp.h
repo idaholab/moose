@@ -43,9 +43,6 @@ protected:
   /// Evaluating the residuals for every tag in the trainer.
   void computeResidual();
 
-  /// Evaluating the residuals for every tag in the trainer in batch mode.
-  void computeResidualBatch();
-
   /// Switch used to differentiate between snapshot generation and residual
   /// computation. Residual generation is only possible after the snapshot generation
   /// part is gone.

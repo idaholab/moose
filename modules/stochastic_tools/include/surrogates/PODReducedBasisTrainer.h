@@ -41,16 +41,16 @@ public:
                             unsigned int tag_i,
                             std::vector<DenseVector<Real>>& residual);
 
-
   const std::vector<std::string>& getVarNames() const {return _var_names;}
 
   const std::vector<std::string>& getTagNames() const {return _tag_names;}
 
   const std::vector<unsigned int>& getIndependent() const {return _independent;}
 
+  /// Getting the base size for a given variable.
   unsigned int getBaseSize(unsigned int v_ind) {return _base[v_ind].size();}
 
-  // Getting the overall base size, which is the sum of the individial bases.
+  /// Getting the overall base size, which is the sum of the individial bases.
   unsigned int getSumBaseSize();
 
   // Getting a basis vector for a given variable.
@@ -67,10 +67,6 @@ protected:
   /// Computes the eigen-decomposition of the stored correlation matrices.
   void computeEigenDecomposition();
 
-  /// Computes the number of bases necessary for a given error indicator. This
-  /// needs a sorted vector as input.
-  unsigned int determineNumberOfModes(Real limit, std::vector<Real>& inp_vec);
-
   /// Generates the basis vectors using the snapshots together with the
   /// eigendecomposition of the correlation matrices
   void computeBasisVectors();
@@ -83,7 +79,10 @@ protected:
   std::vector<Real> _en_limits;
 
   /// Names of the tags that should be used to fetch residuals from the MultiApp.
-  std::vector<std::string> _tag_names;
+  std::vector<std::string>& _tag_names;
+
+  /// Tag names that show which tags correspond to dirichlet boundaries.
+  std::vector<std::string>& _dir_tag_names;
 
   /// list of bools describing which tag is indepedent of the solution.
   std::vector<unsigned int>& _independent;
@@ -112,6 +111,10 @@ protected:
   bool _base_completed;
 
 private:
+
+  /// Computes the number of bases necessary for a given error indicator. This
+  /// needs a sorted vector as input.
+  unsigned int determineNumberOfModes(Real limit, std::vector<Real>& inp_vec);
 
   /// Printing the reduced operators on the terminal (for testing purposes).
   void printReducedOperators();

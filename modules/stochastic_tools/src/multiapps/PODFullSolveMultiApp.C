@@ -80,11 +80,7 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   }
   else
   {
-    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-        _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-      computeResidualBatch();
-    else
-      computeResidual();
+    computeResidual();
   }
 
   return last_solve_converged;
