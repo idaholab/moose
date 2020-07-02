@@ -1406,7 +1406,7 @@ bool
 EFAElement2D::getEdgeNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const
 {
   // get the parametric coords of a node in an element edge
-  unsigned int edge_id = 99999;
+  unsigned int edge_id = std::numeric_limits<unsigned int>::max();
   bool edge_found = false;
   for (unsigned int i = 0; i < _num_edges; ++i)
   {
@@ -1517,7 +1517,7 @@ EFAElement2D::getFragmentEdgeID(unsigned int elem_edge_id, unsigned int & frag_e
   // N.B. if the elem edge contains two frag edges, this method will only return
   // the first frag edge ID
   bool frag_edge_found = false;
-  frag_edge_id = 99999;
+  frag_edge_id = std::numeric_limits<unsigned int>::max();
   if (_fragments.size() == 1)
   {
     for (unsigned int j = 0; j < _fragments[0]->numEdges(); ++j)
@@ -1608,7 +1608,7 @@ unsigned int
 EFAElement2D::getTipEdgeID() const
 {
   // if this element is a crack tip element, returns the crack tip edge's ID
-  unsigned int tip_edge_id = 99999;
+  unsigned int tip_edge_id = std::numeric_limits<unsigned int>::max();
   if (_fragments.size() == 1) // crack tip element with a partial fragment saved
   {
     for (unsigned int i = 0; i < _num_edges; ++i)
@@ -1695,7 +1695,7 @@ EFAElement2D::fragmentEdgeAlreadyCut(unsigned int ElemEdgeID) const
     has_cut = true;
   else
   {
-    unsigned int FragEdgeID = 99999;
+    unsigned int FragEdgeID = std::numeric_limits<unsigned int>::max();
     if (getFragmentEdgeID(ElemEdgeID, FragEdgeID))
     {
       EFAEdge * frag_edge = getFragmentEdge(0, FragEdgeID);
@@ -1740,7 +1740,8 @@ EFAElement2D::addEdgeCut(unsigned int edge_id,
     bool add2elem = true;
 
     // check if it is necessary to add cuts to fragment
-    unsigned int frag_edge_id = 99999; // the id of the partially overlapping fragment edge
+    // id of partially overlapping fragment edge
+    unsigned int frag_edge_id = std::numeric_limits<unsigned int>::max();
     EFAEdge * frag_edge = NULL;
     EFANode * frag_edge_node1 = NULL;
     double frag_pos = -1.0;

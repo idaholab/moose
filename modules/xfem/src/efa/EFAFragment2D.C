@@ -174,7 +174,7 @@ EFAFragment2D::combineTipEdges()
     EFAError("In combine_tip_edges() the frag must have host_elem");
 
   bool has_tip_edges = false;
-  unsigned int elem_tip_edge_id = 99999;
+  unsigned int elem_tip_edge_id = std::numeric_limits<unsigned int>::max();
   std::vector<unsigned int> frag_tip_edge_id;
   for (unsigned int i = 0; i < _host_elem->numEdges(); ++i)
   {

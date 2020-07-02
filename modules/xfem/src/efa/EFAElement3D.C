@@ -462,7 +462,6 @@ EFAElement3D::getNeighborIndex(const EFAElement * neighbor_elem) const
       if (_face_neighbors[i][j] == neighbor_elem)
         return i;
   EFAError("in getNeighborIndex() element ", _id, " does not have neighbor ", neighbor_elem->id());
-  return 99999;
 }
 
 void
@@ -1390,7 +1389,7 @@ bool
 EFAElement3D::getFaceNodeParametricCoordinates(EFANode * node, std::vector<double> & xi_3d) const
 {
   // get the parametric coords of a node in an element face
-  unsigned int face_id = 99999;
+  unsigned int face_id = std::numeric_limits<unsigned int>::max();
   bool face_found = false;
   for (unsigned int i = 0; i < _num_faces; ++i)
   {
@@ -1742,7 +1741,7 @@ EFAElement3D::getFragmentFaceID(unsigned int elem_face_id, unsigned int & frag_f
   // N.B. if the elem edge contains two frag edges, this method will only return
   // the first frag edge ID
   bool frag_face_found = false;
-  frag_face_id = 99999;
+  frag_face_id = std::numeric_limits<unsigned int>::max();
   if (_fragments.size() == 1)
   {
     for (unsigned int j = 0; j < _fragments[0]->numFaces(); ++j)
@@ -1766,8 +1765,7 @@ EFAElement3D::getFragmentFaceEdgeID(unsigned int ElemFaceID,
 {
   // Purpose: given an edge of an elem face, find which frag face's edge it contains
   bool frag_edge_found = false;
-  FragFaceID = 99999;
-  FragFaceEdgeID = 99999;
+  FragFaceID = FragFaceEdgeID = std::numeric_limits<unsigned int>::max();
   if (getFragmentFaceID(ElemFaceID, FragFaceID))
   {
     EFAEdge * elem_edge = _faces[ElemFaceID]->getEdge(ElemFaceEdgeID);
@@ -1790,7 +1788,7 @@ EFAElement3D::isPhysicalEdgeCut(unsigned int ElemFaceID,
                                 unsigned int ElemFaceEdgeID,
                                 double position) const
 {
-  unsigned int FragFaceID = 99999, FragFaceEdgeID = 99999;
+  unsigned int FragFaceID, FragFaceEdgeID = std::numeric_limits<unsigned int>::max();
   bool is_in_real = false;
   if (_fragments.size() == 0)
   {
@@ -1979,7 +1977,7 @@ EFAElement3D::fragmentFaceAlreadyCut(unsigned int ElemFaceID) const
     has_cut = true;
   else
   {
-    unsigned int FragFaceID = 99999;
+    unsigned int FragFaceID = std::numeric_limits<unsigned int>::max();
     if (getFragmentFaceID(ElemFaceID, FragFaceID))
     {
       EFAFace * frag_face = getFragmentFace(0, FragFaceID);
