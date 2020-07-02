@@ -10,6 +10,8 @@
 #include "GaussianProcess.h"
 #include "Sampler.h"
 
+#include "SquaredExponentialCovarianceFunction.h"
+
 registerMooseObject("StochasticToolsApp", GaussianProcess);
 
 InputParameters
@@ -28,8 +30,8 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_function(
-        getModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel>>("_covar_function"))
+    _covar_id(getModelData<int>("_covar_id")),
+    _hyperparams(getModelData<std::vector<std::vector<Real>>>("_hyperparams"))
 {
 }
 
@@ -57,8 +59,25 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 
   test_points = _param_standardizer.getStandardized(test_points);
 
-  RealEigenMatrix K_train_test = _covar_function->compute_K(_training_params, test_points, false);
-  RealEigenMatrix K_test = _covar_function->compute_K(test_points, test_points, true);
+  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS
+  std::unique_ptr<CovarianceFunctionBase> covar_function = NULL;
+  if (_covar_id == 0)
+  {
+    covar_function.reset(new SquaredExponentialCovarianceFunction(_hyperparams));
+  }
+  if (_covar_id == 1)
+  {
+    covar_function.reset(new ExponentialCovarianceFunction(_hyperparams));
+  }
+  if (_covar_id == 2)
+  {
+    covar_function.reset(new MaternHalfIntCovarianceFunction(_hyperparams));
+  }
+  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS END
+
+  RealEigenMatrix K_train_test =
+      covar_function->computeCovarianceMatrix(_training_params, test_points, false);
+  RealEigenMatrix K_test = covar_function->computeCovarianceMatrix(test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);

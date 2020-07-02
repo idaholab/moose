@@ -25,7 +25,7 @@ GaussianProcessTrainer::validParams()
   params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
-  MooseEnum kernels = CovarianceFunction::makeCovarianceKernelEnum();
+  MooseEnum kernels = MooseEnum("squared_exponential=0 exponential=1 matern_half_int=2");
   params.addRequiredParam<MooseEnum>(
       "kernel_function", kernels, "The kernel (covariance function) to use.");
   params.addRequiredParam<std::vector<DistributionName>>(
@@ -55,10 +55,11 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(declareModelData<RealEigenMatrix>("_K")),
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_function(
-        declareModelData<std::unique_ptr<CovarianceFunction::CovarianceKernel>>("_covar_function")),
     _standardize_params(getParam<bool>("standardize_params")),
-    _standardize_data(getParam<bool>("standardize_data"))
+    _standardize_data(getParam<bool>("standardize_data")),
+    _covar_id(declareModelData<int>("_covar_id")),
+    _hyperparams(declareModelData<std::vector<std::vector<Real>>>("_hyperparams"))
+
 {
 }
 
@@ -97,8 +98,6 @@ GaussianProcessTrainer::initialize()
                "' is not equal to the number of samples in '",
                getParam<SamplerName>("sampler"),
                "'!");
-
-  _covar_function = CovarianceFunction::makeCovarianceKernel(_kernel_type, this);
 
   unsigned int num_samples = _values_ptr->size();
 
@@ -149,7 +148,35 @@ GaussianProcessTrainer::initialize()
 void
 GaussianProcessTrainer::execute()
 {
-  _K = _covar_function->compute_K(_training_params, _training_params, true);
+  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS
+  _covar_id = int(_kernel_type);
+  std::vector<Real> length_factor(getParam<std::vector<Real>>("length_factor"));
+  Real signal_variance(getParam<Real>("signal_variance"));
+  Real noise_variance(getParam<Real>("noise_variance"));
+
+  std::unique_ptr<CovarianceFunctionBase> covar_function = NULL;
+  if (_covar_id == 0)
+  {
+    covar_function.reset(
+        new SquaredExponentialCovarianceFunction(length_factor, signal_variance, noise_variance));
+  }
+  if (_covar_id == 1)
+  {
+    Real gamma(getParam<Real>("gamma"));
+    covar_function.reset(
+        new ExponentialCovarianceFunction(length_factor, signal_variance, noise_variance, gamma));
+  }
+  if (_covar_id == 2)
+  {
+    int p(getParam<unsigned int>("p"));
+    covar_function.reset(
+        new MaternHalfIntCovarianceFunction(length_factor, signal_variance, noise_variance, p));
+  }
+  // Store hyperparameters for surrogate use
+  covar_function->getHyperParameters(_hyperparams);
+  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS END
+
+  _K = covar_function->computeCovarianceMatrix(_training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);
 }

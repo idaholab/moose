@@ -10,11 +10,14 @@
 #pragma once
 
 #include "SurrogateTrainer.h"
-#include "CovarianceFunction.h"
 #include "Standardizer.h"
 #include <Eigen/Dense>
 
 #include "Distribution.h"
+
+#include "SquaredExponentialCovarianceFunction.h"
+#include "ExponentialCovarianceFunction.h"
+#include "MaternHalfIntCovarianceFunction.h"
 
 class GaussianProcessTrainer : public SurrogateTrainer
 {
@@ -60,9 +63,6 @@ private:
   /// A solve of Ax=b via Cholesky.
   RealEigenMatrix & _K_results_solve;
 
-  /// Pointer to covariance function used for K matrix
-  std::unique_ptr<CovarianceFunction::CovarianceKernel> & _covar_function;
-
   /// Cholesky decomposition Eigen object
   Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
 
@@ -71,4 +71,8 @@ private:
 
   /// Switch for training data(y) standardization
   bool _standardize_data;
+
+  int & _covar_id;
+
+  std::vector<std::vector<Real>> & _hyperparams;
 };
