@@ -11,10 +11,11 @@ PowerIC::validParams()
   InputParameters params = IC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
   params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column)");
+  params.addParam<FunctionName>("axial_heat_rate", 1.0, "user provided normalized function of axial heat rate [unitless]. The integral over pin length should equal the heated length" );
   return params;
 }
 
-PowerIC::PowerIC(const InputParameters & params) : IC(params)
+PowerIC::PowerIC(const InputParameters & params) : IC(params), _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
   _power = getParam<Real>("power");
@@ -54,7 +55,7 @@ PowerIC::PowerIC(const InputParameters & params) : IC(params)
 
   _power_dis.resize(_mesh->_ny - 1, _mesh->_nx - 1);
   auto sum = _power_dis.sum();
-  auto fpin_power = _power / sum;           // W
+  auto fpin_power = _power / sum;           // full pin power W
   auto ref_power = _power_dis * fpin_power; // W
   // Convert the reference power to a linear heat rate.
   auto heated_length = _mesh->_heated_length; // in m

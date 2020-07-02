@@ -1,3 +1,5 @@
+length = 3.658
+
 [Mesh]
   type = SubChannelMesh
   nx = 6
@@ -6,7 +8,7 @@
   pitch = 0.0126
   rod_diameter = 0.00950
   gap = 0.00095
-  heated_length = 3.658
+  heated_length = ${length}
 []
 
 [AuxVariables]
@@ -35,6 +37,15 @@
   [w_perim]
   []
   [q_prime]
+  []
+[]
+
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    function = '(pi/2.0)*cos(pi*z/l - pi/2.0)'
+    vars = 'l'
+    vals = '${length}'
   []
 []
 
@@ -68,6 +79,7 @@
     variable = q_prime
     power = 3.44e6
     filename = "power_profile.txt"
+    function = axial_heat_rate
   []
 []
 

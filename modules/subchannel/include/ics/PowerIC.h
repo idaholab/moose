@@ -20,6 +20,7 @@ protected:
   int _numberoflines;
   std::string _filename;
   Eigen::MatrixXd _power_dis;
+  const Function & _axial_heat_rate;
 
 private:
   Eigen::MatrixXd _ref_qprime;
