@@ -89,8 +89,8 @@
 
 [Contact]
   [./dummy_name]
-    master = 3
-    slave = 2
+    primary = 3
+    secondary = 2
     penalty = 1e8
     tangential_tolerance = 1e-4
   [../]

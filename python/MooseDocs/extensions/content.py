@@ -27,6 +27,8 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6, hide=[])
+PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False)
 
 LATEX_CONTENTLIST = """
 \\DeclareDocumentCommand{\\ContentItem}{mmm}{#3 (\\texttt{\\small #1})\\dotfill \\pageref{#2}\\\\}
@@ -50,10 +52,14 @@ class ContentExtension(command.CommandExtension):
         self.addCommand(reader, ContentCommand())
         self.addCommand(reader, AtoZCommand())
         self.addCommand(reader, TableOfContentsCommand())
+        self.addCommand(reader, ContentOutlineCommand())
+        self.addCommand(reader, PaginationCommand())
 
         renderer.add('AtoZToken', RenderAtoZ())
         renderer.add('ContentToken', RenderContentToken())
         renderer.add('TableOfContents', RenderTableOfContents())
+        renderer.add('ContentOutline', RenderContentOutline())
+        renderer.add('PaginationToken', RenderPagination())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_CONTENTLIST)
@@ -76,10 +82,8 @@ class ContentExtension(command.CommandExtension):
         nodes.sort(key=lambda n: n.local)
 
         headings = collections.defaultdict(list)
-        func = lambda n: n.local.startswith(location) and isinstance(n, pages.Source)
         for node in nodes:
             h_node = heading.find_heading(node)
-
             if h_node is not None:
                 text = h_node.text()
                 label = text.replace(' ', '-').lower()
@@ -161,6 +165,55 @@ class TableOfContentsCommand(command.CommandComponent):
                                hide=self.settings['hide'].split(),
                                levels=levels,
                                columns=int(self.settings['columns']))
+
+class ContentOutlineCommand(command.CommandComponent):
+    COMMAND = 'content'
+    SUBCOMMAND = 'outline'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['location'] = (None, "The markdown content directory to build outline.")
+        settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
+        settings['max_level'] = (1, 'Maximum heading level to display.')
+        settings['hide'] = ('', "A list of heading ids to hide.")
+        return settings
+
+    def createToken(self, parent, info, page):
+        if self.settings['location'] is None and not self.settings['pages']:
+            msg = "Either the 'location' or the 'pages' setting is required for the !content outline command."
+            raise exceptions.MooseDocsException(msg)
+        if self.settings['location'] is not None and self.settings['pages']:
+            msg = "The 'location' and 'pages' may not be specified simultaneously."
+            raise exceptions.MooseDocsException(msg)
+
+        return ContentOutline(parent,
+                              location=self.settings['location'],
+                              pages=self.settings['pages'].split(),
+                              max_level=int(self.settings['max_level']),
+                              hide=self.settings['hide'].split())
+
+class PaginationCommand(command.CommandComponent):
+    COMMAND = 'content'
+    SUBCOMMAND = 'pagination'
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['previous'] = (None, "The previous markdown page to navigate to.")
+        settings['next'] = (None, "The next markdown page to navigate to.")
+        settings['use_title'] = (False, "Use the title of the page for the hyperlink text.")
+        return settings
+
+    def createToken(self, parent, info, page):
+        if self.settings['previous'] is None and self.settings['next'] is None:
+            msg = "At least one: a 'previous' page or a 'next' page is required for the !content pagination command."
+            raise exceptions.MooseDocsException(msg)
+
+        return PaginationToken(parent,
+                               previous=self.settings['previous'],
+                               next=self.settings['next'],
+                               use_title=self.settings['use_title'])
 
 class RenderContentToken(components.RenderComponent):
 
@@ -281,3 +334,107 @@ class RenderTableOfContents(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
         return None
+
+class RenderContentOutline(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createMaterialize(self, parent, token, page):
+        self.createHTMLHelper(parent, token, page)
+
+    def createHTMLHelper(self, parent, token, page):
+        if token['location'] is not None and not token['pages']:
+            func = lambda p: p.local.startswith(token['location']) and isinstance(p, pages.Source)
+            nodes = self.translator.findPages(func)
+        elif token['pages'] and token['location'] is None:
+            nodes = [self.translator.findPage(p) for p in token['pages']]
+        else:
+            msg = "The 'location' and 'pages' tokens must be used exclusively."
+            raise exceptions.MooseDocsException(msg)
+
+        # Define convenience variables
+        hide = token['hide']
+        max_level = token['max_level']
+        if max_level > 6 or max_level < 1:
+            raise exceptions.MooseDocsException("The 'max_level' must be set in range of 1 to 6.")
+
+        # Create the outline from the headings of each node.
+        # This initializes the html tags to contain this list, where the previous heading level
+        # starts at zero thus will always trigger the creation of <ol><li>...</li></ol> within
+        # the "li" tag created here.
+        previous = 0 # initialize the previous heading level to zero to trigger creation of <ol><li> initially
+        li = html.Tag(parent, 'div', class_='moose-outline')
+        for node in nodes:
+            pageref = str(node.relativeDestination(page))
+
+            for key, head in node['headings'].items():
+                current = head['level']
+                if current <= max_level and key not in hide:
+                    diff = current - previous # change in heading number
+
+                    # At the same level, so add another <li> to the list
+                    if diff == 0:
+                        li = html.Tag(li.parent, 'li')
+
+                    # Heading level is less, so this heading goes within the current li
+                    elif diff > 0:
+                        for j in range(diff):
+                            li = html.Tag(html.Tag(li, 'ol'), 'li')
+
+                    # Heading level is more, so this heading goes above the current li
+                    else:
+                        ol = li.parent
+                        for i in range(-diff):
+                            ol = ol.parent.parent
+                        li = html.Tag(ol, 'li')
+
+                    url = pageref + '#{}'.format(key)
+                    link = core.Link(None, url=url)
+                    head.copyToToken(link)
+                    self.renderer.render(li, link, page)
+                    previous = current
+
+    def createLatex(self, parent, token, page):
+        msg = "Warning: The Content Extension\'s 'outline' command is not supported for LaTex documents."
+        latex.String(parent, content=msg)
+
+class RenderPagination(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        div = html.Tag(parent, 'div', class_='moose-content-pagination')
+
+        if token['previous'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'previous')
+        if token['next'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'next')
+
+    def createMaterialize(self, parent, token, page):
+        div = html.Tag(parent, 'div', class_='moose-content-pagination')
+
+        if token['previous'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'previous')
+            link.addClass('btn')
+            html.Tag(link, 'i', class_='material-icons left', string='arrow_back')
+        if token['next'] is not None:
+            link = self.createHTMLHelper(div, token, page, 'next')
+            link.addClass('btn')
+            html.Tag(link, 'i', class_='material-icons right', string='arrow_forward')
+
+    def createHTMLHelper(self, parent, token, page, direction):
+        node = self.translator.findPage(token[direction])
+
+        # Determine hyperlink style.
+        if token['use_title']:
+            string = heading.find_heading(node).text()
+            if len(string) > 18:
+                string = string[:18] + '. . .'
+        else:
+            string = direction.capitalize()
+
+        return html.Tag(parent, 'a',
+                        class_='moose-content-{}'.format(direction),
+                        href=str(node.relativeDestination(page)),
+                        string=string)
+
+    def createLatex(self, parent, token, page):
+        msg = "Warning: The Content Extension\'s 'pagination' command is not supported for LaTex documents."
+        latex.String(parent, content=msg)

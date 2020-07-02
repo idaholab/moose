@@ -1,5 +1,5 @@
 [Mesh]
-  file = twoBlocksContactDiceSlave2OffsetGap.e
+  file = twoBlocksContactDiceSecondary2OffsetGap.e
 []
 
 [GlobalParams]
@@ -92,8 +92,8 @@
 
 [Contact]
   [./dummy_name]
-    master = 2
-    slave = 3
+    primary = 2
+    secondary = 3
     penalty = 1e8
   [../]
 []

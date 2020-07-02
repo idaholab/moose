@@ -26,7 +26,7 @@
   [../]
   [./interior_sideset]
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = 1
+    primary_block = 1
     paired_block = 2
     input = right
     new_boundary = interior_ss

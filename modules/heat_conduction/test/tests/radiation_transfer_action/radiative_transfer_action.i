@@ -20,7 +20,7 @@
   [./inner_bottom]
     type = SideSetsBetweenSubdomainsGenerator
     input = cmg
-    master_block = 1
+    primary_block = 1
     paired_block = 5
     new_boundary = 'inner_bottom'
   [../]
@@ -28,7 +28,7 @@
   [./inner_left]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_bottom
-    master_block = 4
+    primary_block = 4
     paired_block = 5
     new_boundary = 'inner_left'
   [../]
@@ -36,7 +36,7 @@
   [./inner_right]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_left
-    master_block = 2
+    primary_block = 2
     paired_block = 5
     new_boundary = 'inner_right'
   [../]
@@ -44,7 +44,7 @@
   [./inner_top]
     type = SideSetsBetweenSubdomainsGenerator
     input = inner_right
-    master_block = 3
+    primary_block = 3
     paired_block = 5
     new_boundary = 'inner_top'
   [../]

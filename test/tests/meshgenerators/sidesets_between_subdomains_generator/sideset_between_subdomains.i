@@ -21,7 +21,7 @@
   [./central_boundary]
     type = SideSetsBetweenSubdomainsGenerator
     input = central_block
-    master_block = 2
+    primary_block = 2
     paired_block = 0
     new_boundary = 7
   []

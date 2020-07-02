@@ -33,9 +33,9 @@ protected:
   /// this map is used to store QP data.
   std::map<std::pair<dof_id_type, unsigned int>, std::vector<Real>> _map_values;
 
-  /// the master side, coupled bulk material property
+  /// the primary side, coupled bulk material property
   const MaterialProperty<Real> & _mp;
-  /// the master side, coupled bulk material property
+  /// the primary side, coupled bulk material property
   const MaterialProperty<Real> & _mp_neighbor;
   /// the coupled boundary material property
   const MaterialProperty<Real> & _mp_boundary;

@@ -72,8 +72,8 @@ public:
                             bool periodic);
 
   /**
-   * Once the slave_requested_boundary_ids and
-   * master_requested_boundary_ids containers have been filled in,
+   * Once the secondary_requested_boundary_ids and
+   * primary_requested_boundary_ids containers have been filled in,
    * call this function to build node-to-Elem maps for the
    * lower-dimensional elements.
    */
@@ -96,45 +96,45 @@ public:
   void writeNodalNormalsToFile();
 
   /**
-   * Project slave nodes (find xi^(2) values) to the closest points on
-   * the master surface.
+   * Project secondary nodes (find xi^(2) values) to the closest points on
+   * the primary surface.
    * Inputs:
    * - The nodal normals values
    * - mesh
-   * - nodes_to_master_elem_map
+   * - nodes_to_primary_elem_map
    *
    * Outputs:
-   * - slave_node_and_elem_to_xi2_master_elem
+   * - secondary_node_and_elem_to_xi2_primary_elem
    *
-   * Defined in the file project_slave_nodes.C.
+   * Defined in the file project_secondary_nodes.C.
    */
-  void projectSlaveNodes();
+  void projectSecondaryNodes();
 
   /**
-   * (Inverse) project master nodes to the points on the slave surface
+   * (Inverse) project primary nodes to the points on the secondary surface
    * where they would have come from (find (xi^(1) values)).
    *
    * Inputs:
    * - The nodal normals values
    * - mesh
-   * - nodes_to_slave_elem_map
+   * - nodes_to_secondary_elem_map
    *
    * Outputs:
-   * - master_node_and_elem_to_xi1_slave_elem
+   * - primary_node_and_elem_to_xi1_secondary_elem
    *
-   * Defined in the file project_master_nodes.C.
+   * Defined in the file project_primary_nodes.C.
    */
-  void projectMasterNodes();
+  void projectPrimaryNodes();
 
   /**
-   * Builds the mortar segment mesh once the slave and master node
+   * Builds the mortar segment mesh once the secondary and primary node
    * projections have been completed.
    *
    * Inputs:
    * - mesh
-   * - master_node_and_elem_to_xi1_slave_elem
-   * - slave_node_and_elem_to_xi2_master_elem
-   * - nodes_to_master_elem_map
+   * - primary_node_and_elem_to_xi1_secondary_elem
+   * - secondary_node_and_elem_to_xi2_primary_elem
+   * - nodes_to_primary_elem_map
    *
    * Outputs:
    * - mortar_segment_mesh
@@ -158,47 +158,47 @@ public:
   // Reference to the mesh stored in equation_systems.
   MeshBase & mesh;
 
-  // The boundary ids corresponding to all the slave surfaces.
-  std::set<boundary_id_type> slave_requested_boundary_ids;
+  // The boundary ids corresponding to all the secondary surfaces.
+  std::set<boundary_id_type> secondary_requested_boundary_ids;
 
-  // The boundary ids corresponding to all the master surfaces.
-  std::set<boundary_id_type> master_requested_boundary_ids;
+  // The boundary ids corresponding to all the primary surfaces.
+  std::set<boundary_id_type> primary_requested_boundary_ids;
 
-  // A list of master/slave boundary id pairs corresponding to each
+  // A list of primary/secondary boundary id pairs corresponding to each
   // side of the mortar interface.
-  std::vector<std::pair<boundary_id_type, boundary_id_type>> master_slave_boundary_id_pairs;
+  std::vector<std::pair<boundary_id_type, boundary_id_type>> primary_secondary_boundary_id_pairs;
 
-  // Map from nodes to connected lower-dimensional elements on the slave/master subdomains.
-  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_slave_elem_map;
-  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_master_elem_map;
+  // Map from nodes to connected lower-dimensional elements on the secondary/primary subdomains.
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_secondary_elem_map;
+  std::unordered_map<dof_id_type, std::vector<const Elem *>> nodes_to_primary_elem_map;
 
-  // Similar to the map above, but associates a (Slave Node, Slave Elem)
-  // pair to a (xi^(2), master Elem) pair. This allows a single slave node, which is
-  // potentially connected to two elements on the slave side, to be associated with
-  // multiple master Elem/xi^(2) values to handle the case where the master and slave
+  // Similar to the map above, but associates a (Secondary Node, Secondary Elem)
+  // pair to a (xi^(2), primary Elem) pair. This allows a single secondary node, which is
+  // potentially connected to two elements on the secondary side, to be associated with
+  // multiple primary Elem/xi^(2) values to handle the case where the primary and secondary
   // nodes are "matching".
   // In this configuration:
   //
   //    A     B
-  // o-----o-----o  (slave orientation ->)
+  // o-----o-----o  (secondary orientation ->)
   //       |
   //       v
-  // ------x------ (master orientation <-)
+  // ------x------ (primary orientation <-)
   //    C     D
   //
   // The entries in the map should be:
   // (Elem A, Node 1) -> (Elem C, xi^(2)=-1)
   // (Elem B, Node 0) -> (Elem D, xi^(2)=+1)
   std::unordered_map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
-      slave_node_and_elem_to_xi2_master_elem;
+      secondary_node_and_elem_to_xi2_primary_elem;
 
-  // Same type of container, but for mapping (Master Node ID, Master Node,
-  // Master Elem) -> (xi^(1), Slave Elem) where they are inverse-projected along
-  // the nodal normal direction. Note that the first item of the key, the master
+  // Same type of container, but for mapping (Primary Node ID, Primary Node,
+  // Primary Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
+  // the nodal normal direction. Note that the first item of the key, the primary
   // node ID, is important for storing the key-value pairs in a consistent order
   // across processes, e.g. this container has to be ordered!
   std::map<std::tuple<dof_id_type, const Node *, const Elem *>, std::pair<Real, const Elem *>>
-      master_node_and_elem_to_xi1_slave_elem;
+      primary_node_and_elem_to_xi1_secondary_elem;
 
   // 1D Mesh of mortar segment elements which gets built by the call
   // to build_mortar_segment_mesh().
@@ -217,46 +217,46 @@ public:
   // are offset from their respective interior parent's subdomain ids.
   const subdomain_id_type boundary_subdomain_id_offset = 1000;
 
-  // A list of master/slave subdomain id pairs corresponding to each
+  // A list of primary/secondary subdomain id pairs corresponding to each
   // side of the mortar interface.
-  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> master_slave_subdomain_id_pairs;
+  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> primary_secondary_subdomain_id_pairs;
 
-  // The slave/master lower-dimensional boundary subdomain ids are the
-  // slave/master *boundary* ids offset by the value above.
-  std::set<subdomain_id_type> slave_boundary_subdomain_ids;
-  std::set<subdomain_id_type> master_boundary_subdomain_ids;
+  // The secondary/primary lower-dimensional boundary subdomain ids are the
+  // secondary/primary *boundary* ids offset by the value above.
+  std::set<subdomain_id_type> secondary_boundary_subdomain_ids;
+  std::set<subdomain_id_type> primary_boundary_subdomain_ids;
 
-  // Size of the largest slave side lower-dimensional element added to
+  // Size of the largest secondary side lower-dimensional element added to
   // the mesh. Used in plotting convergence data.
   Real h_max;
 
   // Used by the AugmentSparsityOnInterface functor to determine
   // whether a given Elem is coupled to any others across the gap, and
   // to explicitly set up the dependence between interior_parent()
-  // elements on the slave side and their lower-dimensional sides
+  // elements on the secondary side and their lower-dimensional sides
   // which are on the interface. This latter type of coupling must be
-  // explicitly declared when there is no master_elem for a given
+  // explicitly declared when there is no primary_elem for a given
   // mortar segment and you are using e.g.  a P^1-P^0 discretization
   // which does not induce the coupling automatically.
   std::unordered_multimap<dof_id_type, dof_id_type> mortar_interface_coupling;
 
-  // Container for storing the nodal normal vector associated with each slave node.
-  std::unordered_map<const Node *, Point> slave_node_to_nodal_normal;
+  // Container for storing the nodal normal vector associated with each secondary node.
+  std::unordered_map<const Node *, Point> secondary_node_to_nodal_normal;
 
 private:
   /**
-   * Helper function responsible for projecting slave nodes
-   * onto master elements for a single master/slave pair. Called by the class member
-   * AutomaticMortarGeneration::project_slave_nodes().
+   * Helper function responsible for projecting secondary nodes
+   * onto primary elements for a single primary/secondary pair. Called by the class member
+   * AutomaticMortarGeneration::project_secondary_nodes().
    */
-  void projectSlaveNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
-                                   subdomain_id_type lower_dimensional_slave_subdomain_id);
+  void projectSecondaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
+                                       subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
   /**
-   * Helper function used internally by AutomaticMortarGeneration::project_master_nodes().
+   * Helper function used internally by AutomaticMortarGeneration::project_primary_nodes().
    */
-  void projectMasterNodesSinglePair(subdomain_id_type lower_dimensional_master_subdomain_id,
-                                    subdomain_id_type lower_dimensional_slave_subdomain_id);
+  void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
+                                     subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
 private:
   /// Whether to print debug output

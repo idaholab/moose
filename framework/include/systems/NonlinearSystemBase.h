@@ -238,7 +238,7 @@ public:
   /**
    * Sets the value of constrained variables in the solution vector.
    */
-  void setConstraintSlaveValues(NumericVector<Number> & solution, bool displaced);
+  void setConstraintSecondaryValues(NumericVector<Number> & solution, bool displaced);
 
   /**
    * Add residual contributions from Constraints

@@ -30,12 +30,12 @@ protected:
   /// x,y,z component of the gradient to constrain
   const unsigned int _component;
 
-  ///@{ variable to control gradient on the master side of the interface
+  ///@{ variable to control gradient on the primary side of the interface
   const VariableGradient & _grad_element_value;
   unsigned int _element_jvar;
   ///@}
 
-  /// variable to control gradient on the slave side of the interface
+  /// variable to control gradient on the secondary side of the interface
   unsigned int _neighbor_jvar;
 
   /// compensate Jacobian fill term from NullKernel

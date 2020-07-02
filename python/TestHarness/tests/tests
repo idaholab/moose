@@ -220,4 +220,10 @@
     requirement = "The system shall produces a descriptive error with the file and line number when a test specification parameter is unknown."
     issues = '#14803'
   []
+  [do_last]
+    type = PythonUnitTest
+    input = test_DoLast.py
+    requirement = "TestHarnes shall perform a test after all other tests have passed if specified to do so"
+    issues = '#15230'
+  []
 []

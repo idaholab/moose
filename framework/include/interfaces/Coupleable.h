@@ -914,6 +914,9 @@ protected:
   /// Vector of standard finite volume oupled variables
   std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
 
+  /// map from new to deprecated variable names
+  const std::unordered_map<std::string, std::string> & _new_to_deprecated_coupled_vars;
+
   /// True if we provide coupling to nodal values
   bool _c_nodal;
 
@@ -1224,31 +1227,48 @@ template <typename T, typename std::enable_if<HasMemberType_OutputShape<T>::valu
 const T *
 Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
 {
-  if (!checkVar(var_name, comp, 0))
-    return nullptr;
+  auto name_to_use = var_name;
 
-  auto coupled_vars_it = _coupled_vars.find(var_name);
-  if (coupled_vars_it == _coupled_vars.end())
-    mooseError("Trying to get a coupled var ", var_name, " that doesn't exist");
+  // First check for supplied name
+  if (!checkVar(var_name, comp, 0))
+  {
+    // See if there is an associated deprecated name that the user may have used instead
+    auto it = _new_to_deprecated_coupled_vars.find(var_name);
+    if (it == _new_to_deprecated_coupled_vars.end())
+      return nullptr;
+    else
+    {
+      auto deprecated_name = it->second;
+      if (checkVar(deprecated_name, comp, 0))
+        name_to_use = deprecated_name;
+      else
+        return nullptr;
+    }
+  }
+
+  auto coupled_vars_it = _coupled_vars.find(name_to_use);
+
+  mooseAssert(coupled_vars_it != _coupled_vars.end(),
+              "Trying to get a coupled var " << name_to_use << " that doesn't exist");
 
   if (auto coupled_var = dynamic_cast<T *>(coupled_vars_it->second[comp]))
     return coupled_var;
   else
   {
     for (auto & var : _coupled_standard_moose_vars)
-      if (var->name() == var_name)
+      if (var->name() == name_to_use)
         mooseError("The named variable is a standard variable, try a "
                    "'coupled[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_vector_moose_vars)
-      if (var->name() == var_name)
+      if (var->name() == name_to_use)
         mooseError("The named variable is a vector variable, try a "
                    "'coupledVector[Value/Gradient/Dot/etc]...' function instead");
     for (auto & var : _coupled_array_moose_vars)
-      if (var->name() == var_name)
+      if (var->name() == name_to_use)
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
     mooseError(
-        "Variable '", var_name, "' is of a different C++ type than you tried to fetch it as.");
+        "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
   }
 }
 

@@ -631,6 +631,11 @@ public:
   void ghostGhostedBoundaries();
 
   /**
+   * Whether or not we want to ghost ghosted boundaries
+   */
+  void needGhostGhostedBoundaries(bool needghost) { _need_ghost_ghosted_boundaries = needghost; }
+
+  /**
    * Getter for the patch_size parameter.
    */
   unsigned int getPatchSize() const;
@@ -1419,6 +1424,12 @@ private:
 
   /// Set of elements ghosted by ghostGhostedBoundaries
   std::set<Elem *> _ghost_elems_from_ghost_boundaries;
+
+  /// A parallel mesh generator such as DistributedRectilinearMeshGenerator
+  /// already make everything ready. We do not need to gather all boundaries to
+  /// every single processor. In general, we should avoid using ghostGhostedBoundaries
+  /// when posssible since it is not scalable
+  bool _need_ghost_ghosted_boundaries;
 };
 
 /**

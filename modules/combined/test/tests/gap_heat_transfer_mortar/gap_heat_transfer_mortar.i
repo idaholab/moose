@@ -3,19 +3,19 @@
     type = FileMeshGenerator
     file = 2blk-gap.e
   []
-  [slave]
+  [secondary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '101'
     new_block_id = '10001'
-    new_block_name = 'slave_lower'
+    new_block_name = 'secondary_lower'
     input = file
   []
-  [master]
+  [primary]
     type = LowerDBlockFromSidesetGenerator
     sidesets = '100'
     new_block_id = '10000'
-    new_block_name = 'master_lower'
-    input = slave
+    new_block_name = 'primary_lower'
+    input = secondary
   []
 []
 
@@ -34,7 +34,7 @@
   [./lm]
     order = FIRST
     family = LAGRANGE
-    block = 'slave_lower'
+    block = 'secondary_lower'
   [../]
 []
 
@@ -67,12 +67,12 @@
   [./ced]
     type = GapConductanceConstraint
     variable = lm
-    slave_variable = temp
+    secondary_variable = temp
     k = 100
-    master_boundary = 100
-    master_subdomain = 10000
-    slave_boundary = 101
-    slave_subdomain = 10001
+    primary_boundary = 100
+    primary_subdomain = 10000
+    secondary_boundary = 101
+    secondary_subdomain = 10001
   [../]
 []
 

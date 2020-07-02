@@ -8,7 +8,7 @@
 - /Materials/GapConductance
 - /Postprocessors/ThermalConductivity
 - /ThermalContact
-- /ThermalContact/AddSlaveFluxVectorAction
+- /ThermalContact/AddSecondaryFluxVectorAction
 - /ThermalContact/ThermalContactAuxBCsAction
 - /ThermalContact/ThermalContactAuxVarsAction
 - /ThermalContact/ThermalContactBCsAction

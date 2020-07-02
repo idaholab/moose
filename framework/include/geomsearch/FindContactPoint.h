@@ -31,7 +31,7 @@ void findContactPoint(PenetrationInfo & p_info,
                       FEBase * fe_elem,
                       FEBase * fe_side,
                       FEType & fe_side_type,
-                      const Point & slave_point,
+                      const Point & secondary_point,
                       bool start_with_centroid,
                       const Real tangential_tolerance,
                       bool & contact_point_on_side);

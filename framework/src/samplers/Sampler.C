@@ -97,7 +97,7 @@ Sampler::init()
   MooseRandom seed_generator;
   seed_generator.seed(0, seed);
 
-  // See the "slave" generator that will be used for the random number generation
+  // See the "secondary" generator that will be used for the random number generation
   for (std::size_t i = 0; i < _n_seeds; ++i)
     _generator.seed(i, seed_generator.randl(0));
 

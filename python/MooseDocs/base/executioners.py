@@ -235,7 +235,6 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             self.translator.renderer.write(node)
         return time.time() - start
 
-
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging."""
 
@@ -420,6 +419,12 @@ class ParallelBarrier(Executioner):
         manager = multiprocessing.Manager()
         page_attributes = manager.list([None]*len(self._page_objects))
 
+        # Initialize the page attributes container using the existing list of Page node objects
+        for i in range(len(page_attributes)):
+            Executioner.setMutable(self._page_objects[i], True)
+            page_attributes[i] = self._page_objects[i].attributes
+            Executioner.setMutable(self._page_objects[i], False)
+
         jobs = []
         random.shuffle(nodes)
         for chunk in mooseutils.make_chunks(nodes, num_threads):
@@ -429,6 +434,15 @@ class ParallelBarrier(Executioner):
 
         for job in jobs:
             job.join()
+
+        # This is needed to maintain the page attributes during live serving. In parallel, when the
+        # Executioner executes each process created above gets a copy of self._page_objects. Each
+        # process is running the _target method and keeping the attributes of the pages up to date
+        # across the processes. This call updates the attributes of the original pages that
+        # were copied when the processes start. Thus, when new processes are started during a
+        # live reload the attributes are correct when the copy is performed again for the new
+        # processes.
+        self._updateAttributes(page_attributes)
 
     def _target(self, nodes, barrier, page_attributes):
         """Target function for multiprocessing.Process calls."""

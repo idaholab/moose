@@ -18,7 +18,7 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain_id
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
     new_boundary = 'interface'
   [../]
@@ -114,17 +114,17 @@
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_master_slave]
+  [./diffusivity_jump_primary_secondary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = jump_master_minus_slave
+    interface_value_type = jump_primary_minus_secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_jump_slave_master]
+  [./diffusivity_jump_secondary_primary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = jump_slave_minus_master
+    interface_value_type = jump_secondary_minus_primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
@@ -138,17 +138,17 @@
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_master]
+  [./diffusivity_primary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = master
+    interface_value_type = primary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END
     boundary = 'interface'
   [../]
-  [./diffusivity_slave]
+  [./diffusivity_secondary]
     type = InterfaceIntegralVariableValuePostprocessor
-    interface_value_type = slave
+    interface_value_type = secondary
     variable = diffusivity_1
     neighbor_variable = diffusivity_2
     execute_on = TIMESTEP_END

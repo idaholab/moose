@@ -36,9 +36,9 @@ public:
    */
   virtual Real getValue() override
   {
-    // compute the interface area based on the are of the master side
+    // compute the interface area based on the are of the primary side
     // this come at no cost so why not mek it avaialable for all subclasses
-    gatherSum(_interface_master_area);
+    gatherSum(_interface_primary_area);
     return 0;
   }
 
@@ -46,6 +46,6 @@ public:
   virtual void finalize() override {}
 
 protected:
-  /// the area of the master side of the interface
-  Real _interface_master_area;
+  /// the area of the primary side of the interface
+  Real _interface_primary_area;
 };

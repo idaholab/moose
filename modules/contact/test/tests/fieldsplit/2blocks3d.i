@@ -97,8 +97,8 @@
 
 [Contact]
   [./leftright]
-    slave = 2
-    master = 3
+    secondary = 2
+    primary = 3
     model = frictionless
     penalty = 1e+6
     normalize_penalty = true
@@ -119,8 +119,8 @@
     [./interior]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
-      uncontact_master   = '3'
-      uncontact_slave    = '2'
+      uncontact_primary   = '3'
+      uncontact_secondary    = '2'
       uncontact_displaced = '1'
       blocks              = '1 2'
       include_all_contact_nodes = 1
@@ -130,8 +130,8 @@
     [./contact]
       type = ContactSplit
       vars = 'disp_x disp_y disp_z'
-      contact_master   = '3'
-      contact_slave    = '2'
+      contact_primary   = '3'
+      contact_secondary    = '2'
       contact_displaced = '1'
       include_all_contact_nodes = 1
       petsc_options_iname = '-ksp_type -ksp_max_it -pc_type -pc_asm_overlap -sub_pc_type   -pc_factor_levels'

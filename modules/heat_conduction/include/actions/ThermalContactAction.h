@@ -27,11 +27,14 @@ protected:
   virtual void addBCs();
   virtual void addDiracKernels();
   virtual void addMaterials();
-  virtual void addSlaveFluxVector();
+  virtual void addSecondaryFluxVector();
 
   const bool _quadrature;
   const MooseEnum _order;
   const AuxVariableName _penetration_var_name;
   const AuxVariableName _gap_value_name;
   const AuxVariableName _gap_conductivity_name;
+
+  BoundaryName _primary_name;
+  BoundaryName _secondary_name;
 };

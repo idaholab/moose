@@ -53,21 +53,21 @@ public:
   const Node * nearestNode(dof_id_type node_id);
 
   /**
-   * Returns the list of slave nodes this Locator is tracking.
+   * Returns the list of secondary nodes this Locator is tracking.
    */
-  std::vector<dof_id_type> & slaveNodes() { return _slave_nodes; }
+  std::vector<dof_id_type> & secondaryNodes() { return _secondary_nodes; }
 
   /**
-   * Returns the NodeIdRange of slave nodes to be used for calling threaded
-   * functions operating on the slave nodes.
+   * Returns the NodeIdRange of secondary nodes to be used for calling threaded
+   * functions operating on the secondary nodes.
    */
-  NodeIdRange & slaveNodeRange() { return *_slave_node_range; }
+  NodeIdRange & secondaryNodeRange() { return *_secondary_node_range; }
 
   /**
-   * Reconstructs the KDtree, updates the patch for the nodes in slave_nodes,
+   * Reconstructs the KDtree, updates the patch for the nodes in secondary_nodes,
    * and updates the closest neighbor for these nodes in nearest node info.
    */
-  void updatePatch(std::vector<dof_id_type> & slave_nodes);
+  void updatePatch(std::vector<dof_id_type> & secondary_nodes);
 
   /**
    * Updates the ghosted elements at the start of the time step for iterion
@@ -92,7 +92,7 @@ protected:
 
   MooseMesh & _mesh;
 
-  NodeIdRange * _slave_node_range;
+  NodeIdRange * _secondary_node_range;
 
 public:
   std::map<dof_id_type, NearestNodeInfo> _nearest_node_info;
@@ -101,7 +101,7 @@ public:
   BoundaryID _boundary2;
 
   bool _first;
-  std::vector<dof_id_type> _slave_nodes;
+  std::vector<dof_id_type> _secondary_nodes;
 
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
 

@@ -69,8 +69,8 @@
 [Contact]
   [frictionless]
     mesh = simple_mesh
-    master = 2
-    slave = 1
+    primary = 2
+    secondary = 1
     formulation = mortar
   []
 []

@@ -15,16 +15,16 @@
   [./interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./interface_again]
     input = interface
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
-    new_boundary = 'master1_interface'
+    new_boundary = 'primary1_interface'
   [../]
 []
 
@@ -86,7 +86,7 @@
     type = OneSideDiffusion
     variable = u
     neighbor_var = v
-    boundary = master0_interface
+    boundary = primary0_interface
     D = 4
   [../]
 []
@@ -115,7 +115,7 @@
   [./middle]
     type = NeumannBC
     variable = u
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
     value = '.5'
   [../]
 []

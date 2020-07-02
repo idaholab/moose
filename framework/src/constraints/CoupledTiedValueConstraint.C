@@ -36,25 +36,26 @@ CoupledTiedValueConstraint::CoupledTiedValueConstraint(const InputParameters & p
 }
 
 Real
-CoupledTiedValueConstraint::computeQpSlaveValue()
+CoupledTiedValueConstraint::computeQpSecondaryValue()
 {
-  return _u_master[_qp];
+  return _u_primary[_qp];
 }
 
 Real
 CoupledTiedValueConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   Real scaling_factor = _var.scalingFactor();
-  Real slave_resid = 0;
+  Real secondary_resid = 0;
   Real retVal = 0;
   switch (type)
   {
-    case Moose::Slave:
-      retVal = (_u_slave[_qp] - _u_master[_qp]) * _test_slave[_i][_qp] * _scaling;
+    case Moose::Secondary:
+      retVal = (_u_secondary[_qp] - _u_primary[_qp]) * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::Master:
-      slave_resid = _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
-      retVal = slave_resid * _test_master[_i][_qp];
+    case Moose::Primary:
+      secondary_resid =
+          _residual_copy(_current_node->dof_number(0, _var.number(), 0)) / scaling_factor;
+      retVal = secondary_resid * _test_primary[_i][_qp];
       break;
     default:
       break;
@@ -66,22 +67,22 @@ Real
 CoupledTiedValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType type)
 {
   Real scaling_factor = _var.scalingFactor();
-  Real slave_jac = 0;
+  Real secondary_jac = 0;
   Real retVal = 0;
   switch (type)
   {
-    case Moose::SlaveSlave:
-      retVal = _phi_slave[_j][_qp] * _test_slave[_i][_qp] * _scaling;
+    case Moose::SecondarySecondary:
+      retVal = _phi_secondary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
       break;
-    case Moose::SlaveMaster:
+    case Moose::SecondaryPrimary:
       retVal = 0;
       break;
-    case Moose::MasterSlave:
-      slave_jac =
+    case Moose::PrimarySecondary:
+      secondary_jac =
           (*_jacobian)(_current_node->dof_number(0, _var.number(), 0), _connected_dof_indices[_j]);
-      retVal = slave_jac * _test_master[_i][_qp] / scaling_factor;
+      retVal = secondary_jac * _test_primary[_i][_qp] / scaling_factor;
       break;
-    case Moose::MasterMaster:
+    case Moose::PrimaryPrimary:
       retVal = 0;
       break;
     default:
@@ -97,20 +98,20 @@ CoupledTiedValueConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianTy
 {
   Real retVal = 0;
 
-  if (jvar == _master_var_num)
+  if (jvar == _primary_var_num)
   {
     switch (type)
     {
-      case Moose::SlaveSlave:
+      case Moose::SecondarySecondary:
         retVal = 0;
         break;
-      case Moose::SlaveMaster:
-        retVal = -_phi_master[_j][_qp] * _test_slave[_i][_qp] * _scaling;
+      case Moose::SecondaryPrimary:
+        retVal = -_phi_primary[_j][_qp] * _test_secondary[_i][_qp] * _scaling;
         break;
-      case Moose::MasterSlave:
+      case Moose::PrimarySecondary:
         retVal = 0;
         break;
-      case Moose::MasterMaster:
+      case Moose::PrimaryPrimary:
         retVal = 0;
         break;
       default:

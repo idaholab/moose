@@ -36,28 +36,28 @@
   [interface_01]
     type = SideSetsBetweenSubdomainsGenerator
     input = block_3
-    master_block = 0
+    primary_block = 0
     paired_block = 1
     new_boundary = 'interface_01'
   []
   [interface_13]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface_01
-    master_block = 1
+    primary_block = 1
     paired_block = 3
     new_boundary = 'interface_13'
   []
   [interface_32]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface_13
-    master_block = 3
+    primary_block = 3
     paired_block = 2
     new_boundary = 'interface_32'
   []
   [interface_20]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface_32
-    master_block = 2
+    primary_block = 2
     paired_block = 0
     new_boundary = 'interface_20'
   []
@@ -185,7 +185,7 @@
   # Automatically uses the materials defined in SideSetHeatTransferMaterial
   [gap_01]
     type = SideSetHeatTransferKernel
-    # This variable defined on a given block must match the master_block given when the side set was generated
+    # This variable defined on a given block must match the primary_block given when the side set was generated
     variable = T0
     # This variable defined on a given block must match the paired_block given when the side set was generated
     neighbor_var = T1
@@ -325,9 +325,9 @@
     conductivity = 0.41
     gap_length = 0.002
     Tbulk = 750
-    h_master = 3000
+    h_primary = 3000
     h_neighbor = 3000
-    emissivity_master = 0.85
+    emissivity_primary = 0.85
     emissivity_neighbor = 0.85
   []
 []

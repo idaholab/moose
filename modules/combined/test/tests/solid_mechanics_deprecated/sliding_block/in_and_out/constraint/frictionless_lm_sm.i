@@ -4,14 +4,14 @@
     type = FileMeshGenerator
     file = sliding_elastic_blocks_2d.e
   []
-  [slave]
+  [secondary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '3'
     new_block_id = '30'
   []
-  [master]
-    input = slave
+  [primary]
+    input = secondary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
@@ -147,34 +147,34 @@
 [Constraints]
   [./lm]
     type = NormalNodalLMMechanicalContact
-    slave = 3
-    master = 2
+    secondary = 3
+    primary = 2
     variable = normal_lm
-    master_variable = disp_x
+    primary_variable = disp_x
     disp_y = disp_y
     ncp_function_type = min
     use_displaced_mesh = true
   [../]
   [normal_x]
     type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
+    primary_boundary = '2'
+    secondary_boundary = '3'
+    primary_subdomain = '20'
+    secondary_subdomain = '30'
     variable = normal_lm
-    slave_variable = disp_x
+    secondary_variable = disp_x
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
   []
   [normal_y]
     type = NormalMortarMechanicalContact
-    master_boundary = '2'
-    slave_boundary = '3'
-    master_subdomain = '20'
-    slave_subdomain = '30'
+    primary_boundary = '2'
+    secondary_boundary = '3'
+    primary_subdomain = '20'
+    secondary_subdomain = '30'
     variable = normal_lm
-    slave_variable = disp_y
+    secondary_variable = disp_y
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false

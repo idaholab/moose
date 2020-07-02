@@ -19,26 +19,27 @@ class MooseMesh;
 class NearestNodeLocator;
 class KDTree;
 
-class SlaveNeighborhoodThread
+class SecondaryNeighborhoodThread
 {
 public:
   KDTree & _kd_tree;
 
-  SlaveNeighborhoodThread(const MooseMesh & mesh,
-                          const std::vector<dof_id_type> & trial_master_nodes,
-                          const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-                          const unsigned int patch_size,
-                          KDTree & _kd_tree);
+  SecondaryNeighborhoodThread(
+      const MooseMesh & mesh,
+      const std::vector<dof_id_type> & trial_primary_nodes,
+      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      const unsigned int patch_size,
+      KDTree & _kd_tree);
 
   /// Splitting Constructor
-  SlaveNeighborhoodThread(SlaveNeighborhoodThread & x, Threads::split split);
+  SecondaryNeighborhoodThread(SecondaryNeighborhoodThread & x, Threads::split split);
 
   void operator()(const NodeIdRange & range);
 
-  void join(const SlaveNeighborhoodThread & other);
+  void join(const SecondaryNeighborhoodThread & other);
 
-  /// List of the slave nodes we're actually going to keep track of
-  std::vector<dof_id_type> _slave_nodes;
+  /// List of the secondary nodes we're actually going to keep track of
+  std::vector<dof_id_type> _secondary_nodes;
 
   /// The neighborhood nodes associated with each node
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
@@ -51,7 +52,7 @@ protected:
   const MooseMesh & _mesh;
 
   /// Nodes to search against
-  const std::vector<dof_id_type> & _trial_master_nodes;
+  const std::vector<dof_id_type> & _trial_primary_nodes;
 
   /// Node to elem map
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
@@ -59,4 +60,3 @@ protected:
   /// The number of nodes to keep
   unsigned int _patch_size;
 };
-

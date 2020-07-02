@@ -29,7 +29,7 @@ public:
    * Retrieve the PentrationLocator associated with the two sides.
    */
   PenetrationLocator &
-  getPenetrationLocator(const BoundaryName & master, const BoundaryName & slave, Order order);
+  getPenetrationLocator(const BoundaryName & primary, const BoundaryName & secondary, Order order);
 
   /**
    * Retrieve the Quadrature PentrationLocator associated with the two sides.
@@ -37,15 +37,15 @@ public:
    * A "Quadrature" version means that it's going to find the penetration each quadrature point on
    * this boundary
    */
-  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave,
+  PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & primary,
+                                                       const BoundaryName & secondary,
                                                        Order order);
 
   /**
    * Retrieve the PentrationLocator associated with the two sides.
    */
-  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & master,
-                                             const BoundaryName & slave);
+  NearestNodeLocator & getNearestNodeLocator(const BoundaryName & primary,
+                                             const BoundaryName & secondary);
 
   /**
    * Retrieve a Quadrature NearestNodeLocator associated with the two sides.
@@ -53,8 +53,8 @@ public:
    * A "Quadrature" version means that it's going to find the nearest nodes to each quadrature point
    * on this boundary
    */
-  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & master,
-                                                       const BoundaryName & slave);
+  NearestNodeLocator & getQuadratureNearestNodeLocator(const BoundaryName & primary,
+                                                       const BoundaryName & secondary);
 
 protected:
   GeometricSearchData & _geometric_search_data;

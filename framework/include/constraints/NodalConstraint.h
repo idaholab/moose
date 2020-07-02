@@ -29,16 +29,40 @@ public:
   NodalConstraint(const InputParameters & parameters);
 
   /**
-   * Get the list of master nodes
-   * @return list of master nodes IDs
+   * Get the list of primary nodes
+   * @return list of primary nodes IDs
    */
-  std::vector<dof_id_type> & getMasterNodeId() { return _master_node_vector; }
+  std::vector<dof_id_type> & getMasterNodeId()
+  {
+    mooseDeprecated(
+        "'getPrimaryNodeId' is deprecated and will be removed on September 1st, 2020. Please "
+        "use 'getPrimaryNodeId' instead.");
+    return _primary_node_vector;
+  }
 
   /**
-   * Get the list of connected slave nodes
-   * @return list of slave node IDs
+   * Get the list of primary nodes
+   * @return list of primary nodes IDs
    */
-  std::vector<dof_id_type> & getSlaveNodeId() { return _connected_nodes; }
+  std::vector<dof_id_type> & getPrimaryNodeId() { return _primary_node_vector; }
+
+  /**
+   * Get the list of connected secondary nodes
+   * @return list of secondary node IDs
+   */
+  std::vector<dof_id_type> & getSlaveNodeId()
+  {
+    mooseDeprecated(
+        "'getSecondaryNodeId' is deprecated and will be removed on September 1st, 2020. Please "
+        "use 'getSecondaryNodeId' instead.");
+    return _connected_nodes;
+  }
+
+  /**
+   * Get the list of connected secondary nodes
+   * @return list of secondary node IDs
+   */
+  std::vector<dof_id_type> & getSecondaryNodeId() { return _connected_nodes; }
 
   /**
    * Built the connectivity for this constraint
@@ -76,22 +100,21 @@ protected:
   MooseVariable & _var;
 
   /// Value of the unknown variable this BC is action on
-  const VariableValue & _u_slave;
-  /// node IDs connected to the master node (slave nodes)
+  const VariableValue & _u_secondary;
+  /// node IDs connected to the primary node (secondary nodes)
   std::vector<dof_id_type> _connected_nodes;
-  /// node IDs of the master node
-  std::vector<dof_id_type> _master_node_vector;
+  /// node IDs of the primary node
+  std::vector<dof_id_type> _primary_node_vector;
   /// Holds the current solution at the current quadrature point
-  const VariableValue & _u_master;
+  const VariableValue & _u_primary;
   /// Specifies formulation type used to apply constraints
   Moose::ConstraintFormulationType _formulation;
   /**
-   * When the slave node is constrained to move as a linear combination of the master nodes,
-   * the coefficients associated with each master node is stored in _weights.
+   * When the secondary node is constrained to move as a linear combination of the primary nodes,
+   * the coefficients associated with each primary node is stored in _weights.
    */
   std::vector<Real> _weights;
-  /// Counter for master and slave nodes
+  /// Counter for primary and secondary nodes
   unsigned int _i;
   unsigned int _j;
 };
-

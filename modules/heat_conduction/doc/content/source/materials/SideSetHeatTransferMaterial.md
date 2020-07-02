@@ -10,11 +10,11 @@ This is a interface material (boudary restricted material) specifically for appl
 
   - `gap_Tbulk` : $T_{\mathrm{bulk}}$
 
-  - `gap_h_master` : $h^{+}_{\mathrm{gap}}$
+  - `gap_h_primary` : $h^{+}_{\mathrm{gap}}$
 
   - `gap_h_neighbor` : $h^{-}_{\mathrm{gap}}$
 
-  - `gap_emissivity_eff_master` :
+  - `gap_emissivity_eff_primary` :
 
 \begin{equation}
   \epsilon^{+}_{\mathrm{eff}} = \sigma\epsilon^{+}\frac{1-\rho^{-}}{1-\rho^{+}\rho^{-}}
@@ -39,15 +39,15 @@ The input variables that define these materials with their default values:
 
   - `Tbulk` : $T_{\mathrm{bulk}}$ default: 300 K
 
-  - `h_master` : $h^{+}_{\mathrm{gap}}$ default: 0
+  - `h_primary` : $h^{+}_{\mathrm{gap}}$ default: 0
 
   - `h_neighbor` : $h^{-}_{\mathrm{gap}}$ default: 0
 
-  - `emissivity_master` : $\epsilon^{+}$ default: 0
+  - `emissivity_primary` : $\epsilon^{+}$ default: 0
 
   - `emissivity_neighbor` : $\epsilon^{-}$ default: 0
 
-  - `reflectivity_master` : $\rho^{+}$ default: $1-\epsilon^{+}$
+  - `reflectivity_primary` : $\rho^{+}$ default: $1-\epsilon^{+}$
 
   - `reflectivity_neighbor` : $\rho^{-}$ default: $1-\epsilon^{-}$
 

@@ -2,19 +2,19 @@
 
 !syntax description /Problem/DumpObjectsProblem
 
-Run any input file overriding the `Problem/type` parameter to `DumpObjectsAction` and 
-setting the `Problem/dump_path` parameter to the full _hit_ input file syntax path of an 
+Run any input file overriding the `Problem/type` parameter to `DumpObjectsAction` and
+setting the `Problem/dump_path` parameter to the full _hit_ input file syntax path of an
 action to dump the individual Moose objects and variables created by the action.
 
 After the parse and setup stage the `DumpObjectsProblem` will not execute the input any
-further. Any objects created and parameters set by the selected action will be dumped to 
+further. Any objects created and parameters set by the selected action will be dumped to
 the screen and Moose will halt execution.
 
 ## Example
 
-The input file `two_block_new.i` is a test for the TensorMechanics master action, an action 
+The input file `two_block_new.i` is a test for the TensorMechanics master action, an action
 that sets up (aux)variables, (aux)kernels, and materials for mechanics probems. Let's
-see if we can examine what exactly a particular action block (`[./block2]`) in this file sets 
+see if we can examine what exactly a particular action block (`[./block2]`) in this file sets
 up.
 
 Compile the tensor_mechanics module executable and run

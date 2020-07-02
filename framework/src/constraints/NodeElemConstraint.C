@@ -24,9 +24,10 @@ InputParameters
 NodeElemConstraint::validParams()
 {
   InputParameters params = Constraint::validParams();
-  params.addRequiredParam<SubdomainName>("slave", "slave block id");
-  params.addRequiredParam<SubdomainName>("master", "master block id");
-  params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
+  params.addRequiredParam<SubdomainName>("secondary", "secondary block id");
+  params.addRequiredParam<SubdomainName>("primary", "primary block id");
+  params.addRequiredCoupledVar("primary_variable",
+                               "The variable on the primary side of the domain");
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this constraint is applied to.");
 
@@ -35,80 +36,80 @@ NodeElemConstraint::validParams()
 
 NodeElemConstraint::NodeElemConstraint(const InputParameters & parameters)
   : Constraint(parameters),
-    // The slave side is at nodes (hence passing 'true').  The neighbor side is the master side and
-    // it is not at nodes (so passing false)
+    // The secondary side is at nodes (hence passing 'true').  The neighbor side is the primary side
+    // and it is not at nodes (so passing false)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, false),
     NeighborMooseVariableInterface<Real>(
         this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
 
-    _slave(_mesh.getSubdomainID(getParam<SubdomainName>("slave"))),
-    _master(_mesh.getSubdomainID(getParam<SubdomainName>("master"))),
+    _secondary(_mesh.getSubdomainID(getParam<SubdomainName>("secondary"))),
+    _primary(_mesh.getSubdomainID(getParam<SubdomainName>("primary"))),
     _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
 
-    _master_q_point(_assembly.qPoints()),
-    _master_qrule(_assembly.qRule()),
+    _primary_q_point(_assembly.qPoints()),
+    _primary_qrule(_assembly.qRule()),
 
     _current_node(_var.node()),
     _current_elem(_var.neighbor()),
 
-    _u_slave(_var.dofValues()),
-    _u_slave_old(_var.dofValuesOld()),
-    _phi_slave(1),
-    _test_slave(1), // One entry
+    _u_secondary(_var.dofValues()),
+    _u_secondary_old(_var.dofValuesOld()),
+    _phi_secondary(1),
+    _test_secondary(1), // One entry
 
-    _master_var(*getVar("master_variable", 0)),
-    _master_var_num(_master_var.number()),
+    _primary_var(*getVar("primary_variable", 0)),
+    _primary_var_num(_primary_var.number()),
 
-    _phi_master(_assembly.phiNeighbor(_master_var)),
-    _grad_phi_master(_assembly.gradPhiNeighbor(_master_var)),
+    _phi_primary(_assembly.phiNeighbor(_primary_var)),
+    _grad_phi_primary(_assembly.gradPhiNeighbor(_primary_var)),
 
-    _test_master(_var.phiNeighbor()),
-    _grad_test_master(_var.gradPhiNeighbor()),
+    _test_primary(_var.phiNeighbor()),
+    _grad_test_primary(_var.gradPhiNeighbor()),
 
-    _u_master(_master_var.slnNeighbor()),
-    _u_master_old(_master_var.slnOldNeighbor()),
-    _grad_u_master(_master_var.gradSlnNeighbor()),
+    _u_primary(_primary_var.slnNeighbor()),
+    _u_primary_old(_primary_var.slnOldNeighbor()),
+    _grad_u_primary(_primary_var.gradSlnNeighbor()),
 
     _dof_map(_sys.dofMap()),
     _node_to_elem_map(_mesh.nodeToElemMap()),
 
-    _overwrite_slave_residual(false)
+    _overwrite_secondary_residual(false)
 {
   _mesh.errorIfDistributedMesh("NodeElemConstraint");
 
   addMooseVariableDependency(&_var);
-  // Put a "1" into test_slave
+  // Put a "1" into test_secondary
   // will always only have one entry that is 1
-  _test_slave[0].push_back(1);
+  _test_secondary[0].push_back(1);
 }
 
 NodeElemConstraint::~NodeElemConstraint()
 {
-  _phi_slave.release();
-  _test_slave.release();
+  _phi_secondary.release();
+  _test_secondary.release();
 }
 
 void
-NodeElemConstraint::computeSlaveValue(NumericVector<Number> & current_solution)
+NodeElemConstraint::computeSecondaryValue(NumericVector<Number> & current_solution)
 {
   const dof_id_type & dof_idx = _var.nodalDofIndex();
   _qp = 0;
-  current_solution.set(dof_idx, computeQpSlaveValue());
+  current_solution.set(dof_idx, computeQpSecondaryValue());
 }
 
 void
 NodeElemConstraint::computeResidual()
 {
-  DenseVector<Number> & slave_re = _assembly.residualBlock(_var.number());
-  DenseVector<Number> & master_re = _assembly.residualBlockNeighbor(_master_var.number());
+  DenseVector<Number> & secondary_re = _assembly.residualBlock(_var.number());
+  DenseVector<Number> & primary_re = _assembly.residualBlockNeighbor(_primary_var.number());
 
   _qp = 0;
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    master_re(_i) += computeQpResidual(Moose::Master);
+  for (_i = 0; _i < _test_primary.size(); _i++)
+    primary_re(_i) += computeQpResidual(Moose::Primary);
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
-    slave_re(_i) += computeQpResidual(Moose::Slave);
+  for (_i = 0; _i < _test_secondary.size(); _i++)
+    secondary_re(_i) += computeQpResidual(Moose::Secondary);
 }
 
 void
@@ -119,47 +120,47 @@ NodeElemConstraint::computeJacobian()
   DenseMatrix<Number> & Ken =
       _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number());
 
-  DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), _var.number());
+  DenseMatrix<Number> & Knn = _assembly.jacobianBlockNeighbor(
+      Moose::NeighborNeighbor, _primary_var.number(), _var.number());
 
-  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
+  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
-  _phi_slave.resize(_connected_dof_indices.size());
+  _phi_secondary.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
   for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
   {
-    _phi_slave[j].resize(1);
+    _phi_secondary[j].resize(1);
 
     if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
+      _phi_secondary[j][_qp] = 1.0;
     else
-      _phi_slave[j][_qp] = 0.0;
+      _phi_secondary[j][_qp] = 0.0;
   }
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
+      _Kee(_i, _j) += computeQpJacobian(Moose::SecondarySecondary);
 
   if (Ken.m() && Ken.n())
-    for (_i = 0; _i < _test_slave.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
-        Ken(_i, _j) += computeQpJacobian(Moose::SlaveMaster);
+    for (_i = 0; _i < _test_secondary.size(); _i++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
+        Ken(_i, _j) += computeQpJacobian(Moose::SecondaryPrimary);
 
-  for (_i = 0; _i < _test_master.size(); _i++)
+  for (_i = 0; _i < _test_primary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
+      _Kne(_i, _j) += computeQpJacobian(Moose::PrimarySecondary);
 
   if (Knn.m() && Knn.n())
-    for (_i = 0; _i < _test_master.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
-        Knn(_i, _j) += computeQpJacobian(Moose::MasterMaster);
+    for (_i = 0; _i < _test_primary.size(); _i++)
+      for (_j = 0; _j < _phi_primary.size(); _j++)
+        Knn(_i, _j) += computeQpJacobian(Moose::PrimaryPrimary);
 }
 
 void
@@ -167,48 +168,48 @@ NodeElemConstraint::computeOffDiagJacobian(unsigned int jvar)
 {
   getConnectedDofIndices(jvar);
 
-  _Kee.resize(_test_slave.size(), _connected_dof_indices.size());
-  _Kne.resize(_test_master.size(), _connected_dof_indices.size());
+  _Kee.resize(_test_secondary.size(), _connected_dof_indices.size());
+  _Kne.resize(_test_primary.size(), _connected_dof_indices.size());
 
   DenseMatrix<Number> & Ken =
       _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
   DenseMatrix<Number> & Knn =
-      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _master_var.number(), jvar);
+      _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _primary_var.number(), jvar);
 
-  _phi_slave.resize(_connected_dof_indices.size());
+  _phi_secondary.resize(_connected_dof_indices.size());
 
   _qp = 0;
 
-  // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
+  // Fill up _phi_secondary so that it is 1 when j corresponds to this dof and 0 for every other dof
   // This corresponds to evaluating all of the connected shape functions at _this_ node
   for (unsigned int j = 0; j < _connected_dof_indices.size(); j++)
   {
-    _phi_slave[j].resize(1);
+    _phi_secondary[j].resize(1);
 
     if (_connected_dof_indices[j] == _var.nodalDofIndex())
-      _phi_slave[j][_qp] = 1.0;
+      _phi_secondary[j][_qp] = 1.0;
     else
-      _phi_slave[j][_qp] = 0.0;
+      _phi_secondary[j][_qp] = 0.0;
   }
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
+  for (_i = 0; _i < _test_secondary.size(); _i++)
     // Loop over the connected dof indices so we can get all the jacobian contributions
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
+      _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SecondarySecondary, jvar);
 
-  for (_i = 0; _i < _test_slave.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
-      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+  for (_i = 0; _i < _test_secondary.size(); _i++)
+    for (_j = 0; _j < _phi_primary.size(); _j++)
+      Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SecondaryPrimary, jvar);
 
   if (_Kne.m() && _Kne.n())
-    for (_i = 0; _i < _test_master.size(); _i++)
+    for (_i = 0; _i < _test_primary.size(); _i++)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+        _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::PrimarySecondary, jvar);
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+  for (_i = 0; _i < _test_primary.size(); _i++)
+    for (_j = 0; _j < _phi_primary.size(); _j++)
+      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::PrimaryPrimary, jvar);
 }
 
 void
@@ -239,7 +240,7 @@ NodeElemConstraint::getConnectedDofIndices(unsigned int var_num)
 }
 
 bool
-NodeElemConstraint::overwriteSlaveResidual()
+NodeElemConstraint::overwriteSecondaryResidual()
 {
-  return _overwrite_slave_residual;
+  return _overwrite_secondary_residual;
 }

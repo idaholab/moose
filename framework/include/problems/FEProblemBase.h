@@ -290,7 +290,17 @@ public:
   virtual void createQRules(QuadratureType type,
                             Order order,
                             Order volume_order = INVALID_ORDER,
-                            Order face_order = INVALID_ORDER);
+                            Order face_order = INVALID_ORDER,
+                            SubdomainID block = Moose::ANY_BLOCK_ID);
+
+  /**
+   * Increases the elemennt/volume quadrature order for the specified mesh
+   * block if and only if the current volume quadrature order is lower.  This
+   * can only cause the quadrature level to increase.  If volume_order is
+   * lower than or equal to the current volume/elem quadrature rule order,
+   * then nothing is done (i.e. this function is idempotent).
+   */
+  void bumpVolumeQRuleOrder(Order order, SubdomainID block);
 
   /**
    * @return The maximum number of quadrature points in use on any element in this problem.
@@ -1338,15 +1348,15 @@ public:
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
   virtual void updateMortarMesh();
 
-  void
-  createMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-                        const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
-                        bool on_displaced,
-                        bool periodic);
+  void createMortarInterface(
+      const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+      const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
+      bool on_displaced,
+      bool periodic);
 
   const AutomaticMortarGeneration &
-  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & master_slave_boundary_pair,
-                     const std::pair<SubdomainID, SubdomainID> & master_slave_subdomain_pair,
+  getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
+                     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
                      bool on_displaced) const;
 
   const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
@@ -2130,6 +2140,8 @@ protected:
   bool _using_ad_mat_props;
 
 private:
+  void updateMaxQps();
+
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
 
   bool _error_on_jacobian_nonzero_reallocation;

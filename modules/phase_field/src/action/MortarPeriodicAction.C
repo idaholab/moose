@@ -86,25 +86,26 @@ MortarPeriodicAction::act()
         // Don't do mesh modifiers when recovering!
         if (!_app.isRecovering())
         {
-          auto slave_params = _factory.getValidParams("LowerDBlockFromSideset");
-          auto master_params = _factory.getValidParams("LowerDBlockFromSideset");
+          auto secondary_params = _factory.getValidParams("LowerDBlockFromSideset");
+          auto primary_params = _factory.getValidParams("LowerDBlockFromSideset");
 
-          auto slave_boundary_id = _mesh->getBoundaryID(boundary_names[i]);
-          auto master_boundary_id = _mesh->getBoundaryID(opposite_boundary_names[i]);
+          auto secondary_boundary_id = _mesh->getBoundaryID(boundary_names[i]);
+          auto primary_boundary_id = _mesh->getBoundaryID(opposite_boundary_names[i]);
 
-          slave_params.set<SubdomainID>("new_block_id") = new_subdomain_id++;
-          slave_params.set<SubdomainName>("new_block_name") = "slave_" + axis[i];
-          slave_params.set<std::vector<BoundaryID>>("sidesets") = {slave_boundary_id};
-          slave_params.set<MooseMesh *>("_mesh") = _mesh.get();
+          secondary_params.set<SubdomainID>("new_block_id") = new_subdomain_id++;
+          secondary_params.set<SubdomainName>("new_block_name") = "secondary_" + axis[i];
+          secondary_params.set<std::vector<BoundaryID>>("sidesets") = {secondary_boundary_id};
+          secondary_params.set<MooseMesh *>("_mesh") = _mesh.get();
 
-          master_params.set<SubdomainID>("new_block_id") = new_subdomain_id++;
-          master_params.set<SubdomainName>("new_block_name") = "master_" + axis[i];
-          master_params.set<std::vector<BoundaryID>>("sidesets") = {master_boundary_id};
-          master_params.set<MooseMesh *>("_mesh") = _mesh.get();
+          primary_params.set<SubdomainID>("new_block_id") = new_subdomain_id++;
+          primary_params.set<SubdomainName>("new_block_name") = "primary_" + axis[i];
+          primary_params.set<std::vector<BoundaryID>>("sidesets") = {primary_boundary_id};
+          primary_params.set<MooseMesh *>("_mesh") = _mesh.get();
 
-          _app.addMeshModifier("LowerDBlockFromSideset", axis[i] + "_slave_lower_d", slave_params);
           _app.addMeshModifier(
-              "LowerDBlockFromSideset", axis[i] + "_master_lower_d", master_params);
+              "LowerDBlockFromSideset", axis[i] + "_secondary_lower_d", secondary_params);
+          _app.addMeshModifier(
+              "LowerDBlockFromSideset", axis[i] + "_primary_lower_d", primary_params);
         }
       }
 
@@ -117,7 +118,7 @@ MortarPeriodicAction::act()
 
       if (_current_task == "add_variable")
       {
-        std::set<SubdomainID> sub_ids = {_mesh->getSubdomainID("slave_" + axis[i])};
+        std::set<SubdomainID> sub_ids = {_mesh->getSubdomainID("secondary_" + axis[i])};
         for (auto & var : _variables)
         {
           switch (_periodicity)
@@ -170,11 +171,11 @@ MortarPeriodicAction::act()
                 InputParameters params = _factory.getValidParams("EqualGradientConstraint");
                 params.set<NonlinearVariableName>("variable") =
                     lm_base + "_" + var + "_d" + axis[j];
-                params.set<VariableName>("master_variable") = var;
-                params.set<BoundaryName>("slave_boundary_name") = boundary_names[i];
-                params.set<BoundaryName>("master_boundary_name") = opposite_boundary_names[i];
-                params.set<SubdomainName>("slave_subdomain_name") = "slave_" + axis[i];
-                params.set<SubdomainName>("master_subdomain_name") = "master_" + axis[i];
+                params.set<VariableName>("primary_variable") = var;
+                params.set<BoundaryName>("secondary_boundary_name") = boundary_names[i];
+                params.set<BoundaryName>("primary_boundary_name") = opposite_boundary_names[i];
+                params.set<SubdomainName>("secondary_subdomain_name") = "secondary_" + axis[i];
+                params.set<SubdomainName>("primary_subdomain_name") = "primary_" + axis[i];
                 params.set<unsigned int>("component") = j;
                 params.set<bool>("periodic") = true;
                 _problem->addConstraint(
@@ -187,11 +188,11 @@ MortarPeriodicAction::act()
             {
               InputParameters params = _factory.getValidParams("EqualValueConstraint");
               params.set<NonlinearVariableName>("variable") = lm_base + "_" + var;
-              params.set<VariableName>("master_variable") = var;
-              params.set<BoundaryName>("slave_boundary_name") = boundary_names[i];
-              params.set<BoundaryName>("master_boundary_name") = opposite_boundary_names[i];
-              params.set<SubdomainName>("slave_subdomain_name") = "slave_" + axis[i];
-              params.set<SubdomainName>("master_subdomain_name") = "master_" + axis[i];
+              params.set<VariableName>("primary_variable") = var;
+              params.set<BoundaryName>("secondary_boundary_name") = boundary_names[i];
+              params.set<BoundaryName>("primary_boundary_name") = opposite_boundary_names[i];
+              params.set<SubdomainName>("secondary_subdomain_name") = "secondary_" + axis[i];
+              params.set<SubdomainName>("primary_subdomain_name") = "primary_" + axis[i];
               params.set<bool>("periodic") = true;
               _problem->addConstraint("EqualValueConstraint", ct_base, params);
 

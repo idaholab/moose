@@ -20,10 +20,20 @@ InputParameters
 ContactSlipDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
-  params.addRequiredParam<std::vector<int>>(
-      "master", "IDs of the master surfaces for which slip reversals should be damped");
-  params.addRequiredParam<std::vector<int>>(
-      "slave", "IDs of the slave surfaces for which slip reversals should be damped");
+  params.addParam<std::vector<int>>(
+      "primary", "IDs of the primary surfaces for which slip reversals should be damped");
+  params.addParam<std::vector<int>>(
+      "secondary", "IDs of the secondary surfaces for which slip reversals should be damped");
+  params.addDeprecatedParam<std::vector<int>>(
+      "master",
+      "IDs of the primary surfaces for which slip reversals should be damped",
+      "The 'master' param is deprecated and will be removed on September 1, 2020. Please use the "
+      "'primary' parameter instead.");
+  params.addDeprecatedParam<std::vector<int>>(
+      "slave",
+      "IDs of the secondary surfaces for which slip reversals should be damped",
+      "The 'slave' param is deprecated and will be removed on "
+      "September 1, 2020. Please use the 'secondary' param instead");
   params.addParam<Real>(
       "max_iterative_slip", std::numeric_limits<Real>::max(), "Maximum iterative slip");
   params.addRangeCheckedParam<Real>("min_damping_factor",
@@ -60,18 +70,21 @@ ContactSlipDamper::ContactSlipDamper(const InputParameters & parameters)
   if (!_displaced_problem)
     mooseError("Must have displaced problem to use ContactSlipDamper");
 
-  std::vector<int> master = parameters.get<std::vector<int>>("master");
-  std::vector<int> slave = parameters.get<std::vector<int>>("slave");
+  std::vector<int> primary = isParamValid("primary") ? getParam<std::vector<int>>("primary")
+                                                     : getParam<std::vector<int>>("master");
+  std::vector<int> secondary = isParamValid("secondary") ? getParam<std::vector<int>>("secondary")
+                                                         : getParam<std::vector<int>>("slave");
 
-  unsigned int num_interactions = master.size();
-  if (num_interactions != slave.size())
-    mooseError("Sizes of master surface and slave surface lists must match in ContactSlipDamper");
+  unsigned int num_interactions = primary.size();
+  if (num_interactions != secondary.size())
+    mooseError(
+        "Sizes of primary surface and secondary surface lists must match in ContactSlipDamper");
   if (num_interactions == 0)
-    mooseError("Must define at least one master/slave pair in ContactSlipDamper");
+    mooseError("Must define at least one primary/secondary pair in ContactSlipDamper");
 
-  for (unsigned int i = 0; i < master.size(); ++i)
+  for (unsigned int i = 0; i < primary.size(); ++i)
   {
-    std::pair<int, int> ms_pair(master[i], slave[i]);
+    std::pair<int, int> ms_pair(primary[i], secondary[i]);
     _interactions.insert(ms_pair);
   }
 }
@@ -90,15 +103,15 @@ ContactSlipDamper::timestepSetup()
 
     if (operateOnThisInteraction(pen_loc))
     {
-      std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+      std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
-      for (unsigned int i = 0; i < slave_nodes.size(); i++)
+      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
-        dof_id_type slave_node_num = slave_nodes[i];
+        dof_id_type secondary_node_num = secondary_nodes[i];
 
-        if (pen_loc._penetration_info[slave_node_num])
+        if (pen_loc._penetration_info[secondary_node_num])
         {
-          PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+          PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
           const Node * node = info._node;
 
           if (node->processor_id() == processor_id())
@@ -138,15 +151,15 @@ ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
 
     if (operateOnThisInteraction(pen_loc))
     {
-      std::vector<dof_id_type> & slave_nodes = pen_loc._nearest_node._slave_nodes;
+      std::vector<dof_id_type> & secondary_nodes = pen_loc._nearest_node._secondary_nodes;
 
-      for (unsigned int i = 0; i < slave_nodes.size(); i++)
+      for (unsigned int i = 0; i < secondary_nodes.size(); i++)
       {
-        dof_id_type slave_node_num = slave_nodes[i];
+        dof_id_type secondary_node_num = secondary_nodes[i];
 
-        if (pen_loc._penetration_info[slave_node_num])
+        if (pen_loc._penetration_info[secondary_node_num])
         {
-          PenetrationInfo & info = *pen_loc._penetration_info[slave_node_num];
+          PenetrationInfo & info = *pen_loc._penetration_info[secondary_node_num];
           const Node * node = info._node;
 
           if (node->processor_id() == processor_id())
@@ -239,7 +252,7 @@ ContactSlipDamper::operateOnThisInteraction(const PenetrationLocator & pen_loc)
 {
   bool operate_on_this_interaction = false;
   std::set<std::pair<int, int>>::iterator ipit;
-  std::pair<int, int> ms_pair(pen_loc._master_boundary, pen_loc._slave_boundary);
+  std::pair<int, int> ms_pair(pen_loc._primary_boundary, pen_loc._secondary_boundary);
   ipit = _interactions.find(ms_pair);
   if (ipit != _interactions.end())
     operate_on_this_interaction = true;

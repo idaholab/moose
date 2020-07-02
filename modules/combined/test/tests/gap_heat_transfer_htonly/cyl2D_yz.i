@@ -77,10 +77,10 @@
   [./thermal_contact]
     type = GapHeatTransfer
     variable = temp
-    master = 3
-    slave = 2
-    emissivity_master = 0
-    emissivity_slave = 0
+    primary = 3
+    secondary = 2
+    emissivity_primary = 0
+    emissivity_secondary = 0
     gap_conductivity = 1
     quadrature = true
     gap_geometry_type = CYLINDER

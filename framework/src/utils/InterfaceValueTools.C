@@ -19,35 +19,37 @@ namespace InterfaceValueTools
 MooseEnum
 InterfaceAverageOptions()
 {
-  return MooseEnum("average jump_master_minus_slave jump_slave_minus_master "
-                   "jump_abs master slave",
+  return MooseEnum("average jump_primary_minus_secondary jump_secondary_minus_primary "
+                   "jump_abs primary secondary",
                    "average");
 }
 
 Real
-getQuantity(const MooseEnum interface_value_type, const Real value_master, const Real value_slave)
+getQuantity(const MooseEnum interface_value_type,
+            const Real value_primary,
+            const Real value_secondary)
 {
   Real result = 0.;
 
   switch (interface_value_type)
   {
     case 0: /*average*/
-      result = (value_master + value_slave) * 0.5;
+      result = (value_primary + value_secondary) * 0.5;
       break;
-    case 1: /*jump_master_minus_slave*/
-      result = (value_master - value_slave);
+    case 1: /*jump_primary_minus_secondary*/
+      result = (value_primary - value_secondary);
       break;
-    case 2: /*jump_slave_minus_master*/
-      result = (value_slave - value_master);
+    case 2: /*jump_secondary_minus_primary*/
+      result = (value_secondary - value_primary);
       break;
     case 3: /*jump_abs*/
-      result = std::abs(value_slave - value_master);
+      result = std::abs(value_secondary - value_primary);
       break;
-    case 4: /*master*/
-      result = value_master;
+    case 4: /*primary*/
+      result = value_primary;
       break;
-    case 5: /*slave*/
-      result = value_slave;
+    case 5: /*secondary*/
+      result = value_secondary;
       break;
     default:
       mooseError("InterfaceIntegralMaterialPropertyPostprocessor: the supplied integral "

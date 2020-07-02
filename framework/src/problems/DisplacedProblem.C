@@ -94,13 +94,18 @@ DisplacedProblem::ghostedElems()
 }
 
 void
-DisplacedProblem::createQRules(QuadratureType type,
-                               Order order,
-                               Order volume_order,
-                               Order face_order)
+DisplacedProblem::createQRules(
+    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, order, volume_order, face_order);
+    _assembly[tid]->createQRules(type, order, volume_order, face_order, block);
+}
+
+void
+DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpVolumeQRuleOrder(order, block);
 }
 
 void
@@ -226,8 +231,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
   // communication
   try
   {
-    // We may need to re-run geometric operations like SlaveNeighborhoodTread if, for instance, we
-    // have performed mesh adaptivity
+    // We may need to re-run geometric operations like SecondaryNeighborhoodTread if, for instance,
+    // we have performed mesh adaptivity
     if (mesh_changing)
       _geometric_search_data.reinit();
     else

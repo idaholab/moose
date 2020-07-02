@@ -33,11 +33,11 @@ public:
 
   bool shouldApply() override;
   void residualSetup() override;
-  bool overwriteSlaveResidual() override;
-  void computeSlaveValue(NumericVector<Number> & solution) override;
+  bool overwriteSecondaryResidual() override;
+  void computeSecondaryValue(NumericVector<Number> & solution) override;
 
 protected:
-  virtual Real computeQpSlaveValue() override;
+  virtual Real computeQpSecondaryValue() override;
 
   virtual Real computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
@@ -51,7 +51,7 @@ protected:
   Real _lagrange_multiplier;
   const Node * _nearest_node;
   std::unordered_map<dof_id_type, Real> _node_to_lm;
-  dof_id_type _master_index;
+  dof_id_type _primary_index;
 
   std::unordered_map<dof_id_type, Number> _dof_number_to_value;
 };

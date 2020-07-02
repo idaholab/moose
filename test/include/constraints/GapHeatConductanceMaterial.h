@@ -21,8 +21,8 @@ public:
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;
 
-  const ADMaterialProperty<Real> & _slave_gap_conductance;
-  const ADMaterialProperty<Real> & _master_gap_conductance;
+  const ADMaterialProperty<Real> & _secondary_gap_conductance;
+  const ADMaterialProperty<Real> & _primary_gap_conductance;
 
   const ADMaterialProperty<Real> & _layer_modifier;
 };

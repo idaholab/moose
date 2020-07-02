@@ -69,10 +69,10 @@
   [./thermal_contact]
     type = GapHeatTransfer
     variable = temp
-    master = outer_interior
-    slave = inner_surface
-    emissivity_master = 0
-    emissivity_slave = 0
+    primary = outer_interior
+    secondary = inner_surface
+    emissivity_primary = 0
+    emissivity_secondary = 0
     quadrature = true
   [../]
 []

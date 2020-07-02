@@ -17,12 +17,12 @@
 enum class ContactModel;
 enum class ContactFormulation;
 
-class SlaveConstraint : public DiracKernel
+class SecondaryConstraint : public DiracKernel
 {
 public:
   static InputParameters validParams();
 
-  SlaveConstraint(const InputParameters & parameters);
+  SecondaryConstraint(const InputParameters & parameters);
 
   virtual void addPoints();
   virtual Real computeQpResidual();

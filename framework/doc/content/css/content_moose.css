@@ -38,3 +38,35 @@ ul.moose-a-to-z a{
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* MOOSE Pagination (Next/Previous Buttons) Formatting */
+.moose-content-pagination{
+  display: inline-block;
+  width: 100%;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.moose-content-next{
+  float: right;
+}
+
+.moose-content-previous.btn, .moose-content-next.btn{
+  text-transform: none;
+}
+
+/* MOOSE Outline Counters
+http://jsfiddle.net/PTbGc/
+*/
+div.moose-outline ol {
+    counter-reset: item;
+    padding-left: 10px;
+}
+div.moose-outline li {
+    display: block
+}
+div.moose-outline li:before {
+    content: counters(item, ".") ".   ";
+    counter-increment: item;
+    padding-right:8px;
+}

@@ -20,8 +20,8 @@ OldEqualValueConstraint::validParams()
 {
   InputParameters params = MortarConstraint::validParams();
   params.addClassDescription(
-      "OldEqualValueConstraint enforces solution continuity between slave and "
-      "master sides of a mortar interface using lagrange multipliers");
+      "OldEqualValueConstraint enforces solution continuity between secondary and "
+      "primary sides of a mortar interface using lagrange multipliers");
   return params;
 }
 
@@ -35,12 +35,12 @@ OldEqualValueConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
   switch (mortar_type)
   {
-    case Moose::MortarType::Slave:
-      return -_lambda[_qp] * _test_slave[_i][_qp];
-    case Moose::MortarType::Master:
-      return _lambda[_qp] * _test_master[_i][_qp];
+    case Moose::MortarType::Secondary:
+      return -_lambda[_qp] * _test_secondary[_i][_qp];
+    case Moose::MortarType::Primary:
+      return _lambda[_qp] * _test_primary[_i][_qp];
     case Moose::MortarType::Lower:
-      return (_u_master[_qp] - _u_slave[_qp]) * _test[_i][_qp];
+      return (_u_primary[_qp] - _u_secondary[_qp]) * _test[_i][_qp];
     default:
       return 0;
   }
@@ -54,23 +54,23 @@ OldEqualValueConstraint::computeQpJacobian(Moose::ConstraintJacobianType jacobia
 
   switch (jacobian_type)
   {
-    case JType::SlaveLower:
+    case JType::SecondaryLower:
       if (jvar == _var->number())
-        return -(*_phi)[_j][_qp] * _test_slave[_i][_qp];
+        return -(*_phi)[_j][_qp] * _test_secondary[_i][_qp];
       break;
 
-    case JType::MasterLower:
+    case JType::PrimaryLower:
       if (jvar == _var->number())
-        return (*_phi)[_j][_qp] * _test_master[_i][_qp];
+        return (*_phi)[_j][_qp] * _test_primary[_i][_qp];
       break;
 
-    case JType::LowerSlave:
-      if (jvar == _slave_var.number())
+    case JType::LowerSecondary:
+      if (jvar == _secondary_var.number())
         return -(*_phi)[_j][_qp] * _test[_i][_qp];
       break;
 
-    case JType::LowerMaster:
-      if (jvar == _master_var.number())
+    case JType::LowerPrimary:
+      if (jvar == _primary_var.number())
         return (*_phi)[_j][_qp] * _test[_i][_qp];
       break;
 

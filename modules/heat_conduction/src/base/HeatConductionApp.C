@@ -43,16 +43,16 @@ HeatConductionApp::registerApps()
 static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
-  // This registers an action to add the "slave_flux" vector to the system at the right time
-  registerTask("add_slave_flux_vector", false);
-  addTaskDependency("add_slave_flux_vector", "ready_to_init");
-  addTaskDependency("init_problem", "add_slave_flux_vector");
+  // This registers an action to add the "secondary_flux" vector to the system at the right time
+  registerTask("add_secondary_flux_vector", false);
+  addTaskDependency("add_secondary_flux_vector", "ready_to_init");
+  addTaskDependency("init_problem", "add_secondary_flux_vector");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_aux_variable");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_bc");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_dirac_kernel");
   registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_material");
-  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_slave_flux_vector");
+  registerSyntaxTask("ThermalContactAction", "ThermalContact/*", "add_secondary_flux_vector");
 
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "add_mesh_generator");
   registerSyntaxTask("RadiationTransferAction", "GrayDiffuseRadiation/*", "setup_mesh_complete");

@@ -186,21 +186,6 @@ Assembly::~Assembly()
     for (auto & it : _vector_fe_face_neighbor[dim])
       delete it.second;
 
-  for (auto & it : _holder_qrule_volume)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_arbitrary)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_arbitrary_face)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_face)
-    delete it.second;
-
-  for (auto & it : _holder_qrule_neighbor)
-    delete it.second;
-
   for (auto & it : _fe_shape_data)
     delete it.second;
 
@@ -558,40 +543,58 @@ Assembly::buildVectorFaceNeighborFE(FEType type) const
 }
 
 void
-Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
+Assembly::bumpVolumeQRuleOrder(Order volume_order, SubdomainID block)
 {
-  for (auto & it : _holder_qrule_volume)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_volume[dim] = QBase::build(type, dim, volume_order).release();
+  auto & qdefault = _qrules[Moose::ANY_BLOCK_ID];
+  mooseAssert(qdefault.size() > 0, "default quadrature must be initialized before order bumps");
 
-  for (auto & it : _holder_qrule_face)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_face[dim] = QBase::build(type, dim - 1, face_order).release();
+  unsigned int ndims = _mesh_dimension + 1; // must account for 0-dimensional quadrature.
+  auto & qvec = _qrules[block];
+  if (qvec.size() != ndims || !qvec[0].vol)
+    createQRules(qdefault[0].vol->type(),
+                 qdefault[0].arbitrary_vol->get_order(),
+                 volume_order,
+                 qdefault[0].face->get_order(),
+                 block);
+  else if (qvec[0].vol->get_order() < volume_order)
+    createQRules(qvec[0].vol->type(),
+                 qvec[0].arbitrary_vol->get_order(),
+                 volume_order,
+                 qvec[0].face->get_order(),
+                 block);
+  // otherwise do nothing - quadrature order is already as high as requested
+}
 
-  _holder_qrule_fv_face.resize(_mesh_dimension + 1);
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_fv_face[dim] = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+void
+Assembly::createQRules(
+    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
+{
+  auto & qvec = _qrules[block];
+  unsigned int ndims = _mesh_dimension + 1; // must account for 0-dimensional quadrature.
+  if (qvec.size() != ndims)
+    qvec.resize(ndims);
 
-  for (auto & it : _holder_qrule_neighbor)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_neighbor[dim] = new ArbitraryQuadrature(dim - 1, face_order);
-
-  for (auto & it : _holder_qrule_arbitrary)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary[dim] = new ArbitraryQuadrature(dim, order);
-
-  for (auto & it : _holder_qrule_arbitrary_face)
-    delete it.second;
-  for (unsigned int dim = 0; dim <= _mesh_dimension; dim++)
-    _holder_qrule_arbitrary_face[dim] = new ArbitraryQuadrature(dim - 1, face_order);
+  for (unsigned int i = 0; i < qvec.size(); i++)
+  {
+    int dim = i;
+    auto & q = qvec[dim];
+    q.vol = QBase::build(type, dim, volume_order);
+    q.face = QBase::build(type, dim - 1, face_order);
+    q.fv_face = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+    q.neighbor = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+    q.arbitrary_vol = libmesh_make_unique<ArbitraryQuadrature>(dim, order);
+    q.arbitrary_face = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+  }
 
   delete _qrule_msm;
   _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
   _fe_msm->attach_quadrature_rule(_qrule_msm);
+}
+
+void
+Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
+{
+  createQRules(type, order, volume_order, face_order, Moose::ANY_BLOCK_ID);
 }
 
 void
@@ -1591,7 +1594,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
 {
   unsigned int neighbor_dim = neighbor->dim();
 
-  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
   neighbor_rule->setPoints(reference_points);
   setNeighborQRule(neighbor_rule, neighbor_dim);
 
@@ -1604,7 +1607,7 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
   {
     unsigned int dim = neighbor->dim();
     FEBase * fe = *_holder_fe_neighbor_helper[dim];
-    QBase * qrule = _holder_qrule_volume[dim];
+    QBase * qrule = qrules(dim).vol.get();
 
     fe->attach_quadrature_rule(qrule);
     fe->reinit(neighbor);
@@ -1715,7 +1718,7 @@ Assembly::reinit(const Elem * elem)
 
   unsigned int elem_dimension = elem->dim();
 
-  _current_qrule_volume = _holder_qrule_volume[elem_dimension];
+  _current_qrule_volume = qrules(elem_dimension).vol.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule != _current_qrule_volume)
@@ -1737,7 +1740,7 @@ Assembly::reinit(const Elem * elem, const std::vector<Point> & reference_points)
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  _current_qrule_arbitrary = _holder_qrule_arbitrary[elem_dimension];
+  _current_qrule_arbitrary = qrules(elem_dimension).arbitrary_vol.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule != _current_qrule_arbitrary)
@@ -1768,9 +1771,9 @@ Assembly::reinitFVFace(const FaceInfo & fi)
   prepareJacobianBlock();
 
   unsigned int dim = _current_elem->dim();
-  if (_current_qrule_face != _holder_qrule_fv_face[dim].get())
+  if (_current_qrule_face != qrules(dim).fv_face.get())
   {
-    setFaceQRule(_holder_qrule_fv_face[dim].get(), dim);
+    setFaceQRule(qrules(dim).fv_face.get(), dim);
     // The order of the element that is used for initing here doesn't matter since this will just be
     // used for constant monomials (which only need a single integration point)
     if (dim == 3)
@@ -1799,9 +1802,9 @@ Assembly::reinit(const Elem * elem, unsigned int side)
   unsigned int elem_dimension = _current_elem->dim();
 
   // Make sure the qrule is the right one
-  if (_current_qrule_face != _holder_qrule_face[elem_dimension])
+  if (_current_qrule_face != qrules(elem_dimension).face.get())
   {
-    _current_qrule_face = _holder_qrule_face[elem_dimension];
+    _current_qrule_face = qrules(elem_dimension).face.get();
     setFaceQRule(_current_qrule_face, elem_dimension);
   }
 
@@ -1827,7 +1830,7 @@ Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> 
 
   unsigned int elem_dimension = _current_elem->dim();
 
-  _current_qrule_arbitrary_face = _holder_qrule_arbitrary_face[elem_dimension];
+  _current_qrule_arbitrary_face = qrules(elem_dimension).arbitrary_face.get();
 
   // Make sure the qrule is the right one
   if (_current_qrule_face != _current_qrule_arbitrary_face)
@@ -1905,15 +1908,15 @@ Assembly::reinitElemFaceRef(const Elem * elem,
   // Attach the quadrature rules
   if (pts)
   {
-    ArbitraryQuadrature * face_rule = _holder_qrule_arbitrary_face[elem_dim];
+    ArbitraryQuadrature * face_rule = qrules(elem_dim).arbitrary_face.get();
     face_rule->setPoints(*pts);
     setFaceQRule(face_rule, elem_dim);
   }
   else
   {
-    if (_current_qrule_face != _holder_qrule_face[elem_dim])
+    if (_current_qrule_face != qrules(elem_dim).face.get())
     {
-      _current_qrule_face = _holder_qrule_face[elem_dim];
+      _current_qrule_face = qrules(elem_dim).face.get();
       setFaceQRule(_current_qrule_face, elem_dim);
     }
   }
@@ -2071,8 +2074,7 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
 
   unsigned int neighbor_dim = neighbor->dim();
 
-  // _holder_qrule_neighbor really does contain pointers to ArbitraryQuadrature
-  ArbitraryQuadrature * neighbor_rule = _holder_qrule_neighbor[neighbor_dim];
+  ArbitraryQuadrature * neighbor_rule = qrules(neighbor_dim).neighbor.get();
   neighbor_rule->setPoints(*pts);
 
   // Attach this quadrature rule to all the _fe_face_neighbor FE objects. This
@@ -2143,7 +2145,7 @@ Assembly::reinitLowerDElem(const Elem * elem,
   if (pts)
   {
     // Lower rule matches the face rule for the higher dimensional element
-    ArbitraryQuadrature * lower_rule = _holder_qrule_arbitrary_face[elem_dim + 1];
+    ArbitraryQuadrature * lower_rule = qrules(elem_dim + 1).arbitrary_face.get();
 
     // This also sets the quadrature weights to unity
     lower_rule->setPoints(*pts);
@@ -2153,8 +2155,8 @@ Assembly::reinitLowerDElem(const Elem * elem,
 
     setLowerQRule(lower_rule, elem_dim);
   }
-  else if (_current_qrule_lower != _holder_qrule_face[elem_dim + 1])
-    setLowerQRule(_holder_qrule_face[elem_dim + 1], elem_dim);
+  else if (_current_qrule_lower != qrules(elem_dim + 1).face.get())
+    setLowerQRule(qrules(elem_dim + 1).face.get(), elem_dim);
 
   for (const auto & it : _fe_lower[elem_dim])
   {
@@ -2633,31 +2635,31 @@ Assembly::prepareLowerD()
          tag++)
     {
       // To cover all possible cases we should have 9 combinations below for every 2-permutation of
-      // Lower,Slave,Master. However, 4 cases will in general be covered by calls to prepare() and
-      // prepareNeighbor(). These calls will cover SlaveSlave (ElementElement), SlaveMaster
-      // (ElementNeighbor), MasterSlave (NeighborElement), and MasterMaster (NeighborNeighbor). With
-      // these covered we only need to prepare the 5 remaining below
+      // Lower,Secondary,Primary. However, 4 cases will in general be covered by calls to prepare()
+      // and prepareNeighbor(). These calls will cover SecondarySecondary (ElementElement),
+      // SecondaryPrimary (ElementNeighbor), PrimarySecondary (NeighborElement), and PrimaryPrimary
+      // (NeighborNeighbor). With these covered we only need to prepare the 5 remaining below
 
       // derivatives w.r.t. lower dimensional residuals
       jacobianBlockLower(Moose::LowerLower, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jcount);
 
-      jacobianBlockLower(Moose::LowerSlave, vi, vj, tag)
+      jacobianBlockLower(Moose::LowerSecondary, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndices().size() * jvar.count());
 
-      jacobianBlockLower(Moose::LowerMaster, vi, vj, tag)
+      jacobianBlockLower(Moose::LowerPrimary, vi, vj, tag)
           .resize(ivar.dofIndicesLower().size() * ivar.count(),
                   jvar.dofIndicesNeighbor().size() * jvar.count());
 
-      // derivatives w.r.t. interior slave residuals
-      jacobianBlockLower(Moose::SlaveLower, vi, vj, tag)
+      // derivatives w.r.t. interior secondary residuals
+      jacobianBlockLower(Moose::SecondaryLower, vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
-      // derivatives w.r.t. interior master residuals
-      jacobianBlockLower(Moose::MasterLower, vi, vj, tag)
+      // derivatives w.r.t. interior primary residuals
+      jacobianBlockLower(Moose::PrimaryLower, vi, vj, tag)
           .resize(ivar.dofIndicesNeighbor().size() * ivar.count(),
                   jvar.dofIndicesLower().size() * jvar.count());
 
@@ -2932,21 +2934,21 @@ Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
       default:
       case Moose::LowerLower:
         return _sub_Kll[tag][ivar][0];
-      case Moose::LowerSlave:
+      case Moose::LowerSecondary:
         return _sub_Kle[tag][ivar][0];
-      case Moose::LowerMaster:
+      case Moose::LowerPrimary:
         return _sub_Kln[tag][ivar][0];
-      case Moose::SlaveLower:
+      case Moose::SecondaryLower:
         return _sub_Kel[tag][ivar][0];
-      case Moose::SlaveSlave:
+      case Moose::SecondarySecondary:
         return _sub_Kee[tag][ivar][0];
-      case Moose::SlaveMaster:
+      case Moose::SecondaryPrimary:
         return _sub_Ken[tag][ivar][0];
-      case Moose::MasterLower:
+      case Moose::PrimaryLower:
         return _sub_Knl[tag][ivar][0];
-      case Moose::MasterSlave:
+      case Moose::PrimarySecondary:
         return _sub_Kne[tag][ivar][0];
-      case Moose::MasterMaster:
+      case Moose::PrimaryPrimary:
         return _sub_Knn[tag][ivar][0];
     }
   }
@@ -2957,21 +2959,21 @@ Assembly::jacobianBlockLower(Moose::ConstraintJacobianType type,
       default:
       case Moose::LowerLower:
         return _sub_Kll[tag][ivar][jvar];
-      case Moose::LowerSlave:
+      case Moose::LowerSecondary:
         return _sub_Kle[tag][ivar][jvar];
-      case Moose::LowerMaster:
+      case Moose::LowerPrimary:
         return _sub_Kln[tag][ivar][jvar];
-      case Moose::SlaveLower:
+      case Moose::SecondaryLower:
         return _sub_Kel[tag][ivar][jvar];
-      case Moose::SlaveSlave:
+      case Moose::SecondarySecondary:
         return _sub_Kee[tag][ivar][jvar];
-      case Moose::SlaveMaster:
+      case Moose::SecondaryPrimary:
         return _sub_Ken[tag][ivar][jvar];
-      case Moose::MasterLower:
+      case Moose::PrimaryLower:
         return _sub_Knl[tag][ivar][jvar];
-      case Moose::MasterSlave:
+      case Moose::PrimarySecondary:
         return _sub_Kne[tag][ivar][jvar];
-      case Moose::MasterMaster:
+      case Moose::PrimaryPrimary:
         return _sub_Knn[tag][ivar][jvar];
     }
   }
@@ -3179,7 +3181,8 @@ Assembly::cacheResidualNodes(const DenseVector<Number> & res,
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
   // respectively.
-  // This is used by NodalConstraint.C to cache the residual calculated for master and slave node.
+  // This is used by NodalConstraint.C to cache the residual calculated for primary and secondary
+  // node.
   for (MooseIndex(dof_index) i = 0; i < dof_index.size(); ++i)
   {
     _cached_residual_values[tag].push_back(res(i));
@@ -3697,28 +3700,28 @@ Assembly::addJacobianLower()
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerSlave, i, j, tag),
+                         jacobianBlockLower(Moose::LowerSecondary, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndices());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::LowerMaster, i, j, tag),
+                         jacobianBlockLower(Moose::LowerPrimary, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesLower(),
                          jvar->dofIndicesNeighbor());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::SlaveLower, i, j, tag),
+                         jacobianBlockLower(Moose::SecondaryLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndices(),
                          jvar->dofIndicesLower());
 
         addJacobianBlock(_sys.getMatrix(tag),
-                         jacobianBlockLower(Moose::MasterLower, i, j, tag),
+                         jacobianBlockLower(Moose::PrimaryLower, i, j, tag),
                          *ivar,
                          *jvar,
                          ivar->dofIndicesNeighbor(),

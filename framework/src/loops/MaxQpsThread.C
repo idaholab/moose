@@ -9,6 +9,7 @@
 
 #include "MaxQpsThread.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/threads.h"
@@ -16,25 +17,14 @@
 LIBMESH_DEFINE_HASH_POINTERS
 #include "libmesh/quadrature.h"
 
-MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem,
-                           QuadratureType qtype,
-                           Order order,
-                           Order face_order)
-  : _fe_problem(fe_problem),
-    _qtype(qtype),
-    _order(order),
-    _face_order(face_order),
-    _max(0),
-    _max_shape_funcs(0)
+MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem), _max(0), _max_shape_funcs(0)
 {
 }
 
 // Splitting Constructor
 MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
-    _qtype(x._qtype),
-    _order(x._order),
-    _face_order(x._face_order),
     _max(x._max),
     _max_shape_funcs(x._max_shape_funcs)
 {
@@ -46,58 +36,64 @@ MaxQpsThread::operator()(const ConstElemRange & range)
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  // For short circuiting reinit
-  std::set<ElemType> seen_it;
+  auto & assem = _fe_problem.assembly(_tid);
+
+  // For short circuiting reinit.  With potential block-specific qrules we
+  // need to track "seen" element types by their subdomains as well.
+  std::set<std::pair<ElemType, SubdomainID>> seen_it;
+
   for (const auto & elem : range)
   {
     // Only reinit if the element type has not previously been seen
-    if (seen_it.insert(elem->type()).second)
-    {
-      FEType fe_type(FIRST, LAGRANGE);
-      unsigned int dim = elem->dim();
-      unsigned int side = 0; // we assume that any element will have at least one side ;)
+    if (!seen_it.insert(std::make_pair(elem->type(), elem->subdomain_id())).second)
+      continue;
 
-      // We cannot mess with the FE objects in Assembly, because we might need to request second
-      // derivatives
-      // later on. If we used them, we'd call reinit on them, thus making the call to request second
-      // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally
-      // allocated object here.
-      //
-      // We'll use one for element interiors, which calculates nothing
-      std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
-      fe->get_nothing();
+    // This ensures we can access the correct qrules if any block-specific
+    // qrules have been created.
+    assem.setCurrentSubdomainID(elem->subdomain_id());
 
-      // And another for element sides, which calculates the minimum
-      // libMesh currently allows for that
-      std::unique_ptr<FEBase> side_fe(FEBase::build(dim, fe_type));
-      side_fe->get_xyz();
+    FEType fe_type(FIRST, LAGRANGE);
+    unsigned int dim = elem->dim();
+    unsigned int side = 0; // we assume that any element will have at least one side ;)
 
-      // figure out the number of qps for volume
-      std::unique_ptr<QBase> qrule(QBase::build(_qtype, dim, _order));
-      fe->attach_quadrature_rule(qrule.get());
-      fe->reinit(elem);
-      if (qrule->n_points() > _max)
-        _max = qrule->n_points();
+    // We cannot mess with the FE objects in Assembly, because we might need to request second
+    // derivatives
+    // later on. If we used them, we'd call reinit on them, thus making the call to request second
+    // derivatives harmful (i.e. leading to segfaults/asserts). Thus, we have to use a locally
+    // allocated object here.
+    //
+    // We'll use one for element interiors, which calculates nothing
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
+    fe->get_nothing();
 
-      unsigned int n_shape_funcs = fe->n_shape_functions();
-      if (n_shape_funcs > _max_shape_funcs)
-        _max_shape_funcs = n_shape_funcs;
+    // And another for element sides, which calculates the minimum
+    // libMesh currently allows for that
+    std::unique_ptr<FEBase> side_fe(FEBase::build(dim, fe_type));
+    side_fe->get_xyz();
 
-      // figure out the number of qps for the face
-      // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
-      // than in the volume
-      std::unique_ptr<QBase> qrule_face(QBase::build(_qtype, dim - 1, _face_order));
-      side_fe->attach_quadrature_rule(qrule_face.get());
-      side_fe->reinit(elem, side);
-      if (qrule_face->n_points() > _max)
-        _max = qrule_face->n_points();
+    // figure out the number of qps for volume
+    auto qrule = assem.attachQRuleElem(dim, *fe);
+    fe->reinit(elem);
+    if (qrule->n_points() > _max)
+      _max = qrule->n_points();
 
-      // In initial conditions nodes are enumerated as pretend quadrature points
-      // using the _qp index to access coupled variables. In order to be able to
-      // use _zero (resized according to _max_qps) with _qp, we need to count nodes.
-      if (elem->n_nodes() > _max)
-        _max = elem->n_nodes();
-    }
+    unsigned int n_shape_funcs = fe->n_shape_functions();
+    if (n_shape_funcs > _max_shape_funcs)
+      _max_shape_funcs = n_shape_funcs;
+
+    // figure out the number of qps for the face
+    // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
+    // than in the volume
+    auto qrule_face = assem.attachQRuleFace(dim, *side_fe);
+    side_fe->reinit(elem, side);
+    if (qrule_face->n_points() > _max)
+      _max = qrule_face->n_points();
+
+    // In initial conditions nodes are enumerated as pretend quadrature points
+    // using the _qp index to access coupled variables. In order to be able to
+    // use _zero (resized according to _max_qps) with _qp, we need to count nodes.
+    if (elem->n_nodes() > _max)
+      _max = elem->n_nodes();
   }
 }
 

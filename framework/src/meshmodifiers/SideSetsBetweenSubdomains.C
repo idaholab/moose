@@ -25,7 +25,7 @@ validParams<SideSetsBetweenSubdomains>()
 {
   InputParameters params = validParams<MeshModifier>();
   params.addRequiredParam<std::vector<SubdomainName>>(
-      "master_block", "The master set of blocks for which to draw a sideset between");
+      "primary_block", "The primary set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<SubdomainName>>(
       "paired_block", "The paired set of blocks for which to draw a sideset between");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
@@ -43,9 +43,9 @@ SideSetsBetweenSubdomains::modify()
 {
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  std::vector<SubdomainID> vec_master_ids =
-      _mesh_ptr->getSubdomainIDs(getParam<std::vector<SubdomainName>>("master_block"));
-  std::set<SubdomainID> master_ids(vec_master_ids.begin(), vec_master_ids.end());
+  std::vector<SubdomainID> vec_primary_ids =
+      _mesh_ptr->getSubdomainIDs(getParam<std::vector<SubdomainName>>("primary_block"));
+  std::set<SubdomainID> primary_ids(vec_primary_ids.begin(), vec_primary_ids.end());
 
   std::vector<SubdomainID> vec_paired_ids =
       _mesh_ptr->getSubdomainIDs(getParam<std::vector<SubdomainName>>("paired_block"));
@@ -68,8 +68,8 @@ SideSetsBetweenSubdomains::modify()
   {
     SubdomainID curr_subdomain = elem->subdomain_id();
 
-    // We only need to loop over elements in the master subdomain
-    if (master_ids.count(curr_subdomain) == 0)
+    // We only need to loop over elements in the primary subdomain
+    if (primary_ids.count(curr_subdomain) == 0)
       continue;
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)

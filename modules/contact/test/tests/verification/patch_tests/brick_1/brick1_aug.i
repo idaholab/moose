@@ -360,8 +360,8 @@
 
 [Contact]
   [./leftright]
-    slave = 3
-    master = 4
+    secondary = 3
+    primary = 4
     tangential_tolerance = 1e-3
     formulation = augmented_lagrange
     normalize_penalty = true

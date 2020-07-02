@@ -135,7 +135,7 @@
     tangential_penalty = 100
     friction_coefficient = 0.5
     boundary = 6
-    slave = 4
+    secondary = 4
     variable = disp_z
   [../]
   [./tie_z2]
@@ -144,7 +144,7 @@
     tangential_penalty = 100
     friction_coefficient = 0.2
     boundary = 6
-    slave = 5
+    secondary = 5
     variable = disp_z
   [../]
 []

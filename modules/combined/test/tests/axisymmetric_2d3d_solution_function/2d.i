@@ -112,8 +112,8 @@
   [./disp_y]
     type = EqualValueBoundaryConstraint
     variable = disp_y
-    master = '65'
-    slave = '3'
+    primary = '65'
+    secondary = '3'
     penalty = 1e18
   [../]
 []

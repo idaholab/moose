@@ -347,8 +347,8 @@
 
 [Contact]
   [./interface]
-    master = 3
-    slave = 4
+    primary = 3
+    secondary = 4
     model = glued
     formulation = kinematic
     normalize_penalty = true

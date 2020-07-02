@@ -15,16 +15,16 @@
   [./interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./interface_again]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
-    new_boundary = 'master1_interface'
+    new_boundary = 'primary1_interface'
   [../]
 []
 
@@ -103,15 +103,15 @@
     inlet_conc = 2
     velocity = '1 0 0'
   [../]
-  [./master0_inteface]
+  [./primary0_inteface]
     type = RobinBC
     variable = u
-    boundary = 'master0_interface'
+    boundary = 'primary0_interface'
   [../]
-  [./master1_interface]
+  [./primary1_interface]
    type = InflowBC
    variable = v
-   boundary = 'master1_interface'
+   boundary = 'primary1_interface'
    inlet_conc = 4
    velocity = '1 0 0'
   [../]

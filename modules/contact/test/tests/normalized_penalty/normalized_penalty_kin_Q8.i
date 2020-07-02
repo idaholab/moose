@@ -40,8 +40,8 @@
 
 [Contact]
   [./m3_s2]
-    master = 3
-    slave = 2
+    primary = 3
+    secondary = 2
     penalty = 1e10
     normalize_penalty = true
     tangential_tolerance = 1e-3

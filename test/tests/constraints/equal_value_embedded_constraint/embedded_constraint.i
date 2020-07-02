@@ -51,10 +51,10 @@
 [Constraints]
   [equal]
     type = EqualValueEmbeddedConstraint
-    slave = 2
-    master = 1
+    secondary = 2
+    primary = 1
     penalty = 1e3
-    master_variable = phi
+    primary_variable = phi
     variable = phi
   []
 []

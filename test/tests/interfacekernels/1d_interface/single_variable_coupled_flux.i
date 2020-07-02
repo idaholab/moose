@@ -15,16 +15,16 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
-    new_boundary = 'master0_interface'
+    new_boundary = 'primary0_interface'
   [../]
   [./interface_again]
     type = SideSetsBetweenSubdomainsGenerator
     input = interface
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
-    new_boundary = 'master1_interface'
+    new_boundary = 'primary1_interface'
   [../]
 []
 
@@ -55,7 +55,7 @@
     type = InterfaceDiffusion
     variable = u
     neighbor_var = u
-    boundary = master0_interface
+    boundary = primary0_interface
     D = 4
     D_neighbor = 2
   [../]

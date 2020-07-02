@@ -30,7 +30,7 @@ NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*spl
 }
 
 /**
- * Save a patch of nodes that are close to each of the slave nodes to speed the search algorithm
+ * Save a patch of nodes that are close to each of the secondary nodes to speed the search algorithm
  * TODO: This needs to be updated at some point in time.  If the hits into this data structure
  * approach "the end"
  * then it may be time to update

@@ -27,3 +27,13 @@ custom logic does not need to be implemented in every end-user object. The range
 the second to last paramter right before the doc string.
 
 !listing framework/include/utils/InputParameters.h  start=BEGIN RANGE CHECKED PARAMETER METHODS end=END RANGE CHECKED PARAMETER METHODS
+
+## Deprecating coupled variables
+
+The `InputParameters` class provides a convenient method for deprecating coupled
+variable names called `addDeprecatedCoupledVar`. The method takes four
+arguments. The first corresponds to the deprecated name; the second argument is
+the new, blessed name that users should use. This name should have a
+corresponding `params.addCoupledVar('blessed_name', 'blessed_name_doc_string')`
+in the relevant `Class::validParams()` block. The final optional argument is the
+date that the deprecated variable name will be removed.
