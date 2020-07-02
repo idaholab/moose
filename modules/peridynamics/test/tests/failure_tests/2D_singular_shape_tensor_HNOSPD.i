@@ -6,12 +6,14 @@
 [Mesh]
   type = PeridynamicsMesh
   horizon_number = 3
+  cracks_start = '0.25 0.5 0'
+  cracks_end = '0.75 0.5 0'
 
   [./gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 6
-    ny = 6
+    nx = 8
+    ny = 8
   [../]
   [./gpd]
     type = MeshGeneratorPD
@@ -27,6 +29,38 @@
   [../]
 []
 
+[AuxVariables]
+  [./critical_stress]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./bond_status]
+    type = RankTwoBasedFailureCriteriaNOSPD
+    variable = bond_status
+    rank_two_tensor = stress
+    critical_variable = critical_stress
+    failure_criterion = VonMisesStress
+  [../]
+[]
+
+[UserObjects]
+  [./singular_shape_tensor]
+    type = SingularShapeTensorEliminatorUserObjectPD
+    formulation = BOND_HORIZON
+  [../]
+[]
+
+[ICs]
+  [./critical_stretch]
+    type = ConstantIC
+    variable = critical_stress
+    value = 150
+  [../]
+[]
+
 [BCs]
   [./left_x]
     type = DirichletBC
@@ -34,17 +68,28 @@
     boundary = 1003
     value = 0.0
   [../]
-  [./left_y]
+  [./top_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 1003
+    boundary = 1002
     value = 0.0
   [../]
-  [./right_x]
+  [./bottom_y]
     type = FunctionDirichletBC
+    variable = disp_y
+    boundary = 1000
+    function = '-0.002*t'
+  [../]
+
+  [./rbm_x]
+    type = RBMPresetOldValuePD
     variable = disp_x
-    boundary = 1001
-    function = '0.01*t'
+    boundary = 999
+  [../]
+  [./rbm_y]
+    type = RBMPresetOldValuePD
+    variable = disp_y
+    boundary = 999
   [../]
 []
 
@@ -52,22 +97,21 @@
   [./all]
     formulation = NONORDINARY_STATE
     stabilization = BOND_HORIZON
-    strain = FINITE
   [../]
 []
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 2.1e8
-    poissons_ratio = 0.3
+    youngs_modulus = 2e5
+    poissons_ratio = 0.33
   [../]
   [./strain]
-    type = ComputePlaneFiniteStrainNOSPD
+    type = ComputeSmallStrainNOSPD
     stabilization = BOND_HORIZON
   [../]
   [./stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
   [../]
 []
 
@@ -83,6 +127,7 @@
   solve_type = PJFNK
   line_search = none
   start_time = 0
+  dt = 1
   end_time = 1
 
   [./Quadrature]
@@ -92,6 +137,6 @@
 []
 
 [Outputs]
-  file_base = 2D_finite_strain_HNOSPD
+  file_base = 2D_singular_shape_tensor_HNOSPD
   exodus = true
 []

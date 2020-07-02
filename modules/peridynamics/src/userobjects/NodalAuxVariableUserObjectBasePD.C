@@ -36,12 +36,14 @@ NodalAuxVariableUserObjectBasePD::initialize()
   std::vector<std::string> zero_vars;
   zero_vars.push_back(_var->name());
   _aux.zeroVariables(zero_vars);
+
+  _aux.solution().close();
 }
 
 void
 NodalAuxVariableUserObjectBasePD::execute()
 {
-  for (unsigned int i = 0; i < 2; ++i)
+  for (unsigned int i = 0; i < _nnodes; ++i)
   {
     dof_id_type dof = _current_elem->node_ptr(i)->dof_number(_aux.number(), _var->number(), 0);
 
@@ -52,5 +54,5 @@ NodalAuxVariableUserObjectBasePD::execute()
 void
 NodalAuxVariableUserObjectBasePD::finalize()
 {
-  _aux_sln.close();
+  _aux.solution().close();
 }

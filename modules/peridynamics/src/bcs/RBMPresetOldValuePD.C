@@ -41,34 +41,13 @@ RBMPresetOldValuePD::computeQpValue()
 bool
 RBMPresetOldValuePD::shouldApply()
 {
-  bool should_apply = true;
-
-  // check whether the node shape tensor is singular
-  unsigned int dim = _pdmesh.dimension();
-  Real horiz_size = _pdmesh.getHorizon(_current_node->id());
-  std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_node->id());
+  // check whether the number of active bonds is less than number of problem dimension
+  unsigned int active_bonds = 0;
   std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_node->id());
 
-  RankTwoTensor shape;
-  if (dim == 2)
-    shape(2, 2) = 1.0;
-
-  Real vol_nb;
-  RealGradient origin_vec;
-
-  for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
+  for (unsigned int nb = 0; nb < bonds.size(); ++nb)
     if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
-    {
-      vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
-      origin_vec = *(_pdmesh.nodePtr(neighbors[nb])) - *_current_node;
+      active_bonds++;
 
-      for (unsigned int k = 0; k < dim; ++k)
-        for (unsigned int l = 0; l < dim; ++l)
-          shape(k, l) += horiz_size / origin_vec.norm() * origin_vec(k) * origin_vec(l) * vol_nb;
-    }
-
-  if (!MooseUtils::absoluteFuzzyEqual(shape.det(), 0.0))
-    should_apply = false;
-
-  return should_apply;
+  return (active_bonds < _pdmesh.dimension() + 1);
 }

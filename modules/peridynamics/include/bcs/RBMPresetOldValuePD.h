@@ -13,7 +13,7 @@
 #include "PeridynamicsMesh.h"
 
 /**
- * Class to apply preset BC of old variable solution based on the singularity of nodal shape tensor.
+ * Class to apply preset BC of old variable solution based on the number of active bonds.
  * Used to fix nodes with rigid body motion.
  */
 class RBMPresetOldValuePD : public DirichletBCBase

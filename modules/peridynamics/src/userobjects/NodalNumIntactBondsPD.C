@@ -33,5 +33,5 @@ void
 NodalNumIntactBondsPD::computeValue(unsigned int /*id*/, dof_id_type dof)
 {
   if (_bond_status_var->getElementalValue(_current_elem) > 0.5)
-    _aux_sln.add(dof, 1.0);
+    _aux.solution().add(dof, 1.0);
 }

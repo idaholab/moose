@@ -50,17 +50,32 @@ GeneralizedPlaneStrainUserObjectOSPD::execute()
 
   // number of neighbors for node i and j, used to avoid repeated accounting nodal stress in
   // element-wise loop
-  unsigned int nn_i = _pdmesh.getNeighbors(node_i).size();
-  unsigned int nn_j = _pdmesh.getNeighbors(node_j).size();
+
+  // calculate number of active neighbors for node i and j
+  std::vector<unsigned int> active_neighbors(_nnodes, 0);
+  for (unsigned int nd = 0; nd < _nnodes; nd++)
+  {
+    std::vector<dof_id_type> bonds = _pdmesh.getBonds(_current_elem->node_id(nd));
+    for (unsigned int nb = 0; nb < bonds.size(); ++nb)
+      if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
+        active_neighbors[nd]++;
+
+    if (active_neighbors[nd] == 0) // avoid dividing by zero
+      active_neighbors[nd] = 1;
+  }
+
+  Real bond_status = _bond_status_var->getElementalValue(_current_elem);
 
   // residual
   _residual += (_out_of_plane_stress_var->getNodalValue(*_current_elem->node_ptr(0)) -
                 _pressure.value(_t, coord_i) * _factor) *
-               nv_i / nn_i;
+               nv_i / active_neighbors[0] * bond_status;
   _residual += (_out_of_plane_stress_var->getNodalValue(*_current_elem->node_ptr(1)) -
                 _pressure.value(_t, coord_j) * _factor) *
-               nv_j / nn_j;
+               nv_j / active_neighbors[1] * bond_status;
 
   // diagonal jacobian
-  _jacobian += _Cijkl[0](2, 2, 2, 2) * nv_i / nn_i + _Cijkl[0](2, 2, 2, 2) * nv_j / nn_j;
+  _jacobian += (_Cijkl[0](2, 2, 2, 2) * nv_i / active_neighbors[0] +
+                _Cijkl[0](2, 2, 2, 2) * nv_j / active_neighbors[1]) *
+               bond_status;
 }

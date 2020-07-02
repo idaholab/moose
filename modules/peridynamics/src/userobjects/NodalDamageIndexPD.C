@@ -37,5 +37,5 @@ NodalDamageIndexPD::computeValue(unsigned int id, dof_id_type dof)
   Real node_vol_sum = _pdmesh.getHorizVolume(_current_elem->node_id(id));
 
   if (_bond_status_var->getElementalValue(_current_elem) < 0.5)
-    _aux_sln.add(dof, neighbor_vol / node_vol_sum);
+    _aux.solution().add(dof, neighbor_vol / node_vol_sum);
 }

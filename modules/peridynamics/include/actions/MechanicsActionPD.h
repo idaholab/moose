@@ -47,7 +47,7 @@ protected:
   /// BOND, ORDINARY_STATE or NONORDINARY_STATE
   const MooseEnum _formulation;
 
-  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or HORIZON
+  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or BOND_HORIZON
   const MooseEnum _stabilization;
 
   /// Option of strain formulation: SMALL or FINITE
