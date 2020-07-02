@@ -9,7 +9,6 @@ class SubChannel1PhaseProblem;
 /**
  * This class implements the 1-phase steady state sub channel solver.
  */
-
 class SubChannel1PhaseProblem : public ExternalProblem
 {
 public:
@@ -21,7 +20,4 @@ public:
 
 protected:
   SubChannelMesh & _subchannel_mesh;
-  Real _mflux_in;
-  Real _T_in;
-  Real _P_out;
 };
