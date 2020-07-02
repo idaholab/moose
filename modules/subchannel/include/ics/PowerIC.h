@@ -15,7 +15,7 @@ public:
   Real value(const Point & p) override;
 
 protected:
-  SubChannelMesh * _mesh;
+  SubChannelMesh & _mesh;
   Real _power;
   int _numberoflines;
   std::string _filename;
@@ -24,6 +24,7 @@ protected:
 
 private:
   Eigen::MatrixXd _ref_qprime;
+  Eigen::MatrixXd _pin_power_correction; //unitless
 
 public:
   static InputParameters validParams();
