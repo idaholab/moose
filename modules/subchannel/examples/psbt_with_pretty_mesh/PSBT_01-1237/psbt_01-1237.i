@@ -1,3 +1,5 @@
+length = 3.658
+
 [Mesh]
   type = SubChannelMesh
   nx = 6
@@ -5,8 +7,8 @@
   max_dz = 0.02
   pitch = 0.0126
   rod_diameter = 0.00950
-  gap = 0.00095 
-  heated_length = 3.658
+  gap = 0.00095
+  heated_length = ${length}
 []
 
 [AuxVariables]
@@ -60,6 +62,7 @@
     variable = q_prime
     power = 3.44e6
     filename = "power_profile.txt"
+    function = axial_heat_rate
   []
 []
 
