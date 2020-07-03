@@ -29,14 +29,18 @@ void
 addDisplacementAboutAxisParams(InputParameters & params)
 {
   MooseEnum units("degrees radians");
-  params.addRequiredParam<FunctionName>("function",
-                                        "The function providing the angle of rotation.");
+  params.addRequiredParam<FunctionName>(
+      "function", "The function providing the total angle of rotation or the angular velocity.");
   params.addRequiredParam<MooseEnum>("angle_units",
                                      units,
                                      "The units of the angle of rotation. Choices are:" +
                                          units.getRawNames());
   params.addRequiredParam<RealVectorValue>("axis_origin", "Origin of the axis of rotation");
   params.addRequiredParam<RealVectorValue>("axis_direction", "Direction of the axis of rotation");
+  params.addParam<bool>(
+      "angular_velocity", false, "If true interprets the function value as an angular velocity");
+  params.addRequiredCoupledVar("displacements",
+                               "The string of displacements suitable for the problem statement");
 }
 
 DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
@@ -45,7 +49,10 @@ DisplacementAboutAxis::DisplacementAboutAxis(const InputParameters & parameters)
     _func(getFunction("function")),
     _angle_units(getParam<MooseEnum>("angle_units")),
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
-    _axis_direction(getParam<RealVectorValue>("axis_direction"))
+    _axis_direction(getParam<RealVectorValue>("axis_direction")),
+    _ndisp(coupledComponents("displacements")),
+    _disp_old(_ndisp),
+    _angular_velocity(getParam<bool>("angular_velocity"))
 {
   if (_component < 0 || _component > 2)
     mooseError("Invalid component given for ", name(), ": ", _component, ".");
@@ -59,6 +66,13 @@ DisplacementAboutAxis::initialSetup()
 {
   calculateUnitDirectionVector();
   calculateTransformationMatrices();
+
+  if (_angular_velocity)
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      _disp_old[i] = &coupledDofValuesOld("displacements", i);
+  else
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      _disp_old[i] = nullptr;
 }
 
 Real
@@ -70,15 +84,22 @@ DisplacementAboutAxis::computeQpValue()
   if (_angle_units == "degrees")
     angle = angle * libMesh::pi / 180.0;
 
+  if (_angular_velocity)
+    angle *= _dt;
+
   ColumnMajorMatrix p_old(4, 1);
   p_old(0, 0) = p(0);
   p_old(1, 0) = p(1);
   p_old(2, 0) = p(2);
   p_old(3, 0) = 1;
 
+  if (_angular_velocity)
+    for (unsigned int i = 0; i < _ndisp; i++)
+      p_old(i, 0) += (*_disp_old[i])[_qp];
+
   ColumnMajorMatrix p_new = rotateAroundAxis(p_old, angle);
 
-  return p_new(_component, 0) - p_old(_component, 0);
+  return p_new(_component, 0) - p(_component);
 }
 
 ColumnMajorMatrix

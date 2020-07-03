@@ -35,6 +35,27 @@
     rel_err = 1E-5
     abs_zero = 1e-10
   [../]
+  [./disp_about_axis_motion_incremental]
+    design = DisplacementAboutAxis.md
+    requirement = 'The system shall provide a boundary condition that applies pure finite rigid body rotation to a surface of an elastic body incrementally'
+    type = 'CSVDiff'
+    cli_args = 'BCs/top_x/angular_velocity=true BCs/top_x/function=1 BCs/top_y/angular_velocity=true BCs/top_y/function=1  Outputs/file_base=disp_about_axis_axial_motion_incremental_out'
+    input = 'disp_about_axis_axial_motion.i'
+    csvdiff = 'disp_about_axis_axial_motion_incremental_out.csv'
+    rel_err = 1E-5
+    abs_zero = 1e-10
+    issues = '#15388'
+  [../]
+  [./disp_about_axis_axial_motion_delayed]
+    design = DisplacementAboutAxis.md
+    requirement = 'The system shall be able to use disaplcement about axis after applying an arbitraty deformation'
+    type = 'CSVDiff'
+    input = 'disp_about_axis_axial_motion_delayed.i'
+    csvdiff = 'disp_about_axis_axial_motion_delayed_out.csv'
+    rel_err = 1E-5
+    abs_zero = 1e-10
+    issues = '#15388'
+  [../]
   [./disp_about_axis_error1]
     design = DisplacementAboutAxis.md
     issues = '#15092'
