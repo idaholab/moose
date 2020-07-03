@@ -53,6 +53,15 @@ protected:
   const Point _axis_origin;
   Point _axis_direction;
 
+  /// number of displacement components
+  const unsigned int _ndisp;
+
+  /// the old displacemnt value
+  std::vector<const VariableValue *> _disp_old;
+
+  /// flag for incremental formulation
+  const bool _angular_velocity;
+
   ColumnMajorMatrix _transformation_matrix;
   ColumnMajorMatrix _transformation_matrix_inv;
 };
