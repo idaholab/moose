@@ -89,7 +89,14 @@ ComputeStrainBaseNOSPD::computeQpDeformationGradient()
   if (_bond_status_var->getElementalValue(_current_elem) > 0.5)
   {
     if (_stabilization == "FORCE")
+    {
       computeConventionalQpDeformationGradient();
+
+      _sf_coeff[_qp] = ElasticityTensorTools::getIsotropicYoungsModulus(_Cijkl[_qp]) *
+                       _pdmesh.getNodeAvgSpacing(_current_elem->node_id(_qp)) * _horiz_rad[_qp] /
+                       _origin_vec.norm();
+      _multi[_qp] = _horiz_rad[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
+    }
     else if (_stabilization == "BOND_HORIZON")
       computeBondHorizonQpDeformationGradient();
     else
@@ -151,11 +158,6 @@ ComputeStrainBaseNOSPD::computeConventionalQpDeformationGradient()
   _ddgraddu[_qp] *= _shape2[_qp].inverse();
   _ddgraddv[_qp] *= _shape2[_qp].inverse();
   _ddgraddw[_qp] *= _shape2[_qp].inverse();
-
-  _sf_coeff[_qp] = ElasticityTensorTools::getIsotropicYoungsModulus(_Cijkl[_qp]) *
-                   _pdmesh.getNodeAvgSpacing(_current_elem->node_id(_qp)) * _horiz_rad[_qp] /
-                   _origin_vec.norm();
-  _multi[_qp] = _horiz_rad[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1];
 }
 
 void
@@ -204,14 +206,15 @@ ComputeStrainBaseNOSPD::computeBondHorizonQpDeformationGradient()
     }
   // finalize the deformation gradient and its derivatives
   if (MooseUtils::absoluteFuzzyEqual(_shape2[_qp].det(), 0.0))
-    mooseError("Singular shape tensor is detected in ComputeStrainBaseNOSPD! Use "
-               "SingularShapeTensorEliminatorUserObjectPD to avoid singular shape tensor");
-
-  _deformation_gradient[_qp] *= _shape2[_qp].inverse();
-  _ddgraddu[_qp] *= _shape2[_qp].inverse();
-  _ddgraddv[_qp] *= _shape2[_qp].inverse();
-  _ddgraddw[_qp] *= _shape2[_qp].inverse();
-
+    computeConventionalQpDeformationGradient(); // this will affect the corresponding jacobian
+                                                // calculation
+  else
+  {
+    _deformation_gradient[_qp] *= _shape2[_qp].inverse();
+    _ddgraddu[_qp] *= _shape2[_qp].inverse();
+    _ddgraddv[_qp] *= _shape2[_qp].inverse();
+    _ddgraddw[_qp] *= _shape2[_qp].inverse();
+  }
   // force state multiplier
   _multi[_qp] = _horiz_rad[_qp] / _origin_vec.norm() * _node_vol[0] * _node_vol[1] * dgnodes_vsum /
                 _horiz_vol[_qp];
