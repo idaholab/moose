@@ -98,7 +98,12 @@ DomainIntegralAction::validParams()
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains applied in the strain calculation");
   params.addParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
-
+  params.addDeprecatedParam<bool>("convert_J_to_K",
+                                  false,
+                                  "Convert J-integral to stress intensity factor K.",
+                                  "This input parameter is deprecated and will be removed soon. "
+                                  "Use 'output_type = K' to request output of the "
+                                  "conversion from the J-integral to stress intensity factors");
   return params;
 }
 
@@ -135,8 +140,13 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _output_q(getParam<bool>("output_q")),
     _solid_mechanics(getParam<bool>("solid_mechanics")),
     _incremental(getParam<bool>("incremental")),
-    _n_exponent(isParamValid("n_exponent") ? getParam<Real>("n_exponent") : -1)
+    _n_exponent(isParamValid("n_exponent") ? getParam<Real>("n_exponent") : -1),
+    _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false)
 {
+  // Use deprecated parameter convert_J_to_K
+  if (_convert_J_to_K == true)
+    _output_type = K;
+
   if (_q_function_type == GEOMETRY)
   {
     if (isParamValid("radius_inner") && isParamValid("radius_outer"))
