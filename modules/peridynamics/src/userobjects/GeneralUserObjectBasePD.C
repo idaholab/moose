@@ -23,6 +23,9 @@ GeneralUserObjectBasePD::GeneralUserObjectBasePD(const InputParameters & paramet
   : GeneralUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _pdmesh(dynamic_cast<PeridynamicsMesh &>(_mesh)),
+    _dim(_pdmesh.dimension()),
+    _aux(_fe_problem.getAuxiliarySystem()),
+    _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _nnodes(2)
 {
 }

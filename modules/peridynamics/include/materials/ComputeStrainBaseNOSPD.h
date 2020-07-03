@@ -48,7 +48,7 @@ protected:
    */
   virtual void computeQpStrain() = 0;
 
-  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or HORIZON
+  /// Option of stabilization scheme for peridynamic correspondence model: FORCE or BOND_HORIZON
   const MooseEnum _stabilization;
 
   /// Plane strain problem or not, this is only used for mechanical stretch calculation

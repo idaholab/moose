@@ -39,6 +39,13 @@ ComputeSmallStrainNOSPD::computeQpStrain()
   // Subtract Eigen strains
   for (auto es : _eigenstrains)
     _mechanical_strain[_qp] -= (*es)[_qp];
+
+  // zero out all strain measures for broken bond
+  if (_bond_status_var->getElementalValue(_current_elem) < 0.5)
+  {
+    _mechanical_strain[_qp].zero();
+    _total_strain[_qp].zero();
+  }
 }
 
 void

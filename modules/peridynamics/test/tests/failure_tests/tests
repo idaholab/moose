@@ -17,4 +17,14 @@
     design = 'modules/peridynamics/RankTwoBasedFailureCriteriaNOSPD.md'
     issues = '#11561'
   [../]
+  [./2D_singular_shape_tensor_HNOSPD]
+    type = 'Exodiff'
+    input = '2D_singular_shape_tensor_HNOSPD.i'
+    exodiff = '2D_singular_shape_tensor_HNOSPD.e'
+    map = false
+    requirement = 'SingularShapeTensorEliminatorUserObjectPD shall remove singular shape tensor.'
+    design = 'modules/peridynamics/SingularShapeTensorEliminatorUserObjectPD.md'
+    issues = '#15393'
+  [../]
+
 []

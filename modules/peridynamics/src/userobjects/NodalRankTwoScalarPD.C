@@ -10,6 +10,7 @@
 #include "NodalRankTwoScalarPD.h"
 #include "RankTwoScalarTools.h"
 #include "RankTwoTensor.h"
+#include "AuxiliarySystem.h"
 
 registerMooseObject("PeridynamicsApp", NodalRankTwoScalarPD);
 
@@ -52,5 +53,5 @@ NodalRankTwoScalarPD::gatherWeightedValue(unsigned int id, dof_id_type dof, Real
   Real scalar_value = RankTwoScalarTools::getQuantity(
       _tensor[id], _scalar_type, _point1, _point2, curr_point, _input_direction);
 
-  _aux_sln.add(dof, scalar_value * dg_vol_frac);
+  _aux.solution().add(dof, scalar_value * dg_vol_frac);
 }

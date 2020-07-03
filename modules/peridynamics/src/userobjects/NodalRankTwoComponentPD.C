@@ -9,6 +9,7 @@
 
 #include "NodalRankTwoComponentPD.h"
 #include "RankTwoTensor.h"
+#include "AuxiliarySystem.h"
 
 registerMooseObject("PeridynamicsApp", NodalRankTwoComponentPD);
 
@@ -43,5 +44,5 @@ NodalRankTwoComponentPD::NodalRankTwoComponentPD(const InputParameters & paramet
 void
 NodalRankTwoComponentPD::gatherWeightedValue(unsigned int id, dof_id_type dof, Real dg_vol_frac)
 {
-  _aux_sln.add(dof, _tensor[id](_i, _j) * dg_vol_frac);
+  _aux.solution().add(dof, _tensor[id](_i, _j) * dg_vol_frac);
 }

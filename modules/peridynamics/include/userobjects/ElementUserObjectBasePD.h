@@ -29,9 +29,9 @@ protected:
   /// Reference to auxiliary system
   AuxiliarySystem & _aux;
 
-  /// Solution vector for aux variables
-  NumericVector<Number> & _aux_sln;
-
   /// Reference to Peridynamic mesh
   PeridynamicsMesh & _pdmesh;
+
+  /// number of nodes for a edge element
+  const unsigned int _nnodes;
 };

@@ -81,6 +81,16 @@ ComputeFiniteStrainNOSPD::computeQpStrain()
       _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_strain[_qp] =
       _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  // zero out all strain measures for broken bond
+  if (_bond_status_var->getElementalValue(_current_elem) < 0.5)
+  {
+    _strain_rate[_qp].zero();
+    _strain_increment[_qp].zero();
+    _rotation_increment[_qp].zero();
+    _mechanical_strain[_qp].zero();
+    _total_strain[_qp].zero();
+  }
 }
 
 void
