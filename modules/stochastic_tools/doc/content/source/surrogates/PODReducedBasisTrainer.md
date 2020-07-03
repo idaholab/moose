@@ -1,130 +1,127 @@
-# PolynomialRegressionTrainer
+# PODReducedBasisTrainer
 
-!syntax description /Trainers/PODReducedBasis
+!syntax description /Trainers/PODReducedBasisTrainer
 
 ## Overview
 
-This class is responsible for determining the coefficients of a multi-dimensional polynomial which
-approximates the behavior of the Quantity of Interest (QoI) in the parameter space.
-For this, the object needs $N$ training points in the parameters space.
-These training points can be characterized using their coordinates in the parameter space:
+In this trainer, an intrusive Proper Orthogonal Decomposition (POD) based Reduced Basis (RB) method
+is implemented which, unlike non-intrusive surrogates such as Polynomial Regression Surrogate or
+Polynomial Chaos Expansion Surrogate, is capable of considering the physics of the full-order problem
+at surrogate level. Therefore, it is often referred to as a physics-based but still data-driven approach.
+The intrusiveness, however, decreases the range of problems which this method can be used for.
+In the current version, this surrogate model can deal with
++Parameterized scalar-valued linear steady-state PDEs with affine parameter dependence+ only.
+This class is responsible for two steps in the generation of the surrogate model:
+
+1. [Generation of reduced subspaces](#generation-of-reduced-subspaces)
+2. [Generation of reduced operators](#generation-of-reduced-operators)
+
+## A parameterized linear steady-state PDE
+
+Before the details of the above-mentioned steps are discussed, the basic notation
+has to be established. A +scalar-valued linear steady-state PDE+ can be expressed in
+operator notation as:
+
+!equation id=fom_operators
+\mathcal{A}u = \mathcal{b},
+
+where $u$ is the unknown solution vector, $\mathcal{A}$ is a linear operator and
+$\mathcal{b}$ is a source term. The linear operator and the source terms can
+depend on uncertain parameters which are denoted by $\mu_i,~i=0,...,N_\mu$ and
+organized into a parameter vector $\boldsymbol{\mu} = [\mu_1,...,\mu_{N_\mu}]^T$.
+Therefore, [fom_operators] can be expressed as:
+
+!equation id=fom_parameterized
+\mathcal{A}(\boldsymbol{\mu})u = \mathcal{b}(\boldsymbol{\mu}).
+
+This also means that the solution itself is the function of these parameters
+$u=u(\boldsymbol{\mu})$ as well. To make an efficient surrogate, operator
+$\mathcal{A}(\boldsymbol{\mu})$ and source $\mathcal{b}(\boldsymbol{\mu})$ should
+have an +affine parameter dependence+:
 
 !equation
-\textbf{X} =
-\begin{bmatrix}
-x_{1,1} & x_{1,2} & \dots  & x_{1,D} \\
-x_{2,1} & x_{2,2} & \dots  & x_{2,D} \\
-\vdots  & \vdots  & \ddots & \vdots  \\
-x_{N,1} & x_{N,2} & \dots  & x_{N,D}
-\end{bmatrix}
-=
-\begin{bmatrix}
-\textbf{x}_{1} \\
-\textbf{x}_{2} \\
-\vdots  \\
-\textbf{x}_{N}
-\end{bmatrix}.
+\mathcal{A}(\boldsymbol{\mu})
+= \sum \limits_{i=1}^{N_A} f^A_i(\boldsymbol{\mu})\mathcal{A}_i,
+\text{\quad and \quad} \mathcal{b}(\boldsymbol{\mu})
+= \sum \limits_{i=1}^{N_b} f^b_i(\boldsymbol{\mu})\mathcal{b}_i.
 
-where $D$ denotes the dimension of the parameter space and $\textbf{x}$ is a
-D-dimensional vector containing the coordinates in each dimension.
-Similarly to other `Trainer` classes, `PolynomialRegressionTrainer` accesses this matrix
-from a `Sampler` object. Of course, the trainer has to know the values of the QoI at
-these coordinates as well:
+It is visible that the affine decomposition is the sum of the products of parameter-dependent
+scalar functions and parameter-independent constituent operators. Therefore, the problem
+can be written as
 
-!equation
-\textbf{y} =
-\begin{bmatrix}
-y_{1} \\
-y_{2} \\
-\vdots\\
-y_{N}
-\end{bmatrix}
-.
+!equation id=fom_affine_decomp
+\left(\sum \limits_{i=1}^{N_A} f^A_i(\boldsymbol{\mu})\mathcal{A}_i\right)u =
+\sum \limits_{i=1}^{N_b} f^b_i(\boldsymbol{\mu})\mathcal{b}_i.
 
-This data is accessed through a `VectorPostprocessor`. Now that all data is available,
-$\textbf{y}=f(\textbf{x})$ unknown function is approximated using a polynomial expression of the following form:
+This decomposition cannot be defined automatically, the user has to identify the constituent
+scalar functions and operators before starting to construct a POD-RB surrogate model.
+As a last step, this system is discretized in space using the finite element method to obtain:
 
-!equation id=poly_exp
-\textbf{y} \approx \hat{\textbf{y}} = \sum \limits_{k=1}^{N_p}P(\textbf{x}, \textbf{i}_{k})c_k=\textbf{P}(\textbf{x})\textbf{c},
+!equation id=fom_affine_decomp_discrete
+\left(\sum \limits_{i=1}^{N_A} f^A_i(\boldsymbol{\mu})\textbf{A}_i\right)\textbf{u} =
+\sum \limits_{i=1}^{N_b} f^b_i(\boldsymbol{\mu})\textbf{b}_i,
 
-where $N_p$ is the number of polynomial terms in the approximation, $\textbf{c}=[c_1,...,c_{N_p}]^T$ are the
-unknown coefficients and $\textbf{P}(\textbf{x})=[P(\textbf{x}, \textbf{i}_{1}),...,P(\textbf{x}, \textbf{i}_{N_p})]$.
-The used polynomials in this case can be defined as
+where $\textbf{A}_i$  and $\textbf{b}_i$ are finite element matrices and vectors,
+while $\textbf{u}$ denotes the vector containing the values of the degrees of freedom.
+Furthermore, let $\textbf{u}(\boldsymbol{\mu}^* )$ denote a solution vector which is
+obtained by solving [fom_affine_decomp_discrete] with $\boldsymbol{\mu}=\boldsymbol{\mu}^* ~$.
 
-!equation
-P(\textbf{x}, \textbf{i}) = \textbf{x}^\textbf{i} = \prod \limits_{j=1}^D x_j^{i_j},
+## Generation of reduced subspaces
 
-where $x_j$ denotes the $j$-th coordinate of parameter vector $\textbf{x}$,
-while $\textbf{i}=(i_1,...,i_D)$ is a $D$-dimensional tuple containing the powers
-for each coordinate. This tuple is the same as described in [PolynomialChaos.md].
-To determine these tuples, the trainer needs an additional input parameter, namely
-the maximum degree of the polynomial. This limits the number of polynomial terms in
-[poly_exp]. If this number is fixed, the only unknown parameters are the elements of
-$\textbf{c}$.
+Even though it is not explicitly stated in the previous sub-section, $\textbf{u}$ may
+contain solutions for multiple variables, hence it can be expressed as
+$\textbf{u}=[\textbf{u}_1;...;~\textbf{u}_{N_v}]$, where $N_v$ is the total number of variables.
+It is assumed that each variable has $N$ spatial degrees of freedom, thus the full size of the
+system is $N\times N$.
 
-To determine these, a regression matrix can be defined as:
+As a first step in this process, [fom_affine_decomp_discrete] is solved using $N_s$
+different parameter samples and the solution vectors for each variable are saved into
+snapshot matrices
 
-!equation
-\textbf{R} =
-\begin{bmatrix}
-\textbf{P}(\textbf{x}_1) \\
-\textbf{P}(\textbf{x}_2) \\
-\vdots  \\
-\textbf{P}(\textbf{x}_{N})
-\end{bmatrix}.
+!equation id=fom_parameterized
+\textbf{S}_i = [\textbf{u}_i(\boldsymbol{\mu}_1),...,\textbf{u}_i(\boldsymbol{\mu}_{N_s})].
 
-## Ordinary Least Squares (OLS) regression
+In this implementation, the solutions are obtained from a [PODFullSolveMultiApp.md] using a
+[SamplerSolutionTransfer.md], however the snapshot matrices are stored within the trainer object.
+The next step in this process is to use these snapshots to create reduced sub-spaces for
+each variable. This can be done by performing POD on the snapshot matrices for each variable.
+POD consists of the following four steps for each variable:
 
-Using regression matrix $\textbf{R}$ and and Ordinary Least Squares (OLS) approach described on
-[Wikipedia](https://en.wikipedia.org/wiki/Polynomial_regression) in detail, the unknown
-coefficients can be determined as follows:
+1. +Creation of correlation matrices:+ The correlation matrices ($\textbf{C}_i$) can be computed
+   using the snapshot matrices as $\textbf{C}_i=\textbf{S}_i^T \textbf{W}_i \textbf{S}_i$,
+   where $\textbf{W}_i$ is a weighting matrix. At this moment only $\textbf{W}_i = \textbf{I}$ is
+   supported.
+2. +Eigenvalue decomposition of the correlation matrices:+ The eigenvalue decompositions of the
+   correlation matrices is obtained as: $\textbf{C}_i = \textbf{V}_i\boldsymbol{\Lambda}_i\textbf{V}^T_i$,
+   where matrix $\textbf{V}_i$ contains the eigenvectors and matrix $\boldsymbol{\Lambda}_i$
+   contains the eigenvalues of $\textbf{C}_i$.
+3. +Determining the dimension of the reduced subspace:+ Based on the magnitude of the
+   eigenvalues ($\lambda_{i,k},~k=1,...,N_s$) in $\boldsymbol{\Lambda}_i$, one can compute how many basis functions
+   are needed to reconstruct the snapshots with a given accuracy. The rank of the subspace
+   $r_i$ can be determined as:
 
-!equation
-\textbf{c}=\left(\textbf{R}^T\textbf{R}\right)^{-1}\textbf{R}^T\textbf{y}.
+   !equation id=ev_determination
+   r_i = \argmin\limits_{1\leq r_i\leq N_s}
+   \left(\frac{\sum_{k=1}^{r_i}\lambda_{i,k}}{\sum_{k=1}^{N_s}\lambda_{i,k}}\right).
 
-Finally, it must be mentioned that this method is only applicable if $N_p \leq N$
-and keeping $N_p << N$ is recommended.
+   Of course this rank can be determined manually as well.
+4. +The reconstruction of the basis vectors for each variable:+ For this, the eigenvalues and
+   eigenvectors of the correlation matrices are used together with the snapshots as:
 
-## Ridge regression
+   !equation id=base_definition
+   \Phi_{i,k}=\frac{1}{\sqrt{\lambda_{i,k}}}\sum\limits_{j=1}^{N_s}\textbf{V}_{i,k,j}S_{i,j},
 
-Unfortunately, the OLS approach is known to have some issues like:
-- It is prone to overfit the data,
-- It yields inaccurate results if the input variables are correlated,
-- It is sensitive to outliers.
+   where \Phi_{i,k} is the $k$-th ($k=1,...,r_i$) basis function of the reduced subspace for
+   variable $\textbf{u}_i$. Moreover, $\textbf{V}_{i,k,j}$ denottes the $j$-th element of
+   the $k$-th eigenvector of the correlation matrix. It is important to remember that
+   $\Phi_{i,k}$ has a global support, and shall not be mistaken for the local
+   basis functions ($\phi$) of the finite element approximation.
 
-To tackle the problem, an $L^2$ regularization (or
-[Tikhonov regularization](https://en.wikipedia.org/wiki/Regularized_least_squares) is adopted
-to make sure that the coefficients of the expansion do have uncontrollably high values.
-This extended least squares regression is often referred to as Ridge Regression.
-In this scenario the coefficients can be determined by solving:
 
-!equation
-\textbf{c}=\left(\textbf{R}^T\textbf{R}+\lambda I\right)^{-1}\textbf{R}^T\textbf{y},
+## Generation of reduced operators
 
-where $\lambda$ is a penalty parameter which penalizes coefficients with large
-magnitudes. As $\lambda \rightarrow 0$, Ridge regression converges to OLS.
+!syntax parameters /Trainers/PODReducedBasisTrainer
 
-## Example Input File Syntax
+!syntax inputs /Trainers/PODReducedBasisTrainer
 
-To get the necessary data, two essential blocks have to be included in the master input file.
-The first, the sampler defined in `Samplers`, creates the coordinates in matrix $\textbf{X}$, while
-the objects in `VectorPostprocessors` create, fill and store the result vector $\textbf{y}$.
-
-!listing polynomial_regression/train.i block=Samplers
-
-!listing polynomial_regression/train.i block=VectorPostprocessors
-
-Similarly to [NearestPointTrainer.md], a `GFunction` vector postprocessor from [SobolStatistics.md] is
-used to emulate a full-order model. This simply evaluates a function at sample points.
-
-Using this data and the maximum degree setting (`max_degree` in the input file),
-the trainer computes the model coefficients $\textbf{c}$. To control the type of regression,
-the user has to set `regression_type` to either 'ols' or 'ridge' in the input file:
-
-!listing polynomial_regression/train.i block=Trainers
-
-!syntax parameters /Trainers/PolynomialRegressionTrainer
-
-!syntax inputs /Trainers/PolynomialRegressionTrainer
-
-!syntax children /Trainers/PolynomialRegressionTrainer
+!syntax children /Trainers/PODReducedBasisTrainer
