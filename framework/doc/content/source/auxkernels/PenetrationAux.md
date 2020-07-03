@@ -4,7 +4,7 @@ Auxililary Kernel for computing several geometry related quantities between two 
 
 ## Gap offset parameters
 
-Gap offset can be provided to offset the gap distance between in or near contact bodies. It can be either `slave_gap_offset` (gap offset from slave side) or `mapped_master_gap_offset` (gap offset from master side but mapped to slave side). However, the offsetted gap is treated as rigid region without deformation and temperature gradient.
+Gap offset can be provided to offset the gap distance between in or near contact bodies. It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). However, the offsetted gap is treated as rigid region without deformation and temperature gradient.
 
 !syntax description /AuxKernels/PenetrationAux
 

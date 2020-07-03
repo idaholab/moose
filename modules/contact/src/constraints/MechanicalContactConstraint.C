@@ -54,9 +54,9 @@ MechanicalContactConstraint::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
-  params.addCoupledVar("slave_gap_offset", "offset to the gap distance from slave side");
-  params.addCoupledVar("mapped_master_gap_offset",
-                       "offset to the gap distance mapped from master side");
+  params.addCoupledVar("secondary_gap_offset", "offset to the gap distance from secondary side");
+  params.addCoupledVar("mapped_primary_gap_offset",
+                       "offset to the gap distance mapped from primary side");
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -140,11 +140,12 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
     _var_objects(3, nullptr),
-    _has_slave_gap_offset(isCoupled("slave_gap_offset")),
-    _slave_gap_offset_var(_has_slave_gap_offset ? getVar("slave_gap_offset", 0) : nullptr),
-    _has_mapped_master_gap_offset(isCoupled("mapped_master_gap_offset")),
-    _mapped_master_gap_offset_var(
-        _has_mapped_master_gap_offset ? getVar("mapped_master_gap_offset", 0) : nullptr),
+    _has_secondary_gap_offset(isCoupled("secondary_gap_offset")),
+    _secondary_gap_offset_var(_has_secondary_gap_offset ? getVar("secondary_gap_offset", 0)
+                                                        : nullptr),
+    _has_mapped_primary_gap_offset(isCoupled("mapped_primary_gap_offset")),
+    _mapped_primary_gap_offset_var(
+        _has_mapped_primary_gap_offset ? getVar("mapped_primary_gap_offset", 0) : nullptr),
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
@@ -1714,8 +1715,8 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
 Real
 MechanicalContactConstraint::slaveGapOffset(const Node * node)
 {
-  if (_has_slave_gap_offset)
-    return _slave_gap_offset_var->getNodalValue(*node);
+  if (_has_secondary_gap_offset)
+    return _secondary_gap_offset_var->getNodalValue(*node);
   else
     return 0.0;
 }
@@ -1723,8 +1724,8 @@ MechanicalContactConstraint::slaveGapOffset(const Node * node)
 Real
 MechanicalContactConstraint::mappedMasterGapOffset(const Node * node)
 {
-  if (_has_mapped_master_gap_offset)
-    return _mapped_master_gap_offset_var->getNodalValue(*node);
+  if (_has_mapped_primary_gap_offset)
+    return _mapped_primary_gap_offset_var->getNodalValue(*node);
   else
     return 0.0;
 }

@@ -20,9 +20,9 @@
   [../]
   [./master_gap_offset]
   [../]
-  [./slave_gap_offset]
+  [./secondary_gap_offset]
   [../]
-  [./mapped_master_gap_offset]
+  [./mapped_primary_gap_offset]
   [../]
 []
 
@@ -73,16 +73,16 @@
     value = -0.01
     boundary = 2
   [../]
-  [./mapped_master_gap_offset]
+  [./mapped_primary_gap_offset]
     type = GapValueAux
-    variable = mapped_master_gap_offset
+    variable = mapped_primary_gap_offset
     paired_variable = master_gap_offset
     boundary = 3
     paired_boundary = 2
   [../]
-  [./slave_gap_offset]
+  [./secondary_gap_offset]
     type = ConstantAux
-    variable = slave_gap_offset
+    variable = secondary_gap_offset
     value = -0.01
     boundary = 3
   [../]
@@ -178,7 +178,7 @@
     slave = 3
     model = frictionless
     penalty = 1e+6
-    slave_gap_offset = slave_gap_offset
-    mapped_master_gap_offset = mapped_master_gap_offset
+    secondary_gap_offset = secondary_gap_offset
+    mapped_primary_gap_offset = mapped_primary_gap_offset
   [../]
 []

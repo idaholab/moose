@@ -53,7 +53,7 @@ For the frictional contact (`coulomb` model), the `penalty` method calculates no
 
 ### Contact gap offset
 
-Gap offset can be provided to the current mechanical contact constraint. It can be either `slave_gap_offset` (gap offset from slave side) or `mapped_master_gap_offset` (gap offset from master side but mapped to slave side). This could be useful to model contact in such as plates or shells. However, the offsetted gap is treated as rigid region without deformation.
+Gap offset can be provided to the current mechanical contact constraint. It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). This could be useful to model contact in such as plates or shells. However, the offsetted gap is treated as rigid region without deformation.
 
 !syntax parameters /Constraints/MechanicalContactConstraint
 
