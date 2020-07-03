@@ -15,7 +15,8 @@
 // Forward Declarations
 
 /**
- * Postprocessor to check whether the bond status update is converged for a given timestep
+ * Postprocessor to commpute the number of bonds whose stataus has changed in the most update.
+ Used to check whether the Picard iterations have converged for the current time step.
  */
 class BondStatusConvergedPostprocessorPD : public ElementPostprocessor
 {
@@ -40,5 +41,5 @@ protected:
   const unsigned int _dim;
 
   /// total number of times bond_status updated
-  unsigned int _bond_status_updated_times;
+  unsigned int _num_bond_status_updated;
 };

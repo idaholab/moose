@@ -33,7 +33,7 @@ BondStatusConvergedPostprocessorPD::BondStatusConvergedPostprocessorPD(
 void
 BondStatusConvergedPostprocessorPD::initialize()
 {
-  _bond_status_updated_times = 0;
+  _num_bond_status_updated = 0;
 }
 
 void
@@ -41,15 +41,15 @@ BondStatusConvergedPostprocessorPD::execute()
 {
   if ((_bond_status_var->getElementalValueOld(_current_elem) -
        _bond_status_var->getElementalValue(_current_elem)) > 0.5)
-    _bond_status_updated_times += 1;
+    _num_bond_status_updated += 1;
 }
 
 Real
 BondStatusConvergedPostprocessorPD::getValue()
 {
-  gatherSum(_bond_status_updated_times);
+  gatherSum(_num_bond_status_updated);
 
-  return _bond_status_updated_times;
+  return _num_bond_status_updated;
 }
 
 void
@@ -57,5 +57,5 @@ BondStatusConvergedPostprocessorPD::threadJoin(const UserObject & uo)
 {
   const BondStatusConvergedPostprocessorPD & pps =
       static_cast<const BondStatusConvergedPostprocessorPD &>(uo);
-  _bond_status_updated_times += pps._bond_status_updated_times;
+  _num_bond_status_updated += pps._num_bond_status_updated;
 }
