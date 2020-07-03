@@ -70,9 +70,6 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   registerSyntaxTask("AddCovarianceAction", "Covariance/*", "add_covariance");
   registerMooseObjectTask("add_covariance", CovarianceFunctionBase, false);
   addTaskDependency("add_covariance", "add_user_object");
-  // Adds action for loading Covariance data in model
-  registerTask("load_covariance_data", true);
-  addTaskDependency("load_covariance_data", "load_surrogate_data");
 }
 
 void

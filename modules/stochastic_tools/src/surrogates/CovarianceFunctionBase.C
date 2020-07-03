@@ -9,33 +9,35 @@
 
 #include "CovarianceFunctionBase.h"
 
-// InputParameters
-// CovarianceFunctionBase::validParams()
-// {
-//   InputParameters params = MooseObject::validParams();
-//   params.addRequiredParam<std::vector<Real>>("length_factor",
-//                                              "Length Factor to use for Covariance Kernel");
-//   params.addParam<Real>(
-//       "signal_variance", 1, "Signal Variance (sigma_f^2) to use for kernel calculation.");
-//   params.addParam<Real>(
-//       "noise_variance", 0, "Noise Variance (sigma_n^2) to use for kernel calculation.");
-//   return params;
-// }
-//
-// CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameters)
-//   : MooseObject(parameters),
-//   _length_factor(getParam<std::vector<Real>>("length_factor")),
-//   _signal_variance(getParam<Real>("signal_variance")),
-//   _noise_variance(getParam<Real>("noise_variance"))
-//
-// {
-// }
+InputParameters
+CovarianceFunctionBase::validParams()
+{
+  InputParameters params = MooseObject::validParams();
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length Factor to use for Covariance Kernel");
+  params.addParam<Real>(
+      "signal_variance", 1, "Signal Variance (sigma_f^2) to use for kernel calculation.");
+  params.addParam<Real>(
+      "noise_variance", 0, "Noise Variance (sigma_n^2) to use for kernel calculation.");
+  params.registerBase("CovarianceFunctionBase");
+  params.registerSystemAttributeName("CovarianceFunctionBase");
+  return params;
+}
 
-CovarianceFunctionBase::CovarianceFunctionBase(const std::vector<Real> & length_factor,
-                                               const Real & sigma_f_squared,
-                                               const Real & sigma_n_squared)
-  : _sigma_f_squared(sigma_f_squared),
-    _sigma_n_squared(sigma_n_squared),
-    _length_factor(length_factor)
+CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameters)
+  : MooseObject(parameters),
+    _length_factor(getParam<std::vector<Real>>("length_factor")),
+    _sigma_f_squared(getParam<Real>("signal_variance")),
+    _sigma_n_squared(getParam<Real>("noise_variance"))
+
 {
 }
+
+// CovarianceFunctionBase::CovarianceFunctionBase(const std::vector<Real> & length_factor,
+//                                                const Real & sigma_f_squared,
+//                                                const Real & sigma_n_squared)
+//   : _sigma_f_squared(sigma_f_squared),
+//     _sigma_n_squared(sigma_n_squared),
+//     _length_factor(length_factor)
+// {
+// }

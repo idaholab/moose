@@ -31,20 +31,9 @@ public:
                                           const bool is_self_covariance) const override;
 
   /// Used for outputting Hyper-parameter settings
-  void
-  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
+  void getHyperParameters(std::vector<std::vector<Real>> & vec) const override;
 
 private:
-  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
-
-  /// signal variance (\sigma_f^2)
-  Real _sigma_f_squared;
-
-  /// noise variance (\sigma_n^2)
-  Real _sigma_n_squared;
-
   /// gamma exponential factor for use in kernel
   Real _gamma;
 };

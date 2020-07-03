@@ -16,33 +16,39 @@ InputParameters
 SquaredExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
-  params.addClassDescription("Squared Exponential covariance function.");
-  params.addRequiredParam<std::vector<Real>>("length_factor",
-                                             "Length Factor to use for Covariance Kernel");
-  params.addRequiredParam<Real>("signal_variance",
-                                "Signal Variance (sigma_f^2) to use for kernel calculation.");
-  params.addRequiredParam<Real>("noise_variance",
-                                "Noise Variance (sigma_n^2) to use for kernel calculation.");
   return params;
 }
 
 SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters),
-    _length_factor(getParam<std::vector<Real>>("length_factor")),
-    _sigma_f_squared(getParam<Real>("signal_variance")),
-    _sigma_n_squared(getParam<Real>("noise_variance"))
+  : CovarianceFunctionBase(parameters)
 {
 }
 
-void
-SquaredExponentialCovariance::buildHyperParamMap(
-    std::unordered_map<std::string, Real> & map,
-    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
-{
-  map.insert({"signal_variance", _sigma_f_squared});
-  map.insert({"noise_variance", _sigma_n_squared});
+// SquaredExponentialCovariance::SquaredExponentialCovariance(
+//     const std::vector<Real> & length_factor,
+//     const Real & sigma_f_squared,
+//     const Real & sigma_n_squared)
+//   : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared)
+// {
+// }
+//
+// SquaredExponentialCovariance::SquaredExponentialCovariance(
+//     const std::vector<std::vector<Real>> & vec)
+//   : CovarianceFunctionBase(vec)
+// {
+//   _length_factor = vec[0];
+//   _sigma_f_squared = vec[1][0];
+//   _sigma_n_squared = vec[2][0];
+// }
 
-  vec_map.insert({"length_factor", _length_factor});
+void
+SquaredExponentialCovariance::getHyperParameters(std::vector<std::vector<Real>> & vec) const
+{
+  vec.resize(3);
+
+  vec[0] = _length_factor;
+  vec[1].push_back(_sigma_f_squared);
+  vec[2].push_back(_sigma_n_squared);
 }
 
 RealEigenMatrix

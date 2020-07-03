@@ -10,7 +10,7 @@
 #include "GaussianProcess.h"
 #include "Sampler.h"
 
-#include "SquaredExponentialCovarianceFunction.h"
+#include "CovarianceFunctionBase.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcess);
 
@@ -19,6 +19,7 @@ GaussianProcess::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
+  params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
   return params;
 }
 
@@ -29,10 +30,20 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _training_data(getModelData<RealEigenMatrix>("_training_data")),
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_id(getModelData<int>("_covar_id")),
-    _hyperparams(getModelData<std::vector<std::vector<Real>>>("_hyperparams"))
+    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve"))
 {
+  const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
+  FEProblemBase & feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"));
+
+  std::vector<CovarianceFunctionBase *> models;
+  feproblem.theWarehouse()
+      .query()
+      .condition<AttribName>(name)
+      .condition<AttribSystem>("CovarianceFunctionBase")
+      .queryInto(models);
+  if (models.empty())
+    mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
+  _covariance_function = models[0];
 }
 
 Real
@@ -59,25 +70,10 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 
   test_points = _param_standardizer.getStandardized(test_points);
 
-  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS
-  std::unique_ptr<CovarianceFunctionBase> covar_function = NULL;
-  if (_covar_id == 0)
-  {
-    covar_function.reset(new SquaredExponentialCovarianceFunction(_hyperparams));
-  }
-  if (_covar_id == 1)
-  {
-    covar_function.reset(new ExponentialCovarianceFunction(_hyperparams));
-  }
-  if (_covar_id == 2)
-  {
-    covar_function.reset(new MaternHalfIntCovarianceFunction(_hyperparams));
-  }
-  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS END
-
   RealEigenMatrix K_train_test =
-      covar_function->computeCovarianceMatrix(_training_params, test_points, false);
-  RealEigenMatrix K_test = covar_function->computeCovarianceMatrix(test_points, test_points, true);
+      _covariance_function->computeCovarianceMatrix(_training_params, test_points, false);
+  RealEigenMatrix K_test =
+      _covariance_function->computeCovarianceMatrix(test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);
