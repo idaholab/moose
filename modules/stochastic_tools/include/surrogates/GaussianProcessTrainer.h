@@ -15,9 +15,7 @@
 
 #include "Distribution.h"
 
-#include "SquaredExponentialCovarianceFunction.h"
-#include "ExponentialCovarianceFunction.h"
-#include "MaternHalfIntCovarianceFunction.h"
+#include "CovarianceFunctionBase.h"
 
 class GaussianProcessTrainer : public SurrogateTrainer
 {
@@ -41,9 +39,6 @@ private:
 
   /// Total number of parameters/dimensions
   unsigned int _n_params;
-
-  // Type of kernel function to be used. See CovarianceFunction for options
-  const MooseEnum & _kernel_type;
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
@@ -72,7 +67,7 @@ private:
   /// Switch for training data(y) standardization
   bool _standardize_data;
 
-  int & _covar_id;
-
   std::vector<std::vector<Real>> & _hyperparams;
+
+  const CovarianceFunctionBase * _covariance_function;
 };

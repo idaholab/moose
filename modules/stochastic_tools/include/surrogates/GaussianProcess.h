@@ -41,9 +41,5 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  /// Type of covariance function
-  const int & _covar_id;
-
-  /// Covariance function hyperparameters
-  const std::vector<std::vector<Real>> & _hyperparams;
+  const CovarianceFunctionBase * _covariance_function;
 };

@@ -7,30 +7,46 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MaternHalfIntCovarianceFunction.h"
+#include "MaternHalfIntCovariance.h"
 #include <cmath>
 
-MaternHalfIntCovarianceFunction::MaternHalfIntCovarianceFunction(
-    const std::vector<Real> & length_factor,
-    const Real & sigma_f_squared,
-    const Real & sigma_n_squared,
-    const unsigned int & p)
-  : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared), _p(p)
+registerMooseObject("StochasticToolsApp", MaternHalfIntCovariance);
+
+InputParameters
+MaternHalfIntCovariance::validParams()
+{
+  InputParameters params = CovarianceFunctionBase::validParams();
+  params.addRequiredParam<unsigned int>(
+      "p", "Integer p to use for Matern Hald Integer Covariance Kernel");
+  return params;
+}
+
+MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & parameters)
+  : CovarianceFunctionBase(parameters), _p(getParam<unsigned int>("p"))
 {
 }
 
-MaternHalfIntCovarianceFunction::MaternHalfIntCovarianceFunction(
-    const std::vector<std::vector<Real>> & vec)
-  : CovarianceFunctionBase(vec)
-{
-  _length_factor = vec[0];
-  _sigma_f_squared = vec[1][0];
-  _sigma_n_squared = vec[2][0];
-  _p = (unsigned int)round(vec[3][0]);
-}
+// MaternHalfIntCovariance::MaternHalfIntCovariance(
+//     const std::vector<Real> & length_factor,
+//     const Real & sigma_f_squared,
+//     const Real & sigma_n_squared,
+//     const unsigned int & p)
+//   : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared), _p(p)
+// {
+// }
+//
+// MaternHalfIntCovariance::MaternHalfIntCovariance(
+//     const std::vector<std::vector<Real>> & vec)
+//   : CovarianceFunctionBase(vec)
+// {
+//   _length_factor = vec[0];
+//   _sigma_f_squared = vec[1][0];
+//   _sigma_n_squared = vec[2][0];
+//   _p = (unsigned int)round(vec[3][0]);
+// }
 
 void
-MaternHalfIntCovarianceFunction::getHyperParameters(std::vector<std::vector<Real>> & vec) const
+MaternHalfIntCovariance::getHyperParameters(std::vector<std::vector<Real>> & vec) const
 {
   vec.resize(4);
 
@@ -41,9 +57,9 @@ MaternHalfIntCovarianceFunction::getHyperParameters(std::vector<std::vector<Real
 }
 
 RealEigenMatrix
-MaternHalfIntCovarianceFunction::computeCovarianceMatrix(const RealEigenMatrix & x,
-                                                         const RealEigenMatrix & xp,
-                                                         const bool is_self_covariance) const
+MaternHalfIntCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
+                                                 const RealEigenMatrix & xp,
+                                                 const bool is_self_covariance) const
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();

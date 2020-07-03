@@ -11,21 +11,23 @@
 
 #include "CovarianceFunctionBase.h"
 
-class SquaredExponentialCovarianceFunction : public CovarianceFunctionBase
+class SquaredExponentialCovariance : public CovarianceFunctionBase
 {
 public:
-  /// static InputParameters validParams();
-  /// CovarianceFunctionBase(const InputParameters & parameters);
-  SquaredExponentialCovarianceFunction(const std::vector<Real> & length_factor,
-                                       const Real & sigma_f_squared,
-                                       const Real & sigma_n_squared);
+  static InputParameters validParams();
+  SquaredExponentialCovariance(const InputParameters & parameters);
 
-  SquaredExponentialCovarianceFunction(const std::vector<std::vector<Real>> & vec);
+  // SquaredExponentialCovariance(const std::vector<Real> & length_factor,
+  //                                    const Real & sigma_f_squared,
+  //                                    const Real & sigma_n_squared);
+  //
+  // SquaredExponentialCovariance(const std::vector<std::vector<Real>> & vec);
 
   /// Generates the Covariance Matrix given two points in the parameter space
   RealEigenMatrix computeCovarianceMatrix(const RealEigenMatrix & x,
                                           const RealEigenMatrix & xp,
                                           const bool is_self_covariance) const override;
 
+  /// Used for outputting Hyper-parameter settings
   void getHyperParameters(std::vector<std::vector<Real>> & vec) const override;
 };

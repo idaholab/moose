@@ -12,31 +12,32 @@
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
 
-class CovarianceFunctionBase
+class CovarianceFunctionBase : public MooseObject
 {
 public:
-  /// static InputParameters validParams();
-  /// CovarianceFunctionBase(const InputParameters & parameters);
-  CovarianceFunctionBase(const std::vector<Real> & length_factor,
-                         const Real & sigma_f_squared,
-                         const Real & sigma_n_squared);
+  static InputParameters validParams();
+  CovarianceFunctionBase(const InputParameters & parameters);
+  // CovarianceFunctionBase(const std::vector<Real> & length_factor,
+  //                      const Real & sigma_f_squared,
+  //                      const Real & sigma_n_squared);
 
-  CovarianceFunctionBase(const std::vector<std::vector<Real>> & /*vec*/){};
+  // CovarianceFunctionBase(const std::vector<std::vector<Real>> & /*vec*/){};
 
   /// Generates the Covariance Matrix given two points in the parameter space
   virtual RealEigenMatrix computeCovarianceMatrix(const RealEigenMatrix & x,
                                                   const RealEigenMatrix & xp,
                                                   const bool is_self_covariance) const = 0;
 
+  /// Used for outputting Hyper-parameter settings
   virtual void getHyperParameters(std::vector<std::vector<Real>> & vec) const = 0;
 
 protected:
+  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
+  std::vector<Real> _length_factor;
+
   /// signal variance (\sigma_f^2)
   Real _sigma_f_squared;
 
   /// noise variance (\sigma_n^2)
   Real _sigma_n_squared;
-
-  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
 };

@@ -7,28 +7,42 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SquaredExponentialCovarianceFunction.h"
+#include "SquaredExponentialCovariance.h"
 #include <cmath>
 
-SquaredExponentialCovarianceFunction::SquaredExponentialCovarianceFunction(
-    const std::vector<Real> & length_factor,
-    const Real & sigma_f_squared,
-    const Real & sigma_n_squared)
-  : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared)
+registerMooseObject("StochasticToolsApp", SquaredExponentialCovariance);
+
+InputParameters
+SquaredExponentialCovariance::validParams()
+{
+  InputParameters params = CovarianceFunctionBase::validParams();
+  return params;
+}
+
+SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
+  : CovarianceFunctionBase(parameters)
 {
 }
 
-SquaredExponentialCovarianceFunction::SquaredExponentialCovarianceFunction(
-    const std::vector<std::vector<Real>> & vec)
-  : CovarianceFunctionBase(vec)
-{
-  _length_factor = vec[0];
-  _sigma_f_squared = vec[1][0];
-  _sigma_n_squared = vec[2][0];
-}
+// SquaredExponentialCovariance::SquaredExponentialCovariance(
+//     const std::vector<Real> & length_factor,
+//     const Real & sigma_f_squared,
+//     const Real & sigma_n_squared)
+//   : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared)
+// {
+// }
+//
+// SquaredExponentialCovariance::SquaredExponentialCovariance(
+//     const std::vector<std::vector<Real>> & vec)
+//   : CovarianceFunctionBase(vec)
+// {
+//   _length_factor = vec[0];
+//   _sigma_f_squared = vec[1][0];
+//   _sigma_n_squared = vec[2][0];
+// }
 
 void
-SquaredExponentialCovarianceFunction::getHyperParameters(std::vector<std::vector<Real>> & vec) const
+SquaredExponentialCovariance::getHyperParameters(std::vector<std::vector<Real>> & vec) const
 {
   vec.resize(3);
 
@@ -38,9 +52,9 @@ SquaredExponentialCovarianceFunction::getHyperParameters(std::vector<std::vector
 }
 
 RealEigenMatrix
-SquaredExponentialCovarianceFunction::computeCovarianceMatrix(const RealEigenMatrix & x,
-                                                              const RealEigenMatrix & xp,
-                                                              const bool is_self_covariance) const
+SquaredExponentialCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
+                                                      const RealEigenMatrix & xp,
+                                                      const bool is_self_covariance) const
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();

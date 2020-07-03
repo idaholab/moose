@@ -25,19 +25,9 @@ GaussianProcessTrainer::validParams()
   params.addRequiredParam<std::string>(
       "results_vector",
       "Name of vector from vectorpostprocessor with results of samples created by trainer");
-  MooseEnum kernels = MooseEnum("squared_exponential=0 exponential=1 matern_half_int=2");
-  params.addRequiredParam<MooseEnum>(
-      "kernel_function", kernels, "The kernel (covariance function) to use.");
+  params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions", "Names of the distributions samples were taken from.");
-  params.addRequiredParam<std::vector<Real>>("length_factor",
-                                             "Length Factor to use for Covariance Kernel");
-  params.addParam<Real>(
-      "signal_variance", 1, "Signal Variance (sigma_f^2) to use for kernel calculation.");
-  params.addParam<Real>(
-      "noise_variance", 0, "Noise Variance (sigma_n^2) to use for kernel calculation.");
-  params.addParam<Real>("gamma", "Gamma to use for Exponential Covariance Kernel");
-  params.addParam<unsigned int>("p", "Integer p to use for Matern Hald Integer Covariance Kernel");
   params.addParam<bool>(
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
@@ -48,7 +38,7 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    _kernel_type(getParam<MooseEnum>("kernel_function")),
+    //_kernel_type(getParam<MooseEnum>("kernel_function")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _training_data(declareModelData<RealEigenMatrix>("_training_data")),
@@ -57,10 +47,22 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _covar_id(declareModelData<int>("_covar_id")),
+    //_covar_id(declareModelData<int>("_covar_id")),
     _hyperparams(declareModelData<std::vector<std::vector<Real>>>("_hyperparams"))
 
 {
+  const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
+  FEProblemBase & feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"));
+
+  std::vector<CovarianceFunctionBase *> models;
+  feproblem.theWarehouse()
+      .query()
+      .condition<AttribName>(name)
+      .condition<AttribSystem>("CovarianceFunctionBase")
+      .queryInto(models);
+  if (models.empty())
+    mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
+  _covariance_function = models[0];
 }
 
 void
@@ -148,35 +150,8 @@ GaussianProcessTrainer::initialize()
 void
 GaussianProcessTrainer::execute()
 {
-  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS
-  _covar_id = int(_kernel_type);
-  std::vector<Real> length_factor(getParam<std::vector<Real>>("length_factor"));
-  Real signal_variance(getParam<Real>("signal_variance"));
-  Real noise_variance(getParam<Real>("noise_variance"));
-
-  std::unique_ptr<CovarianceFunctionBase> covar_function = NULL;
-  if (_covar_id == 0)
-  {
-    covar_function.reset(
-        new SquaredExponentialCovarianceFunction(length_factor, signal_variance, noise_variance));
-  }
-  if (_covar_id == 1)
-  {
-    Real gamma(getParam<Real>("gamma"));
-    covar_function.reset(
-        new ExponentialCovarianceFunction(length_factor, signal_variance, noise_variance, gamma));
-  }
-  if (_covar_id == 2)
-  {
-    int p(getParam<unsigned int>("p"));
-    covar_function.reset(
-        new MaternHalfIntCovarianceFunction(length_factor, signal_variance, noise_variance, p));
-  }
-  // Store hyperparameters for surrogate use
-  covar_function->getHyperParameters(_hyperparams);
-  // BLOCK FOR TESTING COVARIANCE FUNCTION CLASS END
-
-  _K = covar_function->computeCovarianceMatrix(_training_params, _training_params, true);
+  //_covariance_function->getHyperParameters(_hyperparams);
+  _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);
 }

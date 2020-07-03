@@ -80,13 +80,9 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    kernel_function = 'matern_half_int'   #Choose a Matern with half-integer argument for the kernel
+    covariance_function = 'covar'   #Choose a Matern with half-integer argument for the kernel
     standardize_params = 'true'           #Center and scale the training params
     standardize_data = 'true'             #Center and scale the training data
-    p = 2                                 #Set the p hyperparameter defining the half-integer value to use
-    signal_variance = 1                   #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-6                 #A small amount of noise can help with numerical stability
-    length_factor = '0.551133 0.551133'   #Select a length factor for each parameter (k and q)
     distributions = 'k_dist q_dist'
     sampler = train_sample
     results_vpp = results
@@ -98,6 +94,17 @@
   [GP_avg]
     type = GaussianProcess
     trainer = GP_avg_trainer
+    covariance_function = 'covar'
+  []
+[]
+
+[Covariance]
+  [covar]
+    type=MaternHalfIntCovariance
+    p = 2                                 #Define the exponential factor
+    signal_variance = 1                       #Use a signal variance of 1 in the kernel
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
   []
 []
 
