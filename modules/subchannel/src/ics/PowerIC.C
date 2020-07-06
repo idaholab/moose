@@ -11,7 +11,7 @@ PowerIC::validParams()
 {
   InputParameters params = IC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
-  params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column)");
+  params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column). It's a Radial Power Profile");
   params.addParam<FunctionName>("axial_heat_rate", 1.0, "user provided normalized function of axial heat rate [unitless]. The integral over pin length should equal the heated length" );
   return params;
 }
@@ -59,13 +59,17 @@ _axial_heat_rate(getFunction("axial_heat_rate"))
   _power_dis.resize(_mesh._ny - 1, _mesh._nx - 1);
   auto sum = _power_dis.sum();
   auto fpin_power = _power / sum;           // full pin power W
-  auto ref_power = _power_dis * fpin_power; // actual pin power W
+  _ref_power = _power_dis * fpin_power; // actual pin power W
   // Convert the actual pin power to a linear heat rate.
   auto heated_length = _mesh._heated_length; // in m
-  _ref_qprime = ref_power / heated_length; // average linear heat rate in W/m
+  _ref_qprime = _ref_power / heated_length; // average linear heat rate in W/m
+}
 
+void PowerIC::initialSetup()
+{
   _estimate_power.resize(_mesh._ny - 1, _mesh._nx - 1);
   _estimate_power.setZero();
+  std::cout << "name: " << _axial_heat_rate.name() << std::endl;
   for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++) // nz cells
   {
     // Compute the height of this element.
@@ -75,16 +79,22 @@ _axial_heat_rate(getFunction("axial_heat_rate"))
     auto z1 = _mesh._z_grid[iz - 1];
     Point p1(0 , 0, z1);
     Point p2(0 , 0, z2);
+    std::cout << "z1: " << z1 << std::endl;
+    std::cout << "Point 1: " << _axial_heat_rate.value(_t, p1) << std::endl;
     for (unsigned int i_pin = 0; i_pin <  (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++) //cycle through pins
     {
       unsigned int j = (i_pin / (_mesh._nx - 1));           // row
       unsigned int i = i_pin - j * (_mesh._nx - 1);         // column
-      _estimate_power(j , i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0; //trapezoidal rule
+      _estimate_power(j, i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0; //trapezoidal rule
     }
   }
 
-  _pin_power_correction = ref_power.cwiseQuotient(_estimate_power); // I want a division element by element
-}
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power); // I want a division element by element
+
+  std::cout << "ref_power: " << _ref_power << std::endl;
+  std::cout << "_estimate_power: " << _estimate_power << std::endl;
+  std::cout << "_pin_power_correction: " << _pin_power_correction << std::endl;
+};
 
 Real PowerIC::value(const Point & p)
 {
@@ -105,7 +115,7 @@ Real PowerIC::value(const Point & p)
   else if (i == 0)
     return 0.25 * (_ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) + _ref_qprime(j, i) * _pin_power_correction(j, i) ) * _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1)
-    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1)+ _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) * _axial_heat_rate.value(_t, p);
+    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) * _axial_heat_rate.value(_t, p);
   else if (j == 0)
     return 0.25 * (_ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) + _ref_qprime(j, i) * _pin_power_correction(j, i)) * _axial_heat_rate.value(_t, p);
   else if (j == _mesh._ny - 1)

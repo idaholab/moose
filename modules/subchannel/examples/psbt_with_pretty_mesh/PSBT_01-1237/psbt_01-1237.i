@@ -40,6 +40,23 @@ length = 3.658
   []
 []
 
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    value = '(pi/2.0)*sin(pi*z/L)'
+    vars = 'L'
+    vals = '${length}'
+  []
+[]
+
+[Modules]
+  [FluidProperties]
+    [water]
+      type = Water97FluidProperties
+    []
+  []
+[]
+
 [Problem]
   type = SubChannel1PhaseProblem
   T_in = 359.15
@@ -62,7 +79,7 @@ length = 3.658
     variable = q_prime
     power = 3.44e6
     filename = "power_profile.txt"
-    function = axial_heat_rate
+    axial_heat_rate = axial_heat_rate
   []
 []
 
