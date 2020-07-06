@@ -1,1 +1,3 @@
-!template load file=stubs/moose_object.md.template name=PODReducedBasisSurrogate syntax=/Surrogates/PODReducedBasisSurrogate
+# PODReducedBasisSurrogate
+
+!syntax description /Surrogates/PODReducedBasisSurrogate
