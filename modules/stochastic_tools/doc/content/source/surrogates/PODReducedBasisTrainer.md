@@ -1,5 +1,7 @@
 # PODReducedBasisTrainer
 
+!syntax description /Surrogates/PODReducedBasisTrainer
+
 ## Overview
 
 In this trainer, an intrusive Proper Orthogonal Decomposition (POD) based Reduced Basis (RB) method
@@ -244,6 +246,40 @@ As a final note, it must emphasized that even though obtaining snapshots and cre
 is a computationally expensive procedure, it has to be carried out only once. After
 this initial investment every new evaluation for a new parameter sample involves the summation
 and scaling of small dense matrices, which is of low computational cost.
+
+## Example Input File Syntax
+
+To get the snapshots, four essential blocks have to be added the main input file.
+First, a sampler has to be defined in `Samplers` to generate realizations for $\boldsymbol{\mu}$.
+These samples are then fed into a [PODFullSolveMultiApp.md] (defined
+in the `MultApps` block) which is capable of running simulations for each parameter.
+The solution vectors (snapshots) for each run are added to the trainer by a
+[SamplerSolutionTransfer.md] defined in the `Transfers` block. It is important to mention
+that the multiapp and transfer objects need to know about the trainer. This can be
+ensured using the `trainer` input argument. The number of collected snapshots is
+defined in the sampler object using the `num_rows` parameter.
+
+!listing rb_pod/internal/trainer.i block=Samplers
+
+!listing rb_pod/internal/trainer.i block=MultiApps
+
+The global basis functions are then plugged back into the same [PODFullSolveMultiApp.md]
+by a new [SamplerSolutionTransfer.md] and the residuals are evaluated. The residuals
+are transferred back to the trainer using a [ResidualTransfer.md].
+
+!listing rb_pod/internal/trainer.i block=Transfers
+
+Finally, the [PODReducedBasisTrainer.md] is defined in the `Trainers` block. It requires
+the names of the variables (`var_names`) one wishes to create reduced basis for and the names of the
+tags (`tag_names`) associated with the affine components of the full-order operator.
+Additionally, a vector specifying which tag corresponds to a linear operator and which to
+a source term needs to be added as well (`independent`). To specify the energy retention
+limits for reach variable ($\tau_i$), one needs to specify `en_limits`.
+In the following example the `execute_on` parameter is set to '`timestep_begin final`' which means
+that at the beginning of the training it will create the basis functions while at the
+end it will create the reduced operators.
+
+!listing rb_pod/internal/trainer.i block=Trainers
 
 !syntax parameters /Trainers/PODReducedBasisTrainer
 
