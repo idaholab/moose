@@ -51,9 +51,7 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
         declareADProperty<RealVectorValue>("coupled_force_strong_residual")),
     // _mms_function_strong_residual(declareProperty<RealVectorValue>("mms_function_strong_residual")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
-    _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints()),
-    _coupled_force_var(nullptr),
-    _coupled_force_vector_function(nullptr)
+    _ad_q_point(_bnd ? _assembly.adQPointsFace() : _assembly.adQPoints())
 {
   if (!_object_tracker)
   {
@@ -90,10 +88,11 @@ INSADMaterial::initialSetup()
   if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force")))
   {
     if (_object_tracker->isTrackerParamValid("coupled_force_var"))
-      _coupled_force_var = _object_tracker->get<const ADVectorVariableValue *>("coupled_force_var");
+      _coupled_force_var =
+          _object_tracker->get<std::vector<const ADVectorVariableValue *>>("coupled_force_var");
     else if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
       _coupled_force_vector_function =
-          _object_tracker->get<const Function *>("coupled_force_vector_function");
+          _object_tracker->get<std::vector<const Function *>>("coupled_force_vector_function");
   }
 }
 
@@ -116,15 +115,19 @@ INSADMaterial::computeQpProperties()
                                        ((*_temperature)[_qp] - (*_ref_temp)[_qp]);
   if (_has_coupled_force)
   {
-    if (_coupled_force_var)
-      _coupled_force_strong_residual[_qp] = -(*_coupled_force_var)[_qp];
-    else
+    _coupled_force_strong_residual[_qp] = 0;
+    mooseAssert(!(_coupled_force_var.empty() && _coupled_force_vector_function.empty()),
+                "Either the coupled force var or the coupled force vector function must be "
+                "non-empty in 'INSADMaterial'");
+    for (const auto * var : _coupled_force_var)
     {
-      mooseAssert(_coupled_force_vector_function,
-                  "Either the coupled force var or the coupled force vector function must be "
-                  "non-null in 'INSADMaterial'");
-      _coupled_force_strong_residual[_qp] =
-          -_coupled_force_vector_function->vectorValue(_t, _q_point[_qp]);
+      mooseAssert(var, "null coupled variable in INSADMaterial");
+      _coupled_force_strong_residual[_qp] -= (*var)[_qp];
+    }
+    for (const auto * fn : _coupled_force_vector_function)
+    {
+      mooseAssert(fn, "null coupled function in INSADMaterial");
+      _coupled_force_strong_residual[_qp] -= fn->vectorValue(_t, _q_point[_qp]);
     }
   }
 

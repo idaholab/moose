@@ -67,7 +67,7 @@
   [momentum_coupled_force]
     type = INSADMomentumCoupledForce
     variable = velocity
-    vector_function = vector_func
+    vector_function = 'vector_func'
   []
 
   [./momentum_supg]

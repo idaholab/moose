@@ -113,9 +113,9 @@ protected:
   /// The gravity vector
   RealVectorValue _gravity_vector;
 
-  /// An optionally copuled vector var
-  const ADVectorVariableValue * _coupled_force_var;
+  /// optionally copuled vector var(s)
+  std::vector<const ADVectorVariableValue *> _coupled_force_var;
 
-  /// An optional vector function
-  const Function * _coupled_force_vector_function;
+  /// optional vector function(s)
+  std::vector<const Function *> _coupled_force_vector_function;
 };

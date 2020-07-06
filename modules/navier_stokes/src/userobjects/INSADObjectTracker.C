@@ -59,10 +59,10 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "has_coupled_force",
       false,
       "Whether the simulation has a force due to a coupled vector variable/vector function");
-  _tracker_params.addParam<const ADVectorVariableValue *>(
-      "coupled_force_var", "The variable providing the coupled force");
-  _tracker_params.addParam<const Function *>("coupled_force_vector_function",
-                                             "The function standing in as a coupled force");
+  _tracker_params.addParam<std::vector<const ADVectorVariableValue *>>(
+      "coupled_force_var", "Variables imposing coupled forces");
+  _tracker_params.addParam<std::vector<const Function *>>(
+      "coupled_force_vector_function", "The function(s) standing in as a coupled force(s)");
 }
 
 void

@@ -39,7 +39,7 @@
     pspg = true
 
     has_coupled_force = true
-    coupled_force_vector_function = vector_func
+    coupled_force_vector_function = 'vector_func'
   []
 []
 

@@ -99,9 +99,9 @@ INSAction::validParams()
       "has_coupled_force",
       false,
       "Whether the simulation has a force due to a coupled vector variable/vector function");
-  params.addCoupledVar("coupled_force_var", "The variable providing the coupled force");
-  params.addParam<FunctionName>("coupled_force_vector_function",
-                                "The function standing in as a coupled force");
+  params.addCoupledVar("coupled_force_var", "The variable(s) providing the coupled force(s)");
+  params.addParam<std::vector<FunctionName>>("coupled_force_vector_function",
+                                             "The function(s) standing in as a coupled force");
 
   params.addParam<std::vector<BoundaryName>>(
       "velocity_boundary", std::vector<BoundaryName>(), "Boundaries with given velocities");
@@ -223,10 +223,6 @@ INSAction::INSAction(InputParameters parameters)
       mooseError("Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
                  "set for the "
                  "'INSADMomentumCoupledForce' object");
-    else if (has_coupled && has_function)
-      mooseError(
-          "Both the 'coupled_force_var' or 'coupled_force_vector_function' param are set for the "
-          "'INSADMomentumCoupledForce' object. Please use one or the other.");
   }
 }
 
@@ -688,8 +684,8 @@ INSAction::addINSMomentum()
       if (isParamValid("coupled_force_var"))
         params.set<CoupledName>("coupled_vector_var") = getParam<CoupledName>("coupled_force_var");
       else if (isParamValid("coupled_force_vector_function"))
-        params.set<FunctionName>("vector_function") =
-            getParam<FunctionName>("coupled_force_vector_function");
+        params.set<std::vector<FunctionName>>("vector_function") =
+            getParam<std::vector<FunctionName>>("coupled_force_vector_function");
       else
         mooseError(
             "Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
