@@ -11,7 +11,7 @@ and assembles the reduced equation system for a new parameter sample ($\boldsymb
 \left(\sum \limits_{i=1}^{N_A} f^A_i(\boldsymbol{\mu^* })\textbf{A}_i^r\right)\textbf{c}(\boldsymbol{\mu^* }) =
 \sum \limits_{i=1}^{N_b} f^b_i(\boldsymbol{\mu^* })\textbf{b}_i^r.
 
-Following this, the reduced equation system is solved for $textbf{c}(\boldsymbol{\mu^* })$ and
+Following this, the reduced equation system is solved for $\textbf{c}(\boldsymbol{\mu^* })$ and
 an approximate solution is reconstructed as
 
 !equation id=full_sol_approximation

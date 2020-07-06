@@ -172,7 +172,6 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     // Getting a cutoff for the number of modes. The functio nrequires a sorted list,
     // thus the temporary vector is sorted.
     std::stable_sort(v.begin(), v.end(), std::greater<Real>());
-    std::cout << std::setprecision(10) << _en_limits[v_ind] << std::endl;
     unsigned int cutoff = determineNumberOfModes(_en_limits[v_ind], v);
 
     // Initializing the actual containers for the eigenvectors and eigenvalues.
