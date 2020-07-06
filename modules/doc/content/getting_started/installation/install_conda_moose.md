@@ -18,15 +18,3 @@ You will have successfully activated the moose environment when you see (moose) 
 
 !alert note
 Know that you will need to `conda activate moose` again for +each terminal window you open+. If you wish to make this automatic, you can add that command to the end of your shell profile.
-
-## Keeping Conda up to date
-
-The MOOSE team will make periodic updates to the conda packages. To stay up-to-date, activate the moose environment, and perform an update:
-
-```bash
-conda activate moose
-conda update --all
-```
-
-!alert note title=Keep Conda updates and MOOSE updates in sync
-Know, that after performing a conda update, it is always advisable to update and rebuild MOOSE, and/or your Application(s).
