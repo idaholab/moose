@@ -334,7 +334,7 @@ SubChannel1PhaseProblem::externalSolve()
             auto mdot_out = mdot_in - SumWij_soln(node_out);
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
-                          q_prime_soln(node_out) * dz); //need to think about this
+                          (q_prime_soln(node_out) + q_prime_soln(node_in))* dz / 2.0); //need to think about this
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
@@ -449,6 +449,9 @@ SubChannel1PhaseProblem::externalSolve()
     Total_crossflow_20 += SumWij_soln(node_20);
   }
 
+  auto POWER = (houtMdotout - hinMdotin);
+  _console << "POWER : " << std::setprecision(15) << POWER << "\n";
+
   for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
   {
     double Total_crossflow = 0.0;
@@ -458,6 +461,11 @@ SubChannel1PhaseProblem::externalSolve()
       Total_crossflow += SumWij_soln(node);
     }
   }
+
+  std::ofstream myfile1;
+  myfile1.open ("Temp_out.txt",std::ofstream::trunc);
+  myfile1 << std::setprecision(3) << std::fixed << Temp_out <<"\n";
+  myfile1.close();
 
   _console << "Finished executing subchannel solver\n";
 }
