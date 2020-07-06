@@ -43,8 +43,7 @@ length = 3.658
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    # value = '(pi/2.0)*sin(pi*z/L)'
-    value = '1.0'
+    value = '(pi/2)*sin(pi*z/L)'
     vars = 'L'
     vals = '${length}'
   []
