@@ -683,14 +683,9 @@ INSAction::addINSMomentum()
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       if (isParamValid("coupled_force_var"))
         params.set<CoupledName>("coupled_vector_var") = getParam<CoupledName>("coupled_force_var");
-      else if (isParamValid("coupled_force_vector_function"))
+      if (isParamValid("coupled_force_vector_function"))
         params.set<std::vector<FunctionName>>("vector_function") =
             getParam<std::vector<FunctionName>>("coupled_force_vector_function");
-      else
-        mooseError(
-            "Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be "
-            "set if adding the 'INSADMomentumCoupledForce' object throught the incompressible "
-            "Navier-Stokes action.");
 
       _problem->addKernel(kernel_type, "ins_momentum_coupled_force", params);
     }

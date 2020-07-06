@@ -22,8 +22,8 @@ INSADMomentumCoupledForce::validParams()
   params.addCoupledVar(
       "coupled_vector_var",
       "The coupled vector variable applying the force. Positive variable components represent "
-      "momentum sinks in that component direction, e.g. if the x-component is positive then this "
-      "object imposes a momentum sink in the +x direction. Multiple variable names can be "
+      "momentum sources in that component direction, e.g. if the x-component is positive then this "
+      "object imposes a momentum source in the +x direction. Multiple variable names can be "
       "provided; the result will be a summed force.");
   params.addParam<std::vector<FunctionName>>(
       "vector_function",

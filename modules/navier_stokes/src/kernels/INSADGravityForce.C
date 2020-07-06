@@ -19,7 +19,6 @@ INSADGravityForce::validParams()
   InputParameters params = ADVectorKernelValue::validParams();
   params.addClassDescription("Computes a body force due to gravity.");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
   return params;
 }
 

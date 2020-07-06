@@ -90,7 +90,7 @@ INSADMaterial::initialSetup()
     if (_object_tracker->isTrackerParamValid("coupled_force_var"))
       _coupled_force_var =
           _object_tracker->get<std::vector<const ADVectorVariableValue *>>("coupled_force_var");
-    else if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
+    if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
       _coupled_force_vector_function =
           _object_tracker->get<std::vector<const Function *>>("coupled_force_vector_function");
   }
