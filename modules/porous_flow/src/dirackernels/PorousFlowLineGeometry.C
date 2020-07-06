@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowLineGeometry.h"
+#include "RayTracing.h"
+#include "LineSegment.h"
 #include "libmesh/utility.h"
 
 #include <fstream>
@@ -55,7 +57,7 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
   if (isParamValid("line_base") && !_point_file.empty())
     paramError("point_file",
                "PorousFlowLineGeometry: must specify only one of 'point_file' and 'line_base'");
-  if (!isParamValid("line_base") && !isParamValid("point_file"))
+  if (!isParamValid("line_base") && _point_file.empty())
     paramError("point_file",
                "PorousFlowLineGeometry: must specify at least one of 'point_file' and 'line_base'");
 
@@ -85,32 +87,35 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
       }
     }
     file.close();
+    calcLineLengths();
   }
   else
   {
-    auto base = getParam<std::vector<Real>>("line_base");
-    if (base.size() != _mesh.dimension() + 1)
+    _line_base = getParam<std::vector<Real>>("line_base");
+    if (_line_base.size() != _mesh.dimension() + 1)
       paramError("line_base",
                  "PorousFlowLineGeometry: wrong number of arguments - got ",
-                 base.size(),
+                 _line_base.size(),
                  ", expected ",
                  _mesh.dimension() + 1,
                  " '<weight> <x> [<y> [z]]'");
 
-    for (int i = base.size(); i < 4; i++)
-      base.push_back(0); // fill out zeros up to 3 dimensions
-    _rs.push_back(base[0]);
-    _xs.push_back(base[1]);
-    _ys.push_back(base[2]);
-    _zs.push_back(base[3]);
+    for (size_t i = _line_base.size(); i < 4; i++)
+      _line_base.push_back(0); // fill out zeros up to weight+3 dimensions
+    regenPoints();
   }
+}
 
+void
+PorousFlowLineGeometry::calcLineLengths()
+{
   const int num_pts = _zs.size();
   _bottom_point(0) = _xs[num_pts - 1];
   _bottom_point(1) = _ys[num_pts - 1];
   _bottom_point(2) = _zs[num_pts - 1];
 
   // construct the line-segment lengths between each point
+  _half_seg_len.clear();
   _half_seg_len.resize(std::max(num_pts - 1, 1));
   for (unsigned int i = 0; i + 1 < _xs.size(); ++i)
   {
@@ -128,6 +133,64 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
   }
   if (num_pts == 1)
     _half_seg_len[0] = _line_length;
+}
+
+void
+PorousFlowLineGeometry::regenPoints()
+{
+  if (!_point_file.empty())
+    return;
+
+  // recalculate the auto-generated points:
+  _rs.clear();
+  _xs.clear();
+  _ys.clear();
+  _zs.clear();
+
+  // add point for each cell the line passes through
+  Point p0(_line_base[1], _line_base[2], _line_base[3]);
+  Point p1 = p0 + _line_length * _line_direction / _line_direction.norm();
+  auto ploc = _mesh.getPointLocator();
+  std::vector<Elem *> elems;
+  std::vector<LineSegment> segs;
+  Moose::elementsIntersectedByLine(p0, p1, _mesh, *ploc, elems, segs);
+  for (size_t i = 0; i < segs.size(); i++)
+  {
+    // elementsIntersectedByLine sometimes returns segments with coincident points - check for this:
+    auto & seg = segs[i];
+    if (seg.start() == seg.end())
+      continue;
+
+    auto middle = (seg.start() + seg.end()) * 0.5;
+    _rs.push_back(_line_base[0]);
+    _xs.push_back(middle(0));
+    _ys.push_back(middle(1));
+    _zs.push_back(middle(2));
+  }
+
+  // make the start point be the line base point
+  _rs.front() = _line_base[0];
+  _xs.front() = p0(0);
+  _ys.front() = p0(1);
+  _zs.front() = p0(2);
+
+  // force the end point only if our line traverses more than one element
+  if (segs.size() > 1)
+  {
+    _rs.back() = _line_base[0];
+    _xs.back() = p1(0);
+    _ys.back() = p1(1);
+    _zs.back() = p1(2);
+  }
+
+  calcLineLengths();
+}
+
+void
+PorousFlowLineGeometry::meshChanged()
+{
+  DiracKernel::meshChanged();
+  regenPoints();
 }
 
 bool
