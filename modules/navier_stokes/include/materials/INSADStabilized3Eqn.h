@@ -46,8 +46,8 @@ protected:
   using INSADTauMaterialTempl<INSAD3Eqn>::_cp;
   using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_advective_strong_residual;
   using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_td_strong_residual;
-  using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_wall_convection_strong_residual;
+  using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_ambient_convection_strong_residual;
   using INSADTauMaterialTempl<INSAD3Eqn>::_temperature_source_strong_residual;
-  using INSADTauMaterialTempl<INSAD3Eqn>::_has_wall_convection;
+  using INSADTauMaterialTempl<INSAD3Eqn>::_has_ambient_convection;
   using INSADTauMaterialTempl<INSAD3Eqn>::_has_heat_source;
 };

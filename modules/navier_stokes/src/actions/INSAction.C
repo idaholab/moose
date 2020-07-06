@@ -67,7 +67,7 @@ INSAction::validParams()
                                              "Dirichlet boundaries for temperature equation");
   params.addParam<std::vector<FunctionName>>(
       "temperature_function", std::vector<FunctionName>(), "Temperature on Dirichlet boundaries");
-  addWallConvectionParams(params);
+  addAmbientConvectionParams(params);
   params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
@@ -192,13 +192,14 @@ INSAction::INSAction(InputParameters parameters)
       mooseError("Boussinesq approximation has not been implemented for non-AD");
   }
 
-  if (getParam<bool>("has_wall_convection"))
+  if (getParam<bool>("has_ambient_convection"))
   {
-    if (!isParamValid("wall_convection_alpha"))
-      mooseError("If 'has_wall_convection' is true, then 'wall_convection_alpha' must be set.");
+    if (!isParamValid("ambient_convection_alpha"))
+      mooseError(
+          "If 'has_ambient_convection' is true, then 'ambient_convection_alpha' must be set.");
 
-    if (!isParamValid("wall_temperature"))
-      mooseError("If 'has_wall_convection' is true, then 'wall_temperature' must be set.");
+    if (!isParamValid("ambient_temperature"))
+      mooseError("If 'has_ambient_convection' is true, then 'ambient_temperature' must be set.");
   }
 
   if (getParam<bool>("has_heat_source"))
@@ -759,16 +760,16 @@ INSAction::addINSTemperature()
       _problem->addKernel(kernel_type, "ins_temperature_supg", params);
     }
 
-    if (getParam<bool>("has_wall_convection"))
+    if (getParam<bool>("has_ambient_convection"))
     {
-      const std::string kernel_type = "INSADEnergyWallConvection";
+      const std::string kernel_type = "INSADEnergyAmbientConvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
-      params.set<Real>("alpha") = getParam<Real>("wall_convection_alpha");
-      params.set<Real>("T_wall") = getParam<Real>("wall_temperature");
-      _problem->addKernel(kernel_type, "ins_temperature_wall_convection", params);
+      params.set<Real>("alpha") = getParam<Real>("ambient_convection_alpha");
+      params.set<Real>("T_ambient") = getParam<Real>("ambient_temperature");
+      _problem->addKernel(kernel_type, "ins_temperature_ambient_convection", params);
     }
 
     if (getParam<bool>("has_heat_source"))

@@ -79,11 +79,11 @@
     thermal_conductivity = 'k'
   [../]
 
-  [temperature_wall_convection]
-    type = INSADEnergyWallConvection
+  [temperature_ambient_convection]
+    type = INSADEnergyAmbientConvection
     variable = temperature
     alpha = 1
-    T_wall = 0.5
+    T_ambient = 0.5
   []
 
   [temperature_supg]

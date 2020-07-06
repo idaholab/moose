@@ -4,7 +4,7 @@
     input = 'steady.i'
     exodiff = 'steady_out.e'
     requirement = 'The system shall be able to model heat transfer from ambient surroundings using a volumetric approximation.'
-    design = 'INSADEnergyWallConvection.md'
+    design = 'INSADEnergyAmbientConvection.md'
     issues = '#15500'
   []
   [steady-action]
@@ -12,7 +12,7 @@
     input = 'steady-action.i'
     exodiff = 'steady-action_out.e'
     requirement = 'The system shall be able to build a simulation, modeling heat transfer from ambient surroundings, using an automated action syntax.'
-    design = 'INSADEnergyWallConvection.md'
+    design = 'INSADEnergyAmbientConvection.md'
     issues = '#15500'
   []
 []

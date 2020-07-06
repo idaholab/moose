@@ -33,9 +33,9 @@
     add_temperature_equation = true
     fixed_temperature_boundary = 'bottom top'
     temperature_function = '1 0'
-    has_wall_convection = true
-    wall_convection_alpha = 1
-    wall_temperature = 0.5
+    has_ambient_convection = true
+    ambient_convection_alpha = 1
+    ambient_temperature = 0.5
 
     supg = true
     pspg = true

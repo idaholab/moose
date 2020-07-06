@@ -23,9 +23,9 @@ template <typename>
 class MaterialProperty;
 
 /**
- * Global for adding wall convection parameters
+ * Global for adding ambient convection parameters
  */
-void addWallConvectionParams(InputParameters & params);
+void addAmbientConvectionParams(InputParameters & params);
 
 /**
  * Object for tracking what kernels have been added to an INSAD simulation. This is used to

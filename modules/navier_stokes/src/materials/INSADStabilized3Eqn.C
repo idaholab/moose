@@ -63,8 +63,8 @@ INSADStabilized3Eqn::computeQpProperties()
   if (_has_transient)
     _temperature_strong_residual[_qp] += _temperature_td_strong_residual[_qp];
 
-  if (_has_wall_convection)
-    _temperature_strong_residual[_qp] += _temperature_wall_convection_strong_residual[_qp];
+  if (_has_ambient_convection)
+    _temperature_strong_residual[_qp] += _temperature_ambient_convection_strong_residual[_qp];
 
   if (_has_heat_source)
     _temperature_strong_residual[_qp] += _temperature_source_strong_residual[_qp];

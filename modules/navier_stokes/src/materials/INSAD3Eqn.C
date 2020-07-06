@@ -33,8 +33,8 @@ INSAD3Eqn::INSAD3Eqn(const InputParameters & parameters)
     _temperature_advective_strong_residual(
         declareADProperty<Real>("temperature_advective_strong_residual")),
     _temperature_td_strong_residual(declareADProperty<Real>("temperature_td_strong_residual")),
-    _temperature_wall_convection_strong_residual(
-        declareADProperty<Real>("temperature_wall_convection_strong_residual")),
+    _temperature_ambient_convection_strong_residual(
+        declareADProperty<Real>("temperature_ambient_convection_strong_residual")),
     _temperature_source_strong_residual(
         declareADProperty<Real>("temperature_source_strong_residual")),
     _heat_source_var(nullptr),
@@ -50,10 +50,10 @@ INSAD3Eqn::initialSetup()
   if (_has_transient)
     _temperature_dot = &adCoupledDot("temperature");
 
-  if ((_has_wall_convection = _object_tracker->get<bool>("has_wall_convection")))
+  if ((_has_ambient_convection = _object_tracker->get<bool>("has_ambient_convection")))
   {
-    _wall_convection_alpha = _object_tracker->get<Real>("wall_convection_alpha");
-    _wall_temperature = _object_tracker->get<Real>("wall_temperature");
+    _ambient_convection_alpha = _object_tracker->get<Real>("ambient_convection_alpha");
+    _ambient_temperature = _object_tracker->get<Real>("ambient_temperature");
   }
 
   if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source")))
@@ -85,9 +85,9 @@ INSAD3Eqn::computeQpProperties()
     _temperature_td_strong_residual[_qp] = _cp[_qp] * _rho[_qp] * (*_temperature_dot)[_qp];
   }
 
-  if (_has_wall_convection)
-    _temperature_wall_convection_strong_residual[_qp] =
-        _wall_convection_alpha * (_temperature[_qp] - _wall_temperature);
+  if (_has_ambient_convection)
+    _temperature_ambient_convection_strong_residual[_qp] =
+        _ambient_convection_alpha * (_temperature[_qp] - _ambient_temperature);
 
   if (_has_heat_source)
   {
