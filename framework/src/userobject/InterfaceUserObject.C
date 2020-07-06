@@ -35,6 +35,7 @@ InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
     NeighborCoupleable(this, false, false),
     MooseVariableDependencyInterface(),
     TransientInterface(this),
+    ElementIDInterface(this),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
