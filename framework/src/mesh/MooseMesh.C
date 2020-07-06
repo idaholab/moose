@@ -478,6 +478,7 @@ MooseMesh::update()
   buildNodeList();
   buildBndElemList();
   cacheInfo();
+  buildElemIDInfo();
 
   _face_info_dirty = true;
 }
@@ -726,6 +727,76 @@ MooseMesh::buildNodeList()
 
   // This sort is here so that boundary conditions are always applied in the same order
   std::sort(_bnd_nodes.begin(), _bnd_nodes.end(), BndNodeCompare());
+}
+
+void
+MooseMesh::buildElemIDInfo()
+{
+  unsigned int n = getMesh().n_elem_integers() + 1;
+
+  _block_id_mapping.clear();
+  _max_ids.clear();
+  _min_ids.clear();
+  _id_identical_flag.clear();
+
+  _block_id_mapping.resize(n);
+  _max_ids.resize(n, std::numeric_limits<dof_id_type>::min());
+  _min_ids.resize(n, std::numeric_limits<dof_id_type>::max());
+  _id_identical_flag.resize(n, std::vector<bool>(n, true));
+  for (const auto & elem : getMesh().active_local_element_ptr_range())
+    for (unsigned int i = 0; i < n; ++i)
+    {
+      auto id = (i == n - 1 ? elem->subdomain_id() : elem->get_extra_integer(i));
+      _block_id_mapping[i][elem->subdomain_id()].insert(id);
+      if (id > _max_ids[i])
+        _max_ids[i] = id;
+      if (id < _min_ids[i])
+        _min_ids[i] = id;
+      for (unsigned int j = 0; j < n; ++j)
+      {
+        auto idj = (j == n - 1 ? elem->subdomain_id() : elem->get_extra_integer(j));
+        if (i != j && _id_identical_flag[i][j] && id != idj)
+          _id_identical_flag[i][j] = false;
+      }
+    }
+
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    for (auto & blk : meshSubdomains())
+      comm().set_union(_block_id_mapping[i][blk]);
+    comm().min(_id_identical_flag[i]);
+  }
+  comm().max(_max_ids);
+  comm().min(_min_ids);
+}
+
+std::set<dof_id_type>
+MooseMesh::getAllElemIDs(unsigned int elem_id_index) const
+{
+  std::set<dof_id_type> unique_ids;
+  for (auto & pair : _block_id_mapping[elem_id_index])
+    for (auto & id : pair.second)
+      unique_ids.insert(id);
+  return unique_ids;
+}
+
+std::set<dof_id_type>
+MooseMesh::getElemIDsOnBlocks(unsigned int elem_id_index, const std::set<SubdomainID> & blks) const
+{
+  std::set<dof_id_type> unique_ids;
+  for (auto & blk : blks)
+  {
+    if (blk == Moose::ANY_BLOCK_ID)
+      return getAllElemIDs(elem_id_index);
+
+    auto it = _block_id_mapping[elem_id_index].find(blk);
+    if (it == _block_id_mapping[elem_id_index].end())
+      mooseError("Block ", blk, " is not available on the mesh");
+
+    for (auto & mid : it->second)
+      unique_ids.insert(mid);
+  }
+  return unique_ids;
 }
 
 void
