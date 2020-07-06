@@ -19,7 +19,7 @@
   [./create_interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = rename_subdomains
-    master_block = stainless_steel
+    primary_block = stainless_steel
     paired_block = graphite
     new_boundary = 'ssg_interface'
   [../]

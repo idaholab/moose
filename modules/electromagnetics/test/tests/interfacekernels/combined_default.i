@@ -31,7 +31,7 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = break_boundary
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
   [../]
