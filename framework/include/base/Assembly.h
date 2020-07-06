@@ -299,6 +299,14 @@ public:
    */
   const dof_id_type & extraElemID(unsigned int id) const { return _extra_elem_ids[id]; }
 
+  /**
+   * Returns an integer ID of the current element given the index associated with the integer
+   */
+  const dof_id_type & extraElemIDNeighbor(unsigned int id) const
+  {
+    return _neighbor_extra_elem_ids[id];
+  }
+
   const MooseArray<ADPoint> & adNormals() const { return _ad_normals; }
 
   const MooseArray<ADPoint> & adQPoints() const
@@ -1851,6 +1859,8 @@ private:
 
   /// Extra element IDs
   std::vector<dof_id_type> _extra_elem_ids;
+  /// Extra element IDs of neighbor
+  std::vector<dof_id_type> _neighbor_extra_elem_ids;
   /// Holds pointers to the dimension's normal vectors
   std::map<unsigned int, const std::vector<Point> *> _holder_normals;
 

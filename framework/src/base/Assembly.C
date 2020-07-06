@@ -145,7 +145,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   // _coord_msm
   _fe_msm->get_xyz();
 
-  _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers());
+  _extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
+  _neighbor_extra_elem_ids.resize(_mesh.getMesh().n_elem_integers() + 1);
 }
 
 Assembly::~Assembly()
@@ -763,8 +764,10 @@ Assembly::reinitFE(const Elem * elem)
     }
   }
 
-  for (unsigned int i = 0; i < _extra_elem_ids.size(); ++i)
+  auto n = _extra_elem_ids.size() - 1;
+  for (auto i : make_range(n))
     _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
+  _extra_elem_ids[n] = _current_elem->subdomain_id();
 
   if (_xfem != nullptr)
     modifyWeightsDueToXFEM(elem);
@@ -1269,6 +1272,11 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 
   if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
+
+  auto n = _extra_elem_ids.size() - 1;
+  for (auto i : make_range(n))
+    _extra_elem_ids[i] = _current_elem->get_extra_integer(i);
+  _extra_elem_ids[n] = _current_elem->subdomain_id();
 }
 
 void
@@ -1622,6 +1630,11 @@ Assembly::reinitNeighbor(const Elem * neighbor, const std::vector<Point> & refer
     for (unsigned int qp = 0; qp < qrule->n_points(); qp++)
       _current_neighbor_volume += JxW[qp] * _coord_neighbor[qp];
   }
+
+  auto n = _neighbor_extra_elem_ids.size() - 1;
+  for (auto i : make_range(n))
+    _neighbor_extra_elem_ids[i] = _current_neighbor_elem->get_extra_integer(i);
+  _neighbor_extra_elem_ids[n] = _current_neighbor_elem->subdomain_id();
 }
 
 template <typename Points, typename Coords>
