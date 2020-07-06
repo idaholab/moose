@@ -1,50 +1,53 @@
 [Tests]
-  design = 'MooseDocs/index.md'
-  issues = '#6699'
-  [core]
-    type = PythonUnitTest
-    input = test_core.py
-    requirement = "The documentation system shall include basic support for a markdown-like syntax."
-  []
-  [comment]
-    type = PythonUnitTest
-    input = test_comment.py
-    requirement = "The documentation system shall support comments within markdown syntax."
-  []
-  [acronym]
-    type = PythonUnitTest
-    input = test_acronym.py
-    requirement = "The documentation system shall support acronyms within markdown syntax."
-    issues = '#6699 #13611'
-  []
-  [sqa]
-    type = PythonUnitTest
-    input = test_sqa.py
-    requirement = "The documentation system shall include tools for building software quality documents."
-    issues = '#6699 #12049'
-  []
-  [autolink]
-    type = PythonUnitTest
-    input = test_autolink.py
-    requirement = "The documentation system shall include tools for automatically cross-linking files."
-    issues = '#6699 #13567'
-  []
-  [civet]
-    type = PythonUnitTest
-    input = test_civet.py
-    requirement = "The documentation system shall include tools for linking to continuous integration testing results."
-    issues = '#12049'
-  []
-  [content]
-    type = PythonUnitTest
-    input = test_content.py
-    requirement = "The documentation system shall include tools for listing and linking to content within and across documents."
-    issues = '#9638'
-  []
-  [appsyntax]
-    type = PythonUnitTest
-    input = test_appsyntax.py
-    requirement = "The documentation system shall include tools for automatically retrieving application syntax."
-    issues = '#9638'
+  [all]
+    design = 'MooseDocs/index.md'
+    issues = '#6699 #9638 #12049 #13567 #13611 #15232'
+
+    requirement = "The system shall include documentation tools that provide support for"
+    [core]
+      type = PythonUnitTest
+      input = test_core.py
+      detail = "markdown-like syntax,"
+    []
+    [comment]
+      type = PythonUnitTest
+      input = test_comment.py
+      detail = "comments within markdown syntax,"
+    []
+    [acronym]
+      type = PythonUnitTest
+      input = test_acronym.py
+      detail = "acronyms within markdown syntax,"
+    []
+    [sqa]
+      type = PythonUnitTest
+      input = test_sqa.py
+      detail = "building software quality documents,"
+    []
+    [autolink]
+      type = PythonUnitTest
+      input = test_autolink.py
+      detail = "automatically cross-linking files,"
+    []
+    [civet]
+      type = PythonUnitTest
+      input = test_civet.py
+      detail = "linking to continuous integration testing results,"
+    []
+    [content]
+      type = PythonUnitTest
+      input = test_content.py
+      detail = "listing and linking to content within and across documents,"
+    []
+    [appsyntax]
+      type = PythonUnitTest
+      input = test_appsyntax.py
+      detail = "automatically retrieving application syntax, and"
+    []
+    [alert]
+      type = PythonUnitTest
+      input = test_alert.py
+      detail = "creating alert text boxes."
+    []
   []
 []

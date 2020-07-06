@@ -15,6 +15,9 @@ An error.
 !alert warning
 A warning.
 
+!alert tip
+A helpful tip.
+
 !alert construction
 Under construction.
 
@@ -31,5 +34,5 @@ int x;
 !alert-end!
 
 
-!alert note title=[Google](https://google.com)
+!alert tip title=[Google](https://google.com)
 Title with link.

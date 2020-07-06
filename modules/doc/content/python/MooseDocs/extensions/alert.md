@@ -11,7 +11,7 @@ The available configuration items for this extension are provided in [alert-conf
 
 ## Basic Alert
 
-There are three versions of alerts---error, warning, and note---all of which are demonstrated
+There are four versions of alerts---error, warning, note, and tip---all of which are demonstrated
 in [alert-example-all]. The available settings for the alert command are listed in
 [alert-settings].
 
@@ -30,6 +30,9 @@ This is a warning alert.
 
 !alert note
 This is a note alert.
+
+!alert tip
+This is a tip alert.
 !devel-end!
 
 ## Alert Title
