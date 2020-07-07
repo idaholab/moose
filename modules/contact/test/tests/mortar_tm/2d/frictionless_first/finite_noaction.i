@@ -36,7 +36,7 @@ name = 'finite_noaction'
     ny = 4
     elem_type = ${elem}
     boundary_name_prefix = block
-    sideset_id_offset = 10
+    boundary_id_offset = 10
   [../]
   [./block_id]
     type = SubdomainIDGenerator

@@ -35,7 +35,7 @@ offset = 0.01
     ny = 1
     elem_type = QUAD4
     boundary_name_prefix = rb
-    sideset_id_offset = 10
+    boundary_id_offset = 10
   [../]
   [./right_block_id]
     type = SubdomainIDGenerator

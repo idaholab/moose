@@ -58,9 +58,9 @@ protected:
    */
   const Real _bias_x, _bias_y, _bias_z;
 
-  /// prefix string for the side set names
+  /// prefix string for the boundary names
   const std::string _boundary_name_prefix;
 
-  /// offset that is added to the side set IDs
+  /// offset that is added to the boundary IDs
   const boundary_id_type _boundary_id_offset;
 };

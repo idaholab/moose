@@ -104,8 +104,8 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z")),
-    _boundary_name_prefix(isParamValid("sideset_name_prefix")
-                              ? getParam<std::string>("sideset_name_prefix") + "_"
+    _boundary_name_prefix(isParamValid("boundary_name_prefix")
+                              ? getParam<std::string>("boundary_name_prefix") + "_"
                               : ""),
     _boundary_id_offset(getParam<boundary_id_type>("boundary_id_offset"))
 {
