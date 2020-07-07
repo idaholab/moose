@@ -296,6 +296,60 @@ PODReducedBasisTrainer::getSumBaseSize()
   return sum;
 }
 
+const DenseVector<Real>&
+PODReducedBasisTrainer::getBasisVector(unsigned int v_ind, unsigned int b_ind) const
+{
+  return _base[v_ind][b_ind];
+}
+
+const DenseVector<Real>&
+PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
+{
+  unsigned int counter = 0;
+  unsigned int var_counter = 0;
+  unsigned int base_counter = 0;
+  bool found = false;
+  for (unsigned int v_ind=0; v_ind < _var_names.size(); ++v_ind)
+  {
+    for (unsigned int b_ind=0; b_ind < _base[v_ind].size(); ++b_ind)
+    {
+      if (g_index == counter)
+      {
+        var_counter = v_ind;
+        base_counter = b_ind;
+        found = true;
+        break;
+      }
+    }
+    if(found)
+      break;
+  }
+  return _base[var_counter][base_counter];
+}
+
+unsigned int
+PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
+{
+  unsigned int counter = 0;
+  unsigned int var_counter = 0;
+  bool found = false;
+  for (unsigned int v_ind=0; v_ind < _var_names.size(); ++v_ind)
+  {
+    for (unsigned int b_ind=0; b_ind < _base[v_ind].size(); ++b_ind)
+    {
+      if (g_index == counter)
+      {
+        var_counter = v_ind;
+        found = true;
+        break;
+      }
+    }
+    if(found)
+      break;
+  }
+  return var_counter;
+}
+
 void
 PODReducedBasisTrainer::printReducedOperators()
 {

@@ -13,6 +13,7 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "PODReducedBasisTrainer.h"
 #include "SamplerInterface.h"
+#include "StochasticToolsTransfer.h"
 
 #include "StochasticToolsTypes.h"
 
@@ -42,6 +43,9 @@ protected:
 
   /// Evaluating the residuals for every tag in the trainer.
   void computeResidual();
+
+  /// Evaluating the residuals for every tag in the trainer in batch mode.
+  void computeResidualBatch(Real target_time);
 
   /// Switch used to differentiate between snapshot generation and residual
   /// computation. Residual generation is only possible after the snapshot generation
