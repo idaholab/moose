@@ -49,7 +49,7 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
                .queryInto(obj);
 
   if (obj.empty())
-    mooseError("Unable to find Trainer with name '"+ _trainer_name + "'!");
+    paramError("trainer_name", "Unable to find Trainer with name '"+ _trainer_name + "'!");
 
   _trainer = obj[0];
 }

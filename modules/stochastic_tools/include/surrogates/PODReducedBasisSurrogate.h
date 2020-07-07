@@ -24,20 +24,8 @@ public:
   /// Get a reference to the approximate solutions.
   std::vector<DenseVector<Real>>& getApproximateSolution(){return _approx_solution;}
 
-  /// Get the nodal maximum of the reconstructed solution for a given variable.
-  Real getNodalMax(std::string var_name) const;
-
-  /// Get the nodal minimum of the reconstructed solution for a given variable.
-  Real getNodalMin(std::string var_name) const;
-
-  /// Get the nodal L1 norm (l1) of the reconstructed solution for a given variable.
-  Real getNodalL1(std::string var_name) const;
-
-  /// Get the nodal L2 norm (l2) of the reconstructed solution for a given variable.
-  Real getNodalL2(std::string var_name) const;
-
-  /// Get the nodal Linf norm (linf) of the reconstructed solution for a given variable.
-  Real getNodalLinf(std::string var_name) const;
+  /// Get the nodal QoI of the reconstructed solution for a given variable.
+  Real getNodalQoI(std::string var_name, MooseEnum qoi_type) const;
 
   /// Must have function, not used in this object.
   virtual Real evaluate(const std::vector<Real> & x) const override;

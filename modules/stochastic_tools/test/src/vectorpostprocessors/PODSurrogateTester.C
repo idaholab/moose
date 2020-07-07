@@ -88,28 +88,7 @@ PODSurrogateTester::execute()
     std::vector<Real> data = _sampler.getNextLocalRow();
 
     _model->evaluateSolution(data);
-    switch(_to_compute)
-    {
-      case 0 :
-        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalMax(_variable_name);
-        break;
-
-      case 1 :
-        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalMin(_variable_name);
-        break;
-
-      case 2 :
-        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalL1(_variable_name);
-        break;
-
-      case 3 :
-        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalL2(_variable_name);
-        break;
-
-      case 4 :
-        _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalLinf(_variable_name);
-        break;
-    }
+    _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalQoI(_variable_name, _to_compute);
 
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)

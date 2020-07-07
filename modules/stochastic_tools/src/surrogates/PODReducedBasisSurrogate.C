@@ -198,71 +198,36 @@ PODReducedBasisSurrogate::reconstructApproximateSolution()
 }
 
 Real
-PODReducedBasisSurrogate::getNodalMax(std::string var_name) const
+PODReducedBasisSurrogate::getNodalQoI(std::string var_name, MooseEnum qoi_type) const
 {
   Real val = 0.0;
 
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-    val = _approx_solution[it-_var_names.begin()].max();
-  else
+  auto it = std::find(_var_names.begin(), _var_names.end(), var_name);
+  if (it == _var_names.end())
     mooseError("Variable '",var_name,"' not found!");
 
-  return(val);
-}
+  switch(qoi_type)
+  {
+    case 0 :
+      val = _approx_solution[it-_var_names.begin()].max();
+      break;
 
-Real
-PODReducedBasisSurrogate::getNodalMin(std::string var_name) const
-{
-  Real val = 0.0;
+    case 1 :
+      val = _approx_solution[it-_var_names.begin()].min();
+      break;
 
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-    val = _approx_solution[it-_var_names.begin()].min();
-  else
-    mooseError("Variable '",var_name,"' not found!");
+    case 2 :
+      val = _approx_solution[it-_var_names.begin()].l1_norm();
+      break;
 
-  return(val);
-}
+    case 3 :
+      val = _approx_solution[it-_var_names.begin()].l2_norm();
+      break;
 
-Real
-PODReducedBasisSurrogate::getNodalL1(std::string var_name) const
-{
-  Real val = 0.0;
-
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-    val = _approx_solution[it-_var_names.begin()].l1_norm();
-  else
-    mooseError("Variable '",var_name,"' not found!");
-
-  return(val);
-}
-
-Real
-PODReducedBasisSurrogate::getNodalL2(std::string var_name) const
-{
-  Real val = 0.0;
-
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-    val = _approx_solution[it-_var_names.begin()].l2_norm();
-  else
-    mooseError("Variable '",var_name,"' not found!");
-
-  return(val);
-}
-
-Real
-PODReducedBasisSurrogate::getNodalLinf(std::string var_name) const
-{
-  Real val = 0.0;
-
-  auto it = std::find (_var_names.begin(), _var_names.end(), var_name);
-  if (it != _var_names.end())
-    val = _approx_solution[it-_var_names.begin()].linfty_norm();
-  else
-    mooseError("Variable '",var_name,"' not found!");
+    case 4 :
+      val = _approx_solution[it-_var_names.begin()].linfty_norm();
+      break;
+  }
 
   return(val);
 }
