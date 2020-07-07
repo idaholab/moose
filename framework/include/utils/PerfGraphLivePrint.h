@@ -49,6 +49,12 @@ protected:
 
   std::unordered_map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
+  /// Limit (in seconds) before printing
+  Real & _time_limit;
+
+  /// Limit (in MB)
+  unsigned int & _mem_limit;
+
   /// This is one beyond the last thing on the stack
   unsigned int _stack_level;
 

@@ -125,6 +125,16 @@ public:
   void setLivePrintAll(bool active) { _live_print_all = active; }
 
   /**
+   * Set the time limit before a message prints
+   */
+  void setLiveTimeLimit(Real time_limit){ _live_print_time_limit = time_limit; }
+
+  /**
+   * Sert the memory limit before a message prints
+   */
+  void setLiveMemoryLimit(unsigned int mem_limit) { _live_print_mem_limit = mem_limit; }
+
+  /**
    * Get the number of calls for a section
    */
   unsigned long int getNumCalls(const std::string & section_name);
@@ -425,6 +435,12 @@ protected:
 
   /// The condition_variable to wake the print thread
   std::condition_variable _finished_section;
+
+  /// The time limit before a message is printed (in seconds)
+  Real _live_print_time_limit;
+
+  /// The memory limit before a message is printed (in MB)
+  unsigned int _live_print_mem_limit;
 
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;

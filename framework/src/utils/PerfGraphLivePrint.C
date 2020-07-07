@@ -16,6 +16,8 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _execution_list(perf_graph._execution_list),
     _done_future(perf_graph._done.get_future()),
     _id_to_section_info(perf_graph._id_to_section_info),
+    _time_limit(perf_graph._live_print_time_limit),
+    _mem_limit(perf_graph._live_print_mem_limit),
     _stack_level(0),
     _last_execution_list_end(0),
     _last_printed_increment(NULL)
@@ -184,7 +186,6 @@ PerfGraphLivePrint::iterateThroughExecutionList()
   while (p != _current_execution_list_end)
   {
     auto next_p = p + 1 < MAX_EXECUTION_LIST_SIZE ? p + 1 : 0;
-    auto previous_p = p - 1 < 0 ? MAX_EXECUTION_LIST_SIZE : 0;
 
     auto & section_increment = _execution_list[p];
 
@@ -213,7 +214,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
       if (_perf_graph._live_print_all ||
           section_increment_start._state == PerfGraph::IncrementState::printed ||
           section_increment_start._state == PerfGraph::IncrementState::continued ||
-          time_increment > 1. || memory_increment > 100)
+          time_increment > _time_limit || memory_increment > _mem_limit)
       {
         printStackUpToLast();
 
