@@ -1,0 +1,29 @@
+[Tests]
+  design = 'NonlinearSystem.md'
+  issues = '#14644'
+  [err-in-dbg-serial]
+    method = 'dbg'
+    type = RunException
+    input = 'should-error.i'
+    expect_err = 'You requested to reuse the nonlinear residual as the base residual for computing the action of the matrix-free Jacobian, but the residuals are not the same. Your physics must have states; either remove the states from your code or set `snesmf_reuse_base = false` in your Executioner block'
+    requirement = 'The system shall error in debug mode if the system or the user requests to use the nonlinear residual as the base residual for computing the matrix-free Jacobian action and if the residual is a function of anything more than the current solution.'
+    max_parallel = 1
+  []
+  [dont-err-in-dbg-parallel]
+    method = 'dbg'
+    type = RunException
+    input = 'should-error.i'
+    should_crash = False
+    min_parallel = 2
+    expect_err = 'Nonlinear solve did not converge due to DIVERGED_LINE_SEARCH iterations'
+    requirement = 'The system shall not perform a sanity check on whether the residual function evaluation is consistent in parallel because vector assembly, e.g. order of floating point operations, is not guaranteed to be deterministic from run to run.'
+  []
+  [dont-err-in-ndebug]
+    method = '!dbg'
+    type = RunException
+    input = 'should-error.i'
+    should_crash = False
+    expect_err = 'Nonlinear solve did not converge due to DIVERGED_LINE_SEARCH iterations'
+    requirement = 'The system shall not perform an expensive sanity check on whether the residual is a function of more than the current solution if running in a non-debug mode. Instead, for a poorly-formed stateful function, the solve shall diverge, and the system shall emit the reason for divergence.'
+  []
+[]

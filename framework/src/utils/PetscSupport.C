@@ -646,6 +646,12 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       po.flags.push_back(option);
   }
 
+  std::array<std::string, 2> reason_flags = {"-snes_converged_reason", "-ksp_converged_reason"};
+
+  for (const auto & reason_flag : reason_flags)
+    if (!po.flags.contains(reason_flag))
+      po.flags.push_back(reason_flag);
+
   // Check that the name value pairs are sized correctly
   if (petsc_options_inames.size() != petsc_options_values.size())
     mooseError("PETSc names and options are not the same length");

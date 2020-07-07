@@ -97,6 +97,14 @@
       custom_cmp = 'upper-and-lower.cmp'
       cli_args = 'Outputs/file_base=vi-ssls-amg -pc_type hypre -pc_hypre_type boomeramg -snes_type vinewtonssls'
     []
+    [rsls_pjfnk]
+      input = vi-bounding.i
+      type = Exodiff
+      exodiff = 'rsls-pjfnk.e'
+      cli_args = 'Executioner/solve_type=PJFNK Outputs/file_base=rsls-pjfnk'
+      custom_cmp = 'upper-and-lower.cmp'
+      detail = 'The reduced space active set method shall work with a matrix-free approximation of the Jacobian, and the function evaluations corresponding to the nonlinear residual and the base for finite-differencing shall be equivalent.'
+    []
   []
   [unbounded]
     design = ConstantBoundsAux.md
