@@ -2,7 +2,7 @@
 
 Conda issues can be the root cause for just about any issue on this page. Scroll through this section, for what may look familiar, and follow those instructions:
 
-- #### command not found
+- #### command not found: conda
 
   You have yet to install conda, or your path to it is incorrect or not set. You will need to recall how you installed conda. Our instructions ask to have Miniconda3 installed to your home directory: `~/miniconda3`. Which requires you to set your PATH accordingly:
 
@@ -14,7 +14,30 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
 - #### conda activate moose
 
-  If activate is failing, it's possible you have yet to perform a `conda init` *properly*. See conda init below. It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at [Conda](https://docs.conda.io/en/latest/help-support.html). What we can attempt, is to create a new environment and go from there:
+  If `conda activate moose` is failing like so:
+
+  ```bash
+  CommandNotFoundError: Your shell has not been properly configured to use 'conda activate'.
+  To initialize your shell, run
+
+      $ conda init <SHELL_NAME>
+
+  Currently supported shells are:
+    - bash
+    - fish
+    - tcsh
+    - xonsh
+    - zsh
+    - powershell
+
+  See 'conda init --help' for more information and options.
+
+  IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+  ```
+
+  ...it's possible you have yet to perform a `conda init` *properly*. See conda init below.
+
+  It could also mean you have an older version of Conda, or that the environment you are trying to activate is somewhere other than where conda thinks it should be, or simply missing / not yet created. Unfortunately, much of what can be diagnosed, is going to be beyond the scope of this document, and better left to the support teams at [Conda](https://docs.conda.io/en/latest/help-support.html). What we can attempt, is to create a new environment and go from there:
 
   ```bash
   conda create --name testing --quiet --yes
@@ -52,6 +75,8 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   ```bash
   conda init zsh
   ```
+
+  +Hint:+ For Linux, this will most likely be `conda init bash`. For Macintosh, this can either be bash or zsh.
 
 - #### Your issue not listed
 
