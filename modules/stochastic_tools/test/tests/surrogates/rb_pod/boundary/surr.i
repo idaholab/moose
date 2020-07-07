@@ -17,7 +17,7 @@
     lower_bound = 2.5
     upper_bound = 7.5
   []
-  [bc_dist]
+  [Dir_dist]
     type = Uniform
     lower_bound = 0
     upper_bound = 1
@@ -27,10 +27,11 @@
 [Samplers]
   [sample]
     type = LatinHypercube
-    distributions = 'k_dist alpha_dist S_dist bc_dist'
-    num_rows = 1000
-    num_bins = 10
+    distributions = 'k_dist alpha_dist S_dist Dir_dist'
+    num_rows = 10
+    num_bins = 3
     execute_on = PRE_MULTIAPP_SETUP
+    seed = 17
   []
 []
 
