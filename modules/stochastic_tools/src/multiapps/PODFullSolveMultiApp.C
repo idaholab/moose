@@ -60,7 +60,13 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
   // Reinitialize the problem only if the snapshot generation part is done.
   if (!_snapshot_generation)
   {
-    init(_trainer->getSumBaseSize());
+    // Since it only works in serial, the number of processes is hardcoded to 1
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+        _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+      init(1);
+    else
+      init(_trainer->getSumBaseSize());
+
     initialSetup();
   }
   SamplerFullSolveMultiApp::preTransfer(dt, target_time);
@@ -80,7 +86,11 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   }
   else
   {
-    computeResidual();
+    if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+        _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+      computeResidualBatch(target_time);
+    else
+      computeResidual();
   }
 
   return last_solve_converged;
@@ -117,4 +127,10 @@ PODFullSolveMultiApp::computeResidual()
 
     problem.computeResidualTags(tags_to_compute);
   }
+}
+
+void
+PODFullSolveMultiApp::computeResidualBatch(Real /*target_time*/)
+{
+  mooseError("Batch mode is not implemented yet for PODFullSolveMultiApp!");
 }

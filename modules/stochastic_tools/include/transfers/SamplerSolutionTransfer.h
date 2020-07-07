@@ -50,6 +50,10 @@ protected:
   virtual void initializeFromMultiapp() override;
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
+
+  virtual void initializeToMultiapp() override;
+  virtual void executeToMultiapp() override;
+  virtual void finalizeToMultiapp() override;
   ///@}
 
 

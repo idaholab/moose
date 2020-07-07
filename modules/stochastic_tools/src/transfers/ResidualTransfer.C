@@ -35,18 +35,6 @@ ResidualTransfer::initialSetup()
 }
 
 void
-ResidualTransfer::initializeFromMultiapp()
-{}
-
-void
-ResidualTransfer::executeFromMultiapp()
-{}
-
-void
-ResidualTransfer::finalizeFromMultiapp()
-{}
-
-void
 ResidualTransfer::execute()
 {
   const std::vector<std::string>& var_names = _trainer->getVarNames();
@@ -95,3 +83,15 @@ ResidualTransfer::execute()
     }
   }
 }
+
+void
+ResidualTransfer::initializeFromMultiapp()
+{}
+
+void
+ResidualTransfer::finalizeFromMultiapp()
+{}
+
+void
+ResidualTransfer::executeFromMultiapp()
+{}

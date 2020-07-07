@@ -53,11 +53,14 @@ public:
   /// Getting the overall base size, which is the sum of the individial bases.
   unsigned int getSumBaseSize();
 
-  // Getting a basis vector for a given variable.
-  const DenseVector<Real>& getBasisVector(unsigned int v_index, unsigned int base_i) const
-  {
-    return _base[v_index][base_i];
-  }
+  /// Getting a basis vector for a given variable.
+  const DenseVector<Real>& getBasisVector(unsigned int v_index, unsigned int base_i) const;
+
+  /// Getting basis vector based on its global index.
+  const DenseVector<Real>& getBasisVector(unsigned int g_index) const;
+
+  /// Getting appropriate variable index for a global base index.
+  unsigned int getVariableIndex(unsigned int g_index);
 
 protected:
 

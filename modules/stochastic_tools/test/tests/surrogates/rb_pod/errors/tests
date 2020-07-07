@@ -70,7 +70,7 @@
   []
   [surrogate]
     requirement = 'PODReducedBasisSurrogate shall throw an error when '
-    design = "ResidualSurrogate.md"
+    design = "PODReducedBasisSurrogate.md"
     [var_name]
       type = RunException
       input = trainer_and_surr.i

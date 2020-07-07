@@ -49,7 +49,7 @@
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
-  [data]
+  [snapshots]
     type = SamplerSolutionTransfer
     multi_app = sub
     sampler = sample
@@ -58,7 +58,7 @@
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
-  [mode]
+  [pod_modes]
     type = SamplerSolutionTransfer
     multi_app = sub
     sampler = sample

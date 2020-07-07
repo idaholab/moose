@@ -1,6 +1,6 @@
 # PODReducedBasisTrainer
 
-!syntax description /Surrogates/PODReducedBasisTrainer
+!syntax description /Trainers/PODReducedBasisTrainer
 
 ## Overview
 
