@@ -4,7 +4,7 @@
 
 class SubChannelMesh;
 /**
- * An abstract class for ICs 
+ * An abstract class for ICs
  */
 class SubChannelBaseIC : public InitialCondition
 {

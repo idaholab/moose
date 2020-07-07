@@ -9,8 +9,10 @@ FlowAreaIC::validParams()
   return params;
 }
 
-FlowAreaIC::FlowAreaIC(const InputParameters & params) : SubChannelBaseIC(params),
-_mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
+FlowAreaIC::FlowAreaIC(const InputParameters & params)
+  : SubChannelBaseIC(params), _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh()))
+{
+}
 
 Real
 FlowAreaIC::value(const Point & p)
@@ -23,7 +25,8 @@ FlowAreaIC::value(const Point & p)
   auto rod_area = 0.25 * M_PI * rod_diameter * rod_diameter;
   auto standard_area = pitch * pitch - rod_area;
 
-  // Determine which channel this point is in and if that channel lies at an edge or corner of the assembly.
+  // Determine which channel this point is in and if that channel lies at an edge or corner of the
+  // assembly.
   auto inds = index_point(p);
   auto i = inds.first;
   auto j = inds.second;

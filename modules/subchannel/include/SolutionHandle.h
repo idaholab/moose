@@ -8,7 +8,8 @@
 class SolutionHandle
 {
 public:
-  SolutionHandle(const MooseVariableFieldBase & variable) : _var(const_cast<MooseVariableFieldBase &>(variable)), _soln(_var.sys().solution())
+  SolutionHandle(const MooseVariableFieldBase & variable)
+    : _var(const_cast<MooseVariableFieldBase &>(variable)), _soln(_var.sys().solution())
   {
   }
 

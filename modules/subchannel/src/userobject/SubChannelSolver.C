@@ -61,7 +61,7 @@ SubChannelSolver::SubChannelSolver(const InputParameters & params)
 void
 SubChannelSolver::initialize()
 {
-  _mesh = dynamic_cast<SubChannelMesh *> (& _fe_problem.mesh());
+  _mesh = dynamic_cast<SubChannelMesh *>(&_fe_problem.mesh());
   if (!_mesh)
   {
     mooseError("Must use a SubChannelMesh");
@@ -499,7 +499,8 @@ SubChannelSolver::execute()
     for (int i_ch = 0; i_ch < _mesh->_n_channels; i_ch++)
     {
       auto * node = _mesh->_nodes[i_ch][iz];
-      Total_crossflow += SumWij_soln(node); //for single phase, Total of sum Crossflows per channel per level should be zero
+      Total_crossflow += SumWij_soln(
+          node); // for single phase, Total of sum Crossflows per channel per level should be zero
     }
   }
 

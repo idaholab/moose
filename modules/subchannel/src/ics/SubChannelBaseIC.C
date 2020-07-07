@@ -2,10 +2,15 @@
 #include "SubChannelMesh.h"
 
 InputParameters
-SubChannelBaseIC::validParams(){ return InitialCondition::validParams();}
+SubChannelBaseIC::validParams()
+{
+  return InitialCondition::validParams();
+}
 
-SubChannelBaseIC::SubChannelBaseIC(const InputParameters & params) : InitialCondition(params) ,
-_mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
+SubChannelBaseIC::SubChannelBaseIC(const InputParameters & params)
+  : InitialCondition(params), _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh()))
+{
+}
 
 std::pair<unsigned int, unsigned int>
 SubChannelBaseIC::index_point(const Point & p) const

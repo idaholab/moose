@@ -11,13 +11,21 @@ PowerIC::validParams()
 {
   InputParameters params = SubChannelBaseIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
-  params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column). It's a Radial Power Profile. [UnitLess]");
-  params.addParam<FunctionName>("axial_heat_rate", 1.0, "user provided normalized function of axial heat rate [Unitless]. The integral over pin length should equal the heated length" );
+  params.addParam<std::string>("filename",
+                               413.0,
+                               "name of power profile .txt file (should be a single column). It's "
+                               "a Radial Power Profile. [UnitLess]");
+  params.addParam<FunctionName>("axial_heat_rate",
+                                1.0,
+                                "user provided normalized function of axial heat rate [Unitless]. "
+                                "The integral over pin length should equal the heated length");
   return params;
 }
 
-PowerIC::PowerIC(const InputParameters & params) : SubChannelBaseIC(params), _mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())),
-_axial_heat_rate(getFunction("axial_heat_rate"))
+PowerIC::PowerIC(const InputParameters & params)
+  : SubChannelBaseIC(params),
+    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   _power = getParam<Real>("power");
   _filename = getParam<std::string>("filename");
@@ -67,7 +75,8 @@ _axial_heat_rate(getFunction("axial_heat_rate"))
   _ref_qprime = _ref_power / heated_length;
 }
 
-void PowerIC::initialSetup()
+void
+PowerIC::initialSetup()
 {
   _estimate_power.resize(_mesh._ny - 1, _mesh._nx - 1);
   _estimate_power.setZero();
@@ -78,51 +87,73 @@ void PowerIC::initialSetup()
     // Compute axial location of nodes.
     auto z2 = _mesh._z_grid[iz];
     auto z1 = _mesh._z_grid[iz - 1];
-    Point p1(0 , 0, z1);
-    Point p2(0 , 0, z2);
-    //cycle through pins
-    for (unsigned int i_pin = 0; i_pin <  (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++)
+    Point p1(0, 0, z1);
+    Point p2(0, 0, z2);
+    // cycle through pins
+    for (unsigned int i_pin = 0; i_pin < (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++)
     {
       // row
       unsigned int j = (i_pin / (_mesh._nx - 1));
       // column
       unsigned int i = i_pin - j * (_mesh._nx - 1);
       // use of trapezoidal rule  to calculate local power
-      _estimate_power(j, i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0;
+      _estimate_power(j, i) += _ref_qprime(j, i) *
+                               (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
+                               dz / 2.0;
     }
   }
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
 };
 
-Real PowerIC::value(const Point & p)
+Real
+PowerIC::value(const Point & p)
 {
   // Determine which subchannel this point is in.
   auto inds = index_point(p);
   // x index
   auto i = inds.first;
-  // y index  
+  // y index
   auto j = inds.second;
   // Compute and return the estimated channel axial heat rate per channel
   // Corners contact 1/4 of a  one pin
   if (i == 0 && j == 0)
-    return 0.25 * _ref_qprime(j, i) * _pin_power_correction(j , i) * _axial_heat_rate.value(_t, p);
+    return 0.25 * _ref_qprime(j, i) * _pin_power_correction(j, i) * _axial_heat_rate.value(_t, p);
   else if (i == 0 && j == _mesh._ny - 1)
-    return 0.25 * _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) * _axial_heat_rate.value(_t, p);
+    return 0.25 * _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) *
+           _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1 && j == 0)
-    return 0.25 * _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) * _axial_heat_rate.value(_t, p);
+    return 0.25 * _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) *
+           _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1 && j == _mesh._ny - 1)
-    return 0.25 * _ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) * _axial_heat_rate.value(_t, p);
+    return 0.25 * _ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) *
+           _axial_heat_rate.value(_t, p);
   // Sides contact 1/4 of  two pins
   else if (i == 0)
-    return 0.25 * (_ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) + _ref_qprime(j, i) * _pin_power_correction(j, i) ) * _axial_heat_rate.value(_t, p);
+    return 0.25 *
+           (_ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) +
+            _ref_qprime(j, i) * _pin_power_correction(j, i)) *
+           _axial_heat_rate.value(_t, p);
   else if (i == _mesh._nx - 1)
-    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) * _axial_heat_rate.value(_t, p);
+    return 0.25 *
+           (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
+            _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) *
+           _axial_heat_rate.value(_t, p);
   else if (j == 0)
-    return 0.25 * (_ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) + _ref_qprime(j, i) * _pin_power_correction(j, i)) * _axial_heat_rate.value(_t, p);
+    return 0.25 *
+           (_ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) +
+            _ref_qprime(j, i) * _pin_power_correction(j, i)) *
+           _axial_heat_rate.value(_t, p);
   else if (j == _mesh._ny - 1)
-    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i)) * _axial_heat_rate.value(_t, p);
+    return 0.25 *
+           (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
+            _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i)) *
+           _axial_heat_rate.value(_t, p);
   // interior contacts 1/4 of 4 pins
   else
-    return 0.25 * (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) + _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) \
-    + _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) + _ref_qprime(j, i) * _pin_power_correction(j, i)) * _axial_heat_rate.value(_t, p);
+    return 0.25 *
+           (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
+            _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) +
+            _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) +
+            _ref_qprime(j, i) * _pin_power_correction(j, i)) *
+           _axial_heat_rate.value(_t, p);
 }

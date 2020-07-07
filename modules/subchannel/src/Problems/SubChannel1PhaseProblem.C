@@ -28,21 +28,25 @@ SubChannel1PhaseProblem::validParams()
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
-  _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
-  _mflux_in(getParam<Real>("mflux_in")),
-  _T_in(getParam<Real>("T_in")),
-  _P_out(getParam<Real>("P_out"))
+    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+    _mflux_in(getParam<Real>("mflux_in")),
+    _T_in(getParam<Real>("T_in")),
+    _P_out(getParam<Real>("P_out"))
 {
 }
 
 bool
-SubChannel1PhaseProblem::converged() {return true;}
+SubChannel1PhaseProblem::converged()
+{
+  return true;
+}
 
 void
 SubChannel1PhaseProblem::externalSolve()
 {
   _console << "Executing subchannel solver\n";
-  const SinglePhaseFluidProperties & _fp = getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
+  const SinglePhaseFluidProperties & _fp =
+      getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   auto mdot_soln = SolutionHandle(getVariable(0, "mdot"));
   auto SumWij_soln = SolutionHandle(getVariable(0, "SumWij"));
   auto SumWijh_soln = SolutionHandle(getVariable(0, "SumWijh"));
@@ -62,7 +66,8 @@ SubChannel1PhaseProblem::externalSolve()
   {
     for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++) // nz + 1 nodes
     {
-      for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++) // _n_channels = number of channels
+      for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels;
+           i_ch++) // _n_channels = number of channels
       {
         // creates node
         auto * node = _subchannel_mesh._nodes[i_ch][iz];
@@ -92,7 +97,7 @@ SubChannel1PhaseProblem::externalSolve()
   // Mass Flow
   Eigen::VectorXd mdot(_subchannel_mesh._n_channels);
   Eigen::VectorXd mdot_old(_subchannel_mesh._n_channels);
-  Eigen::MatrixXd mdot_global(_subchannel_mesh._n_channels,  _subchannel_mesh._nz + 1);
+  Eigen::MatrixXd mdot_global(_subchannel_mesh._n_channels, _subchannel_mesh._nz + 1);
   // Pressure
   Eigen::VectorXd P(_subchannel_mesh._n_channels);
   Eigen::MatrixXd P_global_old(_subchannel_mesh._n_channels, _subchannel_mesh._nz + 1);
@@ -156,8 +161,10 @@ SubChannel1PhaseProblem::externalSolve()
     int bottom_limiter;
     while (PError > 1E-10 && axial_cycles < max_axial_cycles)
     {
-      if (axial_level < 5) bottom_limiter = 1;
-      else bottom_limiter = axial_level - 4;
+      if (axial_level < 5)
+        bottom_limiter = 1;
+      else
+        bottom_limiter = axial_level - 4;
       axial_cycles++;
       PCYCLES(axial_level - 1, 0) = axial_cycles;
       // Sweep upwards through the channels.
@@ -203,7 +210,9 @@ SubChannel1PhaseProblem::externalSolve()
             auto Lij = _subchannel_mesh._pitch;
             // local form loss in the ij direction
             auto kij =
-                2.0 * std::pow((1.0 - std::pow(Lij, 2.0) / std::pow(Lij - _subchannel_mesh._rod_diameter, 2.0)), 2.0);
+                2.0 * std::pow((1.0 - std::pow(Lij, 2.0) /
+                                          std::pow(Lij - _subchannel_mesh._rod_diameter, 2.0)),
+                               2.0);
             // assumed symmetry (that's why there is a two in the denominator)
             auto Mass_Termi = ((mdot_soln(node_out_i) - mdot_soln(node_in_i)) * Lij) / (2.0 * Si);
             auto Mass_Termj = ((mdot_soln(node_out_j) - mdot_soln(node_in_j)) * Lij) / (2.0 * Sj);
@@ -221,8 +230,10 @@ SubChannel1PhaseProblem::externalSolve()
                                mdot_soln(node_in_j) / Sj + mdot_soln(node_out_j) / Sj) *
                               Sij; // Kg/sec
             // INITIAL GUESS
-            if (Wij_old(i_gap) == 0) Wij(i_gap) = std::sqrt(Pressure_Term / kij);
-            else continue;
+            if (Wij_old(i_gap) == 0)
+              Wij(i_gap) = std::sqrt(Pressure_Term / kij);
+            else
+              continue;
 
             auto newton_error = 1.0;
             auto newton_tolerance = 1e-10;
@@ -258,7 +269,8 @@ SubChannel1PhaseProblem::externalSolve()
               newton_error = std::abs(Residual);
             }
             // apply global sign to crossflow
-            Wij(i_gap) = (-2.0 * signbit(P_soln(node_in_i) - P_soln(node_in_j)) + 1.0) * (Wij(i_gap));
+            Wij(i_gap) =
+                (-2.0 * signbit(P_soln(node_in_i) - P_soln(node_in_j)) + 1.0) * (Wij(i_gap));
           }
           Wij_global.col(iz) = Wij;
           double SumSumWij = 0.0;
@@ -294,14 +306,16 @@ SubChannel1PhaseProblem::externalSolve()
               // take care of the sign by applying the map, use donor cell
               SumWijh += _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij(i_gap) *
                          (h_soln(node_in_i) + h_soln(node_in_j) + h_soln(node_out_i) +
-                          h_soln(node_out_j)) / 4.0;
+                          h_soln(node_out_j)) /
+                         4.0;
               SumWijPrimeDhij += WijPrime(i_gap) * ((h_soln(node_in) + h_soln(node_out)) -
                                                     (h_soln(node_in_j) + h_soln(node_out_j)) / 2.0 -
                                                     (h_soln(node_in_i) + h_soln(node_out_i)) / 2.0);
-              SumWijPrimeDUij += WijPrime(i_gap) *
-                                 ((mdot_soln(node_in) + mdot_soln(node_out)) / rho / S -
-                                  (mdot_soln(node_in_j) + mdot_soln(node_out_j)) / 2.0 / rho_j / Sj -
-                                  (mdot_soln(node_in_i) + mdot_soln(node_out_i)) / 2.0 / rho_i / Si);
+              SumWijPrimeDUij +=
+                  WijPrime(i_gap) *
+                  ((mdot_soln(node_in) + mdot_soln(node_out)) / rho / S -
+                   (mdot_soln(node_in_j) + mdot_soln(node_out_j)) / 2.0 / rho_j / Sj -
+                   (mdot_soln(node_in_i) + mdot_soln(node_out_i)) / 2.0 / rho_i / Si);
               counter++;
             }
             SumSumWij += SumWij;
@@ -330,7 +344,7 @@ SubChannel1PhaseProblem::externalSolve()
             // note use of trapezoidal rule concistent with axial power rate calculation (PowerIC.C)
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
-                          (q_prime_soln(node_out) + q_prime_soln(node_in))* dz / 2.0);
+                          (q_prime_soln(node_out) + q_prime_soln(node_in)) * dz / 2.0);
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
@@ -347,7 +361,8 @@ SubChannel1PhaseProblem::externalSolve()
         }
       }
 
-      if (axial_level == _subchannel_mesh._nz) bottom_limiter = 1;
+      if (axial_level == _subchannel_mesh._nz)
+        bottom_limiter = 1;
       P_global_old = P_global;
       // Sweep downwards through the channels. level by level
       for (int iz = axial_level; iz > bottom_limiter - 1; iz--) // nz calculations
@@ -378,7 +393,8 @@ SubChannel1PhaseProblem::externalSolve()
             auto * node_out_i = _subchannel_mesh._nodes[ii_ch][iz];
             auto * node_out_j = _subchannel_mesh._nodes[jj_ch][iz];
             SumCrossflow +=
-                0.25 * _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] * Wij_global(i_gap, iz) *
+                0.25 * _subchannel_mesh._sign_id_crossflow_map[i_ch][counter] *
+                Wij_global(i_gap, iz) *
                 (mdot_soln(node_in_i) / S_flow_soln(node_in_i) / rho_soln(node_in_i) +
                  mdot_soln(node_out_i) / S_flow_soln(node_out_i) / rho_soln(node_out_i) +
                  mdot_soln(node_in_j) / S_flow_soln(node_in_j) / rho_soln(node_in_j) +
@@ -391,10 +407,10 @@ SubChannel1PhaseProblem::externalSolve()
           auto fi = 0.184 * std::pow(Re, -0.2);
           auto Friction = (fi * dz / Dh_i) * 0.5 * (std::pow(mdot_soln(node_in), 2.0)) /
                           (std::pow(Si, 2.0) * rho_i); // Pa
-          auto Gravity = g_grav * rho_i * dz;        // Pa
-          auto Pin =
-              P_soln(node_out) + Friction + Gravity +
-              std::pow(Si, -1.0) * (DeltaMass + SumCrossflow + SumWijPrimeDUij_soln(node_out)); // Pa
+          auto Gravity = g_grav * rho_i * dz;          // Pa
+          auto Pin = P_soln(node_out) + Friction + Gravity +
+                     std::pow(Si, -1.0) *
+                         (DeltaMass + SumCrossflow + SumWijPrimeDUij_soln(node_out)); // Pa
           // Relaxation
           Pin = 0.0 * P_global_old(i_ch, iz - 1) + 1.0 * Pin;
           // update solution
@@ -423,18 +439,18 @@ SubChannel1PhaseProblem::externalSolve()
     auto * node_out = _subchannel_mesh._nodes[i_ch][_subchannel_mesh._nz];
     auto * node_in = _subchannel_mesh._nodes[i_ch][0];
     auto * node_20 = _subchannel_mesh._nodes[i_ch][20];
-    unsigned int i = (i_ch / _subchannel_mesh._nx);           // row
-    unsigned int j = i_ch - i * _subchannel_mesh._nx;         // column
-    Temp_out(i, j) = T_soln(node_out);     // Kelvin
-    Temp_in(i, j) = T_soln(node_in);       // Kelvin
-    rho_in(i, j) = rho_soln(node_in);      // Kg/m3
-    rho_out(i, j) = rho_soln(node_out);    // Kg/m3
-    Pressure_out(i, j) = P_soln(node_out); // Pa
-    Enthalpy_out(i, j) = h_soln(node_out); // J/kg
-    Pressure_in(i, j) = P_soln(node_in);   // Pa
-    Enthalpy_in(i, j) = h_soln(node_in);   // J/kg
-    mdotin(i, j) = mdot_soln(node_in);     // Kg/sec
-    mdotout(i, j) = mdot_soln(node_out);   // Kg/sec
+    unsigned int i = (i_ch / _subchannel_mesh._nx);   // row
+    unsigned int j = i_ch - i * _subchannel_mesh._nx; // column
+    Temp_out(i, j) = T_soln(node_out);                // Kelvin
+    Temp_in(i, j) = T_soln(node_in);                  // Kelvin
+    rho_in(i, j) = rho_soln(node_in);                 // Kg/m3
+    rho_out(i, j) = rho_soln(node_out);               // Kg/m3
+    Pressure_out(i, j) = P_soln(node_out);            // Pa
+    Enthalpy_out(i, j) = h_soln(node_out);            // J/kg
+    Pressure_in(i, j) = P_soln(node_in);              // Pa
+    Enthalpy_in(i, j) = h_soln(node_in);              // J/kg
+    mdotin(i, j) = mdot_soln(node_in);                // Kg/sec
+    mdotout(i, j) = mdot_soln(node_out);              // Kg/sec
     Area(i, j) = S_flow_soln(node_in);
     Gin(i, j) = mdot_soln(node_in) / S_flow_soln(node_in);
     Gout(i, j) = mdot_soln(node_out) / S_flow_soln(node_out);
@@ -458,7 +474,4 @@ SubChannel1PhaseProblem::externalSolve()
   _console << "Finished executing subchannel solver\n";
 }
 
-void
-SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
-{
-}
+void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

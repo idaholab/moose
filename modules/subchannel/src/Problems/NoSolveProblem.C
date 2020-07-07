@@ -9,20 +9,14 @@ NoSolveProblem::validParams()
   return params;
 }
 
-NoSolveProblem::NoSolveProblem(const InputParameters & params)
-  : ExternalProblem(params)
-{
-}
+NoSolveProblem::NoSolveProblem(const InputParameters & params) : ExternalProblem(params) {}
 
 void
 NoSolveProblem::externalSolve()
 {
 }
 
-void
-NoSolveProblem::syncSolutions(Direction /*direction*/)
-{
-}
+void NoSolveProblem::syncSolutions(Direction /*direction*/) {}
 
 bool
 NoSolveProblem::converged()
