@@ -1,10 +1,25 @@
 [Tests]
-  issues = '#8220'
-  design = 'JouleHeatingSource.md'
-  [./test]
+  [./joule_heating]
     type = 'Exodiff'
     input = 'transient_jouleheating.i'
     exodiff = 'transient_jouleheating_out.e'
     requirement = 'The system shall compute Joule heating'
+    issues = '#8220'
+    design = 'JouleHeatingSource.md'
+  [../]
+  [./ad_joule_heating]
+    type = 'Exodiff'
+    input = 'transient_ad_jouleheating.i'
+    exodiff = 'transient_ad_jouleheating_out.e'
+    requirement = 'The system shall compute Joule heating using automatic differentiation'
+    issues = '#15536'
+    design = 'ADJouleHeatingSource.md'
+  [../]
+  [./ad_joule_heating_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'transient_ad_jouleheating.i'
+    requirement = 'The system shall compute a perfect jacobian for Joule heating using automatic differentiation'
+    issues = '#15536'
+    design = 'ADJouleHeatingSource.md'
   [../]
 []
