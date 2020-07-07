@@ -136,4 +136,25 @@
     requirement = "Eigenvalue system should be able scale eigenvector such that postprocessor is a certain value"
   []
 
+  [coupled-system-auto-scaling]
+    type = 'CSVDiff'
+    input = 'ne-coupled-scaling.i'
+    csvdiff = 'ne-coupled-scaling_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.8.0'
+    absent_out = '[1-9]+[0-9]* of 162 singular values'
+    expect_out = '0 of 162 singular values'
+    issues = '#15048'
+    requirement = 'The system shall be able to automatically condition a nonlinear eigen-solve based on diagonal entries in the preconditioning matrix.'
+  []
+
+  [coupled-system-resid-auto-scaling]
+    type = 'CSVDiff'
+    input = 'ne-coupled-resid-scaling.i'
+    csvdiff = 'ne-coupled-resid-scaling_out_eigenvalues_0001.csv'
+    slepc_version = '>=3.8.0'
+    absent_out = '[1-9]+[0-9]* of 162 singular values'
+    expect_out = '0 of 162 singular values'
+    issues = '#15048'
+    requirement = 'The system shall be able to automatically scale a nonlinear eigen-solve based on entries in the non-eigen residual vector.'
+  []
 []

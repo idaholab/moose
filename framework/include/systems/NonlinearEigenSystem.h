@@ -179,6 +179,9 @@ protected:
     return *_transient_sys.older_local_solution;
   }
 
+  void computeScalingJacobian() override;
+  void computeScalingResidual() override;
+
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;
   std::vector<std::pair<Real, Real>> _eigen_values;

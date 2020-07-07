@@ -95,8 +95,7 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
-    _use_coloring_finite_difference(false),
-    _auto_scaling_initd(false)
+    _use_coloring_finite_difference(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -431,222 +430,19 @@ NonlinearSystem::converged()
 }
 
 void
-NonlinearSystem::setupScalingGrouping()
-{
-  if (_auto_scaling_initd)
-    return;
-
-  const auto & field_variables = _vars[0].fieldVariables();
-
-  if (_scaling_group_variables.empty())
-  {
-    _var_to_group_var.reserve(field_variables.size());
-    _num_scaling_groups = field_variables.size();
-
-    for (auto & field_var : field_variables)
-      _var_to_group_var.insert(std::make_pair(field_var->number(), field_var->number()));
-  }
-  else
-  {
-    std::set<unsigned int> var_numbers, var_numbers_covered, var_numbers_not_covered;
-    for (const auto & field_var : field_variables)
-      var_numbers.insert(field_var->number());
-
-    _num_scaling_groups = _scaling_group_variables.size();
-
-    for (MooseIndex(_scaling_group_variables) group_index = 0;
-         group_index < _scaling_group_variables.size();
-         ++group_index)
-      for (const auto & var_name : _scaling_group_variables[group_index])
-      {
-        auto & fe_var = getVariable(/*tid=*/0, var_name);
-        auto map_pair = _var_to_group_var.insert(std::make_pair(fe_var.number(), group_index));
-        if (!map_pair.second)
-          mooseError("Variable ", var_name, " is contained in multiple scaling grouplings");
-        var_numbers_covered.insert(fe_var.number());
-      }
-
-    std::set_difference(var_numbers.begin(),
-                        var_numbers.end(),
-                        var_numbers_covered.begin(),
-                        var_numbers_covered.end(),
-                        std::inserter(var_numbers_not_covered, var_numbers_not_covered.begin()));
-
-    _num_scaling_groups = _scaling_group_variables.size() + var_numbers_not_covered.size();
-
-    auto index = static_cast<unsigned int>(_scaling_group_variables.size());
-    for (auto var_number : var_numbers_not_covered)
-      _var_to_group_var.insert(std::make_pair(var_number, index++));
-  }
-}
-
-void
-NonlinearSystem::computeScaling()
-{
-  _console << "\nPerforming automatic scaling calculation\n\n";
-
-  TIME_SECTION(_compute_scaling_timer);
-
-  // container for repeated access of element global dof indices
-  std::vector<dof_id_type> dof_indices;
-
-  if (!_auto_scaling_initd)
-    setupScalingGrouping();
-
-  auto & field_variables = _vars[0].fieldVariables();
-  auto & scalar_variables = _vars[0].scalars();
-
-  std::vector<Real> inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
-  std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
-  std::vector<Real> jac_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
-  auto & dof_map = dofMap();
-
-  // what types of scaling do we want?
-  bool jac_scaling = _resid_vs_jac_scaling_param < 1. - TOLERANCE;
-  bool resid_scaling = _resid_vs_jac_scaling_param > TOLERANCE;
-
-  SparseMatrix<Number> * scaling_matrix = nullptr;
-  NumericVector<Number> * scaling_residual = nullptr;
-
-  if (jac_scaling)
-  {
-    mooseAssert(_transient_sys.have_matrix("scaling_matrix"),
-                "The scaling matrix has not been created. There must have been an issue in "
-                "initialization of the NonlinearSystem");
-
-    scaling_matrix = &_transient_sys.get_matrix("scaling_matrix");
-
-    if (!_auto_scaling_initd)
-    {
-      auto init_vector = NumericVector<Number>::build(this->comm());
-      init_vector->init(system().n_dofs(), system().n_local_dofs(), /*fast=*/false, PARALLEL);
-
-      auto diagonal_matrix = static_cast<DiagonalMatrix<Number> *>(scaling_matrix);
-      diagonal_matrix->init(*init_vector);
-    }
-
-    _computing_scaling_jacobian = true;
-    _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, *scaling_matrix);
-    _computing_scaling_jacobian = false;
-  }
-
-  if (resid_scaling)
-  {
-    scaling_residual = _transient_sys.rhs;
-
-    _computing_scaling_residual = true;
-    _fe_problem.computingNonlinearResid(true);
-    _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *scaling_residual);
-    _fe_problem.computingNonlinearResid(false);
-    _computing_scaling_residual = false;
-  }
-
-  // Compute our scaling factors for the spatial field variables
-  for (const auto & elem : *mesh().getActiveLocalElementRange())
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-    {
-      auto & field_variable = *field_variables[i];
-      auto var_number = field_variable.number();
-      dof_map.dof_indices(elem, dof_indices, var_number);
-      for (auto dof_index : dof_indices)
-        if (dof_map.local_index(dof_index))
-        {
-          if (jac_scaling)
-          {
-            // For now we will use the diagonal for determining scaling
-            auto mat_value = (*scaling_matrix)(dof_index, dof_index);
-            auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
-            factor = std::max(factor, std::abs(mat_value));
-          }
-          if (resid_scaling)
-          {
-            auto vec_value = (*scaling_residual)(dof_index);
-            auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
-            factor = std::max(factor, std::abs(vec_value));
-          }
-        }
-    }
-
-  auto offset = _num_scaling_groups;
-
-  // Compute scalar factors for scalar variables
-  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-  {
-    auto & scalar_variable = *scalar_variables[i];
-    dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
-    for (auto dof_index : dof_indices)
-      if (dof_map.local_index(dof_index))
-      {
-        if (jac_scaling)
-        {
-          // For now we will use the diagonal for determining scaling
-          auto mat_value = (*scaling_matrix)(dof_index, dof_index);
-          jac_inverse_scaling_factors[offset + i] =
-              std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
-        }
-        if (resid_scaling)
-        {
-          auto vec_value = (*scaling_residual)(dof_index);
-          resid_inverse_scaling_factors[offset + i] =
-              std::max(resid_inverse_scaling_factors[offset + i], std::abs(vec_value));
-        }
-      }
-  }
-
-  if (resid_scaling)
-    _communicator.max(resid_inverse_scaling_factors);
-  if (jac_scaling)
-    _communicator.max(jac_inverse_scaling_factors);
-
-  if (jac_scaling && resid_scaling)
-    for (MooseIndex(inverse_scaling_factors) i = 0; i < inverse_scaling_factors.size(); ++i)
-    {
-      // Be careful not to take log(0)
-      if (!resid_inverse_scaling_factors[i])
-      {
-        if (!jac_inverse_scaling_factors[i])
-          inverse_scaling_factors[i] = 1;
-        else
-          inverse_scaling_factors[i] = jac_inverse_scaling_factors[i];
-      }
-      else if (!jac_inverse_scaling_factors[i])
-        // We know the resid is not zero
-        inverse_scaling_factors[i] = resid_inverse_scaling_factors[i];
-      else
-        inverse_scaling_factors[i] =
-            std::exp(_resid_vs_jac_scaling_param * std::log(resid_inverse_scaling_factors[i]) +
-                     (1 - _resid_vs_jac_scaling_param) * std::log(jac_inverse_scaling_factors[i]));
-    }
-  else if (jac_scaling)
-    inverse_scaling_factors = jac_inverse_scaling_factors;
-  else if (resid_scaling)
-    inverse_scaling_factors = resid_inverse_scaling_factors;
-  else
-    mooseError("We shouldn't be calling this routine if we're not performing any scaling");
-
-  // We have to make sure that our scaling values are not zero
-  for (auto & scaling_factor : inverse_scaling_factors)
-    if (scaling_factor < std::numeric_limits<Real>::epsilon())
-      scaling_factor = 1;
-
-  // Now flatten the group scaling factors to the individual variable scaling factors
-  std::vector<Real> flattened_inverse_scaling_factors(field_variables.size() +
-                                                      scalar_variables.size());
-  for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-    flattened_inverse_scaling_factors[i] = inverse_scaling_factors[_var_to_group_var[i]];
-  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    flattened_inverse_scaling_factors[i + offset] = inverse_scaling_factors[i + offset];
-
-  // Now set the scaling factors for the variables
-  applyScalingFactors(flattened_inverse_scaling_factors);
-  if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
-    displaced_problem->systemBaseNonlinear().applyScalingFactors(flattened_inverse_scaling_factors);
-
-  _auto_scaling_initd = true;
-}
-
-void
 NonlinearSystem::attachPreconditioner(Preconditioner<Number> * preconditioner)
 {
   nonlinearSolver()->attach_preconditioner(preconditioner);
+}
+
+void
+NonlinearSystem::computeScalingJacobian()
+{
+  _fe_problem.computeJacobianSys(_transient_sys, *_current_solution, _scaling_matrix);
+}
+
+void
+NonlinearSystem::computeScalingResidual()
+{
+  _fe_problem.computeResidualSys(_transient_sys, *_current_solution, RHS());
 }
