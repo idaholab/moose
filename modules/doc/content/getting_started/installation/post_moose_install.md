@@ -4,6 +4,8 @@ Now that you have a working MOOSE Framework stack,
 [consider checking out the MOOSE examples](examples/index.md optional=True) for a beginning tour of how to use input
 files and implement your own custom behavior for MOOSE.
 
+You may also want to peruse over our [Conda Command Reference](help/faq/conda_commands.md), to familiarize yourself with Conda.
+
 ## Join the Community
 
 Join one of our mailing lists:
