@@ -1,0 +1,60 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "LoadCovarianceDataAction.h"
+#include "GaussianProcess.h"
+#include "FEProblem.h"
+#include "RestartableDataIO.h"
+#include "StochasticToolsApp.h"
+
+registerMooseAction("StochasticToolsApp", LoadCovarianceDataAction, "load_covariance_data");
+
+InputParameters
+LoadCovarianceDataAction::validParams()
+{
+  InputParameters params = Action::validParams();
+  params.addClassDescription("Calls load method on SurrogateModel objects contained within the "
+                             "`[Surrogates]` input block, if a filename is given.");
+  return params;
+}
+
+LoadCovarianceDataAction::LoadCovarianceDataAction(InputParameters params) : Action(params) {}
+
+void
+LoadCovarianceDataAction::act()
+{
+  std::vector<SurrogateModel *> objects;
+  _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
+  for (auto model_ptr : objects)
+  {
+    if (model_ptr && model_ptr->type()=="GaussianProcess"){
+        if (model_ptr->isParamValid("filename"))
+            load(*dynamic_cast<GaussianProcess *>(model_ptr));
+        dynamic_cast<GaussianProcess *>(model_ptr)->setupCovariance();
+    }
+  }
+}
+
+void
+LoadCovarianceDataAction::load(const GaussianProcess & model)
+{
+
+    const std::string & covar_type = model._covar_type;
+    const std::vector<std::vector<Real>> & hyperparams = model._hyperparams;
+    const std::string & covar_name = model.name()+ "_covar_func";
+
+    InputParameters covar_params = _factory.getValidParams(covar_type);
+
+    covar_params.set<std::vector<std::vector<Real>>>("hyperparams") = hyperparams;
+
+    std::shared_ptr<CovarianceFunctionBase> covar_model =
+        _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
+    _problem->theWarehouse().add(covar_model);
+
+}

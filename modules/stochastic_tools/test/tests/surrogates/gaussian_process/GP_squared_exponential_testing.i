@@ -38,18 +38,9 @@
   [GP_avg]
     type = GaussianProcess
     filename = 'gauss_process_training_GP_avg_trainer.rd'
-    covariance_function='covar'
   []
 []
 
-[Covariance]
-  [covar]
-    type=SquaredExponentialCovariance
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
-  []
-[]
 
 [Outputs]
   [out]

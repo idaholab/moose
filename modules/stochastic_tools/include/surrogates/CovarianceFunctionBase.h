@@ -32,6 +32,9 @@ public:
   virtual void getHyperParameters(std::vector<std::vector<Real>> & vec) const = 0;
 
 protected:
+  /// This needs to be declared first, before all other vairables that would be stored in it
+  std::vector<std::vector<Real>> _hyperparams;
+
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   std::vector<Real> _length_factor;
 
