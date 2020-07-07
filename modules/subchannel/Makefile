@@ -25,7 +25,6 @@ include $(FRAMEWORK_DIR)/moose.mk
 # other set variables).
 
 ALL_MODULES                 := no
-
 CHEMICAL_REACTIONS          := no
 CONTACT                     := no
 EXTERNAL_PETSC_SOLVER       := no

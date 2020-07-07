@@ -26,9 +26,11 @@ protected:
 
 private:
   Eigen::MatrixXd _ref_qprime; /// average linear heat rate over the whole pin in W/m
-  Eigen::MatrixXd _ref_power; /// actual pin power in W
-  Eigen::MatrixXd _pin_power_correction; /// its the correction that will be applied to the estimated calculation [unitless]
-  Eigen::MatrixXd _estimate_power; /// its a matrix which will hold the total estimated power of each pin [W]
+  Eigen::MatrixXd _ref_power;  /// actual pin power in W
+  Eigen::MatrixXd
+      _pin_power_correction; /// its the correction that will be applied to the estimated calculation [unitless]
+  Eigen::MatrixXd
+      _estimate_power; /// its a matrix which will hold the total estimated power of each pin [W]
 
 public:
   static InputParameters validParams();

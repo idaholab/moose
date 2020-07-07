@@ -8,8 +8,10 @@ WettedPerimIC::validParams()
   return SubChannelBaseIC::validParams();
 }
 
-WettedPerimIC::WettedPerimIC(const InputParameters & params) : SubChannelBaseIC(params),
-_mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
+WettedPerimIC::WettedPerimIC(const InputParameters & params)
+  : SubChannelBaseIC(params), _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh()))
+{
+}
 
 Real
 WettedPerimIC::value(const Point & p)
