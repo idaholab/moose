@@ -4,12 +4,12 @@
 
 class SubChannelMesh;
 /**
- * An abstract class for ICs relating to the PSBT fluid temperature benchmarks
+ * An abstract class for ICs 
  */
-class IC : public InitialCondition
+class SubChannelBaseIC : public InitialCondition
 {
 public:
-  IC(const InputParameters & params);
+  SubChannelBaseIC(const InputParameters & params);
 
 protected:
   /**

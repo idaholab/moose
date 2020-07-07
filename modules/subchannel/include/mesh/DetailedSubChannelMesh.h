@@ -6,7 +6,6 @@ class DetailedSubChannelMesh : public SubChannelMesh
 {
 public:
   DetailedSubChannelMesh(const InputParameters & parameters);
-
   virtual void buildMesh() override;
 
 public:

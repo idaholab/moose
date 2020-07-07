@@ -10,7 +10,6 @@ class SubChannelSolver : public GeneralUserObject, public Coupleable
 {
 public:
   explicit SubChannelSolver(const InputParameters & params);
-
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;

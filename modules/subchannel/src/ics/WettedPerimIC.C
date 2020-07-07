@@ -5,10 +5,10 @@ registerMooseObject("SubChannelApp", WettedPerimIC);
 InputParameters
 WettedPerimIC::validParams()
 {
-  return IC::validParams();
+  return SubChannelBaseIC::validParams();
 }
 
-WettedPerimIC::WettedPerimIC(const InputParameters & params) : IC(params),
+WettedPerimIC::WettedPerimIC(const InputParameters & params) : SubChannelBaseIC(params),
 _mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())) {}
 
 Real

@@ -1,15 +1,14 @@
 #pragma once
 
-#include "IC.h"
+#include "SubChannelBaseIC.h"
 
 /**
  * Sets the wetted perimeter of the subchannel
  */
-class WettedPerimIC : public IC
+class WettedPerimIC : public SubChannelBaseIC
 {
 public:
   WettedPerimIC(const InputParameters & params);
-
   Real value(const Point & p) override;
 
 protected:

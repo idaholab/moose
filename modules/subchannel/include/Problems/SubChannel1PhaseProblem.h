@@ -7,7 +7,9 @@
 class SubChannel1PhaseProblem;
 
 /**
- * This class implements the 1-phase sub channel solver.
+ *
+ This class implements the 1-phase steady state sub channel solver.
+ *
  */
 
 class SubChannel1PhaseProblem : public ExternalProblem

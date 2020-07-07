@@ -1,14 +1,15 @@
 #pragma once
 
-#include "IC.h"
+#include "SubChannelBaseIC.h"
 #include <Eigen/Dense>
 
 /**
- * Sets the linear heat rate for the PSBT mixing fluid temperature benchmark.
-  Thus far there is only a radial distribution and not an axial one i.e : constant axial linear heat flux
-  value is the method in InitialConditions that returns the linear heat flux per subchannel cell
+ *
+  Sets the axial heat rate for each pin according to a radial power distribution
+  and a user defined axial power shape.
+ *
  */
-class PowerIC : public IC
+class PowerIC : public SubChannelBaseIC
 {
 public:
   PowerIC(const InputParameters & params);
@@ -24,10 +25,10 @@ protected:
   const Function & _axial_heat_rate;
 
 private:
-  Eigen::MatrixXd _ref_qprime; // average linear heat rate over the whole pin in W/m
-  Eigen::MatrixXd _ref_power;
-  Eigen::MatrixXd _pin_power_correction; //its the correction that will be applied to the estimated calculation [unitless]
-  Eigen::MatrixXd _estimate_power; //its a matrix which will hold the total estimated power of each pin [W]
+  Eigen::MatrixXd _ref_qprime; /// average linear heat rate over the whole pin in W/m
+  Eigen::MatrixXd _ref_power; /// actual pin power in W
+  Eigen::MatrixXd _pin_power_correction; /// its the correction that will be applied to the estimated calculation [unitless]
+  Eigen::MatrixXd _estimate_power; /// its a matrix which will hold the total estimated power of each pin [W]
 
 public:
   static InputParameters validParams();

@@ -177,9 +177,7 @@ SubChannelMesh::buildMesh()
 {
   UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(getMesh());
   mesh.clear();
-
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
   mesh.set_spatial_dimension(3);
   mesh.reserve_elem(_nz * _ny * _nx);
   mesh.reserve_nodes((_nz + 1) * _ny * _nx);
@@ -232,6 +230,5 @@ SubChannelMesh::buildMesh()
   boundary_info.sideset_name(1) = "top";
   boundary_info.nodeset_name(0) = "bottom";
   boundary_info.nodeset_name(1) = "top";
-
   mesh.prepare_for_use();
 }
