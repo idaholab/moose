@@ -932,7 +932,7 @@ public:
    * @param subdomain_id The subdomain ID you want to get the boundary ids for.
    * @return All boundary IDs connected to elements in the give
    */
-  const std::set<BoundaryID> & getSubdomainBoundaryIds(SubdomainID subdomain_id) const;
+  const std::set<BoundaryID> & getSubdomainBoundaryIds(const SubdomainID subdomain_id) const;
 
   /**
    * Get the list of boundaries that contact the given subdomain.
@@ -945,7 +945,7 @@ public:
   /**
    * Get the list of subdomains associated with the given boundary.
    *
-   * @param subdomain_id The boundary ID you want to get the subdomain IDs for.
+   * @param bid The boundary ID you want to get the subdomain IDs for.
    * @return All subdomain IDs associated with given boundary ID
    */
   std::set<SubdomainID> getBoundaryConnectedBlocks(const BoundaryID bid) const;
@@ -953,10 +953,18 @@ public:
   /**
    * Get the list of subdomains contacting the given boundary.
    *
-   * @param subdomain_id The boundary ID you want to get the subdomain IDs for.
+   * @param bid The boundary ID you want to get the subdomain IDs for.
    * @return All subdomain IDs contacting given boundary ID
    */
   std::set<SubdomainID> getInterfaceConnectedBlocks(const BoundaryID bid) const;
+
+  /**
+   * Get the list of subdomains neighboring a given subdomain.
+   *
+   * @param subdomain_id The boundary ID you want to get the subdomain IDs for.
+   * @return All subdomain IDs neighboring a given subdomain
+   */
+  const std::set<SubdomainID> & getBlockConnectedBlocks(const SubdomainID subdomain_id) const;
 
   /**
    * Returns true if the requested node is in the list of boundary nodes, false otherwise.
@@ -1423,6 +1431,9 @@ private:
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::pair<unsigned int, QpMap>>>
       _elem_type_to_coarsening_map;
+
+  /// Holds a map from subomdain ids to the neighboring subdomain ids
+  std::unordered_map<SubdomainID, std::set<SubdomainID>> _sub_to_neighbor_subs;
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
   std::unordered_map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
