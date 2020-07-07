@@ -218,7 +218,7 @@ SubChannel1PhaseProblem::externalSolve()
             double b;
 
             // Calculation of Turbulent Crossflow
-            double abeta = 0.08; // thermal diffusion coefficient 
+            double abeta = 0.08; // thermal diffusion coefficient
             WijPrime(i_gap) = abeta * 0.25 *
                               (mdot_soln(node_in_i) / Si + mdot_soln(node_out_i) / Si +
                                mdot_soln(node_in_j) / Sj + mdot_soln(node_out_j) / Sj) *
@@ -461,31 +461,6 @@ SubChannel1PhaseProblem::externalSolve()
       Total_crossflow += SumWij_soln(node);
     }
   }
-
-  std::ofstream myfile1;
-  myfile1.open ("Temp_out.txt",std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << Temp_out <<"\n";
-  myfile1.close();
-
-  std::ofstream myfile2;
-  myfile2.open ("mdot_out.txt",std::ofstream::trunc);
-  myfile2 << std::setprecision(6) << std::fixed << mdotout <<"\n";
-  myfile2.close();
-
-  std::ofstream myfile3;
-  myfile3.open ("h_out.txt",std::ofstream::trunc);
-  myfile3 << std::setprecision(3) << std::fixed << Enthalpy_out <<"\n";
-  myfile3.close();
-
-  std::ofstream myfile4;
-  myfile4.open ("mdot_in.txt",std::ofstream::trunc);
-  myfile4 << std::setprecision(6) << std::fixed << mdotin <<"\n";
-  myfile4.close();
-
-  std::ofstream myfile5;
-  myfile5.open ("h_in.txt",std::ofstream::trunc);
-  myfile5 << std::setprecision(3) << std::fixed << Enthalpy_in <<"\n";
-  myfile5.close();
 
   _console << "Finished executing subchannel solver\n";
 }
