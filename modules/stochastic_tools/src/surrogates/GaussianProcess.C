@@ -19,30 +19,38 @@ GaussianProcess::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
-  params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
+  params.addParam<UserObjectName>("covariance_function", "Name of covariance function.");
   return params;
 }
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
+    _covar_type(getModelData<std::string>("_covar_type")),
+    _hyperparams(getModelData<std::vector<std::vector<Real>>>("_hyperparams")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _training_data(getModelData<RealEigenMatrix>("_training_data")),
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve"))
+    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
+    _covar_name(isParamValid("filename")? UserObjectName(_name+ "_covar_func"): getParam<UserObjectName>("covariance_function")),
+    _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"))
 {
-  const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
-  FEProblemBase & feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"));
+}
 
+void
+GaussianProcess::setupCovariance()
+{
+  /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction
+  /// Must be called AFTER Covariacne Function is potentially created by action.
   std::vector<CovarianceFunctionBase *> models;
-  feproblem.theWarehouse()
+  _feproblem.theWarehouse()
       .query()
-      .condition<AttribName>(name)
+      .condition<AttribName>(_covar_name)
       .condition<AttribSystem>("CovarianceFunctionBase")
       .queryInto(models);
   if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
+    mooseError("Unable to find a CovarianceFunction object with the name '" + _covar_name + "'");
   _covariance_function = models[0];
 }
 
@@ -57,6 +65,15 @@ GaussianProcess::evaluate(const std::vector<Real> & x) const
 Real
 GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
+
+  //*******************************************//
+  //*****This bock should be .initialize()*****//
+  //*****Only Needs Called Once****************//
+  Eigen::LLT<RealEigenMatrix> _K_cho_decomp(_K);
+  //*******************************************//
+  //*******************************************//
+  //*******************************************//
+
   unsigned int _n_params = _training_params.cols();
   unsigned int _num_tests = 1;
 
@@ -80,8 +97,6 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   // De-center/scale the value and store for return
   pred_value = _data_standardizer.getDestandardized(pred_value);
 
-  // Compute standard deviation
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp(_K);
   RealEigenMatrix pred_var =
       K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
 

@@ -16,13 +16,14 @@ InputParameters
 MaternHalfIntCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
-  params.addRequiredParam<unsigned int>(
+  params.addParam<unsigned int>(
       "p", "Integer p to use for Matern Hald Integer Covariance Kernel");
   return params;
 }
 
 MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters), _p(getParam<unsigned int>("p"))
+  : CovarianceFunctionBase(parameters),
+  _p(!_hyperparams.empty() ? round(_hyperparams[3][0]): getParam<unsigned int>("p"))
 {
 }
 

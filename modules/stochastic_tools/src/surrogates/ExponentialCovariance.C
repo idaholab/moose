@@ -16,12 +16,13 @@ InputParameters
 ExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
-  params.addRequiredParam<Real>("gamma", "Gamma to use for Exponential Covariance Kernel");
+  params.addParam<Real>("gamma", "Gamma to use for Exponential Covariance Kernel");
   return params;
 }
 
 ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters), _gamma(getParam<Real>("gamma"))
+  : CovarianceFunctionBase(parameters),
+  _gamma(!_hyperparams.empty() ? _hyperparams[3][0]: getParam<Real>("gamma"))
 {
 }
 

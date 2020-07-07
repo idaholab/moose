@@ -67,7 +67,9 @@ private:
   /// Switch for training data(y) standardization
   bool _standardize_data;
 
+  std::string & _covar_type;
+
   std::vector<std::vector<Real>> & _hyperparams;
 
-  const CovarianceFunctionBase * _covariance_function;
+  CovarianceFunctionBase * _covariance_function;
 };

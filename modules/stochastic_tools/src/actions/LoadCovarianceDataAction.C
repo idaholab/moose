@@ -33,35 +33,28 @@ LoadCovarianceDataAction::act()
   _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
   for (auto model_ptr : objects)
   {
-    if (model_ptr && model_ptr->type() == "GaussianProcess" && model_ptr->isParamValid("filename"))
-      load(*dynamic_cast<GaussianProcess *>(model_ptr));
+    if (model_ptr && model_ptr->type()=="GaussianProcess"){
+        if (model_ptr->isParamValid("filename"))
+            load(*dynamic_cast<GaussianProcess *>(model_ptr));
+        dynamic_cast<GaussianProcess *>(model_ptr)->setupCovariance();
+    }
   }
 }
 
 void
-LoadCovarianceDataAction::load(GaussianProcess & model)
+LoadCovarianceDataAction::load(const GaussianProcess & model)
 {
 
-  const std::string & covar_type = model.getCovarType();
-  const std::unordered_map<std::string, Real> & map = model.getHyperParamMap();
-  const std::unordered_map<std::string, std::vector<Real>> & vec_map = model.getHyperParamVecMap();
-  const UserObjectName & covar_name = model.name() + "_covar_func";
+    const std::string & covar_type = model._covar_type;
+    const std::vector<std::vector<Real>> & hyperparams = model._hyperparams;
+    const std::string & covar_name = model.name()+ "_covar_func";
 
-  InputParameters covar_params = _factory.getValidParams(covar_type);
+    InputParameters covar_params = _factory.getValidParams(covar_type);
 
-  for (auto & p : map)
-  {
-    covar_params.set<Real>(p.first) = p.second;
-  }
+    covar_params.set<std::vector<std::vector<Real>>>("hyperparams") = hyperparams;
 
-  for (auto & p : vec_map)
-  {
-    covar_params.set<std::vector<Real>>(p.first) = p.second;
-  }
+    std::shared_ptr<CovarianceFunctionBase> covar_model =
+        _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
+    _problem->theWarehouse().add(covar_model);
 
-  std::shared_ptr<CovarianceFunctionBase> covar_model =
-      _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
-  _problem->theWarehouse().add(covar_model);
-
-  model.setupCovariance(covar_name);
 }

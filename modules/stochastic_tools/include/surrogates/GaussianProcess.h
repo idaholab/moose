@@ -22,6 +22,12 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
+  virtual void setupCovariance();
+
+  const std::string & _covar_type;
+
+  const std::vector<std::vector<Real>> & _hyperparams;
+
 private:
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
@@ -41,5 +47,10 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  const CovarianceFunctionBase * _covariance_function;
+  const UserObjectName _covar_name;
+
+  const FEProblemBase & _feproblem;
+
+  CovarianceFunctionBase * _covariance_function;
+
 };

@@ -47,7 +47,8 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    //_covar_id(declareModelData<int>("_covar_id")),
+    //_covariance_function(declareModelData<CovarianceFunctionBase *>("_covariance_function")),
+    _covar_type(declareModelData<std::string>("_covar_type")),
     _hyperparams(declareModelData<std::vector<std::vector<Real>>>("_hyperparams"))
 
 {
@@ -101,6 +102,8 @@ GaussianProcessTrainer::initialize()
                getParam<SamplerName>("sampler"),
                "'!");
 
+  _covar_type = _covariance_function->type();
+
   unsigned int num_samples = _values_ptr->size();
 
   // Offset for replicated/distributed result data
@@ -150,7 +153,7 @@ GaussianProcessTrainer::initialize()
 void
 GaussianProcessTrainer::execute()
 {
-  //_covariance_function->getHyperParameters(_hyperparams);
+  _covariance_function->getHyperParameters(_hyperparams);
   _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);
