@@ -28,12 +28,11 @@
     type = ADJouleHeatingSource
     variable = T
     elec = elec
-    electrical_conductivity = ad_electrical_conductivity
   [../]
   [./electric]
     type = ADHeatConduction
     variable = elec
-    thermal_conductivity = ad_electrical_conductivity
+    thermal_conductivity = electrical_conductivity
   [../]
 []
 
@@ -75,14 +74,8 @@
     prop_values = '8920.0' #copper in kg/(m^3)
   [../]
   [./sigma] #copper is default material
-    type = ElectricalConductivity
+    type = ADElectricalConductivity
     temperature = T
-    temperature_coefficient = 0
-  [../]
-  [./sigma_converter]
-    type = MaterialConverter
-    reg_props_in = electrical_conductivity
-    ad_props_out = ad_electrical_conductivity
   [../]
 []
 

@@ -18,6 +18,9 @@
   [./ad_joule_heating_jacobian]
     type = 'PetscJacobianTester'
     input = 'transient_ad_jouleheating.i'
+    cli_args = 'Executioner/end_time=1'
+    ratio_tol = 3.2e-6
+    difference_tol = 0.002
     requirement = 'The system shall compute a perfect jacobian for Joule heating using automatic differentiation'
     issues = '#15536'
     design = 'ADJouleHeatingSource.md'

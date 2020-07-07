@@ -11,9 +11,11 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("HeatConductionApp", ElectricalConductivity);
+registerMooseObject("HeatConductionApp", ADElectricalConductivity);
 
+template <bool is_ad>
 InputParameters
-ElectricalConductivity::validParams()
+ElectricalConductivityTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addCoupledVar("temperature", 293.0, "Coupled variable for temperature.");
@@ -34,24 +36,63 @@ ElectricalConductivity::validParams()
   return params;
 }
 
-ElectricalConductivity::ElectricalConductivity(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Material>(parameters),
+template <bool is_ad>
+ElectricalConductivityTempl<is_ad>::ElectricalConductivityTempl(const InputParameters & parameters)
+  : Material(parameters),
     _ref_resis(getParam<Real>("reference_resistivity")),
     _temp_coeff(getParam<Real>("temperature_coefficient")),
     _ref_temp(getParam<Real>("reference_temperature")),
-    _T(coupledValue("temperature")),
+    _has_temp(isCoupled("temperature")),
+    _T((_has_temp && !is_ad) ? coupledValue("temperature") : _zero),
+    _ad_T((_has_temp && is_ad) ? adCoupledValue("temperature") : _ad_zero),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _electric_conductivity(declareProperty<Real>(_base_name + "electrical_conductivity")),
-    _delectric_conductivity_dT(declarePropertyDerivative<Real>(
-        _base_name + "electrical_conductivity", getVar("temperature", 0)->name()))
+    _electric_conductivity(
+        declareGenericProperty<Real, is_ad>(_base_name + "electrical_conductivity")),
+    _delectric_conductivity_dT(declareProperty<Real>(_base_name + "electrical_conductivity_dT"))
 {
 }
 
+template <bool is_ad>
 void
-ElectricalConductivity::computeQpProperties()
+ElectricalConductivityTempl<is_ad>::setDerivatives(GenericReal<is_ad> & prop,
+                                                   Real dprop_dT,
+                                                   const ADReal & ad_T)
 {
-  const Real resistivity = _ref_resis * (1.0 + _temp_coeff * (_T[_qp] - _ref_temp));
+  if (ad_T < 0)
+    prop.derivatives() = 0;
+  else
+    prop.derivatives() = dprop_dT * ad_T.derivatives();
+}
+
+template <>
+void
+ElectricalConductivityTempl<false>::setDerivatives(Real &, Real, const ADReal &)
+{
+  mooseError("Mistaken call of setDerivatives in a non-AD ElectricalConductivityTempl version");
+}
+
+template <bool is_ad>
+void
+ElectricalConductivityTempl<is_ad>::computeQpProperties()
+{
+  Real temp_qp = 0;
+  if (is_ad)
+  {
+    temp_qp = MetaPhysicL::raw_value(_ad_T[_qp]);
+  }
+  else
+  {
+    temp_qp = _T[_qp];
+  }
+
+  const Real resistivity = _ref_resis * (1.0 + _temp_coeff * (temp_qp - _ref_temp));
   const Real dresistivity_dT = _ref_resis * _temp_coeff;
   _electric_conductivity[_qp] = 1.0 / resistivity;
   _delectric_conductivity_dT[_qp] = -1.0 / (resistivity * resistivity) * dresistivity_dT;
+
+  if (is_ad)
+    setDerivatives(_electric_conductivity[_qp], _delectric_conductivity_dT[_qp], _ad_T[_qp]);
 }
+
+template class ElectricalConductivityTempl<false>;
+template class ElectricalConductivityTempl<true>;
