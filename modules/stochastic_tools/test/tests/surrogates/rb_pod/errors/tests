@@ -56,7 +56,7 @@
       input = trainer.i
       allow_test_objects = true
       cli_args = 'Trainers/pod_rb/dir_tag_names="doesnt_exist"'
-      detail = "the Dirichlet BC tagnames are not included in 'tag_names'"
+      detail = "the Dirichlet BC tagnames are not included in 'tag_names',"
       expect_err = "Dirichlet BC tag 'doesnt_exist' is not present in tag_names!"
     []
     [wrong_res_transfer]
@@ -64,8 +64,30 @@
       input = trainer.i
       allow_test_objects = true
       cli_args = 'Transfers/res/execute_on="timestep_begin"'
-      detail = 'the system is initialized before the reduced bases are completed'
+      detail = 'and the system is initialized before the reduced bases are completed.'
       expect_err = "There are no basis vectors available. This might indicate that a residual transfer is called before the base generation procedure is finished."
+    []
+  []
+  [surrogate]
+    requirement = 'PODReducedBasisSurrogate shall throw an error when '
+    design = "ResidualSurrogate.md"
+    [var_name]
+      type = RunException
+      input = trainer_and_surr.i
+      allow_test_objects = true
+      cli_args = "Surrogates/rbpod/change_rank='doesnt_exist'"
+      detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same, "
+      expect_err = "The size of 'new_ranks' is not equal to the size of 'change_rank' 0 != 1"
+    []
+    [new_rank_size]
+      type = RunException
+      input = trainer_and_surr.i
+      allow_test_objects = true
+      cli_args = "Surrogates/rbpod/change_rank='u'
+                  Surrogates/rbpod/new_ranks='5'"
+      detail = "the new rank size is out of bounds, "
+      expect_err = "The specified new rank (5) for variable 'u' is higher than the original rank (3)! Only lower ranks are allowed."
+      match_literal = true
     []
   []
 []
