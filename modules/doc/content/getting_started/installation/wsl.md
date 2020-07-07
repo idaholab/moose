@@ -33,7 +33,7 @@ Launch WSL, perform an update, and install necessary OpenGL libraries:
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install x11-apps libglu1-mesa
+sudo apt-get install x11-apps libglu1-mesa libquadmath0
 ```
 
 ## Configure WSL to use VcXsrv
