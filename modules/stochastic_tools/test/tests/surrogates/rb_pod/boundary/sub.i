@@ -1,12 +1,12 @@
 [Problem]
   type = FEProblem
-  extra_tag_vectors  = 'diff react bodyf dir_bc_src dir_bc_imp'
+  extra_tag_vectors  = 'diff react bodyf dir_src dir_imp'
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
+  nx = 15
   xmax = 10
 []
 
@@ -50,19 +50,19 @@
 []
 
 [BCs]
-  [dummy_bc]
+  [dummy_1]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-    extra_vector_tags = 'dir_bc_imp'
+    extra_vector_tags = 'dir_imp'
   []
-  [dummy_modifier]
+  [dummy_2]
     type = DirichletBCModifier
     variable = u
     boundary = left
     value = 1
-    extra_vector_tags = 'dir_bc_src'
+    extra_vector_tags = 'dir_src'
   []
   [left]
     type = DirichletBC
@@ -88,13 +88,6 @@
 [Controls]
   [stochastic]
     type = SamplerReceiver
-  []
-[]
-
-[Postprocessors]
-  [max]
-    type = NodalExtremeValue
-    variable = u
   []
 []
 

@@ -1,13 +1,13 @@
 [Tests]
   issues = "#15538"
   design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md SamplerSolutionTransfer.md ResidualTransfer.md"
-  requirement = 'The system shall demonstrate a POD-RB surrogate (without Dirichlet BC) by '
+  requirement = 'The system shall demonstrate a POD-RB surrogate (with Dirichlet BC) by '
   [train]
     type = CheckFiles
     input = trainer.i
     check_files = 'trainer_out_pod_rb.rd'
     allow_test_objects = true
-    detail = 'training using known 3D data '
+    detail = 'training using known 4D data '
   []
   [load]
     type = CSVDiff
@@ -15,13 +15,6 @@
     allow_test_objects = true
     csvdiff = 'surr_out_res_0001.csv'
     prereq = train # Creates data files that this test uses
-    detail = 'and then evaluating new samples separately for new data'
-  []
-  [train_and_load]
-    type = CSVDiff
-    input = trainer_and_surr.i
-    allow_test_objects = true
-    csvdiff = 'trainer_and_surr_out_res_0002.csv'
-    detail = 'and then doing both together in one input file.'
+    detail = 'and then evaluating new samples separately for new data.'
   []
 []

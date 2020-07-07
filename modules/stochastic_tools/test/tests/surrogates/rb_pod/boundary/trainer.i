@@ -17,7 +17,7 @@
     lower_bound = 2.5
     upper_bound = 7.5
   []
-  [bc_dist]
+  [Dir_dist]
     type = Uniform
     lower_bound = 0
     upper_bound = 1
@@ -27,9 +27,9 @@
 [Samplers]
   [sample]
     type = LatinHypercube
-    distributions = 'k_dist alpha_dist S_dist bc_dist'
-    num_rows = 100
-    num_bins = 10
+    distributions = 'k_dist alpha_dist S_dist Dir_dist'
+    num_rows = 5
+    num_bins = 3
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -52,6 +52,7 @@
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value BCs/left/value'
     to_control = 'stochastic'
     execute_on = 'timestep_begin'
+    check_multiapp_execute_on = false
   []
   [data]
     type = SamplerSolutionTransfer
@@ -60,6 +61,7 @@
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
     execute_on = 'timestep_begin'
+    check_multiapp_execute_on = false
   []
   [mode]
     type = SamplerSolutionTransfer
@@ -68,13 +70,15 @@
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
     execute_on = 'final'
+    check_multiapp_execute_on = false
   []
   [res]
     type = ResidualTransfer
     multi_app = sub
     sampler = sample
-    trainer_name = 'pod_rb'
+    trainer_name = "pod_rb"
     execute_on = 'final'
+    check_multiapp_execute_on = false
   []
 []
 
@@ -83,8 +87,8 @@
     type = PODReducedBasisTrainer
     var_names = 'u'
     en_limits = '0.999999999'
-    tag_names = 'diff react bodyf dir_bc_src dir_bc_imp'
-    dir_tag_names = 'dir_bc_src dir_bc_imp'
+    tag_names = 'diff react bodyf dir_src dir_imp'
+    dir_tag_names = 'dir_src dir_imp'
     independent = '0 0 1 1 0'
     execute_on = 'timestep_begin final'
   []
