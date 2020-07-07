@@ -641,7 +641,6 @@ INSAction::addINSMomentum()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       params.set<RealVectorValue>("gravity") = gravity;
-      params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
       _problem->addKernel(kernel_type, "ins_momentum_gravity", params);
     }
 
@@ -666,7 +665,6 @@ INSAction::addINSMomentum()
       params.set<RealVectorValue>("gravity") = gravity;
       params.set<MaterialPropertyName>("alpha_name") =
           getParam<MaterialPropertyName>("thermal_expansion_name");
-      params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
       params.set<MaterialPropertyName>("ref_temp") =
           getParam<MaterialPropertyName>("reference_temperature_name");
       if (_blocks.size() > 0)
