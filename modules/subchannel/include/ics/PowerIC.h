@@ -4,10 +4,8 @@
 #include <Eigen/Dense>
 
 /**
- *
-  Sets the axial heat rate for each pin according to a radial power distribution
-  and a user defined axial power shape.
- *
+ * Sets the axial heat rate for each pin according to a radial power distribution
+ * and a user defined axial power shape.
  */
 class PowerIC : public SubChannelBaseIC
 {

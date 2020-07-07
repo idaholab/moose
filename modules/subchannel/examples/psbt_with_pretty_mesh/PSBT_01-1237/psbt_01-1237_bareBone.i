@@ -40,15 +40,6 @@ length = 3.658
   []
 []
 
-[Functions]
-  [axial_heat_rate]
-    type = ParsedFunction
-    value = '1.0'
-    vars = 'L'
-    vals = '${length}'
-  []
-[]
-
 [Modules]
   [FluidProperties]
     [water]
@@ -79,7 +70,6 @@ length = 3.658
     variable = q_prime
     power = 3.44e6
     filename = "power_profile.txt"
-    axial_heat_rate = axial_heat_rate
   []
 []
 
