@@ -1,0 +1,3 @@
+time,circle_area,circle_area_exact,circle_perimeter_exact,circle_perimeter_wrt_circle,circle_perimeter_wrt_inside,inside_area,inside_area_exact,inside_perimeter_exact,inside_perimeter_wrt_inside,inside_perimeter_wrt_outside,outside_area,outside_area_exact,outside_perimeter,outside_perimeter_exact,total_area,total_area_exact,u_avg,v_avg
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,0.76536686473018,0.76536686473018,3.1214451522581,3.1214451522581,3.1214451522581,4.0746331352698,4.0746331352698,8.8,8.8,8.8,4.16,4.16,12,12,9,9,2.0000000000236,5.4059023158666

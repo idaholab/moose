@@ -1,0 +1,3 @@
+time,circle_side_area,circle_side_area_exact,circle_volume,circle_volume_exact,inside_side_area,inside_side_area_exact,inside_volume,inside_volume_exact,outside_side_area,outside_side_area_exact,outside_volume,outside_volume_exact,total_volume,total_volume_exact
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1,1.254002132357,1.254002132357,0.31152930753884,0.31152930753884,3.52,3.52,1.6244706924612,1.6244706924612,4.8,4.8,1.664,1.664,3.6000000000001,3.6
