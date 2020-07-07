@@ -48,12 +48,21 @@ PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameter
   if (_en_limits.size() != _var_names.size())
       paramError("en_limits",
                  "The number of elements is not equal to the number"
-                 " of elements in 'var_names'");
+                 " of elements in 'var_names'!");
 
   if (_tag_names.size() != _independent.size())
     paramError("independent",
                "The number of elements is not equal to the number"
-               " of elements in 'tag_names'");
+               " of elements in 'tag_names'!");
+
+  for(auto dir_tag : _dir_tag_names)
+  {
+    auto it = std::find(_tag_names.begin(), _tag_names.end(), dir_tag);
+    if (it == _tag_names.end())
+      paramError("dir_tag_names",
+                 "Dirichlet BC tag '", dir_tag,
+                 "' is not present in tag_names!");
+  }
 }
 
 void
@@ -238,7 +247,9 @@ void
 PODReducedBasisTrainer::initReducedOperators()
 {
   if(!_base_completed)
-    mooseError("There are no basis vectors available, call computeBasisVectors() first!");
+    mooseError("There are no basis vectors available."
+               " This might indicate that a residual transfer is called before"
+               " the base generation procedure is finished.");
 
   _red_operators.resize(_tag_names.size());
 
@@ -261,27 +272,11 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
                                              unsigned int tag_i,
                                              std::vector<DenseVector<Real>>& residual)
 {
-  // Checking if the reduced operators has been initialized.
-  if (_red_operators[tag_i].n() < base_i+1)
-    mooseError("The size of the reduced operator for tag '",
-               _tag_names[tag_i],
-               "' is not consistent with the input! Call initReducedOperators()",
-               " first!");
-
-  // Checking if the residual is consistent with the bases.
-  if (residual.size() != _base.size())
-    mooseError("The number of residual blocks is not equal to the number of variables!");
-
   // Computing the elements of the reduced operator using Galerkin projection
   // on the residual.
   unsigned int counter = 0;
   for (unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
   {
-    // Checking if the vector sizes are the same.
-    if (residual[var_i].size() != _base[var_i][0].size())
-      mooseError("The size of the component residual is not the same as the size of the basis vector!",
-                 residual[var_i].size()," != ",_base[var_i][0].size());
-
     for (unsigned int base_j=0; base_j<_base[var_i].size(); ++base_j)
     {
       _red_operators[tag_i](counter, base_i) = residual[var_i].dot(_base[var_i][base_j]);

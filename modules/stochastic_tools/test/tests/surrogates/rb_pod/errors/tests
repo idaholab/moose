@@ -1,0 +1,71 @@
+[Tests]
+  issues = "#15538"
+  [multiapp]
+    requirement = 'PODFullSolveMultiapp shall throw an error when '
+    design = "PODFullSolveMultiApp.md"
+    [trainer_name]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/sub/trainer_name="doesnt_exist"'
+      detail = 'the trainer object cannot be found.'
+      expect_err = "Unable to find Trainer with name 'doesnt_exist'!"
+    []
+  []
+  [solution_transfer]
+    requirement = 'SamplerSolutionTransfer shall throw an error when '
+    design = "SamplerSolutionTransfer.md"
+    [trainer_name]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Transfers/snapshot/trainer_name="doesnt_exist"'
+      detail = 'the trainer object cannot be found, '
+      expect_err = "Unable to find Trainer with name 'doesnt_exist'!"
+    []
+  []
+  [trainer]
+    requirement = 'PODReducedBasisTrainer shall throw an error when '
+    design = "PODReducedBasisTrainer.md ResidualTransfer.md SamplerSolutionTransfer.md"
+    [var_names]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/var_names='doesnt_exist'"
+      detail = 'the variable names cannot be found on sub-applications, '
+      expect_err = "Variable 'doesnt_exist' not found on sub-application 0!"
+    []
+    [en_limits]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/en_limits='0.9 0.8'"
+      detail = 'the number of energy limits and variable names do not match, '
+      expect_err = "The number of elements is not equal to the number of elements in 'var_names'!"
+    []
+    [independent]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Trainers/pod_rb/independent="1"'
+      detail = 'the number of tag names and independent flags do not match, '
+      expect_err = "The number of elements is not equal to the number of elements in 'tag_names'!"
+    []
+    [dir_tag_names]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Trainers/pod_rb/dir_tag_names="doesnt_exist"'
+      detail = "the Dirichlet BC tagnames are not included in 'tag_names'"
+      expect_err = "Dirichlet BC tag 'doesnt_exist' is not present in tag_names!"
+    []
+    [wrong_res_transfer]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Transfers/res/execute_on="timestep_begin"'
+      detail = 'the system is initialized before the reduced bases are completed'
+      expect_err = "There are no basis vectors available. This might indicate that a residual transfer is called before the base generation procedure is finished."
+    []
+  []
+[]

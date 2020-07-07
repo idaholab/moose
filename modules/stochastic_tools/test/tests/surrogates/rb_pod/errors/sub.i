@@ -6,7 +6,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 100
+  nx = 15
   xmax = 10
 []
 
@@ -74,13 +74,6 @@
 [Controls]
   [stochastic]
     type = SamplerReceiver
-  []
-[]
-
-[Postprocessors]
-  [max]
-    type = NodalExtremeValue
-    variable = u
   []
 []
 

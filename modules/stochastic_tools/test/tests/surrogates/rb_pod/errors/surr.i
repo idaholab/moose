@@ -23,19 +23,17 @@
   [sample]
     type = LatinHypercube
     distributions = 'k_dist alpha_dist S_dist'
-    num_rows = 1000
-    num_bins = 10
-    seed = 17
+    num_rows = 10
+    num_bins = 3
     execute_on = PRE_MULTIAPP_SETUP
+    seed = 17
   []
 []
 
 [Surrogates]
   [rbpod]
     type = PODReducedBasisSurrogate
-    filename = 'trainer_out_pod_rb_999999999_4.rd'
-    change_rank = 'u'
-    new_ranks = '2'
+    filename = 'trainer_out_pod_rb.rd'
   []
 []
 

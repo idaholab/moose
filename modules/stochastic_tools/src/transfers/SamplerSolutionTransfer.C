@@ -56,7 +56,7 @@ SamplerSolutionTransfer::initialSetup()
     if (_multi_app->hasLocalApp(i))
       for(auto var_name : var_names)
         if (!_multi_app->appProblemBase(i).hasVariable(var_name))
-          mooseError("Variable '"+var_name+"' not found in sub-application ",i,"!");
+          mooseError("Variable '"+var_name+"' not found on sub-application ",i,"!");
   }
 }
 
