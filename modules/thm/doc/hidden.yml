@@ -168,7 +168,6 @@
 - /ICs/BetaIC
 - /ICs/OppositePhaseIC
 - /ICs/RhoEAFromPressureTemperatureVelocityIC
-- /ICs/RhoFromPressureTemperatureIC
 - /ICs/ScalarSolutionInitialCondition
 - /ICs/SolutionInitialCondition
 - /ICs/SpecificInternalEnergyIC
