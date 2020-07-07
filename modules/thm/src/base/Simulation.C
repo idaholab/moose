@@ -71,8 +71,9 @@ Simulation::buildMesh()
   // build mesh
   for (auto && comp : _components)
     comp->executeSetupMesh();
-  // Some components add side sets, some add node sets. Make sure both versions exist
-  _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
+  // Make sure all node sets have their corresponding side sets
+  if (_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
+    _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
   _mesh.prep();
 
   // augment the sparsity pattern
