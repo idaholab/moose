@@ -13,7 +13,6 @@ public:
   }
 
   ~SolutionHandle() { _soln.close(); }
-
   /**
    * Get a value from the solution vector.
    */
@@ -23,7 +22,6 @@ public:
     dof_id_type dof = node->dof_number(_var.sys().number(), _var.number(), 0);
     return _soln(dof);
   }
-
   /**
    * Set a value in the solution vector.
    */

@@ -43,7 +43,6 @@ length = 3.658
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    # value = '(pi/2.0)*sin(pi*z/L)'
     value = '1.0'
     vars = 'L'
     vals = '${length}'
@@ -87,10 +86,6 @@ length = 3.658
 [Outputs]
   exodus = true
 []
-
-################################################################################
-# Stuff needed to make the program execute
-################################################################################
 
 [Executioner]
   type = Steady

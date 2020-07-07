@@ -9,14 +9,14 @@ registerMooseObject("SubChannelApp", PowerIC);
 InputParameters
 PowerIC::validParams()
 {
-  InputParameters params = IC::validParams();
+  InputParameters params = SubChannelBaseIC::validParams();
   params.addRequiredParam<Real>("power", "[W]");
   params.addParam<std::string>("filename", 413.0, "name of power profile .txt file (should be a single column). It's a Radial Power Profile. [UnitLess]");
   params.addParam<FunctionName>("axial_heat_rate", 1.0, "user provided normalized function of axial heat rate [Unitless]. The integral over pin length should equal the heated length" );
   return params;
 }
 
-PowerIC::PowerIC(const InputParameters & params) : IC(params), _mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())),
+PowerIC::PowerIC(const InputParameters & params) : SubChannelBaseIC(params), _mesh(dynamic_cast<SubChannelMesh &> (_fe_problem.mesh())),
 _axial_heat_rate(getFunction("axial_heat_rate"))
 {
   _power = getParam<Real>("power");
@@ -58,18 +58,20 @@ _axial_heat_rate(getFunction("axial_heat_rate"))
 
   _power_dis.resize(_mesh._ny - 1, _mesh._nx - 1);
   auto sum = _power_dis.sum();
-  auto fpin_power = _power / sum;           // full pin power W
-  _ref_power = _power_dis * fpin_power; // actual pin power W
-  // Convert the actual pin power to a linear heat rate.
-  auto heated_length = _mesh._heated_length; // in m
-  _ref_qprime = _ref_power / heated_length; // average linear heat rate in W/m
+  // full pin (100%) power of one pin [W]
+  auto fpin_power = _power / sum;
+  // actual pin power [W]
+  _ref_power = _power_dis * fpin_power;
+  // Convert the actual pin power to a linear heat rate [W/m]
+  auto heated_length = _mesh._heated_length;
+  _ref_qprime = _ref_power / heated_length;
 }
 
 void PowerIC::initialSetup()
 {
   _estimate_power.resize(_mesh._ny - 1, _mesh._nx - 1);
   _estimate_power.setZero();
-  for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++) // nz cells
+  for (unsigned int iz = 1; iz < _mesh._nz + 1; iz++)
   {
     // Compute the height of this element.
     auto dz = _mesh._z_grid[iz] - _mesh._z_grid[iz - 1];
@@ -78,21 +80,28 @@ void PowerIC::initialSetup()
     auto z1 = _mesh._z_grid[iz - 1];
     Point p1(0 , 0, z1);
     Point p2(0 , 0, z2);
-    for (unsigned int i_pin = 0; i_pin <  (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++) //cycle through pins
+    //cycle through pins
+    for (unsigned int i_pin = 0; i_pin <  (_mesh._ny - 1) * (_mesh._nx - 1); i_pin++)
     {
-      unsigned int j = (i_pin / (_mesh._nx - 1));           // row
-      unsigned int i = i_pin - j * (_mesh._nx - 1);         // column
-      _estimate_power(j, i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0; //trapezoidal rule
+      // row
+      unsigned int j = (i_pin / (_mesh._nx - 1));
+      // column
+      unsigned int i = i_pin - j * (_mesh._nx - 1);
+      // use of trapezoidal rule  to calculate local power
+      _estimate_power(j, i) += _ref_qprime(j, i) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2))* dz / 2.0;
     }
   }
-  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power); // I want a division element by element
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
 };
 
 Real PowerIC::value(const Point & p)
 {
-  auto inds = index_point(p); // Determine which subchannel this point is in.
-  auto i = inds.first;  // x index
-  auto j = inds.second; // y index
+  // Determine which subchannel this point is in.
+  auto inds = index_point(p);
+  // x index
+  auto i = inds.first;
+  // y index  
+  auto j = inds.second;
   // Compute and return the estimated channel axial heat rate per channel
   // Corners contact 1/4 of a  one pin
   if (i == 0 && j == 0)

@@ -24,31 +24,23 @@ DetailedSubChannelMesh::buildMesh()
 {
   UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(getMesh());
   mesh.clear();
-
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
-
   mesh.set_spatial_dimension(3);
-
   // Define the resolution (the number of points used to represent a circle).
   // This must be divisible by 4.
   const int theta_res = 8; // TODO: parameterize
-
   // Compute the number of points needed to represent one quarter of a circle.
   const int points_per_quad = theta_res / 4 + 1;
-
   // Compute the points needed to represent one axial slice of a subchannel.
   // There is one center point plus the points from 4 intersecting circles.
   const int points_per_plane = points_per_quad * 4 + 1;
-
   // Compute the total number of points and elements.
   const int points_per_ch = points_per_plane * (_nz + 1);
   const int n_points = points_per_ch * _n_channels;
   const int elems_per_level = theta_res + 4;
   const int n_elems = elems_per_level * _nz * _n_channels;
-
   mesh.reserve_nodes(n_points);
   mesh.reserve_elem(n_elems);
-
   // Build an array of points aranged in a circle on the xy-plane.
   double radius = 0.0045720; // TODO: generalize
   std::array<Point, theta_res + 1> circle_points;
@@ -61,7 +53,6 @@ DetailedSubChannelMesh::buildMesh()
       theta += 2 * M_PI / theta_res;
     }
   }
-
   // Define "quadrant center" reference points.  These will be the centers of
   // the 4 circles that intersect each a subchannel cell.  These centers are
   // offset a little bit so that in the final mesh, there is a tiny gap between
@@ -72,7 +63,6 @@ DetailedSubChannelMesh::buildMesh()
   quadrant_centers[1] = Point(-_pitch * 0.5 * 0.99999, _pitch * 0.5 * 0.99999, 0);
   quadrant_centers[2] = Point(-_pitch * 0.5 * 0.99999, -_pitch * 0.5 * 0.99999, 0);
   quadrant_centers[3] = Point(_pitch * 0.5 * 0.99999, -_pitch * 0.5 * 0.99999, 0);
-
   // Build an array of points that represent an axial slice of a subchannel
   // cell.  The points are ordered in this fashion:
   //     4   3
@@ -105,7 +95,6 @@ DetailedSubChannelMesh::buildMesh()
       plane_points[i + 3 * n + 1] = quadrant_centers[3] + c_pt;
     }
   }
-
   // Add the points to the mesh.
   unsigned int node_id = 0;
   for (unsigned int iy = 0; iy < _ny; iy++)
@@ -124,7 +113,6 @@ DetailedSubChannelMesh::buildMesh()
       }
     }
   }
-
   // Add the elements to the mesh.  The elements are 6-node prisms.  The
   // bases of these prisms form a triangulated representation of an axial
   // slice of a subchannel.
@@ -174,9 +162,7 @@ DetailedSubChannelMesh::buildMesh()
       }
     }
   }
-
   boundary_info.sideset_name(0) = "bottom";
   boundary_info.sideset_name(1) = "top";
-
   mesh.prepare_for_use();
 }
