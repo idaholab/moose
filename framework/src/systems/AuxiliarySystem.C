@@ -86,6 +86,8 @@ AuxiliarySystem::addDotVectors()
 void
 AuxiliarySystem::initialSetup()
 {
+  TIME_SECTION("initialSetup", 3, "Initializing Auxiliary System");
+
   SystemBase::initialSetup();
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)

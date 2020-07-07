@@ -23,7 +23,8 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse(MooseApp & app)
-  : _app(app),
+    : PerfGraphInterface(app.perfGraph(), "OutputWarehouse"),
+    _app(app),
     _buffer_action_console_outputs(false),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
@@ -46,6 +47,8 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
+  TIME_SECTION("initialSetup", 5, "Setting Up Outputs");
+
   for (const auto & obj : _all_objects)
     obj->initialSetup();
 }

@@ -450,6 +450,8 @@ FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 void
 FEProblemBase::initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl)
 {
+  TIME_SECTION("initNullSpaceVectors", 5, "Initializing Null Space Vectors");
+
   unsigned int dimNullSpace = parameters.get<unsigned int>("null_space_dimension");
   unsigned int dimTransposeNullSpace =
       parameters.get<unsigned int>("transpose_null_space_dimension");
@@ -528,6 +530,8 @@ void
 FEProblemBase::setCoordSystem(const std::vector<SubdomainName> & blocks,
                               const MultiMooseEnum & coord_sys)
 {
+  TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
+
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
   if (blocks.size() == 0)
   {
@@ -649,33 +653,46 @@ FEProblemBase::initialSetup()
     _communicator.max(max_var_n_dofs_per_node);
   }
 
-  _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
-  auto displaced_problem = getDisplacedProblem();
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+  {
+    TIME_SECTION("assignMaxDofs", 5, "Assigning Maximum Dofs Per Elem");
 
-  _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
-  if (displaced_problem)
-    displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+    _nl->assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+    auto displaced_problem = getDisplacedProblem();
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerElem(max_var_n_dofs_per_elem);
+
+    _nl->assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+    if (displaced_problem)
+      displaced_problem->nlSys().assignMaxVarNDofsPerNode(max_var_n_dofs_per_node);
+  }
+
+  {
+    TIME_SECTION("settingRequireDerivativeSize", 5, "Setting Required Derivative Size");
 
 #ifndef MOOSE_SPARSE_AD
-  auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
-  if (hasMortarCoupling())
-    size_required *= 3;
-  else if (hasNeighborCoupling())
-    size_required *= 2;
+    auto size_required = max_var_n_dofs_per_elem * _nl->nVariables();
+    if (hasMortarCoupling())
+      size_required *= 3;
+    else if (hasNeighborCoupling())
+      size_required *= 2;
 
-  _nl->setRequiredDerivativeSize(size_required);
+    _nl->setRequiredDerivativeSize(size_required);
 #endif
-
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
-    _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
-                               std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
-    _second_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
-                                 std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
   }
+
+  {
+    TIME_SECTION("resizingVarValues", 5, "Resizing Variable Vlues");
+
+    for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    {
+      _phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(), std::vector<Real>(getMaxQps(), 0.));
+      _grad_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                 std::vector<RealGradient>(getMaxQps(), RealGradient(0.)));
+      _second_phi_zero[tid].resize(_nl->getMaxVarNDofsPerElem(),
+                                   std::vector<RealTensor>(getMaxQps(), RealTensor(0.)));
+    }
+  }
+
 
   if (_app.isRecovering() && (_app.isUltimateMaster() || _force_restart))
   {
@@ -775,25 +792,38 @@ FEProblemBase::initialSetup()
   if (_requires_nonlocal_coupling)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
-  // Call the initialSetup methods for functions
-  for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
-    reinitScalars(
+    TIME_SECTION("initializingFunctions", 5, "Initializing Functions");
+
+    // Call the initialSetup methods for functions
+    for (THREAD_ID tid = 0; tid < n_threads; tid++)
+    {
+      reinitScalars(
         tid); // initialize scalars so they are properly sized for use as input into ParsedFunctions
-    _functions.initialSetup(tid);
+      _functions.initialSetup(tid);
+    }
   }
 
-  // Random interface objects
-  for (const auto & it : _random_data_objects)
-    it.second->updateSeeds(EXEC_INITIAL);
+  {
+    TIME_SECTION("initializingRandomObjects", 5, "Initializing Random Objects");
+
+    // Random interface objects
+    for (const auto & it : _random_data_objects)
+      it.second->updateSeeds(EXEC_INITIAL);
+  }
 
   if (!_app.isRecovering())
   {
     computeUserObjects(EXEC_INITIAL, Moose::PRE_IC);
 
-    for (THREAD_ID tid = 0; tid < n_threads; tid++)
-      _ics.initialSetup(tid);
-    _scalar_ics.initialSetup();
+    {
+      TIME_SECTION("ICiniitalSetup", 5, "Setting Up Initial Conditions");
+
+      for (THREAD_ID tid = 0; tid < n_threads; tid++)
+        _ics.initialSetup(tid);
+
+      _scalar_ics.initialSetup();
+    }
 
     projectSolution();
   }
@@ -919,7 +949,10 @@ FEProblemBase::initialSetup()
   auto ti = _nl->getTimeIntegrator();
 
   if (ti)
+  {
+    TIME_SECTION("timeIntegratorInitialSetup", 5, "Initializing Time Integrator");
     ti->initialSetup();
+  }
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -953,28 +986,31 @@ FEProblemBase::initialSetup()
   // Call initialSetup on the MultiApps
   if (_multi_apps.hasObjects())
   {
-    _console << COLOR_CYAN << "Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
+    TIME_SECTION("initialSetupMultiApps", 2, "Initializing MultiApps");
     _multi_apps.initialSetup();
-    _console << COLOR_CYAN << "Finished Initializing All MultiApps" << COLOR_DEFAULT << std::endl;
   }
 
   // Call initialSetup on the transfers
-  _transfers.initialSetup();
-
-  // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
-  const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
-  for (const auto & transfer : to_multi_app_objects)
   {
-    transfer->setCurrentDirection(Transfer::DIRECTION::TO_MULTIAPP);
-    transfer->initialSetup();
-  }
+    TIME_SECTION("initialSetupTransfers", 2, "Initializing Transfers");
 
-  // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
-  const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
-  for (const auto & transfer : from_multi_app_objects)
-  {
-    transfer->setCurrentDirection(Transfer::DIRECTION::FROM_MULTIAPP);
-    transfer->initialSetup();
+    _transfers.initialSetup();
+
+    // Call initialSetup on the MultiAppTransfers to be executed on TO_MULTIAPP
+    const auto & to_multi_app_objects = _to_multi_app_transfers.getActiveObjects();
+    for (const auto & transfer : to_multi_app_objects)
+    {
+      transfer->setCurrentDirection(Transfer::DIRECTION::TO_MULTIAPP);
+      transfer->initialSetup();
+    }
+
+    // Call initialSetup on the MultiAppTransfers to be executed on FROM_MULTIAPP
+    const auto & from_multi_app_objects = _from_multi_app_transfers.getActiveObjects();
+    for (const auto & transfer : from_multi_app_objects)
+    {
+      transfer->setCurrentDirection(Transfer::DIRECTION::FROM_MULTIAPP);
+      transfer->initialSetup();
+    }
   }
 
   if (!_app.isRecovering())
@@ -1015,6 +1051,8 @@ FEProblemBase::initialSetup()
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
        _neighbor_material_props.hasStatefulProperties()))
   {
+    TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
@@ -1047,8 +1085,12 @@ FEProblemBase::initialSetup()
       _assembly[tid]->initNonlocalCoupling();
   }
 
-  if (_line_search)
-    _line_search->initialSetup();
+  {
+    TIME_SECTION("lineSearchInitialSetup", 5, "Initializing Line Search");
+
+    if (_line_search)
+      _line_search->initialSetup();
+  }
 
   // Perform Reporter get/declare check
   _reporter_data.check();
@@ -1180,6 +1222,8 @@ FEProblemBase::getMaxScalarOrder() const
 void
 FEProblemBase::checkNonlocalCoupling()
 {
+  TIME_SECTION("checkNonlocalCoupling", 5, "Checking Nonlocal Coupling");
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     const auto & all_kernels = _nl->getKernelWarehouse();
@@ -1838,6 +1882,8 @@ FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREA
 void
 FEProblemBase::reinitScalars(THREAD_ID tid, bool reinit_for_derivative_reordering /*=false*/)
 {
+  TIME_SECTION("reinitScalars", 3, "Reinitializing Scalar Variables");
+
   if (_displaced_problem && _reinit_displaced_elem)
     _displaced_problem->reinitScalars(tid, reinit_for_derivative_reordering);
 
@@ -4392,6 +4438,8 @@ FEProblemBase::execTransfers(ExecFlagType type)
 {
   if (_transfers[type].hasActiveObjects())
   {
+    TIME_SECTION("execTransfers", 3, "Executing Transfers");
+
     const auto & transfers = _transfers[type].getActiveObjects();
     for (const auto & transfer : transfers)
       transfer->execute();
@@ -4795,6 +4843,8 @@ FEProblemBase::trustUserCouplingMatrix()
 void
 FEProblemBase::setNonlocalCouplingMatrix()
 {
+  TIME_SECTION("setNonlocalCouplingMatrix", 5, "Setting Nonlocal Coupling Matrix");
+
   unsigned int n_vars = _nl->nVariables();
   _nonlocal_cm.resize(n_vars);
   const auto & vars = _nl->getVariables(0);

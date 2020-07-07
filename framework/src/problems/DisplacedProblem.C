@@ -270,7 +270,7 @@ void
 DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
                              const NumericVector<Number> & aux_soln)
 {
-  TIME_SECTION("updateMesh", 3, "Updating Mesh");
+  TIME_SECTION("updateMesh", 3, "Updating Displaced Mesh");
 
   syncSolutions(soln, aux_soln);
 

@@ -1851,7 +1851,7 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 {
-  TIME_SECTION("buildRefinementAndCoarseningMaps", 5);
+  TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
 
   std::map<ElemType, Elem *> canonical_elems;
 
@@ -1915,7 +1915,7 @@ MooseMesh::buildRefinementMap(const Elem & elem,
                               int child,
                               int child_side)
 {
-  TIME_SECTION("buildRefinementMap", 5);
+  TIME_SECTION("buildRefinementMap", 5, "Building Refinement Map");
 
   if (child == -1) // Doing volume mapping or parent side mapping
   {
@@ -1989,7 +1989,7 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
 void
 MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_face, int input_side)
 {
-  TIME_SECTION("buildCoarseningMap", 5);
+  TIME_SECTION("buildCoarseningMap", 5, "Building Coarsening Map");
 
   std::pair<int, ElemType> the_pair(input_side, elem.type());
 

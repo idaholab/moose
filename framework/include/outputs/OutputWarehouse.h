@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "Output.h"
+#include "PerfGraphInterface.h"
 
 // System includes
 #include <atomic>
@@ -22,7 +23,7 @@ class InputParameters;
 /**
  * Class for storing and utilizing output objects
  */
-class OutputWarehouse
+class OutputWarehouse : protected PerfGraphInterface
 {
 public:
   /**

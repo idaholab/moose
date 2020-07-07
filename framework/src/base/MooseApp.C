@@ -543,6 +543,7 @@ MooseApp::MooseApp(InputParameters parameters)
 void
 MooseApp::checkRegistryLabels()
 {
+  TIME_SECTION("MooseApp::checkRegistryLabels", 5, "Checking Registry Labels");
   Registry::checkLabels();
 }
 
