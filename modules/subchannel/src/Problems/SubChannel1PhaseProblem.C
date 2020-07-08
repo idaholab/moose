@@ -478,11 +478,6 @@ SubChannel1PhaseProblem::externalSolve()
     }
   }
 
-  std::ofstream myfile1;
-  myfile1.open("Temp_out_nodeZero.txt", std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << Temp_out << "\n";
-  myfile1.close();
-
   _console << "Finished executing subchannel solver\n";
 }
 
