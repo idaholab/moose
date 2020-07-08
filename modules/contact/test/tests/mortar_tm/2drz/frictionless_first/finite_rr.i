@@ -21,16 +21,11 @@ name = 'finite_rr'
     nx = 2
     ny = 67
     elem_type = ${elem}
-  [../]
-  [./plank_sidesets]
-    type = RenameBoundaryGenerator
-    input = plank
-    old_boundary_id = '0 1 2 3'
-    new_boundary_name = 'plank_bottom plank_right plank_top plank_left'
+    boundary_name_prefix = plank
   [../]
   [./plank_id]
     type = SubdomainIDGenerator
-    input = plank_sidesets
+    input = plank
     subdomain_id = 1
   [../]
 
@@ -44,6 +39,8 @@ name = 'finite_rr'
     nx = 3
     ny = 4
     elem_type = ${elem}
+    boundary_name_prefix = block
+    boundary_id_offset = 10
   [../]
   [./block_id]
     type = SubdomainIDGenerator
@@ -60,15 +57,6 @@ name = 'finite_rr'
     input = combined
     old_block_id = '1 2'
     new_block_name = 'plank block'
-  [../]
-  [./block_sidesets]
-    type = SideSetsFromPointsGenerator
-    input = block_rename
-    points = '0.9  9.2  0
-              1.21 9.5  0
-              0.9  10.0 0
-              0.61 9.5  0'
-    new_boundary = 'block_bottom block_right block_top block_left'
   [../]
 []
 
@@ -113,7 +101,7 @@ name = 'finite_rr'
 
 [Contact]
   [./frictionless]
-    mesh = block_sidesets
+    mesh = block_rename
     primary = plank_right
     secondary = block_left
     formulation = mortar

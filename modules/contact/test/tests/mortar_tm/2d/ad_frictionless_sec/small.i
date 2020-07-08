@@ -17,16 +17,11 @@ name = 'small'
     nx = 2
     ny = 67
     elem_type = ${elem}
-  [../]
-  [./plank_sidesets]
-    type = RenameBoundaryGenerator
-    input = plank
-    old_boundary_id = '0 1 2 3'
-    new_boundary_name = 'plank_bottom plank_right plank_top plank_left'
+    boundary_name_prefix = plank
   [../]
   [./plank_id]
     type = SubdomainIDGenerator
-    input = plank_sidesets
+    input = plank
     subdomain_id = 1
   [../]
 
@@ -40,6 +35,8 @@ name = 'small'
     nx = 3
     ny = 4
     elem_type = ${elem}
+    boundary_name_prefix = block
+    boundary_id_offset = 10
   [../]
   [./block_id]
     type = SubdomainIDGenerator
@@ -56,15 +53,6 @@ name = 'small'
     input = combined
     old_block_id = '1 2'
     new_block_name = 'plank block'
-  [../]
-  [./block_sidesets]
-    type = SideSetsFromPointsGenerator
-    input = block_rename
-    points = '0.6  7.7  0
-              0.91 8.0  0
-              0.6  8.5 0
-              0.31 8.0  0'
-    new_boundary = 'block_bottom block_right block_top block_left'
   [../]
 []
 
@@ -95,7 +83,7 @@ name = 'small'
 
 [Contact]
   [./frictionless]
-    mesh = block_sidesets
+    mesh = block_rename
     primary = plank_right
     secondary = block_left
     formulation = mortar

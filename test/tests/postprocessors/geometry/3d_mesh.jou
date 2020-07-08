@@ -1,0 +1,49 @@
+reset
+
+create surface circle radius 0.5 zplane
+create vertex -1.1 -1.1 0
+create vertex -1.1 1.1 0
+create vertex 1.1 1.1 0
+create vertex 1.1 -1.1 0
+create curve vertex 2 3
+create curve vertex 3 4
+create curve vertex 4 5
+create curve vertex 5 2
+
+create surface 2 3 4 5
+subtract volume 1 from volume 2 imprint  keep
+delete volume 2
+
+create vertex -1.5 -1.5 0
+create vertex -1.5 1.5 0
+create vertex 1.5 1.5 0
+create vertex 1.5 -1.5 0
+create curve vertex 15 16
+create curve vertex 16 17
+create curve vertex 17 18
+create curve vertex 18 15
+create surface 11 12 13 14
+subtract volume 1 3 from volume 4 imprint  keep
+delete volume 4
+
+sweep surface all vector 0 0 -1 distance .4
+
+imprint all
+merge all
+mesh volume all
+
+block 1 add volume 1
+block 1 name "circle"
+block 2 add volume 3
+block 2 name "inside"
+block 3 add volume 5
+block 3 name "outside"
+
+sideset 10 add surface 6
+sideset 10 name "circle_side"
+
+sideset 11 add surface 8 9 10 11
+sideset 11 name "inside_side"
+
+sideset 12 add surface 14 15 16 17
+sideset 12 name "outside_side"

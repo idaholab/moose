@@ -1,0 +1,56 @@
+reset
+
+create surface circle radius 0.5 zplane
+create vertex -1.1 -1.1 0
+create vertex -1.1 1.1 0
+create vertex 1.1 1.1 0
+create vertex 1.1 -1.1 0
+create curve vertex 2 3
+create curve vertex 3 4
+create curve vertex 4 5
+create curve vertex 5 2
+
+create surface 2 3 4 5
+subtract body 1 from body 2 imprint  keep
+delete surface 2
+
+create vertex -1.5 -1.5 0
+create vertex -1.5 1.5 0
+create vertex 1.5 1.5 0
+create vertex 1.5 -1.5 0
+create curve vertex 15 16
+create curve vertex 16 17
+create curve vertex 17 18
+create curve vertex 18 15
+create surface 11 12 13 14
+subtract body 1 3 from body 4 imprint  keep
+delete surface 4
+
+imprint all
+merge all
+
+mesh surface all
+
+block 1 add surface 1
+block 1 name "circle"
+block 2 add surface 3
+block 2 name "inside"
+block 3 add surface 5
+block 3 name "outside"
+
+sideset 10 add curve 1 wrt surface 1
+sideset 10 name "circle_side_wrt_circle"
+
+sideset 14 add curve 1 wrt surface 3
+sideset 14 name "circle_side_wrt_inside"
+
+sideset 11 add curve 7 8 9 10 wrt surface 3
+sideset 11 name "inside_side_wrt_inside"
+
+sideset 15 add curve 7 8 9 10 wrt surface 5
+sideset 15 name "inside_side_wrt_outside"
+
+sideset 12 add curve 19 20 21 22
+sideset 12 name "outside_side"
+
+block all element type quad4
