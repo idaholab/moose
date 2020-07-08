@@ -67,6 +67,8 @@ SetupMeshCompleteAction::act()
     // splitting process
     if (_app.isUseSplit())
       return;
+    if (_app.masterMesh())
+      return;
     _app.executeMeshModifiers();
   }
   else if (_current_task == "uniform_refine_mesh")

@@ -13,10 +13,12 @@
 #include <memory>
 
 #include "MooseObject.h"
+#include "MooseMesh.h"
+
+#include "libmesh/elem.h"
 
 class InputParameters;
 class MooseObject;
-class MooseMesh;
 
 class ElementIDInterface
 {
@@ -26,7 +28,7 @@ public:
 
   /**
    * Gets index of an element integer with a parameter of the object derived from this interface
-   * @param id_name Name of object parameter
+   * @param id_parameter_name Name of object parameter
    * @param comp Component number for vector of integer names
    * @return Index of the element integer
    */
@@ -34,13 +36,98 @@ public:
                                          unsigned int comp = 0) const;
 
   /**
+   * Return the accessing integer for an extra element integer with its name
+   * @param id_name Name of element integer
+   * @return Index of the element integer
+   */
+  virtual unsigned int getElementIDIndexByName(const std::string & id_name) const;
+
+  /**
    * Gets an element integer with a parameter of the object derived from this interface
-   * @param id_name Name of object parameter
+   * @param id_parameter_name Name of object parameter
    * @param comp Component number for vector of integer names
    * @return Integer for the current element
    */
   virtual const dof_id_type & getElementID(const std::string & id_parameter_name,
                                            unsigned int comp = 0) const;
+
+  /**
+   * Gets a neighbor element integer with a parameter of the object derived from this interface
+   * @param id_parameter_name Name of object parameter
+   * @param comp Component number for vector of integer names
+   * @return Integer for the neighbor element
+   */
+  virtual const dof_id_type & getElementIDNeighbor(const std::string & id_parameter_name,
+                                                   unsigned int comp = 0) const;
+
+  /**
+   * Gets an element integer with the element integer name
+   * @param id_name Name of element integer
+   * @return Integer for the current element
+   */
+  virtual const dof_id_type & getElementIDByName(const std::string & id_name) const;
+
+  /**
+   * Gets a neighbor element integer with the element integer name
+   * @param id_name Name of element integer
+   * @return Integer for the neighbor element
+   */
+  virtual const dof_id_type & getElementIDNeighborByName(const std::string & id_name) const;
+
+  /**
+   * Whether mesh has an element integer with a given name
+   */
+  bool hasElementID(const std::string & id_name) const { return _mesh->hasElementID(id_name); }
+
+  /**
+   * Return the maximum element ID for an element integer with its index
+   */
+  dof_id_type maxElementID(unsigned int elem_id_index) const
+  {
+    return _mesh->maxElementID(elem_id_index);
+  }
+
+  /**
+   * Return the minimum element ID for an element integer with its index
+   */
+  dof_id_type minElementID(unsigned int elem_id_index) const
+  {
+    return _mesh->minElementID(elem_id_index);
+  }
+
+  /**
+   * Whether two element integers are identical for all elements
+   */
+  bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
+  {
+    return _mesh->areElemIDsIdentical(id_name1, id_name2);
+  }
+
+  /**
+   * Return all the unique element IDs for an element integer with its index on the entire domain
+   */
+  std::set<dof_id_type> getAllElemIDs(unsigned int elem_id_index) const
+  {
+    return _mesh->getAllElemIDs(elem_id_index);
+  }
+
+  /**
+   * Return all the unique element IDs for an extra element integer with its index on a set of
+   * subdomains
+   */
+  std::set<dof_id_type> getElemIDsOnBlocks(unsigned int elem_id_index,
+                                           const std::set<SubdomainID> & blks) const
+  {
+    return _mesh->getElemIDsOnBlocks(elem_id_index, blks);
+  }
+
+  /**
+   * Get an element integer for an element
+   */
+  dof_id_type getElementID(const Elem * elem, unsigned int elem_id_index) const
+  {
+    return elem->get_extra_integer(elem_id_index);
+  }
 
 private:
   /// Reference to the object's input parameters

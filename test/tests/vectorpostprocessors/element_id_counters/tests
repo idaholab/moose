@@ -1,0 +1,35 @@
+[Tests]
+  issues = '#15534 #13764'
+  design = '/ElementIDInterface.md'
+
+  [element_counter_with_ids]
+    type = 'CSVDiff'
+    input = 'element_counter.i'
+    csvdiff = 'element_counter_out_elem_counter_0001.csv'
+    requirement = 'The system shall have the ability to retrieve element integers when visiting elements.'
+  []
+  [element_counter_with_ids_block_restricted]
+    type = 'CSVDiff'
+    input = 'element_counter_block_restricted.i'
+    csvdiff = 'element_counter_block_restricted_out_elem_counter0_0001.csv element_counter_block_restricted_out_elem_counter1_0001.csv element_counter_block_restricted_out_elem_counter_0001.csv'
+    requirement = 'The system shall have the ability to retrieve element integers when visiting elements only on certain subdomains.'
+  []
+  [element_counter_with_ids_on_side]
+    type = 'CSVDiff'
+    input = 'side_element_counter.i'
+    csvdiff = 'side_element_counter_out_elem_counter_0001.csv'
+    requirement = 'The system shall have the ability to retrieve element integers of attached elements when visiting sides of a side set.'
+  []
+  [element_counter_with_ids_on_interface]
+    type = 'CSVDiff'
+    input = 'interface_element_counter.i'
+    csvdiff = 'interface_element_counter_out_elem_counter_0001.csv'
+    requirement = 'The system shall have the ability to retrieve element integers of attached elements on both sides when visiting internal interfaces.'
+  []
+  [element_counter_with_ids_on_internal_side]
+    type = 'CSVDiff'
+    input = 'internal_side_element_counter.i'
+    csvdiff = 'internal_side_element_counter_out_elem_counter_0001.csv'
+    requirement = 'The system shall have the ability to retrieve element integers of attached elements on both sides when visiting all internal sides.'
+  []
+[]

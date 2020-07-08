@@ -1,0 +1,92 @@
+[Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 10
+    xmax = 1
+    ymax = 1
+    extra_element_integers = foo_id
+  []
+
+  [id0]
+    type = SubdomainBoundingBoxGenerator
+    input = gmg
+    bottom_left = '0 0 0'
+    block_id = 0
+    top_right = '1 1 0'
+    integer_name = foo_id
+  []
+
+  [id1]
+    type = SubdomainBoundingBoxGenerator
+    input = id0
+    bottom_left = '0.4 0.4 0'
+    block_id = 1
+    top_right = '0.9 0.9 0'
+    integer_name = foo_id
+  []
+
+  [id2]
+    type = SubdomainBoundingBoxGenerator
+    input = id1
+    bottom_left = '0.1 0.1 0'
+    block_id = 2
+    top_right = '0.6 0.6 0'
+    integer_name = foo_id
+  []
+
+  [subdomain]
+    type = SubdomainBoundingBoxGenerator
+    input = id2
+    bottom_left = '0 0.6 0'
+    block_id = 1
+    top_right = '1 1 0'
+  []
+
+  [side0to1]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = subdomain
+    master_block = 0
+    paired_block = 1
+    new_boundary = side0to1
+  []
+[]
+
+[AuxVariables]
+  [foo_id_var]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [foo_id]
+    type = ElemExtraIDAux
+    variable = foo_id_var
+    extra_id_name = foo_id
+  []
+[]
+
+[VectorPostprocessors]
+  [elem_counter]
+    type = InterfaceElementCounterWithID
+    boundary = side0to1
+    id_name = foo_id
+  []
+[]
+
+[Problem]
+  kernel_coverage_check = false
+  solve = false
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Outputs]
+  exodus = true
+  csv = true
+  execute_on = 'timestep_end'
+[]
