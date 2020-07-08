@@ -39,20 +39,14 @@ PowerIC::PowerIC(const InputParameters & params)
 
   inFile.open(_filename);
   if (!inFile)
-  {
-    cerr << "Unable to open file : " << _filename << endl;
-    exit(1); // call system to stop
-  }
+    mooseError("unable to open file : ", _filename);
 
   while (inFile >> vin)
     _numberoflines += 1;
 
   if (inFile.fail() && !inFile.eof())
-  {
-    cerr << "ecountered non numerical input in input file : "
-         << " at line " << _numberoflines << endl;
-    exit(1);
-  }
+    mooseError("non numerical input at line : ", _numberoflines);
+
   inFile.close();
 
   inFile.open(_filename);
