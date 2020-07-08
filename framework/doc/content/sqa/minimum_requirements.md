@@ -2,7 +2,7 @@
 
 In general, the following is required for MOOSE-based development:
 
-- GCC/Clang C++11 compliant compiler (GCC @ [!package!minimum_gcc], Clang @ [!package!minimum_clang] or greater)
+- GCC/Clang C++14 compliant compiler (GCC @ [!package!minimum_gcc], Clang @ [!package!minimum_clang] or greater)
 
   - Note: Intel compilers are not supported.
 

@@ -7,6 +7,7 @@ available codes and how to utilize the [!ac](INL) resources to run applications.
 - [inl/applications.md]
 - [inl/hpc_remote.md]
 - [inl/hpc_binary.md]
+- [inl/hpc_ondemand.md]
 
 
 ## Requesting Access id=access

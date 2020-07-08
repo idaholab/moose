@@ -1,6 +1,6 @@
 ## Install Miniconda3 id=installconda
 
-Installing Miniconda3 is straight forward. Download, install, and configure. If you run into issues during these steps, please visit the MOOSE [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
+Installing Miniconda3 is straight forward. Download, install, and configure. If you run into issues during these steps, please visit our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
 
 - +Linux Users:+
 

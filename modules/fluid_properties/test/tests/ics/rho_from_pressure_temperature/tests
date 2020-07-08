@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    rel_err = 1e-10
+    requirement = 'The system shall be able to set an initial condition for density given pressure and temperature as variables'
+    design = 'RhoFromPressureTemperatureIC.md'
+    issues = '#15524'
+  []
+[]

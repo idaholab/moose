@@ -1,4 +1,4 @@
-minimum_gcc: 4.8.4
+minimum_gcc: 5.1.0
 minimum_clang: 3.5.1
 minimum_intel: 2017
 mpich: 3.3
