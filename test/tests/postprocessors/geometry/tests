@@ -1,0 +1,18 @@
+[Tests]
+  design = 'AreaPostprocessor.md VolumePostprocessor.md'
+  issues = '#15542'
+  [./3d]
+    type = CSVDiff
+    input = 3d_geometry.i
+    csvdiff = 3d_geometry_out.csv
+    requirement = 'The system shall be able to correctly compute the volume of blocks and the area of sidesets in 3D.'
+  [../]
+  [./2d]
+    type = CSVDiff
+    input = 2d_geometry.i
+    csvdiff = 2d_geometry_out.csv
+    requirement = 'The system shall be able to correctly compute the area of blocks and the perimeter'
+                  'of sidesets in 2D and appropriately handle boundary conditions applied to sidesets'
+                  'created with respect to different bodies.'
+  [../]
+[]
