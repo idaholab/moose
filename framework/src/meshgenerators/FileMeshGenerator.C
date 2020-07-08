@@ -28,6 +28,10 @@ FileMeshGenerator::validParams()
   params.addParam<std::vector<std::string>>(
       "exodus_extra_element_integers",
       "The variable names in the mesh file for loading extra element integers");
+  params.addParam<bool>("use_for_exodus_restart",
+                        false,
+                        "True to indicate that the mesh file this generator is reading can be used "
+                        "for restarting variables");
   params.addClassDescription("Read a mesh from a file.");
   return params;
 }
@@ -45,22 +49,33 @@ FileMeshGenerator::generate()
   bool exodus =
       _file_name.rfind(".exd") < _file_name.size() || _file_name.rfind(".e") < _file_name.size();
   bool has_exodus_integers = isParamValid("exodus_extra_element_integers");
-  if (exodus && has_exodus_integers)
+  bool restart_exodus = (getParam<bool>("use_for_exodus_restart") && _app.getExodusFileRestart());
+  if (exodus)
   {
-    if (mesh->processor_id() == 0)
-    {
-      ExodusII_IO io(*mesh);
-      io.set_extra_integer_vars(
+    auto exreader = std::make_shared<ExodusII_IO>(*mesh);
+
+    if (has_exodus_integers)
+      exreader->set_extra_integer_vars(
           getParam<std::vector<std::string>>("exodus_extra_element_integers"));
-      io.read(_file_name);
-    }
+
+    if (restart_exodus)
+      _app.setExReaderForRestart(std::move(exreader));
+
+    if (mesh->processor_id() == 0)
+      exreader->read(_file_name);
     MeshCommunication().broadcast(*mesh);
+
     mesh->prepare_for_use();
   }
-  else if (!has_exodus_integers)
-    mesh->read(_file_name);
   else
-    mooseError("\"exodus_extra_element_integers\" should be given only for Exodus mesh files");
+  {
+    if (_pars.isParamSetByUser("exodus_extra_element_integers"))
+      mooseError("\"exodus_extra_element_integers\" should be given only for Exodus mesh files");
+    if (_pars.isParamSetByUser("use_for_exodus_restart"))
+      mooseError("\"use_for_exodus_restart\" should be given only for Exodus mesh files");
+
+    mesh->read(_file_name);
+  }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

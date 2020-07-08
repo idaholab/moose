@@ -83,13 +83,14 @@ FileMesh::buildMesh()
     // the mesh with the exodus reader instead of using mesh.read().  This will read the mesh on
     // every processor
 
-    if (_app.setFileRestart() && (_file_name.rfind(".exd") < _file_name.size() ||
-                                  _file_name.rfind(".e") < _file_name.size()))
+    if (_app.getExodusFileRestart() && (_file_name.rfind(".exd") < _file_name.size() ||
+                                        _file_name.rfind(".e") < _file_name.size()))
     {
       MooseUtils::checkFileReadable(_file_name);
 
-      _exreader = libmesh_make_unique<ExodusII_IO>(getMesh());
-      _exreader->read(_file_name);
+      auto exreader = std::make_shared<ExodusII_IO>(getMesh());
+      _app.setExReaderForRestart(std::move(exreader));
+      exreader->read(_file_name);
 
       getMesh().allow_renumbering(false);
       getMesh().prepare_for_use();

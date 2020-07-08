@@ -56,7 +56,7 @@ CopyNodalVarsAction::act()
     SystemBase * system;
 
     if (_current_task == "check_copy_nodal_vars")
-      _app.setFileRestart() = true;
+      _app.setExodusFileRestart(true);
     else
     {
       // Is this a NonlinearSystem variable or an AuxiliarySystem variable?

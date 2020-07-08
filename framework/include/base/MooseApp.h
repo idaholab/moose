@@ -43,6 +43,10 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 class RelationshipManager;
+namespace libMesh
+{
+class ExodusII_IO;
+}
 
 template <>
 InputParameters validParams<MooseApp>();
@@ -320,10 +324,26 @@ public:
   std::shared_ptr<CommandLine> commandLine() const { return _command_line; }
 
   /**
-   * Returns a writable Boolean to determine whether or not we need to
-   * use a separate reader to read the mesh BEFORE we create the mesh.
+   * Set the flag to indicate whether or not we need to use a separate Exodus reader to read the
+   * mesh BEFORE we create the mesh.
    */
-  bool & setFileRestart() { return _initial_from_file; }
+  void setExodusFileRestart(bool flag) { _initial_from_file = flag; }
+
+  /**
+   * Whether or not we need to use a separate Exodus reader to read the mesh BEFORE we create the
+   * mesh.
+   */
+  bool getExodusFileRestart() const { return _initial_from_file; }
+
+  /**
+   * Set the Exodus reader to restart variables from an Exodus mesh file
+   */
+  void setExReaderForRestart(std::shared_ptr<ExodusII_IO> && exreader) { _ex_reader = exreader; }
+
+  /**
+   * Get the Exodus reader to restart variables from an Exodus mesh file
+   */
+  ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
 
   /**
    * Actually build everything in the input file.
@@ -923,6 +943,9 @@ protected:
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
+
+  /// The Exodus reader when _initial_from_file is set to true
+  std::shared_ptr<ExodusII_IO> _ex_reader;
 
   /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
   bool _distributed_mesh_on_command_line;

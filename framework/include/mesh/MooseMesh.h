@@ -680,11 +680,6 @@ public:
   const MeshBase & getMesh() const;
 
   /**
-   * Not implemented -- always returns NULL.
-   */
-  virtual ExodusII_IO * exReader() const;
-
-  /**
    * Calls print_info() on the underlying Mesh.
    */
   void printInfo(std::ostream & os = libMesh::out) const;

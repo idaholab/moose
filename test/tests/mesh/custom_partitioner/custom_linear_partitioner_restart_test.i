@@ -22,8 +22,6 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-    initial_from_file_var = u
-    initial_from_file_timestep = 2
   [../]
 []
 
