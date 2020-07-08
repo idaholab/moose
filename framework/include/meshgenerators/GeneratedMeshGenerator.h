@@ -40,17 +40,27 @@ protected:
   /// The min/max values for x,y,z component
   Real &_xmin, &_xmax, &_ymin, &_ymax, &_zmin, &_zmax;
 
-  /// All of the libmesh build_line/square/cube routines support an
-  /// option to grade the mesh into the boundaries according to the
-  /// spacing of the Gauss-Lobatto quadrature points.  Defaults to
-  /// false, and cannot be used in conjunction with x, y, and z
-  /// biasing.
-  bool _gauss_lobatto_grid;
+  /**
+   * All of the libmesh build_line/square/cube routines support an
+   * option to grade the mesh into the boundaries according to the
+   * spacing of the Gauss-Lobatto quadrature points.  Defaults to
+   * false, and cannot be used in conjunction with x, y, and z
+   * biasing.
+   */
+  const bool _gauss_lobatto_grid;
 
-  /// The amount by which to bias the cells in the x,y,z directions.
-  /// Must be in the range 0.5 <= _bias_x <= 2.0.
-  /// _bias_x < 1 implies cells are shrinking in the x-direction.
-  /// _bias_x==1 implies no bias (original mesh unchanged).
-  /// _bias_x > 1 implies cells are growing in the x-direction.
-  Real _bias_x, _bias_y, _bias_z;
+  /**
+   * The amount by which to bias the cells in the x,y,z directions.
+   * Must be in the range 0.5 <= _bias_x <= 2.0.
+   * _bias_x < 1 implies cells are shrinking in the x-direction.
+   * _bias_x==1 implies no bias (original mesh unchanged).
+   * _bias_x > 1 implies cells are growing in the x-direction.
+   */
+  const Real _bias_x, _bias_y, _bias_z;
+
+  /// prefix string for the boundary names
+  const std::string _boundary_name_prefix;
+
+  /// offset that is added to the boundary IDs
+  const boundary_id_type _boundary_id_offset;
 };

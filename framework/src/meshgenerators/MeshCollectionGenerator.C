@@ -71,6 +71,56 @@ MeshCollectionGenerator::generate()
                                   elem_delta,
                                   node_delta,
                                   unique_delta);
+
+    // Copy BoundaryInfo from other_mesh too.  We do this via the
+    // list APIs rather than element-by-element for speed.
+    BoundaryInfo & boundary = mesh->get_boundary_info();
+    const BoundaryInfo & other_boundary = other_mesh->get_boundary_info();
+
+    for (const auto & t : other_boundary.build_node_list())
+      boundary.add_node(std::get<0>(t) + node_delta, std::get<1>(t));
+
+    for (const auto & t : other_boundary.build_side_list())
+      boundary.add_side(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+    for (const auto & t : other_boundary.build_edge_list())
+      boundary.add_edge(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+    for (const auto & t : other_boundary.build_shellface_list())
+      boundary.add_shellface(std::get<0>(t) + elem_delta, std::get<1>(t), std::get<2>(t));
+
+    const auto & boundary_ids = boundary.get_boundary_ids();
+    const auto & other_boundary_ids = other_boundary.get_boundary_ids();
+    for (auto id : other_boundary_ids)
+    {
+      // check if the boundary id already exists with a different name
+      if (boundary_ids.count(id))
+      {
+        if (boundary.get_sideset_name(id) != "" &&
+            boundary.get_sideset_name(id) != other_boundary.get_sideset_name(id))
+          mooseError("A sideset with id ",
+                     id,
+                     " exists but has different names in the merged meshes ('",
+                     boundary.get_sideset_name(id),
+                     "' vs.'",
+                     other_boundary.get_sideset_name(id),
+                     "').");
+
+        boundary.sideset_name(id) = other_boundary.get_sideset_name(id);
+
+        if (boundary.get_nodeset_name(id) != "" &&
+            boundary.get_nodeset_name(id) != other_boundary.get_nodeset_name(id))
+          mooseError("A nodeset with id ",
+                     id,
+                     " exists but has different names in the merged meshes ('",
+                     boundary.get_nodeset_name(id),
+                     "' vs.'",
+                     other_boundary.get_nodeset_name(id),
+                     "').");
+
+        boundary.nodeset_name(id) = other_boundary.get_nodeset_name(id);
+      }
+    }
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

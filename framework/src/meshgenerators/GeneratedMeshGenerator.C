@@ -12,6 +12,7 @@
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_generation.h"
+#include "libmesh/mesh_modification.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
@@ -71,6 +72,11 @@ GeneratedMeshGenerator::validParams()
       "bias_z>=0.5 & bias_z<=2",
       "The amount by which to grow (or shrink) the cells in the z-direction.");
 
+  params.addParam<std::string>("boundary_name_prefix",
+                               "If provided, prefix the built in boundary names with this string");
+  params.addParam<boundary_id_type>(
+      "boundary_id_offset", 0, "This offset is added to the generated boundary IDs");
+
   params.addParamNamesToGroup("dim", "Main");
 
   params.addParam<std::vector<ExtraElementIDName>>("extra_element_integers",
@@ -97,7 +103,11 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
     _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z"))
+    _bias_z(getParam<Real>("bias_z")),
+    _boundary_name_prefix(isParamValid("boundary_name_prefix")
+                              ? getParam<std::string>("boundary_name_prefix") + "_"
+                              : ""),
+    _boundary_id_offset(getParam<boundary_id_type>("boundary_id_offset"))
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
@@ -174,6 +184,19 @@ GeneratedMeshGenerator::generate()
                                         elem_type,
                                         _gauss_lobatto_grid);
       break;
+  }
+
+  // rename and shift boundaries
+  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  const auto & mesh_boundary_ids = boundary_info.get_boundary_ids();
+  for (auto rit = mesh_boundary_ids.rbegin(); rit != mesh_boundary_ids.rend(); ++rit)
+  {
+    boundary_info.sideset_name(*rit + _boundary_id_offset) =
+        _boundary_name_prefix + boundary_info.sideset_name(*rit);
+    boundary_info.nodeset_name(*rit + _boundary_id_offset) =
+        _boundary_name_prefix + boundary_info.nodeset_name(*rit);
+
+    MeshTools::Modification::change_boundary_id(*mesh, *rit, *rit + _boundary_id_offset);
   }
 
   // Apply the bias if any exists
