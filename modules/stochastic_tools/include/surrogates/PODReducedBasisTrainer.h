@@ -119,7 +119,4 @@ private:
   /// needs a sorted vector as input.
   unsigned int determineNumberOfModes(Real limit, std::vector<Real>& inp_vec);
 
-  /// Printing the reduced operators on the terminal (for testing purposes).
-  void printReducedOperators();
-
 };

@@ -349,13 +349,3 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
   }
   return var_counter;
 }
-
-void
-PODReducedBasisTrainer::printReducedOperators()
-{
-  for(unsigned int op_i=0; op_i<_red_operators.size(); ++op_i)
-  {
-    std::cout << _tag_names[op_i] << std::endl << std::endl;
-    std::cout << _red_operators[op_i] << std::endl;
-  }
-}
