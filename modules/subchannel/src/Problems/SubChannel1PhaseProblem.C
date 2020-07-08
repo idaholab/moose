@@ -272,12 +272,14 @@ SubChannel1PhaseProblem::externalSolve()
             Wij(i_gap) =
                 (-2.0 * signbit(P_soln(node_in_i) - P_soln(node_in_j)) + 1.0) * (Wij(i_gap));
           }
+          /// Calculate Total Sums in sub_channel
           Wij_global.col(iz) = Wij;
           double SumSumWij = 0.0;
           for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
           {
             auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
             auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
+            // upwind density
             auto rho = rho_soln(node_in);
             auto S = S_flow_soln(node_in);
             double SumWij = 0.0;
@@ -336,6 +338,7 @@ SubChannel1PhaseProblem::externalSolve()
             // Find the nodes for the top and bottom of this element.
             auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
             auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
+            auto * node_inlet = _subchannel_mesh._nodes[i_ch][0];
             // Copy the variables at the inlet (bottom) of this element.
             auto mdot_in = mdot_soln(node_in);
             auto h_in = h_soln(node_in); // J/kg
@@ -348,12 +351,16 @@ SubChannel1PhaseProblem::externalSolve()
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
-            // Update the solution vectors.
+            // Update the solution vectors at the outlet of the cell
+            // (mass,density,Temperature,Enthalpy is upwinded).
             mdot_soln.set(node_out, mdot_out); // kg/sec
             h_soln.set(node_out, h_out);       // J/kg
             T_soln.set(node_out, T_out);       // Kelvin
             rho_soln.set(node_out, rho_out);   // Kg/m3 (This line couples density)
             mdot(i_ch) = mdot_out;
+            // Update the solution vectors at the inlet of the whole assembly.
+            h_soln.set(node_inlet, _fp.h_from_p_T(P_soln(node_inlet), _T_in));
+            rho_soln.set(node_inlet, _fp.rho_from_p_T(P_soln(node_inlet), _T_in));
           }
           mdot_global.col(iz) = mdot;
           MError = std::sqrt((mdot - mdot_old).squaredNorm() / (mdot_old.squaredNorm() + 1E-14));
@@ -470,6 +477,11 @@ SubChannel1PhaseProblem::externalSolve()
       Total_crossflow += SumWij_soln(node);
     }
   }
+
+  std::ofstream myfile1;
+  myfile1.open("Temp_out_nodeZero.txt", std::ofstream::trunc);
+  myfile1 << std::setprecision(3) << std::fixed << Temp_out << "\n";
+  myfile1.close();
 
   _console << "Finished executing subchannel solver\n";
 }
