@@ -33,7 +33,8 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_name(isParamValid("filename")? UserObjectName(_name+ "_covar_func"): getParam<UserObjectName>("covariance_function")),
+    _covar_name(isParamValid("filename") ? UserObjectName(_name + "_covar_func")
+                                         : getParam<UserObjectName>("covariance_function")),
     _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"))
 {
 }
