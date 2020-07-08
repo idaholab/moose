@@ -26,7 +26,8 @@ ResidualTransfer::validParams()
 
 ResidualTransfer::ResidualTransfer(const InputParameters & parameters)
   : SamplerSolutionTransfer(parameters)
-{}
+{
+}
 
 void
 ResidualTransfer::initialSetup()
@@ -37,9 +38,9 @@ ResidualTransfer::initialSetup()
 void
 ResidualTransfer::execute()
 {
-  const std::vector<std::string>& var_names = _trainer->getVarNames();
-  const std::vector<std::string>& tag_names = _trainer->getTagNames();
-  const std::vector<unsigned int>& independent = _trainer->getIndependent();
+  const std::vector<std::string> & var_names = _trainer->getVarNames();
+  const std::vector<std::string> & tag_names = _trainer->getTagNames();
+  const std::vector<unsigned int> & independent = _trainer->getIndependent();
   const unsigned int total_base_num = _trainer->getSumBaseSize();
 
   // Initializing the reduced operators in the trainer.
@@ -50,7 +51,7 @@ ResidualTransfer::execute()
   {
     // Getting reference to the non-linear system
     FEProblemBase & app_problem = _multi_app->appProblemBase(base_i);
-    NonlinearSystemBase& nl = app_problem.getNonlinearSystemBase();
+    NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
     // Looping over the residual tags and extracting the corresponding vector.
     for (unsigned int tag_i = 0; tag_i < tag_names.size(); ++tag_i)
@@ -64,14 +65,14 @@ ResidualTransfer::execute()
 
       // Fetching the corresponding residual vector and extracting the parts for
       // each variable.
-      NumericVector<Number>& full_residual = nl.getVector(tag_id);
+      NumericVector<Number> & full_residual = nl.getVector(tag_id);
       std::vector<DenseVector<Real>> split_residual(var_names.size());
 
-      for (unsigned int var_i=0; var_i<var_names.size(); ++var_i)
+      for (unsigned int var_i = 0; var_i < var_names.size(); ++var_i)
       {
         // Getting the DoF indices of the variable.
         nl.setVariableGlobalDoFs(var_names[var_i]);
-        const std::vector<dof_id_type>& var_dofs = nl.getVariableGlobalDoFs();
+        const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
         // Extracting the corresponding part of the residual vector.
         full_residual.get(var_dofs, split_residual[var_i].get_values());
@@ -86,12 +87,15 @@ ResidualTransfer::execute()
 
 void
 ResidualTransfer::initializeFromMultiapp()
-{}
+{
+}
 
 void
 ResidualTransfer::finalizeFromMultiapp()
-{}
+{
+}
 
 void
 ResidualTransfer::executeFromMultiapp()
-{}
+{
+}

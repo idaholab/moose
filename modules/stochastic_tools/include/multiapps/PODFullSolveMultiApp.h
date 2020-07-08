@@ -33,7 +33,6 @@ public:
   virtual void preTransfer(Real dt, Real target_time) override;
 
 protected:
-
   /// Name of the trainer object which this MultiApp generates snaphots/residuals
   /// for.
   std::string _trainer_name;
@@ -53,5 +52,4 @@ protected:
   bool _snapshot_generation;
 
 private:
-
 };

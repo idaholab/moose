@@ -22,7 +22,7 @@ public:
   void evaluateSolution(const std::vector<Real> & params);
 
   /// Get a reference to the approximate solutions.
-  std::vector<DenseVector<Real>>& getApproximateSolution(){return _approx_solution;}
+  std::vector<DenseVector<Real>> & getApproximateSolution() { return _approx_solution; }
 
   /// Get the nodal QoI of the reconstructed solution for a given variable.
   Real getNodalQoI(std::string var_name, MooseEnum qoi_type) const;
@@ -31,7 +31,6 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
-
   /// Initialize reduced matrices, vectors and additional containers.
   void initializeReducedSystem();
 
@@ -56,22 +55,22 @@ protected:
   std::vector<unsigned int> _comulative_ranks;
 
   /// Vector containing the names of the variables we want to reconstruct.
-  const std::vector<std::string>& _var_names;
+  const std::vector<std::string> & _var_names;
 
   /// Names of the tags that should be used to fetch residuals from the MultiApp.
-  const std::vector<std::string>& _tag_names;
+  const std::vector<std::string> & _tag_names;
 
   /// Tag names that show which tags correspond to dirichlet boundaries.
-  const std::vector<std::string>& _dir_tag_names;
+  const std::vector<std::string> & _dir_tag_names;
 
   /// Bools describing which operator is indepedent of the solution.
-  const std::vector<unsigned int>& _independent;
+  const std::vector<unsigned int> & _independent;
 
   /// The basis vectors for all the variables.
-  const std::vector<std::vector<DenseVector<Real>>>& _base;
+  const std::vector<std::vector<DenseVector<Real>>> & _base;
 
   /// The power matrix for the terms in the polynomial expressions.
-  const std::vector<DenseMatrix<Real>>& _red_operators;
+  const std::vector<DenseMatrix<Real>> & _red_operators;
 
   /// Coefficients of the reduced order model.
   DenseVector<Real> _coeffs;
@@ -90,5 +89,4 @@ protected:
 
   /// Switch that is set to see if the ROM matrices and vectors are initialized.
   bool _initialized;
-
 };
