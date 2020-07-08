@@ -22,7 +22,7 @@ ExponentialCovariance::validParams()
 
 ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
   : CovarianceFunctionBase(parameters),
-  _gamma(!_hyperparams.empty() ? _hyperparams[3][0]: getParam<Real>("gamma"))
+    _gamma(!_hyperparams.empty() ? _hyperparams[3][0] : getParam<Real>("gamma"))
 {
 }
 

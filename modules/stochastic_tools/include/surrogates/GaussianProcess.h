@@ -52,5 +52,4 @@ private:
   const FEProblemBase & _feproblem;
 
   CovarianceFunctionBase * _covariance_function;
-
 };
