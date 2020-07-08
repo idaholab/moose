@@ -1,6 +1,6 @@
 # MultiApp System
 
-A system for performing multiple simulations within a master simulation.
+A system for performing multiple simulations within a main simulation.
 
 !---
 
@@ -17,10 +17,10 @@ The MultiApp system creates simulations of loosely-coupled systems of fully-coup
 
 ## MultiApp Hierarchy
 
-Each "app" is considered to be a solve that is independent, and there is always a "master" that is
+Each "app" is considered to be a solve that is independent, and there is always a "main" that is
 driving the simulation
 
-- The "master" app can have any number of `MultiApp` objects
+- The "main" app can have any number of `MultiApp` objects
 - Each `MultiApp` can represent many sub-applications ("sub-apps")
 
 Each sub-app can solve for different physics from the main application
@@ -43,7 +43,7 @@ MultiApp objects are declared in the `[MultiApps]` block
 The name of the `MooseApp` derived application to run (e.g., "AnimalApp")
 
 `positions`\\
-List of 3D coordinates describing the offset of the sub-application into the physical space of the master application
+List of 3D coordinates describing the offset of the sub-application into the physical space of the main application
 
 `execute_on`\\
 Allows control when sub-applications are executed: INITIAL, LINEAR, NONLINEAR, TIMESTEP_BEGIN, TIMESTEP_END
@@ -61,6 +61,6 @@ One input file can be supplied for all the sub-apps or a file can be provided fo
 
 The MultiApp system is designed for efficient parallel execution of hierarchical problems.
 
-- The master application utilizes all processors
+- The main application utilizes all processors
 - The processors are split among each sub-apps within each MultiApp and are run simultaneously
 - Multiple MultiApps will be executed one after another
