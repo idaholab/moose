@@ -303,15 +303,9 @@ DualMortarPreconditioner::condenseSystem()
   _matrix->create_submatrix(* _M, lm, u1c);
   _matrix->create_submatrix(* _MDinv, u1c, lm);
   _M->get_transpose(*_M);
-  _M->close();
-
-
 
   _matrix->create_submatrix(* _K2ci, u2c, u2i);
   _matrix->create_submatrix(* _K2cc, u2c, u2c);
-
-  _K2ci->close();
-  _K2cc->close();
 
   // invert _D:
   // _D should be strictly diagonal if dual_mortar approach is utilized
@@ -324,12 +318,10 @@ DualMortarPreconditioner::condenseSystem()
    row_i.push_back(i);
     _D->zero_rows(row_i, tmp);
   }
-  _D->close();
 
 
   // compute MDinv=_M*_D
   _M->matrix_matrix_mult(*_D, *_MDinv); // (should use empty initializer for _MDinv)
-  _MDinv->close();
 
   // initialize _J_condensed
 
@@ -343,44 +335,57 @@ DualMortarPreconditioner::condenseSystem()
   _MDinv->matrix_matrix_mult(*_K2ci, *MDinvK2ci);
   _MDinv->matrix_matrix_mult(*_K2cc, *MDinvK2cc);
 
-  MDinvK2ci->close();
-  MDinvK2cc->close();
-
   // add changed parts to _J_condensed
   // original system row_id: u1c
   // original system col_id: u2i, u2c
   std::vector<numeric_index_type> row_id_cond, col_id_cond_u2i, col_id_cond_u2c;
-  for (auto it = u1c.begin(); it!=u1c.end(); ++it)
+  std::map<numeric_index_type, numeric_index_type> row_id_cond_mp, col_id_cond_u2i_mp, col_id_cond_u2c_mp;
+
+  for (auto it: index_range(u1c))
   {
-    auto it_row = find (_rows.begin(), _rows.end(), *it);
+    numeric_index_type lid=static_cast<numeric_index_type>(it);
+    auto it_row = find (_rows.begin(), _rows.end(), u1c[it]);
     if (it_row != _rows.end())
-      row_id_cond.push_back(std::distance(_rows.begin(), it_row));
+    {
+      numeric_index_type gid = std::distance(_rows.begin(), it_row);
+      row_id_cond_mp.insert(std::make_pair(lid , gid));
+    }
     else
-      mooseError("DOF ", *it," does not exist in the rows of the condensed system");
+      mooseError("DOF ", u1c[it]," does not exist in the rows of the condensed system");
   }
 
-  for (auto it = u2i.begin(); it!=u2i.end(); ++it)
+  for (auto it: index_range(u2i))
   {
-    auto it_col = find(_cols.begin(), _cols.end(), *it);
+    numeric_index_type lid=static_cast<numeric_index_type>(it);
+    auto it_col = find(_cols.begin(), _cols.end(), u2i[it]);
     if (it_col != _cols.end())
-      col_id_cond_u2i.push_back(std::distance(_cols.begin(), it_col));
+    {
+      numeric_index_type gid = std::distance(_cols.begin(), it_col);
+      col_id_cond_u2i_mp.insert(std::make_pair(lid, gid));
+    }
     else
-      mooseError("DOF ", *it," does not exist in the columns of the condensed system");
+      mooseError("DOF ", u2i[it]," does not exist in the columns of the condensed system");
   }
 
-  for (auto it = u2c.begin(); it!=u2c.end(); ++it)
+  for (auto it: index_range(u2c))
   {
-    auto it_col = find(_cols.begin(), _cols.end(), *it);
+    numeric_index_type lid=static_cast<numeric_index_type>(it);
+    auto it_col = find(_cols.begin(), _cols.end(), u2c[it]);
     if (it_col != _cols.end())
-      col_id_cond_u2c.push_back(std::distance(_cols.begin(), it_col));
+    {
+      numeric_index_type gid = std::distance(_cols.begin(), it_col);
+      col_id_cond_u2c_mp.insert(std::make_pair(lid, gid));
+    }
     else
-      mooseError("DOF ", *it," does not exist in the columns of the condensed system");
+      mooseError("DOF ", u2c[it]," does not exist in the columns of the condensed system");
   }
 
   MatSetOption(_J_condensed->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-  _J_condensed->add_sparse_matrix(*MDinvK2ci, row_id_cond, col_id_cond_u2i, -1.0);
-  _J_condensed->add_sparse_matrix(*MDinvK2cc, row_id_cond, col_id_cond_u2c, -1.0);
+  _J_condensed->add_sparse_matrix(*MDinvK2ci, row_id_cond_mp, col_id_cond_u2i_mp, -1.0);
+  _J_condensed->add_sparse_matrix(*MDinvK2cc, row_id_cond_mp, col_id_cond_u2c_mp, -1.0);
   _J_condensed->close();
+
+  // _J_condensed->print_personal();
 
 }
 
