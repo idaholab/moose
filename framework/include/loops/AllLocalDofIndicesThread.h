@@ -22,12 +22,15 @@ class DofMap;
 }
 
 /**
- * Grab all the local dof indices for the variables passed in, in the system passed in.
+ * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed
+ * in.
  */
 class AllLocalDofIndicesThread
 {
 public:
-  AllLocalDofIndicesThread(System & sys, std::vector<std::string> vars);
+  AllLocalDofIndicesThread(System & sys,
+                           std::vector<std::string> vars,
+                           bool include_semilocal = false);
   // Splitting Constructor
   AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split split);
 
@@ -42,6 +45,9 @@ protected:
   DofMap & _dof_map;
   std::vector<std::string> _vars;
   std::vector<unsigned int> _var_numbers;
+
+  /// Whether to include semilocal dof indices
+  const bool _include_semilocal;
+
   THREAD_ID _tid;
 };
-

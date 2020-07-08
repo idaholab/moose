@@ -219,7 +219,7 @@ SystemBase::zeroVariables(std::vector<std::string> & vars_to_be_zeroed)
   {
     NumericVector<Number> & solution = this->solution();
 
-    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed);
+    AllLocalDofIndicesThread aldit(system(), vars_to_be_zeroed, true);
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
