@@ -353,7 +353,9 @@ def is_git_repo(working_dir=os.getcwd()):
     """
     Return true if the repository is a git repo.
     """
-    return os.path.isdir(os.path.join(working_dir, '.git'))
+    out = check_output(['git', 'rev-parse', '--is-inside-work-tree'], check=False,
+                       stderr=subprocess.PIPE, cwd=working_dir).strip(' \n')
+    return out.lower() == 'true'
 
 def git_commit(working_dir=os.getcwd()):
     """
@@ -382,7 +384,7 @@ def git_ls_files(working_dir=os.getcwd()):
     """
     out = set()
     for fname in check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
-            out.add(os.path.abspath(os.path.join(working_dir, fname)))
+        out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 
 def list_files(working_dir=os.getcwd()):
@@ -442,7 +444,10 @@ def shellCommand(command, cwd=None):
 
 def check_output(cmd, **kwargs):
     """Get output from a process"""
-    return subprocess.check_output(cmd, encoding='utf-8', **kwargs)
+    kwargs.setdefault('check', True)
+    kwargs.setdefault('stdout', subprocess.PIPE)
+    kwargs.setdefault('encoding', 'utf-8')
+    return subprocess.run(cmd, **kwargs).stdout
 
 def generate_filebase(string, replace='_', lowercase=True):
     """

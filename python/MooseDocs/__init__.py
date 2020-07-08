@@ -24,8 +24,14 @@ import mooseutils
 LOG_LEVEL = logging.NOTSET
 
 # The repository root location
-ROOT_DIR = mooseutils.git_root_dir()
-os.environ['ROOT_DIR'] = ROOT_DIR
+is_git_repo = mooseutils.is_git_repo()
+if is_git_repo:
+    os.environ.setdefault('ROOT_DIR',  mooseutils.git_root_dir())
+elif 'ROOT_DIR' not in os.environ:
+    print('MooseDocs requires the ROOT_DIR environment variable to set when operating outside of a git repository.')
+    sys.exit(1)
+
+ROOT_DIR = os.environ['ROOT_DIR']
 
 # Setup MOOSE_DIR/ROOT_DIR
 MOOSE_DIR = os.getenv('MOOSE_DIR', None)
@@ -33,7 +39,8 @@ if MOOSE_DIR is None:
     print("The MOOSE_DIR environment must be set, this should be set within moosedocs.py.")
     sys.exit(1)
 
-# List all files with git, this is done here to avoid running this command many times
-PROJECT_FILES = mooseutils.git_ls_files(ROOT_DIR)
-PROJECT_FILES.update(mooseutils.git_ls_files(MOOSE_DIR))
-PROJECT_FILES.update(mooseutils.git_ls_files(os.path.join(MOOSE_DIR, 'large_media')))
+# List all files, this is done here to avoid running this command many times
+ls_files = mooseutils.git_ls_files if is_git_repo else mooseutils.list_files
+PROJECT_FILES = ls_files(ROOT_DIR)
+PROJECT_FILES.update(ls_files(MOOSE_DIR))
+PROJECT_FILES.update(ls_files(os.path.join(MOOSE_DIR, 'large_media')))
