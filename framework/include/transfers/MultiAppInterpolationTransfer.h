@@ -14,6 +14,10 @@
 
 #include "libmesh/mesh_base.h"
 
+#include "libmesh/meshfree_interpolation.h"
+#include "libmesh/system.h"
+#include "libmesh/radial_basis_interpolation.h"
+
 // Forward declarations
 class MultiAppInterpolationTransfer;
 
@@ -45,6 +49,20 @@ protected:
                         Real & distance,
                         const MeshBase::const_node_iterator & nodes_begin,
                         const MeshBase::const_node_iterator & nodes_end);
+
+  void
+  fillSourceInterpolationPoints(FEProblemBase & from_problem,
+                                MooseVariableFEBase & from_var,
+                                Point & from_app_position,
+                                std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
+
+  void interpolateTargetPoints(FEProblemBase & to_problem,
+                               MooseVariableFEBase & to_var,
+                               NumericVector<Real> & to_solution,
+                               Point & to_app_position,
+                               std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
+
+  subdomain_id_type subdomainIDNode(MooseMesh & mesh, Node & node);
 
   unsigned int _num_points;
   Real _power;
