@@ -152,7 +152,8 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_o
         msg << "\n\nMOOSE distinguishes between \"node sets\" and \"side sets\" depending on "
                "whether \nyou are using \"Nodal\" or \"Integrated\" BCs respectively. Node sets "
                "corresponding \nto your side sets are constructed for you by default.\n\n"
-               "Try setting \"Mesh/construct_side_set_from_node_set=true\" if you see this error.\n"
+               "Try setting \"Mesh/construct_side_list_from_node_list=true\" if you see this "
+               "error.\n"
                "Note: If you are running with adaptivity you should prefer using side sets.";
 
       moose_object->paramError("boundary", msg.str());
