@@ -20,9 +20,10 @@ PODReducedBasisSurrogate::validParams()
   params.addParam<std::vector<std::string>>("change_rank",
                                             std::vector<std::string>(0),
                                             "Names of variables whose rank should be changed.");
-  params.addParam<std::vector<unsigned int>>("new_ranks",
-                                             std::vector<unsigned int>(0),
-                                             "The new ranks that each variable in 'change_rank' shall have.");
+  params.addParam<std::vector<unsigned int>>(
+      "new_ranks",
+      std::vector<unsigned int>(0),
+      "The new ranks that each variable in 'change_rank' shall have.");
   params.addParam<Real>("penalty", 1e5, "The penalty parameter for Dirichlet BCs.");
   return params;
 }
@@ -40,7 +41,7 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
     _penalty(getParam<Real>("penalty")),
     _initialized(false)
 {
-  if(_change_rank.size() != _new_ranks.size())
+  if (_change_rank.size() != _new_ranks.size())
     paramError("new_ranks",
                "The size of 'new_ranks' is not equal to the ",
                "size of 'change_rank' ",
@@ -48,7 +49,7 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
                " != ",
                _change_rank.size());
 
-  for (unsigned int var_i=0; var_i<_new_ranks.size(); ++var_i)
+  for (unsigned int var_i = 0; var_i < _new_ranks.size(); ++var_i)
     if (_new_ranks[var_i] == 0)
       paramError("new_ranks", "The values should be greater than 0!");
 }
@@ -71,7 +72,7 @@ PODReducedBasisSurrogate::initializeReducedSystem()
 {
   // It initializes the container sizes at the first call only. This way we can
   // new memory allocation at every solve.
-  if(!_initialized)
+  if (!_initialized)
   {
     // Storing important indices for the assemly loops.
     _final_ranks.resize(_var_names.size());
@@ -80,14 +81,14 @@ PODReducedBasisSurrogate::initializeReducedSystem()
 
     // Checking if the user wants to overwrite the original ranks for the
     // variables.
-    for (unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+    for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
     {
       _final_ranks[var_i] = _base[var_i].size();
-      for (unsigned int var_j=0; var_j<_change_rank.size(); ++var_j)
+      for (unsigned int var_j = 0; var_j < _change_rank.size(); ++var_j)
       {
-        if(_change_rank[var_j] == _var_names[var_i])
+        if (_change_rank[var_j] == _var_names[var_i])
         {
-          if(_new_ranks[var_j] > _base[var_i].size())
+          if (_new_ranks[var_j] > _base[var_i].size())
             paramError("new_ranks",
                        "The specified new rank (",
                        _new_ranks[var_j],
@@ -109,7 +110,7 @@ PODReducedBasisSurrogate::initializeReducedSystem()
     _coeffs = DenseVector<Real>(sum_ranks);
 
     _approx_solution.resize(_var_names.size());
-    for(unsigned int var_i=0; var_i<_var_names.size(); var_i++)
+    for (unsigned int var_i = 0; var_i < _var_names.size(); var_i++)
     {
       _approx_solution[var_i] = DenseVector<Real>(_base[var_i][0].size());
     }
@@ -128,7 +129,7 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
   // assembled in the order of the parameters. Also, if the number of
   // parameters is fewer than the number of operators, the operator will
   // just be added without scaling.
-  for(unsigned int i=0; i<_red_operators.size(); ++i)
+  for (unsigned int i = 0; i < _red_operators.size(); ++i)
   {
     unsigned int row_start = 0;
 
@@ -141,17 +142,17 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
 
     // If the user decreased the rank of the reduced bases manually, some parts
     // of the initial reduced operators have to be omited.
-    for(unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+    for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
     {
-      for(unsigned int row_i=row_start; row_i<_comulative_ranks[var_i]; row_i++)
+      for (unsigned int row_i = row_start; row_i < _comulative_ranks[var_i]; row_i++)
       {
         if (!_independent[i])
         {
           unsigned int col_start = 0;
 
-          for(unsigned int var_j=0; var_j<_var_names.size(); ++var_j)
+          for (unsigned int var_j = 0; var_j < _var_names.size(); ++var_j)
           {
-            for(unsigned int col_i=col_start; col_i<_comulative_ranks[var_j]; col_i++)
+            for (unsigned int col_i = col_start; col_i < _comulative_ranks[var_j]; col_i++)
             {
               if (i < params.size())
                 _sys_mx(row_i, col_i) += params[i] * factor * _red_operators[i](row_i, col_i);
@@ -182,15 +183,15 @@ void
 PODReducedBasisSurrogate::reconstructApproximateSolution()
 {
   unsigned int counter = 0;
-  for(unsigned int var_i=0; var_i<_var_names.size(); var_i++)
+  for (unsigned int var_i = 0; var_i < _var_names.size(); var_i++)
   {
     _approx_solution[var_i].zero();
 
     // This also takes into account the potential truncation of the bases by
     // the user.
-    for(unsigned int base_i=0; base_i<_final_ranks[var_i]; ++base_i)
+    for (unsigned int base_i = 0; base_i < _final_ranks[var_i]; ++base_i)
     {
-      for (unsigned int dof_i=0; dof_i<_base[var_i][base_i].size(); ++dof_i)
+      for (unsigned int dof_i = 0; dof_i < _base[var_i][base_i].size(); ++dof_i)
         _approx_solution[var_i](dof_i) += _coeffs(counter) * _base[var_i][base_i](dof_i);
       counter++;
     }
@@ -204,32 +205,32 @@ PODReducedBasisSurrogate::getNodalQoI(std::string var_name, MooseEnum qoi_type) 
 
   auto it = std::find(_var_names.begin(), _var_names.end(), var_name);
   if (it == _var_names.end())
-    mooseError("Variable '",var_name,"' not found!");
+    mooseError("Variable '", var_name, "' not found!");
 
-  switch(qoi_type)
+  switch (qoi_type)
   {
-    case 0 :
-      val = _approx_solution[it-_var_names.begin()].max();
+    case 0:
+      val = _approx_solution[it - _var_names.begin()].max();
       break;
 
-    case 1 :
-      val = _approx_solution[it-_var_names.begin()].min();
+    case 1:
+      val = _approx_solution[it - _var_names.begin()].min();
       break;
 
-    case 2 :
-      val = _approx_solution[it-_var_names.begin()].l1_norm();
+    case 2:
+      val = _approx_solution[it - _var_names.begin()].l1_norm();
       break;
 
-    case 3 :
-      val = _approx_solution[it-_var_names.begin()].l2_norm();
+    case 3:
+      val = _approx_solution[it - _var_names.begin()].l2_norm();
       break;
 
-    case 4 :
-      val = _approx_solution[it-_var_names.begin()].linfty_norm();
+    case 4:
+      val = _approx_solution[it - _var_names.begin()].linfty_norm();
       break;
   }
 
-  return(val);
+  return (val);
 }
 
 Real

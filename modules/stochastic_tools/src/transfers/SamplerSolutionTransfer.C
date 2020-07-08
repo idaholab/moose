@@ -31,8 +31,7 @@ SamplerSolutionTransfer::validParams()
 }
 
 SamplerSolutionTransfer::SamplerSolutionTransfer(const InputParameters & parameters)
-  : StochasticToolsTransfer(parameters),
-  _trainer_name(getParam<std::string>("trainer_name"))
+  : StochasticToolsTransfer(parameters), _trainer_name(getParam<std::string>("trainer_name"))
 {
   // Fetching the trainer based on the name specified in the parameters
   std::vector<PODReducedBasisTrainer *> obj;
@@ -40,7 +39,7 @@ SamplerSolutionTransfer::SamplerSolutionTransfer(const InputParameters & paramet
   _fe_problem.theWarehouse().query().condition<AttribName>(_trainer_name).queryInto(obj);
 
   if (obj.empty())
-    mooseError("Unable to find Trainer with name '"+ _trainer_name + "'!");
+    mooseError("Unable to find Trainer with name '" + _trainer_name + "'!");
 
   _trainer = obj[0];
 }
@@ -49,14 +48,14 @@ void
 SamplerSolutionTransfer::initialSetup()
 {
   // Checking if the subapplication has the requested variables
-  const std::vector<std::string>& var_names = _trainer->getVarNames();
+  const std::vector<std::string> & var_names = _trainer->getVarNames();
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
     if (_multi_app->hasLocalApp(i))
-      for(auto var_name : var_names)
+      for (auto var_name : var_names)
         if (!_multi_app->appProblemBase(i).hasVariable(var_name))
-          mooseError("Variable '"+var_name+"' not found on sub-application ",i,"!");
+          mooseError("Variable '" + var_name + "' not found on sub-application ", i, "!");
   }
 }
 
@@ -64,28 +63,29 @@ void
 SamplerSolutionTransfer::execute()
 {
 
-  const std::vector<std::string>& var_names = _trainer->getVarNames();
+  const std::vector<std::string> & var_names = _trainer->getVarNames();
 
   // Selecting the appropriate action based on the drection.
-  switch(_direction)
+  switch (_direction)
   {
     case FROM_MULTIAPP:
 
       // Looping over sub-apps created for different samples
-      for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
+      for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd();
+           ++i)
       {
         // Getting reference to the  solution vector of the sub-app.
         FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-        NonlinearSystemBase& nl = app_problem.getNonlinearSystemBase();
-        NumericVector<Number>& solution = nl.solution();
+        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+        NumericVector<Number> & solution = nl.solution();
 
         // Looping over the variables to extract the corresponding solution values
         // and copy them into the container of the trainer.
-        for (unsigned int v_index=0; v_index<var_names.size(); ++v_index)
+        for (unsigned int v_index = 0; v_index < var_names.size(); ++v_index)
         {
           // Getting the corresponding DoF indices for the variable.
           nl.setVariableGlobalDoFs(var_names[v_index]);
-          const std::vector<dof_id_type>& var_dofs = nl.getVariableGlobalDoFs();
+          const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
           // Initializing a temporary vector for the partial solution.
           DenseVector<Real> tmp;
@@ -101,18 +101,18 @@ SamplerSolutionTransfer::execute()
 
       // Looping over all the variables in the trainer to copy the corresponding
       // basis vectors into the solution.
-      unsigned int counter=0;
-      for (unsigned int var_i=0; var_i<var_names.size(); ++var_i)
+      unsigned int counter = 0;
+      for (unsigned int var_i = 0; var_i < var_names.size(); ++var_i)
       {
         // Looping over the bases of the given variable and plugging them into
         // a sub-application.
         unsigned int var_base_num = _trainer->getBaseSize(var_i);
-        for(unsigned int base_i=0; base_i<var_base_num; ++base_i)
+        for (unsigned int base_i = 0; base_i < var_base_num; ++base_i)
         {
           // Getting the reference to the solution vector in the subapp.
           FEProblemBase & app_problem = _multi_app->appProblemBase(counter);
-          NonlinearSystemBase& nl = app_problem.getNonlinearSystemBase();
-          NumericVector<Number>& solution = nl.solution();
+          NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+          NumericVector<Number> & solution = nl.solution();
 
           // Zeroing down the solution tho make sure that only the required part
           // is non-zero after copy.
@@ -120,10 +120,10 @@ SamplerSolutionTransfer::execute()
 
           // Getting the degrees of freedom for the given variable.
           nl.setVariableGlobalDoFs(var_names[var_i]);
-          const std::vector<dof_id_type>& var_dofs = nl.getVariableGlobalDoFs();
+          const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
           // Fetching the basis vector and plugging it into the solution.
-          const DenseVector<Real>& base_vector = _trainer->getBasisVector(var_i, base_i);
+          const DenseVector<Real> & base_vector = _trainer->getBasisVector(var_i, base_i);
           solution.insert(base_vector, var_dofs);
           solution.close();
 
@@ -139,24 +139,30 @@ SamplerSolutionTransfer::execute()
 
 void
 SamplerSolutionTransfer::initializeFromMultiapp()
-{}
+{
+}
 
 void
 SamplerSolutionTransfer::finalizeFromMultiapp()
-{}
+{
+}
 
 void
 SamplerSolutionTransfer::executeFromMultiapp()
-{}
+{
+}
 
 void
 SamplerSolutionTransfer::initializeToMultiapp()
-{}
+{
+}
 
 void
 SamplerSolutionTransfer::finalizeToMultiapp()
-{}
+{
+}
 
 void
 SamplerSolutionTransfer::executeToMultiapp()
-{}
+{
+}

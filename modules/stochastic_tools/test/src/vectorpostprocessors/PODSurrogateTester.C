@@ -29,12 +29,10 @@ PODSurrogateTester::validParams()
                         false,
                         "True to output value of samples from sampler (this may be VERY large).");
   params.addRequiredParam<std::string>(
-      "variable_name",
-      "The name of the variable this prostprocessor is supposed to operate on.");
+      "variable_name", "The name of the variable this prostprocessor is supposed to operate on.");
   MooseEnum pptype("nodal_max=0 nodal_min=1 nodal_l1=2 nodal_l2=3 nodal_linf=4");
   params.addRequiredParam<MooseEnum>(
-      "to_compute", pptype,
-      "The global data the postprocessor should compute.");
+      "to_compute", pptype, "The global data the postprocessor should compute.");
   return params;
 }
 
@@ -54,13 +52,10 @@ PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
 
   std::vector<PODReducedBasisSurrogate *> models;
 
-  FEProblemBase& problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
+  FEProblemBase & problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
 
   UserObjectName name = getParam<UserObjectName>("model");
-  problem.theWarehouse()
-          .query()
-          .condition<AttribName>(name)
-          .queryInto(models);
+  problem.theWarehouse().query().condition<AttribName>(name).queryInto(models);
   if (models.empty())
     mooseError("Unable to find a PODReducedBasisSurrogate object with the name '" + name + "'");
   _model = models[0];
@@ -68,7 +63,8 @@ PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
 
 void
 PODSurrogateTester::initialSetup()
-{}
+{
+}
 
 void
 PODSurrogateTester::initialize()
@@ -88,7 +84,8 @@ PODSurrogateTester::execute()
     std::vector<Real> data = _sampler.getNextLocalRow();
 
     _model->evaluateSolution(data);
-    _value_vector[p - _sampler.getLocalRowBegin()] = _model->getNodalQoI(_variable_name, _to_compute);
+    _value_vector[p - _sampler.getLocalRowBegin()] =
+        _model->getNodalQoI(_variable_name, _to_compute);
 
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)

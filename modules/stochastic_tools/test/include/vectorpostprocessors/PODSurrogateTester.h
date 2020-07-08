@@ -18,7 +18,9 @@
 /**
  * A tool for output Sampler data.
  */
-class PODSurrogateTester : public GeneralVectorPostprocessor, SamplerInterface, SurrogateModelInterface
+class PODSurrogateTester : public GeneralVectorPostprocessor,
+                           SamplerInterface,
+                           SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -30,7 +32,6 @@ public:
   virtual void finalize() override;
 
 protected:
-
   /// Sampler for evaluating surrogate model
   Sampler & _sampler;
 

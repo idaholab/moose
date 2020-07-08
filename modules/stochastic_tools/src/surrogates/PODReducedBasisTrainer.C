@@ -25,43 +25,47 @@ PODReducedBasisTrainer::validParams()
                                              "List of energy retention limits for each variable.");
   params.addRequiredParam<std::vector<std::string>>("tag_names",
                                                     "Names of tags for the reduced operators.");
-  params.addParam<std::vector<std::string>>("dir_tag_names",
-                                            std::vector<std::string>(0),
-                                            "Names of tags for reduced operators corresponding to dirichlet BCs.");
-  params.addRequiredParam<std::vector<unsigned int>>("independent",
-                                                     "List of bools describing if the tags"
-                                                     " correspond to and independent operator or not.");
+  params.addParam<std::vector<std::string>>(
+      "dir_tag_names",
+      std::vector<std::string>(0),
+      "Names of tags for reduced operators corresponding to dirichlet BCs.");
+  params.addRequiredParam<std::vector<unsigned int>>(
+      "independent",
+      "List of bools describing if the tags"
+      " correspond to and independent operator or not.");
   return params;
 }
 
 PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-  _var_names(declareModelData<std::vector<std::string>>("_var_names", getParam<std::vector<std::string>>("var_names"))),
-  _en_limits(getParam<std::vector<Real>>("en_limits")),
-  _tag_names(declareModelData<std::vector<std::string>>("_tag_names", getParam<std::vector<std::string>>("tag_names"))),
-  _dir_tag_names(declareModelData<std::vector<std::string>>("_dir_tag_names", getParam<std::vector<std::string>>("dir_tag_names"))),
-  _independent(declareModelData<std::vector<unsigned int>>("_independent", getParam<std::vector<unsigned int>>("independent"))),
-  _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
-  _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
-  _base_completed(false)
+    _var_names(declareModelData<std::vector<std::string>>(
+        "_var_names", getParam<std::vector<std::string>>("var_names"))),
+    _en_limits(getParam<std::vector<Real>>("en_limits")),
+    _tag_names(declareModelData<std::vector<std::string>>(
+        "_tag_names", getParam<std::vector<std::string>>("tag_names"))),
+    _dir_tag_names(declareModelData<std::vector<std::string>>(
+        "_dir_tag_names", getParam<std::vector<std::string>>("dir_tag_names"))),
+    _independent(declareModelData<std::vector<unsigned int>>(
+        "_independent", getParam<std::vector<unsigned int>>("independent"))),
+    _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
+    _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
+    _base_completed(false)
 {
   if (_en_limits.size() != _var_names.size())
-      paramError("en_limits",
-                 "The number of elements is not equal to the number"
-                 " of elements in 'var_names'!");
+    paramError("en_limits",
+               "The number of elements is not equal to the number"
+               " of elements in 'var_names'!");
 
   if (_tag_names.size() != _independent.size())
     paramError("independent",
                "The number of elements is not equal to the number"
                " of elements in 'tag_names'!");
 
-  for(auto dir_tag : _dir_tag_names)
+  for (auto dir_tag : _dir_tag_names)
   {
     auto it = std::find(_tag_names.begin(), _tag_names.end(), dir_tag);
     if (it == _tag_names.end())
-      paramError("dir_tag_names",
-                 "Dirichlet BC tag '", dir_tag,
-                 "' is not present in tag_names!");
+      paramError("dir_tag_names", "Dirichlet BC tag '", dir_tag, "' is not present in tag_names!");
   }
 }
 
@@ -111,7 +115,7 @@ PODReducedBasisTrainer::finalize()
 }
 
 void
-PODReducedBasisTrainer::addSnapshot(unsigned int v_ind, DenseVector<Real>& snapshot)
+PODReducedBasisTrainer::addSnapshot(unsigned int v_ind, DenseVector<Real> & snapshot)
 {
   _snapshots[v_ind].push_back(snapshot);
 }
@@ -120,7 +124,7 @@ void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
   // Looping over all the variables.
-  for (unsigned int v_ind=0; v_ind<_snapshots.size(); ++v_ind)
+  for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
   {
     unsigned int no_snaps = _snapshots[v_ind].size();
 
@@ -129,21 +133,21 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
     // Filling the correlation matrix with the inner products between snapshots
     // and utilizing the fact the the correlation matrix is symmetric.
-    for (unsigned int j=0; j<no_snaps; ++j)
+    for (unsigned int j = 0; j < no_snaps; ++j)
     {
-      for (unsigned int k=0; k<no_snaps; ++k)
+      for (unsigned int k = 0; k < no_snaps; ++k)
       {
-        if (j>=k)
-          _corr_mx[v_ind](j,k)=_snapshots[v_ind][j].dot(_snapshots[v_ind][k]);
+        if (j >= k)
+          _corr_mx[v_ind](j, k) = _snapshots[v_ind][j].dot(_snapshots[v_ind][k]);
       }
     }
 
-    for (unsigned int j=0; j<no_snaps; ++j)
+    for (unsigned int j = 0; j < no_snaps; ++j)
     {
-      for (unsigned int k=0; k<no_snaps; ++k)
+      for (unsigned int k = 0; k < no_snaps; ++k)
       {
-        if (j<k)
-          _corr_mx[v_ind](j,k) = _corr_mx[v_ind](k,j);
+        if (j < k)
+          _corr_mx[v_ind](j, k) = _corr_mx[v_ind](k, j);
       }
     }
   }
@@ -152,7 +156,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 void
 PODReducedBasisTrainer::computeEigenDecomposition()
 {
-  for (unsigned int v_ind=0; v_ind<_corr_mx.size(); ++v_ind)
+  for (unsigned int v_ind = 0; v_ind < _corr_mx.size(); ++v_ind)
   {
     unsigned int no_snaps = _corr_mx[v_ind].n();
 
@@ -161,7 +165,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     DenseVector<Real> eigenvalues(no_snaps);
     DenseMatrix<Real> eigenvectors(no_snaps, no_snaps);
 
-    //Creating a temporary placeholder for the imaginary parts of the eigenvalues
+    // Creating a temporary placeholder for the imaginary parts of the eigenvalues
     DenseVector<Real> eigenvalues_imag(no_snaps);
 
     // Performing the eigenvalue decomposition
@@ -171,12 +175,11 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     // the eigenvalues
     std::vector<unsigned int> idx(eigenvalues.size());
     std::iota(idx.begin(), idx.end(), 0);
-    std::vector<Real>& v = eigenvalues.get_values();
+    std::vector<Real> & v = eigenvalues.get_values();
 
     // Getting the indices to be able to copy the corresponding eigenvector too.
-    std::stable_sort(idx.begin(),
-                     idx.end(),
-                     [&v](unsigned int i, unsigned int j){return v[i]>v[j];});
+    std::stable_sort(
+        idx.begin(), idx.end(), [&v](unsigned int i, unsigned int j) { return v[i] > v[j]; });
 
     // Getting a cutoff for the number of modes. The functio nrequires a sorted list,
     // thus the temporary vector is sorted.
@@ -188,37 +191,37 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     _eigenvectors[v_ind] = DenseMatrix<Real>(eigenvectors.m(), cutoff);
 
     // Copying the kept eigenvalues and eigenvectors in a sorted container.
-    for (unsigned int j=0; j<cutoff; ++j)
+    for (unsigned int j = 0; j < cutoff; ++j)
     {
       _eigenvalues[v_ind](j) = eigenvalues(j);
-      for (unsigned int k=0; k<_eigenvectors[v_ind].m(); ++k)
+      for (unsigned int k = 0; k < _eigenvectors[v_ind].m(); ++k)
       {
-        _eigenvectors[v_ind](k,j) = eigenvectors(k,idx[j]);
+        _eigenvectors[v_ind](k, j) = eigenvectors(k, idx[j]);
       }
     }
   }
 }
 
 unsigned int
-PODReducedBasisTrainer::determineNumberOfModes(Real limit, std::vector<Real>& inp_vec)
+PODReducedBasisTrainer::determineNumberOfModes(Real limit, std::vector<Real> & inp_vec)
 {
   Real sum = std::accumulate(inp_vec.begin(), inp_vec.end(), 0.0);
 
   Real part_sum = 0.0;
-  for(unsigned int i=0; i<inp_vec.size(); ++i)
+  for (unsigned int i = 0; i < inp_vec.size(); ++i)
   {
     part_sum += inp_vec[i];
-    if (part_sum/sum > limit)
-      return(i+1);
+    if (part_sum / sum > limit)
+      return (i + 1);
   }
-  return(inp_vec.size());
+  return (inp_vec.size());
 }
 
 void
 PODReducedBasisTrainer::computeBasisVectors()
 {
   // Looping over all the variables.
-  for (unsigned int v_ind=0; v_ind<_eigenvectors.size(); ++v_ind)
+  for (unsigned int v_ind = 0; v_ind < _eigenvectors.size(); ++v_ind)
   {
     unsigned int no_bases = _eigenvalues[v_ind].size();
 
@@ -227,18 +230,18 @@ PODReducedBasisTrainer::computeBasisVectors()
 
     // Filling the containers using the snapshots and the eigenvalues and
     // eigenvectors of the correlation matrices.
-    for (unsigned int j=0; j<no_bases; ++j)
+    for (unsigned int j = 0; j < no_bases; ++j)
     {
       _base[v_ind][j].resize(_snapshots[v_ind][0].size());
 
-      for (unsigned int k=0; k<_snapshots[v_ind].size(); ++k)
+      for (unsigned int k = 0; k < _snapshots[v_ind].size(); ++k)
       {
         DenseVector<Real> tmp(_snapshots[v_ind][k]);
-        tmp.scale(_eigenvectors[v_ind](k,j));
+        tmp.scale(_eigenvectors[v_ind](k, j));
 
         _base[v_ind][j] += tmp;
       }
-      _base[v_ind][j] *= (1.0/sqrt(_eigenvalues[v_ind](j)));
+      _base[v_ind][j] *= (1.0 / sqrt(_eigenvalues[v_ind](j)));
     }
   }
 }
@@ -246,7 +249,7 @@ PODReducedBasisTrainer::computeBasisVectors()
 void
 PODReducedBasisTrainer::initReducedOperators()
 {
-  if(!_base_completed)
+  if (!_base_completed)
     mooseError("There are no basis vectors available."
                " This might indicate that a residual transfer is called before"
                " the base generation procedure is finished.");
@@ -258,9 +261,9 @@ PODReducedBasisTrainer::initReducedOperators()
   unsigned int base_num = getSumBaseSize();
 
   // Initializing each operator (each operator with a tag).
-  for(unsigned int tag_i=0; tag_i<_red_operators.size(); ++tag_i)
+  for (unsigned int tag_i = 0; tag_i < _red_operators.size(); ++tag_i)
   {
-    if(_independent[tag_i])
+    if (_independent[tag_i])
       _red_operators[tag_i].resize(base_num, 1);
     else
       _red_operators[tag_i].resize(base_num, base_num);
@@ -270,14 +273,14 @@ PODReducedBasisTrainer::initReducedOperators()
 void
 PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
                                              unsigned int tag_i,
-                                             std::vector<DenseVector<Real>>& residual)
+                                             std::vector<DenseVector<Real>> & residual)
 {
   // Computing the elements of the reduced operator using Galerkin projection
   // on the residual.
   unsigned int counter = 0;
-  for (unsigned int var_i=0; var_i<_var_names.size(); ++var_i)
+  for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
   {
-    for (unsigned int base_j=0; base_j<_base[var_i].size(); ++base_j)
+    for (unsigned int base_j = 0; base_j < _base[var_i].size(); ++base_j)
     {
       _red_operators[tag_i](counter, base_i) = residual[var_i].dot(_base[var_i][base_j]);
       counter++;
@@ -290,28 +293,28 @@ PODReducedBasisTrainer::getSumBaseSize()
 {
   unsigned int sum = 0;
 
-  for (unsigned int i=0; i<_base.size(); ++i)
+  for (unsigned int i = 0; i < _base.size(); ++i)
     sum += _base[i].size();
 
   return sum;
 }
 
-const DenseVector<Real>&
+const DenseVector<Real> &
 PODReducedBasisTrainer::getBasisVector(unsigned int v_ind, unsigned int b_ind) const
 {
   return _base[v_ind][b_ind];
 }
 
-const DenseVector<Real>&
+const DenseVector<Real> &
 PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
 {
   unsigned int counter = 0;
   unsigned int var_counter = 0;
   unsigned int base_counter = 0;
   bool found = false;
-  for (unsigned int v_ind=0; v_ind < _var_names.size(); ++v_ind)
+  for (unsigned int v_ind = 0; v_ind < _var_names.size(); ++v_ind)
   {
-    for (unsigned int b_ind=0; b_ind < _base[v_ind].size(); ++b_ind)
+    for (unsigned int b_ind = 0; b_ind < _base[v_ind].size(); ++b_ind)
     {
       if (g_index == counter)
       {
@@ -321,7 +324,7 @@ PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
         break;
       }
     }
-    if(found)
+    if (found)
       break;
   }
   return _base[var_counter][base_counter];
@@ -333,9 +336,9 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
   unsigned int counter = 0;
   unsigned int var_counter = 0;
   bool found = false;
-  for (unsigned int v_ind=0; v_ind < _var_names.size(); ++v_ind)
+  for (unsigned int v_ind = 0; v_ind < _var_names.size(); ++v_ind)
   {
-    for (unsigned int b_ind=0; b_ind < _base[v_ind].size(); ++b_ind)
+    for (unsigned int b_ind = 0; b_ind < _base[v_ind].size(); ++b_ind)
     {
       if (g_index == counter)
       {
@@ -344,7 +347,7 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
         break;
       }
     }
-    if(found)
+    if (found)
       break;
   }
   return var_counter;

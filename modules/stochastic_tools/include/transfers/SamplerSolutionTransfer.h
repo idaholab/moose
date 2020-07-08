@@ -30,7 +30,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-
   /** Name of the trainer object which contains the container for the solutions
    * of the subapp or contains the artificial solution vectors.
    */
@@ -55,6 +54,4 @@ protected:
   virtual void executeToMultiapp() override;
   virtual void finalizeToMultiapp() override;
   ///@}
-
-
 };

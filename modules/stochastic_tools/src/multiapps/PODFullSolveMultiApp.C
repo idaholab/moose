@@ -22,16 +22,16 @@ PODFullSolveMultiApp::validParams()
   params.addClassDescription(
       "Creates a full-solve type sub-application for each row of each Sampler matrix. "
       "Additionally, this runs subapplications with artificial solutions at final time.");
-  params.addRequiredParam<std::string>("trainer_name", "Trainer object that contains the solutions for different samples.");
+  params.addRequiredParam<std::string>(
+      "trainer_name", "Trainer object that contains the solutions for different samples.");
 
   return params;
 }
 
 PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
-  :
-  SamplerFullSolveMultiApp(parameters),
-  _trainer_name(getParam<std::string>("trainer_name")),
-  _snapshot_generation(true)
+  : SamplerFullSolveMultiApp(parameters),
+    _trainer_name(getParam<std::string>("trainer_name")),
+    _snapshot_generation(true)
 {
   // Initializing the subapps
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
@@ -43,13 +43,10 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
   // Getting a pointer to the requested trainer object
   std::vector<PODReducedBasisTrainer *> obj;
 
-  _fe_problem.theWarehouse()
-               .query()
-               .condition<AttribName>(_trainer_name)
-               .queryInto(obj);
+  _fe_problem.theWarehouse().query().condition<AttribName>(_trainer_name).queryInto(obj);
 
   if (obj.empty())
-    paramError("trainer_name", "Unable to find Trainer with name '"+ _trainer_name + "'!");
+    paramError("trainer_name", "Unable to find Trainer with name '" + _trainer_name + "'!");
 
   _trainer = obj[0];
 }
@@ -112,7 +109,7 @@ PODFullSolveMultiApp::computeResidual()
   mooseCheckMPIErr(ierr);
 
   // Getting the necessary tag names.
-  const std::vector<std::string>& trainer_tags = _trainer->getTagNames();
+  const std::vector<std::string> & trainer_tags = _trainer->getTagNames();
 
   // Looping over the subapplications and computing residuals.
   for (unsigned int i = 0; i < _my_num_apps; i++)
@@ -122,15 +119,14 @@ PODFullSolveMultiApp::computeResidual()
 
     // Extracting the TagIDs based on tag names from the current subapp.
     std::set<TagID> tags_to_compute;
-    for (auto& tag_name : trainer_tags)
+    for (auto & tag_name : trainer_tags)
       tags_to_compute.insert(problem.getVectorTagID(tag_name));
 
     problem.computeResidualTags(tags_to_compute);
   }
 }
 
-void
-PODFullSolveMultiApp::computeResidualBatch(Real /*target_time*/)
+void PODFullSolveMultiApp::computeResidualBatch(Real /*target_time*/)
 {
   mooseError("Batch mode is not implemented yet for PODFullSolveMultiApp!");
 }

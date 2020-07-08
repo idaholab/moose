@@ -17,7 +17,6 @@
 class PODReducedBasisTrainer : public SurrogateTrainer
 {
 public:
-
   static InputParameters validParams();
 
   PODReducedBasisTrainer(const InputParameters & parameters);
@@ -34,36 +33,35 @@ public:
   void initReducedOperators();
 
   /// Adding a snapshot for a variable.
-  void addSnapshot(unsigned int v_ind, DenseVector<Real>& snapshot);
+  void addSnapshot(unsigned int v_ind, DenseVector<Real> & snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
   void addToReducedOperator(unsigned int base_i,
                             unsigned int tag_i,
-                            std::vector<DenseVector<Real>>& residual);
+                            std::vector<DenseVector<Real>> & residual);
 
-  const std::vector<std::string>& getVarNames() const {return _var_names;}
+  const std::vector<std::string> & getVarNames() const { return _var_names; }
 
-  const std::vector<std::string>& getTagNames() const {return _tag_names;}
+  const std::vector<std::string> & getTagNames() const { return _tag_names; }
 
-  const std::vector<unsigned int>& getIndependent() const {return _independent;}
+  const std::vector<unsigned int> & getIndependent() const { return _independent; }
 
   /// Getting the base size for a given variable.
-  unsigned int getBaseSize(unsigned int v_ind) {return _base[v_ind].size();}
+  unsigned int getBaseSize(unsigned int v_ind) { return _base[v_ind].size(); }
 
   /// Getting the overall base size, which is the sum of the individial bases.
   unsigned int getSumBaseSize();
 
   /// Getting a basis vector for a given variable.
-  const DenseVector<Real>& getBasisVector(unsigned int v_index, unsigned int base_i) const;
+  const DenseVector<Real> & getBasisVector(unsigned int v_index, unsigned int base_i) const;
 
   /// Getting basis vector based on its global index.
-  const DenseVector<Real>& getBasisVector(unsigned int g_index) const;
+  const DenseVector<Real> & getBasisVector(unsigned int g_index) const;
 
   /// Getting appropriate variable index for a global base index.
   unsigned int getVariableIndex(unsigned int g_index);
 
 protected:
-
   /// Computes the correlation matrices using the snapshots.
   void computeCorrelationMatrix();
 
@@ -76,19 +74,19 @@ protected:
 
   /// Vector containing the names of the variables we want to use for constructing
   /// the surrogates.
-  std::vector<std::string>& _var_names;
+  std::vector<std::string> & _var_names;
 
   /// Energy limits that define how many basis functions will be kept for each variable.
   std::vector<Real> _en_limits;
 
   /// Names of the tags that should be used to fetch residuals from the MultiApp.
-  std::vector<std::string>& _tag_names;
+  std::vector<std::string> & _tag_names;
 
   /// Tag names that show which tags correspond to dirichlet boundaries.
-  std::vector<std::string>& _dir_tag_names;
+  std::vector<std::string> & _dir_tag_names;
 
   /// list of bools describing which tag is indepedent of the solution.
-  std::vector<unsigned int>& _independent;
+  std::vector<unsigned int> & _independent;
 
   /// The snapshot containers for each variable.
   std::vector<std::vector<DenseVector<Real>>> _snapshots;
@@ -103,10 +101,10 @@ protected:
   std::vector<DenseMatrix<Real>> _eigenvectors;
 
   /// The reduced basis for the variables.
-  std::vector<std::vector<DenseVector<Real>>>& _base;
+  std::vector<std::vector<DenseVector<Real>>> & _base;
 
   /// The reduced operators that should be transferred to the surrogate.
-  std::vector<DenseMatrix<Real>>& _red_operators;
+  std::vector<DenseMatrix<Real>> & _red_operators;
 
   /// Switch that tells if the object has already computed the necessary basis
   /// vectors. This switch is used in execute() to determine if we want to compute
@@ -114,9 +112,7 @@ protected:
   bool _base_completed;
 
 private:
-
   /// Computes the number of bases necessary for a given error indicator. This
   /// needs a sorted vector as input.
-  unsigned int determineNumberOfModes(Real limit, std::vector<Real>& inp_vec);
-
+  unsigned int determineNumberOfModes(Real limit, std::vector<Real> & inp_vec);
 };
