@@ -11,13 +11,17 @@ InputParameters
 SubChannelMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
-  params.addParam<unsigned int>("nx", 1, "Number of channels in the x direction");
-  params.addParam<unsigned int>("ny", 1, "Number of channels in the x direction");
-  params.addParam<Real>("max_dz", 0.1, "The maximum element height in meters");
-  params.addParam<Real>("pitch", 0.1, "pitch in meters");
-  params.addParam<Real>("rod_diameter", 1.0, "Rod Diameter in meters");
-  params.addParam<Real>("gap", 1.0, "half gap between assemblies in meters");
-  params.addParam<Real>("heated_length", 3.658, " heated length in meters");
+  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction");
+  params.addRequiredParam<unsigned int>("ny", "Number of channels in the x direction");
+  params.addRequiredParam<Real>("max_dz", "The maximum element height in meters");
+  params.addRequiredParam<Real>("pitch", "pitch in meters");
+  params.addRequiredParam<Real>("rod_diameter", "Rod Diameter in meters");
+  params.addRequiredParam<Real>("gap", "half gap between assemblies in meters");
+  params.addRequiredParam<Real>("heated_length", " heated length in meters");
+  params.addRequiredParam<std::vector<Real>>("spacer_z",
+                                             " axial location of spacers/vanes/mixing_vanes [m]");
+  params.addRequiredParam<std::vector<Real>>(
+      "spacer_k", " K-loss coefficient of spacers/vanes/mixing_vanes [unitless]");
   return params;
 }
 
@@ -31,56 +35,25 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
     _rod_diameter(getParam<Real>("rod_diameter")),
     _gap(getParam<Real>("gap")),
     _heated_length(getParam<Real>("heated_length")),
+    _spacer_z(getParam<std::vector<Real>>("spacer_z")),
+    _spacer_k(getParam<std::vector<Real>>("spacer_k")),
     _max_dz(getParam<Real>("max_dz"))
 {
-  // TODO: parameterize
-  std::vector<Real> spacer_z({0,
-                              0.229,
-                              0.457,
-                              0.686,
-                              0.914,
-                              1.143,
-                              1.372,
-                              1.600,
-                              1.829,
-                              2.057,
-                              2.286,
-                              2.515,
-                              2.743,
-                              2.972,
-                              3.200,
-                              3.429});
-  std::vector<Real> spacer_K({1.06,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77,
-                              1.41,
-                              0.77});
 
   // Define the node placement along the z-axis.
   std::vector<Real> block_sizes;
-  if (spacer_z.size() > 0 && spacer_z[0] != 0)
+  if (_spacer_z.size() > 0 && _spacer_z[0] != 0)
   {
-    block_sizes.push_back(spacer_z[0]);
+    block_sizes.push_back(_spacer_z[0]);
   }
-  for (unsigned int i = 1; i < spacer_z.size(); i++)
+  for (unsigned int i = 1; i < _spacer_z.size(); i++)
   {
-    block_sizes.push_back(spacer_z[i] - spacer_z[i - 1]);
+    block_sizes.push_back(_spacer_z[i] - _spacer_z[i - 1]);
   }
   constexpr Real GRID_TOL = 1e-4;
-  if (spacer_z.size() > 0 && spacer_z.back() < 3.658 - GRID_TOL)
+  if (_spacer_z.size() > 0 && _spacer_z.back() < _heated_length - GRID_TOL)
   {
-    block_sizes.push_back(3.658 - spacer_z.back());
+    block_sizes.push_back(_heated_length - _spacer_z.back());
   }
   _z_grid.push_back(0.0);
   for (auto block_size : block_sizes)
