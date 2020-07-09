@@ -115,30 +115,34 @@ PODReducedBasisTrainer::finalize()
 }
 
 void
-PODReducedBasisTrainer::addSnapshot(unsigned int v_ind, DenseVector<Real> & snapshot)
+PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
+                                    dof_id_type g_ind,
+                                    std::unique_ptr<DenseVector<Real>>& snapshot)
 {
-  _snapshots[v_ind].push_back(snapshot);
+  _snapshots[v_ind].push_back(std::pair<dof_id_type,std::unique_ptr<DenseVector<Real>>>(g_ind, std::move(snapshot)));
 }
 
 void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
   // Looping over all the variables.
-  for (unsigned int v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+  for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
   {
-    unsigned int no_snaps = _snapshots[v_ind].size();
+    const auto no_snaps = _snapshots[v_ind].size();
 
     // Initializing the correlation matrix.
     _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
 
     // Filling the correlation matrix with the inner products between snapshots
     // and utilizing the fact the the correlation matrix is symmetric.
-    for (unsigned int j = 0; j < no_snaps; ++j)
+    // for (MooseIndex(no_snaps) j = 0; j < no_snaps; ++j)
+    for (dof_id_type j = 0; j < no_snaps; ++j)
     {
-      for (unsigned int k = 0; k < no_snaps; ++k)
+      for (dof_id_type k = 0; k < no_snaps; ++k)
       {
         if (j >= k)
-          _corr_mx[v_ind](j, k) = _snapshots[v_ind][j].dot(_snapshots[v_ind][k]);
+          _corr_mx[v_ind](j, k) =
+                 _snapshots[v_ind][j].second->dot(*_snapshots[v_ind][k].second);
       }
     }
 
@@ -232,11 +236,11 @@ PODReducedBasisTrainer::computeBasisVectors()
     // eigenvectors of the correlation matrices.
     for (unsigned int j = 0; j < no_bases; ++j)
     {
-      _base[v_ind][j].resize(_snapshots[v_ind][0].size());
+      _base[v_ind][j].resize(_snapshots[v_ind][0].second->size());
 
       for (unsigned int k = 0; k < _snapshots[v_ind].size(); ++k)
       {
-        DenseVector<Real> tmp(_snapshots[v_ind][k]);
+        DenseVector<Real> tmp(*_snapshots[v_ind][k].second);
         tmp.scale(_eigenvectors[v_ind](k, j));
 
         _base[v_ind][j] += tmp;
