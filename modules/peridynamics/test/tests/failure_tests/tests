@@ -26,5 +26,14 @@
     design = 'modules/peridynamics/SingularShapeTensorEliminatorUserObjectPD.md'
     issues = '#15393'
   [../]
-
+  [./2D_bond_status_convergence_HNOSPD]
+    type = 'Exodiff'
+    input = '2D_bond_status_convergence_HNOSPD.i'
+    exodiff = '2D_bond_status_convergence_HNOSPD.e'
+    map = false
+    requirement = 'The system shall provide a means for computing the number of peridynamic bonds that changed status during
+                   the last Picard update to check convergence of the Picard iterations.'
+    design = 'modules/peridynamics/BondStatusConvergedPostprocessorPD.md'
+    issues = '#15532'
+  [../]
 []
