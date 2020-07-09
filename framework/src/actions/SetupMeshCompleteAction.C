@@ -88,7 +88,7 @@ SetupMeshCompleteAction::act()
      * file based restart and we need uniform refinements, we'll have to postpone
      * those refinements until after the solution has been read in.
      */
-    if (_app.setFileRestart() == false && _app.isRecovering() == false)
+    if (_app.getExodusFileRestart() == false && _app.isRecovering() == false)
     {
       TIME_SECTION(_uniform_refine_timer);
 

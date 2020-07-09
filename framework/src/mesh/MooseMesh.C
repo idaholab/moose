@@ -2844,13 +2844,6 @@ MooseMesh::getMesh() const
   return *_mesh;
 }
 
-ExodusII_IO *
-MooseMesh::exReader() const
-{
-  // TODO: Implement or remove
-  return nullptr;
-}
-
 void
 MooseMesh::printInfo(std::ostream & os) const
 {

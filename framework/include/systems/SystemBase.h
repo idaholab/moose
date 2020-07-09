@@ -823,6 +823,9 @@ public:
   /// caches the dof indices of provided variables in MooseMesh's FaceInfo data structure
   void cacheVarIndicesByFace(const std::vector<VariableName> & vars);
 
+  /// Whether or not there are variables to be restarted from an Exodus mesh file
+  bool hasVarCopy() const { return _var_to_copy.size() > 0; }
+
 protected:
   /**
    * Internal getters for the states of the solution as owned by libMesh.
