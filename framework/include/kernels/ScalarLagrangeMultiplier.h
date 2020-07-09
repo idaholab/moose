@@ -12,25 +12,22 @@
 #include "Kernel.h"
 
 /**
- * This Kernel is part of a test [0] that solves the constrained
- * Neumann problem:
+ * This Kernel implements part of the equation that enforces the constraint
+ * of
  *
- * -\nabla^2 \phi = f
- * -\partial u / \partial n = g
  * \int \phi = V_0
  *
  * where V_0 is a given constant, using a Lagrange multiplier
- * approach. Without the integral constraint, this problem is not
- * well-posed since it has only flux boundary conditions.
+ * approach.
  *
  * In particular, this Kernel implements the residual contribution for
  * the lambda term in Eq. (5), and the Jacobian contributions
  * corresponding to (9) and (10) in our detailed description [1] of
  * the problem.
  *
- * See also: test/src/scalarkernels/PostprocessorCED.C
+ * See also: test/src/scalarkernels/AverageValueConstraint.C
  * [0]: kernels/scalar_constraints/scalar_constraint_kernel.i
- * [1]: https://github.com/idaholab/large_media/blob/master/scalar_constraint_kernel.pdf
+ * [1]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
  */
 class ScalarLagrangeMultiplier : public Kernel
 {
@@ -46,6 +43,9 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  /// Lagrange multiplier variable ID
   unsigned int _lambda_var;
+
+  /// Lagrange multiplier variable value
   VariableValue & _lambda;
 };
