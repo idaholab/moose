@@ -10,7 +10,7 @@ time rate of the strain energy density (see [`StrainEnergyDensity`](/StrainEnerg
   \label{eqn:sed_integral_def}
   \dot{u} = \int \boldsymbol{\sigma} : \textrm{d}\dot{\boldsymbol{\epsilon}}
 \end{equation}
-where $\boldsymbol{\sigma}$ is the stress tensor and $\dot{\boldsymbol{\epsilon}}$ is the strain rate. This expression is multiplied by $\frac{n}{n+1}$ when the input argument `n_exponent` is supplied. This factor decreases the strain energy rate density to better capture the strain rate field around a crack under steady-state creep growth. 
+where $\boldsymbol{\sigma}$ is the stress tensor and $\dot{\boldsymbol{\epsilon}}$ is the strain rate. This expression is multiplied by $\frac{n}{n+1}$ when the input argument `n_exponent` is supplied. This factor decreases the strain energy rate density to better capture the strain rate field around a crack under steady-state creep growth. This factor is primarily used to compute the C(t) integral, see [`FractureIntegrals`](/FractureIntegrals.md).
 
 In the tensor mechanics module we define the strain rate as the sum of the
 elastic and inelastic (e.g. plastic, creep) strain rates.

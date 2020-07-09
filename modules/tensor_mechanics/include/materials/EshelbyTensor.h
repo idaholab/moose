@@ -37,7 +37,7 @@ protected:
   const MaterialProperty<Real> * _serd;
 
   MaterialProperty<RankTwoTensor> & _eshelby_tensor;
-  MaterialProperty<RankTwoTensor> & _eshelby_tensor_rate;
+  MaterialProperty<RankTwoTensor> * _eshelby_tensor_dissipation;
 
   /// The stress tensor
   const MaterialProperty<RankTwoTensor> & _stress;

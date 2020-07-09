@@ -14,7 +14,7 @@
 #include "RankTwoTensorForward.h"
 
 /**
- * StrainEnergyRateDensity calculates the strain energy density.
+ * StrainEnergyRateDensity calculates the strain energy rate density.
  */
 class StrainEnergyRateDensity : public DerivativeMaterialInterface<Material>
 {

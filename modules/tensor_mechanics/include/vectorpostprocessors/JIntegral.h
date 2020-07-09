@@ -55,7 +55,7 @@ protected:
   const MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
 
   /// Eshelby tensor rate for computing the C(t) integral
-  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor_rate;
+  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor_dissipation;
 
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;

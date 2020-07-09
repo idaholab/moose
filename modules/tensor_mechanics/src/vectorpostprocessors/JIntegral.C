@@ -67,9 +67,9 @@ JIntegral::JIntegral(const InputParameters & parameters)
     _Eshelby_tensor(_output_type != OutputType::C
                         ? &getMaterialProperty<RankTwoTensor>("Eshelby_tensor")
                         : nullptr),
-    _Eshelby_tensor_rate(_output_type == OutputType::C
-                             ? &getMaterialProperty<RankTwoTensor>("Eshelby_tensor_rate")
-                             : nullptr),
+    _Eshelby_tensor_dissipation(_output_type == OutputType::C ? &getMaterialProperty<RankTwoTensor>(
+                                                                    "Eshelby_tensor_dissipation")
+                                                              : nullptr),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
@@ -142,7 +142,7 @@ JIntegral::computeQpIntegral(const std::size_t crack_front_point_index,
   if (_output_type != OutputType::C)
     eq = (*_Eshelby_tensor)[_qp].doubleContraction(grad_of_vector_q);
   else
-    eq = (*_Eshelby_tensor_rate)[_qp].doubleContraction(grad_of_vector_q);
+    eq = (*_Eshelby_tensor_dissipation)[_qp].doubleContraction(grad_of_vector_q);
 
   // Thermal component
   Real eq_thermal = 0.0;
