@@ -39,6 +39,13 @@
 
       detail = 'so that construction order does not influence the outcome of the tests, and'
     []
+    [ad_construction]
+      type = 'Exodiff'
+      input = 'ad_construction_order.i'
+      exodiff = 'ad_construction_order_out.e'
+
+      detail = 'so that construction order does not influence the outcome of the tests when using automatic differentiation, and'
+    []
 
     [execution]
       type = 'RunApp'

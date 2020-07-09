@@ -51,3 +51,4 @@ protected:
 };
 
 typedef DerivativeSumMaterialTempl<false> DerivativeSumMaterial;
+typedef DerivativeSumMaterialTempl<true> ADDerivativeSumMaterial;
