@@ -87,8 +87,7 @@ public:
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
-  Real slaveGapOffset(const Node * node);
-  Real mappedMasterGapOffset(const Node * node);
+  Real gapOffset(const Node * node);
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
   Real getTangentialPenalty(PenetrationInfo & pinfo);

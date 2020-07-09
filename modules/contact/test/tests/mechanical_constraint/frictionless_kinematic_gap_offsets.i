@@ -18,7 +18,7 @@
   [../]
   [./accum_slip_y]
   [../]
-  [./master_gap_offset]
+  [./primary_gap_offset]
   [../]
   [./secondary_gap_offset]
   [../]
@@ -67,16 +67,16 @@
     accumulate_from_variable = inc_slip_y
     execute_on = timestep_end
   [../]
-  [./master_gap_offset]
+  [./primary_gap_offset]
     type = ConstantAux
-    variable = master_gap_offset
+    variable = primary_gap_offset
     value = -0.01
     boundary = 2
   [../]
   [./mapped_primary_gap_offset]
     type = GapValueAux
     variable = mapped_primary_gap_offset
-    paired_variable = master_gap_offset
+    paired_variable = primary_gap_offset
     boundary = 3
     paired_boundary = 2
   [../]

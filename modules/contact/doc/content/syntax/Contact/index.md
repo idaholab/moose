@@ -90,7 +90,7 @@ The `system` parameter is deprecated and currently defaults to `Constraint`.
 
 ## Gap offset parameters
 
-Gap offset can be provided to the current contact formulation enforced using the [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md). It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). This could be useful to model contact in such as plates or shells. However, the offsetted gap is treated as rigid region without deformation.
+Gap offset can be provided to the current contact formulation enforced using the [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md). It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). Use of these gap offset parameters treats the surfaces as if they were virtually extended (positive offset value) or narrowed (negative offset value) by the specified amount, so that the surfaces are treated as if they are closer or further away than they actually are. There is no deformation within the material in this gap offset region.
 
 ## Example Input syntax id=example
 
