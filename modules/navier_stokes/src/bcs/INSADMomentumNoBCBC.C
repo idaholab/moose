@@ -43,8 +43,8 @@ INSADMomentumNoBCBC::INSADMomentumNoBCBC(const InputParameters & parameters)
 {
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.setViscousForm(_form);
-  obj_tracker.setIntegratePByParts(_integrate_p_by_parts);
+  obj_tracker.set("viscous_form", _form);
+  obj_tracker.set("integrate_p_by_parts", _integrate_p_by_parts);
 }
 
 ADReal

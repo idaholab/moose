@@ -139,15 +139,19 @@
   []
 
   [temp_advection]
-    type = INSADTemperatureAdvection
+    type = INSADEnergyAdvection
     variable = temp
-    velocity = velocity
   []
   [temp_conduction]
     type = ADHeatConduction
     variable = temp
     thermal_conductivity = 'k'
   [../]
+  [temp_supg]
+    type = INSADEnergySUPG
+    variable = temp
+    velocity = velocity
+  []
 []
 
 [Materials]
@@ -163,8 +167,9 @@
     prop_values = '900'
   [../]
   [ins_mat]
-    type = INSADTauMaterial
+    type = INSADStabilized3Eqn
     velocity = velocity
     pressure = p
+    temperature = temp
   []
 []

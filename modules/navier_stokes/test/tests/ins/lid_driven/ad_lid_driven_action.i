@@ -28,53 +28,15 @@
     laplace = true
     family = LAGRANGE
     order = SECOND
+
+    temperature_variable = 'T'
+    add_temperature_equation = true
+    initial_temperature = 1
+    fixed_temperature_boundary = 'bottom top'
+    temperature_function = '1 0'
   []
 []
 
-[Variables]
-  [T]
-    order = SECOND
-    family = LAGRANGE
-    initial_condition = 1
-  []
-[]
-
-[Kernels]
-  [temperature_time]
-    type = ADHeatConductionTimeDerivative
-    variable = T
-    specific_heat = 'cp'
-    density_name = 'rho'
-  []
-
-  [temperature_advection]
-    type = INSADTemperatureAdvection
-    variable = T
-    velocity = velocity
-  []
-
-  [temperature_conduction]
-    type = ADHeatConduction
-    variable = T
-    thermal_conductivity = 'k'
-  []
-[]
-
-[BCs]
-  [T_hot]
-    type = DirichletBC
-    variable = T
-    boundary = 'bottom'
-    value = 1
-  []
-
-  [T_cold]
-    type = DirichletBC
-    variable = T
-    boundary = 'top'
-    value = 0
-  []
-[]
 
 [Materials]
   [const]

@@ -51,8 +51,8 @@ protected:
   /// The strong residual of the mass continuity equation
   ADMaterialProperty<Real> & _mass_strong_residual;
 
-  /// Strong residual corresponding to the momentum convective term
-  ADMaterialProperty<RealVectorValue> & _convective_strong_residual;
+  /// Strong residual corresponding to the momentum advective term
+  ADMaterialProperty<RealVectorValue> & _advective_strong_residual;
 
   /// Strong residual corresponding to the momentum viscous term. This is only used by stabilization
   /// kernels
@@ -67,12 +67,12 @@ protected:
   /// Strong residual corresponding to the momentum boussinesq term
   ADMaterialProperty<RealVectorValue> & _boussinesq_strong_residual;
 
+  /// Strong residual corresponding to coupled force term
+  ADMaterialProperty<RealVectorValue> & _coupled_force_strong_residual;
+
   // /// Future addition pending addition of INSADMMSKernel.
   // /// Strong residual corresponding to the mms function term
   // MaterialProperty<RealVectorValue> & _mms_function_strong_residual;
-
-  /// The strong residual of the momentum equation
-  ADMaterialProperty<RealVectorValue> & _momentum_strong_residual;
 
   /// Whether we are on the displaced mesh
   const bool _use_displaced_mesh;
@@ -81,5 +81,41 @@ protected:
   /// of freedom
   const MooseArray<ADPoint> & _ad_q_point;
 
+  /// A user object that consumes information from INSAD residual objects and feeds it into this
+  /// material
   static const INSADObjectTracker * _object_tracker;
+
+  /// Whether the simulation is transient
+  bool _has_transient;
+
+  /// Whether there is a gravity force in the momentum equation
+  bool _has_gravity;
+
+  /// Whether natural convection forces via the Boussinesq approximation are added to the momentum
+  /// equation
+  bool _has_boussinesq;
+
+  /// Whether there is a force from a coupled vector variable or vector function
+  bool _has_coupled_force;
+
+  /// The Boussinesq coefficient
+  const ADMaterialProperty<Real> * _boussinesq_alpha;
+
+  /// The temperature
+  const ADVariableValue * _temperature;
+
+  /// The reference temperature
+  const MaterialProperty<Real> * _ref_temp;
+
+  /// The viscous form of the equations. This is either "laplace" or "traction"
+  std::string _viscous_form;
+
+  /// The gravity vector
+  RealVectorValue _gravity_vector;
+
+  /// optionally copuled vector var(s)
+  std::vector<const ADVectorVariableValue *> _coupled_force_var;
+
+  /// optional vector function(s)
+  std::vector<const Function *> _coupled_force_vector_function;
 };
