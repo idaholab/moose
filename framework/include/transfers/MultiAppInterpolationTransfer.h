@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "MultiAppConservativeTransfer.h"
+#include "MooseVariableFEBase.h"
 
 #include "libmesh/mesh_base.h"
 

@@ -84,12 +84,7 @@
     new_boundary = 'boundary43'
   []
 
-  [./breakmesh]
-    type = BreakMeshByBlockGenerator
-    input = boundary43
-  [../]
-
-  uniform_refine = 2
+  uniform_refine = 3
 []
 
 [Variables]
@@ -107,6 +102,10 @@
 [AuxVariables]
   [./frommaster]
   []
+  [./frommasterelem]
+    order = constant
+    family = monomial
+  [../]
 []
 
 [BCs]
@@ -124,24 +123,10 @@
     value = 1
   [../]
 
-  [./left1]
-    type = DirichletBC
-    variable = u
-    boundary = boundary10
-    value = 0
-  [../]
-
   [./right1]
     type = DirichletBC
     variable = u
     boundary = boundary12
-    value = 0
-  [../]
-
-  [./left2]
-    type = DirichletBC
-    variable = u
-    boundary = boundary21
     value = 1
   [../]
 
@@ -152,24 +137,10 @@
     value = 0
   [../]
 
-  [./left3]
-    type = DirichletBC
-    variable = u
-    boundary = boundary32
-    value = 0
-  [../]
-
   [./right3]
     type = DirichletBC
     variable = u
     boundary = boundary34
-    value = 0
-  [../]
-
-  [./left4]
-    type = DirichletBC
-    variable = u
-    boundary = boundary43
     value = 0
   [../]
 

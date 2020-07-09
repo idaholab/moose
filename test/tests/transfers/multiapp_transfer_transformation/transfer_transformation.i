@@ -25,7 +25,7 @@
   [./boundary01]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain_id
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
     new_boundary = 'boundary01'
   []
@@ -33,7 +33,7 @@
   [./boundary10]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary01
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
     new_boundary = 'boundary10'
   []
@@ -41,7 +41,7 @@
   [./boundary12]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary10
-    master_block = '1'
+    primary_block = '1'
     paired_block = '2'
     new_boundary = 'boundary12'
   []
@@ -49,17 +49,12 @@
   [./boundary21]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary12
-    master_block = '2'
+    primary_block = '2'
     paired_block = '1'
     new_boundary = 'boundary21'
   []
 
-  [./breakmesh]
-    type = BreakMeshByBlockGenerator
-    input = boundary21
-  [../]
-
-  uniform_refine = 2
+  uniform_refine = 3
 []
 
 [Variables]
@@ -75,7 +70,7 @@
 []
 
 [AuxVariables]
-  [./material_id]
+  [./fromsubelem]
     order = constant
     family = monomial
   [../]
@@ -99,24 +94,10 @@
     value = 1
   [../]
 
-  [./left1]
-    type = DirichletBC
-    variable = u
-    boundary = boundary10
-    value = 1
-  [../]
-
   [./right1]
     type = DirichletBC
     variable = u
     boundary = boundary12
-    value = 0
-  [../]
-
-  [./left2]
-    type = DirichletBC
-    variable = u
-    boundary = boundary21
     value = 0
   [../]
 
@@ -148,7 +129,7 @@
 []
 
 [Transfers]
-  [from_sub_gap_distance]  # plate displacement in z only
+  [from_sub]
     type = MultiAppInterpolationTransfer
     direction = from_multiapp
     multi_app = sub
@@ -160,7 +141,19 @@
     exclude_gap_blocks = '1 3'
   []
 
-  [to_master]  # plate displacement in z only
+  [from_sub_elem]
+    type = MultiAppInterpolationTransfer
+    direction = from_multiapp
+    multi_app = sub
+    num_points = 4
+    shrink_gap_width = 0.2
+    shrink_mesh = 'source'
+    source_variable = 'u'
+    variable = 'fromsubelem'
+    exclude_gap_blocks = '1 3'
+  []
+
+  [from_master]
     type = MultiAppInterpolationTransfer
     direction = to_multiapp
     multi_app = sub
@@ -170,5 +163,17 @@
     source_variable = 'u'
     exclude_gap_blocks = '1 3'
     variable = 'frommaster'
+  []
+
+  [from_master_elem]
+    type = MultiAppInterpolationTransfer
+    direction = to_multiapp
+    multi_app = sub
+    num_points = 4
+    shrink_gap_width = 0.2
+    shrink_mesh = 'target'
+    source_variable = 'u'
+    exclude_gap_blocks = '1 3'
+    variable = 'frommasterelem'
   []
 []

@@ -17,6 +17,8 @@
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("MooseApp", MultiAppInterpolationTransfer);
 
 defineLegacyParams(MultiAppInterpolationTransfer);
@@ -49,12 +51,13 @@ MultiAppInterpolationTransfer::validParams()
   params.addParam<MooseEnum>("shrink_mesh", shrink_type, "Which mesh we want to shrink");
 
   params.addParam<std::vector<SubdomainName>>(
-      "exclude_gap_blocks", "Gap subdomains we want to exclude when constructing/using virtually translated points");
+      "exclude_gap_blocks",
+      "Gap subdomains we want to exclude when constructing/using virtually translated points");
 
-  params.addParam<Real>(
-      "distance_tol",
-      1e-10,
-      "If the distance between two points is smaller than distance_tol, two points will be considered as identical");
+  params.addParam<Real>("distance_tol",
+                        1e-10,
+                        "If the distance between two points is smaller than distance_tol, two "
+                        "points will be considered as identical");
   return params;
 }
 
@@ -184,7 +187,9 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
                                       exclude_block_ids.begin(),
                                       exclude_block_ids.end(),
                                       include_block_ids.begin());
+
         include_block_ids.resize(it - include_block_ids.begin());
+        // Node is not excluded
         if (include_block_ids.size())
           translate = from_tranforms[*include_block_ids.begin()];
         else
@@ -234,7 +239,8 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
         if (subdomain == Moose::INVALID_BLOCK_ID)
           mooseError("subdomain id does not make sense", subdomain);
 
-        if (exclude_block_ids.find(subdomain) != exclude_block_ids.end())
+        // subdomain is not excluded
+        if (exclude_block_ids.find(subdomain) == exclude_block_ids.end())
           translate = from_tranforms[subdomain];
         else
           continue;
@@ -375,7 +381,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
         if (subdomain == Moose::INVALID_BLOCK_ID)
           mooseError("subdomain id does not make sense", subdomain);
 
-        if (exclude_block_ids.find(subdomain) != exclude_block_ids.end())
+        if (exclude_block_ids.find(subdomain) == exclude_block_ids.end())
           translate = to_tranforms[subdomain];
         else
           continue;
@@ -546,7 +552,6 @@ MultiAppInterpolationTransfer::computeTransformation(
   comm().sum(subdomain_centers);
 
   comm().sum(nelems);
-
 
   subdomain_centers[max_subdomain_id] /= nelems[max_subdomain_id];
 
