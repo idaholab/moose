@@ -15,6 +15,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
+#include "ElementIDInterface.h"
 
 class InternalSideUserObject;
 
@@ -29,7 +30,8 @@ class InternalSideUserObject : public UserObject,
                                public TwoMaterialPropertyInterface,
                                public NeighborCoupleable,
                                public MooseVariableDependencyInterface,
-                               public TransientInterface
+                               public TransientInterface,
+                               public ElementIDInterface
 {
 public:
   static InputParameters validParams();

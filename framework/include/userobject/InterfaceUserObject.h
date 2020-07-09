@@ -15,6 +15,7 @@
 #include "NeighborCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "TransientInterface.h"
+#include "ElementIDInterface.h"
 
 /**
  *  Base class for implementing interface user objects
@@ -24,7 +25,8 @@ class InterfaceUserObject : public UserObject,
                             public TwoMaterialPropertyInterface,
                             public NeighborCoupleable,
                             public MooseVariableDependencyInterface,
-                            public TransientInterface
+                            public TransientInterface,
+                            public ElementIDInterface
 {
 public:
   static InputParameters validParams();
