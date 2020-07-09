@@ -117,9 +117,10 @@ PODReducedBasisTrainer::finalize()
 void
 PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
                                     dof_id_type g_ind,
-                                    std::unique_ptr<DenseVector<Real>>& snapshot)
+                                    std::unique_ptr<DenseVector<Real>> & snapshot)
 {
-  _snapshots[v_ind].push_back(std::pair<dof_id_type,std::unique_ptr<DenseVector<Real>>>(g_ind, std::move(snapshot)));
+  _snapshots[v_ind].push_back(
+      std::pair<dof_id_type, std::unique_ptr<DenseVector<Real>>>(g_ind, std::move(snapshot)));
 }
 
 void
@@ -141,8 +142,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       for (dof_id_type k = 0; k < no_snaps; ++k)
       {
         if (j >= k)
-          _corr_mx[v_ind](j, k) =
-                 _snapshots[v_ind][j].second->dot(*_snapshots[v_ind][k].second);
+          _corr_mx[v_ind](j, k) = _snapshots[v_ind][j].second->dot(*_snapshots[v_ind][k].second);
       }
     }
 

@@ -33,9 +33,8 @@ public:
   void initReducedOperators();
 
   /// Adding a snapshot for a variable.
-  void addSnapshot(dof_id_type v_ind,
-                   dof_id_type g_ind,
-                   std::unique_ptr<DenseVector<Real>>& snapshot);
+  void
+  addSnapshot(dof_id_type v_ind, dof_id_type g_ind, std::unique_ptr<DenseVector<Real>> & snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
   void addToReducedOperator(unsigned int base_i,
