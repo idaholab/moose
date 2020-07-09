@@ -29,5 +29,7 @@ public:
                                           const bool is_self_covariance) const override;
 
   /// Used for outputting Hyper-parameter settings
-  void getHyperParameters(std::vector<std::vector<Real>> & vec) const override;
+  void
+  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
+                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 };

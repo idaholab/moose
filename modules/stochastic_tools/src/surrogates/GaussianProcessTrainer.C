@@ -47,9 +47,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    //_covariance_function(declareModelData<CovarianceFunctionBase *>("_covariance_function")),
     _covar_type(declareModelData<std::string>("_covar_type")),
-    _hyperparams(declareModelData<std::vector<std::vector<Real>>>("_hyperparams"))
+    _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
+    _hyperparam_vec_map(
+        declareModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
 
 {
   const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
@@ -153,7 +154,7 @@ GaussianProcessTrainer::initialize()
 void
 GaussianProcessTrainer::execute()
 {
-  _covariance_function->getHyperParameters(_hyperparams);
+  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);

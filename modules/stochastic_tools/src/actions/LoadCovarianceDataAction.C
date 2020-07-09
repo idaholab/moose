@@ -46,13 +46,22 @@ void
 LoadCovarianceDataAction::load(const GaussianProcess & model)
 {
 
-  const std::string & covar_type = model._covar_type;
-  const std::vector<std::vector<Real>> & hyperparams = model._hyperparams;
+  const std::string & covar_type = model.getCovarType();
+  const std::unordered_map<std::string, Real> & map = model.getHyperParamMap();
+  const std::unordered_map<std::string, std::vector<Real>> & vec_map = model.getHyperParamVecMap();
   const std::string & covar_name = model.name() + "_covar_func";
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
 
-  covar_params.set<std::vector<std::vector<Real>>>("hyperparams") = hyperparams;
+  for (auto & p : map)
+  {
+    covar_params.set<Real>(p.first) = p.second;
+  }
+
+  for (auto & p : vec_map)
+  {
+    covar_params.set<std::vector<Real>>(p.first) = p.second;
+  }
 
   std::shared_ptr<CovarianceFunctionBase> covar_model =
       _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
