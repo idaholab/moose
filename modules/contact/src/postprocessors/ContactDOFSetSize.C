@@ -66,7 +66,7 @@ ContactDOFSetSize::execute()
 
   auto && solution = _fe_problem.getNonlinearSystemBase().solution();
 
-  for (auto dof : aldit._all_dof_indices)
+  for (auto dof : aldit.getDofIndices())
     if (solution(dof) > _tolerance)
       ++_count;
 

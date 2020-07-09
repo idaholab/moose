@@ -236,7 +236,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           ConstElemRange & elem_range = *problem.mesh().getActiveLocalElementRange();
           Threads::parallel_reduce(elem_range, aldit);
 
-          _transferred_dofs = aldit._all_dof_indices;
+          _transferred_dofs = aldit.getDofIndices();
         }
 
         // Disable/enable output for sub cycling

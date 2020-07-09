@@ -38,7 +38,7 @@ public:
 
   void join(const AllLocalDofIndicesThread & y);
 
-  std::set<dof_id_type> _all_dof_indices;
+  const std::set<dof_id_type> & getDofIndices() const { return _all_dof_indices; }
 
 protected:
   System & _sys;
@@ -50,4 +50,6 @@ protected:
   const bool _include_semilocal;
 
   THREAD_ID _tid;
+
+  std::set<dof_id_type> _all_dof_indices;
 };
