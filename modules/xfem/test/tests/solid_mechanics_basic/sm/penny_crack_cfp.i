@@ -67,7 +67,7 @@
 []
 
 [DomainIntegral]
-  integrals = 'Jintegral'
+  integrals = 'KFromJIntegral'
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
@@ -79,7 +79,6 @@
   block = 0
   crack_front_points_provider = circle_cut_uo
   number_points_from_provider = 10
-  output_type = K
   closed_loop = true
   incremental = true
   solid_mechanics = true
