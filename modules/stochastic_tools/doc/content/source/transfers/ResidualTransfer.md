@@ -11,8 +11,8 @@ input file.
 
 !listing modules/stochastic_tools/test/tests/surrogates/rb_pod/internal/trainer.i block=Transfers/res
 
-!syntax parameters /MultiApps/ResidualTransfer
+!syntax parameters /Transfers/ResidualTransfer
 
-!syntax inputs /MultiApps/ResidualTransfer
+!syntax inputs /Transfers/ResidualTransfer
 
-!syntax children /MultiApps/ResidualTransfer
+!syntax children /Transfers/ResidualTransfer
