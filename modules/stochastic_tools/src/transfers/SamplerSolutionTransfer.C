@@ -88,11 +88,11 @@ SamplerSolutionTransfer::execute()
           const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
           // Initializing a temporary vector for the partial solution.
-          DenseVector<Real> tmp;
-          solution.get(var_dofs, tmp.get_values());
+          std::unique_ptr<DenseVector<Real>> tmp = std::make_unique<DenseVector<Real>>();
+          solution.get(var_dofs, tmp->get_values());
 
           // Copying the temporary vector into the trainer.
-          _trainer->addSnapshot(v_index, tmp);
+          _trainer->addSnapshot(v_index, i, tmp);
         }
       }
       break;

@@ -33,7 +33,9 @@ public:
   void initReducedOperators();
 
   /// Adding a snapshot for a variable.
-  void addSnapshot(unsigned int v_ind, DenseVector<Real> & snapshot);
+  void addSnapshot(dof_id_type v_ind,
+                   dof_id_type g_ind,
+                   std::unique_ptr<DenseVector<Real>>& snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
   void addToReducedOperator(unsigned int base_i,
@@ -89,7 +91,7 @@ protected:
   std::vector<unsigned int> & _independent;
 
   /// The snapshot containers for each variable.
-  std::vector<std::vector<DenseVector<Real>>> _snapshots;
+  std::vector<std::vector<std::pair<dof_id_type, std::unique_ptr<DenseVector<Real>>>>> _snapshots;
 
   /// The correlation matrices for the variables.
   std::vector<DenseMatrix<Real>> _corr_mx;
