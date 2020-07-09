@@ -40,7 +40,21 @@ MultiAppInterpolationTransfer::validParams()
                         "Radius to use for radial_basis interpolation.  If negative "
                         "then the radius is taken as the max distance between "
                         "points.");
+  params.addParam<Real>(
+      "shrink_gap_width",
+      0,
+      "gap width with which we want to temporarily shrink mesh in transfering solution");
 
+  MooseEnum shrink_type("SOURCE TARGET", "SOURCE");
+  params.addParam<MooseEnum>("shrink_mesh", shrink_type, "Which mesh we want to shrink");
+
+  params.addParam<std::vector<SubdomainName>>(
+      "exclude_gap_blocks", "Gap subdomains we want to exclude when constructing/using virtually translated points");
+
+  params.addParam<Real>(
+      "distance_tol",
+      1e-10,
+      "If the distance between two points is smaller than distance_tol, two points will be considered as identical");
   return params;
 }
 
@@ -49,7 +63,11 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),
-    _radius(getParam<Real>("radius"))
+    _radius(getParam<Real>("radius")),
+    _shrink_gap_width(getParam<Real>("shrink_gap_width")),
+    _shrink_mesh(getParam<MooseEnum>("shrink_mesh")),
+    _exclude_gap_blocks(getParam<std::vector<SubdomainName>>("exclude_gap_blocks")),
+    _distance_tol(getParam<Real>("distance_tol"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
@@ -61,8 +79,10 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
     paramError("source_variable", " Support single from-variable only ");
 }
 
-subdomain_id_type
-MultiAppInterpolationTransfer::subdomainIDNode(MooseMesh & mesh, Node & node)
+void
+MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
+                                                Node & node,
+                                                std::set<subdomain_id_type> & subdomainids)
 {
   // We need this map to figure out to which subdomains a given mesh point is attached
   auto & node_to_elem = mesh.nodeToElemMap();
@@ -71,17 +91,15 @@ MultiAppInterpolationTransfer::subdomainIDNode(MooseMesh & mesh, Node & node)
   if (node_to_elem_pair == node_to_elem.end())
     mooseError("Can not find elements for node ", node.id());
 
-  auto subdomain = Moose::INVALID_BLOCK_ID;
+  subdomainids.clear();
+  // Add all subdomain IDs that are attached to node
   for (auto element : node_to_elem_pair->second)
   {
     auto & elem = mesh.getMesh().elem_ref(element);
-    subdomain = elem.subdomain_id();
+    auto subdomain = elem.subdomain_id();
+
+    subdomainids.insert(subdomain);
   }
-
-  if (subdomain == Moose::INVALID_BLOCK_ID)
-    mooseError("subdomain id does not make sense", subdomain);
-
-  return subdomain;
 }
 
 void
@@ -131,13 +149,19 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
 
   // How much we want to translate mesh if users ask
   std::unordered_map<dof_id_type, Point> from_tranforms;
-
+  std::set<subdomain_id_type> exclude_block_ids;
   if (_shrink_gap_width > 0 && _shrink_mesh == "source")
+  {
     computeTransformation(*from_moose_mesh, from_tranforms);
+    auto exclude_subdomainids = from_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
+  }
 
   // The solution from the system with which the from_var is associated
   NumericVector<Number> & from_solution = *from_sys.solution;
 
+  std::set<subdomain_id_type> subdomainids;
+  std::vector<subdomain_id_type> include_block_ids;
   if (from_is_nodal)
   {
     for (const auto & from_node : from_mesh->local_node_ptr_range())
@@ -150,10 +174,24 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
 
       if (from_tranforms.size() > 0)
       {
-        auto subdomain = subdomainIDNode(*from_moose_mesh, *from_node);
-        translate = from_tranforms[subdomain];
+        subdomainIDsNode(*from_moose_mesh, *from_node, subdomainids);
+        // Check if node is excluded
+        // Node will be excluded if it is in the interior of excluded subdomains
+        include_block_ids.clear();
+        include_block_ids.resize(std::max(subdomainids.size(), exclude_block_ids.size()));
+        auto it = std::set_difference(subdomainids.begin(),
+                                      subdomainids.end(),
+                                      exclude_block_ids.begin(),
+                                      exclude_block_ids.end(),
+                                      include_block_ids.begin());
+        include_block_ids.resize(it - include_block_ids.begin());
+        if (include_block_ids.size())
+          translate = from_tranforms[*include_block_ids.begin()];
+        else
+          continue;
       }
 
+      // Push value and point to KDTree
       dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
       src_vals.push_back(from_solution(from_dof));
       src_pts.push_back(*from_node + translate + from_app_position);
@@ -196,7 +234,10 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
         if (subdomain == Moose::INVALID_BLOCK_ID)
           mooseError("subdomain id does not make sense", subdomain);
 
-        translate = from_tranforms[subdomain];
+        if (exclude_block_ids.find(subdomain) != exclude_block_ids.end())
+          translate = from_tranforms[subdomain];
+        else
+          continue;
       }
 
       for (auto & point : points)
@@ -241,8 +282,13 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
 
   // Compute transform info
   std::unordered_map<dof_id_type, Point> to_tranforms;
+  std::set<subdomain_id_type> exclude_block_ids;
   if (_shrink_gap_width > 0 && _shrink_mesh == "target")
+  {
     computeTransformation(*to_moose_mesh, to_tranforms);
+    auto exclude_subdomainids = to_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
+  }
 
   auto & to_fe_type = to_sys.variable_type(to_var_num);
   bool to_is_constant = to_fe_type.order == CONSTANT;
@@ -251,6 +297,8 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
   if (to_fe_type.order > FIRST && !to_is_nodal)
     mooseError("We don't currently support second order or higher elemental variable ");
 
+  std::set<subdomain_id_type> subdomainids;
+  std::vector<subdomain_id_type> include_block_ids;
   if (to_is_nodal)
   {
     for (const auto & node : mesh->local_node_ptr_range())
@@ -261,8 +309,21 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
       Point translate(0);
       if (to_tranforms.size() > 0)
       {
-        auto subdomain = subdomainIDNode(*to_moose_mesh, *node);
-        translate = to_tranforms[subdomain];
+        subdomainIDsNode(*to_moose_mesh, *node, subdomainids);
+        // Check if node is excluded
+        // Node will be excluded if it is in the interior of excluded subdomains
+        include_block_ids.clear();
+        include_block_ids.resize(std::max(subdomainids.size(), exclude_block_ids.size()));
+        auto it = std::set_difference(subdomainids.begin(),
+                                      subdomainids.end(),
+                                      exclude_block_ids.begin(),
+                                      exclude_block_ids.end(),
+                                      include_block_ids.begin());
+        include_block_ids.resize(it - include_block_ids.begin());
+        if (include_block_ids.size())
+          translate = to_tranforms[*include_block_ids.begin()];
+        else
+          continue;
       }
 
       std::vector<Point> pts;
@@ -314,7 +375,10 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
         if (subdomain == Moose::INVALID_BLOCK_ID)
           mooseError("subdomain id does not make sense", subdomain);
 
-        translate = to_tranforms[subdomain];
+        if (exclude_block_ids.find(subdomain) != exclude_block_ids.end())
+          translate = to_tranforms[subdomain];
+        else
+          continue;
       }
 
       unsigned int offset = 0;
@@ -438,4 +502,74 @@ MultiAppInterpolationTransfer::execute()
   }
 
   _console << "End InterpolationTransfer " << name() << std::endl;
+}
+
+void
+MultiAppInterpolationTransfer::computeTransformation(
+    MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
+{
+  auto & libmesh_mesh = mesh.getMesh();
+
+  auto & subdomainids = mesh.meshSubdomains();
+
+  subdomain_id_type max_subdomain_id = 0;
+
+  // max_subdomain_id will be used to represent the center of the entire domain
+  for (auto subdomain_id : subdomainids)
+  {
+    max_subdomain_id = max_subdomain_id > subdomain_id ? max_subdomain_id : subdomain_id;
+  }
+
+  max_subdomain_id += 1;
+
+  std::unordered_map<dof_id_type, Point> subdomain_centers;
+  std::unordered_map<dof_id_type, dof_id_type> nelems;
+
+  for (auto & elem :
+       as_range(libmesh_mesh.local_elements_begin(), libmesh_mesh.local_elements_end()))
+  {
+    // Compute center of the entire domain
+    subdomain_centers[max_subdomain_id] += elem->centroid();
+    nelems[max_subdomain_id] += 1;
+
+    auto subdomain = elem->subdomain_id();
+
+    if (subdomain == Moose::INVALID_BLOCK_ID)
+      mooseError("block is invalid");
+
+    // Centers for subdomains
+    subdomain_centers[subdomain] += elem->centroid();
+
+    nelems[subdomain] += 1;
+  }
+
+  comm().sum(subdomain_centers);
+
+  comm().sum(nelems);
+
+
+  subdomain_centers[max_subdomain_id] /= nelems[max_subdomain_id];
+
+  for (auto subdomain_id : subdomainids)
+  {
+    subdomain_centers[subdomain_id] /= nelems[subdomain_id];
+  }
+
+  // Compute unit vectors representing directions in which we want to shrink mesh
+  // The unit vectors is scaled by 'shrink_gap_width'
+  transformation.clear();
+  for (auto subdomain_id : subdomainids)
+  {
+    transformation[subdomain_id] =
+        subdomain_centers[max_subdomain_id] - subdomain_centers[subdomain_id];
+
+    auto norm = transformation[subdomain_id].norm();
+
+    // The current subdomain is the center of the entire domain,
+    // then we do not move this subdomain
+    if (norm > _distance_tol)
+      transformation[subdomain_id] /= norm;
+
+    transformation[subdomain_id] *= _shrink_gap_width;
+  }
 }

@@ -62,10 +62,21 @@ protected:
                                Point & to_app_position,
                                std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
 
-  subdomain_id_type subdomainIDNode(MooseMesh & mesh, Node & node);
+  void subdomainIDsNode(MooseMesh & mesh, Node & node, std::set<subdomain_id_type> & subdomainids);
+
+  void computeTransformation(MooseMesh & mesh,
+                             std::unordered_map<dof_id_type, Point> & transformation);
 
   unsigned int _num_points;
   Real _power;
   MooseEnum _interp_type;
   Real _radius;
+  // How much we want to shrink gap
+  Real _shrink_gap_width;
+  // Which mesh we want to shrink
+  MooseEnum _shrink_mesh;
+  // Which gap blocks want to exclude during solution transfers
+  std::vector<SubdomainName> _exclude_gap_blocks;
+  // How small we can consider two points are identical
+  Real _distance_tol;
 };

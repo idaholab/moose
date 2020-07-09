@@ -23,7 +23,7 @@
   [./boundary01]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain_id
-    master_block = '0'
+    primary_block = '0'
     paired_block = '1'
     new_boundary = 'boundary01'
   []
@@ -31,7 +31,7 @@
   [./boundary10]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary01
-    master_block = '1'
+    primary_block = '1'
     paired_block = '0'
     new_boundary = 'boundary10'
   []
@@ -39,7 +39,7 @@
   [./boundary12]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary10
-    master_block = '1'
+    primary_block = '1'
     paired_block = '2'
     new_boundary = 'boundary12'
   []
@@ -47,7 +47,7 @@
   [./boundary21]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary12
-    master_block = '2'
+    primary_block = '2'
     paired_block = '1'
     new_boundary = 'boundary21'
   []
@@ -55,7 +55,7 @@
   [./boundary23]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary21
-    master_block = '2'
+    primary_block = '2'
     paired_block = '3'
     new_boundary = 'boundary23'
   []
@@ -63,7 +63,7 @@
   [./boundary32]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary23
-    master_block = '3'
+    primary_block = '3'
     paired_block = '2'
     new_boundary = 'boundary32'
   []
@@ -71,7 +71,7 @@
   [./boundary34]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary32
-    master_block = '3'
+    primary_block = '3'
     paired_block = '4'
     new_boundary = 'boundary34'
   []
@@ -79,7 +79,7 @@
   [./boundary43]
     type = SideSetsBetweenSubdomainsGenerator
     input = boundary34
-    master_block = '4'
+    primary_block = '4'
     paired_block = '3'
     new_boundary = 'boundary43'
   []

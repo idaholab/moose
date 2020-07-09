@@ -52,10 +52,4 @@ protected:
   virtual std::vector<VariableName> getFromVarNames() const = 0;
   /// Virtual function defining variables to transfer to
   virtual std::vector<AuxVariableName> getToVarNames() const = 0;
-
-  void computeTransformation(MooseMesh & mesh,
-                             std::unordered_map<dof_id_type, Point> & transformation);
-
-  Real _shrink_gap_width;
-  MooseEnum _shrink_mesh;
 };

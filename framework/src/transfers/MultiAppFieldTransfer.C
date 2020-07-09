@@ -24,20 +24,11 @@ InputParameters
 MultiAppFieldTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
-  params.addParam<Real>(
-      "shrink_gap_width",
-      0,
-      "gap width with which we want to temporarily shrink mesh in transfering solution");
-
-  MooseEnum shrink_type("SOURCE TARGET", "SOURCE");
-  params.addParam<MooseEnum>("shrink_mesh", shrink_type, "Which mesh we want to shrink");
   return params;
 }
 
 MultiAppFieldTransfer::MultiAppFieldTransfer(const InputParameters & parameters)
-  : MultiAppTransfer(parameters),
-    _shrink_gap_width(getParam<Real>("shrink_gap_width")),
-    _shrink_mesh(getParam<MooseEnum>("shrink_mesh"))
+  : MultiAppTransfer(parameters)
 {
 }
 
@@ -50,68 +41,6 @@ MultiAppFieldTransfer::initialSetup()
   else
     for (auto & from_var : getFromVarNames())
       variableIntegrityCheck(from_var);
-}
-
-void
-MultiAppFieldTransfer::computeTransformation(
-    MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
-{
-  auto & libmesh_mesh = mesh.getMesh();
-
-  auto & subdomainids = mesh.meshSubdomains();
-
-  int max_subdomain_id = 0;
-
-  for (auto subdomain_id : subdomainids)
-  {
-    max_subdomain_id = max_subdomain_id > subdomain_id ? max_subdomain_id : subdomain_id;
-  }
-
-  max_subdomain_id += 1;
-
-  std::unordered_map<dof_id_type, Point> subdomain_centers;
-  std::unordered_map<dof_id_type, dof_id_type> nelems;
-
-  for (auto & elem :
-       as_range(libmesh_mesh.local_elements_begin(), libmesh_mesh.local_elements_end()))
-  {
-    subdomain_centers[max_subdomain_id] += elem->centroid();
-    nelems[max_subdomain_id] += 1;
-
-    auto subdomain = elem->subdomain_id();
-
-    if (subdomain == Moose::INVALID_BLOCK_ID)
-      mooseError("block is invalid");
-
-    subdomain_centers[subdomain] += elem->centroid();
-
-    nelems[subdomain] += 1;
-  }
-
-  comm().sum(subdomain_centers);
-
-  comm().sum(nelems);
-
-  subdomain_centers[max_subdomain_id] /= nelems[max_subdomain_id];
-
-  for (auto subdomain_id : subdomainids)
-  {
-    subdomain_centers[subdomain_id] /= nelems[subdomain_id];
-  }
-
-  transformation.clear();
-  for (auto subdomain_id : subdomainids)
-  {
-    transformation[subdomain_id] =
-        subdomain_centers[max_subdomain_id] - subdomain_centers[subdomain_id];
-
-    auto norm = transformation[subdomain_id].norm();
-
-    if (norm > 1e-10)
-      transformation[subdomain_id] /= norm;
-
-    transformation[subdomain_id] *= _shrink_gap_width;
-  }
 }
 
 void

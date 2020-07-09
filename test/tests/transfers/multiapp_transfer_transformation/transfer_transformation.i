@@ -157,14 +157,18 @@
     shrink_mesh = 'source'
     source_variable = 'u'
     variable = 'fromsub'
+    exclude_gap_blocks = '1 3'
   []
 
   [to_master]  # plate displacement in z only
     type = MultiAppInterpolationTransfer
     direction = to_multiapp
     multi_app = sub
-    num_points = 2
+    num_points = 1
+    shrink_gap_width = 0.2
+    shrink_mesh = 'target'
     source_variable = 'u'
+    exclude_gap_blocks = '1 3'
     variable = 'frommaster'
   []
 []
