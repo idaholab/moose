@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/ring_contact/ring_contact.e

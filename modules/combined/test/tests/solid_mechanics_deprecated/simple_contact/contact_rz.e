@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/simple_contact/contact_rz.e

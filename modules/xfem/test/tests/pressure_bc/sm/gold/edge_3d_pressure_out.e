@@ -1,1 +1,0 @@
-../../gold/edge_3d_pressure_out.e

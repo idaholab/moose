@@ -23,7 +23,6 @@
 #include "PeridynamicsTestApp.h"
 #include "PhaseFieldTestApp.h"
 #include "RichardsTestApp.h"
-#include "SolidMechanicsTestApp.h"
 #include "StochasticToolsTestApp.h"
 #include "TensorMechanicsTestApp.h"
 #include "XFEMTestApp.h"
@@ -66,7 +65,6 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
     PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
-    SolidMechanicsTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
     TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
     XFEMTestApp::registerAll(f, af, s, use_test_objs);
@@ -96,7 +94,6 @@ CombinedTestApp::registerObjects(Factory & factory)
   PeridynamicsTestApp::registerObjects(factory);
   PhaseFieldTestApp::registerObjects(factory);
   RichardsTestApp::registerObjects(factory);
-  SolidMechanicsTestApp::registerObjects(factory);
   StochasticToolsTestApp::registerObjects(factory);
   TensorMechanicsTestApp::registerObjects(factory);
   XFEMTestApp::registerObjects(factory);
@@ -117,7 +114,6 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   PeridynamicsTestApp::associateSyntax(syntax, action_factory);
   PhaseFieldTestApp::associateSyntax(syntax, action_factory);
   RichardsTestApp::associateSyntax(syntax, action_factory);
-  SolidMechanicsTestApp::associateSyntax(syntax, action_factory);
   StochasticToolsTestApp::associateSyntax(syntax, action_factory);
   TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
   XFEMTestApp::associateSyntax(syntax, action_factory);
@@ -138,7 +134,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   PeridynamicsTestApp::registerExecFlags(factory);
   PhaseFieldTestApp::registerExecFlags(factory);
   RichardsTestApp::registerExecFlags(factory);
-  SolidMechanicsTestApp::registerExecFlags(factory);
   StochasticToolsTestApp::registerExecFlags(factory);
   TensorMechanicsTestApp::registerExecFlags(factory);
   XFEMTestApp::registerExecFlags(factory);

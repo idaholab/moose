@@ -1,1 +1,0 @@
-../../gold/square_branch_tri_2d_out.e

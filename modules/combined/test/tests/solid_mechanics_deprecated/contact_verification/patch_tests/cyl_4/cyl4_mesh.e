@@ -1,1 +1,0 @@
-../../../../../../../contact/test/tests/verification/patch_tests/cyl_4/cyl4_mesh.e

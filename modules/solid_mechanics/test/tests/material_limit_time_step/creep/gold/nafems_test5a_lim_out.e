@@ -1,1 +1,0 @@
-../../../../../../tensor_mechanics/test/tests/material_limit_time_step/creep/gold/nafems_test5a_lim_out.e

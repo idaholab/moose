@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/nodal_area/nodal_area_Hex20.e
