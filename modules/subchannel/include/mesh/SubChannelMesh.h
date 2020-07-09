@@ -11,7 +11,7 @@ public:
   virtual void buildMesh() override;
   unsigned int _nx, _ny, _nz, _n_channels, _n_gaps;
   Real _pitch, _rod_diameter, _gap, _heated_length;
-  std::vector<Real> _z_grid;
+  std::vector<Real> _z_grid, _spacer_z, _spacer_k;
   std::vector<std::vector<Node *>> _nodes;
   std::vector<std::vector<Node *>> _gapnodes;
   std::vector<std::pair<unsigned int, unsigned int>> _gap_to_chan_map;
