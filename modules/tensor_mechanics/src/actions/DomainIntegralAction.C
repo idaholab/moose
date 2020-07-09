@@ -200,8 +200,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
-    Moose::out << "integral enums: " << integral_moose_enums[i] << "\n";
-
     if (isParamValid("displacements"))
     {
       _displacements = getParam<std::vector<VariableName>>("displacements");

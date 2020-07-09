@@ -75,7 +75,7 @@
 []
 
 [DomainIntegral]
-  integrals = 'JIntegral InteractionIntegralKI'
+  integrals = 'KFromJIntegral InteractionIntegralKI'
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
@@ -83,7 +83,6 @@
   axis_2d = 2
   radius_inner = '60.0 80.0 100.0 120.0'
   radius_outer = '80.0 100.0 120.0 140.0'
-  output_type = K
   symmetry_plane = 1
   incremental = true
 
