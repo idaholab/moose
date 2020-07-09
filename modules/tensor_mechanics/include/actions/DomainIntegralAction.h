@@ -35,6 +35,8 @@ protected:
   enum INTEGRAL
   {
     J_INTEGRAL,
+    C_INTEGRAL,
+    K_FROM_J_INTEGRAL,
     INTERACTION_INTEGRAL_KI,
     INTERACTION_INTEGRAL_KII,
     INTERACTION_INTEGRAL_KIII,
@@ -56,7 +58,6 @@ protected:
     K,
     C
   };
-
   /**
    * Compute the number of points on the crack front. This is either the number of
    * points in the crack front nodeset, or the number of points from the crack
@@ -129,8 +130,6 @@ protected:
   std::vector<VariableName> _displacements;
   /// Temperature variable
   VariableName _temp;
-  /// Output type: J-integral, K intensity factor, or C(t) integral
-  MooseEnum _output_type;
   /// Whether the model has a symmetry plane passing through the plane of the crack
   bool _has_symmetry_plane;
   /// Identifier for which plane is the symmetry plane

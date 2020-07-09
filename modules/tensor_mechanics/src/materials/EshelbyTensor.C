@@ -27,10 +27,11 @@ EshelbyTensor::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addParam<bool>("compute_dissipation",
-                        false,
-                        "Whether to compute Eshelby tensor's dissipation. This tensor"
-                        "yields the increase in dissipation per unit crack advanced");
+  params.addParam<bool>(
+      "compute_dissipation",
+      false,
+      "Whether to compute Eshelby tensor's dissipation (or rate of change). This tensor"
+      "yields the increase in dissipation per unit crack advanced");
   params.addCoupledVar("temperature", "Coupled temperature");
   return params;
 }
@@ -44,7 +45,10 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
               ? &getMaterialPropertyByName<Real>(_base_name + "strain_energy_rate_density")
               : nullptr),
     _eshelby_tensor(declareProperty<RankTwoTensor>(_base_name + "Eshelby_tensor")),
-    _eshelby_tensor_rate(declareProperty<RankTwoTensor>(_base_name + "Eshelby_tensor_rate")),
+    _eshelby_tensor_dissipation(
+        _compute_dissipation
+            ? &declareProperty<RankTwoTensor>(_base_name + "Eshelby_tensor_dissipation")
+            : nullptr),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _grad_disp(3),
@@ -132,7 +136,7 @@ EshelbyTensor::computeQpProperties()
     // FdotTP = Fdot^T * P = Fdot^T * detF * sigma * FinvT;
     RankTwoTensor FdotTP = F_dot.transpose() * P;
 
-    _eshelby_tensor_rate[_qp] = Wdot - FdotTP;
+    (*_eshelby_tensor_dissipation)[_qp] = Wdot - FdotTP;
   }
 
   if (_has_temp)

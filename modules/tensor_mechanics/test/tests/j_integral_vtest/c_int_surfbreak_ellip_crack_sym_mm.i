@@ -35,7 +35,7 @@
 []
 
 [DomainIntegral]
-  integrals = JIntegral
+  integrals = CIntegral
   boundary = 1001
   crack_direction_method = CurvedCrackFront
   crack_end_direction_method = CrackDirectionVector
@@ -46,7 +46,6 @@
   intersecting_boundary = '1 2'
   symmetry_plane = 2
   incremental = true
-  output_type = C
   n_exponent = 4.0
 []
 

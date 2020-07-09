@@ -28,7 +28,7 @@
 []
 
 [DomainIntegral]
-  integrals = JIntegral
+  integrals = CIntegral
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
@@ -39,7 +39,6 @@
   temperature = temp
   incremental = true
   eigenstrain_names = thermal_expansion
-  output_type = C
 []
 
 [Modules/TensorMechanics/Master]

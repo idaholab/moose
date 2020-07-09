@@ -33,8 +33,9 @@ DomainIntegralAction::validParams()
 {
   InputParameters params = Action::validParams();
   addCrackFrontDefinitionParams(params);
-  MultiMooseEnum integral_vec("JIntegral InteractionIntegralKI InteractionIntegralKII "
-                              "InteractionIntegralKIII InteractionIntegralT");
+  MultiMooseEnum integral_vec(
+      "JIntegral CIntegral KFromJIntegral InteractionIntegralKI InteractionIntegralKII "
+      "InteractionIntegralKIII InteractionIntegralT");
   params.addClassDescription(
       "Creates the MOOSE objects needed to compute fraction domain integrals");
   params.addRequiredParam<MultiMooseEnum>("integrals",
@@ -129,7 +130,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
                                       : 0.0),
     _treat_as_2d(getParam<bool>("2d")),
     _axis_2d(getParam<unsigned int>("axis_2d")),
-    _output_type(getParam<MooseEnum>("output_type")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _symmetry_plane(_has_symmetry_plane ? getParam<unsigned int>("symmetry_plane")
                                         : std::numeric_limits<unsigned int>::max()),
@@ -143,9 +143,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _n_exponent(isParamValid("n_exponent") ? getParam<Real>("n_exponent") : -1),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false)
 {
-  // Use deprecated parameter convert_J_to_K
-  if (_convert_J_to_K == true)
-    _output_type = K;
 
   if (_q_function_type == GEOMETRY)
   {
@@ -203,6 +200,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
   for (unsigned int i = 0; i < integral_moose_enums.size(); ++i)
   {
+    Moose::out << "integral enums: " << integral_moose_enums[i] << "\n";
+
     if (isParamValid("displacements"))
     {
       _displacements = getParam<std::vector<VariableName>>("displacements");
@@ -216,7 +215,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     {
       if (isParamValid("disp_x") || isParamValid("disp_y") || isParamValid("disp_z"))
         mooseDeprecated("DomainIntegral Warning: disp_x, disp_y and disp_z are deprecated. "
-                        "Please specify displacements using the `dispalcements` parameter.");
+                        "Please specify displacements using the `displacements` parameter.");
 
       if (!isParamValid("disp_x") || !isParamValid("disp_y"))
         paramError(
@@ -232,7 +231,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
       }
     }
 
-    if (integral_moose_enums[i] != "JIntegral")
+    if (integral_moose_enums[i] != "JIntegral" && integral_moose_enums[i] != "CIntegral" &&
+        integral_moose_enums[i] != "KFromJIntegral")
     {
       // Check that parameters required for interaction integrals are defined
       if (!(isParamValid("poissons_ratio")) || !(isParamValid("youngs_modulus")))
@@ -253,6 +253,19 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     }
 
     _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
+  }
+
+  if ((_integrals.count(J_INTEGRAL) != 0 && _integrals.count(C_INTEGRAL) != 0) ||
+      (_integrals.count(J_INTEGRAL) != 0 && _integrals.count(K_FROM_J_INTEGRAL) != 0) ||
+      (_integrals.count(C_INTEGRAL) != 0 && _integrals.count(K_FROM_J_INTEGRAL) != 0))
+    paramError("integrals",
+               "JIntegral, CIntegral, and KFromJIntegral options are mutually exclusive");
+
+  // Acommodate deprecated parameter convert_J_to_K
+  if (_convert_J_to_K && _integrals.count(K_FROM_J_INTEGRAL) != 0)
+  {
+    _integrals.insert(K_FROM_J_INTEGRAL);
+    _integrals.erase(J_INTEGRAL);
   }
 
   if (isParamValid("temperature"))
@@ -277,11 +290,11 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
                  "'output_variables' not yet supported with 'crack_front_points'");
   }
 
-  if (_output_type == K)
+  if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
   {
     if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
-      mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio for "
-                 "J-integral if convert_J_to_K = true.");
+      mooseError("DomainIntegral error: must set Young's modulus and Poisson's ratio "
+                 "if K_FROM_J_INTEGRAL is selected.");
     if (!youngs_modulus_set)
       _youngs_modulus = getParam<Real>("youngs_modulus");
     if (!poissons_ratio_set)
@@ -458,22 +471,21 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_postprocessor")
   {
-    MooseEnum output_type_K("K");
-    MooseEnum output_type_J("J");
-    MooseEnum output_type_C("C");
-
     for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
     {
       std::string pp_base_name;
       switch (*sit)
       {
         case J_INTEGRAL:
-          if (_output_type == K)
-            pp_base_name = "K";
-          else if (_output_type == J)
-            pp_base_name = "J";
-          else if (_output_type == C)
-            pp_base_name = "C";
+          pp_base_name = "J";
+          break;
+
+        case C_INTEGRAL:
+          pp_base_name = "C";
+          break;
+
+        case K_FROM_J_INTEGRAL:
+          pp_base_name = "K";
           break;
 
         case INTERACTION_INTEGRAL_KI:
@@ -587,18 +599,15 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_vector_postprocessor")
   {
-    MooseEnum output_type_K("K");
-    MooseEnum output_type_J("J");
-    MooseEnum output_type_C("C");
-
-    if (_integrals.count(J_INTEGRAL) != 0)
+    if (_integrals.count(J_INTEGRAL) != 0 || _integrals.count(C_INTEGRAL) != 0 ||
+        _integrals.count(K_FROM_J_INTEGRAL) != 0)
     {
       std::string vpp_base_name;
-      if (_output_type == K)
-        vpp_base_name = "K";
-      else if (_output_type == J)
+      if (_integrals.count(J_INTEGRAL) != 0)
         vpp_base_name = "J";
-      else if (_output_type == C)
+      else if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
+        vpp_base_name = "K";
+      else if (_integrals.count(C_INTEGRAL) != 0)
         vpp_base_name = "C";
 
       if (_treat_as_2d)
@@ -607,10 +616,18 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
-      params.set<MooseEnum>("output_type") = _output_type;
+
+      // Only one option is active in the postprocessor
+      if (_integrals.count(J_INTEGRAL) != 0)
+        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::J;
+      else if (_integrals.count(C_INTEGRAL) != 0)
+        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::C;
+      else if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
+        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::K;
+
       params.set<MooseEnum>("position_type") = _position_type;
 
-      if (_output_type == K)
+      if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
       {
         params.set<Real>("youngs_modulus") = _youngs_modulus;
         params.set<Real>("poissons_ratio") = _poissons_ratio;
@@ -664,6 +681,12 @@ DomainIntegralAction::act()
         switch (*sit)
         {
           case J_INTEGRAL:
+            continue;
+
+          case C_INTEGRAL:
+            continue;
+
+          case K_FROM_J_INTEGRAL:
             continue;
 
           case INTERACTION_INTEGRAL_KI:
@@ -788,11 +811,17 @@ DomainIntegralAction::act()
     }
     MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
     bool have_j_integral = false;
+    bool have_c_integral = false;
+
     for (auto ime : integral_moose_enums)
     {
-      if (ime == "JIntegral")
+      if (ime == "JIntegral" || ime == "CIntegral" || ime == "KFromJIntegral")
         have_j_integral = true;
+
+      if (ime == "CIntegral")
+        have_c_integral = true;
     }
+
     if (have_j_integral && !_solid_mechanics)
     {
       std::string mater_name;
@@ -813,17 +842,17 @@ DomainIntegralAction::act()
       _displacements = getParam<std::vector<VariableName>>("displacements");
       params2.set<std::vector<VariableName>>("displacements") = _displacements;
       params2.set<std::vector<SubdomainName>>("block") = {_blocks};
-      if (_output_type == C)
+
+      if (have_c_integral)
         params2.set<bool>("compute_dissipation") = true;
 
       if (_temp != "")
-      {
         params2.set<std::vector<VariableName>>("temperature") = {_temp};
-      }
+
       _problem->addMaterial(mater_type_name2, mater_name2, params2);
 
       // Strain energy rate density needed for C(t)/C* integral
-      if (_output_type == C)
+      if (have_c_integral)
       {
         std::string mater_name;
         const std::string mater_type_name("StrainEnergyRateDensity");
