@@ -1,1 +1,0 @@
-../../gold/penny_crack_out.e

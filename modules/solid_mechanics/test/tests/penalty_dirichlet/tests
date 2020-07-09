@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'penalty_dirichlet.i'
-    exodiff = 'out.e'
-    no_error_deprecated = true
-  [../]
-[]

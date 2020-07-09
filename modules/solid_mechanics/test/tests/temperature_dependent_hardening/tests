@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'temp_dep_hardening.i'
-    exodiff = 'temp_dep_hardening_out.e'
-    no_error_deprecated = true
-  [../]
-[]

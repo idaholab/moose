@@ -1,1 +1,0 @@
-../../gold/square_branch_quad9_2d_out.e

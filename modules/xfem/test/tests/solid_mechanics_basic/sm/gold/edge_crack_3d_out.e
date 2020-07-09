@@ -1,1 +1,0 @@
-../../gold/edge_crack_3d_out.e

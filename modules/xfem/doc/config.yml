@@ -19,7 +19,6 @@ Extensions:
             tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
-            solid_mechanics: !include modules/solid_mechanics/doc/remove.yml
         includes:
             - framework/include
             - modules/xfem/include

@@ -1,9 +1,0 @@
-[Tests]
-  [./test]
-    type = 'CSVDiff'
-    input = 'line_material_symm_tensor_sampler.i'
-    csvdiff = 'out_vonmises_0010.csv'
-    compiler = '!INTEL'
-    no_error_deprecated = true
-  [../]
-[]

@@ -1,1 +1,0 @@
-../../gold/crack_propagation_2d_out.e

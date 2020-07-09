@@ -52,9 +52,6 @@
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
 #endif
-#ifdef SOLID_MECHANICS_ENABLED
-#include "SolidMechanicsApp.h"
-#endif
 #ifdef STOCHASTIC_TOOLS_ENABLED
 #include "StochasticToolsApp.h"
 #endif
@@ -159,10 +156,6 @@ ModulesApp::registerObjects(Factory & factory)
   RichardsApp::registerObjects(factory);
 #endif
 
-#ifdef SOLID_MECHANICS_ENABLED
-  SolidMechanicsApp::registerObjects(factory);
-#endif
-
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerObjects(factory);
 #endif
@@ -234,10 +227,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RichardsApp::associateSyntax(syntax, action_factory);
 #endif
 
-#ifdef SOLID_MECHANICS_ENABLED
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
-#endif
-
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::associateSyntax(syntax, action_factory);
 #endif
@@ -305,10 +294,6 @@ ModulesApp::registerExecFlags(Factory & factory)
   RichardsApp::registerExecFlags(factory);
 #endif
 
-#ifdef SOLID_MECHANICS_ENABLED
-  SolidMechanicsApp::registerExecFlags(factory);
-#endif
-
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerExecFlags(factory);
 #endif
@@ -373,10 +358,6 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerAll(f, af, s);
-#endif
-
-#ifdef SOLID_MECHANICS_ENABLED
-  SolidMechanicsApp::registerAll(f, af, s);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED

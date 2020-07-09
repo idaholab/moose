@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/check_error/cube.e
