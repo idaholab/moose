@@ -13,8 +13,8 @@ input file.
 
 !listing modules/stochastic_tools/test/tests/surrogates/rb_pod/internal/trainer.i block=Transfers/pod_modes
 
-!syntax parameters /MultiApps/SamplerSolutionTransfer
+!syntax parameters /Transfers/SamplerSolutionTransfer
 
-!syntax inputs /MultiApps/SamplerSolutionTransfer
+!syntax inputs /Transfers/SamplerSolutionTransfer
 
-!syntax children /MultiApps/SamplerSolutionTransfer
+!syntax children /Transfers/SamplerSolutionTransfer
