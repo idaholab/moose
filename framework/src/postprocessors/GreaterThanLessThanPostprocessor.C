@@ -86,13 +86,13 @@ GreaterThanLessThanPostprocessor::execute()
 
   if (_comparator == "greater")
   {
-    for (auto dof : aldit._all_dof_indices)
+    for (auto dof : aldit.getDofIndices())
       if (solution(dof) > _value)
         ++_count;
   }
   else if (_comparator == "less")
   {
-    for (auto dof : aldit._all_dof_indices)
+    for (auto dof : aldit.getDofIndices())
       if (solution(dof) < _value)
         ++_count;
   }

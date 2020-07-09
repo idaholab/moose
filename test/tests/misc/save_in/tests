@@ -45,4 +45,12 @@
       detail = "off-diagonal terms."
     []
   []
+
+  [block-restricted-save-in]
+    type = 'Exodiff'
+    input = 'block-restricted-save-in.i'
+    exodiff = 'block-restricted-save-in_out.e'
+    requirement = 'The system shall be able to compute the same value for a block-restricted save-in variable regardless of the number of processes used to run a simulation.'
+    issues = '#12239'
+  []
 []

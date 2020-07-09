@@ -2587,8 +2587,12 @@ NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
   AllLocalDofIndicesThread aldit(_sys.system(), {var_name});
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   Threads::parallel_reduce(elem_range, aldit);
-  _communicator.set_union(aldit._all_dof_indices);
-  _var_all_dof_indices.assign(aldit._all_dof_indices.begin(), aldit._all_dof_indices.end());
+
+  // Gather the dof indices across procs to get all the dof indices for var_name
+  aldit.dofIndicesSetUnion();
+
+  const auto & all_dof_indices = aldit.getDofIndices();
+  _var_all_dof_indices.assign(all_dof_indices.begin(), all_dof_indices.end());
 }
 
 void

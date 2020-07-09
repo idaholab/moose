@@ -166,7 +166,7 @@ PicardSolve::solve()
     ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
-    relaxed_dofs = aldit._all_dof_indices;
+    relaxed_dofs = aldit.getDofIndices();
   }
 
   // Prepare to relax variables as a subapp
@@ -179,7 +179,7 @@ PicardSolve::solve()
     ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
-    self_relaxed_dofs = aldit._all_dof_indices;
+    self_relaxed_dofs = aldit.getDofIndices();
 
     if (_previous_entering_time == _problem.time())
     {

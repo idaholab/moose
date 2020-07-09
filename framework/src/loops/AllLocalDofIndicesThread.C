@@ -15,11 +15,20 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/threads.h"
 #include "libmesh/system.h"
+
+#include "timpi/communicator.h"
+
 #include LIBMESH_INCLUDE_UNORDERED_SET
 LIBMESH_DEFINE_HASH_POINTERS
 
-AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys, std::vector<std::string> vars)
-  : _sys(sys), _dof_map(sys.get_dof_map()), _vars(vars)
+AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys,
+                                                   std::vector<std::string> vars,
+                                                   bool include_semilocal)
+  : ParallelObject(sys.comm()),
+    _sys(sys),
+    _dof_map(sys.get_dof_map()),
+    _vars(vars),
+    _include_semilocal(include_semilocal)
 {
   _var_numbers.resize(_vars.size());
   for (unsigned int i = 0; i < _vars.size(); i++)
@@ -29,7 +38,12 @@ AllLocalDofIndicesThread::AllLocalDofIndicesThread(System & sys, std::vector<std
 // Splitting Constructor
 AllLocalDofIndicesThread::AllLocalDofIndicesThread(AllLocalDofIndicesThread & x,
                                                    Threads::split /*split*/)
-  : _sys(x._sys), _dof_map(x._dof_map), _vars(x._vars), _var_numbers(x._var_numbers)
+  : ParallelObject(x._sys.comm()),
+    _sys(x._sys),
+    _dof_map(x._dof_map),
+    _vars(x._vars),
+    _var_numbers(x._var_numbers),
+    _include_semilocal(x._include_semilocal)
 {
 }
 
@@ -54,8 +68,8 @@ AllLocalDofIndicesThread::operator()(const ConstElemRange & range)
       {
         dof_id_type dof = dof_indices[j];
 
-        if (dof >= local_dof_begin && dof < local_dof_end)
-          _all_dof_indices.insert(dof_indices[j]);
+        if (_include_semilocal || (dof >= local_dof_begin && dof < local_dof_end))
+          _all_dof_indices.insert(dof);
       }
     }
   }
@@ -65,4 +79,10 @@ void
 AllLocalDofIndicesThread::join(const AllLocalDofIndicesThread & y)
 {
   _all_dof_indices.insert(y._all_dof_indices.begin(), y._all_dof_indices.end());
+}
+
+void
+AllLocalDofIndicesThread::dofIndicesSetUnion()
+{
+  _communicator.set_union(_all_dof_indices);
 }
