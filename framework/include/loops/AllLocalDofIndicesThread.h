@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 
 #include "libmesh/elem_range.h"
+#include "libmesh/parallel_object.h"
 
 // Forward declare classes in libMesh
 namespace libMesh
@@ -25,7 +26,7 @@ class DofMap;
  * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed
  * in.
  */
-class AllLocalDofIndicesThread
+class AllLocalDofIndicesThread : public ParallelObject
 {
 public:
   AllLocalDofIndicesThread(System & sys,
@@ -39,6 +40,8 @@ public:
   void join(const AllLocalDofIndicesThread & y);
 
   const std::set<dof_id_type> & getDofIndices() const { return _all_dof_indices; }
+
+  void dofIndicesSetUnion();
 
 protected:
   System & _sys;
