@@ -56,7 +56,7 @@ protected:
    * @param eqvpstrain_old  The equivalent plastic strain at the previous "time" step
    * @param plastic_strain_old  The value of plastic strain at the previous "time" step
    * @param delta_d  The total strain increment for this "time" step
-   * @param E_ijkl   The elasticity tensor.  If no plasiticity then sig_new = sig_old +
+   * @param E_ijkl   The elasticity tensor.  If no plasticity then sig_new = sig_old +
    * E_ijkl*delta_d
    * @param sig      The stress after returning to the yield surface   (this is an output variable)
    * @param eqvpstrain  The equivalent plastic strain after returning to the yield surface (this is

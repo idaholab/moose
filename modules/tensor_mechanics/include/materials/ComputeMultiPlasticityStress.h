@@ -218,7 +218,7 @@ protected:
    * @param[out] intnl     All the internal variables after returning to the yield surface
    * @param plastic_strain_old The value of plastic strain at the previous "time" step
    * @param[out] plastic_strain    The value of plastic strain after returning to the yield surface
-   * @param E_ijkl   The elasticity tensor.  If no plasiticity then stress = stress_old +
+   * @param E_ijkl   The elasticity tensor.  If no plasticity then stress = stress_old +
    * E_ijkl*strain_increment
    * @param strain_increment   The applied strain increment
    * @param[out] f   All the yield functions after returning to the yield surface
