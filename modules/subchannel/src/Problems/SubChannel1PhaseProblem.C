@@ -24,8 +24,7 @@ SubChannel1PhaseProblem::validParams()
 }
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
-  : ExternalProblem(params),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+  : ExternalProblem(params), _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh))
 {
 }
 
@@ -257,6 +256,7 @@ SubChannel1PhaseProblem::externalSolve()
           }
           /// Calculate Total Sums in sub_channel
           Wij_global.col(iz) = Wij;
+          // calculate Sum values per subchannel
           double SumSumWij = 0.0;
           for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
           {
@@ -321,7 +321,6 @@ SubChannel1PhaseProblem::externalSolve()
             // Find the nodes for the top and bottom of this element.
             auto * node_in = _subchannel_mesh._nodes[i_ch][iz - 1];
             auto * node_out = _subchannel_mesh._nodes[i_ch][iz];
-            auto * node_inlet = _subchannel_mesh._nodes[i_ch][0];
             // Copy the variables at the inlet (bottom) of this element.
             auto mdot_in = mdot_soln(node_in);
             auto h_in = h_soln(node_in); // J/kg
@@ -342,8 +341,12 @@ SubChannel1PhaseProblem::externalSolve()
             rho_soln.set(node_out, rho_out);   // Kg/m3 (This line couples density)
             mdot(i_ch) = mdot_out;
             // Update the solution vectors at the inlet of the whole assembly.
-            h_soln.set(node_inlet, _fp.h_from_p_T(P_soln(node_inlet), _T_in));
-            rho_soln.set(node_inlet, _fp.rho_from_p_T(P_soln(node_inlet), _T_in));
+            // These values will be updated just 5 times depending on the bottom limiter value
+            if (iz == 1)
+            {
+              h_soln.set(node_in, _fp.h_from_p_T(P_soln(node_in), T_soln(node_in)));
+              rho_soln.set(node_in, _fp.rho_from_p_T(P_soln(node_in), T_soln(node_in)));
+            }
           }
           mdot_global.col(iz) = mdot;
           MError = std::sqrt((mdot - mdot_old).squaredNorm() / (mdot_old.squaredNorm() + 1E-14));

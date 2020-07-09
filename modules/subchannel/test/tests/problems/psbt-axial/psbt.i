@@ -1,4 +1,8 @@
+T_in = 359.15
 length = 3.658
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
 
 [Mesh]
   type = SubChannelMesh
@@ -59,9 +63,6 @@ length = 3.658
 
 [Problem]
   type = SubChannel1PhaseProblem
-  T_in = 359.15
-  P_out = 4.923e6
-  mflux_in = ${fparse 1e+6 * 17.00 / 3600.}
   fp = water
 []
 
@@ -70,26 +71,59 @@ length = 3.658
     type = FlowAreaIC
     variable = S
   []
+
   [w_perim_IC]
     type = WettedPerimIC
     variable = w_perim
   []
+
   [q_prime_IC]
     type = PowerIC
     variable = q_prime
-    power = 3.44e6
-    filename = "power_profile.txt"
+    power = 3.44e6 # W
+    filename = "power_profile.txt" #type in name of file that describes power profile
     axial_heat_rate = axial_heat_rate
+  []
+
+  [T_ic]
+    type = ConstantIC
+    variable = T
+    value = ${T_in}
+  []
+
+  [P_ic]
+    type = ConstantIC
+    variable = P
+    value = ${P_out}
+  []
+
+  [rho_ic]
+    type = RhoFromPressureTemperatureIC
+    variable = rho
+    p = P
+    T = T
+    fp = water
+  []
+
+  [h_ic]
+    type = SpecificEnthalpyFromPressureTemperatureIC
+    variable = h
+    p = P
+    T = T
+    fp = water
+  []
+
+  [mdot_ic]
+    type = MassFlowRateIC
+    variable = mdot
+    area = S
+    mass_flux = ${mass_flux_in}
   []
 []
 
 [Outputs]
   exodus = true
 []
-
-################################################################################
-# Stuff needed to make the program execute
-################################################################################
 
 [Executioner]
   type = Steady

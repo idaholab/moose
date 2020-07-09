@@ -61,10 +61,12 @@ P_out = 4.923e6 # Pa
     type = FlowAreaIC
     variable = S
   []
+
   [w_perim_IC]
     type = WettedPerimIC
     variable = w_perim
   []
+  
   [q_prime_IC]
     type = PowerIC
     variable = q_prime
@@ -111,10 +113,6 @@ P_out = 4.923e6 # Pa
 [Outputs]
   exodus = true
 []
-
-################################################################################
-# Stuff needed to make the program execute
-################################################################################
 
 [Executioner]
   type = Steady
