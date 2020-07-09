@@ -13,7 +13,7 @@
 
 /**
  * This class computes the momentum equation residual and Jacobian
- * contributions for the convective term of the incompressible Navier-Stokes momentum
+ * contributions for the advective term of the incompressible Navier-Stokes momentum
  * equation.
  */
 class INSADMomentumAdvection : public ADVectorKernelValue
@@ -26,5 +26,5 @@ public:
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
 
-  const ADMaterialProperty<RealVectorValue> & _convective_strong_residual;
+  const ADMaterialProperty<RealVectorValue> & _advective_strong_residual;
 };

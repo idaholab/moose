@@ -22,12 +22,12 @@
 
 COORDINATES absolute 1.e-6    # min separation not calculated
 
-TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               1 @ t2
+TIME STEPS relative 1.e-6 floor 1e-10     # min:               0 @ t1 max:               1 @ t2
 
 
 # No GLOBAL VARIABLES
 
-NODAL VARIABLES relative 1.e-6 floor 0.0
+NODAL VARIABLES relative 1.e-6 floor 1e-10
 	p      # min:               0 @ t1,n1	max:               1 @ t2,n1
 	vel_x  # min:               0 @ t1,n1	max:     0.043924836 @ t2,n660
 	vel_y  absolute 1.e-9
@@ -37,4 +37,3 @@ NODAL VARIABLES relative 1.e-6 floor 0.0
 # No NODESET VARIABLES
 
 # No SIDESET VARIABLES
-

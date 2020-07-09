@@ -1,0 +1,34 @@
+[Tests]
+  [steady]
+    type = 'Exodiff'
+    input = 'steady.i'
+    exodiff = 'steady_out.e'
+    requirement = 'The system shall be able to model a volumetric heat source and included it in stabilization terms.'
+    design = 'INSADEnergySource.md'
+    issues = '#15500'
+  []
+  [steady-action]
+    type = 'Exodiff'
+    input = 'steady-action.i'
+    exodiff = 'steady-action_out.e'
+    requirement = 'The system shall be able to build a volumetric heat source model using an automatic action syntax.'
+    design = 'INSADEnergySource.md'
+    issues = '#15500'
+  []
+  [steady-var]
+    type = 'Exodiff'
+    input = 'steady-var.i'
+    exodiff = 'steady-var_out.e'
+    requirement = 'The system shall be able to model a volumetric heat source with a coupled variable and included it in stabilization terms.'
+    design = 'INSADEnergySource.md'
+    issues = '#15500'
+  []
+  [steady-var-action]
+    type = 'Exodiff'
+    input = 'steady-var-action.i'
+    exodiff = 'steady-var-action_out.e'
+    requirement = 'The system shall be able to build a volumetric heat source model, provided through a coupled variable, using an automatic action syntax.'
+    design = 'INSADEnergySource.md'
+    issues = '#15500'
+  []
+[]

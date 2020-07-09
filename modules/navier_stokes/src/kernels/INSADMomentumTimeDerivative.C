@@ -34,7 +34,7 @@ INSADMomentumTimeDerivative::INSADMomentumTimeDerivative(const InputParameters &
   // don't need
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
-  obj_tracker.setHasTransient(true);
+  obj_tracker.set("has_transient", true);
 }
 
 ADRealVectorValue

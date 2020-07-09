@@ -2,7 +2,11 @@
 # - restart elemental aux variable
 
 [Mesh]
-  file = elem_part1_out.e
+  [fmg]
+    type = FileMeshGenerator
+    file = elem_part1_out.e
+    use_for_exodus_restart = true
+  []
   # This problem uses ExodusII_IO::copy_elemental_solution(), which only
   # works with ReplicatedMesh
   parallel_type = replicated

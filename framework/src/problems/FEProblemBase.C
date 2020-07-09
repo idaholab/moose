@@ -702,13 +702,20 @@ FEProblemBase::initialSetup()
   }
   else
   {
-    ExodusII_IO * reader = _mesh.exReader();
+    ExodusII_IO * reader = _app.getExReaderForRestart();
 
     if (reader)
     {
       CONSOLE_TIMED_PRINT("Copying variables from Exodus");
       _nl->copyVars(*reader);
       _aux->copyVars(*reader);
+    }
+    else
+    {
+      if (_nl->hasVarCopy() || _aux->hasVarCopy())
+        mooseError("Need Exodus reader to restart variables but the reader is not available\n"
+                   "Use either FileMesh with an Exodus mesh file or FileMeshGenerator with an "
+                   "Exodus mesh file and with use_for_exodus_restart equal to true");
     }
   }
 
@@ -732,11 +739,11 @@ FEProblemBase::initialSetup()
   if (!_app.isRecovering())
   {
     /**
-     * If we are not recovering but we are doing restart (_app_setFileRestart() == true) with
+     * If we are not recovering but we are doing restart (_app.getExodusFileRestart() == true) with
      * additional uniform refinements. We have to delay the refinement until this point
      * in time so that the equation systems are initialized and projections can be performed.
      */
-    if (_mesh.uniformRefineLevel() > 0 && _app.setFileRestart())
+    if (_mesh.uniformRefineLevel() > 0 && _app.getExodusFileRestart())
     {
       if (!_app.isUltimateMaster())
         mooseError(

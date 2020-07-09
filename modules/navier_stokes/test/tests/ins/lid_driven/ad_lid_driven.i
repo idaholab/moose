@@ -89,16 +89,13 @@
   [../]
 
  [./temperature_time]
-   type = ADHeatConductionTimeDerivative
+   type = INSADHeatConductionTimeDerivative
    variable = T
-   specific_heat = 'cp'
-   density_name = 'rho'
  [../]
 
  [./temperature_advection]
-   type = INSADTemperatureAdvection
+   type = INSADEnergyAdvection
    variable = T
-   velocity = velocity
  [../]
 
  [./temperature_conduction]
@@ -151,9 +148,10 @@
     prop_values = '1  1  1  .01'
   [../]
   [ins_mat]
-    type = INSADMaterial
+    type = INSAD3Eqn
     velocity = velocity
     pressure = p
+    temperature = T
   []
 []
 

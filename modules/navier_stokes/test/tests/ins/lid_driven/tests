@@ -108,4 +108,32 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
   [../]
+  [ad_stabilized_energy_steady]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_stabilized_with_temp.i'
+    exodiff = 'ad_lid_driven_stabilized_with_temp_out.e'
+    issues = '#15500'
+    requirement = 'The system shall be able to solve a steady stabilized mass/momentum/energy incompressible Navier-Stokes formulation.'
+  []
+  [ad_stabilized_energy_transient]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_stabilized_with_temp_transient.i'
+    exodiff = 'ad_lid_driven_stabilized_with_temp_transient_out.e'
+    issues = '#15500'
+    requirement = 'The system shall be able to solve a transient stabilized mass/momentum/energy incompressible Navier-Stokes formulation.'
+  []
+  [ad_stabilized_energy_steady_action]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_action_stabilized_steady.i'
+    exodiff = 'ad_lid_driven_action_stabilized_steady_out.e'
+    issues = '#15500'
+    requirement = 'The system shall be able to solve a steady stabilized mass/momentum/energy incompressible Navier-Stokes formulation with action syntax.'
+  []
+  [ad_stabilized_energy_transient_action]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_action_stabilized_transient.i'
+    exodiff = 'ad_lid_driven_action_stabilized_transient_out.e'
+    issues = '#15500'
+    requirement = 'The system shall be able to solve a transient stabilized mass/momentum/energy incompressible Navier-Stokes formulation with action syntax.'
+  []
 []

@@ -111,9 +111,8 @@
     integrate_p_by_parts = true
   []
   [temp_advection]
-    type = INSADTemperatureAdvection
+    type = INSADEnergyAdvection
     variable = temp
-    velocity = velocity
   []
   [temp_conduction]
     type = ADHeatConduction
@@ -146,8 +145,9 @@
     prop_values = '900'
   [../]
   [ins_mat]
-    type = INSADMaterial
+    type = INSAD3Eqn
     velocity = velocity
     pressure = p
+    temperature = temp
   []
 []

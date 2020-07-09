@@ -1,0 +1,120 @@
+[Tests]
+  design = 'INSADMomentumCoupledForce.md'
+  issues = '#15500'
+  [steady]
+    type = Exodiff
+    input = steady.i
+    exodiff = steady_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a coupled variable.'
+  []
+  [steady-jac]
+    type = PetscJacobianTester
+    input = steady.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a coupled variable.'
+  []
+  [steady-function]
+    type = Exodiff
+    input = steady-function.i
+    exodiff = steady-function_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a vector function.'
+  []
+  [steady-function-jac]
+    type = PetscJacobianTester
+    input = steady-function.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a vector function.'
+  []
+  [steady-action]
+    type = Exodiff
+    input = steady-action.i
+    exodiff = steady-action_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a coupled variable, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-jac]
+    type = PetscJacobianTester
+    input = steady-action.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a coupled variable, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-function]
+    type = Exodiff
+    input = steady-action-function.i
+    exodiff = steady-action-function_out.e
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to apply an external force to the incompressible Navier-Stokes momentum equation through a vector function, with the problem setup through automatic action syntax.'
+  []
+  [steady-action-function-jac]
+    type = PetscJacobianTester
+    input = steady-action-function.i
+    cli_args = 'Mesh/gen/nx=5 Mesh/gen/ny=5'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The system shall be able to compute an accurate Jacobian when applying an external force to the incompressible Navier-Stokes momentum equation through a vector function, with the problem setup through automatic action syntax.'
+  []
+
+  [gravity]
+    requirement = 'The system shall be able to solve the Navier-Stokes equations with a coupled variable force and a gravity force'
+    [gravity-object]
+      type = Exodiff
+      input = gravity-object.i
+      exodiff = 'gravity-object_out.e'
+      detail = 'provided through a dedicated object,'
+    []
+    [var-and-func]
+      type = Exodiff
+      input = 'gravity-through-coupled-force.i'
+      exodiff = 'gravity-through-coupled-force_out.e'
+      detail = 'or through a generic object that can simultaneously add multiple forces through both a coupled variable and a function.'
+    []
+    [two-vars]
+      type = Exodiff
+      input = 'gravity-through-coupled-force.i'
+      cli_args = "Outputs/out/file_base=two-vars Kernels/inactive='momentum_coupled_forces_var_and_func momentum_coupled_forces_two_funcs'"
+      exodiff = 'two-vars.e'
+      detail = 'The generic object shall also be able to compute the forces solely through multiple coupled variables,'
+    []
+    [two-funcs]
+      type = Exodiff
+      input = 'gravity-through-coupled-force.i'
+      cli_args = "Outputs/out/file_base=two-funcs Kernels/inactive='momentum_coupled_forces_var_and_func momentum_coupled_forces_two_vars'"
+      exodiff = 'two-funcs.e'
+      detail = 'or solely through multiple vector functions.'
+    []
+
+    [var-and-func-action]
+      type = Exodiff
+      input = 'gravity-through-coupled-force-action.i'
+      cli_args = "Modules/IncompressibleNavierStokes/coupled_force_var=u Modules/IncompressibleNavierStokes/coupled_force_vector_function='vector_gravity_func'"
+      exodiff = 'gravity-through-coupled-force-action_out.e'
+      detail = 'The system shall be able to add the generic object through an automatic action syntax and provide two forces either through a coupled variable and a function,'
+    []
+    [two-vars-action]
+      type = Exodiff
+      input = 'gravity-through-coupled-force-action.i'
+      cli_args = "Outputs/out/file_base=two-vars-action Modules/IncompressibleNavierStokes/coupled_force_var='u gravity'"
+      exodiff = 'two-vars-action.e'
+      detail = 'two coupled variables,'
+    []
+    [two-funcs-action]
+      type = Exodiff
+      input = 'gravity-through-coupled-force-action.i'
+      cli_args = "Outputs/out/file_base=two-funcs-action Modules/IncompressibleNavierStokes/coupled_force_vector_function='vector_func vector_gravity_func'"
+      exodiff = 'two-funcs-action.e'
+      detail = 'or two functions.'
+    []
+  []
+[]
