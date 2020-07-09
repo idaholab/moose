@@ -29,7 +29,9 @@ public:
                                                   const bool is_self_covariance) const = 0;
 
   /// Used for outputting Hyper-parameter settings
-  virtual void getHyperParameters(std::vector<std::vector<Real>> & vec) const = 0;
+  virtual void
+  buildHyperParamMap(std::unordered_map<std::string, Real> & map,
+                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
 
 protected:
   /// This needs to be declared first, before all other vairables that would be stored in it

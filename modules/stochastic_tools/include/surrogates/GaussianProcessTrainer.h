@@ -69,7 +69,9 @@ private:
 
   std::string & _covar_type;
 
-  std::vector<std::vector<Real>> & _hyperparams;
+  std::unordered_map<std::string, Real> & _hyperparam_map;
+
+  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
   CovarianceFunctionBase * _covariance_function;
 };

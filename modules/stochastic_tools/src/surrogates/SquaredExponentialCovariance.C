@@ -16,6 +16,7 @@ InputParameters
 SquaredExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
+  params.addClassDescription("Squared Exponential covariance function.");
   return params;
 }
 
@@ -24,31 +25,15 @@ SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters
 {
 }
 
-// SquaredExponentialCovariance::SquaredExponentialCovariance(
-//     const std::vector<Real> & length_factor,
-//     const Real & sigma_f_squared,
-//     const Real & sigma_n_squared)
-//   : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared)
-// {
-// }
-//
-// SquaredExponentialCovariance::SquaredExponentialCovariance(
-//     const std::vector<std::vector<Real>> & vec)
-//   : CovarianceFunctionBase(vec)
-// {
-//   _length_factor = vec[0];
-//   _sigma_f_squared = vec[1][0];
-//   _sigma_n_squared = vec[2][0];
-// }
-
 void
-SquaredExponentialCovariance::getHyperParameters(std::vector<std::vector<Real>> & vec) const
+SquaredExponentialCovariance::buildHyperParamMap(
+    std::unordered_map<std::string, Real> & map,
+    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
-  vec.resize(3);
+  map.insert({"signal_variance", _sigma_f_squared});
+  map.insert({"noise_variance", _sigma_n_squared});
 
-  vec[0] = _length_factor;
-  vec[1].push_back(_sigma_f_squared);
-  vec[2].push_back(_sigma_n_squared);
+  vec_map.insert({"length_factor", _length_factor});
 }
 
 RealEigenMatrix

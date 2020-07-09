@@ -25,8 +25,6 @@ GaussianProcess::validParams()
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _covar_type(getModelData<std::string>("_covar_type")),
-    _hyperparams(getModelData<std::vector<std::vector<Real>>>("_hyperparams")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _training_data(getModelData<RealEigenMatrix>("_training_data")),
@@ -35,7 +33,11 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
     _covar_name(isParamValid("filename") ? UserObjectName(_name + "_covar_func")
                                          : getParam<UserObjectName>("covariance_function")),
-    _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"))
+    _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
+    _covar_type(getModelData<std::string>("_covar_type")),
+    _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
+    _hyperparam_vec_map(
+        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
 {
 }
 

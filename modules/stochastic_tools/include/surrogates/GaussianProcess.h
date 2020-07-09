@@ -24,9 +24,14 @@ public:
 
   virtual void setupCovariance();
 
-  const std::string & _covar_type;
+  const std::string & getCovarType() const { return _covar_type; }
 
-  const std::vector<std::vector<Real>> & _hyperparams;
+  const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
+
+  const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVecMap() const
+  {
+    return _hyperparam_vec_map;
+  }
 
 private:
   /// Paramaters (x) used for training
@@ -50,6 +55,12 @@ private:
   const UserObjectName _covar_name;
 
   const FEProblemBase & _feproblem;
+
+  const std::string & _covar_type;
+
+  const std::unordered_map<std::string, Real> & _hyperparam_map;
+
+  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
   CovarianceFunctionBase * _covariance_function;
 };

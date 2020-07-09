@@ -16,44 +16,27 @@ InputParameters
 MaternHalfIntCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
-  params.addParam<unsigned int>("p", "Integer p to use for Matern Hald Integer Covariance Kernel");
+  params.addClassDescription("Matern half-integer covariance function.");
+  params.addRequiredParam<unsigned int>(
+      "p", "Integer p to use for Matern Half Integer Covariance Kernel");
   return params;
 }
 
 MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters),
-    _p(!_hyperparams.empty() ? round(_hyperparams[3][0]) : getParam<unsigned int>("p"))
+  : CovarianceFunctionBase(parameters), _p(getParam<unsigned int>("p"))
 {
 }
 
-// MaternHalfIntCovariance::MaternHalfIntCovariance(
-//     const std::vector<Real> & length_factor,
-//     const Real & sigma_f_squared,
-//     const Real & sigma_n_squared,
-//     const unsigned int & p)
-//   : CovarianceFunctionBase(length_factor, sigma_f_squared, sigma_n_squared), _p(p)
-// {
-// }
-//
-// MaternHalfIntCovariance::MaternHalfIntCovariance(
-//     const std::vector<std::vector<Real>> & vec)
-//   : CovarianceFunctionBase(vec)
-// {
-//   _length_factor = vec[0];
-//   _sigma_f_squared = vec[1][0];
-//   _sigma_n_squared = vec[2][0];
-//   _p = (unsigned int)round(vec[3][0]);
-// }
-
 void
-MaternHalfIntCovariance::getHyperParameters(std::vector<std::vector<Real>> & vec) const
+MaternHalfIntCovariance::buildHyperParamMap(
+    std::unordered_map<std::string, Real> & map,
+    std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
-  vec.resize(4);
+  map.insert({"signal_variance", _sigma_f_squared});
+  map.insert({"noise_variance", _sigma_n_squared});
+  map.insert({"p", _p});
 
-  vec[0] = _length_factor;
-  vec[1].push_back(_sigma_f_squared);
-  vec[2].push_back(_sigma_n_squared);
-  vec[3].push_back(_p);
+  vec_map.insert({"length_factor", _length_factor});
 }
 
 RealEigenMatrix
