@@ -7,4 +7,12 @@
     design = "syntax/Kernels/index.md"
     issues = "#5658"
   [../]
+  [./generic_test]
+    type = 'Exodiff'
+    input = 'generic_value.i'
+    exodiff = 'generic_value_out.e'
+    requirement = "The system shall provide a generic kernel object that allows for easy switching between hand-coded and automatic computation of the Jacobian, and encourages maximum kernel code-reuse."
+    design = "syntax/Kernels/index.md"
+    issues = "#15552"
+  [../]
 []
