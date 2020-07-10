@@ -15,12 +15,15 @@
 #include <fstream>
 
 GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename,
-                                                     const bool reexpress_free_electron)
+                                                     const bool reexpress_free_electron,
+                                                     const bool use_piecewise_interpolation)
   : _filename(filename)
 {
   read(_filename);
   if (reexpress_free_electron)
     reexpressFreeElectron();
+  if (use_piecewise_interpolation && _root["Header"].isMember("logk model"))
+    _root["Header"]["logk model"] = "piecewise-linear";
 }
 
 void

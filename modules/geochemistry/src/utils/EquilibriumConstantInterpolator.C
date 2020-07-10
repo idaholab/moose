@@ -11,13 +11,14 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include "libmesh/utility.h"
+#include "libmesh/auto_ptr.h" // libmesh_make_unique
 
 EquilibriumConstantInterpolator::EquilibriumConstantInterpolator(
     const std::vector<Real> & temperature,
     const std::vector<Real> & logk,
     const std::string type,
     const Real no_value)
-  : LeastSquaresFitBase()
+  : LeastSquaresFitBase(), _linear_interp(nullptr)
 {
   // The number of temperature points and logk points must be equal
   if (temperature.size() != logk.size())
@@ -40,12 +41,26 @@ EquilibriumConstantInterpolator::EquilibriumConstantInterpolator(
     _fit_type = FitTypeEnum::FOURTHORDER;
   else if (type == "maier-kelly")
     _fit_type = FitTypeEnum::MAIERKELLY;
+  else if (type == "piecewise-linear")
+  {
+    _fit_type = FitTypeEnum::PIECEWISELINEAR;
+    try
+    {
+      _linear_interp = libmesh_make_unique<LinearInterpolation>(useful_temperature, useful_logk);
+    }
+    catch (std::domain_error & e)
+    {
+      mooseError("EquilibriumConstantInterpolation: ", e.what());
+    }
+  }
   else
     mooseError("Type ", type, " is not supported in EquilibriumConstantInterpolator");
 
   // Set the number of coefficients for the fit
   if (useful_temperature.size() >= 5)
     _num_coeff = 5;
+  else if (useful_temperature.size() >= 1 && _fit_type == FitTypeEnum::PIECEWISELINEAR)
+    _num_coeff = 2;
   else
   {
     _num_coeff = 2;
@@ -95,7 +110,10 @@ EquilibriumConstantInterpolator::fillMatrix()
       break;
     }
 
-    case FitTypeEnum::LINEAR:
+    case FitTypeEnum::PIECEWISELINEAR:
+      break; // _matrix is not used in piecewiselinear
+
+    default: // FitTypeEnum::LINEAR
     {
       for (unsigned int row = 0; row < num_rows; ++row)
       {
@@ -104,9 +122,6 @@ EquilibriumConstantInterpolator::fillMatrix()
       }
       break;
     }
-
-    default:
-      mooseError("Invalid fit type in EquilibriumConstantInterpolator");
   }
 }
 
@@ -123,11 +138,11 @@ EquilibriumConstantInterpolator::sample(Real T)
       return _coeffs[0] * std::log(T) + _coeffs[1] + _coeffs[2] * T + _coeffs[3] / T +
              _coeffs[4] / Utility::pow<2>(T);
 
-    case FitTypeEnum::LINEAR:
-      return _coeffs[0] + _coeffs[1] * T;
+    case FitTypeEnum::PIECEWISELINEAR:
+      return _linear_interp->sample(T);
 
-    default:
-      mooseError("Invalid fit type in EquilibriumConstantInterpolator");
+    default: // FitTypeEnum::LINEAR
+      return _coeffs[0] + _coeffs[1] * T;
   }
 }
 
@@ -144,11 +159,11 @@ EquilibriumConstantInterpolator::sampleDerivative(Real T)
       return _coeffs[0] / T + _coeffs[2] - _coeffs[3] / Utility::pow<2>(T) -
              2.0 * _coeffs[4] / Utility::pow<3>(T);
 
-    case FitTypeEnum::LINEAR:
-      return _coeffs[1];
+    case FitTypeEnum::PIECEWISELINEAR:
+      return _linear_interp->sampleDerivative(T);
 
-    default:
-      mooseError("Invalid fit type in EquilibriumConstantInterpolator");
+    default: // FitTypeEnum::LINEAR:
+      return _coeffs[1];
   }
 }
 
@@ -169,6 +184,6 @@ EquilibriumConstantInterpolator::sample(DualReal T)
       return _coeffs[0] + _coeffs[1] * T;
 
     default:
-      mooseError("Invalid fit type in EquilibriumConstantInterpolator");
+      mooseError("Dual cannot be used for specified fit type in EquilibriumConstantInterpolator");
   }
 }

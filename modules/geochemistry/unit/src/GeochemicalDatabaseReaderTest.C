@@ -38,6 +38,14 @@ TEST(GeochemicalDatabaseReaderTest, getLogKModel)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_EQ(database.getLogKModel(), "fourth-order");
+
+  GeochemicalDatabaseReader database2("database/moose_testdb.json", true);
+
+  EXPECT_EQ(database2.getLogKModel(), "fourth-order");
+
+  GeochemicalDatabaseReader database3("database/moose_testdb.json", false, true);
+
+  EXPECT_EQ(database3.getLogKModel(), "piecewise-linear");
 }
 
 TEST(GeochemicalDatabaseReaderTest, getTemperatures)
