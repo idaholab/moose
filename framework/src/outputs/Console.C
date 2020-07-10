@@ -366,6 +366,8 @@ Console::output(const ExecFlagType & type)
 
   // Write the file
   writeStreamToFile();
+
+  _console << std::flush;
 }
 
 void
@@ -648,6 +650,8 @@ Console::outputSystemInformation()
 
   // Output the legacy flags, these cannot be turned off so they become annoying to people.
   _console << ConsoleUtils::outputLegacyInformation(_app);
+
+  _console << std::flush;
 }
 
 void

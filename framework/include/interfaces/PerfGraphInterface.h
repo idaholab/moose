@@ -21,16 +21,16 @@
 
 #define TIME_SECTION2(section_name, level)                                                         \
   static const PerfID __perf_id =                                                                  \
-      moose::internal::getPerfGraphRegistry().registerSection(section_name, level);                \
+    registerTimedSection(section_name, level); \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION3(section_name, level, live_message)                                           \
   static const PerfID __perf_id =                                                                  \
-      moose::internal::getPerfGraphRegistry().registerSection(section_name, level, live_message);  \
+      registerTimedSection(section_name, level, live_message);  \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
-  static const PerfID __perf_id = moose::internal::getPerfGraphRegistry().registerSection(         \
+  static const PerfID __perf_id = registerTimedSection(         \
       section_name, level, live_message, print_dots);                                              \
   TIME_SECTION1(__perf_id);
 
@@ -78,7 +78,7 @@ protected:
    * @param level The importance of the timer - lower is more important (0 will always come out)
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerTimedSection(const std::string & section_name, const unsigned int level);
+  PerfID registerTimedSection(const std::string & section_name, const unsigned int level) const;
 
   /**
    * Call to register a named section for timing.
@@ -92,7 +92,7 @@ protected:
   PerfID registerTimedSection(const std::string & section_name,
                               const unsigned int level,
                               const std::string & live_message,
-                              const bool print_dots = true);
+                              const bool print_dots = true) const;
 
   /// Params
   const InputParameters * const _pg_params;

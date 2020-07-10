@@ -47,6 +47,8 @@ protected:
 
   std::future<bool> _done_future;
 
+  const std::atomic<bool> & _destructing;
+
   std::unordered_map<PerfID, PerfGraph::SectionInfo> & _id_to_section_info;
 
   /// Limit (in seconds) before printing

@@ -8,6 +8,7 @@ namespace internal
 PerfGraphRegistry &
 getPerfGraphRegistry()
 {
+  // In C++11 this is even thread safe! (Lookup "Static Initializers")
   static PerfGraphRegistry perf_graph_registry_singleton;
 
   return perf_graph_registry_singleton;

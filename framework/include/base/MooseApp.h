@@ -19,6 +19,7 @@
 #include "RestartableData.h"
 #include "ConsoleStreamInterface.h"
 #include "PerfGraph.h"
+#include "PerfGraphInterface.h"
 #include "TheWarehouse.h"
 #include "RankMap.h"
 
@@ -60,7 +61,7 @@ InputParameters validParams<MooseApp>();
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public ConsoleStreamInterface, public libMesh::ParallelObject
+class MooseApp : public ConsoleStreamInterface, public PerfGraphInterface, public libMesh::ParallelObject
 {
 public:
   static const RestartableDataMapName MESH_META_DATA;

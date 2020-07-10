@@ -280,27 +280,7 @@ protected:
   inline void addToExecutionList(const PerfID id,
                                  const IncrementState state,
                                  const std::chrono::time_point<std::chrono::steady_clock> time,
-                                 const long int memory)
-  {
-    auto & section_increment = _execution_list[_execution_list_end];
-
-    section_increment._id = id;
-    section_increment._state = state;
-    section_increment._time = time;
-    section_increment._memory = memory;
-
-    // This will synchronize the above memory changes with the
-    // atomic_thread_fence in the printing thread
-    std::atomic_thread_fence(std::memory_order_release);
-
-    // All of the above memory operations will be seen by the
-    // printing thread before the printing thread sees this new value
-    auto next_execution_list_end = _execution_list_end.fetch_add(1, std::memory_order_relaxed);
-
-    // Are we at the end of our circular buffer?
-    if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
-      _execution_list_end.store(0, std::memory_order_relaxed);
-  }
+                                 const long int memory);
 
   /**
    * Add a Node onto the end of the end of the current callstack
@@ -423,6 +403,9 @@ protected:
 
   /// The promise to the print thread that will signal when to stop
   std::promise<bool> _done;
+
+  /// Tell the print thread to teardown
+  std::atomic<bool> _destructing;
 
   /// The object that is doing live printing
   std::unique_ptr<PerfGraphLivePrint> _live_print;

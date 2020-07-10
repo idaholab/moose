@@ -15,7 +15,7 @@
 std::mutex _stream_mutex;
 
 ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
-  : _output_warehouse(output_warehouse), _oss(output_warehouse.consoleBuffer())
+    : _output_warehouse(output_warehouse), _oss(std::make_shared<std::ostringstream>())
 {
 }
 
@@ -27,11 +27,11 @@ ConsoleStream::operator<<(const StandardEndLine & manip) const
   const std::lock_guard<std::mutex> lock(manip_mutex);
 
   if (manip == (std::basic_ostream<char> & (*)(std::basic_ostream<char> &)) & std::endl)
-    _oss << '\n';
+    (*_oss) << '\n';
   else
-    _oss << manip;
+    (*_oss) << manip;
 
-  _output_warehouse.mooseConsole();
+  _output_warehouse.mooseConsole(*_oss);
 
   return *this;
 }
@@ -39,31 +39,31 @@ ConsoleStream::operator<<(const StandardEndLine & manip) const
 void
 ConsoleStream::unsetf(std::ios_base::fmtflags mask) const
 {
-  _oss.unsetf(mask);
+  _oss->unsetf(mask);
 }
 
 std::streamsize
 ConsoleStream::precision() const
 {
-  return _oss.precision();
+  return _oss->precision();
 }
 
 std::streamsize
 ConsoleStream::precision(std::streamsize new_precision) const
 {
-  return _oss.precision(new_precision);
+  return _oss->precision(new_precision);
 }
 
 std::ios_base::fmtflags
 ConsoleStream::flags() const
 {
-  return _oss.flags();
+  return _oss->flags();
 }
 
 std::ios_base::fmtflags
 ConsoleStream::flags(std::ios_base::fmtflags new_flags) const
 {
-  return _oss.flags(new_flags);
+  return _oss->flags(new_flags);
 }
 
 unsigned long long int

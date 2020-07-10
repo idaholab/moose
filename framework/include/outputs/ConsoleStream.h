@@ -58,7 +58,7 @@ public:
    */
   void unsetf(std::ios_base::fmtflags mask) const;
 
-  std::streampos tellp() const { return _oss.tellp(); }
+  std::streampos tellp() const { return _oss->tellp(); }
 
   /**
    * Return the current precision
@@ -90,7 +90,10 @@ private:
   OutputWarehouse & _output_warehouse;
 
   /// The stream for buffering the message
-  std::ostringstream & _oss;
+  /// This stupidly has to be a shared poitner because
+  /// of something in AutomaticMortarGeneration that requires
+  /// this to be trivially copyable.
+  mutable std::shared_ptr<std::ostringstream> _oss;
 };
 
 extern std::mutex _stream_mutex;
@@ -101,6 +104,6 @@ ConsoleStream::operator<<(const StreamType & s) const
 {
   std::lock_guard<std::mutex> lock(_stream_mutex);
 
-  _oss << s;
+  (*_oss) << s;
   return *this;
 }

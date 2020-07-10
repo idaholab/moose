@@ -295,6 +295,7 @@ MooseApp::validParams()
 
 MooseApp::MooseApp(InputParameters parameters)
   : ConsoleStreamInterface(*this),
+    PerfGraphInterface(_perf_graph, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),

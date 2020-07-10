@@ -175,6 +175,11 @@ public:
   void mooseConsole();
 
   /**
+   * Send a buffer to Console output objects
+   */
+  void mooseConsole(std::ostringstream & buffer);
+
+  /**
    * The buffered messages stream for Console objects
    * @return Reference to the stream storing cached messages from calls to _console
    */
@@ -361,6 +366,9 @@ private:
 
   /// Whether or not the last thing output by mooseConsole had a newline as the last character
   bool _last_message_ended_in_newline;
+
+  /// What the last buffer was that was printed
+  std::ostringstream * _last_buffer;
 
   /// Number of times the stream has been printed to
   std::atomic<unsigned long long int> _num_printed;

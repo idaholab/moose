@@ -80,5 +80,7 @@ PerfGraphOutput::output(const ExecFlagType & /*type*/)
 
     if (_heaviest_sections)
       _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
+
+    _console << std::flush;
   }
 }

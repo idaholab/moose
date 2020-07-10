@@ -41,6 +41,7 @@ PerfGraph::PerfGraph(const std::string & /*root_name*/, MooseApp & app, const bo
     _id_to_section_info(_perf_graph_registry._id_to_section_info),
     _active(true),
     _live_print_active(true),
+    _destructing(false),
     _live_print(std::make_unique<PerfGraphLivePrint>(*this, app)),
     _live_print_time_limit(1.0),
     _live_print_mem_limit(100)
@@ -63,6 +64,10 @@ PerfGraph::~PerfGraph()
   if (_pid == 0)
   {
     _done.set_value(true);
+
+    _destructing = true;
+
+    _finished_section.notify_one();
 
     _print_thread.join();
   }
@@ -154,6 +159,36 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
 }
 
 void
+PerfGraph::addToExecutionList(const PerfID id,
+                              const IncrementState state,
+                              const std::chrono::time_point<std::chrono::steady_clock> time,
+                              const long int memory)
+{
+  auto & section_increment = _execution_list[_execution_list_end];
+
+  section_increment._id = id;
+  section_increment._state = state;
+  section_increment._time = time;
+  section_increment._memory = memory;
+
+  // This will synchronize the above memory changes with the
+  // atomic_thread_fence in the printing thread
+  std::atomic_thread_fence(std::memory_order_release);
+
+  // All of the above memory operations will be seen by the
+  // printing thread before the printing thread sees this new value
+  //
+  // Note fetch_add is a _post_-increment operation.  The +1 here is to add to the previous value
+  // so we can get the next value.
+  auto next_execution_list_end = _execution_list_end.fetch_add(1, std::memory_order_relaxed) + 1;
+
+  // Are we at the end of our circular buffer?
+  if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
+    _execution_list_end.store(0, std::memory_order_relaxed);
+}
+
+
+void
 PerfGraph::push(const PerfID id)
 {
   if (!_active && !_live_print_active)
@@ -192,7 +227,9 @@ PerfGraph::push(const PerfID id)
   // Add this to the exection list
   if ((_live_print_active || _live_print_all) && _pid == 0 &&
       (!_id_to_section_info[id]._live_message.empty() || _live_print_all))
+  {
     addToExecutionList(id, IncrementState::started, current_time, start_memory);
+  }
 }
 
 void
