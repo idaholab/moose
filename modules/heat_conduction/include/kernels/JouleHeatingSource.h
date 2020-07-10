@@ -13,11 +13,9 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-
 /**
  * This kernel calculates the heat source term corresponding to joule heating,
- * Q = J * E = elec_cond * grad_phi * grad_phi, where phi is the electrical potenstial.
+ * Q = J * E = elec_cond * grad_phi * grad_phi, where phi is the electrical potential.
  */
 class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>
 {
