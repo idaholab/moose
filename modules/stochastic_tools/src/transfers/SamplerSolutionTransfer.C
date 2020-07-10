@@ -88,7 +88,7 @@ SamplerSolutionTransfer::execute()
           const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
           // Initializing a temporary vector for the partial solution.
-          std::unique_ptr<DenseVector<Real>> tmp = std::make_unique<DenseVector<Real>>();
+          std::shared_ptr<DenseVector<Real>> tmp = std::make_shared<DenseVector<Real>>();
           solution.get(var_dofs, tmp->get_values());
 
           // Copying the temporary vector into the trainer.

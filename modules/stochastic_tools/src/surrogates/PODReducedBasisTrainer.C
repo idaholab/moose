@@ -8,6 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PODReducedBasisTrainer.h"
+#include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_generation.h"
+#include "SerializerGuard.h"
+#include "libmesh/parallel_algebra.h"
+#include "libmesh/parallel_sync.h"
 
 registerMooseObject("StochasticToolsApp", PODReducedBasisTrainer);
 
@@ -117,20 +122,215 @@ PODReducedBasisTrainer::finalize()
 void
 PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
                                     dof_id_type g_ind,
-                                    std::unique_ptr<DenseVector<Real>> & snapshot)
+                                    const std::shared_ptr<DenseVector<Real>> & snapshot)
 {
   _snapshots[v_ind].push_back(
-      std::pair<dof_id_type, std::unique_ptr<DenseVector<Real>>>(g_ind, std::move(snapshot)));
+      std::pair<dof_id_type, std::shared_ptr<DenseVector<Real>>>(g_ind, snapshot));
+  std::cerr << processor_id() << " added snaphot for variable " << v_ind << " and vector " << g_ind
+            << " at " << snapshot.get() << std::endl;
 }
 
 void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
+  // Getting the number of snapshots. It is assumed that every variable has the
+  // same number of snapshots.
+  const auto no_snaps = getSnapsSize(0);
+
+  ReplicatedMesh mesh(_communicator, 2);
+  MeshTools::Generation::build_square(
+      mesh, no_snaps, no_snaps, -0.5, no_snaps - 0.5, -0.5, no_snaps - 0.5);
+  mesh.add_elem_integer("filled");
+
+  for (Elem * elem : mesh.active_element_ptr_range())
+  {
+    const auto centroid = elem->centroid();
+    if (centroid(0) > centroid(1))
+      mesh.delete_elem(elem);
+  }
+
+  mesh.prepare_for_use();
+
+  std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
+  for (dof_id_type local_vector_ind = 0; local_vector_ind < _snapshots[0].size();
+       ++local_vector_ind)
+  {
+    const dof_id_type global_vector_ind = _snapshots[0][local_vector_ind].first;
+    auto & entry = local_vectors[global_vector_ind];
+    for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+      entry.push_back(_snapshots[v_ind][local_vector_ind].second);
+  }
+
+  std::unordered_map<processor_id_type, std::set<dof_id_type>> send_vectors;
+  std::unordered_map<
+      processor_id_type,
+      std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>>
+      send_map;
+
+  // Fill the send map of processors we need to send data to and the corresponding data
+  for (Elem * elem : mesh.active_element_ptr_range())
+    if (elem->processor_id() != processor_id())
+    {
+      const auto centroid = elem->centroid();
+      const dof_id_type i = centroid(0);
+      const dof_id_type j = centroid(1);
+      const auto it =
+          std::find_if(_snapshots[0].begin(), _snapshots[0].end(), [&i, &j](const auto & pair) {
+            return pair.first == i || pair.first == j;
+          });
+      if (it != _snapshots[0].end())
+      {
+        const auto global_vector_ind = it->first;
+        if (send_vectors[elem->processor_id()].count(global_vector_ind))
+          continue;
+        send_vectors[elem->processor_id()].insert(global_vector_ind);
+        const auto local_vector_ind = std::distance(_snapshots[0].begin(), it);
+        for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+          send_map[elem->processor_id()].emplace_back(
+              global_vector_ind, v_ind, _snapshots[v_ind][local_vector_ind].second);
+      }
+    }
+    else
+      elem->set_extra_integer(0, 0);
+
+  {
+    SerializerGuard sg(_communicator);
+    for (const auto & pair : send_vectors)
+    {
+      std::cerr << processor_id() << "->" << pair.first << ": ";
+      for (auto & vec : pair.second)
+        std::cerr << vec << " ";
+      std::cerr << std::endl;
+    }
+    std::cerr << processor_id() << " responsible for ";
+    for (const Elem * elem : mesh.active_local_element_ptr_range())
+      std::cerr << (dof_id_type)elem->centroid()(0) << "," << (dof_id_type)elem->centroid()(1)
+                << " ";
+    std::cerr << std::endl;
+  }
+
+  for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+    _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
+
+  _corr_mx[0].print();
+
+  std::stringstream oss;
+  // Send and receive the data
+  std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> received_vectors;
+  auto functor =
+      [this, &mesh, &received_vectors, &local_vectors, &oss](
+          processor_id_type pid,
+          const std::vector<
+              std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> & vectors) {
+        for (auto & tuple : vectors)
+        {
+          const auto global_vector_ind = std::get<0>(tuple);
+          const auto variable_ind = std::get<1>(tuple);
+          const auto & vector = std::get<2>(tuple);
+
+          // The entry that will be filled with all of the variable solutions for a vector
+          std::vector<std::shared_ptr<DenseVector<Real>>> & entry =
+              received_vectors[global_vector_ind];
+          // Size it to the number of variables in case we haven't already
+          entry.resize(_snapshots.size(), nullptr);
+          // Add this varaible's contribution - this is shared_ptr so we are claiming partial
+          // ownership of this vector and do not have to do a copy
+          entry[variable_ind] = vector;
+
+          oss << processor_id() << "retreived " << global_vector_ind << " from " << pid << " into "
+              << vector.get() << std::endl;
+        }
+
+        for (Elem * elem : mesh.active_local_element_ptr_range())
+        {
+          if (elem->get_extra_integer(0))
+            continue;
+
+          const dof_id_type i = elem->centroid()(0);
+          const dof_id_type j = elem->centroid()(1);
+          std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
+          std::vector<std::shared_ptr<DenseVector<Real>>> * j_vec = nullptr;
+
+          const auto find_i_local = local_vectors.find(i);
+          if (find_i_local != local_vectors.end())
+            i_vec = &find_i_local->second;
+          else
+          {
+            const auto find_i_received = received_vectors.find(i);
+            if (find_i_received != received_vectors.end())
+            {
+              bool have_all = true;
+              for (const auto & vec : find_i_received->second)
+                if (!vec)
+                {
+                  have_all = false;
+                  break;
+                }
+              if (have_all)
+                i_vec = &find_i_received->second;
+              else
+                continue;
+            }
+            else
+              continue;
+          }
+
+          const auto find_j_local = local_vectors.find(j);
+          if (find_j_local != local_vectors.end())
+            j_vec = &find_j_local->second;
+          else
+          {
+            const auto find_j_received = received_vectors.find(j);
+            if (find_j_received != received_vectors.end())
+            {
+              bool have_all = true;
+              for (const auto & vec : find_j_received->second)
+                if (!vec)
+                {
+                  have_all = false;
+                  break;
+                }
+              if (have_all)
+                j_vec = &find_j_received->second;
+              else
+                continue;
+            }
+            else
+              continue;
+          }
+
+          elem->set_extra_integer(0, 1);
+          for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+            _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
+
+          oss << processor_id() << ": " << i << "," << j << " from vectors " << (*i_vec)[0].get()
+              << " and " << (*j_vec)[0].get() << std::endl;
+        }
+      };
+  Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
+  functor(processor_id(),
+          std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>());
+
+  {
+    SerializerGuard sg(_communicator);
+    std::cerr << oss.str() << std::endl << std::flush;
+  }
+  gatherSum(_corr_mx[0].get_values());
+  _corr_mx[0].print();
+  // for (const auto pair : send_to)
+  // {
+  //   std::cerr << processor_id() << "->" << pair.first << ": ";
+  //   for (const auto id : pair.second)
+  //     std::cerr << id << " ";
+  //   std::cerr << std::endl;
+  // }
+
+  // std::cerr << elem->centroid() << " on pid " << elem->processor_id() << std::endl;
+  _communicator.barrier();
+  mooseError("we suck at coding");
   // Looping over all the variables.
   for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
   {
-    const auto no_snaps = _snapshots[v_ind].size();
-
     // Initializing the correlation matrix.
     _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
 
@@ -292,6 +492,14 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
   }
 }
 
+dof_id_type
+PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i)
+{
+  dof_id_type val = _snapshots[var_i].size();
+  gatherSum(val);
+  return val;
+}
+
 unsigned int
 PODReducedBasisTrainer::getSumBaseSize()
 {
@@ -356,3 +564,73 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
   }
   return var_counter;
 }
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+
+namespace libMesh
+{
+namespace Parallel
+{
+unsigned int
+Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packable_size(
+    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+    const void *)
+{
+  unsigned int total_size = 0;
+  // ID x 2, size
+  total_size += 3;
+  // Data
+  total_size += std::get<2>(object)->size();
+  return total_size;
+}
+unsigned int
+Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packed_size(
+    typename std::vector<Real>::const_iterator in)
+{
+  unsigned int total_size = 0;
+  // Data size
+  total_size += *in++;
+  // ID x 2, size
+  total_size += 3;
+  return total_size;
+}
+template <>
+void
+Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::pack(
+    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+    std::back_insert_iterator<std::vector<Real>> data_out,
+    const void *)
+{
+  // Data size
+  const auto & dense_vector = std::get<2>(object);
+  data_out = dense_vector->size();
+  // IDs
+  data_out = std::get<0>(object);
+  data_out = std::get<1>(object);
+  // Data
+  const auto & vector = dense_vector->get_values();
+  for (std::size_t i = 0; i < dense_vector->size(); ++i)
+    data_out = vector[i];
+}
+template <>
+std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
+Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::unpack(
+    std::vector<Real>::const_iterator in, void *)
+{
+  // Number of points
+  const std::size_t data_size = *in++;
+  std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> object;
+  // IDs
+  std::get<0>(object) = *in++;
+  std::get<1>(object) = *in++;
+  // Data
+  auto & dense_vector = std::get<2>(object);
+  dense_vector = std::make_shared<DenseVector<Real>>(data_size);
+  auto & vector_values = dense_vector->get_values();
+  for (std::size_t i = 0; i < data_size; ++i)
+    vector_values[i] = *in++;
+  return object;
+}
+} // namespace Parallel
+} // namespace libMesh

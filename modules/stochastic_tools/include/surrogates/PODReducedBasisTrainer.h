@@ -13,6 +13,7 @@
 #include "SurrogateTrainer.h"
 #include "MultiApp.h"
 #include "MooseTypes.h"
+#include "libmesh/parallel.h"
 
 class PODReducedBasisTrainer : public SurrogateTrainer
 {
@@ -33,8 +34,9 @@ public:
   void initReducedOperators();
 
   /// Adding a snapshot for a variable.
-  void
-  addSnapshot(dof_id_type v_ind, dof_id_type g_ind, std::unique_ptr<DenseVector<Real>> & snapshot);
+  void addSnapshot(dof_id_type v_ind,
+                   dof_id_type g_ind,
+                   const std::shared_ptr<DenseVector<Real>> & snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
   void addToReducedOperator(unsigned int base_i,
@@ -46,6 +48,9 @@ public:
   const std::vector<std::string> & getTagNames() const { return _tag_names; }
 
   const std::vector<unsigned int> & getIndependent() const { return _independent; }
+
+  /// Getting the snapshot size across all of the processors.
+  dof_id_type getSnapsSize(dof_id_type v_ind);
 
   /// Getting the base size for a given variable.
   unsigned int getBaseSize(unsigned int v_ind) { return _base[v_ind].size(); }
@@ -90,7 +95,7 @@ protected:
   std::vector<unsigned int> & _independent;
 
   /// The snapshot containers for each variable.
-  std::vector<std::vector<std::pair<dof_id_type, std::unique_ptr<DenseVector<Real>>>>> _snapshots;
+  std::vector<std::vector<std::pair<dof_id_type, std::shared_ptr<DenseVector<Real>>>>> _snapshots;
 
   /// The correlation matrices for the variables.
   std::vector<DenseMatrix<Real>> _corr_mx;
@@ -117,3 +122,28 @@ private:
   /// needs a sorted vector as input.
   unsigned int determineNumberOfModes(Real limit, std::vector<Real> & inp_vec);
 };
+
+namespace libMesh
+{
+namespace Parallel
+{
+template <>
+class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>
+{
+public:
+  typedef Real buffer_type;
+  static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
+  static unsigned int packable_size(
+      const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+      const void *);
+  template <typename Iter, typename Context>
+  static void
+  pack(const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+       Iter data_out,
+       const Context *);
+  template <typename BufferIter, typename Context>
+  static std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
+  unpack(BufferIter in, Context *);
+};
+} // namespace Parallel
+} // namespace libMesh
