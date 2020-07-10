@@ -15,16 +15,22 @@
 /**
  * Test class that provides a few material properties through DerivativeMaterialInterface
  */
-class DerivativeMaterialInterfaceTestProvider : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class DerivativeMaterialInterfaceTestProviderTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  DerivativeMaterialInterfaceTestProvider(const InputParameters & parameters);
+  DerivativeMaterialInterfaceTestProviderTempl(const InputParameters & parameters);
 
   virtual void computeQpProperties();
 
 protected:
-  MaterialProperty<Real> &_prop1, &_prop2, &_prop3, &_prop4, &_prop5;
+  GenericMaterialProperty<Real, is_ad> &_prop1, &_prop2, &_prop3, &_prop4, &_prop5;
   MaterialProperty<dof_id_type> & _prop6;
+  GenericMaterialProperty<Real, is_ad> & _prop7;
 };
+
+typedef DerivativeMaterialInterfaceTestProviderTempl<false> DerivativeMaterialInterfaceTestProvider;
+typedef DerivativeMaterialInterfaceTestProviderTempl<true>
+    ADDerivativeMaterialInterfaceTestProvider;

@@ -300,7 +300,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * derivatives of constants are zero.
    */
   if (this->template defaultGenericMaterialProperty<U, is_ad>(prop_name))
-    return this->template getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
+    return this->template getGenericZeroMaterialProperty<U, is_ad>(prop_name + "_zeroderivative");
 
   if (c3 != "")
     return getDefaultMaterialPropertyByName<U, is_ad>(

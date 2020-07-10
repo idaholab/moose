@@ -12,52 +12,60 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("MooseTestApp", DerivativeMaterialInterfaceTestClient);
+registerMooseObject("MooseTestApp", ADDerivativeMaterialInterfaceTestClient);
 
+template <bool is_ad>
 InputParameters
-DerivativeMaterialInterfaceTestClient::validParams()
+DerivativeMaterialInterfaceTestClientTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>("prop_name", "", "Name of the property to be retrieved");
   return params;
 }
 
-DerivativeMaterialInterfaceTestClient::DerivativeMaterialInterfaceTestClient(
+template <bool is_ad>
+DerivativeMaterialInterfaceTestClientTempl<is_ad>::DerivativeMaterialInterfaceTestClientTempl(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _prop_name(getParam<MaterialPropertyName>("prop_name")),
     _by_name(_prop_name == ""),
-    _prop0(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c")
-                    : getMaterialPropertyDerivative<Real>("prop_name",
-                                                          "c")), // fetch non-existing derivative
-    _prop1(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a")
-                    : getMaterialPropertyDerivative<Real>("prop_name", "a")),
-    _prop2(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "b")
-                    : getMaterialPropertyDerivative<Real>("prop_name", "b")),
+    _prop0(_by_name
+               ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "c")
+               : getMaterialPropertyDerivative<Real, is_ad>("prop_name",
+                                                            "c")), // fetch non-existing derivative
+    _prop1(_by_name ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "a")
+                    : getMaterialPropertyDerivative<Real, is_ad>("prop_name", "a")),
+    _prop2(_by_name ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "b")
+                    : getMaterialPropertyDerivative<Real, is_ad>("prop_name", "b")),
     _prop3(_by_name
-               ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "b")
-               : getMaterialPropertyDerivative<Real>(
+               ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "a", "b")
+               : getMaterialPropertyDerivative<Real, is_ad>(
                      "prop_name", "a", "b")), // fetch alphabetically sorted (but declared unsorted)
-    _prop4(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "a", "c")
-                    : getMaterialPropertyDerivative<Real>("prop_name", "a", "c")),
-    _prop5(_by_name ? getMaterialPropertyDerivativeByName<Real>("prop", "c", "b", "a")
-                    : getMaterialPropertyDerivative<Real>(
+    _prop4(_by_name ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "a", "c")
+                    : getMaterialPropertyDerivative<Real, is_ad>("prop_name", "a", "c")),
+    _prop5(_by_name ? getMaterialPropertyDerivativeByName<Real, is_ad>("prop", "c", "b", "a")
+                    : getMaterialPropertyDerivative<Real, is_ad>(
                           "prop_name",
                           "c",
                           "b",
                           "a")), // fetch unsorted (declared unsorted, but differently unsorted)
-    _prop6(getDefaultMaterialProperty<dof_id_type>("elementid")) // check execution order
+    _prop6(getDefaultMaterialProperty<dof_id_type>("elementid")), // check execution order
+    _prop7(getDefaultMaterialProperty<Real, is_ad>("other_prop")),
+    _prop8(getDefaultMaterialProperty<Real, is_ad>("invalid_prop"))
 {
 }
 
+template <bool is_ad>
 void
-DerivativeMaterialInterfaceTestClient::initialSetup()
+DerivativeMaterialInterfaceTestClientTempl<is_ad>::initialSetup()
 {
   if (!_by_name)
-    validateDerivativeMaterialPropertyBase<Real>("prop_name");
+    validateDerivativeMaterialPropertyBase<Real, is_ad>("prop_name");
 }
 
+template <bool is_ad>
 void
-DerivativeMaterialInterfaceTestClient::computeQpProperties()
+DerivativeMaterialInterfaceTestClientTempl<is_ad>::computeQpProperties()
 {
   if (_by_name || _prop_name == "prop")
   {
@@ -76,6 +84,11 @@ DerivativeMaterialInterfaceTestClient::computeQpProperties()
       mooseError("Unexpected DerivativeMaterial property4 value. ", _prop4[_qp]);
     if (_prop5[_qp] != 5.0)
       mooseError("Unexpected DerivativeMaterial property5 value. ", _prop5[_qp]);
+
+    if (_prop7[_qp] != 6.0)
+      mooseError("Unexpected DerivativeMaterial property7 value. ", _prop7[_qp]);
+    if (_prop8[_qp] != 0.0)
+      mooseError("Unexpected DerivativeMaterial property8 value. ", _prop8[_qp]);
   }
   else if (_prop_name == "1.0")
   {
@@ -91,6 +104,11 @@ DerivativeMaterialInterfaceTestClient::computeQpProperties()
       mooseError("Unexpected DerivativeMaterial default property4 value. ", _prop4[_qp]);
     if (_prop5[_qp] != 0.0)
       mooseError("Unexpected DerivativeMaterial default property5 value. ", _prop5[_qp]);
+
+    if (_prop7[_qp] != 6.0)
+      mooseError("Unexpected DerivativeMaterial property7 value. ", _prop7[_qp]);
+    if (_prop8[_qp] != 0.0)
+      mooseError("Unexpected DerivativeMaterial property8 value. ", _prop8[_qp]);
   }
   else
     mooseError("Unexpected DerivativeMaterial property name.");

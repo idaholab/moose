@@ -160,4 +160,5 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::computeProperties()
 }
 
 // explicit instantiation
+template class DerivativeFunctionMaterialBaseTempl<true>;
 template class DerivativeFunctionMaterialBaseTempl<false>;
