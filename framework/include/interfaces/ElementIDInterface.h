@@ -126,6 +126,9 @@ public:
    */
   dof_id_type getElementID(const Elem * elem, unsigned int elem_id_index) const
   {
+    if (elem_id_index == elem->n_extra_integers())
+      return elem->subdomain_id();
+
     return elem->get_extra_integer(elem_id_index);
   }
 

@@ -5,7 +5,7 @@
   [element_counter_with_ids]
     type = 'CSVDiff'
     input = 'element_counter.i'
-    csvdiff = 'element_counter_out_elem_counter_0001.csv'
+    csvdiff = 'element_counter_out_elem_counter_0001.csv element_counter_out_elem_counter_subdomain_0001.csv'
     requirement = 'The system shall have the ability to retrieve element integers when visiting elements.'
   []
   [element_counter_with_ids_block_restricted]
