@@ -111,22 +111,38 @@ GaussianProcessTrainer::initialize()
 
   // Load training parameters into Eigen::Matrix for easier liner algebra manipulation
   // Load training data into Eigen::Vector for easier liner algebra manipulation
-  mooseAssert(_sampler->getLocalSamples().m() == num_samples,
+  mooseAssert(_sampler->getNumberOfRows() == num_samples,
               "Number of sampler rows not equal to number of results in selected VPP.");
 
   // Consider the possibility of a very large matrix load.
-  _training_params.resize(_sampler->getLocalSamples().m(), _sampler->getLocalSamples().n());
-  _training_data.resize(num_samples, 1);
-  int row_num = 0;
-  for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p, ++row_num)
+  _training_params.setZero(_sampler->getNumberOfRows(), _sampler->getNumberOfCols());
+  _training_data.setZero(num_samples, 1);
+  for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
   {
     // Loading parameters from sampler
     std::vector<Real> data = _sampler->getNextLocalRow();
     for (unsigned int d = 0; d < data.size(); ++d)
-      _training_params(row_num, d) = data[d];
+      _training_params(p, d) = data[d];
 
     // Loading result data from VPP
-    _training_data(row_num, 0) = (*_values_ptr)[row_num - offset];
+    _training_data(p, 0) = (*_values_ptr)[p - offset];
+  }
+}
+
+void
+GaussianProcessTrainer::execute()
+{
+}
+
+void
+
+GaussianProcessTrainer::finalize()
+{
+  for (unsigned int ii = 0; ii < _training_params.rows(); ++ii)
+  {
+    for (unsigned int jj = 0; jj < _training_params.cols(); ++jj)
+      gatherSum(_training_params(ii, jj));
+    gatherSum(_training_data(ii, 0));
   }
 
   // Standardize (center and scale) training params
@@ -148,16 +164,7 @@ GaussianProcessTrainer::initialize()
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _param_standardizer.set(0, 1, _n_params);
-}
 
-void
-GaussianProcessTrainer::execute()
-{
-}
-
-void
-GaussianProcessTrainer::finalize()
-{
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
   _K_cho_decomp = _K.llt();

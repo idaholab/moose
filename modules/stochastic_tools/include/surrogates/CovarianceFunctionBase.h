@@ -32,5 +32,4 @@ public:
   virtual void
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
-
 };
