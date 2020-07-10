@@ -27,11 +27,12 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The first and last lines of the output yield the desired information:
 
 ```
-Clinoptil-Ca = 12*H2O + 1*Ca++ + 2*Al+++ + 10*SiO2(aq) - 8*H+  .  log10(K) = -9.12
-Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*SiO2(aq) - 1.333*H+ - 0.6667*K+  .  log10(K) = -18.83
-Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz - 1.333*H+ - 0.6667*K+  .  log10(K) = 13.16
-Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.6667*K+  .  log10(K) = -5.484
+Clinoptil-Ca = 12*H2O + 1*Ca++ + 2*Al+++ + 10*SiO2(aq) - 8*H+  .  log10(K) = -9.235
+Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*SiO2(aq) - 1.333*H+ - 0.6667*K+  .  log10(K) = -18.95
+Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz - 1.333*H+ - 0.6667*K+  .  log10(K) = 13.13
+Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.6667*K+  .  log10(K) = -5.532
 ```
+(The tiny discrepancies between the "theoretical" values and the numerical values in the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
 
 
 ## Pyrite
@@ -68,8 +69,9 @@ The output yields the desired information:
 Pyrite = - 1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
 Pyrite = - 3.5*H2O + 1*Fe(OH)3(ppd) + 2*SO4-- + 4*H+ - 3.75*O2(aq)  .  log10(K) = 221
 Pyrite = - 1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
-Pyrite = - 1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.39
-Pyrite = - 1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.54
+Pyrite = - 1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.24
+Pyrite = - 1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.41
 ```
+(The tiny discrepancies between the "theoretical" values and the numerical values in the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
 
 !bibtex bibliography

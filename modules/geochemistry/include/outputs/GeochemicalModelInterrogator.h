@@ -27,6 +27,7 @@ public:
 protected:
   virtual void output(const ExecFlagType & type) override;
 
+  const GeochemicalDatabaseReader & _db;
   ModelGeochemicalDatabase _mgd;
   GeochemistrySpeciesSwapper _swapper;
   const std::vector<std::string> _swap_out;
@@ -56,22 +57,6 @@ private:
 
   /// return the activity for the species.  Note that knownActivity should be checked before calling getActivity.
   Real getActivity(const std::string & species) const;
-
-  /**
-   * @return log10K at the given temperature
-   * @param reference_log10k values of log10K at the values of temperature in _mgd.tmperatures. Only
-   * reference_log10K(0, *) will be used.
-   * @param temperature the temperature
-   */
-  Real log10K(const DenseMatrix<Real> & reference_log10K, Real temperature) const;
-
-  /**
-   * @return d(log10K)/dT at the given temperature
-   * @param reference_log10k values of log10K at the values of temperature in _mgd.tmperatures. Only
-   * reference_log10K(0, *) will be used.
-   * @param temperature the temperature
-   */
-  Real dlog10K_dT(const DenseMatrix<Real> & reference_log10K, Real temperature) const;
 
   /**
    * @return The value of temperature for which log10K = rhs.  If no solution is possible, NaN is

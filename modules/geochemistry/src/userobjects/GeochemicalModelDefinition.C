@@ -85,8 +85,8 @@ GeochemicalModelDefinition::validParams()
 
 GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _model(GeochemicalDatabaseReader(getParam<FileName>("database_file"),
-                                     getParam<bool>("reexpress_free_electron")),
+    _db(getParam<FileName>("database_file"), getParam<bool>("reexpress_free_electron")),
+    _model(_db,
            getParam<std::vector<std::string>>("basis_species"),
            getParam<std::vector<std::string>>("equilibrium_minerals"),
            getParam<std::vector<std::string>>("equilibrium_gases"),
@@ -119,4 +119,10 @@ const ModelGeochemicalDatabase &
 GeochemicalModelDefinition::getDatabase() const
 {
   return _model.modelGeochemicalDatabase();
+}
+
+const GeochemicalDatabaseReader &
+GeochemicalModelDefinition::getOriginalFullDatabase() const
+{
+  return _db;
 }
