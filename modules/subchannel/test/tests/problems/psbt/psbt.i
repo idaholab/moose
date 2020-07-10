@@ -112,6 +112,31 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[AuxKernels]
+  [P_out_bc]
+    type = ConstantAux
+    variable = P
+    boundary = outlet
+    value = ${P_out}
+    execute_on = 'timestep_begin'
+  []
+  [T_in_bc]
+    type = ConstantAux
+    variable = T
+    boundary = inlet
+    value = ${T_in}
+    execute_on = 'timestep_begin'
+  []
+  [mdot_in_bc]
+    type = MassFlowRateAux
+    variable = mdot
+    boundary = inlet
+    area = S
+    mass_flux = ${mass_flux_in}
+    execute_on = 'timestep_begin'
+  []
+[]
+
 [Outputs]
   exodus = true
 []
