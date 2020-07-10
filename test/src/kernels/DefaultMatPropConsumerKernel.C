@@ -25,6 +25,6 @@ template <bool is_ad>
 DefaultMatPropConsumerKernelTempl<is_ad>::DefaultMatPropConsumerKernelTempl(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<GenericKernel<is_ad>>(parameters),
-    _prop(getDefaultMaterialProperty<Real>("mat_prop"))
+    _prop(this->template getDefaultMaterialProperty<Real, is_ad>("mat_prop"))
 {
 }

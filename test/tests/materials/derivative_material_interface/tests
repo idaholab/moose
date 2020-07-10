@@ -115,23 +115,123 @@
 
   [dual_number_support]
     requirement = 'AD shall work with parsed materials'
-    [jacobian]
-      type = 'PetscJacobianTester'
-      input = 'ad_parsed_material.i'
-      ratio_tol = 1e-8
-      difference_tol = 1e-7
-      run_sim = True
-      turn_off_exodus_output = False
-      detail = 'returning an exact jacobian.'
+
+    [analytic_derivatives]
+      requirement = 'The system shall be capable of producing analytic derivatives of material '
+                    'properties:'
+
+      [jacobian]
+        type = 'PetscJacobianTester'
+        input = 'ad_parsed_material.i'
+        ratio_tol = 1e-8
+        difference_tol = 1e-7
+        run_sim = True
+        turn_off_exodus_output = False
+        detail = 'returning an exact jacobian.'
+      []
+      [derivative_jacobian]
+        type = 'PetscJacobianTester'
+        input = 'ad_derivative_parsed_material.i'
+        ratio_tol = 1e-8
+        difference_tol = 1e-7
+        run_sim = True
+        turn_off_exodus_output = False
+        detail = 'returning an exact jacobian in derivative materials.'
+      []
+
+      [property_names]
+        type = 'RunApp'
+        input = 'ad_test.i'
+        recover = false
+
+        detail = 'defined by function expressions,'
+      []
+
+      [material_chaining]
+        type = CSVDiff
+        input = 'ad_material_chaining.i'
+        csvdiff = 'ad_material_chaining_out.csv'
+
+        detail = 'involving chain rules of material properties defined by function expressions, and'
+      []
     []
-    [derivative_jacobian]
-      type = 'PetscJacobianTester'
-      input = 'ad_derivative_parsed_material.i'
-      ratio_tol = 1e-8
-      difference_tol = 1e-7
-      run_sim = True
-      turn_off_exodus_output = False
-      detail = 'returning an exact jacobian in derivative materials.'
+
+    [ordering]
+      [execution]
+        type = 'RunApp'
+        input = 'ad_execution_order.i'
+        recover = false
+
+        detail = 'so that they may be retrieved before being declared.'
+      []
+    []
+
+    [new_getproperty_semantics]
+      type = 'Exodiff'
+      input = 'ad_const.i'
+      exodiff = 'ad_const_out.e'
+      recover = false
+
+      requirement = 'The system shall support supplying a constant literal in place of a property '
+                    'name for material property derivative consumers.'
+    []
+
+    [mutliblock]
+      # Test the default property behavior of DerivativeMaterialInterface
+      type = 'RunApp'
+      input = 'ad_multiblock.i'
+
+      requirement = 'The system shall support optional coupling where materials that do not exist '
+                    'are returned as valid objects containing zero.'
+    []
+
+    [warn]
+      type = 'RunException'
+      input = 'ad_warn.i'
+      expect_err = "The material property 'prop' does not exist."
+      recover = false
+
+      requirement = 'The system shall issue an error when required derivative materials that are '
+                    'retrieved are never declared.'
+    []
+
+    [bad_evaluation]
+      requirement = 'The system shall handle a bad evaluation by'
+      [nan]
+        type = 'RunApp'
+        input = 'ad_bad_evaluation.i'
+        recover = false
+        detail = 'passing a silent nan.'
+        skip = 'not supported yet'
+      []
+      [warning]
+        type = 'RunApp'
+        input = 'ad_bad_evaluation.i'
+        expect_out = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+        cli_args = 'Materials/F/evalerror_behavior=nan_warning'
+        recover = false
+        detail = 'throwing a warning and passing a silent nan.'
+        allow_warnings = true
+        skip = 'not supported yet'
+      []
+      [error]
+        type = 'RunException'
+        input = 'ad_bad_evaluation.i'
+        expect_err = 'In F: DerivativeParsedMaterial function evaluation encountered an error'
+        cli_args = 'Materials/F/evalerror_behavior=error'
+        recover = false
+        detail = 'throwing an error.'
+        skip = 'not supported yet'
+      []
+      [exception]
+        type = 'RunApp'
+        input = 'ad_bad_evaluation.i'
+        expect_out = 'Cutting timestep'
+        cli_args = 'Materials/F/evalerror_behavior=exception'
+        recover = false
+        detail = 'throwing an exception.'
+        skip = 'not supported yet'
+      []
     []
   []
 []
