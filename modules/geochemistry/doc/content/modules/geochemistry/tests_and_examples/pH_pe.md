@@ -38,11 +38,12 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The output yields the desired information:
 
 ```
-(A_H+)^-4 (A_O2(aq))^0.5 = 10^3.068
-(A_H+)^-6 (A_e-)^-2 = 10^46.07
+(A_H+)^-4 (A_O2(aq))^0.5 = 10^3.066
+(A_H+)^-6 (A_e-)^-2 = 10^46.08
 ```
 
-The square of first equation is [eqn:ph], while the square-root of the second yields [eqn:pe].
+The square of first equation is [eqn:ph], while the square-root of the second yields [eqn:pe].  (The tiny discrepancies between the "theoretical" values and the numerical values in the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
+
 
 
 !bibtex bibliography

@@ -28,9 +28,10 @@ The output yields the desired information:
 
 ```
 Not enough activites known to compute equilibrium temperature for reaction
-  Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.443
-Gypsum.  T = 44.1212
+  Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.451
+Gypsum.  T = 43.6625degC
 ```
+(The tiny discrepancies between the "theoretical" values and the numerical values in the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
 
 The first lines state that equilibrium temperature for the reaction
 \begin{equation}
