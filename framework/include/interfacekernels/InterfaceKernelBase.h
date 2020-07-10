@@ -23,6 +23,7 @@
 #include "MeshChangedInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "TaggingInterface.h"
+#include "ElementIDInterface.h"
 
 // Forward Declarations
 class InterfaceKernelBase;
@@ -45,7 +46,8 @@ class InterfaceKernelBase : public MooseObject,
                             public Restartable,
                             public MeshChangedInterface,
                             public TwoMaterialPropertyInterface,
-                            public TaggingInterface
+                            public TaggingInterface,
+                            public ElementIDInterface
 {
 public:
   static InputParameters validParams();

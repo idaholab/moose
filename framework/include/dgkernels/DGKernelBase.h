@@ -23,6 +23,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
+#include "ElementIDInterface.h"
 
 #include "Assembly.h"
 
@@ -55,7 +56,8 @@ class DGKernelBase : public MooseObject,
                      public TwoMaterialPropertyInterface,
                      public Restartable,
                      public MeshChangedInterface,
-                     public TaggingInterface
+                     public TaggingInterface,
+                     public ElementIDInterface
 {
 public:
   /**

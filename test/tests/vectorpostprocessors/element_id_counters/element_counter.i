@@ -42,6 +42,10 @@
     type = ElementCounterWithID
     id_name = foo_id
   []
+  [elem_counter_subdomain]
+    type = ElementCounterWithID
+    id_name = subdomain_id
+  []
 []
 
 [Problem]

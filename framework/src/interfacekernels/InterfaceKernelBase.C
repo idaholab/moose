@@ -92,6 +92,7 @@ InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
     MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     TaggingInterface(this),
+    ElementIDInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

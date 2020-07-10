@@ -44,6 +44,8 @@ ElementCounterWithID::initialize()
 void
 ElementCounterWithID::execute()
 {
+  if (_current_id != getElementID(_current_elem, _id_index))
+    mooseError("Internal error on element ID handling");
   ++_counters[_current_id];
 }
 
