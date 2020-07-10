@@ -11,7 +11,6 @@
     'compute a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -29,7 +28,6 @@
     'loading in the x-direction.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -47,7 +45,6 @@
     'loading in the y-direction.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -64,7 +61,6 @@
     'the correct response under mixed-mode loading.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -81,7 +77,6 @@
     'compute a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
@@ -98,9 +93,19 @@
     'a normal gap under purely normal loading.'
     mesh_mode = 'REPLICATED'
     recover = false
-    method = '!dbg' # issue 12033
     design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
     abs_zero = 1e-4
     rel_err = 1e-3
+  [../]
+  [./czm_ld_stretch_rotate_patch_convergence_3DC]
+    type = CSVDiff
+    input = 'czm_patch_test.i'
+    csvdiff = 'czm_patch_test_3DC_out.csv'
+    requirement = "The CZMInterfaceKernel should converge quadratically when using the SMP preconditioner."
+    cli_args = "Outputs/file_base=czm_patch_test_3DC_out Materials/czm_mat/type=SalehaniIrani3DCTraction Materials/czm_mat/normal_gap_at_maximum_normal_traction=0.05 Materials/czm_mat/tangential_gap_at_maximum_shear_traction=0.05 Materials/czm_mat/maximum_normal_traction=1e1 Materials/czm_mat/maximum_shear_traction=7e0"
+    issues = '#15368'
+    mesh_mode = 'REPLICATED'
+    design = 'source/materials/czm/SalehaniIrani3DCTraction.md source/interfacekernels/CZMInterfaceKernel.md'
+    recover = false
   [../]
 []

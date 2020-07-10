@@ -37,6 +37,7 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _disp_neighbor_var(_ndisp),
+    _vars(_ndisp),
     _traction_global(getMaterialPropertyByName<RealVectorValue>("traction_global")),
     _traction_derivatives_global(
         getMaterialPropertyByName<RankTwoTensor>("traction_derivatives_global"))
@@ -48,6 +49,7 @@ CZMInterfaceKernel::CZMInterfaceKernel(const InputParameters & parameters)
   {
     _disp_var[i] = coupled("displacements", i);
     _disp_neighbor_var[i] = coupled("displacements", i);
+    _vars[i] = getVar("displacements", i);
   }
 }
 
@@ -80,16 +82,16 @@ CZMInterfaceKernel::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
-      jac *= _test[_i][_qp] * _phi[_j][_qp];
+      jac *= _test[_i][_qp] * _vars[_component]->phiFace()[_j][_qp];
       break;
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
-      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
+      jac *= -_test[_i][_qp] * _vars[_component]->phiFaceNeighbor()[_j][_qp];
       break;
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
-      jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
+      jac *= -_test_neighbor[_i][_qp] * _vars[_component]->phiFace()[_j][_qp];
       break;
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
-      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp];
+      jac *= _test_neighbor[_i][_qp] * _vars[_component]->phiFaceNeighbor()[_j][_qp];
       break;
   }
   return jac;
@@ -113,16 +115,16 @@ CZMInterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigne
   switch (type)
   {
     case Moose::ElementElement: // Residual_sign -1  ddeltaU_ddisp sign -1;
-      jac *= _test[_i][_qp] * _phi[_j][_qp];
+      jac *= _test[_i][_qp] * _vars[off_diag_component]->phiFace()[_j][_qp];
       break;
     case Moose::ElementNeighbor: // Residual_sign -1  ddeltaU_ddisp sign 1;
-      jac *= -_test[_i][_qp] * _phi_neighbor[_j][_qp];
+      jac *= -_test[_i][_qp] * _vars[off_diag_component]->phiFaceNeighbor()[_j][_qp];
       break;
     case Moose::NeighborElement: // Residual_sign 1  ddeltaU_ddisp sign -1;
-      jac *= -_test_neighbor[_i][_qp] * _phi[_j][_qp];
+      jac *= -_test_neighbor[_i][_qp] * _vars[off_diag_component]->phiFace()[_j][_qp];
       break;
     case Moose::NeighborNeighbor: // Residual_sign 1  ddeltaU_ddisp sign 1;
-      jac *= _test_neighbor[_i][_qp] * _phi_neighbor[_j][_qp];
+      jac *= _test_neighbor[_i][_qp] * _vars[off_diag_component]->phiFaceNeighbor()[_j][_qp];
       break;
   }
   return jac;

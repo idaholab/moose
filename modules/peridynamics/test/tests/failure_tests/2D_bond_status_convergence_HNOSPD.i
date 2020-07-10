@@ -47,7 +47,7 @@
 []
 
 [UserObjects]
-  [./singular_shape_tensor]
+  [./shape_singularity]
     type = SingularShapeTensorEliminatorUserObjectPD
   [../]
 []
@@ -114,6 +114,12 @@
   [../]
 []
 
+[Postprocessors]
+  [./bond_status_updated_times]
+    type = BondStatusConvergedPostprocessorPD
+  [../]
+[]
+
 [Preconditioning]
   [./SMP]
     type = SMP
@@ -126,8 +132,14 @@
   solve_type = PJFNK
   line_search = none
   start_time = 0
-  dt = 1
+  dt = 0.5
   end_time = 1
+
+  picard_max_its = 5
+  accept_on_max_picard_iteration = true
+  picard_custom_pp = bond_status_updated_times
+  custom_abs_tol = 2
+  disable_picard_residual_norm_check = true
 
   [./Quadrature]
     type = GAUSS_LOBATTO
@@ -136,6 +148,6 @@
 []
 
 [Outputs]
-  file_base = 2D_singular_shape_tensor_HNOSPD
+  file_base = 2D_bond_status_convergence_HNOSPD
   exodus = true
 []

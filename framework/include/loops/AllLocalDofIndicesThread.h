@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 
 #include "libmesh/elem_range.h"
+#include "libmesh/parallel_object.h"
 
 // Forward declare classes in libMesh
 namespace libMesh
@@ -22,12 +23,15 @@ class DofMap;
 }
 
 /**
- * Grab all the local dof indices for the variables passed in, in the system passed in.
+ * Grab all the (possibly semi)local dof indices for the variables passed in, in the system passed
+ * in.
  */
-class AllLocalDofIndicesThread
+class AllLocalDofIndicesThread : public ParallelObject
 {
 public:
-  AllLocalDofIndicesThread(System & sys, std::vector<std::string> vars);
+  AllLocalDofIndicesThread(System & sys,
+                           std::vector<std::string> vars,
+                           bool include_semilocal = false);
   // Splitting Constructor
   AllLocalDofIndicesThread(AllLocalDofIndicesThread & x, Threads::split split);
 
@@ -35,13 +39,20 @@ public:
 
   void join(const AllLocalDofIndicesThread & y);
 
-  std::set<dof_id_type> _all_dof_indices;
+  const std::set<dof_id_type> & getDofIndices() const { return _all_dof_indices; }
+
+  void dofIndicesSetUnion();
 
 protected:
   System & _sys;
   DofMap & _dof_map;
   std::vector<std::string> _vars;
   std::vector<unsigned int> _var_numbers;
-  THREAD_ID _tid;
-};
 
+  /// Whether to include semilocal dof indices
+  const bool _include_semilocal;
+
+  THREAD_ID _tid;
+
+  std::set<dof_id_type> _all_dof_indices;
+};
