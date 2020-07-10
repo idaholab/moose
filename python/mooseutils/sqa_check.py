@@ -10,7 +10,8 @@
 import os
 import collections
 import subprocess
-from .mooseutils import git_root_dir, colorText
+from .mooseutils import colorText
+from .gitutils import git_root_dir
 
 def check_requirement(filename):
     """Check spec file for requirement documentation."""
