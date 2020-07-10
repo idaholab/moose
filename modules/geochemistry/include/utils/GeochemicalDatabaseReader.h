@@ -222,8 +222,14 @@ public:
    * equilibrium reaction expressed in terms of O2(g), and O2(g) exists as a gas in the database
    * file, and O2(g)'s equilibrium reaction is O2(g)=O2(eq), and O2(aq) exists as a basis species in
    * the database file, then reexpress the free electron's equilibrium reaction in terms of O2(aq)
+   * @param use_piecewise_interpolation If true then set the "logk model" to "piecewise-linear"
+   * regardless of the value found in the filename.  This is designed to make testing easy (because
+   * logK and Debye-Huckel parameters will be exactly as set in the filename instead of from a 4-th
+   * order least-squares fit) but should rarely be used for real geochemical simulations
    */
-  GeochemicalDatabaseReader(const FileName filename, const bool reexpress_free_electron = true);
+  GeochemicalDatabaseReader(const FileName filename,
+                            const bool reexpress_free_electron = true,
+                            const bool use_piecewise_interpolation = false);
 
   /**
    * Parse the thermodynamic database

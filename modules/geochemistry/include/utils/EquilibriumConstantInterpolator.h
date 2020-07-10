@@ -12,24 +12,29 @@
 #include "MooseTypes.h"
 #include "LeastSquaresFitBase.h"
 #include "DualRealOps.h"
+#include "LinearInterpolation.h"
 
 /**
  * Fit the equilibrium constant values read from the thermodynamic databse at specified
- * temperature values with one of two types of fits:
+ * temperature values with one of three types of fits:
  *
- * a fourth-order polynomial fit (for GWB databses)
+ * (1) a fourth-order polynomial fit (for GWB databses)
  *
  * log(K)= a_0 + a_1 T + a_2 T^2 + a_3 T^3 + a_4 T^4
  *
- * a Maier-Kelly type fit (for EQ3/6 databases)
+ * (2) a Maier-Kelly type fit (for EQ3/6 databases)
  *
  * log(K)= a_0 ln(T) + a_1 + a_2 T + a_3 / T + a_4 / T^2
  *
+ * (3) a piecewise linear function (for testing purposes) defined by the (temperature, logk) values,
+ * with no extrapolation (if T<T_min then the first data value is used, while if T>T_max then the
+ * last data value is used)
+ *
  * where T is the temperature in C.
  *
- * Note: at least five data points must be provided to generate a fit of either type.
- * If less than five data points exist (where 500.0000 represents no value), then a
- * linear fit is used.
+ * Note: at least five data points must be provided to generate a fit of type (1) or (2), while at
+ * least one data point must be provided to generate a piecewise linear function.  If fewer
+ * data points exist (where 500.0000 represents no value), then a linear fit is used.
  *
  * The type of fit is specified during construction using the type parameter.
  * The value of "no value" used in the database is provided using the optional no_value
@@ -62,6 +67,10 @@ protected:
   {
     FOURTHORDER,
     MAIERKELLY,
-    LINEAR
+    LINEAR,
+    PIECEWISELINEAR
   } _fit_type;
+
+  /// helper object to perform the linear interpolation of the function data
+  std::unique_ptr<LinearInterpolation> _linear_interp;
 };
