@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Material.h"
-#include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
 
@@ -18,12 +17,13 @@
  * Calculates resistivity and electrical conductivity as a function of temperature.
  * It is assumed that resistivity varies linearly with temperature.
  */
-class ElectricalConductivity : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class ElectricalConductivityTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ElectricalConductivity(const InputParameters & parameters);
+  ElectricalConductivityTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
@@ -32,9 +32,16 @@ private:
   const Real _ref_resis;
   const Real _temp_coeff;
   const Real _ref_temp;
+  const bool _has_temp;
   const VariableValue & _T;
+  const ADVariableValue & _ad_T;
 
   const std::string _base_name;
-  MaterialProperty<Real> & _electric_conductivity;
+  GenericMaterialProperty<Real, is_ad> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
+
+  void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);
 };
+
+typedef ElectricalConductivityTempl<false> ElectricalConductivity;
+typedef ElectricalConductivityTempl<true> ADElectricalConductivity;
