@@ -199,9 +199,9 @@ SubChannelMesh::buildMesh()
     }
   }
 
-  boundary_info.sideset_name(0) = "bottom";
-  boundary_info.sideset_name(1) = "top";
-  boundary_info.nodeset_name(0) = "bottom";
-  boundary_info.nodeset_name(1) = "top";
+  boundary_info.sideset_name(0) = "inlet";
+  boundary_info.sideset_name(1) = "outlet";
+  boundary_info.nodeset_name(0) = "inlet";
+  boundary_info.nodeset_name(1) = "outlet";
   mesh.prepare_for_use();
 }
