@@ -27,6 +27,8 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
+  CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
+
 private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler;
@@ -67,11 +69,15 @@ private:
   /// Switch for training data(y) standardization
   bool _standardize_data;
 
+  /// Type of covariance function used for this surrogate
   std::string & _covar_type;
 
+  /// Scalar hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, Real> & _hyperparam_map;
 
+  /// Vector hyperparameters. Stored for use in surrogate
   std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
+  /// Covariance function object
   CovarianceFunctionBase * _covariance_function;
 };

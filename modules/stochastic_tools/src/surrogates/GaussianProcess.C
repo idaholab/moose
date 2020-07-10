@@ -19,7 +19,6 @@ GaussianProcess::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
-  params.addParam<UserObjectName>("covariance_function", "Name of covariance function.");
   return params;
 }
 
@@ -31,29 +30,40 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _covar_name(isParamValid("filename") ? UserObjectName(_name + "_covar_func")
-                                         : getParam<UserObjectName>("covariance_function")),
     _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _covar_type(getModelData<std::string>("_covar_type")),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
         getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
 {
+  if (isParamValid("trainer"))
+  {
+    const GaussianProcessTrainer & trainer =
+        dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer"));
+    _covariance_function = trainer.getCovarPtr();
+  }
 }
 
 void
 GaussianProcess::setupCovariance()
+{
+}
+
+void
+GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
   /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction
   /// Must be called AFTER Covariacne Function is potentially created by action.
   std::vector<CovarianceFunctionBase *> models;
   _feproblem.theWarehouse()
       .query()
-      .condition<AttribName>(_covar_name)
+      .condition<AttribName>(covar_name)
       .condition<AttribSystem>("CovarianceFunctionBase")
       .queryInto(models);
   if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object with the name '" + _covar_name + "'");
+    mooseError("Unable to find a CovarianceFunction object associated with surrogate trainer, "
+               "searching on '" +
+               covar_name + "'");
   _covariance_function = models[0];
 }
 
