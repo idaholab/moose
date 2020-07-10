@@ -18,6 +18,9 @@
 #include "MultiApp.h"
 
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/meshfree_interpolation.h"
+#include "libmesh/system.h"
+#include "libmesh/radial_basis_interpolation.h"
 
 registerMooseObject("MooseApp", MultiAppInterpolationTransfer);
 
@@ -84,10 +87,12 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
 
 void
 MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
-                                                Node & node,
+                                                const Node & node,
                                                 std::set<subdomain_id_type> & subdomainids)
 {
   // We need this map to figure out to which subdomains a given mesh point is attached
+  // We can not make mesh const here because we may need to create a node-to-elems map
+  // if it does not exists
   auto & node_to_elem = mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem.find(node.id());
 
@@ -108,8 +113,8 @@ MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
 void
 MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
     FEProblemBase & from_problem,
-    MooseVariableFEBase & from_var,
-    Point & from_app_position,
+    const MooseVariableFieldBase & from_var,
+    const Point & from_app_position,
     std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   MeshBase * from_mesh = NULL;
@@ -128,16 +133,16 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
   }
 
   // Moose system
-  SystemBase & from_system_base = from_var.sys();
+  const SystemBase & from_system_base = from_var.sys();
   // libmesh system
-  System & from_sys = from_system_base.system();
+  const System & from_sys = from_system_base.system();
 
   // System number and var number
   auto from_sys_num = from_sys.number();
   auto from_var_num = from_sys.variable_number(from_var.name());
 
   // Check FE type so we can figure out how to sample points
-  auto & fe_type = from_sys.variable_type(from_var_num);
+  const auto & fe_type = from_sys.variable_type(from_var_num);
   bool from_is_constant = fe_type.order == CONSTANT;
   bool from_is_nodal = fe_type.family == LAGRANGE;
 
@@ -161,13 +166,13 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
   }
 
   // The solution from the system with which the from_var is associated
-  NumericVector<Number> & from_solution = *from_sys.solution;
+  const NumericVector<Number> & from_solution = *from_sys.solution;
 
   std::set<subdomain_id_type> subdomainids;
   std::vector<subdomain_id_type> include_block_ids;
   if (from_is_nodal)
   {
-    for (const auto & from_node : from_mesh->local_node_ptr_range())
+    for (const auto * const from_node : from_mesh->local_node_ptr_range())
     {
       // Assuming LAGRANGE!
       if (from_node->n_comp(from_sys_num, from_var_num) == 0)
@@ -205,7 +210,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
   else
   {
     std::vector<Point> points;
-    for (const auto & from_elem :
+    for (const auto * const from_elem :
          as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
     {
       // Skip this element if the variable has no dofs at it.
@@ -216,7 +221,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
       if (from_is_constant)
         points.push_back(from_elem->centroid());
       else
-        for (auto & node : from_elem->node_ref_range())
+        for (const auto & node : from_elem->node_ref_range())
           points.push_back(node);
 
       unsigned int n_comp = from_elem->n_comp(from_sys_num, from_var_num);
@@ -246,7 +251,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
           continue;
       }
 
-      for (auto & point : points)
+      for (const auto & point : points)
       {
         dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
         src_vals.push_back(from_solution(from_dof));
@@ -259,10 +264,10 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
 void
 MultiAppInterpolationTransfer::interpolateTargetPoints(
     FEProblemBase & to_problem,
-    MooseVariableFEBase & to_var,
+    MooseVariableFieldBase & to_var,
     NumericVector<Real> & to_solution,
-    Point & to_app_position,
-    std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
+    const Point & to_app_position,
+    const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
   // Moose system
   SystemBase & to_system_base = to_var.sys();
@@ -296,7 +301,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
     exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
   }
 
-  auto & to_fe_type = to_sys.variable_type(to_var_num);
+  const auto & to_fe_type = to_sys.variable_type(to_var_num);
   bool to_is_constant = to_fe_type.order == CONSTANT;
   bool to_is_nodal = to_fe_type.family == LAGRANGE;
 
@@ -305,9 +310,11 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
 
   std::set<subdomain_id_type> subdomainids;
   std::vector<subdomain_id_type> include_block_ids;
+  std::vector<Point> pts;
+  std::vector<Number> vals;
   if (to_is_nodal)
   {
-    for (const auto & node : mesh->local_node_ptr_range())
+    for (const auto * const node : mesh->local_node_ptr_range())
     {
       if (node->n_dofs(to_sys_num, to_var_num) <= 0) // If this variable has dofs at this node
         continue;
@@ -332,25 +339,20 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
           continue;
       }
 
-      std::vector<Point> pts;
-      std::vector<Number> vals;
-
+      pts.clear();
       pts.push_back(*node + translate + to_app_position);
       vals.resize(1);
 
       idi->interpolate_field_data({_to_var_name}, pts, vals);
-
-      Real value = vals.front();
-
       dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
-
-      to_solution.set(dof, value);
+      to_solution.set(dof, vals.front());
     }
   }
   else // Elemental
   {
     std::vector<Point> points;
-    for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
+    for (const auto * const elem :
+         as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
     {
       // Skip this element if the variable has no dofs at it.
       if (elem->n_dofs(to_sys_num, to_var_num) < 1)
@@ -360,7 +362,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
       if (to_is_constant)
         points.push_back(elem->centroid());
       else
-        for (auto & node : elem->node_ref_range())
+        for (const auto & node : elem->node_ref_range())
           points.push_back(node);
 
       auto n_points = points.size();
@@ -388,21 +390,15 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
       }
 
       unsigned int offset = 0;
-      for (auto & point : points)
+      for (const auto & point : points)
       {
-        std::vector<Point> pts;
-        std::vector<Number> vals;
-
+        pts.clear();
         pts.push_back(point + translate + to_app_position);
         vals.resize(1);
 
         idi->interpolate_field_data({_to_var_name}, pts, vals);
-
-        Real value = vals.front();
-
         dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
-
-        to_solution.set(dof, value);
+        to_solution.set(dof, vals.front());
       } // point
     }   // auto elem
   }     // else
@@ -416,7 +412,7 @@ MultiAppInterpolationTransfer::execute()
 {
   _console << "Beginning InterpolationTransfer " << name() << std::endl;
 
-  FEProblemBase & fe_problem = _multi_app->problemBase();
+  const FEProblemBase & fe_problem = _multi_app->problemBase();
   std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
   switch (_interp_type)
   {
@@ -438,9 +434,9 @@ MultiAppInterpolationTransfer::execute()
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
-      MooseVariableFEBase & from_var = from_problem.getVariable(
+      const auto & from_var = from_problem.getVariable(
           0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
-      Point from_app_position(0);
+      const Point from_app_position(0);
 
       fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
 
@@ -453,7 +449,7 @@ MultiAppInterpolationTransfer::execute()
         {
           auto & to_problem = _multi_app->appProblemBase(i);
           Moose::ScopedCommSwapper swapper(to_problem.comm().get());
-          auto to_app_position = _multi_app->position(i);
+          const auto to_app_position = _multi_app->position(i);
           auto & to_var = to_problem.getVariable(0,
                                                  _to_var_name,
                                                  Moose::VarKindType::VAR_ANY,
@@ -476,11 +472,11 @@ MultiAppInterpolationTransfer::execute()
         {
           auto & from_problem = _multi_app->appProblemBase(i);
           Moose::ScopedCommSwapper swapper(from_problem.comm().get());
-          auto from_app_position = _multi_app->position(i);
-          auto & from_var = from_problem.getVariable(0,
-                                                     _from_var_name,
-                                                     Moose::VarKindType::VAR_ANY,
-                                                     Moose::VarFieldType::VAR_FIELD_STANDARD);
+          const auto from_app_position = _multi_app->position(i);
+          const auto & from_var = from_problem.getVariable(0,
+                                                           _from_var_name,
+                                                           Moose::VarKindType::VAR_ANY,
+                                                           Moose::VarFieldType::VAR_FIELD_STANDARD);
 
           fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
         }
@@ -489,12 +485,12 @@ MultiAppInterpolationTransfer::execute()
       idi->prepare_for_use();
 
       FEProblemBase & to_problem = _multi_app->problemBase();
-      MooseVariableFEBase & to_var = to_problem.getVariable(
+      MooseVariableFieldBase & to_var = to_problem.getVariable(
           0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
       auto & to_solution = *to_var.sys().system().solution;
 
-      Point to_app_position(0);
+      const Point to_app_position(0);
 
       interpolateTargetPoints(to_problem, to_var, to_solution, to_app_position, idi);
 
@@ -512,7 +508,7 @@ MultiAppInterpolationTransfer::execute()
 
 void
 MultiAppInterpolationTransfer::computeTransformation(
-    MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
+    const MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
 {
   auto & libmesh_mesh = mesh.getMesh();
 

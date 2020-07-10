@@ -11,19 +11,21 @@
 
 // MOOSE includes
 #include "MultiAppConservativeTransfer.h"
-#include "MooseVariableFEBase.h"
+#include "MooseVariableFieldBase.h"
 
 #include "libmesh/mesh_base.h"
-
-#include "libmesh/meshfree_interpolation.h"
-#include "libmesh/system.h"
-#include "libmesh/radial_basis_interpolation.h"
 
 // Forward declarations
 class MultiAppInterpolationTransfer;
 
 template <>
 InputParameters validParams<MultiAppInterpolationTransfer>();
+
+namespace libMesh
+{
+template <unsigned int>
+class InverseDistanceInterpolation;
+}
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
@@ -53,19 +55,21 @@ protected:
 
   void
   fillSourceInterpolationPoints(FEProblemBase & from_problem,
-                                MooseVariableFEBase & from_var,
-                                Point & from_app_position,
+                                const MooseVariableFieldBase & from_var,
+                                const Point & from_app_position,
                                 std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
 
-  void interpolateTargetPoints(FEProblemBase & to_problem,
-                               MooseVariableFEBase & to_var,
-                               NumericVector<Real> & to_solution,
-                               Point & to_app_position,
-                               std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
+  void
+  interpolateTargetPoints(FEProblemBase & to_problem,
+                          MooseVariableFieldBase & to_var,
+                          NumericVector<Real> & to_solution,
+                          const Point & to_app_position,
+                          const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi);
 
-  void subdomainIDsNode(MooseMesh & mesh, Node & node, std::set<subdomain_id_type> & subdomainids);
+  void
+  subdomainIDsNode(MooseMesh & mesh, const Node & node, std::set<subdomain_id_type> & subdomainids);
 
-  void computeTransformation(MooseMesh & mesh,
+  void computeTransformation(const MooseMesh & mesh,
                              std::unordered_map<dof_id_type, Point> & transformation);
 
   unsigned int _num_points;

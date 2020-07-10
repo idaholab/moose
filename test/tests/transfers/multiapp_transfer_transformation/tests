@@ -9,6 +9,6 @@
     cli_args = 'Outputs/hide="fromsubelem"'
     # MultiAppInterpolationTransfer does not support distributed mesh at this moment
     mesh_mode = 'replicated'
-    requirement = "The system shall be able to create virtually translated points during MultiApp transfers"
+    requirement = "The system shall be able to create virtually translated points during MultiApp transfers."
   []
 []
