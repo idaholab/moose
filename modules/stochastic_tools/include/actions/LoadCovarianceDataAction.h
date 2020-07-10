@@ -20,5 +20,5 @@ public:
   virtual void act() override;
 
 private:
-  void load(const GaussianProcess & model);
+  void load(GaussianProcess & model);
 };

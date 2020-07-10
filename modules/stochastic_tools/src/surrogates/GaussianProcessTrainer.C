@@ -38,7 +38,6 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    //_kernel_type(getParam<MooseEnum>("kernel_function")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _training_data(declareModelData<RealEigenMatrix>("_training_data")),
@@ -154,13 +153,13 @@ GaussianProcessTrainer::initialize()
 void
 GaussianProcessTrainer::execute()
 {
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
 }
 
 void
 GaussianProcessTrainer::finalize()
 {
+  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
+  _K_cho_decomp = _K.llt();
+  _K_results_solve = _K_cho_decomp.solve(_training_data);
 }

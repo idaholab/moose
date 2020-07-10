@@ -33,16 +33,4 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
 
-protected:
-  /// This needs to be declared first, before all other vairables that would be stored in it
-  std::vector<std::vector<Real>> _hyperparams;
-
-  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
-
-  /// signal variance (\sigma_f^2)
-  Real _sigma_f_squared;
-
-  /// noise variance (\sigma_n^2)
-  Real _sigma_n_squared;
 };

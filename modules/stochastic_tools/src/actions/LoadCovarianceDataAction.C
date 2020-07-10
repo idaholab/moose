@@ -33,23 +33,19 @@ LoadCovarianceDataAction::act()
   _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
   for (auto model_ptr : objects)
   {
-    if (model_ptr && model_ptr->type() == "GaussianProcess")
-    {
-      if (model_ptr->isParamValid("filename"))
-        load(*dynamic_cast<GaussianProcess *>(model_ptr));
-      dynamic_cast<GaussianProcess *>(model_ptr)->setupCovariance();
-    }
+    if (model_ptr && model_ptr->type() == "GaussianProcess" && model_ptr->isParamValid("filename"))
+      load(*dynamic_cast<GaussianProcess *>(model_ptr));
   }
 }
 
 void
-LoadCovarianceDataAction::load(const GaussianProcess & model)
+LoadCovarianceDataAction::load(GaussianProcess & model)
 {
 
   const std::string & covar_type = model.getCovarType();
   const std::unordered_map<std::string, Real> & map = model.getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & vec_map = model.getHyperParamVecMap();
-  const std::string & covar_name = model.name() + "_covar_func";
+  const UserObjectName & covar_name = model.name() + "_covar_func";
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
 
@@ -66,4 +62,6 @@ LoadCovarianceDataAction::load(const GaussianProcess & model)
   std::shared_ptr<CovarianceFunctionBase> covar_model =
       _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);
   _problem->theWarehouse().add(covar_model);
+
+  model.setupCovariance(covar_name);
 }

@@ -94,7 +94,6 @@
   [GP_avg]
     type = GaussianProcess
     trainer = GP_avg_trainer
-    covariance_function = 'covar'
   []
 []
 

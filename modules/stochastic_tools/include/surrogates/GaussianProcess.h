@@ -22,7 +22,11 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
+  // void setCovarianceName(std::string covar_name);
+
   virtual void setupCovariance();
+
+  virtual void setupCovariance(UserObjectName _covar_name);
 
   const std::string & getCovarType() const { return _covar_type; }
 
@@ -52,15 +56,18 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  const UserObjectName _covar_name;
-
+  /// MOOSE problem,
   const FEProblemBase & _feproblem;
 
+  /// Type of covariance function used for this surrogate
   const std::string & _covar_type;
 
+  /// Scalar hyperparameters. Stored for use in surrogate
   const std::unordered_map<std::string, Real> & _hyperparam_map;
 
+  /// Vector hyperparameters. Stored for use in surrogate
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
+  /// Covariance function object
   CovarianceFunctionBase * _covariance_function;
 };

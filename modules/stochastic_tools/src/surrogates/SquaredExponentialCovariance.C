@@ -17,11 +17,20 @@ SquaredExponentialCovariance::validParams()
 {
   InputParameters params = CovarianceFunctionBase::validParams();
   params.addClassDescription("Squared Exponential covariance function.");
+  params.addRequiredParam<std::vector<Real>>("length_factor",
+                                             "Length Factor to use for Covariance Kernel");
+  params.addRequiredParam<Real>("signal_variance",
+                                "Signal Variance (sigma_f^2) to use for kernel calculation.");
+  params.addRequiredParam<Real>("noise_variance",
+                                "Noise Variance (sigma_n^2) to use for kernel calculation.");
   return params;
 }
 
 SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters)
+  : CovarianceFunctionBase(parameters),
+    _length_factor(getParam<std::vector<Real>>("length_factor")),
+    _sigma_f_squared(getParam<Real>("signal_variance")),
+    _sigma_n_squared(getParam<Real>("noise_variance"))
 {
 }
 
