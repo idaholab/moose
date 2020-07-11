@@ -57,4 +57,9 @@
     issues = "#15017"
     requirement = "The system shall include a utility for locating a MOOSE-based application executable."
   []
+  [gitutils]
+    type = PythonUnitTest
+    input = test_gitutils.py
+    requirement = "The system shall include utilities for executing version control system commands."
+  []
 []

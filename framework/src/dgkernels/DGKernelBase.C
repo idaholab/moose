@@ -88,6 +88,7 @@ DGKernelBase::DGKernelBase(const InputParameters & parameters)
     Restartable(this, "DGKernels"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
+    ElementIDInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
