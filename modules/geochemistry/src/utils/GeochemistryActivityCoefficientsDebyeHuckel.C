@@ -11,21 +11,84 @@
 #include "GeochemistryActivityCalculators.h"
 
 GeochemistryActivityCoefficientsDebyeHuckel::GeochemistryActivityCoefficientsDebyeHuckel(
-    const GeochemistryIonicStrength & is_calculator)
+    const GeochemistryIonicStrength & is_calculator, const GeochemicalDatabaseReader & db)
   : GeochemistryActivityCoefficients(),
+    _numT(db.getTemperatures().size()),
+    _database_dh_params(db.getDebyeHuckel()),
+    _database_dh_water((db.getNeutralSpeciesActivity().count("h2o") == 1)
+                           ? db.getNeutralSpeciesActivity().at("h2o")
+                           : GeochemistryNeutralSpeciesActivity()),
+    _database_dh_neutral((db.getNeutralSpeciesActivity().count("co2") == 1)
+                             ? db.getNeutralSpeciesActivity().at("co2")
+                             : GeochemistryNeutralSpeciesActivity()),
     _is_calculator(is_calculator),
     _ionic_strength(1.0),
     _sqrt_ionic_strength(1.0),
     _stoichiometric_ionic_strength(1.0),
     _num_basis(0),
     _num_eqm(0),
-    _dh()
+    _dh(),
+    _interp_A(db.getTemperatures(),
+              (_database_dh_params.adh.size() == _numT) ? _database_dh_params.adh
+                                                        : std::vector<Real>(_numT, 0.0),
+              db.getLogKModel()),
+    _interp_B(db.getTemperatures(),
+              (_database_dh_params.bdh.size() == _numT) ? _database_dh_params.bdh
+                                                        : std::vector<Real>(_numT, 0.0),
+              db.getLogKModel()),
+    _interp_Bdot(db.getTemperatures(),
+                 (_database_dh_params.bdot.size() == _numT) ? _database_dh_params.bdot
+                                                            : std::vector<Real>(_numT, 0.0),
+                 db.getLogKModel()),
+    _interp_a_water(db.getTemperatures(),
+                    (_database_dh_water.a.size() == _numT) ? _database_dh_water.a
+                                                           : std::vector<Real>(_numT, 0.0),
+                    db.getLogKModel()),
+    _interp_b_water(db.getTemperatures(),
+                    (_database_dh_water.b.size() == _numT) ? _database_dh_water.b
+                                                           : std::vector<Real>(_numT, 0.0),
+                    db.getLogKModel()),
+    _interp_c_water(db.getTemperatures(),
+                    (_database_dh_water.c.size() == _numT) ? _database_dh_water.c
+                                                           : std::vector<Real>(_numT, 0.0),
+                    db.getLogKModel()),
+    _interp_d_water(db.getTemperatures(),
+                    (_database_dh_water.d.size() == _numT) ? _database_dh_water.d
+                                                           : std::vector<Real>(_numT, 0.0),
+                    db.getLogKModel()),
+    _interp_a_neutral(db.getTemperatures(),
+                      (_database_dh_neutral.a.size() == _numT) ? _database_dh_neutral.a
+                                                               : std::vector<Real>(_numT, 0.0),
+                      db.getLogKModel()),
+    _interp_b_neutral(db.getTemperatures(),
+                      (_database_dh_neutral.b.size() == _numT) ? _database_dh_neutral.b
+                                                               : std::vector<Real>(_numT, 0.0),
+                      db.getLogKModel()),
+    _interp_c_neutral(db.getTemperatures(),
+                      (_database_dh_neutral.c.size() == _numT) ? _database_dh_neutral.c
+                                                               : std::vector<Real>(_numT, 0.0),
+                      db.getLogKModel()),
+    _interp_d_neutral(db.getTemperatures(),
+                      (_database_dh_neutral.d.size() == _numT) ? _database_dh_neutral.d
+                                                               : std::vector<Real>(_numT, 0.0),
+                      db.getLogKModel())
 {
+  _interp_A.generate();
+  _interp_B.generate();
+  _interp_Bdot.generate();
+  _interp_a_water.generate();
+  _interp_b_water.generate();
+  _interp_c_water.generate();
+  _interp_d_water.generate();
+  _interp_a_neutral.generate();
+  _interp_b_neutral.generate();
+  _interp_c_neutral.generate();
+  _interp_d_neutral.generate();
 }
 
 void
 GeochemistryActivityCoefficientsDebyeHuckel::setInternalParameters(
-    Real /*temperature*/,
+    Real temperature,
     const ModelGeochemicalDatabase & mgd,
     const std::vector<Real> & basis_species_molality,
     const std::vector<Real> & eqm_species_molality,
@@ -38,21 +101,20 @@ GeochemistryActivityCoefficientsDebyeHuckel::setInternalParameters(
       mgd, basis_species_molality, eqm_species_molality, kin_species_molality);
   _num_basis = mgd.basis_species_index.size();
   _num_eqm = mgd.eqm_species_index.size();
-  // when temperature least-squares is completed the following lines will be changed
-  // charged species Debye-Huckel at 25degC
-  _dh.A = 0.5092;
-  _dh.B = 0.3283;
-  _dh.Bdot = 0.035;
-  // water Debye-Huckel at 25degC
-  _dh.a_water = 1.45397;
-  _dh.b_water = 0.022357;
-  _dh.c_water = 0.0093804;
-  _dh.d_water = -0.0005262;
-  // neutral species Debye-Huckel at 25degC
-  _dh.a_neutral = 0.1127;
-  _dh.b_neutral = -0.01049;
-  _dh.c_neutral = 0.001545;
-  _dh.d_neutral = 0.0;
+  // Debye-Huckel base parameters
+  _dh.A = _interp_A.sample(temperature);
+  _dh.B = _interp_B.sample(temperature);
+  _dh.Bdot = _interp_Bdot.sample(temperature);
+  // water Debye-Huckel
+  _dh.a_water = _interp_a_water.sample(temperature);
+  _dh.b_water = _interp_b_water.sample(temperature);
+  _dh.c_water = _interp_c_water.sample(temperature);
+  _dh.d_water = _interp_d_water.sample(temperature);
+  // neutral species Debye-Huckel
+  _dh.a_neutral = _interp_a_neutral.sample(temperature);
+  _dh.b_neutral = _interp_b_neutral.sample(temperature);
+  _dh.c_neutral = _interp_c_neutral.sample(temperature);
+  _dh.d_neutral = _interp_d_neutral.sample(temperature);
 }
 
 const DebyeHuckelParameters &

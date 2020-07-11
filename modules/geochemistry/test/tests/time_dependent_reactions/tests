@@ -178,7 +178,7 @@
   [./flushing_case1]
     type = 'RunApp'
     input = 'flushing_case1.i'
-    expect_out = 'Mass of solvent water = 1.905kg'
+    expect_out = 'Mass of solvent water = 1.934kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
@@ -186,7 +186,7 @@
   [./flushing_case2]
     type = 'RunApp'
     input = 'flushing_case2.i'
-    expect_out = 'Mass of solvent water = 1.356kg'
+    expect_out = 'Mass of solvent water = 1.358kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
@@ -194,7 +194,7 @@
   [./flushing_case3]
     type = 'RunApp'
     input = 'flushing_case3.i'
-    expect_out = 'Mass of solvent water = 1.068kg'
+    expect_out = 'Mass of solvent water = 1.069kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'

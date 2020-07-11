@@ -65,6 +65,9 @@ GeochemicalDatabaseValidator::validate()
     for (auto ns : _root["Header"]["neutral species"].getMemberNames())
       for (auto coeffs : _root["Header"]["neutral species"][ns].getMemberNames())
       {
+        if (coeffs == "note")
+          continue;
+
         // Check that all temperature values are real numbers
         auto values = _root["Header"]["neutral species"][ns][coeffs];
 
