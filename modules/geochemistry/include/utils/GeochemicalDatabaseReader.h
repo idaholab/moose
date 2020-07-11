@@ -192,10 +192,8 @@ struct GeochemistryElements
 
 /**
  * Data structure for neutral species activity coefficients.
- * Members are:
- * * adh: Debye-Huckel a parameter
- * * bdh: Debye-Huckel b parameter
- * * bdot: Debye-Huckel bdot parameter
+ * Members are a, b, c and d, which are temperature dependent coefficients in the Debye-Huckel
+ * activity model.
  */
 struct GeochemistryNeutralSpeciesActivity
 {
@@ -283,7 +281,7 @@ public:
    * Get the temperature points that the equilibrium constant is defined at.
    * @return vector of temperature points (C)
    */
-  std::vector<Real> getTemperatures();
+  const std::vector<Real> & getTemperatures() const;
 
   /**
    * Get the pressure points that the equilibrium constant is defined at.
@@ -295,7 +293,7 @@ public:
    * Get the Debye-Huckel activity coefficients
    * @return vectors of adh, bdh and bdot
    */
-  GeochemistryDebyeHuckel getDebyeHuckel();
+  const GeochemistryDebyeHuckel & getDebyeHuckel() const;
 
   /**
    * Get the basis (primary) species information
@@ -363,7 +361,8 @@ public:
    * Get the neutral species activity coefficients
    * @return neutral species activity coefficients
    */
-  std::map<std::string, GeochemistryNeutralSpeciesActivity> getNeutralSpeciesActivity();
+  const std::map<std::string, GeochemistryNeutralSpeciesActivity> &
+  getNeutralSpeciesActivity() const;
 
   /**
    * Generates a formatted vector of strings representing all aqueous equilibrium
@@ -451,6 +450,24 @@ protected:
   std::vector<std::string>
   printReactions(std::vector<std::string> names,
                  std::vector<std::map<std::string, Real>> basis_species) const;
+
+  /**
+   * Copy the temperature points (if any) found in the database into _temperature_points.  This
+   * method is called in the constructor
+   */
+  void setTemperatures();
+
+  /**
+   * Copy the Debye-Huckel parameters (if any) found in the database into _debye_huckel.  This
+   * method is called in the constructor
+   */
+  void setDebyeHuckel();
+
+  /**
+   * Copy the Debye-Huckel parameters for computing neutral species activity (if any) found in the
+   * databasebase into _neutral_species_activity.  This method is cdalled in the constructor
+   */
+  void setNeutralSpeciesActivity();
 
   /// Database filename
   const FileName _filename;

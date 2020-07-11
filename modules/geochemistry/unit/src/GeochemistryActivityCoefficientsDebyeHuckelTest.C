@@ -12,7 +12,7 @@
 #include "GeochemistryActivityCoefficientsDebyeHuckel.h"
 #include "GeochemistryActivityCalculators.h"
 
-const GeochemicalDatabaseReader database("database/moose_testdb.json");
+const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
 // The following system has secondary species: (O-phth)--, CO2(aq), CO3--, CaCO3, CaOH+, OH-, e-,
 // >(s)FeO-, Calcite
 const PertinentGeochemicalSystem model(database,
@@ -30,7 +30,7 @@ const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
 
   is.setUseOnlyBasisMolality(true);
   is.setMaxStoichiometricIonicStrength(2.0E-8);
@@ -60,18 +60,18 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
   EXPECT_EQ(dh.A, 0.5092);
   EXPECT_EQ(dh.B, 0.3283);
-  EXPECT_EQ(dh.Bdot, 0.035);
+  EXPECT_EQ(dh.Bdot, 0.041);
   EXPECT_EQ(dh.a_water, 1.45397);
   EXPECT_EQ(dh.b_water, 0.022357);
   EXPECT_EQ(dh.c_water, 0.0093804);
-  EXPECT_EQ(dh.d_water, -0.0005262);
+  EXPECT_EQ(dh.d_water, -0.0005362);
   EXPECT_EQ(dh.a_neutral, 0.1127);
   EXPECT_EQ(dh.b_neutral, -0.01049);
   EXPECT_EQ(dh.c_neutral, 0.001545);
@@ -82,7 +82,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsDebyeHuckel)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 
@@ -142,7 +142,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, waterActivity)
 {
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
-  GeochemistryActivityCoefficientsDebyeHuckel ac(is);
+  GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
 

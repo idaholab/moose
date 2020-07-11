@@ -12,9 +12,10 @@
 #include "GeochemicalSolver.h"
 #include "GeochemistryKineticRateCalculator.h"
 
-const GeochemicalDatabaseReader db_solver("database/moose_testdb.json");
-const GeochemicalDatabaseReader db_full("../database/moose_geochemdb.json");
-const GeochemicalDatabaseReader db_ferric("../test/database/ferric_hydroxide_sorption.json");
+const GeochemicalDatabaseReader db_solver("database/moose_testdb.json", true, true);
+const GeochemicalDatabaseReader db_full("../database/moose_geochemdb.json", true, true);
+const GeochemicalDatabaseReader
+    db_ferric("../test/database/ferric_hydroxide_sorption.json", true, true);
 // Following model only has OH- as an equilibrium species
 const PertinentGeochemicalSystem
     model_simplest(db_solver, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
@@ -29,7 +30,7 @@ const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm4 = {
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
 GeochemistryIonicStrength is_solver(3.0, 3.0, false);
-GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver);
+GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver, db_solver);
 
 /// Check exception
 TEST(GeochemicalSolverTest, exception)
@@ -452,7 +453,7 @@ TEST(GeochemicalSolverTest, solve2)
       res += nw * egs.getSolventMassAndFreeMolalityAndMineralMoles()[i];
     for (unsigned j = 0; j < mgd.eqm_species_name.size(); ++j)
       res += nw * mgd.eqm_stoichiometry(j, i) * egs.getEquilibriumMolality(j);
-    EXPECT_LE(std::abs(res), 1E-15);
+    EXPECT_LE(std::abs(res), 1E-13);
   }
   // surface potentials
   const Real prefactor = std::sqrt(GeochemistryConstants::GAS_CONSTANT *

@@ -101,15 +101,25 @@ TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
   auto ns = nsa["co2"];
   std::vector<Real> a_gold{.1224, .1127, .09341, .08018, .08427, .09892, .1371, .1967};
   std::vector<Real> b_gold{-.004679, -.01049, -.0036, -.001503, -.01184, -.0104, -.007086, -.01809};
+  std::vector<Real> c_gold{
+      -0.0004114, 0.001545, 9.609e-05, 0.0005009, 0.003118, 0.001386, -0.002887, -0.002497};
+  std::vector<Real> d_gold(8);
 
   EXPECT_EQ(ns.a, a_gold);
   EXPECT_EQ(ns.b, b_gold);
+  EXPECT_EQ(ns.c, c_gold);
+  EXPECT_TRUE(ns.d.empty());
 
   ns = nsa["h2o"];
-  a_gold = {500.0000, 1.45397, 500.0000, 1.5551, 1.6225, 500.0000, 500.0000, 500.0000};
+  a_gold = {1.4203, 1.45397, 1.5012, 1.5551, 1.6225, 1.6899, 1.7573, 1.8247};
+  b_gold = {0.0177, 0.022357, 0.0289, 0.036478, 0.045891, 0.0553, 0.0647, 0.0741};
+  c_gold = {0.0103, 0.0093804, 0.008, 0.0064366, 0.0045221, 0.0026, 0.0006, -0.0013};
+  d_gold = {-0.0005, -0.0005362, -0.0006, -0.0007132, -0.0008312, -0.0009, -0.0011, -0.0012};
 
   EXPECT_EQ(ns.a, a_gold);
-  EXPECT_TRUE(ns.b.empty());
+  EXPECT_EQ(ns.b, b_gold);
+  EXPECT_EQ(ns.c, c_gold);
+  EXPECT_EQ(ns.d, d_gold);
 }
 
 TEST(GeochemicalDatabaseReaderTest, getElements)
