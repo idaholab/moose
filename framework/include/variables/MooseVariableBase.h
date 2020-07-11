@@ -58,6 +58,11 @@ public:
   SystemBase & sys() { return _sys; }
 
   /**
+   * Get the system this variable is part of.
+   */
+  const SystemBase & sys() const { return _sys; }
+
+  /**
    * Get the variable name
    */
   const std::string & name() const override { return _var_name; }
