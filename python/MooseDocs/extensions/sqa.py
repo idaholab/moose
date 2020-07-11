@@ -19,9 +19,11 @@ import uuid
 import json
 import time
 import pyhit
-import mooseutils
 
 import MooseDocs
+import mooseutils
+import moosesqa
+
 from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
@@ -74,7 +76,7 @@ class SQAExtension(command.CommandExtension):
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
                                         ", 'dependencies', and 'repo'.")
-        config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
+        config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -88,11 +90,35 @@ class SQAExtension(command.CommandExtension):
                                   libmesh="https://github.com/libMesh/libmesh"))
 
         # Build requirements sets
-        repos = self.get('repos')
         self.__has_civet = False
         self.__requirements = dict()
         self.__dependencies = dict()
         self.__remotes = dict()
+        self.__counts = collections.defaultdict(int)
+
+        # Deprecate 'url' and 'repo' config options
+        url = self.get('url')
+        repo = self.get('repo')
+        if repo is not None:
+            msg = "The 'url' and 'repo' config options for MooseDocs.extensions.sqa are deprecated,"\
+                 " add the 'repos' option with a 'default' entry instead."
+            LOG.warning(msg)
+            self['repos'].update(dict(default="{}/{}".format(url, repo)))
+
+    def preExecute(self):
+        """Initialize requirement information"""
+
+        # Clear any existing counts
+        self.__counts.clear()
+
+        # Do not repopulate
+        if self.__requirements:
+            return
+
+        start = time.time()
+        LOG.info("Gathering SQA requirement information...")
+
+        repos = self.get('repos')
         for index, (category, info) in enumerate(self.get('categories').items(), 1):
             specs = info.get('specs', ['tests'])
             repo = info.get('repo', 'default')
@@ -109,7 +135,7 @@ class SQAExtension(command.CommandExtension):
                 directories.append(path)
 
             # Create requirement database
-            self.__requirements[category] = common.get_requirements(directories, specs, 'F', index)
+            self.__requirements[category] = moosesqa.get_requirements(directories, specs, 'F', index)
 
             # Create dependency database
             self.__dependencies[category] = info.get('dependencies', [])
@@ -117,17 +143,7 @@ class SQAExtension(command.CommandExtension):
             # Create remote repository database
             self.__remotes[category] = repos.get(repo, None)
 
-        # Storage for requirement matrix counting (see SQARequirementMatricCommand)
-        self.__counts = collections.defaultdict(int)
-
-        # Deprecate 'url' and 'repo' config options
-        url = self.get('url')
-        repo = self.get('repo')
-        if repo is not None:
-            msg = "The 'url' and 'repo' config options for MooseDocs.extensions.sqa are deprecated,"\
-                 " add the 'repos' option with a 'default' entry instead."
-            LOG.warning(msg)
-            self['repos'].update(dict(default="{}/{}".format(url, repo)))
+        LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
@@ -153,10 +169,6 @@ class SQAExtension(command.CommandExtension):
         if rem is None:
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return rem
-
-    def preExecute(self):
-        """Reset counts and create test pages."""
-        self.__counts.clear()
 
     def increment(self, key):
         """Increment and return count for requirements matrix."""
@@ -237,28 +249,32 @@ class SQARequirementsCommand(command.CommandComponent):
         return parent
 
     def _addRequirement(self, parent, info, page, req, requirements, category):
+        # Do nothing if deprecated
+        if req.deprecated:
+            return
+
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname,
-                                        satisfied=req.satisfied)
+                                        satisfied=not (req.skip or req.deleted))
         text = SQARequirementText(item)
-
-        self.reader.tokenize(text, req.text, page, MarkdownReader.INLINE, info.line, report=False)
-        for token in moosetree.iterate(item):
-            if token.name == 'ErrorToken':
-                msg = common.report_error("Failed to tokenize SQA requirement.",
+        if req.requirement is not None:
+            self.reader.tokenize(text, req.requirement, page, MarkdownReader.INLINE, info.line, report=False)
+            for token in moosetree.iterate(item):
+                if token.name == 'ErrorToken':
+                    msg = common.report_error("Failed to tokenize SQA requirement.",
                                           req.filename,
-                                          req.text_line,
-                                          req.text,
+                                          req.requirement_line,
+                                          req.requirement,
                                           token['traceback'],
                                           'SQA TOKENIZE ERROR')
-                LOG.critical(msg)
+                    LOG.critical(msg)
 
         if req.details:
             details = SQARequirementDetails(item)
             for detail in req.details:
                 ditem = SQARequirementDetailItem(details)
                 text = SQARequirementText(ditem)
-                self.reader.tokenize(text, detail.text, page, MarkdownReader.INLINE, info.line, \
+                self.reader.tokenize(text, detail.detail, page, MarkdownReader.INLINE, info.line, \
                                      report=False)
 
         if self.settings['link']:
@@ -324,6 +340,8 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
 
         for requirements in self.extension.requirements(category).values():
             for req in requirements:
+                if req.design is None:
+                    continue
                 for d in req.design:
                     try:
                         node = self.translator.findPage(d)
@@ -420,13 +438,13 @@ class SQAVerificationCommand(command.CommandComponent):
     def _addRequirement(self, parent, info, page, req):
         reqname = "{}:{}".format(req.path, req.name) if req.path != '.' else req.name
         item = SQARequirementMatrixItem(parent, label=req.label, reqname=reqname)
-        self.reader.tokenize(item, req.text, page, MarkdownReader.INLINE, info.line, report=False)
+        self.reader.tokenize(item, req.requirement, page, MarkdownReader.INLINE, info.line, report=False)
         for token in moosetree.iterate(item):
             if token.name == 'ErrorToken':
                 msg = common.report_error("Failed to tokenize SQA requirement.",
                                           req.filename,
-                                          req.text_line,
-                                          req.text,
+                                          req.requirement_line,
+                                          req.requirement,
                                           token['traceback'],
                                           'SQA TOKENIZE ERROR')
                 LOG.critical(msg)
@@ -442,8 +460,9 @@ class SQAVerificationCommand(command.CommandComponent):
 
         p = core.Paragraph(item)
         tokens.String(p, content='Documentation: ')
-        filename = getattr(req, info['subcommand'])
-        autolink.AutoLink(p, page=str(filename))
+        for filename in  getattr(req, info['subcommand']):
+            autolink.AutoLink(p, page=str(filename))
+            core.Space(p)
 
 class SQADependenciesCommand(command.CommandComponent):
     COMMAND = 'sqa'

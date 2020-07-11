@@ -30,7 +30,6 @@ class TestSQARequirementsAST(MooseDocsTestCase):
     def testASTNoLink(self):
         text = "!sqa requirements category=Demo link=False"
         ast = self.tokenize(text)
-
         self.assertSize(ast, 2)
         self.assertSize(ast(0), 9) # Tree 'demo' file
         self._assertAST_tree(ast(1), item_size=1)
@@ -192,9 +191,10 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(3)(0), 'String', content='Specification: ')
         self.assertToken(ast(0)(0)(3)(1), 'Link', string='common:r3')
 
-        self.assertToken(ast(0)(0)(4), 'Paragraph', size=2)
+        self.assertToken(ast(0)(0)(4), 'Paragraph', size=3)
         self.assertToken(ast(0)(0)(4)(0), 'String', content='Documentation: ')
         self.assertToken(ast(0)(0)(4)(1), 'AutoLink', page='katex.md')
+        self.assertToken(ast(0)(0)(4)(2), 'Space', count=1)
 
         self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=7)
         self.assertToken(ast(0)(1)(0), 'Word', content='Requirement')
@@ -207,9 +207,10 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(1)(5)(0), 'String', content='Specification: ')
         self.assertToken(ast(0)(1)(5)(1), 'Link', string='common:group0')
 
-        self.assertToken(ast(0)(1)(6), 'Paragraph', size=2)
+        self.assertToken(ast(0)(1)(6), 'Paragraph', size=3)
         self.assertToken(ast(0)(1)(6)(0), 'String', content='Documentation: ')
         self.assertToken(ast(0)(1)(6)(1), 'AutoLink', page='bibtex.md')
+        self.assertToken(ast(0)(1)(6)(2), 'Space', count=1)
 
         self.assertToken(ast(1), 'ModalLink', size=2)
         self.assertToken(ast(1)(0), 'ModalLinkTitle', size=1)
@@ -220,6 +221,7 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
     def testValidation(self):
         text = "!sqa validation category=Demo"
         ast = self.tokenize(text)
+
         self.assertToken(ast(0), 'SQARequirementMatrix', size=2)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixItem', size=5)
         self.assertToken(ast(0)(0)(0), 'Word', content='Requirement')
@@ -230,9 +232,10 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(0)(3)(0), 'String', content='Specification: ')
         self.assertToken(ast(0)(0)(3)(1), 'Link', string='common:r2')
 
-        self.assertToken(ast(0)(0)(4), 'Paragraph', size=2)
+        self.assertToken(ast(0)(0)(4), 'Paragraph', size=3)
         self.assertToken(ast(0)(0)(4)(0), 'String', content='Documentation: ')
         self.assertToken(ast(0)(0)(4)(1), 'AutoLink', page='alert.md')
+        self.assertToken(ast(0)(0)(4)(2), 'Space', count=1)
 
         self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=7)
         self.assertToken(ast(0)(1)(0), 'Word', content='Requirement')
@@ -245,9 +248,12 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         self.assertToken(ast(0)(1)(5)(0), 'String', content='Specification: ')
         self.assertToken(ast(0)(1)(5)(1), 'Link', string='common:group2')
 
-        self.assertToken(ast(0)(1)(6), 'Paragraph', size=2)
+        self.assertToken(ast(0)(1)(6), 'Paragraph', size=5)
         self.assertToken(ast(0)(1)(6)(0), 'String', content='Documentation: ')
         self.assertToken(ast(0)(1)(6)(1), 'AutoLink', page='katex.md')
+        self.assertToken(ast(0)(1)(6)(2), 'Space', count=1)
+        self.assertToken(ast(0)(1)(6)(3), 'AutoLink', page='bibtex.md')
+        self.assertToken(ast(0)(1)(6)(4), 'Space', count=1)
 
         self.assertToken(ast(1), 'ModalLink', size=2)
         self.assertToken(ast(1)(0), 'ModalLinkTitle', size=1)

@@ -9,7 +9,7 @@
 
 #include "INSADHeatConductionTimeDerivative.h"
 
-registerMooseObject("HeatConductionApp", INSADHeatConductionTimeDerivative);
+registerMooseObject("NavierStokesApp", INSADHeatConductionTimeDerivative);
 
 InputParameters
 INSADHeatConductionTimeDerivative::validParams()

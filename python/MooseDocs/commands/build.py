@@ -21,7 +21,6 @@ from mooseutils.yaml_load import yaml_load
 import MooseDocs
 from .. import common
 from ..tree import pages
-from .check import check
 
 def command_line_options(subparser, parent):
     """
@@ -66,14 +65,6 @@ def command_line_options(subparser, parent):
     parser.add_argument('--home', default=None, help="The 'home' URL for the hosted website. " \
                                                      "This is mainly used by CIVET to allow " \
                                                      "temporary sites to be functional.")
-
-    parser.add_argument('--check', action='store_true',
-                        help="Run the default check command prior to build, the main purpose " \
-                             "of this command is to allow the make targets to avoid creating " \
-                             "the syntax multiple times.")
-    parser.add_argument('--error', action='store_true',
-                        help="Convert warnings to errors when running with --check.")
-
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -197,10 +188,6 @@ def main(options):
         log = logging.getLogger('MooseDocs.build')
         log.info("Cleaning destination %s", translator['destination'])
         shutil.rmtree(translator['destination'])
-
-    # Perform check
-    if options.check:
-        check(translator, error=options.error)
 
     # Perform build
     if options.files:

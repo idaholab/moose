@@ -20,6 +20,7 @@ from .regex import regex
 from .project_find import project_find
 from .check_filenames import check_filenames
 from .get_requirements import get_requirements
+from .submodule_status import submodule_status
 from .extract_content import extractContent, extractContentSettings, fix_moose_header
 from .log import report_exception
 from .report_error import report_error

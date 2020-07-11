@@ -1,0 +1,45 @@
+# For testing mooseutils.sqa tools
+[Tests]
+   [all]
+     design = 'design.md'
+     issues = '#1234'
+     requirement = 'all'
+   []
+   [no_req]
+     design = 'design.md'
+     issues = '#1234'
+   []
+   [no_design]
+     issues = '#1234'
+     requirement = 'no_design'
+   []
+   [no_issue]
+     design = 'design.md'
+     requirement = 'no_issue'
+   []
+   [empty_req]
+     design = 'design.md'
+     issues = '#1234'
+     requirement = ''
+   []
+   [empty_design]
+     design = ''
+     issues = '#1234'
+     requirement = 'empty_design'
+   []
+   [empty_issue]
+     issues = ''
+     design = 'design.md'
+     requirement = 'empty_issue'
+   []
+   [duplicate0]
+     design = 'design.md'
+     issues = '#1234'
+     requirement = 'duplicate'
+   []
+   [duplicate1]
+     design = 'design.md'
+     issues = '#1234'
+     requirement = 'duplicate'
+   []
+[]

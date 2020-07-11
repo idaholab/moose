@@ -65,16 +65,16 @@ class Property(object):
 
     def __set__(self, instance, value):
         """Set the property value."""
-        if instance._AutoPropertyMixin__mutable:
+        if instance._AutoPropertyMixinBase__mutable:
             self.onPropertySet(instance, value)
-            instance._AutoPropertyMixin__properties[self.name] = value
+            instance._AutoPropertyMixinBase__properties[self.name] = value
         else:
             raise MooseException("The {} object is immutable, see mooseuitls.AutoPropertyMixin.", type(instance).__name__)
 
     def __get__(self, instance, owner):
         """Get the property value."""
         self.onPropertyGet(instance)
-        return instance._AutoPropertyMixin__properties.get(self.name, self.default)
+        return instance._AutoPropertyMixinBase__properties.get(self.name, self.default)
 
     def onPropertySet(self, instance, value):
         """
@@ -82,7 +82,7 @@ class Property(object):
 
         NOTE: To maintain the existing checks, the base class method should be called.
         """
-        if (self.__type is not None) and (not isinstance(value, self.__type)):
+        if (self.__type is not None) and (not isinstance(value, self.__type)) and (value is not None):
             msg = "The supplied property '{}' must be of type '{}', but '{}' was provided."
             raise MooseException(msg, self.name, self.type.__name__, type(value).__name__)
 
@@ -100,7 +100,7 @@ class Property(object):
 
         NOTE: To maintain the existing checks, the base class method should be called.
         """
-        if self.required and (instance._AutoPropertyMixin__properties[self.name] is None):
+        if self.required and (instance._AutoPropertyMixinBase__properties[self.name] is None):
             raise MooseException("The property '{}' is required.", self.name)
 
 def addProperty(*args, **kwargs):
@@ -136,7 +136,64 @@ def _init_properties(cls, *props):
     cls.__DESCRIPTORS__[cls].update(properties)
     cls.__INITIALIZED__.add(cls)
 
-class AutoPropertyMixin(object):
+class AutoPropertyMixinBase(object):
+    """
+    Base for AutoPropertyMixin that doesn't contain automatic attribute, which allows it to work
+    moosetree.Node.
+    """
+
+    #: Storage for Property object descriptors, this should not be messed with.
+    __DESCRIPTORS__ = collections.defaultdict(set)
+    __INITIALIZED__ = set()
+
+    def __init__(self, mutable=True, **kwargs):
+
+        # A flag for controlling the mutability of the object
+        self.__mutable = True # must be True initially to allow for the properties to initialize
+
+        # Class members
+        self.__properties = dict() # storage for property values, addProperty items
+
+        # Initialize properties, this happens automatically if addProperty decorator is used,
+        # but when it is not the properties from the parent classes need to get added.
+        if self.__class__ not in self.__INITIALIZED__:
+            _init_properties(self.__class__)
+
+        descriptors = self.__DESCRIPTORS__[self.__class__]
+        for prop in descriptors:
+            setattr(self.__class__, prop.name, prop)
+            self.__properties[prop.name] = prop.default
+
+        # Update the properties from the key value pairs
+        self.update(kwargs)
+
+        # Check properties
+        for prop in descriptors:
+            prop.onPropertyCheck(self)
+
+        # Update the mutable flag
+        self.__mutable = mutable
+
+    def __setstate__(self, state):
+        """
+        Re-create the properties after a pickle load.
+        """
+        self.__dict__ = state
+        for key, value in self.__properties.items():
+            setattr(self, key, value)
+
+    def update(self, other):
+        """
+        Update properties given a dict-like object.
+        """
+        for key, value in other.items():
+            key = key.strip('_')
+            if value is None:
+                continue
+            if key in self.__properties:
+                setattr(self, key, value)
+
+class AutoPropertyMixin(AutoPropertyMixinBase):
     """
     Class mixin to add automatic property setter/getters that support type restrictions.
 
@@ -180,72 +237,32 @@ class AutoPropertyMixin(object):
         node['range'] = [0, 1]
 
     Inputs:
-        mutable[bool]: (default: True) Set the object to be mutable/immutable.f
+        mutable[bool]: (default: True) Set the object to be mutable/immutable.
         kwargs: (Optional) Any key, value pairs supplied are stored as properties or attributes.
     """
-
-    #: Storage for Property object descriptors, this should not be messed with.
-    __DESCRIPTORS__ = collections.defaultdict(set)
-    __INITIALIZED__ = set()
-
-    def __init__(self, mutable=True, **kwargs):
-
-        # A flag for controlling the mutability of the object
-        self.__mutable = True # must be True initially to allow for the properties to initialize
-
-        # Class members
-        self.__properties = dict() # storage for property values, addProperty items
+    def __init__(self, *args, **kwargs):
         self.__attributes = dict() # storage for attributes (i.e., unknown key, values)
-
-        # Initialize properties, this happens automatically if addProperty decorator is used,
-        # but when it is not the properties from the parent classes need to get added.
-        if self.__class__ not in self.__INITIALIZED__:
-            _init_properties(self.__class__)
-
-        descriptors = self.__DESCRIPTORS__[self.__class__]
-        for prop in descriptors:
-            setattr(self.__class__, prop.name, prop)
-            self.__properties[prop.name] = prop.default
-
-        # Update the properties from the key value pairs
-        self.update(kwargs)
-        """
-        for key, value in kwargs.items():
-            key = key.strip('_')
-            if value is None:
-                continue
-            if key in self.__properties:
-                setattr(self, key, value)
-            else:
-                self.__attributes[key] = value
-        """
-        # Check properties
-        for prop in descriptors:
-            prop.onPropertyCheck(self)
-
-        # Update the mutable flag
-        self.__mutable = mutable
+        AutoPropertyMixinBase.__init__(self, *args, **kwargs)
 
     @property
     def attributes(self):
-        """Return the dict() of attributes."""
-        if self.__mutable:
+        """
+        Return the dict() of attributes.
+        """
+        if self._AutoPropertyMixinBase__mutable:
             return self.__attributes
         else:
             raise MooseException("The {} object is immutable, see mooseuitls.AutoPropertyMixin.", type(self).__name__)
 
-    def __setstate__(self, state):
-        """Re-create the properties after a pickle load."""
-        self.__dict__ = state
-        for key, value in self.__properties.items():
-            setattr(self, key, value)
-
     def update(self, other):
+        """
+        Update properties and attributes given a dict-like object.
+        """
         for key, value in other.items():
             key = key.strip('_')
             if value is None:
                 continue
-            if key in self.__properties:
+            if key in self._AutoPropertyMixinBase__properties:
                 setattr(self, key, value)
             else:
                 self.__attributes[key] = value
@@ -266,7 +283,7 @@ class AutoPropertyMixin(object):
         """
         Create/set an attribute.
         """
-        if self.__mutable:
+        if self._AutoPropertyMixinBase__mutable:
             self.__attributes[key] = value
         else:
             raise MooseException("The {} object is immutable, see mooseuitls.AutoPropertyMixin.", type(self).__name__)

@@ -1,0 +1,400 @@
+Applications:
+    framework:
+        exe_directory: modules/combined
+        app_types:
+            - MooseApp
+        content_directory: framework/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        hidden:
+            - framework/doc/hidden.yml
+        remove:
+            - framework/doc/remove.yml
+            - test/doc/remove.yml
+        log_missing_description: WARNING
+        log_missing_markdown: WARNING
+        log_removed_and_hidden: WARNING
+        log_hidden_non_stub: WARNING
+        log_non_hidden_stub: WARNING
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        show_warning: false
+
+    chemical_reactions:
+        exe_directory: modules/combined
+        app_types:
+            - ChemicalReactionsApp
+        content_directory: modules/chemical_reactions/doc/content
+        hidden:
+            - modules/chemical_reactions/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        show_warning: false
+
+    contact:
+        exe_directory: modules/combined
+        app_types:
+            - ContactApp
+        content_directory: modules/contact/doc/content
+        hidden:
+            - modules/contact/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_missing_markdown: WARNING
+        show_warning: false
+
+    geochemistry:
+        exe_directory: modules/combined
+        app_types:
+            - GeochemistryApp
+        content_directory: modules/geochemistry/doc/content
+
+    fluid_properties:
+        exe_directory: modules/combined
+        app_types:
+            - FluidPropertiesApp
+        content_directory: modules/fluid_properties/doc/content
+        hidden:
+            - modules/fluid_properties/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_non_hidden_stub: WARNING
+        show_warning: false
+
+    functional_expansion_tools:
+        exe_directory: modules/combined
+        app_types:
+            - FunctionalExpansionToolsApp
+        content_directory: modules/functional_expansion_tools/doc/content
+
+    heat_conduction:
+        exe_directory: modules/combined
+        app_types:
+            - HeatConductionApp
+        content_directory: modules/heat_conduction/doc/content
+        hidden:
+            - modules/heat_conduction/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_hidden_non_stub: WARNING
+        log_non_hidden_stub: WARNING
+        show_warning: false
+
+    level_set:
+        exe_directory: modules/combined
+        app_types:
+            - LevelSetApp
+        content_directory: modules/level_set/doc/content
+
+    misc:
+        exe_directory: modules/combined
+        app_types:
+            - MiscApp
+        content_directory: modules/misc/doc/content
+        hidden:
+            - modules/misc/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_non_hidden_stub: WARNING
+        show_warning: false
+
+    navier_stokes:
+        exe_directory: modules/combined
+        app_types:
+            - NavierStokesApp
+        content_directory: modules/navier_stokes/doc/content
+        hidden:
+            - modules/navier_stokes/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_non_hidden_stub: WARNING
+        show_warning: false
+
+    peridynamics:
+        exe_directory: modules/combined
+        app_types:
+            - PeridynamicsApp
+        content_directory: modules/peridynamics/doc/content
+        hidden:
+            - modules/peridynamics/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_hidden_non_stub: WARNING
+        show_warning: false
+
+    phase_field:
+        exe_directory: modules/combined
+        app_types:
+            - PhaseFieldApp
+        content_directory: modules/phase_field/doc/content
+        hidden:
+            - modules/phase_field/doc/hidden.yml
+            - framework/doc/hidden.yml
+        remove:
+            - framework/doc/remove.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_non_hidden_stub: WARNING
+        log_hidden_non_stub: WARNING
+        show_warning: false
+
+    porous_flow:
+        exe_directory: modules/combined
+        app_types:
+            - PorousFlowApp
+        content_directory: modules/porous_flow/doc/content
+        hidden:
+            - modules/porous_flow/doc/hidden.yml
+        remove:
+            - framework/doc/remove.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_hidden_non_stub: WARNING
+        show_warning: false
+
+    RDG:
+        exe_directory: modules/combined
+        content_directory: modules/rdg/doc/content
+        app_types:
+            - RdgApp
+
+    stochastic_tools:
+        exe_directory: modules/combined
+        app_types:
+            - StochasticToolsApp
+        content_directory: modules/stochastic_tools/doc/content
+        hidden:
+            - modules/stochastic_tools/doc/hidden.yml
+        remove:
+            - modules/stochastic_tools/doc/remove.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        show_warning: false
+
+    tensor_mechanics:
+        exe_directory: modules/combined
+        app_types:
+            - TensorMechanicsApp
+        content_directory: modules/tensor_mechanics/doc/content
+        hidden:
+            - modules/tensor_mechanics/doc/hidden.yml
+            - framework/doc/hidden.yml
+        remove:
+            - framework/doc/remove.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_hidden_non_stub: WARNING
+        log_non_hidden_stub: WARNING
+        show_warning: false
+
+    XFEM:
+        exe_directory: modules/combined
+        app_types:
+            - XFEMApp
+        content_directory: modules/xfem/doc/content
+        hidden:
+            - modules/xfem/doc/hidden.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/moose_srs.md
+    software_design_description: sqa/moose_sdd.md
+    software_test_plan: sqa/moose_stp.md
+    requirements_traceablity_matrix: sqa/moose_rtm.md
+    verification_validation_plan: sqa/moose_vvr.md
+    log_safety_software_determination: WARNING
+    log_quality_level_determination: WARNING
+    log_enterprise_architecture_entry: WARNING
+    log_project_management_plan: WARNING
+    log_software_quality_plan: WARNING
+    log_configuration_management_plan: WARNING
+    log_asset_management_plan: WARNING
+    log_verification_validation_plan: WARNING
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+    show_warning: false
+
+Requirements:
+    moose_test:
+        directories:
+            - test/tests
+        log_empty_issues: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
+        show_warning: false
+
+    stork:
+        directories:
+            - stork
+        log_missing: WARNING
+        show_warning: false
+
+    tutorials:
+        directories:
+            - tutorials
+        log_duplicate_requirement: WARNING
+        show_warning: false
+
+    scripts:
+        directories:
+            - scripts
+        log_testable: WARNING
+        show_warning: false
+
+    python:
+        directories:
+            - python
+        log_missing: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    combined:
+        directories:
+            - modules/combined
+        log_missing: WARNING
+        log_missing_requirement: WARNING
+        log_missing_design: WARNING
+        log_top_level_detail: WARNING
+        log_issue_format: WARNING
+        log_design_files: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
+        show_warning: false
+
+    chemical_reactions:
+        directories:
+            - modules/chemical_reactions
+        log_missing: WARNING
+        show_warning: false
+
+    contact:
+        directories:
+            - modules/contact
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_missing_requirement: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    external_petsc_solver:
+        directories:
+            - modules/external_petsc_solver
+        log_duplicate_requirement: WARNING
+        show_warning: false
+
+    fluid_properties:
+        directories:
+            - modules/fluid_properties
+        log_missing: WARNING
+        show_warning: false
+
+    functional_expansion_tools:
+        directories:
+            - modules/functional_expansion_tools
+        log_missing: WARNING
+        show_warning: false
+
+    heat_conduction:
+        directories:
+            - modules/heat_conduction
+        log_duplicate_requirement: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    geochemistry:
+        directories:
+            - modules/geochemistry
+        log_duplicate_requirement: WARNING
+        log_design_files: WARNING
+        show_warning: false
+
+    level_set:
+        directories:
+            - modules/level_set
+        log_missing: WARNING
+        show_warning: false
+
+    misc:
+        directories:
+            - modules/misc
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        show_warning: false
+
+    navier_stokes:
+        directories:
+            - modules/navier_stokes
+        log_missing: WARNING
+        show_warning: false
+
+    phase_field:
+        directories:
+            - modules/phase_field
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_empty_issues: WARNING
+        log_design_files: WARNING
+        show_warning: false
+
+    porous_flow:
+        directories:
+            - modules/porous_flow
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_issue_format: WARNING
+        log_design_files: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    peridynamics:
+        directories:
+            - modules/peridynamics
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_design_files: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    rdg:
+        directories:
+            - modules/rdg
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        show_warning: false
+
+    richards:
+        directories:
+            - modules/richards
+        log_missing: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    solid_mechanics:
+        directories:
+            - modules/solid_mechanics
+        log_missing: WARNING
+        log_design_files: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    stochastic_tools:
+        directories:
+            - modules/stochastic_tools
+        log_missing: WARNING
+        log_missing_requirement: WARNING
+        log_top_level_detail: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    tensor_mechanics:
+        directories:
+            - modules/tensor_mechanics
+        log_duplicate_requirement: WARNING
+        log_missing: WARNING
+        log_empty_issues: WARNING
+        log_testable: WARNING
+        show_warning: false
+
+    xfem:
+        directories:
+            - modules/xfem

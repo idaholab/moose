@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
             node.attributes
         self.assertIn("The MyNode object is immutable", e.exception.message)
 
-        node._AutoPropertyMixin__mutable = True
+        node._AutoPropertyMixinBase__mutable = True
         node['year'] = 1980
         self.assertEqual(node['year'], 1980)
         node.prop = 42

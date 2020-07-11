@@ -45,6 +45,8 @@ Extensions:
             \pf: "\\frac{\\partial #1}{\\partial #2}"
     MooseDocs.extensions.appsyntax: # WARNING: this must follow katex for doco pages to work
         executable: ${MOOSE_DIR}/modules/combined
+        unregister:
+            framework: !include framework/doc/unregister.yml
         hide:
             framework: !include framework/doc/hidden.yml
             chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
