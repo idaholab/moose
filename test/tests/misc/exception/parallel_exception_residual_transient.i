@@ -46,6 +46,7 @@
   dt = 0.01
   dtmin = 0.005
   solve_type = 'PJFNK'
+  snesmf_reuse_base = false
 []
 
 [Outputs]
