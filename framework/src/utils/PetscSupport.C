@@ -933,6 +933,22 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   ISColoringDestroy(&iscoloring);
 }
 
+void
+disableNonlinearConvergedReason(FEProblemBase & fe_problem)
+{
+  auto & petsc_options = fe_problem.getPetscOptions();
+
+  petsc_options.flags.erase("-snes_converged_reason");
+}
+
+void
+disableLinearConvergedReason(FEProblemBase & fe_problem)
+{
+  auto & petsc_options = fe_problem.getPetscOptions();
+
+  petsc_options.flags.erase("-ksp_converged_reason");
+}
+
 } // Namespace PetscSupport
 } // Namespace MOOSE
 

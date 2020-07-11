@@ -145,6 +145,16 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                           std::vector<unsigned int> & vertex_colors,
                           const char * coloring_algorithm);
 
+/**
+ * disable printing of the nonlinear convergence reason
+ */
+void disableNonlinearConvergedReason(FEProblemBase & fe_problem);
+
+/**
+ * disable printing of the linear convergence reason
+ */
+void disableLinearConvergedReason(FEProblemBase & fe_problem);
+
 #if PETSC_VERSION_LESS_THAN(3, 4, 0)
 #define SNESGETLINESEARCH SNESGetSNESLineSearch
 #else
