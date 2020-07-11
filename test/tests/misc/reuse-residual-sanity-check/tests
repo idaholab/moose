@@ -5,7 +5,7 @@
     method = 'dbg'
     type = RunException
     input = 'should-error.i'
-    expect_err = 'You requested to reuse the nonlinear residual as the base residual for computing the action of the matrix-free Jacobian, but the residuals are not the same. Your physics must have states; either remove the states from your code or set `snesmf_reuse_base = false` in your Executioner block'
+    expect_err = 'You requested to reuse the nonlinear residual vector as the base vector for computing the action of the matrix-free Jacobian, but the vectors are not the same'
     requirement = 'The system shall error in debug mode if the system or the user requests to use the nonlinear residual as the base residual for computing the matrix-free Jacobian action and if the residual is a function of anything more than the current solution.'
     max_parallel = 1
   []
