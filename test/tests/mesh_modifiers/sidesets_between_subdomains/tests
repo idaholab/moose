@@ -6,6 +6,7 @@
     exodiff = 'between_in.e'
     recover = false
     no_error_deprecated = true
+    deprecated = true
   [../]
   [./vector_test]
     type = 'Exodiff'
@@ -14,6 +15,7 @@
     exodiff = 'sidesets_between_vectors_of_subdomains_in.e'
     recover = false
     no_error_deprecated = true
+    deprecated = true
   [../]
   [./between_created_subdomain]
     type = 'Exodiff'
@@ -22,5 +24,6 @@
     exodiff = 'between_created_subdomain_in.e'
     recover = false
     no_error_deprecated = true
+    deprecated = true
   [../]
 []

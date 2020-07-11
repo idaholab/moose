@@ -108,8 +108,13 @@ Applications:
         app_types:
             - NavierStokesApp
         content_directory: modules/navier_stokes/doc/content
+        remove:
+            - framework/doc/remove.yml
         hidden:
             - modules/navier_stokes/doc/hidden.yml
+            - framework/doc/hidden.yml
+        unregister:
+            - framework/doc/unregister.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING

@@ -1,5 +1,5 @@
 [Tests]
-  Design = 'FiniteDifferencePreconditioner.md'
+  design = 'FiniteDifferencePreconditioner.md'
   issues = '#2816'
   [./test]
     type = 'Exodiff'

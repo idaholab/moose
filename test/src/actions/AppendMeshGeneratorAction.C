@@ -13,7 +13,7 @@
 #include "Factory.h"
 #include "MooseApp.h"
 
-registerMooseAction("MooseApp", AppendMeshGeneratorAction, "append_mesh_generator");
+registerMooseAction("MooseTestApp", AppendMeshGeneratorAction, "append_mesh_generator");
 
 defineLegacyParams(AppendMeshGeneratorAction);
 

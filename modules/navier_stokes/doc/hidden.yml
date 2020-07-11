@@ -1,4 +1,3 @@
-- /AuxVariables/InitialCondition/NSInitialCondition
 - /Functions/WedgeFunction
 - /AuxKernels/EnthalpyAux
 - /AuxKernels/InternalEnergyAux
@@ -14,4 +13,3 @@
 - /Kernels/MomentumConvectiveFlux
 - /Kernels/TotalEnergyConvectiveFlux
 - /Kernels/PressureGradient
-- /Variables/InitialCondition/NSInitialCondition
