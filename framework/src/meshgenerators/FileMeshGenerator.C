@@ -59,11 +59,17 @@ FileMeshGenerator::generate()
           getParam<std::vector<std::string>>("exodus_extra_element_integers"));
 
     if (restart_exodus)
+    {
       _app.setExReaderForRestart(std::move(exreader));
-
-    if (mesh->processor_id() == 0)
       exreader->read(_file_name);
-    MeshCommunication().broadcast(*mesh);
+      mesh->allow_renumbering(false);
+    }
+    else
+    {
+      if (mesh->processor_id() == 0)
+        exreader->read(_file_name);
+      MeshCommunication().broadcast(*mesh);
+    }
 
     mesh->prepare_for_use();
   }
