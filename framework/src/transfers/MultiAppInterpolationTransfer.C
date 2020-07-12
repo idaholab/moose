@@ -17,6 +17,7 @@
 #include "MooseVariableFE.h"
 #include "MultiApp.h"
 
+#include "libmesh/parallel_algebra.h"
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
@@ -44,7 +45,22 @@ MultiAppInterpolationTransfer::validParams()
                         "Radius to use for radial_basis interpolation.  If negative "
                         "then the radius is taken as the max distance between "
                         "points.");
+  params.addParam<Real>(
+      "shrink_gap_width",
+      0,
+      "gap width with which we want to temporarily shrink mesh in transfering solution");
 
+  MooseEnum shrink_type("SOURCE TARGET", "SOURCE");
+  params.addParam<MooseEnum>("shrink_mesh", shrink_type, "Which mesh we want to shrink");
+
+  params.addParam<std::vector<SubdomainName>>(
+      "exclude_gap_blocks",
+      "Gap subdomains we want to exclude when constructing/using virtually translated points");
+
+  params.addParam<Real>("distance_tol",
+                        1e-10,
+                        "If the distance between two points is smaller than distance_tol, two "
+                        "points will be considered as identical");
   return params;
 }
 
@@ -53,7 +69,11 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
     _num_points(getParam<unsigned int>("num_points")),
     _power(getParam<Real>("power")),
     _interp_type(getParam<MooseEnum>("interp_type")),
-    _radius(getParam<Real>("radius"))
+    _radius(getParam<Real>("radius")),
+    _shrink_gap_width(getParam<Real>("shrink_gap_width")),
+    _shrink_mesh(getParam<MooseEnum>("shrink_mesh")),
+    _exclude_gap_blocks(getParam<std::vector<SubdomainName>>("exclude_gap_blocks")),
+    _distance_tol(getParam<Real>("distance_tol"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppInterpolationTransfer");
@@ -66,115 +86,359 @@ MultiAppInterpolationTransfer::MultiAppInterpolationTransfer(const InputParamete
 }
 
 void
+MultiAppInterpolationTransfer::subdomainIDsNode(MooseMesh & mesh,
+                                                const Node & node,
+                                                std::set<subdomain_id_type> & subdomainids)
+{
+  // We need this map to figure out to which subdomains a given mesh point is attached
+  // We can not make mesh const here because we may need to create a node-to-elems map
+  // if it does not exists
+  auto & node_to_elem = mesh.nodeToElemMap();
+  auto node_to_elem_pair = node_to_elem.find(node.id());
+
+  if (node_to_elem_pair == node_to_elem.end())
+    mooseError("Can not find elements for node ", node.id());
+
+  subdomainids.clear();
+  // Add all subdomain IDs that are attached to node
+  for (auto element : node_to_elem_pair->second)
+  {
+    auto & elem = mesh.getMesh().elem_ref(element);
+    auto subdomain = elem.subdomain_id();
+
+    subdomainids.insert(subdomain);
+  }
+}
+
+void
+MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
+    FEProblemBase & from_problem,
+    const MooseVariableFieldBase & from_var,
+    const Point & from_app_position,
+    std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
+{
+  MeshBase * from_mesh = NULL;
+  MooseMesh * from_moose_mesh = NULL;
+
+  // Get libmesh mesh and moose mesh
+  if (_displaced_source_mesh && from_problem.getDisplacedProblem())
+  {
+    from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
+    from_moose_mesh = &from_problem.getDisplacedProblem()->mesh();
+  }
+  else
+  {
+    from_mesh = &from_problem.mesh().getMesh();
+    from_moose_mesh = &from_problem.mesh();
+  }
+
+  // Moose system
+  const SystemBase & from_system_base = from_var.sys();
+  // libmesh system
+  const System & from_sys = from_system_base.system();
+
+  // System number and var number
+  auto from_sys_num = from_sys.number();
+  auto from_var_num = from_sys.variable_number(from_var.name());
+
+  // Check FE type so we can figure out how to sample points
+  const auto & fe_type = from_sys.variable_type(from_var_num);
+  bool from_is_constant = fe_type.order == CONSTANT;
+  bool from_is_nodal = fe_type.family == LAGRANGE;
+
+  // Currently, for an elemental variable, we support the constant and first order
+  if (fe_type.order > FIRST && !from_is_nodal)
+    mooseError("We don't currently support second order or higher elemental variable ");
+
+  // Containers for points and values
+  // We later will push data into these containers
+  std::vector<Point> & src_pts(idi->get_source_points());
+  std::vector<Number> & src_vals(idi->get_source_vals());
+
+  // How much we want to translate mesh if users ask
+  std::unordered_map<dof_id_type, Point> from_tranforms;
+  std::set<subdomain_id_type> exclude_block_ids;
+  if (_shrink_gap_width > 0 && _shrink_mesh == "source")
+  {
+    computeTransformation(*from_moose_mesh, from_tranforms);
+    auto exclude_subdomainids = from_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
+  }
+
+  // The solution from the system with which the from_var is associated
+  const NumericVector<Number> & from_solution = *from_sys.solution;
+
+  std::set<subdomain_id_type> subdomainids;
+  std::vector<subdomain_id_type> include_block_ids;
+  if (from_is_nodal)
+  {
+    for (const auto * const from_node : from_mesh->local_node_ptr_range())
+    {
+      // Assuming LAGRANGE!
+      if (from_node->n_comp(from_sys_num, from_var_num) == 0)
+        continue;
+
+      Point translate(0);
+
+      if (from_tranforms.size() > 0)
+      {
+        subdomainIDsNode(*from_moose_mesh, *from_node, subdomainids);
+        // Check if node is excluded
+        // Node will be excluded if it is in the interior of excluded subdomains
+        include_block_ids.clear();
+        include_block_ids.resize(std::max(subdomainids.size(), exclude_block_ids.size()));
+        auto it = std::set_difference(subdomainids.begin(),
+                                      subdomainids.end(),
+                                      exclude_block_ids.begin(),
+                                      exclude_block_ids.end(),
+                                      include_block_ids.begin());
+
+        include_block_ids.resize(it - include_block_ids.begin());
+        // Node is not excluded
+        if (include_block_ids.size())
+          translate = from_tranforms[*include_block_ids.begin()];
+        else
+          continue;
+      }
+
+      // Push value and point to KDTree
+      dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
+      src_vals.push_back(from_solution(from_dof));
+      src_pts.push_back(*from_node + translate + from_app_position);
+    }
+  }
+  else
+  {
+    std::vector<Point> points;
+    for (const auto * const from_elem :
+         as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
+    {
+      // Skip this element if the variable has no dofs at it.
+      if (from_elem->n_dofs(from_sys_num, from_var_num) < 1)
+        continue;
+
+      points.clear();
+      if (from_is_constant)
+        points.push_back(from_elem->centroid());
+      else
+        for (const auto & node : from_elem->node_ref_range())
+          points.push_back(node);
+
+      unsigned int n_comp = from_elem->n_comp(from_sys_num, from_var_num);
+      auto n_points = points.size();
+      // We assume each point corresponds to one component of elemental variable
+      if (n_points != n_comp)
+        mooseError(" Number of points ",
+                   n_points,
+                   " does not equal to number of variable components ",
+                   n_comp);
+
+      unsigned int offset = 0;
+
+      Point translate(0);
+
+      if (from_tranforms.size() > 0)
+      {
+        auto subdomain = from_elem->subdomain_id();
+
+        if (subdomain == Moose::INVALID_BLOCK_ID)
+          mooseError("subdomain id does not make sense", subdomain);
+
+        // subdomain is not excluded
+        if (exclude_block_ids.find(subdomain) == exclude_block_ids.end())
+          translate = from_tranforms[subdomain];
+        else
+          continue;
+      }
+
+      for (const auto & point : points)
+      {
+        dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
+        src_vals.push_back(from_solution(from_dof));
+        src_pts.push_back(point + translate + from_app_position);
+      }
+    }
+  }
+}
+
+void
+MultiAppInterpolationTransfer::interpolateTargetPoints(
+    FEProblemBase & to_problem,
+    MooseVariableFieldBase & to_var,
+    NumericVector<Real> & to_solution,
+    const Point & to_app_position,
+    const std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
+{
+  // Moose system
+  SystemBase & to_system_base = to_var.sys();
+  // libmesh system
+  System & to_sys = to_system_base.system();
+
+  // System number and var number
+  auto to_sys_num = to_sys.number();
+  auto to_var_num = to_sys.variable_number(to_var.name());
+
+  MeshBase * mesh = NULL;
+  MooseMesh * to_moose_mesh = NULL;
+  if (_displaced_target_mesh && to_problem.getDisplacedProblem())
+  {
+    mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
+    to_moose_mesh = &to_problem.getDisplacedProblem()->mesh();
+  }
+  else
+  {
+    mesh = &to_problem.mesh().getMesh();
+    to_moose_mesh = &to_problem.mesh();
+  }
+
+  // Compute transform info
+  std::unordered_map<dof_id_type, Point> to_tranforms;
+  std::set<subdomain_id_type> exclude_block_ids;
+  if (_shrink_gap_width > 0 && _shrink_mesh == "target")
+  {
+    computeTransformation(*to_moose_mesh, to_tranforms);
+    auto exclude_subdomainids = to_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
+  }
+
+  const auto & to_fe_type = to_sys.variable_type(to_var_num);
+  bool to_is_constant = to_fe_type.order == CONSTANT;
+  bool to_is_nodal = to_fe_type.family == LAGRANGE;
+
+  if (to_fe_type.order > FIRST && !to_is_nodal)
+    mooseError("We don't currently support second order or higher elemental variable ");
+
+  std::set<subdomain_id_type> subdomainids;
+  std::vector<subdomain_id_type> include_block_ids;
+  std::vector<Point> pts;
+  std::vector<Number> vals;
+  if (to_is_nodal)
+  {
+    for (const auto * const node : mesh->local_node_ptr_range())
+    {
+      if (node->n_dofs(to_sys_num, to_var_num) <= 0) // If this variable has dofs at this node
+        continue;
+
+      Point translate(0);
+      if (to_tranforms.size() > 0)
+      {
+        subdomainIDsNode(*to_moose_mesh, *node, subdomainids);
+        // Check if node is excluded
+        // Node will be excluded if it is in the interior of excluded subdomains
+        include_block_ids.clear();
+        include_block_ids.resize(std::max(subdomainids.size(), exclude_block_ids.size()));
+        auto it = std::set_difference(subdomainids.begin(),
+                                      subdomainids.end(),
+                                      exclude_block_ids.begin(),
+                                      exclude_block_ids.end(),
+                                      include_block_ids.begin());
+        include_block_ids.resize(it - include_block_ids.begin());
+        if (include_block_ids.size())
+          translate = to_tranforms[*include_block_ids.begin()];
+        else
+          continue;
+      }
+
+      pts.clear();
+      pts.push_back(*node + translate + to_app_position);
+      vals.resize(1);
+
+      idi->interpolate_field_data({_to_var_name}, pts, vals);
+      dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
+      to_solution.set(dof, vals.front());
+    }
+  }
+  else // Elemental
+  {
+    std::vector<Point> points;
+    for (const auto * const elem :
+         as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
+    {
+      // Skip this element if the variable has no dofs at it.
+      if (elem->n_dofs(to_sys_num, to_var_num) < 1)
+        continue;
+
+      points.clear();
+      if (to_is_constant)
+        points.push_back(elem->centroid());
+      else
+        for (const auto & node : elem->node_ref_range())
+          points.push_back(node);
+
+      auto n_points = points.size();
+      unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
+      // We assume each point corresponds to one component of elemental variable
+      if (n_points != n_comp)
+        mooseError(" Number of points ",
+                   n_points,
+                   " does not equal to number of variable components ",
+                   n_comp);
+
+      Point translate(0);
+
+      if (to_tranforms.size() > 0)
+      {
+        auto subdomain = elem->subdomain_id();
+
+        if (subdomain == Moose::INVALID_BLOCK_ID)
+          mooseError("subdomain id does not make sense", subdomain);
+
+        if (exclude_block_ids.find(subdomain) == exclude_block_ids.end())
+          translate = to_tranforms[subdomain];
+        else
+          continue;
+      }
+
+      unsigned int offset = 0;
+      for (const auto & point : points)
+      {
+        pts.clear();
+        pts.push_back(point + translate + to_app_position);
+        vals.resize(1);
+
+        idi->interpolate_field_data({_to_var_name}, pts, vals);
+        dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
+        to_solution.set(dof, vals.front());
+      } // point
+    }   // auto elem
+  }     // else
+
+  to_solution.close();
+  to_sys.update();
+}
+
+void
 MultiAppInterpolationTransfer::execute()
 {
   _console << "Beginning InterpolationTransfer " << name() << std::endl;
+
+  const FEProblemBase & fe_problem = _multi_app->problemBase();
+  std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
+  switch (_interp_type)
+  {
+    case 0:
+      idi = libmesh_make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
+          fe_problem.comm(), _num_points, _power);
+      break;
+    case 1:
+      idi = libmesh_make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(fe_problem.comm(), _radius);
+      break;
+    default:
+      mooseError("Unknown interpolation type!");
+  }
+
+  idi->set_field_variables({_to_var_name});
 
   switch (_current_direction)
   {
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
-      MooseVariableFEBase & from_var = from_problem.getVariable(
+      const auto & from_var = from_problem.getVariable(
           0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+      const Point from_app_position(0);
 
-      MeshBase * from_mesh = NULL;
-
-      if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-        from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
-      else
-        from_mesh = &from_problem.mesh().getMesh();
-
-      SystemBase & from_system_base = from_var.sys();
-      System & from_sys = from_system_base.system();
-
-      unsigned int from_sys_num = from_sys.number();
-      unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-      auto & fe_type = from_sys.variable_type(from_var_num);
-      bool from_is_constant = fe_type.order == CONSTANT;
-      bool from_is_nodal = fe_type.family == LAGRANGE;
-
-      if (fe_type.order > FIRST && !from_is_nodal)
-        mooseError("We don't currently support second order or higher elemental variable ");
-
-      // EquationSystems & from_es = from_sys.get_equation_systems();
-
-      NumericVector<Number> & from_solution = *from_sys.solution;
-
-      InverseDistanceInterpolation<LIBMESH_DIM> * idi;
-
-      switch (_interp_type)
-      {
-        case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(from_sys.comm(), _num_points, _power);
-          break;
-        case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(from_sys.comm(), _radius);
-          break;
-        default:
-          mooseError("Unknown interpolation type!");
-      }
-
-      std::vector<Point> & src_pts(idi->get_source_points());
-      std::vector<Number> & src_vals(idi->get_source_vals());
-
-      std::vector<std::string> field_vars;
-      field_vars.push_back(_to_var_name);
-      idi->set_field_variables(field_vars);
-
-      std::vector<std::string> vars;
-      vars.push_back(_to_var_name);
-
-      if (from_is_nodal)
-      {
-        for (const auto & from_node : from_mesh->local_node_ptr_range())
-        {
-          // Assuming LAGRANGE!
-          if (from_node->n_comp(from_sys_num, from_var_num) == 0)
-            continue;
-
-          dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-
-          src_pts.push_back(*from_node);
-          src_vals.push_back(from_solution(from_dof));
-        }
-      }
-      else
-      {
-        std::vector<Point> points;
-        for (const auto & from_elem :
-             as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
-        {
-          // Skip this element if the variable has no dofs at it.
-          if (from_elem->n_dofs(from_sys_num, from_var_num) < 1)
-            continue;
-
-          points.clear();
-          if (from_is_constant)
-            points.push_back(from_elem->centroid());
-          else
-            for (auto & node : from_elem->node_ref_range())
-              points.push_back(node);
-
-          unsigned int n_comp = from_elem->n_comp(from_sys_num, from_var_num);
-          auto n_points = points.size();
-          // We assume each point corresponds to one component of elemental variable
-          if (n_points != n_comp)
-            mooseError(" Number of points ",
-                       n_points,
-                       " does not equal to number of variable components ",
-                       n_comp);
-
-          unsigned int offset = 0;
-          for (auto & point : points)
-          {
-            dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, offset++);
-            src_pts.push_back(point);
-            src_vals.push_back(from_solution(from_dof));
-          }
-        }
-      }
+      fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
 
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
@@ -183,375 +447,130 @@ MultiAppInterpolationTransfer::execute()
       {
         if (_multi_app->hasLocalApp(i))
         {
-          Moose::ScopedCommSwapper swapper(_multi_app->comm());
+          auto & to_problem = _multi_app->appProblemBase(i);
+          Moose::ScopedCommSwapper swapper(to_problem.comm().get());
+          const auto to_app_position = _multi_app->position(i);
+          auto & to_var = to_problem.getVariable(0,
+                                                 _to_var_name,
+                                                 Moose::VarKindType::VAR_ANY,
+                                                 Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-          // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
+          auto & to_solution = _multi_app->appTransferVector(i, _to_var_name);
 
-          unsigned int sys_num = to_sys->number();
-          unsigned int var_num = to_sys->variable_number(_to_var_name);
-          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
-
-          MeshBase * mesh = NULL;
-
-          if (_displaced_target_mesh && _multi_app->appProblemBase(i).getDisplacedProblem())
-            mesh = &_multi_app->appProblemBase(i).getDisplacedProblem()->mesh().getMesh();
-          else
-            mesh = &_multi_app->appProblemBase(i).mesh().getMesh();
-
-          auto & to_fe_type = to_sys->variable_type(var_num);
-          bool to_is_constant = to_fe_type.order == CONSTANT;
-          bool to_is_nodal = to_fe_type.family == LAGRANGE;
-
-          if (to_fe_type.order > FIRST && !to_is_nodal)
-            mooseError("We don't currently support second order or higher elemental variable ");
-
-          if (to_is_nodal)
-          {
-            for (const auto & node : mesh->local_node_ptr_range())
-            {
-              Point actual_position = *node + _multi_app->position(i);
-
-              if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
-              {
-                std::vector<Point> pts;
-                std::vector<Number> vals;
-
-                pts.push_back(actual_position);
-                vals.resize(1);
-
-                idi->interpolate_field_data(vars, pts, vals);
-
-                Real value = vals.front();
-
-                // The zero only works for LAGRANGE!
-                if (node->n_comp(from_sys_num, from_var_num) == 0)
-                  continue;
-
-                dof_id_type dof = node->dof_number(sys_num, var_num, 0);
-
-                solution.set(dof, value);
-              }
-            }
-          }
-          else // Elemental
-          {
-            std::vector<Point> points;
-            for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
-            {
-              // Skip this element if the variable has no dofs at it.
-              if (elem->n_dofs(sys_num, var_num) < 1)
-                continue;
-
-              points.clear();
-              if (to_is_constant)
-                points.push_back(elem->centroid());
-              else
-                for (auto & node : elem->node_ref_range())
-                  points.push_back(node);
-
-              auto n_points = points.size();
-              unsigned int n_comp = elem->n_comp(sys_num, var_num);
-              // We assume each point corresponds to one component of elemental variable
-              if (n_points != n_comp)
-                mooseError(" Number of points ",
-                           n_points,
-                           " does not equal to number of variable components ",
-                           n_comp);
-
-              unsigned int offset = 0;
-              for (auto & point : points)
-              {
-                Point actual_position = point + _multi_app->position(i);
-
-                std::vector<Point> pts;
-                std::vector<Number> vals;
-
-                pts.push_back(actual_position);
-                vals.resize(1);
-
-                idi->interpolate_field_data(vars, pts, vals);
-
-                Real value = vals.front();
-
-                dof_id_type dof = elem->dof_number(sys_num, var_num, offset++);
-
-                solution.set(dof, value);
-              } // point
-            }   // auto elem
-          }     // else
-
-          solution.close();
-          to_sys->update();
+          interpolateTargetPoints(to_problem, to_var, to_solution, to_app_position, idi);
         }
       }
 
-      delete idi;
-
       break;
     }
+
     case FROM_MULTIAPP:
     {
-      FEProblemBase & to_problem = _multi_app->problemBase();
-      MooseVariableFEBase & to_var = to_problem.getVariable(
-          0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
-      SystemBase & to_system_base = to_var.sys();
-
-      System & to_sys = to_system_base.system();
-
-      NumericVector<Real> & to_solution = *to_sys.solution;
-
-      unsigned int to_sys_num = to_sys.number();
-
-      // Only works with a serialized mesh to transfer to!
-      mooseAssert(to_sys.get_mesh().is_serial(),
-                  "MultiAppInterpolationTransfer only works with ReplicatedMesh!");
-
-      unsigned int to_var_num = to_sys.variable_number(to_var.name());
-
-      // EquationSystems & to_es = to_sys.get_equation_systems();
-
-      MeshBase * to_mesh = NULL;
-
-      if (_displaced_target_mesh && to_problem.getDisplacedProblem())
-        to_mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
-      else
-        to_mesh = &to_problem.mesh().getMesh();
-
-      auto & fe_type = to_sys.variable_type(to_var_num);
-      bool is_constant = fe_type.order == CONSTANT;
-      bool is_nodal = fe_type.family == LAGRANGE;
-
-      if (fe_type.order > FIRST && !is_nodal)
-        mooseError("We don't currently support second order or higher elemental variable ");
-
-      InverseDistanceInterpolation<LIBMESH_DIM> * idi;
-
-      switch (_interp_type)
-      {
-        case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(to_sys.comm(), _num_points, _power);
-          break;
-        case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(to_sys.comm(), _radius);
-          break;
-        default:
-          mooseError("Unknown interpolation type!");
-      }
-
-      std::vector<Point> & src_pts(idi->get_source_points());
-      std::vector<Number> & src_vals(idi->get_source_vals());
-
-      std::vector<std::string> field_vars;
-      field_vars.push_back(_to_var_name);
-      idi->set_field_variables(field_vars);
-
-      std::vector<std::string> vars;
-      vars.push_back(_to_var_name);
-
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
-        if (!_multi_app->hasLocalApp(i))
-          continue;
-
-        Moose::ScopedCommSwapper swapper(_multi_app->comm());
-
-        FEProblemBase & from_problem = _multi_app->appProblemBase(i);
-        MooseVariableFEBase & from_var =
-            from_problem.getVariable(0,
-                                     _from_var_name,
-                                     Moose::VarKindType::VAR_ANY,
-                                     Moose::VarFieldType::VAR_FIELD_STANDARD);
-        SystemBase & from_system_base = from_var.sys();
-
-        System & from_sys = from_system_base.system();
-        unsigned int from_sys_num = from_sys.number();
-
-        unsigned int from_var_num = from_sys.variable_number(from_var.name());
-
-        auto & from_fe_type = from_sys.variable_type(from_var_num);
-        bool from_is_constant = from_fe_type.order == CONSTANT;
-        bool from_is_nodal = from_fe_type.family == LAGRANGE;
-
-        if (from_fe_type.order > FIRST && !is_nodal)
-          mooseError("We don't currently support second order or higher elemental variable ");
-        // EquationSystems & from_es = from_sys.get_equation_systems();
-
-        NumericVector<Number> & from_solution = *from_sys.solution;
-
-        MeshBase * from_mesh = NULL;
-
-        if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-          from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
-        else
-          from_mesh = &from_problem.mesh().getMesh();
-
-        Point app_position = _multi_app->position(i);
-
-        if (from_is_nodal)
+        if (_multi_app->hasLocalApp(i))
         {
-          for (const auto & from_node : from_mesh->local_node_ptr_range())
-          {
-            // Assuming LAGRANGE!
-            if (from_node->n_comp(from_sys_num, from_var_num) == 0)
-              continue;
+          auto & from_problem = _multi_app->appProblemBase(i);
+          Moose::ScopedCommSwapper swapper(from_problem.comm().get());
+          const auto from_app_position = _multi_app->position(i);
+          const auto & from_var = from_problem.getVariable(0,
+                                                           _from_var_name,
+                                                           Moose::VarKindType::VAR_ANY,
+                                                           Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-            dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
-
-            src_pts.push_back(*from_node + app_position);
-            src_vals.push_back(from_solution(from_dof));
-          }
+          fillSourceInterpolationPoints(from_problem, from_var, from_app_position, idi);
         }
-        else
-        {
-          std::vector<Point> points;
-          for (auto & from_element :
-               as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
-          {
-            // Assuming LAGRANGE!
-            if (from_element->n_comp(from_sys_num, from_var_num) == 0)
-              continue;
-
-            points.clear();
-            // grap sample points
-            // for constant shape function, we take the element centroid
-            if (from_is_constant)
-              points.push_back(from_element->centroid());
-            // for higher order method, we take all nodes of element
-            // this works for the first order L2 Lagrange.
-            else
-              for (auto & node : from_element->node_ref_range())
-                points.push_back(node);
-
-            auto n_points = points.size();
-            unsigned int n_comp = from_element->n_comp(from_sys_num, from_var_num);
-            unsigned int offset = 0;
-            // We assume each point corresponds to one component of elemental variable
-            if (n_points != n_comp)
-              mooseError(" Number of points ",
-                         n_points,
-                         " does not equal to number of variable components ",
-                         n_comp);
-
-            for (auto & point : points)
-            {
-              dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, offset++);
-              src_pts.push_back(point + app_position);
-              src_vals.push_back(from_solution(from_dof));
-            } // point
-          }   // from_element
-        }     // else
       }
 
-      // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
 
-      // Now do the interpolation to the target system
-      if (is_nodal)
-      {
-        for (auto & node : as_range(to_mesh->local_nodes_begin(), to_mesh->local_nodes_end()))
-        {
-          if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
-          {
-            std::vector<Point> pts;
-            std::vector<Number> vals;
+      FEProblemBase & to_problem = _multi_app->problemBase();
+      MooseVariableFieldBase & to_var = to_problem.getVariable(
+          0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
-            pts.push_back(*node);
-            vals.resize(1);
+      auto & to_solution = *to_var.sys().system().solution;
 
-            idi->interpolate_field_data(vars, pts, vals);
+      const Point to_app_position(0);
 
-            Real value = vals.front();
+      interpolateTargetPoints(to_problem, to_var, to_solution, to_app_position, idi);
 
-            // The zero only works for LAGRANGE!
-            dof_id_type dof = node->dof_number(to_sys_num, to_var_num, 0);
-
-            to_solution.set(dof, value);
-          }
-        }
-      }
-      else // Elemental
-      {
-        std::vector<Point> points;
-        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
-        {
-          // Assuming LAGRANGE!
-          if (elem->n_comp(to_sys_num, to_var_num) == 0)
-            continue;
-
-          points.clear();
-          // grap sample points
-          // for constant shape function, we take the element centroid
-          if (is_constant)
-            points.push_back(elem->centroid());
-          // for higher order method, we take all nodes of element
-          // this works for the first order L2 Lagrange.
-          else
-            for (auto & node : elem->node_ref_range())
-              points.push_back(node);
-
-          auto n_points = points.size();
-          unsigned int n_comp = elem->n_comp(to_sys_num, to_var_num);
-          // We assume each point corresponds to one component of elemental variable
-          if (n_points != n_comp)
-            mooseError(" Number of points ",
-                       n_points,
-                       " does not equal to number of variable components ",
-                       n_comp);
-
-          unsigned int offset = 0;
-          for (auto & point : points)
-          {
-            std::vector<Point> pts;
-            std::vector<Number> vals;
-
-            pts.push_back(point);
-            vals.resize(1);
-
-            idi->interpolate_field_data(vars, pts, vals);
-
-            Real value = vals.front();
-
-            dof_id_type dof = elem->dof_number(to_sys_num, to_var_num, offset++);
-
-            to_solution.set(dof, value);
-          }
-        }
-      }
-
-      to_solution.close();
-      to_sys.update();
-
-      delete idi;
-
+      break;
+    }
+    default:
+    {
+      mooseError("Unsupported transfer direction  ", _current_direction);
       break;
     }
   }
 
-  _console << "Finished InterpolationTransfer " << name() << std::endl;
-
-  postExecute();
+  _console << "End InterpolationTransfer " << name() << std::endl;
 }
 
-Node *
-MultiAppInterpolationTransfer::getNearestNode(const Point & p,
-                                              Real & distance,
-                                              const MeshBase::const_node_iterator & nodes_begin,
-                                              const MeshBase::const_node_iterator & nodes_end)
+void
+MultiAppInterpolationTransfer::computeTransformation(
+    const MooseMesh & mesh, std::unordered_map<dof_id_type, Point> & transformation)
 {
-  distance = std::numeric_limits<Real>::max();
-  Node * nearest = NULL;
+  auto & libmesh_mesh = mesh.getMesh();
 
-  for (auto & node : as_range(nodes_begin, nodes_end))
+  auto & subdomainids = mesh.meshSubdomains();
+
+  subdomain_id_type max_subdomain_id = 0;
+
+  // max_subdomain_id will be used to represent the center of the entire domain
+  for (auto subdomain_id : subdomainids)
   {
-    Real current_distance = (p - *node).norm();
-
-    if (current_distance < distance)
-    {
-      distance = current_distance;
-      nearest = node;
-    }
+    max_subdomain_id = max_subdomain_id > subdomain_id ? max_subdomain_id : subdomain_id;
   }
 
-  return nearest;
+  max_subdomain_id += 1;
+
+  std::unordered_map<dof_id_type, Point> subdomain_centers;
+  std::unordered_map<dof_id_type, dof_id_type> nelems;
+
+  for (auto & elem :
+       as_range(libmesh_mesh.local_elements_begin(), libmesh_mesh.local_elements_end()))
+  {
+    // Compute center of the entire domain
+    subdomain_centers[max_subdomain_id] += elem->centroid();
+    nelems[max_subdomain_id] += 1;
+
+    auto subdomain = elem->subdomain_id();
+
+    if (subdomain == Moose::INVALID_BLOCK_ID)
+      mooseError("block is invalid");
+
+    // Centers for subdomains
+    subdomain_centers[subdomain] += elem->centroid();
+
+    nelems[subdomain] += 1;
+  }
+
+  comm().sum(subdomain_centers);
+
+  comm().sum(nelems);
+
+  subdomain_centers[max_subdomain_id] /= nelems[max_subdomain_id];
+
+  for (auto subdomain_id : subdomainids)
+  {
+    subdomain_centers[subdomain_id] /= nelems[subdomain_id];
+  }
+
+  // Compute unit vectors representing directions in which we want to shrink mesh
+  // The unit vectors is scaled by 'shrink_gap_width'
+  transformation.clear();
+  for (auto subdomain_id : subdomainids)
+  {
+    transformation[subdomain_id] =
+        subdomain_centers[max_subdomain_id] - subdomain_centers[subdomain_id];
+
+    auto norm = transformation[subdomain_id].norm();
+
+    // The current subdomain is the center of the entire domain,
+    // then we do not move this subdomain
+    if (norm > _distance_tol)
+      transformation[subdomain_id] /= norm;
+
+    transformation[subdomain_id] *= _shrink_gap_width;
+  }
 }

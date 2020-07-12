@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#15567'
+  design = 'MultiAppInterpolationTransfer.md'
+
+  [fromsub]
+    type = 'Exodiff'
+    input = 'transfer_transformation.i'
+    exodiff = 'transfer_transformation_out.e transfer_transformation_out_sub0.e'
+    cli_args = 'Outputs/hide="fromsubelem"'
+    # MultiAppInterpolationTransfer does not support distributed mesh at this moment
+    mesh_mode = 'replicated'
+    requirement = "The system shall be able to create virtually translated points during MultiApp transfers."
+  []
+[]
