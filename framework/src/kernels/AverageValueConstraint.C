@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PostprocessorCED.h"
+#include "AverageValueConstraint.h"
 
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
 
-registerMooseObject("MooseTestApp", PostprocessorCED);
+registerMooseObject("MooseApp", AverageValueConstraint);
 
 InputParameters
-PostprocessorCED::validParams()
+AverageValueConstraint::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
-  params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
+  params.addClassDescription("This class is used to enforce integral of phi with a "
                              "Lagrange multiplier approach.");
   params.addRequiredParam<PostprocessorName>(
       "pp_name", "Name of the Postprocessor value we are trying to equate with 'value'.");
@@ -29,22 +29,22 @@ PostprocessorCED::validParams()
   return params;
 }
 
-PostprocessorCED::PostprocessorCED(const InputParameters & parameters)
+AverageValueConstraint::AverageValueConstraint(const InputParameters & parameters)
   : ScalarKernel(parameters),
     _value(getParam<Real>("value")),
     _pp_value(getPostprocessorValue("pp_name"))
 {
 }
 
-PostprocessorCED::~PostprocessorCED() {}
+AverageValueConstraint::~AverageValueConstraint() {}
 
 void
-PostprocessorCED::reinit()
+AverageValueConstraint::reinit()
 {
 }
 
 void
-PostprocessorCED::computeResidual()
+AverageValueConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_i = 0; _i < re.size(); _i++)
@@ -52,13 +52,13 @@ PostprocessorCED::computeResidual()
 }
 
 Real
-PostprocessorCED::computeQpResidual()
+AverageValueConstraint::computeQpResidual()
 {
   return _pp_value - _value;
 }
 
 void
-PostprocessorCED::computeJacobian()
+AverageValueConstraint::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   for (_i = 0; _i < ke.m(); _i++)
@@ -66,7 +66,7 @@ PostprocessorCED::computeJacobian()
 }
 
 Real
-PostprocessorCED::computeQpJacobian()
+AverageValueConstraint::computeQpJacobian()
 {
   // Note: Here, the true on-diagonal Jacobian contribution is
   // actually zero, i.e. we are not making any approximation
@@ -79,12 +79,12 @@ PostprocessorCED::computeQpJacobian()
 }
 
 void
-PostprocessorCED::computeOffDiagJacobian(unsigned int /*jvar*/)
+AverageValueConstraint::computeOffDiagJacobian(unsigned int /*jvar*/)
 {
 }
 
 Real
-PostprocessorCED::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+AverageValueConstraint::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   // The off-diagonal contribution for this ScalarKernel (derivative
   // wrt the "primal" field variable) is not _actually_ zero, but we

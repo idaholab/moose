@@ -12,16 +12,13 @@
 #include "ScalarKernel.h"
 
 /**
- * This Kernel is part of a test [0] that solves the constrained
- * Neumann problem:
+ * This Kernel implements part of the equation that enforces the constraint
+ * of
  *
- * -\nabla^2 \phi = f
- * -\partial u / \partial n = g
  * \int \phi = V_0
  *
  * where V_0 is a given constant, using a Lagrange multiplier
- * approach. Without the integral constraint, this problem is not
- * well-posed since it has only flux boundary conditions.
+ * approach.
  *
  * In particular, this Kernel implements the residual contribution
  * corresponding to equation (6) in the detailed description [1] of
@@ -31,13 +28,13 @@
  * [0]: kernels/scalar_constraints/scalar_constraint_kernel.i
  * [1]: https://github.com/idaholab/large_media/blob/master/scalar_constraint_kernel.pdf
  */
-class PostprocessorCED : public ScalarKernel
+class AverageValueConstraint : public ScalarKernel
 {
 public:
   static InputParameters validParams();
 
-  PostprocessorCED(const InputParameters & parameters);
-  virtual ~PostprocessorCED();
+  AverageValueConstraint(const InputParameters & parameters);
+  virtual ~AverageValueConstraint();
 
   virtual void reinit();
   virtual void computeResidual();
@@ -49,8 +46,12 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
+  /// Local index
   unsigned int _i;
 
+  /// Given (constant) which we want the integral of the solution variable to match
   Real _value;
+
+  /// Name of the Postprocessor value we are trying to equate with 'value'
   const PostprocessorValue & _pp_value;
 };

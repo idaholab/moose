@@ -75,7 +75,7 @@
 
 [ScalarKernels]
   [./constraint]
-    type = PostprocessorCED
+    type = AverageValueConstraint
     variable = lambda
     pp_name = pp
     value = 2.666666666666666
