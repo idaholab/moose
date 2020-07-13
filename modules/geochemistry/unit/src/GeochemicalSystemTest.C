@@ -2337,10 +2337,18 @@ TEST(GeochemicalSystemTest, getOriginalRedoxLHS)
 /// Check getRedoxLog10K
 TEST(GeochemicalSystemTest, getRedoxLog10K)
 {
+  // not sure which order the redox has been ordered in.  The reactions are:
+  // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
+  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
+  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
   Real boa = 1.0 / 4.0 / 7.5;
-  EXPECT_NEAR(egs_redox.getRedoxLog10K(0), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      egs_redox.getRedoxLog10K(ophth_slot), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
   boa = 1.0 / 8.0;
-  EXPECT_NEAR(egs_redox.getRedoxLog10K(1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      egs_redox.getRedoxLog10K(ch4_slot), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
   try
   {
     egs_redox.getRedoxLog10K(2);
@@ -2360,16 +2368,22 @@ TEST(GeochemicalSystemTest, getRedoxLog10K)
 /// Check log10RedoxActivityProduct
 TEST(GeochemicalSystemTest, log10RedoxActivityProduct)
 {
+  // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
+  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
+  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
+
   Real boa = 1.0 / 4.0 / 7.5;
   const Real log10ap_o =
       boa * std::log10(5.0) + (-1.0 - 6.0 * boa) * std::log10(2.0) - 8 * boa * std::log10(3.0);
-  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(0), log10ap_o, 1E-8);
-  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(ophth_slot), log10ap_o, 1E-8);
+
   boa = 1.0 / 8.0;
   const Real log10ap_c =
       boa * std::log10(6.0) - (1.0 + boa) * std::log10(2.0) - boa * std::log10(3.0);
-  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(1), log10ap_c, 1E-8);
+  EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(ch4_slot), log10ap_c, 1E-8);
   try
   {
     egs_redox.log10RedoxActivityProduct(2);
