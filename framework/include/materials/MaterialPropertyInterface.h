@@ -191,6 +191,19 @@ public:
   bool hasADMaterialPropertyByName(const std::string & name);
   ///@}
 
+  ///@{ generic hasMaterialProperty helper
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  bool hasGenericMaterialProperty(const std::string & name)
+  {
+    return hasADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  bool hasGenericMaterialProperty(const std::string & name)
+  {
+    return hasMaterialProperty<T>(name);
+  }
+  ///@}
+
   /**
    * Derived classes can declare whether or not they work with
    * stateful material properties.  See, for example, DiracKernel.  By

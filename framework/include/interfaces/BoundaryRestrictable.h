@@ -160,7 +160,7 @@ public:
    * @param prop_name the name of the property to query
    * @return true if the property exists for all boundary ids of the object, otherwise false
    */
-  template <typename T>
+  template <typename T, bool is_ad = false>
   bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
 
   /**
@@ -219,12 +219,12 @@ protected:
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
 };
 
-template <typename T>
+template <typename T, bool is_ad>
 bool
 BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name) const
 {
   // If you get here the supplied property is defined on all boundaries, but is still subject
   // existence in the MateialData class
   return hasBoundaryMaterialPropertyHelper(prop_name) &&
-         _bnd_material_data->haveProperty<T>(prop_name);
+         _bnd_material_data->haveGenericProperty<T, is_ad>(prop_name);
 }

@@ -178,7 +178,7 @@ public:
    *
    * @see Material::hasBlockMaterialProperty
    */
-  template <typename T>
+  template <typename T, bool is_ad = false>
   bool hasBlockMaterialProperty(const std::string & prop_name);
 
   /**
@@ -252,11 +252,11 @@ private:
   const std::string & _blk_name;
 };
 
-template <typename T>
+template <typename T, bool is_ad>
 bool
 BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
 {
   mooseAssert(_blk_material_data != NULL, "MaterialData pointer is not defined");
   return hasBlockMaterialPropertyHelper(prop_name) &&
-         _blk_material_data->haveProperty<T>(prop_name);
+         _blk_material_data->haveGenericProperty<T, is_ad>(prop_name);
 }
