@@ -13,7 +13,9 @@
 
 namespace GeochemistryConstants
 {
-constexpr Real MOLES_PER_KG_WATER = 55.51;
+constexpr Real MOLES_PER_KG_WATER =
+    55.5; // This is only approximate, but 55.5 is chosen so the results of the geochemistry module
+          // closely match Geochemists Workbench
 constexpr Real LOGTEN = 2.30258509299404;
 constexpr Real FARADAY = 96485.3415;    // Coulombs . mol^-1
 constexpr Real GAS_CONSTANT = 8.314472; // m^2 . kg . s^-2 . K^-1 . mol^-1

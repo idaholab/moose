@@ -135,7 +135,7 @@
   [./seawater_flowthrough]
     type = 'RunApp'
     input = 'seawater_evaporation.i'
-    expect_out = 'Mass of solvent water = 0.0272kg'
+    expect_out = 'Mass of solvent water = 0.02703kg'
     requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
     issues = '#15330'
     design = 'flow_through.md'

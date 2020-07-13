@@ -29,11 +29,11 @@ const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm_calcite = {
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
     GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-GeochemistryIonicStrength is3(3.0, 3.0, false);
+GeochemistryIonicStrength is3(3.0, 3.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac3(is3, db_calcite);
-GeochemistryIonicStrength is0(0.0, 0.0, false);
+GeochemistryIonicStrength is0(0.0, 0.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac0(is0, db_calcite);
-GeochemistryIonicStrength is8(1E-8, 1E-8, false);
+GeochemistryIonicStrength is8(1E-8, 1E-8, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac8(is8, db_calcite);
 const GeochemicalSystem egs_calcite(mgd_calcite,
                                     ac3,
@@ -2233,7 +2233,7 @@ TEST(GeochemicalSystemTest, getIS)
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
       GeochemicalSystem::ConstraintMeaningEnum::FREE_MOLALITY};
-  GeochemistryIonicStrength is(0.0078125, 0.0078125, false);
+  GeochemistryIonicStrength is(0.0078125, 0.0078125, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, db_calcite);
   ModelGeochemicalDatabase mgd = model_calcite.modelGeochemicalDatabase();
   const GeochemicalSystem egs_small_IS(mgd,
@@ -2254,7 +2254,7 @@ TEST(GeochemicalSystemTest, getIS)
   EXPECT_EQ(egs_small_IS.getIonicStrength(), 0.0078125);
   EXPECT_EQ(egs_small_IS.getStoichiometricIonicStrength(), 0.0078125);
 
-  GeochemistryIonicStrength is_false(3.0, 3.0, true);
+  GeochemistryIonicStrength is_false(3.0, 3.0, true, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac_false(is_false, db_calcite);
   const GeochemicalSystem egs(
       mgd,
@@ -2640,7 +2640,7 @@ TEST(GeochemicalSystemTest, surfacePotJac)
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const Real temp = 45.0;
-  GeochemistryIonicStrength is2(1E-2, 1E-2, false);
+  GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
   GeochemicalSystem egs(mgd,
                         ac2,
@@ -2708,7 +2708,7 @@ TEST(GeochemicalSystemTest, bigJac)
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const Real temp = 45.0;
-  GeochemistryIonicStrength is2(1E-2, 1E-2, false);
+  GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
   GeochemicalSystem egs(mgd,
                         ac2,
@@ -2776,7 +2776,7 @@ TEST(GeochemicalSystemTest, bigJac2)
       GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
       GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
   const Real temp = 45.0;
-  GeochemistryIonicStrength is2(1E-2, 1E-2, false);
+  GeochemistryIonicStrength is2(1E-2, 1E-2, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac2(is2, database);
   GeochemicalSystem egs(mgd,
                         ac2,

@@ -24,8 +24,9 @@ const PertinentGeochemicalSystem model(database,
                                        "O2(aq)",
                                        "e-");
 const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
-const GeochemistryIonicStrength is_calc(1E9, 1E9, false);
-const GeochemistryIonicStrength is_basis_only(1E9, 1E9, true);
+const GeochemistryIonicStrength is_calc(1E9, 1E9, false, false);
+const GeochemistryIonicStrength is_basis_only(1E9, 1E9, true, false);
+const GeochemistryIonicStrength is_cl_only(1E9, 1E9, false, true);
 
 TEST(GeochemistryIonicStrengthTest, sizeExceptions)
 {
@@ -125,7 +126,7 @@ TEST(GeochemistryIonicStrengthTest, sizeExceptions)
 /// Test getting and setting maximum ionic strengths
 TEST(GeochemistryIonicStrengthTest, getsetMax)
 {
-  GeochemistryIonicStrength is(1.0, 2.0, false);
+  GeochemistryIonicStrength is(1.0, 2.0, false, false);
   EXPECT_EQ(is.getMaxIonicStrength(), 1.0);
   EXPECT_EQ(is.getMaxStoichiometricIonicStrength(), 2.0);
 
@@ -134,6 +135,30 @@ TEST(GeochemistryIonicStrengthTest, getsetMax)
 
   EXPECT_EQ(is.getMaxIonicStrength(), 3.25);
   EXPECT_EQ(is.getMaxStoichiometricIonicStrength(), 4.5);
+}
+
+/// Test using basis or Cl only
+TEST(GeochemistryIonicStrengthTest, getsetOnly)
+{
+  EXPECT_FALSE(is_calc.getUseOnlyBasisMolality());
+  EXPECT_TRUE(is_basis_only.getUseOnlyBasisMolality());
+  EXPECT_FALSE(is_cl_only.getUseOnlyBasisMolality());
+  EXPECT_FALSE(is_calc.getUseOnlyClMolality());
+  EXPECT_FALSE(is_basis_only.getUseOnlyClMolality());
+  EXPECT_TRUE(is_cl_only.getUseOnlyClMolality());
+
+  GeochemistryIonicStrength is_tmp(0.125, 1E9, false, false);
+  EXPECT_FALSE(is_tmp.getUseOnlyBasisMolality());
+  EXPECT_FALSE(is_tmp.getUseOnlyClMolality());
+  is_tmp.setUseOnlyBasisMolality(true);
+  EXPECT_TRUE(is_tmp.getUseOnlyBasisMolality());
+  EXPECT_FALSE(is_tmp.getUseOnlyClMolality());
+  is_tmp.setUseOnlyClMolality(true);
+  EXPECT_TRUE(is_tmp.getUseOnlyBasisMolality());
+  EXPECT_TRUE(is_tmp.getUseOnlyClMolality());
+  is_tmp.setUseOnlyBasisMolality(false);
+  EXPECT_FALSE(is_tmp.getUseOnlyBasisMolality());
+  EXPECT_TRUE(is_tmp.getUseOnlyClMolality());
 }
 
 /// Test computing ionic strength
@@ -185,7 +210,7 @@ TEST(GeochemistryIonicStrengthTest, ionicStrength)
   EXPECT_NEAR(ionic_str, gold_ionic_str, 1E-9);
   EXPECT_NEAR(ionic_str_basis_only, gold_basis_only, 1E-9);
 
-  GeochemistryIonicStrength is_max(0.125, 1E9, false);
+  GeochemistryIonicStrength is_max(0.125, 1E9, false, false);
   EXPECT_EQ(is_max.ionicStrength(mgd, basis_m, eqm_m, kin_m), 0.125);
 }
 
@@ -244,6 +269,42 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
   EXPECT_NEAR(ionic_str, gold_ionic_str, 1E-9);
   EXPECT_NEAR(ionic_str_basis_only, gold_basis_only, 1E-9);
 
-  GeochemistryIonicStrength is_max(1E9, 0.125, false);
+  GeochemistryIonicStrength is_max(1E9, 0.125, false, false);
   EXPECT_EQ(is_max.stoichiometricIonicStrength(mgd, basis_m, eqm_m, kin_m), 0.125);
+}
+
+/// Test exception stoichiometric ionic strength when using Cl only
+TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength_except)
+{
+  std::vector<Real> basis_m(6);
+  std::vector<Real> eqm_m(9);
+  std::vector<Real> kin_m(3);
+  try
+  {
+    is_cl_only.stoichiometricIonicStrength(mgd, basis_m, eqm_m, kin_m);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "GeochemistryIonicStrength: attempting to compute stoichiometric ionic strength "
+            "using only the Cl- molality, but Cl- does not appear in the geochemical system") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test stoichiometric ionic strength when using Cl only
+TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrengthOnlyCl)
+{
+  const GeochemicalDatabaseReader db_cl("../database/moose_geochemdb.json", true, true);
+  const PertinentGeochemicalSystem model_cl(
+      db_cl, {"H2O", "H+", "Cl-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  const ModelGeochemicalDatabase mgd_cl = model_cl.modelGeochemicalDatabase();
+  const GeochemistryIonicStrength is_cl(1E9, 1E9, false, true);
+  const std::vector<Real> basis_m{0.75, 2.5, 3.5};
+  const std::vector<Real> eqm_m{1.5, 0.25};
+  EXPECT_EQ(is_cl.stoichiometricIonicStrength(mgd_cl, basis_m, eqm_m, {}), 3.5);
 }

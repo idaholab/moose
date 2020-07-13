@@ -28,10 +28,13 @@ public:
    * reasonable approximation, and it can help with convergence of geochemistry algorithms since it
    * eliminates problems associated with unphysical huge equilibrium molalities that can occur
    * during Newton-iteration to the equilibrium solution
+   * @param use_only_Cl_molality If true, set the stoichiometric ionic strength to the Chlorine-
+   * molality.  Note that this is the method used by the Geochemists Workbench
    */
   GeochemistryIonicStrength(Real max_ionic_strength,
                             Real max_stoichiometric_ionic_strength,
-                            bool use_only_basis_molality);
+                            bool use_only_basis_molality,
+                            bool use_only_Cl_molality);
 
   /**
    * Compute ionic strength
@@ -77,6 +80,12 @@ public:
   /// Return the value of use_only_basis_molality
   Real getUseOnlyBasisMolality() const;
 
+  /// Set the value of use_only_Cl_molality
+  void setUseOnlyClMolality(bool use_only_Cl_molality);
+
+  /// Return the value of use_only_Cl_molality
+  Real getUseOnlyClMolality() const;
+
 private:
   /// maximum ionic strength
   Real _max_ionic_strength;
@@ -86,4 +95,7 @@ private:
 
   /// use only basis molality in the ionic strength calculations
   bool _use_only_basis_molality;
+
+  /// set the stoichiometric ionic strength to the Cl- molality
+  bool _use_only_Cl_molality;
 };

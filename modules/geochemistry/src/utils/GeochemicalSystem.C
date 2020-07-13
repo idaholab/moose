@@ -1079,7 +1079,7 @@ GeochemicalSystem::getResidualComponent(unsigned algebraic_ind,
     return res;
   }
   else if (algebraic_ind <
-           _num_basis_in_algebraic_system + _num_surface_pot) // residual for basis molality
+           _num_basis_in_algebraic_system + _num_surface_pot) // residual for surface potential
   {
     const unsigned sp = algebraic_ind - _num_basis_in_algebraic_system;
     Real res = surfacePotPrefactor(sp) * (_surface_pot_expr[sp] - 1.0 / _surface_pot_expr[sp]);

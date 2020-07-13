@@ -29,7 +29,7 @@ const ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 /// Test interface with ionic strength object
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 {
-  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
 
   is.setUseOnlyBasisMolality(true);
@@ -59,7 +59,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
 /// Test getDebyeHuckel
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 {
-  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
@@ -81,7 +81,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
 /// Test calculate activity coefficients for method=DebyeHuckel
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsDebyeHuckel)
 {
-  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
@@ -141,7 +141,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
 /// Test water activity for method=DebyeHuckel
 TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, waterActivity)
 {
-  GeochemistryIonicStrength is(1.0E9, 2.0E9, false);
+  GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
       25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));

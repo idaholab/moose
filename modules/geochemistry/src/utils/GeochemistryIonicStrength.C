@@ -12,10 +12,12 @@
 
 GeochemistryIonicStrength::GeochemistryIonicStrength(Real max_ionic_strength,
                                                      Real max_stoichiometric_ionic_strength,
-                                                     bool use_only_basis_molality)
+                                                     bool use_only_basis_molality,
+                                                     bool use_only_Cl_molality)
   : _max_ionic_strength(max_ionic_strength),
     _max_stoichiometric_ionic_strength(max_stoichiometric_ionic_strength),
-    _use_only_basis_molality(use_only_basis_molality)
+    _use_only_basis_molality(use_only_basis_molality),
+    _use_only_Cl_molality(use_only_Cl_molality)
 {
 }
 
@@ -77,6 +79,20 @@ GeochemistryIonicStrength::stoichiometricIonicStrength(
               "equal to the size of kin_species_molality");
 
   Real ionic_strength = 0.0;
+  if (_use_only_Cl_molality)
+  {
+    if (mgd.basis_species_index.count("Cl-"))
+      ionic_strength = basis_species_molality[mgd.basis_species_index.at("Cl-")];
+    else if (mgd.eqm_species_index.count("Cl-"))
+      ionic_strength = eqm_species_molality[mgd.eqm_species_index.at("Cl-")];
+    else if (mgd.kin_species_index.count("Cl-"))
+      ionic_strength = kin_species_molality[mgd.kin_species_index.at("Cl-")];
+    else
+      mooseError("GeochemistryIonicStrength: attempting to compute stoichiometric ionic strength "
+                 "using only the Cl- molality, but Cl- does not appear in the geochemical system");
+    return std::max(0.0, std::min(_max_stoichiometric_ionic_strength, ionic_strength));
+  }
+
   for (unsigned i = 0; i < num_basis; ++i)
     ionic_strength += Utility::pow<2>(mgd.basis_species_charge[i]) * basis_species_molality[i];
   if (!_use_only_basis_molality)
@@ -134,4 +150,16 @@ Real
 GeochemistryIonicStrength::getUseOnlyBasisMolality() const
 {
   return _use_only_basis_molality;
+}
+
+void
+GeochemistryIonicStrength::setUseOnlyClMolality(bool use_only_Cl_molality)
+{
+  _use_only_Cl_molality = use_only_Cl_molality;
+}
+
+Real
+GeochemistryIonicStrength::getUseOnlyClMolality() const
+{
+  return _use_only_Cl_molality;
 }

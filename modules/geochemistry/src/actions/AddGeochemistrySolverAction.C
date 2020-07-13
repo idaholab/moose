@@ -132,6 +132,11 @@ AddGeochemistrySolverAction::validParams()
       "setting this parameter true often results in a reasonable approximation.  It can aid in "
       "convergence since it eliminates problems associated with unphysical huge equilibrium "
       "molalities that can occur during Newton iteration to the solution");
+  params.addParam<bool>("stoichiometric_ionic_str_using_Cl_only",
+                        false,
+                        "If set to true, the stoichiometric ionic strength will be set equal to "
+                        "Cl- molality (or max_ionic_strength if the Cl- molality is too "
+                        "big).  This flag overrides ionic_str_using_basis_molality_only");
 
   // following are exclusively for the GeochemistryConsoleOutput
   params.addParam<unsigned int>("precision", 4, "Precision for printing values to the console");

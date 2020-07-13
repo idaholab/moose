@@ -54,7 +54,7 @@
     rel_err = 1.0E-5
     requirement = 'Time-indpendent problems involving fixing pH should be solvable using an Action'
     issues = '#15290 #15261'
-    design = 'GeochemistryTimeIndependentReactor.md'
+    design = 'HCl.md GeochemistryTimeIndependentReactor.md'
   [../]
   [./HCl_no_action]
     type = 'CSVDiff'
@@ -64,7 +64,7 @@
     rel_err = 1.0E-5
     requirement = 'Time-indpendent problems involving fixing pH should be solvable without using an Action'
     issues = '#15290 #15261'
-    design = 'GeochemistryTimeIndependentReactor.md'
+    design = 'HCl.md GeochemistryTimeIndependentReactor.md'
   [../]
   [./except1]
     type = RunException

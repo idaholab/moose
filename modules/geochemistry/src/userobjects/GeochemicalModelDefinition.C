@@ -26,6 +26,12 @@ GeochemicalModelDefinition::validParams()
       "then reexpress the free electron's equilibrium reaction in terms of O2(aq).  Note that if "
       "you choose 'reexpress_free_electron=false' and these other 5 conditions are true, then the "
       "'free electron' will not be available as a secondary species");
+  params.addParam<bool>(
+      "piecewise_linear_interpolation",
+      false,
+      "If true then use a piecewise-linear interpolation of logK and Debye-Huckel parameters, "
+      "regardless of the interpolation type specified in the database file.  This can be useful "
+      "for comparing with results using other geochemistry software");
   params.addRequiredParam<std::vector<std::string>>(
       "basis_species",
       "A list of basis components relevant to the aqueous-equilibrium problem. H2O must appear "
@@ -85,7 +91,9 @@ GeochemicalModelDefinition::validParams()
 
 GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _db(getParam<FileName>("database_file"), getParam<bool>("reexpress_free_electron")),
+    _db(getParam<FileName>("database_file"),
+        getParam<bool>("reexpress_free_electron"),
+        getParam<bool>("piecewise_linear_interpolation")),
     _model(_db,
            getParam<std::vector<std::string>>("basis_species"),
            getParam<std::vector<std::string>>("equilibrium_minerals"),
