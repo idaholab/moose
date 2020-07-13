@@ -197,6 +197,8 @@
   dtmin = 1e-5
 
   num_steps = 3
+
+  snesmf_reuse_base = false
 []
 
 [Outputs]

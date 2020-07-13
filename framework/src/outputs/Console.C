@@ -215,10 +215,12 @@ Console::Console(const InputParameters & parameters)
   if (_app.getParam<bool>("show_outputs"))
     _system_info_flags.push_back("output");
 
-  if (!common_action->getParam<bool>("print_nonlinear_converged_reason"))
+  if (common_action->isParamValid("print_nonlinear_converged_reason") &&
+      !common_action->getParam<bool>("print_nonlinear_converged_reason"))
     Moose::PetscSupport::disableNonlinearConvergedReason(*_problem_ptr);
 
-  if (!common_action->getParam<bool>("print_linear_converged_reason"))
+  if (common_action->isParamValid("print_linear_converged_reason") &&
+      !common_action->getParam<bool>("print_linear_converged_reason"))
     Moose::PetscSupport::disableLinearConvergedReason(*_problem_ptr);
 }
 

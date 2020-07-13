@@ -109,6 +109,7 @@ offset = 1e-2
   scaling_group_variables = 'disp_x disp_y'
   resid_vs_jac_scaling_param = 1
   nl_rel_tol = 1e-12
+  snesmf_reuse_base = false
 []
 
 [Debug]

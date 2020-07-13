@@ -99,6 +99,7 @@ starting_point = .5
   l_max_its = 30
   nl_max_its = 20
   line_search = 'project'
+  snesmf_reuse_base = false
 []
 
 [Debug]

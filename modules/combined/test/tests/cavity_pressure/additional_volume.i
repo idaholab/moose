@@ -329,6 +329,8 @@
 
   dt = 0.5
   end_time = 1.0
+
+  snesmf_reuse_base = false
 []
 
 [Postprocessors]
