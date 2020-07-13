@@ -36,7 +36,7 @@ InputParameters
 getSlepcValidParams(InputParameters & params)
 {
   MooseEnum solve_type("POWER ARNOLDI KRYLOVSCHUR JACOBI_DAVIDSON "
-                       "NONLINEAR_POWER NEWTON");
+                       "NONLINEAR_POWER NEWTON PJFNK JFNK");
   params.set<MooseEnum>("solve_type") = solve_type;
 
   params.setDocString("solve_type",
@@ -45,7 +45,9 @@ getSlepcValidParams(InputParameters & params)
                       "KRYLOVSCHUR: Krylov-Schur "
                       "JACOBI_DAVIDSON: Jacobi-Davidson "
                       "NONLINEAR_POWER: Nonlinear Power "
-                      "NEWTON: Newton ");
+                      "NEWTON: Newton "
+                      "PJFNK: Preconditioned Jacobian-free Newton-Kyrlov"
+                      "JFNK: Jacobian-free Newton-Kyrlov");
 
   // When the eigenvalue problems is reformed as a coupled nonlinear system,
   // we use part of Jacobian as the preconditioning matrix.
@@ -254,6 +256,17 @@ setEigenProblemOptions(SolverParams & solver_params)
 }
 
 void
+setNewtonOutputOptions()
+{
+  Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
+  Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
+  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_monitor");
+  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_monitor");
+}
+
+void
 setSlepcOutputOptions(EigenProblem & eigen_problem)
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_monitor_conv");
@@ -266,13 +279,17 @@ setSlepcOutputOptions(EigenProblem & eigen_problem)
       break;
 
     case Moose::EST_NEWTON:
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_monitor");
+      setNewtonOutputOptions();
       break;
+
+    case Moose::EST_PJFNK:
+      setNewtonOutputOptions();
+      break;
+
+    case Moose::EST_JFNK:
+      setNewtonOutputOptions();
+      break;
+
     case Moose::EST_POWER:
       break;
 
@@ -341,6 +358,38 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
 }
 
 void
+setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & params)
+{
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
+    Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
+    Moose::PetscSupport::setSinglePetscOption(
+        "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
+    Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+    if (solver_params._eigen_matrix_free)
+    {
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+    }
+
+    if (solver_params._customized_pc_for_eigen)
+    {
+      Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
+    }
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+    Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+    Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
+#endif
+#else
+    mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
+#endif
+}
+
+void
 setEigenSolverOptions(SolverParams & solver_params, const InputParameters & params)
 {
   // Avoid unused variable warnings when you have SLEPc but not PETSc-dev.
@@ -382,36 +431,24 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
 #endif
       break;
-    case Moose::EST_NEWTON:
-#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
-      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
-      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
-      Moose::PetscSupport::setSinglePetscOption(
-          "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      if (solver_params._eigen_matrix_free)
-      {
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
-        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
-      }
 
-      if (solver_params._customized_pc_for_eigen)
-      {
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
-        Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
-      }
-#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
-      Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
-#endif
-#else
-      mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
-#endif
-      break;
-    default:
+     case Moose::EST_NEWTON:
+       setNewtonPetscOptions(solver_params, params);
+       break;
+
+     case Moose::EST_PJFNK:
+       solver_params._eigen_matrix_free = true;
+       solver_params._customized_pc_for_eigen = false;
+       setNewtonPetscOptions(solver_params, params);
+       break;
+
+     case Moose::EST_JFNK:
+       solver_params._eigen_matrix_free = true;
+       solver_params._customized_pc_for_eigen = true;
+       setNewtonPetscOptions(solver_params, params);
+       break;
+
+     default:
       mooseError("Unknown eigen solver type \n");
   }
 }

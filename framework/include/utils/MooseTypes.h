@@ -678,6 +678,8 @@ enum EigenSolveType
   EST_JACOBI_DAVIDSON, ///< Jacobi-Davidson
   EST_NONLINEAR_POWER, ///< Nonlinear inverse power
   EST_NEWTON,          ///< Newton-based eigen solver
+  EST_PJFNK,           ///< Preconditioned Jacobian-free Newton Krylov
+  EST_JFNK             ///< Jacobian-free Newton Krylov
 };
 
 /**

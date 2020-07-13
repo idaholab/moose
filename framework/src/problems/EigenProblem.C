@@ -381,5 +381,7 @@ bool
 EigenProblem::isNonlinearEigenvalueSolver()
 {
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_NEWTON;
+         solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
+         solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
+         solverParams()._eigen_solve_type == Moose::EST_JFNK;
 }
