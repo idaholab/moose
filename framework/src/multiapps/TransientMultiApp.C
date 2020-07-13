@@ -610,10 +610,8 @@ void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should
   // Update the file numbers for the outputs from the parent application
   app->getOutputWarehouse().setFileNumbers(_app.getOutputFileNumbers());
 
-  // Call initialization method of Executioner (Note, this preforms the output of the initial time
-  // step, if desired)
-  ex->init();
-
+  // Add these vectors before we call init on the executioner because that will try to restore these
+  // vectors in a restart context
   if (_interpolate_transfers)
   {
     AuxiliarySystem & aux_system = problem.getAuxiliarySystem();
@@ -625,6 +623,10 @@ void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should
     // This will be where we'll transfer the value to for the "target" time
     libmesh_aux_system.add_vector("transfer", false);
   }
+
+  // Call initialization method of Executioner (Note, this preforms the output of the initial time
+  // step, if desired)
+  ex->init();
 
   ex->preExecute();
   if (!_app.isRecovering())
