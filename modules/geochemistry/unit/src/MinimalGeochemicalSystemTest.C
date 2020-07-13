@@ -1538,43 +1538,67 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
   // have a pair
   EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 2);
   EXPECT_EQ(mgd_redox.redox_log10K.m(), 2);
+
+  // not sure which order the redox has been ordered in.  The reactions are:
+  // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
+  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
+  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
+
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   Real boa = 1.0 / 4.0 / 7.5;
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 0), 0.5 + 5.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 1), -1 - 6.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 2), -8.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 3), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 4), boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 5), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 6), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 7), 0.0);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 0), -boa * 594.3211 + 22.76135 - 0.25 * (-2.6610), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 1), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 2), -boa * 482.3612 + 18.513025 - 0.25 * (-3.0580), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 3), -boa * 425.9738 + 16.4658 - 0.25 * (-3.1250), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 4), -boa * 368.7004 + 14.473225 - 0.25 * (-3.0630), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 5), -boa * 321.8658 + 12.92125 - 0.25 * (-2.9140), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 6), -boa * 281.8216 + 11.68165 - 0.25 * (-2.6600), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 7), -boa * 246.4849 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 0), 0.5 + 5.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 1), -1 - 6.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 2), -8.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 4), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 5), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 7), 0.0);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 0), -boa * 594.3211 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 1), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 2), -boa * 482.3612 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 3), -boa * 425.9738 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 4), -boa * 368.7004 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 5), -boa * 321.8658 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 6), -boa * 281.8216 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 7), -boa * 246.4849 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
   boa = 1.0 / 8.0;
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 0), 0.5 - boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 1), -1 - boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 2), -boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 3), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 4), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 5), boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 6), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 7), 0.0);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 0), -boa * 157.8920 + 22.76135 - 0.25 * (-2.6610), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 2), -boa * 127.9360 + 18.513025 - 0.25 * (-3.0580), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 3), -boa * 112.8800 + 16.4658 - 0.25 * (-3.1250), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 4), -boa * 97.7060 + 14.473225 - 0.25 * (-3.0630), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 5), -boa * 85.2880 + 12.92125 - 0.25 * (-2.9140), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 0), 0.5 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 1), -1 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 2), -boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 4), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 5), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 7), 0.0);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 0), -boa * 157.8920 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 2), -boa * 127.9360 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 3), -boa * 112.8800 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 4), -boa * 97.7060 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 5), -boa * 85.2880 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 }
 
 /// Test addKineticRate exceptions

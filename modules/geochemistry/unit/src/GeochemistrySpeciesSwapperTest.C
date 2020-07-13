@@ -1285,22 +1285,27 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   EXPECT_EQ(mgd.redox_lhs, "e-");
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
   const Real p = 1.0 / 4.0 / 7.5;
+  // not sure of the order of the redox_stoichiometry stuff: this tells us
+  const bool fe3_is_slot_zero =
+      (std::abs(mgd.redox_stoichiometry(0, 2)) > 1.0E-8); // note: involves Fe++
+  const unsigned fe3_slot = (fe3_is_slot_zero ? 0 : 1);
+  const unsigned ophth_slot = (fe3_is_slot_zero ? 1 : 0);
   // e- = p*(O-phth)-- + (5p+0.5)*H20 - 8p*HCO3- + (-6p-1)*H+
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), 5.0 * p + 0.5, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), -6.0 * p - 1.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), -8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 0), 5.0 * p + 0.5, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 1), -6.0 * p - 1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 2), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 4), -8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 5), p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 6), 0.0, 1.0E-8);
   // e- = Fe++ - Fe+++
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 0), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 1), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 2), 1.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 4), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 5), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 6), -1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 0), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 1), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 2), 1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 4), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 5), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 6), -1.0, 1.0E-8);
   // record stoichiometry and log10K to compare with below
   DenseMatrix<Real> orig_stoi = mgd.redox_stoichiometry;
   DenseMatrix<Real> orig_log10K = mgd.redox_log10K;
@@ -1323,38 +1328,38 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
   const Real pp = 1.0 / 7.5;
   // O2(aq) = pp * (-(O-phth)-- - 5*H20 + 8*HCO3- + 6*H+)
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), -5.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), 6.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), 8.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), -pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 0), -5.0 * pp, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 1), 6.0 * pp, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 2), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 4), 8.0 * pp, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 5), -pp, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 6), 0.0, 1.0E-8);
   // O2(aq) = 4 (Fe+++ - Fe++ - H+ + (1/2) H20)
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 0), 2.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 1), -4.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 2), -4.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 4), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 5), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 6), 4.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 0), 2.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 1), -4.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 2), -4.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 4), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 5), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 6), 4.0, 1.0E-8);
   // Equilibrium constants should just be scaled versions of those in the database
-  EXPECT_NEAR(mgd.redox_log10K(0, 0), pp * 594.3211, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 1), pp * 542.8292, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 2), pp * 482.3612, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 3), pp * 425.9738, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 4), pp * 368.7004, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 5), pp * 321.8658, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 6), pp * 281.8216, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 7), pp * 246.4849, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 0), -4.0 * (-10.0553), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 1), -4.0 * (-8.4878), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 2), -4.0 * (-6.6954), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 3), -4.0 * (-5.0568), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 4), -4.0 * (-3.4154), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 5), -4.0 * (-2.0747), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 6), -4.0 * (-0.8908), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 7), -4.0 * (0.2679), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 0), pp * 594.3211, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 1), pp * 542.8292, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 2), pp * 482.3612, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 3), pp * 425.9738, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 4), pp * 368.7004, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 5), pp * 321.8658, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 6), pp * 281.8216, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(ophth_slot, 7), pp * 246.4849, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 0), -4.0 * (-10.0553), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 1), -4.0 * (-8.4878), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 2), -4.0 * (-6.6954), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 3), -4.0 * (-5.0568), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 4), -4.0 * (-3.4154), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 5), -4.0 * (-2.0747), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 6), -4.0 * (-0.8908), 1.0E-8);
+  EXPECT_NEAR(mgd.redox_log10K(fe3_slot, 7), -4.0 * (0.2679), 1.0E-8);
 
   // swap O2(aq) with e-
   swapper.performSwap(mgd, "e-", "O2(aq)");
@@ -1393,27 +1398,34 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
 
   // Since HCO3- = CO3-- + H+
   // e- = p*(O-phth)-- + (5p+0.5)*H20 - 8p*CO3-- + (-6p-1-8p)*H+
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), 5.0 * p + 0.5, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), -6.0 * p - 1.0 - 8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), -8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 0), orig_log10K(0, 0) + 8.0 * p * 10.6169, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 1), orig_log10K(0, 1) + 8.0 * p * 10.3439, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 2), orig_log10K(0, 2) + 8.0 * p * 10.2092, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 3), orig_log10K(0, 3) + 8.0 * p * 10.2793, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 4), orig_log10K(0, 4) + 8.0 * p * 10.5131, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 5), orig_log10K(0, 5) + 8.0 * p * 10.8637, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 6), orig_log10K(0, 6) + 8.0 * p * 11.2860, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 7), orig_log10K(0, 7) + 8.0 * p * 11.6319, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 0), 5.0 * p + 0.5, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 1), -6.0 * p - 1.0 - 8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 2), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 4), -8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 5), p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 6), 0.0, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 0), orig_log10K(ophth_slot, 0) + 8.0 * p * 10.6169, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 1), orig_log10K(ophth_slot, 1) + 8.0 * p * 10.3439, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 2), orig_log10K(ophth_slot, 2) + 8.0 * p * 10.2092, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 3), orig_log10K(ophth_slot, 3) + 8.0 * p * 10.2793, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 4), orig_log10K(ophth_slot, 4) + 8.0 * p * 10.5131, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 5), orig_log10K(ophth_slot, 5) + 8.0 * p * 10.8637, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 6), orig_log10K(ophth_slot, 6) + 8.0 * p * 11.2860, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 7), orig_log10K(ophth_slot, 7) + 8.0 * p * 11.6319, 1.0E-8);
   // e- = Fe++ - Fe+++ is unimpacted by the swap
-  const unsigned red = 1;
   for (unsigned basis_i = 0; basis_i < 7; ++basis_i)
-    EXPECT_NEAR(mgd.redox_stoichiometry(red, basis_i), orig_stoi(red, basis_i), 1.0E-8);
+    EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, basis_i), orig_stoi(fe3_slot, basis_i), 1.0E-8);
   for (unsigned temp = 0; temp < 8; ++temp)
-    EXPECT_NEAR(mgd.redox_log10K(red, temp), orig_log10K(red, temp), 1.0E-8);
+    EXPECT_NEAR(mgd.redox_log10K(fe3_slot, temp), orig_log10K(fe3_slot, temp), 1.0E-8);
 }
 
 /// Check findBestEqmSwap execption
