@@ -11,7 +11,8 @@
   constraint_value = "  1.0 1E-2 1E-2"
   constraint_meaning = "kg_solvent_water activity moles_bulk_species"
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
-  execute_console_output_on = '' # only CSV output for this example
+  execute_console_output_on = initial
+  abs_tol = 1E-15
 []
 
 [Postprocessors]
@@ -50,6 +51,7 @@
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl-"
+    piecewise_linear_interpolation = true # to reproduce the GWB result
   [../]
 []
 

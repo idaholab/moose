@@ -29,7 +29,7 @@ const std::vector<GeochemicalSystem::ConstraintMeaningEnum> cm4 = {
     GeochemicalSystem::ConstraintMeaningEnum::ACTIVITY,
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES,
     GeochemicalSystem::ConstraintMeaningEnum::MOLES_BULK_SPECIES};
-GeochemistryIonicStrength is_solver(3.0, 3.0, false);
+GeochemistryIonicStrength is_solver(3.0, 3.0, false, false);
 GeochemistryActivityCoefficientsDebyeHuckel ac_solver(is_solver, db_solver);
 
 /// Check exception
@@ -1703,7 +1703,9 @@ TEST(GeochemicalSolverTest, solve5_restore)
 
   // now setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles to the solution
   // obtained This should actually do nothing: we are just checking the "restore" doesn't muck
-  // something up!
+  // something up!  Of course, activity coefficients will slightly change due to making the
+  // configuration slightly more consistent (activities and molalities match) so there will be very
+  // minor changes
   std::vector<std::string> names = mgd.basis_species_name;
   names.insert(names.end(), mgd.eqm_species_name.begin(), mgd.eqm_species_name.end());
   names.push_back("Fe(OH)3(ppd)_surface_potential_expr");
@@ -1720,7 +1722,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
 
   solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
   EXPECT_EQ(tot_iter, 0);
-  EXPECT_EQ(abs_residual, old_residual);
+  EXPECT_LE(abs_residual, 2.0 * old_residual);
 
   // Now use constraints_from_molalities = true
   const std::vector<bool> com_true(egs.getNumInBasis(), true);
@@ -1730,7 +1732,7 @@ TEST(GeochemicalSolverTest, solve5_restore)
   solver.solveSystem(ss, tot_iter, abs_residual, 0.0, mole_additions, dmole_additions);
 
   EXPECT_EQ(tot_iter, 0);
-  EXPECT_LE(abs_residual, old_residual);
+  EXPECT_LE(abs_residual, 2.0 * old_residual);
 }
 
 /// Test progressively adding H+ to a system

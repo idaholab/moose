@@ -122,6 +122,8 @@ AddTimeIndependentReactionSolverAction::act()
     params.set<unsigned>("ramp_max_ionic_strength_initial") =
         getParam<unsigned>("ramp_max_ionic_strength_initial");
     params.set<bool>("ionic_str_using_basis_only") = getParam<bool>("ionic_str_using_basis_only");
+    params.set<bool>("stoichiometric_ionic_str_using_Cl_only") =
+        getParam<bool>("stoichiometric_ionic_str_using_Cl_only");
     params.set<Real>("temperature") = getParam<Real>("temperature");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
     _problem->addUserObject(

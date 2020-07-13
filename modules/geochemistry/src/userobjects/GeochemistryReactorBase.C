@@ -121,6 +121,11 @@ GeochemistryReactorBase::validParams()
       "setting this parameter true often results in a reasonable approximation.  It can aid in "
       "convergence since it eliminates problems associated with unphysical huge equilibrium "
       "molalities that can occur during Newton iteration to the solution");
+  params.addParam<bool>("stoichiometric_ionic_str_using_Cl_only",
+                        false,
+                        "If set to true, the stoichiometric ionic strength will be set equal to "
+                        "Cl- molality (or max_ionic_strength if the Cl- molality is too "
+                        "big).  This flag overrides ionic_str_using_basis_molality_only");
   params.addClassDescription("Base class for UserObject to solve geochemistry reactions");
   return params;
 }
@@ -134,7 +139,8 @@ GeochemistryReactorBase::GeochemistryReactorBase(const InputParameters & paramet
                            (1.0 + getParam<unsigned>("ramp_max_ionic_strength_initial"))),
     _is(_initial_max_ionic_str,
         _initial_max_ionic_str,
-        getParam<bool>("ionic_str_using_basis_only")),
+        getParam<bool>("ionic_str_using_basis_only"),
+        getParam<bool>("stoichiometric_ionic_str_using_Cl_only")),
     _gac(_is,
          getUserObject<GeochemicalModelDefinition>("model_definition").getOriginalFullDatabase()),
     _max_swaps_allowed(getParam<unsigned>("max_swaps_allowed")),
