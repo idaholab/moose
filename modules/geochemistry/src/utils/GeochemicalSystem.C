@@ -10,6 +10,7 @@
 #include "GeochemicalSystem.h"
 #include "GeochemistryActivityCalculators.h"
 #include "GeochemistryKineticRateCalculator.h"
+#include "EquilibriumConstantInterpolator.h"
 
 GeochemicalSystem::GeochemicalSystem(ModelGeochemicalDatabase & mgd,
                                      GeochemistryActivityCoefficients & gac,
@@ -434,16 +435,34 @@ GeochemicalSystem::log10KineticActivityProduct(unsigned kin) const
   return log10ap;
 }
 
-void GeochemicalSystem::buildTemperatureDependentQuantities(Real /*temperature*/)
+void
+GeochemicalSystem::buildTemperatureDependentQuantities(Real temperature)
 {
-  // When temperature least-squares stuff has been done, this function will be altered
-  // at 25degC currently
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
+
   for (unsigned eqm_j = 0; eqm_j < _num_eqm; ++eqm_j)
-    _eqm_log10K[eqm_j] = _mgd.eqm_log10K(eqm_j, 1);
+  {
+    EquilibriumConstantInterpolator interp(
+        temps, _mgd.eqm_log10K.sub_matrix(eqm_j, 1, 0, numT).get_values(), model_type);
+    interp.generate();
+    _eqm_log10K[eqm_j] = interp.sample(temperature);
+  }
   for (unsigned red = 0; red < _num_redox; ++red)
-    _redox_log10K[red] = _mgd.redox_log10K(red, 1);
+  {
+    EquilibriumConstantInterpolator interp(
+        temps, _mgd.redox_log10K.sub_matrix(red, 1, 0, numT).get_values(), model_type);
+    interp.generate();
+    _redox_log10K[red] = interp.sample(temperature);
+  }
   for (unsigned kin = 0; kin < _num_kin; ++kin)
-    _kin_log10K[kin] = _mgd.kin_log10K(kin, 1);
+  {
+    EquilibriumConstantInterpolator interp(
+        temps, _mgd.kin_log10K.sub_matrix(kin, 1, 0, numT).get_values(), model_type);
+    interp.generate();
+    _kin_log10K[kin] = interp.sample(temperature);
+  }
 }
 
 void
@@ -597,15 +616,15 @@ GeochemicalSystem::initBulkAndFree(std::vector<Real> & bulk_moles_old,
       case ConstraintMeaningEnum::FREE_MOLALITY:
       {
         bulk_moles_old[i] =
-            value * basis_molality[0] / 0.9; // initial guess (i is not an algebraic variable). Will
-                                             // be determined exactly during the solve
+            value * basis_molality[0] / 0.9; // initial guess (i is not an algebraic variable).
+                                             // Will be determined exactly during the solve
         basis_molality[i] = value;
         break;
       }
       case ConstraintMeaningEnum::FREE_MOLES_MINERAL_SPECIES:
       {
-        bulk_moles_old[i] = value / 0.9; // initial guess (i is not an algebraic variable).  Will be
-                                         // determined exactly during the solve
+        bulk_moles_old[i] = value / 0.9; // initial guess (i is not an algebraic variable).  Will
+                                         // be determined exactly during the solve
         basis_molality[i] = value;       // note, this is *moles*, not molality
         break;
       }
@@ -620,8 +639,8 @@ GeochemicalSystem::initBulkAndFree(std::vector<Real> & bulk_moles_old,
       }
       case ConstraintMeaningEnum::ACTIVITY:
       {
-        bulk_moles_old[i] = value / 0.9; // initial guess (i is not an algebraic variable).  Will be
-                                         // determined exactly during the solve
+        bulk_moles_old[i] = value / 0.9; // initial guess (i is not an algebraic variable).  Will
+                                         // be determined exactly during the solve
         if (i == 0)
           basis_molality[i] = 1.0; // assumption
         else
@@ -1008,8 +1027,8 @@ GeochemicalSystem::getResidualComponent(unsigned algebraic_ind,
      *   = -(M_old + sum_kin[stoi*mole_kin_old] + mole_addition) + M + sum_kin[stoi*mole_kin]
      *   = -(M_old + mole_addition) + M + sum_kin[stoi*kin_mole_addition]
      * which is exactly Eqns(16.7)-(16.9).
-     * One problem with Bethke's approach is that if kin_mole_addition depends on the mole number of
-     the kinetic species, there is a "hidden" variable (moles of kinetic species) which is kept
+     * One problem with Bethke's approach is that if kin_mole_addition depends on the mole number
+     of the kinetic species, there is a "hidden" variable (moles of kinetic species) which is kept
      constant during the solve.  Here, including the moles of kinetic species as additional
      variables allows greater accuracy.
      */
@@ -1041,10 +1060,10 @@ GeochemicalSystem::getResidualComponent(unsigned algebraic_ind,
           // do not know the bulk moles of this species: use the current value for molality and
           // kin_moles.  Note, there is no mole_additions here since physically any mole_additions
           // get instantly get soaked up by the fixed activity (or fixed molality, etc), and
-          // mathematically when we eventually come to add mole_additions to the bulk_moles_old (via
-          // addtoBulkMoles, for instance) we immediately return without adding stuff.  End result:
-          // charge-neutrality should not depend on mole_additions for fixed-activity (molality,
-          // etc) species.
+          // mathematically when we eventually come to add mole_additions to the bulk_moles_old
+          // (via addtoBulkMoles, for instance) we immediately return without adding stuff.  End
+          // result: charge-neutrality should not depend on mole_additions for fixed-activity
+          // (molality, etc) species.
           res += _mgd.basis_species_charge[i] * computeBulkFromMolalities(i) /
                  _mgd.basis_species_charge[basis_i];
         }
@@ -2168,8 +2187,8 @@ GeochemicalSystem::updateOldWithCurrent(const DenseVector<Real> & mole_additions
   // - for the other species, computes bulk_moles_old from the molalities
   computeBulk(_bulk_moles_old);
 
-  // It is possible that the user would also like to enforceChargeBalance() now, and that is fine -
-  // there will be no negative consequences
+  // It is possible that the user would also like to enforceChargeBalance() now, and that is fine
+  // - there will be no negative consequences
 }
 
 void

@@ -27,7 +27,6 @@ public:
 protected:
   virtual void output(const ExecFlagType & type) override;
 
-  const GeochemicalDatabaseReader & _db;
   ModelGeochemicalDatabase _mgd;
   GeochemistrySpeciesSwapper _swapper;
   const std::vector<std::string> _swap_out;

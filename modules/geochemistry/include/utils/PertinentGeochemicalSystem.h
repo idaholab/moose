@@ -58,10 +58,10 @@ struct KineticRateDefinition
  */
 struct ModelGeochemicalDatabase
 {
-  ModelGeochemicalDatabase(){};
+  ModelGeochemicalDatabase(const GeochemicalDatabaseReader & db) : original_database(&db){};
 
-  /// temperatures defined in the database
-  std::vector<Real> temperatures;
+  /// a pointer to the original database used to build this ModelGeochemicalDatabase
+  const GeochemicalDatabaseReader * original_database;
 
   /**
    * basis_species_index[name] = index of the basis species, within all ModelGeochemicalDatabase

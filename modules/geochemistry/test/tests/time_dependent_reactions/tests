@@ -96,6 +96,7 @@
     expect_out = 'Temperature = 25'
     requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
     issues = '#15330'
+    skip = 'temperature stuff needs to be validated'
     design = 'cooling_feldspar.md'
   [../]
   [./dissolution_pyrite_1]
@@ -178,7 +179,7 @@
   [./flushing_case1]
     type = 'RunApp'
     input = 'flushing_case1.i'
-    expect_out = 'Mass of solvent water = 1.934kg'
+    expect_out = 'Mass of solvent water = 5.139kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
@@ -186,7 +187,7 @@
   [./flushing_case2]
     type = 'RunApp'
     input = 'flushing_case2.i'
-    expect_out = 'Mass of solvent water = 1.358kg'
+    expect_out = 'Mass of solvent water = 6.58kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
@@ -194,7 +195,7 @@
   [./flushing_case3]
     type = 'RunApp'
     input = 'flushing_case3.i'
-    expect_out = 'Mass of solvent water = 1.069kg'
+    expect_out = 'Mass of solvent water = 2.102kg'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'

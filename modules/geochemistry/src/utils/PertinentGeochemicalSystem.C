@@ -36,7 +36,7 @@ PertinentGeochemicalSystem::PertinentGeochemicalSystem(
     _secondary_info(),
     _redox_ox(redox_ox),
     _redox_e(redox_e),
-    _model()
+    _model(_db)
 {
   // Use the constructor info to build the "index" and "info" structures
   buildBasis(basis_species);
@@ -316,8 +316,6 @@ PertinentGeochemicalSystem::createModel()
   const unsigned num_cols = _basis_info.size();
   const unsigned num_temperatures = _db.getTemperatures().size();
   unsigned ind = 0;
-
-  _model.temperatures = _db.getTemperatures();
 
   // create basis_species_index map
   _model.basis_species_index = _basis_index;

@@ -79,7 +79,6 @@ GeochemicalModelInterrogator::validParams()
 GeochemicalModelInterrogator::GeochemicalModelInterrogator(const InputParameters & parameters)
   : Output(parameters),
     UserObjectInterface(this),
-    _db(getUserObject<GeochemicalModelDefinition>("model_definition").getOriginalFullDatabase()),
     _mgd(getUserObject<GeochemicalModelDefinition>("model_definition").getDatabase()),
     _swapper(_mgd.basis_species_index.size(), getParam<Real>("stoichiometry_tolerance")),
     _swap_out(getParam<std::vector<std::string>>("swap_out_of_basis")),
@@ -164,10 +163,11 @@ GeochemicalModelInterrogator::outputReaction(const std::string & eqm_species) co
   std::stringstream ss;
   const unsigned row = _mgd.eqm_species_index.at(eqm_species);
   const Real cutoff = std::pow(10.0, -1.0 * _precision);
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
   EquilibriumConstantInterpolator log10K(
-      _mgd.temperatures,
-      _mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()).get_values(),
-      _db.getLogKModel());
+      temps, _mgd.eqm_log10K.sub_matrix(row, 1, 0, numT).get_values(), model_type);
   log10K.generate();
   const Real log10_eqm_const = log10K.sample(_temperature);
   ss << std::setprecision(_precision);
@@ -214,10 +214,11 @@ GeochemicalModelInterrogator::outputActivity(const std::string & eqm_species) co
   const unsigned row = _mgd.eqm_species_index.at(eqm_species);
   const unsigned num_cols = _mgd.basis_species_index.size();
   const Real cutoff = std::pow(10.0, -1.0 * _precision);
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
   EquilibriumConstantInterpolator log10K(
-      _mgd.temperatures,
-      _mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()).get_values(),
-      _db.getLogKModel());
+      temps, _mgd.eqm_log10K.sub_matrix(row, 1, 0, numT).get_values(), model_type);
   log10K.generate();
   Real rhs = log10K.sample(_temperature);
   std::stringstream lhs;
@@ -278,19 +279,21 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
       }
     }
 
-  const Real tsoln =
-      solveForT(_mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()), rhs);
+  const Real tsoln = solveForT(
+      _mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.original_database->getTemperatures().size()), rhs);
   _console << eqm_species << ".  T = " << tsoln << "degC\n";
 }
 
 Real
 GeochemicalModelInterrogator::solveForT(const DenseMatrix<Real> & reference_log10K, Real rhs) const
 {
-  const unsigned num_t = _mgd.temperatures.size();
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
 
   // find the bracket that contains the rhs
   unsigned bracket = 0;
-  for (bracket = 0; bracket < num_t - 1; ++bracket)
+  for (bracket = 0; bracket < numT - 1; ++bracket)
   {
     if (reference_log10K(0, bracket) <= rhs && reference_log10K(0, bracket + 1) > rhs)
       break;
@@ -298,14 +301,13 @@ GeochemicalModelInterrogator::solveForT(const DenseMatrix<Real> & reference_log1
       break;
   }
 
-  if (bracket == num_t - 1)
+  if (bracket == numT - 1)
     return std::numeric_limits<double>::quiet_NaN();
 
-  EquilibriumConstantInterpolator log10K(
-      _mgd.temperatures, reference_log10K.get_values(), _db.getLogKModel());
+  EquilibriumConstantInterpolator log10K(temps, reference_log10K.get_values(), model_type);
   log10K.generate();
   // now do a Newton-Raphson to find T for which log10K.sample(T) = rhs
-  Real temp = _mgd.temperatures[bracket + 1];
+  Real temp = _mgd.original_database->getTemperatures()[bracket + 1];
   const Real small_delT =
       (temp + GeochemistryConstants::CELSIUS_TO_KELVIN) * std::pow(10.0, -1.0 * _precision);
   Real del_temp = small_delT;
