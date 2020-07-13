@@ -554,7 +554,7 @@ TEST(PertinentGeochemicalSystemTest, temperatures)
   PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.temperatures, database.getTemperatures());
+  ASSERT_EQ(mgd.original_database->getTemperatures(), database.getTemperatures());
 }
 
 /**
