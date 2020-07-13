@@ -1,0 +1,34 @@
+{% set build = 0 %}
+{% set version = "2020.07.13" %}
+
+package:
+  name: moose-pyhit
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/milljm/moose-pyhit.git
+
+build:
+  number: {{ build }}  # [linux,osx]
+  skip: true           # [win]
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+  host:
+    - python {{ python }}
+  run:
+    - python {{ python }}
+
+test:
+  imports:
+    - pyhit
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'HIT Parser'
+
+extra:
+  recipe-maintainers:
+    - milljm
