@@ -83,6 +83,8 @@ initEigenSolveType()
     eigen_solve_type_to_enum["JACOBI_DAVIDSON"] = EST_JACOBI_DAVIDSON;
     eigen_solve_type_to_enum["NONLINEAR_POWER"] = EST_NONLINEAR_POWER;
     eigen_solve_type_to_enum["NEWTON"] = EST_NEWTON;
+    eigen_solve_type_to_enum["PJFNK"] = EST_PJFNK;
+    eigen_solve_type_to_enum["JFNK"] = EST_JFNK;
   }
 }
 

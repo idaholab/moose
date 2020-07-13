@@ -6,10 +6,21 @@
     type = 'CSVDiff'
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
-    cli_args = '-eps_view'
+    cli_args = 'Executioner/solve_type=Newton Executioner/matrix_free=true -eps_view'
     slepc_version = '>=3.8.0'
     expect_out = 'type: moosepc'
     requirement = "Eigen solver should work with a physics-based preconditioner "
+  [../]
+
+  [./JFNK_pbp]
+    type = 'CSVDiff'
+    input = 'ne_pbp.i'
+    csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
+    cli_args = 'Executioner/solve_type=JFNK -eps_view'
+    slepc_version = '>=3.8.0'
+    expect_out = 'type: moosepc'
+    prereq = 'newton_pbp'
+    requirement = "The system shall support a physics-based preconditioner with using JFNK "
   [../]
 
   [./newton_pbp_shell_precond]
@@ -17,7 +28,7 @@
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
     cli_args = 'Executioner/precond_matrix_free=true -eps_view'
-    prereq = 'newton_pbp'
+    prereq = 'JFNK_pbp'
     slepc_version = '>=3.8.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with a shell preconditioning matrix"
   [../]
