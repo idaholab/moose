@@ -249,7 +249,14 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         bool at_steady = false;
 
-        if (_first && !_app.isRecovering())
+        // ADL: During restart, there is already an FEProblemBase::advanceState that occurs at the
+        // end of TransientMultiApp::setupApp. advanceState, along with copying the solutions
+        // backwards in time/state, also *moves* (note it doesn't copy!) stateful material
+        // properties backwards (through swapping). So if restarting from a full-solve steady
+        // multi-app for example, then after one advance state, we will have good information in old
+        // and no information in current. But then if we advance again we no longer have good data
+        // in the old material properties, so don't advance here if we're restarting
+        if (_first && !_app.isRecovering() && !_app.isRestarting())
           problem.advanceState();
 
         bool local_first = _first;
@@ -363,7 +370,14 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       }
       else
       {
-        if (_first && !_app.isRecovering())
+        // ADL: During restart, there is already an FEProblemBase::advanceState that occurs at the
+        // end of TransientMultiApp::setupApp. advanceState, along with copying the solutions
+        // backwards in time/state, also *moves* (note it doesn't copy!) stateful material
+        // properties backwards (through swapping). So if restarting from a full-solve steady
+        // multi-app for example, then after one advance state, we will have good information in old
+        // and no information in current. But then if we advance again we no longer have good data
+        // in the old material properties, so don't advance here if we're restarting
+        if (_first && !_app.isRecovering() && !_app.isRestarting())
           problem.advanceState();
 
         if (auto_advance)
