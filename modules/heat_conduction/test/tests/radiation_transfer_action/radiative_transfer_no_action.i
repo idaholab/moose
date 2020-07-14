@@ -157,10 +157,8 @@
     type = GrayLambertNeumannBC
     variable = temperature
     surface_radiation_object_name = gray_lambert
-    boundary = 'inner_bottom_0 inner_bottom_1
-                inner_left_0 inner_left_1
-                inner_right_0 inner_right_1
-                inner_top_0 inner_top_1 inner_top_2'
+    boundary = 'inner_left_0 inner_left_1
+                inner_right_0 inner_right_1'
   [../]
 []
 
