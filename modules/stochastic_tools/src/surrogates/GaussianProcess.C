@@ -45,11 +45,6 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
 }
 
 void
-GaussianProcess::setupCovariance()
-{
-}
-
-void
 GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
   /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction

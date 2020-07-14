@@ -8,7 +8,6 @@
     check_files = 'gauss_process_training_GP_avg_trainer.rd'
     allow_test_objects = true
     detail = 'training a Gaussian process model, '
-    max_parallel = 1
   []
   [GP_testing]
     type = CSVDiff
@@ -16,7 +15,6 @@
     allow_test_objects = true
     csvdiff = 'GP_squared_exponential_testing_out_samp_avg_0002.csv'
     detail = 'evaluating the trained Gaussian process model, '
-    max_parallel = 1
     prereq = GP_training
   []
   [GP_squared_exponential]
@@ -25,7 +23,6 @@
     allow_test_objects = true
     csvdiff = 'GP_squared_exponential_out_samp_avg_0002.csv GP_squared_exponential_out_results_0002.csv'
     detail = 'training and evaluating with a squared exponential kernel, '
-    max_parallel = 1
   []
   [GP_exponential]
     type = CSVDiff
@@ -33,7 +30,6 @@
     allow_test_objects = true
     csvdiff = 'GP_exponential_out_samp_avg_0002.csv GP_exponential_out_results_0002.csv'
     detail = 'training and evaluating with an exponential kernel, '
-    max_parallel = 1
   []
   [GP_Matern_half_int]
     type = CSVDiff
@@ -41,6 +37,5 @@
     allow_test_objects = true
     csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
     detail = 'and training and evaluating with a Matern half integer kernel.'
-    max_parallel = 1
   []
 []

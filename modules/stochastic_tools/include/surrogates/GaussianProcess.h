@@ -22,10 +22,6 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
-  // void setCovarianceName(std::string covar_name);
-
-  virtual void setupCovariance();
-
   virtual void setupCovariance(UserObjectName _covar_name);
 
   const std::string & getCovarType() const { return _covar_type; }
