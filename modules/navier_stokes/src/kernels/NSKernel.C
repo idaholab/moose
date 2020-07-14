@@ -17,6 +17,8 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
+namespace nms = NS;
+
 InputParameters
 NSKernel::validParams()
 {
@@ -24,14 +26,14 @@ NSKernel::validParams()
   params.addClassDescription("This class couples together all the variables for the compressible "
                              "Navier-Stokes equations to allow them to be used in derived Kernel "
                              "classes.");
-  params.addRequiredCoupledVar(NS::velocity_x, "x-velocity");
-  params.addCoupledVar(NS::velocity_y, "y-velocity"); // only required in 2D and 3D
-  params.addCoupledVar(NS::velocity_z, "z-velocity"); // only required in 3D
-  params.addRequiredCoupledVar(NS::density, "density");
-  params.addRequiredCoupledVar(NS::momentum_x, "x-momentum");
-  params.addCoupledVar(NS::momentum_y, "y-momentum"); // only required in 2D and 3D
-  params.addCoupledVar(NS::momentum_z, "z-momentum"); // only required in 3D
-  params.addRequiredCoupledVar(NS::total_energy, "total energy");
+  params.addRequiredCoupledVar(nms::velocity_x, "x-velocity");
+  params.addCoupledVar(nms::velocity_y, "y-velocity"); // only required in 2D and 3D
+  params.addCoupledVar(nms::velocity_z, "z-velocity"); // only required in 3D
+  params.addRequiredCoupledVar(nms::density, "density");
+  params.addRequiredCoupledVar(nms::momentum_x, "x-momentum");
+  params.addCoupledVar(nms::momentum_y, "y-momentum"); // only required in 2D and 3D
+  params.addCoupledVar(nms::momentum_z, "z-momentum"); // only required in 3D
+  params.addRequiredCoupledVar(nms::total_energy, "total energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
   return params;
@@ -40,29 +42,29 @@ NSKernel::validParams()
 NSKernel::NSKernel(const InputParameters & parameters)
   : Kernel(parameters),
     // Coupled variables
-    _u_vel(coupledValue(NS::velocity_x)),
-    _v_vel(_mesh.dimension() >= 2 ? coupledValue(NS::velocity_y) : _zero),
-    _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
+    _u_vel(coupledValue(nms::velocity_x)),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue(nms::velocity_y) : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue(nms::velocity_z) : _zero),
 
-    _rho(coupledValue(NS::density)),
-    _rho_u(coupledValue(NS::momentum_x)),
-    _rho_v(_mesh.dimension() >= 2 ? coupledValue(NS::momentum_y) : _zero),
-    _rho_w(_mesh.dimension() == 3 ? coupledValue(NS::momentum_z) : _zero),
-    _rho_E(coupledValue(NS::total_energy)),
+    _rho(coupledValue(nms::density)),
+    _rho_u(coupledValue(nms::momentum_x)),
+    _rho_v(_mesh.dimension() >= 2 ? coupledValue(nms::momentum_y) : _zero),
+    _rho_w(_mesh.dimension() == 3 ? coupledValue(nms::momentum_z) : _zero),
+    _rho_E(coupledValue(nms::total_energy)),
 
     // Gradients
-    _grad_rho(coupledGradient(NS::density)),
-    _grad_rho_u(coupledGradient(NS::momentum_x)),
-    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(NS::momentum_y) : _grad_zero),
-    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(NS::momentum_z) : _grad_zero),
-    _grad_rho_E(coupledGradient(NS::total_energy)),
+    _grad_rho(coupledGradient(nms::density)),
+    _grad_rho_u(coupledGradient(nms::momentum_x)),
+    _grad_rho_v(_mesh.dimension() >= 2 ? coupledGradient(nms::momentum_y) : _grad_zero),
+    _grad_rho_w(_mesh.dimension() == 3 ? coupledGradient(nms::momentum_z) : _grad_zero),
+    _grad_rho_E(coupledGradient(nms::total_energy)),
 
     // Variable numberings
-    _rho_var_number(coupled(NS::density)),
-    _rhou_var_number(coupled(NS::momentum_x)),
-    _rhov_var_number(_mesh.dimension() >= 2 ? coupled(NS::momentum_y) : libMesh::invalid_uint),
-    _rhow_var_number(_mesh.dimension() == 3 ? coupled(NS::momentum_z) : libMesh::invalid_uint),
-    _rhoE_var_number(coupled(NS::total_energy)),
+    _rho_var_number(coupled(nms::density)),
+    _rhou_var_number(coupled(nms::momentum_x)),
+    _rhov_var_number(_mesh.dimension() >= 2 ? coupled(nms::momentum_y) : libMesh::invalid_uint),
+    _rhow_var_number(_mesh.dimension() == 3 ? coupled(nms::momentum_z) : libMesh::invalid_uint),
+    _rhoE_var_number(coupled(nms::total_energy)),
 
     // Material properties
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),

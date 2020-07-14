@@ -1,0 +1,10 @@
+[Tests]
+  [./supersonic_nozzle_hllc]
+    type = Exodiff
+    input =  supersonic_nozzle_hllc.i
+    exodiff = supersonic_nozzle_hllc_out.e
+    cli_args = 'Executioner/end_time=0.1'
+    abs_zero = 1e-9
+    requirement = "HLLC"
+  [../]
+[]

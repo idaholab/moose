@@ -1,0 +1,9 @@
+[Tests]
+  [./fv_implicit_bcs]
+    type = Exodiff
+    input =  hllc_sod_shocktube.i
+    exodiff = hllc_sod_shocktube_out.e
+    abs_zero = 1e-9
+    requirement = "HLLC"
+  [../]
+[]

@@ -1,0 +1,10 @@
+[Tests]
+  [./hllc_sod_shocktube]
+    type = Exodiff
+    input = hllc_sod_shocktube.i
+    exodiff = hllc_sod_shocktube_out.e
+    abs_zero = 1e-9
+    requirement = "HLLC"
+    cli_args = 'Mesh/cartesian/nx=100 Executioner/end_time=1'
+  [../]
+[]
