@@ -26,6 +26,7 @@ protected:
   void addRadiationBCs() const;
 
   std::vector<std::vector<std::string>> radiationPatchNames() const;
+  std::vector<std::vector<std::string>> bcRadiationPatchNames() const;
   UserObjectName viewFactorObjectName() const;
   UserObjectName radiationObjectName() const;
 

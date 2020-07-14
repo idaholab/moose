@@ -91,7 +91,7 @@ RadiationTransferAction::addRadiationBCs() const
   InputParameters params = _factory.getValidParams("GrayLambertNeumannBC");
 
   // set boundary
-  std::vector<std::vector<std::string>> radiation_patch_names = radiationPatchNames();
+  std::vector<std::vector<std::string>> radiation_patch_names = bcRadiationPatchNames();
   std::vector<BoundaryName> boundary_names;
   for (auto & e1 : radiation_patch_names)
     for (auto & e2 : e1)
@@ -271,6 +271,34 @@ RadiationTransferAction::radiationPatchNames() const
       bnames.push_back(ss.str());
     }
     radiation_patch_names[j] = bnames;
+  }
+  return radiation_patch_names;
+}
+
+std::vector<std::vector<std::string>>
+RadiationTransferAction::bcRadiationPatchNames() const
+{
+  auto ad_bnd_ids = getParam<std::vector<boundary_id_type>>("adiabatic_sidesets");
+  auto ft_bnd_ids = getParam<std::vector<boundary_id_type>>("fixed_temperature_sidesets");
+  std::vector<std::vector<std::string>> radiation_patch_names;
+  for (unsigned int j = 0; j < _boundary_ids.size(); ++j)
+  {
+    boundary_id_type bid = _boundary_ids[j];
+    // check if this sideset is adiabatic or isothermal
+    auto it_a = std::find(ad_bnd_ids.begin(), ad_bnd_ids.end(), bid);
+    auto it_t = std::find(ft_bnd_ids.begin(), ft_bnd_ids.end(), bid);
+    if (it_a != ad_bnd_ids.end() || it_t != ft_bnd_ids.end())
+      continue;
+
+    std::string base_name = _mesh->getBoundaryName(bid);
+    std::vector<std::string> bnames;
+    for (unsigned int i = 0; i < _n_patches[j]; ++i)
+    {
+      std::stringstream ss;
+      ss << base_name << "_" << i;
+      bnames.push_back(ss.str());
+    }
+    radiation_patch_names.push_back(bnames);
   }
   return radiation_patch_names;
 }
