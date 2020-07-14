@@ -39,7 +39,6 @@
     flow_channel = pipe1
     Hw = 3000
     P_hf = 6.2831853072e-01
-    initial_T_wall = 300.
   [../]
 
   [./inlet]
