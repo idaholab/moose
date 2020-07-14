@@ -14,6 +14,9 @@
 #include "MultiApp.h"
 #include "MooseTypes.h"
 #include "libmesh/parallel.h"
+#include "DistributedData.h"
+
+typedef StochasticTools::DistributedData<std::shared_ptr<DenseVector<Real>>> DistributedSnapshots;
 
 class PODReducedBasisTrainer : public SurrogateTrainer
 {
@@ -94,8 +97,7 @@ protected:
   /// list of bools describing which tag is indepedent of the solution.
   std::vector<unsigned int> & _independent;
 
-  /// The snapshot containers for each variable.
-  std::vector<std::vector<std::pair<dof_id_type, std::shared_ptr<DenseVector<Real>>>>> _snapshots;
+  std::vector<DistributedSnapshots> _snapshots;
 
   /// The correlation matrices for the variables.
   std::vector<DenseMatrix<Real>> _corr_mx;
@@ -117,33 +119,10 @@ protected:
   /// basis vectors or do something else.
   bool _base_completed;
 
+  bool _empty_operators;
+
 private:
   /// Computes the number of bases necessary for a given error indicator. This
   /// needs a sorted vector as input.
   unsigned int determineNumberOfModes(Real limit, std::vector<Real> & inp_vec);
 };
-
-namespace libMesh
-{
-namespace Parallel
-{
-template <>
-class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>
-{
-public:
-  typedef Real buffer_type;
-  static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
-  static unsigned int packable_size(
-      const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
-      const void *);
-  template <typename Iter, typename Context>
-  static void
-  pack(const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
-       Iter data_out,
-       const Context *);
-  template <typename BufferIter, typename Context>
-  static std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
-  unpack(BufferIter in, Context *);
-};
-} // namespace Parallel
-} // namespace libMesh

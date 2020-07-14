@@ -57,10 +57,15 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
   // Reinitialize the problem only if the snapshot generation part is done.
   if (!_snapshot_generation)
   {
+    if (_trainer->getSumBaseSize() < 1)
+      mooseError("There are no basis vectors available for residual generation."
+                 " This indicates that the bases have not been created yet."
+                 " The most common cause of this error is the wrong setting"
+                 " of the 'execute_on' flags in the PODMultiApp and/or PODReducedBasisTrainer.");
     // Since it only works in serial, the number of processes is hardcoded to 1
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
         _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-      init(1);
+      init(n_processors());
     else
       init(_trainer->getSumBaseSize());
 
@@ -72,6 +77,7 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
 bool
 PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+
   bool last_solve_converged = true;
 
   // If snapshot generation phase, solve the subapplications in a regular manner.

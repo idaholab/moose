@@ -109,27 +109,30 @@ SamplerSolutionTransfer::execute()
         unsigned int var_base_num = _trainer->getBaseSize(var_i);
         for (unsigned int base_i = 0; base_i < var_base_num; ++base_i)
         {
-          // Getting the reference to the solution vector in the subapp.
-          FEProblemBase & app_problem = _multi_app->appProblemBase(counter);
-          NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
-          NumericVector<Number> & solution = nl.solution();
+          if (_multi_app->hasLocalApp(counter))
+          {
+            // Getting the reference to the solution vector in the subapp.
+            FEProblemBase & app_problem = _multi_app->appProblemBase(counter);
+            NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+            NumericVector<Number> & solution = nl.solution();
 
-          // Zeroing down the solution tho make sure that only the required part
-          // is non-zero after copy.
-          solution.zero();
+            // Zeroing down the solution tho make sure that only the required part
+            // is non-zero after copy.
+            solution.zero();
 
-          // Getting the degrees of freedom for the given variable.
-          nl.setVariableGlobalDoFs(var_names[var_i]);
-          const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
+            // Getting the degrees of freedom for the given variable.
+            nl.setVariableGlobalDoFs(var_names[var_i]);
+            const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
-          // Fetching the basis vector and plugging it into the solution.
-          const DenseVector<Real> & base_vector = _trainer->getBasisVector(var_i, base_i);
-          solution.insert(base_vector, var_dofs);
-          solution.close();
+            // Fetching the basis vector and plugging it into the solution.
+            const DenseVector<Real> & base_vector = _trainer->getBasisVector(var_i, base_i);
+            solution.insert(base_vector, var_dofs);
+            solution.close();
 
-          // Make sure that the sub-application uses this vector to evaluate the
-          // residual.
-          nl.setSolution(solution);
+            // Make sure that the sub-application uses this vector to evaluate the
+            // residual.
+            nl.setSolution(solution);
+          }
           counter++;
         }
       }
