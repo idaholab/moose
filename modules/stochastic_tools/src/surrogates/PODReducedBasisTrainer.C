@@ -13,6 +13,7 @@
 #include "SerializerGuard.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel_sync.h"
+#include "VectorPacker.h"
 
 registerMooseObject("StochasticToolsApp", PODReducedBasisTrainer);
 
@@ -54,7 +55,8 @@ PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameter
         "_independent", getParam<std::vector<unsigned int>>("independent"))),
     _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
-    _base_completed(false)
+    _base_completed(false),
+    _empty_operators(true)
 {
   if (_en_limits.size() != _var_names.size())
     paramError("en_limits",
@@ -79,8 +81,9 @@ PODReducedBasisTrainer::initialSetup()
 {
   // Initializing the containers for the essential data to construct the
   // reduced operators.
+
   _snapshots.clear();
-  _snapshots.resize(_var_names.size());
+  _snapshots.resize(_var_names.size(), DistributedSnapshots(_communicator));
 
   _base.clear();
   _base.resize(_var_names.size());
@@ -110,13 +113,20 @@ PODReducedBasisTrainer::execute()
     computeCorrelationMatrix();
     computeEigenDecomposition();
     computeBasisVectors();
+    initReducedOperators();
     _base_completed = true;
+    _empty_operators = true;
   }
 }
 
 void
 PODReducedBasisTrainer::finalize()
 {
+  if (!_empty_operators)
+    for (unsigned int tag_i = 0; tag_i < _red_operators.size(); ++tag_i)
+    {
+      gatherSum(_red_operators[tag_i].get_values());
+    }
 }
 
 void
@@ -124,10 +134,7 @@ PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
                                     dof_id_type g_ind,
                                     const std::shared_ptr<DenseVector<Real>> & snapshot)
 {
-  _snapshots[v_ind].push_back(
-      std::pair<dof_id_type, std::shared_ptr<DenseVector<Real>>>(g_ind, snapshot));
-  std::cerr << processor_id() << " added snaphot for variable " << v_ind << " and vector " << g_ind
-            << " at " << snapshot.get() << std::endl;
+  _snapshots[v_ind].addNewSample(g_ind, snapshot);
 }
 
 void
@@ -152,13 +159,13 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   mesh.prepare_for_use();
 
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
-  for (dof_id_type local_vector_ind = 0; local_vector_ind < _snapshots[0].size();
-       ++local_vector_ind)
+  for (dof_id_type loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalSamples(); ++loc_vec_i)
   {
-    const dof_id_type global_vector_ind = _snapshots[0][local_vector_ind].first;
-    auto & entry = local_vectors[global_vector_ind];
+    const dof_id_type glob_vec_i = _snapshots[0].getGlobalIndex(loc_vec_i);
+    auto & entry = local_vectors[glob_vec_i];
+
     for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-      entry.push_back(_snapshots[v_ind][local_vector_ind].second);
+      entry.push_back(_snapshots[v_ind].getLocalSample(loc_vec_i));
   }
 
   std::unordered_map<processor_id_type, std::set<dof_id_type>> send_vectors;
@@ -174,71 +181,54 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       const auto centroid = elem->centroid();
       const dof_id_type i = centroid(0);
       const dof_id_type j = centroid(1);
-      const auto it =
-          std::find_if(_snapshots[0].begin(), _snapshots[0].end(), [&i, &j](const auto & pair) {
-            return pair.first == i || pair.first == j;
-          });
-      if (it != _snapshots[0].end())
+
+      if (_snapshots[0].hasGlobalSample(i))
       {
-        const auto global_vector_ind = it->first;
-        if (send_vectors[elem->processor_id()].count(global_vector_ind))
+        if (send_vectors[elem->processor_id()].count(i))
           continue;
-        send_vectors[elem->processor_id()].insert(global_vector_ind);
-        const auto local_vector_ind = std::distance(_snapshots[0].begin(), it);
+
+        send_vectors[elem->processor_id()].insert(i);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-          send_map[elem->processor_id()].emplace_back(
-              global_vector_ind, v_ind, _snapshots[v_ind][local_vector_ind].second);
+          send_map[elem->processor_id()].emplace_back(i, v_ind, _snapshots[v_ind].getSample(i));
+      }
+      else if (_snapshots[0].hasGlobalSample(j))
+      {
+        if (send_vectors[elem->processor_id()].count(j))
+          continue;
+
+        send_vectors[elem->processor_id()].insert(j);
+        for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+          send_map[elem->processor_id()].emplace_back(j, v_ind, _snapshots[v_ind].getSample(j));
       }
     }
     else
       elem->set_extra_integer(0, 0);
 
-  {
-    SerializerGuard sg(_communicator);
-    for (const auto & pair : send_vectors)
-    {
-      std::cerr << processor_id() << "->" << pair.first << ": ";
-      for (auto & vec : pair.second)
-        std::cerr << vec << " ";
-      std::cerr << std::endl;
-    }
-    std::cerr << processor_id() << " responsible for ";
-    for (const Elem * elem : mesh.active_local_element_ptr_range())
-      std::cerr << (dof_id_type)elem->centroid()(0) << "," << (dof_id_type)elem->centroid()(1)
-                << " ";
-    std::cerr << std::endl;
-  }
-
   for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
     _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
 
-  _corr_mx[0].print();
-
-  std::stringstream oss;
   // Send and receive the data
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> received_vectors;
   auto functor =
-      [this, &mesh, &received_vectors, &local_vectors, &oss](
-          processor_id_type pid,
+      [this, &mesh, &received_vectors, &local_vectors](
+          processor_id_type /*pid*/,
           const std::vector<
               std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> & vectors) {
         for (auto & tuple : vectors)
         {
-          const auto global_vector_ind = std::get<0>(tuple);
-          const auto variable_ind = std::get<1>(tuple);
+          const auto glob_vec_i = std::get<0>(tuple);
+          const auto var_i = std::get<1>(tuple);
           const auto & vector = std::get<2>(tuple);
 
           // The entry that will be filled with all of the variable solutions for a vector
-          std::vector<std::shared_ptr<DenseVector<Real>>> & entry =
-              received_vectors[global_vector_ind];
+          std::vector<std::shared_ptr<DenseVector<Real>>> & entry = received_vectors[glob_vec_i];
+
           // Size it to the number of variables in case we haven't already
           entry.resize(_snapshots.size(), nullptr);
+
           // Add this varaible's contribution - this is shared_ptr so we are claiming partial
           // ownership of this vector and do not have to do a copy
-          entry[variable_ind] = vector;
-
-          oss << processor_id() << "retreived " << global_vector_ind << " from " << pid << " into "
-              << vector.get() << std::endl;
+          entry[var_i] = vector;
         }
 
         for (Elem * elem : mesh.active_local_element_ptr_range())
@@ -259,17 +249,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
             const auto find_i_received = received_vectors.find(i);
             if (find_i_received != received_vectors.end())
             {
-              bool have_all = true;
-              for (const auto & vec : find_i_received->second)
-                if (!vec)
-                {
-                  have_all = false;
-                  break;
-                }
-              if (have_all)
-                i_vec = &find_i_received->second;
-              else
-                continue;
+              i_vec = &find_i_received->second;
             }
             else
               continue;
@@ -283,17 +263,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
             const auto find_j_received = received_vectors.find(j);
             if (find_j_received != received_vectors.end())
             {
-              bool have_all = true;
-              for (const auto & vec : find_j_received->second)
-                if (!vec)
-                {
-                  have_all = false;
-                  break;
-                }
-              if (have_all)
-                j_vec = &find_j_received->second;
-              else
-                continue;
+              j_vec = &find_j_received->second;
             }
             else
               continue;
@@ -302,58 +272,25 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
           elem->set_extra_integer(0, 1);
           for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
             _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
-
-          oss << processor_id() << ": " << i << "," << j << " from vectors " << (*i_vec)[0].get()
-              << " and " << (*j_vec)[0].get() << std::endl;
         }
       };
   Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
   functor(processor_id(),
           std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>());
 
-  {
-    SerializerGuard sg(_communicator);
-    std::cerr << oss.str() << std::endl << std::flush;
-  }
   gatherSum(_corr_mx[0].get_values());
-  _corr_mx[0].print();
-  // for (const auto pair : send_to)
-  // {
-  //   std::cerr << processor_id() << "->" << pair.first << ": ";
-  //   for (const auto id : pair.second)
-  //     std::cerr << id << " ";
-  //   std::cerr << std::endl;
-  // }
 
-  // std::cerr << elem->centroid() << " on pid " << elem->processor_id() << std::endl;
-  _communicator.barrier();
-  mooseError("we suck at coding");
-  // Looping over all the variables.
-  for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+  for (auto & corr_mx : _corr_mx)
   {
-    // Initializing the correlation matrix.
-    _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
-
-    // Filling the correlation matrix with the inner products between snapshots
-    // and utilizing the fact the the correlation matrix is symmetric.
-    // for (MooseIndex(no_snaps) j = 0; j < no_snaps; ++j)
-    for (dof_id_type j = 0; j < no_snaps; ++j)
+    for (dof_id_type row_i = 0; row_i < corr_mx.m(); ++row_i)
     {
-      for (dof_id_type k = 0; k < no_snaps; ++k)
+      for (dof_id_type col_i = 0; col_i < corr_mx.n(); ++col_i)
       {
-        if (j >= k)
-          _corr_mx[v_ind](j, k) = _snapshots[v_ind][j].second->dot(*_snapshots[v_ind][k].second);
+        if (row_i > col_i)
+          corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
       }
     }
-
-    for (unsigned int j = 0; j < no_snaps; ++j)
-    {
-      for (unsigned int k = 0; k < no_snaps; ++k)
-      {
-        if (j < k)
-          _corr_mx[v_ind](j, k) = _corr_mx[v_ind](k, j);
-      }
-    }
+    _corr_mx[0].print();
   }
 }
 
@@ -425,27 +362,32 @@ void
 PODReducedBasisTrainer::computeBasisVectors()
 {
   // Looping over all the variables.
-  for (unsigned int v_ind = 0; v_ind < _eigenvectors.size(); ++v_ind)
+  for (dof_id_type var_i = 0; var_i < _eigenvectors.size(); ++var_i)
   {
-    unsigned int no_bases = _eigenvalues[v_ind].size();
+    unsigned int no_bases = _eigenvalues[var_i].size();
+    dof_id_type no_snaps = _snapshots[var_i].getNumberOfLocalSamples();
 
-    // Initializing the containers for the basis vectors.
-    _base[v_ind] = std::vector<DenseVector<Real>>(no_bases);
+    _base[var_i].resize(no_bases);
 
     // Filling the containers using the snapshots and the eigenvalues and
     // eigenvectors of the correlation matrices.
-    for (unsigned int j = 0; j < no_bases; ++j)
+    for (dof_id_type base_i = 0; base_i < no_bases; ++base_i)
     {
-      _base[v_ind][j].resize(_snapshots[v_ind][0].second->size());
+      _base[var_i][base_i].resize(_snapshots[var_i].getLocalSample(0)->size());
 
-      for (unsigned int k = 0; k < _snapshots[v_ind].size(); ++k)
+      for (dof_id_type loc_i = 0; loc_i < no_snaps; ++loc_i)
       {
-        DenseVector<Real> tmp(*_snapshots[v_ind][k].second);
-        tmp.scale(_eigenvectors[v_ind](k, j));
+        dof_id_type glob_i = _snapshots[var_i].getGlobalIndex(loc_i);
+        const DenseVector<Real> & snapshot = *_snapshots[var_i].getLocalSample(loc_i);
 
-        _base[v_ind][j] += tmp;
+        for (dof_id_type i = 0; i < _base[var_i][base_i].size(); ++i)
+        {
+          _base[var_i][base_i](i) += _eigenvectors[var_i](glob_i, base_i) * snapshot(i);
+        }
       }
-      _base[v_ind][j] *= (1.0 / sqrt(_eigenvalues[v_ind](j)));
+
+      gatherSum(_base[var_i][base_i].get_values());
+      _base[var_i][base_i].scale(1.0 / sqrt(_eigenvalues[var_i](base_i)));
     }
   }
 }
@@ -453,11 +395,6 @@ PODReducedBasisTrainer::computeBasisVectors()
 void
 PODReducedBasisTrainer::initReducedOperators()
 {
-  if (!_base_completed)
-    mooseError("There are no basis vectors available."
-               " This might indicate that a residual transfer is called before"
-               " the base generation procedure is finished.");
-
   _red_operators.resize(_tag_names.size());
 
   // Getting the sum of the ranks of the different bases. Every reduced operator
@@ -490,13 +427,14 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
       counter++;
     }
   }
+
+  _empty_operators = false;
 }
 
 dof_id_type
 PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i)
 {
-  dof_id_type val = _snapshots[var_i].size();
-  gatherSum(val);
+  dof_id_type val = _snapshots[var_i].getNumberOfGlobalSamples();
   return val;
 }
 
@@ -524,14 +462,14 @@ PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
   unsigned int var_counter = 0;
   unsigned int base_counter = 0;
   bool found = false;
-  for (unsigned int v_ind = 0; v_ind < _var_names.size(); ++v_ind)
+  for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
   {
-    for (unsigned int b_ind = 0; b_ind < _base[v_ind].size(); ++b_ind)
+    for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
       if (g_index == counter)
       {
-        var_counter = v_ind;
-        base_counter = b_ind;
+        var_counter = var_i;
+        base_counter = base_i;
         found = true;
         break;
       }
@@ -548,13 +486,13 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
   unsigned int counter = 0;
   unsigned int var_counter = 0;
   bool found = false;
-  for (unsigned int v_ind = 0; v_ind < _var_names.size(); ++v_ind)
+  for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
   {
-    for (unsigned int b_ind = 0; b_ind < _base[v_ind].size(); ++b_ind)
+    for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
       if (g_index == counter)
       {
-        var_counter = v_ind;
+        var_counter = var_i;
         found = true;
         break;
       }
@@ -564,73 +502,3 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
   }
   return var_counter;
 }
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-
-namespace libMesh
-{
-namespace Parallel
-{
-unsigned int
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packable_size(
-    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
-    const void *)
-{
-  unsigned int total_size = 0;
-  // ID x 2, size
-  total_size += 3;
-  // Data
-  total_size += std::get<2>(object)->size();
-  return total_size;
-}
-unsigned int
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packed_size(
-    typename std::vector<Real>::const_iterator in)
-{
-  unsigned int total_size = 0;
-  // Data size
-  total_size += *in++;
-  // ID x 2, size
-  total_size += 3;
-  return total_size;
-}
-template <>
-void
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::pack(
-    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
-    std::back_insert_iterator<std::vector<Real>> data_out,
-    const void *)
-{
-  // Data size
-  const auto & dense_vector = std::get<2>(object);
-  data_out = dense_vector->size();
-  // IDs
-  data_out = std::get<0>(object);
-  data_out = std::get<1>(object);
-  // Data
-  const auto & vector = dense_vector->get_values();
-  for (std::size_t i = 0; i < dense_vector->size(); ++i)
-    data_out = vector[i];
-}
-template <>
-std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::unpack(
-    std::vector<Real>::const_iterator in, void *)
-{
-  // Number of points
-  const std::size_t data_size = *in++;
-  std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> object;
-  // IDs
-  std::get<0>(object) = *in++;
-  std::get<1>(object) = *in++;
-  // Data
-  auto & dense_vector = std::get<2>(object);
-  dense_vector = std::make_shared<DenseVector<Real>>(data_size);
-  auto & vector_values = dense_vector->get_values();
-  for (std::size_t i = 0; i < data_size; ++i)
-    vector_values[i] = *in++;
-  return object;
-}
-} // namespace Parallel
-} // namespace libMesh
