@@ -6,7 +6,7 @@
 
 ## Overview
 
-A special case of the Matérn class of covariance functions, in which the $\nu$ hyperparameter takes on a half integer value. Substituting a positive integer $p$ for $\nu$ using $\nu = p + 1/2$ the covariance function is given as
+A special case of the Matern class of covariance functions, in which the $\nu$ hyperparameter takes on a half integer value. Substituting a positive integer $p$ for $\nu$ using $\nu = p + 1/2$ the covariance function is given as
 
 !equation
 k(x,x^\prime) = \sigma_f^2 \, exp \left(- \sqrt{2p+1} r_\ell(x,x^\prime) \right) \frac{p!}{(2p)!} \sum_{i=0}^p \left[ \frac{(p+i)!}{i! (2p-i)!} \left( 2 \sqrt{2p+1} r_\ell(x,x^\prime) \right)^{p-i}  \right]   + \sigma_n^2 \, \delta_{x,x^\prime}
