@@ -10,23 +10,133 @@
 #pragma once
 
 #include <string>
+#include "MooseTypes.h"
+#include "libmesh/vector_value.h"
 
 namespace NS
 {
-const std::string density = "rho";
-const std::string momentum_x = "rhou";
-const std::string momentum_y = "rhov";
-const std::string momentum_z = "rhow";
-const std::string total_energy = "rhoE";
+  // geometric quantities
+  static const std::string pebble_diameter = "pebble_diameter";
+  static const std::string infinite_porosity = "infinite_porosity";
+  static const std::string axis = "axis";
+  static const std::string center = "center";
+  static const std::string wall_porosity = "wall_porosity";
+  static const std::string wall_distance = "wall_distance";
 
-const std::string velocity = "velocity";
-const std::string velocity_x = "vel_x";
-const std::string velocity_y = "vel_y";
-const std::string velocity_z = "vel_z";
-const std::string pressure = "p";
-const std::string temperature = "temperature";
-const std::string enthalpy = "enthalpy";
-const std::string mach_number = "Mach";
-const std::string internal_energy = "internal_energy";
-const std::string specific_volume = "specific_volume";
+  // Names defined in Navier-Stokes
+  static const std::string density = "rho";
+  static const std::string momentum_x = "rhou";
+  static const std::string momentum_y = "rhov";
+  static const std::string momentum_z = "rhow";
+  static const std::string superficial_momentum_x = "superficial_rhou";
+  static const std::string superficial_momentum_y = "superficial_rhov";
+  static const std::string superficial_momentum_z = "superficial_rhow";
+
+  static const std::string total_energy = "rhoE";
+  static const std::string rho_et = "rho_et";
+
+  static const std::string velocity = "velocity";
+  static const std::string velocity_x = "vel_x";
+  static const std::string velocity_y = "vel_y";
+  static const std::string velocity_z = "vel_z";
+  static const std::string superficial_velocity_x = "superficial_vel_x";
+  static const std::string superficial_velocity_y = "superficial_vel_y";
+  static const std::string superficial_velocity_z = "superficial_vel_z";
+  static const std::string pressure = "pressure";
+  static const std::string temperature = "temperature";
+  static const std::string enthalpy = "enthalpy";
+  static const std::string mach_number = "Mach";
+  static const std::string internal_energy = "internal_energy";
+  static const std::string specific_volume = "specific_volume";
+
+  static const std::string momentum = "momentum";
+  static const std::string e = "e";
+  static const std::string v = "v";
+  static const std::string acceleration = "acceleration";
+  static const std::string fluid = "fp";
+
+  // for pronghorn material props representing gradients of nonlin+aux vars
+  inline std::string grad(const std::string & var) { return "grad_" + var; }
+  // for pronghorn material props representing time derivatives of nonlin+aux vars
+  inline std::string time_deriv(const std::string & var) { return "d" + var + "_dt"; }
+
+  // Navier-Stokes Variables
+  // Relating to porous media
+  static const std::string porosity = "porosity";
+  static const std::string T_fluid = "T_fluid";
+  static const std::string T_solid = "T_solid";
+  static const std::string heat_source = "heat_source";
+
+  // Navier-Stokes Materials
+  static const std::string cL = "Darcy_coefficient";
+  static const std::string cQ = "Forchheimer_coefficient";
+  static const std::string drhos_dTs = "drhos_dTs";
+  static const std::string dks_dTs = "dks_dTs";
+  static const std::string kappa = "kappa";
+  static const std::string kappa_s = "kappa_s";
+  static const std::string mu_eff = "mu_eff";
+  static const std::string rho_s = "rho_s";
+  static const std::string cp_s = "cp_s";
+  static const std::string k_s = "k_s";
+  static const std::string cp = "cp";
+  static const std::string cv = "cv";
+  static const std::string mu = "mu";
+  static const std::string k = "k";
+  static const std::string thermal_diffusivity = "thermal_diffusivity";
+  static const std::string alpha = "alpha";
+  static const std::string alpha_wall = "alpha_wall";
+  static const std::string solid = "solid";
+  static const std::string Prandtl = "Pr";
+  static const std::string Reynolds = "Re";
+  static const std::string Reynolds_hydraulic = "Re_h";
+  static const std::string Reynolds_interstitial = "Re_i";
+  static const std::string emissivity = "emissivity";
+  static const std::string c = "c";
+  static const std::string speed = "speed";
+  static const std::string sound_speed = "sound_speed";
+
+  // other Pronghorn terms
+  static const std::string component = "component";
+  static const std::string T_ambient = "T_ambient";
+  static const std::string source_scaling = "source_scaling";
+
+  // SUPG terms
+  static const std::string matrix_tau = "matrix_tau";
+  static const std::string vector_tau = "vector_tau";
+  static const std::string scalar_tau = "scalar_tau";
+  static const std::string diagonal_tau = "diagonal_tau";
+  static const std::string A = "A";
+  static const std::string R = "R";
+  static const std::string S = "S";
+  static const std::string dS_dTs = "dS_dTs";
+  static const std::string F = "F";
+  static const std::string G = "G";
+  static const std::string dUdt = "dUdt";
+  static const std::string C = "C";
+  static const std::string Z = "Z";
+  static const std::string K = "K";
+}
+
+namespace NS_DEFAULT_VALUES
+{
+  static const Real infinite_porosity = 0.4;
+  static const int bed_axis = 2;
+  static const Real wall_porosity = 1.0;
+
+  // epsilon terms for comparing equivalence to zero. Some of these are for
+  // specific variables, while 'epsilon' is a generic comparison tolerance.
+  static const Real epsilon = 1.00;
+  static const Real k_epsilon = 1e-6;
+  static const Real vel_epsilon = 1e-8;
+
+  static const RealVectorValue center(0.0, 0.0, 0.0);
+  static const RealVectorValue acceleration(0.0, 0.0, 0.0);
+
+  // assumed that the bed is not annular unless otherwise specified
+  static const Real inner_radius = 0.0;
+}
+
+namespace NS_CONSTANTS
+{
+  static const Real sigma = 5.67e-8;
 }

@@ -1,0 +1,9 @@
+[Tests]
+  [./fv_specified_pressure_out]
+    type = Exodiff
+    input =  subsonic_nozzle_fixed_inflow_hllc.i
+    exodiff = subsonic_nozzle_fixed_inflow_hllc_out.e
+    abs_zero = 1e-9
+    requirement = "HLLC"
+  [../]
+[]

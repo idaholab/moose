@@ -1,0 +1,7 @@
+[Tests]
+  [./2D_symmetry_hllc]
+    type = RunApp
+    input =  2D_symmetry.i
+    check_input = True
+  [../]
+[]

@@ -1,0 +1,7 @@
+[Tests]
+  [./hllc_sod_shocktube_2D]
+    type = RunApp
+    input = 'hllc_sod_shocktube_2D.i'
+    check_input = True
+  [../]
+[]

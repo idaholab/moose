@@ -1,0 +1,13 @@
+[Tests]
+  [./hllc_sod_shocktube_1D_benchmark]
+    type = RunApp
+    input = 'hllc_sod_shocktube.i'
+    check_input = True
+  [../]
+
+  [./cfem_sod_shocktube_1D_benchmark]
+    type = RunApp
+    input = 'cfem_sod_shocktube.i'
+    check_input = True
+  [../]
+[]
