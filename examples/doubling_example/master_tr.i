@@ -42,7 +42,7 @@
   [./all]
     type = DirichletBC
     variable = temp
-    boundary = '1 2 3 4'
+    boundary = 'bottom top left right'
     value = 300
   [../]
 []
@@ -50,14 +50,12 @@
 [Materials]
   [./heat_material]
     type = HeatConductionMaterial
-    block = 1
     temp = temp
     specific_heat = 1000
     thermal_conductivity = 500
   [../]
   [./density]
     type = Density
-    block = 1
     density = 2000
   [../]
 []

@@ -1,6 +1,14 @@
 [Mesh]
-  type = FileMesh
-  file = '2DSquare.e'
+  [gen]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    xmin = -82.627
+    xmax = 82.627
+    ymin = -82.627
+    ymax = 82.627
+    dim = 2
+  []
 []
 
 [Variables]
@@ -35,7 +43,7 @@
   [./all]
     type = DirichletBC
     variable = temp
-    boundary = '1 2 3 4'
+    boundary = 'bottom top left right'
     value = 300
   [../]
 []
@@ -43,14 +51,12 @@
 [Materials]
   [./heat_material]
     type = HeatConductionMaterial
-    block = 1
     temp = temp
     specific_heat = 1000
     thermal_conductivity = 500
   [../]
   [./density]
     type = Density
-    block = 1
     density = 2000
   [../]
 []
