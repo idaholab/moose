@@ -25,7 +25,7 @@ bibliography: paper.bib
 
 # Summary and applications
 
-``PorousFlow`` enables simulation of transport and flow in porous media.  These are important in many practical fields of research.  For instance, ``PorousFlow`` has been used in the following applications.
+``PorousFlow`` enables simulation of transport and flow in porous media.  ``PorousFlow`` can simulate multi-component, multi-phase fluid flow, along with solid mechanics, heat flow and chemical reactions in a tightly-coupled framework.  Such simulations are important in many practical fields of research.  For instance, ``PorousFlow`` has been used in the following applications.
 
 - Groundwater studies [@herron; @crosbie].  This often involves assessing the impacts of human interventions on groundwater resources, and the consequences on the biosphere.  It is frequently necessary to use large and complex models that include the effect of rainfall patterns, spatially and temporally varying evaporation and transpiration, seasonal river flows, realistic topography and hydrogeology, as well as human factors such as mines, water bores, dams, etc.  In certain situations, such as assessing the impact of mining on groundwater, it is vital that the model includes the deformation of the porous material (the rock) since this greatly impacts groundwater flow.  In other situations, it is useful to be able to track the transport of tracers and pollutants through the system, or to model the unsaturated (vadose) zone, where air and groundwater coexist in the subsurface.
 
@@ -90,7 +90,7 @@ One aspect that makes ``PorousFlow`` different to these codes is the ease of cou
 
 ![As CO$_{2}$ dissolves into brine, the brine's density increases, resulting in beautiful density-driven convective flows that resemble a "lava lamp".  The top figure shows the initial condition with CO$_{2}$ injected at the top of a brine-filled reservoir.  The lower figures show the CO$_{2}$ concentration as time evolves.\label{fig:example}](paper.png)
 
-For convenience, the source code for ``PorousFlow``, https://github.com/idaholab/moose/tree/master/modules/porous_flow, is bundled within the MOOSE framework, https://github.com/idaholab/moose, and detailed documentation found at https://mooseframework.org/modules/porous_flow/index.html.
+For convenience, the source code for ``PorousFlow`` is bundled within the MOOSE framework, and detailed documentation found at https://mooseframework.org/modules/porous_flow/index.html.
 
 # Acknowledgements
 

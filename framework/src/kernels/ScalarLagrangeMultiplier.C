@@ -17,13 +17,13 @@
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("MooseTestApp", ScalarLagrangeMultiplier);
+registerMooseObject("MooseApp", ScalarLagrangeMultiplier);
 
 InputParameters
 ScalarLagrangeMultiplier::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addClassDescription("This class is used to solve a constrained Neumann problem with a "
+  params.addClassDescription("This class is used to enforce integral of phi = V_0 with a "
                              "Lagrange multiplier approach.");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier variable");
 
@@ -54,7 +54,7 @@ ScalarLagrangeMultiplier::computeOffDiagJacobianScalar(unsigned int jvar)
   // this for both simplicity (results in slightly less code) and efficiency:
   // the contribution is symmetric, so it can be computed once and used twice.
   //
-  // [0]: https://github.com/idaholab/large_media/blob/master/scalar_constraint_kernel.pdf
+  // [0]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
   DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), jvar);
   DenseMatrix<Number> & kne = _assembly.jacobianBlock(jvar, _var.number());
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);

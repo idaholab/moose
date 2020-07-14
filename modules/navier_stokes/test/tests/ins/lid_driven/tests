@@ -19,6 +19,14 @@
     issues = '#13025'
     requirement = 'We shall be able to reproduce the results from the hand-coded lid-driven simulation using automatic differentiation objects.'
   [../]
+  [./ad_lid_driven_mean_zero_pressure]
+    type = 'Exodiff'
+    input = 'ad_lid_driven_mean_zero_pressure.i'
+    exodiff = 'ad_lid_driven_mean_zero_pressure_out.e'
+    method = 'OPT'
+    issues = '#15549'
+    requirement = 'We shall be able to run lid-dirven simulation using a global mean-zero pressure constraint approach.'
+  [../]
   [./ad_lid_driven_jacobian]
     type = 'PetscJacobianTester'
     input = 'ad_lid_driven.i'
