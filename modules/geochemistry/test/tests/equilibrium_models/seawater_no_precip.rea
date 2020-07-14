@@ -1,0 +1,22 @@
+# React script that is analogous to the seawater_no_precip.i MOOSE input file
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = 0.566 mol
+balance on Cl-
+Na+          = 0.485 mol
+SO4--        = 0.0292 mol
+Mg++         = 0.055 mol
+Ca++         = 0.0106 mol
+K+           = 0.0106 mol
+HCO3-        = 0.00241 mol
+SiO2(aq)     = 0.000103 mol
+swap O2(g) for O2(aq)
+swap CO2(g) for H+
+f CO2(g) = 0.0003162
+f O2(g) = 0.2
+printout  species = long
+epsilon = 1e-15
+suppress all
+go
