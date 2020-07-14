@@ -7,6 +7,7 @@ HeatTransferFromExternalAppTemperature1Phase::validParams()
 {
   InputParameters params = HeatTransferFromTemperature1Phase::validParams();
   params.addParam<FunctionName>("initial_T_wall", "Initial condition for wall temperature [K]");
+  params.addParam<VariableName>("T_ext", "Name of the wall temperature variable");
   params.addClassDescription("Heat transfer into 1-phase flow channel from temperature provided by "
                              "an external application");
   return params;
@@ -19,12 +20,22 @@ HeatTransferFromExternalAppTemperature1Phase::HeatTransferFromExternalAppTempera
 }
 
 void
+HeatTransferFromExternalAppTemperature1Phase::initSecondary()
+{
+  HeatTransferFromTemperature1Phase::initSecondary();
+
+  if (isParamValid("T_ext"))
+    _T_wall_name = getParam<VariableName>("T_ext");
+}
+
+void
 HeatTransferFromExternalAppTemperature1Phase::check() const
 {
   HeatTransferFromTemperature1Phase::check();
 
-  if (!isParamValid("initial_T_wall") && !_app.isRestarting())
-    logError("Missing initial condition for wall temperature.");
+  if (!isParamValid("T_ext"))
+    if (!isParamValid("initial_T_wall") && !_app.isRestarting())
+      logError("Missing initial condition for wall temperature.");
 }
 
 void
@@ -32,8 +43,9 @@ HeatTransferFromExternalAppTemperature1Phase::addVariables()
 {
   HeatTransferFromTemperature1Phase::addVariables();
 
-  _sim.addFunctionIC(
-      _T_wall_name, getParam<FunctionName>("initial_T_wall"), _flow_channel_subdomains);
+  if (!isParamValid("T_ext"))
+    _sim.addFunctionIC(
+        _T_wall_name, getParam<FunctionName>("initial_T_wall"), _flow_channel_subdomains);
 }
 
 void

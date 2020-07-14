@@ -15,6 +15,7 @@ public:
 
 protected:
   virtual void check() const override;
+  virtual void initSecondary() override;
 
   /// Name of the function specifying initial condition for wall temperature
   const FunctionName _T_wall_fn_name;
