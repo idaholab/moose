@@ -1,16 +1,21 @@
-[Problem]
-  restart_file_base = master_ss_checkpoint_cp/LATEST
-  force_restart = true
-  skip_additional_restart_data = true
-[]
-
 [Mesh]
-  file = master_ss_checkpoint_cp/LATEST
+  [gen]
+    type = GeneratedMeshGenerator
+    nx = 8
+    ny = 8
+    xmin = -82.627
+    xmax = 82.627
+    ymin = -82.627
+    ymax = 82.627
+    dim = 2
+  []
 []
 
 [Variables]
   [./temp]
-    # no initial condition for restart.
+    order = FIRST
+    family = LAGRANGE
+    initial_condition = 500
   [../]
 []
 
@@ -25,10 +30,6 @@
 [Kernels]
   [./heat]
     type = HeatConduction
-    variable = temp
-  [../]
-  [./heat_ie]
-    type = HeatConductionTimeDerivative
     variable = temp
   [../]
   [./heat_source_fuel]
@@ -64,45 +65,46 @@
   [./avg_temp]
     type = ElementAverageValue
     variable = temp
-    execute_on = 'timestep_end'
+    execute_on = 'initial timestep_end'
   [../]
   [./avg_power]
     type = ElementAverageValue
     variable = power
-    execute_on = 'timestep_end'
   [../]
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 300'
   line_search = 'none'
 
   l_tol = 1e-02
-  nl_rel_tol = 5e-05
-  nl_abs_tol = 5e-05
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-9
 
   l_max_its = 50
   nl_max_its = 25
-
-  start_time = 0
-  end_time = 40
-  dt = 10
 []
 
 [Outputs]
-  exodus = true
-  print_linear_residuals = false
   perf_graph = true
   color = true
+  csv = true
+  exodus = true
+
+  [checkpoint]
+    type = Checkpoint
+    num_files = 2
+    additional_execute_on = 'FINAL' # seems to be a necessary to avoid a Checkpoint bug
+  []
 []
 
 [MultiApps]
   [./bison]
-    type = TransientMultiApp
+    type = FullSolveMultiApp
     positions = '0 0 0'
-    input_files = 'sub_tr.i'
+    input_files = 'sub_ss.i'
     execute_on = 'timestep_end'
   [../]
 []

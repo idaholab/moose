@@ -5,8 +5,8 @@
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    nx = 2
-    ny = 2
+    nx = 8
+    ny = 8
     xmin = -82.627
     xmax = 82.627
     ymin = -82.627
@@ -92,7 +92,6 @@
   [./avg_temp]
     type = ElementAverageValue
     variable = temp
-    execute_on = 'initial timestep_end'
   [../]
   [./disp_x_max_element]
     type = ElementExtremeValue
@@ -121,21 +120,17 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 300'
   line_search = 'none'
 
   l_tol = 1e-02
   nl_rel_tol = 5e-04
-  nl_abs_tol = 5e-04
+  nl_abs_tol = 1e-2
 
   l_max_its = 50
   nl_max_its = 25
-
-  start_time = 0
-  end_time = 40
-  dt = 10
 []
 
 [Outputs]
