@@ -65,7 +65,12 @@ protected:
 
   PenetrationLocator & _penetration_locator;
 
+  const bool _has_secondary_gap_offset;
+  MooseVariable * _secondary_gap_offset_var;
+
+  const bool _has_mapped_primary_gap_offset;
+  MooseVariable * _mapped_primary_gap_offset_var;
+
 public:
   static const Real NotPenetrated;
 };
-

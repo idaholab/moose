@@ -87,6 +87,7 @@ public:
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  Real gapOffset(const Node * node);
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
   Real getTangentialPenalty(PenetrationInfo & pinfo);
@@ -112,6 +113,12 @@ protected:
 
   std::vector<unsigned int> _vars;
   std::vector<MooseVariable *> _var_objects;
+
+  /// gap offset from either secondary, primary or both
+  const bool _has_secondary_gap_offset;
+  MooseVariable * _secondary_gap_offset_var;
+  const bool _has_mapped_primary_gap_offset;
+  MooseVariable * _mapped_primary_gap_offset_var;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;

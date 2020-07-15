@@ -91,6 +91,10 @@ ThermalContactAction::validParams()
   params.addParam<std::vector<VariableName>>(
       "gap_conductivity_function_variable",
       "Variable to be used in gap_conductivity_function in place of time");
+  params.addParam<VariableName>("secondary_gap_offset",
+                                "Offset to gap distance from secondary side");
+  params.addParam<VariableName>("mapped_primary_gap_offset",
+                                "Offset to gap distance mapped from primary side");
 
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
@@ -192,6 +196,12 @@ ThermalContactAction::addAuxKernels()
         parameters(),
         {"tangential_tolerance", "normal_smoothing_distance", "normal_smoothing_method", "order"});
     params.set<AuxVariableName>("variable") = _penetration_var_name;
+    if (isParamValid("secondary_gap_offset"))
+      params.set<std::vector<VariableName>>("secondary_gap_offset") = {
+          getParam<VariableName>("secondary_gap_offset")};
+    if (isParamValid("mapped_primary_gap_offset"))
+      params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
+          getParam<VariableName>("mapped_primary_gap_offset")};
     params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
     params.set<std::vector<BoundaryName>>("boundary") = {_secondary_name};
     params.set<BoundaryName>("paired_boundary") = _primary_name;

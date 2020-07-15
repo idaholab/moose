@@ -44,7 +44,7 @@ that can be created for various types of contact enforcement.
 | mortar             | all          | [NormalMortarMechanicalContact](/constraints/NormalMortarMechanicalContact.md) [NormalMortarLMMechanicalContact](/constraints/NormalMortarLMMechanicalContact.md) |
 | mortar             | coulomb      | [TangentialMortarMechanicalContact](/constraints/TangentialMortarMechanicalContact.md) [TangentialMortarLMMechanicalContact](/constraints/TangentialMortarLMMechanicalContact.md) |
 
-In addition to the Constraint class, several other objects are created, as shown in 
+In addition to the Constraint class, several other objects are created, as shown in
 
 !table id=contact_action_otherobj_table caption=Other objects constructed by ContactAction
 | Constructed Object | Purpose |
@@ -87,7 +87,11 @@ large, the solver may struggle due to poor conditioning.
 ## `System` Parameter
 
 The `system` parameter is deprecated and currently defaults to `Constraint`.
-  
+
+## Gap offset parameters
+
+Gap offset can be provided to the current contact formulation enforced using the [MechanicalContactConstraint](/constraints/MechanicalContactConstraint.md). It can be either `secondary_gap_offset` (gap offset from secondary side) or `mapped_primary_gap_offset` (gap offset from primary side but mapped to secondary side). Use of these gap offset parameters treats the surfaces as if they were virtually extended (positive offset value) or narrowed (negative offset value) by the specified amount, so that the surfaces are treated as if they are closer or further away than they actually are. There is no deformation within the material in this gap offset region.
+
 ## Example Input syntax id=example
 
 Node/face frictionless contact:
@@ -105,6 +109,10 @@ Normal (frictionless) mortar contact:
 Normal and tangential (frictional) mortar contact:
 
 !listing test/tests/bouncing-block-contact/frictional-nodal-min-normal-lm-mortar-fb-tangential-lm-mortar-action.i block=Contact
+
+Gap offset:
+
+!listing test/tests/mechanical_constraint/frictionless_kinematic_gap_offsets.i block=Contact
 
 !syntax parameters /Contact/ContactAction
 
