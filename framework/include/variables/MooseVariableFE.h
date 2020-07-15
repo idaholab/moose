@@ -453,15 +453,15 @@ public:
   /**
    * Get the value of this variable at given node
    */
-  OutputData getNodalValue(const Node & node);
+  OutputData getNodalValue(const Node & node) const;
   /**
    * Get the old value of this variable at given node
    */
-  OutputData getNodalValueOld(const Node & node);
+  OutputData getNodalValueOld(const Node & node) const;
   /**
    * Get the t-2 value of this variable at given node
    */
-  OutputData getNodalValueOlder(const Node & node);
+  OutputData getNodalValueOlder(const Node & node) const;
   /**
    * Get the current value of this variable on an element
    * @param[in] elem   Element at which to get value
