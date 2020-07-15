@@ -18,6 +18,9 @@ namespace libMesh
 namespace Parallel
 {
 
+/// This object is responsible to pack and unpack data stored in a std::shared_ptr<DenseVector<Real>
+/// It is also specific to the training process of PODReducedBasisTrainer since it
+/// packs the global sample index and variable index together with the vector.
 template <>
 class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>
 {
@@ -25,18 +28,22 @@ class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<R
 public:
   typedef Real buffer_type;
 
+  /// Getting the sizes of the packed objects using an iterator.
   static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
 
+  /// Getting the sizes of the packed objects using the object itself.
   static unsigned int packable_size(
       const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
       const void *);
 
+  // Pack the objects on the sending process.
   template <typename Iter, typename Context>
   static void
   pack(const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
        Iter data_out,
        const Context *);
 
+  // Unpack the object on the receiving process.
   template <typename BufferIter, typename Context>
   static std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
   unpack(BufferIter in, Context *);

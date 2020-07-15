@@ -119,6 +119,9 @@ protected:
   /// basis vectors or do something else.
   bool _base_completed;
 
+  /// Flag describing if the reduced operators are empty or not. This is necessary
+  /// to be able to do both the base and reduced operator generation in the same
+  /// object.
   bool _empty_operators;
 
 private:

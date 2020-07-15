@@ -16,59 +16,86 @@
 namespace StochasticTools
 {
 
+/*
+Templated class that specifies a distributed storage of a vector of given
+objects. It has a helper vector that contains global IDs for every stored item.
+*/
 template <typename T>
 class DistributedData : public libMesh::ParallelObject
 {
 public:
   DistributedData(const libMesh::Parallel::Communicator & comm_in);
 
+  /// Initialize the container with a given number of samples. this partitions
+  /// the samples using linearPartitioning.
   void initializeContainer(dof_id_type num_global_samples);
 
-  void changeSample(dof_id_type sample_id, const T & sample);
+  /// Changing a sample with a global index if it is owed locally.
+  void changeSample(dof_id_type glob_i, const T & sample);
 
-  void addNewSample(dof_id_type sample_id, const T & sample);
+  /// Adding a new sample locally with a global index.
+  void addNewSample(dof_id_type glob_i, const T & sample);
 
-  const T & getSample(dof_id_type glob_i);
-
-  const T & getLocalSample(dof_id_type loc_i);
-
-  dof_id_type getNumberOfGlobalSamples() const;
-
-  dof_id_type getNumberOfLocalSamples() const { return _n_local_samples; };
-
+  /// Closes the container meaning that no new samples can be added or the
+  /// already existing samples canot be changed.
   void closeContainer() { _closed = true; };
 
-  std::vector<T> & getLocalSamples() { return _local_samples; };
-
-  std::vector<dof_id_type> & getLocalSampleIDs() { return _local_sample_ids; };
-
+  /// Checking of sample with global ID is locally owned ot not.
   bool hasGlobalSample(dof_id_type glob_i);
 
-  dof_id_type getLocalIndex(dof_id_type glob_i);
-
-  dof_id_type getGlobalIndex(dof_id_type loc_i);
-
+  /// Getting an itertor to the beginning of the local samples.
   typename std::vector<T>::iterator localSampleBegin() { return _local_samples.begin(); };
 
+  /// Getting an iterator to the end of the locally owned samples.
   typename std::vector<T>::iterator localSampleEnd() { return _local_samples.end(); };
 
+  /// Getting an iterator to the beginning of the locally owned sample IDs.
   typename std::vector<dof_id_type>::iterator localSampleIDBegin()
   {
     return _local_sample_ids.begin();
   };
 
+  /// Getting an iterator to the end of the locally owned sample IDs.
   typename std::vector<dof_id_type>::iterator localSampleIDEnd()
   {
     return _local_sample_ids.end();
   };
 
+  /// Getting a sample using its global index.
+  const T & getSample(dof_id_type glob_i);
+
+  /// Getting a sample using its local index.
+  const T & getLocalSample(dof_id_type loc_i);
+
+  /// Getting all of the locally owned samples.
+  std::vector<T> & getLocalSamples() { return _local_samples; };
+
+  /// Getting the vector of sample IDs for locally owned samples.
+  std::vector<dof_id_type> & getLocalSampleIDs() { return _local_sample_ids; };
+
+  /// Getting the number of global samples.
+  dof_id_type getNumberOfGlobalSamples() const;
+
+  /// Getting the number of locally owned samples.
+  dof_id_type getNumberOfLocalSamples() const { return _n_local_samples; };
+
+  /// Getting the local index of a global sample if locally owned.
+  dof_id_type getLocalIndex(dof_id_type glob_i);
+
+  /// Getting the global index of a locally owned sample.
+  dof_id_type getGlobalIndex(dof_id_type loc_i);
+
 protected:
+  /// The vector where the samples are stored.
   std::vector<T> _local_samples;
 
+  /// The vector where the global sample IDs are stored.
   std::vector<dof_id_type> _local_sample_ids;
 
+  /// Flag which shows if the container is closed or not.
   bool _closed;
 
+  /// Number of local samples.
   dof_id_type _n_local_samples;
 };
 

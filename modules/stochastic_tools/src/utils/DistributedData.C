@@ -25,6 +25,8 @@ template <typename T>
 void
 DistributedData<T>::initializeContainer(dof_id_type n_global_samples)
 {
+  // This function can be used when a linear partitioning is required and the
+  // number of global samples is known in advance.
   dof_id_type local_sample_begin;
   dof_id_type local_sample_end;
   MooseUtils::linearPartitionItems(n_global_samples,
@@ -37,10 +39,40 @@ DistributedData<T>::initializeContainer(dof_id_type n_global_samples)
   _local_samples.resize(_n_local_samples);
   _local_sample_ids.resize(_n_local_samples);
 
+  // Filling the sample ID vector, leaving the elements of the sample vector
+  // with the default constructor.
   for (dof_id_type sample_i = local_sample_begin; sample_i < local_sample_end; ++sample_i)
   {
     _local_sample_ids[sample_i] = sample_i;
   }
+}
+
+template <typename T>
+void
+DistributedData<T>::addNewSample(dof_id_type glob_i, const T & sample)
+{
+  auto it = std::find(_local_sample_ids.begin(), _local_sample_ids.end(), glob_i);
+  if (it != _local_sample_ids.end())
+    ::mooseError("Local object ID (", glob_i, ") already exists!");
+  if (_closed)
+    ::mooseError("DistributeData has already been closed, cannot add new elements!");
+
+  _local_samples.push_back(sample);
+  _local_sample_ids.push_back(glob_i);
+  _n_local_samples += 1;
+}
+
+template <typename T>
+void
+DistributedData<T>::changeSample(dof_id_type glob_i, const T & sample)
+{
+  auto it = std::find(_local_sample_ids.begin(), _local_sample_ids.end(), glob_i);
+  if (it == _local_sample_ids.end())
+    ::mooseError("Local object ID (", glob_i, ") does not exists!");
+  if (_closed)
+    ::mooseError("DistributeData has already been closed, cannot change elements!");
+
+  _local_samples[std::distance(_local_sample_ids.begin(), it)] = sample;
 }
 
 template <typename T>
@@ -66,30 +98,6 @@ DistributedData<T>::getLocalSample(dof_id_type loc_i)
                  ") of the locally stored vector!");
 
   return _local_samples[loc_i];
-}
-
-template <typename T>
-void
-DistributedData<T>::addNewSample(dof_id_type sample_id, const T & sample)
-{
-  auto it = std::find(_local_sample_ids.begin(), _local_sample_ids.end(), sample_id);
-  if (it != _local_sample_ids.end())
-    ::mooseError("Local object ID (", sample_id, ") already exists!");
-
-  _local_samples.push_back(sample);
-  _local_sample_ids.push_back(sample_id);
-  _n_local_samples += 1;
-}
-
-template <typename T>
-void
-DistributedData<T>::changeSample(dof_id_type sample_id, const T & sample)
-{
-  auto it = std::find(_local_sample_ids.begin(), _local_sample_ids.end(), sample_id);
-  if (it == _local_sample_ids.end())
-    ::mooseError("Local object ID (", sample_id, ") does not exists!");
-
-  _local_samples[std::distance(_local_sample_ids.begin(), it)] = sample;
 }
 
 template <typename T>
@@ -137,6 +145,7 @@ DistributedData<T>::getGlobalIndex(dof_id_type loc_i)
   return _local_sample_ids[loc_i];
 }
 
+// Explicit instantiation of types that are necessary.
 template class DistributedData<DenseVector<Real>>;
 template class DistributedData<std::shared_ptr<DenseVector<Real>>>;
 template class DistributedData<std::vector<Real>>;
