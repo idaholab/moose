@@ -1,0 +1,25 @@
+# React script that is equivalent to red_sea_precip.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 60 C
+H2O          = 1 free kg
+Cl-          = 5.89 mol
+balance on Cl-
+Na+          = 5.42 mol
+Ca++         = 0.173 mol
+K+           = 0.0643 mol
+SO4--        = 0.0118 mol
+Mg++         = 0.0423 mol
+HCO3-        = 0.00309 mol
+Fe++         = 0.00195 mol
+Zn++         = 0.000111 mol
+F-           = 0.000354 mol
+swap Barite for Ba++
+Barite       = 0.5e-11 free mol
+Pb++         = 4.09e-06 mol
+Cu+          = 5.50e-6 mol
+pH           = 5.6
+swap Sphalerite for O2(aq)
+Sphalerite   = 1e-11 free mol
+printout  species = long
+epsilon = 1e-14
