@@ -70,7 +70,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   echo $0
   ```
 
-  What ever returns here, is the type of shell you are operating in, and is also what you should be instructing Conda to 'initialize'. Example:
+  Whatever returns here, is the type of shell you are operating in, and is also what you should be instructing Conda to 'initialize'. Example:
 
   ```bash
   conda init zsh
@@ -85,7 +85,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   ```bash
   conda deactivate
   conda remove moose --all --yes
-  conda create moose moose-libmesh moose-tools
+  conda create --name moose moose-libmesh moose-tools
   ```
 
   If the above re-install method ultimately failed, it is time to submit your errors to the [mailing list](faq/mailing_list.md).

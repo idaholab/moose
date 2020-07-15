@@ -440,7 +440,7 @@ class TestHarness:
     def printOutput(self, job, color):
         """ Method to print a testers output to the screen """
         output = ''
-        # Print what ever status the tester has at the time
+        # Print whatever status the tester has at the time
         if self.options.verbose or (job.isFail() and not self.options.quiet):
             output = 'Working Directory: ' + job.getTestDir() + '\nRunning command: ' + job.getCommand() + '\n'
             output += util.trimOutput(job, self.options)

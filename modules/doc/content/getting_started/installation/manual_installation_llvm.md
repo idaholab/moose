@@ -52,7 +52,7 @@ Append the following contents into a new file called `moose-environment.sh`:
 # MPICH __MPICH__
 # PETSc __PETSC_DEFAULT__
 
-export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
+export PACKAGES_DIR=<whatever you exported initially during the Environment setup>
 
 export PATH=$PACKAGES_DIR/llvm-__LLVM__/bin:$PACKAGES_DIR/gcc-__GCC__/bin:$PACKAGES_DIR/mpich-__MPICH__/bin:$PACKAGES_DIR/miniconda/bin:$PATH
 export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$PACKAGES_DIR/gcc-__GCC__/lib64:$PACKAGES_DIR/gcc-__GCC__/lib:$PACKAGES_DIR/gcc-__GCC__/lib/gcc/x86_64-pc-linux-gnu/__GCC__:$PACKAGES_DIR/gcc-__GCC__/libexec/gcc/x86_64-pc-linux-gnu/__GCC__:$PACKAGES_DIR/mpich-__MPICH__/lib:$LD_LIBRARY_PATH
