@@ -2714,6 +2714,8 @@ MooseMesh::ghostGhostedBoundaries()
   if (!_use_distributed_mesh || !_need_ghost_ghosted_boundaries)
     return;
 
+  return;
+
   TIME_SECTION(_ghost_ghosted_boundaries_timer);
 
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
