@@ -330,12 +330,11 @@ SubChannel1PhaseProblem::externalSolve()
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
                           (q_prime_soln(node_out) + q_prime_soln(node_in)) * dz / 2.0);
-            auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
-            auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
-
             _console << "LEVEL: " << iz << " channel :" << i_ch << "\n";
             _console << "h_out: " << h_out << "\n";
             _console << "mdot_out: " << mdot_out << "\n";
+            auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
+            auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
             // Update the solution vectors at the outlet of the cell
             // (mass,density,Temperature,Enthalpy is upwinded).
@@ -457,6 +456,16 @@ SubChannel1PhaseProblem::externalSolve()
     Total_crossflow_in += SumWij_soln(node_in);
     Total_crossflow_20 += SumWij_soln(node_20);
   }
+
+  std::ofstream myfile1;
+  myfile1.open("Temp_out.txt", std::ofstream::trunc);
+  myfile1 << std::setprecision(6) << std::fixed << Temp_out << "\n";
+  myfile1.close();
+
+  std::ofstream myfile2;
+  myfile2.open("Temp_in.txt", std::ofstream::trunc);
+  myfile2 << std::setprecision(6) << std::fixed << Temp_in << "\n";
+  myfile2.close();
 
   for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
   {
