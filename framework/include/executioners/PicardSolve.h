@@ -76,6 +76,11 @@ public:
     _picard_self_relaxed_variables = vars;
   }
 
+  /**
+   * Whether sub-applications are automatically advanced no matter what happens during their solves
+   */
+  bool autoAdvance() const;
+
 protected:
   /**
    * Perform one Picard iteration or a full solve.
@@ -162,4 +167,12 @@ private:
   Real _previous_entering_time;
 
   const std::string _solve_message;
+
+  /// Whether the user has set the auto_advance parameter for handling advancement of
+  /// sub-applications in multi-app contexts
+  const bool _auto_advance_set_by_user;
+
+  /// The value of auto_advance set by the user for handling advancement of sub-applications in
+  /// multi-app contexts
+  const bool _auto_advance_user_value;
 };

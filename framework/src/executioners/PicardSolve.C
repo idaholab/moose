@@ -99,6 +99,9 @@ PicardSolve::validParams()
   params.addParam<bool>("update_xfem_at_timestep_begin",
                         false,
                         "Should XFEM update the mesh at the beginning of the timestep");
+  params.addParam<bool>("auto_advance",
+                        "Whether to automatically advance sub-applications regardless of whether "
+                        "their solve converges.");
 
   return params;
 }
@@ -130,7 +133,9 @@ PicardSolve::PicardSolve(Executioner * ex)
     _xfem_update_count(0),
     _xfem_repeat_step(false),
     _previous_entering_time(_problem.time() - 1),
-    _solve_message(_problem.shouldSolve() ? "Solve Converged!" : "Solve Skipped!")
+    _solve_message(_problem.shouldSolve() ? "Solve Converged!" : "Solve Skipped!"),
+    _auto_advance_set_by_user(isParamValid("auto_advance")),
+    _auto_advance_user_value(_auto_advance_set_by_user ? getParam<bool>("auto_advance") : true)
 {
   if (_relax_factor != 1.0)
     // Store a copy of the previous solution here
@@ -376,6 +381,20 @@ PicardSolve::solve()
 }
 
 bool
+PicardSolve::autoAdvance() const
+{
+  bool auto_advance = !(_has_picard_its && _problem.isTransient());
+
+  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_picard_its)
+    auto_advance = true;
+
+  if (_auto_advance_set_by_user)
+    auto_advance = _auto_advance_user_value;
+
+  return auto_advance;
+}
+
+bool
 PicardSolve::solveStep(Real begin_norm_old,
                        Real & begin_norm,
                        Real end_norm_old,
@@ -383,10 +402,7 @@ PicardSolve::solveStep(Real begin_norm_old,
                        bool relax,
                        const std::set<dof_id_type> & relaxed_dofs)
 {
-  bool auto_advance = !(_has_picard_its && _problem.isTransient());
-
-  if (dynamic_cast<EigenExecutionerBase *>(&_executioner) && _has_picard_its)
-    auto_advance = true;
+  bool auto_advance = autoAdvance();
 
   _executioner.preSolve();
 

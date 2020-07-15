@@ -76,24 +76,34 @@
     type = NumPicardIterations
     execute_on = 'initial timestep_end'
   [../]
+  [master_time]
+    type = Receiver
+    execute_on = 'timestep_end'
+  []
+  [master_dt]
+    type = Receiver
+    execute_on = 'timestep_end'
+  []
+  [time]
+    type = TimePostprocessor
+    execute_on = 'timestep_end'
+  []
+  [dt]
+    type = TimestepSize
+    execute_on = 'timestep_end'
+  []
 []
 
 [Executioner]
   type = Transient
-  num_steps = 5
-  dt = 1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 2 # deliberately make it fail at 2 to test the time step rejection behavior
   nl_rel_tol = 1e-5 # loose enough to force multiple Picard iterations on this example
-  nl_abs_tol = 1e-9
+  l_tol = 1e-5 # loose enough to force multiple Picard iterations on this example
   picard_rel_tol = 1e-8
-  picard_abs_tol = 1e-9
-[]
-
-[Outputs]
-  exodus = true
+  num_steps = 2
 []
 
 [MultiApps]
@@ -120,4 +130,32 @@
     source_variable = w
     variable = w
   [../]
+  [time_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = time
+    to_postprocessor = sub_time
+    direction = to_multiapp
+    multi_app = sub2
+  []
+  [dt_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = dt
+    to_postprocessor = sub_dt
+    direction = to_multiapp
+    multi_app = sub2
+  []
+  [matser_time_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = time
+    to_postprocessor = master_time
+    direction = to_multiapp
+    multi_app = sub2
+  []
+  [master_dt_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = dt
+    to_postprocessor = master_dt
+    direction = to_multiapp
+    multi_app = sub2
+  []
 []

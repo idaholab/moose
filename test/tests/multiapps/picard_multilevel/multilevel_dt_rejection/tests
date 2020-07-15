@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#15166'
+  design = 'TransientMultiApp.md'
+  [run]
+    type = RunApp
+    input = master.i
+    allow_warnings = True
+    expect_out = 'sub1 failed to converge'
+    max_buffer_size = -1
+    requirement = 'The system shall be able to run multiple timesteps of a multi-level multi-app simulation, handling the case when Picard coupling between two levels fails to converge.'
+  []
+  [python]
+    prereq = 'run'
+    type = PythonUnitTest
+    input = 'test_multilevel.py'
+    test_case = 'TestMultiLevel'
+    requirement = 'The system shall be able to uniformly cut the time-step across levels of a multi-app solve, even when there is no Picard coupling between two levels.'
+    required_python_packages = 'numpy'
+  []
+[]

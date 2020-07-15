@@ -58,18 +58,12 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
-  dt = 1
   solve_type = PJFNK
+  num_steps = 2
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   picard_max_its = 1
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
-[]
-
-[Outputs]
-  exodus = true
+  auto_advance = false
 []
 
 [MultiApps]
@@ -89,4 +83,29 @@
     source_variable = u
     variable = v2
   [../]
+  [time_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = time
+    to_postprocessor = master_time
+    direction = to_multiapp
+    multi_app = sub1
+  []
+  [dt_to_sub]
+    type = MultiAppPostprocessorTransfer
+    from_postprocessor = dt
+    to_postprocessor = master_dt
+    direction = to_multiapp
+    multi_app = sub1
+  []
+[]
+
+[Postprocessors]
+  [time]
+    type = TimePostprocessor
+    execute_on = 'timestep_end'
+  []
+  [dt]
+    type = TimestepSize
+    execute_on = 'timestep_end'
+  []
 []
