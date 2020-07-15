@@ -13,7 +13,7 @@
 
 const GeochemicalDatabaseReader database("database/moose_testdb.json");
 // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
-// >(s)FeO-, e-
+// >(s)FeO-
 const PertinentGeochemicalSystem model(database,
                                        {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                        {"Calcite"},
@@ -31,7 +31,7 @@ const GeochemistryIonicStrength is_cl_only(1E9, 1E9, false, true);
 TEST(GeochemistryIonicStrengthTest, sizeExceptions)
 {
   const std::vector<Real> basis_m_good(6);
-  const std::vector<Real> eqm_m_good(9);
+  const std::vector<Real> eqm_m_good(8);
   const std::vector<Real> kin_m_good(3);
 
   try
@@ -179,7 +179,7 @@ TEST(GeochemistryIonicStrengthTest, ionicStrength)
 
   const Real gold_basis_only = 0.5 * gold_ionic_str;
 
-  std::vector<Real> eqm_m(9);
+  std::vector<Real> eqm_m(8);
   eqm_m[mgd.eqm_species_index.at("CO2(aq)")] = 1.1;
   eqm_m[mgd.eqm_species_index.at("CO3--")] = 2.2;
   gold_ionic_str += 4 * 2.2;
@@ -192,8 +192,6 @@ TEST(GeochemistryIonicStrengthTest, ionicStrength)
   gold_ionic_str += 4 * 6.6;
   eqm_m[mgd.eqm_species_index.at(">(s)FeO-")] = 7.7;
   gold_ionic_str += 7.7;
-  eqm_m[mgd.eqm_species_index.at("e-")] = 8.8;
-  gold_ionic_str += 8.8;
   eqm_m[mgd.eqm_species_index.at("Calcite")] = 9.9;
 
   std::vector<Real> kin_m(3);
@@ -232,7 +230,7 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
 
   const Real gold_basis_only = 0.5 * gold_ionic_str;
 
-  std::vector<Real> eqm_m(9);
+  std::vector<Real> eqm_m(8);
   eqm_m[mgd.eqm_species_index.at("CO2(aq)")] = 1.1;
   gold_ionic_str += 1.1 * (1 + 1);
   eqm_m[mgd.eqm_species_index.at("CO3--")] = 2.2;
@@ -247,8 +245,6 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
   gold_ionic_str += 6.6 * (4);
   eqm_m[mgd.eqm_species_index.at(">(s)FeO-")] = 7.7;
   gold_ionic_str += 7.7 * (1);
-  eqm_m[mgd.eqm_species_index.at("e-")] = 8.8;
-  gold_ionic_str += 8.8 * (1);
   eqm_m[mgd.eqm_species_index.at("Calcite")] = 9.9;
   gold_ionic_str += 9.9 * (4 + 1 - 1);
 
@@ -277,7 +273,7 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength)
 TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength_except)
 {
   std::vector<Real> basis_m(6);
-  std::vector<Real> eqm_m(9);
+  std::vector<Real> eqm_m(8);
   std::vector<Real> kin_m(3);
   try
   {

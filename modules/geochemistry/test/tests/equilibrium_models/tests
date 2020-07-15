@@ -64,7 +64,7 @@ Aragonite = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -5.941;  SI = 0.5708
 Quartz = 1*SiO2(aq);  log10K = -3.999;  SI = -0.01256
 
 Nernst potentials:
-e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = 0.7277V
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7277V
 '
     match_literal = true
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems with no precipitation"
@@ -90,7 +90,7 @@ Na+;  bulk_moles = 0.485mol;  bulk_conc = 1.076e+04mg/kg(soln);  molality = 0.47
 Mg++;  bulk_moles = 0.0551mol;  bulk_conc = 1292mg/kg(soln);  molality = 0.03984mol/kg(solvent water);  free_conc = 934.3mg/kg(soln);  act_coeff = 0.316;  log10(a) = -1.9
 SO4--;  bulk_moles = 0.0292mol;  bulk_conc = 2707mg/kg(soln);  molality = 0.01605mol/kg(solvent water);  free_conc = 1487mg/kg(soln);  act_coeff = 0.1693;  log10(a) = -2.566
 K+;  bulk_moles = 0.0106mol;  bulk_conc = 399.9mg/kg(soln);  molality = 0.01035mol/kg(solvent water);  free_conc = 390.7mg/kg(soln);  act_coeff = 0.6276;  log10(a) = -2.187
-Ca++;  bulk_moles = 0.0105mol;  bulk_conc = 406.2mg/kg(soln);  molality = 0.005801mol/kg(solvent water);  free_conc = 224.3mg/kg(soln);  act_coeff = 0.2465;  log10(a) = -2.845
+Ca++;  bulk_moles = 0.0105mol;  bulk_conc = 406.2mg/kg(soln);  molality = 0.005801mol/kg(solvent water);  free_conc = 224.4mg/kg(soln);  act_coeff = 0.2465;  log10(a) = -2.845
 HCO3-;  bulk_moles = 0.00241mol;  bulk_conc = 141.9mg/kg(soln);  molality = 0.001167mol/kg(solvent water);  free_conc = 68.7mg/kg(soln);  act_coeff = 0.6906;  log10(a) = -3.094
 Dolomite;  bulk_moles = 9.795e-05mol;  bulk_conc = 17.43mg/kg(soln);  free_moles = 0.0002745mol;  free_mass = 50.63mg
 O2(aq);  bulk_moles = 0.0002151mol;  bulk_conc = 6.642mg/kg(soln);  molality = 0.0002151mol/kg(solvent water);  free_conc = 6.642mg/kg(soln);  act_coeff = 1.173;  log10(a) = -3.598
@@ -171,7 +171,7 @@ Paragonite = 6*H2O - 10*H+ + 3*SiO2(aq) + 3*Al+++ + 1*Na+;  log10K = 18.48;  SI 
 Quartz = 1*SiO2(aq);  log10K = -3.999;  SI = 0.06547
 
 Nernst potentials:
-e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = 0.8321V
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
 '
     match_literal = true
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed"
@@ -226,7 +226,7 @@ Beidellit-Na = -1.165*H2O - 0.33*H+ + 1.34*SiO2(aq) + 1.165*Kaolinite + 0.33*Na+
 Paragonite = -1.5*H2O - 1*H+ + 1.5*Kaolinite + 1*Na+;  log10K = 7.331;  SI = -4.949
 
 Nernst potentials:
-e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = 0.8321V
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8321V
 '
     match_literal = true
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems when the pH is fixed and minerals precipitate"
@@ -244,7 +244,7 @@ e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = 0.8321V
   [./red_sea_precip]
     type = 'RunApp'
     input = 'red_sea_precip.i'
-    expect_out = 'Chalcocite;  bulk_moles'
+    expect_out = 'pH = 5.6'
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems for specified temperature, including when mineral precipitate"
     issues = '#15290 #15261'
     design = 'GeochemistryTimeIndependentReactor.md red_sea.md'

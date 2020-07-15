@@ -103,7 +103,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   // remove the free minerals
   for (unsigned i = 1; i < num_basis; ++i) // do not loop over water
     if (mgd.basis_species_mineral[i])
-      mass -= bulk_moles[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
+      mass -= basis_molality[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
   _console << "Mass of aqueous solution = " << mass << "kg";
   if (num_kin == 0)
     _console << " (without free minerals)\n";
@@ -120,16 +120,8 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
              << "\n";
 
   // Output the aqueous solution pe, if relevant
-  Real pe = 0.0;
-  const bool pe_defined =
-      (mgd.basis_species_index.count("e-") == 1) || (mgd.eqm_species_index.count("e-") == 1);
-  if (mgd.basis_species_index.count("e-"))
-    pe = -std::log10(basis_activity[mgd.basis_species_index.at("e-")]);
-  if (mgd.eqm_species_index.count("e-"))
-    pe = -std::log10(eqm_molality[mgd.eqm_species_index.at("e-")] *
-                     eqm_act_coef[mgd.eqm_species_index.at("e-")]);
-  if (pe_defined)
-    _console << "pe = " << pe << "\n";
+  if (mgd.redox_stoichiometry.m() > 0)
+    _console << "pe = " << egs.getRedoxLog10K(0) - egs.log10RedoxActivityProduct(0) << "\n";
 
   // Output ionic strengths
   _console << "Ionic strength = " << egs.getIonicStrength() << "mol/kg(solvent water)\n";
@@ -234,12 +226,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
                << ";  log10K = " << egs.getLog10K(i) << ";  SI = " << eqm_SI[i] << "\n";
 
   // Output the Nernst potentials, if relevant
-  const Real prefactor = -GeochemistryConstants::LOGTEN * GeochemistryConstants::GAS_CONSTANT *
-                         (egs.getTemperature() + GeochemistryConstants::CELSIUS_TO_KELVIN) /
-                         GeochemistryConstants::FARADAY;
   _console << "\nNernst potentials:\n";
-  if (pe_defined)
-    _console << "e- = 0.5*H20 - 0.25*O2(aq) - 1*H+;  Eh = " << -prefactor * pe << "V\n";
   if (mgd.redox_stoichiometry.m() > 0)
     outputNernstInfo(egs);
 

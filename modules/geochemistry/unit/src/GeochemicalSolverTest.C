@@ -315,7 +315,7 @@ TEST(GeochemicalSolverTest, solve2)
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
   EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 0);
+  EXPECT_EQ(egs.getNumRedox(), 1);
   EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
   EXPECT_EQ(egs.getNumKinetic(), 0);
@@ -591,7 +591,7 @@ TEST(GeochemicalSolverTest, solve3)
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
   EXPECT_EQ(egs.getNumInBasis(), 11);
-  EXPECT_EQ(egs.getNumRedox(), 0);
+  EXPECT_EQ(egs.getNumRedox(), 1);
   EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 
@@ -1041,7 +1041,7 @@ TEST(GeochemicalSolverTest, solve4)
 
   // check number in basis, number in redox disequilibrium and number of surface potentials
   EXPECT_EQ(egs.getNumInBasis(), 14);
-  EXPECT_EQ(egs.getNumRedox(), 1);
+  EXPECT_EQ(egs.getNumRedox(), 2);
   EXPECT_EQ(egs.getNumSurfacePotentials(), 0);
   EXPECT_EQ(egs.getNumInEquilibrium(), mgd.eqm_species_name.size());
 

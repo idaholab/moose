@@ -20,8 +20,7 @@ Gypsum.  T = 43.6625degC'
   [./hematite]
     type = 'RunApp'
     input = 'hematite.i'
-    expect_out = '\(A_H\+\)\^-4 \(A_O2\(aq\)\)\^0.5 = 10\^3.066
-\(A_H\+\)\^-6 \(A_e-\)\^-2 = 10\^46.08'
+    expect_out = '\(A_H\+\)\^-4 \(A_O2\(aq\)\)\^0.5 = 10\^3.066'
     requirement = "The geochemistry interrogator shall be output equations involving pH and pe for equilibrium reactions"
     issues = '#14981'
     design = 'pH_pe.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'

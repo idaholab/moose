@@ -332,7 +332,7 @@ public:
    * @param redox_e The name of the free electron, eg e-.  For redox pairs that are in
    * disequilibrium to be correctly recorded, and hence their Nernst potentials to be computed
    * easily, the equilibrium reaction for redox_e must involve redox_ox, and the basis species must
-   * be chosen so that redox_e is an equilibrium species.
+   * be chosen so that redox_e is an equilibrium species according to the database reader
    */
   PertinentGeochemicalSystem(const GeochemicalDatabaseReader & db,
                              const std::vector<std::string> & basis_species,
@@ -453,6 +453,12 @@ private:
   void buildSecondarySpecies();
 
   /**
+   * @return true if _redox_e appears as a secondary species in the database and that its
+   * stoichiometry can be expressed in terms of basis species
+   */
+  bool checkRedoxe();
+
+  /**
    * Check that all minerals in mineral_info have reactions that involve only the
    * basis_species or secondary_species.   Check that if a mineral in this list is also a
    * "sorbing mineral", its sorbing sites are present in the basis_species list
@@ -481,4 +487,13 @@ private:
    * Fully populate the ModelGeochemicalDatabase
    */
   void createModel();
+
+  /**
+   * Extract the stoichiometry and log10K for the _redox_e species.  This is called during
+   * createModel()
+   * @param redox_e_stoichiometry upon exit will contain the stoichiometry for the _redox_e species
+   * @param redox_e_log10K upon exit will contain the log10K info for the _redox_e species
+   */
+  void buildRedoxeInfo(std::vector<Real> & redox_e_stoichiometry,
+                       std::vector<Real> & redox_e_log10K);
 };

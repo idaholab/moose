@@ -13,7 +13,7 @@
 #include "GeochemistryActivityCalculators.h"
 
 const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
-// The following system has secondary species: (O-phth)--, CO2(aq), CO3--, CaCO3, CaOH+, OH-, e-,
+// The following system has secondary species: (O-phth)--, CO2(aq), CO3--, CaCO3, CaOH+, OH-,
 // >(s)FeO-, Calcite
 const PertinentGeochemicalSystem model(database,
                                        {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
@@ -50,7 +50,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, ionicStrengthInterface)
   // the equilibrium and kinetic molalities do not make any difference due to ionic strength using
   // only basis molalities
   ac.setInternalParameters(
-      25.0, mgd, basis_m, std::vector<Real>(9, 1.1), std::vector<Real>(3, 2.2));
+      25.0, mgd, basis_m, std::vector<Real>(8, 1.1), std::vector<Real>(3, 2.2));
 
   EXPECT_NEAR(ac.getIonicStrength(), 0.5 * gold_ionic_str, 1E-8);
   EXPECT_EQ(ac.getStoichiometricIonicStrength(), 2.0E-8);
@@ -62,7 +62,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, getDebyeHuckel)
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
-      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
+      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(8), std::vector<Real>(3));
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
   EXPECT_EQ(dh.A, 0.5092);
@@ -84,7 +84,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
-      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
+      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(8), std::vector<Real>(3));
 
   const Real ionic_str = ac.getIonicStrength();
 
@@ -93,7 +93,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
   ac.buildActivityCoefficients(mgd, basis_ac, eqm_ac);
 
   EXPECT_EQ(basis_ac.size(), 6);
-  EXPECT_EQ(eqm_ac.size(), 9);
+  EXPECT_EQ(eqm_ac.size(), 8);
 
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
 
@@ -120,10 +120,10 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, buildActivityCoefficientsD
     ASSERT_NEAR(basis_ac[i], gold, 1.0E-8);
   }
 
-  for (unsigned j = 0; j < 8; ++j) // don't loop over the mineral calcite
+  for (unsigned j = 0; j < 7; ++j) // don't loop over the mineral calcite
   {
     Real gold = 0.0;
-    if (j == 1 || j == 3 || j == 7) // CO2(aq) and CaCO3 and >(s)FeO-
+    if (j == 1 || j == 3 || j == 6) // CO2(aq) and CaCO3 and >(s)FeO-
       gold = 1.0;
     else
       gold =
@@ -144,7 +144,7 @@ TEST(GeochemistryActivityCoefficientsDebyeHuckelTest, waterActivity)
   GeochemistryIonicStrength is(1.0E9, 2.0E9, false, false);
   GeochemistryActivityCoefficientsDebyeHuckel ac(is, database);
   ac.setInternalParameters(
-      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(9), std::vector<Real>(3));
+      25.0, mgd, std::vector<Real>(6, 1.0), std::vector<Real>(8), std::vector<Real>(3));
 
   const DebyeHuckelParameters dh = ac.getDebyeHuckel();
   const Real stoi_ionic_str = ac.getStoichiometricIonicStrength();
