@@ -90,7 +90,7 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   Real mass = bulk_moles[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
   for (unsigned i = 1; i < num_basis; ++i) // do not loop over water
     mass += bulk_moles[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
-  _console << "Mass of aqueous solution = " << mass << "kg";
+  _console << "Total mass = " << mass << "kg";
   if (num_kin == 0)
     _console << "\n";
   else
@@ -98,9 +98,17 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
     _console << " (including kinetic species and free minerals)\n";
     for (unsigned k = 0; k < num_kin; ++k)
       mass -= kin_moles[k] * mgd.kin_species_molecular_weight[k] / 1000.0;
-    _console << "Mass of aqueous solution = " << mass
-             << "kg (without kinetic species, but with free minerals)\n";
+    _console << "Mass without kinetic species but including free minerals = " << mass << "kg\n";
   }
+  // remove the free minerals
+  for (unsigned i = 1; i < num_basis; ++i) // do not loop over water
+    if (mgd.basis_species_mineral[i])
+      mass -= bulk_moles[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
+  _console << "Mass of aqueous solution = " << mass << "kg";
+  if (num_kin == 0)
+    _console << " (without free minerals)\n";
+  else
+    _console << " (without kinetic species and without free minerals)\n";
 
   // Output the aqueous solution pH, if relevant
   if (mgd.basis_species_index.count("H+"))
@@ -146,11 +154,12 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
       _console << mgd.basis_species_name[i] << ";  bulk_moles = " << bulk_moles[i]
                << "mol;  bulk_conc = "
                << bulk_moles[i] * mgd.basis_species_molecular_weight[i] * 1000.0 / mass
-               << "mg/kg(solution);";
+               << "mg/kg(soln);";
       if (!mgd.basis_species_mineral[i])
         _console << "  molality = " << basis_molality[i] << "mol/kg(solvent water);  free_conc = "
-                 << basis_molality[i] * mgd.basis_species_molecular_weight[i] * 1000.0
-                 << "mg/kg(solvent water);  act_coeff = " << basis_act_coef[i]
+                 << basis_molality[i] * basis_molality[0] / mass *
+                        mgd.basis_species_molecular_weight[i] * 1000.0
+                 << "mg/kg(soln);  act_coeff = " << basis_act_coef[i]
                  << ";  log10(a) = " << std::log10(basis_activity[i]) << "\n";
       else if (mgd.basis_species_mineral[i])
         _console << "  free_moles = " << basis_molality[i] << "mol;  free_mass = "
@@ -171,8 +180,9 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
     else
       _console << mgd.eqm_species_name[i] << ";  molality = " << eqm_molality[i]
                << "mol/kg(solvent water);  free_conc = "
-               << eqm_molality[i] * mgd.eqm_species_molecular_weight[i] * 1000.0
-               << "mg/kg(solvent water);  act_coeff = " << eqm_act_coef[i]
+               << eqm_molality[i] * basis_molality[0] / mass * mgd.eqm_species_molecular_weight[i] *
+                      1000.0
+               << "mg/kg(soln);  act_coeff = " << eqm_act_coef[i]
                << ";  log10(a) = " << std::log10(eqm_molality[i] * eqm_act_coef[i]) << ";  "
                << mgd.eqm_species_name[i] << " = "
                << GeochemistryFormattedOutput::reaction(
