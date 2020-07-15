@@ -250,6 +250,8 @@ SubChannel1PhaseProblem::externalSolve()
               Wij(i_gap) = Wolder - Residual / (derivative + 1e-10);
               newton_error = std::abs(Residual);
             }
+            // if (Wij(i_gap) < 0)
+            //   mooseError(name(), " : Calculation of negative crossflow : ");
             // apply global sign to crossflow
             Wij(i_gap) =
                 (-2.0 * signbit(P_soln(node_in_i) - P_soln(node_in_j)) + 1.0) * (Wij(i_gap));
@@ -330,9 +332,6 @@ SubChannel1PhaseProblem::externalSolve()
             auto h_out = std::pow(mdot_out, -1) *
                          (mdot_in * h_in - SumWijh_soln(node_out) - SumWijPrimeDhij_soln(node_out) +
                           (q_prime_soln(node_out) + q_prime_soln(node_in)) * dz / 2.0);
-            _console << "LEVEL: " << iz << " channel :" << i_ch << "\n";
-            _console << "h_out: " << h_out << "\n";
-            _console << "mdot_out: " << mdot_out << "\n";
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
@@ -459,12 +458,12 @@ SubChannel1PhaseProblem::externalSolve()
 
   std::ofstream myfile1;
   myfile1.open("Temp_out.txt", std::ofstream::trunc);
-  myfile1 << std::setprecision(6) << std::fixed << Temp_out << "\n";
+  myfile1 << std::setprecision(3) << std::fixed << Temp_out << "\n";
   myfile1.close();
 
   std::ofstream myfile2;
   myfile2.open("Temp_in.txt", std::ofstream::trunc);
-  myfile2 << std::setprecision(6) << std::fixed << Temp_in << "\n";
+  myfile2 << std::setprecision(3) << std::fixed << Temp_in << "\n";
   myfile2.close();
 
   for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
