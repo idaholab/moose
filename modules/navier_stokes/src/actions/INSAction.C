@@ -14,6 +14,7 @@
 #include "AddVariableAction.h"
 #include "MooseObject.h"
 #include "INSADObjectTracker.h"
+#include "NonlinearSystemBase.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -324,7 +325,8 @@ INSAction::act()
       }
     }
 
-    if (getParam<bool>("add_temperature_equation"))
+    if (getParam<bool>("add_temperature_equation") &&
+        !_problem->getNonlinearSystemBase().hasVariable(_temperature_variable_name))
     {
       params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
       _problem->addVariable(var_type, _temperature_variable_name, params);
