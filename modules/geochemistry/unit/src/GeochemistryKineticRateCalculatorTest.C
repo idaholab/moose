@@ -74,7 +74,7 @@ TEST(KineticRateUserDescriptionTest, exceptions)
 TEST(GeochemistryKineticRateCalculatorTest, exceptions)
 {
   model_kin.addKineticRate(rate_ch4);
-  const std::vector<Real> promoting_indices(5 + 7, 0.0);
+  const std::vector<Real> promoting_indices(5 + 6, 0.0);
   const std::vector<std::string> basis_name = {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"};
   const std::vector<bool> & basis_species_gas = mgd_kin.basis_species_gas;
   const std::vector<Real> basis_molality = {1.0, 2.0, 3.0, 4.0, 5.0};
@@ -82,8 +82,8 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
   const std::vector<bool> basis_activity_known(5, false);
   const std::vector<std::string> & eqm_name = mgd_kin.eqm_species_name;
   const std::vector<bool> & eqm_species_gas = mgd_kin.eqm_species_gas;
-  const std::vector<Real> eqm_molality = {1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5};
-  const std::vector<Real> eqm_activity = {1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7};
+  const std::vector<Real> eqm_molality = {1.5, 2.5, 3.5, 4.5, 5.5, 7.5};
+  const std::vector<Real> eqm_activity = {1.1, 1.2, 1.3, 1.4, 1.5, 1.7};
   const DenseMatrix<Real> & eqm_stoichiometry = mgd_kin.eqm_stoichiometry;
   const DenseMatrix<Real> & kin_stoichiometry = mgd_kin.kin_stoichiometry;
 
@@ -325,7 +325,7 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 7 0 7 7") !=
+    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 6 0 6 6") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -359,7 +359,7 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 7 7 0 7") !=
+    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 6 6 0 6") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -393,7 +393,7 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 7 7 7 0") !=
+    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized equilibrium-species vectors 6 6 6 0") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -435,7 +435,7 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
 
   try
   {
-    DenseMatrix<Real> stoi(6, 5);
+    DenseMatrix<Real> stoi(4, 5);
     GeochemistryKineticRateCalculator::calculateRate(promoting_indices,
                                                      rate_ch4,
                                                      basis_name,
@@ -463,7 +463,7 @@ TEST(GeochemistryKineticRateCalculatorTest, exceptions)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized eqm stoichiometry matrix 6 5") !=
+    ASSERT_TRUE(msg.find("kinetic_rate: incorrectly sized eqm stoichiometry matrix 4 5") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }

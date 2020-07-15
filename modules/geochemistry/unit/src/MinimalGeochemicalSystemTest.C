@@ -567,7 +567,7 @@ TEST(PertinentGeochemicalSystemTest, names1)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -583,7 +583,7 @@ TEST(PertinentGeochemicalSystemTest, names1)
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 10);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
@@ -601,7 +601,7 @@ TEST(PertinentGeochemicalSystemTest, names2)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
+  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {},
@@ -617,7 +617,7 @@ TEST(PertinentGeochemicalSystemTest, names2)
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
@@ -1004,7 +1004,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
+  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -1016,9 +1016,8 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
-  for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "e-", "Calcite"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "Calcite"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
@@ -1030,15 +1029,11 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                           "(O-phth)--",
                           ">(s)FeO-",
                           ">(s)FeOCa+",
-                          "e-",
                           "Calcite",
                           "Calcite_asdf",
                           "CH4(aq)"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 6);
   // remember the order of primaries: {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1.0;
-  stoi_gold["e-"](0, 3) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 2) = 1;
@@ -1073,8 +1068,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
   stoi_gold["CH4(aq)"](0, 2) = 1;
   stoi_gold["CH4(aq)"](0, 3) = -2;
 
-  for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "e-", "Calcite"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "Calcite"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     ASSERT_EQ(mgd.eqm_stoichiometry.sub_matrix(row, 1, 0, 6), stoi_gold[sp]);
@@ -1092,7 +1086,7 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
-  // >(s)FeO-, >(s)FeOCa+, e-
+  // >(s)FeO-, >(s)FeOCa+
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -1120,7 +1114,6 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 0), 8.9300);
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeOCa+"], 0), 1.7200);
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["Calcite"], 0), 2.0683);
-  ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["e-"], 0), 23.4266);
 }
 
 /**
@@ -1133,7 +1126,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {"Fe(OH)3(ppd)fake"},
@@ -1145,7 +1138,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 10);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
   for (const auto & sp : {"CO2(aq)",
                           "CO3--",
                           "OH-",
@@ -1153,7 +1146,6 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
@@ -1166,16 +1158,12 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "Fe(OH)3(ppd)",
                           "CH4(g)fake"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 7);
   // remember the order of primaries:
   // {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"}
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1;
-  stoi_gold["e-"](0, 6) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 5) = 1;
@@ -1217,7 +1205,6 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "CH4(g)fake"})
   {
@@ -1236,7 +1223,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++, e-
+  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -1248,8 +1235,8 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
@@ -1260,16 +1247,12 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "Fe(OH)3(ppd)",
                           "CH4(g)fake"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 7);
   // remember the order of primaries:
   // {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"}
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1;
-  stoi_gold["e-"](0, 6) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 5) = 1;
@@ -1304,7 +1287,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
   stoi_gold["Fe(OH)3(ppd)"](0, 0) = 2.5;
   stoi_gold["Fe(OH)3(ppd)"](0, 6) = 0.25;
 
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     ASSERT_EQ(mgd.eqm_stoichiometry.sub_matrix(row, 1, 0, 7), stoi_gold[sp]);
@@ -1327,7 +1310,7 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {"Fe(OH)3(ppd)fake"},
@@ -1345,7 +1328,6 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["(O-phth)--"], 0), 594.3211, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CH4(aq)"], 0), 157.8920, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Fe+++"], 0), -10.0553, eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["e-"], 0), 23.4266, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 0), 8.93, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 1), 8.93 - 0.3 * (25 - 0), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 2), 8.93 - 0.3 * (60 - 0), eps);
@@ -1405,7 +1387,7 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, >(s)FeO-,
-  // >(s)FeOCa+, e-
+  // >(s)FeOCa+
   PertinentGeochemicalSystem model(
       database,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH", "(O-phth)--"},
@@ -1418,9 +1400,9 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
       "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
   for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", ">(s)FeO-", ">(s)FeOCa+", "Calcite", "e-"})
+       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", ">(s)FeO-", ">(s)FeOCa+", "Calcite"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 }
 
@@ -1517,8 +1499,8 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
       "e-");
   ModelGeochemicalDatabase mgd_no_redox = model_no_redox.modelGeochemicalDatabase();
 
-  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 0);
-  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 0);
+  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 1);
+  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 1);
 
   PertinentGeochemicalSystem model_redox(
       database,
@@ -1536,15 +1518,15 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
 
   // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not
   // have a pair
-  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 2);
-  EXPECT_EQ(mgd_redox.redox_log10K.m(), 2);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 3);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), 3);
 
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
-  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
-  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
-  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
+  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
+  const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
 
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   Real boa = 1.0 / 4.0 / 7.5;

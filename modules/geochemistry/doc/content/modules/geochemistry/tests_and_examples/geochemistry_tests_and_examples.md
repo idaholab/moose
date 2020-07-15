@@ -9,7 +9,7 @@ Most of the tests and examples are drawn from [!cite](bethke_2007)
 - [A simple HCl solution](HCl.md)
 - [Chemical model of seawater](seawater.md)
 - [Water in the Amazon river](amazon.md)
-- [Red Sea bine](red_sea.md)
+- [Red Sea brine](red_sea.md)
 
 ## Models with redox disequilibrium
 

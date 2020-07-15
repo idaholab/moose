@@ -207,8 +207,11 @@ PertinentGeochemicalSystem::buildSecondarySpecies()
 
   // run through all secondary species, including them if:
   // - their reaction involves only basis_species, or secondary species already encountered
+  // - the name is not _redox_e (which is usually "e-" the free electron)
   for (const auto & name : _db.secondarySpeciesNames())
   {
+    if (name == _redox_e)
+      continue;
     const GeochemistryEquilibriumSpecies ss = _db.getEquilibriumSpecies({name})[name];
     // check all reaction species are in the basis
     bool all_species_in_basis_or_sec = true;
@@ -260,6 +263,58 @@ PertinentGeochemicalSystem::buildSecondarySpecies()
       }
     }
   }
+}
+
+bool
+PertinentGeochemicalSystem::checkRedoxe()
+{
+  bool found = false;
+  for (const auto & name : _db.secondarySpeciesNames())
+    if (name == _redox_e)
+    {
+      found = true;
+      const GeochemistryEquilibriumSpecies ss = _db.getEquilibriumSpecies({name})[name];
+      for (const auto & element : ss.basis_species)
+        if (_basis_index.count(element.first) == 0 && _secondary_index.count(element.first) == 0)
+          return false;
+    }
+  return found;
+}
+
+void
+PertinentGeochemicalSystem::buildRedoxeInfo(std::vector<Real> & redox_e_stoichiometry,
+                                            std::vector<Real> & redox_e_log10K)
+{
+  const unsigned num_basis = _basis_info.size();
+  const unsigned numT = _db.getTemperatures().size();
+  redox_e_stoichiometry.assign(num_basis, 0.0);
+  redox_e_log10K.assign(numT, 0.0);
+  for (const auto & name : _db.secondarySpeciesNames())
+    if (name == _redox_e)
+    {
+      const GeochemistryEquilibriumSpecies ss = _db.getEquilibriumSpecies({name})[name];
+      for (unsigned i = 0; i < numT; ++i)
+        redox_e_log10K[i] = ss.equilibrium_const[i];
+      for (const auto & react : ss.basis_species)
+      {
+        const Real stoi_coeff = react.second;
+        if (_model.basis_species_index.count(react.first) == 1)
+        {
+          const unsigned col = _model.basis_species_index[react.first];
+          redox_e_stoichiometry[col] += react.second;
+        }
+        else if (_secondary_index.count(react.first) == 1)
+        {
+          // reaction species is not a basis component, but a secondary component.
+          // So express stoichiometry in terms of the secondary component's reaction
+          const unsigned sec_row = _model.eqm_species_index[react.first];
+          for (unsigned i = 0; i < numT; ++i)
+            redox_e_log10K[i] += stoi_coeff * _model.eqm_log10K(sec_row, i);
+          for (unsigned col = 0; col < num_basis; ++col)
+            redox_e_stoichiometry[col] += stoi_coeff * _model.eqm_stoichiometry(sec_row, col);
+        }
+      }
+    }
 }
 
 void
@@ -482,16 +537,21 @@ PertinentGeochemicalSystem::createModel()
   // Build the redox information, if any.  Here we express any O2(aq) in the redox equations in
   // terms of redox_e (which is usually e-)
   _model.redox_lhs = _redox_e;
+  std::vector<Real> redox_e_stoichiometry(num_cols, 0.0);
+  std::vector<Real> redox_e_log10K(num_temperatures, 0.0);
   std::vector<Real> redox_stoi;
   std::vector<Real> redox_log10K;
-  if (_model.basis_species_index.count(_redox_ox) == 1 &&
-      _model.eqm_species_index.count(_redox_e) == 1)
+  if ((_model.basis_species_index.count(_redox_ox) == 1) && checkRedoxe())
   {
-    const unsigned o2_index = _model.basis_species_index.at(_redox_ox);
-    const unsigned free_el_index = _model.eqm_species_index.at(_redox_e);
+    // construct the stoichiometry and log10K for _redox_e and put it
+    buildRedoxeInfo(redox_e_stoichiometry, redox_e_log10K);
+    redox_stoi.insert(redox_stoi.end(), redox_e_stoichiometry.begin(), redox_e_stoichiometry.end());
+    redox_log10K.insert(redox_log10K.end(), redox_e_log10K.begin(), redox_e_log10K.end());
     // the electron reaction is
-    // e- = nuw_i * basis_i + beta * O2(aq), where we've pulled out the O2(aq) because it's special
-    const Real beta = _model.eqm_stoichiometry(free_el_index, o2_index);
+    // e- = nuw_i * basis_i + beta * O2(aq), where we've pulled out the O2(aq) because it's
+    // special
+    const unsigned o2_index = _model.basis_species_index.at(_redox_ox);
+    const Real beta = redox_e_stoichiometry[o2_index];
     if (beta != 0.0)
     {
       for (const auto & bs : _model.basis_species_index)
@@ -516,9 +576,9 @@ PertinentGeochemicalSystem::createModel()
           if (!only_involves_basis_species)
             continue;
           // Reaction is now
-          // redox = nu_i * basis_i + alpha * O2(aq), where we've pulled the O2(aq) out because it's
-          // special. Now pull the redox couple to the RHS of the reaction, so we have
-          // 0 = -redox + nu_i * basis_i + alpha * O2(aq)
+          // redox = nu_i * basis_i + alpha * O2(aq), where we've pulled the O2(aq) out because
+          // it's special. Now pull the redox couple to the RHS of the reaction, so we have 0 =
+          // -redox + nu_i * basis_i + alpha * O2(aq)
           stoi[bs.second] = -1.0;
           // check that the stoichiometry involves O2(aq)
           const Real alpha = stoi[o2_index];
@@ -530,14 +590,14 @@ PertinentGeochemicalSystem::createModel()
             stoi[basis_i] *= -beta / alpha;
           // add the equation to e- = nuw_i * basis_i + beta * O2(aq)
           for (unsigned basis_i = 0; basis_i < num_cols; ++basis_i)
-            stoi[basis_i] += _model.eqm_stoichiometry(free_el_index, basis_i);
+            stoi[basis_i] += redox_e_stoichiometry[basis_i];
           // now the reation is e- = nuw_i * basis_i - beta/alpha * (-redox + nu_i * basis_i)
           redox_stoi.insert(redox_stoi.end(), stoi.begin(), stoi.end());
 
           // record the equilibrium constants
           for (unsigned temp = 0; temp < num_temperatures; ++temp)
             redox_log10K.push_back((-beta / alpha) * rs.equilibrium_const[temp] +
-                                   _model.eqm_log10K(free_el_index, temp));
+                                   redox_e_log10K[temp]);
         }
     }
   }

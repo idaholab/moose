@@ -2128,7 +2128,7 @@ TEST(GeochemicalSystemTest, swapExceptions)
 
   try
   {
-    egs.performSwap(3, 6);
+    egs.performSwap(3, 5);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2326,7 +2326,7 @@ TEST(GeochemicalSystemTest, alterAndRevertChargeBalance)
 }
 
 /// Check getNumRedox
-TEST(GeochemicalSystemTest, getNumRedox) { EXPECT_EQ(egs_redox.getNumRedox(), 2); }
+TEST(GeochemicalSystemTest, getNumRedox) { EXPECT_EQ(egs_redox.getNumRedox(), 3); }
 
 /// Check getOriginalRedoxLHS
 TEST(GeochemicalSystemTest, getOriginalRedoxLHS)
@@ -2340,9 +2340,9 @@ TEST(GeochemicalSystemTest, getRedoxLog10K)
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
-  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
-  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
-  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
+  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
+  const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
   Real boa = 1.0 / 4.0 / 7.5;
   EXPECT_NEAR(
       egs_redox.getRedoxLog10K(ophth_slot), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
@@ -2351,7 +2351,7 @@ TEST(GeochemicalSystemTest, getRedoxLog10K)
       egs_redox.getRedoxLog10K(ch4_slot), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
   try
   {
-    egs_redox.getRedoxLog10K(2);
+    egs_redox.getRedoxLog10K(3);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -2359,7 +2359,7 @@ TEST(GeochemicalSystemTest, getRedoxLog10K)
     std::string msg(e.what());
     ASSERT_TRUE(
         msg.find(
-            "Cannot retrieve log10K for redox species 2 since there are only 2 redox species") !=
+            "Cannot retrieve log10K for redox species 3 since there are only 3 redox species") !=
         std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -2371,9 +2371,9 @@ TEST(GeochemicalSystemTest, log10RedoxActivityProduct)
   // not sure which order the redox has been ordered in.  The reactions are:
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
-  const bool ophth_is_slot_zero = (mgd_redox.redox_stoichiometry(0, 4) > 1.0E-6);
-  const unsigned ophth_slot = (ophth_is_slot_zero ? 0 : 1);
-  const unsigned ch4_slot = (ophth_is_slot_zero ? 1 : 0);
+  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
+  const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
 
   Real boa = 1.0 / 4.0 / 7.5;
   const Real log10ap_o =
@@ -2386,14 +2386,14 @@ TEST(GeochemicalSystemTest, log10RedoxActivityProduct)
   EXPECT_NEAR(egs_redox.log10RedoxActivityProduct(ch4_slot), log10ap_c, 1E-8);
   try
   {
-    egs_redox.log10RedoxActivityProduct(2);
+    egs_redox.log10RedoxActivityProduct(3);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Cannot retrieve activity product for redox species 2 since there are "
-                         "only 2 redox species") != std::string::npos)
+    ASSERT_TRUE(msg.find("Cannot retrieve activity product for redox species 3 since there are "
+                         "only 3 redox species") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -3076,11 +3076,10 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)"},
-        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16},
         {false, true, true, false, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3107,12 +3106,11 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)",
          "Goethite_surface_potential_expr"},
-        {1.1, 2.2, 3.3, 1.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {1.1, 2.2, 3.3, 1.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 17},
         {false, true, true, false, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3139,12 +3137,11 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)",
          "Goethite_surface_potential_expr"},
-        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, -1.0, 17},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, -1.0, 17},
         {false, true, true, false, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3171,12 +3168,11 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)",
          "Goethite"},
-        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 17},
         {false, true, true, false, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3203,12 +3199,11 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)",
          "Goethite_surface_potential_expr"},
-        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 0},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 0},
         {false, true, true, false, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3235,12 +3230,11 @@ TEST(GeochemicalSystemTest, setMolalitiesExcept2)
          "CO2(aq)",
          "CO3--",
          "OH-",
-         "e-",
          ">(s)FeO-",
          "Goethite",
          "O2(aq)",
          "Goethite_surface_potential_expr"},
-        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17},
+        {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 17},
         {false, true, true, true, true, true, true});
     FAIL() << "Missing expected exception.";
   }
@@ -3345,13 +3339,12 @@ TEST(GeochemicalSystemTest, setMolalities1)
                                               "CO2(aq)",
                                               "CO3--",
                                               "OH-",
-                                              "e-",
                                               ">(s)FeO-",
                                               "Goethite",
                                               "O2(aq)",
                                               "Goethite_surface_potential_expr"};
   const std::vector<Real> set_molal = {
-      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17};
+      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 17};
   nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       gold_name, set_molal, {true, true, true, false, false, true, false});
 
@@ -3362,7 +3355,7 @@ TEST(GeochemicalSystemTest, setMolalities1)
   std::vector<Real> gold_molal = set_molal;
   gold_molal[6] = molal_before_set[6]; // >(w)FeOH has a FREE_MOLALITY constraint and the
                                        // setSolvent... method has false
-  gold_molal[14] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
+  gold_molal[13] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
   const std::vector<Real> molal = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
   for (unsigned i = 0; i < num_basis; ++i)
     EXPECT_EQ(molal[mgd.basis_species_index[gold_name[i]]], gold_molal[i]);
@@ -3459,13 +3452,12 @@ TEST(GeochemicalSystemTest, setMolalities2)
                                               "CO2(aq)",
                                               "CO3--",
                                               "OH-",
-                                              "e-",
                                               ">(s)FeO-",
                                               "Goethite",
                                               "O2(aq)",
                                               "Goethite_surface_potential_expr"};
   const std::vector<Real> set_molal = {
-      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 13, 14, 15, 16, 17};
+      1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12, 14, 15, 16, 17};
   nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       gold_name, set_molal, {false, false, true, false, false, true, false});
 
@@ -3478,7 +3470,7 @@ TEST(GeochemicalSystemTest, setMolalities2)
       molal_before_set[1]; // H+ has an ACTIVITY constraint and the setSolvent... method has false
   gold_molal[6] = molal_before_set[6]; // >(w)FeOH has a FREE_MOLALITY constraint and the
                                        // setSolvent... method has false
-  gold_molal[14] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
+  gold_molal[13] = 0.0; // the setSolvent... method explicitly sets secondary mineral molality zero
   const std::vector<Real> molal = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
   for (unsigned i = 0; i < num_basis; ++i)
     EXPECT_EQ(molal[mgd.basis_species_index[gold_name[i]]], gold_molal[i]);
@@ -4002,20 +3994,17 @@ TEST(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
   const unsigned num_kin = nonconst.getNumKinetic();
 
   // preset some molalities
-  const std::vector<std::string> gold_name = {"H2O",         "H+",
-                                              "HCO3-",       "O2(g)",
-                                              "Fe+++",       ">(s)FeOH",
-                                              ">(w)FeOH",    "Calcite",
-                                              "(O-phth)--",  "CH4(aq)",
-                                              "CO2(aq)",     "CO3--",
-                                              "CaCO3",       "CaOH+",
-                                              "OH-",         "e-",
-                                              ">(s)FeO-",    ">(s)FeOCa+",
-                                              "Goethite",    "Ca++",
-                                              "O2(aq)",      "Goethite_surface_potential_expr",
-                                              "Calcite_asdf"};
-  const std::vector<Real> set_molal = {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11, 12,
-                                       13,  14,  15,  16,  17,  18,  19,  20,  21,  22, 23};
+  const std::vector<std::string> gold_name = {
+      "H2O",         "H+",         "HCO3-",
+      "O2(g)",       "Fe+++",      ">(s)FeOH",
+      ">(w)FeOH",    "Calcite",    "(O-phth)--",
+      "CH4(aq)",     "CO2(aq)",    "CO3--",
+      "CaCO3",       "CaOH+",      "OH-",
+      ">(s)FeO-",    ">(s)FeOCa+", "Goethite",
+      "Ca++",        "O2(aq)",     "Goethite_surface_potential_expr",
+      "Calcite_asdf"};
+  const std::vector<Real> set_molal = {1.1, 2.2, 3.3, 0.0, 5.5, 6.6, 7.7, 8.8, 9.9, 10, 11,
+                                       12,  13,  14,  15,  17,  18,  19,  20,  21,  22, 23};
   nonconst.setSolventMassAndFreeMolalityAndMineralMolesAndSurfacePotsAndKineticMoles(
       gold_name, set_molal, {true, true, true, false, true, true, true, true});
 
@@ -4026,10 +4015,10 @@ TEST(GeochemicalSystemTest, getsetMineralRelatedFreeMoles)
   gold_molal[5] = 1234.5;  // >(s)FeOH
   gold_molal[6] = 1234.5;  // >(w)FeOH
   gold_molal[7] = 1234.5;  // Calcite
-  gold_molal[16] = 1234.5; // >(s)FeO-
-  gold_molal[17] = 1234.5; // >(s)FeOCa+
-  gold_molal[18] = 0.0;    // Goethite is an equilibrium mineral
-  gold_molal[22] = 1234.5; // Calcite_asdf
+  gold_molal[15] = 1234.5; // >(s)FeO-
+  gold_molal[16] = 1234.5; // >(s)FeOCa+
+  gold_molal[17] = 0.0;    // Goethite is an equilibrium mineral
+  gold_molal[21] = 1234.5; // Calcite_asdf
 
   const std::vector<Real> & basis_mol = nonconst.getSolventMassAndFreeMolalityAndMineralMoles();
   for (unsigned i = 0; i < num_basis; ++i)

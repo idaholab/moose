@@ -21,7 +21,7 @@ A chemical analysis of the major element composition of hot hydrothermal brines 
 | Pb$^{2+}$ | 0.63 |
 | Cu$^{+}$ | 0.26 |
 
-In order to estimate the brine's oxidation state, [!cite](bethke_2007) recommends using the mineral Sphalerite instead of primary species O2(aq), and the mineral Barite instead of primary aqueous species Ba++.  [!cite](bethke_2007) uses a small initial value of $10^{-9}\,$g of free amounts of each of these minerals to avoid dissolution when considering precipitation/dissolution later int he calculation.
+In order to estimate the brine's oxidation state, [!cite](bethke_2007) recommends using the mineral Sphalerite instead of primary species O2(aq), and the mineral Barite instead of primary aqueous species Ba++.  [!cite](bethke_2007) uses a small initial value of $10^{-9}\,$g of free amounts of each of these minerals to avoid dissolution when considering precipitation/dissolution later in the calculation.
 
 
 ## Species distribution
