@@ -1,0 +1,23 @@
+# React script that is the GWB equivalent to amazon_with_minerals.rea
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+HCO3-        = .0003114 mol
+SiO2(aq)     = .0001165 mol
+O2(aq)       = .0001813 free molal
+Ca++         = .0001073 mol
+SO4--        = 3.1233e-5 mol
+Cl-          = .0001383 mol
+balance on Cl-
+Na+          = 7.83e-5 mol
+Mg++         = 4.526e-5 mol
+swap Kaolinite for Al+++
+Kaolinite    = .01 free mol
+swap Hematite for Fe++
+Hematite     = .033 free mol
+pH           = 6.5
+suppress ALL
+unsuppress  Hematite Kaolinite
+printout  species = long
+epsilon = 1e-15

@@ -8,7 +8,7 @@ This means moles per kg of solvent water.  Note that the mass of solvent water w
 
 ## `moles_bulk_species`
 
-This is the total number of moles of a species.  It includes the "free" contribution, which is the number of moles of a species that is "floating around" in the solution, as well as the number of moles that appears in other species.  For example, if a solution contains 2 free moles of Cl$^{-}$, and 1 mole of the complex NaCl, then the total bulk number of moles of Cl$^{-1}$ is 3.
+This is one the accepted inputs of `geochemistry` and is the total number of moles of a species.  It includes the "free" contribution, which is the number of moles of a species that is "floating around" in the solution, as well as the number of moles that appears in other species.  For example, if a solution contains 2 free moles of Cl$^{-}$, and 1 mole of the complex NaCl, then the total bulk number of moles of Cl$^{-1}$ is 3.
 
 ## g/kg or mg/kg
 
