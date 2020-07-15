@@ -107,7 +107,8 @@ void
 PODReducedBasisTrainer::execute()
 {
   // If the base is not ready yet, create it by performing the POD on the
-  // snapshot matrices.
+  // snapshot matrices. Also, initialize the containers for the reduced
+  // operators.
   if (!_base_completed)
   {
     computeCorrelationMatrix();
@@ -122,6 +123,9 @@ PODReducedBasisTrainer::execute()
 void
 PODReducedBasisTrainer::finalize()
 {
+  // If the operators are already filled on each processor, gather and sum them
+  // together. This way every processor has access to every completer reduced
+  // operator.
   if (!_empty_operators)
     for (unsigned int tag_i = 0; tag_i < _red_operators.size(); ++tag_i)
     {
@@ -141,14 +145,34 @@ void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
   // Getting the number of snapshots. It is assumed that every variable has the
-  // same number of snapshots.
+  // same number of snapshots. This assumption is used at multiple locations in
+  // this source file.
   const auto no_snaps = getSnapsSize(0);
 
+  // Initializing the correlation matrices for each variable.
+  for (dof_id_type var_i = 0; var_i < _snapshots.size(); ++var_i)
+    _corr_mx[var_i] = DenseMatrix<Real>(no_snaps, no_snaps);
+
+  /*
+  Creating a simple 2D map that distributes the elements in the correlation
+  matrices to each processor. A square mesh with elements corresponding to
+  the entries in the correlation matrix is used, since optimal partitioning
+  routines are already implemented for it. In this case, the centroids of the
+  elements are equivalent to the indices of the correlation matrix. This method
+  may seem too convoluted, but is necessary to ensure that the communication
+  stays balanced and scales well for runs with a large number of processors.
+  */
   ReplicatedMesh mesh(_communicator, 2);
   MeshTools::Generation::build_square(
       mesh, no_snaps, no_snaps, -0.5, no_snaps - 0.5, -0.5, no_snaps - 0.5);
+
+  // A flag is added to each element saying if the result has already been compuuted
+  // or not.
   mesh.add_elem_integer("filled");
 
+  // Since the correlation matrix is symmetric, it is enough to compute the
+  // entries on the diagonal in addition to the elements above the diagonal.
+  // Therefore, the elements in the mesh below the diagonal are deleted.
   for (Elem * elem : mesh.active_element_ptr_range())
   {
     const auto centroid = elem->centroid();
@@ -156,8 +180,15 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       mesh.delete_elem(elem);
   }
 
+  // The mesh is distributed among the processors.
   mesh.prepare_for_use();
 
+  /*
+  This step restruvtures the snapshotts into an unordered map to make it easier
+  to do cross-products in the later stages. Since _snapshots only contains
+  pointers to the data, this should not include a considerable amount of copy
+  operations.
+  */
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
   for (dof_id_type loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalSamples(); ++loc_vec_i)
   {
@@ -168,47 +199,76 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       entry.push_back(_snapshots[v_ind].getLocalSample(loc_vec_i));
   }
 
+  /*
+  Initializing containers for the objects that will be sent to other processors.
+  send_vectors is just a temporary object that ensures that the same snapshot is
+  sent to other processors only once. send_map, on the other hand, will be used
+  by the communicator and contains the required snapshots for each processor
+  which is not the the current rank.
+  std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> type
+  is a container that uses (global snapshot index, variable index, snapshot) to
+  identify and send/receive snapshots during the communication.
+  */
+
   std::unordered_map<processor_id_type, std::set<dof_id_type>> send_vectors;
   std::unordered_map<
       processor_id_type,
       std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>>
       send_map;
 
-  // Fill the send map of processors we need to send data to and the corresponding data
+  // Fill the send map with snapshots we need to send for each processor. First,
+  // we loop over the matrix entries (elements in the mesh)
   for (Elem * elem : mesh.active_element_ptr_range())
     if (elem->processor_id() != processor_id())
     {
+      // The centroids in the mesh correspond to the 2D corrdinates of the elements
+      // in the mesh.
       const auto centroid = elem->centroid();
       const dof_id_type i = centroid(0);
       const dof_id_type j = centroid(1);
 
+      /*
+      Checking if the current processor has the required snapshot.
+      We assume that every variable has the same number of snapshots with the
+      same distribution amond processors. Therefore, it is enough to test
+      the first variable only.
+      */
       if (_snapshots[0].hasGlobalSample(i))
       {
+        // Continue loop if the snapshot is already being sent.
         if (send_vectors[elem->processor_id()].count(i))
           continue;
 
+        // Add another entry to the map if another processor needs the owned
+        // snapshot.
         send_vectors[elem->processor_id()].insert(i);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
           send_map[elem->processor_id()].emplace_back(i, v_ind, _snapshots[v_ind].getSample(i));
       }
       else if (_snapshots[0].hasGlobalSample(j))
       {
+        // Continue loop if the snapshot is already being sent.
         if (send_vectors[elem->processor_id()].count(j))
           continue;
 
+        // Add another entry to the map if another processor needs the owned
+        // snapshot.
         send_vectors[elem->processor_id()].insert(j);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
           send_map[elem->processor_id()].emplace_back(j, v_ind, _snapshots[v_ind].getSample(j));
       }
     }
     else
+      // Initializing the flag value with 0 (not computed) for each element.
       elem->set_extra_integer(0, 0);
 
-  for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-    _corr_mx[v_ind] = DenseMatrix<Real>(no_snaps, no_snaps);
-
-  // Send and receive the data
+  // Creating container for received data. In this case the map contains the snapshots
+  // for each variable for each required global snapshot index.
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> received_vectors;
+
+  // The Parallel::push_parallel_packed_range() function needs a functor that manipulates
+  // the received objects. In this case it is a labda function which is also responsible for the
+  // coputation of the elements in the matrix on the fly.
   auto functor =
       [this, &mesh, &received_vectors, &local_vectors](
           processor_id_type /*pid*/,
@@ -231,11 +291,16 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
           entry[var_i] = vector;
         }
 
+        // Looping over the locally owned entries in the matrix and computing the
+        // values.
         for (Elem * elem : mesh.active_local_element_ptr_range())
         {
+          // If the matrix entry is already filled, the loop skips this element.
           if (elem->get_extra_integer(0))
             continue;
 
+          // Getting pointers to the necessary snapshots for the matrix entry.
+          // This points to a vector of size (number of variables).
           const dof_id_type i = elem->centroid()(0);
           const dof_id_type j = elem->centroid()(1);
           std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
@@ -269,17 +334,29 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
               continue;
           }
 
-          elem->set_extra_integer(0, 1);
+          // Coputing the available matrix entries for every variable.
           for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
             _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
+
+          // Set the 'filled' flag to 1 (true) to make sure it is not recomputed.
+          elem->set_extra_integer(0, 1);
         }
       };
+
+  // The prepared objects are communicated and the matrix entries are computed on the
+  // fly.
   Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
+
+  // This extra call is necessary in case a processor has all the elements it needs
+  // (hence doesn't receive any).
   functor(processor_id(),
           std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>());
 
+  // Now, the correlation matrices aregathered and  summed to make sure every processor
+  // sees them.
   gatherSum(_corr_mx[0].get_values());
 
+  // The lower triangle of the matrices are then filled using symmetry.
   for (auto & corr_mx : _corr_mx)
   {
     for (dof_id_type row_i = 0; row_i < corr_mx.m(); ++row_i)
@@ -369,7 +446,7 @@ PODReducedBasisTrainer::computeBasisVectors()
 
     _base[var_i].resize(no_bases);
 
-    // Filling the containers using the snapshots and the eigenvalues and
+    // Filling the containers using the local snapshots and the eigenvalues and
     // eigenvectors of the correlation matrices.
     for (dof_id_type base_i = 0; base_i < no_bases; ++base_i)
     {
@@ -386,7 +463,11 @@ PODReducedBasisTrainer::computeBasisVectors()
         }
       }
 
+      // Gathering and summing the local contributions over all of the processes.
+      // This makes sure that every process sees all of the basis functions.
       gatherSum(_base[var_i][base_i].get_values());
+
+      // Normalizing the basis functions to make sure they are orthornormal.
       _base[var_i][base_i].scale(1.0 / sqrt(_eigenvalues[var_i](base_i)));
     }
   }
@@ -417,7 +498,8 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
                                              std::vector<DenseVector<Real>> & residual)
 {
   // Computing the elements of the reduced operator using Galerkin projection
-  // on the residual.
+  // on the residual. This is done in parallel and the local contributions are
+  // gathered in finalize().
   unsigned int counter = 0;
   for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
   {
