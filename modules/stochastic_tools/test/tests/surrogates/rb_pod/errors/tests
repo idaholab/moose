@@ -33,7 +33,7 @@
       allow_test_objects = true
       cli_args = "Trainers/pod_rb/var_names='doesnt_exist'"
       detail = 'the variable names cannot be found on sub-applications, '
-      expect_err = "Variable 'doesnt_exist' not found on sub-application 0!"
+      expect_err = "Variable 'doesnt_exist' not found on sub-application [0-9]+!"
     []
     [en_limits]
       type = RunException

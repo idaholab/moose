@@ -10,15 +10,17 @@
 #pragma once
 
 #include "libmesh/parallel_object.h"
+#include "libmesh/parallel.h"
+#include "MooseTypes.h"
 
 namespace StochasticTools
 {
 
 template <typename T>
-class DistributedData : public ParallelObject
+class DistributedData : public libMesh::ParallelObject
 {
 public:
-  DistributedData(const Parallel::Communicator & comm_in);
+  DistributedData(const libMesh::Parallel::Communicator & comm_in);
 
   void initializeContainer(dof_id_type num_global_samples);
 

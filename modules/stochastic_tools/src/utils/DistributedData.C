@@ -7,18 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
-
 #include "DistributedData.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "libmesh/dense_vector.h"
 
 namespace StochasticTools
 {
 
 template <typename T>
-DistributedData<T>::DistributedData(const Parallel::Communicator & comm_in)
-  : ParallelObject(comm_in), _closed(false), _n_local_samples(0)
+DistributedData<T>::DistributedData(const libMesh::Parallel::Communicator & comm_in)
+  : libMesh::ParallelObject(comm_in), _closed(false), _n_local_samples(0)
 {
 }
 
