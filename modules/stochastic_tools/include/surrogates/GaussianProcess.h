@@ -40,9 +40,6 @@ private:
   /// Standardizer for use with params (x)
   const StochasticTools::Standardizer & _param_standardizer;
 
-  /// Data (y) used for training
-  const RealEigenMatrix & _training_data;
-
   /// Standardizer for use with data (y)
   const StochasticTools::Standardizer & _data_standardizer;
 
@@ -65,5 +62,5 @@ private:
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
   /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
+  CovarianceFunctionBase * _covariance_function = nullptr;
 };

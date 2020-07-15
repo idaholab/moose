@@ -42,15 +42,16 @@ MaternHalfIntCovariance::buildHyperParamMap(
     std::unordered_map<std::string, Real> & map,
     std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
-  map.insert({"signal_variance", _sigma_f_squared});
-  map.insert({"noise_variance", _sigma_n_squared});
-  map.insert({"p", _p});
+  map["signal_variance"] = _sigma_f_squared;
+  map["noise_variance"] = _sigma_n_squared;
+  map["p"] = _p;
 
-  vec_map.insert({"length_factor", _length_factor});
+  vec_map["length_factor"] = _length_factor;
 }
 
-RealEigenMatrix
-MaternHalfIntCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
+void
+MaternHalfIntCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
+                                                 const RealEigenMatrix & x,
                                                  const RealEigenMatrix & xp,
                                                  const bool is_self_covariance) const
 {
@@ -60,8 +61,6 @@ MaternHalfIntCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
 
   mooseAssert(num_params_x == xp.cols(),
               "Number of parameters do not match in covariance kernel calculation");
-
-  RealEigenMatrix K(num_samples_x, num_samples_xp);
 
   // This factor is used over and over, don't calculate each time
   Real factor = sqrt(2 * _p + 1);
@@ -87,5 +86,4 @@ MaternHalfIntCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
     if (is_self_covariance)
       K(ii, ii) += _sigma_n_squared;
   }
-  return K;
 }

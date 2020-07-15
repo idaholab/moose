@@ -40,7 +40,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   : SurrogateTrainer(parameters),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _training_data(declareModelData<RealEigenMatrix>("_training_data")),
+    _training_data(),
     _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(declareModelData<RealEigenMatrix>("_K")),
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
@@ -104,19 +104,18 @@ GaussianProcessTrainer::initialize()
 
   _covar_type = _covariance_function->type();
 
-  unsigned int num_samples = _values_ptr->size();
-
-  // Offset for replicated/distributed result data
-  dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
-
-  // Load training parameters into Eigen::Matrix for easier liner algebra manipulation
-  // Load training data into Eigen::Vector for easier liner algebra manipulation
-  mooseAssert(_sampler->getNumberOfRows() == num_samples,
+  mooseAssert(_sampler->getNumberOfRows() == _values_ptr->size(),
               "Number of sampler rows not equal to number of results in selected VPP.");
+}
+
+void
+GaussianProcessTrainer::execute()
+{
+  dof_id_type offset = _values_distributed ? _sampler->getLocalRowBegin() : 0;
 
   // Consider the possibility of a very large matrix load.
   _training_params.setZero(_sampler->getNumberOfRows(), _sampler->getNumberOfCols());
-  _training_data.setZero(num_samples, 1);
+  _training_data.setZero(_sampler->getNumberOfRows(), 1);
   for (dof_id_type p = _sampler->getLocalRowBegin(); p < _sampler->getLocalRowEnd(); ++p)
   {
     // Loading parameters from sampler
@@ -127,11 +126,6 @@ GaussianProcessTrainer::initialize()
     // Loading result data from VPP
     _training_data(p, 0) = (*_values_ptr)[p - offset];
   }
-}
-
-void
-GaussianProcessTrainer::execute()
-{
 }
 
 void
@@ -149,7 +143,7 @@ GaussianProcessTrainer::finalize()
   if (_standardize_params)
   {
     _param_standardizer.computeSet(_training_params);
-    _training_params = _param_standardizer.getStandardized(_training_params);
+    _param_standardizer.getStandardized(_training_params);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
@@ -159,14 +153,15 @@ GaussianProcessTrainer::finalize()
   if (_standardize_data)
   {
     _data_standardizer.computeSet(_training_data);
-    _training_data = _data_standardizer.getStandardized(_training_data);
+    _data_standardizer.getStandardized(_training_data);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _param_standardizer.set(0, 1, _n_params);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _K = _covariance_function->computeCovarianceMatrix(_training_params, _training_params, true);
+  _K.resize(_training_params.rows(), _training_params.rows());
+  _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);
 }

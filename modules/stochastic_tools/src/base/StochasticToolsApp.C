@@ -66,7 +66,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   registerTask("declare_stochastic_results_vectors", true);
   addTaskDependency("declare_stochastic_results_vectors", "add_vector_postprocessor");
 
-  // Covariacne functions (Gaussian Process)
+  // Covariance functions (Gaussian Process)
   registerSyntaxTask("AddCovarianceAction", "Covariance/*", "add_covariance");
   registerMooseObjectTask("add_covariance", CovarianceFunctionBase, false);
   addTaskDependency("add_covariance", "add_user_object");

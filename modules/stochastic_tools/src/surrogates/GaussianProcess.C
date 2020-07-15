@@ -26,7 +26,6 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _training_data(getModelData<RealEigenMatrix>("_training_data")),
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
@@ -34,19 +33,20 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _covar_type(getModelData<std::string>("_covar_type")),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
-        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
+        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map")),
+    _covariance_function(
+        isParamValid("trainer")
+            ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getCovarPtr()
+            : nullptr)
+
 {
-  if (isParamValid("trainer"))
-  {
-    const GaussianProcessTrainer & trainer =
-        dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer"));
-    _covariance_function = trainer.getCovarPtr();
-  }
 }
 
 void
 GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
+  mooseAssert(_covariance_function == nullptr,
+              "Attempting to redefine covariacne function using setupCovariance.");
   /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction
   /// Must be called AFTER Covariacne Function is potentially created by action.
   std::vector<CovarianceFunctionBase *> models;
@@ -74,13 +74,9 @@ Real
 GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
 
-  //*******************************************//
-  //*****This bock should be .initialize()*****//
-  //*****Only Needs Called Once****************//
+  // TODO: This decomposition should be in an initalize() function, it only needs to be called once.
+  // Issue #15482
   Eigen::LLT<RealEigenMatrix> _K_cho_decomp(_K);
-  //*******************************************//
-  //*******************************************//
-  //*******************************************//
 
   unsigned int _n_params = _training_params.cols();
   unsigned int _num_tests = 1;
@@ -93,23 +89,25 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   for (unsigned int ii = 0; ii < _n_params; ++ii)
     test_points(0, ii) = x[ii];
 
-  test_points = _param_standardizer.getStandardized(test_points);
+  _param_standardizer.getStandardized(test_points);
 
-  RealEigenMatrix K_train_test =
-      _covariance_function->computeCovarianceMatrix(_training_params, test_points, false);
-  RealEigenMatrix K_test =
-      _covariance_function->computeCovarianceMatrix(test_points, test_points, true);
+  RealEigenMatrix K_train_test(_training_params.rows(), test_points.rows());
+  _covariance_function->computeCovarianceMatrix(K_train_test, _training_params, test_points, false);
+  RealEigenMatrix K_test(test_points.rows(), test_points.rows());
+  _covariance_function->computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);
   // De-center/scale the value and store for return
-  pred_value = _data_standardizer.getDestandardized(pred_value);
+  _data_standardizer.getDestandardized(pred_value);
 
   RealEigenMatrix pred_var =
       K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  std_dev = _data_standardizer.getDescaled(pred_var.array().sqrt())(0, 0);
+  RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
+  _data_standardizer.getDescaled(std_dev_mat);
+  std_dev = std_dev_mat(0, 0);
 
   return pred_value(0, 0);
 }

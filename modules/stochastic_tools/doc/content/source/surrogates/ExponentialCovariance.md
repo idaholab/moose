@@ -1,5 +1,3 @@
-<!-- !template load file=stubs/moose_object.md.template name=ExponentialCovariance syntax=/Covariance/ExponentialCovariance -->
-
 # ExponentialCovariance
 
 !syntax description /Covariance/ExponentialCovariance

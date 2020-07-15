@@ -27,27 +27,19 @@ GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
   const auto & model_names = getParam<std::vector<UserObjectName>>("model");
   _GP_model.resize(_model.size());
   _std_vector.reserve(model_names.size());
-  unsigned int ii = 0;
-  for (const auto & nm : model_names)
+  for (unsigned int ii = 0; ii < _model.size(); ++ii)
   {
     _GP_model[ii] = dynamic_cast<const GaussianProcess *>(_model[ii]);
-    _std_vector.push_back(&declareVector(nm + "_std"));
-    ++ii;
+    _std_vector.push_back(&declareVector(model_names[ii] + "_std"));
   }
 }
 
 void
 GaussianProcessTester::initialize()
 {
-  for (auto & vec : _value_vector)
-    vec->resize(_sampler.getNumberOfLocalRows(), 0);
-
+  SurrogateTester::initialize();
   for (auto & vec : _std_vector)
     vec->resize(_sampler.getNumberOfLocalRows(), 0);
-
-  if (_output_samples)
-    for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
-      _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
 }
 
 void
@@ -74,11 +66,7 @@ GaussianProcessTester::execute()
 void
 GaussianProcessTester::finalize()
 {
-  for (auto & vec : _value_vector)
-    _communicator.gather(0, *vec);
+  SurrogateTester::finalize();
   for (auto & vec : _std_vector)
     _communicator.gather(0, *vec);
-  if (_output_samples)
-    for (auto & ppv_ptr : _sample_vector)
-      _communicator.gather(0, *ppv_ptr);
 }

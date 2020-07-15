@@ -76,27 +76,28 @@ Standardizer::computeSet(const RealEigenMatrix & input)
   RealEigenVector::Map(&_stdev[0], n) = stdev;
 }
 
-RealEigenMatrix
-Standardizer::getStandardized(const RealEigenMatrix & input) const
+void
+Standardizer::getStandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  return (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
+  input = (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
 }
 
-RealEigenMatrix
-Standardizer::getDestandardized(const RealEigenMatrix & input) const
+void
+Standardizer::getDestandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  return (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
+  input =
+      (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
 }
 
-RealEigenMatrix
-Standardizer::getDescaled(const RealEigenMatrix & input) const
+void
+Standardizer::getDescaled(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  return input.array().rowwise() * stdev.transpose().array();
+  input = input.array().rowwise() * stdev.transpose().array();
 }
 
 /// Helper for dataStore
@@ -111,7 +112,7 @@ Standardizer::storeHelper(std::ostream & stream, void * context) const
     dataStore(stream, _stdev[ii], context);
 }
 
-} // Statistics namespace
+} // StochasticTools namespace
 
 template <>
 void

@@ -1,5 +1,3 @@
-<!-- !template load file=stubs/moose_object.md.template name=MaternHalfIntCovariance syntax=/Covariance/MaternHalfIntCovariance -->
-
 # MaternHalfIntCovariance
 
 !syntax description /Covariance/MaternHalfIntCovariance

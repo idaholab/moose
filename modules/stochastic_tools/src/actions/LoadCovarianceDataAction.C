@@ -33,8 +33,9 @@ LoadCovarianceDataAction::act()
   _app.theWarehouse().query().condition<AttribSystem>("SurrogateModel").queryInto(objects);
   for (auto model_ptr : objects)
   {
-    if (model_ptr && model_ptr->type() == "GaussianProcess" && model_ptr->isParamValid("filename"))
-      load(*dynamic_cast<GaussianProcess *>(model_ptr));
+    auto * gp = dynamic_cast<GaussianProcess *>(model_ptr);
+    if (gp && model_ptr->isParamValid("filename"))
+      load(*gp);
   }
 }
 
@@ -50,14 +51,10 @@ LoadCovarianceDataAction::load(GaussianProcess & model)
   InputParameters covar_params = _factory.getValidParams(covar_type);
 
   for (auto & p : map)
-  {
     covar_params.set<Real>(p.first) = p.second;
-  }
 
   for (auto & p : vec_map)
-  {
     covar_params.set<std::vector<Real>>(p.first) = p.second;
-  }
 
   std::shared_ptr<CovarianceFunctionBase> covar_model =
       _factory.create<CovarianceFunctionBase>(covar_type, covar_name, covar_params);

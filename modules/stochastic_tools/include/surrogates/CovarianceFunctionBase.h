@@ -17,16 +17,12 @@ class CovarianceFunctionBase : public MooseObject
 public:
   static InputParameters validParams();
   CovarianceFunctionBase(const InputParameters & parameters);
-  // CovarianceFunctionBase(const std::vector<Real> & length_factor,
-  //                      const Real & sigma_f_squared,
-  //                      const Real & sigma_n_squared);
-
-  // CovarianceFunctionBase(const std::vector<std::vector<Real>> & /*vec*/){};
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  virtual RealEigenMatrix computeCovarianceMatrix(const RealEigenMatrix & x,
-                                                  const RealEigenMatrix & xp,
-                                                  const bool is_self_covariance) const = 0;
+  virtual void computeCovarianceMatrix(RealEigenMatrix & K,
+                                       const RealEigenMatrix & x,
+                                       const RealEigenMatrix & xp,
+                                       const bool is_self_covariance) const = 0;
 
   /// Used for outputting Hyper-parameter settings
   virtual void

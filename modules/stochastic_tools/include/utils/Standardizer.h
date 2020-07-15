@@ -16,13 +16,12 @@
 namespace StochasticTools
 {
 
-/* Class standardizing data (centering and scaling)
+/// Class for standardizing data (centering and scaling)
 
- */
 class Standardizer
 {
 public:
-  Standardizer(){};
+  Standardizer() = default;
 
   /// Methods for setting mean and standard deviation directly
   /// Sets mean=0, std=1 for n variables
@@ -41,20 +40,20 @@ public:
   void storeHelper(std::ostream & stream, void * context) const;
 
   /// Returns the standardized (centered and scaled) of the provided input
-  RealEigenMatrix getStandardized(const RealEigenMatrix & input) const;
+  void getStandardized(RealEigenMatrix & input) const;
 
   /// De-standardizes (de-centered and de-scaled) the assumed standardized input
-  RealEigenMatrix getDestandardized(const RealEigenMatrix & input) const;
+  void getDestandardized(RealEigenMatrix & input) const;
 
   /// De-scales the assumed scaled input
-  RealEigenMatrix getDescaled(const RealEigenMatrix & input) const;
+  void getDescaled(RealEigenMatrix & input) const;
 
 protected:
   std::vector<Real> _mean;
   std::vector<Real> _stdev;
 };
 
-} // namespace
+} // StochasticTools namespace
 
 template <>
 void dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context);

@@ -28,7 +28,6 @@ AddCovarianceAction::AddCovarianceAction(InputParameters params) : MooseObjectAc
 void
 AddCovarianceAction::act()
 {
-  //_problem->addUserObject(_type, _name, _moose_object_pars);
   std::shared_ptr<CovarianceFunctionBase> model =
       _factory.create<CovarianceFunctionBase>(_type, _name, _moose_object_pars);
   _problem->theWarehouse().add(model);

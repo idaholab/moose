@@ -1,12 +1,12 @@
 # GaussianProcessTrainer
 
-"Gaussian Processes for Machine Learning" [!cite](rasmussen2005gpml) provides a well written discussion of Gaussian Processes, and its reading is highly encouraged. Chapters 1-5 cover the topics presented here with far greater detail, depth, and rigor.
+"Gaussian Processes for Machine Learning" [!cite](rasmussen2005gaussian) provides a well written discussion of Gaussian Processes, and its reading is highly encouraged. Chapters 1-5 cover the topics presented here with far greater detail, depth, and rigor.
 
 The documentation here is meant to give some practical insight for users to begin creating surrogate models with Gaussian Processes.
 
 Given a set of inputs $X=\lbrace{\vec{x}_1, \cdots, \vec{x}_m \rbrace}$ for which we have made observations of the correspond outputs $Y=\lbrace{\vec{y}_1, \cdots, \vec{y}_m \rbrace}$ using the system ($Y = f(X)$). Given another set of inputs $X_\star=\lbrace{\vec{x}_{\star 1}, \cdots, \vec{x}_{\star n} \rbrace}$ we wish to predict the associated outputs $Y_\star=f(X_\star)$ without evaluation of $f(X_\star)$, which is presumed costly.
-
-In overly simplistic terms, Gaussian Process Modeling is driven by the idea that trails which are "close" in their input parameter space will be "close" in their output space. Closeness in the parameter space is driven by the covariance function $k(\vec{x},\vec{x'})$ (also called a kernel function, not to be confused with a MOOSE Framework kernel). This covariance function is used to generate a covariance matrix between the complete set of parameters $X \cup X_\star = \lbrace{\vec{x}_1, \cdots, \vec{x}_m, \vec{x}_{\star 1}, \cdots, \vec{x}_{\star n} \rbrace}$, which can then be interpreted block-wise as various covariance matrices between $X$ and $X_\star$.
+ 
+In overly simplistic terms, Gaussian Process Modeling is driven by the idea that trials which are "close" in their input parameter space will be "close" in their output space. Closeness in the parameter space is driven by the covariance function $k(\vec{x},\vec{x'})$ (also called a kernel function, not to be confused with a MOOSE Framework kernel). This covariance function is used to generate a covariance matrix between the complete set of parameters $X \cup X_\star = \lbrace{\vec{x}_1, \cdots, \vec{x}_m, \vec{x}_{\star 1}, \cdots, \vec{x}_{\star n} \rbrace}$, which can then be interpreted block-wise as various covariance matrices between $X$ and $X_\star$.
 
 !equation
 \begin{aligned}
@@ -35,34 +35,50 @@ k(\vec{x}_{\star n},\vec{x}_{1})  & \cdots & k(\vec{x}_{\star n},\vec{x}_{m}) & 
 \end{aligned}
 
 
-To begin to adapt an intuitive sense of Gaussian Process it is often best to start with a multivariate Gaussian $\mathcal{N}(\vec{\mu},\Sigma)$, which has a mean **vector** and a covariance **matrix**.
+<!-- To begin to adapt an intuitive sense of Gaussian Process it is often best to start with a multivariate Gaussian $\mathcal{N}(\vec{\mu},\Sigma)$, which has a mean **vector** and a covariance **matrix**. -->
 
-A Gaussian Process extends the concepts of a multivariate Gaussian to a function space, where a Gaussian Process $\mathcal{GP}(\mu(x),k(x,x^\prime))$ is defined by a mean **function** and a covariance **function**
+<!-- A Gaussian Process extends the concepts of a multivariate Gaussian to a function space, where a Gaussian Process $\mathcal{GP}(\mu(x),k(x,x^\prime))$ is defined by a mean **function** and a covariance **function** -->
 
-Where Gaussian Process modeling differs from other common regression methods is that the model is not a single function, but an (infinite) collection of functions defined by a mean and covariance matrix.
+<!-- Where Gaussian Process modeling differs from other common regression methods is that the model is not a single function, but an (infinite) collection of functions defined by a mean and covariance matrix. -->
 
 The Gaussian Process Model consists of an infinite collection of functions, all of which agree with the training/observation data. Importantly the collection has closed forms for 2nd order statistics (mean and variance). When used as a surrogate, the nominal value is chosen to be the mean value. The method can be broken down into two step: definition of the prior distribution then conditioning on observed data.
+
+#### Gaussian processes
+
+A Gaussian Process is a (potentially infinite) collection of random variables, such that the joint distribution of every finite selection of random variables from the collection is a Gaussian distribution.
+
+!equation
+\mathcal{GP}(\mu(\vec{x}),k(\vec{x},\vec{x'}))  
+
+In an analogous way that a multivariate Gaussian is completely defined by its mean vector and its covariance matrix, a Gaussian Process is completely defined by its mean function and covariance function.
+
+The (potentially) infinite number of random variables within the Gaussian Process correspond to the (potentially) infinite points in the parameter space our surrogate can be evaluated at.
 
 #### Prior distribution:
 
 We assume the observations (both training and testing) are pulled from an $m+n$ multivariate Gaussian distribution. The covariance matrix $\Sigma$ is the result of the choice of covariance function.
 
 !equation
-Y \cup Y_\star \tilde \mathcal{N}(\mu,\Sigma)
+Y \cup Y_\star \sim \mathcal{N}(\mu,\Sigma)
 
-Zero Mean Assumption: Discussions of Gaussian Process typically work under assumption that $\mu=0$. This occurs without loss of generality since any sample can be made $\mu=0$ by subtracting the sample mean.
+Note that $\mu$ and $\Sigma$ are a vector and matrix respectively, and are a result of the mean and covariance functions applied to the sample points.  
+
++Zero Mean Assumption:+ Discussions of Gaussian Process are typically presented under assumption that $\mu=0$. This occurs without loss of generality since any sample can be made $\mu=0$ by subtracting the sample mean (or a variety of other preprocessing options). Note that in a training\testing paradigm, the testing data $Y_\star$ is unknown, so determination of what to use as $\mu$ is based on the information from the training data $Y$ (or some other prior assumption).
+
+#### Conditioning:
+
+With the prior formed as above, conditioning on the available training data $Y$ is performed. This alters the mean and variance to new values $\mu_\star$ and $\Sigma_\star$
 
 !equation
 \begin{aligned}
-f(X_\star) = \mu(X_\star) &= \mu(X) + K_\star K^{-1}(Y-\mu(X)) \\
+\mu_\star &= \mu + K_\star K^{-1}(Y-\mu) \\
+\Sigma_\star &= K_{\star \star} - K_\star^T K^{-1} K_\star
 \end{aligned}
 
 !equation
-\Sigma(Y_\star) = K_{\star \star} - K_\star^T K^{-1} K_\star
+Y_\star \sim \mathcal{N}(\mu_\star ,\Sigma_\star)
 
-A common preprocessing step is to center  
-
-
+When used as a surrogate, the nominal value is typically taken as the mean value, with $diag(\Sigma_\star)$ providing variances which can be used to generate confidence intervals.
 
 ## Common Hyperparameters
 

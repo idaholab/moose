@@ -1,7 +1,7 @@
 # AddCovarianceAction
 
 This action operates on existing `GaussianProcess` objects contained within the `[Surrogates]` block.
-If the model provides a filename (as shown below), a `[CovarianceFunction]` object equivalent to the function used in the training phase is reconstructed for use in model evaluation.
+If the model provides a filename (as shown below), a `[Covariance]` object equivalent to the function used in the training phase is reconstructed for use in model evaluation.
 
 ## Example Input File Syntax
 

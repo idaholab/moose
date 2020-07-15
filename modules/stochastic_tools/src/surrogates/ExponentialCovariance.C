@@ -41,15 +41,16 @@ ExponentialCovariance::buildHyperParamMap(
     std::unordered_map<std::string, Real> & map,
     std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
-  map.insert({"signal_variance", _sigma_f_squared});
-  map.insert({"noise_variance", _sigma_n_squared});
-  map.insert({"gamma", _gamma});
+  map["signal_variance"] = _sigma_f_squared;
+  map["noise_variance"] = _sigma_n_squared;
+  map["gamma"] = _gamma;
 
-  vec_map.insert({"length_factor", _length_factor});
+  vec_map["length_factor"] = _length_factor;
 }
 
-RealEigenMatrix
-ExponentialCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
+void
+ExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
+                                               const RealEigenMatrix & x,
                                                const RealEigenMatrix & xp,
                                                const bool is_self_covariance) const
 {
@@ -59,8 +60,6 @@ ExponentialCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
 
   mooseAssert(num_params_x == xp.cols(),
               "Number of parameters do not match in covariance kernel calculation");
-
-  RealEigenMatrix K(num_samples_x, num_samples_xp);
 
   for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
@@ -76,6 +75,4 @@ ExponentialCovariance::computeCovarianceMatrix(const RealEigenMatrix & x,
     if (is_self_covariance)
       K(ii, ii) += _sigma_n_squared;
   }
-
-  return K;
 }

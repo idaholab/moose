@@ -31,7 +31,7 @@ public:
 
 private:
   /// Sampler from which the parameters were perturbed
-  Sampler * _sampler;
+  Sampler * _sampler = nullptr;
 
   /// Vector postprocessor of the results from perturbing the model with _sampler
   const VectorPostprocessorValue * _values_ptr = nullptr;
@@ -49,7 +49,7 @@ private:
   StochasticTools::Standardizer & _param_standardizer;
 
   /// Data (y) used for training
-  RealEigenMatrix & _training_data;
+  RealEigenMatrix _training_data;
 
   /// Standardizer for use with data (y)
   StochasticTools::Standardizer & _data_standardizer;
@@ -79,5 +79,5 @@ private:
   std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
   /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
+  CovarianceFunctionBase * _covariance_function = nullptr;
 };
