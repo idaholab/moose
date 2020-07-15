@@ -51,6 +51,19 @@ SquaredExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
                                                       const RealEigenMatrix & xp,
                                                       const bool is_self_covariance) const
 {
+  SquaredExponentialFunction(
+      K, x, xp, _length_factor, _sigma_f_squared, _sigma_n_squared, is_self_covariance);
+}
+
+void
+SquaredExponentialCovariance::SquaredExponentialFunction(RealEigenMatrix & K,
+                                                         const RealEigenMatrix & x,
+                                                         const RealEigenMatrix & xp,
+                                                         const std::vector<Real> & length_factor,
+                                                         const Real & sigma_f_squared,
+                                                         const Real & sigma_n_squared,
+                                                         const bool & is_self_covariance)
+{
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
@@ -65,10 +78,10 @@ SquaredExponentialCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
       // Compute distance per parameter, scaled by length factor
       Real r_squared_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_squared_scaled += std::pow((x(ii, kk) - xp(jj, kk)) / _length_factor[kk], 2);
-      K(ii, jj) = _sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
+        r_squared_scaled += std::pow((x(ii, kk) - xp(jj, kk)) / length_factor[kk], 2);
+      K(ii, jj) = sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
     }
     if (is_self_covariance)
-      K(ii, ii) += _sigma_n_squared;
+      K(ii, ii) += sigma_n_squared;
   }
 }

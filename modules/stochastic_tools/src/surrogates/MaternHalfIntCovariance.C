@@ -55,6 +55,20 @@ MaternHalfIntCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
                                                  const RealEigenMatrix & xp,
                                                  const bool is_self_covariance) const
 {
+  maternHalfIntFunction(
+      K, x, xp, _length_factor, _sigma_f_squared, _sigma_n_squared, _p, is_self_covariance);
+}
+
+void
+MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
+                                               const RealEigenMatrix & x,
+                                               const RealEigenMatrix & xp,
+                                               const std::vector<Real> & length_factor,
+                                               const Real & sigma_f_squared,
+                                               const Real & sigma_n_squared,
+                                               const unsigned int & p,
+                                               const bool & is_self_covariance)
+{
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();
   unsigned int num_params_x = x.cols();
@@ -63,7 +77,7 @@ MaternHalfIntCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
               "Number of parameters do not match in covariance kernel calculation");
 
   // This factor is used over and over, don't calculate each time
-  Real factor = sqrt(2 * _p + 1);
+  Real factor = sqrt(2 * p + 1);
 
   for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
@@ -72,18 +86,18 @@ MaternHalfIntCovariance::computeCovarianceMatrix(RealEigenMatrix & K,
       // Compute distance per parameter, scaled by length factor
       Real r_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / _length_factor[kk], 2);
+        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
       Real summation = 0;
       // tgamma(x+1) == x! when x is a natural number, which should always be the case for
       // MaternHalfInt
-      for (unsigned int tt = 0; tt < _p + 1; ++tt)
-        summation += (tgamma(_p + tt + 1) / (tgamma(tt + 1) * tgamma(_p - tt + 1))) *
-                     pow(2 * factor * r_scaled, _p - tt);
-      K(ii, jj) = _sigma_f_squared * std::exp(-factor * r_scaled) *
-                  (tgamma(_p + 1) / (tgamma(2 * _p + 1))) * summation;
+      for (unsigned int tt = 0; tt < p + 1; ++tt)
+        summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) *
+                     pow(2 * factor * r_scaled, p - tt);
+      K(ii, jj) = sigma_f_squared * std::exp(-factor * r_scaled) *
+                  (tgamma(p + 1) / (tgamma(2 * p + 1))) * summation;
     }
     if (is_self_covariance)
-      K(ii, ii) += _sigma_n_squared;
+      K(ii, ii) += sigma_n_squared;
   }
 }
