@@ -258,6 +258,30 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
+  [./pls02_autopoints]
+    type = 'CSVDiff'
+    input = 'pls02.i'
+    csvdiff = 'pls02_dirac_pts_0004.csv'
+    allow_test_objects = true
+    cli_args = "VectorPostprocessors/dirac_pts/type=DiracPointsWriter"
+               " DiracKernels/pls/point_file=''"
+               " DiracKernels/pls/line_base='0.1 0.01 0.01 -0.249'"
+               " DiracKernels/pls/line_direction='0 0 1'"
+               " DiracKernels/pls/line_length=0.5"
+               " Adaptivity/max_h_level=4"
+               " Adaptivity/steps=3"
+               " Adaptivity/marker=box"
+               " Adaptivity/Markers/box/type=BoxMarker"
+               " Adaptivity/Markers/box/bottom_left='-2 -2 -2'"
+               " Adaptivity/Markers/box/top_right='2 2 2'"
+               " Adaptivity/Markers/box/inside=refine"
+               " Adaptivity/Markers/box/outside=do_nothing"
+               " Executioner/end_time=4"
+    threading = '!pthreads'
+    requirement = 'PorousFlowPolyLineSink shall be able to dynamically create dirac points automatically in response to changing mesh geometry.'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
+    issues = '#15528 #15547'
+  [../]
   [./pls03_00]
     type = 'CSVDiff'
     input = 'pls03.i'
