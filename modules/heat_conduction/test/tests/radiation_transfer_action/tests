@@ -11,8 +11,16 @@
 
   [./radiative_transfer_no_action]
     type = 'Exodiff'
-    input = ' radiative_transfer_no_action.i'
+    input = 'radiative_transfer_no_action.i'
     exodiff = 'radiative_transfer_no_action_out.e'
+    requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
+    petsc_version = '>=3.9.4'
+  [../]
+
+  [./radiative_transfer_action_external_boundary]
+    type = 'Exodiff'
+    input = 'radiative_transfer_action_external_boundary.i'
+    exodiff = 'radiative_transfer_action_external_boundary_out.e'
     requirement = 'The system shall provide an action to set up radiative heat transfer problems using the net radiation method'
     petsc_version = '>=3.9.4'
   [../]
