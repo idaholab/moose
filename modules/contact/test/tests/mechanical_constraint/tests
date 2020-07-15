@@ -10,6 +10,16 @@
                    between two blocks with a combination of normal and tangential motion using
                    a kinematic enforcement with the Constraint system."
   [../]
+  [./frictionless_kinematic_gap_offset]
+    type = 'Exodiff'
+    input = 'frictionless_kinematic_gap_offsets.i'
+    exodiff = 'frictionless_kinematic_gap_offsets_out.e'
+    max_parallel = 1                                    # -pc_type lu
+    requirement = "The contact system shall enforce a frictionless mechanical contact condition
+                   between two blocks with gap offsets on both master and slave blocks using
+                   a kinematic enforcement with the DiracKernel system."
+    issues = '#14089'
+  [../]
   [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'

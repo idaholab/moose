@@ -40,6 +40,9 @@ PenetrationAux::validParams()
   params.addParam<std::string>("normal_smoothing_method",
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
+  params.addCoupledVar("secondary_gap_offset", "offset to the gap distance from secondary side");
+  params.addCoupledVar("mapped_primary_gap_offset",
+                       "offset to the gap distance mapped from primary side");
 
   params.set<bool>("use_displaced_mesh") = true;
 
@@ -75,7 +78,13 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters)
                : getQuadraturePenetrationLocator(
                      parameters.get<BoundaryName>("paired_boundary"),
                      boundaryNames()[0],
-                     Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
+                     Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
+    _has_secondary_gap_offset(isCoupled("secondary_gap_offset")),
+    _secondary_gap_offset_var(_has_secondary_gap_offset ? getVar("secondary_gap_offset", 0)
+                                                        : nullptr),
+    _has_mapped_primary_gap_offset(isCoupled("mapped_primary_gap_offset")),
+    _mapped_primary_gap_offset_var(
+        _has_mapped_primary_gap_offset ? getVar("mapped_primary_gap_offset", 0) : nullptr)
 {
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
@@ -106,7 +115,13 @@ PenetrationAux::computeValue()
     switch (_quantity)
     {
       case PA_DISTANCE:
-        retVal = pinfo->_distance;
+        retVal =
+            pinfo->_distance -
+            (_has_secondary_gap_offset ? _secondary_gap_offset_var->getNodalValue(*current_node)
+                                       : 0) -
+            (_has_mapped_primary_gap_offset
+                 ? _mapped_primary_gap_offset_var->getNodalValue(*current_node)
+                 : 0);
         break;
       case PA_TANG_DISTANCE:
         retVal = pinfo->_tangential_distance;
