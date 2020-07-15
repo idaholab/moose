@@ -333,6 +333,10 @@ SubChannel1PhaseProblem::externalSolve()
             auto T_out = _fp.T_from_p_h(P_soln(node_out), h_out);
             auto rho_out = _fp.rho_from_p_T(P_soln(node_out), T_out);
 
+            _console << "LEVEL: " << iz << " channel :" << i_ch << "\n";
+            _console << "h_out: " << h_out << "\n";
+            _console << "mdot_out: " << mdot_out << "\n";
+
             // Update the solution vectors at the outlet of the cell
             // (mass,density,Temperature,Enthalpy is upwinded).
             mdot_soln.set(node_out, mdot_out); // kg/sec

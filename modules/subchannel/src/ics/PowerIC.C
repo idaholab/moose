@@ -45,20 +45,25 @@ PowerIC::PowerIC(const InputParameters & params)
     _numberoflines += 1;
 
   if (inFile.fail() && !inFile.eof())
-    mooseError(name(), "non numerical input at line : ", _numberoflines);
+    mooseError(name(), " non numerical input at line : ", _numberoflines);
 
+  if (_numberoflines != (_mesh._ny - 1) * (_mesh._nx - 1))
+    mooseError(name(),
+               " Radial profile file doesn't have correct size : ",
+               (_mesh._ny - 1) * (_mesh._nx - 1));
   inFile.close();
 
   inFile.open(_filename);
   int i(0);
   while (inFile >> vin)
   {
-    _power_dis(i) = vin;
+    _power_dis(i, 0) = vin;
     i++;
   }
   inFile.close();
 
   _power_dis.resize(_mesh._ny - 1, _mesh._nx - 1);
+  _console << " Power distribution matrix :\n" << _power_dis << " \n";
   auto sum = _power_dis.sum();
   // full pin (100%) power of one pin [W]
   auto fpin_power = _power / sum;
