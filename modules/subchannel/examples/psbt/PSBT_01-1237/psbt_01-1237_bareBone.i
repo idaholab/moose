@@ -5,8 +5,8 @@ P_out = 4.923e6 # Pa
 
 [Mesh]
   type = SubChannelMesh
-  nx = 3
-  ny = 3
+  nx = 6
+  ny = 6
   max_dz = 0.02
   pitch = 0.0126
   rod_diameter = 0.00950
