@@ -157,21 +157,21 @@ MooseVariableFE<OutputType>::getDofIndices(const Elem * elem,
 
 template <typename OutputType>
 typename MooseVariableFE<OutputType>::OutputData
-MooseVariableFE<OutputType>::getNodalValue(const Node & node)
+MooseVariableFE<OutputType>::getNodalValue(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Current);
 }
 
 template <typename OutputType>
 typename MooseVariableFE<OutputType>::OutputData
-MooseVariableFE<OutputType>::getNodalValueOld(const Node & node)
+MooseVariableFE<OutputType>::getNodalValueOld(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Old);
 }
 
 template <typename OutputType>
 typename MooseVariableFE<OutputType>::OutputData
-MooseVariableFE<OutputType>::getNodalValueOlder(const Node & node)
+MooseVariableFE<OutputType>::getNodalValueOlder(const Node & node) const
 {
   return _element_data->getNodalValue(node, Moose::Older);
 }

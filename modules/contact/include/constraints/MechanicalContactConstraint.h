@@ -116,9 +116,9 @@ protected:
 
   /// gap offset from either secondary, primary or both
   const bool _has_secondary_gap_offset;
-  MooseVariable * _secondary_gap_offset_var;
+  const MooseVariable * const _secondary_gap_offset_var;
   const bool _has_mapped_primary_gap_offset;
-  MooseVariable * _mapped_primary_gap_offset_var;
+  const MooseVariable * const _mapped_primary_gap_offset_var;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
