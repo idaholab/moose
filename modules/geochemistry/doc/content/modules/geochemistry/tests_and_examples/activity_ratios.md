@@ -26,8 +26,8 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The final line of the output yields the desired information:
 
 ```
-(A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.57
-(A_K+)^1 (A_H+)^-1 = 10^3.419
+(A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
+(A_K+)^1 (A_H+)^-1 = 10^3.421
 ```
 
 ## Muscovite and other minerals
@@ -60,15 +60,14 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The output yields the desired information
 
 ```
-(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.57
-(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_H+)^-10 = 10^26.6
-(A_K+)^-2 (A_H+)^2 = 10^-9.682
-(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.38
-(A_K+)^-2 (A_H+)^2 = 10^-8.687
-(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.38
-(A_K+)^-2 (A_H+)^2 = 10^-1.947
+(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
+(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_H+)^-10 = 10^26.56
+(A_K+)^-2 (A_H+)^2 = 10^-9.681
+(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.31
+(A_K+)^-2 (A_H+)^2 = 10^-8.686
+(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.31
+(A_K+)^-2 (A_H+)^2 = 10^-1.967
 ```
-(The tiny discrepancies between the "theoretical" values and the numerical values on the right-hand side of the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
 
 ## Ca-clinoptilolite, prehnite and quartz
 
@@ -92,12 +91,10 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The final line of the output yields the desired information:
 
 ```
-(A_Ca++)^1 (A_Al+++)^2 (A_SiO2(aq))^10 (A_H+)^-8 = 10^-13.22
-(A_Ca++)^-1 (A_SiO2(aq))^7 (A_H+)^2 = 10^-26.95
-(A_Ca++)^-1 (A_H+)^2 = 10^-9.925
+(A_Ca++)^1 (A_Al+++)^2 (A_SiO2(aq))^10 (A_H+)^-8 = 10^-13.51
+(A_Ca++)^-1 (A_SiO2(aq))^7 (A_H+)^2 = 10^-27.22
+(A_Ca++)^-1 (A_H+)^2 = 10^-10.23
 ```
-(The tiny discrepancies between the "theoretical" values and the numerical values on the right-hand side of the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
-
 
 
 !bibtex bibliography

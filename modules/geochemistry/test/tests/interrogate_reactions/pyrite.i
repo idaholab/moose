@@ -12,6 +12,7 @@
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O Fe++ SO4-- H+ O2(aq)"
     equilibrium_minerals = "Pyrite Fe(OH)3(ppd)"
+    piecewise_linear_interpolation = true # to get exact logK at 25degC with no best-fit interpolation
   [../]
 []
 

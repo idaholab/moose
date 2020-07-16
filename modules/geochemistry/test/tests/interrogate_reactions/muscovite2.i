@@ -13,6 +13,7 @@
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O K+ Al+++ SiO2(aq) H+"
     equilibrium_minerals = "Muscovite Quartz Maximum Tridymite Amrph^silica"
+    piecewise_linear_interpolation = true # to get exact logK at 25degC with no best-fit interpolation
   [../]
 []
 
