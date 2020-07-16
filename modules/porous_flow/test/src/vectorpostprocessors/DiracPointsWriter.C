@@ -31,10 +31,10 @@ DiracPointsWriter::execute()
   _xs.clear();
   _ys.clear();
   _zs.clear();
-  std::vector<Point> points;
+  std::set<Point> points;
   for (auto & entry : _subproblem.diracKernelInfo().getPoints())
     if (entry.first->active())
-      points.insert(points.end(), entry.second.first.begin(), entry.second.first.end());
+      points.insert(entry.second.first.begin(), entry.second.first.end());
   for (auto & p : points)
   {
     _xs.push_back(p(0));
