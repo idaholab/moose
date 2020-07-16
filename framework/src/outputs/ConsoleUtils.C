@@ -81,12 +81,31 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     // clang-format on
   }
 
+  dof_id_type avg_nnodes, max_nnodes, avg_nelems, max_nelems;
+
+  // Maximum number of local nodes
+  max_nnodes = mesh.n_local_nodes();
+  mesh.comm().max(max_nnodes);
+  // Average number of nodes per processor
+  avg_nnodes = mesh.n_nodes() / mesh.comm().size();
+  // Maximum local elements
+  max_nelems = mesh.n_active_local_elem();
+  mesh.comm().max(max_nelems);
+  // Average number of elements per processor
+  avg_nelems = mesh.n_active_elem() / mesh.comm().size();
+
+  // "Max(avg)" is used to measure if the workload is balanced
+  // If max equals avg, then the workload is perfectly balanced
   oss << std::setw(console_field_width) << "  Nodes:" << '\n'
       << std::setw(console_field_width) << "    Total:" << mesh.n_nodes() << '\n'
       << std::setw(console_field_width) << "    Local:" << mesh.n_local_nodes() << '\n'
+      << std::setw(console_field_width) << "    Max(avg):" << max_nnodes << "(" << avg_nnodes << ")"
+      << '\n'
       << std::setw(console_field_width) << "  Elems:" << '\n'
       << std::setw(console_field_width) << "    Total:" << mesh.n_active_elem() << '\n'
-      << std::setw(console_field_width) << "    Local:" << mesh.n_active_local_elem() << '\n';
+      << std::setw(console_field_width) << "    Local:" << mesh.n_active_local_elem() << '\n'
+      << std::setw(console_field_width) << "    Max(avg):" << max_nelems << "(" << avg_nelems << ")"
+      << '\n';
 
   if (verbose)
   {
