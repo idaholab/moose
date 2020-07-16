@@ -12,6 +12,8 @@
 #include "FEProblemBase.h"
 #include "ParallelUniqueId.h"
 
+static Threads::spin_mutex threaded_node_mutex;
+
 template <typename RangeType, typename IteratorType>
 class ThreadedNodeLoop
 {
@@ -53,6 +55,8 @@ public:
    */
   virtual void caughtMooseException(MooseException & e)
   {
+    Threads::spin_mutex::scoped_lock lock(threaded_node_mutex);
+
     std::string what(e.what());
     _fe_problem.setException(what);
   };
