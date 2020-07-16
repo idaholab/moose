@@ -179,7 +179,7 @@ mpif90_command := $(libmesh_F90)
 # If $(libmesh_f90) is an mpiXXX compiler script, use -show
 # to determine the base compiler
 ifneq (,$(findstring mpi,$(mpif90_command)))
-	mpif90_command := $(shell $(libmesh_F90) -show)
+       mpif90_command := $(shell $(libmesh_F90) -show | cut -f1 -d' ')
 endif
 
 # module_dir_flag is a flag that, if defined, instructs the compiler
@@ -196,6 +196,11 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 endif
 
 %.$(obj-suffix) : %.f90
+	@echo "Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_F90) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
+
+%.$(obj-suffix) : %.F90
 	@echo "Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
@@ -239,6 +244,21 @@ endif
 ifneq (,$(findstring g95,$(mpif77_command)))
 	libmesh_FFLAGS += -r8
 endif
+
+#ifort
+ifneq (,$(findstring ifort,$(mpif90_command)))
+	libmesh_FFLAGS += -nofpp
+endif
+
+#gfortran
+ifneq (,$(findstring gfortran,$(mpif90_command)))
+	libmesh_FFLAGS += -ffree-line-length-none
+	libmesh_FFLAGS += -cpp
+endif
+
+libmesh_FFLAGS := $(filter-out -fopenmp,$(libmesh_FFLAGS))
+libmesh_FFLAGS := $(filter-out -fdefault-real-8,$(libmesh_FFLAGS))
+libmesh_FFLAGS := $(filter-out -fdefault-double-8,$(libmesh_FFLAGS))
 
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
@@ -291,6 +311,9 @@ endif
 	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
+	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
+%-$(METHOD).plugin : %.F90
 	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 

@@ -241,11 +241,13 @@ endif
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
+moose_F90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.F90")
 # object files
 moose_objects	:= $(patsubst %.C, %.$(obj-suffix), $(moose_srcfiles))
 moose_objects	+= $(patsubst %.c, %.$(obj-suffix), $(moose_csrcfiles))
 moose_objects   += $(patsubst %.f, %.$(obj-suffix), $(moose_fsrcfiles))
 moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
+moose_objects   += $(patsubst %.F90, %.$(obj-suffix), $(moose_F90srcfiles))
 # dependency files
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))

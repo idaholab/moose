@@ -106,6 +106,7 @@ endif
 csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
 fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
 f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
+F90srcfiles := $(shell find $(SRC_DIRS) -name "*.F90")
 
 # object files
 ifeq ($(LIBRARY_SUFFIX),yes)
@@ -116,13 +117,15 @@ endif
 cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
+F90objects  := $(patsubst %.F90, %.$(obj-suffix), $(F90srcfiles))
 
-app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
+app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(F90objects) $(ADDITIONAL_APP_OBJECTS)
 
 test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes) 2>/dev/null)
 test_csrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.c" 2>/dev/null)
 test_fsrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.f" 2>/dev/null)
 test_f90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.f90" 2>/dev/null)
+test_F90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.F90" 2>/dev/null)
 ifeq ($(LIBRARY_SUFFIX),yes)
   test_objects:= $(patsubst %.C, %_with$(app_LIB_SUFFIX).$(obj-suffix), $(test_srcfiles))
 else
@@ -132,7 +135,8 @@ endif
 test_cobjects:= $(patsubst %.c, %.$(obj-suffix), $(test_csrcfiles))
 test_fobjects:= $(patsubst %.f, %.$(obj-suffix), $(test_fsrcfiles))
 test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
-app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
+test_F90objects:= $(patsubst %.F90, %.$(obj-suffix), $(test_F90srcfiles))
+app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects) $(test_F90objects)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
@@ -153,12 +157,14 @@ plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
 cplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.c" 2>/dev/null)
 fplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.f" 2>/dev/null)
 f90plugfiles:= $(shell find $(PLUGIN_DIR) -name "*.f90" 2>/dev/null)
+F90plugfiles:= $(shell find $(PLUGIN_DIR) -name "*.F90" 2>/dev/null)
 
 # plugins
 plugins	    := $(patsubst %.C, %-$(METHOD).plugin, $(plugfiles))
 plugins	    += $(patsubst %.c, %-$(METHOD).plugin, $(cplugfiles))
 plugins	    += $(patsubst %.f, %-$(METHOD).plugin, $(fplugfiles))
 plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
+plugins	    += $(patsubst %.F90, %-$(METHOD).plugin, $(F90plugfiles))
 
 # main
 MAIN_DIR    ?= $(APPLICATION_DIR)/src
