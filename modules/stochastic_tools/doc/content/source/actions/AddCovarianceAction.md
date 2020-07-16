@@ -1,16 +1,8 @@
 # AddCovarianceAction
 
-This action operates on existing `GaussianProcess` objects contained within the `[Surrogates]` block.
-If the model provides a filename (as shown below), a `[Covariance]` object equivalent to the function used in the training phase is reconstructed for use in model evaluation.
+This action adds `CovarainceFunctionBase` [asds](Covariance/index.md) objects contained within the `[Covariance]` block. For example,
+the following block adds a [SquaredExponentialCovariance.md] covariance function.
 
-## Example Input File Syntax
-
-In the training input file we setup a GaussianProcessTrainer, with a SquaredExponential covariance function.
-
-!listing test/tests/surrogates/gaussian_process/GP_squared_exponential_training.i block=Trainers Covariance
-
-In the surrogate input file, the GaussianProcess surrogate recreates the covariance function used in training and links to it.
-
-!listing test/tests/surrogates/gaussian_process/GP_squared_exponential_testing.i block=Surrogates
+!listing test/tests/surrogates/gaussian_process/GP_squared_exponential_training.i block=Covariance
 
 !syntax parameters /Covariance/AddCovarianceAction

@@ -50,12 +50,12 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _standardize_data(getParam<bool>("standardize_data")),
     _covar_type(declareModelData<std::string>("_covar_type")),
     _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(
-        declareModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
+    _hyperparam_vec_map(declareModelData<std::unordered_map<std::string, std::vector<Real>>>(
+        "_hyperparam_vec_map")),
+    _covariance_function(
+        getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")))
 
 {
-  _covariance_function =
-      getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"));
 }
 
 void

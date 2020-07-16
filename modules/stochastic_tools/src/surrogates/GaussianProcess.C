@@ -40,15 +40,14 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
         isParamValid("trainer")
             ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getCovarPtr()
             : nullptr)
-
 {
 }
 
 void
 GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
-  mooseAssert(_covariance_function == nullptr,
-              "Attempting to redefine covariacne function using setupCovariance.");
+  if (_covariance_function != nullptr)
+    ::mooseError("Attempting to redefine covariance function using setupCovariance.");
   _covariance_function = getCovarianceFunctionByName(covar_name);
 }
 

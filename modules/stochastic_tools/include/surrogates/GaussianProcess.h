@@ -23,6 +23,11 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
   virtual Real evaluate(const std::vector<Real> & x, Real & std) const;
 
+  /**
+   * This function is called by LoadCovarianceDataAction when the surrogate is
+   * loading training data from a file. The action must recreate the covariance
+   * object before this surrogate can set the correct pointer.
+   */
   virtual void setupCovariance(UserObjectName _covar_name);
 
   const std::string & getCovarType() const { return _covar_type; }

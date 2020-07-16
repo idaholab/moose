@@ -64,10 +64,10 @@ MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
                                                const RealEigenMatrix & x,
                                                const RealEigenMatrix & xp,
                                                const std::vector<Real> & length_factor,
-                                               const Real & sigma_f_squared,
-                                               const Real & sigma_n_squared,
-                                               const unsigned int & p,
-                                               const bool & is_self_covariance)
+                                               const Real sigma_f_squared,
+                                               const Real sigma_n_squared,
+                                               const unsigned int p,
+                                               const bool is_self_covariance)
 {
   unsigned int num_samples_x = x.rows();
   unsigned int num_samples_xp = xp.rows();

@@ -27,9 +27,9 @@ public:
                                          const RealEigenMatrix & x,
                                          const RealEigenMatrix & xp,
                                          const std::vector<Real> & length_factor,
-                                         const Real & sigma_f_squared,
-                                         const Real & sigma_n_squared,
-                                         const bool & is_self_covariance);
+                                         const Real sigma_f_squared,
+                                         const Real sigma_n_squared,
+                                         const bool is_self_covariance);
 
   /// Used for outputting Hyper-parameter settings
   void
