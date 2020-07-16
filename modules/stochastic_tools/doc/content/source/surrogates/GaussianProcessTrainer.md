@@ -127,7 +127,13 @@ Due to the addition of $\sigma_n^2$ along the diagonal of the $K$ matrix, this h
 
 ## Selected Covariance Functions
 
-!syntax list /Covariance
+!table id=HyperpramTable caption=Selected Covariance Functions
+| Covariance Function | Description |
+| - | - |
+| [](SquaredExponentialCovariance.md) | Also referred to as a radial basis function (RBF) this is a widely used, general purpose covariance function. Serves as a common starting point for many. |
+| [](ExponentialCovariance.md) | A simple exponential covariance function. |
+| [](MaternHalfIntCovariance.md) | Implementation of the Matern class of covariance function, where the $\nu$ parameter takes on half-integer values. |
+
 
 
 !syntax parameters /Trainers/GaussianProcessTrainer
