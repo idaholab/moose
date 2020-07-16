@@ -287,16 +287,20 @@ GeochemistryConsoleOutput::outputNernstInfo(const GeochemicalSystem & egs_ref) c
                          GeochemistryConstants::FARADAY;
 
   if (mgd_ref.redox_lhs == egs_ref.getOriginalRedoxLHS())
+  {
+    std::vector<Real> eh(mgd_ref.redox_stoichiometry.m());
     for (unsigned red = 0; red < mgd_ref.redox_stoichiometry.m(); ++red)
+      eh[red] = prefactor * (egs.log10RedoxActivityProduct(red) - egs.getRedoxLog10K(red));
+    const std::vector<unsigned> eh_order = GeochemistrySortedIndices::sortedIndices(eh, false);
+    for (const auto & red : eh_order)
       _console << mgd_ref.redox_lhs << " = "
                << GeochemistryFormattedOutput::reaction(mgd_ref.redox_stoichiometry,
                                                         red,
                                                         mgd_ref.basis_species_name,
                                                         _stoi_tol,
                                                         _precision)
-               << ";  Eh = "
-               << prefactor * (egs.log10RedoxActivityProduct(red) - egs.getRedoxLog10K(red))
-               << "V\n";
+               << ";  Eh = " << eh[red] << "V\n";
+  }
 
   // restore the original mgd by copying the data in copy_of_mgd into the memory referenced by
   // egs.getModelGeochemicalDatabase()

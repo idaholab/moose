@@ -74,13 +74,13 @@ This output is produced by the [Geochemists Workbench](https://www.gwb.com/) sof
 ```
 Nernst potentials:
 e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8361V
-e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3206V
-e- = 0.375*H2O - 1.25*H+ + 0.125*NH4+ - 0.125*NO3-;  Eh = 0.4425V
-e- = -1*H+ + 0.5*H2(aq);  Eh = -0.1986V
-e- = 0.5*H2O - 1.125*H+ - 0.125*SO4-- + 0.125*HS-;  Eh = -0.1263V
-e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
 e- = 0.5*H2O - 1*H+ + 0.5*NO2- - 0.5*NO3-;  Eh = 0.4809V
+e- = 0.375*H2O - 1.25*H+ + 0.125*NH4+ - 0.125*NO3-;  Eh = 0.4425V
+e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3206V
+e- = 0.5*H2O - 1.125*H+ - 0.125*SO4-- + 0.125*HS-;  Eh = -0.1263V
 e- = 0.375*H2O - 1.125*H+ - 0.125*HCO3- + 0.125*CH4(aq);  Eh = -0.1875V
+e- = -1*H+ + 0.5*H2(aq);  Eh = -0.1986V
+e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
 ```
 
 The differences are:
@@ -104,10 +104,5 @@ produces the equation
 3\mathrm{e}^{-} = \mathrm{H}_{2}\mathrm{O} - 4\mathrm{H}^{+} + \frac{1}{2}\mathrm{NH}_{4}^{+} - \frac{1}{2}\mathrm{NO}_{2}^{-} \ \ \ \   \mathrm{Eh} = 1289.1\,\mathrm{mV}
 \end{equation}
 which produces the result $\mathrm{Eh} = 430\,$mV when divided by 3.  (Remember that Eh values quoted by GWB are normalised to the number of electrons, but when manipulating equations in the way just described, the number of electrons must be accounted for.)
-
-
-
-
-
 
 !bibtex bibliography

@@ -128,13 +128,13 @@ Minerals:
 
 Nernst potentials:
 e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8361V
-e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3206V
-e- = 0.375*H2O - 1.25*H+ + 0.125*NH4+ - 0.125*NO3-;  Eh = 0.4425V
-e- = -1*H+ + 0.5*H2(aq);  Eh = -0.1986V
-e- = 0.5*H2O - 1.125*H+ - 0.125*SO4-- + 0.125*HS-;  Eh = -0.1263V
-e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
 e- = 0.5*H2O - 1*H+ + 0.5*NO2- - 0.5*NO3-;  Eh = 0.4809V
+e- = 0.375*H2O - 1.25*H+ + 0.125*NH4+ - 0.125*NO3-;  Eh = 0.4425V
+e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3206V
+e- = 0.5*H2O - 1.125*H+ - 0.125*SO4-- + 0.125*HS-;  Eh = -0.1263V
 e- = 0.375*H2O - 1.125*H+ - 0.125*HCO3- + 0.125*CH4(aq);  Eh = -0.1875V
+e- = -1*H+ + 0.5*H2(aq);  Eh = -0.1986V
+e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
 '
     match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
