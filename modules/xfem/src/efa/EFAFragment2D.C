@@ -367,10 +367,11 @@ EFAFragment2D::split()
   {
     for (unsigned int frag_idx = 0; frag_idx < 2; ++frag_idx) // Create 2 fragments
     {
-      EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
       auto & this_frag_nodes = fragment_nodes[frag_idx];
+      // check to make sure an edge wasn't cut
       if (this_frag_nodes.size() >= 3)
-      { // check to make sure an edge wasn't cut
+      {
+        EFAFragment2D * new_frag = new EFAFragment2D(_host_elem, false, NULL);
         for (unsigned int inode = 0; inode < this_frag_nodes.size() - 1; inode++)
           new_frag->addEdge(new EFAEdge(this_frag_nodes[inode], this_frag_nodes[inode + 1]));
 
