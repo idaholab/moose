@@ -141,6 +141,7 @@ refine = 0
 
   nl_max_its = 30
   nl_rel_tol = 1e-6
+  snesmf_reuse_base = false
 []
 
 [Outputs]

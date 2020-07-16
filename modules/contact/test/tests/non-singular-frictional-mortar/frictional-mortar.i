@@ -141,6 +141,7 @@ petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -s
   num_steps = 7
   end_time = 4
   line_search = none
+  snesmf_reuse_base = false
 []
 
 [Debug]

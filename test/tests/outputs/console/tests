@@ -164,7 +164,7 @@
     input = 'console_print_toggles.i'
     expect_out = '\s*0\sNonlinear[^\n]*?\n\s*1\sNonlinear'
     valgrind = NONE
-    cli_args = "Outputs/console/execute_on='nonlinear final failed timestep_end'"
+    cli_args = "Outputs/console/execute_on='nonlinear final failed timestep_end' Outputs/print_linear_converged_reason=false"
 
     requirement = 'The system shall support disabling the linear residual output.'
     issues = '#4497'

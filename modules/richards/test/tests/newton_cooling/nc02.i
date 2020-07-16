@@ -131,6 +131,7 @@
 
 [Executioner]
   type = Steady
+  snesmf_reuse_base = false
 []
 
 [Outputs]

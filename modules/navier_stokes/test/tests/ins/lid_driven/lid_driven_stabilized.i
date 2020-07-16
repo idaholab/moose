@@ -156,6 +156,8 @@
 
 [Outputs]
   exodus = true
+  print_linear_converged_reason = false
+  print_nonlinear_converged_reason = false
 []
 
 [Postprocessors]
