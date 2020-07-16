@@ -13,7 +13,7 @@ has the equilibrium equation
 Then:
 
 - If water activity is 1, the equilibrium temperature (where $K=1$) is found to be 43.7$^{\circ}$C.
-- If water activity is 0.7, the equilibrium temperature (where $K=1$) is found to be 11.8$^{\circ}$C.
+- If water activity is 0.7, the equilibrium temperature (where $K=1$) is found to be 11.7$^{\circ}$C.
 - If the temperature is 25$^{\circ}$C, the equilibrium is attained when water activity is 0.815.
 
 To perform this calculation using the `geochemistry` module, a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) object must be created with the desired mineral species:
@@ -28,10 +28,9 @@ The output yields the desired information:
 
 ```
 Not enough activites known to compute equilibrium temperature for reaction
-  Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.451
+  Gypsum = 2\*H2O \+ 1\*Ca\+\+ \+ 1\*SO4--  .  log10\(K\) = -4.451
 Gypsum.  T = 43.6625degC
 ```
-(The tiny discrepancies between the "theoretical" values and the numerical values in the above output are due to the geochemistry module's fourth-order least-squares best fit of the tabulated equilibrium constants.)
 
 The first lines state that equilibrium temperature for the reaction
 \begin{equation}
@@ -41,7 +40,19 @@ cannot be found because the activities of Ca$^{2+}$ and SO$_{4}^{2-}$ are unknow
 
 Altering the activity value for H$_{2}$O using the `activity_values` input enables finding the equilibrium temperature for different $a_{\mathrm{H}_{2}\mathrm{O}}$.
 
-To find the activity of water given $T=25^{\circ}$C, simply use `interrogation = activity` as in the page on [equilibrium activity ratios](activity_ratios.md).
+To find the activity of water given $T=25^{\circ}$C, simply use:
+
+- `interrogation = activity`
+- remove the `activity_species` and `activity_values` lines
+
+as in the page on [equilibrium activity ratios](activity_ratios.md).  This produces
+
+```
+(A_H2O)^2 (A_Ca++)^1 (A_SO4--)^1 = 10^-4.451
+(A_H2O)^2 = 10^-0.1775
+```
+
+where the last line is the desired result: $a_{\mathrm{H}_{2}\mathrm{O}} = 10^{-0.1775/2} = 0.815$.
 
 
 !bibtex bibliography

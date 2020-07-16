@@ -30,7 +30,7 @@ Most of the tests and examples are drawn from [!cite](bethke_2007)
 
 - [Reactions in terms of different components](reaction_balancing.md)
 - [Equilibrium activity ratios](activity_ratios.md)
-- [Computing pH and pe](pH_pe.md)
+- [Computing equilibrium pH](pH_pe.md)
 - [Equilibrium temperature or activity](eqm_temp_a.md)
 
 ## Nonunique solutions
