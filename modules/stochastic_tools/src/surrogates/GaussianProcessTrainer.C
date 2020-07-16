@@ -17,6 +17,7 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
+  params += CovarianceInterface::validParams();
   params.addClassDescription(
       "Provides data preperation and training for a Gaussian Process surrogate model.");
   params.addRequiredParam<SamplerName>("sampler", "Training set defined by a sampler object.");
@@ -38,6 +39,7 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
+    CovarianceInterface(parameters),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _training_data(),
@@ -52,18 +54,8 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         declareModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
 
 {
-  const UserObjectName & name(getParam<UserObjectName>("covariance_function"));
-  FEProblemBase & feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base"));
-
-  std::vector<CovarianceFunctionBase *> models;
-  feproblem.theWarehouse()
-      .query()
-      .condition<AttribName>(name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
-      .queryInto(models);
-  if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
-  _covariance_function = models[0];
+  _covariance_function =
+      getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"));
 }
 
 void

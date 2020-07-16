@@ -13,8 +13,9 @@
 #include "GaussianProcessTrainer.h"
 #include "Standardizer.h"
 #include <Eigen/Dense>
+#include "CovarianceInterface.h"
 
-class GaussianProcess : public SurrogateModel
+class GaussianProcess : public SurrogateModel, public CovarianceInterface
 {
 public:
   static InputParameters validParams();

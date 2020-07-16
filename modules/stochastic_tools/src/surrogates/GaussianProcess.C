@@ -18,12 +18,14 @@ InputParameters
 GaussianProcess::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
+  params += CovarianceInterface::validParams();
   params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
   return params;
 }
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
+    CovarianceInterface(parameters),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
     _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
@@ -47,19 +49,7 @@ GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
   mooseAssert(_covariance_function == nullptr,
               "Attempting to redefine covariacne function using setupCovariance.");
-  /// This is called to "initialize" the covariance function by the LoadCovarianceDataAction
-  /// Must be called AFTER Covariacne Function is potentially created by action.
-  std::vector<CovarianceFunctionBase *> models;
-  _feproblem.theWarehouse()
-      .query()
-      .condition<AttribName>(covar_name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
-      .queryInto(models);
-  if (models.empty())
-    mooseError("Unable to find a CovarianceFunction object associated with surrogate trainer, "
-               "searching on '" +
-               covar_name + "'");
-  _covariance_function = models[0];
+  _covariance_function = getCovarianceFunctionByName(covar_name);
 }
 
 Real
