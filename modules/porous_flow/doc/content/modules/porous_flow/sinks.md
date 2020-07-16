@@ -66,6 +66,21 @@ space-separated quantities:
 The weighting terms, $w_{i}$, are for user convenience, but for the Peaceman borehole case they are
 the borehole radius at point $x_{i}$.
 
+Rather than manually specifying each point via the separate points file, the
+line may be specified instead using the combination of the following parameters:
+
+- `line_base = '[w] [x] [y] [z]'`: the base/start point for the line
+- `line_direction = '[dx] [dy] [dz]'`: line direction (does not need to be unit-length)
+- `line_length = [length]`: exactly what you expect - the line length.
+
+It is an error to specify both a point (plain text) file parameter and the
+line base parameter.  When specifying the line this way, one point will be
+generated along the line for each element the line passes through.  These
+points are automatically updated when the mesh changes due to adaptivity,
+displacement, etc.  When using this mode of line-specification, the line end
+points must NOT ever lie on any mesh face or node during the entire simulation
+duration.
+
 The basic sink may be multiplied by any or all of the following quantities
 
 - Fluid relative permeability (when ```use_relative_permeability = true```)
@@ -85,6 +100,14 @@ usually used in coupled situations, for instance, a fluid sink may
 extract fluid at a given rate, and therefore in a simulation that
 includes, the same sink multiplied by fluid enthalpy should be applied
 to the temperature variable.
+
+!alert warning
+When creating the points for the line sink, it is important to ensure that
+every element the line passes through contains at least one (and ideally only
+one) point.  When doing this, it is also important to keep in mind that Mesh
+displacement and adaptivity can affect the location and number of elements
+during the simulation.
+
 
 !alert warning
 When using the PorousFlow Dirac Kernels in conjunction with [`PorousFlowPorosity`](porosity.md) that depends on volumetric strain (`mechanical = true`) you should set `strain_at_nearest_qp = true` in your GlobalParams block.  This ensures the nodal Porosity Material uses the volumetric strain at the Dirac quadpoint(s).  Otherwise, a nodal Porosity Material evaluated at node $i$ in an element will attempt to use the $i^{th}$ member of volumetric strain, but volumetric strain will only be of size equal to the number of Dirac points in the element.
