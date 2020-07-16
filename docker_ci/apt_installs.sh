@@ -28,7 +28,8 @@ apt-get install -y \
   curl \
   bison \
   flex \
-  libboost-all-dev
+  libboost-all-dev \
+  emacs
 
 # Clear cache
 rm -rf /var/lib/apt/lists/*

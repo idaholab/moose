@@ -37,7 +37,8 @@ yum install -y \
   tar \
   libtool \
   libtirpc \
-  libtirpc-devel
+  libtirpc-devel \
+  emacs
 
 # Clear cache
 yum clean all
