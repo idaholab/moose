@@ -1,8 +1,8 @@
 [Tests]
   [./gypsum_solubility]
-    type = 'RunApp'
+    type = 'CSVDiff'
     input = 'gypsum_solubility.i'
-    expect_out = 'Gypsum;  bulk_moles'
+    csvdiff = 'gypsum_solubility_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore solubilities'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md gypsum.md'
