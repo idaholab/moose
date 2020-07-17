@@ -1,0 +1,15 @@
+# React script that is equivalent to gypsum_solubility.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = 1e-10 free mol
+Na+          = 1e-10 free mol
+SO4--        = 1e-6 mol
+balance on SO4--
+swap Gypsum for Ca++
+Gypsum       = .5814 free mol
+react 3 mol of NaCl
+suppress ALL
+unsuppress  Gypsum
+dxprint = .01
