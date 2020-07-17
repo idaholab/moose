@@ -47,7 +47,7 @@ The MOOSE input file contains the usual [GeochemicalModelDefinition](Geochemical
 
 !listing modules/geochemistry/test/tests/equilibrium_models/seawater_no_precip.i block=UserObjects
 
-To instruct MOOSE to find the equilibrium configuration, a [TimeIndependentReactionSolver](actions/AddTimeDependentReactionSolverAction.md) is used:
+To instruct MOOSE to find the equilibrium configuration, a [TimeIndependentReactionSolver](actions/AddTimeIndependentReactionSolverAction.md) is used:
 
 - The swaps are defined.
 - The fugacity of the gases is fixed as defined above.
