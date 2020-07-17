@@ -4943,8 +4943,6 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
   TIME_SECTION(_check_exception_and_stop_solve_timer);
 
-  return;
-
   // See if any processor had an exception.  If it did, get back the
   // processor that the exception occurred on.
   unsigned int processor_id;

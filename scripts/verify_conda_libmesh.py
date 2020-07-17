@@ -64,7 +64,7 @@ def check_remote_conda(pkg_name):
 def inform_user_to_update():
     """User should update conda."""
     msg = "moose-libmesh may be outdated. run conda update -n moose --all"
-    # print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr)
 
 
 def inform_user_to_wait():
@@ -83,7 +83,7 @@ or
     2. Use `conda build` to build your own moose-libmesh
        package.
 """
-   # print(msg, file=sys.stderr)
+    print(msg, file=sys.stderr)
 
 
 def main():
@@ -109,8 +109,6 @@ def main():
 if __name__ == '__main__':
     # This script should act as an informational note only, allowing the user to
     # continue as frequently as possible (early versions of Conda do not work)
-    
-    
     try:
         print(main())
     except:

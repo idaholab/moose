@@ -1495,6 +1495,8 @@ private:
   std::vector<dof_id_type> _min_ids;
   /// Flags to indicate whether or not any two extra element integers are the same
   std::vector<std::vector<bool>> _id_identical_flag;
+  ///Whether or not to balance mesh vertices
+  bool _mesh_node_balance;
 
   /// Build extra data for faster access to the information of extra element integers
   void buildElemIDInfo();

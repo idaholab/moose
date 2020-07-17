@@ -169,6 +169,12 @@ MooseMesh::validParams()
       "construct_node_list_from_side_list",
       true,
       "Whether or not to generate nodesets from the sidesets (usually a good idea).");
+
+   params.addParam<bool>(
+       "mesh_node_balance",
+        false,
+        "Whether or not to balance mesh vertices to have better performance).");
+
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("ghosting_patch_size",
@@ -257,7 +263,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(false),
-    _need_ghost_ghosted_boundaries(true)
+    _need_ghost_ghosted_boundaries(true),
+    _mesh_node_balance(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -319,7 +326,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _read_recovered_mesh_timer(registerTimedSection("readRecoveredMesh", 2)),
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(other_mesh._need_delete),
-    _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries)
+    _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
+    _mesh_node_balance(false)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -422,6 +430,9 @@ MooseMesh::prepare(bool force)
     if (force || _needs_prepare_for_use)
       getMesh().prepare_for_use();
   }
+
+  if (_mesh_node_balance)
+    Partitioner::set_node_processor_ids(getMesh());
 
   // Collect (local) subdomain IDs
   _mesh_subdomains.clear();
@@ -2713,8 +2724,6 @@ MooseMesh::ghostGhostedBoundaries()
   // where boundaries are already ghosted accordingly
   if (!_use_distributed_mesh || !_need_ghost_ghosted_boundaries)
     return;
-
-  return;
 
   TIME_SECTION(_ghost_ghosted_boundaries_timer);
 
