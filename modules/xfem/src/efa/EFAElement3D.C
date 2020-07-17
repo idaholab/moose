@@ -1277,7 +1277,7 @@ EFAElement3D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
 }
 
 void
-EFAElement3D::printElement(std::ostream & ostream)
+EFAElement3D::printElement(std::ostream & ostream) const
 {
   // first line: all elem faces
   ostream << std::setw(5);
