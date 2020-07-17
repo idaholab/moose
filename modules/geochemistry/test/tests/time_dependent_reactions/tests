@@ -49,9 +49,9 @@
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
   [./add_feldspar]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'add_feldspar.i'
-    expect_out = 'Quartz;  bulk_moles'
+    csvdiff = 'add_feldspar_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions that involve adding reactants"
     issues = '#15330'
     design = 'adding_feldspar.md'
