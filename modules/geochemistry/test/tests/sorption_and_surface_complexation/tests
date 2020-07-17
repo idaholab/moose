@@ -1,8 +1,8 @@
 [Tests]
   [./selenate]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'selenate.i'
-    expect_out = 'SorbedSelenate;  molality'
+    csvdiff = 'selenate_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the Langmuir model'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md selenate.md'
