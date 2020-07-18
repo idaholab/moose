@@ -48,7 +48,8 @@ GeochemistryIonicStrength::ionicStrength(const ModelGeochemicalDatabase & mgd,
   if (!_use_only_basis_molality)
   {
     for (unsigned i = 0; i < num_eqm; ++i)
-      ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
+      if (!mgd.surface_sorption_related[i])
+        ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
     for (unsigned i = 0; i < num_kin; ++i)
       ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i] /
                         basis_species_molality[0]; // kin_species_molality is actually the number of
@@ -98,13 +99,17 @@ GeochemistryIonicStrength::stoichiometricIonicStrength(
   if (!_use_only_basis_molality)
   {
     for (unsigned i = 0; i < num_eqm; ++i)
-      if (mgd.eqm_species_charge[i] != 0.0)
-        ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
-      else
+      if (!mgd.surface_sorption_related[i])
       {
-        for (unsigned j = 0; j < num_basis; ++j)
-          ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) * eqm_species_molality[i] *
-                            mgd.eqm_stoichiometry(i, j);
+
+        if (mgd.eqm_species_charge[i] != 0.0)
+          ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
+        else
+        {
+          for (unsigned j = 0; j < num_basis; ++j)
+            ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) *
+                              eqm_species_molality[i] * mgd.eqm_stoichiometry(i, j);
+        }
       }
     for (unsigned i = 0; i < num_kin;
          ++i) // kin_species_molality is actually the number of moles, not molality
