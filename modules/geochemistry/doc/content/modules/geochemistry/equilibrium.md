@@ -120,7 +120,7 @@ which sets the molality of each surface complex.  Here:
 Computing the surface potential, $\Psi$, requires an additional equation, which [!cite](bethke_2007) writes as
 \begin{equation}
 \label{eq:psi}
-\frac{A_{\mathrm{sf}}}{Fn_{w}}\sqrt{RT\epsilon\epsilon_{0}\rho_{w} I}\sinh \left(\frac{z_{\pm}\Psi F}{2RT}\right) = \sum_{q}z_{q}m_{q} \ .
+\frac{A_{\mathrm{sf}}}{Fn_{w}}\sqrt{8RT\epsilon\epsilon_{0}\rho_{w} I}\sinh \left(\frac{z_{\pm}\Psi F}{2RT}\right) = \sum_{q}z_{q}m_{q} \ .
 \end{equation}
 Note that the right-hand side of this equation depends on $\Psi$ through [eq:mq].  The additional notation introduced here is as follows.
 

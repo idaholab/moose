@@ -1587,7 +1587,7 @@ TEST(GeochemicalSolverTest, solve5)
     EXPECT_LE(std::abs(res), 1E-14);
   }
   // surface potentials
-  const Real prefactor = std::sqrt(GeochemistryConstants::GAS_CONSTANT *
+  const Real prefactor = std::sqrt(8.0 * GeochemistryConstants::GAS_CONSTANT *
                                    (25.0 + GeochemistryConstants::CELSIUS_TO_KELVIN) *
                                    GeochemistryConstants::PERMITTIVITY_FREE_SPACE *
                                    GeochemistryConstants::DIELECTRIC_CONSTANT_WATER *
