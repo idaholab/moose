@@ -2571,10 +2571,10 @@ TEST(GeochemicalSystemTest, surfacePot)
   }
 
   // check the specific surface charge is correctly computed
-  const Real pref =
-      0.5 / 96485.3415 *
-      std::sqrt(8.314472 * 318.15 * 8.8541878128E-12 * 78.5 * 1000.0 * egs.getIonicStrength()) *
-      (-alg_vars(2) + 1.0 / alg_vars(2));
+  const Real pref = 0.5 / 96485.3415 *
+                    std::sqrt(8.0 * 8.314472 * 318.15 * 8.8541878128E-12 * 78.5 * 1000.0 *
+                              egs.getIonicStrength()) *
+                    (-alg_vars(2) + 1.0 / alg_vars(2));
   const Real surf_charge_gold = pref * 96485.3415;
   EXPECT_NEAR(egs.getSurfaceCharge(0), surf_charge_gold, 1.0E-9);
   try

@@ -1613,7 +1613,7 @@ Real
 GeochemicalSystem::surfacePotPrefactor(unsigned sp) const
 {
   return 0.5 * _sorbing_surface_area[sp] / GeochemistryConstants::FARADAY *
-         std::sqrt(GeochemistryConstants::GAS_CONSTANT *
+         std::sqrt(8.0 * GeochemistryConstants::GAS_CONSTANT *
                    (_temperature + GeochemistryConstants::CELSIUS_TO_KELVIN) *
                    GeochemistryConstants::PERMITTIVITY_FREE_SPACE *
                    GeochemistryConstants::DIELECTRIC_CONSTANT_WATER *
