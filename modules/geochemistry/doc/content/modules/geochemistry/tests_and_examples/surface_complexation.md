@@ -4,6 +4,8 @@ This example closely follows Section 10.4 of [!cite](bethke_2007).
 
 We explore the sorption of mercury, lead and sulfate onto hydrous ferric oxide at pH 4 and 8.
 
+## Definition of the sorption via surface complexation
+
 It is assumed that there are two sorbing sites:
 \begin{equation}
 A_{p}=\left(\ \mathrm{>(s)FeOH},\  \mathrm{>(w)FeOH}\,\right) \ .
@@ -35,11 +37,14 @@ A_{s} = 600\,\mathrm{m}^{2}/\mathrm{g(mineral)} \ ,
 \end{equation}
 We assume that:
 
-- There is 1 free gram of Fe(OH)3(ppd), which sets $n_{k}$ for this mineral, and sets the surface area $A_{\mathrm{sf}}=600\,$m$^{2}$ in the formula for $\Psi$.
 - For each mol of Fe(OH)3(ppd), there is 0.005$\,$mol of >(s)FeOH
 - For each mol of Fe(OH)3(ppd), there is 0.2$\,$mol of >(w)FeOH
 
-All of the above information is contained in the MOOSE database ????
+All of the above information is contained in the MOOSE test database `ferric_hydroxide_sorption.json`.  It is read into the MOOSE input file using a [GeochemicalModelDefinition](GeochemicalModelDefinition.md) UserObject
+
+!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/ferric_hydroxide.i block=UserObjects
+
+## Chemical composition, mineral quantities and sorbing moles
 
 The chemical composition of the water is shown in [table:analysis].  In addition:
 
@@ -55,7 +60,29 @@ The chemical composition of the water is shown in [table:analysis].  In addition
 | Pb$^{2+}$ | 0.1 |
 | SO$_{4}^{2-}$ | 0.2 |
 
-[!cite](bethke_2007) computes the results that are shown in [table:surface], [table:weak_conc], [table:strong_conc] and [table:perc_sorbed].  These may be compared with MOOSE ????
+There is 1 free gram of Fe(OH)3(ppd), which in `geochemistry` language means there is $9.357\times 10^{-3}$ free mols of this mineral.  Remember "free" moles means a quantity that is "floating around in the aqueous solution".  This is in contrast to a "bulk composition" which consists of the free amount as well as an amount that forms equilibrium (secondary) species.  This means there is
+
+- $0.005 \times 9.357\times 10^{-3} = 4.6786\times 10^{-5}\,$mol of >(s)FeOH
+- $0.2 \times 9.357\times 10^{-3} = 1.87145\times 10^{-3}\,$mol of >(w)FeOH
+
+Note that these are *bulk* composition values as some of these sites will be free and some will be occupied by sorbed species.
+
+!alert note
+The bulk mole compositions of the sites >(s)FeOH and >(w)FeOH must be specified in the geochemistry module.  This is different from Geochemists Workbench, which works out the bulk compositions internally.
+
+The [TimeIndependentReactionSolver](AddTimeIndependentReactionSolverAction.md) defines the composition, including the pH, the free mole number of the mineral, and the bulk composition of the sorbing sites:
+
+!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/ferric_hydroxide.i block=TimeIndependentReactionSolver
+
+## GWB input file
+
+The equivalent [Geochemists Workbench](https://www.gwb.com/) input file is
+
+!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/ferric_hydroxide.rea
+
+## Results
+
+[!cite](bethke_2007) computes the results that are shown in [table:surface], [table:weak_conc], [table:strong_conc] and [table:perc_sorbed].  Both the `geochemistry` module and the GWB software give the same results.  (A final note: sometimes the `geochemistry` results differ from the Geochemists Workbench results in the 4$^{\mathrm{th}}$ significant figure.  This is because of the different precision used for the permittivity of free space, the Faraday constant, etc.)
 
 !table id=table:surface caption=Surface characteristics
 | Characteristic | pH=4 | pH=8 |
@@ -89,7 +116,5 @@ The chemical composition of the water is shown in [table:analysis].  In addition
 | Hg$^{2+}$ | 0.000 | 98.45 |
 | Pb$^{2+}$ | 39.59 | 100 |
 | SO$_{4}^{2-}$ | 99.95 | 1.98 |
-
-!listing modules/geochemistry/test/tests/sorption_and_surface_complexation/ferric_hydroxide.i
 
 !bibtex bibliography
