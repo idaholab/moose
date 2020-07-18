@@ -104,6 +104,16 @@ GeochemistryConsoleOutput::output(const ExecFlagType & type)
   for (unsigned i = 1; i < num_basis; ++i) // do not loop over water
     if (mgd.basis_species_mineral[i])
       mass -= basis_molality[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
+  // remove surface complexes
+  for (const auto & name_info :
+       mgd.surface_complexation_info) // all minerals involved in surface complexation
+    for (const auto & name_frac :
+         name_info.second.sorption_sites) // all sorption sites on the given mineral
+    {
+      const unsigned i =
+          mgd.basis_species_index.at(name_frac.first); // i = basis_index_of_sorption_site
+      mass -= basis_molality[i] * mgd.basis_species_molecular_weight[i] / 1000.0;
+    }
   _console << "Mass of aqueous solution = " << mass << "kg";
   if (num_kin == 0)
     _console << " (without free minerals)\n";
