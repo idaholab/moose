@@ -1,0 +1,14 @@
+# React script that is equivalent to kinetic_albite.i
+time begin = 0 days, end = 30 days
+T = 70
+pH = 1.5
+0.1 molal Cl-
+0.1 molal Na+
+1 umolal SiO2(aq)
+1 umolal Al+++
+
+react 250 g "Albite low"
+kinetic "Albite low" rate_con = 6.3e-13, apower(H+) = 1 \
+   surface = 1000
+fix pH
+go
