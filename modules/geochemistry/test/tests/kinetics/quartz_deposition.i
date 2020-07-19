@@ -1,5 +1,5 @@
 # Example of quartz deposition in a fracture, as the temperature is reduced from 300degC to 25degC
-# The initial free molality of SiO2(aq) is determined using quartz_equilibrium_at300degC: this will need to be updated when temperature-dependence has been included in geochemistry
+# The initial free molality of SiO2(aq) is determined using quartz_equilibrium_at300degC
 [GlobalParams]
   point = '0 0 0'
 []
@@ -8,16 +8,17 @@
   model_definition = definition
   geochemistry_reactor_name = reactor
   charge_balance_species = "Cl-"
-  constraint_species = "H2O H+ Cl- SiO2(aq)"
-  constraint_value = "  1.0 1E-5 1E-5 0.0001002"
+  constraint_species = "H2O              Na+                Cl-                SiO2(aq)"
+  constraint_value = "  1.0              1E-10              1E-10              0.009722905"
   constraint_meaning = "kg_solvent_water moles_bulk_species moles_bulk_species free_molality"
   initial_temperature = 300.0
   temperature = temp_controller
   kinetic_species_name = Quartz
   kinetic_species_initial_moles = 6.657313 # Quartz has 60.0843g/mol
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
-  close_system_at_time = 0
+  add_aux_pH = false # there is no H+ in this system
   evaluate_kinetic_rates_always = true # implicit time-marching used for stability
+  execute_console_output_on = '' # only CSV output used in this example
 []
 
 [UserObjects]
@@ -32,10 +33,17 @@
   [./definition]
     type = GeochemicalModelDefinition
     database_file = "../../../database/moose_geochemdb.json"
-    basis_species = "H2O SiO2(aq) H+ Cl-"
+    basis_species = "H2O SiO2(aq) Na+ Cl-"
     kinetic_minerals = "Quartz"
     kinetic_rate_descriptions = "rate_quartz"
   [../]
+[]
+
+
+[Executioner]
+  type = Transient
+  dt = 0.02
+  end_time = 1 # measured in years
 []
 
 [AuxVariables]
@@ -45,7 +53,7 @@
   [../]
 []
 [AuxKernels]
-  [./temp_controller]
+  [./temp_controller_auxk]
     type = FunctionAux
     function = '300 - 275 * t'
     variable = temp_controller
@@ -54,11 +62,10 @@
   [./diss_rate]
     type = ParsedAux
     args = mol_change_Quartz
-    function = '-mol_change_Quartz / 0.1' # 0.1 = timestep size
+    function = '-mol_change_Quartz / 0.02' # 0.02 = timestep size
     variable = diss_rate
   [../]
 []
-
 [Postprocessors]
   [./mg_per_kg_sio2]
     type = PointValue
@@ -68,14 +75,11 @@
     type = PointValue
     variable = diss_rate
   [../]
+  [./temperature]
+    type = PointValue
+    variable = "solution_temperature"
+  [../]
 []
-
-[Executioner]
-  type = Transient
-  dt = 0.1
-  end_time = 1 # measured in years
-[]
-
 [Outputs]
   csv = true
 []
