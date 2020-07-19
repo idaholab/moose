@@ -1,7 +1,4 @@
 # Sorption onto FerricHydroxide.
-# There is 1 free gram of Fe(OH)3(ppd), which amounts to 9.357E-3 free moles.
-# Per mole of Fe(OH)3(ppd) there are 0.005 moles of >(s)FeOH, giving a total of 4.679E-5 moles (bulk composition)
-# Per mole of Fe(OH)3(ppd) there are 0.2 moles of >(w)FeOH, giving a total of 1.871E-3 moles (bulk composition)
 [TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Cl-"

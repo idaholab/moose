@@ -1,20 +1,19 @@
 # Sorption onto FerricHydroxide along with changing pH
-# There is 1 free gram of Fe(OH)3(ppd), which amounts to 9.357E-3 free moles.
-# Per mole of Fe(OH)3(ppd) there are 0.005 moles of >(s)FeOH, giving a total of 4.679E-5 moles (bulk composition)
-# Per mole of Fe(OH)3(ppd) there are 0.2 moles of >(w)FeOH, giving a total of 1.871E-3 moles (bulk composition)
 [TimeDependentReactionSolver]
   model_definition = definition
   geochemistry_reactor_name = reactor
   swap_out_of_basis = "Fe+++"
   swap_into_basis = "Fe(OH)3(ppd)"
   charge_balance_species = "Cl-"
-  constraint_species = "H2O              H+        Na+ Cl- Fe(OH)3(ppd) >(s)FeOH  >(w)FeOH"
-  constraint_value = "  1.0              1E-4      0.1 0.1 9.3573E-3    4.6786E-5 1.87145E-3"
+  constraint_species = "H2O              H+        Na+                Cl-                Fe(OH)3(ppd)               >(s)FeOH           >(w)FeOH"
+  constraint_value = "  1.0              1E-4      0.1                0.1                9.3573E-3                  4.6786E-5          1.87145E-3"
   constraint_meaning = "kg_solvent_water activity  moles_bulk_species moles_bulk_species free_moles_mineral_species moles_bulk_species moles_bulk_species"
-  abs_tol = 1E-14
   controlled_activity_name = "H+"
   controlled_activity_value = set_aH
-  execute_console_output_on = 'initial final'
+  ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
+  stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
+  abs_tol = 1E-14
+  execute_console_output_on = '' # only CSV output needed for this example
 []
 
 [AuxVariables]
@@ -75,9 +74,12 @@
 
 [Executioner]
   type = Transient
-  start_time = -1
-  dt = 1
+  start_time = -0.25
+  dt = 0.25
   end_time = 8
+[]
+[Outputs]
+  csv = true
 []
 
 [UserObjects]
@@ -86,6 +88,7 @@
     database_file = "../../database/ferric_hydroxide_sorption.json"
     basis_species = "H2O H+ Na+ Cl- Fe+++ >(s)FeOH >(w)FeOH"
     equilibrium_minerals = "Fe(OH)3(ppd)"
+    piecewise_linear_interpolation = true # for comparison with GWB
   [../]
 []
 
