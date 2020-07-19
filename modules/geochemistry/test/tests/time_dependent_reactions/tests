@@ -91,12 +91,11 @@
     design = 'changing_pH_iron.md'
   [../]
   [./cooling]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'cooling.i'
-    expect_out = 'Temperature = 25'
+    csvdiff = 'cooling_out.csv'
     requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
     issues = '#15330'
-    skip = 'temperature stuff needs to be validated'
     design = 'cooling_feldspar.md'
   [../]
   [./dissolution_pyrite_1]
