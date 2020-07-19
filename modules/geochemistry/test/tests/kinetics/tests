@@ -1,18 +1,16 @@
 [Tests]
   [./quartz_dissolution]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'quartz_dissolution.i'
-
-    expect_out = 'Quartz;  moles'
+    csvdiff = 'quartz_dissolution_out.csv'
     requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions such as dissolution"
     issues = '#15330'
     design = 'kinetic_quartz.md'
   [../]
   [./kinetic_albite]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'kinetic_albite.i'
-
-    expect_out = 'Albite;  moles'
+    csvdiff = 'kinetic_albite_out.csv'
     requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with promoting species"
     issues = '#15330'
     design = 'kinetic_albite.md'
