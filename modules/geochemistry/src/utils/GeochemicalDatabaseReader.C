@@ -14,9 +14,11 @@
 #include "string"
 #include <fstream>
 
-GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename,
-                                                     const bool reexpress_free_electron,
-                                                     const bool use_piecewise_interpolation)
+GeochemicalDatabaseReader::GeochemicalDatabaseReader(
+    const FileName filename,
+    const bool reexpress_free_electron,
+    const bool use_piecewise_interpolation,
+    const bool remove_all_extrapolated_secondary_species)
   : _filename(filename)
 {
   read(_filename);
@@ -24,6 +26,8 @@ GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename,
     reexpressFreeElectron();
   if (use_piecewise_interpolation && _root["Header"].isMember("logk model"))
     _root["Header"]["logk model"] = "piecewise-linear";
+  if (remove_all_extrapolated_secondary_species)
+    removeExtrapolatedSecondarySpecies();
 
   setTemperatures();
   setDebyeHuckel();
@@ -80,6 +84,15 @@ GeochemicalDatabaseReader::reexpressFreeElectron()
     const Real newk = logk_e + stoi * logk_o2;
     _root["free electron"]["e-"]["logk"][i] = std::to_string(newk);
   }
+}
+
+void
+GeochemicalDatabaseReader::removeExtrapolatedSecondarySpecies()
+{
+  const std::vector<std::string> names(_root["secondary species"].getMemberNames());
+  for (const auto & name : names)
+    if (_root["secondary species"][name].isMember("note"))
+      _root["secondary species"].removeMember(name);
 }
 
 std::string

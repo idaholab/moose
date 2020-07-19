@@ -361,8 +361,9 @@
         11.5940,
         11.2191,
         11.0880,
-        11.2844
-      ]
+        1001.2844
+      ],
+      "note": "this is a note saying that the 1001.2844 has resulted from a crazy extrapolation of logK"
     }
   },
   "mineral species": {

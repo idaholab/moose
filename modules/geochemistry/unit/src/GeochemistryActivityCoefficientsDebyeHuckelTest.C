@@ -12,7 +12,7 @@
 #include "GeochemistryActivityCoefficientsDebyeHuckel.h"
 #include "GeochemistryActivityCalculators.h"
 
-const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 // The following system has secondary species: (O-phth)--, CO2(aq), CO3--, CaCO3, CaOH+, OH-,
 // >(s)FeO-, Calcite
 const PertinentGeochemicalSystem model(database,

@@ -247,7 +247,7 @@ TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
   EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
 
   sspecies = ss["OH-"];
-  logk_gold = {14.9325, 13.9868, 13.0199, 12.2403, 11.5940, 11.2191, 11.0880, 11.2844};
+  logk_gold = {14.9325, 13.9868, 13.0199, 12.2403, 11.5940, 11.2191, 11.0880, 1001.2844};
   bs_gold = {{"H2O", 1}, {"H+", -1}};
 
   EXPECT_EQ(sspecies.radius, 3.5);
@@ -515,6 +515,7 @@ TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies)
   EXPECT_FALSE(database.isSecondarySpecies("Ag"));
   EXPECT_TRUE(database.isSecondarySpecies("CO2(aq)"));
   EXPECT_TRUE(database.isSecondarySpecies("CO3--"));
+  EXPECT_TRUE(database.isSecondarySpecies("OH-"));
   EXPECT_FALSE(database.isSecondarySpecies("Calcite"));
   EXPECT_FALSE(database.isSecondarySpecies("Fe(OH)3(ppd)"));
   EXPECT_FALSE(database.isSecondarySpecies("CH4(g)"));
@@ -711,4 +712,25 @@ TEST(GeochemicalDatabaseReaderTest, freeElectronNoReexpress)
   EXPECT_EQ(fe.molecular_weight, 0.0);
   EXPECT_EQ(fe.basis_species, bs_gold);
   EXPECT_EQ(fe.equilibrium_const, logk_gold);
+}
+
+/// Test the DatabaseReader when the secondary species that contain extrapolated logK are removed
+TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies_noextrap)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, false, true);
+
+  EXPECT_FALSE(database.isSecondarySpecies("Ca++"));
+  EXPECT_FALSE(database.isSecondarySpecies("H2O"));
+  EXPECT_FALSE(database.isSecondarySpecies("Ag"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO2(aq)"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO3--"));
+  EXPECT_FALSE(database.isSecondarySpecies("OH-"));
+  EXPECT_FALSE(database.isSecondarySpecies("Calcite"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isSecondarySpecies("CH4(g)"));
+  EXPECT_FALSE(database.isSecondarySpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe+++"));
+  EXPECT_FALSE(database.isSecondarySpecies("Cu2O"));
+  EXPECT_FALSE(database.isSecondarySpecies(">(s)FeO-"));
+  EXPECT_TRUE(database.isSecondarySpecies("e-"));
 }

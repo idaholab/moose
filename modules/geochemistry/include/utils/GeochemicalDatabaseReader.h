@@ -227,7 +227,8 @@ public:
    */
   GeochemicalDatabaseReader(const FileName filename,
                             const bool reexpress_free_electron = true,
-                            const bool use_piecewise_interpolation = false);
+                            const bool use_piecewise_interpolation = false,
+                            const bool remove_all_extrapolated_secondary_species = false);
 
   /**
    * Parse the thermodynamic database
@@ -441,6 +442,13 @@ public:
   std::vector<std::string> surfaceSpeciesNames() const;
 
 protected:
+  /**
+   * After parsing the database file, remove any secondary species that have extrapolated
+   * equilibrium constants.  This is called in the constructor if the
+   * remove_all_extrapolated_secondary_species flag is true
+   */
+  void removeExtrapolatedSecondarySpecies();
+
   /**
    * Generates a formatted vector of strings representing all reactions
    * @param names list of reaction species

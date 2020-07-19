@@ -82,6 +82,12 @@ GeochemicalModelDefinition::validParams()
       "kinetic_rate_descriptions",
       "A list of GeochemistryKineticRate UserObject names that define the kinetic rates.  If a "
       "kinetic species has no rate prescribed to it, its reaction rate will be zero");
+  params.addParam<bool>(
+      "remove_all_extrapolated_secondary_species",
+      false,
+      "After reading the database file, immediately remove all secondary species that have "
+      "extrapolated equilibrium constants.  Sometimes these extrapolations are completely crazy "
+      "and those secondary species greatly impact the results");
 
   params.addClassDescription("User object that parses a geochemical database file, and only "
                              "retains information relevant to the current geochemical model");
@@ -93,7 +99,8 @@ GeochemicalModelDefinition::GeochemicalModelDefinition(const InputParameters & p
   : GeneralUserObject(parameters),
     _db(getParam<FileName>("database_file"),
         getParam<bool>("reexpress_free_electron"),
-        getParam<bool>("piecewise_linear_interpolation")),
+        getParam<bool>("piecewise_linear_interpolation"),
+        getParam<bool>("remove_all_extrapolated_secondary_species")),
     _model(_db,
            getParam<std::vector<std::string>>("basis_species"),
            getParam<std::vector<std::string>>("equilibrium_minerals"),

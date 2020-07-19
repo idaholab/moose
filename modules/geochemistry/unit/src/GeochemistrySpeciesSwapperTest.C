@@ -17,7 +17,7 @@ const Real eps =
 /// Check bulk_composition exception
 TEST(GeochemistrySpeciesSwapperTest, bulkCompositionException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // The following system has secondary species: CO2(aq), CO3--, OH-,
   // (O-phth)--, CH4(aq), Fe+++,
@@ -52,7 +52,7 @@ TEST(GeochemistrySpeciesSwapperTest, bulkCompositionException)
 /// Check all sorts of illegal swaps throw mooseError or mooseException
 TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // The following system has secondary species: CO2(aq), CO3--, OH-,
   // (O-phth)--, CH4(aq), Fe+++,
@@ -208,7 +208,7 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 /// Check a simple swap that does not involve redox or other complicated things
 TEST(GeochemistrySpeciesSwapperTest, swap1)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
   PertinentGeochemicalSystem model(
@@ -488,7 +488,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 4), 11.5940 - 0 * 0.0762, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 5), 11.2191 - 0 * (-0.5349), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 6), 11.0880 - 0 * (-1.2301), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 11.2844 - 0 * (-2.2107), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 1001.2844 - 0 * (-2.2107), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 0), 0 - 1 * 2.0683, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 1), 0 - 1 * 1.7130, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 2), 0 - 1 * 1.2133, eps);
@@ -508,7 +508,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
 /// Check a complicated swap involving redox and complicated stoichiometric coefficients
 TEST(GeochemistrySpeciesSwapperTest, swap2)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: OH-, CO2(aq), CO3--, StoiCheckRedox, StoiCheckGas
   PertinentGeochemicalSystem model(database,
@@ -757,7 +757,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 4), 11.5940, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 5), 11.2191, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 6), 11.0880, eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 11.2844, eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 1001.2844, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 0), -0.5 * (-2.9620), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 1), -0.5 * (-3.1848), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 2), -0.5 * (-3.3320), eps);
@@ -797,7 +797,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
 /// Test the swap works on kinetic species
 TEST(GeochemistrySpeciesSwapperTest, swap3)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++
   PertinentGeochemicalSystem model(database,
@@ -1255,7 +1255,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
 /// Test the swap works on redox in disequilibrium
 TEST(GeochemistrySpeciesSwapperTest, swap_redox)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "Fe++", "O2(aq)", "HCO3-", "(O-phth)--", "Fe+++"},
@@ -1349,7 +1349,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
 /// Check findBestEqmSwap execption
 TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwapException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
   PertinentGeochemicalSystem model(
@@ -1389,7 +1389,7 @@ TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwapException)
 /// Check findBestEqmSwap
 TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwap)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
   PertinentGeochemicalSystem model(
