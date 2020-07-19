@@ -83,9 +83,9 @@
     design = 'changing_fugacity_with_calcite.md'
   [../]
   [./changing_pH_ferric_hydroxide]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'changing_pH_ferric_hydroxide.i'
-    expect_out = 'pH = 12'
+    csvdiff = 'changing_pH_ferric_hydroxide_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where pH is changed over time"
     issues = '#15330'
     design = 'changing_pH_iron.md'
