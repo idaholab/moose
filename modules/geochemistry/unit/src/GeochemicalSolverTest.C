@@ -12,8 +12,8 @@
 #include "GeochemicalSolver.h"
 #include "GeochemistryKineticRateCalculator.h"
 
-const GeochemicalDatabaseReader db_solver("database/moose_testdb.json", true, true);
-const GeochemicalDatabaseReader db_full("../database/moose_geochemdb.json", true, true);
+const GeochemicalDatabaseReader db_solver("database/moose_testdb.json", true, true, false);
+const GeochemicalDatabaseReader db_full("../database/moose_geochemdb.json", true, true, false);
 const GeochemicalDatabaseReader
     db_ferric("../test/database/ferric_hydroxide_sorption.json", true, true);
 // Following model only has OH- as an equilibrium species

@@ -295,7 +295,7 @@ TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrength_except)
 /// Test stoichiometric ionic strength when using Cl only
 TEST(GeochemistryIonicStrengthTest, stoichiometricIonicStrengthOnlyCl)
 {
-  const GeochemicalDatabaseReader db_cl("../database/moose_geochemdb.json", true, true);
+  const GeochemicalDatabaseReader db_cl("../database/moose_geochemdb.json", true, true, false);
   const PertinentGeochemicalSystem model_cl(
       db_cl, {"H2O", "H+", "Cl-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   const ModelGeochemicalDatabase mgd_cl = model_cl.modelGeochemicalDatabase();

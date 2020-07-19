@@ -11,7 +11,7 @@
 
 #include "GeochemicalSystem.h"
 
-const GeochemicalDatabaseReader db_calcite("database/moose_testdb.json", true, true);
+const GeochemicalDatabaseReader db_calcite("database/moose_testdb.json", true, true, false);
 const PertinentGeochemicalSystem model_calcite(
     db_calcite, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
 const PertinentGeochemicalSystem model_kinetic_calcite(
@@ -136,7 +136,7 @@ TEST(GeochemicalSystemTest, numInEquilibrium) { EXPECT_EQ(egs_calcite.getNumInEq
 /// Check swaps have correct size
 TEST(GeochemicalSystemTest, swapSizeException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -166,7 +166,7 @@ TEST(GeochemicalSystemTest, swapSizeException)
 /// Check swaps is not swapping charge-balance species out
 TEST(GeochemicalSystemTest, swapChargeBalanceException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -195,7 +195,7 @@ TEST(GeochemicalSystemTest, swapChargeBalanceException)
 /// Check illegal swap produces an error
 TEST(GeochemicalSystemTest, swapException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -238,7 +238,7 @@ TEST(GeochemicalSystemTest, swapException)
 /// Check constraint sizes
 TEST(GeochemicalSystemTest, constraintSizeExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -339,7 +339,7 @@ TEST(GeochemicalSystemTest, constraintSizeExceptions)
 /// Check constraint sizes
 TEST(GeochemicalSystemTest, constraintNameExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -407,7 +407,7 @@ TEST(GeochemicalSystemTest, constraintNameExceptions)
 /// Check appropriate positivity
 TEST(GeochemicalSystemTest, positiveException1)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -447,7 +447,7 @@ TEST(GeochemicalSystemTest, positiveException1)
 /// Check appropriate positivity
 TEST(GeochemicalSystemTest, positiveException2)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -488,7 +488,7 @@ TEST(GeochemicalSystemTest, positiveException2)
 /// Check appropriate positivity
 TEST(GeochemicalSystemTest, positiveException3)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -530,7 +530,7 @@ TEST(GeochemicalSystemTest, positiveException3)
 /// Check appropriate positivity
 TEST(GeochemicalSystemTest, positiveException4)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -571,7 +571,7 @@ TEST(GeochemicalSystemTest, positiveException4)
 /// Check appropriate positivity
 TEST(GeochemicalSystemTest, positiveException5)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "Ca++"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -615,7 +615,7 @@ TEST(GeochemicalSystemTest, positiveException5)
 /// Check water provided with appropriate value
 TEST(GeochemicalSystemTest, waterException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -657,7 +657,7 @@ TEST(GeochemicalSystemTest, waterException)
 /// Check gases are provided with appropriate value
 TEST(GeochemicalSystemTest, fugacityException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -1164,7 +1164,7 @@ TEST(GeochemicalSystemTest, getBasisActivityKnown)
   EXPECT_EQ(egs_calcite.getBasisActivityKnown()[2], false); // HCO3-
   EXPECT_EQ(egs_calcite.getBasisActivityKnown()[3], true);  // Calcite
 
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -1217,7 +1217,7 @@ TEST(GeochemicalSystemTest, getBasisActivity)
         << "Failed with unexpected error message: " << msg;
   }
 
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -1268,7 +1268,7 @@ TEST(GeochemicalSystemTest, getBasisActivityCoeff)
         << "Failed with unexpected error message: " << msg;
   }
 
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -1468,7 +1468,7 @@ TEST(GeochemicalSystemTest, getEquilibriumActivityExeception)
 /// Check getTotalChargeOld
 TEST(GeochemicalSystemTest, getTotalChargeOld)
 {
-  const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   const PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "Fe+++"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -2099,7 +2099,7 @@ TEST(GeochemicalSystemTest, swapExceptions)
         << "Failed with unexpected error message: " << msg;
   }
 
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -2279,7 +2279,7 @@ TEST(GeochemicalSystemTest, getIS)
 /// Check alterChargeBalanceSpecies and revert
 TEST(GeochemicalSystemTest, alterAndRevertChargeBalance)
 {
-  const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  const GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   const PertinentGeochemicalSystem model(
       database, {"H2O", "StoiCheckBasis", "HCO3-"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -2435,7 +2435,7 @@ TEST(GeochemicalSystemTest, getSurfaceChargeException)
 /// Check sorbing surface area
 TEST(GeochemicalSystemTest, sorbingSurfaceArea)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++"},
                                    {"Fe(OH)3(ppd)"},
@@ -2474,7 +2474,7 @@ TEST(GeochemicalSystemTest, sorbingSurfaceArea)
 /// Check surface potential things (not jacobian)
 TEST(GeochemicalSystemTest, surfacePot)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                                    {"Fe(OH)3(ppd)"},
@@ -2621,7 +2621,7 @@ TEST(GeochemicalSystemTest, surfacePot)
 /// Check jacobian when there is a surface potential
 TEST(GeochemicalSystemTest, surfacePotJac)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                                    {"Fe(OH)3(ppd)"},
@@ -2689,7 +2689,7 @@ TEST(GeochemicalSystemTest, surfacePotJac)
 /// Check jacobian when there is a surface potential and kinetic species
 TEST(GeochemicalSystemTest, bigJac)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                                    {"Fe(OH)3(ppd)"},
@@ -2757,7 +2757,7 @@ TEST(GeochemicalSystemTest, bigJac)
 /// Check jacobian when there is a surface potential and kinetic species and mole additions
 TEST(GeochemicalSystemTest, bigJac2)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe+++", "HCO3-"},
                                    {"Fe(OH)3(ppd)"},
@@ -3545,7 +3545,7 @@ TEST(GeochemicalSystemTest, getConstraintMeaning)
 /// Check changeConstraintToBulk exceptions
 TEST(GeochemicalSystemTest, changeContraintToBulkExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3617,7 +3617,7 @@ TEST(GeochemicalSystemTest, changeContraintToBulkExceptions)
 /// Check closeSystem
 TEST(GeochemicalSystemTest, closeSystem)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3653,7 +3653,7 @@ TEST(GeochemicalSystemTest, closeSystem)
 /// Check changeConstraintToBulk
 TEST(GeochemicalSystemTest, changeConstraintToBulk)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3714,7 +3714,7 @@ TEST(GeochemicalSystemTest, changeConstraintToBulk)
 /// Check addToBulkMoles exceptions
 TEST(GeochemicalSystemTest, addToBulkMolesExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "HCO3-", "O2(aq)"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3759,7 +3759,7 @@ TEST(GeochemicalSystemTest, addToBulkMolesExceptions)
 /// Check addToBulkMoles
 TEST(GeochemicalSystemTest, addToBulkMoles)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3825,7 +3825,7 @@ TEST(GeochemicalSystemTest, setConstraintValueExceptions)
 /// Check setConstraintValue
 TEST(GeochemicalSystemTest, setConstraintValue)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true);
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
   PertinentGeochemicalSystem model(
       database, {"H2O", "H+", "O2(aq)", "HCO3-"}, {}, {"O2(g)"}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
@@ -3907,7 +3907,7 @@ TEST(GeochemicalSystemTest, getsetModelGeochemicalDatabase)
   // this test involves radically changing the basis to illustrate copying, etc, works: no coder
   // should actually perform these radical changes otherwise a crash is virtually guaranteed!
 
-  const GeochemicalDatabaseReader db("database/moose_testdb.json", true, true);
+  const GeochemicalDatabaseReader db("database/moose_testdb.json", true, true, false);
   const PertinentGeochemicalSystem pgs(db, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = pgs.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(2, 1E-6);
