@@ -14,7 +14,7 @@
 #include "SamplerInterface.h"
 #include "SurrogateModelInterface.h"
 
-class SurrogateModel : public MooseObject, public SamplerInterface, SurrogateModelInterface
+class SurrogateModel : public MooseObject, public SamplerInterface, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
