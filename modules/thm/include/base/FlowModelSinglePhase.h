@@ -36,6 +36,7 @@ public:
   static const std::string TEMPERATURE;
   static const std::string THERMAL_CONDUCTIVITY;
   static const std::string VELOCITY;
+  static const std::string REYNOLDS_NUMBER;
 
   static InputParameters validParams();
 };
