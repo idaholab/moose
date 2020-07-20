@@ -31,13 +31,11 @@ JIntegral::validParams()
       position_type,
       "The method used to calculate position along crack front.  Options are: " +
           position_type.getRawNames());
-
-  MooseEnum output_type("J K C", "J");
-  params.addParam<MooseEnum>("output_type",
-                             output_type,
-                             "Select J-integral, stress intensity factor K from J-integral, or "
-                             "C(t) integral. Options are: " +
-                                 output_type.getRawNames());
+  MooseEnum integral_vec("JIntegral CIntegral KFromJIntegral");
+  params.addRequiredParam<MooseEnum>("integral",
+                                     integral_vec,
+                                     "Domain integrals to calculate.  Choices are: " +
+                                         integral_vec.getRawNames());
   params.addParam<unsigned int>("symmetry_plane",
                                 "Account for a symmetry plane passing through "
                                 "the plane of the crack, normal to the specified "
@@ -60,16 +58,17 @@ JIntegral::validParams()
 JIntegral::JIntegral(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
+    _integral(getParam<MooseEnum>("integral")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             ? &getMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             : nullptr),
-    _output_type(getParam<MooseEnum>("output_type").getEnum<OutputType>()),
-    _Eshelby_tensor(_output_type != OutputType::C
+    _Eshelby_tensor(_integral != INTEGRAL::C_INTEGRAL
                         ? &getMaterialProperty<RankTwoTensor>("Eshelby_tensor")
                         : nullptr),
-    _Eshelby_tensor_dissipation(_output_type == OutputType::C ? &getMaterialProperty<RankTwoTensor>(
-                                                                    "Eshelby_tensor_dissipation")
-                                                              : nullptr),
+    _Eshelby_tensor_dissipation(
+        _integral == INTEGRAL::C_INTEGRAL
+            ? &getMaterialProperty<RankTwoTensor>("Eshelby_tensor_dissipation")
+            : nullptr),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
@@ -82,9 +81,10 @@ JIntegral::JIntegral(const InputParameters & parameters)
     _y(declareVector("y")),
     _z(declareVector("z")),
     _position(declareVector("id")),
-    _j_integral(declareVector(
-        (_output_type == OutputType::K ? "K_" : (_output_type == OutputType::J ? "J_" : "C_")) +
-        Moose::stringify(_ring_index)))
+    _j_integral(declareVector((_integral == INTEGRAL::K_FROM_J_INTEGRAL
+                                   ? "K_"
+                                   : (_integral == INTEGRAL::J_INTEGRAL ? "J_" : "C_")) +
+                              Moose::stringify(_ring_index)))
 {
 }
 
@@ -92,9 +92,9 @@ void
 JIntegral::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
-  if (_output_type == OutputType::K &&
+  if (_integral == INTEGRAL::K_FROM_J_INTEGRAL &&
       (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio")))
-    mooseError("youngs_modulus and poissons_ratio must be specified if output_type = K");
+    mooseError("youngs_modulus and poissons_ratio must be specified if integrals = KFromJIntegral");
 }
 
 void
@@ -139,14 +139,14 @@ JIntegral::computeQpIntegral(const std::size_t crack_front_point_index,
 
   Real eq;
 
-  if (_output_type != OutputType::C)
+  if (_integral != INTEGRAL::C_INTEGRAL)
     eq = (*_Eshelby_tensor)[_qp].doubleContraction(grad_of_vector_q);
   else
     eq = (*_Eshelby_tensor_dissipation)[_qp].doubleContraction(grad_of_vector_q);
 
   // Thermal component
   Real eq_thermal = 0.0;
-  if (_J_thermal_term_vec && _output_type != OutputType::C)
+  if (_J_thermal_term_vec && _integral != INTEGRAL::C_INTEGRAL)
   {
     for (std::size_t i = 0; i < 3; i++)
       eq_thermal += crack_direction(i) * scalar_q * (*_J_thermal_term_vec)[_qp](i);
@@ -229,7 +229,7 @@ JIntegral::finalize()
 
     Real sign = (_j_integral[i] > 0.0) ? 1.0 : ((_j_integral[i] < 0.0) ? -1.0 : 0.0);
 
-    if (_output_type == OutputType::K)
+    if (_integral == INTEGRAL::K_FROM_J_INTEGRAL)
       _j_integral[i] = sign * std::sqrt(std::abs(_j_integral[i]) * _youngs_modulus /
                                         (1.0 - Utility::pow<2>(_poissons_ratio)));
 

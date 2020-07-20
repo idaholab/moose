@@ -51,13 +51,6 @@ protected:
     TOPOLOGY
   };
 
-  /// Enum for output type
-  enum OUTPUT_TYPE
-  {
-    J,
-    K,
-    C
-  };
   /**
    * Compute the number of points on the crack front. This is either the number of
    * points in the crack front nodeset, or the number of points from the crack

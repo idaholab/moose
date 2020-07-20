@@ -57,12 +57,6 @@ DomainIntegralAction::validParams()
                                 "The last ring of elements for volume integral domain");
   params.addParam<std::vector<VariableName>>(
       "output_variable", "Variable values to be reported along the crack front");
-  MooseEnum output_type("J K C", "J");
-  params.addParam<MooseEnum>("output_type",
-                             output_type,
-                             "Select J-integral, stress intensity factor K from J-integral, or "
-                             "C(t) integral. Options are: " +
-                                 output_type.getRawNames());
   params.addParam<Real>("poissons_ratio", "Poisson's ratio");
   params.addParam<Real>("youngs_modulus", "Young's modulus");
   params.addParam<std::vector<SubdomainName>>("block", "The block ids where integrals are defined");
@@ -103,7 +97,7 @@ DomainIntegralAction::validParams()
                                   false,
                                   "Convert J-integral to stress intensity factor K.",
                                   "This input parameter is deprecated and will be removed soon. "
-                                  "Use 'output_type = K' to request output of the "
+                                  "Use 'integrals = KFromJIntegral' to request output of the "
                                   "conversion from the J-integral to stress intensity factors");
   return params;
 }
@@ -601,12 +595,23 @@ DomainIntegralAction::act()
         _integrals.count(K_FROM_J_INTEGRAL) != 0)
     {
       std::string vpp_base_name;
+      INTEGRAL jintegral_selection = J_INTEGRAL;
+
       if (_integrals.count(J_INTEGRAL) != 0)
+      {
         vpp_base_name = "J";
+        jintegral_selection = INTEGRAL::J_INTEGRAL;
+      }
       else if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
+      {
         vpp_base_name = "K";
+        jintegral_selection = INTEGRAL::K_FROM_J_INTEGRAL;
+      }
       else if (_integrals.count(C_INTEGRAL) != 0)
+      {
         vpp_base_name = "C";
+        jintegral_selection = INTEGRAL::C_INTEGRAL;
+      }
 
       if (_treat_as_2d)
         vpp_base_name += "_2DVPP";
@@ -614,14 +619,6 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
-
-      // Only one option is active in the postprocessor
-      if (_integrals.count(J_INTEGRAL) != 0)
-        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::J;
-      else if (_integrals.count(C_INTEGRAL) != 0)
-        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::C;
-      else if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
-        params.set<MooseEnum>("output_type") = OUTPUT_TYPE::K;
 
       params.set<MooseEnum>("position_type") = _position_type;
 
@@ -633,6 +630,9 @@ DomainIntegralAction::act()
 
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+
+      // Select the integral type to be computed in JIntegral vector postprocessor
+      params.set<MooseEnum>("integral") = jintegral_selection;
 
       params.set<std::vector<VariableName>>("displacements") = _displacements;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
