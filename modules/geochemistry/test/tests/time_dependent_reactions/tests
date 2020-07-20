@@ -75,9 +75,9 @@
     design = 'calcite_buffer.md'
   [../]
   [./changing_fugacity_calcite]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'changing_fugacity_calcite.i'
-    expect_out = 'CO2\(g\);  fugacity = 1'
+    csvdiff = 'changing_fugacity_calcite_out.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where gas fugacity is changed over time"
     issues = '#15330'
     design = 'changing_fugacity_with_calcite.md'

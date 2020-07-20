@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# Plotting the results of gypsum_solubility and the equivalent GWB simulation
+# Plotting the results of dissolution_pyrite_1 and the equivalent GWB simulation
 
 import os
 import sys
