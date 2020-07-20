@@ -5,16 +5,34 @@
   swap_out_of_basis = "O2(aq) Fe++"
   swap_into_basis = "O2(g) Hematite"
   charge_balance_species = "Cl-"
-  constraint_species = "H2O Hematite H+         Ca++    Mg++     Na+    HCO3-   SO4--    Cl-       O2(g)"
-  constraint_value = "  1.0 6.26E-6  3.16228E-7 9.98E-5 4.114E-5 8.7E-5 2.95E-4 3.123E-5 1.4103E-4 0.2"
-  constraint_meaning = "kg_solvent_water free_moles_mineral_species activity moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species fugacity"
-  source_species_names = "Pyrite"
-  source_species_rates = 8.336E-3 # = 1g(pyrite)/second, 1g(pyrite) = 8.34E-3
-  ramp_max_ionic_strength_initial = 0
-  close_system_at_time = 0
+  constraint_species = "H2O              Hematite                   H+         Ca++               Mg++               Na+                HCO3-              SO4--              Cl-                O2(g)"
+  constraint_value = "  1.0              6.26E-6                    3.16228E-7 9.98E-5            4.114E-5           8.7E-5             2.95E-4            3.123E-5           1.4103E-4          0.2"
+  constraint_meaning = "kg_solvent_water free_moles_mineral_species activity   moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species fugacity"
   remove_fixed_activity_name = "H+"
   remove_fixed_activity_time = '0 '
-  execute_console_output_on = 'initial final'
+  source_species_names = "Pyrite"
+  source_species_rates = 8.336E-4 # = 0.1g(pyrite)/second over 10 seconds, 1g(pyrite) = 8.34E-3
+  ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
+  stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
+  abs_tol = 1E-13
+  execute_console_output_on = '' # only CSV output is required
+[]
+
+[Executioner]
+  type = Transient
+  dt = 1
+  end_time = 10
+[]
+
+[UserObjects]
+  [./definition]
+    type = GeochemicalModelDefinition
+    database_file = "../../../database/moose_geochemdb.json"
+    basis_species = "H2O H+ Fe++ Ca++ Mg++ Na+ HCO3- SO4-- Cl- O2(aq)"
+    equilibrium_minerals = "Hematite Pyrite"
+    equilibrium_gases = "O2(g)"
+    piecewise_linear_interpolation = true # for comparison with GWB
+  [../]
 []
 
 [Postprocessors]
@@ -59,20 +77,6 @@
     variable = 'molal_O2(aq)'
   [../]
 []
-
-[Executioner]
-  type = Transient
-  dt = 1
-  end_time = 10
+[Outputs]
+  csv = true
 []
-
-[UserObjects]
-  [./definition]
-    type = GeochemicalModelDefinition
-    database_file = "../../../database/moose_geochemdb.json"
-    basis_species = "H2O H+ Fe++ Ca++ Mg++ Na+ HCO3- SO4-- Cl- O2(aq)"
-    equilibrium_minerals = "Hematite Pyrite"
-    equilibrium_gases = "O2(g)"
-  [../]
-[]
-
