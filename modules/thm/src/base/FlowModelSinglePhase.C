@@ -18,6 +18,7 @@ const std::string FlowModelSinglePhase::SPECIFIC_VOLUME = "v";
 const std::string FlowModelSinglePhase::TEMPERATURE = "T";
 const std::string FlowModelSinglePhase::THERMAL_CONDUCTIVITY = "k";
 const std::string FlowModelSinglePhase::VELOCITY = "vel";
+const std::string FlowModelSinglePhase::REYNOLDS_NUMBER = "Re";
 
 InputParameters
 FlowModelSinglePhase::validParams()
