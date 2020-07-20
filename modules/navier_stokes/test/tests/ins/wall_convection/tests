@@ -15,4 +15,13 @@
     design = 'INSADEnergyAmbientConvection.md'
     issues = '#15500'
   []
+  [steady-action-no-temp-var]
+    type = 'Exodiff'
+    input = 'steady-action.i'
+    exodiff = 'steady-action-no-temp-var.e'
+    cli_args = "Variables/active='temperature' Outputs/file_base=steady-action-no-temp-var"
+    requirement = 'The system shall be able to add a incompressible Navier-Stokes energy/temperature equation using an action, but use a temperature variable already added in the input file.'
+    design = 'INSAction.md'
+    issues = '#15607'
+  []
 []

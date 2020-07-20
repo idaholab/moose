@@ -11,6 +11,11 @@
   []
 []
 
+[Variables]
+  active = ''
+  [temperature][]
+[]
+
 [Modules]
   [IncompressibleNavierStokes]
     equation_type = steady-state
