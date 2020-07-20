@@ -51,6 +51,8 @@ public:
     return _flow_channel_subdomains;
   }
 
+  const UserObjectName & getFluidPropertiesName() const;
+
 protected:
   virtual void init() override;
   virtual void initSecondary() override;
