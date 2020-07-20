@@ -646,7 +646,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       po.flags.push_back(option);
   }
 
-  std::array<std::string, 2> reason_flags = {"-snes_converged_reason", "-ksp_converged_reason"};
+  std::array<std::string, 2> reason_flags = {{"-snes_converged_reason", "-ksp_converged_reason"}};
 
   for (const auto & reason_flag : reason_flags)
     if (!po.flags.contains(reason_flag))
