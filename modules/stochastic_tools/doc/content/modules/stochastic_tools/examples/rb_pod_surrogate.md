@@ -8,8 +8,7 @@ and used on a parametric problem.
 The full-order model is a one energy group, fixed-source neutron diffusion problem, adopted from [!cite](prince2019parametric).
 It showcases a Pressurized Water Reactor (PWR) reactor core surrounded with water reflector.
 
-!media stochastic_tools/surrogates/pod_rb/geometry.png style=width:100%; id=fig:geometry
-       caption=Something here.
+!media large_media/stochastic_tools/surrogates/pod_rb/geometry.png
 
 
 
