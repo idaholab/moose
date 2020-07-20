@@ -99,17 +99,17 @@
     design = 'cooling_feldspar.md'
   [../]
   [./dissolution_pyrite_1]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'dissolution_pyrite_1.i'
-    expect_out = 'Total mass = 1kg'
+    csvdiff = 'dissolution_pyrite_1_out.csv'
     requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
     issues = '#15330'
     design = 'adding_pyrite.md'
   [../]
   [./dissolution_pyrite_2]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'dissolution_pyrite_2.i'
-    expect_out = 'Pyrite = -2*H2O + 4*H+ + 0.5*Hematite + 2*SO4-- - 3.75*O2(g)'
+    csvdiff = 'dissolution_pyrite_2_out.csv'
     match_literal = true
     requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is fixed"
     issues = '#15330'

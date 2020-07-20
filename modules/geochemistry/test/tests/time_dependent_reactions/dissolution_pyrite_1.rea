@@ -1,0 +1,16 @@
+# React script that is equivalent to dissolution_pyrite_1.i
+Ca++ = 9.98e-5 mol
+Mg++ = 4.114e-5 mol
+Na+ = 8.7e-5 mol
+HCO3- = 2.95e-4 mol
+SO4-- = 3.123e-5 mol
+Cl- = 1.4103e-5 mol
+balance on Cl-
+H+ = 6.5 pH
+swap O2(g) for O2(aq)
+f O2(g) = 0.2
+swap Hematite for Fe++
+Hematite = 6.26e-6 free mol
+epsilon = 1e-13
+react 8.336e-5 mol Pyrite
+go
