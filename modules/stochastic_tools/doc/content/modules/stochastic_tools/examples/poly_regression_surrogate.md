@@ -227,7 +227,7 @@ is presented in [normal_hist_outlier]. It is visible that the tails of the histo
 further increased and the mean got distorted as well.
 
 !media poly_reg_example_normal_hist_outlier.svg id=normal_hist_outlier
-       caption=Histogram of the maximum temperature presenting the ffect of increasing the outliers in the training of the polynomial regression surrogate.
+       caption=Histogram of the maximum temperature presenting the effect of increasing the outliers in the training of the polynomial regression surrogate.
 
 To conclude, it is apparent that there are potential issues associated with the polynomial regression
 such as overfitting and the bias introduced by the outliers. For this reason, the utilization
