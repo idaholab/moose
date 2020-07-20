@@ -247,6 +247,15 @@ is a computationally expensive procedure, it has to be carried out only once. Af
 this initial investment every new evaluation for a new parameter sample involves the summation
 and scaling of small dense matrices, which is of low computational cost.
 
+## Note on parallelism
+
+As of now, the training phase is implemented in a semi-parallel manner. This means that
+the snapshot generation, correlation matrix generation, base generation and
+the computation of the reduced operators are all executed in parallel. However,
+the eigenvalues and eigenvectors of the correlation matrices are obtained in serial.
+Therefore, this phase may experience considerable slowdown when the number of
+snapshots is large (above ~2000).   
+
 ## Example Input File Syntax
 
 To get the snapshots, four essential blocks have to be added the main input file.
