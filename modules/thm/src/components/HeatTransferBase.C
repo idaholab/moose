@@ -153,3 +153,11 @@ HeatTransferBase::getWallHeatFluxName() const
 {
   return _q_wall_name;
 }
+
+const UserObjectName &
+HeatTransferBase::getFluidPropertiesName() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _fp_name;
+}
