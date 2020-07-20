@@ -42,23 +42,11 @@ def command_line_options():
     verify.command_line_options(subparser, parent)
     return parser.parse_args()
 
-def init_large_media():
-    """
-    Be sure large_media is checked out.
-    """
-    get_large_media = os.path.join(os.getenv('MOOSE_DIR'), 'scripts', 'get_large_media.sh')
-    large_media_git = os.path.join(os.getenv('MOOSE_DIR'), 'large_media', '.git')
-    if os.path.exists(get_large_media) and not os.path.exists(large_media_git):
-        print('Checking out large_media...')
-        mooseutils.shellCommand(get_large_media, os.getenv('MOOSE_DIR'))
-        print('Done.')
-
 def run():
     """
     Parse the command line options and run the correct command.
     """
     options = command_line_options()
-    init_large_media()
     log.init_logging(getattr(logging, options.level))
 
     if options.command == 'build':

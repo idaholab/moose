@@ -152,6 +152,10 @@ def _init_large_media():
             log.info("Initializing the 'large_media' submodule for storing images above 1MB.")
             subprocess.call(['git', 'submodule', 'update', '--init', 'large_media'],
                             cwd=MooseDocs.MOOSE_DIR)
+            break
+
+    MooseDocs.PROJECT_FILES.update(MooseDocs.ls_files(
+                                   os.path.join(MooseDocs.MOOSE_DIR, 'large_media')))
 
 def main(options):
     """
