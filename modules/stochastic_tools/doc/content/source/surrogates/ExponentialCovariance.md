@@ -4,17 +4,17 @@
 
 ## Overview
 
-A simple exponential covariance function valid for $0 < \gamma \leq 2$
+A simple exponential covariance function can be constructed as
 
 !equation
-k(x,x^\prime) = \sigma_f^2 \, exp \left(- r_\ell(x,x^\prime)^\gamma \right) + \sigma_n^2 \, \delta_{x,x^\prime}
+k(x,x^\prime) = \sigma_f^2 \, exp \left(- r_\ell(x,x^\prime)^\gamma \right) + \sigma_n^2 \, \delta_{x,x^\prime},
 
-and the scaled distance based on the length factor $\ell$ is defined as
+which is valid for $0 < \gamma \leq 2$. $r_\ell(x,x^\prime)$ is a scaled distance based on the length factor $\vec{\ell}$, defined as
 
 !equation
-r_\ell(x,x^\prime)^2 = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2} .
+r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}.
 
-When $\gamma = 2$ is is equivalent to [](SquaredExponentialCovariance.md), save a factor of $2$ (which can be absorbed into $\vec{\ell}$). 
+When $\gamma = 2$ is is equivalent to [](SquaredExponentialCovariance.md), save a factor of $2$ (which can be absorbed into $\vec{\ell}$).
 
 ## Hyperparameters
 

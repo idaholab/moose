@@ -31,7 +31,6 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _covar_type(getModelData<std::string>("_covar_type")),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(

@@ -4,15 +4,15 @@
 
 ## Overview
 
-A widely used, general purpose isotropic covariance function.
+A widely used, general purpose isotropic covariance function is
 
 !equation
-k(x,x^\prime) = \sigma_f^2 \, exp \left(- \frac{r_\ell(x,x^\prime)^2}{2} \right) + \sigma_n^2 \, \delta_{x,x^\prime}
+k(x,x^\prime) = \sigma_f^2 \, exp \left(- \frac{r_\ell(x,x^\prime)^2}{2} \right) + \sigma_n^2 \, \delta_{x,x^\prime}.
 
-where the scaled distance based on the length factor $\ell$ is defined as
+$r_\ell(x,x^\prime)$ is a scaled distance based on the length factor $\vec{\ell}$, defined as
 
 !equation
-r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}
+r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}.
 
 ## Hyperparameters
 

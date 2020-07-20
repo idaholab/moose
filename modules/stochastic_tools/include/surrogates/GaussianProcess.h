@@ -55,9 +55,6 @@ private:
   /// A solve of Ax=b via Cholesky.
   const RealEigenMatrix & _K_results_solve;
 
-  /// MOOSE problem,
-  const FEProblemBase & _feproblem;
-
   /// Type of covariance function used for this surrogate
   const std::string & _covar_type;
 

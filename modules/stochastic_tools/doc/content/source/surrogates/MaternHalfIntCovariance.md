@@ -7,12 +7,12 @@
 A special case of the Matern class of covariance functions, in which the $\nu$ hyperparameter takes on a half integer value. Substituting a positive integer $p$ for $\nu$ using $\nu = p + 1/2$ the covariance function is given as
 
 !equation
-k(x,x^\prime) = \sigma_f^2 \, exp \left(- \sqrt{2p+1} r_\ell(x,x^\prime) \right) \frac{p!}{(2p)!} \sum_{i=0}^p \left[ \frac{(p+i)!}{i! (2p-i)!} \left( 2 \sqrt{2p+1} r_\ell(x,x^\prime) \right)^{p-i}  \right]   + \sigma_n^2 \, \delta_{x,x^\prime}
+k(x,x^\prime) = \sigma_f^2 \, exp \left(- \sqrt{2p+1} r_\ell(x,x^\prime) \right) \frac{p!}{(2p)!} \sum_{i=0}^p \left[ \frac{(p+i)!}{i! (2p-i)!} \left( 2 \sqrt{2p+1} r_\ell(x,x^\prime) \right)^{p-i}  \right]   + \sigma_n^2 \, \delta_{x,x^\prime}.
 
-where the scaled distance based on the length factor $\ell$ is defined as
+$r_\ell(x,x^\prime)$ is a scaled distance based on the length factor $\vec{\ell}$, defined as
 
 !equation
-r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}
+r_\ell(x,x^\prime) = \sqrt{ \sum_n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}.
 
 ## Hyperparameters
 

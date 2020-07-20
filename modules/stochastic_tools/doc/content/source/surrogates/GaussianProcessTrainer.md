@@ -86,14 +86,14 @@ While the only apparent decision in the above formulation is the choice of covar
 Frequently Kernels consider the distance between two input parameters $\vec{x}$ and $\vec{x}^\prime$. For system of only a single parameter this distance often takes the form of
 
 !equation
-\frac{|x - x^\prime|}{\ell}
+\frac{|x - x^\prime|}{\ell}.
 
 In this form the $\ell$ factor set a relevant length scale for the distance measurements.
 
 When multiple input parameters are to be considered, it may be advantageous to specify $n$ different length scales for each of the $n$ parameters, resulting in a vector $\vec{\ell}$. For example distance may be calculated as
 
 !equation
-\sqrt{ \sum_{i=1}^n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}
+\sqrt{ \sum_{i=1}^n \left( \frac{x_i - x^\prime_i}{\ell_i} \right)^2}.
 
 When used with standardized parameters, $\ell$ can be interpreted in units of standard deviation for the relevant parameter.
 

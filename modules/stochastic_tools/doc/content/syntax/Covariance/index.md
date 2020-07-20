@@ -22,7 +22,7 @@ Because many trainers which use a covariance function should be compatible with 
 
 The covariance can be found by name using the interface
 
-!listing GaussianProcessTrainer.C line=covariance_function(getCovarianceFunctionByName
+!listing GaussianProcessTrainer.C line=covariance_function(
 
 #### In a Surrogate
 
@@ -32,7 +32,7 @@ If the surrogate is given the trainer (not loaded from a file) the covariance fu
 
 !listing GaussianProcess.C start=covariance_function( end=: nullptr) include-end=True
 
-If the surrogate loads the training data from a file, the [](LoadCovarianceDataAction.md) automatically reconstructs the covariance object used in the training phase, and calls the surrogate `setupCovariance()` method to make the linkage. This recreation is done by storing the `buildHyperParamMap()` in the trainer, and storing the hyperparameters for use in the surrogate. 
+If the surrogate loads the training data from a file, the [](LoadCovarianceDataAction.md) automatically reconstructs the covariance object used in the training phase, and calls the surrogate `setupCovariance()` method to make the linkage. This recreation is done by storing the `buildHyperParamMap()` in the trainer, and storing the hyperparameters for use in the surrogate.
 
 
 ## Example Input File Syntax
