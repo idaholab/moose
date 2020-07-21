@@ -38,11 +38,11 @@ but shall be discussed in [parameter_study.md#transfers] section.
 !listing parameter_study/diffusion.i id=diffusion
          caption=Complete input file for example heat equation problem to be used in parameter study.
 
-Executing this file using the StocasticToolsApp can be done as follows
+Executing this file using the StochasticToolsApp can be done as follows
 
 ```
-cd moose/modules/stocastic_tools/examples/parameter_study
-../../stocastic_tools-opt -i diffusion.i
+cd moose/modules/stochastic_tools/examples/parameter_study
+../../stochastic_tools-opt -i diffusion.i
 ```
 
 The simulation will perform four timesteps and should result in $T_{avg}=-5.12$ and $q_{left}=-7.77$.
@@ -88,28 +88,28 @@ for 5000 samples.
 
 !listing examples/parameter_study/master.i block=Distributions
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_samples_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_samples_0002.csv
                 vectors=hypercube_0
                 xlabel=Diffusivity
                 id=sampler_gamma
                 legend=False
                 caption=Input distribution of diffusivity ($\gamma$).
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_samples_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_samples_0002.csv
                 vectors=hypercube_1
                 xlabel=Flux
                 id=sampler_q_0
                 legend=False
                 caption=Input distribution of flux boundary condition ($q_0$).
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_samples_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_samples_0002.csv
                 vectors=hypercube_2
                 xlabel=Temperature
                 id=sampler_T_0
                 legend=False
                 caption=Input distribution of temperature boundary condition ($T_0$).
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_samples_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_samples_0002.csv
                 vectors=hypercube_3
                 xlabel=Source
                 id=sampler_s
@@ -165,7 +165,7 @@ using the comma separated files.
 The resulting distributions are for the quantities of interest: $T_{avg}$ and $q_{left}$ are presented
 in [results_T_avg] and [results_q_left].
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_results_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_results_0002.csv
                 vectors=results:T_avg
                 bins=20
                 xlabel=Average Temperature
@@ -173,7 +173,7 @@ in [results_T_avg] and [results_q_left].
                 caption=Resulting distribution of quantity of interest: $T_{avg}$.
 
 
-!plot histogram filename=stochastic_tools/parameter_study/master_out_results_0002.csv
+!plot histogram filename=stochastic_tools/examples/parameter_study/gold/master_out_results_0002.csv
                 vectors=results:q_left
                 bins=20
                 xlabel=Flux
