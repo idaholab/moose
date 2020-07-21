@@ -36,12 +36,12 @@
 # Sampling surrogate
 [VectorPostprocessors]
   [samp_avg]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = nearest_point_avg
     sampler = sample
   []
   [samp_max]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = nearest_point_max
     sampler = sample
   []

@@ -8,30 +8,31 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
-#include "SurrogateTester.h"
+#include "EvaluateSurrogate.h"
 
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsTestApp", SurrogateTester);
+registerMooseObject("StochasticToolsApp", EvaluateSurrogate);
 
 InputParameters
-SurrogateTester::validParams()
+EvaluateSurrogate::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
-  params.addClassDescription("Tool for sampling surrogate model.");
-  params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of surrogate model.");
+  params.addClassDescription("Tool for sampling surrogate models.");
+  params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of surrogate models.");
   params += SamplerInterface::validParams();
-  params.addRequiredParam<SamplerName>(
-      "sampler", "Sampler to use for evaluating PCE model (mainly for testing).");
-  params.addParam<bool>("output_samples",
-                        false,
-                        "True to output value of samples from sampler (this may be VERY large).");
+  params.addRequiredParam<SamplerName>("sampler",
+                                       "Sampler to use for evaluating surrogate models.");
+  params.addParam<bool>(
+      "output_samples",
+      false,
+      "True to output value of parameter values from samples (this may be VERY large).");
   return params;
 }
 
-SurrogateTester::SurrogateTester(const InputParameters & parameters)
+EvaluateSurrogate::EvaluateSurrogate(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SamplerInterface(this),
     SurrogateModelInterface(this),
@@ -53,7 +54,7 @@ SurrogateTester::SurrogateTester(const InputParameters & parameters)
 }
 
 void
-SurrogateTester::initialize()
+EvaluateSurrogate::initialize()
 {
   for (auto & vec : _value_vector)
     vec->resize(_sampler.getNumberOfLocalRows(), 0);
@@ -64,7 +65,7 @@ SurrogateTester::initialize()
 }
 
 void
-SurrogateTester::execute()
+EvaluateSurrogate::execute()
 {
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
@@ -81,7 +82,7 @@ SurrogateTester::execute()
 }
 
 void
-SurrogateTester::finalize()
+EvaluateSurrogate::finalize()
 {
   for (auto & vec : _value_vector)
     _communicator.gather(0, *vec);

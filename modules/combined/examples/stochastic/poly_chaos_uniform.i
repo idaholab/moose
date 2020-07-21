@@ -117,7 +117,7 @@
     sensitivity_order = 'first second total'
   []
   [storage]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     sampler = sample
     model = 'temp_center_inner  temp_center_outer  temp_end_inner  temp_end_outer
              dispx_center_inner dispx_center_outer dispx_end_inner dispx_end_outer

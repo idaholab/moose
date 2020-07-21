@@ -47,12 +47,12 @@
 # Computing statistics
 [VectorPostprocessors]
   [pc_max_res]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = pc_max
     sampler = sample
   []
   [pr_max_res]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = pr_max
     sampler = sample
   []
