@@ -33,12 +33,19 @@
   [../]
 []
 
+[Functions]
+  [./timestepper]
+    type = PiecewiseLinear
+    x = '0 0.5 3'
+    y = '0.01 0.05 0.1'
+  [../]
+[]
+
 [Executioner]
   type = Transient
   [./TimeStepper]
     type = FunctionDT
-    time_t = '0 0.5 3'
-    time_dt = '0.01 0.05 0.1'
+    function = timestepper
   [../]
   end_time = 5.0
 []
