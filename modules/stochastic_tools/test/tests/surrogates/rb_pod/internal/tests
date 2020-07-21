@@ -12,7 +12,7 @@
   [save_ev]
     type = CSVDiff
     input = trainer.i
-    check_files = 'eigenvalues_u.csv'
+    csvdiff = 'eigenvalues_u.csv'
     cli_args = 'Trainers/pod_rb/print_eigenvalues=true'
     allow_test_objects = true
     detail = 'and then saving the eigenvalues '

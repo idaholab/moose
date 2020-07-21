@@ -603,6 +603,7 @@ PODReducedBasisTrainer::printEigenvalues()
       std::filebuf fb;
       fb.open(filename, std::ios::out);
       std::ostream os(&fb);
+      os << "evs" << std::endl;
       _eigenvalues[var_i].print_scientific(os);
     }
   }
