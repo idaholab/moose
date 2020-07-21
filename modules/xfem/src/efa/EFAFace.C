@@ -649,9 +649,7 @@ EFAFace::adjacentCommonEdge(const EFAFace * other_face) const
       if (other_face->ownsEdge(_edges[i]))
         return i;
   }
-  else
-    EFAError("this face is not adjacent with other_face");
-  return 99999;
+  EFAError("this face is not adjacent with other_face");
 }
 
 bool
