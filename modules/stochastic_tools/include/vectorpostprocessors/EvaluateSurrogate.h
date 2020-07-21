@@ -18,12 +18,14 @@
 /**
  * A tool for output Sampler data.
  */
-class SurrogateTester : public GeneralVectorPostprocessor, SamplerInterface, SurrogateModelInterface
+class EvaluateSurrogate : public GeneralVectorPostprocessor,
+                          SamplerInterface,
+                          SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
 
-  SurrogateTester(const InputParameters & parameters);
+  EvaluateSurrogate(const InputParameters & parameters);
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;

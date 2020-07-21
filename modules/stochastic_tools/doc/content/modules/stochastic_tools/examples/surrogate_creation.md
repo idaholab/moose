@@ -74,6 +74,6 @@ See [Surrogates](Surrogates/index.md) for more information on the `getModelData`
 
 ### evaluate
 
-`evaluate` is a public member function required for all surrogate models. This is where surrogate model is actually used. `evaluate` takes in parameter values and returns the surrogate's estimation of the quantity of interest. See [SurrogateTester](SurrogateTester.C) for an example on how the `evaluate` function is used.
+`evaluate` is a public member function required for all surrogate models. This is where surrogate model is actually used. `evaluate` takes in parameter values and returns the surrogate's estimation of the quantity of interest. See [EvaluateSurrogate](EvaluateSurrogate.C) for an example on how the `evaluate` function is used.
 
 !listing NearestPointSurrogate.C re=Real\sNearestPointSurrogate::evaluate.*?^}

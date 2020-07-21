@@ -17,12 +17,12 @@ registerMooseObject("StochasticToolsTestApp", GaussianProcessTester);
 InputParameters
 GaussianProcessTester::validParams()
 {
-  InputParameters params = SurrogateTester::validParams();
+  InputParameters params = EvaluateSurrogate::validParams();
   return params;
 }
 
 GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
-  : SurrogateTester(parameters)
+  : EvaluateSurrogate(parameters)
 {
   const auto & model_names = getParam<std::vector<UserObjectName>>("model");
   _GP_model.resize(_model.size());
@@ -37,7 +37,7 @@ GaussianProcessTester::GaussianProcessTester(const InputParameters & parameters)
 void
 GaussianProcessTester::initialize()
 {
-  SurrogateTester::initialize();
+  EvaluateSurrogate::initialize();
   for (auto & vec : _std_vector)
     vec->resize(_sampler.getNumberOfLocalRows(), 0);
 }
@@ -66,7 +66,7 @@ GaussianProcessTester::execute()
 void
 GaussianProcessTester::finalize()
 {
-  SurrogateTester::finalize();
+  EvaluateSurrogate::finalize();
   for (auto & vec : _std_vector)
     _communicator.gather(0, *vec);
 }
