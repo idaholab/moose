@@ -65,6 +65,7 @@ if __name__ == '__main__':
 
         os.system('rm surrs*0000.csv')
         rom_data = mooseutils.PostprocessorReader(rom_results)
+        os.system('mv surr_out_res_0001.csv surr_out_res_'+str(no_modes)+'.csv')
 
         rel_diff = abs(fom_data['results:nodal_l2'].values - rom_data['value'].values)/abs(fom_data['results:nodal_l2'].values)
 

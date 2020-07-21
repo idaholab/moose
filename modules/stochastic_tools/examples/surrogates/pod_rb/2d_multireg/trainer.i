@@ -120,7 +120,7 @@
     type = ResidualTransfer
     multi_app = sub
     sampler = sample
-    trainer_name = "pod_rb"
+    trainer_name = 'pod_rb'
     execute_on = 'final'
   []
 []
@@ -128,7 +128,7 @@
 [Trainers]
   [pod_rb]
     type = PODReducedBasisTrainer
-    var_names = 'phi'
+    var_names = 'psi'
     en_limits = '0.999999999'
     tag_names = 'diff0 diff1 diff2 diff3 abs0 abs1 abs2 abs3 src0 src1 src2'
     independent = '0 0 0 0 0 0 0 0 1 1 1'

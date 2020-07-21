@@ -75,7 +75,7 @@
   [rbpod]
     type = PODReducedBasisSurrogate
     filename = 'trainer_out_pod_rb.rd'
-    change_rank = 'phi'
+    change_rank = 'psi'
     new_ranks = '40'
   []
 []
@@ -85,7 +85,7 @@
     type = PODSurrogateTester
     model = rbpod
     sampler = sample
-    variable_name = "phi"
+    variable_name = 'psi'
     to_compute = nodal_l2
   []
 []
