@@ -21,7 +21,7 @@
     outputs = none
   []
   [results]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = surrogate
     sampler = test
     output_samples = true

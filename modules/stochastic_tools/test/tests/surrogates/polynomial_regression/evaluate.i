@@ -12,7 +12,7 @@
 
 [VectorPostprocessors]
   [results]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = surrogate
     sampler = test
     execute_on = final

@@ -66,7 +66,7 @@
     execute_on = final
   []
   [pc_samp]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = poly_chaos
     sampler = sample
     output_samples = true

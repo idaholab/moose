@@ -47,12 +47,12 @@
 # Computing statistics
 [VectorPostprocessors]
   [samp_avg]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = poly_chaos_avg
     sampler = sample
   []
   [samp_max]
-    type = SurrogateTester
+    type = EvaluateSurrogate
     model = poly_chaos_max
     sampler = sample
   []

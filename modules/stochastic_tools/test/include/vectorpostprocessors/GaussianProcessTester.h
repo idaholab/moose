@@ -10,16 +10,13 @@
 #pragma once
 
 // MOOSE includes
-#include "GeneralVectorPostprocessor.h"
-#include "SamplerInterface.h"
-#include "SurrogateModelInterface.h"
-#include "SurrogateTester.h"
+#include "EvaluateSurrogate.h"
 #include "GaussianProcess.h"
 
 /**
  * A tool for output Gaussian Process Surrogate data.
  */
-class GaussianProcessTester : public SurrogateTester
+class GaussianProcessTester : public EvaluateSurrogate
 {
 public:
   static InputParameters validParams();

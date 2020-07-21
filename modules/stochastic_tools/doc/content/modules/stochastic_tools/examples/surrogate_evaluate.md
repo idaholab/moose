@@ -32,7 +32,7 @@ In this example, the surrogate is evaluated at points given by a sampler. Here w
 
 ### Sampling Surrogate
 
-Evaluating a surrogate model occurs within objects that obtain the surrogate object's reference and call the `evaluate` function. In this example, we will use [SurrogateTester](SurrogateTester.C) to evaluate the surrogate, this function is for testing purposes only. [SurrogateTester](SurrogateTester.C) takes in a sampler and the surrogate model as inputs, and evaluates the surrogate at the points given by the sampler.
+Evaluating a surrogate model occurs within objects that obtain the surrogate object's reference and call the `evaluate` function. In this example, we will use [EvaluateSurrogate.md] to evaluate the surrogate, this function is for testing purposes only. [EvaluateSurrogate.md] takes in a sampler and the surrogate model as inputs, and evaluates the surrogate at the points given by the sampler.
 
 !listing nearest_point_uniform.i block=VectorPostprocessors
 

@@ -90,7 +90,7 @@ Evaluating a polynomial chaos surrogate model is exactly the same as any other t
 
 !listing examples/surrogates/poly_chaos_normal.i block=Distributions Samplers caption=Defining sampler for evaluation -- Normal distributions
 
-!listing examples/surrogates/poly_chaos_uniform.i block=samp_avg samp_max caption=Evaluating surrogate with [SurrogateTester](SurrogateTester.C)
+!listing examples/surrogates/poly_chaos_uniform.i block=samp_avg samp_max caption=Evaluating surrogate with [EvaluateSurrogate](EvaluateSurrogate.C)
 
 ### Statistical Moments
 
