@@ -186,11 +186,24 @@ through `change_rank` and `new_ranks` parameters.
 
 These surrogate models can be evaluated at the points defined in the testing sample batch.
 This is done using a `PODSurrogateTester` object in the `VectorPostprocessors` block.
-In this case the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solution for $\psi$. 
+In this case the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solution for $\psi$.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=VectorPostprocessors
 
 ## Results and Analysis
+
+!row!
+
+!media 2d_multiregion_sol0.png style=width:33%;float:left
+       id=pwr_geom caption=The geometry of the PWR core used in this example.
+
+!media 2d_multiregion_sol1.png style=width:33%;float:left
+       id=pwr_geom caption=The geometry of the PWR core used in this example.
+
+!media 2d_multiregion_sol2.png style=width:33%;float:left
+       id=pwr_geom caption=The geometry of the PWR core used in this example.
+
+!row-end!
 
 
 
