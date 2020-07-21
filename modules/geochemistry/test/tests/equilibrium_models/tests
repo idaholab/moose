@@ -1,4 +1,57 @@
 [Tests]
+  [./bulk_constraints]
+    type = 'RunApp'
+    input = 'bulk_constraints.i'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.508kg
+Mass of aqueous solution = 1.186kg (without free minerals)
+Ionic strength = 2.662mol/kg(solvent water)
+Stoichiometric ionic strength = 0.976mol/kg(solvent water)
+Activity of water = 0.9681
+Temperature = 25
+
+Basis Species:
+Na+;  bulk_moles = 1mol;  bulk_conc = 1.939e+04mg/kg(soln);  molality = 2.266mol/kg(solvent water);  free_conc = 4.395e+04mg/kg(soln);  act_coeff = 0.6995;  log10(a) = 0.2001
+Mirabilite;  bulk_moles = 1.895mol;  bulk_conc = 5.149e+05mg/kg(soln);  free_moles = 1mol;  free_mass = 3.222e+05mg
+Cl-;  bulk_moles = 1mol;  bulk_conc = 2.991e+04mg/kg(soln);  molality = 0.976mol/kg(solvent water);  free_conc = 2.919e+04mg/kg(soln);  act_coeff = 0.6172;  log10(a) = -0.2201
+
+Equilibrium Species:
+NaSO4-;  molality = 0.4991mol/kg(solvent water);  free_conc = 5.012e+04mg/kg(soln);  act_coeff = 0.6995;  log10(a) = -0.4571;  NaSO4- = -10*H2O - 1*Na+ + 1*Mirabilite;  log10K = 0.3976
+SO4--;  molality = 0.3957mol/kg(solvent water);  free_conc = 3.206e+04mg/kg(soln);  act_coeff = 0.1126;  log10(a) = -1.351;  SO4-- = -10*H2O - 2*Na+ + 1*Mirabilite;  log10K = 1.091
+NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  act_coeff = 1;  log10(a) = -1.619;  NaCl = 1*Cl- + 1*Na+;  log10K = 1.599'
+    match_literal = true
+    requirement = "Differences between the geochemistry module and GWB shall be able explored"
+    issues = '#15641'
+    design = 'gwb_diff.md'
+  [../]
+  [./ph_constraint]
+    type = 'RunApp'
+    input = 'ph_constraint.i'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.101kg
+Mass of aqueous solution = 1.003kg (without free minerals)
+pH = 6
+Ionic strength = 0.06006mol/kg(solvent water)
+Stoichiometric ionic strength = 0.03374mol/kg(solvent water)
+Activity of water = 0.9988
+Temperature = 25
+
+Basis Species:
+Calcite;  bulk_moles = 1mol;  bulk_conc = 9.977e+04mg/kg(soln);  free_moles = 0.9783mol;  free_mass = 9.792e+04mg
+Cl-;  bulk_moles = 0.03522mol;  bulk_conc = 1245mg/kg(soln);  molality = 0.03374mol/kg(solvent water);  free_conc = 1192mg/kg(soln);  act_coeff = 0.7979;  log10(a) = -1.57
+Ca++;  bulk_moles = -2.22e-16mol;  bulk_conc = -8.871e-12mg/kg(soln);  molality = 0.01918mol/kg(solvent water);  free_conc = 766.1mg/kg(soln);  act_coeff = 0.4633;  log10(a) = -2.051
+H+;  bulk_moles = 0.03522mol;  bulk_conc = 35.39mg/kg(soln);  molality = 1.175e-06mol/kg(solvent water);  free_conc = 0.00118mg/kg(soln);  act_coeff = 0.8513;  log10(a) = -6
+
+Equilibrium Species:
+CO2(aq);  molality = 0.01352mol/kg(solvent water);  free_conc = 593mg/kg(soln);  act_coeff = 1;  log10(a) = -1.869;  CO2(aq) = -1*H2O - 1*Ca++ + 2*H+ + 1*Calcite;  log10K = -8.079
+HCO3-;  molality = 0.007138mol/kg(solvent water);  free_conc = 434.2mg/kg(soln);  act_coeff = 0.8144;  log10(a) = -2.236;  HCO3- = -1*Ca++ + 1*H+ + 1*Calcite;  log10K = -1.713
+CaCl+;  molality = 0.001481mol/kg(solvent water);  free_conc = 111.5mg/kg(soln);  act_coeff = 0.8092;  log10(a) = -2.921;  CaCl+ = 1*Cl- + 1*Ca++;  log10K = -0.7
+CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln);  act_coeff = 0.8213;  log10(a) = -3.065;  CaHCO3+ = 1*H+ + 1*Calcite;  log10K = -2.935'
+    match_literal = true
+    requirement = "Differences between the geochemistry module and GWB shall be able explored"
+    issues = '#15641'
+    design = 'gwb_diff.md'
+  [../]
   [./seawater_no_precip]
     type = 'RunApp'
     input = 'seawater_no_precip.i'
