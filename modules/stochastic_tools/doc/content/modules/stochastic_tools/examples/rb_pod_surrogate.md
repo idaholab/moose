@@ -20,16 +20,16 @@ The fixed-source one-group neutron diffusion with space dependent cross-sections
 
 where $D(\textbf{r})$ is the diffusion coefficient, $\Sigma_a(\textbf{r})$ is the
 absorption cross-section, $q(\textbf{r})$ is the fixed source term and
-field variable \psi(\textbf{r}) is the scalar neutron flux. Furthermore, $\Omega$
-denotes the internal domain, without the boundaries. This domain can be
+field variable $\psi(\textbf{r})$ is the scalar neutron flux. Furthermore, $\Omega$
+denotes the internal domain, without the boundaries, which can be
 partitioned into four sub-domains corresponding to the four material regions ($\Omega_1$, $\Omega_2$, $\Omega_3$ and $\Omega_4$).
 This equation needs to be supplemented with boundary conditions.
-For the symmetry lines (dashed in [pwr_geom], denoted by $\partial\Omega_{sym}$) a homogeneous Neumann condition is used:
+For the symmetry lines (dashed lines in [pwr_geom], denoted by $\partial\Omega_{sym}$) a homogeneous Neumann condition is used:
 
 !equation
--D(\textbf{r})\nabla\psi(\textbf{r}) = 0 \,, \quad \textbf{r}\in\partial\Omega_{sym}
+-D(\textbf{r})\nabla\psi(\textbf{r})\cdot \textbf{n}(\textbf{r}) = 0 \,, \quad \textbf{r}\in\partial\Omega_{sym}
 
-where while the rest of the boundaries (in the reflectors, denoted by $\partial\Omega_{refl}$) are treated with homogeneous
+while the rest of the boundaries (in the reflector, denoted by $\partial\Omega_{refl}$) are treated with homogeneous
 Dirichlet conditions:
 
 !equation
@@ -40,8 +40,7 @@ cross-sections and the source: $\psi = \psi\left(\textbf{r},D(\textbf{r}),\Sigma
 In this example, material region-wise constant cross-sections and source terms are considered
 yielding eight uncertain parameters altogether (assuming that Region 4 does not have a source).
 The material properties in each region have [Uniform](Uniform.md) distributions ($\mathcal{U}(a,b)$)
-specified in [param_distributions] with $a$ and $b$ being the lower and upper bounds of the
-distribution.
+specified in [param_distributions] with $a$ and $b$ being the lower and upper bounds.
 
 !table id=param_distributions caption=The distributions of the uncertain parameters used in this problem ([!cite](prince2019parametric)).
 | Parameter | Symbol | Distribution |
@@ -60,7 +59,7 @@ distribution.
 
 It is important to mention that POD-RB surrogates are only efficient when the original
 problem has an affine decomposition. For more information about affine decomposition see
-[PODReducedBasisTrainer.md]. Luckily, there is an affine decomposition for [fom_problem] in
+[PODReducedBasisTrainer.md]. Luckily, the problem at hand has an affine decomposition in
 the following form:
 
 !equation id=fom_problem
@@ -76,8 +75,8 @@ which can solve [fom_problem] with fixed parameters.
 There are +three important factors+ that need to be considered while preparing the input file for this problem:
 
 1. The user must specify vector tags in the `Problem` block for each component in the affine decomposition of the system.
-   In this, as shown in [vector_tags], 8 vector tags are specified for the eight uncertain parameters. These
-   do not do anything in the full-order model, however they help to identify the affine components
+   In this example, as shown in [vector_tags], 8 vector tags are specified for the eight uncertain parameters. These
+   do not introduce extra work in the full-order model, however they help to identify the affine components
    throughout the training phase.
 
    !listing surrogates/pod_rb/2d_multireg/sub.i id=vector_tags block=Problem
@@ -104,6 +103,7 @@ There are +three important factors+ that need to be considered while preparing t
 
 For the details of the training procedure of a POD-RB surrogate, see [PODReducedBasisTrainer.md].
 The first step is the collection of data, which involves the repeated execution of the
+[full-order problem](surrogates/pod_rb/2d_multireg/sub.i)
 with different parameter combinations and the saving of the full solution vectors.
 These solution vectors are often referred to as snapshots and this naming is preferred in
 this example as well.
@@ -118,14 +118,14 @@ are specified as:
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=Distributions
 
 As a next step, the underlying distributions are sampled to create parameter combinations.
-This done using a LatinHypercubeSampler.md] defined in the  `Samplers` block.
+This is done using a [LatinHypercubeSampler.md] defined in the  `Samplers` block.
 It is visible that 100 samples are prepared, meaning that 100 snapshots will be collected
 for the generation of the surrogates.
 
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=Samplers  
 
 To be able to create the reduced operators for the surrogate model, a custom `MultiApp`,
-[PODFullSolveMultiApp.md] has been created. This object is responsible for executing
+[PODFullSolveMultiApp.md], has been created. This object is responsible for executing
 sub-problems using different combinations of parameter values provided by the sampler.
 The secondary function of this object is to create the action of the full-order operators
 on the basis functions of the reduced subspace. Therefore, this object has to be executed
@@ -134,12 +134,12 @@ this custom object has to know certain parameters of the trainer as well.
 
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=MultiApps
 
-The `Transfers` block became slightly more convoluted as well. Besides sending the
+In terms of the `Transfers` block, besides sending the
 actual parameter samples to the sub-applications, in this intrusive procedure,
 the snapshots need to be collected from the sub-applications, the basis functions
 need to be sent back to different sub-applications and the action of the operators on
-the basis functions need to be collected as well. This requires four transfer objects,
-out of which two ([SamplerSolutionTransfer.md] and [ResidualTransfer.md]) are specifically
+the basis functions need to be collected as well. This requires four transfer objects.
+The two custom types ([SamplerSolutionTransfer.md] and [ResidualTransfer.md]) are specifically
 used to support [PODReducedBasisTrainer.md] at this moment.
 
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=Transfers
@@ -147,19 +147,18 @@ used to support [PODReducedBasisTrainer.md] at this moment.
 Next, the [PODReducedBasisTrainer.md] is set up in the `Trainers` block.
 The trainer stores the snapshots and uses them to create basis functions
 for the reduced subspaces. Furthermore, it is also responsible for creating
-the reduced-order operators. These two tasks can be only carried out one after
-the other, therefore the trainer object needs to be executed twice.
+the reduced-order operators, therefore it needs to be executed twice in the training process.
 The trainer object needs to know what variable needs to be reduced and
 the names of the vector tags from the sub-application to be able to identify the
-affine constituent operators. Furthermore, using the `independent` input argument
-one has to specify if the affine constituent operator acts on the variable or not.
+affine constituent operators. Furthermore, using the `independent` input argument,
+the user has to specify if the reduced affine constituent operator acts on the variable or not.
 The ordering must be the same as the names of the vector tags. The meaning of the
-limit for energy retention is discussed in [PODReducedBasisTrainer.md].
+energy retention limits is discussed in [PODReducedBasisTrainer.md].
 
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=Trainers
 
 As a last step in the training process, the basis functions, reduced operators and
-every necessay information for the surrogate are saved into and `.rd` file.
+every necessary information for the surrogate are saved into an `.rd` file.
 This file can be then used to construct a surrogate model
 without the need to repeat the training process.
 
@@ -167,33 +166,33 @@ without the need to repeat the training process.
 
 ## Evaluation of surrogate models
 
-To evaluate surrogate models, a new [main input file](surrogates/pod_rb/2d_multireg/surr.i) has to be created for.
-The same distributions have to be defined for the parameters to be able to test the
-generated surrogate models. Therefore, the content of the `Distributions` block is identical to the
+To evaluate surrogate models, a new [main input file](surrogates/pod_rb/2d_multireg/surr.i) has to be created.
+In this example, the same distributions are defined for the parameters as used in the training phase.
+Therefore, the content of the `Distributions` block is identical to the
 one in the [trainer input file](surrogates/pod_rb/2d_multireg/trainer.i).
 As a next step, new samples are generated using these distributions. Again, a [LatinHypercubeSampler.md]
-is employed for this task, however this time the number of samples is 1000 since the
+is employed for this task, however this time the number of samples is increased to 1000 since the
 surrogates are orders of magnitudes faster than the full-order model.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=Samplers  
 
-As a next step, a [PODReducedBasisSurrogate.md] is created in the `Surrogates` block.
-It is constructed using the information available within the corresponding `.rd` file.
-The surrogate allows the change of the rank of the sub-spaces used for different parameters
+A [PODReducedBasisSurrogate.md] is created in the `Surrogates` block.
+It is constructed using the information available within the corresponding `.rd` file
+and allows the user to change of the rank of the sub-spaces used for different variables
 through `change_rank` and `new_ranks` parameters.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=Surrogates
 
-These surrogate models can be evaluated at the points defined in the testing sample batch.
-This is done using a `PODSurrogateTester` object in the `VectorPostprocessors` block.
-In this case the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solution for $\psi$.
+These surrogate models can be evaluated at the points defined in the testing sample batch
+by a `PODSurrogateTester` object in the `VectorPostprocessors` block.
+In this case, the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solution for $\psi$.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=VectorPostprocessors
 
 ## Running the input files
 
-Since the sub-applications use test object one has to allow the executioner to use these
-by specifying the following on the command line:
+Since the sub-applications use test objects, one has to allow the executioner to use them
+by specifying the following argument on the command line:
 
 ```
 cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
@@ -210,39 +209,73 @@ cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
 
 ## Results and Analysis
 
-
+In the following subsection a short analysis is provided for the results obtained
+using the example input files. As already mentioned, the problem has 8 uncertain parameters and
+altogether 100 parameter samples are generated using [LatinHypercubeSampler.md]
+to obtain snapshots for the training. The first three snapshots are presented in
+[snap_1], [snap_2] and [snap_3]. It is visible that depending on the actual parameter combination,
+the profile of the solution can change considerably.
 
 !row!
 
 !media 2d_multiregion_sol0.png style=width:33%;float:left
-       id=pwr_geom caption=The geometry of the PWR core used in this example.
+       id=snap_1 caption=Snapshot #1.
 
 !media 2d_multiregion_sol1.png style=width:33%;float:left
-       id=pwr_geom caption=The geometry of the PWR core used in this example.
+       id=snap_2 caption=Snapshot #2.
 
 !media 2d_multiregion_sol2.png style=width:33%;float:left
-       id=pwr_geom caption=The geometry of the PWR core used in this example.
+       id=snap_3 caption=Snapshot #3.
 
 !row-end!
 
-!plot scatter
+After all of the snapshots are obtained, the basis functions of the reduced subspaces are extracted.
+In this scenario, an energy retention limit of 0.999 999 999 is used in the trainer
+which will keep 53 basis functions for the reduced subspace. The decay of the
+eigenvalues of the snapshot correlation matrix is shown in [ev_decay].
+The reduced operators are then computed using these 53 basis functions.
+
+!plot scatter id=ev_decay caption=Scree plot of the eigenvalues of the correlation matrix.
   filename=examples/surrogates/pod_rb/2d_multireg/gold/eigenvalues_psi.csv
+  data=[{'x':'no', 'y':'evs', 'name':'Eigenvalues'}]
   layout={'xaxis':{'title':'Basis function'},
           'yaxis':{'type':'log','title':'Corresponding eigenvalue'}}
+  style=display:block;margin-left:auto;margin-right:auto;width:40%
+
+As a next step, two surrogate models are prepared using the `change_rank` and `new_ranks`
+parameters of [PODReducedBasisSurrogate.md] to change the size of the reduced system.
+The first surrogate model has 1 basis function, while the other has 8. Both
+models are then run on a 1000 sample test set and the nodal $l^2$ norms of the approximate solutions
+are saved. Additionally, a full-order model was executed on the same test set and the results
+are saved to serve as reference values.
+[hist_1] presents the results with the surrogate model built with 1 basis function only. It is
+visible that the distribution of the QoI (nodal $l^2$ norm) on the test set is considerably different
+than the reference distribution.
 
 !media 2d_multireg_1.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
-       id=pwr_geom caption=The geometry of the PWR core used in this example.
+       id=hist_1 caption=The histogram of the QoI for the full-order reference model and the surrogate built with 1 basis function.
+
+[hist_2] shows the distribution of the QoI obtained by a surrogate with 8 basis functions.
+It is visible that the difference between the reference values and those from the surrogate is
+negligible.
 
 !media 2d_multireg_8.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
-       id=pwr_geom caption=The geometry of the PWR core used in this example.
+       id=hist_2 caption=The histogram of the QoI for the full-order reference model and the surrogate built with 8 basis function.
 
+As a last experiment, the surrogate model is run multiple times with different ranks and
+the following error indicators are computed for each sample in the test set:
 
+!equation
+e_i = \frac{||\psi_{Ref}-\psi_{Surr}||_{l^2}}{||\psi_{Ref}||_{l^2}}.\quad i=1,...,1000
 
+Then, the maximum and average relative errors are recorder as function of the number of basis functions used.
+[convergence] shows the results. It is visible that by increasing the number of basis functions,
+both error indicators decrease rapidly.
 
 !plot scatter
   id=convergence caption=The convergence of averaged quantities of interest.
   filename=examples/surrogates/pod_rb/2d_multireg/gold/2d_multireg_results.csv
-  data=[{'x':'no_modes', 'y':'mean', 'name':'Average relative error'},
-        {'x':'no_modes', 'y':'max', 'name':'Maximum relative error'}]
-  layout={'xaxis':{'type':'log', 'title':'Number of basis functions'},
-          'yaxis':{'type':'log','title':'Relative Error'}}
+  data=[{'x':'no_modes', 'y':'mean', 'name':'Average e'},
+        {'x':'no_modes', 'y':'max', 'name':'Maximum e'}]
+  layout={'xaxis':{'type':'log', 'title':'Number of basis functions used'},
+          'yaxis':{'type':'log','title':'Relative error'}}
