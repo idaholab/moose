@@ -82,7 +82,7 @@
 []
 
 [Transfers]
-  [quad]
+  [param]
     type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
@@ -99,6 +99,7 @@
                   Kernels/src2/value'
     to_control = 'stochastic'
     execute_on = 'timestep_begin'
+    check_multiapp_execute_on = false
   []
   [data]
     type = SamplerSolutionTransfer
@@ -107,6 +108,7 @@
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
     execute_on = 'timestep_begin'
+    check_multiapp_execute_on = false
   []
   [mode]
     type = SamplerSolutionTransfer
@@ -115,6 +117,7 @@
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
     execute_on = 'final'
+    check_multiapp_execute_on = false
   []
   [res]
     type = ResidualTransfer
@@ -122,6 +125,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'final'
+    check_multiapp_execute_on = false
   []
 []
 
