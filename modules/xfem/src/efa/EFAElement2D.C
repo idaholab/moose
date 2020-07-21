@@ -1309,7 +1309,7 @@ EFAElement2D::updateFragmentNode()
 }
 
 void
-EFAElement2D::printElement(std::ostream & ostream)
+EFAElement2D::printElement(std::ostream & ostream) const
 {
   ostream << std::setw(4);
   ostream << _id << " | ";

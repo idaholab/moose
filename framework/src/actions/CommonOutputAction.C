@@ -119,6 +119,16 @@ CommonOutputAction::validParams()
   params.addParam<bool>("print_linear_residuals",
                         true,
                         "Enable printing of linear residuals to the screen (Console)");
+  params.addParam<bool>("print_nonlinear_converged_reason",
+                        true,
+                        "Enable/disable printing of the nonlinear solver convergence reason to the "
+                        "screen. This parameter only affects the output of the third-party solver "
+                        "(e.g. PETSc), not MOOSE itself.");
+  params.addParam<bool>("print_linear_converged_reason",
+                        true,
+                        "Enable/disable printing of the linear solver convergence reason to the "
+                        "screen. This parameter only affects the output of the third-party solver "
+                        "(e.g. PETSc), not MOOSE itself.");
 
   // Return object
   return params;

@@ -137,6 +137,7 @@
   type = Transient
   end_time = 50
   dt = 2
+  snesmf_reuse_base = false
 []
 
 [Outputs]

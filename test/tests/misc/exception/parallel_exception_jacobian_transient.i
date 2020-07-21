@@ -46,8 +46,11 @@
   dt = 0.01
   dtmin = 0.005
   solve_type = 'PJFNK'
+  snesmf_reuse_base = false
 []
 
 [Outputs]
   exodus = true
+  print_nonlinear_converged_reason = false
+  print_linear_converged_reason = false
 []

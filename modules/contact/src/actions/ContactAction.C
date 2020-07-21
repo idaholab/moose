@@ -188,28 +188,24 @@ void
 ContactAction::act()
 {
   if (_formulation == "mortar")
+    // This method executes multiple tasks
     addMortarContact();
-  else
+
+  if (_current_task == "add_dirac_kernel")
   {
-    if (_current_task == "add_dirac_kernel")
-    {
-      // It is risky to apply this optimization to contact problems
-      // since the problem configuration may be changed during Jacobian
-      // evaluation. We therefore turn it off for all contact problems so that
-      // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
-      if (!_problem->isSNESMFReuseBaseSetbyUser())
-        _problem->setSNESMFReuseBase(false, false);
+    // It is risky to apply this optimization to contact problems
+    // since the problem configuration may be changed during Jacobian
+    // evaluation. We therefore turn it off for all contact problems so that
+    // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
+    if (!_problem->isSNESMFReuseBaseSetbyUser())
+      _problem->setSNESMFReuseBase(false, false);
 
-      if (!_problem->getDisplacedProblem())
-        mooseError(
-            "Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
-            "Mesh block.");
+    if (!_problem->getDisplacedProblem())
+      mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
+                 "Mesh block.");
 
-      if (_system == "Constraint")
-        // MechanicalContactConstraint has to be added after the init_problem task, so it cannot
-        // be added for the add_constraint task.
-        addNodeFaceContact();
-    }
+    if (_formulation != "mortar")
+      addNodeFaceContact();
   }
 
   if (_current_task == "add_aux_kernel")

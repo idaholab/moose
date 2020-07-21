@@ -169,6 +169,7 @@ offset = 1e-2
   line_search = 'none'
   nl_abs_tol = 1e-10
   num_grids = 5
+  snesmf_reuse_base = false
 []
 
 [Debug]

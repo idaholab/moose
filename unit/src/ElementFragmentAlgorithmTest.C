@@ -749,7 +749,7 @@ TEST(ElementFragmentAlgorithm, test5a)
   CheckElements(parent_elem2, pe_gold2);
 
   // add the upper vertical cut
-  MyMesh.addFragEdgeIntersection((unsigned int)14, 3, 0.5); // I cheated here
+  MyMesh.addFragEdgeIntersection((unsigned int)14, 4, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();
@@ -843,7 +843,7 @@ TEST(ElementFragmentAlgorithm, test5b)
 
   // add the upper part of the vertical cut
   MyMesh.addElemEdgeIntersection((unsigned int)9, 1, 0.5);
-  MyMesh.addFragEdgeIntersection((unsigned int)9, 2, 0.5); // I cheated here
+  MyMesh.addFragEdgeIntersection((unsigned int)9, 3, 0.5); // I cheated here
 
   MyMesh.updatePhysicalLinksAndFragments();
   MyMesh.updateTopology();

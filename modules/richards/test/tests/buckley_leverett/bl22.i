@@ -227,6 +227,8 @@
 [Outputs]
   execute_on = 'timestep_end'
   file_base = bl22
+  print_linear_converged_reason = false
+  print_nonlinear_converged_reason = false
   [./exodus]
     type = Exodus
     interval = 100000
