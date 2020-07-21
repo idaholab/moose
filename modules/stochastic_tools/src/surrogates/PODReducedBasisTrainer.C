@@ -36,9 +36,9 @@ PODReducedBasisTrainer::validParams()
       std::vector<std::string>(0),
       "Names of tags for reduced operators corresponding to dirichlet BCs.");
   params.addParam<bool>(
-          "print_eigenvalues",
-          false,
-          "Flag that decides if the eigenvalues of the correlation matrix are printed or not.");
+      "print_eigenvalues",
+      false,
+      "Flag that decides if the eigenvalues of the correlation matrix are printed or not.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "independent",
       "List of bools describing if the tags"
@@ -422,7 +422,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
       }
     }
 
-    if(_print_eigenvalues)
+    if (_print_eigenvalues)
       printEigenvalues();
   }
 }
