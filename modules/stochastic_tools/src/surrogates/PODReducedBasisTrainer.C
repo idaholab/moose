@@ -372,7 +372,6 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
           corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
       }
     }
-    _corr_mx[0].print();
   }
 }
 

@@ -40,7 +40,7 @@
 []
 
 [Transfers]
-  [quad]
+  [param]
     type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
@@ -85,6 +85,7 @@
     tag_names = 'diff react bodyf'
     independent = '0 0 1'
     execute_on = 'timestep_begin final'
+    print_eigenvalues=false
   []
 []
 
