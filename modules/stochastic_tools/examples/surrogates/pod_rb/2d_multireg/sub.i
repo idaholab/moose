@@ -27,84 +27,84 @@ fulla = 20
 []
 
 [Variables]
-  [phi]
+  [psi]
   []
 []
 
 [Kernels]
   [diff0]
     type = MatDiffusion
-    variable = phi
+    variable = psi
     diffusivity = D0
     extra_vector_tags = 'diff0'
     block = 0
   []
   [diff1]
     type = MatDiffusion
-    variable = phi
+    variable = psi
     diffusivity = D1
     extra_vector_tags = 'diff1'
     block = 1
   []
   [diff2]
     type = MatDiffusion
-    variable = phi
+    variable = psi
     diffusivity = D2
     extra_vector_tags = 'diff2'
     block = 2
   []
   [diff3]
     type = MatDiffusion
-    variable = phi
+    variable = psi
     diffusivity = D3
     extra_vector_tags = 'diff3'
     block = 3
   []
   [abs0]
     type = MaterialReaction
-    variable = phi
+    variable = psi
     coefficient = absxs0
     extra_vector_tags = 'abs0'
     block = 0
   []
   [abs1]
     type = MaterialReaction
-    variable = phi
+    variable = psi
     coefficient = absxs1
     extra_vector_tags = 'abs1'
     block = 1
   []
   [abs2]
     type = MaterialReaction
-    variable = phi
+    variable = psi
     coefficient = absxs2
     extra_vector_tags = 'abs2'
     block = 2
   []
   [abs3]
     type = MaterialReaction
-    variable = phi
+    variable = psi
     coefficient = absxs3
     extra_vector_tags = 'abs3'
     block = 3
   []
   [src0]
     type = BodyForce
-    variable = phi
+    variable = psi
     value = 1
     extra_vector_tags = 'src0'
     block = 0
   []
   [src1]
     type = BodyForce
-    variable = phi
+    variable = psi
     value = 1
     extra_vector_tags = 'src1'
     block = 1
   []
   [src2]
     type = BodyForce
-    variable = phi
+    variable = psi
     value = 1
     extra_vector_tags = 'src2'
     block = 2
@@ -165,25 +165,25 @@ fulla = 20
 [BCs]
   [left]
     type = NeumannBC
-    variable = phi
+    variable = psi
     boundary = left
     value = 0
   []
   [bottom]
     type = NeumannBC
-    variable = phi
+    variable = psi
     boundary = bottom
     value = 0
   []
   [top]
     type = DirichletBC
-    variable = phi
+    variable = psi
     boundary = top
     value = 0
   []
   [right]
     type = DirichletBC
-    variable = phi
+    variable = psi
     boundary = right
     value = 0
   []
@@ -205,7 +205,7 @@ fulla = 20
 [Postprocessors]
   [nodal_l2]
     type = NodalL2Norm
-    variable = phi
+    variable = psi
   []
 []
 

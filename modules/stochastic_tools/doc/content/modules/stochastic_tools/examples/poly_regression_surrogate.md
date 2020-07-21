@@ -69,7 +69,7 @@ and standard deviation ($\sigma$) of the QoI can be computed for reference:
 ## Solving the problem without uncertain parameters
 
 The first step towards creating a surrogate model is the generation of a full-order model
-which can solve [problem] fixed parameter combination. The complete input file
+which can solve [problem] with fixed parameter combinations. The complete input file
 for this case is presented in [sub_app].
 
 !listing surrogates/polynomial_regression/sub.i id=sub_app
