@@ -12,15 +12,19 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-class DefaultMatPropConsumerMaterial : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class DefaultMatPropConsumerMaterialTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  DefaultMatPropConsumerMaterial(const InputParameters & parameters);
+  DefaultMatPropConsumerMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties();
   std::string _prop_name;
-  const MaterialProperty<Real> & _prop;
+  const GenericMaterialProperty<Real, is_ad> & _prop;
 };
+
+typedef DefaultMatPropConsumerMaterialTempl<false> DefaultMatPropConsumerMaterial;
+typedef DefaultMatPropConsumerMaterialTempl<true> ADDefaultMatPropConsumerMaterial;

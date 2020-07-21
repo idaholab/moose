@@ -127,18 +127,18 @@ public:
    * check if derivatives of the passed in material property exist w.r.t a variable
    * that is _not_ coupled in to the current object
    */
-  template <typename U>
+  template <typename U, bool is_ad = false>
   void validateCoupling(const MaterialPropertyName & base,
                         const std::vector<VariableName> & c,
                         bool validate_aux = true);
 
-  template <typename U>
+  template <typename U, bool is_ad = false>
   void validateCoupling(const MaterialPropertyName & base,
                         const VariableName & c1 = "",
                         const VariableName & c2 = "",
                         const VariableName & c3 = "");
 
-  template <typename U>
+  template <typename U, bool is_ad = false>
   void validateNonlinearCoupling(const MaterialPropertyName & base,
                                  const VariableName & c1 = "",
                                  const VariableName & c2 = "",
@@ -164,7 +164,7 @@ private:
   buildVariableVector(const VariableName & c1, const VariableName & c2, const VariableName & c3);
 
   /// helper method to compile list of missing coupled variables for a given system
-  template <typename U>
+  template <typename U, bool is_ad = false>
   void validateCouplingHelper(const MaterialPropertyName & base,
                               const std::vector<VariableName> & c,
                               const System & system,
@@ -190,9 +190,9 @@ template <typename U, bool is_ad>
 bool
 DerivativeMaterialInterface<Material>::haveMaterialProperty(const std::string & prop_name)
 {
-  return (
-      (this->boundaryRestricted() && this->template hasBoundaryMaterialProperty<U>(prop_name)) ||
-      (this->template hasBlockMaterialProperty<U>(prop_name)));
+  return ((this->boundaryRestricted() &&
+           this->template hasBoundaryMaterialProperty<U, is_ad>(prop_name)) ||
+          (this->template hasBlockMaterialProperty<U, is_ad>(prop_name)));
 }
 
 template <class T>
@@ -204,9 +204,9 @@ DerivativeMaterialInterface<T>::haveMaterialProperty(const std::string & prop_na
   BlockRestrictable * blk = dynamic_cast<BlockRestrictable *>(this);
   BoundaryRestrictable * bnd = dynamic_cast<BoundaryRestrictable *>(this);
   return ((bnd && bnd->boundaryRestricted() &&
-           bnd->template hasBoundaryMaterialProperty<U>(prop_name)) ||
-          (blk && blk->template hasBlockMaterialProperty<U>(prop_name)) ||
-          (this->template hasMaterialProperty<U>(prop_name)));
+           bnd->template hasBoundaryMaterialProperty<U, is_ad>(prop_name)) ||
+          (blk && blk->template hasBlockMaterialProperty<U, is_ad>(prop_name)) ||
+          (this->template hasGenericMaterialProperty<U, is_ad>(prop_name)));
 }
 
 template <class T>
@@ -233,7 +233,7 @@ const GenericMaterialProperty<U, is_ad> &
 DerivativeMaterialInterface<T>::getDefaultMaterialPropertyByName(const std::string & prop_name)
 {
   // if found return the requested property
-  if (haveMaterialProperty<U>(prop_name))
+  if (haveMaterialProperty<U, is_ad>(prop_name))
     return this->template getGenericMaterialPropertyByName<U, is_ad>(prop_name);
 
   return this->template getGenericZeroMaterialProperty<U, is_ad>(prop_name);
@@ -300,7 +300,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * derivatives of constants are zero.
    */
   if (this->template defaultGenericMaterialProperty<U, is_ad>(prop_name))
-    return this->template getZeroMaterialProperty<U>(prop_name + "_zeroderivative");
+    return this->template getGenericZeroMaterialProperty<U, is_ad>(prop_name + "_zeroderivative");
 
   if (c3 != "")
     return getDefaultMaterialPropertyByName<U, is_ad>(
@@ -368,7 +368,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivativeByName(
 }
 
 template <class T>
-template <typename U>
+template <typename U, bool is_ad>
 void
 DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyName & base,
                                                        const std::vector<VariableName> & c,
@@ -388,7 +388,7 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
       cj.push_back(jname);
 
       // if the derivative exists make sure the variable is coupled
-      if (haveMaterialProperty<U>(derivativePropertyName(base, cj)))
+      if (haveMaterialProperty<U, is_ad>(derivativePropertyName(base, cj)))
       {
         // kernels and BCs to not have the variable they are acting on in coupled_moose_vars
         bool is_missing = isNotObjectVariable(jname);
@@ -408,7 +408,7 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
 }
 
 template <class T>
-template <typename U>
+template <typename U, bool is_ad>
 void
 DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & base,
                                                  const std::vector<VariableName> & c,
@@ -420,10 +420,11 @@ DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & ba
   std::vector<VariableName> missing;
 
   // iterate over all variables in the both the non-linear and auxiliary system (optional)
-  validateCouplingHelper<U>(
+  validateCouplingHelper<U, is_ad>(
       prop_name, c, _dmi_fe_problem.getNonlinearSystemBase().system(), missing);
   if (validate_aux)
-    validateCouplingHelper<U>(prop_name, c, _dmi_fe_problem.getAuxiliarySystem().system(), missing);
+    validateCouplingHelper<U, is_ad>(
+        prop_name, c, _dmi_fe_problem.getAuxiliarySystem().system(), missing);
 
   if (missing.size() > 0)
   {
@@ -461,25 +462,25 @@ DerivativeMaterialInterface<T>::buildVariableVector(const VariableName & c1,
 }
 
 template <class T>
-template <typename U>
+template <typename U, bool is_ad>
 void
 DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & base,
                                                  const VariableName & c1,
                                                  const VariableName & c2,
                                                  const VariableName & c3)
 {
-  validateCoupling<U>(base, buildVariableVector(c1, c2, c3), true);
+  validateCoupling<U, is_ad>(base, buildVariableVector(c1, c2, c3), true);
 }
 
 template <class T>
-template <typename U>
+template <typename U, bool is_ad>
 void
 DerivativeMaterialInterface<T>::validateNonlinearCoupling(const MaterialPropertyName & base,
                                                           const VariableName & c1,
                                                           const VariableName & c2,
                                                           const VariableName & c3)
 {
-  validateCoupling<U>(base, buildVariableVector(c1, c2, c3), false);
+  validateCoupling<U, is_ad>(base, buildVariableVector(c1, c2, c3), false);
 }
 
 template <class T>
@@ -492,7 +493,7 @@ DerivativeMaterialInterface<T>::validateDerivativeMaterialPropertyBase(const std
 
   // check if the material property does not exist on the blocks of the current object,
   // and check if it is not a plain number in the input file
-  if (!haveMaterialProperty<U>(prop_name) &&
+  if (!haveMaterialProperty<U, is_ad>(prop_name) &&
       this->template defaultGenericMaterialProperty<U, is_ad>(prop_name) == 0)
     mooseWarning("The material property '",
                  prop_name,

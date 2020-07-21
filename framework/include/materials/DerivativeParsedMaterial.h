@@ -13,8 +13,8 @@
 #include "ParsedMaterialBase.h"
 
 /**
- * DerivativeFunctionMaterialBase child class to evaluate a parsed function (for
- * example a free energy) and automatically provide all derivatives.
+ * Class to evaluate a parsed function (for example a free energy) and automatically
+ * provide all derivatives.
  */
 template <bool is_ad>
 class DerivativeParsedMaterialTempl : public DerivativeParsedMaterialHelperTempl<is_ad>,
