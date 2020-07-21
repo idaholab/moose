@@ -247,7 +247,7 @@
     y = '0.01 0.01 0.5 10'
   [../]
 []
-    
+
 [Executioner]
   type = Transient
   start_time = -0.01 # to allow initial dump to occur
