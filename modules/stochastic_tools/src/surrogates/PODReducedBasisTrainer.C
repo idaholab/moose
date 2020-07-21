@@ -35,6 +35,10 @@ PODReducedBasisTrainer::validParams()
       "dir_tag_names",
       std::vector<std::string>(0),
       "Names of tags for reduced operators corresponding to dirichlet BCs.");
+  params.addParam<bool>(
+          "print_eigenvalues",
+          false,
+          "Flag that decides if the eigenvalues of the correlation matrix are printed or not.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "independent",
       "List of bools describing if the tags"
@@ -56,7 +60,8 @@ PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameter
     _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
     _base_completed(false),
-    _empty_operators(true)
+    _empty_operators(true),
+    _print_eigenvalues(getParam<bool>("print_eigenvalues"))
 {
   if (_en_limits.size() != _var_names.size())
     paramError("en_limits",
@@ -417,6 +422,9 @@ PODReducedBasisTrainer::computeEigenDecomposition()
         _eigenvectors[v_ind](k, j) = eigenvectors(k, idx[j]);
       }
     }
+
+    if(_print_eigenvalues)
+      printEigenvalues();
   }
 }
 
@@ -583,4 +591,20 @@ PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
       break;
   }
   return var_counter;
+}
+
+void
+PODReducedBasisTrainer::printEigenvalues()
+{
+  if (processor_id() == 0 && _tid == 0)
+  {
+    for (dof_id_type var_i = 0; var_i < _var_names.size(); ++var_i)
+    {
+      std::string filename("eigenvalues_" + _var_names[var_i] + ".csv");
+      std::filebuf fb;
+      fb.open(filename, std::ios::out);
+      std::ostream os(&fb);
+      _eigenvalues[var_i].print_scientific(os);
+    }
+  }
 }

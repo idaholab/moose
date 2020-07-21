@@ -190,7 +190,27 @@ In this case the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solut
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=VectorPostprocessors
 
+## Running the input files
+
+Since the sub-applications use test object one has to allow the executioner to use these
+by specifying the following on the command line:
+
+```
+cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
+../../../../stochastic_tools-opt -i trainer.i --allow-test-objects
+```
+
+The same is true for the surrogate input file as well, therefore one needs to
+start the executions as follows:
+
+```
+cd moose/modules/stocastic_tools/examples/surrogates/pod_rb/2d_multireg
+../../../../stochastic_tools-opt -i surr.i --allow-test-objects
+```
+
 ## Results and Analysis
+
+
 
 !row!
 
@@ -204,6 +224,18 @@ In this case the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solut
        id=pwr_geom caption=The geometry of the PWR core used in this example.
 
 !row-end!
+
+!plot scatter
+  filename=examples/surrogates/pod_rb/2d_multireg/gold/eigenvalues_psi.csv
+  layout={'xaxis':{'title':'Basis function'},
+          'yaxis':{'type':'log','title':'Corresponding eigenvalue'}}
+
+!media 2d_multireg_1.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
+       id=pwr_geom caption=The geometry of the PWR core used in this example.
+
+!media 2d_multireg_8.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
+       id=pwr_geom caption=The geometry of the PWR core used in this example.
+
 
 
 

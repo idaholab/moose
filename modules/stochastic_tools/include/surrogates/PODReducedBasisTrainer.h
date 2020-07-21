@@ -81,6 +81,9 @@ protected:
   /// eigendecomposition of the correlation matrices
   void computeBasisVectors();
 
+  /// Prints the eigenvalues of the correlation matrix for each variable.
+  void printEigenvalues();
+
   /// Vector containing the names of the variables we want to use for constructing
   /// the surrogates.
   std::vector<std::string> & _var_names;
@@ -123,6 +126,10 @@ protected:
   /// to be able to do both the base and reduced operator generation in the same
   /// object.
   bool _empty_operators;
+
+  /// Flag that shots if the eigenvlaues of the correlation matrices are being
+  /// printed or not.
+  bool _print_eigenvalues;
 
 private:
   /// Computes the number of bases necessary for a given error indicator. This
