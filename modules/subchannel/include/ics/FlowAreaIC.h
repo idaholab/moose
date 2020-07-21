@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SubChannelBaseIC.h"
-#include "SolutionHandle.h"
 #include "SubChannelMesh.h"
 
 /**
