@@ -48,6 +48,12 @@ protected:
   virtual void computeProperties() override;
 
   /**
+   * Compute the material properties at each node, and if the number of nodes is less
+   * than the number of quadpoints, fill the remaining empty values with the last value.
+   */
+  void computeNodalProperties();
+
+  /**
    * Resizes properties to be equal to max(number of nodes, number of quadpoints)
    * in the current element
    */
