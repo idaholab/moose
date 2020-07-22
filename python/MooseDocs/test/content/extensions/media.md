@@ -57,4 +57,4 @@ Idaho: [idaho-flag]
 !media youtube youtube_embed_src=http://www.youtube.com/embed/2tJwBsYaLaI
                id=training-webinar
                latex_src=training-webinar.png
-               caption=MOOSE training webinar given on June 9 - 10, 2020.
+               caption=MOOSE training webinar given on June 9--10, 2020.
