@@ -288,7 +288,6 @@ EFAFragment3D::getFaceID(EFAFace * face) const
     if (_faces[i] == face)
       return i;
   EFAError("face not found in get_face_id()");
-  return 99999;
 }
 
 void

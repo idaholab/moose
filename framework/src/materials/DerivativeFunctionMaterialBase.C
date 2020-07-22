@@ -55,14 +55,13 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::DerivativeFunctionMaterialBaseTempl(
   // initialize derivatives
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    // first derivatives (TODO: declareGenericPropertyDerivative)
-    _prop_dF[i] = &this->template declarePropertyDerivative<Real>(_F_name, _arg_names[i]);
+    _prop_dF[i] = &this->template declarePropertyDerivative<Real, is_ad>(_F_name, _arg_names[i]);
 
     // second derivatives
     for (unsigned int j = i; j < _nargs; ++j)
     {
-      _prop_d2F[i][j] = _prop_d2F[j][i] =
-          &this->template declarePropertyDerivative<Real>(_F_name, _arg_names[i], _arg_names[j]);
+      _prop_d2F[i][j] = _prop_d2F[j][i] = &this->template declarePropertyDerivative<Real, is_ad>(
+          _F_name, _arg_names[i], _arg_names[j]);
 
       // third derivatives
       if (_third_derivatives)
@@ -73,7 +72,7 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::DerivativeFunctionMaterialBaseTempl(
           // (no need to check i<=j<=k)
           _prop_d3F[i][j][k] = _prop_d3F[k][i][j] = _prop_d3F[j][k][i] = _prop_d3F[k][j][i] =
               _prop_d3F[j][i][k] = _prop_d3F[i][k][j] =
-                  &this->template declarePropertyDerivative<Real>(
+                  &this->template declarePropertyDerivative<Real, is_ad>(
                       _F_name, _arg_names[i], _arg_names[j], _arg_names[k]);
         }
       }
@@ -161,4 +160,5 @@ DerivativeFunctionMaterialBaseTempl<is_ad>::computeProperties()
 }
 
 // explicit instantiation
+template class DerivativeFunctionMaterialBaseTempl<true>;
 template class DerivativeFunctionMaterialBaseTempl<false>;

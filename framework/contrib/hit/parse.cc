@@ -18,7 +18,6 @@
 namespace hit
 {
 
-// returns the type of quoting used on string s (i.e. " or ') or an empty string otherwise.
 std::string
 quoteChar(const std::string & s)
 {

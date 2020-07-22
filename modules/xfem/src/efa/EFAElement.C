@@ -110,20 +110,12 @@ EFAElement::getGlobalNodeFromLocalNode(const EFANode * local_node) const
 unsigned int
 EFAElement::getLocalNodeIndex(EFANode * node) const
 {
-  unsigned int local_node_id = 99999;
-  bool found_local_node = false;
   for (unsigned int i = 0; i < _num_nodes; ++i)
   {
     if (_nodes[i] == node)
-    {
-      found_local_node = true;
-      local_node_id = i;
-      break;
-    }
+      return i;
   }
-  if (!found_local_node)
-    EFAError("In EFAelement::getLocalNodeIndex, cannot find the given node");
-  return local_node_id;
+  EFAError("In EFAelement::getLocalNodeIndex, cannot find the given node");
 }
 
 void

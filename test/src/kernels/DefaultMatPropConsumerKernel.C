@@ -10,17 +10,21 @@
 #include "DefaultMatPropConsumerKernel.h"
 
 registerMooseObject("MooseTestApp", DefaultMatPropConsumerKernel);
+registerMooseObject("MooseTestApp", ADDefaultMatPropConsumerKernel);
 
+template <bool is_ad>
 InputParameters
-DefaultMatPropConsumerKernel::validParams()
+DefaultMatPropConsumerKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addParam<MaterialPropertyName>("mat_prop", "prop", "Material property name to fetch");
   return params;
 }
 
-DefaultMatPropConsumerKernel::DefaultMatPropConsumerKernel(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Kernel>(parameters),
-    _prop(getDefaultMaterialProperty<Real>("mat_prop"))
+template <bool is_ad>
+DefaultMatPropConsumerKernelTempl<is_ad>::DefaultMatPropConsumerKernelTempl(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<GenericKernel<is_ad>>(parameters),
+    _prop(this->template getDefaultMaterialProperty<Real, is_ad>("mat_prop"))
 {
 }

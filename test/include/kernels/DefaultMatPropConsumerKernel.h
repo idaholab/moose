@@ -9,18 +9,22 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
 #include "DerivativeMaterialInterface.h"
 
-class DefaultMatPropConsumerKernel : public DerivativeMaterialInterface<Kernel>
+template <bool is_ad>
+class DefaultMatPropConsumerKernelTempl : public DerivativeMaterialInterface<GenericKernel<is_ad>>
 {
 public:
   static InputParameters validParams();
 
-  DefaultMatPropConsumerKernel(const InputParameters & parameters);
+  DefaultMatPropConsumerKernelTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() { return 0.0; };
+  virtual GenericReal<is_ad> computeQpResidual() { return 0.0; };
 
-  const MaterialProperty<Real> & _prop;
+  const GenericMaterialProperty<Real, is_ad> & _prop;
 };
+
+typedef DefaultMatPropConsumerKernelTempl<false> DefaultMatPropConsumerKernel;
+typedef DefaultMatPropConsumerKernelTempl<true> ADDefaultMatPropConsumerKernel;

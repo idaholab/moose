@@ -93,8 +93,16 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
 
   try
   {
+    auto unquoted = f->val();
+    auto quote = quoteChar(f->val());
+    if (quote != "")
+      unquoted = unquoted.substr(1, unquoted.size() - 2);
+
     std::string s;
-    s = expand(f, f->val());
+    s = expand(f, unquoted);
+    if (f->kind() == Field::Kind::String)
+      s = quote + s + quote;
+
     if (errors.size() == 0)
       f->setVal(s);
   }

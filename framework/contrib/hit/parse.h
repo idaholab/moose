@@ -57,9 +57,12 @@ namespace hit
 
 const std::string default_indent = "  ";
 
-// toBool converts the given val to a boolean value which is stored in dst.  It returns true if
-// val was successfully converted to a boolean and returns false otherwise.
+/// toBool converts the given val to a boolean value which is stored in dst.  It returns true if
+/// val was successfully converted to a boolean and returns false otherwise.
 bool toBool(const std::string & val, bool * dst);
+
+/// returns the type of quoting used on string s (i.e. " or ') or an empty string otherwise.
+std::string quoteChar(const std::string & s);
 
 /// NodeType represents every element type in a parsed hit tree.
 enum class NodeType

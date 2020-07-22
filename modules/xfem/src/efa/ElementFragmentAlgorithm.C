@@ -598,7 +598,7 @@ ElementFragmentAlgorithm::getElemByID(unsigned int id)
 unsigned int
 ElementFragmentAlgorithm::getElemIdByNodes(unsigned int * node_id)
 {
-  unsigned int elem_id = 99999;
+  unsigned int elem_id = std::numeric_limits<unsigned int>::max();
   std::map<unsigned int, EFAElement *>::iterator eit;
   for (eit = _elements.begin(); eit != _elements.end(); ++eit)
   {
