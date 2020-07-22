@@ -293,7 +293,7 @@ generation of a surrogate model is a better alternative.
 !table id=com_time caption=The computation time of the full-order solutions on the test set compared to the cost of training a surrogate and evaluating it on the same test set.
 | Process | Execution time (s) |
 | :- | - | - | - |
-| Evaluation of the full-order model on the 1000 sample test set | 779.479 |
+| Evaluation of the full-order model on the 1000 sample test set | 779.5 |
 | Training a POD-RB surrogate using 100 samples | 116.2 |
 | Evaluation of the POD-RB surrogate on the 1000 sample test set (4 basis functions) | 0.592 |
 | Evaluation of the POD-RB surrogate on the 1000 sample test set (8 basis functions) | 0.937 |

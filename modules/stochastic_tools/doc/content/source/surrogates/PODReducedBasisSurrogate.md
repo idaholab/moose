@@ -42,19 +42,19 @@ need of rerunning the training procedure.
 
 To create a POD reduced basis surrogate model, one can use the following syntax:
 
-!listing rb_pod/internal/surr.i block=Surrogates
+!listing pod_rb/internal/surr.i block=Surrogates
 
 It is visible that the reduced operators and basis vectors from [PODReducedBasisTrainer.md]
 have been saved to `trainer_out_pod_rb.rd` and the surrogate model is constructed by
 loading the necessary information from it. For the sampling
 of the uncertain parameters, the same objects can be used in the `Samplers` block:
 
-!listing rb_pod/internal/surr.i block=Samplers
+!listing pod_rb/internal/surr.i block=Samplers
 
 Finally, a vector postprocessor of type `PODSurrogateTester` is created to extract
 the approximate value of the nodal maximum of variable `u` in this case:
 
-!listing rb_pod/internal/surr.i block=VectorPostprocessors
+!listing pod_rb/internal/surr.i block=VectorPostprocessors
 
 
 

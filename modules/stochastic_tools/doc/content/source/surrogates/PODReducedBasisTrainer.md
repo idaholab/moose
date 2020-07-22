@@ -268,15 +268,15 @@ that the multiapp and transfer objects need to know about the trainer. This can 
 ensured using the `trainer` input argument. The number of collected snapshots is
 defined in the sampler object using the `num_rows` parameter.
 
-!listing rb_pod/internal/trainer.i block=Samplers
+!listing pod_rb/internal/trainer.i block=Samplers
 
-!listing rb_pod/internal/trainer.i block=MultiApps
+!listing pod_rb/internal/trainer.i block=MultiApps
 
 The global basis functions are then plugged back into the same [PODFullSolveMultiApp.md]
 by a new [SamplerSolutionTransfer.md] and the residuals are evaluated. The residuals
 are transferred back to the trainer using a [ResidualTransfer.md].
 
-!listing rb_pod/internal/trainer.i block=Transfers
+!listing pod_rb/internal/trainer.i block=Transfers
 
 Finally, the [PODReducedBasisTrainer.md] is defined in the `Trainers` block. It requires
 the names of the variables (`var_names`) one wishes to create reduced basis for and the names of the
@@ -288,7 +288,7 @@ In the following example the `execute_on` parameter is set to '`timestep_begin f
 that at the beginning of the training it will create the basis functions while at the
 end it will create the reduced operators.
 
-!listing rb_pod/internal/trainer.i block=Trainers
+!listing pod_rb/internal/trainer.i block=Trainers
 
 !syntax parameters /Trainers/PODReducedBasisTrainer
 
