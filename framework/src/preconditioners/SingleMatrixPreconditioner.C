@@ -26,6 +26,9 @@ SingleMatrixPreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
 
+  params.addClassDescription("Single matrix preconditioner (SMP) builds a preconditioner using "
+                             "user defined off-diagonal parts of the Jacobian.");
+
   params.addParam<std::vector<NonlinearVariableName>>(
       "off_diag_row",
       "The off diagonal row you want to add into the matrix, it will be associated "

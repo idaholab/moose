@@ -37,6 +37,9 @@ PhysicsBasedPreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
 
+  params.addClassDescription("Physics-based preconditioner (PBP) allows individual physics to have "
+                             "their own preconditioner.");
+
   params.addRequiredParam<std::vector<std::string>>(
       "solve_order",
       "The order the block rows will be solved in.  Put the name of variables here "
