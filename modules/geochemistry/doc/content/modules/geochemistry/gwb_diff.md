@@ -5,14 +5,14 @@ The [Geochemists Workbench](https://www.gwb.com/) (GWB) software is a popular "g
 On the other hand, the C++ code behind the `geochemistry` solver is different than GWB and [!cite](bethke_2007) because it is part of the MOOSE framework.  There are a number of differences that users should be aware of.  Most of these can be summarized by the following rule
 
 !alert note
-Rule: The geochemistry module respects the users constraints
+Rule: The geochemistry module respects the constraints
 
 ## Setting bulk constraints
 
 When the user sets `moles_bulk_species`, this means the mole number in the current basis (after the swaps).  For instance, the following means there is:
 
-- 1 mole of Na$^{+}$.  There is also additional Na$^{+}$ inside the other basis species Mirabilite
-- 1 mole of Cl$^{-}$
+- 1 mole of Na$^{+}$.  There is also additional Na$^{+}$ inside the other basis species Mirabilite.  Some of the 1$\,$mol will be free, while the remaining part will be bound into secondary species such as NaCl.
+- 1 mole of Cl$^{-}$.  Some of this will be free, while the other part will be bound into secondary species such as NaCl.
 - 1 free mole of Mirabilite precipitate floating around in the solution, which contains 2 moles of Na$^{+}$, 1 mole of SO$_{4}^{2-}$ and 10 moles of H$_{2}$O
 
 !listing modules/geochemistry/test/tests/equilibrium_models/bulk_constraints.i
@@ -29,7 +29,9 @@ In fact, this does not converge in GWB (unless the charge-balance species is mov
 Na+ = 2.79 mol
 ```
 
-The additional 1.79$\,$mol is twice the 0.895$\,$mol of dissolved Mirabilite (each mole of Mirabilite contains two moles of Na$^{+}$).  I'm not sure how to compute this number a-priori.
+The additional 1.79$\,$mol is twice the 0.895$\,$mol of dissolved Mirabilite (each mole of Mirabilite contains two moles of Na$^{+}$).
+
+The difference is that GWB expects the bulk composition defined in the bases *before* the swaps, while `geochemistry` expects it *after* the swaps.
 
 
 !table id=table:bulk_constraints caption=Species molality for the `bulk_constraints` simulation
