@@ -139,6 +139,30 @@ SubChannelMesh::SubChannelMesh(const InputParameters & params)
   }
 }
 
+SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
+  : MooseMesh(other_mesh),
+    _nx(other_mesh._nx),
+    _ny(other_mesh._ny),
+    _nz(other_mesh._nz),
+    _n_channels(other_mesh._n_channels),
+    _n_gaps(other_mesh._n_gaps),
+    _pitch(other_mesh._pitch),
+    _rod_diameter(other_mesh._rod_diameter),
+    _gap(other_mesh._gap),
+    _heated_length(other_mesh._heated_length),
+    _z_grid(other_mesh._z_grid),
+    _spacer_z(other_mesh._spacer_z),
+    _spacer_k(other_mesh._spacer_k),
+    _nodes(other_mesh._nodes),
+    _gapnodes(other_mesh._gapnodes),
+    _gap_to_chan_map(other_mesh._gap_to_chan_map),
+    _chan_to_gap_map(other_mesh._chan_to_gap_map),
+    _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
+    _gij_map(other_mesh._gij_map),
+    _max_dz(other_mesh._max_dz)
+{
+}
+
 std::unique_ptr<MooseMesh>
 SubChannelMesh::safeClone() const
 {
