@@ -263,6 +263,7 @@
     input = 'pls02.i'
     csvdiff = 'pls02_dirac_pts_0004.csv'
     allow_test_objects = true
+    mesh_mode=replicated
     cli_args = "VectorPostprocessors/dirac_pts/type=DiracPointsWriter"
                " DiracKernels/pls/point_file=''"
                " DiracKernels/pls/line_base='0.1 0.01 0.01 -0.249'"

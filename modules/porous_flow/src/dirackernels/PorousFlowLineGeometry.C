@@ -102,6 +102,18 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
 
     for (size_t i = _line_base.size(); i < 4; i++)
       _line_base.push_back(0); // fill out zeros up to weight+3 dimensions
+
+    // make sure line base point is inside the mesh
+    Point start(_line_base[1], _line_base[2], _line_base[3]);
+    Point end = start + _line_length * _line_direction / _line_direction.norm();
+    auto pl = _subproblem.mesh().getPointLocator();
+    pl->enable_out_of_mesh_mode();
+    auto * elem = (*pl)(start);
+    auto elem_id = elem ? elem->id() : DofObject::invalid_id;
+    _communicator.min(elem_id);
+    if (elem_id == DofObject::invalid_id)
+      paramError("line_base", "point ", start, " lies outside the mesh");
+
     regenPoints();
   }
 }
@@ -147,9 +159,10 @@ PorousFlowLineGeometry::regenPoints()
   _ys.clear();
   _zs.clear();
 
-  // add point for each cell the line passes through
   Point p0(_line_base[1], _line_base[2], _line_base[3]);
   Point p1 = p0 + _line_length * _line_direction / _line_direction.norm();
+
+  // add point for each cell the line passes through
   auto ploc = _mesh.getPointLocator();
   std::vector<Elem *> elems;
   std::vector<LineSegment> segs;
