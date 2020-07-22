@@ -73,6 +73,13 @@ public:
    */
   virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const = 0;
 
+  /**
+   * @return the moles dumped of the given species at the specified node_id
+   * @param species the name of the species
+   * @param node_id the node ID
+   */
+  virtual Real getMolesDumped(unsigned node_id, const std::string & species) const = 0;
+
 protected:
   /// my copy of the underlying ModelGeochemicalDatabase
   ModelGeochemicalDatabase _mgd;

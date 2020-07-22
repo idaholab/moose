@@ -20,7 +20,7 @@ GeochemistryQuantityAux::validParams()
   params.addRequiredParam<std::string>("species", "Species name");
   MooseEnum quantity_choice(
       "molal mg_per_kg free_mg free_cm3 neglog10a activity bulk_moles "
-      "surface_charge surface_potential temperature kinetic_moles kinetic_additions",
+      "surface_charge surface_potential temperature kinetic_moles kinetic_additions moles_dumped",
       "molal");
   params.addParam<MooseEnum>(
       "quantity",
@@ -32,7 +32,8 @@ GeochemistryQuantityAux::validParams()
       "= "
       "mol(species)/kg(solvent_water); mg_per_kg = mg(species)/kg(solvent_water).  These are "
       "available only for minerals: "
-      "free_mg = free mg; free_cm3 = free cubic-centimeters.  These are available for minerals "
+      "free_mg = free mg; free_cm3 = free cubic-centimeters; moles_dumped = moles dumped when "
+      "special dump and flow-through modes are active.  These are available for minerals "
       "that host sorbing sites: surface_charge (C/m^2); surface_potential (V).  These are "
       "available for kinetic species: kinetic_moles; kinetic_additions (-dt * rate = mole "
       "increment in kinetic species for this timestep).  If "
@@ -73,10 +74,12 @@ GeochemistryQuantityAux::GeochemistryQuantityAux(const InputParameters & paramet
   if (!is_mineral && (_quantity_choice == QuantityChoiceEnum::FREE_CM3 ||
                       _quantity_choice == QuantityChoiceEnum::FREE_MG ||
                       _quantity_choice == QuantityChoiceEnum::SURFACE_CHARGE ||
-                      _quantity_choice == QuantityChoiceEnum::SURFACE_POTENTIAL))
-    paramError("quantity",
-               "the free_mg, free_cm3 and surface-related quantities are only available for "
-               "mineral species");
+                      _quantity_choice == QuantityChoiceEnum::SURFACE_POTENTIAL ||
+                      _quantity_choice == QuantityChoiceEnum::MOLES_DUMPED))
+    paramError(
+        "quantity",
+        "the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for "
+        "mineral species");
   if ((is_mineral || is_kinetic) && (_quantity_choice == QuantityChoiceEnum::MOLAL ||
                                      _quantity_choice == QuantityChoiceEnum::MG_PER_KG))
     paramError("quantity",
@@ -116,6 +119,8 @@ GeochemistryQuantityAux::computeValue()
     ret = egs.getSurfacePotential(_surface_sorption_mineral_index);
   else if (_quantity_choice == QuantityChoiceEnum::TEMPERATURE)
     ret = egs.getTemperature();
+  else if (_quantity_choice == QuantityChoiceEnum::MOLES_DUMPED)
+    ret = _reactor.getMolesDumped(_current_node->id(), _species);
   else
   {
     if (mgd.basis_species_index.count(_species) == 1)

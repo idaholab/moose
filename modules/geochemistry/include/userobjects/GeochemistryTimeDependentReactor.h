@@ -34,6 +34,7 @@ public:
   virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
   virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const override;
   virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const override;
+  virtual Real getMolesDumped(unsigned node_id, const std::string & species) const override;
 
 protected:
   /// Temperature specified by user
@@ -77,7 +78,7 @@ protected:
   /// Mode of the system (flush, flow-through, etc)
   const VariableValue & _mode;
   /// Moles of mineral removed by dump and flow-through
-  std::map<std::string, Real> _minerals_dumped;
+  std::unordered_map<std::string, Real> _minerals_dumped;
   /// the ramp_max_ionic_strength to use during time-stepping
   const unsigned _ramp_subsequent;
 };

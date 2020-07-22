@@ -42,7 +42,8 @@ protected:
     SURFACE_POTENTIAL,
     TEMPERATURE,
     KINETIC_MOLES,
-    KINETIC_ADDITIONS
+    KINETIC_ADDITIONS,
+    MOLES_DUMPED
   } _quantity_choice;
 
   /**

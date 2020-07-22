@@ -34,6 +34,7 @@ public:
   virtual const GeochemicalSystem & getGeochemicalSystem(unsigned node_id) const override;
   virtual const DenseVector<Real> & getMoleAdditions(unsigned node_id) const override;
   virtual const DenseVector<Real> & getMoleAdditions(const Point & point) const override;
+  virtual Real getMolesDumped(unsigned node_id, const std::string & species) const override;
 
 protected:
   const Real _temperature;

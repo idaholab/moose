@@ -413,7 +413,8 @@ GeochemistryTimeDependentReactor::execute()
 
   if (_mode[0] == 2.0) // flow-through
   {
-    const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+    // copy the current_molal values into a new vector
+    const std::vector<Real> current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
     for (unsigned i = 1; i < _num_basis; ++i)
       if (_mgd.basis_species_mineral[i])
       {
@@ -464,4 +465,13 @@ Real
 GeochemistryTimeDependentReactor::getSolverResidual(const Point & /*point*/) const
 {
   return _abs_residual;
+}
+
+Real
+GeochemistryTimeDependentReactor::getMolesDumped(unsigned /*node_id*/,
+                                                 const std::string & species) const
+{
+  if (_minerals_dumped.count(species) == 1)
+    return _minerals_dumped.at(species);
+  return 0.0;
 }
