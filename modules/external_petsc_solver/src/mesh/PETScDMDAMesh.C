@@ -45,10 +45,13 @@ PETScDMDAMesh::validParams()
 PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(parameters)
 {
   // Get TS from ExternalPetscSolverApp
-  ExternalPetscSolverApp & petsc_app = static_cast<ExternalPetscSolverApp &>(_app);
+  ExternalPetscSolverApp * petsc_app = dynamic_cast<ExternalPetscSolverApp *>(&_app);
 
-  // Retrieve mesh from TS
-  TSGetDM(petsc_app.getPetscTS(), &_dmda);
+  if (petsc_app && petsc_app->getPetscTS())
+    // Retrieve mesh from TS
+    TSGetDM(petsc_app->getPetscTS(), &_dmda);
+  else
+    mooseError(" PETSc external solver TS does not exist or this is not a petsc external solver");
 }
 
 std::unique_ptr<MooseMesh>

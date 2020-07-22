@@ -66,7 +66,7 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master'
+    cli_args = 'Outputs/hide="pid"'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
@@ -79,7 +79,7 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true'
+    cli_args = 'Outputs/hide="pid" MultiApps/sub_app/sub_cycling=true'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
@@ -93,7 +93,7 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_out.e petsc_transient_as_master_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.5'
+    cli_args = 'Outputs/hide="pid" MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.5'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
@@ -107,7 +107,7 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_multistep_out.e petsc_transient_as_master_multistep_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_master_multistep_out --petsc-solver-as-master MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.05'
+    cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_master_multistep_out MultiApps/sub_app/sub_cycling=true sub_app:Executioner/dt=0.05'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
@@ -121,7 +121,7 @@
     type = 'Exodiff'
     input = 'petsc_transient_as_master.i'
     exodiff = 'petsc_transient_as_master_small_dt_out.e petsc_transient_as_master_small_dt_out_sub_app0.e'
-    cli_args = 'Outputs/hide="pid"  --petsc-solver-as-master Outputs/file_base=petsc_transient_as_master_small_dt_out sub_app:Executioner/dt=0.05'
+    cli_args = 'Outputs/hide="pid" Outputs/file_base=petsc_transient_as_master_small_dt_out sub_app:Executioner/dt=0.05'
     allow_warnings = true
     issues = "#12595"
     petsc_version = '>=3.8.0'
@@ -130,5 +130,4 @@
     executable_pattern = 'external_petsc_solver*'
     requirement = "MOOSE shall be able to run the PETSc external solver as master with a smaller dt in moose subapp."
   []
-
 []

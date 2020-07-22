@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ExternalPetscSolverTestApp.h"
-#include "ExternalPetscSolverApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -21,7 +20,7 @@ ExternalPetscSolverTestApp::validParams()
 }
 
 ExternalPetscSolverTestApp::ExternalPetscSolverTestApp(InputParameters parameters)
-  : MooseApp(parameters)
+  : ExternalPetscSolverApp(parameters)
 {
   ExternalPetscSolverTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
