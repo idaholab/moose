@@ -595,22 +595,22 @@ DomainIntegralAction::act()
         _integrals.count(K_FROM_J_INTEGRAL) != 0)
     {
       std::string vpp_base_name;
-      INTEGRAL jintegral_selection = J_INTEGRAL;
+      std::string jintegral_selection = "JIntegral";
 
       if (_integrals.count(J_INTEGRAL) != 0)
       {
         vpp_base_name = "J";
-        jintegral_selection = INTEGRAL::J_INTEGRAL;
+        jintegral_selection = "JIntegral";
       }
       else if (_integrals.count(K_FROM_J_INTEGRAL) != 0)
       {
         vpp_base_name = "K";
-        jintegral_selection = INTEGRAL::K_FROM_J_INTEGRAL;
+        jintegral_selection = "KFromJIntegral";
       }
       else if (_integrals.count(C_INTEGRAL) != 0)
       {
         vpp_base_name = "C";
-        jintegral_selection = INTEGRAL::C_INTEGRAL;
+        jintegral_selection = "CIntegral";
       }
 
       if (_treat_as_2d)

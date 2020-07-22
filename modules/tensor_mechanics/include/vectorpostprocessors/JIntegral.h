@@ -46,8 +46,8 @@ protected:
                          const Real scalar_q,
                          const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
-  /// Type of integral to be computed
-  MooseEnum _integral;
+  /// Enum defining the type of integral to be computed
+  const enum class IntegralType { JIntegral, CIntegral, KFromJIntegral } _integral;
 
   const MaterialProperty<RealVectorValue> * const _J_thermal_term_vec;
 
@@ -71,13 +71,6 @@ protected:
   Real _youngs_modulus;
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
-  /// Enum used to select the type of integral to be performed within JIntegral class
-  enum INTEGRAL
-  {
-    J_INTEGRAL,
-    C_INTEGRAL,
-    K_FROM_J_INTEGRAL,
-  };
   /// Enum used to select the method used to compute the q function used
   /// in the fracture integrals
   const enum class QMethod { Geometry, Topology } _q_function_type;
