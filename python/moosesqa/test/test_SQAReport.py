@@ -73,7 +73,7 @@ class TestSQAReport(unittest.TestCase):
         self.assertIn('error message', r)
         self.assertNotIn('critical message', r)
 
-    @mock.patch('mooseutils.colorText', side_effect=lambda t, c: '{}::{}'.format(c, t))
+    @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: '{}::{}'.format(c, t))
     def testColorText(self, color_text):
         r = SQAReport()
         txt = r._colorTextByStatus(1, SQAReport.Status.PASS)
@@ -89,7 +89,7 @@ class TestSQAReport(unittest.TestCase):
         self.assertEqual(txt, 'LIGHT_YELLOW::1')
 
 
-    @mock.patch('mooseutils.colorText', side_effect=lambda t, c: '{}::{}'.format(c, t))
+    @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: '{}::{}'.format(c, t))
     def testGetStatusText(self, color_text):
         r = SQAReport()
         txt = r._getStatusText(SQAReport.Status.PASS)

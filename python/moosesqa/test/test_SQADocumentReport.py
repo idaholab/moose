@@ -18,7 +18,7 @@ class TestSQADocumentReport(unittest.TestCase):
     def setUp(self):
         SQADocumentReport.FILE_CACHE = MooseDocs.PROJECT_FILES
 
-    @mock.patch('mooseutils.colorText', side_effect=lambda t, c: t)
+    @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: t)
     def testReport(self, color_text):
 
         # PASS

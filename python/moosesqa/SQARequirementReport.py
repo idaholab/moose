@@ -55,7 +55,7 @@ class SQARequirementReport(SQAReport):
             self.test_names.add((req.filename, req.name, req.line))
 
         # Check the requirements
-        logger = check_requirements(requirements, **kwargs)
+        logger = check_requirements(requirements, color_text=self.color_text, **kwargs)
 
         return logger
 

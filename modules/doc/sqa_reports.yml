@@ -215,6 +215,7 @@ Documents:
     show_warning: false
 
 Requirements:
+    create_diff_report: true
     moose_test:
         directories:
             - test/tests

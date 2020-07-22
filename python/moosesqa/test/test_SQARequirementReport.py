@@ -16,14 +16,14 @@ from moosesqa import SQAReport, SQARequirementReport
 
 class TestSQARequirementReport(unittest.TestCase):
 
-    @mock.patch('mooseutils.colorText', side_effect=lambda t, c: t)
+    @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: t)
     def testBasic(self, color_text):
         reporter = SQARequirementReport(title='moosesqa', directories=['python/moosesqa/test'])
         r = reporter.getReport()
         self.assertEqual(reporter.status, SQAReport.Status.PASS)
         self.assertIn('moosesqa OK', r)
 
-    @mock.patch('mooseutils.colorText', side_effect=lambda t, c: '{}:{}'.format(c,t))
+    @mock.patch('mooseutils.colorText', side_effect=lambda t, c, **kwargs: '{}:{}'.format(c,t))
     def testOptions(self, *args):
 
         reporter = SQARequirementReport(title='testing', specs='spec_missing_req',

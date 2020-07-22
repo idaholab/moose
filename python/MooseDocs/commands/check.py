@@ -33,8 +33,9 @@ def command_line_options(subparser, parent):
                                   help="Tool for performing SQA error checking and "
                                        "creating/updating documentation stub pages.")
 
-    parser.add_argument('--config', type=str, default='sqa.yml',
+    parser.add_argument('--config', type=str, default='sqa_reports.yml',
                         help="The YAML config file for performing SQA checks.")
+
     parser.add_argument('--reports', nargs='+', default=['doc', 'req', 'app'], choices=['doc', 'req', 'app'],
                         help='Select the reports to produce.')
 
@@ -91,8 +92,9 @@ def main(opt):
 
     # Apply --generate option
     if app_reports and opt.generate:
-        for rep in app_reports:
-            rep.generate_stubs = True
+        for report in app_reports:
+            if (set(report.app_types) == set(opt.generate)):
+                report.generate_stubs = True
 
     # Apply --dump option
     if app_reports and opt.dump:

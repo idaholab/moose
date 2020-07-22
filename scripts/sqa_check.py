@@ -21,7 +21,7 @@ def get_options():
     """Command-line options."""
     parser = argparse.ArgumentParser(description='SQA document checking tool.')
     parser.add_argument('--config', type=str,
-                        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sqa.yml'),
+                        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../modules/doc/sqa_reports.yml'),
                         help="The YAML config file for performing SQA checks.")
     parser.add_argument('--reports', nargs='+', default=['doc', 'req', 'app'], choices=['doc', 'req', 'app'],
                         help='Select the reports to produce.')
@@ -50,6 +50,7 @@ def print_reports(title, reports, status):
     return status
 
 if __name__ == '__main__':
+    print("This script is deprecated and will be removed, use moosedocs.py check.")
 
     opt = get_options()
     if opt.skip:

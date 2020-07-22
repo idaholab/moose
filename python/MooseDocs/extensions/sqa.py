@@ -50,6 +50,11 @@ SQARequirementDetailItem = tokens.newToken('SQARequirementDetailItem', label=Non
 
 SQARequirementMatrixHeading = tokens.newToken('SQARequirementMatrixHeading', category=None)
 
+# use 'Token' suffix to avoid confusion with moosesqa.SQAReport object
+SQADocumentReportToken = tokens.newToken('SQADocumentReportToken', reports=None)
+SQAMooseAppReportToken = tokens.newToken('SQAMooseAppReportToken', reports=None)
+SQARequirementReportToken = tokens.newToken('SQARequirementReportToken', reports=None)
+
 LATEX_REQUIREMENT = """
 \\DeclareDocumentEnvironment{Requirement}{m}{%
   \\begin{minipage}[t]{0.08\\textwidth}%
@@ -77,6 +82,7 @@ class SQAExtension(command.CommandExtension):
                                         "dictionary with 'directories' and optionally 'specs' " \
                                         ", 'dependencies', and 'repo'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
+        config['reports'] = (dict(), "Build SQA reports for dashboard creation.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -95,6 +101,7 @@ class SQAExtension(command.CommandExtension):
         self.__dependencies = dict()
         self.__remotes = dict()
         self.__counts = collections.defaultdict(int)
+        self.__reports = (None, None, None)
 
         # Deprecate 'url' and 'repo' config options
         url = self.get('url')
@@ -145,6 +152,14 @@ class SQAExtension(command.CommandExtension):
 
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
+        # Report generation for !sqa report command
+        reports = self.get('reports')
+        if reports:
+            start = time.time()
+            LOG.info("Generating SQA report information...")
+            self.__reports = moosesqa.get_sqa_reports(reports)
+            LOG.info("Generating SQA report information complete [%s sec.]", time.time() - start)
+
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
         return self.__has_civet
@@ -170,6 +185,10 @@ class SQAExtension(command.CommandExtension):
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return rem
 
+    def reports(self):
+        """Return the SQAReport objects"""
+        return self.__reports
+
     def increment(self, key):
         """Increment and return count for requirements matrix."""
         self.__counts[key] += 1
@@ -188,6 +207,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(reader, SQACrossReferenceCommand())
         self.addCommand(reader, SQADependenciesCommand())
         self.addCommand(reader, SQADocumentCommand())
+        self.addCommand(reader, SQAReportCommand())
 
         renderer.add('SQARequirementMatrix', RenderSQARequirementMatrix())
         renderer.add('SQARequirementMatrixItem', RenderSQARequirementMatrixItem())
@@ -200,6 +220,9 @@ class SQAExtension(command.CommandExtension):
         renderer.add('SQARequirementPrequisites', RenderSQARequirementPrequisites())
         renderer.add('SQARequirementDetails', RenderSQARequirementDetails())
         renderer.add('SQARequirementDetailItem', RenderSQARequirementDetailItem())
+        renderer.add('SQADocumentReportToken', RenderSQADocumentReport())
+        renderer.add('SQARequirementReportToken', RenderSQARequirementReport())
+        renderer.add('SQAMooseAppReportToken', RenderSQAMooseAppReport())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('xcolor')
@@ -509,6 +532,26 @@ class SQADocumentCommand(command.CommandComponent):
         return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
 
+class SQAReportCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'report'
+
+    @staticmethod
+    def defaultSettings():
+        config = command.CommandComponent.defaultSettings()
+        config['config_file'] = (None, "Provide the config YAML file for gathering reports to display on the dashboard.")
+        return config
+
+
+
+    def createToken(self, parent, info, page):
+        doc_reports, req_reports, app_reports = self.extension.reports()
+        core.Heading(parent, string='Software Quality Status Report(s)', level=2)
+        SQADocumentReportToken(parent, reports=doc_reports)
+        SQARequirementReportToken(parent, reports=req_reports)
+        SQAMooseAppReportToken(parent, reports=app_reports)
+        return parent
+
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
 
     def createHTML(self, parent, token, page):
@@ -760,3 +803,92 @@ class RenderSQARequirementDetailItem(components.RenderComponent):
     def createLatex(self, parent, token, page):
         latex.Command(parent, 'item', start='\n', end=' ')
         return parent
+
+class RenderSQAReport(components.RenderComponent):
+
+    def createHTML(self, parent, token, page):
+        msg = "The '!sqa report' command in not supported with plain HTML output, it is being ignored."
+        LOG.warning(msg)
+
+    def createLatex(self, parent, token, page):
+        msg = "The '!sqa report' command in not supported with Latex output, it is being ignored."
+        LOG.warning(msg)
+
+    def createMaterialize(self, parent, token, page):
+        reports = token['reports']
+
+        ul = html.Tag(parent, 'ul', class_='collapsible')
+        for report in reports:
+            report.color_text = False
+            report.getReport()
+
+            # Header
+            li = html.Tag(ul, 'li')
+            hdr = html.Tag(li, 'div', class_='collapsible-header', string=report.title)
+            if report.status ==report.Status.WARNING:
+                badge = ('WARNING', 'yellow')
+            elif report.status == report.Status.ERROR:
+                badge = ('ERROR', 'red')
+            else:
+                badge = ('OK', 'green')
+            html.Tag(hdr, 'span', string=self._getBadgeText(report.status),
+                     class_='badge {}'.format(self._getBadgeColor(report.status)))
+
+            # Body
+            body = html.Tag(li, 'div', class_='collapsible-body')
+            collection = html.Tag(body, 'ul', class_='collection')
+            for key, mode in report.logger.modes.items():
+                cnt = report.logger.counts[key]
+                item = html.Tag(collection, 'li', class_='collection-item')
+                span = html.Tag(item, 'span', string=key)
+                color = self._getBadgeColor(mode) if (cnt > 0) else 'green'
+                badge = html.Tag(item, 'span', class_='badge {}'.format(color), string=str(cnt))
+                if cnt > 0:
+                    self._addMessageModal(item, color, report.logger.text(key))
+
+    @staticmethod
+    def _addMessageModal(item, color, text):
+        unique_id = uuid.uuid4()
+
+        trigger = html.Tag(item, 'a', class_='modal-trigger', href='#{}'.format(unique_id),
+                           style="float:right;margin-left:10px;margin-right:10px;")
+        i = html.Tag(trigger, 'i', string='help', class_='material-icons', style='color:{};'.format(color))
+
+        modal = html.Tag(item, 'div', id_=str(unique_id), class_="modal modal-fixed-footer")
+        content = html.Tag(modal, class_='modal-content')
+        for t in text:
+            html.Tag(content, 'p', string='<br>'.join(t.split('\n')))
+        footer = html.Tag(modal, 'div', class_='modal-footer')
+        html.Tag(footer, 'a', class_='modal-close btn-flat', string='Close')
+
+
+    @staticmethod
+    def _getBadgeColor(status):
+        if status == moosesqa.SQAReport.Status.WARNING or status == logging.WARNING:
+            return 'orange'
+        elif status == moosesqa.SQAReport.Status.ERROR or status == logging.ERROR:
+            return 'red'
+        return 'green'
+
+    @staticmethod
+    def _getBadgeText(status):
+        if status == moosesqa.SQAReport.Status.WARNING:
+            return 'WARNING'
+        elif status == moosesqa.SQAReport.Status.ERROR:
+            return 'ERROR'
+        return 'OK'
+
+class RenderSQADocumentReport(RenderSQAReport):
+    def createMaterialize(self, parent, token, page):
+        html.Tag(parent, 'h3', string='Necessary SQA Document Report(s)')
+        super().createMaterialize(parent, token, page)
+
+class RenderSQARequirementReport(RenderSQAReport):
+    def createMaterialize(self, parent, token, page):
+        html.Tag(parent, 'h3', string='Requirement Completion Report(s)')
+        super().createMaterialize(parent, token, page)
+
+class RenderSQAMooseAppReport(RenderSQAReport):
+    def createMaterialize(self, parent, token, page):
+        html.Tag(parent, 'h3', string='Application Design Page Report(s)')
+        super().createMaterialize(parent, token, page)

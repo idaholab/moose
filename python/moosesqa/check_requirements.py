@@ -19,6 +19,8 @@ from .LogHelper import LogHelper
 ISSUE_RE = re.compile(r'^([0-9a-f]{6,40})$|^(\w*#[0-9]+)$', flags=re.MULTILINE)
 
 class RequirementLogHelper(LogHelper):
+    COLOR_TEXT = True
+
     def log(self, key, req, msg, *args, filename=None, name=None, line=None, **kwargs):
         msg = self._colorTestInfo(req, filename, name, line) + msg
         LogHelper.log(self, key, msg, *args, **kwargs)
@@ -27,11 +29,11 @@ class RequirementLogHelper(LogHelper):
     def _colorTestInfo(req, filename, name, line):
         """Helper for creating first line of message with file:test:line information"""
         filename = filename or req.filename
-        name = mooseutils.colorText(name or req.name, 'MAGENTA')
-        line = mooseutils.colorText(str(line if (line is not None) else req.line), 'CYAN')
+        name = mooseutils.colorText(name or req.name, 'MAGENTA', colored=RequirementLogHelper.COLOR_TEXT)
+        line = mooseutils.colorText(str(line if (line is not None) else req.line), 'CYAN', colored=RequirementLogHelper.COLOR_TEXT)
         return '{}:{}:{}\n'.format(filename, name, line)
 
-def check_requirements(requirements, file_list=None, **kwargs):
+def check_requirements(requirements, file_list=None, color_text=True, **kwargs):
     """
     Tool for checking Requirement for deficiencies
     """
@@ -69,6 +71,7 @@ def check_requirements(requirements, file_list=None, **kwargs):
     kwargs.setdefault('log_duplicate_requirement', log_default)
 
     logger = RequirementLogHelper(__name__, **kwargs)
+    RequirementLogHelper.COLOR_TEXT = color_text
 
     # Setup file_list, if not provided
     if (file_list is None) and (not mooseutils.is_git_repo()):
@@ -91,7 +94,7 @@ def check_requirements(requirements, file_list=None, **kwargs):
     for txt, value in requirement_dict.items():
         if len(value) > 1:
             msg = 'Duplicate requirements found:'
-            msg += '\n{}\n'.format(mooseutils.colorText(txt, 'GREY'))
+            msg += '\n{}\n'.format(mooseutils.colorText(txt, 'GREY', colored=color_text))
             for r in value:
                 r.duplicate = True
                 msg += RequirementLogHelper._colorTestInfo(r, None, None, None)

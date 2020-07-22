@@ -15,6 +15,7 @@ class LogHelper(object):
         self.__logger = logging.getLogger(logger_name)
         self.__modes = {k:default for k in keys}
         self.__counts = collections.defaultdict(int)
+        self.__text = collections.defaultdict(list)
         for key, value in kwargs.items():
             self.setLevel(key, value)
 
@@ -32,10 +33,17 @@ class LogHelper(object):
         """Add/set the desired log level for a given key"""
         self.__modes[key] = level
 
+    def text(self, key):
+        """Return the messages for the given key"""
+        return self.__text[key]
+
     def log(self, key, msg, *args, **kwargs):
         """Wrapper for logging log that uses the key to determine the message level"""
         mode = self.__modes[key]
         self.__counts[key] += 1
+
+        text = msg.format(*args, **kwargs)
+        self.__text[key].append(text)
+
         if mode is not None:
-            text = msg.format(*args, **kwargs)
             self.__logger.log(mode, text)

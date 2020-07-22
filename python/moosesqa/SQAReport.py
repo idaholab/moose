@@ -11,6 +11,7 @@ import logging
 import collections
 import copy
 import mooseutils
+from .LogHelper import LogHelper
 
 LOG = logging.getLogger(__name__)
 
@@ -19,6 +20,8 @@ LOG = logging.getLogger(__name__)
 @mooseutils.addProperty('show_error', ptype=bool, default=True)
 @mooseutils.addProperty('show_critical', ptype=bool, default=True)
 @mooseutils.addProperty('status', ptype=int, default=0)
+@mooseutils.addProperty('logger', ptype=LogHelper)
+@mooseutils.addProperty('color_text', ptype=bool, default=True)
 @mooseutils.addProperty('number_of_newlines_after_log', ptype=int, default=2)
 class SQAReport(mooseutils.AutoPropertyMixin):
     """
@@ -52,7 +55,7 @@ class SQAReport(mooseutils.AutoPropertyMixin):
         """Generate the report."""
 
         # Execute the function to report about, getting the LogHelper in return
-        logger = self.execute(**self.attributes)
+        self.logger = self.execute(**self.attributes)
 
         # Return the logging records from the SilentReportHandler
         records = self._handler.getRecords()
@@ -67,15 +70,16 @@ class SQAReport(mooseutils.AutoPropertyMixin):
 
         # Determine the text length for the LogHelper keys
         width = 0
-        for k in logger.modes.keys():
+        for k in self.logger.modes.keys():
             width = max(width, len(k))
 
         # Start the report text
-        text = '{} {}\n'.format(mooseutils.colorText(self.title, 'CYAN'), self._getStatusText(self.status))
+        text = '{} {}\n'.format(mooseutils.colorText(self.title, 'CYAN', colored=self.color_text),
+                                self._getStatusText(self.status))
 
         # Report the error counts
-        for key, mode in logger.modes.items():
-            cnt = logger.counts[key]
+        for key, mode in self.logger.modes.items():
+            cnt = self.logger.counts[key]
             msg = '{:>{width}}: {}\n'.format(key, cnt, width=width+2)
             text += self._colorTextByMode(msg, mode) if cnt > 0 else msg
         text += '\n'
@@ -105,8 +109,7 @@ class SQAReport(mooseutils.AutoPropertyMixin):
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def _colorTextByStatus(text, status):
+    def _colorTextByStatus(self, text, status):
         """Helper for coloring text based on status."""
         if not isinstance(text, str):
             text = str(text)
@@ -115,23 +118,21 @@ class SQAReport(mooseutils.AutoPropertyMixin):
             color = 'LIGHT_RED'
         elif status == SQAReport.Status.WARNING:
             color = 'LIGHT_YELLOW'
-        return mooseutils.colorText(text, color)
+        return mooseutils.colorText(text, color, colored=self.color_text)
 
-    @staticmethod
-    def _colorTextByMode(text, mode):
+    def _colorTextByMode(self, text, mode):
         if mode == logging.ERROR or mode == logging.CRITICAL:
-            return mooseutils.colorText(text, 'LIGHT_RED')
+            return mooseutils.colorText(text, 'LIGHT_RED', colored=self.color_text)
         elif mode == logging.WARNING:
-            return mooseutils.colorText(text, 'LIGHT_YELLOW')
+            return mooseutils.colorText(text, 'LIGHT_YELLOW', colored=self.color_text)
         return text
 
-    @staticmethod
-    def _getStatusText(status):
+    def _getStatusText(self, status):
         """Helper for returning a string version of the report status"""
         if status == SQAReport.Status.ERROR:
-            text = mooseutils.colorText('FAIL', 'LIGHT_RED')
+            text = mooseutils.colorText('FAIL', 'LIGHT_RED', colored=self.color_text)
         elif status == SQAReport.Status.WARNING:
-            text = mooseutils.colorText('WARNING', 'LIGHT_YELLOW')
+            text = mooseutils.colorText('WARNING', 'LIGHT_YELLOW', colored=self.color_text)
         else:
-            text = mooseutils.colorText('OK', 'LIGHT_GREEN')
+            text = mooseutils.colorText('OK', 'LIGHT_GREEN', colored=self.color_text)
         return text

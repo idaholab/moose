@@ -90,11 +90,11 @@ class SQAMooseAppReport(SQAReport):
 
         # Create stub pages
         if self.generate_stubs:
-            func = lambda n: not (n.is_root or n.removed) \
-                             and (app_type in n.groups()) \
-                             and (len(n.groups()) == 1) \
-                             and ((n['_md_file'] is None) or n['_is_stub'])
-            for node in moosetree.iterate(app_syntax, func):
+            func = lambda n: (not n.removed) \
+                             and ('_md_file' in n) \
+                             and ((n['_md_file'] is None) or n['_is_stub']) \
+                             and (n.group in self.app_types)
+            for node in moosetree.iterate(self.app_syntax, func):
                 self._createStubPage(node)
 
         # Dump
@@ -109,10 +109,10 @@ class SQAMooseAppReport(SQAReport):
         # Determine the correct markdown filename
         filename = node['_md_path']
         if isinstance(node, moosesyntax.ObjectNodeBase):
-            filename = os.path.join(self.working_dir, self.object_prefix, node['_md_path'])
+            filename = os.path.join(self.working_dir, node['_md_path'])
         elif isinstance(node, moosesyntax.SyntaxNode):
             action = moosetree.find(node, lambda n: isinstance(n, moosesyntax.ActionNode))
-            filename = os.path.join(self.working_dir, self.syntax_prefix, os.path.dirname(node['_md_path']), 'index.md')
+            filename = os.path.join(self.working_dir,os.path.dirname(node['_md_path']), 'index.md')
 
         # Determine the source template
         tname = None
@@ -135,9 +135,7 @@ class SQAMooseAppReport(SQAReport):
         content = mooseutils.apply_template_arguments(content, name=node.name, syntax=node.fullpath())
 
         # Write the content to the desired destination
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, 'w') as fid:
-            fid.write(content)
+        self._writeFile(filename, content)
 
     def _loadYamlFiles(self, filenames):
         """Load the hidden/removed/alias yml files"""
@@ -147,3 +145,10 @@ class SQAMooseAppReport(SQAReport):
                 yml_file = os.path.join(self.working_dir, fname)
                 content.update({fname:yaml_load(yml_file)})
         return content
+
+    @staticmethod
+    def _writeFile(filename, content):
+        """A helper function that is easy to mock in tests"""
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as fid:
+            fid.write(content)
