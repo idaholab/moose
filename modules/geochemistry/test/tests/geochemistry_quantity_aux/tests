@@ -11,7 +11,7 @@
     type = RunException
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=free_mg'
-    expect_err = 'the free_mg, free_cm3 and surface-related quantities are only available for mineral species'
+    expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
     requirement = 'An error will be thrown when trying to set free-mg AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -20,7 +20,7 @@
     type = RunException
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=free_cm3'
-    expect_err = 'the free_mg, free_cm3 and surface-related quantities are only available for mineral species'
+    expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
     requirement = 'An error will be thrown when trying to set free-cm3 AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -29,7 +29,7 @@
     type = RunException
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=surface_charge'
-    expect_err = 'the free_mg, free_cm3 and surface-related quantities are only available for mineral species'
+    expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
     requirement = 'An error will be thrown when trying to set surface-charge AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'
@@ -38,7 +38,16 @@
     type = RunException
     input = except2.i
     cli_args = 'AuxKernels/error/quantity=surface_potential'
-    expect_err = 'the free_mg, free_cm3 and surface-related quantities are only available for mineral species'
+    expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
+    requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a non-mineral species'
+    issues = '#15330'
+    design = 'GeochemistryQuantityAux.md'
+  [../]
+  [./except2g]
+    type = RunException
+    input = except2.i
+    cli_args = 'AuxKernels/error/quantity=moles_dumped'
+    expect_err = 'the free_mg, free_cm3, moles_dumped and surface-related quantities are only available for mineral species'
     requirement = 'An error will be thrown when trying to set surface-potential AuxVariable information for a non-mineral species'
     issues = '#15330'
     design = 'GeochemistryQuantityAux.md'

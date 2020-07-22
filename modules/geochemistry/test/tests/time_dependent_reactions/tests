@@ -191,21 +191,19 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     issues = '#15330'
     design = 'pickup.md'
   [../]
-  [./seawater_flowthrough]
-    type = 'RunApp'
-    input = 'seawater_evaporation.i'
-    expect_out = 'Mass of solvent water = 0.02703kg'
+  [./seawater_evaporation_flow_through]
+    type = CSVDiff
+    input = 'seawater_evaporation_flow_through.i'
+    csvdiff = 'seawater_evaporation_flow_through_out.csv'
     requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
     issues = '#15330'
     design = 'flow_through.md'
   [../]
-  [./seawater_no_flowthrough]
-    type = 'RunApp'
-    input = 'seawater_evaporation.i'
-    cli_args = "AuxKernels/mode/function='if(t<=1.0, 1.0, 0.0)'"
-    prereq = 'seawater_flowthrough'
-    expect_out = 'Halite;  bulk_moles'
-    requirement = "The geochemistry module shall be able to progressively remove reactants, allowing precipitates for form"
+  [./seawater_evaporation_no_flow_through]
+    type = CSVDiff
+    input = 'seawater_evaporation_no_flow_through.i'
+    csvdiff = 'seawater_evaporation_no_flow_through_out.csv'
+    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
     issues = '#15330'
     design = 'flow_through.md'
   [../]
@@ -231,6 +229,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [./flushing_equilibrium_at70degC]
     type = 'RunApp'
     input = 'flushing_equilibrium_at70degC.i'
+    skip = "soon no skip"
     expect_out = 'Quartz;  bulk_moles'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'

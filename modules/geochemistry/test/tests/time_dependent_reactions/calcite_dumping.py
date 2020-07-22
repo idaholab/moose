@@ -47,7 +47,7 @@ gwb_cacl = [0.001840, 0.003188, 0.004388, 0.005591, 0.006825, 0.008097, 0.009409
 gwb_cacl = [m * 1000 for m in gwb_cacl]
 gwb_hco3 = [0.0002108, 0.004374, 0.006147, 0.007273, 0.008095, 0.008743, 0.009280, 0.009738, 0.01014, 0.01050, 0.01082]
 gwb_hco3 = [m * 1000 for m in gwb_hco3]
-            
+
 plt.figure(0)
 plt.plot(tim, fug, 'k-', linewidth = 2.0, label = 'No calcite (MOOSE)')
 plt.plot(tim, fugc, 'r-', linewidth = 2.0, label = 'With calcite (MOOSE)')
