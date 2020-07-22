@@ -7,7 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import re
 import subprocess
+import logging
 from .mooseutils import check_output
 
 def is_git_repo(working_dir=os.getcwd()):
@@ -59,3 +61,24 @@ def git_root_dir(working_dir=os.getcwd()):
         print("The supplied directory is not a git repository: {}".format(working_dir))
     except OSError:
         print("The supplied directory does not exist: {}".format(working_dir))
+
+def git_submodule_status(working_dir=os.getcwd()):
+    """
+    Return the status of each of the git submodule(s).
+    """
+    out = dict()
+    result = check_output(['git', 'submodule', 'status'], cwd=working_dir)
+    regex = re.compile(r'(?P<status>[\s\-\+U])(?P<sha1>[a-f0-9]{40})\s(?P<name>.*?)\s')
+    for match in regex.finditer(result):
+        out[match.group('name')] = match.group('status')
+    return out
+
+def git_init_submodule(path, working_dir=os.getcwd()):
+    """Check submodule for given in path"""
+    status = git_submodule_status(working_dir)
+    print("STATUS:", status)
+    for submodule, status in status.items():
+        print(submodule, path, submodule == path)
+        if (submodule == path) and (status == '-'):
+            subprocess.call(['git', 'submodule', 'update', '--init', path], cwd=working_dir)
+            break

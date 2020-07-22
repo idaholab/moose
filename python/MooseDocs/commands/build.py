@@ -141,22 +141,6 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                 self._translator.addContent(page)
                 return page
 
-def _init_large_media():
-    """Check submodule for large_media."""
-    log = logging.getLogger('MooseDocs._init_large_media')
-    status = common.submodule_status()
-    large_media = os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, 'large_media'))
-    for submodule, status in status.items():
-        if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
-                and (status == '-')):
-            log.info("Initializing the 'large_media' submodule for storing images above 1MB.")
-            subprocess.call(['git', 'submodule', 'update', '--init', 'large_media'],
-                            cwd=MooseDocs.MOOSE_DIR)
-            break
-
-    MooseDocs.PROJECT_FILES.update(MooseDocs.ls_files(
-                                   os.path.join(MooseDocs.MOOSE_DIR, 'large_media')))
-
 def main(options):
     """
     Main function for the build command.
