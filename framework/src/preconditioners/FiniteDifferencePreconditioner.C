@@ -25,6 +25,9 @@ FiniteDifferencePreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
 
+  params.addClassDescription("Finite difference preconditioner (FDP) builds a numerical Jacobian "
+                             "for preconditioning, only use for testing and verification.");
+
   params.addParam<std::vector<std::string>>(
       "off_diag_row",
       "The off diagonal row you want to add into the matrix, it will be associated "
