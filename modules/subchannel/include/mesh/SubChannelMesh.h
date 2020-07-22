@@ -7,6 +7,7 @@ class SubChannelMesh : public MooseMesh
 {
 public:
   SubChannelMesh(const InputParameters & parameters);
+  SubChannelMesh(const SubChannelMesh & other_mesh);
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
   unsigned int _nx, _ny, _nz, _n_channels, _n_gaps;
