@@ -131,4 +131,16 @@
     requirement = "MOOSE shall be able to run the PETSc external solver as master with a smaller dt in moose subapp."
   []
 
+  [check_petsc_external_solver]
+    type = 'RunException'
+    input = 'petsc_transient_as_master.i'
+  #  allow_warnings = true
+    issues = "#15647"
+    petsc_version = '>=3.8.0'
+    expect_err = "PETSc external solver TS does not exist or this is not a petsc external solver."
+
+#    executable_pattern = 'external_petsc_solver*'
+    requirement = "The system shall check if the app is an external petsc solver app."
+  []
+
 []
