@@ -11,17 +11,17 @@ InputParameters
 SubChannelMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
-  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction");
-  params.addRequiredParam<unsigned int>("ny", "Number of channels in the x direction");
-  params.addRequiredParam<Real>("max_dz", "The maximum element height in meters");
-  params.addRequiredParam<Real>("pitch", "pitch in meters");
-  params.addRequiredParam<Real>("rod_diameter", "Rod Diameter in meters");
-  params.addRequiredParam<Real>("gap", "half gap between assemblies in meters");
-  params.addRequiredParam<Real>("heated_length", " heated length in meters");
+  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
+  params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
+  params.addRequiredParam<Real>("max_dz", "The maximum element height [m]");
+  params.addRequiredParam<Real>("pitch", "Pitch [m]");
+  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
+  params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addRequiredParam<std::vector<Real>>("spacer_z",
-                                             " axial location of spacers/vanes/mixing_vanes [m]");
+                                             "Axial location of spacers/vanes/mixing_vanes [m]");
   params.addRequiredParam<std::vector<Real>>(
-      "spacer_k", " K-loss coefficient of spacers/vanes/mixing_vanes [unitless]");
+      "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   return params;
 }
 
