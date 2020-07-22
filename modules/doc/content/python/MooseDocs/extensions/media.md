@@ -51,11 +51,11 @@ fashion as for [images](#images), but also includes some extra settings as liste
                animated short.
 
 YouTube videos can also be displayed using the `!media youtube` syntax. The embedded youtube URL
-(for the video in [training-webinar], this is `http://www.youtube.com/embed/2tJwBsYaLaI`) must be
+(for the video in [training-webinar], this is `https://www.youtube.com/embed/2tJwBsYaLaI`) must be
 provided via the `youtube_embed_src` setting parameter. Similar to locally stored or hosted videos,
 extra settings are provided as listed in [video-settings].
 
-!media youtube youtube_embed_src=http://www.youtube.com/embed/2tJwBsYaLaI
+!media youtube youtube_embed_src=https://www.youtube.com/embed/2tJwBsYaLaI
                id=training-webinar
                caption=MOOSE training webinar given on June 9 - 10, 2020.
 
