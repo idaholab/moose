@@ -31,8 +31,11 @@ public:
   virtual std::shared_ptr<Backup> backup() override;
   virtual void restore(std::shared_ptr<Backup> backup, bool for_restart = false) override;
 
-  TS & getPetscTS() { return _ts; }
+  TS & getPetscTS();
+
+  bool isPetscApp() const { return _is_petsc_app; }
 
 private:
   TS _ts;
+  bool _is_petsc_app;
 };

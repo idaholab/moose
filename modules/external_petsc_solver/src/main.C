@@ -27,22 +27,9 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   ExternalPetscSolverTestApp::registerApps();
 
-  // ExternalPetscSolverApp is a specified app that takes a "petsc" input-file
-  // (a moose input file with a customized input file).  We need to use
-  // "--petsc-solver-as-master" build ExternalPetscSolverApp when the input
-  // file is a "petsc" one.  A better way to handle this is to "merge"
-  // ExternalPetscSolverApp and ExternalPetscSolverTestApp together to
-  // take all input files. But "merge" may introduce a mess that will
-  // make the code hard to learn for beginners, which contradicts the goal of this module.
-  bool petsc_master = libMesh::on_command_line("--petsc-solver-as-master");
-
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app;
-
-  if (petsc_master)
-    app = AppFactory::createAppShared("ExternalPetscSolverApp", argc, argv);
-  else
-    app = AppFactory::createAppShared("ExternalPetscSolverTestApp", argc, argv);
+  std::shared_ptr<MooseApp> app =
+      AppFactory::createAppShared("ExternalPetscSolverTestApp", argc, argv);
 
   // Execute the application
   app->run();
