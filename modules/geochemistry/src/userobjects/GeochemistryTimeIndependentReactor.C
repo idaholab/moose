@@ -115,3 +115,10 @@ GeochemistryTimeIndependentReactor::getMoleAdditions(const Point & /*point*/) co
 {
   return _mole_additions;
 }
+
+Real
+GeochemistryTimeIndependentReactor::getMolesDumped(unsigned /*node_id*/,
+                                                   const std::string & /*species*/) const
+{
+  return 0.0;
+}
