@@ -11,6 +11,7 @@ InputParameters
 SubChannelMesh::validParams()
 {
   InputParameters params = MooseMesh::validParams();
+  params.set<MooseEnum>("dim") = "3";
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("max_dz", "The maximum element height [m]");
