@@ -262,7 +262,8 @@ negligible.
 !media 2d_multireg_8.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
        id=hist_2 caption=The histogram of the QoI for the full-order reference model and the surrogate built with 8 basis function.
 
-As a last experiment, the surrogate model is run multiple times with different ranks and
+The see the convergence of the results from the surrogate to those of the full-order model,
+the surrogate model is run multiple times with different ranks and
 the following error indicators are computed for each sample in the test set:
 
 !equation
@@ -279,3 +280,21 @@ both error indicators decrease rapidly.
         {'x':'no_modes', 'y':'max', 'name':'Maximum e'}]
   layout={'xaxis':{'type':'log', 'title':'Number of basis functions used'},
           'yaxis':{'type':'log','title':'Relative error'}}
+
+Lastly, the computation time full-order model on the test set is compared to the
+combined cost of training and evaluating a POD-RB surrogate model in [com_time].
+The test has been carried out on one processor only, not using the parallel capabilities of the
+MultiApp system. The results show that it is beneficial to create a POD-RB surrogate
+if more than 148 evaluations are needed. This assumes that the full-order evaluation time
+can be equally distributed among the 1000 test samples (0.779 s/sample). By dividing the
+trining time with this number we get a critical sample number above which the
+generation of a surrogate model is a better alternative.
+
+!table id=com_time caption=The computation time of the full-order solutions on the test set compared to the cost of training a surrogate and evaluating it on the same test set.
+| Process | Execution time (s) |
+| :- | - | - | - |
+| Evaluation of the full-order model on the 1000 sample test set | 779.479 |
+| Training a POD-RB surrogate using 100 samples | 116.2 |
+| Evaluation of the POD-RB surrogate on the 1000 sample test set (4 basis functions) | 0.592 |
+| Evaluation of the POD-RB surrogate on the 1000 sample test set (8 basis functions) | 0.937 |
+| Evaluation of the POD-RB surrogate on the 1000 sample test set (16 basis functions) | 1.576 |
