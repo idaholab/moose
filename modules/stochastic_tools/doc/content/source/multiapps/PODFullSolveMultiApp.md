@@ -12,7 +12,7 @@ This MultiApp type needs a `trainer` parameter which allows to access certain
 data members of a [PODReducedBasisTrainer.md]. Otherwise, the input syntax is
 the same as in case of [SamplerFullSolveMultiApp.md].
 
-!listing modules/stochastic_tools/test/tests/surrogates/rb_pod/internal/trainer.i block=MultiApps
+!listing modules/stochastic_tools/test/tests/surrogates/pod_rb/internal/trainer.i block=MultiApps
 
 !syntax parameters /MultiApps/PODFullSolveMultiApp
 
