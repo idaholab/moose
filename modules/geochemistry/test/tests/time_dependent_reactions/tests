@@ -56,20 +56,20 @@
     issues = '#15330'
     design = 'adding_feldspar.md'
   [../]
-  [./calcite_dumping]
-    type = 'RunApp'
+  [./calcite_dumping_dump]
+    type = CSVDiff
     input = 'calcite_dumping.i'
-    expect_out = 'Mass of solvent water = 1kg'
+    csvdiff = 'calcite_dumping_dump.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
     issues = '#15330'
     design = 'calcite_buffer.md'
   [../]
   [./calcite_no_dumping]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'calcite_dumping.i'
-    cli_args = 'TimeDependentReactionSolver/mode=0'
-    prereq = 'calcite_dumping'
-    expect_out = 'Mass of solvent water = 1kg'
+    cli_args = 'TimeDependentReactionSolver/mode=0 Outputs/file_base=calcite_dumping_no_dump'
+    prereq = 'calcite_dumping_dump'
+    csvdiff = 'calcite_dumping_no_dump.csv'
     requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are not dumped and then reactants are added"
     issues = '#15330'
     design = 'calcite_buffer.md'

@@ -9,13 +9,18 @@
   constraint_value = "  1.0 0.2708  0.01 0.1 0.11 1E-8"
   constraint_meaning = "kg_solvent_water free_moles_mineral_species moles_bulk_species moles_bulk_species moles_bulk_species activity"
   ramp_max_ionic_strength_initial = 10
-  close_system_at_time = 0
   remove_fixed_activity_name = 'H+'
   remove_fixed_activity_time = 0
-  mode = 1 # in this case, Calcite never re-precipitates, so never need to turn the dump option off
   source_species_names = 'HCl'
   source_species_rates = 1E-3
-  execute_console_output_on = 'initial final'
+  mode = 1 # in this case, Calcite never re-precipitates, so never need to turn the dump option off
+  stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
+  execute_console_output_on = '' # only CSV output for this test
+[]
+
+[Outputs]
+  csv = true
+  file_base = calcite_dumping_dump
 []
 
 [Postprocessors]
@@ -69,6 +74,7 @@
     basis_species = "H2O H+ Na+ Cl- Ca++ HCO3-"
     equilibrium_minerals = "Calcite"
     equilibrium_gases = "CO2(g)"
+    piecewise_linear_interpolation = true # for comparison with GWB
   [../]
 []
 
