@@ -149,9 +149,6 @@ def main(options):
         options[argparse options]: Complete options from argparse, see MooseDocs/main.py
     """
 
-    # Make sure "large_media" exists in MOOSE
-    _init_large_media()
-
     # Setup executioner
     kwargs = dict()
     if options.executioner:

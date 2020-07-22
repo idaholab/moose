@@ -76,9 +76,7 @@ def git_submodule_status(working_dir=os.getcwd()):
 def git_init_submodule(path, working_dir=os.getcwd()):
     """Check submodule for given in path"""
     status = git_submodule_status(working_dir)
-    print("STATUS:", status)
     for submodule, status in status.items():
-        print(submodule, path, submodule == path)
         if (submodule == path) and (status == '-'):
             subprocess.call(['git', 'submodule', 'update', '--init', path], cwd=working_dir)
             break
