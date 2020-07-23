@@ -10,8 +10,12 @@
 import os
 import shutil
 import unittest
+import mock
 import tempfile
+import subprocess
 import mooseutils
+
+from mooseutils.gitutils import git_submodule_status
 
 class Test(unittest.TestCase):
     def testIsGitRepo(self):
@@ -47,6 +51,26 @@ class Test(unittest.TestCase):
     def testGitRootDir(self):
         root = mooseutils.git_root_dir()
         self.assertEqual(root, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+    @unittest.skipIf(not mooseutils.is_git_repo(), "Not a Git repository")
+    def testGitSubmoduleStatus(self):
+        root = mooseutils.git_root_dir()
+        status = mooseutils.git_submodule_status(root)
+        self.assertIn('large_media', status)
+        self.assertIn('libmesh', status)
+        self.assertIn('petsc', status)
+
+    @mock.patch('subprocess.call')
+    @mock.patch('mooseutils.gitutils.git_submodule_status')
+    @unittest.skipIf(not mooseutils.is_git_repo(), "Not a Git repository")
+    def testGitInitSubmodule(self, status_func, call_func):
+        status_func.return_value = {'test':'-'}
+
+        root = mooseutils.git_root_dir()
+        mooseutils.git_init_submodule('test', root)
+
+        status_func.assert_called_with(root)
+        call_func.assert_called_with(['git', 'submodule', 'update', '--init', 'test'], cwd=root)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

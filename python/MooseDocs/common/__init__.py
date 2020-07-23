@@ -19,7 +19,6 @@ from .read import read, write, get_language
 from .regex import regex
 from .project_find import project_find
 from .check_filenames import check_filenames
-from .submodule_status import submodule_status
 from .get_requirements import get_requirements
 from .extract_content import extractContent, extractContentSettings, fix_moose_header
 from .log import report_exception
