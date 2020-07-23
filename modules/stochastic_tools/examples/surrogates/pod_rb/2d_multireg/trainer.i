@@ -78,7 +78,6 @@
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'timestep_begin final'
-    mode = 'batch-restore'
   []
 []
 
@@ -99,33 +98,33 @@
                   Kernels/src1/value
                   Kernels/src2/value'
     to_control = 'stochastic'
-#    execute_on = 'timestep_begin'
+    execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [data]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
-#    execute_on = 'timestep_begin'
+    execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [mode]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
-#    execute_on = 'final'
+    execute_on = 'final'
     check_multiapp_execute_on = false
   []
   [res]
-    type = ResidualTransfer
+    type = PODResidualTransfer
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-#    execute_on = 'final'
+    execute_on = 'final'
     check_multiapp_execute_on = false
   []
 []

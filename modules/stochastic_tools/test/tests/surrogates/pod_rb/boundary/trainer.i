@@ -45,8 +45,8 @@
 []
 
 [Transfers]
-  [quad]
-    type = PODSamplerParameterTransfer
+  [param]
+    type = SamplerParameterTransfer
     multi_app = sub
     sampler = sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value BCs/left/value'
