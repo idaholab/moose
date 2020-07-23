@@ -96,15 +96,16 @@ class ImageCommand(command.CommandComponent):
 
 class VideoCommand(command.CommandComponent):
     COMMAND = 'media'
-    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v')
+    SUBCOMMAND = ('ogv', 'webm', 'mp4', 'm4v', 'youtube')
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
+        settings['youtube_embed_src'] = (None, "Youtube embed link, only recognized when the subcommand is 'youtube'.")
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
-        settings['controls'] = (True, "Display the video player controls.")
-        settings['loop'] = (False, "Automatically loop the video.")
-        settings['autoplay'] = (False, "Automatically start playing the video.")
+        settings['controls'] = (True, "Display the video player controls (not compatible with YouTube).")
+        settings['loop'] = (False, "Automatically loop the video (not compatible with YouTube).")
+        settings['autoplay'] = (False, "Automatically start playing the video (not compatible with YouTube).")
         settings['tstart'] = (None, "Time (sec) to start video.")
         settings['tstop'] = (None, "Time (sec) to stop video.")
         settings.update(floats.caption_settings())
@@ -114,14 +115,24 @@ class VideoCommand(command.CommandComponent):
 
         flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
                                   bottom=True, img=True)
-        vid = Video(flt,
-                    src=info['subcommand'],
-                    tex=self.settings['latex_src'],
-                    controls=self.settings['controls'],
-                    loop=self.settings['loop'],
-                    autoplay=self.settings['autoplay'],
-                    tstart=self.settings['tstart'],
-                    tstop=self.settings['tstop'])
+
+        if info['subcommand'] == "youtube":
+            vid = Video(flt,
+                        src=self.settings['youtube_embed_src'],
+                        youtube=True,
+                        tex=self.settings['latex_src'],
+                        tstart=self.settings['tstart'],
+                        tstop=self.settings['tstop'])
+        else:
+            vid = Video(flt,
+                        src=info['subcommand'],
+                        youtube=False,
+                        tex=self.settings['latex_src'],
+                        controls=self.settings['controls'],
+                        loop=self.settings['loop'],
+                        autoplay=self.settings['autoplay'],
+                        tstart=self.settings['tstart'],
+                        tstop=self.settings['tstop'])
 
         if flt is parent:
             vid.attributes.update(**self.attributes)
@@ -177,24 +188,40 @@ class RenderVideo(components.RenderComponent):
 
         tstart = token['tstart']
         tstop = token['tstop']
-        if tstart and tstop:
-            src += '#t={},{}'.format(tstart, tstop)
-        elif tstart:
-            src += '#t={}'.format(tstart)
-        elif tstop:
-            src += '#t=0,{}'.format(tstop)
 
-        video = html.Tag(parent, 'video', token, src=src)
-        _, ext = os.path.splitext(src)
-        html.Tag(video, 'source', src=src, type_="video/{}".format(ext[1:]))
+        if token['youtube']:
+            if tstart and tstop:
+                src += '?start={:.0f}&end={:.0f};'.format(tstart, tstop)
+            elif tstart:
+                src += '?t={:.0f};'.format(tstart)
+            elif tstop:
+                src += '?start=0&end={:.0f};'.format(tstop)
 
-        video['width'] = '100%'
-        if token['controls']:
-            video['controls'] = 'controls'
-        if token['autoplay']:
-            video['autoplay'] = 'autoplay'
-        if token['loop']:
-            video['loop'] = 'loop'
+            div = html.Tag(parent, 'div', style="text-align:center;")
+            # using standard YouTube width and height for embedded videos as of July 2020
+            video = html.Tag(div, 'iframe', token, width="560", height="315", src=src,
+                             frameborder="0",
+                             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture",
+                             allowfullscreen="allowfullscreen")
+        else:
+            if tstart and tstop:
+                src += '#t={},{}'.format(tstart, tstop)
+            elif tstart:
+                src += '#t={}'.format(tstart)
+            elif tstop:
+                src += '#t=0,{}'.format(tstop)
+
+            video = html.Tag(parent, 'video', token, src=src)
+            _, ext = os.path.splitext(src)
+            html.Tag(video, 'source', src=src, type_="video/{}".format(ext[1:]))
+
+            video['width'] = '100%'
+            if token['controls']:
+                video['controls'] = 'controls'
+            if token['autoplay']:
+                video['autoplay'] = 'autoplay'
+            if token['loop']:
+                video['loop'] = 'loop'
 
     def createLatex(self, parent, token, page):
 

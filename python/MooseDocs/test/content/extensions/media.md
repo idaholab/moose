@@ -53,3 +53,8 @@ Idaho: [idaho-flag]
        latex_src=big_buck_bunny.jpg
        style=width:100%;
        caption=Big Bug Bunny is an open-source movie short.
+
+!media youtube youtube_embed_src=http://www.youtube.com/embed/2tJwBsYaLaI
+               id=training-webinar
+               latex_src=training-webinar.png
+               caption=MOOSE training webinar given on June 9--10, 2020.
