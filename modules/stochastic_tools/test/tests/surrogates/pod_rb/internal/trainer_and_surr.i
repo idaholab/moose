@@ -58,7 +58,7 @@
     check_multiapp_execute_on = false
   []
   [data]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = train_sample
     trainer_name = 'pod_rb'
@@ -67,7 +67,7 @@
     check_multiapp_execute_on = false
   []
   [mode]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = train_sample
     trainer_name = 'pod_rb'
@@ -76,7 +76,7 @@
     check_multiapp_execute_on = false
   []
   [res]
-    type = ResidualTransfer
+    type = PODResidualTransfer
     multi_app = sub
     sampler = train_sample
     trainer_name = "pod_rb"
