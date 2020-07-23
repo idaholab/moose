@@ -26,7 +26,7 @@ The [GeochemicalModelDefinition](GeochemicalModelDefinition.md) defines the basi
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines:
 
 - the swaps;
-- the initial bulk mole number of the aqueous species [in the current basis](gwb_diff.md), the free mole number of Calcite and the pH (via the H$^{+}$ `activity`);
+- the initial bulk mole number of the aqueous species [in the current basis](theory/gwb_diff.md), the free mole number of Calcite and the pH (via the H$^{+}$ `activity`);
 - that the system is closed at $t=0$ (the default), so that after this time no more Calcite can be added to the system to maintain its free mole number;
 - that at $t=0$ the activity constraint is removed on H$^{+}$ so that the pH can vary;
 - that HCl is added at a rate of 0.001$\,$mol/s;
@@ -50,7 +50,7 @@ The equivalent [Geochemists Workbench](https://www.gwb.com/) file is
 
 !listing modules/geochemistry/test/tests/time_dependent_reactions/calcite_dumping.rea
 
-Note the slightly increased Ca$^{2+}$ bulk composition: this is explained [here](gwb_diff.md).
+Note the slightly increased Ca$^{2+}$ bulk composition: this is explained [here](theory/gwb_diff.md).
 
 ## Results
 

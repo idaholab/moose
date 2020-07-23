@@ -55,7 +55,7 @@ The kinetic rate for Quartz is specified by a [GeochemistryKineticRate](Geochemi
 The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) specifies:
 
 - the swaps;
-- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note this is [different than GWB](gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
+- the initial pH (via the H$^{+}$ `activity`), the bulk composition of the aqueous species (note this is [different than GWB](theory/gwb_diff.md)) and the free mole number for the minerals (not Quartz because it is a kinetic species) and free molality of SiO2(aq) from stage 1;
 - the temperature;
 - the initial number of moles for Quartz
 - that the kinetic rate should be updated during the Newton process that finds the equilibrium configuration at each time-step (which is unnecessary and computationally inefficient for this example, but is included for illustration)
@@ -82,7 +82,7 @@ The equivalent [Geochemists Workbench](https://www.gwb.com/) input file is
 
 !listing modules/geochemistry/test/tests/time_dependent_reactions/flushing.rea
 
-Note the different initial molality specified for Ca$^{2+}$.  In this case it makes no noticable difference to the result, but users desiring an exact correspondance between the two software packages should understand [the differences](gwb_diff.md).
+Note the different initial molality specified for Ca$^{2+}$.  In this case it makes no noticable difference to the result, but users desiring an exact correspondance between the two software packages should understand [the differences](theory/gwb_diff.md).
 
 ## Results
 
