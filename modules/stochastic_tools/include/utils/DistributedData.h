@@ -56,10 +56,7 @@ public:
   };
 
   /// Getting an iterator to the end of the locally owned sample IDs.
-  typename std::vector<dof_id_type>::iterator localEntryIDEnd()
-  {
-    return _local_entry_ids.end();
-  };
+  typename std::vector<dof_id_type>::iterator localEntryIDEnd() { return _local_entry_ids.end(); };
 
   /// Getting a sample using its global index.
   const T & getEntry(dof_id_type glob_i);
