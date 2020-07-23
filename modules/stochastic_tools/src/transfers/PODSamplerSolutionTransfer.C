@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // StochasticTools includes
-#include "SamplerSolutionTransfer.h"
+#include "PODSamplerSolutionTransfer.h"
 #include "SamplerFullSolveMultiApp.h"
 #include "SamplerTransientMultiApp.h"
 #include "NonlinearSystemBase.h"
@@ -16,10 +16,10 @@
 #include "StochasticResults.h"
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", SamplerSolutionTransfer);
+registerMooseObject("StochasticToolsApp", PODSamplerSolutionTransfer);
 
 InputParameters
-SamplerSolutionTransfer::validParams()
+PODSamplerSolutionTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Transfers solution vectors from the sub-applications to a "
@@ -30,9 +30,16 @@ SamplerSolutionTransfer::validParams()
   return params;
 }
 
-SamplerSolutionTransfer::SamplerSolutionTransfer(const InputParameters & parameters)
+PODSamplerSolutionTransfer::PODSamplerSolutionTransfer(const InputParameters & parameters)
   : StochasticToolsTransfer(parameters), _trainer_name(getParam<std::string>("trainer_name"))
 {
+  auto pod_pointer = std::dynamic_pointer_cast<PODFullSolveMultiApp>(_multi_app);
+
+  if (pod_pointer)
+    _pod_multi_app = pod_pointer;
+  else
+    paramError("multi_app", "The Multiapp given is not a PODFullsolveMultiapp!");
+
   // Fetching the trainer based on the name specified in the parameters
   std::vector<PODReducedBasisTrainer *> obj;
 
@@ -45,7 +52,7 @@ SamplerSolutionTransfer::SamplerSolutionTransfer(const InputParameters & paramet
 }
 
 void
-SamplerSolutionTransfer::initialSetup()
+PODSamplerSolutionTransfer::initialSetup()
 {
   // Checking if the subapplication has the requested variables
   const std::vector<std::string> & var_names = _trainer->getVarNames();
@@ -60,7 +67,7 @@ SamplerSolutionTransfer::initialSetup()
 }
 
 void
-SamplerSolutionTransfer::execute()
+PODSamplerSolutionTransfer::execute()
 {
 
   const std::vector<std::string> & var_names = _trainer->getVarNames();
@@ -141,31 +148,91 @@ SamplerSolutionTransfer::execute()
 }
 
 void
-SamplerSolutionTransfer::initializeFromMultiapp()
+PODSamplerSolutionTransfer::initializeFromMultiapp()
 {
 }
 
 void
-SamplerSolutionTransfer::finalizeFromMultiapp()
+PODSamplerSolutionTransfer::executeFromMultiapp()
+{
+  if (_pod_multi_app->snapshotGeneration())
+  {
+    const std::vector<std::string> & var_names = _trainer->getVarNames();
+
+    const dof_id_type n = _multi_app->numGlobalApps();
+
+    for (MooseIndex(n) i = 0; i < n; i++)
+    {
+      if (_multi_app->hasLocalApp(i))
+      {
+        // Getting reference to the  solution vector of the sub-app.
+        FEProblemBase & app_problem = _multi_app->appProblemBase(i);
+        NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+        NumericVector<Number> & solution = nl.solution();
+
+        // Looping over the variables to extract the corresponding solution values
+        // and copy them into the container of the trainer.
+        for (unsigned int var_i = 0; var_i < var_names.size(); ++var_i)
+        {
+          // Getting the corresponding DoF indices for the variable.
+          nl.setVariableGlobalDoFs(var_names[var_i]);
+          const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
+
+          // Initializing a temporary vector for the partial solution.
+          std::shared_ptr<DenseVector<Real>> tmp = std::make_shared<DenseVector<Real>>();
+          solution.get(var_dofs, tmp->get_values());
+
+          // Copying the temporary vector into the trainer.
+          _trainer->addSnapshot(var_i, _global_index, tmp);
+        }
+      }
+    }
+  }
+}
+
+void
+PODSamplerSolutionTransfer::finalizeFromMultiapp()
 {
 }
 
 void
-SamplerSolutionTransfer::executeFromMultiapp()
+PODSamplerSolutionTransfer::initializeToMultiapp()
 {
 }
 
 void
-SamplerSolutionTransfer::initializeToMultiapp()
+PODSamplerSolutionTransfer::executeToMultiapp()
 {
+  if (!_pod_multi_app->snapshotGeneration())
+  {
+    const std::vector<std::string> & var_names = _trainer->getVarNames();
+    dof_id_type var_i = _trainer->getVariableIndex(_global_index);
+
+    // Getting the reference to the solution vector in the subapp.
+    FEProblemBase & app_problem = _multi_app->appProblemBase(processor_id());
+    NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
+    NumericVector<Number> & solution = nl.solution();
+
+    // Zeroing down the solution tho make sure that only the required part
+    // is non-zero after copy.
+    solution.zero();
+
+    // Getting the degrees of freedom for the given variable.
+    nl.setVariableGlobalDoFs(var_names[var_i]);
+    const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
+
+    // Fetching the basis vector and plugging it into the solution.
+    const DenseVector<Real> & base_vector = _trainer->getBasisVector(_global_index);
+    solution.insert(base_vector, var_dofs);
+    solution.close();
+
+    // Make sure that the sub-application uses this vector to evaluate the
+    // residual.
+    nl.setSolution(solution);
+  }
 }
 
 void
-SamplerSolutionTransfer::finalizeToMultiapp()
-{
-}
-
-void
-SamplerSolutionTransfer::executeToMultiapp()
+PODSamplerSolutionTransfer::finalizeToMultiapp()
 {
 }

@@ -12,33 +12,21 @@
 // MOOSE includes
 #include "PODReducedBasisTrainer.h"
 #include "StochasticToolsTransfer.h"
+#include "PODFullSolveMultiApp.h"
 
 // Forward declarations
-class SamplerReceiver;
-class SamplerFullSolveMultiApp;
-class StochasticResults;
+class PODFullSolveMultiApp;
 
 /**
  * Transfer solutions from sub-applications to a container in a Trainer.
  * This object also transfers artificial solution vectors back to sub-applications.
  */
-class SamplerSolutionTransfer : public StochasticToolsTransfer
+class PODSamplerSolutionTransfer : public StochasticToolsTransfer
 {
 public:
   static InputParameters validParams();
-  SamplerSolutionTransfer(const InputParameters & parameters);
+  PODSamplerSolutionTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
-
-protected:
-  /** Name of the trainer object which contains the container for the solutions
-   * of the subapp or contains the artificial solution vectors.
-   */
-  std::string _trainer_name;
-
-  /** The trainer object to save the solution vector into or to fetch the
-   * artificial solution vectors from.
-   */
-  PODReducedBasisTrainer * _trainer = nullptr;
 
   virtual void execute() override;
 
@@ -54,4 +42,20 @@ protected:
   virtual void executeToMultiapp() override;
   virtual void finalizeToMultiapp() override;
   ///@}
+
+protected:
+  /// The input multiapp casted into a PODFullSolveMultiapp to get access to the
+  /// specific pod attributes. Used in batch mode onlzy and checking if the
+  /// correct MultiApp type has been provided.
+  std::shared_ptr<PODFullSolveMultiApp> _pod_multi_app;
+
+  /** Name of the trainer object which contains the container for the solutions
+   * of the subapp or contains the artificial solution vectors.
+   */
+  std::string _trainer_name;
+
+  /** The trainer object to save the solution vector into or to fetch the
+   * artificial solution vectors from.
+   */
+  PODReducedBasisTrainer * _trainer = nullptr;
 };

@@ -1,4 +1,4 @@
-# ResidualTransfer
+# PODResidualTransfer
 
 This object is responsible for transferring residual vectors from [PODFullSolveMultiApp.md]
 to [PODReducedBasisTrainer.md].
@@ -11,8 +11,8 @@ input file.
 
 !listing modules/stochastic_tools/test/tests/surrogates/pod_rb/internal/trainer.i block=Transfers/res
 
-!syntax parameters /Transfers/ResidualTransfer
+!syntax parameters /Transfers/PODResidualTransfer
 
-!syntax inputs /Transfers/ResidualTransfer
+!syntax inputs /Transfers/PODResidualTransfer
 
-!syntax children /Transfers/ResidualTransfer
+!syntax children /Transfers/PODResidualTransfer

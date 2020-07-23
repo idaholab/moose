@@ -1,4 +1,4 @@
-# SamplerSolutionTransfer
+# PODSamplerSolutionTransfer
 
 This object is responsible for transferring solution vectors from [PODFullSolveMultiApp.md]
 to [PODReducedBasisTrainer.md] and back.
@@ -13,8 +13,8 @@ input file.
 
 !listing modules/stochastic_tools/test/tests/surrogates/pod_rb/internal/trainer.i block=Transfers/pod_modes
 
-!syntax parameters /Transfers/SamplerSolutionTransfer
+!syntax parameters /Transfers/PODSamplerSolutionTransfer
 
-!syntax inputs /Transfers/SamplerSolutionTransfer
+!syntax inputs /Transfers/PODSamplerSolutionTransfer
 
-!syntax children /Transfers/SamplerSolutionTransfer
+!syntax children /Transfers/PODSamplerSolutionTransfer

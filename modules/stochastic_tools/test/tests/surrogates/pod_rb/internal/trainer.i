@@ -41,7 +41,7 @@
 
 [Transfers]
   [param]
-    type = SamplerParameterTransfer
+    type = PODSamplerParameterTransfer
     multi_app = sub
     sampler = sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
@@ -50,7 +50,7 @@
     check_multiapp_execute_on = false
   []
   [snapshots]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
@@ -59,7 +59,7 @@
     check_multiapp_execute_on = false
   []
   [pod_modes]
-    type = SamplerSolutionTransfer
+    type = PODSamplerSolutionTransfer
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
@@ -68,7 +68,7 @@
     check_multiapp_execute_on = false
   []
   [res]
-    type = ResidualTransfer
+    type = PODResidualTransfer
     multi_app = sub
     sampler = sample
     trainer_name = "pod_rb"
