@@ -1,0 +1,39 @@
+Applications:
+    navier_stokes:
+        exe_directory: modules/navier_stokes
+        app_types:
+            - NavierStokesApp
+        content_directory: modules/navier_stokes/doc/content
+        remove:
+            - framework/doc/remove.yml
+        hidden:
+            - modules/navier_stokes/doc/hidden.yml
+            - framework/doc/hidden.yml
+        unregister:
+            - framework/doc/unregister.yml
+        log_hidden_syntax: WARNING
+        log_stub_files: WARNING
+        log_non_hidden_stub: WARNING
+
+Documents:
+    log_software_requirements_specification: WARNING
+    log_software_design_description: WARNING
+    log_software_test_plan: WARNING
+    log_requirements_traceablity_matrix: WARNING
+    log_verification_validation_plan: WARNING
+    log_safety_software_determination: WARNING
+    log_quality_level_determination: WARNING
+    log_enterprise_architecture_entry: WARNING
+    log_project_management_plan: WARNING
+    log_software_quality_plan: WARNING
+    log_configuration_management_plan: WARNING
+    log_asset_management_plan: WARNING
+    log_verification_validation_plan: WARNING
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+
+Requirements:
+    navier_stokes:
+        directories:
+            - modules/navier_stokes
+        log_missing: WARNING
