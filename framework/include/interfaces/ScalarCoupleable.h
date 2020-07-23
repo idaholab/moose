@@ -105,6 +105,17 @@ protected:
   const ADVariableValue & adCoupledScalarValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled scalar variable for use in templated automatic differentiation
+   * classes
+   * @param var_name Name of coupled scalar variable
+   * @param comp Component number for vector of coupled scalar variables
+   * @return Reference to a GenericVariableValue for the coupled scalar variable
+   */
+  template <bool is_ad>
+  const GenericVariableValue<is_ad> & coupledGenericScalarValue(const std::string & var_name,
+                                                                unsigned int comp = 0);
+
+  /**
    * Returns value of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param tag Tag ID of coupled vector ;
