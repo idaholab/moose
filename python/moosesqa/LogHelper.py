@@ -43,6 +43,7 @@ class LogHelper(object):
         self.__counts[key] += 1
 
         text = msg.format(*args, **kwargs)
+        text += "\nControl this message using: '{}'".format(key)
         self.__text[key].append(text)
 
         if mode is not None:

@@ -1,11 +1,11 @@
 Applications:
     contact:
-        exe_directory: modules/contact
+        exe_directory: ${MOOSE_DIR}/modules/contact
         app_types:
             - ContactApp
-        content_directory: modules/contact/doc/content
+        content_directory: ${MOOSE_DIR}/modules/contact/doc/content
         hidden:
-            - modules/contact/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/contact/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_missing_markdown: WARNING
 
@@ -29,7 +29,7 @@ Documents:
 Requirements:
     contact:
         directories:
-            - modules/contact
+            - ${MOOSE_DIR}/modules/contact
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_missing_requirement: WARNING

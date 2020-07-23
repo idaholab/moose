@@ -38,12 +38,23 @@ class SQARequirementReport(SQAReport):
         local_dirs = self.directories
         specs = self.specs or 'tests'
 
-        # Get the Requirement objects
+        # Get complete directory paths
         if local_dirs:
-            directories = [os.path.join(working_dir, directory) for directory in local_dirs]
+            directories = list()
+            for local_dir in local_dirs:
+                d = mooseutils.eval_path(local_dir)
+                if not os.path.isdir(d):
+                    d = os.path.join(working_dir, d)
+                directories.append(d)
         else:
             directories = [working_dir]
 
+        # Check that directories exist
+        for d in directories:
+            if not os.path.isdir(d):
+                raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
+
+        # Build Requirement objects and remove directory based dict
         req_dict = get_requirements(directories, specs.split())
         requirements = []
         for values in req_dict.values():

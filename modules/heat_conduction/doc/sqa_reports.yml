@@ -1,11 +1,11 @@
 Applications:
     heat_conduction:
-        exe_directory: modules/heat_conduction
+        exe_directory: ${MOOSE_DIR}/modules/heat_conduction
         app_types:
             - HeatConductionApp
-        content_directory: modules/heat_conduction/doc/content
+        content_directory: ${MOOSE_DIR}/modules/heat_conduction/doc/content
         hidden:
-            - modules/heat_conduction/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/heat_conduction/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_hidden_non_stub: WARNING
@@ -31,6 +31,6 @@ Documents:
 Requirements:
     heat_conduction:
         directories:
-            - modules/heat_conduction
+            - ${MOOSE_DIR}/modules/heat_conduction
         log_duplicate_requirement: WARNING
         log_testable: WARNING

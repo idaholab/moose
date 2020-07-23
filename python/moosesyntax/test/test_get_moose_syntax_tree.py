@@ -174,6 +174,12 @@ class TestSyntaxTree(unittest.TestCase):
         node = moosetree.find(root, lambda n: n.fullpath() == '/UserObjects/TestCSVReader')
         self.assertFalse(node.removed)
 
+    def testTestApp(self):
+        root = moosesyntax.get_moose_syntax_tree(self.json)
+        node = moosetree.find(root, lambda n: n.fullpath() == '/Testing')
+        self.assertTrue(node.removed)
+        self.assertTrue(node(0).removed)
+        self.assertTrue(node(0,0).removed)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

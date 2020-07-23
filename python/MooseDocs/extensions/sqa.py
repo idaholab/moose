@@ -28,7 +28,7 @@ from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
 from ..tree import tokens, html, latex, pages
-from . import core, command, floats, autolink, civet
+from . import core, command, floats, autolink, civet, appsyntax
 
 LOG = logging.getLogger(__name__)
 
@@ -151,13 +151,32 @@ class SQAExtension(command.CommandExtension):
             # Create remote repository database
             self.__remotes[category] = repos.get(repo, None)
 
-            # Create reports
+            # Create reports from included SQA apps (e.g., moose/modulus/stochastic_tools)
             if reports:
                 self.__reports[category] = moosesqa.get_sqa_reports(reports)
 
+        # Report for the entire app (e.g, moose/modules/doc)
         general_reports = self.get('reports')
         if general_reports is not None:
             self.__reports['__empty__'] = moosesqa.get_sqa_reports(general_reports)
+
+        # Get the syntax tree and app types from the appsyntax extension
+        app_syntax = None
+        app_types = None
+        for ext in self.translator.extensions:
+            if isinstance(ext, appsyntax.AppSyntaxExtension):
+                app_syntax = ext.syntax
+                app_types = [ext.apptype]
+                break
+
+        # Setup the SQAMooseAppReports to use the syntax from the running app
+        for reports in self.__reports.values():
+            for app_report in reports[2]:
+                app_report.app_types = app_types
+                app_report.app_syntax = app_syntax
+                if app_syntax is None:
+                    msg = 'Attempting to inject application syntax into SQAMooseAppReport, but the syntax does not exist.'
+                    LOG.warning(msg)
 
         LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
@@ -820,6 +839,8 @@ class RenderSQAReport(components.RenderComponent):
 
     def createMaterialize(self, parent, token, page):
         reports = token['reports']
+        if not reports:
+            return
 
         ul = html.Tag(parent, 'ul', class_='collapsible')
         for report in reports:

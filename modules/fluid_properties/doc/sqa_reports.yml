@@ -1,11 +1,11 @@
 Applications:
     fluid_properties:
-        exe_directory: modules/fluid_properties
+        exe_directory: ${MOOSE_DIR}/modules/fluid_properties
         app_types:
             - FluidPropertiesApp
-        content_directory: modules/fluid_properties/doc/content
+        content_directory: ${MOOSE_DIR}/modules/fluid_properties/doc/content
         hidden:
-            - modules/fluid_properties/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
@@ -30,5 +30,5 @@ Documents:
 Requirements:
     fluid_properties:
         directories:
-            - modules/fluid_properties
+            - ${MOOSE_DIR}/modules/fluid_properties
         log_missing: WARNING

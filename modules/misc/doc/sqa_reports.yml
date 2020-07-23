@@ -1,11 +1,11 @@
 Applications:
     misc:
-        exe_directory: modules/misc
+        exe_directory: ${MOOSE_DIR}/modules/misc
         app_types:
             - MiscApp
-        content_directory: modules/misc/doc/content
+        content_directory: ${MOOSE_DIR}/modules/misc/doc/content
         hidden:
-            - modules/misc/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/misc/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
@@ -29,6 +29,6 @@ Documents:
 Requirements:
     misc:
         directories:
-            - modules/misc
+            - ${MOOSE_DIR}/modules/misc
         log_duplicate_requirement: WARNING
         log_missing: WARNING

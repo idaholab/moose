@@ -1,11 +1,11 @@
 Applications:
     peridynamics:
-        exe_directory: modules/peridynamics
+        exe_directory: ${MOOSE_DIR}/modules/peridynamics
         app_types:
             - PeridynamicsApp
-        content_directory: modules/peridynamics/doc/content
+        content_directory: ${MOOSE_DIR}/modules/peridynamics/doc/content
         hidden:
-            - modules/peridynamics/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/peridynamics/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_hidden_non_stub: WARNING
 
@@ -29,7 +29,7 @@ Documents:
 Requirements:
     peridynamics:
         directories:
-            - modules/peridynamics
+            - ${MOOSE_DIR}/modules/peridynamics
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_design_files: WARNING

@@ -1,9 +1,9 @@
 Applications:
     level_set:
-        exe_directory: modules/level_set
+        exe_directory: ${MOOSE_DIR}/modules/level_set
         app_types:
             - LevelSetApp
-        content_directory: modules/level_set/doc/content
+        content_directory: ${MOOSE_DIR}/modules/level_set/doc/content
 
 Documents:
     log_software_requirements_specification: WARNING
@@ -25,5 +25,5 @@ Documents:
 Requirements:
     level_set:
         directories:
-            - modules/level_set
+            - ${MOOSE_DIR}/modules/level_set
         log_missing: WARNING

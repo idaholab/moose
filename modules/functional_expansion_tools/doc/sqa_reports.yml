@@ -1,9 +1,9 @@
 Applications:
     functional_expansion_tools:
-        exe_directory: modules/functional_expansion_tools
+        exe_directory: ${MOOSE_DIR}/modules/functional_expansion_tools
         app_types:
             - FunctionalExpansionToolsApp
-        content_directory: modules/functional_expansion_tools/doc/content
+        content_directory: ${MOOSE_DIR}/modules/functional_expansion_tools/doc/content
 
 Documents:
     log_software_requirements_specification: WARNING
@@ -25,5 +25,5 @@ Documents:
 Requirements:
     functional_expansion_tools:
         directories:
-            - modules/functional_expansion_tools
+            - ${MOOSE_DIR}/modules/functional_expansion_tools
         log_missing: WARNING

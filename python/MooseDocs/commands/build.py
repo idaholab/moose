@@ -176,7 +176,11 @@ def main(options):
     if options.dump:
         for page in translator.getPages():
             print('{}: {}'.format(page.local, page.source))
-        sys.exit()
+        for ext in translator.extensions:
+            if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
+                ext.preExecute()
+                print(ext.syntax)
+        return 0
 
     # Set default for --clean: clean when --files is NOT used.
     if options.clean is None:

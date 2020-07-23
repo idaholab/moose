@@ -182,14 +182,15 @@ class AppSyntaxExtension(command.CommandExtension):
                 self._cache[node.fullpath()] = node
                 if node.alias:
                     self._cache[node.alias] = node
-                if isinstance(node, moosesyntax.ObjectNodeBase):
-                    self._object_cache[node.fullpath()] = node
-                    if node.alias:
-                        self._object_cache[node.alias] = node
-                elif isinstance(node, moosesyntax.SyntaxNode):
+                if isinstance(node, moosesyntax.SyntaxNode):
                     self._syntax_cache[node.fullpath()] = node
                     if node.alias:
                         self._syntax_cache[node.alias] = node
+                else:
+                    self._object_cache[node.fullpath()] = node
+                    if node.alias:
+                        self._object_cache[node.alias] = node
+
         LOG.info("MOOSE class database complete [%s sec]", time.time() - start)
 
     @property

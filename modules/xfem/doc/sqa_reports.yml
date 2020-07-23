@@ -1,11 +1,11 @@
 Applications:
     XFEM:
-        exe_directory: modules/xfem
+        exe_directory: ${MOOSE_DIR}/modules/xfem
         app_types:
             - XFEMApp
-        content_directory: modules/xfem/doc/content
+        content_directory: ${MOOSE_DIR}/modules/xfem/doc/content
         hidden:
-            - modules/xfem/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/xfem/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
 
@@ -29,4 +29,4 @@ Documents:
 Requirements:
     xfem:
         directories:
-            - modules/xfem
+            - ${MOOSE_DIR}/modules/xfem

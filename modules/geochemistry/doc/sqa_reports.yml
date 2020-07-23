@@ -1,9 +1,9 @@
 Applications:
     geochemistry:
-        exe_directory: modules/geochemistry
+        exe_directory: ${MOOSE_DIR}/modules/geochemistry
         app_types:
             - GeochemistryApp
-        content_directory: modules/geochemistry/doc/content
+        content_directory: ${MOOSE_DIR}/modules/geochemistry/doc/content
 
 Documents:
     log_software_requirements_specification: WARNING
@@ -25,6 +25,6 @@ Documents:
 Requirements:
     geochemistry:
         directories:
-            - modules/geochemistry
+            - ${MOOSE_DIR}/modules/geochemistry
         log_duplicate_requirement: WARNING
         log_design_files: WARNING

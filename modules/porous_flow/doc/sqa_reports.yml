@@ -1,13 +1,13 @@
 Applications:
     porous_flow:
-        exe_directory: modules/porous_flow
+        exe_directory: ${MOOSE_DIR}/modules/porous_flow
         app_types:
             - PorousFlowApp
-        content_directory: modules/porous_flow/doc/content
+        content_directory: ${MOOSE_DIR}/modules/porous_flow/doc/content
         hidden:
-            - modules/porous_flow/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/porous_flow/doc/hidden.yml
         remove:
-            - framework/doc/remove.yml
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_hidden_non_stub: WARNING
@@ -32,7 +32,7 @@ Documents:
 Requirements:
     porous_flow:
         directories:
-            - modules/porous_flow
+            - ${MOOSE_DIR}/modules/porous_flow
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_issue_format: WARNING

@@ -84,9 +84,13 @@ class SyntaxNode(NodeBase):
         Return groups associated with this Actions (i.e., where the syntax is defined).
         """
         out = set([self.group]) if self.group is not None else set()
-        for node in self.actions():
-            if node.group is not None:
-                out.add(node.group)
+        for node in self.descendants:
+            if isinstance(node, (SyntaxNode, ActionNode)):
+                out.update(node.groups())
+        #for node in self.actions():
+        #    out.update(node.groups())
+        #for node in self.syntax():
+        #    out.update(node.groups())
         return out
 
     def parameters(self):

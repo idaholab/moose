@@ -1,14 +1,14 @@
 Applications:
     phase_field:
-        exe_directory: modules/phase_field
+        exe_directory: ${MOOSE_DIR}/modules/phase_field
         app_types:
             - PhaseFieldApp
-        content_directory: modules/phase_field/doc/content
+        content_directory: ${MOOSE_DIR}/modules/phase_field/doc/content
         hidden:
-            - modules/phase_field/doc/hidden.yml
-            - framework/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/phase_field/doc/hidden.yml
+            - ${MOOSE_DIR}/framework/doc/hidden.yml
         remove:
-            - framework/doc/remove.yml
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_non_hidden_stub: WARNING
@@ -34,7 +34,7 @@ Documents:
 Requirements:
     phase_field:
         directories:
-            - modules/phase_field
+            - ${MOOSE_DIR}/modules/phase_field
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING

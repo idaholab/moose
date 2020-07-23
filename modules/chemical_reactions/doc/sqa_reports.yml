@@ -1,11 +1,11 @@
 Applications:
     chemical_reactions:
-        exe_directory: modules/chemical_reactions
+        exe_directory: ${MOOSE_DIR}/modules/chemical_reactions
         app_types:
             - ChemicalReactionsApp
-        content_directory: modules/chemical_reactions/doc/content
+        content_directory: ${MOOSE_DIR}/modules/chemical_reactions/doc/content
         hidden:
-            - modules/chemical_reactions/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/chemical_reactions/doc/hidden.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
 
@@ -29,5 +29,5 @@ Documents:
 Requirements:
     chemical_reactions:
         directories:
-            - modules/chemical_reactions
+            - ${MOOSE_DIR}/modules/chemical_reactions
         log_missing: WARNING

@@ -1,7 +1,7 @@
 Applications:
     RDG:
-        exe_directory: modules/combined
-        content_directory: modules/rdg/doc/content
+        exe_directory: ${MOOSE_DIR}/modules/combined
+        content_directory: ${MOOSE_DIR}/modules/rdg/doc/content
         app_types:
             - RdgApp
 
@@ -25,6 +25,6 @@ Documents:
 Requirements:
     rdg:
         directories:
-            - modules/rdg
+            - ${MOOSE_DIR}/modules/rdg
         log_duplicate_requirement: WARNING
         log_missing: WARNING

@@ -1,9 +1,9 @@
 Applications:
     external_petsc_solver:
-        exe_directory: modules/external_petsc_solver
+        exe_directory: ${MOOSE_DIR}/modules/external_petsc_solver
         app_types:
             - ExternalPetscApp
-        content_directory: modules/external_petsc_solver/doc/content
+        content_directory: ${MOOSE_DIR}/modules/external_petsc_solver/doc/content
 
 Documents:
     log_software_requirements_specification: WARNING
@@ -25,5 +25,5 @@ Documents:
 Requirements:
     external_petsc_solver:
         directories:
-            - modules/external_petsc_solver
+            - ${MOOSE_DIR}/modules/external_petsc_solver
         log_duplicate_requirement: WARNING

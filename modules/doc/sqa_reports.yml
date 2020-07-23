@@ -127,6 +127,7 @@ Applications:
         content_directory: modules/peridynamics/doc/content
         hidden:
             - modules/peridynamics/doc/hidden.yml
+        log_stub_files: WARNING
         log_hidden_syntax: WARNING
         log_hidden_non_stub: WARNING
         show_warning: false

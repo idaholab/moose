@@ -59,17 +59,18 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
 
     # Apply remove/hide/alias/unregister restrictions
     for node in moosetree.iterate(root):
+
         # Hidden
         if node.fullpath() in hidden:
             node.hidden = True
 
         # Removed
-        if node.fullpath() in removed or (node.parent and node.parent.removed):
+        if (node.fullpath() in removed) or ((node.parent is not None) and node.parent.removed):
             node.removed = True
 
         # Remove 'Test' objects if not allowed
-        if not allow_test_objects and all(grp.endswith('TestApp') for grp in node.groups()):
-            node.removed = True
+        if (not allow_test_objects) and all(grp.endswith('TestApp') for grp in node.groups()):
+            node.removed =  True
 
         # Remove unregistered items
         for base, parent_syntax in unregister.items():

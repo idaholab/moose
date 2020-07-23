@@ -1,14 +1,14 @@
 Applications:
     tensor_mechanics:
-        exe_directory: modules/tensor_mechanics
+        exe_directory: ${MOOSE_DIR}/modules/tensor_mechanics
         app_types:
             - TensorMechanicsApp
-        content_directory: modules/tensor_mechanics/doc/content
+        content_directory: ${MOOSE_DIR}/modules/tensor_mechanics/doc/content
         hidden:
-            - modules/tensor_mechanics/doc/hidden.yml
-            - framework/doc/hidden.yml
+            - ${MOOSE_DIR}/modules/tensor_mechanics/doc/hidden.yml
+            - ${MOOSE_DIR}/framework/doc/hidden.yml
         remove:
-            - framework/doc/remove.yml
+            - ${MOOSE_DIR}/framework/doc/remove.yml
         log_hidden_syntax: WARNING
         log_stub_files: WARNING
         log_hidden_non_stub: WARNING
@@ -34,7 +34,7 @@ Documents:
 Requirements:
     tensor_mechanics:
         directories:
-            - modules/tensor_mechanics
+            - ${MOOSE_DIR}/modules/tensor_mechanics
         log_duplicate_requirement: WARNING
         log_missing: WARNING
         log_empty_issues: WARNING

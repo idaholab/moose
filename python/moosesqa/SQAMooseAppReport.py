@@ -52,8 +52,14 @@ class SQAMooseAppReport(SQAReport):
     def execute(self, **kwargs):
         """Perform app syntax checking"""
 
+        # Check that the supplied content dir exists
+        content_dir = mooseutils.eval_path(self.content_directory)
+        if not os.path.isdir(content_dir):
+            content_dir = os.path.join(self.working_dir, content_dir)
+        if not os.path.isdir(content_dir):
+            raise NotADirectoryError("'content_directory' input is not a directory: {}".format(content_dir))
+
         # Populate the available list of files
-        content_dir = os.path.join(self.working_dir, self.content_directory)
         file_cache = mooseutils.git_ls_files(content_dir)
 
         # Build syntax tree if not provided
@@ -65,9 +71,15 @@ class SQAMooseAppReport(SQAReport):
             alias = self._loadYamlFiles(self.alias)
             unregister = self._loadYamlFiles(self.unregister)
 
+            # Check that the supplied exe dir exists
+            exe_dir = mooseutils.eval_path(self.exe_directory)
+            if not os.path.isdir(exe_dir):
+                exe_dir = os.path.join(self.working_dir, exe_dir)
+            if not os.path.isdir(exe_dir):
+                raise NotADirectoryError("'exe_directory' input is not a directory: {}".format(exe_dir))
+
             # Locate the executable
-            location = os.path.join(self.working_dir, self.exe_directory)
-            exe = mooseutils.find_moose_executable(location, name=self.exe_name, show_error=False)
+            exe = mooseutils.find_moose_executable(exe_dir, name=self.exe_name, show_error=False)
 
             # Build the complete syntax tree
             self.app_syntax = moosesyntax.get_moose_syntax_tree(exe, hide=hide, remove=remove,
@@ -94,7 +106,6 @@ class SQAMooseAppReport(SQAReport):
                              and ((n.group in self.app_types) \
                                   or (n.groups() == set(self.app_types)))
             for node in moosetree.iterate(self.app_syntax, func):
-                print("STUB: ", node.fullpath())
                 self._createStubPage(node)
 
         # Dump
@@ -142,7 +153,13 @@ class SQAMooseAppReport(SQAReport):
         content = dict()
         if filenames is not None:
             for fname in filenames:
-                yml_file = os.path.join(self.working_dir, fname)
+                yml_file = mooseutils.eval_path(fname)
+                if not os.path.isdir(yml_file):
+                    yml_file = os.path.join(self.working_dir, yml_file)
+
+                if not os.path.isfile(yml_file):
+                    raise NotADirectoryError("YAML file is not a directory: {}".format(fname))
+
                 content.update({fname:yaml_load(yml_file)})
         return content
 
