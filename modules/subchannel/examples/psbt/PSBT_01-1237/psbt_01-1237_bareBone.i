@@ -139,7 +139,7 @@ P_out = 4.923e6 # Pa
 
 [UserObjects]
   [_Temp_Out]
-    type = exitValue
+    type = NormalSliceValues
     value = T
     execute_on = final
     file_name = Temp

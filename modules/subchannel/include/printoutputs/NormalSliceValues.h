@@ -8,10 +8,10 @@
 /**
  * Prints out a user selected value in csv format to be used for post-processing
  */
-class exitValue : public GeneralUserObject, public Coupleable
+class NormalSliceValues : public GeneralUserObject, public Coupleable
 {
 public:
-  exitValue(const InputParameters & params);
+  NormalSliceValues(const InputParameters & params);
   virtual void execute() override;
   virtual void initialize() override;
   virtual void finalize() override;

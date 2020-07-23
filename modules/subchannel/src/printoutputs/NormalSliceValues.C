@@ -1,21 +1,21 @@
-#include "exitValue.h"
+#include "NormalSliceValues.h"
 #include "SolutionHandle.h"
 
-registerMooseObject("SubChannelApp", exitValue);
+registerMooseObject("SubChannelApp", NormalSliceValues);
 
 InputParameters
-exitValue::validParams()
+NormalSliceValues::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredCoupledVar("value", "variable you want the value at the exit");
+  params.addRequiredCoupledVar("value", "variable you want the value off at the exit");
   params.addParam<std::string>("file_name",
-                               "name of the value used to printing in the correct file name");
-  params.addClassDescription(
-      "Prints out a user selected value in a matrix format to be used for post-processing");
+                               "name of the value used to printing the correct file name");
+  params.addClassDescription("Prints out a user selected value at a user selected axial height in "
+                             "a matrix format to be used for post-processing");
   return params;
 }
 
-exitValue::exitValue(const InputParameters & parameters)
+NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, true),
     _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
@@ -26,16 +26,16 @@ exitValue::exitValue(const InputParameters & parameters)
 }
 
 void
-exitValue::initialize()
+NormalSliceValues::initialize()
 {
 }
 void
-exitValue::finalize()
+NormalSliceValues::finalize()
 {
 }
 
 void
-exitValue::execute()
+NormalSliceValues::execute()
 {
   auto val_soln = SolutionHandle(*getFieldVar("value", 0));
 
