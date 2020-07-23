@@ -137,6 +137,15 @@ P_out = 4.923e6 # Pa
   []
 []
 
+[UserObjects]
+  [_Temp_Out]
+    type = exitValue
+    value = T
+    execute_on = final
+    file_name = Temp
+  []
+[]
+
 [Outputs]
   exodus = true
 []
