@@ -27,15 +27,9 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   ExternalPetscSolverTestApp::registerApps();
 
-  bool petsc_master = libMesh::on_command_line("--petsc-solver-as-master");
-
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app;
-
-  if (petsc_master)
-    app = AppFactory::createAppShared("ExternalPetscSolverApp", argc, argv);
-  else
-    app = AppFactory::createAppShared("ExternalPetscSolverTestApp", argc, argv);
+  std::shared_ptr<MooseApp> app =
+      AppFactory::createAppShared("ExternalPetscSolverTestApp", argc, argv);
 
   // Execute the application
   app->run();

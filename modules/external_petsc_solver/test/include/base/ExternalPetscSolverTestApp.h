@@ -9,9 +9,11 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "ExternalPetscSolverApp.h"
 
-class ExternalPetscSolverTestApp : public MooseApp
+// Derive from ExternalPetscSolverApp instead of MooseApp
+// so that we can handle petsc-specified (external app) input
+class ExternalPetscSolverTestApp : public ExternalPetscSolverApp
 {
 public:
   static InputParameters validParams();

@@ -11,12 +11,10 @@ import sys
 import subprocess
 import logging
 
-
 if sys.version_info < (3, 6):
     print('"MOOSEDocs" requires python version 3.6 or greater, version {}.{} is being used.' \
           .format(sys.version_info[0], sys.version_info[1]))
     sys.exit(1)
-
 
 import mooseutils
 
@@ -38,6 +36,9 @@ MOOSE_DIR = os.getenv('MOOSE_DIR', None)
 if MOOSE_DIR is None:
     print("The MOOSE_DIR environment must be set, this should be set within moosedocs.py.")
     sys.exit(1)
+
+# Initialize submodule(s)
+mooseutils.git_init_submodule('large_media', MOOSE_DIR)
 
 # List all files, this is done here to avoid running this command many times
 ls_files = mooseutils.git_ls_files if is_git_repo else mooseutils.list_files
