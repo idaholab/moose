@@ -143,7 +143,7 @@ PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
                                     dof_id_type g_ind,
                                     const std::shared_ptr<DenseVector<Real>> & snapshot)
 {
-  _snapshots[v_ind].addNewSample(g_ind, snapshot);
+  _snapshots[v_ind].addNewEntry(g_ind, snapshot);
 }
 
 void
@@ -195,13 +195,13 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   operations.
   */
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> local_vectors;
-  for (dof_id_type loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalSamples(); ++loc_vec_i)
+  for (dof_id_type loc_vec_i = 0; loc_vec_i < _snapshots[0].getNumberOfLocalEntries(); ++loc_vec_i)
   {
     const dof_id_type glob_vec_i = _snapshots[0].getGlobalIndex(loc_vec_i);
     auto & entry = local_vectors[glob_vec_i];
 
     for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-      entry.push_back(_snapshots[v_ind].getLocalSample(loc_vec_i));
+      entry.push_back(_snapshots[v_ind].getLocalEntry(loc_vec_i));
   }
 
   /*
@@ -238,7 +238,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       same distribution amond processors. Therefore, it is enough to test
       the first variable only.
       */
-      if (_snapshots[0].hasGlobalSample(i))
+      if (_snapshots[0].hasGlobalEntry(i))
       {
         // Continue loop if the snapshot is already being sent.
         if (send_vectors[elem->processor_id()].count(i))
@@ -248,9 +248,9 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // snapshot.
         send_vectors[elem->processor_id()].insert(i);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-          send_map[elem->processor_id()].emplace_back(i, v_ind, _snapshots[v_ind].getSample(i));
+          send_map[elem->processor_id()].emplace_back(i, v_ind, _snapshots[v_ind].getEntry(i));
       }
-      else if (_snapshots[0].hasGlobalSample(j))
+      else if (_snapshots[0].hasGlobalEntry(j))
       {
         // Continue loop if the snapshot is already being sent.
         if (send_vectors[elem->processor_id()].count(j))
@@ -260,7 +260,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // snapshot.
         send_vectors[elem->processor_id()].insert(j);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-          send_map[elem->processor_id()].emplace_back(j, v_ind, _snapshots[v_ind].getSample(j));
+          send_map[elem->processor_id()].emplace_back(j, v_ind, _snapshots[v_ind].getEntry(j));
       }
     }
     else
@@ -449,7 +449,7 @@ PODReducedBasisTrainer::computeBasisVectors()
   for (dof_id_type var_i = 0; var_i < _eigenvectors.size(); ++var_i)
   {
     unsigned int no_bases = _eigenvalues[var_i].size();
-    dof_id_type no_snaps = _snapshots[var_i].getNumberOfLocalSamples();
+    dof_id_type no_snaps = _snapshots[var_i].getNumberOfLocalEntries();
 
     _base[var_i].resize(no_bases);
 
@@ -457,12 +457,12 @@ PODReducedBasisTrainer::computeBasisVectors()
     // eigenvectors of the correlation matrices.
     for (dof_id_type base_i = 0; base_i < no_bases; ++base_i)
     {
-      _base[var_i][base_i].resize(_snapshots[var_i].getLocalSample(0)->size());
+      _base[var_i][base_i].resize(_snapshots[var_i].getLocalEntry(0)->size());
 
       for (dof_id_type loc_i = 0; loc_i < no_snaps; ++loc_i)
       {
         dof_id_type glob_i = _snapshots[var_i].getGlobalIndex(loc_i);
-        const DenseVector<Real> & snapshot = *_snapshots[var_i].getLocalSample(loc_i);
+        const DenseVector<Real> & snapshot = *_snapshots[var_i].getLocalEntry(loc_i);
 
         for (dof_id_type i = 0; i < _base[var_i][base_i].size(); ++i)
         {
@@ -523,7 +523,7 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
 dof_id_type
 PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i)
 {
-  dof_id_type val = _snapshots[var_i].getNumberOfGlobalSamples();
+  dof_id_type val = _snapshots[var_i].getNumberOfGlobalEntries();
   return val;
 }
 
