@@ -139,7 +139,7 @@ actual parameter samples to the sub-applications, in this intrusive procedure,
 the snapshots need to be collected from the sub-applications, the basis functions
 need to be sent back to different sub-applications and the action of the operators on
 the basis functions need to be collected as well. This requires four transfer objects.
-The two custom types ([SamplerSolutionTransfer.md] and [ResidualTransfer.md]) are specifically
+The two custom types ([PODSamplerSolutionTransfer.md] and [PODResidualTransfer.md]) are specifically
 used to support [PODReducedBasisTrainer.md] at this moment.
 
 !listing surrogates/pod_rb/2d_multireg/trainer.i block=Transfers

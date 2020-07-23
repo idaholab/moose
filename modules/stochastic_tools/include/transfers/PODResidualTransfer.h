@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "PODReducedBasisTrainer.h"
-#include "SamplerSolutionTransfer.h"
+#include "PODSamplerSolutionTransfer.h"
 
 // Forward declarations
 class SamplerReceiver;
@@ -23,19 +23,12 @@ class StochasticResults;
  *
  * This object transfers the distributed data to a StochasticResults object.
  */
-class ResidualTransfer : public SamplerSolutionTransfer
+class PODResidualTransfer : public PODSamplerSolutionTransfer
 {
 public:
   static InputParameters validParams();
-  ResidualTransfer(const InputParameters & parameters);
+  PODResidualTransfer(const InputParameters & parameters);
   virtual void initialSetup() override;
-
-protected:
-  /**
-   * Transfer callback that will transfer residuls with given tags from the
-   * subapplication.
-   */
-  virtual void execute() override;
 
   ///@{
   /**
@@ -45,4 +38,11 @@ protected:
   virtual void executeFromMultiapp() override;
   virtual void finalizeFromMultiapp() override;
   ///@}
+
+protected:
+  /**
+   * Transfer callback that will transfer residuls with given tags from the
+   * subapplication.
+   */
+  virtual void execute() override;
 };

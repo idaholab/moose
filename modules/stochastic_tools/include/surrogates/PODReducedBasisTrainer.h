@@ -42,8 +42,8 @@ public:
                    const std::shared_ptr<DenseVector<Real>> & snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
-  void addToReducedOperator(unsigned int base_i,
-                            unsigned int tag_i,
+  void addToReducedOperator(dof_id_type base_i,
+                            dof_id_type tag_i,
                             std::vector<DenseVector<Real>> & residual);
 
   const std::vector<std::string> & getVarNames() const { return _var_names; }
@@ -56,19 +56,19 @@ public:
   dof_id_type getSnapsSize(dof_id_type v_ind);
 
   /// Getting the base size for a given variable.
-  unsigned int getBaseSize(unsigned int v_ind) { return _base[v_ind].size(); }
+  dof_id_type getBaseSize(dof_id_type v_ind) { return _base[v_ind].size(); }
 
   /// Getting the overall base size, which is the sum of the individial bases.
-  unsigned int getSumBaseSize();
+  dof_id_type getSumBaseSize();
 
   /// Getting a basis vector for a given variable.
-  const DenseVector<Real> & getBasisVector(unsigned int v_index, unsigned int base_i) const;
+  const DenseVector<Real> & getBasisVector(dof_id_type v_index, dof_id_type base_i) const;
 
   /// Getting basis vector based on its global index.
-  const DenseVector<Real> & getBasisVector(unsigned int g_index) const;
+  const DenseVector<Real> & getBasisVector(dof_id_type g_index) const;
 
   /// Getting appropriate variable index for a global base index.
-  unsigned int getVariableIndex(unsigned int g_index);
+  dof_id_type getVariableIndex(dof_id_type g_index);
 
 protected:
   /// Computes the correlation matrices using the snapshots.
@@ -100,6 +100,7 @@ protected:
   /// list of bools describing which tag is indepedent of the solution.
   std::vector<unsigned int> & _independent;
 
+  /// Distributed container for snapshots per variable.
   std::vector<DistributedSnapshots> _snapshots;
 
   /// The correlation matrices for the variables.

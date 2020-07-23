@@ -78,6 +78,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'timestep_begin final'
+    mode = 'batch-restore'
   []
 []
 
@@ -98,7 +99,7 @@
                   Kernels/src1/value
                   Kernels/src2/value'
     to_control = 'stochastic'
-    execute_on = 'timestep_begin'
+#    execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [data]
@@ -107,7 +108,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
-    execute_on = 'timestep_begin'
+#    execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
   [mode]
@@ -116,7 +117,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
-    execute_on = 'final'
+#    execute_on = 'final'
     check_multiapp_execute_on = false
   []
   [res]
@@ -124,7 +125,7 @@
     multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
-    execute_on = 'final'
+#    execute_on = 'final'
     check_multiapp_execute_on = false
   []
 []
@@ -145,5 +146,12 @@
     type = SurrogateTrainerOutput
     trainers = 'pod_rb'
     execute_on = FINAL
+  []
+  [pgraph]
+    type = PerfGraphOutput
+    execute_on = 'initial final'  # Default is "final"
+    level = 2                     # Default is 1
+    heaviest_branch = true        # Default is false
+    heaviest_sections = 7         # Default is 0
   []
 []

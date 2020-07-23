@@ -57,7 +57,8 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
   // Reinitialize the problem only if the snapshot generation part is done.
   if (!_snapshot_generation)
   {
-    if (_trainer->getSumBaseSize() < 1)
+    dof_id_type base_size = _trainer->getSumBaseSize();
+    if (base_size < 1)
       mooseError("There are no basis vectors available for residual generation."
                  " This indicates that the bases have not been created yet."
                  " The most common cause of this error is the wrong setting"
@@ -67,7 +68,7 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
         _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       init(n_processors());
     else
-      init(_trainer->getSumBaseSize());
+      init(base_size);
 
     initialSetup();
   }
@@ -132,7 +133,100 @@ PODFullSolveMultiApp::computeResidual()
   }
 }
 
-void PODFullSolveMultiApp::computeResidualBatch(Real /*target_time*/)
+void
+PODFullSolveMultiApp::computeResidualBatch(Real target_time)
 {
-  mooseError("Batch mode is not implemented yet for PODFullSolveMultiApp!");
+  // Getting the overall base size from the trainer.
+  dof_id_type base_size = _trainer->getSumBaseSize();
+
+  // Distrivuting the residual evaluation among processes.
+  dof_id_type local_base_begin;
+  dof_id_type local_base_end;
+  dof_id_type n_local_bases;
+  MooseUtils::linearPartitionItems(
+      base_size, n_processors(), processor_id(), n_local_bases, local_base_begin, local_base_end);
+
+  // List of active relevant Transfer objects
+  std::vector<std::shared_ptr<PODSamplerSolutionTransfer>> to_transfers =
+      getActiveSolutionTransfers(MultiAppTransfer::TO_MULTIAPP);
+  std::vector<std::shared_ptr<PODResidualTransfer>> from_transfers =
+      getActiveResidualTransfers(MultiAppTransfer::FROM_MULTIAPP);
+
+  // Initialize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->initializeToMultiapp();
+
+  for (auto transfer : from_transfers)
+    transfer->initializeFromMultiapp();
+
+  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+    backup();
+
+  // Perform batch MultiApp solves
+  _local_batch_app_index = 0;
+  for (dof_id_type i = local_base_begin; i < local_base_end; ++i)
+  {
+    for (auto & transfer : to_transfers)
+    {
+      transfer->setGlobalMultiAppIndex(i);
+      transfer->executeToMultiapp();
+    }
+
+    computeResidual();
+
+    for (auto & transfer : from_transfers)
+    {
+      transfer->setGlobalMultiAppIndex(i);
+      transfer->executeFromMultiapp();
+    }
+
+    if (i < _sampler.getLocalRowEnd() - 1)
+    {
+      if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+        restore();
+      else
+      {
+        // The app is being reset for the next loop, thus the batch index must be indexed as such
+        _local_batch_app_index = i + 1;
+        resetApp(_local_batch_app_index, target_time);
+        initialSetup();
+      }
+    }
+  }
+
+  // Finalize to/from transfers
+  for (auto transfer : to_transfers)
+    transfer->finalizeToMultiapp();
+  for (auto transfer : from_transfers)
+    transfer->finalizeFromMultiapp();
+}
+
+std::vector<std::shared_ptr<PODSamplerSolutionTransfer>>
+PODFullSolveMultiApp::getActiveSolutionTransfers(Transfer::DIRECTION direction)
+{
+  std::vector<std::shared_ptr<PODSamplerSolutionTransfer>> output;
+  const ExecuteMooseObjectWarehouse<Transfer> & warehouse =
+      _fe_problem.getMultiAppTransferWarehouse(direction);
+  for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
+  {
+    auto ptr = std::dynamic_pointer_cast<PODSamplerSolutionTransfer>(transfer);
+    if (ptr)
+      output.push_back(ptr);
+  }
+  return output;
+}
+
+std::vector<std::shared_ptr<PODResidualTransfer>>
+PODFullSolveMultiApp::getActiveResidualTransfers(Transfer::DIRECTION direction)
+{
+  std::vector<std::shared_ptr<PODResidualTransfer>> output;
+  const ExecuteMooseObjectWarehouse<Transfer> & warehouse =
+      _fe_problem.getMultiAppTransferWarehouse(direction);
+  for (std::shared_ptr<Transfer> transfer : warehouse.getActiveObjects())
+  {
+    auto ptr = std::dynamic_pointer_cast<PODResidualTransfer>(transfer);
+    if (ptr)
+      output.push_back(ptr);
+  }
+  return output;
 }

@@ -93,7 +93,7 @@ snapshot matrices
 \textbf{S}_i = [\textbf{u}_i(\boldsymbol{\mu}_1),...,\textbf{u}_i(\boldsymbol{\mu}_{N_s})].
 
 In this implementation, the solutions are obtained from a [PODFullSolveMultiApp.md] using a
-[SamplerSolutionTransfer.md] and the snapshot matrices are stored within the trainer object.
+[PODSamplerSolutionTransfer.md] and the snapshot matrices are stored within the trainer object.
 The next step in this process is to use these snapshots to create reduced sub-spaces for
 each variable. This can be done by performing POD on the snapshot matrices,
 which consists of the following four steps for each variable:
@@ -234,7 +234,7 @@ The computation of the reduced operators consists of two step in the current imp
    includes the creation of $\textbf{A}_i\boldsymbol{\Phi}$. In practice, this is done by
    plugging in the basis function into a [PODFullSolveMultiApp.md] object which evaluates the residual for a given
    vector tag (defined using the `tag_names` input argument). The tagged residual is then
-   transferred back to the trainer using a [ResidualTransfer.md] object. In case when
+   transferred back to the trainer using a [PODResidualTransfer.md] object. In case when
    the residual from a kernel contains contributions to both the system matrix and the
    source term (e.g. Dirichlet BC or time derivative), certain input-level tricks
    can be used to separate these.
@@ -263,7 +263,7 @@ First, a sampler has to be defined in `Samplers` to generate realizations for $\
 These samples are then fed into a [PODFullSolveMultiApp.md] (defined
 in the `MultApps` block) which is capable of running simulations for each parameter.
 The solution vectors (snapshots) for each run are added to the trainer by a
-[SamplerSolutionTransfer.md] defined in the `Transfers` block. It is important to mention
+[PODSamplerSolutionTransfer.md] defined in the `Transfers` block. It is important to mention
 that the multiapp and transfer objects need to know about the trainer. This can be
 ensured using the `trainer` input argument. The number of collected snapshots is
 defined in the sampler object using the `num_rows` parameter.
@@ -273,8 +273,8 @@ defined in the sampler object using the `num_rows` parameter.
 !listing pod_rb/internal/trainer.i block=MultiApps
 
 The global basis functions are then plugged back into the same [PODFullSolveMultiApp.md]
-by a new [SamplerSolutionTransfer.md] and the residuals are evaluated. The residuals
-are transferred back to the trainer using a [ResidualTransfer.md].
+by a new [PODSamplerSolutionTransfer.md] and the residuals are evaluated. The residuals
+are transferred back to the trainer using a [PODResidualTransfer.md].
 
 !listing pod_rb/internal/trainer.i block=Transfers
 

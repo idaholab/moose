@@ -13,11 +13,13 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "PODReducedBasisTrainer.h"
 #include "SamplerInterface.h"
-#include "StochasticToolsTransfer.h"
+#include "PODSamplerSolutionTransfer.h"
+#include "PODResidualTransfer.h"
 
 #include "StochasticToolsTypes.h"
 
-class StochasticToolsTransfer;
+class PODSamplerSolutionTransfer;
+class PODResidualTransfer;
 
 class PODFullSolveMultiApp : public SamplerFullSolveMultiApp
 {
@@ -32,19 +34,30 @@ public:
   /// executed twice.
   virtual void preTransfer(Real dt, Real target_time) override;
 
-protected:
-  /// Name of the trainer object which this MultiApp generates snaphots/residuals
-  /// for.
-  std::string _trainer_name;
+  /// Returning the value of the snapshotgeneration flag.
+  bool snapshotGeneration() { return _snapshot_generation; }
 
-  /// Pointer to the trainer object itself.
-  PODReducedBasisTrainer * _trainer = nullptr;
+protected:
+  /// Returning pointers to the solution transfers. Used in batch mode.
+  std::vector<std::shared_ptr<PODSamplerSolutionTransfer>>
+  getActiveSolutionTransfers(Transfer::DIRECTION direction);
+
+  /// Returning pointers to the solution transfers. Used in batch mode.
+  std::vector<std::shared_ptr<PODResidualTransfer>>
+  getActiveResidualTransfers(Transfer::DIRECTION direction);
 
   /// Evaluating the residuals for every tag in the trainer.
   void computeResidual();
 
   /// Evaluating the residuals for every tag in the trainer in batch mode.
   void computeResidualBatch(Real target_time);
+
+  /// Name of the trainer object which this MultiApp generates snaphots/residuals
+  /// for.
+  std::string _trainer_name;
+
+  /// Pointer to the trainer object itself.
+  PODReducedBasisTrainer * _trainer = nullptr;
 
   /// Switch used to differentiate between snapshot generation and residual
   /// computation. Residual generation is only possible after the snapshot generation
