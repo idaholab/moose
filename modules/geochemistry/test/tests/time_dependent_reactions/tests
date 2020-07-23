@@ -227,37 +227,17 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     design = 'GeochemistryTimeDependentReactor.md'
   [../]
   [./flushing_equilibrium_at70degC]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'flushing_equilibrium_at70degC.i'
-    skip = "soon no skip"
-    expect_out = 'Quartz;  bulk_moles'
+    csvdiff = 'flushing_equilibrium_at70degC_out.csv'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
   [../]
-  [./flushing_case1]
-    type = 'RunApp'
-    input = 'flushing_case1.i'
-    expect_out = 'Mass of solvent water'
-    skip = 'temperature stuff needs to be validated'
-    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
-    issues = '#15330'
-    design = 'flush.md'
-  [../]
-  [./flushing_case2]
-    type = 'RunApp'
-    input = 'flushing_case2.i'
-    expect_out = 'Mass of solvent water'
-    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
-    skip = 'temperature stuff needs to be validated'
-    issues = '#15330'
-    design = 'flush.md'
-  [../]
-  [./flushing_case3]
-    type = 'RunApp'
-    input = 'flushing_case3.i'
-    expect_out = 'Mass of solvent water'
-    skip = 'temperature stuff needs to be validated'
+  [./flushing]
+    type = CSVDiff
+    input = 'flushing.i'
+    csvdiff = 'flushing_out.csv'
     requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
     issues = '#15330'
     design = 'flush.md'
