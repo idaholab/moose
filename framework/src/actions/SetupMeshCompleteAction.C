@@ -117,7 +117,8 @@ SetupMeshCompleteAction::act()
     // We currently only trigger the needsRemoteDeletion flag if somebody has requested a late
     // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
     // trigger this.
-    if (_mesh->needsRemoteElemDeletion())
+    // We delete elements only when users ask us to do so AND libMesh allows us to do so
+    if (_mesh->needsRemoteElemDeletion() && _mesh->getMesh().allow_remote_element_removal())
     {
       _mesh->getMesh().delete_remote_elements();
       if (_displaced_mesh)

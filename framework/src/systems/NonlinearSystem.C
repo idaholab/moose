@@ -221,6 +221,9 @@ NonlinearSystem::solve()
     MatFDColoringDestroy(&_fdcoloring);
 #endif
 #endif
+
+  // We init again for next time step since mesh could be changed during adaptivity
+  //  _auto_scaling_initd = false;
 }
 
 void

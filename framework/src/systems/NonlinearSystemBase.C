@@ -3296,11 +3296,17 @@ NonlinearSystemBase::computeScaling()
 
   if (jac_scaling)
   {
-    if (!_auto_scaling_initd)
+    // if (!_auto_scaling_initd)
+    // We need to reinit this when the number of dofs changes
+    // but there is no good way to track that
+    // In theory, it is the job of libmesh system to track this,
+    // but this special matrix is not owned by libMesh system
+    // Let us reinit eveytime since it is not expensive
     {
       auto init_vector = NumericVector<Number>::build(this->comm());
       init_vector->init(system().n_dofs(), system().n_local_dofs(), /*fast=*/false, PARALLEL);
 
+      _scaling_matrix.clear();
       _scaling_matrix.init(*init_vector);
     }
 
