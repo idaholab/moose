@@ -1186,4 +1186,12 @@ div.moose-mega-menu-content{
  code {
    color: white;
  }
+ #moose-search-box{
+   color: white;
+ }
+ #gsc-i-id1{
+   padding:8px !important;
+   background:var(--darkmode-card) !important;
+   color:white;
+ }
 }
