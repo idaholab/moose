@@ -3,7 +3,7 @@ Applications:
         exe_directory: test
         exe_name: moose_test
         app_types:
-            - MooseAppget
+            - MooseApp
         content_directory: framework/doc/content
         unregister:
             - framework/doc/unregister.yml

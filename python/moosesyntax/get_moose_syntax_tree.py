@@ -53,6 +53,9 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
     # Initialize dict if not provided
     alias = alias or dict()
     unregister = unregister or dict()
+    for key in list(unregister.keys()):
+        if isinstance(unregister[key], dict):
+            unregister.update(unregister.pop(key))
 
     # Apply remove/hide/alias/unregister restrictions
     for node in moosetree.iterate(root):
@@ -65,11 +68,14 @@ def get_moose_syntax_tree(exe, remove=None, hide=None, alias=None, unregister=No
             node.removed = True
 
         # Remove 'Test' objects if not allowed
-        if not allow_test_objects and ((node.group is not None) and (node.group.endswith('TestApp'))):
+        if not allow_test_objects and all(grp.endswith('TestApp') for grp in node.groups()):
             node.removed = True
 
         # Remove unregistered items
         for base, parent_syntax in unregister.items():
+            if (node.name == base) and (node.get('action_path') == parent_syntax):
+                node.removed = True
+
             if (node.get('moose_base') == base) and (node.get('parent_syntax') == parent_syntax):
                 node.removed = True
 

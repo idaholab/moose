@@ -6,4 +6,4 @@
 - [!sqa!document category={{category}} suffix=vvr](Verification and Validation Report (VVR))
 - [!sqa!document category={{category}} suffix=stp](Software Test Plan (STP))
 
-!sqa report
+!sqa report category={{category}}

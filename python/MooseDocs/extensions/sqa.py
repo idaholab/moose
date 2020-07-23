@@ -80,9 +80,9 @@ class SQAExtension(command.CommandExtension):
                            "'#1234' or add additional keys to allow for foo#1234.")
         config['categories'] = (dict(), "A dictionary of category names that includes a " \
                                         "dictionary with 'directories' and optionally 'specs' " \
-                                        ", 'dependencies', and 'repo'.")
+                                        ", 'dependencies', 'repo', 'reports'.")
         config['requirement-groups'] = (dict(), "Allows requirement group names to be changed")
-        config['reports'] = (dict(), "Build SQA reports for dashboard creation.")
+        config['reports'] = (None, "Build SQA reports for dashboard creation.")
 
         # Disable by default to allow for updates to applications
         config['active'] = (False, config['active'][1])
@@ -101,7 +101,7 @@ class SQAExtension(command.CommandExtension):
         self.__dependencies = dict()
         self.__remotes = dict()
         self.__counts = collections.defaultdict(int)
-        self.__reports = (None, None, None)
+        self.__reports = dict()
 
         # Deprecate 'url' and 'repo' config options
         url = self.get('url')
@@ -129,6 +129,7 @@ class SQAExtension(command.CommandExtension):
         for index, (category, info) in enumerate(self.get('categories').items(), 1):
             specs = info.get('specs', ['tests'])
             repo = info.get('repo', 'default')
+            reports = info.get('reports', None)
             directories = []
 
             for d in info.get('directories'):
@@ -150,15 +151,15 @@ class SQAExtension(command.CommandExtension):
             # Create remote repository database
             self.__remotes[category] = repos.get(repo, None)
 
-        LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
+            # Create reports
+            if reports:
+                self.__reports[category] = moosesqa.get_sqa_reports(reports)
 
-        # Report generation for !sqa report command
-        reports = self.get('reports')
-        if reports:
-            start = time.time()
-            LOG.info("Generating SQA report information...")
-            self.__reports = moosesqa.get_sqa_reports(reports)
-            LOG.info("Generating SQA report information complete [%s sec.]", time.time() - start)
+        general_reports = self.get('reports')
+        if general_reports is not None:
+            self.__reports['__empty__'] = moosesqa.get_sqa_reports(general_reports)
+
+        LOG.info("Gathering SQA requirement information complete [%s sec.]", time.time() - start)
 
     def hasCivetExtension(self):
         """Return True if the CivetExtension exists."""
@@ -185,9 +186,12 @@ class SQAExtension(command.CommandExtension):
             raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
         return rem
 
-    def reports(self):
+    def reports(self, category):
         """Return the SQAReport objects"""
-        return self.__reports
+        rep = self.__reports.get(category, None)
+        if rep is None:
+            raise exceptions.MooseDocsException("Unknown or missing 'category': {}", category)
+        return rep
 
     def increment(self, key):
         """Increment and return count for requirements matrix."""
@@ -540,12 +544,12 @@ class SQAReportCommand(command.CommandComponent):
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
         config['config_file'] = (None, "Provide the config YAML file for gathering reports to display on the dashboard.")
+        config['category'] = (None, "Provide the category.")
         return config
 
-
-
     def createToken(self, parent, info, page):
-        doc_reports, req_reports, app_reports = self.extension.reports()
+        category = self.settings.get('category') or  '__empty__'
+        doc_reports, req_reports, app_reports = self.extension.reports(category)
         core.Heading(parent, string='Software Quality Status Report(s)', level=2)
         SQADocumentReportToken(parent, reports=doc_reports)
         SQARequirementReportToken(parent, reports=req_reports)

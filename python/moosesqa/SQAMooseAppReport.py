@@ -63,9 +63,7 @@ class SQAMooseAppReport(SQAReport):
             hide = self._loadYamlFiles(self.hidden)
             remove = self._loadYamlFiles(self.remove)
             alias = self._loadYamlFiles(self.alias)
-            unregister = dict()
-            for value in self._loadYamlFiles(self.unregister).values():
-                unregister.update(value)
+            unregister = self._loadYamlFiles(self.unregister)
 
             # Locate the executable
             location = os.path.join(self.working_dir, self.exe_directory)
@@ -93,8 +91,10 @@ class SQAMooseAppReport(SQAReport):
             func = lambda n: (not n.removed) \
                              and ('_md_file' in n) \
                              and ((n['_md_file'] is None) or n['_is_stub']) \
-                             and (n.group in self.app_types)
+                             and ((n.group in self.app_types) \
+                                  or (n.groups() == set(self.app_types)))
             for node in moosetree.iterate(self.app_syntax, func):
+                print("STUB: ", node.fullpath())
                 self._createStubPage(node)
 
         # Dump
