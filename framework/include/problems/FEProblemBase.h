@@ -1076,9 +1076,10 @@ public:
   }
 
   /**
-   * Finish the MultiApp time step (endStep, postStep) associated with the ExecFlagType
+   * Finish the MultiApp time step (endStep, postStep) associated with the ExecFlagType. Optionally
+   * recurse through all multi-app levels
    */
-  void finishMultiAppStep(ExecFlagType type);
+  void finishMultiAppStep(ExecFlagType type, bool recurse_through_multiapp_levels = false);
 
   /**
    * Backup the MultiApps associated with the ExecFlagType

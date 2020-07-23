@@ -117,9 +117,11 @@ public:
    * Calls multi-apps executioners' endStep and postStep methods which creates output and advances
    * time (not the time step; see incrementTStep()) among other things. This method is only called
    * for Picard calculations because for loosely coupled calculations the executioners' endStep and
-   * postStep methods are called from solveStep().
+   * postStep methods are called from solveStep(). This may be called with the optional flag \p
+   * recurse_through_multiapp_levels which may be useful if this method is being called for the
+   * *final* time of program execution
    */
-  virtual void finishStep() {}
+  virtual void finishStep(bool /*recurse_through_multiapp_levels*/ = false) {}
 
   /**
    * Save off the state of every Sub App

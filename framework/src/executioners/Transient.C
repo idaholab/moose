@@ -314,10 +314,18 @@ Transient::execute()
   if (lastSolveConverged())
   {
     _t_step++;
-    if (_picard_solve.hasPicardIteration())
+
+    /*
+     * Call the multi-app executioners endStep and
+     * postStep methods when doing Picard or when not automatically advancing sub-applications for
+     * some other reason. We do not perform these calls for loose-coupling/auto-advancement
+     * problems because Transient::endStep and Transient::postStep get called from
+     * TransientMultiApp::solveStep in that case.
+     */
+    if (!_picard_solve.autoAdvance())
     {
-      _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
-      _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
+      _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
+      _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
     }
   }
 
@@ -365,11 +373,12 @@ Transient::incrementStepOrReject()
 
       /*
        * Call the multi-app executioners endStep and
-       * postStep methods when doing Picard. We do not perform these calls for
-       * loose coupling because Transient::endStep and Transient::postStep get
-       * called from TransientMultiApp::solveStep in that case.
+       * postStep methods when doing Picard or when not automatically advancing sub-applications for
+       * some other reason. We do not perform these calls for loose-coupling/auto-advancement
+       * problems because Transient::endStep and Transient::postStep get called from
+       * TransientMultiApp::solveStep in that case.
        */
-      if (_picard_solve.hasPicardIteration())
+      if (!_picard_solve.autoAdvance())
       {
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
