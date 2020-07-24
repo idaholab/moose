@@ -13,8 +13,8 @@
     []
   []
   [solution_transfer]
-    requirement = 'SamplerSolutionTransfer shall throw an error when '
-    design = "SamplerSolutionTransfer.md"
+    requirement = 'PODSamplerSolutionTransfer shall throw an error when '
+    design = "PODSamplerSolutionTransfer.md"
     [trainer_name]
       type = RunException
       input = trainer.i
@@ -26,7 +26,7 @@
   []
   [trainer]
     requirement = 'PODReducedBasisTrainer shall throw an error when '
-    design = "PODReducedBasisTrainer.md ResidualTransfer.md SamplerSolutionTransfer.md"
+    design = "PODReducedBasisTrainer.md PODResidualTransfer.md PODSamplerSolutionTransfer.md"
     [var_names]
       type = RunException
       input = trainer.i
