@@ -58,7 +58,7 @@ ADViscoplasticityStressUpdate::ADViscoplasticityStressUpdate(const InputParamete
     _pore_shape_factor(_pore_shape == PoreShapeModel::SPHERICAL ? 1.5 : std::sqrt(3.0)),
     _power(getParam<Real>("power")),
     _power_factor(_model == ViscoplasticityModel::LPS ? (_power - 1.0) / (_power + 1.0) : 1.0),
-    _coefficient(getMaterialProperty<Real>("coefficient")),
+    _coefficient(getADMaterialProperty<Real>("coefficient")),
     _gauge_stress(declareADProperty<Real>(_base_name + "gauge_stress")),
     _maximum_gauge_ratio(getParam<Real>("maximum_gauge_ratio")),
     _minimum_equivalent_stress(getParam<Real>("minimum_equivalent_stress")),
