@@ -1,10 +1,10 @@
-#include "NormalSliceValues.h"
+#include "NormalSliceValuesCSV.h"
 #include "SolutionHandle.h"
 
-registerMooseObject("SubChannelApp", NormalSliceValues);
+registerMooseObject("SubChannelApp", NormalSliceValuesCSV);
 
 InputParameters
-NormalSliceValues::validParams()
+NormalSliceValuesCSV::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addRequiredCoupledVar("value", "variable you want the value off at the exit");
@@ -16,7 +16,7 @@ NormalSliceValues::validParams()
   return params;
 }
 
-NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
+NormalSliceValuesCSV::NormalSliceValuesCSV(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, true),
     _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
@@ -28,16 +28,16 @@ NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
 }
 
 void
-NormalSliceValues::initialize()
+NormalSliceValuesCSV::initialize()
 {
 }
 void
-NormalSliceValues::finalize()
+NormalSliceValuesCSV::finalize()
 {
 }
 
 void
-NormalSliceValues::execute()
+NormalSliceValuesCSV::execute()
 {
   auto val_soln = SolutionHandle(*getFieldVar("value", 0));
 
@@ -83,10 +83,13 @@ NormalSliceValues::execute()
     }
   }
 
-  std::string fullName = _file_name + "_out" + ".txt";
+  _exitValue.resize(1, _mesh._ny * _mesh._nx);
+
+  std::string fullName = _file_name + "_out" + ".csv";
+  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
 
   std::ofstream myfile1;
   myfile1.open(fullName, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exitValue << "\n";
+  myfile1 << std::setprecision(3) << std::fixed << _exitValue.format(CSVFormat) << "\n";
   myfile1.close();
 }
