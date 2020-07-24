@@ -149,6 +149,20 @@ ScalarCoupleable::adCoupledScalarValue(const std::string & var_name, unsigned in
                "coupledValue instead for non-implicit");
 }
 
+template <>
+const GenericVariableValue<false> &
+ScalarCoupleable::coupledGenericScalarValue<false>(const std::string & var_name, unsigned int comp)
+{
+  return coupledScalarValue(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+ScalarCoupleable::coupledGenericScalarValue<true>(const std::string & var_name, unsigned int comp)
+{
+  return adCoupledScalarValue(var_name, comp);
+}
+
 ADVariableValue *
 ScalarCoupleable::getADDefaultValue(const std::string & var_name)
 {

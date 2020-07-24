@@ -4300,7 +4300,7 @@ FEProblemBase::incrementMultiAppTStep(ExecFlagType type)
 }
 
 void
-FEProblemBase::finishMultiAppStep(ExecFlagType type)
+FEProblemBase::finishMultiAppStep(ExecFlagType type, bool recurse_through_multiapp_levels)
 {
   const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
@@ -4310,7 +4310,7 @@ FEProblemBase::finishMultiAppStep(ExecFlagType type)
              << std::endl;
 
     for (const auto & multi_app : multi_apps)
-      multi_app->finishStep();
+      multi_app->finishStep(recurse_through_multiapp_levels);
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 

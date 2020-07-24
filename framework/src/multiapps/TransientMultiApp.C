@@ -535,7 +535,7 @@ TransientMultiApp::incrementTStep(Real target_time)
 }
 
 void
-TransientMultiApp::finishStep()
+TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
 {
   if (!_sub_cycling)
   {
@@ -544,6 +544,13 @@ TransientMultiApp::finishStep()
       Transient * ex = _transient_executioners[i];
       ex->endStep();
       ex->postStep();
+      if (recurse_through_multiapp_levels)
+      {
+        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_BEGIN,
+                                           /*recurse_through_multiapp_levels=*/true);
+        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_END,
+                                           /*recurse_through_multiapp_levels=*/true);
+      }
     }
   }
 }
@@ -585,7 +592,8 @@ TransientMultiApp::computeDT()
   return smallest_dt;
 }
 
-void TransientMultiApp::resetApp(
+void
+TransientMultiApp::resetApp(
     unsigned int global_app,
     Real /*time*/) // FIXME: Note that we are passing in time but also grabbing it below
 {
@@ -611,7 +619,8 @@ void TransientMultiApp::resetApp(
   }
 }
 
-void TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
+void
+TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
   auto & app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());

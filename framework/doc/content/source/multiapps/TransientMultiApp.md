@@ -14,6 +14,45 @@ sub-apps is utilized. The ability to do perform sub-cycling, which allows the su
 to perform multiple time steps per execution may be enabled using the
 [!param](/MultiApps/TransientMultiApp/sub_cycling) parameter.
 
+## Time state of TransientMultiApps
+
+`TransientMultiApps` are "auto-advanced" by default whenever we are not doing
+Picard iterations between the master and sub-application. This means that the
+`Transient::endStep` and `Transient::postStep` methods of the sub-applications
+executioner are called, regardless of whether the sub-application solve fails or
+not. The `endStep` method increments the time and also performs
+`EXEC_TIMESTEP_END` output. When sub-applications are auto-advanced, their
+`endStep` call happens before the master application's `endStep` call. This has
+the important benefit that when master application output occurs, the
+sub-application's and master application's time states are the same, which
+enables MOOSE restart/recovery capability.
+
+## Handing sub-application solve failures
+
+As noted above, the default behavior when running `TransientMultiApps` is that
+their time state is incremented, e.g. they are "auto-advanced", regardless of
+whether their solve is actually successful. This is undesirable behavior, but we
+believe that the syncing of master and sub-application states, under normal
+operation, to enable correct [checkpoint](/Checkpoint.md) output is a good
+trade. Given the constraints of the elected design, there are still multiple ways to turn a failed
+sub-application solve from a warning into an exception that will force corrective
+behavior in either the sub- or master-application:
+
+1. The user can set `auto_advance = false` in the `Executioner` block of the
+   master application . This will cause the master application to immediately cut
+   its time-step when the sub-application fails. **However**, setting this
+   parameter to `false` also eliminates the possibility of doing restart/recover
+   because the master and sub will be out of sync if/when checkpoint output occurs.
+2. The user can set `catch_up = true` in the `TransientMultiApp` block. This
+   will cause the sub-application to try and catch up to the master application
+   after a sub-app failed solve. If catch-up is unsuccessful, then MOOSE
+   registers this as a true failure of the solve, and the master dt will *then*
+   get cut. This option has the advantage of keeping the master and sub
+   transient states in sync, enabling accurate restart/recover data.
+
+In general, if the user wants sub-application failed solves to be treated as
+exceptions, we recommend that option 2 over option 1.
+
 ## Example Input File Syntax
 
 The following input file shows the creation of a TransientMultiApp object with the time step
