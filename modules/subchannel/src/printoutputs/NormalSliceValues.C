@@ -20,9 +20,9 @@ NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, true),
     _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
-    _height(getParam<Real>("height")),
     _value(coupledValue("value")),
-    _file_name(getParam<std::string>("file_name"))
+    _file_name(getParam<std::string>("file_name")),
+    _height(getParam<Real>("height"))
 {
   _exitValue.resize(_mesh._ny, _mesh._nx);
 }
@@ -40,7 +40,6 @@ void
 NormalSliceValues::execute()
 {
   auto val_soln = SolutionHandle(*getFieldVar("value", 0));
-  Node * node;
 
   if (_height >= _mesh._heated_length)
   {
