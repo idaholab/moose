@@ -1,6 +1,6 @@
 [Tests]
   issues = "#15538"
-  design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md SamplerSolutionTransfer.md ResidualTransfer.md"
+  design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md PODSamplerSolutionTransfer.md PODResidualTransfer.md"
   requirement = 'The system shall demonstrate a POD-RB surrogate (without Dirichlet BC) by '
   [train]
     type = CheckFiles

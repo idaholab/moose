@@ -13,8 +13,6 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "PODReducedBasisTrainer.h"
 #include "SamplerInterface.h"
-#include "PODSamplerSolutionTransfer.h"
-#include "PODResidualTransfer.h"
 
 #include "StochasticToolsTypes.h"
 

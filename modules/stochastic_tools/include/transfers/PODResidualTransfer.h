@@ -10,13 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "PODReducedBasisTrainer.h"
 #include "PODSamplerSolutionTransfer.h"
-
-// Forward declarations
-class SamplerReceiver;
-class PODFullSolveMultiApp;
-class StochasticResults;
 
 /**
  * Transfer Postprocessor from sub-applications to a VectorPostprocessor on the master application.

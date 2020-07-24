@@ -12,6 +12,8 @@
 #include "NonlinearSystemBase.h"
 #include "Sampler.h"
 #include "Executioner.h"
+#include "PODSamplerSolutionTransfer.h"
+#include "PODResidualTransfer.h"
 
 registerMooseObject("StochasticToolsApp", PODFullSolveMultiApp);
 

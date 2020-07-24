@@ -9,11 +9,7 @@
 
 // StochasticTools includes
 #include "PODSamplerSolutionTransfer.h"
-#include "SamplerFullSolveMultiApp.h"
-#include "SamplerTransientMultiApp.h"
 #include "NonlinearSystemBase.h"
-#include "SamplerReceiver.h"
-#include "StochasticResults.h"
 #include "Sampler.h"
 
 registerMooseObject("StochasticToolsApp", PODSamplerSolutionTransfer);
