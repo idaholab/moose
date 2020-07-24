@@ -172,6 +172,12 @@ Exodus::outputSetup()
       return;
   }
 
+  if (_problem_ptr->getDisplacedProblem())
+  {
+     _problem_ptr->mesh().getMesh().gather_to_zero();
+     _problem_ptr->getDisplacedProblem()->mesh().getMesh().gather_to_zero();
+  }
+
   // Create the ExodusII_IO object
   _exodus_io_ptr = libmesh_make_unique<ExodusII_IO>(_es_ptr->get_mesh());
   _exodus_initialized = false;
