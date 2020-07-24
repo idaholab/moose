@@ -49,7 +49,7 @@
     relative_tolerance = 1e-11
   [../]
   [./coef]
-    type = ParsedMaterial
+    type = ADParsedMaterial
     f_name = coef
     # Example of creep power law
     function = '1e-18 * exp(-4e4 / 1.987 / 1200)'
