@@ -41,11 +41,48 @@ ExponentialCovariance::buildHyperParamMap(
     std::unordered_map<std::string, Real> & map,
     std::unordered_map<std::string, std::vector<Real>> & vec_map) const
 {
-  map["signal_variance"] = _sigma_f_squared;
   map["noise_variance"] = _sigma_n_squared;
+  map["signal_variance"] = _sigma_f_squared;
   map["gamma"] = _gamma;
 
   vec_map["length_factor"] = _length_factor;
+}
+
+void
+ExponentialCovariance::buildHyperParamVec(libMesh::PetscVector<Number> & theta) const
+{
+  theta.set(0, _sigma_n_squared);
+  theta.set(1, _sigma_f_squared);
+  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  {
+    theta.set(2 + ii, _length_factor[ii]);
+  }
+}
+
+void
+ExponentialCovariance::buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                                             libMesh::PetscVector<Number> & theta_u) const
+{
+  theta_l.set(0, 0);
+  theta_u.set(0, 1e16);
+  theta_l.set(1, 0);
+  theta_u.set(1, 1e16);
+  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  {
+    theta_l.set(2 + ii, 0);
+    theta_u.set(2 + ii, 1e16);
+  }
+}
+
+void
+ExponentialCovariance::loadHyperParamVec(libMesh::PetscVector<Number> & theta)
+{
+  _sigma_n_squared = theta(0);
+  _sigma_f_squared = theta(1);
+  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  {
+    _length_factor[ii] = theta(2 + ii);
+  }
 }
 
 void

@@ -36,6 +36,23 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
+  void computedKdhyper(RealEigenMatrix & dKdhp,
+                       const RealEigenMatrix & x,
+                       unsigned int hyper_param_id) const override;
+
+  static void computedKdlf(RealEigenMatrix & K,
+                           const RealEigenMatrix & x,
+                           const std::vector<Real> & length_factor,
+                           const Real sigma_f_squared,
+                           const int ind);
+
+  void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const override;
+
+  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                             libMesh::PetscVector<Number> & theta_u) const override;
+
+  void loadHyperParamVec(libMesh::PetscVector<Number> & theta) override;
+
 protected:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   std::vector<Real> _length_factor;

@@ -12,6 +12,9 @@
 #include "StochasticToolsApp.h"
 #include "MooseObject.h"
 
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
+
 class CovarianceFunctionBase : public MooseObject
 {
 public:
@@ -28,4 +31,20 @@ public:
   virtual void
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
+
+  virtual void computedKdhyper(RealEigenMatrix & /*dKdhp*/,
+                               const RealEigenMatrix & /*x*/,
+                               unsigned int /*hyper_param_id*/) const {};
+
+  virtual unsigned int getNumTunable() const { return _num_tunable; };
+
+  virtual void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const = 0;
+
+  virtual void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                                     libMesh::PetscVector<Number> & theta_u) const = 0;
+
+  virtual void loadHyperParamVec(libMesh::PetscVector<Number> & theta) = 0;
+
+protected:
+  unsigned int _num_tunable = 0;
 };

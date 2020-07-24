@@ -30,6 +30,15 @@ public:
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
+  int petscOptimize();
+
+  static PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
+
+  static PetscErrorCode
+  FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
+
+  void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
+
 private:
   /// Sampler from which the parameters were perturbed
   Sampler * _sampler = nullptr;
@@ -81,4 +90,6 @@ private:
 
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
+
+  bool _optimize;
 };

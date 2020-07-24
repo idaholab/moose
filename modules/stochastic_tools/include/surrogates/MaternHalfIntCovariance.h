@@ -37,6 +37,13 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
+  void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const override;
+
+  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                             libMesh::PetscVector<Number> & theta_u) const override;
+
+  void loadHyperParamVec(libMesh::PetscVector<Number> & theta) override;
+
 private:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
   std::vector<Real> _length_factor;
