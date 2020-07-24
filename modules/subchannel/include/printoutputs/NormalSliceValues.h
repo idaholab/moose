@@ -21,6 +21,7 @@ protected:
   Eigen::MatrixXd _exitValue;
   const VariableValue & _value;
   std::string _file_name;
+  const Real & _height;
 
 public:
   static InputParameters validParams();
