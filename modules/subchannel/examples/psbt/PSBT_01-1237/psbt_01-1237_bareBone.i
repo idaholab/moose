@@ -143,6 +143,7 @@ P_out = 4.923e6 # Pa
     value = T
     execute_on = final
     file_name = Temp
+    height = 3.658
   []
 []
 
