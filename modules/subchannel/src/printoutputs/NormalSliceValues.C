@@ -83,10 +83,13 @@ NormalSliceValues::execute()
     }
   }
 
-  std::string fullName = _file_name + "_out" + ".txt";
+  _exitValue.resize(1, _mesh._ny * _mesh._nx);
+
+  std::string fullName = _file_name + "_out" + ".csv";
+  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
 
   std::ofstream myfile1;
   myfile1.open(fullName, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exitValue << "\n";
+  myfile1 << std::setprecision(3) << std::fixed << _exitValue.format(CSVFormat) << "\n";
   myfile1.close();
 }
