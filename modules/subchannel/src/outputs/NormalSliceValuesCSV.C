@@ -1,45 +1,32 @@
-#include "NormalSliceValues.h"
+#include "NormalSliceValuesCSV.h"
 #include "SolutionHandle.h"
 
-registerMooseObject("SubChannelApp", NormalSliceValues);
+registerMooseObject("SubChannelApp", NormalSliceValuesCSV);
 
 InputParameters
-NormalSliceValues::validParams()
+NormalSliceValuesCSV::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
-  params.addRequiredCoupledVar("value", "variable you want the value off at the exit");
-  params.addParam<Real>("height", "Axial location of normal slice [m]");
-  params.addParam<std::string>("file_name",
-                               "name of the value used to printing the correct file name");
+  InputParameters params = FileOutput::validParams();
+  params.addRequiredParam<VariableName>("variable", "variable you want the value off at the exit");
+  params.addRequiredParam<Real>("height", "Axial location of normal slice [m]");
   params.addClassDescription("Prints out a user selected value at a user selected axial height in "
-                             "a matrix format to be used for post-processing");
+                             "a csv line format to be used for post-processing");
   return params;
 }
 
-NormalSliceValues::NormalSliceValues(const InputParameters & parameters)
-  : GeneralUserObject(parameters),
-    Coupleable(this, true),
-    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
-    _value(coupledValue("value")),
-    _file_name(getParam<std::string>("file_name")),
+NormalSliceValuesCSV::NormalSliceValuesCSV(const InputParameters & parameters)
+  : FileOutput(parameters),
+    _mesh(dynamic_cast<SubChannelMesh &>(*_mesh_ptr)),
+    _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height"))
 {
   _exitValue.resize(_mesh._ny, _mesh._nx);
 }
 
 void
-NormalSliceValues::initialize()
+NormalSliceValuesCSV::output(const ExecFlagType & /*type*/)
 {
-}
-void
-NormalSliceValues::finalize()
-{
-}
-
-void
-NormalSliceValues::execute()
-{
-  auto val_soln = SolutionHandle(*getFieldVar("value", 0));
+  auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
 
   if (_height >= _mesh._heated_length)
   {
@@ -83,10 +70,12 @@ NormalSliceValues::execute()
     }
   }
 
-  std::string fullName = _file_name + "_out" + ".txt";
+  _exitValue.resize(1, _mesh._ny * _mesh._nx);
+
+  const static Eigen::IOFormat CSVFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "\n");
 
   std::ofstream myfile1;
-  myfile1.open(fullName, std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << _exitValue << "\n";
+  myfile1.open(_file_base, std::ofstream::trunc);
+  myfile1 << std::setprecision(3) << std::fixed << _exitValue.format(CSVFormat) << "\n";
   myfile1.close();
 }

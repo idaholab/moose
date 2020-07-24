@@ -137,18 +137,22 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[UserObjects]
-  [_Temp_Out]
-    type = NormalSliceValues
-    value = T
-    execute_on = final
-    file_name = Temp
-    height = 3.658
-  []
-[]
-
 [Outputs]
   exodus = true
+  [Temp_Out_CSV]
+    type = NormalSliceValuesCSV
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.csv"
+    height = 3.658
+  []
+  [Temp_Out_MATRIX]
+    type = NormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.txt"
+    height = 3.658
+  []
 []
 
 [Executioner]

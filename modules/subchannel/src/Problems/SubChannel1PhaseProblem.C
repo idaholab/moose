@@ -456,16 +456,6 @@ SubChannel1PhaseProblem::externalSolve()
     Total_crossflow_20 += SumWij_soln(node_20);
   }
 
-  std::ofstream myfile1;
-  myfile1.open("Temp_out.txt", std::ofstream::trunc);
-  myfile1 << std::setprecision(3) << std::fixed << Temp_out << "\n";
-  myfile1.close();
-
-  std::ofstream myfile2;
-  myfile2.open("Temp_in.txt", std::ofstream::trunc);
-  myfile2 << std::setprecision(3) << std::fixed << Temp_in << "\n";
-  myfile2.close();
-
   for (unsigned int iz = 0; iz < _subchannel_mesh._nz + 1; iz++)
   {
     double Total_crossflow = 0.0;
