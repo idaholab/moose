@@ -26,12 +26,20 @@ T_in = 359.15
   []
 []
 
-[UserObjects]
-  [_Temp_Out]
-    type = NormalSliceValues
-    value = T
+[Outputs]
+  exodus = true
+  [Temp_Out_CSV]
+    type = NormalSliceValuesCSV
+    variable = T
     execute_on = final
-    file_name = Temp
+    file_base = "Temp_Out.csv"
+    height = 3.658
+  []
+  [Temp_Out_MATRIX]
+    type = NormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.txt"
     height = 3.658
   []
 []
@@ -42,8 +50,4 @@ T_in = 359.15
 
 [Executioner]
   type = Steady
-[]
-
-[Outputs]
-  exodus = true
 []

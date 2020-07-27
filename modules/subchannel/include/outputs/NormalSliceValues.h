@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 
 /**
- * Prints out a user selected value in csv format to be used for post-processing
+ * Prints out a user selected value in matrix format to be used for post-processing
  */
 class NormalSliceValues : public FileOutput
 {
