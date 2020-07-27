@@ -31,7 +31,7 @@ public:
   virtual void
   computeStrainEnergyRateDensity(MaterialProperty<Real> & strain_energy_rate_density,
                                  const MaterialProperty<RankTwoTensor> & stress,
-                                 const MaterialProperty<RankTwoTensor> & strain) override;
+                                 const MaterialProperty<RankTwoTensor> & strain_rate) override;
 
 protected:
   virtual void computeStressInitialize(const Real effective_trial_stress,
