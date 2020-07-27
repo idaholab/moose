@@ -22,6 +22,19 @@ public:
 
   RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
+  /**
+   * This class computes strain energy rate density for StrainEnergyRateDensity.
+   * The computed material property is needed for the fracture C(t) integral.
+   */
+  virtual void
+  computeStrainEnergyRateDensity(MaterialProperty<Real> & /*strain_energy_rate_density*/,
+                                 const MaterialProperty<RankTwoTensor> & /*stress*/,
+                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
+  {
+    mooseError(
+        "The computation of strain energy rate density needs to be implemented by a child class");
+  }
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;

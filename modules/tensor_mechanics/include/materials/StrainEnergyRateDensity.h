@@ -12,16 +12,19 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
+#include "RadialReturnCreepStressUpdateBase.h"
+#include "ADRadialReturnCreepStressUpdateBase.h"
 
 /**
  * StrainEnergyRateDensity calculates the strain energy rate density.
  */
-class StrainEnergyRateDensity : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class StrainEnergyRateDensityTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  StrainEnergyRateDensity(const InputParameters & parameters);
+  StrainEnergyRateDensityTempl(const InputParameters & parameters);
 
   virtual void initQpStatefulProperties() override;
   virtual void initialSetup() override;
@@ -32,14 +35,22 @@ private:
   const std::string _base_name;
 
   /// The strain energy density material property
-  MaterialProperty<Real> & _strain_energy_rate_density;
+  GenericMaterialProperty<Real, is_ad> & _strain_energy_rate_density;
 
   /// Current and old values of stress
-  const MaterialProperty<RankTwoTensor> & _stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
 
   /// Current value of the strain increment for incremental models
-  const MaterialProperty<RankTwoTensor> & _strain_rate;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _strain_rate;
 
-  /// Exponent on the effective stress
-  const Real _n_exponent;
+  /// number of plastic models
+  const unsigned _num_models;
+
+  /// The user supplied list of inelastic models to compute the strain energy release rate
+  std::vector<RadialReturnCreepStressUpdateBase *> _inelastic_models;
+  /// The user supplied list of AD inelastic models to compute the strain energy release rate
+  std::vector<ADRadialReturnCreepStressUpdateBase *> _ad_inelastic_models;
 };
+
+typedef StrainEnergyRateDensityTempl<false> StrainEnergyRateDensity;
+typedef StrainEnergyRateDensityTempl<true> ADStrainEnergyRateDensity;

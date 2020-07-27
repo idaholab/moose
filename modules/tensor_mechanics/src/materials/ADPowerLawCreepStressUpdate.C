@@ -78,3 +78,18 @@ ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_st
                                        _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
+
+void
+ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
+    ADMaterialProperty<Real> & strain_energy_rate_density,
+    const ADMaterialProperty<RankTwoTensor> & stress,
+    const ADMaterialProperty<RankTwoTensor> & strain_rate)
+{
+  if (_n_exponent < 1)
+    return;
+
+  Real creep_factor = _n_exponent / (_n_exponent + 1);
+
+  strain_energy_rate_density[_qp] =
+      creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]);
+}
