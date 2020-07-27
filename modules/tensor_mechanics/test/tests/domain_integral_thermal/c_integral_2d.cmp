@@ -38,10 +38,10 @@ NODAL VARIABLES relative 1.e-6 floor 1.0e-6
 	q_3     # min:               0 @ t1,n1	max:               1 @ t1,n214
 	q_4     # min:               0 @ t1,n1	max:               1 @ t1,n203
 
-ELEMENT VARIABLES relative 1.e-6 floor 1.0e-6
+ELEMENT VARIABLES relative 1.e-5 floor 1.0e-6
 	stress_xx  absolute 1.e-5 # min:               0 @ t1,b1,e1	max:       24.954581 @ t2,b1,e195
-	stress_yy  # min:               0 @ t1,b1,e1	max:       56.520596 @ t2,b1,e191
-	stress_zz  # min:               0 @ t1,b1,e1	max:       41.887766 @ t2,b1,e191
+	stress_yy  absolute 1.e-5 # min:               0 @ t1,b1,e1	max:       56.520596 @ t2,b1,e191
+	stress_zz  absolute 1.e-5 # min:               0 @ t1,b1,e1	max:       41.887766 @ t2,b1,e191
 	vonmises_stress   # min:               0 @ t1,b1,e1	max:       51.610177 @ t2,b1,e191
 	SERD        # min:               0 @ t1,b1,e1	max:    0.0087019827 @ t2,b1,e191
 
