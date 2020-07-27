@@ -143,8 +143,6 @@ protected:
   bool _solid_mechanics;
   /// Whether the constitutive models for the mechanics calculations use an incremental form
   bool _incremental;
-  /// Exponent on the effective stress used by the C integral
-  const Real _n_exponent;
   /// Whether to convert the J-integral to a stress intensity factor (K) --deprecated
   bool _convert_J_to_K;
 };

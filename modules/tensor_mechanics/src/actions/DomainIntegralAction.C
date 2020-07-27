@@ -92,13 +92,15 @@ DomainIntegralAction::validParams()
       "incremental", "Flag to indicate whether an incremental or total model is being used.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains applied in the strain calculation");
-  params.addParam<Real>("n_exponent", "Exponent on effective stress in power-law equation");
   params.addDeprecatedParam<bool>("convert_J_to_K",
                                   false,
                                   "Convert J-integral to stress intensity factor K.",
                                   "This input parameter is deprecated and will be removed soon. "
                                   "Use 'integrals = KFromJIntegral' to request output of the "
                                   "conversion from the J-integral to stress intensity factors");
+  params.addParam<std::vector<MaterialName>>(
+      "inelastic_models",
+      "The material objects to use to calculate the strain energy rate density.");
   return params;
 }
 
@@ -134,7 +136,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _output_q(getParam<bool>("output_q")),
     _solid_mechanics(getParam<bool>("solid_mechanics")),
     _incremental(getParam<bool>("incremental")),
-    _n_exponent(isParamValid("n_exponent") ? getParam<Real>("n_exponent") : -1),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false)
 {
 
@@ -858,7 +859,8 @@ DomainIntegralAction::act()
 
         InputParameters params = _factory.getValidParams(mater_type_name);
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
-        params.set<Real>("n_exponent") = {_n_exponent};
+        params.set<std::vector<MaterialName>>("inelastic_models") = {
+            getParam<std::vector<MaterialName>>("inelastic_models")};
 
         _problem->addMaterial(mater_type_name, mater_name, params);
       }
