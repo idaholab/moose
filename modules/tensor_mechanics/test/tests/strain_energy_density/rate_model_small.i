@@ -42,7 +42,7 @@
     strain = SMALL
     add_variables = true
     incremental = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress elastic_strain_xx elastic_strain_yy elastic_strain_zz plastic_strain_xx plastic_strain_yy plastic_strain_zz strain_xx strain_yy strain_zz'
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress elastic_strain_xx elastic_strain_yy elastic_strain_zz strain_xx strain_yy strain_zz'
     planar_formulation = PLANE_STRAIN
   [../]
 []
@@ -83,20 +83,24 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 30e+6
-    poissons_ratio = 0.3
+    youngs_modulus = 206800
+    poissons_ratio = 0.0
   [../]
-  [./elastic_stress]
+  [./radial_return_stress]
     type = ComputeMultipleInelasticStress
-    inelastic_models = 'isoplas'
+    inelastic_models = 'powerlawcrp'
   [../]
-  [./isoplas]
-    type = IsotropicPlasticityStressUpdate
-    yield_stress = 1e2
-    hardening_constant = 0.0
+  [./powerlawcrp]
+    type = PowerLawCreepStressUpdate
+    coefficient = 3.125e-21 # 7.04e-17 #
+    n_exponent = 4.0
+    m_exponent = 0.0
+    activation_energy = 0.0
+    # max_inelastic_increment = 0.01
   [../]
   [./strain_energy_rate_density]
     type = StrainEnergyRateDensity
+    inelastic_models = 'powerlawcrp'
   [../]
 []
 
@@ -122,36 +126,6 @@
 []
 
 [Postprocessors]
-  [./epxx]
-    type = ElementalVariableValue
-    variable = elastic_strain_xx
-    elementid = 0
-  [../]
-  [./epyy]
-    type = ElementalVariableValue
-    variable = elastic_strain_yy
-    elementid = 0
-  [../]
-  [./epzz]
-    type = ElementalVariableValue
-    variable = elastic_strain_zz
-    elementid = 0
-  [../]
-  [./eplxx]
-    type = ElementalVariableValue
-    variable = plastic_strain_xx
-    elementid = 0
-  [../]
-  [./eplyy]
-    type = ElementalVariableValue
-    variable = plastic_strain_yy
-    elementid = 0
-  [../]
-  [./eplzz]
-    type = ElementalVariableValue
-    variable = plastic_strain_zz
-    elementid = 0
-  [../]
   [./etxx]
     type = ElementalVariableValue
     variable = strain_xx

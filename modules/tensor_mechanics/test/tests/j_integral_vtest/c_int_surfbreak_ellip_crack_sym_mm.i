@@ -34,8 +34,6 @@
 [../]
 []
 
-
-
 [Modules/TensorMechanics/Master]
   [./master]
     strain = FINITE

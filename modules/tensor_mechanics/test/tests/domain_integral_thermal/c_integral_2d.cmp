@@ -37,7 +37,6 @@ NODAL VARIABLES relative 1.e-6 floor 1.0e-6
 	q_2     # min:               0 @ t1,n1	max:               1 @ t1,n214
 	q_3     # min:               0 @ t1,n1	max:               1 @ t1,n214
 	q_4     # min:               0 @ t1,n1	max:               1 @ t1,n203
-	temp    # min:               0 @ t1,n1	max:              10 @ t2,n1
 
 ELEMENT VARIABLES relative 1.e-6 floor 1.0e-6
 	stress_xx  absolute 1.e-5 # min:               0 @ t1,b1,e1	max:       24.954581 @ t2,b1,e195

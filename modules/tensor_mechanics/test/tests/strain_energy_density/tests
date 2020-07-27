@@ -61,15 +61,35 @@
    requirement = 'Moose shall be capable of calculating strain energy rate density '
                  'with elastic stress and finite strain.'
  [../]
- [./rate_elas_plas]
+ [./rate_model_small]
    type = 'CSVDiff'
-   input = 'rate_model_elas_plas.i'
-   csvdiff = 'rate_model_elas_plas_out.csv'
+   input = 'rate_model_small.i'
+   csvdiff = 'rate_model_small_out.csv'
    rel_err = 1e-6
    design = 'StrainEnergyRateDensity.md'
    requirement = 'Moose shall be capable of calculating strain energy rate density '
-                 'with elastic and plastic strains. Strain rates being computed with '
-                 'total strains.'
+                 'when using small strain assumptions.'
  [../]
 
+ [./ad_rate_model_weak_plane]
+   type = 'CSVDiff'
+   input = 'ad_rate_model_weak_plane.i'
+   csvdiff = 'ad_rate_model_weak_plane_out.csv'
+   rel_err = 1e-6
+   abs_zero = 1e-8
+   design = 'StrainEnergyRateDensity.md'
+   requirement = 'Moose shall be capable of calculating strain energy rate density '
+                 'when using automatic differentiation and weak plane stress.'
+ [../]
+
+ [./nonAD_rate_model_weak_plane]
+   type = 'CSVDiff'
+   input = 'nonAD_rate_model_weak_plane.i'
+   csvdiff = 'nonAD_rate_model_weak_plane_out.csv'
+   rel_err = 1e-6
+   abs_zero = 1e-8
+   design = 'StrainEnergyRateDensity.md'
+   requirement = 'Moose shall be capable of calculating strain energy rate density '
+                 'when using hand-coded Jacobian and weak plane stress.'
+ [../]
 []

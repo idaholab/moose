@@ -3,6 +3,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
+  out_of_plane_strain = strain_zz
 []
 
 [Mesh]
@@ -14,6 +15,11 @@
   xmax = 1
   ymin = 0
   ymax = 2
+[]
+
+[Variables]
+  [./strain_zz]
+  []
 []
 
 [AuxVariables]
@@ -37,8 +43,8 @@
     strain = FINITE
     add_variables = true
     incremental = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
-    planar_formulation = PLANE_STRAIN
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy'
+    planar_formulation = WEAK_PLANE_STRESS
   [../]
 []
 
@@ -118,33 +124,6 @@
 []
 
 [Postprocessors]
-  [./epxx]
-    type = ElementalVariableValue
-    variable = strain_xx
-    elementid = 0
-  [../]
-  [./epyy]
-    type = ElementalVariableValue
-    variable = strain_yy
-    elementid = 0
-  [../]
-  [./epzz]
-    type = ElementalVariableValue
-    variable = strain_zz
-    elementid = 0
-  [../]
-  [./sigxx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./sigyy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-  [./sigzz]
-    type = ElementAverageValue
-    variable = stress_zz
-  [../]
   [./SERD]
     type = ElementAverageValue
     variable = SERD

@@ -46,32 +46,12 @@
 []
 
 [Functions]
-  [./tempfunc]
-    type = ParsedFunction
-    value = 10.0*(2*x/504)
+  [./rampConstantUp]
+    type = PiecewiseLinear
+    x = '0. 0.1 100.0'
+    y = '0. 1 1'
+    scale_factor = -68.95 #MPa
   [../]
-[]
-
-[DomainIntegral]
-  integrals = 'CIntegral InteractionIntegralKI'
-  boundary = 800
-  crack_direction_method = CrackDirectionVector
-  crack_direction_vector = '1 0 0'
-  2d = true
-  axis_2d = 2
-  radius_inner = '60.0 80.0 100.0 120.0'
-  radius_outer = '80.0 100.0 120.0 140.0'
-  symmetry_plane = 1
-  incremental = true
-
-  # interaction integral parameters
-  disp_x = disp_x
-  disp_y = disp_y
-  block = 1
-  youngs_modulus = 207000
-  poissons_ratio = 0.3
-  temperature = temp
-  eigenstrain_names = thermal_expansion
 []
 
 [Modules/TensorMechanics/Master]
@@ -81,7 +61,6 @@
     incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
-    eigenstrain_names = thermal_expansion
   [../]
 []
 
@@ -97,12 +76,6 @@
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end
-  [../]
-  [./tempfuncaux]
-    type = FunctionAux
-    variable = temp
-    function = tempfunc
-    block = 1
   [../]
 []
 
@@ -125,26 +98,53 @@
     boundary = 900
     value = 0.0
   [../]
+  [./Pressure]
+    [./crack_pressure]
+      boundary = 700
+      function = rampConstantUp
+    [../]
+  [../]
 [] # BCs
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 207000
-    poissons_ratio = 0.3
+    youngs_modulus = 206800
+    poissons_ratio = 0.0
   [../]
-  [./elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+  [./radial_return_stress]
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'powerlawcrp'
   [../]
-  [./thermal_expansion_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 0.0
-    thermal_expansion_coeff = 1.35e-5
-    temperature = temp
-    eigenstrain_name = thermal_expansion
+  [./powerlawcrp]
+    type = PowerLawCreepStressUpdate
+    coefficient = 3.125e-21 # 7.04e-17 #
+    n_exponent = 3.0
+    m_exponent = 0.0
+    activation_energy = 0.0
   [../]
 []
 
+[DomainIntegral]
+  integrals = 'CIntegral InteractionIntegralKI'
+  boundary = 800
+  crack_direction_method = CrackDirectionVector
+  crack_direction_vector = '1 0 0'
+  2d = true
+  axis_2d = 2
+  radius_inner = '60.0 80.0 100.0 120.0'
+  radius_outer = '80.0 100.0 120.0 140.0'
+  symmetry_plane = 1
+  incremental = true
+
+  # interaction integral parameters
+  disp_x = disp_x
+  disp_y = disp_y
+  block = 1
+  youngs_modulus = 207000
+  poissons_ratio = 0.3
+  inelastic_models = 'powerlawcrp'
+[]
 
 [Executioner]
   type = Transient

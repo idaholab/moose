@@ -3,6 +3,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
+  out_of_plane_strain = strain_zz
 []
 
 [Mesh]
@@ -23,6 +24,11 @@
   [../]
 []
 
+[Variables]
+  [./strain_zz]
+  []
+[]
+
 [Functions]
   [./rampConstantUp]
     type = PiecewiseLinear
@@ -37,14 +43,15 @@
     strain = FINITE
     add_variables = true
     incremental = true
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
-    planar_formulation = PLANE_STRAIN
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy'
+    planar_formulation = WEAK_PLANE_STRESS
+    use_automatic_differentiation = true
   [../]
 []
 
 [AuxKernels]
   [./SERD]
-    type = MaterialRealAux
+    type = ADMaterialRealAux
     variable = SERD
     property = strain_energy_rate_density
     execute_on = timestep_end
@@ -53,13 +60,13 @@
 
 [BCs]
   [./no_x]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
   [../]
   [./no_y]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
@@ -74,16 +81,16 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 206800
     poissons_ratio = 0.0
   [../]
   [./radial_return_stress]
-    type = ComputeMultipleInelasticStress
+    type = ADComputeMultipleInelasticStress
     inelastic_models = 'powerlawcrp'
   [../]
   [./powerlawcrp]
-    type = PowerLawCreepStressUpdate
+    type = ADPowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
     n_exponent = 4.0
     m_exponent = 0.0
@@ -91,7 +98,7 @@
     # max_inelastic_increment = 0.01
   [../]
   [./strain_energy_rate_density]
-    type = StrainEnergyRateDensity
+    type = ADStrainEnergyRateDensity
     inelastic_models = 'powerlawcrp'
   [../]
 []
@@ -118,33 +125,6 @@
 []
 
 [Postprocessors]
-  [./epxx]
-    type = ElementalVariableValue
-    variable = strain_xx
-    elementid = 0
-  [../]
-  [./epyy]
-    type = ElementalVariableValue
-    variable = strain_yy
-    elementid = 0
-  [../]
-  [./epzz]
-    type = ElementalVariableValue
-    variable = strain_zz
-    elementid = 0
-  [../]
-  [./sigxx]
-    type = ElementAverageValue
-    variable = stress_xx
-  [../]
-  [./sigyy]
-    type = ElementAverageValue
-    variable = stress_yy
-  [../]
-  [./sigzz]
-    type = ElementAverageValue
-    variable = stress_zz
-  [../]
   [./SERD]
     type = ElementAverageValue
     variable = SERD
