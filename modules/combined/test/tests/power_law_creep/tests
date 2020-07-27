@@ -1,76 +1,29 @@
 [Tests]
   issues = '#8642'
   design = 'PowerLawCreepStressUpdate.md'
-  [./power_law_creep_tm]
+  [./power_law_creep]
     type = 'Exodiff'
     input = 'power_law_creep.i'
     exodiff = 'power_law_creep_out.e'
     requirement = 'The system shall provide a power law creep mechanical constitutive model.'
   [../]
-  [./power_law_creep_sm]
-    type = 'Exodiff'
-    input = 'power_law_creep_sm.i'
-    exodiff = 'power_law_creep_sm_out.e'
-    cli_args = 'Outputs/file_base=power_law_creep_sm_out'
-    prereq = 'power_law_creep_tm'
-    no_error_deprecated = true
-    design = 'PowerLawCreep.md'
-    requirement = 'The system shall provide a power law creep mechanical constitutive model using deprecated solid_mechanics.'
-  [../]
-  [./testRestart1_tm]
+  [./testRestart1]
     type = 'RunApp'
     input = 'power_law_creep_restart1.i'
-    prereq = 'power_law_creep_sm'
+    prereq = 'power_law_creep'
     recover = false
     requirement = 'Models using the power law creep model shall be restartable.'
   [../]
-  [./testRestart2_tm]
+  [./testRestart2]
     type = 'Exodiff'
     input = 'power_law_creep_restart2.i'
-    prereq = 'testRestart1_tm'
+    prereq = 'testRestart1'
     exodiff = 'power_law_creep_restart2_tm_out.e'
     cli_args = 'Outputs/file_base=power_law_creep_restart2_tm_out'
     exodiff_opts = '-TM'
     requirement = 'Models using the power law creep model shall be restartable with a response that matches the original run.'
   [../]
-  [./testRestart1_sm]
-    type = 'RunApp'
-    input = 'power_law_creep_restart1_sm.i'
-    prereq = 'testRestart2_tm'
-    recover = false
-    no_error_deprecated = true
-    requirement = 'Models using the power law creep model shall be restartable using deprecated solid_mechanics.'
-  [../]
-  [./testRestart2_sm]
-    type = 'Exodiff'
-    input = 'power_law_creep_restart2_sm.i'
-    prereq = 'testRestart1_sm'
-    exodiff = 'power_law_creep_restart2_sm_out.e'
-    exodiff_opts = '-TM'
-    cli_args = 'Outputs/file_base=power_law_creep_restart2_sm_out'
-    no_error_deprecated = true
-    requirement = 'Models using the power law creep model shall be restartable with a response that matches the original run using deprecated solid_mechanics.'
-  [../]
-
-  [./plc]
-    type = 'Exodiff'
-    input = 'creep_only_combined_class_sm1.i'
-    exodiff = 'creep_only_combined_class_sm_out.e'
-    no_error_deprecated = true
-    design = 'PowerLawCreep.md'
-    requirement = 'The deprecated solid_mechanics system shall replicate an analytic solution using the power law creep model.'
-  [../]
-  [./plc2]
-    type = 'Exodiff'
-    input = 'creep_only_combined_class_sm2.i'
-    exodiff = 'creep_only_combined_class_sm_out.e'
-    prereq = plc
-    no_error_deprecated = true
-    design = 'PowerLawCreep.md'
-    requirement = 'The deprecated solid_mechanics system shall replicate an analytic solution using the power law creep model combined with a linear strain hardening model.'
-  [../]
-
-  [./small_strain_tm]
+  [./small_strain]
     type = Exodiff
     input = 'power_law_creep_smallstrain.i'
     exodiff = 'power_law_creep_smallstrain_out.e'

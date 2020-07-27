@@ -17,18 +17,6 @@
     design = "/ADDensity.md"
     issues = "#12633"
   [../]
-  [./sm_plane_strain]
-    type = Exodiff
-    input = 'elastic_patch_plane_strain_sm.i'
-    exodiff = 'elastic_patch_plane_strain_out.e'
-    scale_refine = 1
-    prereq = 'plane_strain'
-    requirement = 'The solid mechanics formulation of elastic plane strain and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
   [./rz]
     type = Exodiff
     input = 'elastic_patch_rz.i'
@@ -47,18 +35,6 @@
     design = "/ADDensity.md"
     issues = "#12633"
   [../]
-  [./sm_rz]
-    type = Exodiff
-    input = 'elastic_patch_rz_sm.i'
-    exodiff = 'elastic_patch_rz_out.e'
-    scale_refine = 1
-    prereq = 'rz'
-    requirement = 'The solid mechanics formulation of elastic 2DRZ solution and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
   [./rz_nonlinear]
     type = Exodiff
     input = 'elastic_patch_rz_nonlinear.i'
@@ -75,17 +51,6 @@
     design = "/ADDensity.md"
     issues = "#12633"
   [../]
-  [./sm_nonlinear]
-    type = Exodiff
-    input = 'elastic_patch_rz_nonlinear_sm.i'
-    exodiff = 'elastic_patch_rz_nonlinear_out.e'
-    prereq = 'rz_nonlinear'
-    requirement = 'The solid mechanics formulation of elastic 2DRZ eigenstrain solution and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
   [./rspherical]
     type = Exodiff
     input = 'elastic_patch_rspherical.i'
@@ -101,36 +66,5 @@
     requirement = 'AD density shall calculate the density due to changes in strain in the spherical formulation'
     design = "/ADDensity.md"
     issues = "#12633"
-  [../]
-  [./sm_rspherical]
-    type = Exodiff
-    input = 'elastic_patch_rspherical_sm.i'
-    exodiff = 'elastic_patch_rspherical_out.e'
-    prereq = 'rspherical'
-    requirement = 'The solid mechanics formulation of elastic spherical solution and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
-  [./sm_plane_strain_large_strain]
-    type = Exodiff
-    input = 'elastic_patch_plane_strain_large_strain_sm.i'
-    exodiff = 'elastic_patch_plane_strain_large_strain_out.e'
-    scale_refine = 3
-    requirement = 'The solid mechanics formulation of large elastic plane strain and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-  [./sm_rz_large_strain]
-    type = Exodiff
-    input = 'elastic_patch_rz_large_strain_sm.i'
-    exodiff = 'elastic_patch_rz_large_strain_out.e'
-    scale_refine = 3
-    requirement = 'The solid mechanics formulation of large elastic 2DRZ strain and density shall match the analytical expression'
-    issues = "#8642"
-    design = "/solid_mechanics/index.md"
-    no_error_deprecated = true
   [../]
 []

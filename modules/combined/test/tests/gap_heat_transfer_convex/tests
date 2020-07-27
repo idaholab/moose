@@ -1,21 +1,9 @@
 [Tests]
-  [./test_sm]
-    type = 'Exodiff'
-    input = 'gap_heat_transfer_convex_sm.i'
-    exodiff = 'gap_heat_transfer_convex_out.e'
-    abs_zero = 1e-09
-    requirement = "The thermal contact system shall compute the heat transfer across a gap between a moving "
-                  "block and a larger convex block using the solid_mechanics system."
-    design = "/materials/GapConductance.md"
-    issues = "#2714"
-    no_error_deprecated = true
-  [../]
   [./test]
     type = 'Exodiff'
     input = 'gap_heat_transfer_convex.i'
     exodiff = 'gap_heat_transfer_convex_out.e'
     abs_zero = 1e-09
-    prereq = 'test_sm'
     requirement = "The thermal contact system shall compute the heat transfer across a gap between a moving "
                   "block and a larger convex block."
     design = "/materials/GapConductance.md"

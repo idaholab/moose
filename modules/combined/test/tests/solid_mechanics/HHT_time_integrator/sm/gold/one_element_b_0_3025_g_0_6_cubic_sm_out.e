@@ -1,1 +1,0 @@
-../../gold/one_element_b_0_3025_g_0_6_cubic_out.e
