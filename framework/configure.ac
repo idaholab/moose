@@ -18,15 +18,14 @@ AX_PREFIX_CONFIG_H(include/base/MooseConfig.h,MOOSE,include/base/MooseConfig.h.t
 
 AC_ARG_WITH(derivative-type,
             AS_HELP_STRING([--with-derivative-type=sparse,nonsparse],[Specify the derivative type to use]),
-            [derivative_type="$withval"],
-            [derivative_type=nonsparse])
-
-AS_CASE("$derivative_type",
-        [sparse], [AC_DEFINE(SPARSE_AD, 1, [Whether to use a sparse derivative type])],
-        [nonsparse], [],
-        [AC_MSG_ERROR(bad value "$derivative_type" for --with-derivative-type)])
-
-AC_MSG_RESULT([configuring with derivative type $derivative_type])
+            [
+              derivative_type="$withval"
+              user_set_derivative_type=yes
+            ],
+            [
+              derivative_type=nonsparse
+              user_det_derivative_type=no
+            ])
 
 AC_ARG_WITH(derivative-size,
             AS_HELP_STRING([--with-derivative-size=<n>], [Specify the size of the derivative backing array]),
@@ -36,6 +35,37 @@ AC_ARG_WITH(derivative-size,
 AC_DEFINE_UNQUOTED(AD_MAX_DOFS_PER_ELEM, [$derivative_size], [The size of the derivative backing array])
 
 AC_MSG_RESULT([configuring with derivative backing array size of $derivative_size])
+
+AC_ARG_WITH(ad-indexing-type,
+            AS_HELP_STRING([--with-ad-indexing-type=local,global],[Specify the indexing scheme for AD derivatives]),
+            [ad_indexing_type="$withval"],
+            [ad_indexing_type=local])
+
+AS_CASE("$ad_indexing_type",
+        [global],
+        [
+          AS_IF([test "$derivative_type" = nonsparse],
+                 [
+                   AS_IF([test "$user_set_derivative_type" = yes],
+                         dnl The user explicitly requested a nonsparse container which is incompatabile with global indexing
+                         [AC_MSG_ERROR(cannot request global AD indexing and a nonsparse derivative container)],
+                         dnl The user did not explicity request a container type so well set sparse for them
+                         [derivative_type=sparse]
+                        )
+                 ])
+          AC_DEFINE(GLOBAL_AD_INDEXING, 1, [Whether to use a global indexing scheme for AD])
+        ],
+        [local], [],
+        [AC_MSG_ERROR(bad value "$ad_indexing_type" for --with-ad-indexing-type)])
+
+AC_MSG_RESULT([configuring with AD indexing type $ad_indexing_type])
+
+AS_CASE("$derivative_type",
+        [sparse], [AC_DEFINE(SPARSE_AD, 1, [Whether to use a sparse derivative type])],
+        [nonsparse], [],
+        [AC_MSG_ERROR(bad value "$derivative_type" for --with-derivative-type)])
+
+AC_MSG_RESULT([configuring with derivative type $derivative_type])
 
 AC_PATH_TOOL(PKG_CONFIG,pkg-config)
 if test x$PKG_CONFIG != x; then
