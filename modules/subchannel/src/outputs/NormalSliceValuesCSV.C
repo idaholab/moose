@@ -7,10 +7,10 @@ InputParameters
 NormalSliceValuesCSV::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addRequiredParam<VariableName>("variable", "variable you want the value off at the exit");
+  params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
   params.addRequiredParam<Real>("height", "Axial location of normal slice [m]");
   params.addClassDescription("Prints out a user selected value at a user selected axial height in "
-                             "a csv line format to be used for post-processing");
+                             "a CSV line format to be used for post-processing");
   return params;
 }
 
