@@ -469,6 +469,19 @@ RankTwoTensorTempl<T>::deviatoric() const
 {
   RankTwoTensorTempl<T> deviatoric(*this);
   deviatoric.addIa(-1.0 / 3.0 * this->tr()); // actually construct deviatoric part
+
+  // Sometimes numerical precision results in a non-zero trace of the deviatoric tensor. Ensure that
+  // doesn't happen here by subtracting any extra volumetric components
+  T trace = deviatoric.tr();
+  unsigned int it = 0;
+  while (it < 3 && trace != 0.0)
+  {
+    deviatoric.addIa(-1.0 / 3.0 * trace);
+    trace = deviatoric.tr();
+    if (std::abs(trace) < 1.0e-11)
+      break;
+    ++it;
+  }
   return deviatoric;
 }
 
