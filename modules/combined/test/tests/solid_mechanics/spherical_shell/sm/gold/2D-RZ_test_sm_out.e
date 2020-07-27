@@ -1,1 +1,0 @@
-../../gold/2D-RZ_test_out.e

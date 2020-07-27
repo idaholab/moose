@@ -5,11 +5,4 @@
     csvdiff = 'j2_hard1_mod_out.csv'
     heavy = true
   [../]
-  [./LSH_mod]
-    type = 'CSVDiff'
-    input = 'LSH_mod.i'
-    csvdiff = 'LSH_mod_out.csv'
-    heavy = true
-  [../]
 []
-

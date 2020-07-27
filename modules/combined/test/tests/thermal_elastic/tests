@@ -29,19 +29,6 @@
     design = "jacobian_definition.md"
     issues = "#12633"
   [../]
-
-  [./test_sm]
-    type = 'Exodiff'
-    input = 'thermal_elastic_sm.i'
-    exodiff = 'thermal_elastic_out.e'
-    prereq = test
-    design = 'solid_mechanics/index.md'
-    issues = '#8265'
-    requirement = "The system shall compute the same stress values as the thermal_elastic.i test using the
-                   solid mechanics module implementation  using the solid mechanics module."
-    no_error_deprecated = true
-  [../]
-
   [./derivatives]
     type = 'AnalyzeJacobian'
     petsc_version = '>=3.9.4 || <3.9.0'

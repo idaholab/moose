@@ -58,7 +58,6 @@
     design = "jacobian_definition.md"
     issues = "#12633"
   [../]
-
   [./thermo_mech_smp]
     type = 'Exodiff'
     input = 'thermo_mech_smp.i'
@@ -68,31 +67,6 @@
     issues = "#8642"
     requirement = "Moose shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and match the deprecated solid mechanics methods"
     design = "heat_conduction/index.md tensor_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
-  [./thermo_mech_sm]
-    type = 'Exodiff'
-    input = 'thermo_mech_sm.i'
-    exodiff = 'thermo_mech_out.e'
-    scale_refine = 1
-    prereq = 'thermo_mech'
-    issues = "#2460"
-    requirement = "Moose shall be able to run coupled thermo-mechanics simulations using deprecated solid mechanics methods"
-    design = "heat_conduction/index.md solid_mechanics/index.md"
-    no_error_deprecated = true
-  [../]
-
-  [./thermo_mech_smp_sm]
-    type = 'Exodiff'
-    input = 'thermo_mech_smp_sm.i'
-    exodiff = 'thermo_mech_smp_out.e'
-    custom_cmp = 'thermo_mech.cmp'
-    max_parallel = 1
-    prereq = 'thermo_mech_smp'
-    issues = "#2460"
-    requirement = "Moose shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and using deprecated solid mechanics methods"
-    design = "heat_conduction/index.md solid_mechanics/index.md"
     no_error_deprecated = true
   [../]
 []
