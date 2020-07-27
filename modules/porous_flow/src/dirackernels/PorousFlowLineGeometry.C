@@ -108,11 +108,18 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
     Point end = start + _line_length * _line_direction / _line_direction.norm();
     auto pl = _subproblem.mesh().getPointLocator();
     pl->enable_out_of_mesh_mode();
+
     auto * elem = (*pl)(start);
     auto elem_id = elem ? elem->id() : DofObject::invalid_id;
     _communicator.min(elem_id);
     if (elem_id == DofObject::invalid_id)
-      paramError("line_base", "point ", start, " lies outside the mesh");
+      paramError("line_base", "base point ", start, " lies outside the mesh");
+
+    elem = (*pl)(end);
+    elem_id = elem ? elem->id() : DofObject::invalid_id;
+    _communicator.min(elem_id);
+    if (elem_id == DofObject::invalid_id)
+      paramError("line_length", "length causes end point ", end, " to lie outside the mesh");
 
     regenPoints();
   }
