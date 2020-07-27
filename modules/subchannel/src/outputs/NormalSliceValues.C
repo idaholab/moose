@@ -8,7 +8,7 @@ InputParameters
 NormalSliceValues::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addRequiredParam<VariableName>("variable", "variable you want the value off at the exit");
+  params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
   params.addRequiredParam<Real>("height", "Axial location of normal slice [m]");
   params.addClassDescription("Prints out a user selected value at a user selected axial height in "
                              "a matrix format to be used for post-processing");
