@@ -118,7 +118,7 @@
   [./lps_dual-jac]
     type = 'PetscJacobianTester'
     input = 'lps_dual.i'
-    cli_args = "-snes_test_err 1e-11"
+    cli_args = "-snes_test_err 1e-11 Executioner/num_steps=2"
     run_sim = 'True'
     ratio_tol = 3e-7
     difference_tol = 1e8
