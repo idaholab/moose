@@ -105,8 +105,11 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
         dynamic_cast<const MaterialProperty<RankTwoTensor> *>(&_strain_rate);
 
     if (strain_energy_rate_density && stress && strain_rate)
+    {
+      _inelastic_models[i]->setQp(_qp);
       _inelastic_models[i]->computeStrainEnergyRateDensity(
           *strain_energy_rate_density, *stress, *strain_rate);
+    }
   }
 
   for (unsigned int i = 0; i < _ad_inelastic_models.size(); ++i)
@@ -121,7 +124,10 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
         dynamic_cast<const ADMaterialProperty<RankTwoTensor> *>(&_strain_rate);
 
     if (ad_strain_energy_rate_density && ad_stress && ad_strain_rate)
+    {
+      _ad_inelastic_models[i]->setQp(_qp);
       _ad_inelastic_models[i]->computeStrainEnergyRateDensity(
           *ad_strain_energy_rate_density, *ad_stress, *ad_strain_rate);
+    }
   }
 }

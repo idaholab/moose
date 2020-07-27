@@ -34,20 +34,7 @@
 [../]
 []
 
-[DomainIntegral]
-  integrals = CIntegral
-  boundary = 1001
-  crack_direction_method = CurvedCrackFront
-  crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '0.0 1.0 0.0'
-  crack_direction_vector_end_2 = '1.0 0.0 0.0'
-  radius_inner = '12.5 25.0 37.5'
-  radius_outer = '25.0 37.5 50.0'
-  intersecting_boundary = '1 2'
-  symmetry_plane = 2
-  incremental = true
-  n_exponent = 4.0
-[]
+
 
 [Modules/TensorMechanics/Master]
   [./master]
@@ -95,14 +82,6 @@
 [] # BCs
 
 [Materials]
-#  [./elasticity_tensor]
-#    type = ComputeIsotropicElasticityTensor
-#    youngs_modulus = 206800
-#    poissons_ratio = 0.0
-#  [../]
-#  [./elastic_stress]
-#    type = ComputeFiniteStrainElasticStress
-#  [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 206800
@@ -120,6 +99,21 @@
     activation_energy = 0.0
     # max_inelastic_increment = 0.01
   [../]
+[]
+
+[DomainIntegral]
+  integrals = CIntegral
+  boundary = 1001
+  crack_direction_method = CurvedCrackFront
+  crack_end_direction_method = CrackDirectionVector
+  crack_direction_vector_end_1 = '0.0 1.0 0.0'
+  crack_direction_vector_end_2 = '1.0 0.0 0.0'
+  radius_inner = '12.5 25.0 37.5'
+  radius_outer = '25.0 37.5 50.0'
+  intersecting_boundary = '1 2'
+  symmetry_plane = 2
+  incremental = true
+  inelastic_models = 'powerlawcrp'
 []
 
 [Executioner]
