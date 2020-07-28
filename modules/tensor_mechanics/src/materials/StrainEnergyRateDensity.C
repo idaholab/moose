@@ -107,8 +107,8 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
     if (strain_energy_rate_density && stress && strain_rate)
     {
       _inelastic_models[i]->setQp(_qp);
-      _inelastic_models[i]->computeStrainEnergyRateDensity(
-          *strain_energy_rate_density, *stress, *strain_rate);
+      (*strain_energy_rate_density)[_qp] =
+          _inelastic_models[i]->computeStrainEnergyRateDensity(*stress, *strain_rate);
     }
   }
 
@@ -126,8 +126,8 @@ StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
     if (ad_strain_energy_rate_density && ad_stress && ad_strain_rate)
     {
       _ad_inelastic_models[i]->setQp(_qp);
-      _ad_inelastic_models[i]->computeStrainEnergyRateDensity(
-          *ad_strain_energy_rate_density, *ad_stress, *ad_strain_rate);
+      (*ad_strain_energy_rate_density)[_qp] =
+          _ad_inelastic_models[i]->computeStrainEnergyRateDensity(*ad_stress, *ad_strain_rate);
     }
   }
 }

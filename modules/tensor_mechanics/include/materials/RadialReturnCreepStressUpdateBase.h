@@ -23,12 +23,13 @@ public:
   RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
   /**
-   * This class computes strain energy rate density for StrainEnergyRateDensity.
-   * The computed material property is needed for the fracture C(t) integral.
+   * Compute the strain energy rate density for this inelastic model for the current step.
+   * @param stress The stress tensor at the end of the step
+   * @param strain_rate The strain rate at the end of the step
+   * @return The computed strain energy rate density
    */
-  virtual void
-  computeStrainEnergyRateDensity(MaterialProperty<Real> & /*strain_energy_rate_density*/,
-                                 const MaterialProperty<RankTwoTensor> & /*stress*/,
+  virtual Real
+  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & /*stress*/,
                                  const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
   {
     mooseError(
