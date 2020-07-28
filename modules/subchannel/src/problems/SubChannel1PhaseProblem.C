@@ -58,7 +58,6 @@ SubChannel1PhaseProblem::externalSolve()
   // Initialize  crossflow / Pressure matrixes and vectors to use in calculation set
   // Crossflow
   Eigen::VectorXd Wij(_subchannel_mesh._n_gaps);
-  Eigen::VectorXd Wij_old(_subchannel_mesh._n_gaps);
   Eigen::MatrixXd Wij_global(_subchannel_mesh._n_gaps, _subchannel_mesh._nz + 1);
   // turbulent Crossflow
   Eigen::VectorXd WijPrime(_subchannel_mesh._n_gaps);
@@ -102,7 +101,6 @@ SubChannel1PhaseProblem::externalSolve()
   mdotout.setZero();
   Wij.setZero();
   WijPrime.setZero();
-  Wij_old.setZero();
   Wij_global.setZero();
 
   for (unsigned int i_ch = 0; i_ch < _subchannel_mesh._n_channels; i_ch++)
@@ -164,7 +162,6 @@ SubChannel1PhaseProblem::externalSolve()
         while ((MError > 1E-9 || WError > 1E-8) && (level_cycles < max_level_cycles))
         {
           level_cycles++;
-          Wij_old = Wij;
           mdot_old = mdot;
           // Calculate crossflow between channel i-j using crossflow momentum equation
           // number of gaps = _subchannel_mesh._n_gaps
@@ -212,7 +209,7 @@ SubChannel1PhaseProblem::externalSolve()
                                mdot_soln(node_in_j) / Sj + mdot_soln(node_out_j) / Sj) *
                               Sij; // Kg/sec
             // INITIAL GUESS
-            if (Wij_old(i_gap) == 0)
+            if (Wij(i_gap) == 0)
               Wij(i_gap) = std::sqrt(Pressure_Term / kij);
             else
               continue;
