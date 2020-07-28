@@ -14,6 +14,23 @@
 #include "RankTwoTensorForward.h"
 #include "RadialReturnCreepStressUpdateBase.h"
 #include "ADRadialReturnCreepStressUpdateBase.h"
+#include "MooseTypes.h"
+
+// Create GenericRadialReturn interface to call (AD)RadialReturnCreepStressUpdateBase.
+namespace Moose
+{
+template <typename T>
+struct ADType;
+template <>
+struct ADType<RadialReturnCreepStressUpdateBase>
+{
+  typedef ADRadialReturnCreepStressUpdateBase type;
+};
+}
+
+template <bool is_ad>
+using GenericRadialReturnCreepStressUpdateBase =
+    typename Moose::GenericStruct<RadialReturnCreepStressUpdateBase, is_ad>::type;
 
 /**
  * StrainEnergyRateDensity calculates the strain energy rate density.
@@ -47,9 +64,7 @@ private:
   const unsigned _num_models;
 
   /// The user supplied list of inelastic models to compute the strain energy release rate
-  std::vector<RadialReturnCreepStressUpdateBase *> _inelastic_models;
-  /// The user supplied list of AD inelastic models to compute the strain energy release rate
-  std::vector<ADRadialReturnCreepStressUpdateBase *> _ad_inelastic_models;
+  std::vector<GenericRadialReturnCreepStressUpdateBase<is_ad> *> _inelastic_models;
 };
 
 typedef StrainEnergyRateDensityTempl<false> StrainEnergyRateDensity;

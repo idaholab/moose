@@ -859,8 +859,8 @@ DomainIntegralAction::act()
 
         InputParameters params = _factory.getValidParams(mater_type_name);
         params.set<std::vector<SubdomainName>>("block") = {_blocks};
-        params.set<std::vector<MaterialName>>("inelastic_models") = {
-            getParam<std::vector<MaterialName>>("inelastic_models")};
+        params.set<std::vector<MaterialName>>("inelastic_models") =
+            getParam<std::vector<MaterialName>>("inelastic_models");
 
         _problem->addMaterial(mater_type_name, mater_name, params);
       }

@@ -26,8 +26,9 @@ StrainEnergyRateDensityTempl<is_ad>::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addRequiredParam<std::vector<MaterialName>>(
+  params.addRequiredRangeCheckedParam<std::vector<MaterialName>>(
       "inelastic_models",
+      "inelastic_models_size=1",
       "The material objects to use to calculate the strain energy rate density.");
   return params;
 }
@@ -46,32 +47,15 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
 
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
 
-  if (_num_models > 1)
-    paramError("inelastic_models",
-               "StrainEnergyRateDensity can only compute the strain energy release rate density"
-               " when one inelastic model is supplied. ");
-
-  if (_num_models < 1)
-    paramError("inelastic_models",
-               "StrainEnergyRateDensity requires one inelastic model to be supplied. ");
-
-  // Store AD and non-AD inelastic models separately
+  // Store inelastic models as generic RadialreturnCreepStressUpdateBase.
   for (unsigned int i = 0; i < _num_models; ++i)
   {
-    RadialReturnCreepStressUpdateBase * inelastic_model_stress_update =
-        dynamic_cast<RadialReturnCreepStressUpdateBase *>(&getMaterialByName(models[i]));
+    GenericRadialReturnCreepStressUpdateBase<is_ad> * inelastic_model_stress_update =
+        dynamic_cast<GenericRadialReturnCreepStressUpdateBase<is_ad> *>(
+            &getMaterialByName(models[i]));
 
     if (inelastic_model_stress_update)
-    {
       _inelastic_models.push_back(inelastic_model_stress_update);
-      continue;
-    }
-
-    ADRadialReturnCreepStressUpdateBase * ad_inelastic_model_stress_update =
-        dynamic_cast<ADRadialReturnCreepStressUpdateBase *>(&getMaterialByName(models[i]));
-
-    if (ad_inelastic_model_stress_update)
-      _ad_inelastic_models.push_back(ad_inelastic_model_stress_update);
   }
 }
 
@@ -92,42 +76,10 @@ template <bool is_ad>
 void
 StrainEnergyRateDensityTempl<is_ad>::computeQpProperties()
 {
-
   for (unsigned int i = 0; i < _inelastic_models.size(); ++i)
   {
-    MaterialProperty<Real> * strain_energy_rate_density =
-        dynamic_cast<MaterialProperty<Real> *>(&_strain_energy_rate_density);
-
-    const MaterialProperty<RankTwoTensor> * stress =
-        dynamic_cast<const MaterialProperty<RankTwoTensor> *>(&_stress);
-
-    const MaterialProperty<RankTwoTensor> * strain_rate =
-        dynamic_cast<const MaterialProperty<RankTwoTensor> *>(&_strain_rate);
-
-    if (strain_energy_rate_density && stress && strain_rate)
-    {
-      _inelastic_models[i]->setQp(_qp);
-      (*strain_energy_rate_density)[_qp] =
-          _inelastic_models[i]->computeStrainEnergyRateDensity(*stress, *strain_rate);
-    }
-  }
-
-  for (unsigned int i = 0; i < _ad_inelastic_models.size(); ++i)
-  {
-    ADMaterialProperty<Real> * ad_strain_energy_rate_density =
-        dynamic_cast<ADMaterialProperty<Real> *>(&_strain_energy_rate_density);
-
-    const ADMaterialProperty<RankTwoTensor> * ad_stress =
-        dynamic_cast<const ADMaterialProperty<RankTwoTensor> *>(&_stress);
-
-    const ADMaterialProperty<RankTwoTensor> * ad_strain_rate =
-        dynamic_cast<const ADMaterialProperty<RankTwoTensor> *>(&_strain_rate);
-
-    if (ad_strain_energy_rate_density && ad_stress && ad_strain_rate)
-    {
-      _ad_inelastic_models[i]->setQp(_qp);
-      (*ad_strain_energy_rate_density)[_qp] =
-          _ad_inelastic_models[i]->computeStrainEnergyRateDensity(*ad_stress, *ad_strain_rate);
-    }
+    _inelastic_models[i]->setQp(_qp);
+    _strain_energy_rate_density[_qp] =
+        _inelastic_models[i]->computeStrainEnergyRateDensity(_stress, _strain_rate);
   }
 }
