@@ -1,5 +1,6 @@
 #include "PowerIC.h"
 #include "Function.h"
+#include "SubChannelMesh.h"
 
 using namespace std;
 using namespace Eigen;

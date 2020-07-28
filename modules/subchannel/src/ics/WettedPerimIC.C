@@ -1,4 +1,5 @@
 #include "WettedPerimIC.h"
+#include "SubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", WettedPerimIC);
 
