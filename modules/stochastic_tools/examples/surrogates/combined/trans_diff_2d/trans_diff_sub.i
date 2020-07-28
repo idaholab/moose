@@ -1,0 +1,104 @@
+[Functions]
+  [src_func]
+    type = ParsedFunction
+    value = "1000*sin(f*t)"
+    vars = 'f'
+    vals = '20'
+  []
+[]
+
+[Mesh]
+  [msh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 100
+    xmin = -0.5
+    xmax = 0.5
+    ny = 100
+    ymin = -0.5
+    ymax = 0.5
+  []
+  [source_domain]
+    type = ParsedSubdomainMeshGenerator
+    input = msh
+    combinatorial_geometry = '(x<0.1 & x>-0.1) & (y<0.1 & y>-0.1)'
+    block_id=1
+  []
+[]
+
+[Variables]
+  [u]
+    initial_condition = 300
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = MatDiffusion
+    variable = u
+    diffusivity = diff_coeff
+  []
+  [source]
+    type = BodyForce
+    variable = u
+    function = src_func
+    block = 1
+  []
+  [time_deriv]
+    type = TimeDerivative
+    variable = u
+  []
+[]
+
+[Materials]
+  [diff_coeff]
+    type = ParsedMaterial
+    f_name = diff_coeff
+    args = 'u'
+    constant_names = 'C'
+    constant_expressions = 0.02
+    function = 'C * pow(300/u, 2)'
+  []
+[]
+
+[BCs]
+  [neumann_all]
+    type = NeumannBC
+    variable = u
+    boundary = 'left right top bottom'
+    value = 0
+  []
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 100
+  dt = 0.01
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  nl_rel_tol = 1e-6
+  l_abs_tol = 1e-6
+  timestep_tolerance = 1e-6
+[]
+
+[Postprocessors]
+  [max]
+    type = NodalExtremeValue
+    variable = u
+  []
+  [min]
+    type = NodalExtremeValue
+    variable = u
+    value_type = min
+  []
+  [time_max]
+    type = TimeExtremeValue
+    postprocessor = max
+  []
+  [time_min]
+    type = TimeExtremeValue
+    postprocessor = min
+    value_type = min
+  []
+[]

@@ -1,0 +1,31 @@
+[Tests]
+  design = nonlin_parameter_study.md
+  issues = '#14933'
+
+  requirement = "The system shall include an example demonstrating a second stochastic parameter study with parameters that are "
+
+  [parameter_study_uniform]
+    type = CSVDiff
+    input = nonlin_diff_react_master_uniform.i
+    allow_test_objects = true
+    cli_args = "Samplers/hypercube/num_rows=5
+                Samplers/hypercube/num_bins=3
+                runner:Mesh/gen/nx=10
+                runner:Mesh/gen/ny=10"
+    csvdiff = 'nonlin_diff_react_master_uniform_out_results_0002.csv nonlin_diff_react_master_uniform_out_stats_0002.csv'
+
+    detail = "uniformly distributed and "
+  []
+  [parameter_study_normal]
+    type = CSVDiff
+    input = nonlin_diff_react_master_normal.i
+    allow_test_objects = true
+    cli_args = "Samplers/hypercube/num_rows=5
+                Samplers/hypercube/num_bins=3
+                runner:Mesh/gen/nx=10
+                runner:Mesh/gen/ny=10"
+    csvdiff = 'nonlin_diff_react_master_normal_out_results_0002.csv nonlin_diff_react_master_normal_out_stats_0002.csv'
+
+    detail = "normally distributed."
+  []
+[]
