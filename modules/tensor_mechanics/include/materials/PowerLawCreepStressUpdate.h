@@ -28,9 +28,8 @@ public:
 
   PowerLawCreepStressUpdate(const InputParameters & parameters);
 
-  virtual void
-  computeStrainEnergyRateDensity(MaterialProperty<Real> & strain_energy_rate_density,
-                                 const MaterialProperty<RankTwoTensor> & stress,
+  virtual Real
+  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & stress,
                                  const MaterialProperty<RankTwoTensor> & strain_rate) override;
 
 protected:
