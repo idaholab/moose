@@ -63,6 +63,16 @@ protected:
   /// Add Dirac Points to the line sink
   virtual void addPoints() override;
 
+  /// regenerate points in each cell if using line_base
+  virtual void meshChanged() override;
+
   /// Reads a space-separated line of floats from ifs and puts in myvec
   bool parseNextLineReals(std::ifstream & ifs, std::vector<Real> & myvec);
+
+private:
+  void calcLineLengths();
+  void regenPoints();
+
+  /// alternative (to the point file data) line weight and start point.
+  std::vector<Real> _line_base;
 };

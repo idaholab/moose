@@ -26,9 +26,9 @@ protected:
   /// mass flux = _sink_func as a function of porepressure or temperature
   LinearInterpolation _sink_func;
 
-  Real computeQpBaseOutflow(unsigned current_dirac_ptid) const override;
-  void computeQpBaseOutflowJacobian(unsigned jvar,
-                                    unsigned current_dirac_ptid,
-                                    Real & outflow,
-                                    Real & outflowp) const override;
+  virtual Real computeQpBaseOutflow(unsigned current_dirac_ptid) const override;
+  virtual void computeQpBaseOutflowJacobian(unsigned jvar,
+                                            unsigned current_dirac_ptid,
+                                            Real & outflow,
+                                            Real & outflowp) const override;
 };
