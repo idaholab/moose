@@ -25,15 +25,15 @@ PowerIC::validParams()
 PowerIC::PowerIC(const InputParameters & params)
   : SubChannelBaseIC(params),
     _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
+    _power(getParam<Real>("power")),
+    _numberoflines(0),
+    _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
-  _power = getParam<Real>("power");
-  _filename = getParam<std::string>("filename");
   _power_dis.resize((_mesh._ny - 1) * (_mesh._nx - 1), 1);
   _power_dis.setZero();
   _pin_power_correction.resize(_mesh._ny - 1, _mesh._nx - 1);
   _pin_power_correction.setOnes();
-  _numberoflines = 0;
   double vin;
   ifstream inFile;
 
