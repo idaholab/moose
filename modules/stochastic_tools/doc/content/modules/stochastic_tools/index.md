@@ -21,6 +21,7 @@ used independently or in combination to meet the needs of the application develo
 - Example 8: [examples/poly_chaos_surrogate.md]
 - Example 9: [examples/poly_regression_surrogate.md]
 - Example 10: [examples/pod_rb_surrogate.md]
+- Example 11: [examples/combined_example_2d_trans_diff.md]
 
 ## Performance
 
