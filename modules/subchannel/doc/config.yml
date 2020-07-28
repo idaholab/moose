@@ -1,20 +1,47 @@
 Content:
     subchannel:
         root_dir: ${ROOT_DIR}/doc/content
+    framework:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
+    modules:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
-            - js/*
-            - css/*
-            - contrib/**
-            - media/**
+            - application_usage/command_line_usage.md
+            - help/development/Atom_Editor.md
+            - media/*
+    fluid_properties:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: subchannel
 
 Extensions:
+    MooseDocs.extensions.navigation:
+        name: subchannel
+        repo: https://hpcgitlab.hpc.inl.gov/idaholab/subchannel
+        home: https://hpcsc.inl.gov/ssl/SUBCHANNEL/site/
+
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
+        hide:
+            framework: !include ${MOOSE_DIR}/framework/doc/hidden.yml
+            fluid_properties: !include ${MOOSE_DIR}/modules/fluid_properties/doc/hidden.yml
+            subchannel: !include ${ROOT_DIR}/doc/hidden.yml
+        remove:
+            framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
         includes:
+            - ${MOOSE_DIR}/framework/include
+            - ${MOOSE_DIR}/modules/fluid_properties/include
             - include
+
+    MooseDocs.extensions.common:
+        shortcuts:
+            framework: !include ${MOOSE_DIR}/framework/doc/globals.yml
+
+    MooseDocs.extensions.acronym:
+        acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+
+    MooseDocs.extensions.bibtex:
+        duplicate_warning: False
