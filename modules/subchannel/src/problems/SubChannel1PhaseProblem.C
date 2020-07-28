@@ -256,7 +256,7 @@ SubChannel1PhaseProblem::externalSolve()
             Wij(i_gap) =
                 (-2.0 * signbit(P_soln(node_in_i) - P_soln(node_in_j)) + 1.0) * (Wij(i_gap));
           }
-          /// Calculate Total Sums in sub_channel
+          /// Calculate Total Sums in subchannel
           Wij_global.col(iz) = Wij;
           // calculate Sum values per subchannel
           double SumSumWij = 0.0;

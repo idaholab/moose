@@ -28,7 +28,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 # set desired physics modules equal to 'yes' to enable them
 CHEMICAL_REACTIONS        := no
 CONTACT                   := no
-FLUID_PROPERTIES          := no
+FLUID_PROPERTIES          := yes
 HEAT_CONDUCTION           := no
 MISC                      := no
 NAVIER_STOKES             := no
@@ -51,20 +51,20 @@ ADDITIONAL_LIBS     := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 # dep apps
 CURRENT_DIR        := $(shell pwd)
 APPLICATION_DIR    := $(CURRENT_DIR)/..
-APPLICATION_NAME   := sub_channel
+APPLICATION_NAME   := subchannel
 include            $(FRAMEWORK_DIR)/app.mk
 
 APPLICATION_DIR    := $(CURRENT_DIR)
-APPLICATION_NAME   := sub_channel-unit
+APPLICATION_NAME   := subchannel-unit
 BUILD_EXEC         := yes
 
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
-# Find all the sub_channel unit test source files and include their dependencies.
-sub_channel_unit_srcfiles := $(shell find $(CURRENT_DIR)/src -name "*.C")
-sub_channel_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(sub_channel_unit_srcfiles))
--include $(sub_channel_unit_deps)
+# Find all the subchannel unit test source files and include their dependencies.
+subchannel_unit_srcfiles := $(shell find $(CURRENT_DIR)/src -name "*.C")
+subchannel_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(subchannel_unit_srcfiles))
+-include $(subchannel_unit_deps)
 
 ###############################################################################
 # Additional special case targets should be added here

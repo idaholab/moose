@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APPLICATION_NAME=sub_channel
+APPLICATION_NAME=subchannel
 # If $METHOD is not set, use opt
 if [ -z $METHOD ]; then
   export METHOD=opt

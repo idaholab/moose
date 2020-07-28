@@ -5,7 +5,7 @@
 #include "AppFactory.h"
 
 // Create a performance log
-PerfLog Moose::perf_log("sub_channel");
+PerfLog Moose::perf_log("subchannel");
 
 // Begin the main program.
 int

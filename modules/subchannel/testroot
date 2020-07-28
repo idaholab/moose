@@ -1,4 +1,4 @@
-app_name = sub_channel
+app_name = subchannel
 allow_warnings = false
 allow_unused = false
 allow_override = false

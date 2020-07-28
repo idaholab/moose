@@ -1,5 +1,5 @@
 Content:
-    sub_channel:
+    subchannel:
         root_dir: ${ROOT_DIR}/doc/content
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
@@ -11,7 +11,7 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
-    name: sub_channel
+    name: subchannel
 
 Extensions:
     MooseDocs.extensions.appsyntax:
