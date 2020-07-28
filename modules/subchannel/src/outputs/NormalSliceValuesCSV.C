@@ -1,5 +1,6 @@
 #include "NormalSliceValuesCSV.h"
 #include "SolutionHandle.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("SubChannelApp", NormalSliceValuesCSV);
 
