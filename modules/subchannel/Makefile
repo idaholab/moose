@@ -55,3 +55,7 @@ include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here
+
+tags:
+	@echo Building tags...
+	@ctags -f .tags -R --c++-kinds=+p --fields=+iaS --extras=+q --exclude=doc --exclude=test --exclude=.git --exclude=problems --exclude="*header_symlinks*"
