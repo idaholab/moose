@@ -17,7 +17,7 @@ public:
 protected:
   SubChannelMesh & _mesh;
   Real _power;
-  int _numberoflines;
+  unsigned int _numberoflines;
   std::string _filename;
   Eigen::MatrixXd _power_dis;
   const Function & _axial_heat_rate;
