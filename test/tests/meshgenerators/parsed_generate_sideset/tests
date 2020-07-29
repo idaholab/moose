@@ -11,4 +11,17 @@
     design = 'meshgenerators/ParsedGenerateSideset.md'
     issues = '#11640'
   [../]
+
+  [./parsed_generate_sideset_neighbor_sub_id_test]
+    type = 'Exodiff'
+    input = 'parsed_generate_sideset_neighbor_sub_id.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_sideset_neighbor_sub_id_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    requirement = 'The system shall have the ability to filter by neighboring subdomain id in ParsedGenerateSideset.'
+    design = 'meshgenerators/ParsedGenerateSideset.md'
+    issues = '#15651'
+  [../]
 []

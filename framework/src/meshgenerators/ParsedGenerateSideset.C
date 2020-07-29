@@ -36,6 +36,10 @@ ParsedGenerateSideset::validParams()
   params.addParam<std::vector<subdomain_id_type>>(
       "included_subdomain_ids",
       "A set of subdomain ids whose sides will be included in the new sidesets");
+  params.addParam<std::vector<subdomain_id_type>>(
+      "included_neighbor_ids",
+      "A set of neighboring subdomain ids. A face is only added if the subdomain id of the "
+      "neighbor is in this set");
   params.addParam<Point>(
       "normal",
       Point(),
@@ -60,10 +64,14 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
     _function(parameters.get<std::string>("combinatorial_geometry")),
     _sideset_name(getParam<BoundaryName>("new_sideset_name")),
     _check_subdomains(isParamValid("included_subdomain_ids")),
+    _check_neighbor_subdomains(isParamValid("included_neighbor_ids")),
     _check_normal(parameters.isParamSetByUser("normal")),
     _included_ids(_check_subdomains
                       ? parameters.get<std::vector<SubdomainID>>("included_subdomain_ids")
                       : std::vector<SubdomainID>()),
+    _included_neighbor_ids(_check_neighbor_subdomains
+                               ? parameters.get<std::vector<SubdomainID>>("included_neighbor_ids")
+                               : std::vector<SubdomainID>()),
     _normal(getParam<Point>("normal"))
 {
   if (typeid(_input).name() == typeid(std::unique_ptr<DistributedMesh>).name())
@@ -121,6 +129,22 @@ ParsedGenerateSideset::generate()
     {
       const std::vector<Point> & normals = _fe_face->get_normals();
       _fe_face->reinit(elem, side);
+
+      // check if the neighboring elems subdomain is included
+      if (_check_neighbor_subdomains)
+      {
+        const Elem * neighbor = elem->neighbor_ptr(side);
+        // if the neighbor does not exist, then skip this face; we only add sidesets
+        // between existing elems if _check_neighbor_subdomains is true
+        if (!neighbor)
+          continue;
+
+        subdomain_id_type curr_neighbor_subdomain = neighbor->subdomain_id();
+        if (std::find(_included_neighbor_ids.begin(),
+                      _included_neighbor_ids.end(),
+                      curr_neighbor_subdomain) == _included_neighbor_ids.end())
+          continue;
+      }
 
       // check normal if requested
       if (_check_normal && std::abs(1.0 - _normal * normals[0]) > _variance)
