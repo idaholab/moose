@@ -59,17 +59,43 @@ FVElementalKernel::computeResidual()
 void
 FVElementalKernel::computeJacobian()
 {
+  const auto r = computeQpResidual() * _assembly.elemVolume();
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // When doing global indexing, we process *all* the derivatives/Jacobian entries here, not just
+  // the on-diagonal ones. By doing this we avoid doing dof index lookups to determine what
+  // derivative entries actually correspond to the on-diagonal.
+  const auto & derivs = r.derivatives();
+
+  const auto & column_indices = derivs.nude_indices();
+  const auto & values = derivs.nude_data();
+
+  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
+
+  const auto & row_indices = _var.dofIndices();
+  mooseAssert(row_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  const auto row_index = row_indices[0];
+
+  for (std::size_t i = 0; i < column_indices.size(); ++i)
+    _assembly.cacheJacobianContribution(row_index, column_indices[i], values[i], _matrix_tags);
+#else
+
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   auto dofs_per_elem = _subproblem.systemBaseNonlinear().getMaxVarNDofsPerElem();
   auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
-  const auto r = computeQpResidual() * _assembly.elemVolume();
   _local_ke(0, 0) += r.derivatives()[ad_offset];
   accumulateTaggedLocalMatrix();
+
+#endif
 }
 
 void
 FVElementalKernel::computeOffDiagJacobian()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // computeJacobian processes on- and off-diagonal entries when we're doing global indexing for AD
+  computeJacobian();
+#else
   const auto r = computeQpResidual() * _assembly.elemVolume();
 
   auto & ce = _assembly.couplingEntries();
@@ -107,4 +133,5 @@ FVElementalKernel::computeOffDiagJacobian()
 
     accumulateTaggedLocalMatrix();
   }
+#endif
 }

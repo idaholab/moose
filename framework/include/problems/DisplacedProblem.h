@@ -268,6 +268,7 @@ public:
   virtual void cacheJacobianNonlocal(THREAD_ID tid);
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
   virtual void addCachedJacobian(THREAD_ID tid) override;
+  virtual void addCachedJacobianContributions(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;

@@ -113,6 +113,17 @@ protected:
   /// those calculations will be handled for appropriately by this function.
   virtual ADReal gradUDotNormal();
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  /**
+   * Process the globally indexed derivative vector coming from AD into the system Jacobian
+   * @param residual The ADReal representing the residual and its derivatives with respect to the
+   * system degrees of freedom
+   * @param row_index The row index in the system Jacobian for which we are filling column Jacobian
+   * entries
+   */
+  void processGlobalDerivatives(const ADReal & residual, dof_id_type row_index);
+#endif
+
   MooseVariableFV<Real> & _var;
 
   const unsigned int _qp = 0;

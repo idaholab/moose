@@ -123,7 +123,23 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
   if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  DualReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+  ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto & derivs = r.derivatives();
+
+  const auto & column_indices = derivs.nude_indices();
+  const auto & values = derivs.nude_data();
+
+  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
+
+  const auto & row_indices = _var.dofIndices();
+  mooseAssert(row_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+  const auto row_index = row_indices[0];
+
+  for (std::size_t i = 0; i < column_indices.size(); ++i)
+    _assembly.cacheJacobianContribution(row_index, column_indices[i], values[i], _matrix_tags);
+#else
 
   // Even though the elem element is always the non-null pointer on mesh
   // external boundary faces, this could be an "internal" boundary - one
@@ -140,4 +156,5 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
     computeJacobian(Moose::NeighborNeighbor, r);
   else
     mooseError("should never get here");
+#endif
 }
