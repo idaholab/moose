@@ -20,7 +20,7 @@ which can be difficult to solve.
 
 ## Example Input Syntax
 
-!listing test/tests/kernels/vector_fe/electromagnetic_coulomb_gauge.i
+!listing test/tests/kernels/vector_fe/electromagnetic_coulomb_gauge.i block=BCs
 
 !syntax parameters /BCs/VectorPenaltyDirichletBC
 
