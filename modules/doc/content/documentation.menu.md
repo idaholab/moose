@@ -18,7 +18,6 @@
 !col! small=12 medium=6 large=4
 ## [Application Development [!icon!link]](application_development/index.md)
 
-- [Workshop](https://mooseframework.org/workshop)
 - [Source Pages](source/index.md)
 - [Jacobian Definition](/jacobian_definition.md)
 - [Hypre/BoomerAMG Preconditioning](hypre.md)

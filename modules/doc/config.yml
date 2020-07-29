@@ -31,7 +31,7 @@ Extensions:
         home: https://www.mooseframework.org
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
-            Getting Started: getting_started/index.md
+            Getting Started: getting_started.menu.md
             Documentation: documentation.menu.md
             Help: help.menu.md
             Gallery: /gallery.md

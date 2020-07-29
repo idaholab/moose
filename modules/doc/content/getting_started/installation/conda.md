@@ -15,6 +15,6 @@ and an experimental [WSL](installation/windows10.md) option is available.
 
 !include getting_started/installation/test_moose.md
 
-Head back over to the [getting_started/index.md optional=True] page to continue your tour of MOOSE.
+Head back over to the [getting_started/installation/index.md optional=True] page to continue your tour of MOOSE.
 
 !include installation/uninstall_conda.md
