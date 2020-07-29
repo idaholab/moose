@@ -79,7 +79,7 @@ getScatterVectorPostprocessorValue('the_vpp_parameter_name', 'the_vector_name')
 If the data in a VPP is naturally replicated on all processors a VectorPostprocessor should set `_auto_broadcast = false` in its `validParams()` like so:
 
 ```c++
-params.set<MooseEnum>("_auto_broadcast") = "false";
+params.set<bool>("_auto_broadcast") = "false";
 ```
 
 This tells MOOSE that the data is already replicated and there is no need to broadcast it if another object is asking for it to be broadcast.
