@@ -24,7 +24,8 @@ VectorPenaltyDirichletBC::validParams()
   params.addClassDescription("Enforces a Dirichlet boundary condition for "
                              "vector nonlinear variables in a weak sense by "
                              "applying a penalty to the difference in the "
-                             "current solution and the Dirichlet data.") return params;
+                             "current solution and the Dirichlet data.");
+  return params;
 }
 
 VectorPenaltyDirichletBC::VectorPenaltyDirichletBC(const InputParameters & parameters)
