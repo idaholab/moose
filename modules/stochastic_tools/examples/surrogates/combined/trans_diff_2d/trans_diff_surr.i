@@ -30,29 +30,29 @@
 []
 
 [Surrogates]
-  [pc_max]
-    type = PolynomialChaos
-    filename = 'trainer_out_pc_max.rd'
-  []
   [pc_min]
     type = PolynomialChaos
-    filename = 'trainer_out_pc_min.rd'
+    filename = 'trans_diff_trainer_out_pc_min.rd'
+  []
+  [pc_max]
+    type = PolynomialChaos
+    filename = 'trans_diff_trainer_out_pc_max.rd'
   []
   [pr_min]
     type = PolynomialRegressionSurrogate
-    filename = 'trainer_out_pr_min.rd'
+    filename = 'trans_diff_trainer_out_pr_min.rd'
   []
   [pr_max]
     type = PolynomialRegressionSurrogate
-    filename = 'trainer_out_pr_max.rd'
+    filename = 'trans_diff_trainer_out_pr_max.rd'
   []
   [np_min]
     type = NearestPointSurrogate
-    filename = 'trainer_out_np_min.rd'
+    filename = 'trans_diff_trainer_out_np_min.rd'
   []
   [np_max]
     type = NearestPointSurrogate
-    filename = 'trainer_out_np_max.rd'
+    filename = 'trans_diff_trainer_out_np_max.rd'
   []
 []
 
@@ -64,9 +64,11 @@
     sampler = sample
   []
   [pc_max_stats]
-    type = PolynomialChaosStatistics
-    pc_name = 'pc_max'
+    type = Statistics
+    vectorpostprocessors = pc_max_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
   [pc_min_res]
     type = EvaluateSurrogate
@@ -74,9 +76,11 @@
     sampler = sample
   []
   [pc_min_stats]
-    type = PolynomialChaosStatistics
-    pc_name = 'pc_min'
+    type = Statistics
+    vectorpostprocessors = pc_min_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
   [pr_max_res]
     type = EvaluateSurrogate
@@ -87,6 +91,8 @@
     type = Statistics
     vectorpostprocessors = pr_max_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
   [pr_min_res]
     type = EvaluateSurrogate
@@ -97,6 +103,8 @@
     type = Statistics
     vectorpostprocessors = pr_min_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
   [np_max_res]
     type = EvaluateSurrogate
@@ -107,6 +115,8 @@
     type = Statistics
     vectorpostprocessors = np_max_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
   [np_min_res]
     type = EvaluateSurrogate
@@ -117,16 +127,11 @@
     type = Statistics
     vectorpostprocessors = np_min_res
     compute = 'mean stddev'
+    ci_method = 'percentile'
+    ci_levels = '0.05'
   []
 []
 
 [Outputs]
   csv = true
-  [pgraph]
-    type = PerfGraphOutput
-    execute_on = 'initial final'  # Default is "final"
-    level = 4                    # Default is 1
-    heaviest_branch = true        # Default is false
-    heaviest_sections = 7         # Default is 0
-  []
 []
