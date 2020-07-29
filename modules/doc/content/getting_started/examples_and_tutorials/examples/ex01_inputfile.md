@@ -125,7 +125,7 @@ implement your own physics, you will need to understand the following:
   the "weak" form of for PDEs
 - [C++](help/c++/index.md) and object-oriented design
 - [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
-- Check out more [examples](examples/index.md)
+- Check out more [examples](examples_and_tutorials/index.md#examples)
 
 ## Complete Source Files
 
@@ -135,4 +135,3 @@ implement your own physics, you will need to understand the following:
 - [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/base/ExampleApp.C)
 - [Diffusion.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Diffusion.h)
 - [Diffusion.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Diffusion.C)
-

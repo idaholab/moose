@@ -2,7 +2,6 @@
 !col! small=12 medium=6 large=4
 ## [Application Usage [!icon!link]](application_usage/index.md)
 
-- [Examples](examples/index.md)
 - [Command-line Options](command_line_usage.md)
 - [Peacock](peacock.md)
 - [Troubleshooting Solves](failed_solves.md)
