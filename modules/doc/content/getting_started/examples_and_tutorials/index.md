@@ -48,7 +48,16 @@ TODO: we should use !content outline here, but only once its possible to not use
 
 ## Tutorials style=font-size:200%;font-weight:500; id=tutorials
 
-<!--Link to all tutorials here-->
+!gallery! large=6
+
+!card! tutorial01_app_development/moose_intro.png title=[1. Application Development [!icon!link]](tutorial01_app_development/index.md)
+Learn how to develop a MOOSE-based application to solve coupled systems of differential equations in a multiphysics setting. Our primary tutorial teaches you how to create custom MOOSE objects: `Kernels`, `Materials`, `BCs`, `Functions`, `Postprocessors`, and more. Also learn how to setup input files to invoke these objects and how to process and visualize the results of your simulations.
+!card-end!
+
+!card! media/phase_field/solutionrasterizer.png title=2. Phase Field Module
+Coming soon.
+!card-end!
+!gallery-end!
 
 ## Workshop style=font-size:200%;font-weight:500; id=lws
 

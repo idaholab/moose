@@ -20,6 +20,7 @@
 !col! small=12 medium=6 large=4
 ## [Examples and Tutorials [!icon!link]](getting_started/examples_and_tutorials/index.md)
 
+- [getting_started/examples_and_tutorials/tutorial01_app_development/index.md]
 - [Workshop Slides](https://www.mooseframework.org/workshop)
 - [Workshop Video](https://www.youtube.com/watch?v=2tJwBsYaLaI)
 !col-end!

@@ -75,7 +75,7 @@ You probably shouldn't simply enable all of the physics modules, because this wi
 ## Learn More
 
 Now that you have a working MOOSE Framework stack, consider checking out the [examples_and_tutorials/index.md] page for a beginning tour of how to use input
-files and implement your own custom behavior for MOOSE. You may also visit our [framework_development/index.md] to learn how to contribute to MOOSE.
+files and implement your own custom behavior for MOOSE. Our [first tutorial](tutorial01_app_development/index.md) demonstrates how MOOSE application development works. You may also visit our [framework_development/index.md] to learn how to contribute to MOOSE.
 
 ## Helpful Software id=helpful-software
 
