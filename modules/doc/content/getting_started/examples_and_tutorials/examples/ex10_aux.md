@@ -20,3 +20,6 @@
        caption=Example 10 Output
        style=width:50%;
 
+!content pagination use_title=True
+                    previous=examples/ex09_stateful_materials.md
+                    next=examples/ex11_prec.md

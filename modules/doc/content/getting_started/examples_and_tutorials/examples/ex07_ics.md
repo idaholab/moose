@@ -67,3 +67,6 @@ surfaces.
 - [examples/ex07_ics/transient.i]
 - [examples/ex07_ics/steady.i]
 
+!content pagination use_title=True
+                    previous=examples/ex06_transient.md
+                    next=examples/ex08_materials.md

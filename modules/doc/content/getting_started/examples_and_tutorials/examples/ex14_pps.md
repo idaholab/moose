@@ -46,3 +46,7 @@ Also present in Example 14 are two input files (`ex14_solution_comparison_1.i` a
 [ex14_compare_solutions_1.i](https://github.com/idaholab/moose/blob/devel/examples/ex14_pps/ex14_compare_solutions_1.i)
 
 [ex14_compare_solutions_2.i](https://github.com/idaholab/moose/blob/devel/examples/ex14_pps/ex14_compare_solutions_2.i)
+
+!content pagination use_title=True
+                    previous=examples/ex13_functions.md
+                    next=examples/ex15_actions.md

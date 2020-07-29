@@ -6,7 +6,7 @@
 
 ## Example 19 Results
 
-Damping = 1.0 
+Damping = 1.0
 
 ```text
     Outputting Initial Condition
@@ -14,10 +14,10 @@ Damping = 1.0
       NL step  0, |residual|_2 = 1.044031e+01
       NL step  1, |residual|_2 = 6.366756e-05
       NL step  2, |residual|_2 = 3.128450e-10
-    0: 3.128450e-10 
+    0: 3.128450e-10
 ```
 
-Damping = 0.9 
+Damping = 0.9
 
 ```text
     Outputting Initial Condition
@@ -35,3 +35,6 @@ Damping = 0.9
     0: 1.044031e-08
 ```
 
+!content pagination use_title=True
+                    previous=examples/ex18_scalar_kernel.md
+                    next=examples/ex20_user_objects.md

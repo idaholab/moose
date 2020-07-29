@@ -2,7 +2,7 @@
 
 The problem is time-dependent diffusion with Dirichlet boundary conditions of 0 on the left and 1 on the right. The diffusion coefficient being calculated bu the `Material` is dependent on the average value of a variable on each block. Thus, as the concentration diffuses, the diffusion coefficient increases, but the coefficient is different for each block (based on the average of the variable on that block).
 
-To achieve this, we need 3 objects working together : 
+To achieve this, we need 3 objects working together :
 
 -  `BlockAverageValue` : A `UserObject` that computes the average value of a variable on each block of the domain and provides `averageValue()` for retrieving the average value on a particular block.
 -  `BlockAverageDiffusionMaterial` : A `Material` that computes "diffusivity" based on the average value of a variable as computes by a `BlockAverageValue` `UserObject`.
@@ -69,3 +69,6 @@ This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex20_user_objects/src/base/ExampleApp.C)
 
+!content pagination use_title=True
+                    previous=examples/ex19_dampers.md
+                    next=examples/ex21_debugging.md

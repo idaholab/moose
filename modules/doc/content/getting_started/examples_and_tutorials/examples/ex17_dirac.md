@@ -19,3 +19,7 @@
 !media large_media/examples/ex17-dirac-out.png
        caption=Example 17 Results
        style=width:50%;
+
+!content pagination use_title=True
+                    previous=examples/ex16_timestepper.md
+                    next=examples/ex18_scalar_kernel.md

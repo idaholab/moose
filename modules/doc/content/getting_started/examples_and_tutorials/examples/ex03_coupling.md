@@ -126,3 +126,7 @@ u = \frac{\exp\left(\frac{x}{\epsilon}\right) - 1}{\exp\left(\frac{1}{\epsilon}\
 - [examples/ex03_coupling/include/kernels/ExampleConvection.h]
 - [examples/ex03_coupling/src/kernels/ExampleConvection.C]
 - [examples/ex03_coupling/src/base/ExampleApp.C]
+
+!content pagination use_title=True
+                    previous=examples/ex02_kernel.md
+                    next=examples/ex04_bcs.md

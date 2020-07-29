@@ -111,3 +111,6 @@ return _coupled_coef[_qp]*Diffusion::computeQpResidual();
 [](---)
 
 [ExampleDiffusion.C](https://github.com/idaholab/moose/blob/devel/examples/ex21_debugging/src/kernels/ExampleDiffusion.C)
+
+!content pagination use_title=True
+                    previous=examples/ex20_user_objects.md

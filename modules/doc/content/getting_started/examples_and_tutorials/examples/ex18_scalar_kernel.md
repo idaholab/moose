@@ -29,3 +29,7 @@
 
 !media large_media/examples/ex18-ode-plot.png
        style=width:50%;
+
+!content pagination use_title=True
+                    previous=examples/ex17_dirac.md
+                    next=examples/ex19_dampers.md

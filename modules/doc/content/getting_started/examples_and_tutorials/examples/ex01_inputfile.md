@@ -135,3 +135,6 @@ implement your own physics, you will need to understand the following:
 - [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex01_inputfile/src/base/ExampleApp.C)
 - [Diffusion.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/Diffusion.h)
 - [Diffusion.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/Diffusion.C)
+
+!content pagination use_title=True
+                    next=examples/ex02_kernel.md

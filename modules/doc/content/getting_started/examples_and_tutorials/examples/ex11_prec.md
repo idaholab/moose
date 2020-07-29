@@ -58,3 +58,7 @@ This will create a near-perfect preconditioning matrix; however, it is extremely
 [CoupledForce.h](https://github.com/idaholab/moose/blob/devel/framework/include/kernels/CoupledForce.h)
 
 [CoupledForce.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C)
+
+!content pagination use_title=True
+                    previous=examples/ex10_aux.md
+                    next=examples/ex12_pbp.md

@@ -24,7 +24,7 @@ each of the 6 refinement steps are shown below:
 
 !media large_media/examples/ex5-mesh-1.png
        style=width:50%;margin-left:0%;
-       caption=Adaptivity Step 1 
+       caption=Adaptivity Step 1
 
 !media large_media/examples/ex5-mesh-2.png
        caption=Adaptivity Step 2
@@ -58,3 +58,7 @@ And here is the final solution after all refinement steps are complete:
 - [examples/ex05_amr/ex05.i]
 - [examples/ex05_amr/include/kernels/ExampleCoefDiffusion.h]
 - [examples/ex05_amr/src/kernels/ExampleCoefDiffusion.C]
+
+!content pagination use_title=True
+                    previous=examples/ex04_bcs.md
+                    next=examples/ex06_transient.md

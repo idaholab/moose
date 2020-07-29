@@ -10,3 +10,6 @@
 
 [CoupledForce.C](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C)
 
+!content pagination use_title=True
+                    previous=examples/ex11_prec.md
+                    next=examples/ex13_functions.md

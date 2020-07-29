@@ -124,3 +124,7 @@ mesh via the `block = '...'` lines. These objects will provide the "diffused" an
 - [examples/ex08_materials/src/kernels/ExampleDiffusion.C]
 - [examples/ex08_materials/include/kernels/ExampleConvection.h]
 - [examples/ex08_materials/src/kernels/ExampleConvection.C]
+
+!content pagination use_title=True
+                    previous=examples/ex07_ics.md
+                    next=examples/ex09_stateful_materials.md

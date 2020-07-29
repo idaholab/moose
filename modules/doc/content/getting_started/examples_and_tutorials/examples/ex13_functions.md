@@ -12,3 +12,6 @@
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex13_functions/src/base/ExampleApp.C)
 
+!content pagination use_title=True
+                    previous=examples/ex12_pbp.md
+                    next=examples/ex14_pps.md

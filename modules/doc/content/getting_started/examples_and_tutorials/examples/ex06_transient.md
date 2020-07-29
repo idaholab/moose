@@ -54,3 +54,6 @@ Here are solution snapshots from the beginning and end times from running `ex06-
 - [examples/ex06_transient/src/kernels/ExampleTimeDerivative.C]
 - [examples/ex06_transient/src/base/ExampleApp.C]
 
+!content pagination use_title=True
+                    previous=examples/ex05_amr.md
+                    next=examples/ex07_ics.md

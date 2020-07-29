@@ -86,3 +86,7 @@ Peacock or an external application that supports the Exodus II format (e.g., Par
 - [examples/ex02_kernel/src/kernels/ExampleConvection.C]
 - [examples/ex02_kernel/src/base/ExampleApp.C]
 - [examples/ex02_kernel/ex02_oversample.i]
+
+!content pagination use_title=True
+                    previous=examples/ex01_inputfile.md
+                    next=examples/ex03_coupling.md
