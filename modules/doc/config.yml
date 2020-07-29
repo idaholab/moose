@@ -16,7 +16,7 @@ Content:
     - modules/porous_flow/doc/content
     - modules/rdg/doc/content
     - modules/richards/doc/content
-    - modules/solid_mechanics/doc/content
+  #  - modules/solid_mechanics/doc/content
     - modules/stochastic_tools/doc/content
     - modules/tensor_mechanics/doc/content
     - modules/xfem/doc/content
@@ -83,7 +83,6 @@ Extensions:
             #porous_flow: !include modules/porous_flow/doc/remove.yml
             #rdg: !include modules/rdg/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
-            solid_mechanics: !include modules/solid_mechanics/doc/remove.yml
             stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
             #tensor_mechanics: !include modules/tensor_mechanics/doc/remove.yml
             #xfem: !include modules/xfem/doc/remove.yml
