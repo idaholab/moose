@@ -8,7 +8,7 @@
 which enforces a weak sense of the Dirichlet boundary
 condition by setting the boundary as a penalty times the inner product of the
 test function and the difference between the current solution and Dirichlet
-data. This is given by $p(\\vec{u}^\\ast, \\vec{u} - \\vec{u}_0)$, where p is a
+data. This is given by $p(\vec{u}^\ast, \vec{u} - \vec{u}_0)$, where $p$ is a
 scalar defining the penalty value, $\vec{u}^\ast$ is the test function, and
 $\vec{u} - \vec{u}_0$ is the vector difference between the current solution and
 Dirichlet data.
