@@ -17,6 +17,7 @@ def make_extension(**kwargs):
 
 ColumnToken = tokens.newToken('ColumnToken', width='', small=12, medium=12, large=12)
 RowToken = tokens.newToken('RowToken')
+ScrollToken = tokens.newToken('ScrollToken', max_height='')
 
 class LayoutExtension(command.CommandExtension):
     """
@@ -34,9 +35,11 @@ class LayoutExtension(command.CommandExtension):
         self.requires(core, command, materialicon)
         self.addCommand(reader, RowCommand())
         self.addCommand(reader, ColumnCommand())
+        self.addCommand(reader, ScrollCommand())
 
         renderer.add('ColumnToken', RenderColumnToken())
         renderer.add('RowToken', RenderRowToken())
+        renderer.add('ScrollToken', RenderScrollToken())
 
 class RowCommand(command.CommandComponent):
     COMMAND = 'row'
@@ -89,6 +92,19 @@ class ColumnCommand(command.CommandComponent):
 
         return col
 
+class ScrollCommand(command.CommandComponent):
+    COMMAND = 'scroll'
+    SUBCOMMAND = None
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        settings['max-height'] = ('400px', "The default height for scrollbox content.")
+        return settings
+
+    def createToken(self, parent, info, page):
+        return ScrollToken(parent, max_height=self.settings['max-height'])
+
 class RenderRowToken(components.RenderComponent):
     def createHTML(self, parent, token, page):
         row = html.Tag(parent, 'div', token)
@@ -128,3 +144,20 @@ class RenderColumnToken(components.RenderComponent):
         if token is not token.parent.children[-1]:
             latex.Command(parent, 'hfill')
         return env
+
+class RenderScrollToken(components.RenderComponent):
+    def createHTML(self, parent, token, page):
+        return self.createHTMLHelper(parent, token, page)
+
+    def createMaterialize(self, parent, token, page):
+        return self.createHTMLHelper(parent, token, page)
+
+    def createHTMLHelper(self, parent, token, page):
+        box = html.Tag(parent, 'p', class_='moose-scrollbox')
+        scroll = html.Tag(box, 'div', token)
+        scroll.addStyle('overflow-y:scroll')
+        scroll.addStyle('max-height:{}'.format(token['max_height']))
+        return scroll
+
+    def createLatex(self, parent, token, page):
+        return parent
