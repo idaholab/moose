@@ -22,10 +22,10 @@ PorousFlow is distributed with MOOSE under the [Gnu Lesser General Public Licens
 
 ## Install
 
-PorousFlow comes packaged with the MOOSE framework.  To install MOOSE and PorousFlow, please follow the instructions at https://mooseframework.org/getting_started/index.html.  After building and testing MOOSE you will need to build PorousFlow, which is an easy step:
+PorousFlow comes packaged with the MOOSE framework.  To install MOOSE and PorousFlow, please follow the instructions at https://mooseframework.org/modules/porous_flow/getting_started_with_pf.html. After building and testing MOOSE you will need to build PorousFlow, which is an easy step:
 
 ``
-cd <path_to_moose>/modules/porous_flow ; 
+cd <path_to_moose>/modules/porous_flow ;
 make
 ``
 

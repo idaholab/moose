@@ -5,7 +5,7 @@
 This example builds on Example 1 and introduces how to create a custom `Kernel`, which is the
 mechanism for adding your physics into `MOOSE`.  You can either follow along with the files in
 `examples` directory in the MOOSE repository or you can create your own app as explained
-[here](getting_started/index.md#create-an-app). When you are ready to build custom physics and
+[here](getting_started/new_users.md#create-an-app). When you are ready to build custom physics and
 code for you own physics/problems, you should work in your own MOOSE-based application.
 
 ## Problem Statement
