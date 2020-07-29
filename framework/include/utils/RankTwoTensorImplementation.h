@@ -923,7 +923,8 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
 
       iter++;
       if (iter > 30)
-        break;
+        mooseError("Diverged when computing the eigenvalues and eigenvectors for a symmetric "
+                   "rank-2 tensor");
     }
   }
 
