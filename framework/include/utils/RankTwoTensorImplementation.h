@@ -875,24 +875,57 @@ void
 ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigvals,
                                                   ADRankTwoTensor & eigvecs) const
 {
-  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE;
+  Real maximum_absolute_offdiag_entry;
+  if (N == 2)
+    maximum_absolute_offdiag_entry = std::abs((*this)(1, 0).value());
+  else if (N == 3)
+    maximum_absolute_offdiag_entry =
+        std::max(std::max(std::abs((*this)(1, 0).value()), std::abs((*this)(2, 0).value())),
+                 std::abs((*this)(2, 1).value()));
+  else
+    mooseException("RankTwoTensor::symmetricEigenvaluesEigenvectors(): unsupported N.");
+
+  const Real eps =
+      std::max(libMesh::TOLERANCE * libMesh::TOLERANCE * maximum_absolute_offdiag_entry,
+               libMesh::TOLERANCE * libMesh::TOLERANCE);
 
   eigvals.resize(N);
   ADRankTwoTensor D, Q, R;
-  this->hessenberg(D, eigvecs);
 
-  unsigned int iter = 0;
+  this->hessenberg(D, eigvecs, eps);
+
+  DualReal shift;
+
   for (unsigned m = N - 1; m > 0; m--)
-    do
+  {
+    unsigned int iter = 0;
+    bool converged = false;
+    while (!converged)
     {
-      iter++;
-      auto shift = D(m, m);
+      shift = D(m, m);
+      if (std::abs(shift) < eps)
+      {
+        shift = std::max(std::abs(D(m - 1, m)), std::abs(D(m - 1, m - 1)));
+        if (std::abs(shift) < eps)
+          shift = 1.0;
+      }
+      if (std::abs(D(m - 1, m - 1) - shift) < eps)
+        shift = 0.0;
+
       D.addIa(-shift);
-      D.QR(Q, R, m + 1);
+      D.QR(Q, R, m + 1, eps);
       D = R * Q;
       D.addIa(shift);
       eigvecs = eigvecs * Q;
-    } while (std::abs(D(m, m - 1)) > eps);
+
+      // check for convergence
+      converged = std::abs(D(m, m - 1)) > eps ? false : true;
+
+      iter++;
+      if (iter > 30)
+        break;
+    }
+  }
 
   for (unsigned int i = 0; i < N; i++)
     eigvals[i] = D(i, i);
@@ -901,7 +934,7 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
   for (unsigned int i = 0; i < N - 1; i++)
   {
     unsigned int k = i;
-    auto p = eigvals[i];
+    DualReal p = eigvals[i];
     for (unsigned int j = i + 1; j < N; j++)
       if (eigvals[j] < p)
       {
@@ -938,7 +971,9 @@ RankTwoTensorTempl<T>::permutationTensor(
 
 template <typename T>
 void
-RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const
+RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H,
+                                  RankTwoTensorTempl<T> & U,
+                                  const Real eps) const
 {
   if (N < 3)
     return;
@@ -947,59 +982,31 @@ RankTwoTensorTempl<T>::hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<
   U.zero();
   U.addIa(1.0);
 
-  RankTwoTensorTempl<T> R = this->givensRotation(N - 2, N - 1, 0);
-  H = R * H * R.transpose();
-  U = U * R.transpose();
+  const RankTwoTensorTempl<T> G = H.givensRotation(N - 2, N - 1, 0, eps);
+  H = G * H * G.transpose();
+  U = U * G.transpose();
 }
 
 template <typename T>
 void
 RankTwoTensorTempl<T>::QR(RankTwoTensorTempl<T> & Q,
                           RankTwoTensorTempl<T> & R,
-                          unsigned int dim) const
+                          const unsigned int dim,
+                          const Real eps) const
 {
   R = *this;
   Q.zero();
   Q.addIa(1.0);
 
-  for (unsigned int i = 0; i < dim - 1; i++)
-    for (unsigned int b = dim - 1; b > i; b--)
+  RankTwoTensorTempl<T> CS;
+
+  unsigned int a, b, i;
+
+  for (i = 0; i < dim - 1; i++)
+    for (b = dim - 1; b > i; b--)
     {
-      unsigned int a = b - 1;
-
-      // special case when both entries to rotate are zero
-      // in which case the dual numbers cannot be rotated
-      // therefore we need to find another nonzero entry to permute
-      RankTwoTensorTempl<T> P(initIdentity);
-      if (MooseUtils::absoluteFuzzyEqual(R(a, i), 0.0) &&
-          MooseUtils::absoluteFuzzyEqual(R(b, i), 0.0))
-      {
-        unsigned int c = 3 - a - b;
-        if (!MooseUtils::absoluteFuzzyEqual(R(c, i), 0.0))
-          P = this->permutationTensor({{a, b, c}}, {{c, b, a}});
-      }
-
-      Q = Q * P.transpose();
-      R = P * R;
-      RankTwoTensorTempl<T> CS = R.givensRotation(a, b, i);
-      R = P.transpose() * CS * R;
-      Q = Q * CS.transpose() * P;
-    }
-}
-
-template <>
-void
-RankTwoTensor::QR(RankTwoTensor & Q, RankTwoTensor & R, unsigned int dim) const
-{
-  R = *this;
-  Q.zero();
-  Q.addIa(1.0);
-
-  for (unsigned int i = 0; i < dim - 1; i++)
-    for (unsigned int b = dim - 1; b > i; b--)
-    {
-      unsigned int a = b - 1;
-      RankTwoTensor CS = R.givensRotation(a, b, i);
+      a = b - 1;
+      CS = R.givensRotation(a, b, i, eps);
       R = CS * R;
       Q = Q * CS.transpose();
     }

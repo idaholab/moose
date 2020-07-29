@@ -446,18 +446,21 @@ public:
    */
   template <typename T2 = T>
   typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
-  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
+  givensRotation(unsigned int row1, unsigned int row2, unsigned int col, Real eps) const;
   template <typename T2 = T>
   typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
-  givensRotation(unsigned int, unsigned int, unsigned int) const;
+  givensRotation(unsigned int, unsigned int, unsigned int, Real) const;
 
   /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
-  void hessenberg(RankTwoTensorTempl<T> & H, RankTwoTensorTempl<T> & U) const;
+  void hessenberg(RankTwoTensorTempl<T> & H,
+                  RankTwoTensorTempl<T> & U,
+                  const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 
   /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
   void QR(RankTwoTensorTempl<T> & Q,
           RankTwoTensorTempl<T> & R,
-          unsigned int dim = RankTwoTensorTempl<T>::N) const;
+          const unsigned int dim = RankTwoTensorTempl<T>::N,
+          const Real eps = libMesh::TOLERANCE * libMesh::TOLERANCE) const;
 
   /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
@@ -594,24 +597,24 @@ RankTwoTensorTempl<T>::operator-(const TypeTensor<T2> & b) const
 
 template <typename T>
 template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const T2 & b) const
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const T2 & b) const
 {
   return TensorValue<T>::operator*(b);
 }
 
 template <typename T>
 template <typename T2>
-TypeVector<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const TypeVector<T2> & b) const
+TypeVector<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const TypeVector<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }
 
 template <typename T>
 template <typename T2>
-RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> RankTwoTensorTempl<T>::
-operator*(const TypeTensor<T2> & b) const
+RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
+    RankTwoTensorTempl<T>::operator*(const TypeTensor<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }
@@ -689,35 +692,38 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> &,
 template <typename T>
 template <typename T2>
 typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
-RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const
+RankTwoTensorTempl<T>::givensRotation(unsigned int row1,
+                                      unsigned int row2,
+                                      unsigned int col,
+                                      Real eps) const
 {
   T c, s;
-  T a = (*this)(row1, col);
-  T b = (*this)(row2, col);
+  const T a = (*this)(row1, col);
+  const T b = (*this)(row2, col);
+  RankTwoTensorTempl<T> R(initIdentity);
 
-  if (MooseUtils::absoluteFuzzyEqual(b, 0.0) && MooseUtils::absoluteFuzzyEqual(a, 0.0))
+  if (std::abs(b) < eps && std::abs(a) < eps)
   {
-    c = a < 0.0 ? -1.0 : 1.0;
+    c = 1.0;
     s = 0.0;
   }
   else if (std::abs(a) > std::abs(b))
   {
-    T t = b / a;
-    Real sgn = a < 0.0 ? -1.0 : 1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
+    const T t = b / a;
+    const Real sgn = a >= 0.0 ? 1.0 : -1.0;
+    const T u = sgn * std::sqrt(1.0 + t * t);
     c = 1.0 / u;
     s = c * t;
   }
   else
   {
-    T t = a / b;
-    Real sgn = b < 0.0 ? -1.0 : 1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
+    const T t = a / b;
+    const Real sgn = b >= 0.0 ? 1.0 : -1.0;
+    const T u = sgn * std::sqrt(1.0 + t * t);
     s = 1.0 / u;
     c = s * t;
   }
 
-  RankTwoTensorTempl<T> R(initIdentity);
   R(row1, row1) = c;
   R(row1, row2) = s;
   R(row2, row1) = -s;
@@ -729,7 +735,7 @@ RankTwoTensorTempl<T>::givensRotation(unsigned int row1, unsigned int row2, unsi
 template <typename T>
 template <typename T2>
 typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, RankTwoTensorTempl<T>>::type
-RankTwoTensorTempl<T>::givensRotation(unsigned int, unsigned int, unsigned int) const
+RankTwoTensorTempl<T>::givensRotation(unsigned int, unsigned int, unsigned int, Real) const
 {
   mooseError("givensRotation is only available for ordered tensor component types");
 }
