@@ -27,7 +27,7 @@
 []
 
 [Variables]
-  [u]
+  [T]
     initial_condition = 300
   []
 []
@@ -35,18 +35,18 @@
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = u
+    variable = T
     diffusivity = diff_coeff
   []
   [source]
     type = BodyForce
-    variable = u
+    variable = T
     function = src_func
     block = 1
   []
   [time_deriv]
     type = TimeDerivative
-    variable = u
+    variable = T
   []
 []
 
@@ -54,17 +54,17 @@
   [diff_coeff]
     type = ParsedMaterial
     f_name = diff_coeff
-    args = 'u'
+    args = 'T'
     constant_names = 'C'
     constant_expressions = 0.02
-    function = 'C * pow(300/u, 2)'
+    function = 'C * pow(300/T, 2)'
   []
 []
 
 [BCs]
   [neumann_all]
     type = NeumannBC
-    variable = u
+    variable = T
     boundary = 'left right top bottom'
     value = 0
   []
@@ -85,11 +85,11 @@
 [Postprocessors]
   [max]
     type = NodalExtremeValue
-    variable = u
+    variable = T
   []
   [min]
     type = NodalExtremeValue
-    variable = u
+    variable = T
     value_type = min
   []
   [time_max]
