@@ -1,31 +1,51 @@
 [Tests]
-  design = nonlin_parameter_study.md
-  issues = '#14933'
+  design = combined_example_2d_trans_diff.md
+  issues = '#15672'
 
-  requirement = "The system shall include an example demonstrating a second stochastic parameter study with parameters that are "
+  requirement = "The system shall include an example demonstrating a combined surrogate-based uncertainty quantification "
 
-  [parameter_study_uniform]
+  [reference]
     type = CSVDiff
-    input = nonlin_diff_react_master_uniform.i
-    allow_test_objects = true
-    cli_args = "Samplers/hypercube/num_rows=5
-                Samplers/hypercube/num_bins=3
-                runner:Mesh/gen/nx=10
-                runner:Mesh/gen/ny=10"
-    csvdiff = 'nonlin_diff_react_master_uniform_out_results_0002.csv nonlin_diff_react_master_uniform_out_stats_0002.csv'
+    input = trans_diff_main.i
+    cli_args = "Samplers/hypercube/num_rows=3
+                Samplers/hypercube/num_bins=1
+                runner:Mesh/msh/nx=10
+                runner:Mesh/msh/ny=10
+                runner:Executioner/num_steps=2"
+    csvdiff = 'trans_diff_main_out_results_0001.csv trans_diff_main_out_stats_0001.csv'
 
-    detail = "uniformly distributed and "
+    detail = "with computing reference solutions "
   []
-  [parameter_study_normal]
-    type = CSVDiff
-    input = nonlin_diff_react_master_normal.i
-    allow_test_objects = true
-    cli_args = "Samplers/hypercube/num_rows=5
-                Samplers/hypercube/num_bins=3
-                runner:Mesh/gen/nx=10
-                runner:Mesh/gen/ny=10"
-    csvdiff = 'nonlin_diff_react_master_normal_out_results_0002.csv nonlin_diff_react_master_normal_out_stats_0002.csv'
+  [train]
+    type = CheckFiles
+    input = trans_diff_trainer.i
+    cli_args = "Samplers/sample/order=1
+                Trainers/pc_max/order=1
+                Trainers/pc_min/order=1
+                Trainers/pr_max/max_degree=1
+                Trainers/pr_min/max_degree=1
+                runner:Mesh/msh/nx=10
+                runner:Mesh/msh/ny=10
+                runner:Executioner/num_steps=2"
+    check_files = 'trans_diff_trainer_out_np_max.rd trans_diff_trainer_out_np_min.rd
+                   trans_diff_trainer_out_pc_max.rd trans_diff_trainer_out_pc_min.rd
+                   trans_diff_trainer_out_pr_max.rd trans_diff_trainer_out_pr_min.rd'
 
-    detail = "normally distributed."
+    detail = "then training surrogate models "
+  []
+  [evaluate]
+    type = CSVDiff
+    input = trans_diff_surr.i
+    cli_args = "Samplers/sample/num_rows=10
+                Samplers/sample/num_bins=1"
+    csvdiff = 'trans_diff_surr_out_np_max_stats_0001.csv trans_diff_surr_out_np_max_res_0001.csv
+               trans_diff_surr_out_np_min_stats_0001.csv trans_diff_surr_out_np_min_res_0001.csv
+               trans_diff_surr_out_pc_min_stats_0001.csv trans_diff_surr_out_pc_min_res_0001.csv
+               trans_diff_surr_out_pc_max_stats_0001.csv trans_diff_surr_out_pc_max_res_0001.csv
+               trans_diff_surr_out_pr_min_stats_0001.csv trans_diff_surr_out_pr_min_res_0001.csv
+               trans_diff_surr_out_pr_max_stats_0001.csv trans_diff_surr_out_pr_max_res_0001.csv'
+    prereq = train
+
+    detail = "and evaluating the surrogate models"
   []
 []

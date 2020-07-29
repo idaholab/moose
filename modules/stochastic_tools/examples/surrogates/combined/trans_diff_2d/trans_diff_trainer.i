@@ -41,7 +41,7 @@
     type = MultiAppCommandLineControl
     multi_app = runner
     sampler = sample
-    param_names = 'Materials/diff_coeff/constant_expressions Functions/src_func/vals Variables/u/initial_condition'
+    param_names = 'Materials/diff_coeff/constant_expressions Functions/src_func/vals Variables/T/initial_condition'
   []
 []
 
@@ -119,12 +119,5 @@
     type = SurrogateTrainerOutput
     trainers = 'pc_max pc_min np_max np_min pr_max pr_min'
     execute_on = FINAL
-  []
-  [pgraph]
-    type = PerfGraphOutput
-    execute_on = 'initial final'  # Default is "final"
-    level = 4                    # Default is 1
-    heaviest_branch = true        # Default is false
-    heaviest_sections = 7         # Default is 0
   []
 []

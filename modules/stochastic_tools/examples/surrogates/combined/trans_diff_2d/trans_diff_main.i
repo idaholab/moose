@@ -42,7 +42,7 @@
     type = MultiAppCommandLineControl
     multi_app = runner
     sampler = hypercube
-    param_names = 'Materials/diff_coeff/constant_expressions Functions/src_func/vals Variables/u/initial_condition'
+    param_names = 'Materials/diff_coeff/constant_expressions Functions/src_func/vals Variables/T/initial_condition'
   []
 []
 
@@ -71,11 +71,4 @@
 
 [Outputs]
   csv = true
-  [pgraph]
-    type = PerfGraphOutput
-    execute_on = 'initial final'  # Default is "final"
-    level = 4                    # Default is 1
-    heaviest_branch = true        # Default is false
-    heaviest_sections = 7         # Default is 0
-  []
 []
