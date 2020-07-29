@@ -598,7 +598,7 @@ RankTwoTensorTempl<T>::operator-(const TypeTensor<T2> & b) const
 template <typename T>
 template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type>
 RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-    RankTwoTensorTempl<T>::operator*(const T2 & b) const
+RankTwoTensorTempl<T>::operator*(const T2 & b) const
 {
   return TensorValue<T>::operator*(b);
 }
@@ -606,7 +606,7 @@ RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
 template <typename T>
 template <typename T2>
 TypeVector<typename CompareTypes<T, T2>::supertype>
-    RankTwoTensorTempl<T>::operator*(const TypeVector<T2> & b) const
+RankTwoTensorTempl<T>::operator*(const TypeVector<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }
@@ -614,7 +614,7 @@ TypeVector<typename CompareTypes<T, T2>::supertype>
 template <typename T>
 template <typename T2>
 RankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-    RankTwoTensorTempl<T>::operator*(const TypeTensor<T2> & b) const
+RankTwoTensorTempl<T>::operator*(const TypeTensor<T2> & b) const
 {
   return TensorValue<T>::operator*(b);
 }
