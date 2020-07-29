@@ -654,7 +654,7 @@ class TestHarness:
 
                         # Yes, by design test dir will be apart of the output file name
                         output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
-                                                                         job.getTestNameShort(),
+                                                                         job.getTestNameShort().replace(os.sep, '.'),
                                                                          status,
                                                                          'txt']))
 
