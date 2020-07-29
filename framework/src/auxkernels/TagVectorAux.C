@@ -18,7 +18,7 @@ TagVectorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
-  params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
+  params.addRequiredParam<std::string>("vector_tag", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
