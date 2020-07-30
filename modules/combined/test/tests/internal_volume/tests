@@ -67,7 +67,7 @@
     type = 'CSVDiff'
     input = 'hex8.i'
     csvdiff = 'hex8_out.csv'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for solid_mechanics'
+    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for mechanics models'
   [../]
 
   [./rz_displaced]

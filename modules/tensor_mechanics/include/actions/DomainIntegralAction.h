@@ -139,8 +139,6 @@ protected:
   bool _output_q;
   /// Vector of ids for the individual rings on which the fracture integral is computed
   std::vector<unsigned int> _ring_vec;
-  /// Whether the deprecated solid_mechanics system is used for mechanics calculations
-  bool _solid_mechanics;
   /// Whether the constitutive models for the mechanics calculations use an incremental form
   bool _incremental;
   /// Whether to convert the J-integral to a stress intensity factor (K) --deprecated

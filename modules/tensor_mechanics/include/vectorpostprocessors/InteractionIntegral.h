@@ -82,9 +82,9 @@ protected:
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
   /// Pointer to the stress tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> * const _stress;
+  const MaterialProperty<RankTwoTensor> & _stress;
   /// Pointer to the strain tensor computed by the material models
-  const MaterialProperty<RankTwoTensor> * const _strain;
+  const MaterialProperty<RankTwoTensor> & _strain;
   /// Vector of all coupled variables
   std::vector<MooseVariableFEBase *> _fe_vars;
   /// FEType object defining order and family of displacement variables
