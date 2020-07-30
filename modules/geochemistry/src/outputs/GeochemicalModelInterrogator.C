@@ -15,9 +15,9 @@
 registerMooseObject("GeochemistryApp", GeochemicalModelInterrogator);
 
 InputParameters
-GeochemicalModelInterrogator::validParams()
+GeochemicalModelInterrogator::sharedParams()
 {
-  InputParameters params = Output::validParams();
+  InputParameters params = emptyInputParameters();
   params.addRequiredParam<UserObjectName>("model_definition",
                                           "The name of the GeochemicalModelDefinition user object");
   params.addParam<std::vector<std::string>>(
@@ -69,6 +69,14 @@ GeochemicalModelInterrogator::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
+  return params;
+}
+
+InputParameters
+GeochemicalModelInterrogator::validParams()
+{
+  InputParameters params = Output::validParams();
+  params += GeochemicalModelInterrogator::sharedParams();
   params.addClassDescription("Performing simple manipulations of and querying a "
                              "geochemical model");
 

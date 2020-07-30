@@ -20,6 +20,9 @@
 class GeochemicalModelInterrogator : public Output, public UserObjectInterface
 {
 public:
+  /// params that are shared with the AddGeochemicalModelInterrogatorAction
+  static InputParameters sharedParams();
+
   static InputParameters validParams();
 
   GeochemicalModelInterrogator(const InputParameters & parameters);

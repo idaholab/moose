@@ -10,11 +10,9 @@
 #include "GeochemistryReactorBase.h"
 
 InputParameters
-GeochemistryReactorBase::validParams()
+GeochemistryReactorBase::sharedParams()
 {
-  InputParameters params = NodalUserObject::validParams();
-  params.addRequiredParam<UserObjectName>(
-      "model_definition", "The name of the GeochemicalModelDefinition user object.");
+  InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::string>>(
       "swap_out_of_basis",
       "Species that should be removed from the model_definition's basis and be replaced with the "
@@ -49,14 +47,6 @@ GeochemistryReactorBase::validParams()
       0,
       "Extra iterations to make the molalities, activities, etc, consistent "
       "before commencing the Newton process to find the aqueous configuration");
-  params.addRangeCheckedParam<Real>(
-      "stoichiometry_tolerance",
-      1E-6,
-      "stoichiometry_tolerance >= 0.0",
-      "Swapping involves inverting matrices via a singular value decomposition. During this "
-      "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
-      "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
-      "stoichiometric coefficient) < stoi_tol then it is set to zero.");
   params.addRequiredParam<std::string>(
       "charge_balance_species",
       "Charge balance will be enforced on this basis species.  This means that its bulk mole "
@@ -126,6 +116,25 @@ GeochemistryReactorBase::validParams()
                         "If set to true, the stoichiometric ionic strength will be set equal to "
                         "Cl- molality (or max_ionic_strength if the Cl- molality is too "
                         "big).  This flag overrides ionic_str_using_basis_molality_only");
+  return params;
+}
+
+InputParameters
+GeochemistryReactorBase::validParams()
+{
+  InputParameters params = NodalUserObject::validParams();
+  params += GeochemistryReactorBase::sharedParams();
+
+  params.addRequiredParam<UserObjectName>(
+      "model_definition", "The name of the GeochemicalModelDefinition user object.");
+  params.addRangeCheckedParam<Real>(
+      "stoichiometry_tolerance",
+      1E-6,
+      "stoichiometry_tolerance >= 0.0",
+      "Swapping involves inverting matrices via a singular value decomposition. During this "
+      "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
+      "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
+      "stoichiometric coefficient) < stoi_tol then it is set to zero.");
   params.addClassDescription("Base class for UserObject to solve geochemistry reactions");
   return params;
 }

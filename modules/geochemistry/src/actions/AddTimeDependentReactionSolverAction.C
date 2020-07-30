@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AddTimeDependentReactionSolverAction.h"
+#include "GeochemistryTimeDependentReactor.h"
 #include "FEProblem.h"
 
 registerMooseAction("GeochemistryApp", AddTimeDependentReactionSolverAction, "setup_mesh");
@@ -25,80 +26,7 @@ InputParameters
 AddTimeDependentReactionSolverAction::validParams()
 {
   InputParameters params = AddGeochemistrySolverAction::validParams();
-  params.addParam<unsigned>(
-      "ramp_max_ionic_strength_subsequent",
-      0,
-      "The number of iterations over which to progressively increase the maximum ionic strength "
-      "(from zero to max_ionic_strength) during time-stepping.  Unless a great deal occurs in each "
-      "time step, this parameter can be set quite small");
-  params.addParam<Real>("initial_temperature",
-                        25.0,
-                        "The initial aqueous solution is equilibrated at this system before adding "
-                        "reactants, changing temperature, etc.");
-  params.addCoupledVar(
-      "temperature",
-      25,
-      "Temperature.  Note, this has two different meanings.  (1) If no species are being added to "
-      "the solution (no source_species_rates are positive) then this is the temperature of the "
-      "aqueous solution.  (2) If species are being added, this is the temperature of the species "
-      "being added.  In case (2), the final aqueous-solution temperature is computed assuming the "
-      "species are added, temperature is equilibrated and then, if species are also being removed, "
-      "they are removed.  If you wish to add species and simultaneously alter the temperature, you "
-      "will have to use a sequence of heat-add-heat-add, etc steps");
-  params.addParam<Real>("close_system_at_time",
-                        0.0,
-                        "Time at which to 'close' the system, that is, change a kg_solvent_water "
-                        "constraint to moles_bulk_water, and all free_molality and "
-                        "free_moles_mineral_species to moles_bulk_species");
-  params.addParam<std::vector<std::string>>(
-      "remove_fixed_activity_name",
-      "The name of the species that should have their activity or fugacity constraint removed at "
-      "time given in remove_fixed_activity_time.  There should be an equal number of these names "
-      "as times given in remove_fixed_activity_time");
-  params.addParam<std::vector<Real>>("remove_fixed_activity_time",
-                                     "The times at which the species in remove_fixed_activity_name "
-                                     "should have their activity or fugacity constraint removed.");
-  params.addParam<std::vector<std::string>>(
-      "source_species_names",
-      "The name of the species that are added at rates given in source_species_rates.  There must "
-      "be an equal number of these as source_species_rates.");
-  params.addCoupledVar("source_species_rates",
-                       "Rates, in mols/time_unit, of addition of the species with names given in "
-                       "source_species_names.  A negative value corresponds to removing a species: "
-                       "be careful that you don't cause negative mass problems!");
-  params.addParam<std::vector<std::string>>(
-      "controlled_activity_name",
-      "The names of the species that have their activity or fugacity constrained.  There should be "
-      "an equal number of these names as values given in controlled_activity_value");
-  params.addCoupledVar("controlled_activity_value",
-                       "Values of the activity or fugacity of the species in "
-                       "controlled_activity_name list.  These should always be positive");
-  params.addCoupledVar(
-      "mode",
-      0.0,
-      "This may vary temporally.  If mode=1 then 'dump' mode is used, which means "
-      "all mineral masses are removed from the system before the equilibrium solution is sought "
-      "(ie, removal occurs at the beginning of the time step).  If mode=2 then 'flow-through' mode "
-      "is used, which means all mimeral masses are removed from the system after it the equilbrium "
-      "solution has been found (ie, at the end of a time step).  If mode=3 then 'flush' mode is "
-      "used, then before the equilibrium solution is sought (ie, at the start of a time step) "
-      "water+species is removed from the system at the same rate as pure water + non-mineral "
-      "solutes are entering the system (specified in source_species_rates).  If mode is any other "
-      "number, no special mode is active (the system simply responds to the source_species_rates, "
-      "controlled_activity_value, etc).");
-  params.addParam<bool>(
-      "evaluate_kinetic_rates_always",
-      true,
-      "If true, then, evaluate the kinetic rates at every Newton step during the solve using the "
-      "current values of molality, activity, etc (ie, implement an implicit solve).  If false, "
-      "then evaluate the kinetic rates using the values of molality, activity, etc, at the start "
-      "of the current time step (ie, implement an explicit solve)");
-  params.addParam<std::vector<std::string>>(
-      "kinetic_species_name",
-      "Names of the kinetic species given initial values in kinetic_species_initial_moles");
-  params.addParam<std::vector<Real>>(
-      "kinetic_species_initial_moles",
-      "Initial number of moles for each of the species named in kinetic_species_name");
+  params += GeochemistryTimeDependentReactor::sharedParams();
   params.addClassDescription(
       "Action that sets up a time-dependent equilibrium reaction solver.  This creates creates a "
       "time-dependent geochemistry solver, and adds AuxVariables corresonding to the molalities, "

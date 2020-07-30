@@ -3,9 +3,9 @@
 registerMooseObject("GeochemistryApp", GeochemistryTimeDependentReactor);
 
 InputParameters
-GeochemistryTimeDependentReactor::validParams()
+GeochemistryTimeDependentReactor::sharedParams()
 {
-  InputParameters params = GeochemistryReactorBase::validParams();
+  InputParameters params = emptyInputParameters();
   params.addParam<unsigned>(
       "ramp_max_ionic_strength_subsequent",
       0,
@@ -78,14 +78,22 @@ GeochemistryTimeDependentReactor::validParams()
       "current values of molality, activity, etc (ie, implement an implicit solve).  If false, "
       "then evaluate the kinetic rates using the values of molality, activity, etc, at the start "
       "of the current time step (ie, implement an explicit solve)");
-  params.addClassDescription("UserObject that controls the time-dependent geochemistry reaction "
-                             "processes.  Spatial dependence is not possible using this class");
   params.addParam<std::vector<std::string>>(
       "kinetic_species_name",
       "Names of the kinetic species given initial values in kinetic_species_initial_moles");
   params.addParam<std::vector<Real>>(
       "kinetic_species_initial_moles",
       "Initial number of moles for each of the species named in kinetic_species_name");
+  return params;
+}
+
+InputParameters
+GeochemistryTimeDependentReactor::validParams()
+{
+  InputParameters params = GeochemistryReactorBase::validParams();
+  params += GeochemistryTimeDependentReactor::sharedParams();
+  params.addClassDescription("UserObject that controls the time-dependent geochemistry reaction "
+                             "processes.  Spatial dependence is not possible using this class");
   return params;
 }
 

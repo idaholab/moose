@@ -18,6 +18,9 @@
 class GeochemistryTimeDependentReactor : public GeochemistryReactorBase
 {
 public:
+  /// params that are shared with AddTimeDependentReactionSolverAction
+  static InputParameters sharedParams();
+
   static InputParameters validParams();
   GeochemistryTimeDependentReactor(const InputParameters & parameters);
   virtual void initialize() override;

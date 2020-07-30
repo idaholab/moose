@@ -9,6 +9,8 @@
 
 #include "AddGeochemistrySolverAction.h"
 #include "GeochemicalModelDefinition.h"
+#include "GeochemistryReactorBase.h"
+#include "GeochemistryConsoleOutput.h"
 
 registerMooseAction("GeochemistryApp", AddGeochemistrySolverAction, "add_output");
 registerMooseAction("GeochemistryApp",
@@ -19,47 +21,16 @@ InputParameters
 AddGeochemistrySolverAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addRequiredParam<UserObjectName>("model_definition",
-                                          "The name of the GeochemicalModelDefinition user object "
-                                          "(you must create this UserObject yourself)");
   params.addParam<UserObjectName>(
       "geochemistry_reactor_name",
       "geochemistry_reactor",
       "The name that will be given to the GeochemistryReactor UserObject built by this action");
-  params.addParam<std::vector<std::string>>(
-      "swap_out_of_basis",
-      "Species that should be removed from the model_definition's basis and be replaced with the "
-      "swap_into_basis species");
-  params.addParam<std::vector<std::string>>(
-      "swap_into_basis",
-      "Species that should be removed from the model_definition's equilibrium species list and "
-      "added to the basis.  There must be the same number of species in swap_out_of_basis and "
-      "swap_into_basis.  These swaps are performed before any other computations during the "
-      "initial problem setup. If this list contains more than one species, the swapping is "
-      "performed one-by-one, starting with the first pair (swap_out_of_basis[0] and "
-      "swap_into_basis[0]), then the next pair, etc");
-  MultiMooseEnum constraint_meaning("moles_bulk_water kg_solvent_water moles_bulk_species "
-                                    "free_molality free_moles_mineral_species fugacity activity");
-  params.addRequiredParam<MultiMooseEnum>(
-      "constraint_meaning",
-      constraint_meaning,
-      "Meanings of the numerical values given in constraint_value");
-  params.addRequiredParam<std::vector<std::string>>(
-      "constraint_species",
-      "Names of the species that have their values fixed to constraint_value with meaning "
-      "constraint_meaning.  All basis species (after swap_into_basis and swap_out_of_basis) must "
-      "be provided with exactly one constraint.  These constraints are used to compute the "
-      "configuration during the initial problem setup, and in time-dependent simulations they may "
-      "be modified as time progresses.");
-  params.addRequiredParam<std::vector<Real>>(
-      "constraint_value", "Numerical value of the containts on constraint_species");
-  params.addRangeCheckedParam<Real>(
-      "max_ionic_strength", 3.0, "max_ionic_strength >= 0.0", "Maximum value of ionic strength");
-  params.addParam<unsigned>(
-      "extra_iterations_to_make_consistent",
-      0,
-      "Extra iterations to make the molalities, activities, etc, consistent "
-      "before commencing the Newton process to find the aqueous configuration");
+
+  params.addRequiredParam<UserObjectName>("model_definition",
+                                          "The name of the GeochemicalModelDefinition user object "
+                                          "(you must create this UserObject yourself)");
+  params += GeochemistryReactorBase::sharedParams();
+
   params.addRangeCheckedParam<Real>(
       "stoichiometry_tolerance",
       1E-6,
@@ -68,86 +39,9 @@ AddGeochemistrySolverAction::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
-  params.addRequiredParam<std::string>(
-      "charge_balance_species",
-      "Charge balance will be enforced on this basis species.  This means that its bulk mole "
-      "number may be changed from the initial value you provide in order to ensure charge "
-      "neutrality.  After the initial swaps have been performed, this must be in the basis, and it "
-      "must be provided with a moles_bulk_species constraint_meaning.");
-  params.addParam<std::vector<std::string>>(
-      "prevent_precipitation",
-      "Mineral species in this list will be prevented from precipitating, irrespective of their "
-      "saturation index, unless they are in the basis");
-  params.addParam<Real>(
-      "abs_tol",
-      1E-10,
-      "If the residual of the algebraic system (measured in mol) is lower than this value, the "
-      "Newton process (that finds the aqueous configuration) is deemed to have converged");
-  params.addParam<Real>("rel_tol",
-                        1E-200,
-                        "If the residual of the algebraic system (measured in mol) is lower than "
-                        "this value times the initial residual, the Newton process (that finds the "
-                        "aqueous configuration) is deemed to have converged");
-  params.addRangeCheckedParam<Real>("min_initial_molality",
-                                    1E-20,
-                                    "min_initial_molality > 0.0",
-                                    "Minimum value of the initial-guess molality used in the "
-                                    "Newton process to find the aqueous configuration");
-  params.addParam<unsigned>(
-      "max_iter",
-      100,
-      "Maximum number of Newton iterations allowed when finding the aqueous configuration");
-  params.addParam<Real>(
-      "max_initial_residual",
-      1E3,
-      "Attempt to alter the initial-guess molalities so that the initial residual for the Newton "
-      "process (that finds the aqueous configuration) is less than this number of moles");
-  params.addRangeCheckedParam<Real>(
-      "swap_threshold",
-      0.1,
-      "swap_threshold >= 0.0",
-      "If the molality of a basis species in the algebraic system falls below swap_threshold * "
-      "abs_tol then it is swapped out of the basis.  The dimensions of swap_threshold are "
-      "1/kg(solvent water)");
-  params.addParam<unsigned>(
-      "max_swaps_allowed",
-      20,
-      "Maximum number of swaps allowed during a single attempt at finding the aqueous "
-      "configuration.  Usually only a handful of swaps are used: this parameter prevents endless "
-      "cyclic swapping that prevents the algorithm from progressing");
-  params.addParam<unsigned>(
-      "ramp_max_ionic_strength_initial",
-      20,
-      "The number of iterations over which to progressively increase the maximum ionic strength "
-      "(from zero to max_ionic_strength) during the initial equilibration.  Increasing this can "
-      "help in convergence of the Newton process, at the cost of spending more time finding the "
-      "aqueous configuration.");
-  params.addParam<bool>(
-      "ionic_str_using_basis_only",
-      false,
-      "If set to true, ionic strength and stoichiometric ionic strength will be computed using "
-      "only the basis molalities, ignoring molalities of equilibrium species.  Since basis "
-      "molality is usually greater than equilibrium molality, and the whole Debye-Huckel concept "
-      "of activity coefficients depending on ionic strength is only approximate in practice, "
-      "setting this parameter true often results in a reasonable approximation.  It can aid in "
-      "convergence since it eliminates problems associated with unphysical huge equilibrium "
-      "molalities that can occur during Newton iteration to the solution");
-  params.addParam<bool>("stoichiometric_ionic_str_using_Cl_only",
-                        false,
-                        "If set to true, the stoichiometric ionic strength will be set equal to "
-                        "Cl- molality (or max_ionic_strength if the Cl- molality is too "
-                        "big).  This flag overrides ionic_str_using_basis_molality_only");
 
   // following are exclusively for the GeochemistryConsoleOutput
-  params.addParam<unsigned int>("precision", 4, "Precision for printing values to the console");
-  params.addParam<Real>(
-      "mol_cutoff",
-      1E-40,
-      "Information regarding species with molalities less than this amount will not be outputted");
-  params.addParam<bool>("solver_info",
-                        false,
-                        "Print information (to the console via the geochemistry console output "
-                        "object) from the solver including residuals, swaps, etc");
+  params += GeochemistryConsoleOutput::sharedParams();
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_FINAL};
   params.addParam<ExecFlagEnum>(
