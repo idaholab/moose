@@ -46,10 +46,17 @@ protected:
                          const Real scalar_q,
                          const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
-  const MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
+  /// Enum defining the type of integral to be computed
+  const enum class IntegralType { JIntegral, CIntegral, KFromJIntegral } _integral;
+
   const MaterialProperty<RealVectorValue> * const _J_thermal_term_vec;
-  /// Whether to convert the J-Integral to a stress intensity factor (K)
-  bool _convert_J_to_K;
+
+  /// Eshelby tensor for J integral and K stress intensity factor
+  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
+
+  /// Eshelby tensor rate for computing the C(t) integral
+  const MaterialProperty<RankTwoTensor> * _Eshelby_tensor_dissipation;
+
   /// Whether to treat a 3D model as 2D for computation of fracture integrals
   bool _treat_as_2d;
   /// Vector of all coupled variables
@@ -64,7 +71,6 @@ protected:
   Real _youngs_modulus;
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
-
   /// Enum used to select the method used to compute the q function used
   /// in the fracture integrals
   const enum class QMethod { Geometry, Topology } _q_function_type;
@@ -81,7 +87,6 @@ protected:
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
   /// Current quadrature point index
   unsigned int _qp;
-
   /// Vectors computed by this VectorPostprocessor:
   /// x,y,z coordinates, position of nodes along crack front, and
   /// interaction integral

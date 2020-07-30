@@ -106,3 +106,22 @@ The $T$-stress is the first second-order parameter in Williams' expansion of str
 The MOOSE implementation of the capability to compute these fracture integrals is provided using a variety of MOOSE objects, which are quite complex to define manually, especially for 3D simulations. For this reason, the to compute $J$-integrals or interaction integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects.
 
 !listing modules/tensor_mechanics/test/tests/j_integral/j_integral_3d.i block=DomainIntegral
+
+
+## C-Integral
+
+The C(t) integral is a fracture integral that is obtained in essentially the same way as the $J$-integral described above, but by replacing displacements and strains with displacement rates and strain rates:
+
+\begin{equation}
+{C}(t)=\int_{\Gamma}\biggl(
+P_{ji}\frac{\partial \dot{u}_i}{\partial X_k}ds -\dot{W}dy
+\biggr) d\Gamma
+\end{equation}
+
+This integral is computed in an analogous way to the J-integral: A domain integral is solved on the crack front geometry defined in the mesh. This integral becomes the $C^{*}$ integral as creep behavior becomes steady state. Then, creep crack growth behavior during secondary creep can be obtained from this integral. A number of approximate expressions for $C^{*}$ are available in the literature [!citep](bongyoon_2003).
+
+### Usage
+
+To compute $C$-integrals, the [DomainIntegral Action](/DomainIntegralAction.md) should be used to set up all of the required objects. In particular, two additional inputs are required `integrals = CIntegral` and `inelastic_models`. The former refers to the type of integral requested ('C') and the latter refers to the name of the power law creep model --only supported material model at present. The power law exponent in the material model is used to compute the strain energy rate density in the fracture integral under the assumption of a creep strain rate field subject to steady-state (secondary) crack growth.
+
+!listing modules/tensor_mechanics/test/tests/j_integral_vtest/c_int_surfbreak_ellip_crack_sym_mm.i block=DomainIntegral

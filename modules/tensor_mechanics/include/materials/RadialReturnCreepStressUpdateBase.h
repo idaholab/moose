@@ -22,6 +22,20 @@ public:
 
   RadialReturnCreepStressUpdateBase(const InputParameters & parameters);
 
+  /**
+   * Compute the strain energy rate density for this inelastic model for the current step.
+   * @param stress The stress tensor at the end of the step
+   * @param strain_rate The strain rate at the end of the step
+   * @return The computed strain energy rate density
+   */
+  virtual Real
+  computeStrainEnergyRateDensity(const MaterialProperty<RankTwoTensor> & /*stress*/,
+                                 const MaterialProperty<RankTwoTensor> & /*strain_rate*/)
+  {
+    mooseError(
+        "The computation of strain energy rate density needs to be implemented by a child class");
+  }
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void propagateQpStatefulProperties() override;
