@@ -10,6 +10,7 @@
 #include "FullSolveMultiApp.h"
 #include "LayeredSideFluxAverage.h"
 #include "Executioner.h"
+#include "Transient.h"
 
 // libMesh
 #include "libmesh/mesh_tools.h"
@@ -33,10 +34,16 @@ FullSolveMultiApp::validParams()
       "keep_full_output_history",
       false,
       "Whether or not to keep the full output history when this multiapp has multiple entries");
+  params.addParam<bool>("ignore_solve_not_converge",
+                        false,
+                        "True to continue main app even if a sub app's solve does not converge.");
   return params;
 }
 
-FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters) : MultiApp(parameters) {}
+FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
+  : MultiApp(parameters), _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
+{
+}
 
 void
 FullSolveMultiApp::backup()
@@ -76,6 +83,13 @@ FullSolveMultiApp::initialSetup()
       if (!ex)
         mooseError("Executioner does not exist!");
 
+      if (_ignore_diverge)
+      {
+        Transient * tex = dynamic_cast<Transient *>(ex);
+        if (tex)
+          tex->setErrorOnDtmin(false);
+      }
+
       ex->init();
 
       _executioners[i] = ex;
@@ -112,5 +126,5 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
       last_solve_converged = false;
   }
 
-  return last_solve_converged;
+  return last_solve_converged || _ignore_diverge;
 }
