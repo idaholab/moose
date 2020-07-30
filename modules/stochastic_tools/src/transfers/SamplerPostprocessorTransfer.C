@@ -50,6 +50,14 @@ SamplerPostprocessorTransfer::validParams()
                                "Use the supplied string as the prefix for vector postprocessor "
                                "name rather than the transfer name.");
 
+  params.addParam<bool>("skip_solve_not_converge_value",
+                        false,
+                        "True to skip entries where the sub app did not converge.");
+  params.addParam<Real>("solve_not_converge_value",
+                        std::numeric_limits<double>::quiet_NaN(),
+                        "Value to transfer if the sub app solve did not converge. If not "
+                        "specified, whatever the value the sub app has upon exitting is used.");
+
   params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
@@ -61,7 +69,9 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
     _master_vpp_name(getParam<VectorPostprocessorName>("to_vector_postprocessor")),
     _vpp_names(isParamValid("prefix")
                    ? getVectorNamesHelper(getParam<std::string>("prefix"), _sub_pp_names)
-                   : getVectorNamesHelper(_name, _sub_pp_names))
+                   : getVectorNamesHelper(_name, _sub_pp_names)),
+    _skip_diverge(getParam<bool>("skip_solve_not_converge_value")),
+    _diverge_value(getParam<Real>("solve_not_converge_value"))
 {
 }
 
@@ -120,8 +130,15 @@ SamplerPostprocessorTransfer::executeFromMultiapp()
     if (_multi_app->hasLocalApp(i))
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
-        _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+      if (app_problem.converged() || !_skip_diverge)
+      {
+        if (app_problem.converged() || std::isnan(_diverge_value))
+          for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+            _current_data[j].emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+        else
+          for (std::size_t j = 0; j < _sub_pp_names.size(); ++j)
+            _current_data[j].emplace_back(_diverge_value);
+      }
     }
   }
 }
@@ -146,7 +163,13 @@ SamplerPostprocessorTransfer::execute()
     for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
     {
       FEProblemBase & app_problem = _multi_app->appProblemBase(i);
-      current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+      if (app_problem.converged() || !_skip_diverge)
+      {
+        if (app_problem.converged() || std::isnan(_diverge_value))
+          current.emplace_back(app_problem.getPostprocessorValue(_sub_pp_names[j]));
+        else
+          current.emplace_back(_diverge_value);
+      }
     }
     _results->setCurrentLocalVectorPostprocessorValue(_vpp_names[j], std::move(current));
   }
