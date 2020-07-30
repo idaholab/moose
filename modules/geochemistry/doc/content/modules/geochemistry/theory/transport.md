@@ -9,7 +9,7 @@ Only rudimentary transport is available as part of the `geochemistry` module.  C
 - coupling with geomechanics
 - sophisticated numerical stabilization
 
-Notation and definitions are described in [geochemistry_nomenclature.md].
+Notation and definitions are described in [here](geochemistry_nomenclature.md).  The relevant Kernels are [GeochemistryTimeDerivative](GeochemistryTimeDerivative.md), [ConservativeAdvection](ConservativeAdvection.md) (preferably with `upwinding_type = full`) and [GeochemistryDispersion](GeochemistryDispersion.md).
 
 ## Volumes, concentrations and mass conservation.
 

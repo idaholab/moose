@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AddGeochemicalModelInterrogatorAction.h"
+#include "GeochemicalModelInterrogator.h"
 #include "Executioner.h"
 #include "FEProblem.h"
 
@@ -21,54 +22,7 @@ InputParameters
 AddGeochemicalModelInterrogatorAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addRequiredParam<UserObjectName>("model_definition",
-                                          "The name of the GeochemicalModelDefinition user object");
-  params.addParam<std::vector<std::string>>(
-      "swap_out_of_basis",
-      "Species that should be removed from the model_definition's basis and be replaced with the "
-      "swap_into_basis species.  There must be the same number of species in swap_out_of_basis and "
-      "swap_into_basis.  If this list contains more than one species, the swapping is performed "
-      "one-by-one, starting with the first pair (swap_out_of_basis[0] and swap_into_basis[0]), "
-      "then the next pair, etc");
-  params.addParam<std::vector<std::string>>(
-      "swap_into_basis",
-      "Species that should be removed from the model_definition's "
-      "equilibrium species list and added to the basis");
-  params.addParam<std::vector<std::string>>(
-      "activity_species",
-      "Species that are provided numerical values of activity (or fugacity for gases) in the "
-      "activity_value input");
-  params.addParam<std::vector<Real>>("activity_values",
-                                     "Numerical values for the activity (or fugacity) for the "
-                                     "species in the activity_species list");
-  params.addParam<unsigned int>(
-      "precision",
-      4,
-      "Precision for printing values.  Also, if the absolute value of a stoichiometric coefficient "
-      "is less than 10^(-precision) then it is set to zero");
-  params.addParam<std::string>("equilibrium_species",
-                               "",
-                               "Only output results for this equilibrium species.  If not "
-                               "provided, results for all equilibrium species will be outputted");
-  MooseEnum interrogation_choice("reaction activity eqm_temperature", "reaction");
-  params.addParam<MooseEnum>(
-      "interrogation",
-      interrogation_choice,
-      "Type of interrogation to perform.  reaction: Output equilibrium species reactions and "
-      "log10K.  activity: determine activity products at equilibrium.  eqm_temperature: determine "
-      "temperature to ensure equilibrium");
-  params.addParam<Real>("temperature",
-                        25,
-                        "Equilibrium constants will be computed at this temperature.  This is "
-                        "ignored if interrogation=eqm_temperature.");
-  params.addRangeCheckedParam<Real>(
-      "stoichiometry_tolerance",
-      1E-6,
-      "stoichiometry_tolerance >= 0.0",
-      "Swapping involves inverting matrices via a singular value decomposition. During this "
-      "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
-      "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
-      "stoichiometric coefficient) < stoi_tol then it is set to zero.");
+  params += GeochemicalModelInterrogator::sharedParams();
   params.addClassDescription("Action that sets up the geochemical model interrogator");
 
   return params;

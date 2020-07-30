@@ -15,23 +15,33 @@
 registerMooseObject("GeochemistryApp", GeochemistryConsoleOutput);
 
 InputParameters
-GeochemistryConsoleOutput::validParams()
+GeochemistryConsoleOutput::sharedParams()
 {
-  InputParameters params = Output::validParams();
-  params.addRequiredParam<UserObjectName>("geochemistry_reactor",
-                                          "The name of the GeochemistryReactor UserObject");
+  InputParameters params = emptyInputParameters();
   params.addParam<unsigned int>("precision", 4, "Precision for printing values");
   params.addParam<Real>(
       "mol_cutoff",
       1E-40,
       "Information regarding species with molalities less than this amount will not be outputted");
+  params.addParam<bool>(
+      "solver_info",
+      false,
+      "Print information (to the console) from the solver including residuals, swaps, etc");
+  return params;
+}
+
+InputParameters
+GeochemistryConsoleOutput::validParams()
+{
+  InputParameters params = Output::validParams();
+  params += GeochemistryConsoleOutput::sharedParams();
+  params.addRequiredParam<UserObjectName>("geochemistry_reactor",
+                                          "The name of the GeochemistryReactor UserObject");
   params.addRangeCheckedParam<Real>("stoichiometry_tolerance",
                                     1E-6,
                                     "stoichiometry_tolerance >= 0.0",
                                     "if abs(any stoichiometric coefficient) < stoi_tol then it is "
                                     "set to zero, and so will not appear in the output");
-  params.addParam<bool>(
-      "solver_info", false, "Print information from the solver including residuals, swaps, etc");
   params.addRequiredParam<Point>("point",
                                  "The physical point at which to query the GeochemistryReactor");
   params.addClassDescription("Outputs results from a GeochemistryReactor at a particular point");

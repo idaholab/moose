@@ -19,6 +19,9 @@
 class GeochemistryConsoleOutput : public Output, public UserObjectInterface
 {
 public:
+  /// contains params that are shared with Actions that use this object
+  static InputParameters sharedParams();
+
   static InputParameters validParams();
 
   GeochemistryConsoleOutput(const InputParameters & parameters);

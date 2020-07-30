@@ -19,6 +19,9 @@
 class GeochemistryReactorBase : public NodalUserObject
 {
 public:
+  /// contains params that are shared with AddGeochemistrySolverAction and its children
+  static InputParameters sharedParams();
+
   static InputParameters validParams();
   GeochemistryReactorBase(const InputParameters & parameters);
   virtual void initialize() override;
