@@ -43,4 +43,30 @@
       detail = "final."
     []
   []
+
+  [solve_not_converge]
+    requirement = "When sub-application solve does not converge, the system shall be able to either "
+    [abort]
+      type = RunException
+      input = master.i
+      cli_args = 'full_solve0:Executioner/nl_rel_tol=0
+                  full_solve0:Executioner/dtmin=0.01
+                  full_solve0:Executioner/nl_max_its=3'
+      expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
+
+      detail = "abort run or "
+    []
+    [continue]
+      type = Exodiff
+      input = master.i
+      cli_args = 'MultiApps/full_solve/ignore_solve_not_converge=true
+                  full_solve0:Executioner/nl_rel_tol=0
+                  full_solve0:Executioner/dtmin=0.01
+                  full_solve0:Executioner/nl_max_its=3
+                  Outputs/file_base=master_diverge_out'
+      exodiff = 'master_diverge_out.e master_diverge_out_full_solve0.e'
+
+      detail = "continue run."
+    []
+  []
 []
