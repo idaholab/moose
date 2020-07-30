@@ -23,4 +23,42 @@
                   "          transfer a single value from a sub-application."
 
   []
+
+  [solve_not_converge]
+    requirement = "When sub-application solve does not converge, the system shall either "
+    
+    [abort]
+      type = RunException
+      input = cartesian_diverge.i
+      cli_args = 'MultiApps/sub/ignore_solve_not_converge=false'
+      expect_err = "Solve failed and timestep already at or below dtmin, cannot continue!"
+
+      detail = "abort run, "
+    []
+    [last_computed]
+      type = CSVDiff
+      input = cartesian_diverge.i
+      csvdiff = 'cartesian_diverge_out_storage_0001.csv'
+
+      detail = "transfer last computed postprocessor value, "
+    []
+    [skip]
+      type = CSVDiff
+      input = cartesian_diverge.i
+      cli_args = 'Transfers/data/skip_solve_not_converge_value=true
+                  Outputs/file_base=cartesian_diverge_skip'
+      csvdiff = 'cartesian_diverge_skip_storage_0001.csv'
+
+      detail = "skip value transfer, "
+    []
+    [user_value]
+      type = CSVDiff
+      input = cartesian_diverge.i
+      cli_args = 'Transfers/data/solve_not_converge_value=-1e16
+                  Outputs/file_base=cartesian_diverge_value'
+      csvdiff = 'cartesian_diverge_value_storage_0001.csv'
+
+      detail = "or transfer user defined value."
+    []
+  []
 []
