@@ -84,3 +84,4 @@ The material properties of the fluid, $f$, and the solid, $s$, are given in [mat
 | Specific heat capacity of steel, $c_p{_s}$ | 466 | $\textrm{J}/(\textrm{kg}\,\textrm{K})$ |
 
 !content pagination previous=tutorial01_app_development/index.md
+                    next=tutorial01_app_development/step01_moose_app.md
