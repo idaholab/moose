@@ -265,7 +265,10 @@ public:
   /**
    * Check if the tagged vector exists in the system.
    */
-  virtual bool hasVector(TagID tag_id) const;
+  virtual bool hasVector(TagID tag_id) const
+  {
+    return tag_id < _tagged_vectors.size() && _tagged_vectors[tag_id];
+  }
 
   /**
    * Ideally, we should not need this API.
@@ -273,27 +276,34 @@ public:
    * This API should go away once addCachedResidualDirectly is removed in the future
    * Return Tag ID for Time
    */
-  virtual TagID timeVectorTag();
-
-  /**
-   * Return the Matrix Tag ID for Time
-   */
-  virtual TagID timeMatrixTag();
+  virtual TagID timeVectorTag() const { mooseError("Not implemented yet"); }
 
   /**
    * Return the Matrix Tag ID for System
    */
-  virtual TagID systemMatrixTag();
+  virtual TagID systemMatrixTag() const { mooseError("Not implemented yet"); }
 
   /*
    * Return TagID for nontime
    */
-  virtual TagID nonTimeVectorTag();
+  virtual TagID nonTimeVectorTag() const { mooseError("Not implemented yet"); }
 
   /*
    * Return TagID for nontime
    */
-  virtual TagID residualVectorTag();
+  virtual TagID residualVectorTag() const { mooseError("Not implemented yet"); }
+
+  /**
+   * Get the default vector tags associated with this system
+   */
+  virtual std::set<TagID> defaultVectorTags() const
+  {
+    return {timeVectorTag(), nonTimeVectorTag(), residualVectorTag()};
+  }
+  /**
+   * Get the default matrix tags associted with this system
+   */
+  virtual std::set<TagID> defaultMatrixTags() const { return {systemMatrixTag()}; }
 
   /**
    * Get a raw NumericVector
@@ -316,19 +326,27 @@ public:
   virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
 
   /**
-   * Associate a vector for a given tag
+   * Disassociate a given vector from a given tag
    */
   virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag);
 
   /**
-   * Disassociate all vectors, and then hasVector() will return false.
+   * Disassociate any vector that is associated with a given tag
    */
-  virtual void disassociateAllTaggedVectors();
+  virtual void disassociateVectorFromTag(TagID tag);
+
+  /**
+   * Disassociate the vectors associated with the default vector tags of this system
+   */
+  virtual void disassociateDefaultVectorTags();
 
   /**
    * Check if the tagged matrix exists in the system.
    */
-  virtual bool hasMatrix(TagID tag) const;
+  virtual bool hasMatrix(TagID tag) const
+  {
+    return tag < _tagged_matrices.size() && _tagged_matrices[tag];
+  }
 
   /**
    * Get a raw SparseMatrix
@@ -371,19 +389,24 @@ public:
   void closeTaggedMatrices(const std::set<TagID> & tags);
 
   /**
-   * associate a matirx to a tag
+   * Associate a matrix to a tag
    */
   virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);
 
   /**
-   * disassociate a matirx from a tag
+   * Disassociate a matrix from a tag
    */
   virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag);
 
   /**
-   * Clear all tagged matrices
+   * Disassociate any matrix that is associated with a given tag
    */
-  virtual void disassociateAllTaggedMatrices();
+  virtual void disassociateMatrixFromTag(TagID tag);
+
+  /**
+   * Disassociate the matrices associated with the default matrix tags of this system
+   */
+  virtual void disassociateDefaultMatrixTags();
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -717,7 +740,7 @@ public:
   /**
    * Remove a vector from the system with the given name.
    */
-  virtual void removeVector(const std::string & name);
+  void removeVector(const std::string & name);
 
   /**
    * Adds a solution length vector to the system.
@@ -732,7 +755,7 @@ public:
    *                                            The ghosting pattern is the same as the solution
    * vector.
    */
-  virtual NumericVector<Number> &
+  NumericVector<Number> &
   addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
   /**
@@ -751,41 +774,43 @@ public:
   NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
   /**
+   * Close vector with the given tag
+   */
+  void closeTaggedVector(const TagID tag);
+  /**
    * Close all vectors for given tags
    */
-  virtual void closeTaggedVectors(const std::set<TagID> & tags);
+  void closeTaggedVectors(const std::set<TagID> & tags);
 
+  /**
+   * Zero vector with the given tag
+   */
+  void zeroTaggedVector(const TagID tag);
   /**
    * Zero all vectors for given tags
    */
-  virtual void zeroTaggedVectors(const std::set<TagID> & tags);
+  void zeroTaggedVectors(const std::set<TagID> & tags);
 
   /**
    * Remove a solution length vector from the system with the specified TagID
    *
    * @param tag_id  Tag ID
    */
-  virtual void removeVector(TagID tag_id);
+  void removeVector(TagID tag_id);
 
   /**
-   * Adds a jacobian sized vector
+   * Adds a matrix with a given tag
    *
    * @param tag_name The name of the tag
    */
-  virtual SparseMatrix<Number> & addMatrix(TagID /* tag */)
-  {
-    mooseError("Adding a matrix is not supported for this type of system!");
-  }
+  SparseMatrix<Number> & addMatrix(TagID tag);
 
   /**
-   * Removes a jacobian sized vector
+   * Removes a matrix with a given tag
    *
    * @param tag_name The name of the tag
    */
-  virtual void removeMatrix(TagID /* tag */)
-  {
-    mooseError("Removing a matrix is not supported for this type of system!");
-  }
+  void removeMatrix(TagID tag);
 
   virtual const std::string & name() const;
 

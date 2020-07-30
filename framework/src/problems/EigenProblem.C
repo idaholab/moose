@@ -129,13 +129,21 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 {
   TIME_SECTION(_compute_jacobian_tag_timer);
 
-  _fe_matrix_tags.clear();
+  // Disassociate the default tags because we will associate vectors with only the
+  // specific system tags that we need for this instance
+  _nl_eigen->disassociateDefaultMatrixTags();
 
+  // Clear FE tags and first add the specific tag assoicated with the Jacobian
+  _fe_matrix_tags.clear();
   _fe_matrix_tags.insert(tag);
 
-  _nl_eigen->setSolution(soln);
+  // Add any other user-added matrix tags if they have associated matrices
+  const auto & matrix_tags = getMatrixTags();
+  for (const auto matrix_tag : matrix_tags)
+    if (_nl_eigen->hasMatrix(matrix_tag.second))
+      _fe_matrix_tags.insert(matrix_tag.second);
 
-  _nl_eigen->disassociateAllTaggedMatrices();
+  _nl_eigen->setSolution(soln);
 
   _nl_eigen->associateMatrixToTag(jacobian, tag);
 
@@ -158,11 +166,13 @@ EigenProblem::computeMatricesTags(
                " does not equal the number of tags ",
                tags.size());
 
+  // Disassociate the default tags because we will associate vectors with only the
+  // specific system tags that we need for this instance
+  _nl_eigen->disassociateDefaultMatrixTags();
+
   _fe_matrix_tags.clear();
 
   _nl_eigen->setSolution(soln);
-
-  _nl_eigen->disassociateAllTaggedMatrices();
 
   unsigned int i = 0;
   for (auto tag : tags)
@@ -201,14 +211,23 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
 {
   TIME_SECTION(_compute_jacobian_ab_timer);
 
-  _fe_matrix_tags.clear();
+  // Disassociate the default tags because we will associate vectors with only the
+  // specific system tags that we need for this instance
+  _nl_eigen->disassociateDefaultMatrixTags();
 
+  // Clear FE tags and first add the specific tags assoicated with the Jacobian
+  _fe_matrix_tags.clear();
   _fe_matrix_tags.insert(tagA);
   _fe_matrix_tags.insert(tagB);
 
+  // Add any other user-added matrix tags if they have associated matrices
+  const auto & matrix_tags = getMatrixTags();
+  for (const auto matrix_tag : matrix_tags)
+    if (_nl_eigen->hasMatrix(matrix_tag.second))
+      _fe_matrix_tags.insert(matrix_tag.second);
+
   _nl_eigen->setSolution(soln);
 
-  _nl_eigen->disassociateAllTaggedMatrices();
   _nl_eigen->associateMatrixToTag(jacobianA, tagA);
   _nl_eigen->associateMatrixToTag(jacobianB, tagB);
 
@@ -225,15 +244,23 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
 {
   TIME_SECTION(_compute_residual_tag_timer);
 
-  _fe_vector_tags.clear();
+  // Disassociate the default tags because we will associate vectors with only the
+  // specific system tags that we need for this instance
+  _nl_eigen->disassociateDefaultVectorTags();
 
+  // Clear FE tags and first add the specific tag associated with the residual
+  _fe_vector_tags.clear();
   _fe_vector_tags.insert(tag);
 
-  _nl_eigen->setSolution(soln);
-
-  _nl_eigen->disassociateAllTaggedVectors();
+  // Add any other user-added vector residual tags if they have associated vectors
+  const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+  for (const auto & vector_tag : residual_vector_tags)
+    if (_nl_eigen->hasVector(vector_tag._id))
+      _fe_vector_tags.insert(vector_tag._id);
 
   _nl_eigen->associateVectorToTag(residual, tag);
+
+  _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
 
@@ -249,24 +276,29 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
 {
   TIME_SECTION(_compute_residual_ab_timer);
 
+  // Disassociate the default tags because we will associate vectors with only the
+  // specific system tags that we need for this instance
+  _nl_eigen->disassociateDefaultVectorTags();
+
+  // Clear FE tags and first add the specific tags associated with the residual
   _fe_vector_tags.clear();
-
   _fe_vector_tags.insert(tagA);
-
   _fe_vector_tags.insert(tagB);
 
-  _nl_eigen->setSolution(soln);
-
-  _nl_eigen->disassociateAllTaggedVectors();
+  // Add any other user-added vector residual tags if they have associated vectors
+  const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
+  for (const auto & vector_tag : residual_vector_tags)
+    if (_nl_eigen->hasVector(vector_tag._id))
+      _fe_vector_tags.insert(vector_tag._id);
 
   _nl_eigen->associateVectorToTag(residualA, tagA);
-
   _nl_eigen->associateVectorToTag(residualB, tagB);
+
+  _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
 
   _nl_eigen->disassociateVectorFromTag(residualA, tagA);
-
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
 

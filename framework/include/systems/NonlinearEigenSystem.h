@@ -133,22 +133,25 @@ public:
   /**
    * Vector tag ID of right hand side
    */
-  TagID eigenVectorTag() { return _Bx_tag; }
+  TagID eigenVectorTag() const { return _Bx_tag; }
 
   /**
    * Vector tag ID of left hand side
    */
-  TagID nonEigenVectorTag() { return _Ax_tag; }
+  TagID nonEigenVectorTag() const { return _Ax_tag; }
 
   /**
    * Matrix tag ID of right hand side
    */
-  TagID eigenMatrixTag() { return _B_tag; }
+  TagID eigenMatrixTag() const { return _B_tag; }
 
   /**
    * Matrix tag ID of left hand side
    */
-  TagID nonEigenMatrixTag() { return _A_tag; }
+  TagID nonEigenMatrixTag() const { return _A_tag; }
+
+  std::set<TagID> defaultVectorTags() const override;
+  std::set<TagID> defaultMatrixTags() const override;
 
   /**
    * If the preconditioning matrix includes eigen kernels
