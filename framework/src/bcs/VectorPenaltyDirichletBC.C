@@ -10,7 +10,7 @@
 #include "VectorPenaltyDirichletBC.h"
 #include "Function.h"
 
-registerMooseObject("MooseTestApp", VectorPenaltyDirichletBC);
+registerMooseObject("MooseApp", VectorPenaltyDirichletBC);
 
 InputParameters
 VectorPenaltyDirichletBC::validParams()
@@ -21,6 +21,10 @@ VectorPenaltyDirichletBC::validParams()
   params.addParam<FunctionName>("y_exact_sln", 0, "The exact solution for the y component");
   params.addParam<FunctionName>("z_exact_sln", 0, "The exact solution for the z component");
   params.addParam<bool>("linear", false, "Whether this is formulated as a linear problem");
+  params.addClassDescription("Enforces a Dirichlet boundary condition for "
+                             "vector nonlinear variables in a weak sense by "
+                             "applying a penalty to the difference in the "
+                             "current solution and the Dirichlet data.");
   return params;
 }
 
