@@ -20,7 +20,7 @@ ConservativeAdvection::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
                              "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-  params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
+  params.addRequiredCoupledVar("velocity", "Velocity vector");
   MooseEnum upwinding_type("none full", "none");
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
@@ -32,7 +32,7 @@ ConservativeAdvection::validParams()
 
 ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters)
   : Kernel(parameters),
-    _velocity(getParam<RealVectorValue>("velocity")),
+    _velocity(coupledVectorValue("velocity")),
     _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
     _u_nodal(_var.dofValues()),
     _upwind_node(0),
@@ -43,7 +43,7 @@ ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters)
 Real
 ConservativeAdvection::negSpeedQp() const
 {
-  return -_grad_test[_i][_qp] * _velocity;
+  return -_grad_test[_i][_qp] * _velocity[_qp];
 }
 
 Real
