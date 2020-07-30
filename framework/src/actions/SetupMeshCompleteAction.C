@@ -118,12 +118,26 @@ SetupMeshCompleteAction::act()
     // geometric ghosting functor and/or we have a displaced mesh. In other words, we almost never
     // trigger this.
     // We delete elements only when users ask us to do so AND libMesh allows us to do so
-    if (_mesh->needsRemoteElemDeletion() && _mesh->getMesh().allow_remote_element_removal())
+
+    for (auto & elem_ptr : _mesh->getMesh().element_ptr_range())
+      std::cout<<"elem "<<elem_ptr->id()<<std::endl;
+
+    for (auto & elem_ptr : _displaced_mesh->getMesh().element_ptr_range())
+      std::cout<<"d elem "<<elem_ptr->id()<<std::endl;
+
+    if (_mesh->needsRemoteElemDeletion() /*&& _mesh->getMesh().allow_remote_element_removal()*/)
     {
       _mesh->getMesh().delete_remote_elements();
       if (_displaced_mesh)
         _displaced_mesh->getMesh().delete_remote_elements();
     }
+
+
+    for (auto & elem_ptr : _mesh->getMesh().element_ptr_range())
+      std::cout<<"elem "<<elem_ptr->id()<<std::endl;
+
+    for (auto & elem_ptr : _displaced_mesh->getMesh().element_ptr_range())
+      std::cout<<"d elem "<<elem_ptr->id()<<std::endl;
   }
   else
   {

@@ -101,6 +101,7 @@ SetAdaptivityOptionsAction::act()
     rm_params.set<MooseMesh *>("mesh") = _mesh.get();
     rm_params.set<Moose::RelationshipManagerType>("rm_type") =
         Moose::RelationshipManagerType::GEOMETRIC;
+    rm_params.set<bool>("use_displaced_mesh") = true;
 
     if (rm_params.areAllRequiredParamsValid())
     {
