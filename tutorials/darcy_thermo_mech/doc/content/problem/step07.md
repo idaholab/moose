@@ -55,7 +55,7 @@ cd problems
 
 !---
 
-!media step07abc_result.mp4
+!media darcy_thermo_mech/step07abc_result.mp4
 
 !---
 
@@ -65,4 +65,4 @@ cd problems
 
 !---
 
-!media step07d_result.mp4
+!media darcy_thermo_mech/step07d_result.mp4

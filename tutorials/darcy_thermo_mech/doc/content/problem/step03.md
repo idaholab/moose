@@ -94,7 +94,7 @@ cd problems
 ~/projects/moose/python/peacock/peacock -r step3_out.e
 ```
 
-!media step03_result.png
+!media darcy_thermo_mech/step03_result.png
 
 !---
 
@@ -112,4 +112,4 @@ Update the input file to vary the sphere size from 1 to 3 along the length of th
 
 ## Step 3b: Visualize Result
 
-!media step03b_result.png
+!media darcy_thermo_mech/step03b_result.png

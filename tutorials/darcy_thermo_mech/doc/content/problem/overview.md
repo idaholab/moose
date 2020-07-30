@@ -7,7 +7,7 @@ connected via a pipe that contains a filter consisting of close-packed steel sph
 velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m
 in diameter.
 
-!media problem_schematic.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/problem_schematic.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
 
 !style fontsize=large
 Pamuk and Ozdemir, [*"Friction factor, permeability, and inertial coefficient of oscillating flow through porous media of packed balls"*](https://www.sciencedirect.com/science/article/pii/S0894177711002640), Experimental Thermal and Fluid Science, v. 38, pp. 134-139, 2012.

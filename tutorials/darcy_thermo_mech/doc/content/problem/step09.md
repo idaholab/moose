@@ -55,4 +55,4 @@ cd problems
 
 ## Step 9: Results
 
-!media step09_result.mp4
+!media darcy_thermo_mech/step09_result.mp4

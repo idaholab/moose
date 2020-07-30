@@ -39,7 +39,7 @@ cd problems
 
 ## Step 10: Micro-scale Results
 
-!media step10_micro_result.mp4
+!media darcy_thermo_mech/step10_micro_result.mp4
 
 !---
 
@@ -74,4 +74,4 @@ cd problems
 
 ## Step 10: Multi-scale Results
 
-!media step10_result.mp4
+!media darcy_thermo_mech/step10_result.mp4

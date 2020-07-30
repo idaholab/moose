@@ -5,7 +5,7 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media moose_intro.png style=width:100%;
+!media darcy_thermo_mech/moose_intro.png style=width:100%;
 
 !---
 
@@ -26,11 +26,11 @@ Multi-physics Object Oriented Simulation Environment
 
 ## MOOSE Team
 
-!media moose_team.png style=width:100%;
+!media darcy_thermo_mech/moose_team.png style=width:100%;
 
 !---
 
-!media moose_design.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_design.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -51,13 +51,13 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Object-oriented, pluggable system
 
-!media moose_systems.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_systems.png style=width:80%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
 ## Example Code
 
-!media moose_code.png style=width:100%;
+!media darcy_thermo_mech/moose_code.png style=width:100%;
 
 !---
 
@@ -74,7 +74,7 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Development Process
 
-!media civet_flow.png style=width:100%;
+!media darcy_thermo_mech/civet_flow.png style=width:100%;
 
 !---
 
@@ -82,13 +82,13 @@ Multi-physics Object Oriented Simulation Environment
 
 ###### moose-users@googlegroups.com
 
-!media moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
        caption=Total posts (top) and topics (bottom) from June 1, 2019 to May 25, 2020.
 
 !---
 
-!media moose_contributors.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_contributors.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
-!media moose_add_del.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_add_del.png style=width:100%;margin-left:auto;margin-right:auto;display:block;

@@ -158,4 +158,4 @@ cd problems
 
 ## Step 5c: Results
 
-!media step05c_result.webm
+!media darcy_thermo_mech/step05c_result.webm
