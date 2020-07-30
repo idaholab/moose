@@ -1026,7 +1026,7 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   // No, I do not want to remove anything in case periodic boundary conditions
   // are required late. We  stop libMesh from deleting the valuable remote
   // elements paired with the local elements
-  mesh.allow_remote_element_removal(false);
+  //mesh.allow_remote_element_removal(false);
   mesh.prepare_for_use();
 
   // But we'll want to at least find neighbors after any future mesh changes!

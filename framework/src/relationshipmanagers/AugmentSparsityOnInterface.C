@@ -48,6 +48,17 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
 {
 }
 
+AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnInterface & others)
+  : RelationshipManager(others),
+    _amg(others._amg),
+    _has_attached_amg(others._has_attached_amg),
+    _primary_boundary_name(others._primary_boundary_name),
+    _secondary_boundary_name(others._secondary_boundary_name),
+    _primary_subdomain_name(others._primary_boundary_name),
+    _secondary_subdomain_name(others._secondary_boundary_name)
+{
+}
+
 void
 AugmentSparsityOnInterface::mesh_reinit()
 {
@@ -58,7 +69,7 @@ AugmentSparsityOnInterface::mesh_reinit()
 void
 AugmentSparsityOnInterface::internalInit()
 {
-  if (_mesh.isDistributedMesh())
+  if (_mesh->isDistributedMesh())
     mooseError(
         "We need to first be able to run MeshModifiers before remote elements are deleted before "
         "the AugmentSparsityOnInterface ghosting functor can work with DistributedMesh");
@@ -90,10 +101,10 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
     // unable to get the boundary ids until we've read in the mesh, which is done after we add
     // geometric relationship managers. Hence we can't do the below in our constructor. Now that
     // we're doing ghosting we've definitely read in the mesh
-    auto boundary_pair = std::make_pair(_mesh.getBoundaryID(_primary_boundary_name),
-                                        _mesh.getBoundaryID(_secondary_boundary_name));
-    _subdomain_pair.first = _mesh.getSubdomainID(_primary_subdomain_name);
-    _subdomain_pair.second = _mesh.getSubdomainID(_secondary_subdomain_name);
+    auto boundary_pair = std::make_pair(_mesh->getBoundaryID(_primary_boundary_name),
+                                        _mesh->getBoundaryID(_secondary_boundary_name));
+    _subdomain_pair.first = _mesh->getSubdomainID(_primary_subdomain_name);
+    _subdomain_pair.second = _mesh->getSubdomainID(_secondary_subdomain_name);
 
     _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
         boundary_pair, _subdomain_pair, _use_displaced_mesh);
@@ -107,7 +118,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // solve
   if (_use_displaced_mesh)
   {
-    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+    for (const auto & elem : _mesh->getMesh().active_element_ptr_range())
     {
       if (elem->subdomain_id() == _subdomain_pair.first ||
           elem->subdomain_id() == _subdomain_pair.second)
@@ -131,7 +142,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
 
       for (const auto & pr : as_range(bounds))
       {
-        const Elem * cross_interface_neighbor = _mesh.getMesh().elem_ptr(pr.second);
+        const Elem * cross_interface_neighbor = _mesh->getMesh().elem_ptr(pr.second);
 
         if (cross_interface_neighbor->processor_id() != p)
           coupled_elements.insert(std::make_pair(cross_interface_neighbor, null_mat));

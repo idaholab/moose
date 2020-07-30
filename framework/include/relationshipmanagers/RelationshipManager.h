@@ -50,6 +50,8 @@ public:
    */
   bool inited() { return _inited; }
 
+  virtual void set_mesh(const MeshBase * mesh) overridden { _mesh = mesh; }
+
   /**
    * The object (or Action) this RelationshipManager was built for
    */
@@ -115,7 +117,7 @@ protected:
   bool _inited = false;
 
   /// Reference to the Mesh object
-  MooseMesh & _mesh;
+  MooseMesh * _mesh;
 
   /// Pointer to the \p MooseMesh object
   MooseMesh * const _moose_mesh;

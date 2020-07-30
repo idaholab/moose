@@ -45,6 +45,12 @@ public:
                           map_type & coupled_elements) override;
 
   /**
+   *
+   */
+  virtual std::unique_ptr<GhostingFunctor> clone () const
+  { return libmesh_make_unique<AugmentSparsityOnInterface>(*this); }
+
+  /**
    * According to the base class docs, "We call mesh_reinit() whenever
    * the relevant Mesh has changed, but before remote elements on a
    * distributed mesh are deleted."

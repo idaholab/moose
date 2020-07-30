@@ -45,7 +45,15 @@ public:
 
   virtual void delete_remote_elements() override;
 
+  virtual void set_mesh(const MeshBase * mesh) override
+  {
+    RelationshipManager::set_mesh(mesh);
+    if (_functor)
+      _functor->set_mesh(mesh);
+    else
+      mooseError("functor does not exist");
+  }
+
 protected:
   std::unique_ptr<GhostingFunctor> _functor;
 };
-
