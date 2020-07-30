@@ -84,10 +84,6 @@ DomainIntegralAction::validParams()
       false,
       "Calculate an equivalent K from KI, KII and KIII, assuming self-similar crack growth.");
   params.addParam<bool>("output_q", true, "Output q");
-  params.addParam<bool>("solid_mechanics",
-                        false,
-                        "Set to true if the solid_mechanics system is "
-                        "used.");
   params.addRequiredParam<bool>(
       "incremental", "Flag to indicate whether an incremental or total model is being used.");
   params.addParam<std::vector<MaterialPropertyName>>(
@@ -134,7 +130,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _get_equivalent_k(getParam<bool>("equivalent_k")),
     _use_displaced_mesh(false),
     _output_q(getParam<bool>("output_q")),
-    _solid_mechanics(getParam<bool>("solid_mechanics")),
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false)
 {
@@ -264,7 +259,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   if (isParamValid("temperature"))
     _temp = getParam<VariableName>("temperature");
 
-  if (_temp != "" && !isParamValid("eigenstrain_names") && !_solid_mechanics)
+  if (_temp != "" && !isParamValid("eigenstrain_names"))
     paramError(
         "eigenstrain_names",
         "DomainIntegral error: must provide `eigenstrain_names` when temperature is coupled.");
@@ -661,9 +656,6 @@ DomainIntegralAction::act()
       std::string vpp_base_name;
       std::string vpp_type_name("InteractionIntegral");
 
-      if (_solid_mechanics)
-        vpp_type_name = "InteractionIntegralSM";
-
       InputParameters params = _factory.getValidParams(vpp_type_name);
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
@@ -795,7 +787,7 @@ DomainIntegralAction::act()
 
   else if (_current_task == "add_material")
   {
-    if (_temp != "" && !_solid_mechanics)
+    if (_temp != "")
     {
       std::string mater_name;
       const std::string mater_type_name("ThermalFractureIntegral");
@@ -820,8 +812,7 @@ DomainIntegralAction::act()
       if (ime == "CIntegral")
         have_c_integral = true;
     }
-
-    if (have_j_integral && !_solid_mechanics)
+    if (have_j_integral)
     {
       std::string mater_name;
       const std::string mater_type_name("StrainEnergyDensity");
