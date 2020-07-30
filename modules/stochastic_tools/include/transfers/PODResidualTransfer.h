@@ -22,15 +22,14 @@ class PODResidualTransfer : public PODSamplerSolutionTransfer
 public:
   static InputParameters validParams();
   PODResidualTransfer(const InputParameters & parameters);
-  virtual void initialSetup() override;
 
   ///@{
   /**
    * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
    */
-  virtual void initializeFromMultiapp() override;
+  virtual void initializeFromMultiapp() override{};
   virtual void executeFromMultiapp() override;
-  virtual void finalizeFromMultiapp() override;
+  virtual void finalizeFromMultiapp() override{};
   ///@}
 
 protected:
@@ -39,4 +38,10 @@ protected:
    * subapplication.
    */
   virtual void execute() override;
+
+private:
+  /**
+  * Adds the variable-residuals to the trainer.
+  */
+  void transferResidual(dof_id_type base_i, dof_id_type multi_app_i);
 };

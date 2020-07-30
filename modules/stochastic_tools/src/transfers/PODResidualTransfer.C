@@ -30,75 +30,31 @@ PODResidualTransfer::PODResidualTransfer(const InputParameters & parameters)
 }
 
 void
-PODResidualTransfer::initialSetup()
-{
-  PODSamplerSolutionTransfer::initialSetup();
-}
-
-void
 PODResidualTransfer::execute()
 {
-  const std::vector<std::string> & var_names = _trainer->getVarNames();
-  const std::vector<std::string> & tag_names = _trainer->getTagNames();
-  const std::vector<unsigned int> & independent = _trainer->getIndependent();
   const unsigned int total_base_num = _trainer->getSumBaseSize();
 
   // Looping over sub-apps
   for (unsigned int base_i = 0; base_i < total_base_num; ++base_i)
-  {
     if (_multi_app->hasLocalApp(base_i))
-    {
-      // Getting reference to the non-linear system
-      FEProblemBase & app_problem = _multi_app->appProblemBase(base_i);
-      NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
-
-      // Looping over the residual tags and extracting the corresponding vector.
-      for (unsigned int tag_i = 0; tag_i < tag_names.size(); ++tag_i)
-      {
-        // If the tag corresponds to an independent operator, it is enough to
-        // transfer it once.
-        if (base_i > 0 && independent[tag_i])
-          continue;
-
-        TagID tag_id = app_problem.getVectorTagID(tag_names[tag_i]);
-
-        // Fetching the corresponding residual vector and extracting the parts for
-        // each variable.
-        NumericVector<Number> & full_residual = nl.getVector(tag_id);
-        std::vector<DenseVector<Real>> split_residual(var_names.size());
-
-        for (unsigned int var_i = 0; var_i < var_names.size(); ++var_i)
-        {
-          // Getting the DoF indices of the variable.
-          nl.setVariableGlobalDoFs(var_names[var_i]);
-          const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
-
-          // Extracting the corresponding part of the residual vector.
-          full_residual.get(var_dofs, split_residual[var_i].get_values());
-        }
-
-        // Inserting the contribution of this residual into the reduced operator in
-        // the trainer.
-        _trainer->addToReducedOperator(base_i, tag_i, split_residual);
-      }
-    }
-  }
-}
-
-void
-PODResidualTransfer::initializeFromMultiapp()
-{
+      transferResidual(base_i, base_i);
 }
 
 void
 PODResidualTransfer::executeFromMultiapp()
+{
+  transferResidual(_global_index, processor_id());
+}
+
+void
+PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_i)
 {
   const std::vector<std::string> & var_names = _trainer->getVarNames();
   const std::vector<std::string> & tag_names = _trainer->getTagNames();
   const std::vector<unsigned int> & independent = _trainer->getIndependent();
 
   // Getting reference to the non-linear system
-  FEProblemBase & app_problem = _multi_app->appProblemBase(processor_id());
+  FEProblemBase & app_problem = _multi_app->appProblemBase(multi_app_i);
   NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
   // Looping over the residual tags and extracting the corresponding vector.
@@ -106,7 +62,7 @@ PODResidualTransfer::executeFromMultiapp()
   {
     // If the tag corresponds to an independent operator, it is enough to
     // transfer it once.
-    if (_global_index > 0 && independent[tag_i])
+    if (base_i > 0 && independent[tag_i])
       continue;
 
     TagID tag_id = app_problem.getVectorTagID(tag_names[tag_i]);
@@ -128,11 +84,6 @@ PODResidualTransfer::executeFromMultiapp()
 
     // Inserting the contribution of this residual into the reduced operator in
     // the trainer.
-    _trainer->addToReducedOperator(_global_index, tag_i, split_residual);
+    _trainer->addToReducedOperator(base_i, tag_i, split_residual);
   }
-}
-
-void
-PODResidualTransfer::finalizeFromMultiapp()
-{
 }
