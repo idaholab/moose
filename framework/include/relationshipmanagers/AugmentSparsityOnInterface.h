@@ -32,6 +32,8 @@ class AugmentSparsityOnInterface : public RelationshipManager
 public:
   AugmentSparsityOnInterface(const InputParameters &);
 
+  AugmentSparsityOnInterface(const AugmentSparsityOnInterface & others);
+
   static InputParameters validParams();
 
   /**
@@ -47,7 +49,7 @@ public:
   /**
    *
    */
-  virtual std::unique_ptr<GhostingFunctor> clone () const
+  virtual std::unique_ptr<GhostingFunctor> clone() const override
   { return libmesh_make_unique<AugmentSparsityOnInterface>(*this); }
 
   /**

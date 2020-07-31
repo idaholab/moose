@@ -31,10 +31,13 @@ public:
 
   MooseGhostPointNeighbors(const InputParameters & parameters);
 
+  MooseGhostPointNeighbors(const MooseGhostPointNeighbors & other);
+
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
+
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
 protected:
   virtual void internalInit() override;
 };
-

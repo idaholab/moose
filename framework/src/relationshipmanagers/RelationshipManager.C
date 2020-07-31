@@ -86,16 +86,16 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
   _for_whom.push_back(getParam<std::string>("for_whom"));
 }
 
-RelationshipManager::RelationshipManager(const RelationshipManager & others)
-  : MooseObject(others._pars),
-    GhostingFunctor(others),
-    _mesh(others._mesh),
-    _dof_map(others._dof_map),
-    _attach_geometric_early(others._attach_geometric_early),
-    _rm_type(others._rm_type),
-    _use_displaced_mesh(others._use_displaced_mesh),
-    _system_type(others._system_type),
-    _for_whom(other._for_whom)
+RelationshipManager::RelationshipManager(const RelationshipManager & other)
+  : MooseObject(other._pars),
+    GhostingFunctor(other),
+    _mesh(other._mesh),
+    _dof_map(other._dof_map),
+    _attach_geometric_early(other._attach_geometric_early),
+    _rm_type(other._rm_type),
+    _for_whom(other._for_whom),
+    _use_displaced_mesh(other._use_displaced_mesh),
+    _system_type(other._system_type)
 {
 }
 

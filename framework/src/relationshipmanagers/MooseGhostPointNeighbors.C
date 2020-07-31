@@ -33,6 +33,20 @@ MooseGhostPointNeighbors::MooseGhostPointNeighbors(const InputParameters & param
                "geometric ghosting");
 }
 
+MooseGhostPointNeighbors::MooseGhostPointNeighbors(const MooseGhostPointNeighbors & others)
+  : FunctorRelationshipManager(others)
+{
+  if (_rm_type != Moose::RelationshipManagerType::GEOMETRIC)
+    mooseError("The MooseGhostPointNeighbors relationship manager should only be used for "
+               "geometric ghosting");
+}
+
+std::unique_ptr<GhostingFunctor>
+MooseGhostPointNeighbors::clone() const
+{
+  return libmesh_make_unique<MooseGhostPointNeighbors>(*this);
+}
+
 std::string
 MooseGhostPointNeighbors::getInfo() const
 {
@@ -56,7 +70,7 @@ MooseGhostPointNeighbors::operator==(const RelationshipManager & rhs) const
 void
 MooseGhostPointNeighbors::internalInit()
 {
-  auto functor = libmesh_make_unique<GhostPointNeighbors>(_mesh);
+  auto functor = libmesh_make_unique<GhostPointNeighbors>(_mesh->getMesh());
 
   _functor = std::move(functor);
 }

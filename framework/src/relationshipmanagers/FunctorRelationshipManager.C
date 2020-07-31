@@ -24,6 +24,11 @@ FunctorRelationshipManager::FunctorRelationshipManager(const InputParameters & p
 {
 }
 
+FunctorRelationshipManager::FunctorRelationshipManager(const FunctorRelationshipManager & other)
+  : RelationshipManager(other), _functor(other._functor ? other._functor->clone() : nullptr)
+{
+}
+
 void
 FunctorRelationshipManager::operator()(const MeshBase::const_element_iterator & range_begin,
                                        const MeshBase::const_element_iterator & range_end,
