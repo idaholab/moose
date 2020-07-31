@@ -35,7 +35,7 @@ protected:
   virtual void computeJacobian() override;
 
   /// advection velocity
-  RealVectorValue _velocity;
+  const VectorVariableValue & _velocity;
 
   /// enum to make the code clearer
   enum class JacRes
@@ -62,4 +62,3 @@ protected:
   /// Calculates the fully-upwind Residual and Jacobian (depending on res_or_jac)
   void fullUpwind(JacRes res_or_jac);
 };
-
