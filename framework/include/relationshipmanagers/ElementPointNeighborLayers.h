@@ -34,7 +34,12 @@ public:
 
   ElementPointNeighborLayers(const InputParameters & parameters);
 
+  ElementPointNeighborLayers(const ElementPointNeighborLayers & other);
+
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
+
   virtual std::string getInfo() const override;
+
   virtual bool operator==(const RelationshipManager & rhs) const override;
 
 protected:
@@ -44,4 +49,3 @@ protected:
   /// applicable and necessary when using DistributedMesh.
   unsigned short _layers;
 };
-

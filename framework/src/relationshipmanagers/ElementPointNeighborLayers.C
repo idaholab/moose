@@ -38,6 +38,17 @@ ElementPointNeighborLayers::ElementPointNeighborLayers(const InputParameters & p
 {
 }
 
+ElementPointNeighborLayers::ElementPointNeighborLayers(const ElementPointNeighborLayers & others)
+  : FunctorRelationshipManager(others), _layers(others._layers)
+{
+}
+
+std::unique_ptr<GhostingFunctor>
+ElementPointNeighborLayers::clone() const
+{
+  return libmesh_make_unique<ElementPointNeighborLayers>(*this);
+}
+
 std::string
 ElementPointNeighborLayers::getInfo() const
 {

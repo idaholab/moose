@@ -309,29 +309,6 @@ SetupMeshAction::act()
         _displaced_mesh->getMesh().allow_remote_element_removal(
             _mesh->getMesh().allow_remote_element_removal());
 
-
-      /*std::cout<<"add MooseGhostPointNeighbors "<<" for dispalced mesh "<<std::endl;
-
-      auto rm_params_dis = _factory.getValidParams("MooseGhostPointNeighbors");
-
-      rm_params_dis.set<std::string>("for_whom") = "Adaptivity";
-      rm_params_dis.set<MooseMesh *>("mesh") = _displaced_mesh.get();
-      rm_params_dis.set<Moose::RelationshipManagerType>("rm_type") =
-          Moose::RelationshipManagerType::GEOMETRIC;
-
-      if (rm_params_dis.areAllRequiredParamsValid())
-      {
-        auto rm_obj = _factory.create<RelationshipManager>(
-            "MooseGhostPointNeighbors", "adaptivity_geometric_ghosting_dispalced", rm_params_dis);
-
-        // Delete the resources created on behalf of the RM if it ends up not being added to the
-        // App.
-        if (!_app.addRelationshipManager(rm_obj))
-          _factory.releaseSharedObjects(*rm_obj);
-      }
-      else
-        mooseError("Invalid initialization of MooseGhostPointNeighbors"); */
-
         std::vector<std::string> displacements =
             getParam<std::vector<std::string>>("displacements");
         if (displacements.size() < _displaced_mesh->dimension())

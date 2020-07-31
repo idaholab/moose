@@ -35,6 +35,12 @@ public:
 
   RelationshipManager(const InputParameters & parameters);
 
+  RelationshipManager(const RelationshipManager & other);
+
+  virtual void set_mesh(const MeshBase * /*mesh*/) override {}
+
+  virtual std::unique_ptr<GhostingFunctor> clone() const override = 0;
+
   /**
    * Called before this RM is attached.  Will only be called once.
    */
@@ -50,7 +56,7 @@ public:
    */
   bool inited() { return _inited; }
 
-  virtual void set_mesh(const MeshBase * mesh) overridden { _mesh = mesh; }
+  // virtual void set_mesh(const MeshBase * mesh) override { _mesh = mesh; }
 
   /**
    * The object (or Action) this RelationshipManager was built for

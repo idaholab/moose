@@ -10,7 +10,6 @@
 #pragma once
 
 #include "RelationshipManager.h"
-
 #include "libmesh/ghosting_functor.h"
 
 // Forward declarations
@@ -36,6 +35,8 @@ public:
 
   ProxyRelationshipManager(const InputParameters & parameters);
 
+  ProxyRelationshipManager(const ProxyRelationshipManager & other);
+
   virtual void operator()(const MeshBase::const_element_iterator & /*range_begin*/,
                           const MeshBase::const_element_iterator & /*range_end*/,
                           processor_id_type p,
@@ -45,11 +46,21 @@ public:
 
   virtual bool operator==(const RelationshipManager & /*rhs*/) const override;
 
+  virtual void set_mesh(const MeshBase * mesh) override
+  {
+    RelationshipManager::set_mesh(mesh);
+    _this_mesh = mesh;
+  }
+
+  virtual std::unique_ptr<GhostingFunctor> clone() const override
+  {
+    return libmesh_make_unique<ProxyRelationshipManager>(*this);
+  }
+
 protected:
   virtual void internalInit() override{};
 
-  MeshBase * _this_mesh;
+  const MeshBase * _this_mesh;
 
   System * _other_system;
 };
-

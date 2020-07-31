@@ -32,6 +32,10 @@ public:
 
   ElementSideNeighborLayers(const InputParameters & parameters);
 
+  ElementSideNeighborLayers(const ElementSideNeighborLayers & other);
+
+  virtual std::unique_ptr<GhostingFunctor> clone() const override;
+
   virtual std::string getInfo() const override;
   virtual bool operator==(const RelationshipManager & rhs) const override;
 

@@ -32,6 +32,8 @@ public:
 
   FunctorRelationshipManager(const InputParameters & parameters);
 
+  FunctorRelationshipManager(const FunctorRelationshipManager & other);
+
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
@@ -47,7 +49,6 @@ public:
 
   virtual void set_mesh(const MeshBase * mesh) override
   {
-    RelationshipManager::set_mesh(mesh);
     if (_functor)
       _functor->set_mesh(mesh);
     else
