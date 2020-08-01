@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#0000'
+  design = 'DistributedRectilinearMeshGenerator.md'
+
+  [./adaptivity]
+    type = 'Exodiff'
+    input = 'adaptivity.i'
+    exodiff = 'adaptivity_out.e'
+    requirement = "The system shall support mesh adaptivity on a distributed generated displaced mesh."
+  [../]
+[]
