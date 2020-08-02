@@ -4,6 +4,6 @@ The `geochemistry` module is designed to solve reactive transport in geochemical
 
 - [Theory](geochemistry/theory/index.md)
 - [Examples](geochemistry/tests_and_examples/index.md)
-- [Documentation of input-file syntax](geochemistry/systems.md)
+- [Description of input-file objects](geochemistry/systems.md)
 - [A to Z index of these webpages](geochemistry/contents.md)
 - [Some miscellaneous information regarding the database](geochemistry/database/index.md)

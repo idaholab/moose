@@ -24,7 +24,7 @@ In this situation, the `start_time` is before $t=0$ when the system closes and t
 
 !listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i block=Postprocessors
 
-[!cite](bethke_2007) presents results in Figures 14.8 and 14.9 (bold line only).  The results are faithfully reproduced by the `geochemistry` module as shown in the figures below.
+[!cite](bethke_2007) presents results in Figures 14.8 and 14.9 (bold line only, since the fine line shows a different type of aqueous solution).  The results are faithfully reproduced by the `geochemistry` module as shown in the figures below.
 
 !media changing_pH_ferric_hydroxide_fig1.png caption=Concentrations of sites on a ferric oxide surface.  Compare with Bethke's Figure 14.8  id=changing_pH_ferric_hydroxide_fig1
 
