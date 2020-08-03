@@ -41,7 +41,7 @@ protected:
 
 private:
   /**
-  * Adds the variable-residuals to the trainer.
-  */
+   * Adds the variable-residuals to the trainer.
+   */
   void transferResidual(dof_id_type base_i, dof_id_type multi_app_i);
 };
