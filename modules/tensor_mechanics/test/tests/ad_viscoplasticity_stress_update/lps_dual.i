@@ -14,6 +14,23 @@
   ymax = 0.002
 []
 
+[Variables]
+  [./temp]
+    initial_condition = 1000
+  [../]
+[]
+
+[Kernels]
+  [./dt]
+    type = ADTimeDerivative
+    variable = temp
+  [../]
+  [./diff]
+    type = ADDiffusion
+    variable = temp
+  [../]
+[]
+
 [Modules/TensorMechanics/Master/All]
   strain = FINITE
   add_variables = true
@@ -65,10 +82,11 @@
     relative_tolerance = 1e-11
   [../]
   [./coef]
-    type = ParsedMaterial
+    type = ADParsedMaterial
     f_name = coef_3
     # Example of creep power law
-    function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
+    args = temp
+    function = '0.5e-18 * exp(-4e4 / 1.987 / temp)'
   [../]
 []
 
@@ -90,6 +108,12 @@
     variable = disp_y
     boundary = top
     function = pull
+  [../]
+  [./temp_ramp]
+    type = ADFunctionDirichletBC
+    boundary = right
+    function = '1000 + 400 * t / 0.12'
+    variable = temp
   [../]
 []
 
