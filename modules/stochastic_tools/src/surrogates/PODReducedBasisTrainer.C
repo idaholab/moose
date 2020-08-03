@@ -17,6 +17,14 @@
 
 registerMooseObject("StochasticToolsApp", PODReducedBasisTrainer);
 
+typedef std::function<void(
+    ReplicatedMesh &,
+    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &,
+    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &,
+    processor_id_type,
+    const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &)>
+    passingFunction;
+
 InputParameters
 PODReducedBasisTrainer::validParams()
 {
@@ -27,22 +35,17 @@ PODReducedBasisTrainer::validParams()
   params.addRequiredParam<std::vector<std::string>>("var_names",
                                                     "Names of variables we want to"
                                                     "extract from solution vectors.");
-  params.addRequiredParam<std::vector<Real>>("en_limits",
-                                             "List of energy retention limits for each variable.");
+  params.addRequiredParam<std::vector<Real>>("error_res",
+                                             "The errors allowed in the sanpshot reconstruction.");
   params.addRequiredParam<std::vector<std::string>>("tag_names",
                                                     "Names of tags for the reduced operators.");
   params.addParam<std::vector<std::string>>(
-      "dir_tag_names",
-      std::vector<std::string>(0),
-      "Names of tags for reduced operators corresponding to dirichlet BCs.");
-  params.addParam<bool>(
-      "print_eigenvalues",
-      false,
-      "Flag that decides if the eigenvalues of the correlation matrix are printed or not.");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "independent",
-      "List of bools describing if the tags"
-      " correspond to and independent operator or not.");
+      "filenames", "Files where the eigenvalues are printed for each variable (if given).");
+
+  params.addRequiredParam<std::vector<std::string>>(
+      "tag_types",
+      "List of keywords describing if the tags"
+      " correspond to independent operatos or not. (op/op_dir/src/src_dir)");
   return params;
 }
 
@@ -50,34 +53,36 @@ PODReducedBasisTrainer::PODReducedBasisTrainer(const InputParameters & parameter
   : SurrogateTrainer(parameters),
     _var_names(declareModelData<std::vector<std::string>>(
         "_var_names", getParam<std::vector<std::string>>("var_names"))),
-    _en_limits(getParam<std::vector<Real>>("en_limits")),
+    _error_res(getParam<std::vector<Real>>("error_res")),
     _tag_names(declareModelData<std::vector<std::string>>(
         "_tag_names", getParam<std::vector<std::string>>("tag_names"))),
-    _dir_tag_names(declareModelData<std::vector<std::string>>(
-        "_dir_tag_names", getParam<std::vector<std::string>>("dir_tag_names"))),
-    _independent(declareModelData<std::vector<unsigned int>>(
-        "_independent", getParam<std::vector<unsigned int>>("independent"))),
+    _tag_types(declareModelData<std::vector<std::string>>(
+        "_tag_types", getParam<std::vector<std::string>>("tag_types"))),
     _base(declareModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(declareModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
     _base_completed(false),
-    _empty_operators(true),
-    _print_eigenvalues(getParam<bool>("print_eigenvalues"))
+    _empty_operators(true)
 {
-  if (_en_limits.size() != _var_names.size())
-    paramError("en_limits",
+  if (_error_res.size() != _var_names.size())
+    paramError("error_res",
                "The number of elements is not equal to the number"
                " of elements in 'var_names'!");
 
-  if (_tag_names.size() != _independent.size())
-    paramError("independent",
+  if (_tag_names.size() != _tag_types.size())
+    paramError("tag_types",
                "The number of elements is not equal to the number"
                " of elements in 'tag_names'!");
 
-  for (auto dir_tag : _dir_tag_names)
+  std::vector<std::string> available_names{"op", "src", "op_dir", "src_dir"};
+  for (auto tag_type : _tag_types)
   {
-    auto it = std::find(_tag_names.begin(), _tag_names.end(), dir_tag);
-    if (it == _tag_names.end())
-      paramError("dir_tag_names", "Dirichlet BC tag '", dir_tag, "' is not present in tag_names!");
+    auto it = std::find(available_names.begin(), available_names.end(), tag_type);
+    if (it == available_names.end())
+      paramError("tag_types",
+                 "Tag type '",
+                 tag_type,
+                 "' is not valid, available names are:",
+                 " op, op_dir, src, src_dir");
   }
 }
 
@@ -101,11 +106,6 @@ PODReducedBasisTrainer::initialSetup()
 
   _eigenvectors.clear();
   _eigenvectors.resize(_var_names.size());
-}
-
-void
-PODReducedBasisTrainer::initialize()
-{
 }
 
 void
@@ -271,85 +271,15 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   // for each variable for each required global snapshot index.
   std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> received_vectors;
 
-  // The Parallel::push_parallel_packed_range() function needs a functor that manipulates
-  // the received objects. In this case it is a labda function which is also responsible for the
-  // coputation of the elements in the matrix on the fly.
+  // Converting function to functor to be able to pass to push packed range.
   auto functor =
       [this, &mesh, &received_vectors, &local_vectors](
-          processor_id_type /*pid*/,
+          processor_id_type pid,
           const std::vector<
               std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> & vectors) {
-        for (auto & tuple : vectors)
-        {
-          const auto glob_vec_i = std::get<0>(tuple);
-          const auto var_i = std::get<1>(tuple);
-          const auto & vector = std::get<2>(tuple);
-
-          // The entry that will be filled with all of the variable solutions for a vector
-          std::vector<std::shared_ptr<DenseVector<Real>>> & entry = received_vectors[glob_vec_i];
-
-          // Size it to the number of variables in case we haven't already
-          entry.resize(_snapshots.size(), nullptr);
-
-          // Add this varaible's contribution - this is shared_ptr so we are claiming partial
-          // ownership of this vector and do not have to do a copy
-          entry[var_i] = vector;
-        }
-
-        // Looping over the locally owned entries in the matrix and computing the
-        // values.
-        for (Elem * elem : mesh.active_local_element_ptr_range())
-        {
-          // If the matrix entry is already filled, the loop skips this element.
-          if (elem->get_extra_integer(0))
-            continue;
-
-          // Getting pointers to the necessary snapshots for the matrix entry.
-          // This points to a vector of size (number of variables).
-          const dof_id_type i = elem->centroid()(0);
-          const dof_id_type j = elem->centroid()(1);
-          std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
-          std::vector<std::shared_ptr<DenseVector<Real>>> * j_vec = nullptr;
-
-          const auto find_i_local = local_vectors.find(i);
-          if (find_i_local != local_vectors.end())
-            i_vec = &find_i_local->second;
-          else
-          {
-            const auto find_i_received = received_vectors.find(i);
-            if (find_i_received != received_vectors.end())
-            {
-              i_vec = &find_i_received->second;
-            }
-            else
-              continue;
-          }
-
-          const auto find_j_local = local_vectors.find(j);
-          if (find_j_local != local_vectors.end())
-            j_vec = &find_j_local->second;
-          else
-          {
-            const auto find_j_received = received_vectors.find(j);
-            if (find_j_received != received_vectors.end())
-            {
-              j_vec = &find_j_received->second;
-            }
-            else
-              continue;
-          }
-
-          // Coputing the available matrix entries for every variable.
-          for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-            _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
-
-          // Set the 'filled' flag to 1 (true) to make sure it is not recomputed.
-          elem->set_extra_integer(0, 1);
-        }
+        PODReducedBasisTrainer::receiveObjects(mesh, received_vectors, local_vectors, pid, vectors);
       };
 
-  // The prepared objects are communicated and the matrix entries are computed on the
-  // fly.
   Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
 
   // This extra call is necessary in case a processor has all the elements it needs
@@ -363,15 +293,89 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
   // The lower triangle of the matrices are then filled using symmetry.
   for (auto & corr_mx : _corr_mx)
-  {
     for (dof_id_type row_i = 0; row_i < corr_mx.m(); ++row_i)
-    {
       for (dof_id_type col_i = 0; col_i < corr_mx.n(); ++col_i)
-      {
         if (row_i > col_i)
           corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
+}
+
+void
+PODReducedBasisTrainer::receiveObjects(
+    ReplicatedMesh & mesh,
+    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+        received_vectors,
+    std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+        local_vectors,
+    processor_id_type /*pid*/,
+    const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &
+        vectors)
+{
+  for (auto & tuple : vectors)
+  {
+    const auto glob_vec_i = std::get<0>(tuple);
+    const auto var_i = std::get<1>(tuple);
+    const auto & vector = std::get<2>(tuple);
+
+    // The entry that will be filled with all of the variable solutions for a vector
+    std::vector<std::shared_ptr<DenseVector<Real>>> & entry = received_vectors[glob_vec_i];
+
+    // Size it to the number of variables in case we haven't already
+    entry.resize(_snapshots.size(), nullptr);
+
+    // Add this varaible's contribution - this is shared_ptr so we are claiming partial
+    // ownership of this vector and do not have to do a copy
+    entry[var_i] = vector;
+  }
+
+  // Looping over the locally owned entries in the matrix and computing the
+  // values.
+  for (Elem * elem : mesh.active_local_element_ptr_range())
+  {
+    // If the matrix entry is already filled, the loop skips this element.
+    if (elem->get_extra_integer(0))
+      continue;
+
+    // Getting pointers to the necessary snapshots for the matrix entry.
+    // This points to a vector of size (number of variables).
+    const dof_id_type i = elem->centroid()(0);
+    const dof_id_type j = elem->centroid()(1);
+    std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
+    std::vector<std::shared_ptr<DenseVector<Real>>> * j_vec = nullptr;
+
+    const auto find_i_local = local_vectors.find(i);
+    if (find_i_local != local_vectors.end())
+      i_vec = &find_i_local->second;
+    else
+    {
+      const auto find_i_received = received_vectors.find(i);
+      if (find_i_received != received_vectors.end())
+      {
+        i_vec = &find_i_received->second;
       }
+      else
+        continue;
     }
+
+    const auto find_j_local = local_vectors.find(j);
+    if (find_j_local != local_vectors.end())
+      j_vec = &find_j_local->second;
+    else
+    {
+      const auto find_j_received = received_vectors.find(j);
+      if (find_j_received != received_vectors.end())
+      {
+        j_vec = &find_j_received->second;
+      }
+      else
+        continue;
+    }
+
+    // Coputing the available matrix entries for every variable.
+    for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
+      _corr_mx[v_ind](i, j) = (*i_vec)[v_ind]->dot(*(*j_vec)[v_ind]);
+
+    // Set the 'filled' flag to 1 (true) to make sure it is not recomputed.
+    elem->set_extra_integer(0, 1);
   }
 }
 
@@ -406,7 +410,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     // Getting a cutoff for the number of modes. The functio nrequires a sorted list,
     // thus the temporary vector is sorted.
     std::stable_sort(v.begin(), v.end(), std::greater<Real>());
-    unsigned int cutoff = determineNumberOfModes(_en_limits[v_ind], v);
+    unsigned int cutoff = determineNumberOfModes(_error_res[v_ind], v);
 
     // Initializing the actual containers for the eigenvectors and eigenvalues.
     _eigenvalues[v_ind] = DenseVector<Real>(cutoff);
@@ -422,13 +426,12 @@ PODReducedBasisTrainer::computeEigenDecomposition()
       }
     }
 
-    if (_print_eigenvalues)
-      printEigenvalues();
+    printEigenvalues();
   }
 }
 
 unsigned int
-PODReducedBasisTrainer::determineNumberOfModes(Real limit, std::vector<Real> & inp_vec)
+PODReducedBasisTrainer::determineNumberOfModes(Real error, const std::vector<Real> & inp_vec) const
 {
   Real sum = std::accumulate(inp_vec.begin(), inp_vec.end(), 0.0);
 
@@ -436,7 +439,7 @@ PODReducedBasisTrainer::determineNumberOfModes(Real limit, std::vector<Real> & i
   for (unsigned int i = 0; i < inp_vec.size(); ++i)
   {
     part_sum += inp_vec[i];
-    if (part_sum / sum > limit)
+    if (part_sum / sum > 1 - error)
       return (i + 1);
   }
   return (inp_vec.size());
@@ -492,7 +495,7 @@ PODReducedBasisTrainer::initReducedOperators()
   // Initializing each operator (each operator with a tag).
   for (unsigned int tag_i = 0; tag_i < _red_operators.size(); ++tag_i)
   {
-    if (_independent[tag_i])
+    if (_tag_types[tag_i] == "src" || _tag_types[tag_i] == "src_dir")
       _red_operators[tag_i].resize(base_num, 1);
     else
       _red_operators[tag_i].resize(base_num, base_num);
@@ -548,60 +551,53 @@ const DenseVector<Real> &
 PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
 {
   unsigned int counter = 0;
-  unsigned int var_counter = 0;
-  unsigned int base_counter = 0;
-  bool found = false;
+
   for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
-  {
     for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
       if (g_index == counter)
-      {
-        var_counter = var_i;
-        base_counter = base_i;
-        found = true;
-        break;
-      }
+        return _base[var_i][base_i];
+
+      counter += 1;
     }
-    if (found)
-      break;
-  }
-  return _base[var_counter][base_counter];
+
+  mooseError("The basis vector with global index ", g_index, "is not available!");
+  return _base[0][0];
 }
 
 unsigned int
 PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
 {
   unsigned int counter = 0;
-  unsigned int var_counter = 0;
-  bool found = false;
+
   for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
-  {
     for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
       if (g_index == counter)
-      {
-        var_counter = var_i;
-        found = true;
-        break;
-      }
+        return var_i;
+
+      counter += 1;
     }
-    if (found)
-      break;
-  }
-  return var_counter;
+
+  mooseError("Variable with global base index ", g_index, "is not available!");
+  return 0;
 }
 
 void
 PODReducedBasisTrainer::printEigenvalues()
 {
-  if (processor_id() == 0 && _tid == 0)
+  if (processor_id() == 0 && _tid == 0 && isParamValid("filenames"))
   {
+    std::vector<std::string> filenames = getParam<std::vector<std::string>>("filenames");
+
+    if (filenames.size() != _var_names.size())
+      paramError("filenames",
+                 "The number of file names is not equal to the number of variable names!");
+
     for (dof_id_type var_i = 0; var_i < _var_names.size(); ++var_i)
     {
-      std::string filename("eigenvalues_" + _var_names[var_i] + ".csv");
       std::filebuf fb;
-      fb.open(filename, std::ios::out);
+      fb.open(filenames[var_i], std::ios::out);
       std::ostream os(&fb);
       os << "evs" << std::endl;
       _eigenvalues[var_i].print_scientific(os);

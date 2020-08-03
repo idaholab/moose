@@ -115,10 +115,10 @@ which consists of the following four steps for each variable:
 
    !equation id=ev_determination
    r_i = \argmin\limits_{1\leq r_i\leq N_s}
-   \left(\frac{\sum_{k=1}^{r_i}\lambda_{i,k}}{\sum_{k=1}^{N_s}\lambda_{i,k}} > \tau_i\right),
+   \left(\frac{\sum_{k=1}^{r_i}\lambda_{i,k}}{\sum_{k=1}^{N_s}\lambda_{i,k}} > 1 - \tau_i\right),
 
-   where $\tau$ is a given parameter often referred to as energy retention limit.
-   This can be supplied to the trainer using the `en_limits` input parameter.
+   where $\tau$ is a given parameter describing the allowed error in the reconstruction of the snapshots.
+   This can be supplied to the trainer using the `error_res` input parameter.
    Of course, this rank can be determined manually as well. For more information about this option, see
    [PODReducedBasisSurrogate.md].
 
@@ -282,8 +282,18 @@ Finally, the [PODReducedBasisTrainer.md] is defined in the `Trainers` block. It 
 the names of the variables (`var_names`) one wishes to create reduced basis for and the names of the
 tags (`tag_names`) associated with the affine components of the full-order operator.
 Additionally, a vector specifying which tag corresponds to a linear operator and which to
-a source term needs to be added as well (`independent`). To specify the energy retention
-limits for reach variable ($\tau_i$), one needs to specify `en_limits`.
+a source term needs to be added as well (`tag_types`). The available tag types are:
+
+!table
+| Tag type | Description |
+| :- | - |
+| op | Operator that acts on the solution vector (i.e. a matrix). |
+| src | Operator that does not act on the solution vector (i.e. a source vector). |
+| op_dir | Dirichlet operator that acts on the solution vector (i.e. Dirichlet penalty matrix). |
+| src_dir | Dirichlet operator that does not act on the solution vector (i.e. Dirichlet pensalty source vector). |
+
+To specify the allowed error in the snapshot reconstruction
+for reach variable ($\tau_i$), one needs to specify `error_res`.
 In the following example the `execute_on` parameter is set to '`timestep_begin final`' which means
 that at the beginning of the training it will create the basis functions while at the
 end it will create the reduced operators.
