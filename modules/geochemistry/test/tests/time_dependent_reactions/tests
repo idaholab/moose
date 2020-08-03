@@ -10,7 +10,9 @@
   [./except2]
     type = RunException
     input = except2.i
-    expect_err = 'source_species_names: The name badname does not appear in the basis or equilibrium species list'
+    expect_err = 'source_species_names:
+    The name badname does not appear in the basis, equilibrium or kinetic species list'
+    match_literal = true
     requirement = 'An error will be thrown if a source species does not exist in the geochemical system'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'
@@ -218,7 +220,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
   [../]
   [./simple_no_action]
     type = 'CSVDiff'
-    input = 'simple.i'
+    input = 'simple_no_action.i'
     csvdiff = 'simple_out.csv'
     prereq = 'simple'
     rel_err = 1.0E-5

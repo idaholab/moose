@@ -20,10 +20,8 @@ class GeochemicalSolver
 public:
   /**
    * Construct and check for sensible arguments
-   * @param mgd The ModelGeocehmicalDatabase for the model that holds the basis species names,
-   * equilibrium stoichiometry, etc
-   * @param egs The GeochemicalSystem that holds the molalities, activities, etc.
-   * GeochemicalSolver changes quantities within egs as it solves the system.
+   * @param num_basis Number of basis species in the system
+   * @param mum_kin Number of kinetic species in the system
    * @param is The object to compute ionic strengths.  GeochemicalSolver changes the
    * maximum value of ionic strength as it progresses towards the solution
    * @param abs_tol The Newton solution process is deemed to have converged if the L1 norm of the
@@ -49,8 +47,8 @@ public:
    * calculation, otherwise evaluate them only at the start of the solve process (which will be
    * using the molalities, etc from the previous time-step)
    */
-  GeochemicalSolver(const ModelGeochemicalDatabase & mgd,
-                    GeochemicalSystem & egs,
+  GeochemicalSolver(unsigned num_basis,
+                    unsigned num_kin,
                     GeochemistryIonicStrength & is,
                     Real abs_tol,
                     Real rel_tol,
@@ -65,6 +63,8 @@ public:
 
   /**
    * Solve the system
+   * @param egs The geochemical system that needs to be solved.  This gets modified as the solve
+   * progresses
    * @param ss Textual information such as (iteration, residual) and swap information is written to
    * this stringstream
    * @param tot_iter The total number of iterations used in the solve
@@ -81,7 +81,8 @@ public:
    * @param dmole_additions dmole_additions(a, b) = d(mole_additions(a))/d(basis_molality(b)) for b
    * < _num_basis and d(mole_additions(a))/d(kinetic_moles(b - _num_basis)) otherwise.
    */
-  void solveSystem(std::stringstream & ss,
+  void solveSystem(GeochemicalSystem & egs,
+                   std::stringstream & ss,
                    unsigned & tot_iter,
                    Real & abs_residual,
                    Real dt,
@@ -98,16 +99,10 @@ public:
   unsigned getRampMaxIonicStrength() const;
 
 private:
-  /// The database for the user-defined model
-  const ModelGeochemicalDatabase & _mgd;
-  /// The GeochemicalSystem
-  GeochemicalSystem & _egs;
   /// The ionic-strength calculator
   GeochemistryIonicStrength & _is;
   /// Number of species in the basis
   const unsigned _num_basis;
-  /// Number of species in equilibrium with the basis components
-  const unsigned _num_eqm;
   /// Number of kinetic species
   const unsigned _num_kin;
   /// Number of basis molalities (and potentially solvent water mass) in the algebraic system
@@ -147,25 +142,32 @@ private:
    * otherwise evaluate only at the start of the solve process (using, eg, the old molality values)
    */
   bool _evaluate_kin_always;
+  /// the mole_additions for the kinetic species as specified in the argument of solveSystem
+  DenseVector<Real> _input_kin_mole_additions;
 
   /**
    * Builds the residual of the algebraic system
+   * @param egs The geochemical system to use to compute the residual
    * @param residual The residual components will be placed here
    * @param mole_additions the increment of mole number of each basis species and kinetic species
    * since the last timestep.
    * @return the L1 norm of residual
    */
-  Real computeResidual(DenseVector<Real> & residual,
+  Real computeResidual(const GeochemicalSystem & egs,
+                       DenseVector<Real> & residual,
                        const DenseVector<Real> & mole_additions) const;
 
   /**
    * Solves _jacobian * neg_change_mol = _residual for neg_change_mol, then performs an
    * underrelaxation to get new_mol
+   * @param egs The geochemical system that we're trying to solve
    * @param jacobian the jacobian of the system
    * @param new_mol upon exit, this will be the new molality (and surface potential values, if any)
    * values according to the underrelaxed Newton process
    */
-  void solveAndUnderrelax(DenseMatrix<Real> & jacobian, DenseVector<Real> & new_mol) const;
+  void solveAndUnderrelax(const GeochemicalSystem & egs,
+                          DenseMatrix<Real> & jacobian,
+                          DenseVector<Real> & new_mol) const;
 
   /**
    * Check if a basis swap is needed.  It is needed if:
@@ -173,25 +175,37 @@ private:
    * - the free number of moles of a basis mineral is negative
    * - the saturation index of an equilibrium mineral is positive (and it is not in the
    * prevent_precipitation list)
+   * @param egs Geochemical system that we're trying to solve
    * @param swap_out_of_basis the index of the species in the basis that will be removed from the
    * basis
    * @param swap_into_basis the index of the equilibrium mineneral that will be added to the basis
    * @return true if a swap is needed, false otherwise
    */
-  bool swapNeeded(unsigned & swap_out_of_basis,
+  bool swapNeeded(const GeochemicalSystem & egs,
+                  unsigned & swap_out_of_basis,
                   unsigned & swap_into_basis,
                   std::stringstream & ss) const;
 
   /**
    * Progressively alter the initial-guess molalities for the algebraic system to attempt to reduce
    * the residual
+   * @param egs The GeochemicalSystem we're trying to solve
    * @param dt time-step size (used for determining kinetic rates)
    * @param mole_additions the increment of mole number of each basis species and kinetic species
    * since the last timestep.  This may change during this function as kinetic rates depend on
    * molalities
    * @param dmole_additions d(mole_additions)/(molality and kinetic moles)
    */
-  bool reduceInitialResidual(Real dt,
+  bool reduceInitialResidual(GeochemicalSystem & egs,
+                             Real dt,
                              DenseVector<Real> & mole_additions,
                              DenseMatrix<Real> & dmole_additions);
+
+  /**
+   * Add _input_kin_mole_additions to the kinetic slots of mole_additions.  This is necessary after
+   * every call to egs.setKineticRates, because that method zeroes mole_additions corresponding to
+   * the kinetic_slots, but the user could have specified some overall ("input") kinetic mole
+   * additions to solveSystem
+   */
+  void addKineticInputMoleAdditions(DenseVector<Real> & mole_additions) const;
 };

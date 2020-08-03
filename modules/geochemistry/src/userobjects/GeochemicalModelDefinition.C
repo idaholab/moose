@@ -136,6 +136,12 @@ GeochemicalModelDefinition::getDatabase() const
   return _model.modelGeochemicalDatabase();
 }
 
+const PertinentGeochemicalSystem &
+GeochemicalModelDefinition::getPertinentGeochemicalSystem() const
+{
+  return _model;
+}
+
 const GeochemicalDatabaseReader &
 GeochemicalModelDefinition::getOriginalFullDatabase() const
 {

@@ -15,26 +15,42 @@ GeochemistryTimeDependentReactor::sharedParams()
   params.addCoupledVar(
       "mode",
       0.0,
-      "This may vary temporally.  If mode=1 then 'dump' mode is used, which means "
-      "all mineral masses are removed from the system before the equilibrium solution is sought "
-      "(ie, removal occurs at the beginning of the time step).  If mode=2 then 'flow-through' mode "
-      "is used, which means all mimeral masses are removed from the system after it the equilbrium "
-      "solution has been found (ie, at the end of a time step).  If mode=3 then 'flush' mode is "
-      "used, then before the equilibrium solution is sought (ie, at the start of a time step) "
-      "water+species is removed from the system at the same rate as pure water + non-mineral "
-      "solutes are entering the system (specified in source_species_rates).  If mode is any other "
-      "number, no special mode is active (the system simply responds to the source_species_rates, "
-      "controlled_activity_value, etc).");
+      "This may vary temporally.  If mode=1 then 'dump' mode is used, which means all non-kinetic "
+      "mineral masses are removed from the system before the equilibrium solution is sought (ie, "
+      "removal occurs at the beginning of the time step).  If mode=2 then 'flow-through' mode is "
+      "used, which means all mineral masses are removed from the system after it the "
+      "equilbrium solution has been found (ie, at the end of a time step).  If mode=3 then 'flush' "
+      "mode is used, then before the equilibrium solution is sought (ie, at the start of a time "
+      "step) water+species is removed from the system at the same rate as pure water + non-mineral "
+      "solutes are entering the system (specified in source_species_rates).  If mode=4 then "
+      "'heat-exchanger' mode is used, which means the entire current aqueous solution is removed, "
+      "then the source_species are added, then the temperature is set to 'cold_temperature', the "
+      "system is solved and any precipitated minerals are removed, then the temperature is set to "
+      "'temperature', the system re-solved and any precipitated minerals are removed.  If mode is "
+      "any other number, no special mode is active (the system simply responds to the "
+      "source_species_rates, controlled_activity_value, etc).");
   params.addCoupledVar(
       "temperature",
       25,
-      "Temperature.  Note, this has two different meanings.  (1) If no species are being added to "
-      "the solution (no source_species_rates are positive) then this is the temperature of the "
-      "aqueous solution.  (2) If species are being added, this is the temperature of the species "
-      "being added.  In case (2), the final aqueous-solution temperature is computed assuming the "
-      "species are added, temperature is equilibrated and then, if species are also being removed, "
-      "they are removed.  If you wish to add species and simultaneously alter the temperature, you "
-      "will have to use a sequence of heat-add-heat-add, etc steps");
+      "Temperature.  This has two different meanings if mode!=4.  (1) If no species are being "
+      "added to the solution (no source_species_rates are positive) then this is the temperature "
+      "of the aqueous solution.  (2) If species are being added, this is the temperature of the "
+      "species being added.  In case (2), the final aqueous-solution temperature is computed "
+      "assuming the species are added, temperature is equilibrated and then, if species are also "
+      "being removed, they are removed.  If you wish to add species and simultaneously alter the "
+      "temperature, you will have to use a sequence of heat-add-heat-add, etc steps.  In the case "
+      "that mode=4, temperature is the final temperature of the aqueous solution");
+  params.addCoupledVar(
+      "cold_temperature",
+      25,
+      "This is only used if mode=4, where it is the cold temperature of the heat exchanger.");
+  params.addRangeCheckedParam<unsigned>(
+      "heating_increments",
+      1,
+      "heating_increments > 0",
+      "This is only used if mode=4.  Internal to this object, the temperature is ramped from "
+      "cold_temperature to temperature in heating_increments increments.  This helps difficult "
+      "problems converge");
   params.addParam<Real>("initial_temperature",
                         25.0,
                         "The initial aqueous solution is equilibrated at this system before adding "
@@ -101,6 +117,9 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     const InputParameters & parameters)
   : GeochemistryReactorBase(parameters),
     _temperature(coupledValue("temperature")),
+    _cold_temperature(coupledValue("cold_temperature")),
+    _heating_increments(getParam<unsigned>("heating_increments")),
+    _new_temperature(getParam<Real>("initial_temperature")),
     _previous_temperature(getParam<Real>("initial_temperature")),
     _egs(_mgd,
          _gac,
@@ -117,8 +136,8 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
          getParam<Real>("min_initial_molality"),
          getParam<std::vector<std::string>>("kinetic_species_name"),
          getParam<std::vector<Real>>("kinetic_species_initial_moles")),
-    _solver(_mgd,
-            _egs,
+    _solver(_mgd.basis_species_name.size(),
+            _mgd.kin_species_name.size(),
             _is,
             getParam<Real>("abs_tol"),
             getParam<Real>("rel_tol"),
@@ -155,10 +174,11 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
     paramError("source_species_names", "must have the same size as source_species_rates");
   for (unsigned i = 0; i < _num_source_species; ++i)
     if (!(_mgd.basis_species_index.count(_source_species_names[i]) == 1 ||
-          _mgd.eqm_species_index.count(_source_species_names[i]) == 1))
+          _mgd.eqm_species_index.count(_source_species_names[i]) == 1 ||
+          _mgd.kin_species_index.count(_source_species_names[i]) == 1))
       paramError("source_species_names",
                  "The name " + _source_species_names[i] +
-                     " does not appear in the basis or equilibrium species list");
+                     " does not appear in the basis, equilibrium or kinetic species list");
 
   // check and set activity controllers
   for (unsigned i = 0; i < _num_removed_fixed; ++i)
@@ -200,6 +220,9 @@ GeochemistryTimeDependentReactor::GeochemistryTimeDependentReactor(
   for (unsigned j = 0; j < _mgd.eqm_species_name.size(); ++j)
     if (_mgd.eqm_species_mineral[j])
       _minerals_dumped[_mgd.eqm_species_name[j]] = 0.0;
+  for (unsigned k = 0; k < _mgd.kin_species_name.size(); ++k)
+    if (_mgd.kin_species_mineral[k])
+      _minerals_dumped[_mgd.kin_species_name[k]] = 0.0;
 }
 
 void
@@ -217,10 +240,17 @@ void
 GeochemistryTimeDependentReactor::initialSetup()
 {
   // solve the geochemical system with its initial composition and with dt=0 so no kinetic additions
+  if (_num_my_nodes == 0)
+    return; // rather peculiar case where user has used many processors
   _mole_additions.zero();
   _dmole_additions.zero();
-  _solver.solveSystem(
-      _solver_output, _tot_iter, _abs_residual, 0.0, _mole_additions, _dmole_additions);
+  _solver.solveSystem(_egs,
+                      _solver_output[0],
+                      _tot_iter[0],
+                      _abs_residual[0],
+                      0.0,
+                      _mole_additions,
+                      _dmole_additions);
 }
 
 void
@@ -273,209 +303,308 @@ GeochemistryTimeDependentReactor::execute()
       const unsigned basis_ind = _mgd.basis_species_index.at(_source_species_names[i]);
       _mole_additions(basis_ind) += this_rate;
     }
-    else
+    else if (_mgd.eqm_species_index.count(_source_species_names[i]))
     {
       const unsigned eqm_j = _mgd.eqm_species_index.at(_source_species_names[i]);
       for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
         _mole_additions(basis_ind) += _mgd.eqm_stoichiometry(eqm_j, basis_ind) * this_rate;
     }
+    else
+    {
+      const unsigned kin_ind = _mgd.kin_species_index.at(_source_species_names[i]);
+      _mole_additions(_num_basis + kin_ind) += this_rate;
+    }
   }
-  for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-    _mole_additions(basis_ind) *= _dt;
+  for (unsigned i = 0; i < _num_basis + _num_kin; ++i)
+    _mole_additions(i) *= _dt;
 
   // activate special modes
-  if (_mode[0] == 1.0) // dump
+  if (_mode[0] == 1.0)
+    preSolveDump();
+  else if (_mode[0] == 3.0)
+    preSolveFlush();
+  else if (_mode[0] == 4.0)
   {
-    const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
-    for (unsigned i = 1; i < _num_basis; ++i)
-      if (_mgd.basis_species_mineral[i])
-      {
-        _mole_additions(i) =
-            -current_molal[i]; // might overwrite the rates set above, which is good
-        _minerals_dumped[_mgd.basis_species_name[i]] += current_molal[i];
-      }
+    removeCurrentSpecies();
+    _new_temperature = _cold_temperature[0];
   }
-  else if (_mode[0] == 3.0) // flush
-  {
-    // Here we conserve mass, so compute the mass of the solution, without the free mineral moles.
-    // We don't include the free mineral moles because users of GeochemistWorkbench will want
-    // "flush" to operate like Bethke Eqn(13.14)
-    // I assume we also don't include kinetic-mineral moles
-    Real kg_in = _mole_additions(0) / GeochemistryConstants::MOLES_PER_KG_WATER;
-    for (unsigned i = 1; i < _num_basis; ++i)
-      if (!_mgd.basis_species_mineral[i])
-        kg_in += _mole_additions(i) * _mgd.basis_species_molecular_weight[i] / 1000.0;
-
-    const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
-    const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
-    const std::vector<Real> & kin_moles = _egs.getKineticMoles();
-
-    // compute the current mass, without moles from free minerals and without kinetic minerals
-    Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
-    for (unsigned i = 1; i < _num_basis; ++i)
-    {
-      Real kinetic_contribution = 0.0;
-      for (unsigned k = 0; k < _num_kin; ++k)
-        kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
-      if (_mgd.basis_species_mineral[i])
-        current_kg += (current_bulk[i] - current_molal[i] - kinetic_contribution) *
-                      _mgd.basis_species_molecular_weight[i] / 1000.0;
-      else
-        current_kg += (current_bulk[i] - kinetic_contribution) *
-                      _mgd.basis_species_molecular_weight[i] / 1000.0;
-    }
-
-    const Real fraction_to_remove = kg_in / current_kg;
-    for (unsigned i = 0; i < _num_basis; ++i)
-    {
-      Real kinetic_contribution = 0.0;
-      for (unsigned k = 0; k < _num_kin; ++k)
-        kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
-      if (_mgd.basis_species_mineral[i])
-        _mole_additions(i) -=
-            fraction_to_remove * (current_bulk[i] - current_molal[i] - kinetic_contribution);
-      else
-        _mole_additions(i) -= fraction_to_remove * (current_bulk[i] - kinetic_contribution);
-    }
-  }
-
-  Real new_temperature = _temperature[0];
-  if (new_temperature != _previous_temperature)
-  {
-    // if reactants are being added, the system temperature will not be _temperature[0]
-    bool any_additions = false;
-    for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-      if (_mole_additions(basis_ind) > 0)
-      {
-        any_additions = true;
-        break;
-      }
-    if (any_additions)
-    {
-      // assume heat capacities of inputs and outputs are the same, so final temperature is dictated
-      // by masses, also assume that the input happens first, then temperature equilibration, then
-      // the outputs occur
-      const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
-      Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
-      Real input_kg = std::max(_mole_additions(0), 0.0) / GeochemistryConstants::MOLES_PER_KG_WATER;
-      for (unsigned i = 1; i < _num_basis; ++i)
-      {
-        current_kg += current_bulk[i] * _mgd.basis_species_molecular_weight[i] / 1000.0;
-        input_kg +=
-            std::max(_mole_additions(i), 0.0) * _mgd.basis_species_molecular_weight[i] / 1000.0;
-      }
-      new_temperature = (_previous_temperature * current_kg + _temperature[0] * input_kg) /
-                        (current_kg + input_kg);
-    }
-  }
-
-  if (_mode[0] == 1.0) // dump all minerals
-  {
-    // add the chemicals immediately instead of during the solve (as occurs for other modes)
-    for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
-    {
-      _egs.addToBulkMoles(basis_ind, _mole_additions(basis_ind));
-      _mole_additions(basis_ind) = 0.0;
-    }
-    // dump needs free mineral moles to be exactly zero and the above addToBulkMoles will have set
-    // this for standard minerals, but not things related to sorption or kinetic minerals, so:
-    _egs.setMineralRelatedFreeMoles(0.0);
-
-    // Now need to swap all minerals out of the basis
-    const std::vector<Real> & eqm_molality = _egs.getEquilibriumMolality();
-    unsigned swap_into_basis = 0;
-    for (unsigned i = 0; i < _num_basis; ++i)
-      if (_mgd.basis_species_mineral[i])
-      {
-        const bool legitimate_swap_found = _egs.getSwapper().findBestEqmSwap(
-            i, _mgd, eqm_molality, false, false, false, swap_into_basis);
-        if (legitimate_swap_found)
-        {
-          try
-          {
-            _egs.performSwap(i, swap_into_basis);
-          }
-          catch (const MooseException & e)
-          {
-            mooseError(e.what());
-          }
-        }
-      }
-  }
+  else // nothing special: simply compute the desired temperature
+    _new_temperature = newTemperature(_mole_additions);
 
   // set temperature, if necessary
-  if (new_temperature != _previous_temperature)
+  if (_new_temperature != _previous_temperature)
   {
-    _egs.setTemperature(new_temperature);
+    _egs.setTemperature(_new_temperature);
     _egs.computeConsistentConfiguration();
   }
-  _previous_temperature = new_temperature;
+  _previous_temperature = _new_temperature;
 
   // solve the geochemical system
-  _solver.solveSystem(
-      _solver_output, _tot_iter, _abs_residual, _dt, _mole_additions, _dmole_additions);
+  _solver.solveSystem(_egs,
+                      _solver_output[0],
+                      _tot_iter[0],
+                      _abs_residual[0],
+                      _dt,
+                      _mole_additions,
+                      _dmole_additions);
 
-  if (_mode[0] == 2.0) // flow-through
-  {
-    // copy the current_molal values into a new vector
-    const std::vector<Real> current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
-    for (unsigned i = 1; i < _num_basis; ++i)
-      if (_mgd.basis_species_mineral[i])
-      {
-        _egs.addToBulkMoles(i, -current_molal[i]);
-        _minerals_dumped[_mgd.basis_species_name[i]] += current_molal[i];
-      }
-    _egs.setMineralRelatedFreeMoles(_small_molality * 10.0);
-  }
+  // activate special modes
+  if (_mode[0] == 2.0)
+    postSolveFlowThrough();
+  else if (_mode[0] == 4.0)
+    postSolveExchanger();
 }
 
 const GeochemicalSystem &
-GeochemistryTimeDependentReactor::getGeochemicalSystem(const Point & /*point*/) const
-{
-  return _egs;
-}
-
-const GeochemicalSystem &
-GeochemistryTimeDependentReactor::getGeochemicalSystem(unsigned /*node_id*/) const
+    GeochemistryTimeDependentReactor::getGeochemicalSystem(dof_id_type /*node_id*/) const
 {
   return _egs;
 }
 
 const DenseVector<Real> &
-GeochemistryTimeDependentReactor::getMoleAdditions(unsigned /*node_id*/) const
-{
-  return _mole_additions;
-}
-
-const DenseVector<Real> &
-GeochemistryTimeDependentReactor::getMoleAdditions(const Point & /*point*/) const
+    GeochemistryTimeDependentReactor::getMoleAdditions(dof_id_type /*node_id*/) const
 {
   return _mole_additions;
 }
 
 const std::stringstream &
-GeochemistryTimeDependentReactor::getSolverOutput(const Point & /*point*/) const
+    GeochemistryTimeDependentReactor::getSolverOutput(dof_id_type /*node_id*/) const
 {
-  return _solver_output;
+  return _solver_output[0];
 }
 
-unsigned
-GeochemistryTimeDependentReactor::getSolverIterations(const Point & /*point*/) const
+unsigned GeochemistryTimeDependentReactor::getSolverIterations(dof_id_type /*node_id*/) const
 {
-  return _tot_iter;
+  return _tot_iter[0];
+}
+
+Real GeochemistryTimeDependentReactor::getSolverResidual(dof_id_type /*node_id*/) const
+{
+  return _abs_residual[0];
 }
 
 Real
-GeochemistryTimeDependentReactor::getSolverResidual(const Point & /*point*/) const
-{
-  return _abs_residual;
-}
-
-Real
-GeochemistryTimeDependentReactor::getMolesDumped(unsigned /*node_id*/,
+GeochemistryTimeDependentReactor::getMolesDumped(dof_id_type /*node_id*/,
                                                  const std::string & species) const
 {
   if (_minerals_dumped.count(species) == 1)
     return _minerals_dumped.at(species);
   return 0.0;
+}
+
+Real
+GeochemistryTimeDependentReactor::newTemperature(const DenseVector<Real> & mole_additions) const
+{
+  if (_temperature[0] == _previous_temperature)
+    return _temperature[0];
+
+  // if no reactants are being added, the system temperature will be _temperature[0]
+  bool any_additions = false;
+  for (unsigned i = 0; i < _num_basis + _num_kin; ++i)
+    if (mole_additions(i) > 0)
+    {
+      any_additions = true;
+      break;
+    }
+  if (!any_additions)
+    return _temperature[0];
+
+  // assume heat capacities of inputs and outputs are the same, so final temperature is dictated
+  // by masses, also assume that the input happens first, then temperature equilibration, then
+  // the outputs occur
+  Real new_temperature = _temperature[0];
+  const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
+  Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
+  Real input_kg = std::max(mole_additions(0), 0.0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+  for (unsigned i = 1; i < _num_basis; ++i)
+  {
+    current_kg += current_bulk[i] * _mgd.basis_species_molecular_weight[i] / 1000.0;
+    input_kg += std::max(mole_additions(i), 0.0) * _mgd.basis_species_molecular_weight[i] / 1000.0;
+  }
+  for (unsigned k = 0; k < _num_kin; ++k)
+    input_kg += std::max(mole_additions(k + _num_basis), 0.0) *
+                _mgd.kin_species_molecular_weight[k] / 1000.0;
+  new_temperature =
+      (_previous_temperature * current_kg + _temperature[0] * input_kg) / (current_kg + input_kg);
+  return new_temperature;
+}
+
+void
+GeochemistryTimeDependentReactor::preSolveDump()
+{
+  // remove basis mineral moles
+  const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  for (unsigned i = 1; i < _num_basis; ++i)
+    if (_mgd.basis_species_mineral[i])
+    {
+      _mole_additions(i) = -current_molal[i]; // might overwrite the rates set above, which is good
+      _minerals_dumped[_mgd.basis_species_name[i]] += current_molal[i];
+    }
+
+  _new_temperature = newTemperature(_mole_additions);
+
+  // add the chemicals immediately instead of during the solve (as occurs for other modes)
+  for (unsigned basis_ind = 0; basis_ind < _num_basis; ++basis_ind)
+  {
+    _egs.addToBulkMoles(basis_ind, _mole_additions(basis_ind));
+    _mole_additions(basis_ind) = 0.0;
+  }
+  // dump needs free mineral moles to be exactly zero and the above addToBulkMoles will have set
+  // this for standard minerals, but not things related to sorption or kinetic minerals, so:
+  _egs.setMineralRelatedFreeMoles(0.0);
+
+  // Now need to swap all minerals out of the basis
+  const std::vector<Real> & eqm_molality = _egs.getEquilibriumMolality();
+  unsigned swap_into_basis = 0;
+  for (unsigned i = 0; i < _num_basis; ++i)
+    if (_mgd.basis_species_mineral[i])
+    {
+      const bool legitimate_swap_found = _egs.getSwapper().findBestEqmSwap(
+          i, _mgd, eqm_molality, false, false, false, swap_into_basis);
+      if (legitimate_swap_found)
+      {
+        try
+        {
+          _egs.performSwap(i, swap_into_basis);
+        }
+        catch (const MooseException & e)
+        {
+          mooseError(e.what());
+        }
+      }
+    }
+}
+
+void
+GeochemistryTimeDependentReactor::preSolveFlush()
+{
+  _new_temperature = newTemperature(_mole_additions);
+
+  // Here we conserve mass, so compute the mass of the solution, without the free mineral moles.
+  // We don't include the free mineral moles because users of GeochemistWorkbench will want
+  // "flush" to operate like Bethke Eqn(13.14)
+  // I assume we also don't include kinetic-mineral moles
+  Real kg_in = _mole_additions(0) / GeochemistryConstants::MOLES_PER_KG_WATER;
+  for (unsigned i = 1; i < _num_basis; ++i)
+    if (!_mgd.basis_species_mineral[i])
+      kg_in += _mole_additions(i) * _mgd.basis_species_molecular_weight[i] / 1000.0;
+  for (unsigned kin = 0; kin < _num_kin; ++kin)
+    if (!_mgd.kin_species_mineral[kin])
+      kg_in += _mole_additions(kin + _num_basis) * _mgd.kin_species_molecular_weight[kin] / 1000.0;
+
+  const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
+  const std::vector<Real> & current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  const std::vector<Real> & kin_moles = _egs.getKineticMoles();
+
+  // compute the current mass, without moles from free minerals and without kinetic minerals
+  Real current_kg = current_bulk[0] / GeochemistryConstants::MOLES_PER_KG_WATER;
+  for (unsigned i = 1; i < _num_basis; ++i)
+  {
+    Real kinetic_contribution = 0.0;
+    for (unsigned k = 0; k < _num_kin; ++k)
+      if (_mgd.kin_species_mineral[k])
+        kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
+    if (_mgd.basis_species_mineral[i])
+      current_kg += (current_bulk[i] - current_molal[i] - kinetic_contribution) *
+                    _mgd.basis_species_molecular_weight[i] / 1000.0;
+    else
+      current_kg += (current_bulk[i] - kinetic_contribution) *
+                    _mgd.basis_species_molecular_weight[i] / 1000.0;
+  }
+
+  const Real fraction_to_remove = kg_in / current_kg;
+  for (unsigned i = 0; i < _num_basis; ++i)
+  {
+    Real all_kinetic_contribution = 0.0;
+    for (unsigned k = 0; k < _num_kin; ++k)
+      all_kinetic_contribution += kin_moles[k] * _mgd.kin_stoichiometry(k, i);
+    if (_mgd.basis_species_mineral[i])
+      _mole_additions(i) -=
+          fraction_to_remove * (current_bulk[i] - current_molal[i] - all_kinetic_contribution);
+    else
+      _mole_additions(i) -= fraction_to_remove * (current_bulk[i] - all_kinetic_contribution);
+  }
+  for (unsigned k = 0; k < _num_kin; ++k)
+    if (!_mgd.kin_species_mineral[k])
+      _mole_additions(k + _num_basis) -= fraction_to_remove * kin_moles[k];
+}
+
+void
+GeochemistryTimeDependentReactor::postSolveFlowThrough()
+{
+  // copy the current_molal values into a new vector
+  const std::vector<Real> current_molal = _egs.getSolventMassAndFreeMolalityAndMineralMoles();
+  // remove minerals
+  for (unsigned i = 1; i < _num_basis; ++i)
+    if (_mgd.basis_species_mineral[i])
+    {
+      const Real to_remove = current_molal[i] - _small_molality * 10.0;
+      _egs.addToBulkMoles(i, -to_remove);
+      _minerals_dumped[_mgd.basis_species_name[i]] += to_remove;
+    }
+
+  // copy the current kinetic moles into a new vector
+  const std::vector<Real> kin_moles = _egs.getKineticMoles();
+  // remove minerals
+  for (unsigned k = 0; k < _num_kin; ++k)
+    if (_mgd.kin_species_mineral[k])
+    {
+      const Real to_remove = kin_moles[k] - _small_molality;
+      for (unsigned i = 0; i < _num_basis; ++i)
+        if (_mgd.kin_stoichiometry(k, i) != 0)
+          _egs.addToBulkMoles(i,
+                              -_mgd.kin_stoichiometry(k, i) *
+                                  to_remove); // remember bulk moles contains kinetic contributions
+      _egs.setKineticMoles(k, _small_molality);
+      _minerals_dumped[_mgd.kin_species_name[k]] += to_remove;
+    }
+
+  _egs.setMineralRelatedFreeMoles(_small_molality * 10.0);
+}
+
+void
+GeochemistryTimeDependentReactor::removeCurrentSpecies()
+{
+  const std::vector<Real> & current_bulk = _egs.getBulkMolesOld();
+  for (unsigned i = 0; i < _num_basis; ++i)
+    _mole_additions(i) -= current_bulk[i];
+  const std::vector<Real> & kin_moles = _egs.getKineticMoles();
+  for (unsigned k = 0; k < _num_kin; ++k)
+    _mole_additions(k + _num_basis) -= kin_moles[k];
+}
+
+void
+GeochemistryTimeDependentReactor::postSolveExchanger()
+{
+  // remove precipitates
+  postSolveFlowThrough();
+
+  DenseVector<Real> zero_mole_additions(_num_basis + _num_kin);
+  DenseMatrix<Real> zero_dmole_additions(_num_basis + _num_kin, _num_basis + _num_kin);
+
+  const Real del_temperature = (_temperature[0] - _previous_temperature) / _heating_increments;
+
+  for (unsigned incr = 0; incr < _heating_increments; ++incr)
+  {
+    // set temperature
+    _new_temperature = _previous_temperature + del_temperature;
+    _egs.setTemperature(_new_temperature);
+    _egs.computeConsistentConfiguration();
+    _previous_temperature = _new_temperature;
+
+    zero_mole_additions.zero();
+    zero_dmole_additions.zero();
+
+    // solve the geochemical system
+    _solver.solveSystem(_egs,
+                        _solver_output[0],
+                        _tot_iter[0],
+                        _abs_residual[0],
+                        _dt,
+                        zero_mole_additions,
+                        zero_dmole_additions);
+
+    // remove precipitates
+    postSolveFlowThrough();
+  }
 }

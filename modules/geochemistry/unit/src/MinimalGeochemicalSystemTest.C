@@ -1482,6 +1482,61 @@ TEST(PertinentGeochemicalSystemTest, isGas)
       ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
 }
 
+/// Test that PertinentGeochemicalSystem correctly identifies transported species
+TEST(PertinentGeochemicalSystemTest, isTransported)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
+  // >(s)FeO-, e-
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"Fe(OH)3(ppd)"},
+                                   {"CH4(g)fake"},
+                                   {},
+                                   {},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+
+  for (const auto & species : mgd.basis_species_index)
+    if (species.first == ">(s)FeOH" || species.first == ">(w)FeOH")
+      EXPECT_EQ(mgd.basis_species_transported[species.second], false);
+    else
+      EXPECT_EQ(mgd.basis_species_transported[species.second], true);
+  for (const auto & species : mgd.eqm_species_index)
+    if (species.first == "Fe(OH)3(ppd)" || species.first == ">(s)FeO-")
+      EXPECT_EQ(mgd.eqm_species_transported[species.second], false);
+    else
+      EXPECT_EQ(mgd.eqm_species_transported[species.second], true);
+
+  PertinentGeochemicalSystem model2(
+      database,
+      {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+      {},
+      {"CH4(g)fake"},
+      {"Fe(OH)3(ppd)"},
+      {"(O-phth)--"},
+      {">(s)FeO-"},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd2 = model2.modelGeochemicalDatabase();
+
+  for (const auto & species : mgd2.basis_species_index)
+    if (species.first == ">(s)FeOH" || species.first == ">(w)FeOH")
+      ASSERT_EQ(mgd2.basis_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd2.basis_species_transported[species.second], true);
+  for (const auto & species : mgd2.eqm_species_index)
+    ASSERT_EQ(mgd2.eqm_species_transported[species.second], true);
+  for (const auto & species : mgd2.kin_species_index)
+    if (species.first == "Fe(OH)3(ppd)" || species.first == ">(s)FeO-")
+      ASSERT_EQ(mgd2.kin_species_transported[species.second], false);
+    else
+      ASSERT_EQ(mgd2.kin_species_transported[species.second], true);
+}
+
 /// Tests the redox information is correctly captured
 TEST(PertinentGeochemicalSystemTest, redoxCapture)
 {
@@ -1748,4 +1803,72 @@ TEST(PertinentGeochemicalSystemTest, kin_log10K1)
   ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 5), 8.93 - 0.3 * (200 - 0), eps);
   ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 6), 8.93 - 0.3 * (250 - 0), eps);
   ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 7), 8.93 - 0.3 * (300 - 0), eps);
+}
+
+/// Test that PertinentGeochemicalSystem correctly initializes swap_to_original_basis
+TEST(PertinentGeochemicalSystemTest, initSwapToOrigBasis)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  ASSERT_EQ(mgd.swap_to_original_basis.n(), 0.0);
+}
+
+/// Test getIndexOfOriginalBasisSpecies
+TEST(PertinentGeochemicalSystemTest, getIndexOfOriginalBasisSpecies)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  try
+  {
+    model.getIndexOfOriginalBasisSpecies("OH-");
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("species OH- is not in the original basis") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  };
+  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H2O"), 0);
+  EXPECT_EQ(model.getIndexOfOriginalBasisSpecies("H+"), 1);
+}
+
+/// Test originalBasisNames
+TEST(PertinentGeochemicalSystemTest, originalBasisNames)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database, {"H2O", "H+"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  EXPECT_EQ(model.originalBasisNames()[0], "H2O");
+  EXPECT_EQ(model.originalBasisNames()[1], "H+");
+}
+
+/// Test that PertinentGeochemicalSystem correctly builds mineral list when {"*"} is used
+TEST(PertinentGeochemicalSystemTest, allMinerals)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb_all_minerals.json");
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {"*"},
+                                   {},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"(O-phth)--"},
+                                   {">(s)FeO-"},
+                                   "O2(aq)",
+                                   "e-");
+  ModelGeochemicalDatabase mgd2 = model.modelGeochemicalDatabase();
+
+  for (const auto & species : mgd2.basis_species_index)
+    ASSERT_EQ(mgd2.basis_species_mineral[species.second], false);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite"), 0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Calcite_asdf"), 0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)fake"), 0);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Fe(OH)3(ppd)"), 1);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Goethite"), 1);
+  EXPECT_EQ(mgd2.eqm_species_index.count("Something"), 1);
+  for (const auto & species : mgd2.kin_species_index)
+    if (species.first == "Fe(OH)3(ppd)fake")
+      ASSERT_EQ(mgd2.kin_species_mineral[species.second], true);
+    else
+      ASSERT_EQ(mgd2.kin_species_mineral[species.second], false);
 }
