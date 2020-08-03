@@ -1,8 +1,8 @@
 [Tests]
   [./selenate]
-    type = 'RunApp'
+    type = CSVDiff
     input = 'selenate.i'
-    expect_out = 'SorbedSelenate;  molality'
+    csvdiff = 'selenate_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the Langmuir model'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md selenate.md'
@@ -10,7 +10,57 @@
   [./ferric_hydroxide]
     type = 'RunApp'
     input = 'ferric_hydroxide.i'
-    expect_out = 'Fe\(OH\)3\(ppd\); area = 600m\^2; specific charge = '
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.004kg
+Mass of aqueous solution = 1.002kg (without free minerals)
+pH = 4
+Ionic strength = 0.01076mol/kg(solvent water)
+Stoichiometric ionic strength = 0.01115mol/kg(solvent water)
+Activity of water = 0.9996
+Temperature = 25
+
+Basis Species:
+Cl-;  bulk_moles = 0.01142mol;  bulk_conc = 404mg/kg(soln);  molality = 0.01115mol/kg(solvent water);  free_conc = 394.3mg/kg(soln);  act_coeff = 0.8964;  log10(a) = -2
+Na+;  bulk_moles = 0.01mol;  bulk_conc = 229.3mg/kg(soln);  molality = 0.009998mol/kg(solvent water);  free_conc = 229.3mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -2.046
+Fe(OH)3(ppd);  bulk_moles = 0.009357mol;  bulk_conc = 997.6mg/kg(soln);  free_moles = 0.009357mol;  free_mass = 1000mg
+>(w)FeOH;  bulk_moles = 0.001871mol;  bulk_conc = 2305mg/kg(soln);  molality = 0.000435mol/kg(solvent water);  free_conc = 535.7mg/kg(soln);  act_coeff = 1;  log10(a) = -3.361
+H+;  bulk_moles = 0.001423mol;  bulk_conc = 1.43mg/kg(soln);  molality = 0.0001096mol/kg(solvent water);  free_conc = 0.1102mg/kg(soln);  act_coeff = 0.912;  log10(a) = -4
+Pb++;  bulk_moles = 0.0001mol;  bulk_conc = 20.67mg/kg(soln);  molality = 4.666e-05mol/kg(solvent water);  free_conc = 9.645mg/kg(soln);  act_coeff = 0.6565;  log10(a) = -4.514
+>(s)FeOH;  bulk_moles = 4.679e-05mol;  bulk_conc = 3.4mg/kg(soln);  molality = 1.972e-06mol/kg(solvent water);  free_conc = 0.1433mg/kg(soln);  act_coeff = 1;  log10(a) = -5.705
+SO4--;  bulk_moles = 0.0002mol;  bulk_conc = 19.16mg/kg(soln);  molality = 9.965e-08mol/kg(solvent water);  free_conc = 0.009549mg/kg(soln);  act_coeff = 0.6524;  log10(a) = -7.187
+Hg++;  bulk_moles = 0.0001mol;  bulk_conc = 20.01mg/kg(soln);  molality = 3.553e-14mol/kg(solvent water);  free_conc = 7.11e-09mg/kg(soln);  act_coeff = 0.6606;  log10(a) = -13.63
+
+Equilibrium Species:
+>(w)FeOH2+;  molality = 0.001233mol/kg(solvent water);  free_conc = 90.82mg/kg(soln);  act_coeff = 1;  log10(a) = -2.909;  >(w)FeOH2+ = 1*H+ + 1*>(w)FeOH;  log10K = -7.29
+>(w)FeSO4-;  molality = 0.0001173mol/kg(solvent water);  free_conc = 17.78mg/kg(soln);  act_coeff = 1;  log10(a) = -3.931;  >(w)FeSO4- = -1*H2O + 1*H+ + 1*SO4-- + 1*>(w)FeOH;  log10K = -7.78
+>(w)FeOHSO4--;  molality = 8.258e-05mol/kg(solvent water);  free_conc = 13.91mg/kg(soln);  act_coeff = 1;  log10(a) = -4.083;  >(w)FeOHSO4-- = 1*SO4-- + 1*>(w)FeOH;  log10K = -0.79
+HgCl3-;  molality = 5.831e-05mol/kg(solvent water);  free_conc = 17.85mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -4.28;  HgCl3- = 3*Cl- + 1*Hg++;  log10K = -15.35
+HgCl2;  molality = 4.169e-05mol/kg(solvent water);  free_conc = 11.29mg/kg(soln);  act_coeff = 1;  log10(a) = -4.38;  HgCl2 = 2*Cl- + 1*Hg++;  log10K = -13.25
+>(s)FeOPb+;  molality = 3.921e-05mol/kg(solvent water);  free_conc = 10.91mg/kg(soln);  act_coeff = 1;  log10(a) = -4.407;  >(s)FeOPb+ = -1*H+ + 1*Pb++ + 1*>(s)FeOH;  log10K = -4.65
+PbCl+;  molality = 1.355e-05mol/kg(solvent water);  free_conc = 3.28mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -4.914;  PbCl+ = 1*Cl- + 1*Pb++;  log10K = -1.6
+>(s)FeOH2+;  molality = 5.587e-06mol/kg(solvent water);  free_conc = 0.4116mg/kg(soln);  act_coeff = 1;  log10(a) = -5.253;  >(s)FeOH2+ = 1*H+ + 1*>(s)FeOH;  log10K = -7.29
+>(w)FeO-;  molality = 3.517e-06mol/kg(solvent water);  free_conc = 0.2521mg/kg(soln);  act_coeff = 1;  log10(a) = -5.454;  >(w)FeO- = -1*H+ + 1*>(w)FeOH;  log10K = 8.93
+NaCl;  molality = 2.26e-06mol/kg(solvent water);  free_conc = 0.1318mg/kg(soln);  act_coeff = 1;  log10(a) = -5.646;  NaCl = 1*Na+ + 1*Cl-;  log10K = 1.599
+>(w)FeOPb+;  molality = 3.864e-07mol/kg(solvent water);  free_conc = 0.1076mg/kg(soln);  act_coeff = 1;  log10(a) = -6.413;  >(w)FeOPb+ = -1*H+ + 1*Pb++ + 1*>(w)FeOH;  log10K = -0.3
+PbCl2;  molality = 1.844e-07mol/kg(solvent water);  free_conc = 0.05115mg/kg(soln);  act_coeff = 1;  log10(a) = -6.734;  PbCl2 = 2*Cl- + 1*Pb++;  log10K = -1.78
+Fe+++;  molality = 1.79e-07mol/kg(solvent water);  free_conc = 0.009973mg/kg(soln);  act_coeff = 0.4331;  log10(a) = -7.11;  Fe+++ = -3*H2O + 3*H+ + 1*Fe(OH)3(ppd);  log10K = -4.889
+>(s)FeO-;  molality = 1.594e-08mol/kg(solvent water);  free_conc = 0.001143mg/kg(soln);  act_coeff = 1;  log10(a) = -7.797;  >(s)FeO- = -1*H+ + 1*>(s)FeOH;  log10K = 8.93
+NaSO4-;  molality = 3.211e-09mol/kg(solvent water);  free_conc = 0.0003814mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -8.539;  NaSO4- = 1*Na+ + 1*SO4--;  log10K = -0.6938
+PbCl3-;  molality = 1.627e-09mol/kg(solvent water);  free_conc = 0.000509mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -8.835;  PbCl3- = 3*Cl- + 1*Pb++;  log10K = -1.68
+HgCl+;  molality = 4.638e-10mol/kg(solvent water);  free_conc = 0.0001092mg/kg(soln);  act_coeff = 0.8994;  log10(a) = -9.38;  HgCl+ = 1*Cl- + 1*Hg++;  log10K = -6.25
+>(w)FeOHg+;  molality = 4.182e-10mol/kg(solvent water);  free_conc = 0.0001137mg/kg(soln);  act_coeff = 1;  log10(a) = -9.379;  >(w)FeOHg+ = -1*H+ + 1*Hg++ + 1*>(w)FeOH;  log10K = -6.45
+OH-;  molality = 1.148e-10mol/kg(solvent water);  free_conc = 1.947e-06mg/kg(soln);  act_coeff = 0.8979;  log10(a) = -9.987;  OH- = 1*H2O - 1*H+;  log10K = 13.99
+
+Kinetic Species:
+
+Minerals:
+
+Nernst potentials:
+
+Sorbing surfaces:
+Fe(OH)3(ppd); area = 600m^2; specific charge = 0.1595C/m^2; surface potential = 0.1679V
+'
+    match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including sorption using the surface complexation approach'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md surface_complexation.md'

@@ -1,0 +1,21 @@
+# React script that is equivalent to ferric_hydroxide.i
+surface_data = FeOH+.dat
+sorbate include
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = 10.0E-3 mol
+balance on Cl-
+Na+          = 10.0E-3 mol
+pH           = 4
+Hg++         = 0.1E-3 mol
+Pb++         = 0.1E-3 mol
+SO4--        = 0.2E-3 mol
+decouple Fe+++
+swap Fe(OH)3(ppd) for Fe+++
+Fe(OH)3(ppd) = 9.3573E-3 free mol
+printout species = long
+suppress all
+unsuppress Fe(OH)3(ppd)
+epsilon = 1e-12

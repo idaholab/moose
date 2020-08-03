@@ -2,45 +2,34 @@
 
 Section 14.3 of [!cite](bethke_2007) describes how to explore the impact of pH on sorption.
 
-This page builds upon the [surface complexation example](surface_complexation.md).  It is assumed that there are two sorbing sites:
-\begin{equation}
-A_{p}=\left(\ \mathrm{>(s)FeOH},\  \mathrm{>(w)FeOH}\,\right) \ .
-\end{equation}
-[!cite](bethke_2007) uses the convention that a ">" indicates something to do with sorption.  The sorbing reactions, written in the [documentation on equilibrium reactions](equilibrium.md) as
-\begin{equation}
-A_{q} \rightleftharpoons \nu_{wq}A_{w} + \sum_{i}\nu_{iq}A_{i} + \sum_{k}\nu_{kq}A_{k} + \sum_{m}\nu_{mq}A_{m} + \nu_{pq}A_{p} \ ,
-\end{equation}
-are, specifically:
-\begin{equation}
-\begin{aligned}
-\mathrm{>(w)FeOH}_{2}^{+} & \rightleftharpoons \mathrm{>(w)FeOH} + \mathrm{H}^{+} & \log_{10}K=-7.29\ , \\
-\mathrm{>(w)FeO}^{-} & \rightleftharpoons \mathrm{>(w)FeOH} - \mathrm{H}^{+} & \log_{10}K=8.93\ , \\
-\mathrm{>(s)FeOH}_{2}^{+} & \rightleftharpoons \mathrm{>(s)FeOH} + \mathrm{H}^{+} & \log_{10}K=-7.29\ , \\
-\mathrm{>(s)FeO}^{-} & \rightleftharpoons \mathrm{>(s)FeOH} - \mathrm{H}^{+} & \log_{10}K=8.93\ . \\
-\end{aligned}
-\end{equation}
-The sorption occurs on the ferric hydroxide mineral, Fe(OH)$_{3}$, called Fe(OH)3(ppd) in the database.  This is used in place of the redox basis species Fe$^{3+}$.
+This page builds upon the [surface complexation example](surface_complexation.md) in which sorption to the ferric hydroxide mineral Fe(OH)$_{3}$ was studied.  In that example, agreement between [!cite](bethke_2007), the [Geochemists Workbench](https://www.gwb.com/) software, and the `geochemistry` module was demonstrated at pH 4 and 8.  On this page, the pH is varied between 4 and 12, and amount of sorption of each species is plotted.
 
-Precipitation of hematite and goethite is disallowed.
+The [surface complexation example](surface_complexation.md) included lead, mercury and iron complexes, but for simplicity this example only include iron complexes.  The model definition therefore reads:
 
-In order to complete the description of surface complexation, the surface potential $\Psi$ must be specified.  This requires the specific surface area, which is assumed to be
-\begin{equation}
-A_{s} = 600\,\mathrm{m}^{2}/\mathrm{g(mineral)} \ ,
-\end{equation}
-We assume that:
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i block=UserObjects
 
-- There is 1 free gram of Fe(OH)3(ppd), which sets $n_{k}$ for this mineral, and sets the surface area $A_{\mathrm{sf}}=600\,$m$^{2}$ in the formula for $\Psi$.
-- For each mol of Fe(OH)3(ppd), there is 0.005$\,$mol of >(s)FeOH
-- For each mol of Fe(OH)3(ppd), there is 0.2$\,$mol of >(w)FeOH
+The [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md) defines the initial composition as well as how to vary the pH with time via the `controlled_activity` inputs:
 
-All of the above information is contained in the MOOSE database ????
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i block=TimeDependentReactionSolver
 
-The chemical composition of the water is 0.1 molal Na$^{+}$ and 0.1 molal Cl$^{-}$, and its temperature is 25$^{\circ}$C.
+The `set_aH` value is defined via a `FunctionAux` in the following way:
 
-pH is initialised to 4 and progressively increased to 12.
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i start=[AuxVariables] end=[Postprocessors]
 
-[!cite](bethke_2007) presents results in Figures 14.8 and 14.9 (bold line only).
+and the timestepping is defined in the executioner:
 
-MOOSE produces the result ????
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i block=Executioner
+
+In this situation, the `start_time` is before $t=0$ when the system closes and the time-dependency begins, just so the results at $\mathrm{pH}=4$ can be simply recorded.  Finally, the quantities of interest are recorded into `Postprocessors` using the `AuxVariables` that are automatically included in the simulation by the [TimeDependentReactionSolver](AddTimeDependentReactionSolverAction.md)
+
+!listing modules/geochemistry/test/tests/time_dependent_reactions/changing_pH_ferric_hydroxide.i block=Postprocessors
+
+[!cite](bethke_2007) presents results in Figures 14.8 and 14.9 (bold line only, since the fine line shows a different type of aqueous solution).  The results are faithfully reproduced by the `geochemistry` module as shown in the figures below.
+
+!media changing_pH_ferric_hydroxide_fig1.png caption=Concentrations of sites on a ferric oxide surface.  Compare with Bethke's Figure 14.8  id=changing_pH_ferric_hydroxide_fig1
+
+!media changing_pH_ferric_hydroxide_fig2.png caption=Surface potential of ferric oxide.  Compare with Bethke's Figure 14.9  id=changing_pH_ferric_hydroxide_fig2
+
+
 
 !bibtex bibliography

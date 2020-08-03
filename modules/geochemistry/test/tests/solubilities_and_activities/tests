@@ -1,8 +1,8 @@
 [Tests]
   [./gypsum_solubility]
-    type = 'RunApp'
+    type = 'CSVDiff'
     input = 'gypsum_solubility.i'
-    expect_out = 'Gypsum;  bulk_moles'
+    csvdiff = 'gypsum_solubility_out.csv'
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore solubilities'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md gypsum.md'
@@ -10,7 +10,10 @@
   [./sebkhat_el_melah]
     type = 'RunApp'
     input = 'sebkhat_el_melah.i'
-    expect_out = 'Halite = 1\*Cl- \+ 1\*Na\+;'
+    expect_out = 'Minerals:
+Halite = 1*Cl- + 1*Na+;  log10K = 1.593;  SI = -0.9384
+Anhydrite = 1*SO4-- + 1*Ca++;  log10K = -4.265;  SI = -1.733'
+    match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems in order to explore saturation indices'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md sebkhat.md'

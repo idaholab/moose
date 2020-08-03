@@ -1,0 +1,30 @@
+# React script that is equivalent to flushing.i
+T = 70
+H+ = 5 pH
+Na+ = 1 molal
+Ca++ = 0.288445 molal
+Cl- = 1 molal
+balance on Cl-
+swap Dolomite-ord for Mg++
+swap Muscovite for K+
+swap Kaolinite for Al+++
+swap Quartz for SiO2(aq)
+swap Calcite for HCO3-
+Calcite = 9.88249 free mol
+Dolomite-ord = 3.652471265 free mol
+Muscovite = 1.2792268 free mol
+Kaolinite = 1.2057878 free mol
+Quartz = 226.99243 free mol
+
+react 1 kg H2O
+react 0.5 moles Na+
+react 0.5 moles OH-
+
+suppress all
+unsuppress Analcime Calcite Dawsonite Dolomite-ord Gibbsite Kaolinite Muscovite Paragonite Phlogopite Quartz Saponite-Ca
+kinetic Quartz rate_con = 1.8e-18, apower(H+) = -0.5 surface = 1000
+
+reactants times 10
+time end = 20 days
+flush
+go

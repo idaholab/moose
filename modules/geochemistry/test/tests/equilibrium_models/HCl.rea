@@ -1,0 +1,10 @@
+# React script that is analogous to HCl.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = .01 molal
+balance on Cl-
+pH           = 2
+printout  species = long
+epsilon = 1e-15

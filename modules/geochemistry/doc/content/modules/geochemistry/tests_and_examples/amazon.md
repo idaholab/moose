@@ -2,9 +2,9 @@
 
 This example closely follows Section 6.2 of [!cite](bethke_2007).
 
-A chemical analysis of the major element composition of water in the Amazon river [table:analysis].  The "free" O$_{2}$(aq) concentration of 5.8$\,$mg.kg$^{-1}$ means its bulk composition will be more than this. In addition, the pH is 6.5.
+A chemical analysis of the major element composition of water in the Amazon river [table:analysis].  The "free" O$_{2}$(aq) concentration of 5.8$\,$mg.kg$^{-1}$ means its bulk composition will be more than this. In addition, the pH is 6.5.  Assume that the extent of the system is 1$\,$kg of solvent water along with the solutes dissolved in it.
 
-!table id=table:analysis caption=Major element composition of Amazon river water
+!table id=table:analysis caption=Major element composition of Amazon river water 
 | Species | Concentration (mg.kg$^{-1}$) |
 | --- | --- |
 | HCO$_{3}^{-}$ | 19 |
@@ -12,17 +12,58 @@ A chemical analysis of the major element composition of water in the Amazon rive
 | O$_{2}$(aq) | 5.8 free |
 | Ca$^{2+}$ | 4.3 |
 | SO$_{4}^{2-}$ | 3 |
-| Cl$^{-}$ | 1.9 |
+| Cl$^{-}$ | 4.9 |
 | Na$^{+}$ | 1.8 | 
 | Mg$^{2+}$ | 1.1 |
 | Al$^{3+}$ | 0.07 |
 | Fe$^{2+}$ | 0.06 |
 
-## Species distribution
+The concentration of Cl$^{-}$ is listed as 1.9$\,$mg.kg$^{-1}$ in [!cite](bethke_2007), but its molality is computed to be 1.38E-4$\,$mol/kg(solvent water).  Hence its bulk composition must have been at least 1.38E-4$\,$mol since all the stoichiometric coefficients of Cl- in all the secondary species are positive.  This implies the bulk composition of Cl$^{-}$ must be more than 1.9$\,$mg/kg(soln).  There is probably a typo in the book.  Hence the bulk concentration is set to 4.9$\,$mg/kg(soln), leading to 1.383E-4$\,$moles.   In any case, charge balance is performed on Cl$^{-}$.
 
-Assume the extent of the system is 1$\,$kg of solvent water along with the solutes dissolved in it.  Charge balance is performed on Cl$^{-}$.
+## MOOSE input file: no minerals
 
-Ignoring all mineral supersaturation, [!cite](bethke_2007) states that an equilibrium calculation of the molalities of the most abundant species results in [table:molalities_etc].  These may be compared with the prediction from MOOSE in ????
+The MOOSE input file contains the usual [GeochemicalModelDefinition](GeochemicalModelDefinition.md) that specifies the database file to use, and in this case just the basis species and equilibrium minerals (that are prevented from precipitating, but for which the saturation indices are of interest).  The flag `piecewise_linear_interpolation = true` in order to compare with the [Geochemists Workbench](https://www.gwb.com/) result.
+
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon.i block=UserObjects
+
+To instruct MOOSE to find the equilibrium configuration, a [TimeIndependentReactionSolver](actions/AddTimeDependentReactionSolverAction.md) is used:
+
+- The pH is fixed by setting the activity of H$^{+}$.
+- The bulk mole number of the aqueous species is also fixed appropriately.  The numbers are different than the concentration in mg.kg$^{-1}$ given in the above table, and may be worked out using the [TDS](tests_and_examples/ic_unit_conversions.md).
+- The `prevent_precipitation` input prevents any minerals from precipitating when finding the equilibrium configuration, even if their saturation indices are positive.
+- The other flags enable an accurate comparison with the [Geochemists Workbench](https://www.gwb.com/) software.
+
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon.i block=TimeIndependentReactionSolver
+
+## GWB input file: no minerals
+
+The analogous [GWB](https://www.gwb.com/) input file is
+
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon.rea
+
+## Results: no minerals
+
+### Error and charge-neutrality error
+
+The `geochemistry` simulation reports an error of 3.163e-16$\,$mol, and that the charge of the solution is 0$\,$mol.
+
+### Solution mass
+
+The solution mass is 1.000$\,$kg.
+
+### Ionic strength and water activity
+
+The ionic strength is 0.0005644$\,$mol/kg(solvent water), and the water activity is 1.000.
+
+### pH, pe and Eh
+
+The pH is 6.5, the pe is 14.07, and Eh = 0.832$\,$V.
+
+### Species distribution
+
+Ignoring all mineral supersaturation, [!cite](bethke_2007) states that an equilibrium calculation of the molalities of the most abundant species results in [table:molalities_etc].
+
+Identical results are produced by the `geochemistry` module and the [Geochemists Workbench](https://www.gwb.com/) software.
 
 !table id=table:molalities_etc caption=Calculated molalities, activity coefficients and activities of the most abundant species in Amazon river water
 | Species | Molality (mol.kg$^{-1}$) | Activity coeff | log$_{10}$a |
@@ -37,21 +78,9 @@ Ignoring all mineral supersaturation, [!cite](bethke_2007) states that an equili
 | Mg$^{2+}$ | $0.450\times 10^{-4}$ | 0.901 | -4.39 |
 | SO$_{4}^{2-}$ | $0.305\times 10^{-4}$ | 0.898 | -4.56 |
 
-## Mass conservation
+### Minerals
 
-Note that the free species concentrations do not satisfy the input constraints, since the latter are bulk values.  Nevertheless, mass conservation may be checked as in Section 6.1.3 of [!cite](bethke_2007).  Performing this calculation using MOOSE produces ????
-
-## Mass action
-
-Similarly, the mass-action equations may be checked as in Section 6.1.3 of [!cite](bethke_2007).  Performing this calculation using MOOSE produces ????
-
-## Charge balance
-
-MOOSE produces a total free charge of ????
-
-## Minerals
-
-The saturation indices of the equilibrium solution in [table:molalities_etc] are greater than 0 for the minerals: nontronite, hematitie, kaolinite, beidellite, pyrophyllite, gibbsite, paragonite and quartz (see Figure 6.3 of [!cite](bethke_2007)).  MOOSE produces the result ????
+Both the `geochemistry` module and the GWB software predict indentical saturation indices for minerals.  They predict the saturation indices of the equilibrium solution in [table:molalities_etc] are greater than 0 for the minerals: nontronite, hematitie, kaolinite, beidellite, pyrophyllite, gibbsite, paragonite and quartz (see Figure 6.3 of [!cite](bethke_2007)).
 
 ## Fixing mineral volumes
 
@@ -63,11 +92,18 @@ An alternate model assumes the water is in equilibrium with kaolinite and hemati
 | Kaolinite | 1 |
 | Hematite | 1 |
 
-According to this model, only nontronite clay is supersaturated by any significant amount.  MOOSE produces the result ????
-
-!listing modules/geochemistry/test/tests/equilibrium_models/amazon.i
+## MOOSE input file: with minerals
 
 !listing modules/geochemistry/test/tests/equilibrium_models/amazon_with_minerals.i
+
+## GWB input file: with minerals
+
+!listing modules/geochemistry/test/tests/equilibrium_models/amazon_with_minerals.rea
+
+## Results: with minerals
+
+According to this model, only nontronite clay is supersaturated by any significant amount.  The `geochemistry` module produces identical results to the [GWB](https://www.gwb.com/) software.
+
 
 
 !bibtex bibliography

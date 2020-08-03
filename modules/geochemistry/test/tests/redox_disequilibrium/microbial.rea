@@ -1,0 +1,37 @@
+# React script that is equivalent to the microbial.i MOOSE input file
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+decouple CH3COO-
+decouple CH4(aq)
+decouple Fe+++
+decouple H2(aq)
+decouple HS-
+decouple NH4+
+decouple NO2-
+H2O          = 1 free kg
+Cl-          = 0.46E-3 mol
+balance on Cl-
+H+           = 6 pH
+swap CO2(g) for HCO3-
+CO2(g)       = 0.01 fugacity
+swap Fe(OH)3(ppd) for Fe+++
+Fe(OH)3(ppd) = 0.02914 free mol
+Na+          = 0.473E-3 mol
+Ca++         = 0.407E-3 mol
+Mg++         = 0.0895E-3 mol
+SO4--        = 0.3963E-3 mol
+Fe++         = 3.895E-6 mol
+H2(aq)       = 0.004E-6 free molal
+HS-          = 1.6445E-6 mol
+O2(aq)       = 3.399E-6 free molal
+CH4(aq)      = 2.712E-5 mol
+NO3-         = 3.508E-5 mol
+NO2-         = 9.456E-6 mol
+NH4+         = 6.029E-6 mol
+CH3COO-      = 5.5526E-6 mol
+printout  species = long
+suppress all
+unsuppress Fe(OH)3(ppd)
+epsilon = 1e-14
+go

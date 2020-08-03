@@ -38,6 +38,14 @@ TEST(GeochemicalDatabaseReaderTest, getLogKModel)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   EXPECT_EQ(database.getLogKModel(), "fourth-order");
+
+  GeochemicalDatabaseReader database2("database/moose_testdb.json", true);
+
+  EXPECT_EQ(database2.getLogKModel(), "fourth-order");
+
+  GeochemicalDatabaseReader database3("database/moose_testdb.json", false, true);
+
+  EXPECT_EQ(database3.getLogKModel(), "piecewise-linear");
 }
 
 TEST(GeochemicalDatabaseReaderTest, getTemperatures)
@@ -93,15 +101,25 @@ TEST(GeochemicalDatabaseReaderTest, getNeutralSpeciesActivity)
   auto ns = nsa["co2"];
   std::vector<Real> a_gold{.1224, .1127, .09341, .08018, .08427, .09892, .1371, .1967};
   std::vector<Real> b_gold{-.004679, -.01049, -.0036, -.001503, -.01184, -.0104, -.007086, -.01809};
+  std::vector<Real> c_gold{
+      -0.0004114, 0.001545, 9.609e-05, 0.0005009, 0.003118, 0.001386, -0.002887, -0.002497};
+  std::vector<Real> d_gold(8);
 
   EXPECT_EQ(ns.a, a_gold);
   EXPECT_EQ(ns.b, b_gold);
+  EXPECT_EQ(ns.c, c_gold);
+  EXPECT_TRUE(ns.d.empty());
 
   ns = nsa["h2o"];
-  a_gold = {500.0000, 1.45397, 500.0000, 1.5551, 1.6225, 500.0000, 500.0000, 500.0000};
+  a_gold = {1.4203, 1.45397, 1.5012, 1.5551, 1.6225, 1.6899, 1.7573, 1.8247};
+  b_gold = {0.0177, 0.022357, 0.0289, 0.036478, 0.045891, 0.0553, 0.0647, 0.0741};
+  c_gold = {0.0103, 0.0093804, 0.008, 0.0064366, 0.0045221, 0.0026, 0.0006, -0.0013};
+  d_gold = {-0.0005, -0.0005362, -0.0006, -0.0007132, -0.0008312, -0.0009, -0.0011, -0.0012};
 
   EXPECT_EQ(ns.a, a_gold);
-  EXPECT_TRUE(ns.b.empty());
+  EXPECT_EQ(ns.b, b_gold);
+  EXPECT_EQ(ns.c, c_gold);
+  EXPECT_EQ(ns.d, d_gold);
 }
 
 TEST(GeochemicalDatabaseReaderTest, getElements)
@@ -229,7 +247,7 @@ TEST(GeochemicalDatabaseReaderTest, getEquilibriumSpecies)
   EXPECT_EQ(sspecies.equilibrium_const, logk_gold);
 
   sspecies = ss["OH-"];
-  logk_gold = {14.9325, 13.9868, 13.0199, 12.2403, 11.5940, 11.2191, 11.0880, 11.2844};
+  logk_gold = {14.9325, 13.9868, 13.0199, 12.2403, 11.5940, 11.2191, 11.0880, 1001.2844};
   bs_gold = {{"H2O", 1}, {"H+", -1}};
 
   EXPECT_EQ(sspecies.radius, 3.5);
@@ -497,6 +515,7 @@ TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies)
   EXPECT_FALSE(database.isSecondarySpecies("Ag"));
   EXPECT_TRUE(database.isSecondarySpecies("CO2(aq)"));
   EXPECT_TRUE(database.isSecondarySpecies("CO3--"));
+  EXPECT_TRUE(database.isSecondarySpecies("OH-"));
   EXPECT_FALSE(database.isSecondarySpecies("Calcite"));
   EXPECT_FALSE(database.isSecondarySpecies("Fe(OH)3(ppd)"));
   EXPECT_FALSE(database.isSecondarySpecies("CH4(g)"));
@@ -693,4 +712,25 @@ TEST(GeochemicalDatabaseReaderTest, freeElectronNoReexpress)
   EXPECT_EQ(fe.molecular_weight, 0.0);
   EXPECT_EQ(fe.basis_species, bs_gold);
   EXPECT_EQ(fe.equilibrium_const, logk_gold);
+}
+
+/// Test the DatabaseReader when the secondary species that contain extrapolated logK are removed
+TEST(GeochemicalDatabaseReaderTest, isSecondarySpecies_noextrap)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, false, true);
+
+  EXPECT_FALSE(database.isSecondarySpecies("Ca++"));
+  EXPECT_FALSE(database.isSecondarySpecies("H2O"));
+  EXPECT_FALSE(database.isSecondarySpecies("Ag"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO2(aq)"));
+  EXPECT_TRUE(database.isSecondarySpecies("CO3--"));
+  EXPECT_FALSE(database.isSecondarySpecies("OH-"));
+  EXPECT_FALSE(database.isSecondarySpecies("Calcite"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe(OH)3(ppd)"));
+  EXPECT_FALSE(database.isSecondarySpecies("CH4(g)"));
+  EXPECT_FALSE(database.isSecondarySpecies("(O-phth)--"));
+  EXPECT_FALSE(database.isSecondarySpecies("Fe+++"));
+  EXPECT_FALSE(database.isSecondarySpecies("Cu2O"));
+  EXPECT_FALSE(database.isSecondarySpecies(">(s)FeO-"));
+  EXPECT_TRUE(database.isSecondarySpecies("e-"));
 }

@@ -2,7 +2,41 @@
   [./morro]
     type = 'RunApp'
     input = 'morro.i'
-    expect_out = 'pH = 6.05'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1kg
+Mass of aqueous solution = 1kg (without free minerals)
+pH = 6.05
+pe = 14.7
+Ionic strength = 0.0001007mol/kg(solvent water)
+Stoichiometric ionic strength = 5.941e-05mol/kg(solvent water)
+Activity of water = 1
+Temperature = 22
+
+Basis Species:
+O2(aq);  bulk_moles = 0.0001376mol;  bulk_conc = 4.405mg/kg(soln);  molality = 0.0001344mol/kg(solvent water);  free_conc = 4.3mg/kg(soln);  act_coeff = 1;  log10(a) = -3.872
+Cl-;  bulk_moles = 5.941e-05mol;  bulk_conc = 2.106mg/kg(soln);  molality = 5.941e-05mol/kg(solvent water);  free_conc = 2.106mg/kg(soln);  act_coeff = 0.9885;  log10(a) = -4.231
+Mg++;  bulk_moles = 1.448e-05mol;  bulk_conc = 0.3519mg/kg(soln);  molality = 1.447e-05mol/kg(solvent water);  free_conc = 0.3518mg/kg(soln);  act_coeff = 0.9555;  log10(a) = -4.859
+HCO3-;  bulk_moles = 2.95e-05mol;  bulk_conc = 1.8mg/kg(soln);  molality = 9.212e-06mol/kg(solvent water);  free_conc = 0.5621mg/kg(soln);  act_coeff = 0.9886;  log10(a) = -5.041
+Ca++;  bulk_moles = 5.938e-06mol;  bulk_conc = 0.238mg/kg(soln);  molality = 5.934e-06mol/kg(solvent water);  free_conc = 0.2378mg/kg(soln);  act_coeff = 0.9553;  log10(a) = -5.247
+K+;  bulk_moles = 5.115e-06mol;  bulk_conc = 0.2mg/kg(soln);  molality = 5.115e-06mol/kg(solvent water);  free_conc = 0.2mg/kg(soln);  act_coeff = 0.9885;  log10(a) = -5.296
+Mn++;  bulk_moles = 5.042e-06mol;  bulk_conc = 0.277mg/kg(soln);  molality = 5.04e-06mol/kg(solvent water);  free_conc = 0.2769mg/kg(soln);  act_coeff = 0.9553;  log10(a) = -5.317
+Zn++;  bulk_moles = 1.897e-06mol;  bulk_conc = 0.124mg/kg(soln);  molality = 1.896e-06mol/kg(solvent water);  free_conc = 0.124mg/kg(soln);  act_coeff = 0.9553;  log10(a) = -5.742
+Na+;  bulk_moles = 1.87e-06mol;  bulk_conc = 0.043mg/kg(soln);  molality = 1.87e-06mol/kg(solvent water);  free_conc = 0.043mg/kg(soln);  act_coeff = 0.9886;  log10(a) = -5.733
+SO4--;  bulk_moles = 1.562e-06mol;  bulk_conc = 0.15mg/kg(soln);  molality = 1.555e-06mol/kg(solvent water);  free_conc = 0.1493mg/kg(soln);  act_coeff = 0.955;  log10(a) = -5.828
+H+;  bulk_moles = 4.199e-06mol;  bulk_conc = 0.004232mg/kg(soln);  molality = 9.014e-07mol/kg(solvent water);  free_conc = 0.0009085mg/kg(soln);  act_coeff = 0.9887;  log10(a) = -6.05
+Fe++;  bulk_moles = 1.307e-05mol;  bulk_conc = 0.7299mg/kg(soln);  molality = 1.065e-13mol/kg(solvent water);  free_conc = 5.95e-09mg/kg(soln);  act_coeff = 0.9553;  log10(a) = -12.99
+
+Equilibrium Species:
+CO2(aq);  molality = 2.028e-05mol/kg(solvent water);  free_conc = 0.8927mg/kg(soln);  act_coeff = 1;  log10(a) = -4.693;  CO2(aq) = -1*H2O + 1*H+ + 1*HCO3-;  log10K = -6.398
+
+Kinetic Species:
+
+Minerals:
+
+Nernst potentials:
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
+'
+    match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md morro.md'
@@ -10,7 +44,43 @@
   [./morro_disequilibrium]
     type = 'RunApp'
     input = 'morro_disequilibrium.i'
-    expect_out = 'e- = 1\*Fe\+\+ - 1\*Fe\+\+\+;  Eh'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1kg
+Mass of aqueous solution = 1kg (without free minerals)
+pH = 6.05
+pe = 14.7
+Ionic strength = 0.0001294mol/kg(solvent water)
+Stoichiometric ionic strength = 7.568e-05mol/kg(solvent water)
+Activity of water = 1
+Temperature = 22
+
+Basis Species:
+O2(aq);  bulk_moles = 0.0001344mol;  bulk_conc = 4.3mg/kg(soln);  molality = 0.0001344mol/kg(solvent water);  free_conc = 4.3mg/kg(soln);  act_coeff = 1;  log10(a) = -3.872
+Cl-;  bulk_moles = 7.569e-05mol;  bulk_conc = 2.683mg/kg(soln);  molality = 7.568e-05mol/kg(solvent water);  free_conc = 2.683mg/kg(soln);  act_coeff = 0.987;  log10(a) = -4.127
+Mg++;  bulk_moles = 1.448e-05mol;  bulk_conc = 0.3519mg/kg(soln);  molality = 1.447e-05mol/kg(solvent water);  free_conc = 0.3518mg/kg(soln);  act_coeff = 0.9499;  log10(a) = -4.862
+Fe++;  bulk_moles = 1.253e-05mol;  bulk_conc = 0.7mg/kg(soln);  molality = 1.253e-05mol/kg(solvent water);  free_conc = 0.6995mg/kg(soln);  act_coeff = 0.9496;  log10(a) = -4.925
+HCO3-;  bulk_moles = 2.95e-05mol;  bulk_conc = 1.8mg/kg(soln);  molality = 9.221e-06mol/kg(solvent water);  free_conc = 0.5627mg/kg(soln);  act_coeff = 0.9871;  log10(a) = -5.041
+Ca++;  bulk_moles = 5.938e-06mol;  bulk_conc = 0.238mg/kg(soln);  molality = 5.933e-06mol/kg(solvent water);  free_conc = 0.2378mg/kg(soln);  act_coeff = 0.9496;  log10(a) = -5.249
+K+;  bulk_moles = 5.115e-06mol;  bulk_conc = 0.2mg/kg(soln);  molality = 5.115e-06mol/kg(solvent water);  free_conc = 0.2mg/kg(soln);  act_coeff = 0.987;  log10(a) = -5.297
+Mn++;  bulk_moles = 5.042e-06mol;  bulk_conc = 0.277mg/kg(soln);  molality = 5.04e-06mol/kg(solvent water);  free_conc = 0.2769mg/kg(soln);  act_coeff = 0.9496;  log10(a) = -5.32
+Zn++;  bulk_moles = 1.897e-06mol;  bulk_conc = 0.124mg/kg(soln);  molality = 1.896e-06mol/kg(solvent water);  free_conc = 0.124mg/kg(soln);  act_coeff = 0.9496;  log10(a) = -5.745
+Na+;  bulk_moles = 1.87e-06mol;  bulk_conc = 0.043mg/kg(soln);  molality = 1.87e-06mol/kg(solvent water);  free_conc = 0.043mg/kg(soln);  act_coeff = 0.9871;  log10(a) = -5.734
+SO4--;  bulk_moles = 1.562e-06mol;  bulk_conc = 0.15mg/kg(soln);  molality = 1.552e-06mol/kg(solvent water);  free_conc = 0.1491mg/kg(soln);  act_coeff = 0.9492;  log10(a) = -5.832
+H+;  bulk_moles = 1.993e-05mol;  bulk_conc = 0.02009mg/kg(soln);  molality = 9.027e-07mol/kg(solvent water);  free_conc = 0.0009098mg/kg(soln);  act_coeff = 0.9873;  log10(a) = -6.05
+Fe+++;  bulk_moles = 5.372e-07mol;  bulk_conc = 0.03mg/kg(soln);  molality = 2.11e-13mol/kg(solvent water);  free_conc = 1.179e-08mg/kg(soln);  act_coeff = 0.8912;  log10(a) = -12.73
+
+Equilibrium Species:
+CO2(aq);  molality = 2.027e-05mol/kg(solvent water);  free_conc = 0.8922mg/kg(soln);  act_coeff = 1;  log10(a) = -4.693;  CO2(aq) = -1*H2O + 1*H+ + 1*HCO3-;  log10K = -6.398
+
+Kinetic Species:
+
+Minerals:
+
+Nernst potentials:
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.861V
+e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3074V
+'
+    match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md morro.md'
@@ -18,7 +88,55 @@
   [./microbial]
     type = 'RunApp'
     input = 'microbial.i'
-    expect_out = 'e- = 0.25\*H2O - 0.875\*H\+ - 0.25\*CO2\(g\) \+ 0.125\*CH3COO-;  Eh'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.003kg
+Mass of aqueous solution = 1kg (without free minerals)
+pH = 6
+pe = 14.13
+Ionic strength = 0.002278mol/kg(solvent water)
+Stoichiometric ionic strength = 0.0004766mol/kg(solvent water)
+Activity of water = 1
+Temperature = 25
+
+Basis Species:
+Fe(OH)3(ppd);  bulk_moles = 0.02914mol;  bulk_conc = 3114mg/kg(soln);  free_moles = 0.02914mol;  free_mass = 3114mg
+Cl-;  bulk_moles = 0.0004774mol;  bulk_conc = 16.92mg/kg(soln);  molality = 0.0004766mol/kg(solvent water);  free_conc = 16.89mg/kg(soln);  act_coeff = 0.9482;  log10(a) = -3.345
+Na+;  bulk_moles = 0.000473mol;  bulk_conc = 10.87mg/kg(soln);  molality = 0.0004722mol/kg(solvent water);  free_conc = 10.85mg/kg(soln);  act_coeff = 0.9489;  log10(a) = -3.349
+Ca++;  bulk_moles = 0.000407mol;  bulk_conc = 16.31mg/kg(soln);  molality = 0.0003855mol/kg(solvent water);  free_conc = 15.45mg/kg(soln);  act_coeff = 0.8151;  log10(a) = -3.503
+SO4--;  bulk_moles = 0.0003963mol;  bulk_conc = 38.06mg/kg(soln);  molality = 0.000372mol/kg(solvent water);  free_conc = 35.73mg/kg(soln);  act_coeff = 0.8102;  log10(a) = -3.521
+Mg++;  bulk_moles = 8.95e-05mol;  bulk_conc = 2.175mg/kg(soln);  molality = 8.575e-05mol/kg(solvent water);  free_conc = 2.084mg/kg(soln);  act_coeff = 0.8198;  log10(a) = -4.153
+NO3-;  bulk_moles = 3.508e-05mol;  bulk_conc = 2.175mg/kg(soln);  molality = 3.499e-05mol/kg(solvent water);  free_conc = 2.169mg/kg(soln);  act_coeff = 0.9482;  log10(a) = -4.479
+CH4(aq);  bulk_moles = 2.712e-05mol;  bulk_conc = 0.435mg/kg(soln);  molality = 2.712e-05mol/kg(solvent water);  free_conc = 0.435mg/kg(soln);  act_coeff = 1.001;  log10(a) = -4.566
+NO2-;  bulk_moles = 9.456e-06mol;  bulk_conc = 0.435mg/kg(soln);  molality = 9.441e-06mol/kg(solvent water);  free_conc = 0.4343mg/kg(soln);  act_coeff = 0.9482;  log10(a) = -5.048
+NH4+;  bulk_moles = 6.029e-06mol;  bulk_conc = 0.1087mg/kg(soln);  molality = 6.01e-06mol/kg(solvent water);  free_conc = 0.1084mg/kg(soln);  act_coeff = 0.9478;  log10(a) = -5.244
+CH3COO-;  bulk_moles = 5.553e-06mol;  bulk_conc = 0.3278mg/kg(soln);  molality = 5.256e-06mol/kg(solvent water);  free_conc = 0.3103mg/kg(soln);  act_coeff = 0.9493;  log10(a) = -5.302
+Fe++;  bulk_moles = 3.895e-06mol;  bulk_conc = 0.2175mg/kg(soln);  molality = 3.733e-06mol/kg(solvent water);  free_conc = 0.2084mg/kg(soln);  act_coeff = 0.8151;  log10(a) = -5.517
+O2(aq);  bulk_moles = 3.399e-06mol;  bulk_conc = 0.1088mg/kg(soln);  molality = 3.399e-06mol/kg(solvent water);  free_conc = 0.1088mg/kg(soln);  act_coeff = 1.001;  log10(a) = -5.468
+H+;  bulk_moles = -0.0001581mol;  bulk_conc = -0.1593mg/kg(soln);  molality = 1.05e-06mol/kg(solvent water);  free_conc = 0.001058mg/kg(soln);  act_coeff = 0.9523;  log10(a) = -6
+HS-;  bulk_moles = 1.645e-06mol;  bulk_conc = 0.05437mg/kg(soln);  molality = 1.74e-07mol/kg(solvent water);  free_conc = 0.005752mg/kg(soln);  act_coeff = 0.9485;  log10(a) = -6.783
+H2(aq);  bulk_moles = 4e-09mol;  bulk_conc = 8.062e-06mg/kg(soln);  molality = 4e-09mol/kg(solvent water);  free_conc = 8.062e-06mg/kg(soln);  act_coeff = 1.001;  log10(a) = -8.398
+CO2(g);  fugacity = 0.01
+
+Equilibrium Species:
+CO2(aq);  molality = 0.0003529mol/kg(solvent water);  free_conc = 15.53mg/kg(soln);  act_coeff = 1;  log10(a) = -3.452;  CO2(aq) = 1*CO2(g);  log10K = 1.452
+HCO3-;  molality = 0.00016mol/kg(solvent water);  free_conc = 9.764mg/kg(soln);  act_coeff = 0.9493;  log10(a) = -3.818;  HCO3- = 1*H2O - 1*H+ + 1*CO2(g);  log10K = 7.818
+CaSO4;  molality = 1.979e-05mol/kg(solvent water);  free_conc = 2.693mg/kg(soln);  act_coeff = 1;  log10(a) = -4.704;  CaSO4 = 1*Ca++ + 1*SO4--;  log10K = -2.32
+
+Kinetic Species:
+
+Minerals:
+
+Nernst potentials:
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.8361V
+e- = 0.5*H2O - 1*H+ + 0.5*NO2- - 0.5*NO3-;  Eh = 0.4809V
+e- = 0.375*H2O - 1.25*H+ + 0.125*NH4+ - 0.125*NO3-;  Eh = 0.4425V
+e- = 1*Fe++ - 1*Fe+++;  Eh = 0.3206V
+e- = 0.5*H2O - 1.125*H+ - 0.125*SO4-- + 0.125*HS-;  Eh = -0.1263V
+e- = 0.375*H2O - 1.125*H+ - 0.125*HCO3- + 0.125*CH4(aq);  Eh = -0.1875V
+e- = -1*H+ + 0.5*H2(aq);  Eh = -0.1986V
+e- = 0.5*H2O - 1.125*H+ - 0.25*HCO3- + 0.125*CH3COO-;  Eh = -0.2298V
+'
+    match_literal = true
     requirement = 'The geochemistry module shall be able to solve equilibrium reaction systems including redox disequilibrium and output detailed Nernst information'
     issues = '#15290 #15261'
     design = 'EquilibriumReactionSolverOutput.md microbial.md'

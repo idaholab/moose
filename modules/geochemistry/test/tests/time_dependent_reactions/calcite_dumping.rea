@@ -1,0 +1,20 @@
+# React script that is equivalent to calcite_dumping.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+H+           = 8 pH
+Na+          = 0.1 mol
+Ca++         = 0.01024844 mol
+Cl-          = 0.12 mol
+balance on Cl-
+swap Calcite for HCO3-
+Calcite      = 0.2708 free mol
+suppress all
+unsuppress Calcite
+printout  species = long
+epsilon = 1e-13
+dump
+react 0.1 mol of HCl
+go
+

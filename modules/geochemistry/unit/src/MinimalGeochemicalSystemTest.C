@@ -554,7 +554,7 @@ TEST(PertinentGeochemicalSystemTest, temperatures)
   PertinentGeochemicalSystem model(database, {"H2O"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.temperatures, database.getTemperatures());
+  ASSERT_EQ(mgd.original_database->getTemperatures(), database.getTemperatures());
 }
 
 /**
@@ -567,7 +567,7 @@ TEST(PertinentGeochemicalSystemTest, names1)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -583,7 +583,7 @@ TEST(PertinentGeochemicalSystemTest, names1)
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 10);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
@@ -601,7 +601,7 @@ TEST(PertinentGeochemicalSystemTest, names2)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
+  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {},
@@ -617,7 +617,7 @@ TEST(PertinentGeochemicalSystemTest, names2)
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
@@ -1004,7 +1004,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--, e-
+  // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -1016,9 +1016,8 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
-  for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "e-", "Calcite"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "Calcite"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
@@ -1030,15 +1029,11 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
                           "(O-phth)--",
                           ">(s)FeO-",
                           ">(s)FeOCa+",
-                          "e-",
                           "Calcite",
                           "Calcite_asdf",
                           "CH4(aq)"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 6);
   // remember the order of primaries: {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1.0;
-  stoi_gold["e-"](0, 3) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 2) = 1;
@@ -1073,8 +1068,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry1)
   stoi_gold["CH4(aq)"](0, 2) = 1;
   stoi_gold["CH4(aq)"](0, 3) = -2;
 
-  for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "e-", "Calcite"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", "(O-phth)--", "Calcite"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     ASSERT_EQ(mgd.eqm_stoichiometry.sub_matrix(row, 1, 0, 6), stoi_gold[sp]);
@@ -1092,7 +1086,7 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, (O-phth)--,
-  // >(s)FeO-, >(s)FeOCa+, e-
+  // >(s)FeO-, >(s)FeOCa+
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH"},
                                    {"Calcite"},
@@ -1120,7 +1114,6 @@ TEST(PertinentGeochemicalSystemTest, log10K1)
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 0), 8.9300);
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeOCa+"], 0), 1.7200);
   ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["Calcite"], 0), 2.0683);
-  ASSERT_EQ(mgd.eqm_log10K(mgd.eqm_species_index["e-"], 0), 23.4266);
 }
 
 /**
@@ -1133,7 +1126,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {"Fe(OH)3(ppd)fake"},
@@ -1145,7 +1138,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 10);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
   for (const auto & sp : {"CO2(aq)",
                           "CO3--",
                           "OH-",
@@ -1153,7 +1146,6 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
@@ -1166,16 +1158,12 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "Fe(OH)3(ppd)",
                           "CH4(g)fake"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 7);
   // remember the order of primaries:
   // {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"}
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1;
-  stoi_gold["e-"](0, 6) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 5) = 1;
@@ -1217,7 +1205,6 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry2)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "CH4(g)fake"})
   {
@@ -1236,7 +1223,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
 {
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
-  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++, e-
+  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -1248,8 +1235,8 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                                    "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 
   std::map<std::string, DenseMatrix<Real>> stoi_gold;
@@ -1260,16 +1247,12 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
                           "CH4(aq)",
                           "Fe+++",
                           ">(s)FeO-",
-                          "e-",
                           "Fe(OH)3(ppd)fake",
                           "Fe(OH)3(ppd)",
                           "CH4(g)fake"})
     stoi_gold[sp] = DenseMatrix<Real>(1, 7);
   // remember the order of primaries:
   // {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"}
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1;
-  stoi_gold["e-"](0, 6) = -0.25;
   stoi_gold["CO2(aq)"](0, 0) = -1;
   stoi_gold["CO2(aq)"](0, 1) = 1;
   stoi_gold["CO2(aq)"](0, 5) = 1;
@@ -1304,7 +1287,7 @@ TEST(PertinentGeochemicalSystemTest, stoichiometry3)
   stoi_gold["Fe(OH)3(ppd)"](0, 0) = 2.5;
   stoi_gold["Fe(OH)3(ppd)"](0, 6) = 0.25;
 
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     ASSERT_EQ(mgd.eqm_stoichiometry.sub_matrix(row, 1, 0, 7), stoi_gold[sp]);
@@ -1327,7 +1310,7 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, OH-, (O-phth)--, CH4(aq), Fe+++,
-  // >(s)FeO-, e-
+  // >(s)FeO-
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {"Fe(OH)3(ppd)fake"},
@@ -1345,7 +1328,6 @@ TEST(PertinentGeochemicalSystemTest, log10K2)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["(O-phth)--"], 0), 594.3211, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["CH4(aq)"], 0), 157.8920, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Fe+++"], 0), -10.0553, eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["e-"], 0), 23.4266, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 0), 8.93, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 1), 8.93 - 0.3 * (25 - 0), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index[">(s)FeO-"], 2), 8.93 - 0.3 * (60 - 0), eps);
@@ -1405,7 +1387,7 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
   GeochemicalDatabaseReader database("database/moose_testdb.json");
 
   // The following system has secondary species: CO2(aq), CO3--, CaCO3, CaOH+, OH-, >(s)FeO-,
-  // >(s)FeOCa+, e-
+  // >(s)FeOCa+
   PertinentGeochemicalSystem model(
       database,
       {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++", ">(s)FeOH", "(O-phth)--"},
@@ -1418,9 +1400,9 @@ TEST(PertinentGeochemicalSystemTest, secondarySpecies2)
       "e-");
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 9);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 8);
   for (const auto & sp :
-       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", ">(s)FeO-", ">(s)FeOCa+", "Calcite", "e-"})
+       {"CO2(aq)", "CO3--", "CaCO3", "CaOH+", "OH-", ">(s)FeO-", ">(s)FeOCa+", "Calcite"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 }
 
@@ -1517,8 +1499,8 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
       "e-");
   ModelGeochemicalDatabase mgd_no_redox = model_no_redox.modelGeochemicalDatabase();
 
-  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 0);
-  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 0);
+  EXPECT_EQ(mgd_no_redox.redox_stoichiometry.m(), 1);
+  EXPECT_EQ(mgd_no_redox.redox_log10K.m(), 1);
 
   PertinentGeochemicalSystem model_redox(
       database,
@@ -1536,43 +1518,234 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
 
   // StoiCheckRedox is not expressed in terms of O2(aq), and there is no Fe++ so Fe+++ does not
   // have a pair
-  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 2);
-  EXPECT_EQ(mgd_redox.redox_log10K.m(), 2);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), 3);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), 3);
+
+  // not sure which order the redox has been ordered in.  The reactions are:
+  // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
+  // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
+  const bool ophth_is_slot_one = (mgd_redox.redox_stoichiometry(1, 4) > 1.0E-6);
+  const unsigned ophth_slot = (ophth_is_slot_one ? 1 : 2);
+  const unsigned ch4_slot = (ophth_is_slot_one ? 2 : 1);
+
   // e- = (1/4/7.5)(O-phth)-- + (1/2 + 5/4/7.5)H2O + (-1 - 6/4/7.5)H+ - 8/4/7.5HCO3-
   Real boa = 1.0 / 4.0 / 7.5;
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 0), 0.5 + 5.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 1), -1 - 6.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 2), -8.0 * boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 3), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 4), boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 5), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 6), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 7), 0.0);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 0), -boa * 594.3211 + 22.76135 - 0.25 * (-2.6610), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 1), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 2), -boa * 482.3612 + 18.513025 - 0.25 * (-3.0580), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 3), -boa * 425.9738 + 16.4658 - 0.25 * (-3.1250), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 4), -boa * 368.7004 + 14.473225 - 0.25 * (-3.0630), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 5), -boa * 321.8658 + 12.92125 - 0.25 * (-2.9140), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 6), -boa * 281.8216 + 11.68165 - 0.25 * (-2.6600), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(0, 7), -boa * 246.4849 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 0), 0.5 + 5.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 1), -1 - 6.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 2), -8.0 * boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 4), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 5), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ophth_slot, 7), 0.0);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 0), -boa * 594.3211 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 1), -boa * 542.8292 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 2), -boa * 482.3612 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 3), -boa * 425.9738 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 4), -boa * 368.7004 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 5), -boa * 321.8658 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 6), -boa * 281.8216 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ophth_slot, 7), -boa * 246.4849 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 
   // e- = (1/8)CH4(aq) + (1/2 - 1/8)H2O - (1+1/8)H+ - (1/8)HCO3-
   boa = 1.0 / 8.0;
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 0), 0.5 - boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 1), -1 - boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 2), -boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 3), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 4), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 5), boa);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 6), 0.0);
-  EXPECT_EQ(mgd_redox.redox_stoichiometry(1, 7), 0.0);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 0), -boa * 157.8920 + 22.76135 - 0.25 * (-2.6610), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 2), -boa * 127.9360 + 18.513025 - 0.25 * (-3.0580), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 3), -boa * 112.8800 + 16.4658 - 0.25 * (-3.1250), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 4), -boa * 97.7060 + 14.473225 - 0.25 * (-3.0630), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 5), -boa * 85.2880 + 12.92125 - 0.25 * (-2.9140), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
-  EXPECT_NEAR(mgd_redox.redox_log10K(1, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 0), 0.5 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 1), -1 - boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 2), -boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 3), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 4), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 5), boa);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 6), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(ch4_slot, 7), 0.0);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 0), -boa * 157.8920 + 22.76135 - 0.25 * (-2.6610), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 1), -boa * 144.1080 + 20.7757 - 0.25 * (-2.8990), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 2), -boa * 127.9360 + 18.513025 - 0.25 * (-3.0580), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 3), -boa * 112.8800 + 16.4658 - 0.25 * (-3.1250), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 4), -boa * 97.7060 + 14.473225 - 0.25 * (-3.0630), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 5), -boa * 85.2880 + 12.92125 - 0.25 * (-2.9140), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 6), -boa * 74.7500 + 11.68165 - 0.25 * (-2.6600), 1E-8);
+  EXPECT_NEAR(
+      mgd_redox.redox_log10K(ch4_slot, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
+}
+
+/// Test addKineticRate exceptions
+TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                   {},
+                                   {},
+                                   {"Calcite"},
+                                   {"CH4(aq)"},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+
+  try
+  {
+    KineticRateUserDescription rate("Ca++", 1.0, 2.0, true, {"H2O"}, {3.0}, 4.0, 5.0, 6.0, 7.0);
+    model.addKineticRate(rate);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find(
+            "Cannot prescribe a kinetic rate to species Ca++ since it is not a kinetic species") !=
+        std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    KineticRateUserDescription rate(
+        "CH4(aq)", 1.0, 2.0, true, {"H2O", "H++"}, {3.0, 1.0}, 4.0, 5.0, 6.0, 7.0);
+    model.addKineticRate(rate);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Promoting species H++ must be a basis or a secondary species") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Test addKineticRate
+TEST(PertinentGeochemicalSystemTest, addKineticRate)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                   {},
+                                   {},
+                                   {"Calcite"},
+                                   {"CH4(aq)"},
+                                   {},
+                                   "O2(aq)",
+                                   "e-");
+  KineticRateUserDescription rate("CH4(aq)",
+                                  1.0,
+                                  2.0,
+                                  true,
+                                  {"H2O", "OH-", "O2(aq)", "CO2(aq)", "CaCO3"},
+                                  {3.0, 3.1, 3.2, 3.3, 3.4},
+                                  4.0,
+                                  5.0,
+                                  6.0,
+                                  7.0);
+  model.addKineticRate(rate);
+
+  const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd.kin_rate.size(), 1);
+  EXPECT_EQ(mgd.kin_rate[0].kinetic_species_index, mgd.kin_species_index.at("CH4(aq)"));
+  EXPECT_EQ(mgd.kin_rate[0].description.intrinsic_rate_constant, 1.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.area_quantity, 2.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.multiply_by_mass, true);
+  std::vector<Real> pi_gold(mgd.basis_species_index.size() + mgd.eqm_species_index.size(), 0.0);
+  EXPECT_EQ(mgd.kin_rate[0].promoting_indices.size(), pi_gold.size());
+  pi_gold[0] = 3.0; // H2O
+  pi_gold[5 + mgd.eqm_species_index.at("OH-")] = 3.1;
+  pi_gold[3] = 3.2; // O2(aq)
+  pi_gold[5 + mgd.eqm_species_index.at("CO2(aq)")] = 3.3;
+  pi_gold[5 + mgd.eqm_species_index.at("CaCO3")] = 3.4;
+  for (unsigned i = 0; i < pi_gold.size(); ++i)
+    EXPECT_EQ(mgd.kin_rate[0].promoting_indices[i], pi_gold[i]);
+  EXPECT_EQ(mgd.kin_rate[0].description.theta, 4.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.eta, 5.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.activation_energy, 6.0);
+  EXPECT_EQ(mgd.kin_rate[0].description.one_over_T0, 7.0);
+
+  KineticRateUserDescription ratec("Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 5.0, 4.0, 3.0, 2.0);
+  model.addKineticRate(ratec);
+
+  EXPECT_EQ(mgd.kin_rate.size(), 2);
+  EXPECT_EQ(mgd.kin_rate[1].kinetic_species_index, mgd.kin_species_index.at("Calcite"));
+  EXPECT_EQ(mgd.kin_rate[1].description.intrinsic_rate_constant, 7.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.area_quantity, 6.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.multiply_by_mass, false);
+  EXPECT_EQ(mgd.kin_rate[1].promoting_indices.size(), pi_gold.size());
+  std::fill(pi_gold.begin(), pi_gold.end(), 0.0);
+  pi_gold[1] = -3.0; // H++
+  for (unsigned i = 0; i < pi_gold.size(); ++i)
+    EXPECT_EQ(mgd.kin_rate[1].promoting_indices[i], pi_gold[i]);
+  EXPECT_EQ(mgd.kin_rate[1].description.theta, 5.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.eta, 4.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.activation_energy, 3.0);
+  EXPECT_EQ(mgd.kin_rate[1].description.one_over_T0, 2.0);
+}
+
+/**
+ * Test that the kinetic equilibrium constants are correctly computed and recorded, including the
+ * case where the kinetic species depend on the basis species only through redox or other
+ * secondary species
+ */
+TEST(PertinentGeochemicalSystemTest, kin_log10K1)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json");
+
+  PertinentGeochemicalSystem model(database,
+                                   {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+                                   {},
+                                   {"CH4(g)fake"},
+                                   {"Fe(OH)3(ppd)fake"},
+                                   {"(O-phth)--"},
+                                   {">(s)FeO-"},
+                                   "O2(aq)",
+                                   "e-");
+  const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
+
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 0),
+              6.1946 + 2 * (-10.0553),
+              eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 1), 4.8890 + 2 * (-8.4878), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 2), 3.4608 + 2 * (-6.6954), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 3), 2.2392 + 2 * (-5.0568), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 4), 1.1150 + 2 * (-3.4154), eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 5), 0.2446 + 2 * (-2.0747), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 6),
+              -0.5504 + 2 * (-0.8908),
+              eps);
+  ASSERT_NEAR(
+      mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), 7), -1.5398 + 2 * (0.2679), eps);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 0), 594.3211);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 1), 542.8292);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 2), 482.3612);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 3), 425.9738);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 4), 368.7004);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 5), 321.8658);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 6), 281.8216);
+  EXPECT_EQ(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), 7), 246.4849);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 0), 8.93, eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 1), 8.93 - 0.3 * (25 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 2), 8.93 - 0.3 * (60 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 3), 8.93 - 0.3 * (100 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 4), 8.93 - 0.3 * (150 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 5), 8.93 - 0.3 * (200 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 6), 8.93 - 0.3 * (250 - 0), eps);
+  ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), 7), 8.93 - 0.3 * (300 - 0), eps);
 }

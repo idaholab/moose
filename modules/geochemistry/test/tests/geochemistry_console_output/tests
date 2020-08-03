@@ -1,0 +1,11 @@
+[Tests]
+  [./console]
+    type = 'RunApp'
+    input = 'console.i'
+    expect_out = 'Total mass = 1.0005269kg (including kinetic species and free minerals)'
+    match_literal = true
+    requirement = "The geochemistry module shall be able to output descriptive information concerning molalities, bulk composition, free minerals, temperature, etc, at any point"
+    issues = '#15330'
+    design = 'GeochemistryConsoleOutput.md'
+  [../]
+[]

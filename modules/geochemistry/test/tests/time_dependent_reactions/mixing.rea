@@ -1,0 +1,61 @@
+# React script, the second half of which is equivalent to mixing.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+suppress all
+unsuppress Anhydrite Pyrite Talc Amrph^silica Barite Dolomite-ord Muscovite Nontronit-Na Pyrolusite Strontianite
+temperature = 4 C
+H2O          = 1 free kg
+H+           = 8.1 pH
+Cl-          = 559 mmolal
+balance on Cl-
+Na+          = 480.2 mmolal
+Mg++         = 54.5 mmolal
+SO4--        = 29.5 mmolal
+Ca++         = 10.5 mmolal
+K+           = 10.1 mmolal
+HCO3-        = 2.4 mmolal
+SiO2(aq)     = 0.17 mmolal
+Sr++         = 0.09 mmolal
+
+Ba++         = 0.2 umolal
+Zn++         = 0.01 umolal
+Al+++        = 0.005 umolal
+Cu+          = 0.007 umolal
+Fe++         = 0.001 umolal
+Mn++         = 0.001 umolal
+O2(aq)       = 123.0 free umolal
+printout  species = long
+epsilon = 1e-14
+go
+
+pickup reactant = fluid
+
+# Below here is equivalent to mixing.i  The material above here provides the rates to mixing.i
+
+reactant times 10
+
+H+       = 4.2 pH
+swap H2S(aq) for O2(aq)
+
+Cl-      = 600.0 mmolal
+Na+      = 529.0 mmolal
+K+       = 26.7 mmolal
+Ca++     = 21.6 mmolal
+SiO2(aq) = 20.2 mmolal
+H2S(aq)  = 6.81 mmolal
+HCO3-    = 2.0 mmolal
+
+Mn++  = 1039.0 umolal
+Fe++  = 903.0 umolal
+Sr++  = 100.5 umolal
+Zn++  = 41.0 umolal
+Ba++  = 15.0 umolal
+Al+++ = 4.1 umolal
+Cu+   = 0.02 umolal
+Mg++  = 0.01 umolal
+SO4-- = 0.01 umolal
+
+dump
+T initial 273, reactants = 4
+delxi = 0.001
+go

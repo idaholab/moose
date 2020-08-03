@@ -1,12 +1,15 @@
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Cl-"
-  constraint_species = "H2O              H+       Cl- Mg++ Na+ SO4-- K+ Br- Ca++ HCO3-"
+  constraint_species = "H2O              H+           Cl-                Mg++               Na+                SO4--              K+                 Br-                Ca++               HCO3-"
 # assume that g/l means g/kg(solvent water)
-  constraint_value = "  1.0              7.079E-8 5.500239754 2.143591854 1.874744452 0.285245519 0.176478261 0.028158791 0.00499002 0.002294439"
-  constraint_meaning = "kg_solvent_water activity moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species"
-  max_ionic_strength = 10.0
+  constraint_value = "  1.0              7.0794578E-8 5.500              2.1436             1.8747             0.2852             0.17648            0.02816            0.00499            0.00229"
+  constraint_meaning = "kg_solvent_water activity     moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species moles_bulk_species"
   prevent_precipitation = "Halite Anhydrite"
+  max_ionic_strength = 10.0
+  ramp_max_ionic_strength_initial = 0 # not needed in this simple example
+  stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
+  abs_tol = 1E-12
 []
 
 [UserObjects]
@@ -15,5 +18,6 @@
     database_file = "../../../database/moose_geochemdb.json"
     basis_species = "H2O H+ Cl- Mg++ Na+ SO4-- K+ Br- Ca++ HCO3-"
     equilibrium_minerals = "Halite Anhydrite"
+    piecewise_linear_interpolation = true # for comparison with GWB
   [../]
 []

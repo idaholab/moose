@@ -1,0 +1,7 @@
+# React script that is equivalent to quartz_dissolution.i
+time begin = 0 days, end = 5 days
+T = 100
+SiO2(aq) = 1 umolal
+react 5000 g Quartz
+kinetic Quartz rate_con = 2.0e-15 surface = 1000
+go
