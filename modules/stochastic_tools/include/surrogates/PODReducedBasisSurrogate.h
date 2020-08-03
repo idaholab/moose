@@ -60,11 +60,8 @@ protected:
   /// Names of the tags that should be used to fetch residuals from the MultiApp.
   const std::vector<std::string> & _tag_names;
 
-  /// Tag names that show which tags correspond to dirichlet boundaries.
-  const std::vector<std::string> & _dir_tag_names;
-
   /// Bools describing which operator is indepedent of the solution.
-  const std::vector<unsigned int> & _independent;
+  const std::vector<std::string> & _tag_types;
 
   /// The basis vectors for all the variables.
   const std::vector<std::vector<DenseVector<Real>>> & _base;

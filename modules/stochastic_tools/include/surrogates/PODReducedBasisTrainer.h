@@ -27,7 +27,7 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void initialize() override;
+  virtual void initialize() override{};
 
   virtual void execute() override;
 
@@ -50,7 +50,7 @@ public:
 
   const std::vector<std::string> & getTagNames() const { return _tag_names; }
 
-  const std::vector<unsigned int> & getIndependent() const { return _independent; }
+  const std::vector<std::string> & getTagTypes() const { return _tag_types; }
 
   /// Getting the snapshot size across all of the processors.
   dof_id_type getSnapsSize(dof_id_type v_ind);
@@ -89,16 +89,13 @@ protected:
   std::vector<std::string> & _var_names;
 
   /// Energy limits that define how many basis functions will be kept for each variable.
-  std::vector<Real> _en_limits;
+  std::vector<Real> _error_res;
 
   /// Names of the tags that should be used to fetch residuals from the MultiApp.
   std::vector<std::string> & _tag_names;
 
-  /// Tag names that show which tags correspond to dirichlet boundaries.
-  std::vector<std::string> & _dir_tag_names;
-
   /// list of bools describing which tag is indepedent of the solution.
-  std::vector<unsigned int> & _independent;
+  std::vector<std::string> & _tag_types;
 
   /// Distributed container for snapshots per variable.
   std::vector<DistributedSnapshots> _snapshots;
@@ -128,12 +125,20 @@ protected:
   /// object.
   bool _empty_operators;
 
-  /// Flag that shots if the eigenvlaues of the correlation matrices are being
-  /// printed or not.
-  bool _print_eigenvalues;
-
 private:
   /// Computes the number of bases necessary for a given error indicator. This
   /// needs a sorted vector as input.
-  unsigned int determineNumberOfModes(Real limit, std::vector<Real> & inp_vec);
+  unsigned int determineNumberOfModes(Real error, const std::vector<Real> & inp_vec) const;
+
+  /// Function that manipulates the received objects and computes the
+  /// correlation matrices on the fly.
+  void receiveObjects(
+      ReplicatedMesh & mesh,
+      std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+          received_vectors,
+      std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+          local_vectors,
+      processor_id_type /*pid*/,
+      const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &
+          vectors);
 };

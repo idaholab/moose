@@ -133,9 +133,9 @@
   [pod_rb]
     type = PODReducedBasisTrainer
     var_names = 'psi'
-    en_limits = '0.999999999'
+    error_res = '1e-9'
     tag_names = 'diff0 diff1 diff2 diff3 abs0 abs1 abs2 abs3 src0 src1 src2'
-    independent = '0 0 0 0 0 0 0 0 1 1 1'
+    tag_types = 'op op op op op op op op src src src'
     execute_on = 'timestep_begin final'
   []
 []

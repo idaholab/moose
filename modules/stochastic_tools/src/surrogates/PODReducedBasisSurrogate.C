@@ -34,8 +34,7 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
     _new_ranks(getParam<std::vector<unsigned int>>("new_ranks")),
     _var_names(getModelData<std::vector<std::string>>("_var_names")),
     _tag_names(getModelData<std::vector<std::string>>("_tag_names")),
-    _dir_tag_names(getModelData<std::vector<std::string>>("_dir_tag_names")),
-    _independent(getModelData<std::vector<unsigned int>>("_independent")),
+    _tag_types(getModelData<std::vector<std::string>>("_tag_types")),
     _base(getModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(getModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),
     _penalty(getParam<Real>("penalty")),
@@ -136,8 +135,7 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
     // Checking if the reduced operator corresponds to a Dirichlet BC, if
     // yes introduce the penalty factor.
     Real factor = 1.0;
-    auto it = std::find(_dir_tag_names.begin(), _dir_tag_names.end(), _tag_names[i]);
-    if (it != _dir_tag_names.end())
+    if (_tag_types[i] == "op_dir" || _tag_types[i] == "src_dir")
       factor = _penalty;
 
     // If the user decreased the rank of the reduced bases manually, some parts
@@ -146,8 +144,9 @@ PODReducedBasisSurrogate::solveReducedSystem(const std::vector<Real> & params)
     {
       for (unsigned int row_i = row_start; row_i < _comulative_ranks[var_i]; row_i++)
       {
-        if (!_independent[i])
+        if (_tag_types[i] == "op" || _tag_types[i] == "op_dir")
         {
+
           unsigned int col_start = 0;
 
           for (unsigned int var_j = 0; var_j < _var_names.size(); ++var_j)

@@ -86,10 +86,9 @@
   [pod_rb]
     type = PODReducedBasisTrainer
     var_names = 'u'
-    en_limits = '0.999999999'
+    error_res = '1e-9'
     tag_names = 'diff react bodyf dir_src dir_imp'
-    dir_tag_names = 'dir_src dir_imp'
-    independent = '0 0 1 1 0'
+    tag_types = 'op op src src_dir op_dir'
     execute_on = 'timestep_begin final'
   []
 []

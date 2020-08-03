@@ -51,7 +51,7 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
 {
   const std::vector<std::string> & var_names = _trainer->getVarNames();
   const std::vector<std::string> & tag_names = _trainer->getTagNames();
-  const std::vector<unsigned int> & independent = _trainer->getIndependent();
+  const std::vector<std::string> & tag_types = _trainer->getTagTypes();
 
   // Getting reference to the non-linear system
   FEProblemBase & app_problem = _multi_app->appProblemBase(multi_app_i);
@@ -62,7 +62,7 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
   {
     // If the tag corresponds to an independent operator, it is enough to
     // transfer it once.
-    if (base_i > 0 && independent[tag_i])
+    if (base_i > 0 && (tag_types[tag_i] == "src" || tag_types[tag_i] == "src_dir"))
       continue;
 
     TagID tag_id = app_problem.getVectorTagID(tag_names[tag_i]);
