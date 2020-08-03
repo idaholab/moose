@@ -113,6 +113,8 @@ public:
    */
   void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
 
+  void setMooseMesh(MooseMesh * mesh) { _mesh = mesh; }
+
 protected:
   /**
    * Called before this RM is attached.  Only called once

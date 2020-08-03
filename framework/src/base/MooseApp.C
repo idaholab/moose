@@ -1983,10 +1983,14 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 
         rm->init();
 
-        if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
-        else
-          mesh->getMesh().add_ghosting_functor(*rm);
+        mesh->getMesh().add_ghosting_functor(*rm);
+
+        if (_action_warehouse.displacedMesh())
+        {
+          std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
+          clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+          _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+        }
       }
 
       if (rm_type != Moose::RelationshipManagerType::GEOMETRIC)
@@ -2000,10 +2004,14 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
-          if (rm->useDisplacedMesh() && _action_warehouse.displacedMesh())
-            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(*rm);
-          else
-            problem.mesh().getMesh().add_ghosting_functor(*rm);
+          if (_action_warehouse.displacedMesh())
+          {
+            std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
+            clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
+            _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
+          }
+
+          problem.mesh().getMesh().add_ghosting_functor(*rm);
         }
 
         if (rm->useDisplacedMesh() && problem.getDisplacedProblem())
@@ -2090,6 +2098,29 @@ MooseApp::getRelationshipManagerInfo() const
     for (const auto pair : counts)
       info_strings.emplace_back(std::make_pair(
           "Default", pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "")));
+  }
+
+  // List the libMesh GhostingFunctors - Not that in libMesh all of the algebraic and coupling
+  // Ghosting Functors are also attached to the mesh. This should catch them all.
+  const auto & d_mesh = _action_warehouse.getDisplacedMesh();
+  if (d_mesh)
+  {
+    std::unordered_map<std::string, unsigned int> counts;
+
+    for (auto & gf : as_range(d_mesh->getMesh().ghosting_functors_begin(),
+                              d_mesh->getMesh().ghosting_functors_end()))
+    {
+      const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
+      if (!gf_ptr)
+        // Count how many occurances of the same Ghosting Functor types we are encountering
+        counts[demangle(typeid(*gf).name())]++;
+    }
+
+    for (const auto pair : counts)
+      info_strings.emplace_back(
+          std::make_pair("Default",
+                         pair.first + (pair.second > 1 ? " x " + std::to_string(pair.second) : "") +
+                             " for DisplacedMesh"));
   }
 
   return info_strings;

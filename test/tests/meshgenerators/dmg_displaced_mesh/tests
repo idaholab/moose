@@ -8,4 +8,18 @@
     exodiff = 'adaptivity_out.e'
     requirement = "The system shall support mesh adaptivity on a distributed generated displaced mesh."
   [../]
+
+  [./pbc_adaptivity]
+    type = 'Exodiff'
+    input = 'pbc_adaptivity.i'
+    exodiff = 'pbc_adaptivity_out.e'
+    cli_args = 'Outputs/hide="pid" Outputs/console/type=Console Outputs/console/system_info="framework mesh aux nonlinear execution relationship"'
+    expect_out = '  Default:                 libMesh::DefaultCoupling x 2
+  Default:                 libMesh::GhostPointNeighbors
+  Default:                 libMesh::DefaultCoupling x 2 for DisplacedMesh
+  Default:                 libMesh::GhostPointNeighbors for DisplacedMesh'
+    abs_zero = 1e-7
+    rel_err = 1e-4
+    requirement = "The system shall support mesh adaptivity with periodic boundary conditions on a distributed generated displaced mesh."
+  [../]
 []

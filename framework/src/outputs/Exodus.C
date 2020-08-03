@@ -172,8 +172,7 @@ Exodus::outputSetup()
       return;
   }
 
-
-   _problem_ptr->mesh().getMesh().gather_to_zero();
+  _problem_ptr->mesh().getMesh().gather_to_zero();
   if (_problem_ptr->getDisplacedProblem())
   {
     _problem_ptr->getDisplacedProblem()->mesh().getMesh().gather_to_zero();
