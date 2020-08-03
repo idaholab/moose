@@ -198,7 +198,7 @@ PODReducedBasisSurrogate::reconstructApproximateSolution()
 }
 
 Real
-PODReducedBasisSurrogate::getNodalQoI(std::string var_name, MooseEnum qoi_type) const
+PODReducedBasisSurrogate::getNodalQoI(std::string var_name, unsigned int qoi_type) const
 {
   Real val = 0.0;
 
