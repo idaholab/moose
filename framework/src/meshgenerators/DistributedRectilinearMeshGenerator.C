@@ -1021,16 +1021,16 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
   // No need to renumber or find neighbors this time - done did it.
   bool old_allow_renumbering = mesh.allow_renumbering();
-  mesh.allow_renumbering(false);
+  /*mesh.allow_renumbering(false);
   mesh.allow_find_neighbors(false);
   // No, I do not want to remove anything in case periodic boundary conditions
   // are required late. We  stop libMesh from deleting the valuable remote
   // elements paired with the local elements
-  //mesh.allow_remote_element_removal(false);
+  mesh.allow_remote_element_removal(false);
   mesh.prepare_for_use();
 
   // But we'll want to at least find neighbors after any future mesh changes!
-  mesh.allow_find_neighbors(true);
+  mesh.allow_find_neighbors(true);*/
   mesh.allow_renumbering(old_allow_renumbering);
 
   // Scale the nodal positions
@@ -1208,6 +1208,10 @@ DistributedRectilinearMeshGenerator::generate()
   // the old node IDs. Yes, you could say: go ahead to do a mesh update, but I would say no. I do
   // not change mesh and there is no point to update anything.
   mesh->allow_renumbering(true);
+
+  mesh->allow_remote_element_removal(false);
+  _mesh->prepared(false);
+  _mesh->needsPrepareForUse();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
