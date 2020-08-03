@@ -51,11 +51,16 @@ HSBoundary::check() const
 
     // Check that no perimeter is zero; if so, there is not physically a boundary
     for (unsigned int i = 0; i < _boundary.size(); i++)
-      if (MooseUtils::absoluteFuzzyEqual(hs.getUnitPerimeter(_hs_sides[i]), 0))
-        logError("The heat structure side of the heat structure '",
-                 _hs_name,
-                 "' corresponding to the boundary name '",
-                 _boundary[i],
-                 "' has a zero perimeter.");
+    {
+      if ((_hs_sides[i] == HeatStructureBase::INNER) || (_hs_sides[i] == HeatStructureBase::OUTER))
+      {
+        if (MooseUtils::absoluteFuzzyEqual(hs.getUnitPerimeter(_hs_sides[i]), 0))
+          logError("The heat structure side of the heat structure '",
+                   _hs_name,
+                   "' corresponding to the boundary name '",
+                   _boundary[i],
+                   "' has a zero perimeter.");
+      }
+    }
   }
 }

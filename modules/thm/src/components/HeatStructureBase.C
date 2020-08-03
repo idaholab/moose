@@ -5,7 +5,7 @@
 #include "THMMesh.h"
 
 const std::map<std::string, HeatStructureBase::SideType> HeatStructureBase::_side_type_to_enum{
-    {"INNER", INNER}, {"OUTER", OUTER}};
+    {"INNER", INNER}, {"OUTER", OUTER}, {"START", START}, {"END", END}};
 
 MooseEnum
 HeatStructureBase::getSideType(const std::string & name)
@@ -165,6 +165,24 @@ HeatStructureBase::build2DMesh()
 
           elem_ids[i].push_back(elem->id());
 
+          if (i == 0)
+          {
+            _mesh.getMesh().boundary_info->add_side(elem, 0, _start_bc_id[0]);
+            _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+          }
+          if (i == _n_elem - 1)
+          {
+            _mesh.getMesh().boundary_info->add_side(elem, 2, _end_bc_id[0]);
+            _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+          }
+          if (_names.size() > 1)
+          {
+            if (i == 0)
+              _mesh.getMesh().boundary_info->add_side(elem, 0, _radial_start_bc_id[j_section]);
+            if (i == _n_elem - 1)
+              _mesh.getMesh().boundary_info->add_side(elem, 2, _radial_end_bc_id[j_section]);
+          }
+
           if (j == 0)
           {
             _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
@@ -249,6 +267,24 @@ HeatStructureBase::build2DMesh2ndOrder()
 
           elem_ids[i].push_back(elem->id());
 
+          if (i == 0)
+          {
+            _mesh.getMesh().boundary_info->add_side(elem, 0, _start_bc_id[0]);
+            _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
+          }
+          if (i == _n_elem - 1)
+          {
+            _mesh.getMesh().boundary_info->add_side(elem, 2, _end_bc_id[0]);
+            _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
+          }
+          if (_names.size() > 1)
+          {
+            if (i == 0)
+              _mesh.getMesh().boundary_info->add_side(elem, 0, _radial_start_bc_id[j_section]);
+            if (i == _n_elem - 1)
+              _mesh.getMesh().boundary_info->add_side(elem, 2, _radial_end_bc_id[j_section]);
+          }
+
           if (j == 0)
           {
             _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
@@ -307,6 +343,23 @@ HeatStructureBase::buildMesh()
       _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
       _mesh.setBoundaryName(_axial_inner_bc_id[i], _boundary_names_axial_inner[i]);
       _mesh.setBoundaryName(_axial_outer_bc_id[i], _boundary_names_axial_outer[i]);
+    }
+
+  _start_bc_id.push_back(_mesh.getNextBoundaryId());
+  _end_bc_id.push_back(_mesh.getNextBoundaryId());
+  _boundary_names_start.push_back(genName(name(), "start"));
+  _boundary_names_end.push_back(genName(name(), "end"));
+  _mesh.setBoundaryName(_start_bc_id[0], _boundary_names_start[0]);
+  _mesh.setBoundaryName(_end_bc_id[0], _boundary_names_end[0]);
+  if (_names.size() > 1)
+    for (unsigned int i = 0; i < _names.size(); i++)
+    {
+      _radial_start_bc_id.push_back(_mesh.getNextBoundaryId());
+      _radial_end_bc_id.push_back(_mesh.getNextBoundaryId());
+      _boundary_names_radial_start.push_back(genName(name(), _names[i], "start"));
+      _boundary_names_radial_end.push_back(genName(name(), _names[i], "end"));
+      _mesh.setBoundaryName(_radial_start_bc_id[i], _boundary_names_radial_start[i]);
+      _mesh.setBoundaryName(_radial_end_bc_id[i], _boundary_names_radial_end[i]);
     }
 
   // Build the mesh
@@ -395,6 +448,22 @@ HeatStructureBase::getInnerBoundaryNames() const
   return _boundary_names_inner;
 }
 
+const std::vector<BoundaryName> &
+HeatStructureBase::getStartBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_start;
+}
+
+const std::vector<BoundaryName> &
+HeatStructureBase::getEndBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names_end;
+}
+
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &
 HeatStructureBase::getBoundaryInfo(const HeatStructureBase::SideType & side) const
 {
@@ -404,7 +473,9 @@ HeatStructureBase::getBoundaryInfo(const HeatStructureBase::SideType & side) con
       return _inner_bnd_info;
     case OUTER:
       return _outer_bnd_info;
-    default:
-      mooseError(name(), "Unknown heat structure side requested.");
+    case START:
+      return _start_bnd_info;
+    case END:
+      return _end_bnd_info;
   }
 }

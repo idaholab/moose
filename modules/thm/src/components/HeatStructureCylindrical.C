@@ -48,7 +48,8 @@ HeatStructureCylindrical::getUnitPerimeter(const HeatStructureBase::SideType & s
     case HeatStructureBase::INNER:
       return 2 * M_PI * _inner_radius;
 
-    default:
-      mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+    case HeatStructureBase::START:
+    case HeatStructureBase::END:
+      return std::numeric_limits<Real>::quiet_NaN();
   }
 }

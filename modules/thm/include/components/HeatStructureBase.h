@@ -12,7 +12,9 @@ public:
   enum SideType
   {
     INNER = 0,
-    OUTER = 1
+    OUTER = 1,
+    START = 2,
+    END = 3
   };
 
   virtual void buildMesh() override;
@@ -23,6 +25,8 @@ public:
   const std::vector<unsigned int> & getOuterNodeIds() const;
   const std::vector<BoundaryName> & getOuterBoundaryNames() const;
   const std::vector<BoundaryName> & getInnerBoundaryNames() const;
+  const std::vector<BoundaryName> & getStartBoundaryNames() const;
+  const std::vector<BoundaryName> & getEndBoundaryNames() const;
 
   const Real & getTotalWidth() const { return _total_width; }
   unsigned int getNumHS() const { return _number_of_hs; }
@@ -108,28 +112,48 @@ protected:
   std::vector<unsigned int> _outer_bc_id;
   /// BC ID of the heat structure (inner)
   std::vector<unsigned int> _inner_bc_id;
+  /// BC ID of the heat structure (start)
+  std::vector<unsigned int> _start_bc_id;
+  /// BC ID of the heat structure (end)
+  std::vector<unsigned int> _end_bc_id;
   /// BC ID of the axial regions of the outer boundary of the heat structure
   std::vector<unsigned int> _axial_outer_bc_id;
   /// BC ID of the axial regions of the inner boundary of the heat structure
   std::vector<unsigned int> _axial_inner_bc_id;
+  /// BC ID of the radial regions of the start boundary of the heat structure
+  std::vector<unsigned int> _radial_start_bc_id;
+  /// BC ID of the radial regions of the end boundary of the heat structure
+  std::vector<unsigned int> _radial_end_bc_id;
   /// Boundary names of the outer side of the heat structure
   std::vector<BoundaryName> _boundary_names_outer;
   /// Boundary names of the inner side of the heat structure
   std::vector<BoundaryName> _boundary_names_inner;
+  /// Boundary names of the start side of the heat structure
+  std::vector<BoundaryName> _boundary_names_start;
+  /// Boundary names of the end side of the heat structure
+  std::vector<BoundaryName> _boundary_names_end;
   /// Boundary names of the axial regions of the outer side of the heat structure
   std::vector<BoundaryName> _boundary_names_axial_outer;
   /// Boundary names of the axial regions of the inner side of the heat structure
   std::vector<BoundaryName> _boundary_names_axial_inner;
+  /// Boundary names of the radial regions of the start side of the heat structure
+  std::vector<BoundaryName> _boundary_names_radial_start;
+  /// Boundary names of the radial regions of the end side of the heat structure
+  std::vector<BoundaryName> _boundary_names_radial_end;
   /// Nodes on the side of the "block"
   std::map<std::string, std::vector<unsigned int>> _side_heat_node_ids;
   /// Nodes at the outer side of the generated heat structure
   std::vector<unsigned int> _outer_heat_node_ids;
   /// Nodes at the inner side of the generated heat structure
   std::vector<unsigned int> _inner_heat_node_ids;
-  /// Boundary info for the outer side of the heat strucutre
+  /// Boundary info for the outer side of the heat structure
   std::vector<std::tuple<dof_id_type, unsigned short int>> _outer_bnd_info;
-  /// Boundary info for the inner side of the heat strucutre
+  /// Boundary info for the inner side of the heat structure
   std::vector<std::tuple<dof_id_type, unsigned short int>> _inner_bnd_info;
+  /// Boundary info for the start side of the heat structure
+  std::vector<std::tuple<dof_id_type, unsigned short int>> _start_bnd_info;
+  /// Boundary info for the end side of the heat structure
+  std::vector<std::tuple<dof_id_type, unsigned short int>> _end_bnd_info;
 
 public:
   /// map of heat structure side string to enum

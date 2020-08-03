@@ -38,7 +38,8 @@ HeatStructurePlate::getUnitPerimeter(const HeatStructureBase::SideType & side) c
     case HeatStructureBase::INNER:
       return _depth;
 
-    default:
-      mooseError(name(), ": The heat structure side value '", side, "' is invalid.");
+    case HeatStructureBase::START:
+    case HeatStructureBase::END:
+      return std::numeric_limits<Real>::quiet_NaN();
   }
 }
