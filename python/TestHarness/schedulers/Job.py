@@ -157,8 +157,16 @@ class Job(object):
         return self.__tester.getOutputFiles()
 
     def getMaxTime(self):
-        """ Wrapper method to return getMaxTime  """
+        """ Wrapper method to return getMaxTime """
         return self.__tester.getMaxTime()
+
+    def getInputFile(self):
+        """ Wrapper method to return input filename """
+        return self.__tester.getInputFile()
+
+    def getInputFileContents(self):
+        """ Wrapper method to return input file contents """
+        return self.__tester.getInputFileContents()
 
     def getUniqueIdentifier(self):
         """ A unique identifier for this job object """
