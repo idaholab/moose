@@ -88,6 +88,7 @@ PODReducedBasisSurrogate::initializeReducedSystem()
         if (_change_rank[var_j] == _var_names[var_i])
         {
           if (_new_ranks[var_j] > _base[var_i].size())
+          {
             mooseWarning("The specified new rank (",
                          _new_ranks[var_j],
                          ") for variable '",
@@ -95,6 +96,9 @@ PODReducedBasisSurrogate::initializeReducedSystem()
                          "' is higher than the original rank (",
                          _base[var_i].size(),
                          ")! Switched to original rank.");
+            break;
+          }
+
           _final_ranks[var_i] = _new_ranks[var_j];
         }
       }
