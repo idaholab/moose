@@ -21,17 +21,18 @@ PODSurrogateTester::validParams()
   params += SamplerInterface::validParams();
   params += SurrogateModelInterface::validParams();
   params.addClassDescription("Tool for sampling POD surrogate model.");
-  params.addRequiredParam<UserObjectName>("model", "Name of surrogate model.");
+  params.addRequiredParam<std::vector<UserObjectName>>("model", "Name of POD surrogate models.");
   params += SamplerInterface::validParams();
-  params.addRequiredParam<SamplerName>(
-      "sampler", "Sampler to use for evaluating POD model (mainly for testing).");
-  params.addParam<bool>("output_samples",
-                        false,
-                        "True to output value of samples from sampler (this may be VERY large).");
+  params.addRequiredParam<SamplerName>("sampler",
+                                       "Sampler to use for evaluating surrogate models.");
+  params.addParam<bool>(
+      "output_samples",
+      false,
+      "True to output value of parameter values from samples (this may be VERY large).");
   params.addRequiredParam<std::string>(
       "variable_name", "The name of the variable this prostprocessor is supposed to operate on.");
-  MooseEnum pptype("nodal_max=0 nodal_min=1 nodal_l1=2 nodal_l2=3 nodal_linf=4");
-  params.addRequiredParam<MooseEnum>(
+  MultiMooseEnum pptype("nodal_max=0 nodal_min=1 nodal_l1=2 nodal_l2=3 nodal_linf=4");
+  params.addRequiredParam<MultiMooseEnum>(
       "to_compute", pptype, "The global data the postprocessor should compute.");
   return params;
 }
@@ -42,34 +43,58 @@ PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
     SurrogateModelInterface(this),
     _sampler(getSampler("sampler")),
     _output_samples(getParam<bool>("output_samples")),
-    _value_vector(declareVector("value")),
     _variable_name(getParam<std::string>("variable_name")),
-    _to_compute(getParam<MooseEnum>("to_compute"))
+    _to_compute(getParam<MultiMooseEnum>("to_compute"))
 {
+  const auto & model_names = getParam<std::vector<UserObjectName>>("model");
+  _model.reserve(model_names.size());
+  _value_vector.reserve(model_names.size());
+
+  // Fetching the corresponding Surrogate models
+  FEProblemBase & problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
+
+  for (unsigned int model_i = 0; model_i < model_names.size(); ++model_i)
+  {
+    std::vector<SurrogateModel *> models;
+    problem.theWarehouse()
+        .query()
+        .condition<AttribName>(model_names[model_i])
+        .condition<AttribSystem>("SurrogateModel")
+        .queryInto(models);
+
+    if (models.empty())
+      mooseError("Unable to find a object with the name '" + model_names[model_i] + "'");
+
+    // Checking if the model can be cast into a PODRBSurrogate
+    auto pod_pointer = dynamic_cast<PODReducedBasisSurrogate *>(models[0]);
+
+    if (pod_pointer)
+      _model.push_back(pod_pointer);
+    else
+      paramError("model",
+                 "The Surrogate model (at index '",
+                 model_i,
+                 "') given is not a PODReducedBasisSurrogate!");
+
+    // Creating given vector postprocessors for every item in to_compute
+    for (unsigned int pp_i = 0; pp_i < _to_compute.size(); ++pp_i)
+    {
+      std::string name = model_names[model_i] + ":" + _to_compute[pp_i];
+      _value_vector.push_back(&declareVector(name));
+    }
+  }
+
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector.push_back(&declareVector("sample_p" + std::to_string(d)));
-
-  std::vector<PODReducedBasisSurrogate *> models;
-
-  FEProblemBase & problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
-
-  UserObjectName name = getParam<UserObjectName>("model");
-  problem.theWarehouse().query().condition<AttribName>(name).queryInto(models);
-  if (models.empty())
-    mooseError("Unable to find a PODReducedBasisSurrogate object with the name '" + name + "'");
-  _model = models[0];
-}
-
-void
-PODSurrogateTester::initialSetup()
-{
 }
 
 void
 PODSurrogateTester::initialize()
 {
-  _value_vector.resize(_sampler.getNumberOfLocalRows(), 0);
+  for (auto & vec : _value_vector)
+    vec->resize(_sampler.getNumberOfLocalRows(), 0);
+
   if (_output_samples)
     for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
       _sample_vector[d]->resize(_sampler.getNumberOfLocalRows(), 0);
@@ -78,14 +103,24 @@ PODSurrogateTester::initialize()
 void
 PODSurrogateTester::execute()
 {
+  unsigned int n_models = _model.size();
+  unsigned int n_pp = _to_compute.size();
+
   // Loop over samples
   for (dof_id_type p = _sampler.getLocalRowBegin(); p < _sampler.getLocalRowEnd(); ++p)
   {
     std::vector<Real> data = _sampler.getNextLocalRow();
 
-    _model->evaluateSolution(data);
-    _value_vector[p - _sampler.getLocalRowBegin()] =
-        _model->getNodalQoI(_variable_name, _to_compute);
+    for (unsigned int m = 0; m < n_models; ++m)
+    {
+      _model[m]->evaluateSolution(data);
+      for (unsigned int ppi = 0; ppi < n_pp; ++ppi)
+      {
+        unsigned int idx = m * n_pp + ppi;
+        (*_value_vector[idx])[p - _sampler.getLocalRowBegin()] =
+            _model[m]->getNodalQoI(_variable_name, _to_compute.get(ppi));
+      }
+    }
 
     if (_output_samples)
       for (unsigned int d = 0; d < _sampler.getNumberOfCols(); ++d)
@@ -98,7 +133,8 @@ PODSurrogateTester::execute()
 void
 PODSurrogateTester::finalize()
 {
-  _communicator.gather(0, _value_vector);
+  for (auto & vec : _value_vector)
+    _communicator.gather(0, *vec);
   if (_output_samples)
     for (auto & ppv_ptr : _sample_vector)
       _communicator.gather(0, *ppv_ptr);

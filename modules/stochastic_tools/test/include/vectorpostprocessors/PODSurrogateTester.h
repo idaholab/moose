@@ -26,7 +26,6 @@ public:
   static InputParameters validParams();
 
   PODSurrogateTester(const InputParameters & parameters);
-  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
@@ -38,18 +37,18 @@ protected:
   /// Where or not to output all the samples used
   const bool _output_samples;
 
-  /// Reference to surrogate model
-  PODReducedBasisSurrogate * _model;
-
-  /// Vector containing results of sampling surrogate model
-  VectorPostprocessorValue & _value_vector;
-
   /// Vector containing all the sample points for each parameter
   std::vector<VectorPostprocessorValue *> _sample_vector;
+
+  /// Pointers to surrogate model
+  std::vector<PODReducedBasisSurrogate *> _model;
+
+  /// Vectors containing results of sampling model
+  std::vector<VectorPostprocessorValue *> _value_vector;
 
   /// Name of the variable this tester operates on.
   std::string _variable_name;
 
   /// The type of the post-processor value which needs to be extracted.
-  MooseEnum _to_compute;
+  MultiMooseEnum _to_compute;
 };
