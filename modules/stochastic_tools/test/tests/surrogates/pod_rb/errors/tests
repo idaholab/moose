@@ -80,15 +80,5 @@
       detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same, "
       expect_err = "The size of 'new_ranks' is not equal to the size of 'change_rank' 0 != 1"
     []
-    [new_rank_size]
-      type = RunException
-      input = trainer_and_surr.i
-      allow_test_objects = true
-      cli_args = "Surrogates/rbpod/change_rank='u'
-                  Surrogates/rbpod/new_ranks='5'"
-      detail = "the new rank size is out of bounds, "
-      expect_err = "The specified new rank (5) for variable 'u' is higher than the original rank (3)! Only lower ranks are allowed."
-      match_literal = true
-    []
   []
 []

@@ -88,14 +88,13 @@ PODReducedBasisSurrogate::initializeReducedSystem()
         if (_change_rank[var_j] == _var_names[var_i])
         {
           if (_new_ranks[var_j] > _base[var_i].size())
-            paramError("new_ranks",
-                       "The specified new rank (",
-                       _new_ranks[var_j],
-                       ") for variable '",
-                       _var_names[var_i],
-                       "' is higher than the original rank (",
-                       _base[var_i].size(),
-                       ")! Only lower ranks are allowed.");
+            mooseWarning("The specified new rank (",
+                         _new_ranks[var_j],
+                         ") for variable '",
+                         _var_names[var_i],
+                         "' is higher than the original rank (",
+                         _base[var_i].size(),
+                         ")! Switched to original rank.");
           _final_ranks[var_i] = _new_ranks[var_j];
         }
       }
