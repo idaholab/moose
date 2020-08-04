@@ -11,8 +11,9 @@
     type = 'RunApp'
     input = 'gypsum.i'
     expect_out = 'Not enough activites known to compute equilibrium temperature for reaction
-  Gypsum = 2\*H2O \+ 1\*Ca\+\+ \+ 1\*SO4--  .  log10\(K\) = -4.443
-Gypsum.  T = 44.1212'
+  Gypsum = 2*H2O + 1*Ca++ + 1*SO4--  .  log10(K) = -4.451
+Gypsum.  T = 43.6625degC'
+    match_literal = true
     requirement = "The geochemistry interrogator shall be able to compute temperature at equilibrium, given enough information about activity values"
     issues = '#14981'
     design = 'eqm_temp_a.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -20,8 +21,8 @@ Gypsum.  T = 44.1212'
   [./hematite]
     type = 'RunApp'
     input = 'hematite.i'
-    expect_out = '\(A_H\+\)\^-4 \(A_O2\(aq\)\)\^0.5 = 10\^3.068
-\(A_H\+\)\^-6 \(A_e-\)\^-2 = 10\^46.07'
+    expect_out = '(A_H+)^-4 (A_O2(aq))^0.5 = 10^3.068'
+    match_literal = true
     requirement = "The geochemistry interrogator shall be output equations involving pH and pe for equilibrium reactions"
     issues = '#14981'
     design = 'pH_pe.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -29,8 +30,9 @@ Gypsum.  T = 44.1212'
   [./muscovite]
     type = 'RunApp'
     input = 'muscovite.i'
-    expect_out = '\(A_K\+\)\^1 \(A_Al\+\+\+\)\^3 \(A_SiO2\(aq\)\)\^3 \(A_H\+\)\^-10 = 10\^14.56
-\(A_K\+\)\^1 \(A_H\+\)\^-1 = 10\^3.421'
+    expect_out = '(A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
+(A_K+)^1 (A_H+)^-1 = 10^3.421'
+    match_literal = true
     requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
     issues = '#14981'
     design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -38,13 +40,14 @@ Gypsum.  T = 44.1212'
   [./muscovite2]
     type = 'RunApp'
     input = 'muscovite2.i'
-    expect_out = '\(A_H2O\)\^6 \(A_K\+\)\^1 \(A_Al\+\+\+\)\^3 \(A_SiO2\(aq\)\)\^3 \(A_H\+\)\^-10 = 10\^14.56
-\(A_H2O\)\^6 \(A_K\+\)\^1 \(A_Al\+\+\+\)\^3 \(A_H\+\)\^-10 = 10\^26.56
-\(A_K\+\)\^-2 \(A_H\+\)\^2 = 10\^-9.681
-\(A_K\+\)\^-2 \(A_SiO2\(aq\)\)\^-6 \(A_H\+\)\^2 = 10\^14.31
-\(A_K\+\)\^-2 \(A_H\+\)\^2 = 10\^-8.686
-\(A_K\+\)\^-2 \(A_SiO2\(aq\)\)\^-6 \(A_H\+\)\^2 = 10\^14.31
-\(A_K\+\)\^-2 \(A_H\+\)\^2 = 10\^-1.967'
+    expect_out = '(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_SiO2(aq))^3 (A_H+)^-10 = 10^14.56
+(A_H2O)^6 (A_K+)^1 (A_Al+++)^3 (A_H+)^-10 = 10^26.56
+(A_K+)^-2 (A_H+)^2 = 10^-9.681
+(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.31
+(A_K+)^-2 (A_H+)^2 = 10^-8.686
+(A_K+)^-2 (A_SiO2(aq))^-6 (A_H+)^2 = 10^14.31
+(A_K+)^-2 (A_H+)^2 = 10^-1.967'
+    match_literal = true
     requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
     issues = '#14981'
     design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -52,11 +55,12 @@ Gypsum.  T = 44.1212'
   [./pyrite]
     type = 'RunApp'
     input = 'pyrite.i'
-    expect_out = 'Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
-Pyrite = -3.5\*H2O \+ 1\*Fe\(OH\)3\(ppd\) \+ 2\*SO4-- \+ 4\*H\+ - 3.75\*O2\(aq\)  .  log10\(K\) = 221
-Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*SO4-- \+ 2\*H\+ - 3.5\*O2\(aq\)  .  log10\(K\) = 217.4
-Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 2\*H2S\(aq\) - 2\*H\+ \+ 0.5\*O2\(aq\)  .  log10\(K\) = -45.39
-Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 1.75\*H2S\(aq\) - 1.5\*H\+ \+ 0.25\*SO4--  .  log10\(K\) = -12.54'
+    expect_out = 'Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
+Pyrite = -3.5*H2O + 1*Fe(OH)3(ppd) + 2*SO4-- + 4*H+ - 3.75*O2(aq)  .  log10(K) = 221
+Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
+Pyrite = -1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.39
+Pyrite = -1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.54'
+    match_literal = true
     requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components."
     issues = '#14981'
     design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -64,10 +68,11 @@ Pyrite = -1\*H2O \+ 1\*Fe\+\+ \+ 1.75\*H2S\(aq\) - 1.5\*H\+ \+ 0.25\*SO4--  .  l
   [./clinoptilolite]
     type = 'RunApp'
     input = 'clinoptilolite.i'
-    expect_out = 'Clinoptil-Ca = 12\*H2O \+ 1\*Ca\+\+ \+ 2\*Al\+\+\+ \+ 10\*SiO2\(aq\) - 8\*H\+  .  log10\(K\) = -9.12
-Clinoptil-Ca = 8\*H2O \+ 1\*Ca\+\+ \+ 0.6667\*Muscovite \+ 8\*SiO2\(aq\) - 1.333\*H\+ - 0.6667\*K\+  .  log10\(K\) = -18.83
-Clinoptil-Ca = 8\*H2O \+ 1\*Ca\+\+ \+ 0.6667\*Muscovite \+ 8\*Quartz - 1.333\*H\+ - 0.6667\*K\+  .  log10\(K\) = 13.16
-Clinoptil-Ca = 6.667\*H2O \+ 1\*Ca\+\+ \+ 0.6667\*Muscovite \+ 8\*Quartz \+ 1.333\*OH- - 0.6667\*K\+  .  log10\(K\) = -5.484'
+    expect_out = 'Clinoptil-Ca = 12*H2O + 1*Ca++ + 2*Al+++ + 10*SiO2(aq) - 8*H+  .  log10(K) = -9.12
+Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*SiO2(aq) - 1.333*H+ - 0.6667*K+  .  log10(K) = -18.83
+Clinoptil-Ca = 8*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz - 1.333*H+ - 0.6667*K+  .  log10(K) = 13.16
+Clinoptil-Ca = 6.667*H2O + 1*Ca++ + 0.6667*Muscovite + 8*Quartz + 1.333*OH- - 0.6667*K+  .  log10(K) = -5.484'
+    match_literal = true
     requirement = "The geochemistry interrogator shall output reactions and equilibrium constants for different choice of basis components."
     issues = '#14981'
     design = 'reaction_balancing.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'
@@ -75,9 +80,10 @@ Clinoptil-Ca = 6.667\*H2O \+ 1\*Ca\+\+ \+ 0.6667\*Muscovite \+ 8\*Quartz \+ 1.33
   [./clinoptilolite2]
     type = 'RunApp'
     input = 'clinoptilolite2.i'
-    expect_out = '\(A_Ca\+\+\)\^1 \(A_Al\+\+\+\)\^2 \(A_SiO2\(aq\)\)\^10 \(A_H\+\)\^-8 = 10\^-13.51
-\(A_Ca\+\+\)\^-1 \(A_SiO2\(aq\)\)\^7 \(A_H\+\)\^2 = 10\^-27.22
-\(A_Ca\+\+\)\^-1 \(A_H\+\)\^2 = 10\^-10.23'
+    expect_out = '(A_Ca++)^1 (A_Al+++)^2 (A_SiO2(aq))^10 (A_H+)^-8 = 10^-13.51
+(A_Ca++)^-1 (A_SiO2(aq))^7 (A_H+)^2 = 10^-27.22
+(A_Ca++)^-1 (A_H+)^2 = 10^-10.23'
+    match_literal = true
     requirement = "The geochemistry interrogator shall output activity ratios for different choice of basis components."
     issues = '#14981'
     design = 'activity_ratios.md GeochemicalModelInterrogator.md GeochemicalModelRoot.md'

@@ -30,4 +30,13 @@ issues = '#2717'
    max_parallel = 1
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the J integral for surface breaking elliptical cracks with crack face pressure and crack mouth boundary specified.'
  [../]
+ [./c_int_surfbreak_ellip_crack_sym_mm]
+   design = 'syntax/DomainIntegral/index.md'
+   type = 'CSVDiff'
+   input = 'c_int_surfbreak_ellip_crack_sym_mm.i'
+   csvdiff = 'c_int_surfbreak_ellip_crack_sym_mm_out_C_1_0002.csv c_int_surfbreak_ellip_crack_sym_mm_out_C_2_0002.csv c_int_surfbreak_ellip_crack_sym_mm_out_C_3_0002.csv'
+   max_parallel = 1
+   heavy = true
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the C integral for surface breaking elliptical cracks.'
+ [../]
 []

@@ -14,13 +14,24 @@
 #include "string"
 #include <fstream>
 
-GeochemicalDatabaseReader::GeochemicalDatabaseReader(const FileName filename,
-                                                     const bool reexpress_free_electron)
+GeochemicalDatabaseReader::GeochemicalDatabaseReader(
+    const FileName filename,
+    const bool reexpress_free_electron,
+    const bool use_piecewise_interpolation,
+    const bool remove_all_extrapolated_secondary_species)
   : _filename(filename)
 {
   read(_filename);
   if (reexpress_free_electron)
     reexpressFreeElectron();
+  if (use_piecewise_interpolation && _root["Header"].isMember("logk model"))
+    _root["Header"]["logk model"] = "piecewise-linear";
+  if (remove_all_extrapolated_secondary_species)
+    removeExtrapolatedSecondarySpecies();
+
+  setTemperatures();
+  setDebyeHuckel();
+  setNeutralSpeciesActivity();
 }
 
 void
@@ -75,6 +86,15 @@ GeochemicalDatabaseReader::reexpressFreeElectron()
   }
 }
 
+void
+GeochemicalDatabaseReader::removeExtrapolatedSecondarySpecies()
+{
+  const std::vector<std::string> names(_root["secondary species"].getMemberNames());
+  for (const auto & name : names)
+    if (_root["secondary species"][name].isMember("note"))
+      _root["secondary species"].removeMember(name);
+}
+
 std::string
 GeochemicalDatabaseReader::getActivityModel() const
 {
@@ -93,10 +113,9 @@ GeochemicalDatabaseReader::getLogKModel() const
   return _root["Header"]["logk model"].asString();
 }
 
-std::vector<Real>
-GeochemicalDatabaseReader::getTemperatures()
+void
+GeochemicalDatabaseReader::setTemperatures()
 {
-  // Read temperature points
   if (_root["Header"].isMember("temperatures"))
   {
     auto temperatures = _root["Header"]["temperatures"];
@@ -104,7 +123,11 @@ GeochemicalDatabaseReader::getTemperatures()
     for (unsigned int i = 0; i < temperatures.size(); ++i)
       _temperature_points[i] = MooseUtils::convert<Real>(temperatures[i].asString());
   }
+}
 
+const std::vector<Real> &
+GeochemicalDatabaseReader::getTemperatures() const
+{
   return _temperature_points;
 }
 
@@ -123,8 +146,8 @@ GeochemicalDatabaseReader::getPressures()
   return _pressure_points;
 }
 
-GeochemistryDebyeHuckel
-GeochemicalDatabaseReader::getDebyeHuckel()
+void
+GeochemicalDatabaseReader::setDebyeHuckel()
 {
   if (getActivityModel() == "debye-huckel")
   {
@@ -152,10 +175,14 @@ GeochemicalDatabaseReader::getDebyeHuckel()
       _debye_huckel.bdot = bdotvals;
     }
   }
-  else
+}
+
+const GeochemistryDebyeHuckel &
+GeochemicalDatabaseReader::getDebyeHuckel() const
+{
+  if (getActivityModel() != "debye-huckel")
     mooseError("Attempted to get Debye-Huckel activity parameters but the activity model is ",
                getActivityModel());
-
   return _debye_huckel;
 }
 
@@ -439,8 +466,8 @@ GeochemicalDatabaseReader::getSurfaceSpecies(const std::vector<std::string> & na
   return _surface_species;
 }
 
-std::map<std::string, GeochemistryNeutralSpeciesActivity>
-GeochemicalDatabaseReader::getNeutralSpeciesActivity()
+void
+GeochemicalDatabaseReader::setNeutralSpeciesActivity()
 {
   if (_root["Header"].isMember("neutral species"))
   {
@@ -451,6 +478,8 @@ GeochemicalDatabaseReader::getNeutralSpeciesActivity()
 
       for (auto & nsac : neutral_species[ns].getMemberNames())
       {
+        if (nsac == "note")
+          continue;
         std::vector<Real> coeffvec(neutral_species[ns][nsac].size());
 
         for (unsigned int i = 0; i < coeffvec.size(); ++i)
@@ -468,9 +497,13 @@ GeochemicalDatabaseReader::getNeutralSpeciesActivity()
       _neutral_species_activity[ns] = nsa;
     }
   }
-  else
-    mooseError("No neutral species activity coefficients in database");
+}
 
+const std::map<std::string, GeochemistryNeutralSpeciesActivity> &
+GeochemicalDatabaseReader::getNeutralSpeciesActivity() const
+{
+  if (!_root["Header"].isMember("neutral species"))
+    mooseError("No neutral species activity coefficients in database");
   return _neutral_species_activity;
 }
 

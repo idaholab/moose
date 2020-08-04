@@ -1,0 +1,20 @@
+# React script that is the GWB equivalent to amazon.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+HCO3-        = .0003114 mol
+SiO2(aq)     = .0001165 mol
+O2(aq)       = .0001813 free molal
+Ca++         = .0001073 mol
+SO4--        = 3.1233e-5 mol
+Cl-          = .0001383 mol
+balance on Cl-
+Na+          = 7.83e-5 mol
+Mg++         = 4.526e-5 mol
+Al+++        = 2.5945e-6 mol
+Fe++         = 1.0744e-6 mol
+pH           = 6.5
+suppress all
+printout  species = long
+epsilon = 1e-12

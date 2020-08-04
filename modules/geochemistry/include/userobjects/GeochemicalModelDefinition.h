@@ -30,6 +30,9 @@ public:
   /// provides a reference to the pertinent geochemical database held by this object
   const ModelGeochemicalDatabase & getDatabase() const;
 
+  const GeochemicalDatabaseReader & getOriginalFullDatabase() const;
+
 private:
-  const PertinentGeochemicalSystem _model;
+  const GeochemicalDatabaseReader _db;
+  PertinentGeochemicalSystem _model;
 };

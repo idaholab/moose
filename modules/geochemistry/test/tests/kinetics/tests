@@ -1,0 +1,50 @@
+[Tests]
+  [./quartz_dissolution]
+    type = CSVDiff
+    input = 'quartz_dissolution.i'
+    csvdiff = 'quartz_dissolution_out.csv'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions such as dissolution"
+    issues = '#15330'
+    design = 'kinetic_quartz.md'
+  [../]
+  [./kinetic_albite]
+    type = CSVDiff
+    input = 'kinetic_albite.i'
+    csvdiff = 'kinetic_albite_out.csv'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with promoting species"
+    issues = '#15330'
+    design = 'kinetic_albite.md'
+  [../]
+  [./quartz_equilibrium_at300degC]
+    type = 'RunApp'
+    input = 'quartz_equilibrium_at300degC.i'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.401kg
+Mass of aqueous solution = 1.001kg (without free minerals)
+Ionic strength = 9e-11mol/kg(solvent water)
+Stoichiometric ionic strength = 9e-11mol/kg(solvent water)
+Activity of water = 1
+Temperature = 300
+
+Basis Species:
+Quartz;  bulk_moles = 6.667mol;  bulk_conc = 4.004e+05mg/kg(soln);  free_moles = 6.657mol;  free_mass = 4e+05mg
+Na+;  bulk_moles = 1e-10mol;  bulk_conc = 2.298e-06mg/kg(soln);  molality = 9e-11mol/kg(solvent water);  free_conc = 2.068e-06mg/kg(soln);  act_coeff = 1;  log10(a) = -10.05
+Cl-;  bulk_moles = 1e-10mol;  bulk_conc = 3.543e-06mg/kg(soln);  molality = 9e-11mol/kg(solvent water);  free_conc = 3.189e-06mg/kg(soln);  act_coeff = 1;  log10(a) = -10.05
+
+Equilibrium Species:
+SiO2(aq);  molality = 0.009723mol/kg(solvent water);  free_conc = 583.9mg/kg(soln);  act_coeff = 1;  log10(a) = -2.012;  SiO2(aq) = 1*Quartz;  log10K = 2.012
+NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(soln);  act_coeff = 1;  log10(a) = -19.74;  NaCl = 1*Na+ + 1*Cl-;  log10K = -0.3487'
+    match_literal = true
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    issues = '#15330'
+    design = 'kinetic_quartz_arrhenius.md'
+  [../]
+  [./quartz_deposition]
+    type = CSVDiff
+    input = 'quartz_deposition.i'
+    csvdiff = 'quartz_deposition_out.csv'
+    requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
+    issues = '#15330'
+    design = 'kinetic_quartz_arrhenius.md'
+  [../]
+[]

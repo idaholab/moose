@@ -1,0 +1,245 @@
+[Tests]
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'source_species_names: must have the same size as source_species_rates'
+    requirement = 'An error will be thrown if each source species is not provided with exactly onerate'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except2]
+    type = RunException
+    input = except2.i
+    expect_err = 'source_species_names: The name badname does not appear in the basis or equilibrium species list'
+    requirement = 'An error will be thrown if a source species does not exist in the geochemical system'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except3]
+    type = RunException
+    input = except3.i
+    expect_err = 'The species NaCl is not in the basis, so cannot have its activity or fugacity constraint removed'
+    requirement = 'An error will be thrown if a species whose activity constraint is to be removed is not in the basis'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except4]
+    type = RunException
+    input = except4.i
+    expect_err = 'remove_fixed_activity_name:
+    The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
+    requirement = 'An error will be thrown if a species whose activity constraint is to be removed does not have an activity or fugacity constraint'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except5]
+    type = RunException
+    input = except5.i
+    expect_err = 'remove_fixed_activity_name: must be of the same size as remove_fixed_activity_time'
+    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./except6]
+    type = RunException
+    input = except6.i
+    expect_err = 'controlled_activity_name: must have the same size as controlled_activity_value'
+    requirement = 'An error will be thrown if the number of species whose activity constraints are to be removed is not equal to the number of times when the activity constraints will be removed'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./add_feldspar]
+    type = CSVDiff
+    input = 'add_feldspar.i'
+    csvdiff = 'add_feldspar_out.csv'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions that involve adding reactants"
+    issues = '#15330'
+    design = 'adding_feldspar.md'
+  [../]
+  [./calcite_dumping_dump]
+    type = CSVDiff
+    input = 'calcite_dumping.i'
+    csvdiff = 'calcite_dumping_dump.csv'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are dumped and then reactants are added"
+    issues = '#15330'
+    design = 'calcite_buffer.md'
+  [../]
+  [./calcite_no_dumping]
+    type = CSVDiff
+    input = 'calcite_dumping.i'
+    cli_args = 'TimeDependentReactionSolver/mode=0 Outputs/file_base=calcite_dumping_no_dump'
+    prereq = 'calcite_dumping_dump'
+    csvdiff = 'calcite_dumping_no_dump.csv'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where initial precipitates are not dumped and then reactants are added"
+    issues = '#15330'
+    design = 'calcite_buffer.md'
+  [../]
+  [./changing_fugacity_calcite]
+    type = CSVDiff
+    input = 'changing_fugacity_calcite.i'
+    csvdiff = 'changing_fugacity_calcite_out.csv'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where gas fugacity is changed over time"
+    issues = '#15330'
+    design = 'changing_fugacity_with_calcite.md'
+  [../]
+  [./changing_pH_ferric_hydroxide]
+    type = CSVDiff
+    input = 'changing_pH_ferric_hydroxide.i'
+    csvdiff = 'changing_pH_ferric_hydroxide_out.csv'
+    requirement = "The geochemistry module shall be able to solve time-dependent reactions where pH is changed over time"
+    issues = '#15330'
+    design = 'changing_pH_iron.md'
+  [../]
+  [./cooling]
+    type = CSVDiff
+    input = 'cooling.i'
+    csvdiff = 'cooling_out.csv'
+    requirement = "The geochemistry module shall be able to solve reactions when temperature is time-dependent"
+    issues = '#15330'
+    design = 'cooling_feldspar.md'
+  [../]
+  [./dissolution_pyrite_1]
+    type = CSVDiff
+    input = 'dissolution_pyrite_1.i'
+    csvdiff = 'dissolution_pyrite_1_out.csv'
+    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is not fixed"
+    issues = '#15330'
+    design = 'adding_pyrite.md'
+  [../]
+  [./dissolution_pyrite_2]
+    type = CSVDiff
+    input = 'dissolution_pyrite_2.i'
+    csvdiff = 'dissolution_pyrite_2_out.csv'
+    match_literal = true
+    requirement = "The geochemistry module shall be able to solve reactions involving dissolution and addition of reactants when gas fugacity is fixed"
+    issues = '#15330'
+    design = 'adding_pyrite.md'
+  [../]
+  [./mixing_seawater_step1]
+    type = RunApp
+    input = 'mixing_seawater_step1.i'
+    expect_out = 'Mass of solvent water = 1kg
+Total mass = 1.036kg
+Mass of aqueous solution = 1.036kg (without free minerals)
+pH = 8.1
+pe = 14.04
+Ionic strength = 0.6413mol/kg(solvent water)
+Stoichiometric ionic strength = 0.5402mol/kg(solvent water)
+Activity of water = 0.9823
+Temperature = 4
+
+Basis Species:
+Cl-;  bulk_moles = 0.559mol;  bulk_conc = 1.913e+04mg/kg(soln);  molality = 0.5402mol/kg(solvent water);  free_conc = 1.849e+04mg/kg(soln);  act_coeff = 0.6204;  log10(a) = -0.4748
+Na+;  bulk_moles = 0.4802mol;  bulk_conc = 1.066e+04mg/kg(soln);  molality = 0.4716mol/kg(solvent water);  free_conc = 1.047e+04mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -0.5054
+Mg++;  bulk_moles = 0.0545mol;  bulk_conc = 1279mg/kg(soln);  molality = 0.03688mol/kg(solvent water);  free_conc = 865.3mg/kg(soln);  act_coeff = 0.3174;  log10(a) = -1.932
+SO4--;  bulk_moles = 0.0295mol;  bulk_conc = 2735mg/kg(soln);  molality = 0.01714mol/kg(solvent water);  free_conc = 1589mg/kg(soln);  act_coeff = 0.1737;  log10(a) = -2.526
+K+;  bulk_moles = 0.0101mol;  bulk_conc = 381.2mg/kg(soln);  molality = 0.009874mol/kg(solvent water);  free_conc = 372.6mg/kg(soln);  act_coeff = 0.6204;  log10(a) = -2.213
+Ca++;  bulk_moles = 0.0105mol;  bulk_conc = 406.2mg/kg(soln);  molality = 0.004799mol/kg(solvent water);  free_conc = 185.7mg/kg(soln);  act_coeff = 0.2497;  log10(a) = -2.921
+HCO3-;  bulk_moles = 0.0024mol;  bulk_conc = 141.4mg/kg(soln);  molality = 0.001473mol/kg(solvent water);  free_conc = 86.76mg/kg(soln);  act_coeff = 0.6802;  log10(a) = -2.999
+SiO2(aq);  bulk_moles = 0.00017mol;  bulk_conc = 9.859mg/kg(soln);  molality = 0.0001567mol/kg(solvent water);  free_conc = 9.089mg/kg(soln);  act_coeff = 1.189;  log10(a) = -3.73
+O2(aq);  bulk_moles = 0.000123mol;  bulk_conc = 3.799mg/kg(soln);  molality = 0.000123mol/kg(solvent water);  free_conc = 3.799mg/kg(soln);  act_coeff = 1.189;  log10(a) = -3.835
+Sr++;  bulk_moles = 9e-05mol;  bulk_conc = 7.612mg/kg(soln);  molality = 8.139e-05mol/kg(solvent water);  free_conc = 6.883mg/kg(soln);  act_coeff = 0.2126;  log10(a) = -4.762
+Ba++;  bulk_moles = 2e-07mol;  bulk_conc = 0.02651mg/kg(soln);  molality = 1.483e-07mol/kg(solvent water);  free_conc = 0.01966mg/kg(soln);  act_coeff = 0.2126;  log10(a) = -7.501
+H+;  bulk_moles = -4.659e-05mol;  bulk_conc = -0.04532mg/kg(soln);  molality = 1.008e-08mol/kg(solvent water);  free_conc = 9.809e-06mg/kg(soln);  act_coeff = 0.7879;  log10(a) = -8.1
+Zn++;  bulk_moles = 1e-08mol;  bulk_conc = 0.0006311mg/kg(soln);  molality = 7.466e-09mol/kg(solvent water);  free_conc = 0.0004711mg/kg(soln);  act_coeff = 0.2497;  log10(a) = -8.73
+Mn++;  bulk_moles = 1e-09mol;  bulk_conc = 5.303e-05mg/kg(soln);  molality = 8.005e-10mol/kg(solvent water);  free_conc = 4.245e-05mg/kg(soln);  act_coeff = 0.2497;  log10(a) = -9.699
+Al+++;  bulk_moles = 5e-09mol;  bulk_conc = 0.0001302mg/kg(soln);  molality = 1.066e-15mol/kg(solvent water);  free_conc = 2.776e-11mg/kg(soln);  act_coeff = 0.08918;  log10(a) = -16.02
+Fe++;  bulk_moles = 1e-09mol;  bulk_conc = 5.391e-05mg/kg(soln);  molality = 1.045e-20mol/kg(solvent water);  free_conc = 5.634e-16mg/kg(soln);  act_coeff = 0.2497;  log10(a) = -20.58
+Cu+;  bulk_moles = 7e-09mol;  bulk_conc = 0.0004294mg/kg(soln);  molality = 3.078e-21mol/kg(solvent water);  free_conc = 1.888e-16mg/kg(soln);  act_coeff = 0.5959;  log10(a) = -20.74
+
+Equilibrium Species:
+MgCl+;  molality = 0.01217mol/kg(solvent water);  free_conc = 701.9mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -2.094;  MgCl+ = 1*Cl- + 1*Mg++;  log10K = -0.3126
+NaSO4-;  molality = 0.006257mol/kg(solvent water);  free_conc = 719mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -2.383;  NaSO4- = 1*Na+ + 1*SO4--;  log10K = -0.6489
+MgSO4;  molality = 0.005242mol/kg(solvent water);  free_conc = 609mg/kg(soln);  act_coeff = 1;  log10(a) = -2.28;  MgSO4 = 1*Mg++ + 1*SO4--;  log10K = -2.177
+CaCl+;  molality = 0.005002mol/kg(solvent water);  free_conc = 364.7mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -2.48;  CaCl+ = 1*Cl- + 1*Ca++;  log10K = -0.9164
+NaCl;  molality = 0.001615mol/kg(solvent water);  free_conc = 91.13mg/kg(soln);  act_coeff = 1;  log10(a) = -2.792;  NaCl = 1*Cl- + 1*Na+;  log10K = 1.812
+CaSO4;  molality = 0.0006678mol/kg(solvent water);  free_conc = 87.75mg/kg(soln);  act_coeff = 1;  log10(a) = -3.175;  CaSO4 = 1*SO4-- + 1*Ca++;  log10K = -2.272
+NaHCO3;  molality = 0.0006452mol/kg(solvent water);  free_conc = 52.32mg/kg(soln);  act_coeff = 1;  log10(a) = -3.19;  NaHCO3 = 1*Na+ + 1*HCO3-;  log10K = -0.3142
+KSO4-;  molality = 0.000188mol/kg(solvent water);  free_conc = 24.52mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -3.905;  KSO4- = 1*SO4-- + 1*K+;  log10K = -0.8342
+MgHCO3+;  molality = 0.0001704mol/kg(solvent water);  free_conc = 14.03mg/kg(soln);  act_coeff = 0.6622;  log10(a) = -3.948;  MgHCO3+ = 1*Mg++ + 1*HCO3-;  log10K = -0.9831
+KCl;  molality = 3.839e-05mol/kg(solvent water);  free_conc = 2.763mg/kg(soln);  act_coeff = 1;  log10(a) = -4.416;  KCl = 1*Cl- + 1*K+;  log10K = 1.728
+CO2(aq);  molality = 2.651e-05mol/kg(solvent water);  free_conc = 1.126mg/kg(soln);  act_coeff = 1;  log10(a) = -4.577;  CO2(aq) = -1*H2O + 1*H+ + 1*HCO3-;  log10K = -6.515
+CaHCO3+;  molality = 2.601e-05mol/kg(solvent water);  free_conc = 2.538mg/kg(soln);  act_coeff = 0.7026;  log10(a) = -4.738;  CaHCO3+ = 1*Ca++ + 1*HCO3-;  log10K = -1.183
+MgCO3;  molality = 2.036e-05mol/kg(solvent water);  free_conc = 1.657mg/kg(soln);  act_coeff = 1;  log10(a) = -4.691;  MgCO3 = -1*H+ + 1*Mg++ + 1*HCO3-;  log10K = 7.861
+CO3--;  molality = 1.802e-05mol/kg(solvent water);  free_conc = 1.044mg/kg(soln);  act_coeff = 0.1933;  log10(a) = -5.458;  CO3-- = -1*H+ + 1*HCO3-;  log10K = 10.56
+
+Kinetic Species:
+
+Minerals:
+
+Nernst potentials:
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
+    match_literal = true
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    issues = '#15330'
+    design = 'pickup.md'
+  [../]
+  [./mixing_seawater_step2]
+    type = CSVDiff
+    input = 'mixing_seawater_step2.i'
+    csvdiff = 'mixing_seawater_step2_out.csv'
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    issues = '#15330'
+    design = 'pickup.md'
+  [../]
+  [./mixing]
+    type = CSVDiff
+    input = 'mixing.i'
+    csvdiff = 'mixing_out.csv'
+    heavy = true
+    requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems"
+    issues = '#15330'
+    design = 'pickup.md'
+  [../]
+  [./seawater_evaporation_flow_through]
+    type = CSVDiff
+    input = 'seawater_evaporation_flow_through.i'
+    csvdiff = 'seawater_evaporation_flow_through_out.csv'
+    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
+    issues = '#15330'
+    design = 'flow_through.md'
+  [../]
+  [./seawater_evaporation_no_flow_through]
+    type = CSVDiff
+    input = 'seawater_evaporation_no_flow_through.i'
+    csvdiff = 'seawater_evaporation_no_flow_through_out.csv'
+    requirement = "The geochemistry module shall be able to progressively remove reactants, and any precipitates that form shall be able to be removed at the end of the timestep"
+    issues = '#15330'
+    design = 'flow_through.md'
+  [../]
+  [./simple]
+    type = 'CSVDiff'
+    input = 'simple.i'
+    csvdiff = 'simple_out.csv'
+    rel_err = 1.0E-5
+    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./simple_no_action]
+    type = 'CSVDiff'
+    input = 'simple.i'
+    csvdiff = 'simple_out.csv'
+    prereq = 'simple'
+    rel_err = 1.0E-5
+    requirement = 'Controlling pH should be possible either through explicitly setting a controlled activity or by titrating acids into the solution, without using an Action'
+    issues = '#15330'
+    design = 'GeochemistryTimeDependentReactor.md'
+  [../]
+  [./flushing_equilibrium_at70degC]
+    type = CSVDiff
+    input = 'flushing_equilibrium_at70degC.i'
+    csvdiff = 'flushing_equilibrium_at70degC_out.csv'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
+  [./flushing]
+    type = CSVDiff
+    input = 'flushing.i'
+    csvdiff = 'flushing_out.csv'
+    requirement = "The geochemistry module shall be able to flush aqueous solutions while adding reactants"
+    issues = '#15330'
+    design = 'flush.md'
+  [../]
+[]

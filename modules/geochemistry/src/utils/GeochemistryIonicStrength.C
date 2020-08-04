@@ -12,10 +12,12 @@
 
 GeochemistryIonicStrength::GeochemistryIonicStrength(Real max_ionic_strength,
                                                      Real max_stoichiometric_ionic_strength,
-                                                     bool use_only_basis_molality)
+                                                     bool use_only_basis_molality,
+                                                     bool use_only_Cl_molality)
   : _max_ionic_strength(max_ionic_strength),
     _max_stoichiometric_ionic_strength(max_stoichiometric_ionic_strength),
-    _use_only_basis_molality(use_only_basis_molality)
+    _use_only_basis_molality(use_only_basis_molality),
+    _use_only_Cl_molality(use_only_Cl_molality)
 {
 }
 
@@ -46,9 +48,12 @@ GeochemistryIonicStrength::ionicStrength(const ModelGeochemicalDatabase & mgd,
   if (!_use_only_basis_molality)
   {
     for (unsigned i = 0; i < num_eqm; ++i)
-      ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
+      if (!mgd.surface_sorption_related[i])
+        ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
     for (unsigned i = 0; i < num_kin; ++i)
-      ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i];
+      ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i] /
+                        basis_species_molality[0]; // kin_species_molality is actually the number of
+                                                   // moles of the kinetic species
   }
 
   return std::max(0.0, std::min(_max_ionic_strength, 0.5 * ionic_strength));
@@ -75,28 +80,42 @@ GeochemistryIonicStrength::stoichiometricIonicStrength(
               "equal to the size of kin_species_molality");
 
   Real ionic_strength = 0.0;
+  if (_use_only_Cl_molality)
+  {
+    if (mgd.basis_species_index.count("Cl-"))
+      ionic_strength = basis_species_molality[mgd.basis_species_index.at("Cl-")];
+    else if (mgd.eqm_species_index.count("Cl-"))
+      ionic_strength = eqm_species_molality[mgd.eqm_species_index.at("Cl-")];
+    else if (mgd.kin_species_index.count("Cl-"))
+      ionic_strength = kin_species_molality[mgd.kin_species_index.at("Cl-")];
+    else
+      mooseError("GeochemistryIonicStrength: attempting to compute stoichiometric ionic strength "
+                 "using only the Cl- molality, but Cl- does not appear in the geochemical system");
+    return std::max(0.0, std::min(_max_stoichiometric_ionic_strength, ionic_strength));
+  }
+
   for (unsigned i = 0; i < num_basis; ++i)
     ionic_strength += Utility::pow<2>(mgd.basis_species_charge[i]) * basis_species_molality[i];
   if (!_use_only_basis_molality)
   {
     for (unsigned i = 0; i < num_eqm; ++i)
-      if (mgd.eqm_species_charge[i] != 0.0)
-        ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
-      else
+      if (!mgd.surface_sorption_related[i])
       {
-        for (unsigned j = 0; j < num_basis; ++j)
-          ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) * eqm_species_molality[i] *
-                            mgd.eqm_stoichiometry(i, j);
+
+        if (mgd.eqm_species_charge[i] != 0.0)
+          ionic_strength += Utility::pow<2>(mgd.eqm_species_charge[i]) * eqm_species_molality[i];
+        else
+        {
+          for (unsigned j = 0; j < num_basis; ++j)
+            ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) *
+                              eqm_species_molality[i] * mgd.eqm_stoichiometry(i, j);
+        }
       }
-    for (unsigned i = 0; i < num_kin; ++i)
+    for (unsigned i = 0; i < num_kin;
+         ++i) // kin_species_molality is actually the number of moles, not molality
       if (mgd.kin_species_charge[i] != 0.0)
-        ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i];
-      else
-      {
-        for (unsigned j = 0; j < num_basis; ++j)
-          ionic_strength += Utility::pow<2>(mgd.basis_species_charge[j]) * kin_species_molality[i] *
-                            mgd.kin_stoichiometry(i, j);
-      }
+        ionic_strength += Utility::pow<2>(mgd.kin_species_charge[i]) * kin_species_molality[i] /
+                          basis_species_molality[0];
   }
 
   return std::max(0.0, std::min(_max_stoichiometric_ionic_strength, 0.5 * ionic_strength));
@@ -136,4 +155,16 @@ Real
 GeochemistryIonicStrength::getUseOnlyBasisMolality() const
 {
   return _use_only_basis_molality;
+}
+
+void
+GeochemistryIonicStrength::setUseOnlyClMolality(bool use_only_Cl_molality)
+{
+  _use_only_Cl_molality = use_only_Cl_molality;
+}
+
+Real
+GeochemistryIonicStrength::getUseOnlyClMolality() const
+{
+  return _use_only_Cl_molality;
 }

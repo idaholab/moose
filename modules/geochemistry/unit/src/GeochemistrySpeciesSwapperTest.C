@@ -17,7 +17,7 @@ const Real eps =
 /// Check bulk_composition exception
 TEST(GeochemistrySpeciesSwapperTest, bulkCompositionException)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // The following system has secondary species: CO2(aq), CO3--, OH-,
   // (O-phth)--, CH4(aq), Fe+++,
@@ -52,7 +52,7 @@ TEST(GeochemistrySpeciesSwapperTest, bulkCompositionException)
 /// Check all sorts of illegal swaps throw mooseError or mooseException
 TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // The following system has secondary species: CO2(aq), CO3--, OH-,
   // (O-phth)--, CH4(aq), Fe+++,
@@ -208,7 +208,7 @@ TEST(GeochemistrySpeciesSwapperTest, swapExceptions)
 /// Check a simple swap that does not involve redox or other complicated things
 TEST(GeochemistrySpeciesSwapperTest, swap1)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
   PertinentGeochemicalSystem model(
@@ -228,6 +228,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_EQ(mgd.eqm_species_index.size(), 6);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -373,6 +376,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["Ca++"], calcite_posn);
 
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], ca_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], calcite_posn);
+
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_charge[sp.second], charge_gold[sp.first]);
@@ -479,7 +488,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 4), 11.5940 - 0 * 0.0762, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 5), 11.2191 - 0 * (-0.5349), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 6), 11.0880 - 0 * (-1.2301), eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 11.2844 - 0 * (-2.2107), eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 1001.2844 - 0 * (-2.2107), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 0), 0 - 1 * 2.0683, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 1), 0 - 1 * 1.7130, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["Ca++"], 2), 0 - 1 * 1.2133, eps);
@@ -499,7 +508,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap1)
 /// Check a complicated swap involving redox and complicated stoichiometric coefficients
 TEST(GeochemistrySpeciesSwapperTest, swap2)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   // eqm species are: OH-, CO2(aq), CO3--, StoiCheckRedox, StoiCheckGas
   PertinentGeochemicalSystem model(database,
@@ -521,6 +530,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   ASSERT_EQ(mgd.eqm_species_index.size(), 5);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -650,6 +662,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
   ASSERT_EQ(mgd.eqm_species_index["StoiCheckBasis"], sc_gas_posn);
 
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], sc_basis_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], sc_gas_posn);
+
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_charge[sp.second], charge_gold[sp.first]);
@@ -739,7 +757,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 4), 11.5940, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 5), 11.2191, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 6), 11.0880, eps);
-  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 11.2844, eps);
+  ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["OH-"], 7), 1001.2844, eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 0), -0.5 * (-2.9620), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 1), -0.5 * (-3.1848), eps);
   ASSERT_NEAR(mgd.eqm_log10K(mgd.eqm_species_index["StoiCheckRedox"], 2), -0.5 * (-3.3320), eps);
@@ -779,9 +797,9 @@ TEST(GeochemistrySpeciesSwapperTest, swap2)
 /// Test the swap works on kinetic species
 TEST(GeochemistrySpeciesSwapperTest, swap3)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
-  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++, e-
+  // The following system has secondary species: CO2(aq), CO3--, OH-, CH4(aq), Fe+++
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
                                    {},
@@ -791,6 +809,39 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
                                    {">(s)FeO-"},
                                    "O2(aq)",
                                    "e-");
+  KineticRateUserDescription rate1("Fe(OH)3(ppd)",
+                                   1.0,
+                                   2.0,
+                                   true,
+                                   {"H+", "O2(aq)", "CO3--"},
+                                   {1.1, 2.2, 3.3},
+                                   5.0,
+                                   6.0,
+                                   7.0,
+                                   8.0);
+  model.addKineticRate(rate1);
+  KineticRateUserDescription rate2("Fe(OH)3(ppd)",
+                                   -1.0,
+                                   -2.0,
+                                   false,
+                                   {"O2(aq)", "Fe+++", "H2O"},
+                                   {-1.1, -2.2, -3.3},
+                                   -5.0,
+                                   -6.0,
+                                   -7.0,
+                                   -8.0);
+  model.addKineticRate(rate2);
+  KineticRateUserDescription rate3(">(s)FeO-",
+                                   1.1,
+                                   2.2,
+                                   false,
+                                   {"CO2(aq)", "Fe+++", "Fe++"},
+                                   {1.25, 2.25, 3.25},
+                                   5.5,
+                                   -6.6,
+                                   -7.7,
+                                   -8.8);
+  model.addKineticRate(rate3);
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
@@ -798,13 +849,16 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_name[sp.second], sp.first);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
+  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
 
   ASSERT_EQ(mgd.kin_species_index.size(), 4);
   for (const auto & sp : mgd.kin_species_index)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
+
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
   for (const auto & species : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_mineral[species.second], false);
@@ -824,8 +878,8 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     else
       ASSERT_EQ(mgd.eqm_species_gas[species.second], false);
 
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
 
   ASSERT_EQ(mgd.kin_species_index.size(), 4);
@@ -845,7 +899,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   charge_gold["OH-"] = -1.0;
   charge_gold["CH4(aq)"] = 0.0;
   charge_gold["Fe+++"] = 3.0;
-  charge_gold["e-"] = -1.0;
   charge_gold["CH4(g)fake"] = 0.0;
   charge_gold["Fe(OH)3(ppd)"] = 0.0;
   charge_gold["Fe(OH)3(ppd)fake"] = 0.0;
@@ -871,7 +924,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   radius_gold["OH-"] = 3.5;
   radius_gold["CH4(aq)"] = -0.5;
   radius_gold["Fe+++"] = 9.0;
-  radius_gold["e-"] = 0.0;
   radius_gold["CH4(g)fake"] = 0.0;
   for (const auto & sp : mgd.basis_species_index)
     ASSERT_EQ(mgd.basis_species_radius[sp.second], radius_gold[sp.first]);
@@ -891,7 +943,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   molecular_weight_gold["OH-"] = 17.0073;
   molecular_weight_gold["CH4(aq)"] = 16.0426;
   molecular_weight_gold["Fe+++"] = 55.8470;
-  molecular_weight_gold["e-"] = 0.0;
   molecular_weight_gold["CH4(g)fake"] = 16.0426;
   molecular_weight_gold["Fe(OH)3(ppd)"] = 106.8689;
   molecular_weight_gold["Fe(OH)3(ppd)fake"] = 106.8689;
@@ -917,7 +968,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   molecular_volume_gold["OH-"] = 0.0;
   molecular_volume_gold["CH4(aq)"] = 0.0;
   molecular_volume_gold["Fe+++"] = 0.0;
-  molecular_volume_gold["e-"] = 0.0;
   molecular_volume_gold["CH4(g)fake"] = 0.0;
   molecular_volume_gold["Fe(OH)3(ppd)"] = 34.3200;
   molecular_volume_gold["Fe(OH)3(ppd)fake"] = 34.3200;
@@ -936,7 +986,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
                           "OH-",
                           "CH4(aq)",
                           "Fe+++",
-                          "e-",
                           "CH4(g)fake",
                           "Fe(OH)3(ppd)",
                           "Fe(OH)3(ppd)fake",
@@ -960,9 +1009,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   stoi_gold["Fe+++"](0, 4) = 1;
   stoi_gold["Fe+++"](0, 1) = 1;
   stoi_gold["Fe+++"](0, 6) = 0.25;
-  stoi_gold["e-"](0, 0) = 0.5;
-  stoi_gold["e-"](0, 1) = -1;
-  stoi_gold["e-"](0, 6) = -0.25;
   stoi_gold["CH4(g)fake"](0, 0) = 3;
   stoi_gold["CH4(g)fake"](0, 4) = -2;
   stoi_gold["CH4(g)fake"](0, 5) = 3.5;
@@ -982,7 +1028,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   stoi_gold[">(s)FeO-"](0, 2) = 1;
   stoi_gold[">(s)FeO-"](0, 1) = -1;
 
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "e-", "CH4(g)fake"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "Fe+++", "CH4(g)fake"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     ASSERT_EQ(mgd.eqm_stoichiometry.sub_matrix(row, 1, 0, 7), stoi_gold[sp]);
@@ -993,6 +1039,46 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     const unsigned row = mgd.kin_species_index[sp];
     ASSERT_EQ(mgd.kin_stoichiometry.sub_matrix(row, 1, 0, 7), stoi_gold[sp]);
   }
+
+  const std::vector<Real> feoh3ppd = {
+      6.1946, 4.8890, 3.4608, 2.2392, 1.1150, 0.2446, -0.5504, -1.5398};
+  const std::vector<Real> fe3 = {10.0553, 8.4878, 6.6954, 5.0568, 3.4154, 2.0747, 0.8908, -0.2679};
+  const std::vector<Real> ophth = {
+      594.3211, 542.8292, 482.3612, 425.9738, 368.7004, 321.8658, 281.8216, 246.4849};
+  const std::vector<Real> feom = {8.93,
+                                  8.93 - 0.3 * 25,
+                                  8.93 - 0.3 * 60,
+                                  8.93 - 0.3 * 100,
+                                  8.93 - 0.3 * 150,
+                                  8.93 - 0.3 * 200,
+                                  8.93 - 0.3 * 250,
+                                  8.93 - 0.3 * 300};
+
+  for (unsigned t = 0; t < 8; ++t)
+  {
+    ASSERT_NEAR(
+        mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)"), t), feoh3ppd[t] - fe3[t], eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), t),
+                feoh3ppd[t] - 2 * fe3[t],
+                eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), t), ophth[t], eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), t), feom[t], eps);
+  }
+
+  ASSERT_EQ(mgd.kin_rate.size(), 3);
+  std::vector<std::vector<Real>> kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
+  kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
+  kin_rate_gold[0][mgd.basis_species_index.at("O2(aq)")] = 2.2;
+  kin_rate_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 3.3;
+  kin_rate_gold[1][mgd.basis_species_index.at("O2(aq)")] = -1.1;
+  kin_rate_gold[1][7 + mgd.eqm_species_index.at("Fe+++")] = -2.2;
+  kin_rate_gold[1][mgd.basis_species_index.at("H2O")] = -3.3;
+  kin_rate_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 1.25;
+  kin_rate_gold[2][7 + mgd.eqm_species_index.at("Fe+++")] = 2.25;
+  kin_rate_gold[2][mgd.basis_species_index.at("Fe++")] = 3.25;
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 7 + 6; ++j)
+      EXPECT_EQ(mgd.kin_rate[i].promoting_indices[j], kin_rate_gold[i][j]);
 
   const unsigned o2aq_posn = mgd.basis_species_index["O2(aq)"];
   const unsigned fe3_posn = mgd.eqm_species_index["Fe+++"];
@@ -1008,8 +1094,8 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   ASSERT_EQ(mgd.basis_species_index["Fe+++"], o2aq_posn);
 
   // check names are swapped correctly
-  ASSERT_EQ(mgd.eqm_species_index.size(), 7);
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "O2(aq)", "e-", "CH4(g)fake"})
+  ASSERT_EQ(mgd.eqm_species_index.size(), 6);
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "O2(aq)", "CH4(g)fake"})
     ASSERT_EQ(mgd.eqm_species_index.count(sp), 1);
   for (const auto & sp : mgd.eqm_species_index)
     ASSERT_EQ(mgd.eqm_species_name[sp.second], sp.first);
@@ -1020,6 +1106,12 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     ASSERT_EQ(mgd.kin_species_name[sp.second], sp.first);
   for (const auto & sp : {"Fe(OH)3(ppd)", "Fe(OH)3(ppd)fake", "(O-phth)--", ">(s)FeO-"})
     ASSERT_EQ(mgd.kin_species_index.count(sp), 1);
+
+  // check the swap is recorded correctly
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], o2aq_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], fe3_posn);
 
   // check charges swapped correctly
   for (const auto & sp : mgd.basis_species_index)
@@ -1077,7 +1169,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
                           "OH-",
                           "CH4(aq)",
                           "O2(aq)",
-                          "e-",
                           "CH4(g)fake",
                           "Fe(OH)3(ppd)",
                           "Fe(OH)3(ppd)fake",
@@ -1102,8 +1193,6 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   stoi_gold["O2(aq)"](0, 1) = -4;
   stoi_gold["O2(aq)"](0, 4) = -4;
   stoi_gold["O2(aq)"](0, 6) = 4;
-  stoi_gold["e-"](0, 4) = 1;
-  stoi_gold["e-"](0, 6) = -1;
   stoi_gold["CH4(g)fake"](0, 0) = -6;
   stoi_gold["CH4(g)fake"](0, 1) = 18;
   stoi_gold["CH4(g)fake"](0, 4) = 16;
@@ -1123,7 +1212,7 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
   stoi_gold[">(s)FeO-"](0, 2) = 1;
   stoi_gold[">(s)FeO-"](0, 1) = -1;
 
-  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "O2(aq)", "e-", "CH4(g)fake"})
+  for (const auto & sp : {"CO2(aq)", "CO3--", "OH-", "CH4(aq)", "O2(aq)", "CH4(g)fake"})
   {
     const unsigned row = mgd.eqm_species_index[sp];
     for (unsigned i = 0; i < 7; ++i)
@@ -1136,12 +1225,37 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
     for (unsigned i = 0; i < 7; ++i)
       ASSERT_NEAR(mgd.kin_stoichiometry(row, i), stoi_gold[sp](0, i), eps);
   }
+
+  for (unsigned t = 0; t < 8; ++t)
+  {
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)"), t), feoh3ppd[t], eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("Fe(OH)3(ppd)fake"), t), feoh3ppd[t], eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at("(O-phth)--"), t),
+                ophth[t] - (7.5 / 0.25) * fe3[t],
+                eps);
+    ASSERT_NEAR(mgd.kin_log10K(mgd.kin_species_index.at(">(s)FeO-"), t), feom[t], eps);
+  }
+
+  ASSERT_EQ(mgd.kin_rate.size(), 3);
+  std::vector<std::vector<Real>> new_kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
+  new_kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
+  new_kin_rate_gold[0][7 + mgd.eqm_species_index.at("O2(aq)")] = 2.2;
+  new_kin_rate_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 3.3;
+  new_kin_rate_gold[1][7 + mgd.eqm_species_index.at("O2(aq)")] = -1.1;
+  new_kin_rate_gold[1][mgd.basis_species_index.at("Fe+++")] = -2.2;
+  new_kin_rate_gold[1][mgd.basis_species_index.at("H2O")] = -3.3;
+  new_kin_rate_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 1.25;
+  new_kin_rate_gold[2][mgd.basis_species_index.at("Fe+++")] = 2.25;
+  new_kin_rate_gold[2][mgd.basis_species_index.at("Fe++")] = 3.25;
+  for (unsigned i = 0; i < 3; ++i)
+    for (unsigned j = 0; j < 7 + 6; ++j)
+      EXPECT_EQ(mgd.kin_rate[i].promoting_indices[j], new_kin_rate_gold[i][j]);
 }
 
 /// Test the swap works on redox in disequilibrium
 TEST(GeochemistrySpeciesSwapperTest, swap_redox)
 {
-  GeochemicalDatabaseReader database("database/moose_testdb.json");
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
 
   PertinentGeochemicalSystem model(database,
                                    {"H2O", "H+", "Fe++", "O2(aq)", "HCO3-", "(O-phth)--", "Fe+++"},
@@ -1156,108 +1270,144 @@ TEST(GeochemistrySpeciesSwapperTest, swap_redox)
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
 
   EXPECT_EQ(mgd.redox_lhs, "e-");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
+  EXPECT_EQ(mgd.redox_stoichiometry.m(), 3);
   const Real p = 1.0 / 4.0 / 7.5;
+  // not sure of the order of the redox_stoichiometry stuff: this tells us
+  const bool fe3_is_slot_one =
+      (std::abs(mgd.redox_stoichiometry(1, 2)) > 1.0E-8); // note: involves Fe++
+  const unsigned fe3_slot = (fe3_is_slot_one ? 1 : 2);
+  const unsigned ophth_slot = (fe3_is_slot_one ? 2 : 1);
   // e- = p*(O-phth)-- + (5p+0.5)*H20 - 8p*HCO3- + (-6p-1)*H+
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), 5.0 * p + 0.5, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), -6.0 * p - 1.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), -8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 0), 5.0 * p + 0.5, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 1), -6.0 * p - 1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 2), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 4), -8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 5), p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 6), 0.0, 1.0E-8);
   // e- = Fe++ - Fe+++
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 0), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 1), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 2), 1.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 4), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 5), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 6), -1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 0), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 1), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 2), 1.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 4), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 5), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, 6), -1.0, 1.0E-8);
   // record stoichiometry and log10K to compare with below
   DenseMatrix<Real> orig_stoi = mgd.redox_stoichiometry;
   DenseMatrix<Real> orig_log10K = mgd.redox_log10K;
 
-  // swap e- with O2(aq)
-  swapper.performSwap(mgd, "O2(aq)", "e-");
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 0);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 0);
 
-  EXPECT_EQ(mgd.redox_lhs, "O2(aq)");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
-  const Real pp = 1.0 / 7.5;
-  // O2(aq) = pp * (-(O-phth)-- - 5*H20 + 8*HCO3- + 6*H+)
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), -5.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), 6.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), 8.0 * pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), -pp, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
-  // O2(aq) = 4 (Fe+++ - Fe++ - H+ + (1/2) H20)
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 0), 2.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 1), -4.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 2), -4.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 4), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 5), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(1, 6), 4.0, 1.0E-8);
-  // Equilibrium constants should just be scaled versions of those in the database
-  EXPECT_NEAR(mgd.redox_log10K(0, 0), pp * 594.3211, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 1), pp * 542.8292, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 2), pp * 482.3612, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 3), pp * 425.9738, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 4), pp * 368.7004, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 5), pp * 321.8658, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 6), pp * 281.8216, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 7), pp * 246.4849, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 0), -4.0 * (-10.0553), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 1), -4.0 * (-8.4878), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 2), -4.0 * (-6.6954), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 3), -4.0 * (-5.0568), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 4), -4.0 * (-3.4154), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 5), -4.0 * (-2.0747), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 6), -4.0 * (-0.8908), 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(1, 7), -4.0 * (0.2679), 1.0E-8);
-
-  // swap O2(aq) with e-
-  swapper.performSwap(mgd, "e-", "O2(aq)");
-
-  EXPECT_EQ(mgd.redox_lhs, "e-");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
-  for (unsigned red = 0; red < 2; ++red)
-  {
-    for (unsigned basis_i = 0; basis_i < 7; ++basis_i)
-      EXPECT_NEAR(mgd.redox_stoichiometry(red, basis_i), orig_stoi(red, basis_i), 1.0E-8);
-    for (unsigned temp = 0; temp < 8; ++temp)
-      EXPECT_NEAR(mgd.redox_log10K(red, temp), orig_log10K(red, temp), 1.0E-8);
-  }
+  const unsigned hco3_posn = mgd.basis_species_index["HCO3-"];
+  const unsigned co3_posn = mgd.eqm_species_index["CO3--"];
 
   // swap CO3-- into the basis in place of HCO3-
   swapper.performSwap(mgd, "HCO3-", "CO3--");
 
+  ASSERT_EQ(mgd.have_swapped_out_of_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_into_basis.size(), 1);
+  ASSERT_EQ(mgd.have_swapped_out_of_basis[0], hco3_posn);
+  ASSERT_EQ(mgd.have_swapped_into_basis[0], co3_posn);
+
   EXPECT_EQ(mgd.redox_lhs, "e-");
-  EXPECT_EQ(mgd.redox_stoichiometry.m(), 2);
+  EXPECT_EQ(mgd.redox_stoichiometry.m(), 3);
 
   // Since HCO3- = CO3-- + H+
   // e- = p*(O-phth)-- + (5p+0.5)*H20 - 8p*CO3-- + (-6p-1-8p)*H+
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 0), 5.0 * p + 0.5, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 1), -6.0 * p - 1.0 - 8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 2), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 3), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 4), -8.0 * p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 5), p, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_stoichiometry(0, 6), 0.0, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 0), orig_log10K(0, 0) + 8.0 * p * 10.6169, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 1), orig_log10K(0, 1) + 8.0 * p * 10.3439, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 2), orig_log10K(0, 2) + 8.0 * p * 10.2092, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 3), orig_log10K(0, 3) + 8.0 * p * 10.2793, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 4), orig_log10K(0, 4) + 8.0 * p * 10.5131, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 5), orig_log10K(0, 5) + 8.0 * p * 10.8637, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 6), orig_log10K(0, 6) + 8.0 * p * 11.2860, 1.0E-8);
-  EXPECT_NEAR(mgd.redox_log10K(0, 7), orig_log10K(0, 7) + 8.0 * p * 11.6319, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 0), 5.0 * p + 0.5, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 1), -6.0 * p - 1.0 - 8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 2), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 3), 0.0, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 4), -8.0 * p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 5), p, 1.0E-8);
+  EXPECT_NEAR(mgd.redox_stoichiometry(ophth_slot, 6), 0.0, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 0), orig_log10K(ophth_slot, 0) + 8.0 * p * 10.6169, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 1), orig_log10K(ophth_slot, 1) + 8.0 * p * 10.3439, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 2), orig_log10K(ophth_slot, 2) + 8.0 * p * 10.2092, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 3), orig_log10K(ophth_slot, 3) + 8.0 * p * 10.2793, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 4), orig_log10K(ophth_slot, 4) + 8.0 * p * 10.5131, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 5), orig_log10K(ophth_slot, 5) + 8.0 * p * 10.8637, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 6), orig_log10K(ophth_slot, 6) + 8.0 * p * 11.2860, 1.0E-8);
+  EXPECT_NEAR(
+      mgd.redox_log10K(ophth_slot, 7), orig_log10K(ophth_slot, 7) + 8.0 * p * 11.6319, 1.0E-8);
   // e- = Fe++ - Fe+++ is unimpacted by the swap
-  const unsigned red = 1;
   for (unsigned basis_i = 0; basis_i < 7; ++basis_i)
-    EXPECT_NEAR(mgd.redox_stoichiometry(red, basis_i), orig_stoi(red, basis_i), 1.0E-8);
+    EXPECT_NEAR(mgd.redox_stoichiometry(fe3_slot, basis_i), orig_stoi(fe3_slot, basis_i), 1.0E-8);
   for (unsigned temp = 0; temp < 8; ++temp)
-    EXPECT_NEAR(mgd.redox_log10K(red, temp), orig_log10K(red, temp), 1.0E-8);
+    EXPECT_NEAR(mgd.redox_log10K(fe3_slot, temp), orig_log10K(fe3_slot, temp), 1.0E-8);
+}
+
+/// Check findBestEqmSwap execption
+TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwapException)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+
+  // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+  unsigned best;
+
+  try
+  {
+    const std::vector<Real> eqm_molality(6, 1.0);
+    swapper.findBestEqmSwap(4, mgd, eqm_molality, false, false, false, best);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("basis index 4 must be less than 4") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    const std::vector<Real> eqm_molality(5, 1.0);
+    swapper.findBestEqmSwap(1, mgd, eqm_molality, false, false, false, best);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Size of eqm_molality is 5 which is not equal to the number of "
+                         "equilibrium species 6") != std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+}
+
+/// Check findBestEqmSwap
+TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwap)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb.json", true, true, false);
+
+  // eqm species are: CO2(aq), CO3--, CaCO3, CaOH+, OH-, Calcite
+  PertinentGeochemicalSystem model(
+      database, {"H2O", "Ca++", "HCO3-", "H+"}, {"Calcite"}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
+  unsigned best;
+  // the following equilibrium molality has molality=5.0 for equilibrium mineral Calcite, which
+  // violates the assumption in the Geochemistry module that all equilibrium minerals have zero
+  // molality, but i'm setting this for testing only
+  const std::vector<Real> eqm_molality = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+  bool legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, false, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 3);
+  legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 5);
+  legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, true, true, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, 5);
 }

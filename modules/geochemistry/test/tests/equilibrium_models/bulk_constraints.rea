@@ -1,0 +1,15 @@
+# React script that appears equivalent to bulk_constraints.i but is not
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Na+          = 1 mol
+Cl-          = 1 mol
+balance on Cl-
+swap Mirabilite for SO4--
+Mirabilite   = 1 free mol
+suppress all
+unsuppress Mirabilite
+printout  species = long
+epsilon = 1e-13
+go

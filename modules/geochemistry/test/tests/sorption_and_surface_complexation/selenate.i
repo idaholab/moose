@@ -1,25 +1,42 @@
 # Langmuir sorption of Selenate
-# The reaction is SorbedSelenate = Selenate + SorbingSite with K = 5.4E-6
-# Assuming that SorbedSelenate has an activity coefficient of 1 and the activity coefficient of Selenate is also very close to 1,
-# molality_{SorbedSelenate} = molality_{Selenate} * molality_{SorbingSite} / K
-# The equation for the bulk composition of SorbingSite is
-# Moles_{SorbingSite} = n_{w} * (molality_{SorbingSite} + molality_{Sorbed})
-# Plugging this into the above equation gives
-# molality_{SorbedSelenate} = Moles_{SorbingSite} / n_{w} * r / (1 + r), where r = molality_{Selenate} / K
-# The simulation below predicts molality_{SorbedSelenate} given Moles_{SorbingSite}, K and the free molality of Selenate.
-# The Moles_{SorbingSite} results from 0.62E-9mol/g(dry soil): there is assumed 500g of dry soil in this simulation (and 1kg of solvent water).
-[EquilibriumReactionSolver]
+[TimeIndependentReactionSolver]
   model_definition = definition
   charge_balance_species = "Na+"
-  constraint_species = "H2O              H+        Na+                SeO4--        SorbingSite"
-  constraint_value = "  1.0              3.1623E-8 10E-6              5.0E-6       310E-9"
-  constraint_meaning = "kg_solvent_water activity  moles_bulk_species free_molality moles_bulk_species"
+  constraint_species = "H2O              H+           Na+                SorbingSite        SeO4--"
+  constraint_value = "  1.0              3.1622777E-8 10E-6              310E-9             5E-6"
+  constraint_meaning = "kg_solvent_water activity     moles_bulk_species moles_bulk_species free_molality"
+  ramp_max_ionic_strength_initial = 0 # not needed in this simple problem
+  execute_console_output_on = '' # only CSV output for this problem
 []
 
 [UserObjects]
   [./definition]
     type = GeochemicalModelDefinition
-    database_file = "selenate_sorption.json"
+    database_file = "../../database/selenate_sorption.json"
     basis_species = "H2O H+ Na+ SeO4-- SorbingSite"
   [../]
+[]
+
+[AuxVariables]
+  [./mol_sorbed_selenate_per_g_dry_soil]
+  [../]
+[]
+[AuxKernels]
+  [./mol_sorbed_selenate_per_g_dry_soil]
+    type = ParsedAux
+    args = molal_SorbedSelenate
+    function = 'molal_SorbedSelenate / 500.0'
+    variable = mol_sorbed_selenate_per_g_dry_soil
+  [../]
+[]
+[Postprocessors]
+  [./mol_sorbed_selenate_per_g_dry_soil]
+    type = PointValue
+    point = '0 0 0'
+    variable = mol_sorbed_selenate_per_g_dry_soil
+  [../]
+[]
+
+[Outputs]
+  csv = true
 []

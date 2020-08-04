@@ -28,6 +28,10 @@ public:
 
   ADPowerLawCreepStressUpdate(const InputParameters & parameters);
 
+  virtual ADReal
+  computeStrainEnergyRateDensity(const ADMaterialProperty<RankTwoTensor> & stress,
+                                 const ADMaterialProperty<RankTwoTensor> & strain_rate) override;
+
 protected:
   virtual void computeStressInitialize(const ADReal & effective_trial_stress,
                                        const ADRankFourTensor & elasticity_tensor) override;

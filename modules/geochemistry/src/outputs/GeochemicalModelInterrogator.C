@@ -9,14 +9,15 @@
 
 #include "GeochemicalModelInterrogator.h"
 #include "GeochemistryFormattedOutput.h"
+#include "EquilibriumConstantInterpolator.h"
 #include <limits>
 
 registerMooseObject("GeochemistryApp", GeochemicalModelInterrogator);
 
 InputParameters
-GeochemicalModelInterrogator::validParams()
+GeochemicalModelInterrogator::sharedParams()
 {
-  InputParameters params = Output::validParams();
+  InputParameters params = emptyInputParameters();
   params.addRequiredParam<UserObjectName>("model_definition",
                                           "The name of the GeochemicalModelDefinition user object");
   params.addParam<std::vector<std::string>>(
@@ -42,7 +43,8 @@ GeochemicalModelInterrogator::validParams()
       "precision",
       4,
       "Precision for printing values.  Also, if the absolute value of a stoichiometric coefficient "
-      "is less than 10^(-precision) then it is set to zero");
+      "is less than 10^(-precision) then it is set to zero.  Also, if equilibrium temperatures are "
+      "desired, they will be computed to a relative error of 10^(-precision)");
   params.addParam<std::string>("equilibrium_species",
                                "",
                                "Only output results for this equilibrium species.  If not "
@@ -67,6 +69,14 @@ GeochemicalModelInterrogator::validParams()
       "process: (1) if abs(singular value) < stoi_tol * L1norm(singular values), then the "
       "matrix is deemed singular (so the basis swap is deemed invalid); (2) if abs(any "
       "stoichiometric coefficient) < stoi_tol then it is set to zero.");
+  return params;
+}
+
+InputParameters
+GeochemicalModelInterrogator::validParams()
+{
+  InputParameters params = Output::validParams();
+  params += GeochemicalModelInterrogator::sharedParams();
   params.addClassDescription("Performing simple manipulations of and querying a "
                              "geochemical model");
 
@@ -161,12 +171,18 @@ GeochemicalModelInterrogator::outputReaction(const std::string & eqm_species) co
   std::stringstream ss;
   const unsigned row = _mgd.eqm_species_index.at(eqm_species);
   const Real cutoff = std::pow(10.0, -1.0 * _precision);
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
+  EquilibriumConstantInterpolator log10K(
+      temps, _mgd.eqm_log10K.sub_matrix(row, 1, 0, numT).get_values(), model_type);
+  log10K.generate();
+  const Real log10_eqm_const = log10K.sample(_temperature);
   ss << std::setprecision(_precision);
   ss << eqm_species << " = ";
   ss << GeochemistryFormattedOutput::reaction(
       _mgd.eqm_stoichiometry, row, _mgd.basis_species_name, cutoff, _precision);
-  ss << "  .  log10(K) = "
-     << log10K(_mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()), _temperature);
+  ss << "  .  log10(K) = " << log10_eqm_const;
   ss << std::endl;
   _console << ss.str();
 }
@@ -206,7 +222,13 @@ GeochemicalModelInterrogator::outputActivity(const std::string & eqm_species) co
   const unsigned row = _mgd.eqm_species_index.at(eqm_species);
   const unsigned num_cols = _mgd.basis_species_index.size();
   const Real cutoff = std::pow(10.0, -1.0 * _precision);
-  Real rhs = log10K(_mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()), _temperature);
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
+  EquilibriumConstantInterpolator log10K(
+      temps, _mgd.eqm_log10K.sub_matrix(row, 1, 0, numT).get_values(), model_type);
+  log10K.generate();
+  Real rhs = log10K.sample(_temperature);
   std::stringstream lhs;
 
   lhs << std::setprecision(_precision);
@@ -265,48 +287,21 @@ GeochemicalModelInterrogator::outputTemperature(const std::string & eqm_species)
       }
     }
 
-  const Real tsoln =
-      solveForT(_mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.temperatures.size()), rhs);
-  _console << eqm_species << ".  T = " << tsoln << "\n";
-}
-
-Real
-GeochemicalModelInterrogator::log10K(const DenseMatrix<Real> & reference_log10K,
-                                     Real temperature) const
-{
-  const unsigned num_t = _mgd.temperatures.size();
-  if (temperature < _mgd.temperatures[0])
-    return reference_log10K(0, 0);
-  for (unsigned i = 1; i < num_t; ++i)
-    if (temperature < _mgd.temperatures[i])
-      return reference_log10K(0, i) + (_mgd.temperatures[i] - temperature) /
-                                          (_mgd.temperatures[i] - _mgd.temperatures[i - 1]) *
-                                          (reference_log10K(0, i - 1) - reference_log10K(0, i));
-  return reference_log10K(0, num_t - 1);
-}
-
-Real
-GeochemicalModelInterrogator::dlog10K_dT(const DenseMatrix<Real> & reference_log10K,
-                                         Real temperature) const
-{
-  const unsigned num_t = _mgd.temperatures.size();
-  if (temperature < _mgd.temperatures[0])
-    return 0.0;
-  for (unsigned i = 1; i < num_t; ++i)
-    if (temperature < _mgd.temperatures[i])
-      return -1.0 / (_mgd.temperatures[i] - _mgd.temperatures[i - 1]) *
-             (reference_log10K(0, i - 1) - reference_log10K(0, i));
-  return 0.0;
+  const Real tsoln = solveForT(
+      _mgd.eqm_log10K.sub_matrix(row, 1, 0, _mgd.original_database->getTemperatures().size()), rhs);
+  _console << eqm_species << ".  T = " << tsoln << "degC\n";
 }
 
 Real
 GeochemicalModelInterrogator::solveForT(const DenseMatrix<Real> & reference_log10K, Real rhs) const
 {
-  const unsigned num_t = _mgd.temperatures.size();
+  const std::vector<Real> temps = _mgd.original_database->getTemperatures();
+  const unsigned numT = temps.size();
+  const std::string model_type = _mgd.original_database->getLogKModel();
 
   // find the bracket that contains the rhs
   unsigned bracket = 0;
-  for (bracket = 0; bracket < num_t - 1; ++bracket)
+  for (bracket = 0; bracket < numT - 1; ++bracket)
   {
     if (reference_log10K(0, bracket) <= rhs && reference_log10K(0, bracket + 1) > rhs)
       break;
@@ -314,10 +309,22 @@ GeochemicalModelInterrogator::solveForT(const DenseMatrix<Real> & reference_log1
       break;
   }
 
-  if (bracket == num_t - 1)
+  if (bracket == numT - 1)
     return std::numeric_limits<double>::quiet_NaN();
-  return _mgd.temperatures[bracket + 1] -
-         (rhs - reference_log10K(0, bracket + 1)) *
-             (_mgd.temperatures[bracket + 1] - _mgd.temperatures[bracket]) /
-             (reference_log10K(0, bracket) - reference_log10K(0, bracket + 1));
+
+  EquilibriumConstantInterpolator log10K(temps, reference_log10K.get_values(), model_type);
+  log10K.generate();
+  // now do a Newton-Raphson to find T for which log10K.sample(T) = rhs
+  Real temp = _mgd.original_database->getTemperatures()[bracket + 1];
+  const Real small_delT =
+      (temp + GeochemistryConstants::CELSIUS_TO_KELVIN) * std::pow(10.0, -1.0 * _precision);
+  Real del_temp = small_delT;
+  unsigned iter = 0;
+  while (std::abs(del_temp) >= small_delT && iter++ < 100)
+  {
+    Real residual = log10K.sample(temp) - rhs;
+    del_temp = -residual / log10K.sampleDerivative(temp);
+    temp += del_temp;
+  }
+  return temp;
 }

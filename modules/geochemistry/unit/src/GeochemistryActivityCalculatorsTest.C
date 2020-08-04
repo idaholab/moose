@@ -78,7 +78,7 @@ TEST(GeochemistryActivityCalculatorsTest, log10ActCoeffDHBdotNeutral)
 TEST(GeochemistryActivityCalculatorsTest, lnActivityDHBdotWater)
 {
   const Real ionic_str = 0.2;
-  const Real loggold = -0.00669430363445377;
+  const Real loggold = -0.0066955098152888023;
   ASSERT_NEAR(GeochemistryActivityCalculators::lnActivityDHBdotWater(
                   ionic_str, A, atilde, btilde, ctilde, dtilde),
               loggold,

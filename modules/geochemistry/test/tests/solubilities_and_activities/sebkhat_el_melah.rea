@@ -1,0 +1,21 @@
+# React script that is equivalent to sebkhat_el_melah.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = 5.5 mol
+balance on Cl-
+H+           = 7.15
+Mg++         = 2.1436 mol
+Na+          = 1.8747 mol
+SO4--        = 0.2852 mol
+K+           = 0.17648 mol
+Br-          = 0.02816 mol
+Ca++         = 0.00499 mol
+HCO3-        = 0.00229 mol
+suppress ALL
+epsilon = 1E-12
+simax = 10
+timax = 10
+go
+

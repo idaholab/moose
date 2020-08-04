@@ -1,0 +1,12 @@
+# React script that is equivalent to quartz_deposition.i
+time end = 1 year
+T initial = 300, final = 25
+
+swap Quartz for SiO2(aq)
+400 free grams Quartz
+kinetic Quartz surface = 1
+kinetic Quartz pre-exp = 2.35e-5, act_eng = 72800
+
+suppress Tridymite Chalcedony Cristobalite Amrph^silica
+delxi = 0.001
+go

@@ -1,0 +1,22 @@
+# React script that is equivalent to the morro.i MOOSE input file
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 22 C
+H2O          = 1 free kg
+Cl-          = 3.041E-5 mol
+balance on Cl-
+H+           = 6.05 pH
+O2(aq)       = 0.13438E-3 free molal
+HCO3-        = 0.0295E-3 mol
+Ca++         = 0.005938E-3 mol
+Mg++         = 0.01448E-3 mol
+Na+          = 0.0018704E-3 mol
+K+           = 0.005115E-3 mol
+Fe++         = 0.01307E-3 mol
+Mn++         = 0.005042E-3 mol
+Zn++         = 0.001897E-3 mol
+SO4--        = 0.01562E-4 mol
+printout  species = long
+suppress all
+epsilon = 1e-13
+go

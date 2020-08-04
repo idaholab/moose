@@ -65,11 +65,11 @@ Then a [GeochemicalModelInterrogator](GeochemicalModelInterrogator.md) must be c
 The output yields the desired information:
 
 ```
-Pyrite = - 1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
-Pyrite = - 3.5*H2O + 1*Fe(OH)3(ppd) + 2*SO4-- + 4*H+ - 3.75*O2(aq)  .  log10(K) = 221
-Pyrite = - 1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
-Pyrite = - 1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.39
-Pyrite = - 1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.54
+Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
+Pyrite = -3.5*H2O + 1*Fe(OH)3(ppd) + 2*SO4-- + 4*H+ - 3.75*O2(aq)  .  log10(K) = 221
+Pyrite = -1*H2O + 1*Fe++ + 2*SO4-- + 2*H+ - 3.5*O2(aq)  .  log10(K) = 217.4
+Pyrite = -1*H2O + 1*Fe++ + 2*H2S(aq) - 2*H+ + 0.5*O2(aq)  .  log10(K) = -45.39
+Pyrite = -1*H2O + 1*Fe++ + 1.75*H2S(aq) - 1.5*H+ + 0.25*SO4--  .  log10(K) = -12.54
 ```
 
 !bibtex bibliography

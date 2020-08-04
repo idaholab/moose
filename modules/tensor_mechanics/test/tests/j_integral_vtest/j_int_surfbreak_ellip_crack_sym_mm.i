@@ -24,8 +24,8 @@
   [./rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
-    y = '0. 0.1'
-    scale_factor = -689.5 #MPa
+    y = '0. 1'
+    scale_factor = -68.95 #MPa
   [../]
 []
 

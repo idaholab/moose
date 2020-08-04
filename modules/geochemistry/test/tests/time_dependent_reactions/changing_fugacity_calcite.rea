@@ -1,0 +1,11 @@
+# React script that is equivalent to changing_fugacity_calcite.i
+Na+ = 1e-2 mol
+Cl- = 1e-2 mol
+balance on HCO3-
+swap Calcite for Ca++
+Calcite = 0.01354 free mol
+swap CO2(g) for H+
+log f CO2(g) = -3.5
+epsilon = 1e-13
+slide f CO2(g) to 1
+go

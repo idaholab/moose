@@ -1,0 +1,24 @@
+# React script that is equivalent to seawater_evaporation_flow_through.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature = 25 C
+H2O          = 1 free kg
+Cl-          = 0.5656 mol
+balance on Cl-
+Na+          = 0.4850 mol
+SO4--        = 0.02924 mol
+Mg++         = 0.05501 mol
+Ca++         = 0.01063 mol
+K+           = 0.010576055 mol
+HCO3-        = 0.002412
+swap CO2(g) for H+
+log f CO2(g) = -3.5
+fix fugacity of CO2(g)
+printout  species = long
+epsilon = 1e-13
+react -55 mol of H2O
+delxi = 0.001
+dump
+go
+flow-through
+go

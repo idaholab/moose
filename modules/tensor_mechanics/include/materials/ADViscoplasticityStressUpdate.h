@@ -91,7 +91,7 @@ protected:
   const Real _power_factor;
 
   /// Leading coefficient
-  const MaterialProperty<Real> & _coefficient;
+  const ADMaterialProperty<Real> & _coefficient;
 
   /// Gauge stress
   ADMaterialProperty<Real> & _gauge_stress;

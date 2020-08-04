@@ -1,0 +1,20 @@
+# React script that is equivalent to cooling.i
+data = thermo.tdat verify
+conductivity = conductivity-USGS.dat
+temperature initial = 300 C, final = 25 C
+H2O          = 1 free kg
+swap Albite for Al+++
+Albite       = .19986 free mol
+swap "Maximum Microcline" for K+
+"Maximum Microcline" = .09196 free mol
+swap Muscovite for H+
+Muscovite    = .03553 free mol
+swap Quartz for SiO2(aq)
+Quartz       = .08815 free mol
+Na+          = 1 molal
+Cl-          = 1 molal
+balance on Cl-
+
+suppress  "Albite low"
+printout  species = long
+epsilon = 1e-14
