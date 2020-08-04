@@ -172,7 +172,17 @@ Exodus::outputSetup()
       return;
   }
 
+  // Exodus is serial output so that we have to gather everything to "zero".
   _problem_ptr->mesh().getMesh().gather_to_zero();
+  // We need to do the same thing for displaced mesh to make them consistent.
+  // In general, it is a good idea to make the reference mesh and the displaced mesh
+  // consistent since some operations or calculations are already based on this assumption.
+  // For example,
+  // FlagElementsThread::onElement(const Elem * elem)
+  //   if (_displaced_problem)
+  //    _displaced_problem->mesh().elemPtr(elem->id())->set_refinement_flag((Elem::RefinementState)marker_value);
+  // Here we assume that the displaced mesh and the reference mesh are identical except
+  // coordinations.
   if (_problem_ptr->getDisplacedProblem())
   {
     _problem_ptr->getDisplacedProblem()->mesh().getMesh().gather_to_zero();

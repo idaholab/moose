@@ -34,6 +34,11 @@ public:
 
   ElementSideNeighborLayers(const ElementSideNeighborLayers & other);
 
+  /**
+   * According to the base class docs, "We call mesh_reinit() whenever
+   * the relevant Mesh has changed, but before remote elements on a
+   * distributed mesh are deleted."
+   */
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
   virtual std::string getInfo() const override;

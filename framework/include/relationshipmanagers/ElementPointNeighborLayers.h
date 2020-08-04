@@ -36,6 +36,10 @@ public:
 
   ElementPointNeighborLayers(const ElementPointNeighborLayers & other);
 
+  /**
+   * A clone() is needed because GhostingFunctor can not be shared between
+   * different meshes. The operations in  GhostingFunctor are mesh dependent.
+   */
   virtual std::unique_ptr<GhostingFunctor> clone() const override;
 
   virtual std::string getInfo() const override;
