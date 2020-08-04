@@ -16,7 +16,7 @@
 class Function;
 
 /**
- * ComputeIncrementalTrussStrain defines a displacement strain increment and rotation
+ * ComputeIncrementalTrussStrain defines a displacement strain increment
  * increment (=1), for small strains.
  */
 class ComputeIncrementalTrussStrain : public Material
