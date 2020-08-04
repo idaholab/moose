@@ -56,8 +56,13 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
 void
 PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params)
 {
-  // The containers are initialized (if needed).
-  initializeReducedSystem();
+  if (!_initialized)
+  {
+    // The containers are initialized (if needed).
+    initializeReducedSystem();
+    initializeApproximateSolution();
+    _initialized = true;
+  }
 
   // Assembling and solving the reduced equation system.
   solveReducedSystem(params);
@@ -67,57 +72,72 @@ PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params)
 }
 
 void
-PODReducedBasisSurrogate::initializeReducedSystem()
+PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params,
+                                           DenseVector<Real> & inp_vector,
+                                           std::string var_name)
 {
-  // It initializes the container sizes at the first call only. This way we can
-  // new memory allocation at every solve.
   if (!_initialized)
   {
-    // Storing important indices for the assemly loops.
-    _final_ranks.resize(_var_names.size());
-    _comulative_ranks.resize(_var_names.size());
-    unsigned int sum_ranks = 0;
-
-    // Checking if the user wants to overwrite the original ranks for the
-    // variables.
-    for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
-    {
-      _final_ranks[var_i] = _base[var_i].size();
-      for (unsigned int var_j = 0; var_j < _change_rank.size(); ++var_j)
-      {
-        if (_change_rank[var_j] == _var_names[var_i])
-        {
-          if (_new_ranks[var_j] > _base[var_i].size())
-          {
-            mooseWarning("The specified new rank (",
-                         _new_ranks[var_j],
-                         ") for variable '",
-                         _var_names[var_i],
-                         "' is higher than the original rank (",
-                         _base[var_i].size(),
-                         ")! Switched to original rank.");
-            break;
-          }
-
-          _final_ranks[var_i] = _new_ranks[var_j];
-        }
-      }
-      sum_ranks += _final_ranks[var_i];
-      _comulative_ranks[var_i] = sum_ranks;
-    }
-
-    // Resizing containers to match the newly prescribed ranks.
-    _sys_mx = DenseMatrix<Real>(sum_ranks, sum_ranks);
-    _rhs = DenseVector<Real>(sum_ranks);
-    _coeffs = DenseVector<Real>(sum_ranks);
-
-    _approx_solution.resize(_var_names.size());
-    for (unsigned int var_i = 0; var_i < _var_names.size(); var_i++)
-    {
-      _approx_solution[var_i] = DenseVector<Real>(_base[var_i][0].size());
-    }
+    // The containers are initialized (if needed).
+    initializeReducedSystem();
     _initialized = true;
   }
+
+  // Assembling and solving the reduced equation system.
+  solveReducedSystem(params);
+
+  // Reconstructing the approximate solutions for every variable.
+  reconstructApproximateSolution(inp_vector, var_name);
+}
+
+void
+PODReducedBasisSurrogate::initializeReducedSystem()
+{
+  // Storing important indices for the assemly loops.
+  _final_ranks.resize(_var_names.size());
+  _comulative_ranks.resize(_var_names.size());
+  unsigned int sum_ranks = 0;
+
+  // Checking if the user wants to overwrite the original ranks for the
+  // variables.
+  for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
+  {
+    _final_ranks[var_i] = _base[var_i].size();
+    for (unsigned int var_j = 0; var_j < _change_rank.size(); ++var_j)
+    {
+      if (_change_rank[var_j] == _var_names[var_i])
+      {
+        if (_new_ranks[var_j] > _base[var_i].size())
+        {
+          mooseWarning("The specified new rank (",
+                       _new_ranks[var_j],
+                       ") for variable '",
+                       _var_names[var_i],
+                       "' is higher than the original rank (",
+                       _base[var_i].size(),
+                       ")! Switched to original rank.");
+          break;
+        }
+
+        _final_ranks[var_i] = _new_ranks[var_j];
+      }
+    }
+    sum_ranks += _final_ranks[var_i];
+    _comulative_ranks[var_i] = sum_ranks;
+  }
+
+  // Resizing containers to match the newly prescribed ranks.
+  _sys_mx = DenseMatrix<Real>(sum_ranks, sum_ranks);
+  _rhs = DenseVector<Real>(sum_ranks);
+  _coeffs = DenseVector<Real>(sum_ranks);
+}
+
+void
+PODReducedBasisSurrogate::initializeApproximateSolution()
+{
+  _approx_solution.resize(_var_names.size());
+  for (unsigned int var_i = 0; var_i < _var_names.size(); var_i++)
+    _approx_solution[var_i] = DenseVector<Real>(_base[var_i][0].size());
 }
 
 void
@@ -197,6 +217,38 @@ PODReducedBasisSurrogate::reconstructApproximateSolution()
         _approx_solution[var_i](dof_i) += _coeffs(counter) * _base[var_i][base_i](dof_i);
       counter++;
     }
+  }
+}
+
+void
+PODReducedBasisSurrogate::reconstructApproximateSolution(DenseVector<Real> & inp_vector,
+                                                         std::string var_name)
+{
+  auto it = std::find(_var_names.begin(), _var_names.end(), var_name);
+  if (it == _var_names.end())
+    mooseError("Variable '", var_name, "' does not exist in the POD-RB surrogate!");
+
+  unsigned int var_i = std::distance(_var_names.begin(), it);
+
+  if (inp_vector.size() != _base[var_i][0].size())
+    mooseError("The size of the input vector (",
+               inp_vector.size(),
+               ") for variable '",
+               var_name,
+               "' does not match the size of the stored base vector (",
+               _base[var_i][0].size(),
+               ") in POD-RB surrogate!");
+
+  inp_vector.zero();
+
+  unsigned int base_begin = 0;
+  if (var_i != 0)
+    base_begin = _comulative_ranks[var_i - 1];
+
+  for (unsigned int base_i = 0; base_i < _final_ranks[var_i]; ++base_i)
+  {
+    for (unsigned int dof_i = 0; dof_i < inp_vector.size(); ++dof_i)
+      inp_vector(dof_i) += _coeffs(base_i + base_begin) * _base[var_i][base_i](dof_i);
   }
 }
 

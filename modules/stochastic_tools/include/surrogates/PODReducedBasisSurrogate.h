@@ -21,6 +21,12 @@ public:
   /// Get the reduced solution for a given parameter sample.
   void evaluateSolution(const std::vector<Real> & params);
 
+  /// Get the reduced solution for a given parameter sample and reconstruct the
+  /// approximate solution into a given vector.
+  void evaluateSolution(const std::vector<Real> & params,
+                        DenseVector<Real> & inp_vector,
+                        std::string var_name);
+
   /// Get a reference to the approximate solutions.
   std::vector<DenseVector<Real>> & getApproximateSolution() { return _approx_solution; }
 
@@ -34,12 +40,18 @@ protected:
   /// Initialize reduced matrices, vectors and additional containers.
   void initializeReducedSystem();
 
+  /// Initialize approximate solution vector.
+  void initializeApproximateSolution();
+
   /// Assemble and solve the reduced equation system.
   void solveReducedSystem(const std::vector<Real> & params);
 
   /// Reconstruct the approximate solution vector using the stored
   /// coefficients.
   void reconstructApproximateSolution();
+
+  /// Reconstruct the approximate solution vector into an input vector.
+  void reconstructApproximateSolution(DenseVector<Real> & inp_vector, std::string var_name);
 
   /// A vector containing the number of basis functions each variable should use.
   /// This is optional, used only to override the base numbers from the RD input.
