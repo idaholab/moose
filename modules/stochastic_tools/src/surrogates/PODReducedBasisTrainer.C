@@ -129,7 +129,7 @@ void
 PODReducedBasisTrainer::finalize()
 {
   // If the operators are already filled on each processor, gather and sum them
-  // together. This way every processor has access to every completer reduced
+  // together. This way every processor has access to every complete reduced
   // operator.
   if (!_empty_operators)
     for (unsigned int tag_i = 0; tag_i < _red_operators.size(); ++tag_i)
@@ -189,7 +189,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   mesh.prepare_for_use();
 
   /*
-  This step restruvtures the snapshotts into an unordered map to make it easier
+  This step restructures the snapshots into an unordered map to make it easier
   to do cross-products in the later stages. Since _snapshots only contains
   pointers to the data, this should not include a considerable amount of copy
   operations.
@@ -235,7 +235,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       /*
       Checking if the current processor has the required snapshot.
       We assume that every variable has the same number of snapshots with the
-      same distribution amond processors. Therefore, it is enough to test
+      same distribution among processors. Therefore, it is enough to test
       the first variable only.
       */
       if (_snapshots[0].hasGlobalEntry(i))
@@ -293,10 +293,9 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
 
   // The lower triangle of the matrices are then filled using symmetry.
   for (auto & corr_mx : _corr_mx)
-    for (dof_id_type row_i = 0; row_i < corr_mx.m(); ++row_i)
-      for (dof_id_type col_i = 0; col_i < corr_mx.n(); ++col_i)
-        if (row_i > col_i)
-          corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
+    for (dof_id_type row_i = 1; row_i < corr_mx.m(); ++row_i)
+      for (dof_id_type col_i = 0; col_i < row_i; ++col_i)
+        corr_mx(row_i, col_i) = corr_mx(col_i, row_i);
 }
 
 void
@@ -386,7 +385,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
   {
     unsigned int no_snaps = _corr_mx[v_ind].n();
 
-    // Initializing temprary objects for the eigenvalues and eigenvectors since
+    // Initializing temporary objects for the eigenvalues and eigenvectors since
     // evd_left() returns an unordered vector of eigenvalues.
     DenseVector<Real> eigenvalues(no_snaps);
     DenseMatrix<Real> eigenvectors(no_snaps, no_snaps);
@@ -407,7 +406,7 @@ PODReducedBasisTrainer::computeEigenDecomposition()
     std::stable_sort(
         idx.begin(), idx.end(), [&v](unsigned int i, unsigned int j) { return v[i] > v[j]; });
 
-    // Getting a cutoff for the number of modes. The functio nrequires a sorted list,
+    // Getting a cutoff for the number of modes. The function requires a sorted list,
     // thus the temporary vector is sorted.
     std::stable_sort(v.begin(), v.end(), std::greater<Real>());
     unsigned int cutoff = determineNumberOfModes(_error_res[v_ind], v);
@@ -477,7 +476,7 @@ PODReducedBasisTrainer::computeBasisVectors()
       // This makes sure that every process sees all of the basis functions.
       gatherSum(_base[var_i][base_i].get_values());
 
-      // Normalizing the basis functions to make sure they are orthornormal.
+      // Normalizing the basis functions to make sure they are orthonormal.
       _base[var_i][base_i].scale(1.0 / sqrt(_eigenvalues[var_i](base_i)));
     }
   }

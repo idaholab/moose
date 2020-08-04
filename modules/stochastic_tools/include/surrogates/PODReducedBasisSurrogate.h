@@ -54,7 +54,7 @@ protected:
   void reconstructApproximateSolution(DenseVector<Real> & inp_vector, std::string var_name);
 
   /// A vector containing the number of basis functions each variable should use.
-  /// This is optional, used only to override the base numbers from the RD input.
+  /// This is optional, used only to override the base numbers from the training data.
   std::vector<std::string> _change_rank;
 
   /// The new rank the variable should have.

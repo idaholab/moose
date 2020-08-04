@@ -20,7 +20,7 @@
       input = trainer.i
       allow_test_objects = true
       cli_args = 'Transfers/snapshot/trainer_name="doesnt_exist"'
-      detail = 'the trainer object cannot be found, '
+      detail = 'the trainer object cannot be found.'
       expect_err = "Unable to find Trainer with name 'doesnt_exist'!"
     []
   []
@@ -56,7 +56,7 @@
       input = trainer.i
       allow_test_objects = true
       cli_args = 'Trainers/pod_rb/tag_types="doesnt_exist doesnt_exist doesnt_exist"'
-      detail = "the Dirichlet tag types do not exist,"
+      detail = "the Dirichlet tag types do not exist, "
       expect_err = "Tag type 'doesnt_exist' is not valid, available names are: op, op_dir, src, src_dir"
     []
     [wrong_res_transfer]
@@ -77,7 +77,7 @@
       input = trainer_and_surr.i
       allow_test_objects = true
       cli_args = "Surrogates/rbpod/change_rank='doesnt_exist'"
-      detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same, "
+      detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same."
       expect_err = "The size of 'new_ranks' is not equal to the size of 'change_rank' 0 != 1"
     []
   []

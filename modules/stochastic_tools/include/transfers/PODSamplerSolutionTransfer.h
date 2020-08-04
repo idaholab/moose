@@ -45,16 +45,18 @@ public:
 
 protected:
   /// The input multiapp casted into a PODFullSolveMultiapp to get access to the
-  /// specific pod attributes. Used in batch mode onlzy and checking if the
+  /// specific pod attributes. Used in batch mode only and checking if the
   /// correct MultiApp type has been provided.
   std::shared_ptr<PODFullSolveMultiApp> _pod_multi_app;
 
-  /** Name of the trainer object which contains the container for the solutions
+  /**
+   * Name of the trainer object which contains the container for the solutions
    * of the subapp or contains the artificial solution vectors.
    */
   std::string _trainer_name;
 
-  /** The trainer object to save the solution vector into or to fetch the
+  /**
+   * The trainer object to save the solution vector into or to fetch the
    * artificial solution vectors from.
    */
   PODReducedBasisTrainer * _trainer = nullptr;

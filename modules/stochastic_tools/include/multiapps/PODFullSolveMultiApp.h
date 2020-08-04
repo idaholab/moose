@@ -32,7 +32,7 @@ public:
   /// executed twice.
   virtual void preTransfer(Real dt, Real target_time) override;
 
-  /// Returning the value of the snapshotgeneration flag.
+  /// Returning the value of the snapshot generation flag.
   bool snapshotGeneration() { return _snapshot_generation; }
 
 protected:
@@ -59,7 +59,7 @@ protected:
 
   /// Switch used to differentiate between snapshot generation and residual
   /// computation. Residual generation is only possible after the snapshot generation
-  /// part is gone.
+  /// part is complete.
   bool _snapshot_generation;
 
 private:

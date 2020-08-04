@@ -7,7 +7,7 @@
     input = trainer.i
     check_files = 'trainer_out_pod_rb.rd'
     allow_test_objects = true
-    detail = 'training using known 3D data '
+    detail = 'training using known 3D data, '
   []
   [save_ev]
     type = CSVDiff
@@ -15,7 +15,7 @@
     csvdiff = 'eigenvalues_u.csv'
     cli_args = "Trainers/pod_rb/filenames='eigenvalues_u.csv'"
     allow_test_objects = true
-    detail = 'and then saving the eigenvalues '
+    detail = 'saving the eigenvalues, '
   []
   [load]
     type = CSVDiff
@@ -23,13 +23,13 @@
     allow_test_objects = true
     csvdiff = 'surr_out_res_0001.csv'
     prereq = train # Creates data files that this test uses
-    detail = 'and then evaluating new samples separately for new data'
+    detail = 'then evaluating new samples separately for new data, '
   []
   [train_and_load]
     type = CSVDiff
     input = trainer_and_surr.i
     allow_test_objects = true
     csvdiff = 'trainer_and_surr_out_res_0002.csv'
-    detail = 'and then doing both together in one input file.'
+    detail = 'and doing both together in one input file.'
   []
 []

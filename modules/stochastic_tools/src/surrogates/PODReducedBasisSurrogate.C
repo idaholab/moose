@@ -93,7 +93,7 @@ PODReducedBasisSurrogate::evaluateSolution(const std::vector<Real> & params,
 void
 PODReducedBasisSurrogate::initializeReducedSystem()
 {
-  // Storing important indices for the assemly loops.
+  // Storing important indices for the assembly loops.
   _final_ranks.resize(_var_names.size());
   _comulative_ranks.resize(_var_names.size());
   unsigned int sum_ranks = 0;
