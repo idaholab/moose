@@ -4,18 +4,8 @@
     type = 'Exodiff'
     input = 'creep_nl1.i'
     exodiff = 'creep_nl1_out.e'
-    prereq = 'creep_sm'
     abs_zero = 7e-5
     design = 'PowerLawCreepStressUpdate.md'
     requirement = 'The system shall compute and output the effective creep strain'
-  [../]
-  [./creep_sm]
-    type = 'Exodiff'
-    input = 'creep_nl1_sm.i'
-    exodiff = 'creep_nl1_out.e'
-    abs_zero = 7e-5
-    no_error_deprecated = true
-    design = 'PowerLawCreepModel.md'
-    requirement = 'The system shall compute and output the effective creep strain using deprecated solid_mechanics'
   [../]
 []

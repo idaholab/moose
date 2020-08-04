@@ -1,1 +1,0 @@
-../../../../../../../contact/test/tests/verification/patch_tests/cyl_3/cyl3_mesh.e

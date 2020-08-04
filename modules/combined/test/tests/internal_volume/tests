@@ -1,114 +1,6 @@
 [Tests]
   design = 'InternalVolume.md'
   issues = '#7061'
-  [./rspherical_sm]
-    type = 'CSVDiff'
-    input = 'rspherical_sm.i'
-    cli_args = 'Outputs/file_base=rspherical_out'
-    csvdiff = 'rspherical_out.csv'
-    prereq = 'rspherical'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for spherical coordinates for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rspherical_error_sm]
-    type = RunException
-    input = 'rspherical_sm.i'
-    cli_args = 'Postprocessors/intVolTotal/component=1'
-    expect_err = 'With spherical coordinates, the component must be 0 in InternalVolume.'
-    requirement = 'The system shall report an error if component is not 0 in InternalVolume for spherical coordinates for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_sm]
-    type = 'CSVDiff'
-    input = 'rz_sm.i'
-    cli_args = 'Outputs/file_base=rz_sm_out'
-    csvdiff = 'rz_sm_out.csv'
-    prereq = 'rz2'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz2_sm]
-    type = 'CSVDiff'
-    input = 'rz_sm.i'
-    cli_args = 'Postprocessors/internalVolume/component=1 Outputs/file_base=rz2_sm_out'
-    csvdiff = 'rz2_sm_out.csv'
-    prereq = 'rz_sm'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and with the y coordinate used in the integration over the sideset for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_error_sm]
-    type = RunException
-    input = 'rz_sm.i'
-    cli_args = 'Postprocessors/internalVolume/component=2'
-    expect_err = 'With cylindrical coordinates, the component must be 0 or 1 in InternalVolume.'
-    requirement = 'The system shall report an error if component is not 0 or 1 in InternalVolume for axisymmetric coordinates for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./hex20_sm]
-    type = 'CSVDiff'
-    input = 'hex20_sm.i'
-    cli_args = 'Outputs/file_base=hex20_out'
-    csvdiff = 'hex20_out.csv'
-    prereq = 'hex20'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates and hex20 elements for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_quad8_sm]
-    type = 'CSVDiff'
-    input = 'rz_quad8_sm.i'
-    cli_args = 'Outputs/file_base=rz_quad8_out'
-    csvdiff = 'rz_quad8_out.csv'
-    prereq = 'rz_quad8'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and quad8 elements for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_cone_sm]
-    type = 'CSVDiff'
-    input = 'rz_cone_sm.i'
-    cli_args = 'Outputs/file_base=rz_cone_out'
-    csvdiff = 'rz_cone_out.csv'
-    prereq = 'rz_cone'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for meshes with non axis-aligned geometries for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./hex8_sm]
-    type = 'CSVDiff'
-    input = 'hex8_sm.i'
-    cli_args = 'Outputs/file_base=hex8_out'
-    csvdiff = 'hex8_out.csv'
-    prereq = 'hex8'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_displaced_sm]
-    type = 'CSVDiff'
-    input = 'rz_displaced_sm.i'
-    cli_args = 'Outputs/file_base=rz_displaced_out'
-    csvdiff = 'rz_displaced_out.csv'
-    prereq = 'rz_displaced'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates and changing geometry for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
-  [./rz_displaced_quad8_sm]
-    type = 'CSVDiff'
-    input = 'rz_displaced_quad8_sm.i'
-    cli_args = 'Outputs/file_base=rz_displaced_quad8_out'
-    csvdiff = 'rz_displaced_quad8_out.csv'
-    prereq = 'rz_displaced_quad8'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for axisymmetric coordinates, changing geometry, and quad8 elements for solid_mechanics'
-    no_error_deprecated = true
-  [../]
-
   [./rspherical]
     type = 'CSVDiff'
     input = 'rspherical.i'
@@ -175,7 +67,7 @@
     type = 'CSVDiff'
     input = 'hex8.i'
     csvdiff = 'hex8_out.csv'
-    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for solid_mechanics'
+    requirement = 'The system shall compute internal volume given an enclosing sideset for 3D coordinates for mechanics models'
   [../]
 
   [./rz_displaced]

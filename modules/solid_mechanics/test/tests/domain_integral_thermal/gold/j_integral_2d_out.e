@@ -1,1 +1,0 @@
-../../../../../tensor_mechanics/test/tests/domain_integral_thermal/gold/j_integral_2d_out.e

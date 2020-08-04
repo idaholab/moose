@@ -1,9 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'solid_mech_cube_test.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-6
-    no_error_deprecated = true
-  [../]
-[]

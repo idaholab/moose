@@ -1,49 +1,6 @@
 [Tests]
   design = "/IterationAdaptiveDT.md"
   issues = "#2423"
-  [./test_function_change_sm]
-    type = 'Exodiff'
-    input = 'adapt_tstep_function_change_sm.i'
-    cli_args = 'Outputs/file_base=adapt_tstep_function_change_out'
-    exodiff = 'adapt_tstep_function_change_out.e'
-    rel_err = 9e-06
-    prereq = 'test_function_change_restart2'
-    no_error_deprecated = true
-    requirement = "The system shall allow for an adaptively computed time step to be limited based on a permissible change in the value of a function over a step using deprecated solid_mechanics."
-  [../]
-
-  [./test_function_force_step_sm]
-    type = 'Exodiff'
-    input = 'adapt_tstep_function_force_step_sm.i'
-    cli_args = 'Outputs/file_base=adapt_tstep_function_force_step_out'
-    exodiff = 'adapt_tstep_function_force_step_out.e'
-    rel_err = 9e-06
-    prereq = test_function_force_step
-    no_error_deprecated = true
-    requirement = "The system shall allow for forcing time steps to be taken at the knots of a time-dependent function using deprecated solid_mechanics."
-  [../]
-
-  [./test_function_change_restart1_sm]
-    type = 'RunApp'
-    input = 'adapt_tstep_function_change_restart1_sm.i'
-    recover = false
-    prereq = test_function_change_restart1
-    no_error_deprecated = true
-    requirement = "The system shall run the first part of a model used to test restarting with adaptive time steps using deprecated solid_mechanics."
-  [../]
-
-  [./test_function_change_restart2_sm]
-    type = 'Exodiff'
-    input = 'adapt_tstep_function_change_restart2_sm.i'
-    cli_args = 'Outputs/file_base=adapt_tstep_function_change_restart2_sm_out'
-    exodiff = 'adapt_tstep_function_change_restart2_sm_out.e'
-    exodiff_opts = -TM
-    rel_err = 9e-06
-    prereq = 'test_function_change_sm test_function_change_restart1_sm'
-    no_error_deprecated = true
-    requirement = "The system shall restart a model using adaptively computed time steps using deprecated solid_mechanics."
-  [../]
-
   [./test_function_change]
     type = 'Exodiff'
     input = 'adapt_tstep_function_change.i'

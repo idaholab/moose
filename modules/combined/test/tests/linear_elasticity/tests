@@ -9,21 +9,11 @@
     requirement = 'The system shall compute the elasticity tensor for linear isotropic material.'
   [../]
 
-  [./linear_anisotropic_material_sm]
-    type = 'Exodiff'
-    input = 'linear_anisotropic_material_sm.i'
-    exodiff = 'linear_anisotropic_material_out.e'
-    no_error_deprecated = true
-    design = 'LinearGeneralAnisotropicMaterial.md'
-    requirement = 'The system shall compute the elasticity tensor for linear anisotropic material using deprecated solid_mechanics.'
-  [../]
-
   [./linear_anisotropic_material]
     type = 'Exodiff'
     input = 'linear_anisotropic_material.i'
     exodiff = 'linear_anisotropic_material_out.e'
-    prereq = 'linear_anisotropic_material_sm'
-    requirement = 'The system shall compute the elasticity tensor for linear anisotropic material using deprecated solid_mechanics.'
+    requirement = 'The system shall compute the elasticity tensor for linear anisotropic material.'
   [../]
 
   [./applied_strain]

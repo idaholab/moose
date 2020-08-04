@@ -1,1 +1,0 @@
-../../gold/corner_edge_cut_out.e

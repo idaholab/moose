@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/simple_contact/simple_contact_rspherical.e

@@ -1,1 +1,0 @@
-../../../../../contact/test/tests/normalized_penalty/normalized_penalty_Q8.e
