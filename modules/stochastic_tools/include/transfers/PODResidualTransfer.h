@@ -27,14 +27,14 @@ public:
   /**
    * Methods used when running in batch mode (see SamplerFullSolveMultiApp)
    */
-  virtual void initializeFromMultiapp() override{};
+  virtual void initializeFromMultiapp() override {};
   virtual void executeFromMultiapp() override;
-  virtual void finalizeFromMultiapp() override{};
+  virtual void finalizeFromMultiapp() override {};
   ///@}
 
 protected:
   /**
-   * Transfer callback that will transfer residuls with given tags from the
+   * Transfer callback that will transfer residuals with given tags from the
    * subapplication.
    */
   virtual void execute() override;

@@ -16,10 +16,10 @@
 namespace StochasticTools
 {
 
-/*
-Templated class that specifies a distributed storage of a vector of given
-objects. It has a helper vector that contains global IDs for every stored item.
-*/
+/**
+ * Templated class that specifies a distributed storage of a vector of given
+ * objects. It has a helper vector that contains global IDs for every stored item.
+ */
 template <typename T>
 class DistributedData : public libMesh::ParallelObject
 {
@@ -30,7 +30,7 @@ public:
   /// the samples using linearPartitioning.
   void initializeContainer(dof_id_type num_global_entries);
 
-  /// Changing a sample with a global index if it is owed locally.
+  /// Changing a sample with a global index if it is owned locally.
   void changeEntry(dof_id_type glob_i, const T & sample);
 
   /// Adding a new sample locally with a global index.

@@ -119,7 +119,7 @@ PODSamplerSolutionTransfer::execute()
             NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
             NumericVector<Number> & solution = nl.solution();
 
-            // Zeroing down the solution tho make sure that only the required part
+            // Zeroing the solution to make sure that only the required part
             // is non-zero after copy.
             solution.zero();
 
@@ -209,7 +209,7 @@ PODSamplerSolutionTransfer::executeToMultiapp()
     NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
     NumericVector<Number> & solution = nl.solution();
 
-    // Zeroing down the solution tho make sure that only the required part
+    // Zeroing the solution to make sure that only the required part
     // is non-zero after copy.
     solution.zero();
 

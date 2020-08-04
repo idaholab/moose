@@ -105,7 +105,7 @@ PODFullSolveMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 void
 PODFullSolveMultiApp::computeResidual()
 {
-  // Doing the regual computation but instead of solving the subapplication,
+  // Doing the regular computation but instead of solving the subapplication,
   // the residuals for different tags are evaluated.
   if (!_has_an_app)
     return;
@@ -141,7 +141,7 @@ PODFullSolveMultiApp::computeResidualBatch(Real target_time)
   // Getting the overall base size from the trainer.
   dof_id_type base_size = _trainer->getSumBaseSize();
 
-  // Distrivuting the residual evaluation among processes.
+  // Distributing the residual evaluation among processes.
   dof_id_type local_base_begin;
   dof_id_type local_base_end;
   dof_id_type n_local_bases;

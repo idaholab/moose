@@ -5,22 +5,22 @@ and used on a parametric problem.
 
 ## Problem statement
 
-The full-order model is a one energy group, fixed-source neutron diffusion problem, adopted from [!cite](prince2019parametric).
-It showcases the core of a Pressurized Water Reactor (PWR) in 2D. The used geometry
+The full-order model is a one energy group, fixed-source diffusion-reaction problem, adopted from [!cite](prince2019parametric).
+The geometry for this problem
 is presented in [pwr_geom]. The problem has four different material regions, from which
-three (1, 2 and 3) act as neutron sources.
+three (1, 2 and 3) act as fixed sources.
 
 !media 2d_multiregion_geometry.png style=display:block;margin-left:auto;margin-right:auto;width:40%;
-       id=pwr_geom caption=The geometry of the PWR core used in this example ([!cite](prince2019parametric)).
+       id=pwr_geom caption=The geometry of the diffusion-reaction problem used in this example ([!cite](prince2019parametric)).
 
-The fixed-source one-group neutron diffusion with space dependent cross-sections can be expressed as:
+The fixed-source diffusion-reaction problem with space dependent coefficients can be expressed as:
 
 !equation id=fom_problem
 -\nabla \cdot\left[D(\textbf{r})\nabla\psi(\textbf{r})\right]+\Sigma_a(\textbf{r})\psi(\textbf{r}) = q(\textbf{r}) \,, \quad \textbf{r}\in\Omega
 
 where $D(\textbf{r})$ is the diffusion coefficient, $\Sigma_a(\textbf{r})$ is the
-absorption cross-section, $q(\textbf{r})$ is the fixed source term and
-field variable $\psi(\textbf{r})$ is the scalar neutron flux. Furthermore, $\Omega$
+reaction coefficient, $q(\textbf{r})$ is the fixed source term and
+field variable $\psi(\textbf{r})$ is the solution of interest. Furthermore, $\Omega$
 denotes the internal domain, without the boundaries, which can be
 partitioned into four sub-domains corresponding to the four material regions ($\Omega_1$, $\Omega_2$, $\Omega_3$ and $\Omega_4$).
 This equation needs to be supplemented with boundary conditions.
@@ -35,7 +35,7 @@ Dirichlet conditions:
 !equation
 \psi(\textbf{r}) = 0 \,, \quad \textbf{r}\in\partial\Omega_{refl}
 
-This problem is parametric in a sense that the solution for the scalar flux depends on the values of the
+This problem is parametric in a sense that the solution depends on the values of the
 cross-sections and the source: $\psi = \psi\left(\textbf{r},D(\textbf{r}),\Sigma_a(\textbf{r}),q(\textbf{r})\right)$.
 In this example, material region-wise constant cross-sections and source terms are considered
 yielding eight uncertain parameters altogether (assuming that Region 4 does not have a source).
@@ -185,7 +185,7 @@ through `change_rank` and `new_ranks` parameters.
 
 These surrogate models can be evaluated at the points defined in the testing sample batch
 by a `PODSurrogateTester` object in the `VectorPostprocessors` block.
-In this case, the Quantity of Interest (QoI) is the nodal $l^2$ norm of the solution for $\psi$.
+In this case, the Quantity of Interest (QoI) is the nodal $L^2$ norm of the solution for $\psi$.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=VectorPostprocessors
 
@@ -245,11 +245,11 @@ The reduced operators are then computed using these 53 basis functions.
 As a next step, two surrogate models are prepared using the `change_rank` and `new_ranks`
 parameters of [PODReducedBasisSurrogate.md] to change the size of the reduced system.
 The first surrogate model has 1 basis function, while the other has 8. Both
-models are then run on a 1000 sample test set and the nodal $l^2$ norms of the approximate solutions
+models are then run on a 1000 sample test set and the nodal $L^2$ norms of the approximate solutions
 are saved. Additionally, a full-order model was executed on the same test set and the results
 are saved to serve as reference values.
 [hist_1] presents the results with the surrogate model built with 1 basis function only. It is
-visible that the distribution of the QoI (nodal $l^2$ norm) on the test set is considerably different
+visible that the distribution of the QoI (nodal $L^2$ norm) on the test set is considerably different
 than the reference distribution.
 
 !media 2d_multireg_1.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
@@ -262,7 +262,7 @@ negligible.
 !media 2d_multireg_8.svg style=display:block;margin-left:auto;margin-right:auto;width:70%;
        id=hist_2 caption=The histogram of the QoI for the full-order reference model and the surrogate built with 8 basis function.
 
-The see the convergence of the results from the surrogate to those of the full-order model,
+To see the convergence of the results from the surrogate to those of the full-order model,
 the surrogate model is run multiple times with different ranks and
 the following error indicators are computed for each sample in the test set:
 
@@ -287,7 +287,7 @@ The test has been carried out on one processor only, not using the parallel capa
 MultiApp system. The results show that it is beneficial to create a POD-RB surrogate
 if more than 148 evaluations are needed. This assumes that the full-order evaluation time
 can be equally distributed among the 1000 test samples (0.779 s/sample). By dividing the
-trining time with this number we get a critical sample number above which the
+training time with this number we get a critical sample number above which the
 generation of a surrogate model is a better alternative.
 
 !table id=com_time caption=The computation time of the full-order solutions on the test set compared to the cost of training a surrogate and evaluating it on the same test set.

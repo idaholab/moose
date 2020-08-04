@@ -27,7 +27,7 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void initialize() override{};
+  virtual void initialize() override {};
 
   virtual void execute() override;
 
@@ -52,13 +52,13 @@ public:
 
   const std::vector<std::string> & getTagTypes() const { return _tag_types; }
 
-  /// Getting the snapshot size across all of the processors.
+  /// Getting the snapshot size across all of the processors for a given variable.
   dof_id_type getSnapsSize(dof_id_type v_ind);
 
   /// Getting the base size for a given variable.
   dof_id_type getBaseSize(dof_id_type v_ind) { return _base[v_ind].size(); }
 
-  /// Getting the overall base size, which is the sum of the individial bases.
+  /// Getting the overall base size, which is the sum of the individual bases.
   dof_id_type getSumBaseSize();
 
   /// Getting a basis vector for a given variable.
@@ -78,7 +78,7 @@ protected:
   void computeEigenDecomposition();
 
   /// Generates the basis vectors using the snapshots together with the
-  /// eigendecomposition of the correlation matrices
+  /// eigen-decomposition of the correlation matrices
   void computeBasisVectors();
 
   /// Prints the eigenvalues of the correlation matrix for each variable.
