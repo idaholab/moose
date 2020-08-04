@@ -192,13 +192,6 @@ public:
    */
   virtual Real relativeSolutionDifferenceNorm();
 
-  /**
-   * Set to change error_on_dtmin parameter
-   *
-   * @param error_on_dtmin The value to change the parameter to
-   */
-  void setErrorOnDtmin(bool error_on_dtmin) { _error_on_dtmin = error_on_dtmin; }
-
 protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
@@ -247,7 +240,7 @@ protected:
   /// This parameter controls how the system will deal with _dt <= _dtmin
   /// If true, the time stepper is expected to throw an error
   /// If false, the executioner will continue through EXEC_FINAL
-  bool _error_on_dtmin;
+  const bool _error_on_dtmin;
 
   ///if to use time interval output
   bool & _time_interval;
