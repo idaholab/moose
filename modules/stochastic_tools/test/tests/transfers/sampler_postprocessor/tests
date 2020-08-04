@@ -26,7 +26,6 @@
 
   [solve_not_converge]
     requirement = "When sub-application solve does not converge, the system shall either "
-    
     [abort]
       type = RunException
       input = cartesian_diverge.i
@@ -42,23 +41,14 @@
 
       detail = "transfer last computed postprocessor value, "
     []
-    [skip]
-      type = CSVDiff
+    [nan]
+      type = CheckFiles
       input = cartesian_diverge.i
-      cli_args = 'Transfers/data/skip_solve_not_converge_value=true
-                  Outputs/file_base=cartesian_diverge_skip'
-      csvdiff = 'cartesian_diverge_skip_storage_0001.csv'
-
-      detail = "skip value transfer, "
-    []
-    [user_value]
-      type = CSVDiff
-      input = cartesian_diverge.i
-      cli_args = 'Transfers/data/solve_not_converge_value=-1e16
-                  Outputs/file_base=cartesian_diverge_value'
-      csvdiff = 'cartesian_diverge_value_storage_0001.csv'
-
-      detail = "or transfer user defined value."
+      cli_args = 'Transfers/data/keep_solve_fail_value=false 
+                  Outputs/file_base=cartesian_diverge_nan'
+      check_files = 'cartesian_diverge_nan_storage_0001.csv'
+      file_expect_out = 'data:avg\nnan\n0\.269307.*\n0\.269307.*\n0\.269307.*\n0\.269307.*\n'
+      detail = "or transfer NaN."
     []
   []
 []
