@@ -326,6 +326,9 @@ protected:
 
   /// Number of cores per compute node if hierarch partitioning is used
   processor_id_type _num_parts_per_compute_node;
+
+  /// Whether or not to partition mesh linearly
+  bool _linear_partition;
 };
 
 template <>

@@ -23,7 +23,8 @@ public:
   FlagElementsThread(FEProblemBase & fe_problem,
                      std::vector<Number> & serialized_solution,
                      unsigned int max_h_level,
-                     const std::string & marker_name);
+                     const std::string & marker_name,
+                     bool is_serialized_solution);
 
   // Splitting Constructor
   FlagElementsThread(FlagElementsThread & x, Threads::split split);
@@ -42,5 +43,5 @@ protected:
   unsigned int _field_var_number;
   std::vector<Number> & _serialized_solution;
   unsigned int _max_h_level;
+  bool _is_serialized_solution;
 };
-

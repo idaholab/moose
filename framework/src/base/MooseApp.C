@@ -2084,7 +2084,10 @@ MooseApp::getRelationshipManagerInfo() const
   const auto & mesh = _action_warehouse.getMesh();
   if (mesh)
   {
-    std::unordered_map<std::string, unsigned int> counts;
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
 
     for (auto & gf : as_range(mesh->getMesh().ghosting_functors_begin(),
                               mesh->getMesh().ghosting_functors_end()))
@@ -2105,7 +2108,10 @@ MooseApp::getRelationshipManagerInfo() const
   const auto & d_mesh = _action_warehouse.getDisplacedMesh();
   if (d_mesh)
   {
-    std::unordered_map<std::string, unsigned int> counts;
+    // Let us use an ordered map to avoid stochastic console behaviors.
+    // I believe we won't have many RMs, and there is no performance issue.
+    // Deterministic behaviors are good for setting up regression tests
+    std::map<std::string, unsigned int> counts;
 
     for (auto & gf : as_range(d_mesh->getMesh().ghosting_functors_begin(),
                               d_mesh->getMesh().ghosting_functors_end()))

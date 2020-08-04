@@ -22,4 +22,18 @@
     rel_err = 1e-4
     requirement = "The system shall support mesh adaptivity with periodic boundary conditions on a distributed generated displaced mesh."
   [../]
+
+  [./pbc_adaptivity_nemesis]
+    type = 'Exodiff'
+    input = 'pbc_adaptivity.i'
+    exodiff = 'pbc_adaptivity_out.e.4.0 pbc_adaptivity_out.e.4.1 pbc_adaptivity_out.e.4.2 pbc_adaptivity_out.e.4.3'
+    # We use "linear_partition=true" here, so that the tests are platform independent
+    cli_args = 'Outputs/hide="pid" Outputs/nemesis=true Outputs/exodus=false Mesh/dmg/linear_partition=true'
+    allow_warnings = true
+    max_parallel = 4
+    min_parallel = 4
+    abs_zero = 1e-7
+    rel_err = 1e-4
+    requirement = "The system shall support a scalable mesh adaptivity with periodic boundary conditions on a distributed generated displaced mesh."
+  [../]
 []

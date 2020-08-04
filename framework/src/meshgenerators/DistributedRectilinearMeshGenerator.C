@@ -54,6 +54,12 @@ DistributedRectilinearMeshGenerator::validParams()
   params.addParam<processor_id_type>(
       "num_cores_for_partition", 0, "Number of cores for partitioning the graph");
 
+  params.addParam<bool>("linear_partition",
+                        false,
+                        "Whether or not to partition mesh linearly."
+                        " This parameter is mainly used for setting up regression tests."
+                        " For the production run, please do not use it.  ");
+
   MooseEnum elem_types(
       "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
       "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
@@ -105,7 +111,8 @@ DistributedRectilinearMeshGenerator::DistributedRectilinearMeshGenerator(
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z")),
     _part_package(getParam<MooseEnum>("part_package")),
-    _num_parts_per_compute_node(getParam<processor_id_type>("num_cores_per_compute_node"))
+    _num_parts_per_compute_node(getParam<processor_id_type>("num_cores_per_compute_node")),
+    _linear_partition(getParam<bool>("linear_partition"))
 {
 }
 
@@ -911,8 +918,20 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
   // Partition the distributed graph
   std::vector<dof_id_type> partition_vec;
-  PetscExternalPartitioner::partitionGraph(
-      comm, graph, {}, {}, num_procs, _num_parts_per_compute_node, _part_package, partition_vec);
+  if (_linear_partition)
+  {
+    mooseWarning(" LinearPartitioner is mainly used for setting up regression tests. For the "
+                 "production run, please do not use it.");
+    // The graph is already partitioned linearly via calling MooseUtils::linearPartitionItems
+    partition_vec.resize(num_local_elems);
+    // We use it as is
+    std::fill(partition_vec.begin(), partition_vec.end(), pid);
+  }
+  else
+  {
+    PetscExternalPartitioner::partitionGraph(
+        comm, graph, {}, {}, num_procs, _num_parts_per_compute_node, _part_package, partition_vec);
+  }
 
   mooseAssert(partition_vec.size() == num_local_elems, " Invalid partition was generateed ");
 
@@ -1018,20 +1037,6 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
 
   // Already partitioned!
   mesh.skip_partitioning(true);
-
-  // No need to renumber or find neighbors this time - done did it.
-  bool old_allow_renumbering = mesh.allow_renumbering();
-  /*mesh.allow_renumbering(false);
-  mesh.allow_find_neighbors(false);
-  // No, I do not want to remove anything in case periodic boundary conditions
-  // are required late. We  stop libMesh from deleting the valuable remote
-  // elements paired with the local elements
-  mesh.allow_remote_element_removal(false);
-  mesh.prepare_for_use();
-
-  // But we'll want to at least find neighbors after any future mesh changes!
-  mesh.allow_find_neighbors(true);*/
-  mesh.allow_renumbering(old_allow_renumbering);
 
   // Scale the nodal positions
   scaleNodalPositions<T>(nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax, mesh);
@@ -1209,7 +1214,6 @@ DistributedRectilinearMeshGenerator::generate()
   // not change mesh and there is no point to update anything.
   mesh->allow_renumbering(true);
 
-  mesh->allow_remote_element_removal(false);
   _mesh->prepared(false);
   _mesh->needsPrepareForUse();
 
