@@ -20,6 +20,7 @@
       input = master_single.i
       csvdiff = 'master_single_out_storage_0002.csv'
       prereq = master/single_normal
+      max_parallel = 3
 
       detail = 'for a single parameter for a batch of sub-applications,'
     []
@@ -39,6 +40,7 @@
       input = master_multiple.i
       csvdiff = 'master_multiple_out_storage_0002.csv'
       prereq = master/multiple_normal
+      max_parallel = 3
 
       detail = 'for multiple parameters for a batch of sub-applications.'
     []
@@ -54,6 +56,7 @@
     requirement = "The system shall error when the supplied sampler object operates in a mode that "
                   "does not allow for command line arguments to be modified."
     prereq = master/multiple_batch
+    max_parallel = 3
   []
 
   [wrong_execute_on]
@@ -65,5 +68,6 @@
     requirement = "The system shall error when the supplied sampler does not use the correct "
                   "execution flags."
     prereq = master/multiple_batch
+    max_parallel = 3
   []
 []
