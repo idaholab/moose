@@ -211,14 +211,14 @@ ComputeLinearElasticPFFractureStress::computeQpStress()
       break;
     default:
     {
-      _stress[_qp] = _D[_qp] * _elasticity_tensor[_qp] * _mechanical_strain[_qp] -
-                     _pressure[_qp] * I2 * _I[_qp];
-      F_pos = (_stress[_qp]).doubleContraction(_mechanical_strain[_qp]) / 2.0;
+      RankTwoTensor stress = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
+      F_pos = stress.doubleContraction(_mechanical_strain[_qp]) / 2.0;
       F_neg = 0.0;
       if (_use_current_hist)
-        _d2Fdcdstrain[_qp] = _stress[_qp] * _dDdc[_qp];
+        _d2Fdcdstrain[_qp] = stress * _dDdc[_qp];
 
-      _dstress_dc[_qp] = _stress[_qp] * _dDdc[_qp] - _pressure[_qp] * I2 * _dIdc[_qp];
+      _stress[_qp] = _D[_qp] * stress - _pressure[_qp] * I2 * _I[_qp];
+      _dstress_dc[_qp] = stress * _dDdc[_qp] - _pressure[_qp] * I2 * _dIdc[_qp];
       _Jacobian_mult[_qp] = _D[_qp] * _elasticity_tensor[_qp];
     }
   }

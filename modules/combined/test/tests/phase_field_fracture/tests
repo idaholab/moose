@@ -19,6 +19,16 @@
     issues = '#12868'
     requirement = 'The phase-field fracture model shall predict damage evolution using strain volumetric/deviatoric decomposition approach for an isotropic elastic material.'
   [../]
+  [./crack2d_no_split]
+    type = 'Exodiff'
+    input = 'crack2d_no_split.i'
+    exodiff = 'crack2d_no_split_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    design = 'ComputeLinearElasticPFFractureStress.md'
+    issues = '#12868 #15695'
+    requirement = 'The phase-field fracture model shall predict damage evolution with no decomposition approach for an isotropic elastic material.'
+  [../]
   [./crack2d_linear_fracture_energy]
     type = 'Exodiff'
     input = 'crack2d_linear_fracture_energy.i'
