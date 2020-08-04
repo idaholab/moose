@@ -2,7 +2,7 @@
   type = GeneratedMesh
   dim = 1
   elem_type = EDGE
-  nx = 1
+  nx = 3
 []
 
 [GlobalParams]
@@ -22,6 +22,10 @@
     family = MONOMIAL
   [../]
   [./e_over_l]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./forces]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -69,10 +73,15 @@
     property = e_over_l
     variable = e_over_l
   [../]
+  [./forces]
+    type = MaterialRealAux
+    property = forces
+    variable = forces
+  [../]
   [./area]
     type = ConstantAux
     variable = area
-    value = 1.0
+    value = 1
     execute_on = 'initial timestep_begin'
   [../]
 []
@@ -82,17 +91,9 @@
     type = ElementIntegralMaterialProperty
     mat_prop = axial_stress
   [../]
-  [./e_xx]
+  [./forces]
     type = ElementIntegralMaterialProperty
-    mat_prop = total_stretch
-  [../]
-  [./ee_xx]
-    type = ElementIntegralMaterialProperty
-    mat_prop = elastic_stretch
-  [../]
-  [./ep_xx]
-    type = ElementIntegralMaterialProperty
-    mat_prop = plastic_stretch
+    mat_prop = forces
   [../]
 []
 
@@ -104,25 +105,33 @@
   petsc_options_value = 'lu'
   nl_abs_tol = 1e-11
   l_max_its = 20
-  dt = 5e-5
-  num_steps = 10
+  dt = 1e-3
+  num_steps = 100
 []
 
 [Kernels]
   [./solid]
-    type = StressDivergenceTensorsTruss
+    type = StressDivergenceTruss
     component = 0
     variable = disp_x
-    area = area
     save_in = react_x
   [../]
 []
 
 [Materials]
+  [./elasticity]
+    type = ComputeElasticityTruss
+    youngs_modulus = 1e6
+  [../]
+  [./strain]
+    type = ComputeIncrementalTrussStrain
+    displacements = 'disp_x'
+    area = area
+  [../]
   [./truss]
-    type = PlasticTruss
-    youngs_modulus = 2.0e11
-    yield_stress = 500e5
+    type = ComputePlasticTrussResultants
+    area = area
+    yield_stress = 1e4
     hardening_constant = 0.
     outputs = exodus
   [../]
