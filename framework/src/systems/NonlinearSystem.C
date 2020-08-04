@@ -312,7 +312,8 @@ NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
   PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
       static_cast<PetscNonlinearSolver<Number> *>(_transient_sys.nonlinear_solver.get());
 
-  PetscMatrix<Number> * petsc_mat = static_cast<PetscMatrix<Number> *>(_transient_sys.matrix);
+  PetscMatrix<Number> * petsc_mat =
+      static_cast<PetscMatrix<Number> *>(&_transient_sys.get_system_matrix());
 
   SNESSetJacobian(petsc_nonlinear_solver->snes(),
                   petsc_mat->mat(),
@@ -337,7 +338,8 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
       dynamic_cast<PetscNonlinearSolver<Number> &>(*_transient_sys.nonlinear_solver);
 
   // Pointer to underlying PetscMatrix type
-  PetscMatrix<Number> * petsc_mat = dynamic_cast<PetscMatrix<Number> *>(_transient_sys.matrix);
+  PetscMatrix<Number> * petsc_mat =
+      dynamic_cast<PetscMatrix<Number> *>(&_transient_sys.get_system_matrix());
 
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
   // This variable is only needed for PETSC < 3.2.0

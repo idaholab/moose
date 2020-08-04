@@ -78,7 +78,7 @@ ActuallyExplicitEuler::solve()
   _explicit_residual *= -1.0;
 
   // Compute the mass matrix
-  auto & mass_matrix = *_nonlinear_implicit_system->matrix;
+  auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
   _fe_problem.computeJacobianTag(
       *_nonlinear_implicit_system->current_local_solution, mass_matrix, _Ke_time_tag);
 
