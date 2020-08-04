@@ -86,8 +86,50 @@ Sampler::init()
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
   // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
-  MooseUtils::linearPartitionItems(
-      _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
+  if (n_processors() > _n_rows)
+  {
+    // This code is specifically to match what is going on in MulitApp::buildComm()
+    // This will give the minimum processors per row
+    unsigned int procs_per_row = n_processors() / _n_rows;
+    // This will give the number of rows that have one additional processor
+    unsigned int extra_proc_rows = n_processors() % _n_rows;
+
+    // Index for the processor within a block of processors for a row
+    unsigned int block_ind = 0;
+    // Sample row
+    _local_row_begin = 0;
+    for (unsigned int i = 0; i < n_processors(); ++i)
+    {
+      if (i == processor_id())
+      {
+        if (block_ind == 0)
+          _n_local_rows = 1;
+        else
+        {
+          ++_local_row_begin;
+          _n_local_rows = 0;
+        }
+        break;
+      }
+      ++block_ind;
+
+      // Reset block index and increment row index
+      if (block_ind == procs_per_row)
+      {
+        block_ind = 0;
+        ++_local_row_begin;
+
+        // Increment the number of processors for every app after this point
+        if (_local_row_begin == (_n_rows - extra_proc_rows))
+          ++procs_per_row;
+      }
+    }
+
+    _local_row_end = _local_row_begin + _n_local_rows;
+  }
+  else
+    MooseUtils::linearPartitionItems(
+        _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
 
   // Set the next row iterator index
   _next_local_row = _local_row_begin;
