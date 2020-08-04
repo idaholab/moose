@@ -88,6 +88,8 @@ StressDivergenceTensorsTruss::computeStiffness(unsigned int i, unsigned int j)
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
 
+  out << " stiffness " << orientation(i) * orientation(j) * _e_over_l[0] * _area[0] << std::endl;
+
   return orientation(i) * orientation(j) * _e_over_l[0] * _area[0];
 }
 
