@@ -54,7 +54,17 @@
                   full_solve0:Executioner/nl_max_its=3'
       expect_err = 'Solve failed and timestep already at or below dtmin, cannot continue!'
 
-      detail = "abort run or "
+      detail = "abort run, "
+    []
+    [error]
+      type = RunException
+      input = master.i
+      cli_args = 'MultiApps/full_solve/ignore_solve_not_converge=true'
+      expect_err = 'Requesting to ignore failed solutions, but \'Executioner\/error\_on\_dtmin\' '
+                   'is true in sub-application. Set this parameter to false in '
+                   'sub-application to avoid an error if Transient solve fails.'
+
+      detail = "throw error if error_on_dtmin is not set, or "
     []
     [continue]
       type = Exodiff
@@ -63,6 +73,7 @@
                   full_solve0:Executioner/nl_rel_tol=0
                   full_solve0:Executioner/dtmin=0.01
                   full_solve0:Executioner/nl_max_its=3
+                  full_solve0:Executioner/error_on_dtmin=false
                   Outputs/file_base=master_diverge_out'
       exodiff = 'master_diverge_out.e master_diverge_out_full_solve0.e'
 

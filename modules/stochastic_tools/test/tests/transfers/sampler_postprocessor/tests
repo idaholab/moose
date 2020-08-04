@@ -29,7 +29,8 @@
     [abort]
       type = RunException
       input = cartesian_diverge.i
-      cli_args = 'MultiApps/sub/ignore_solve_not_converge=false'
+      cli_args = 'MultiApps/sub/ignore_solve_not_converge=false
+                  sub0:Executioner/error_on_dtmin=true'
       expect_err = "Solve failed and timestep already at or below dtmin, cannot continue!"
 
       detail = "abort run, "
