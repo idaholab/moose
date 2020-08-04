@@ -37,8 +37,11 @@ public:
 
   RelationshipManager(const RelationshipManager & other);
 
-  virtual void set_mesh(const MeshBase * /*mesh*/) override {}
-
+  /**
+   * A clone() is needed because GhostingFunctor can not be shared between
+   * different meshes. The operations in  GhostingFunctor are mesh dependent.
+   * We force all children to implement this.
+   */
   virtual std::unique_ptr<GhostingFunctor> clone() const override = 0;
 
   /**
@@ -55,8 +58,6 @@ public:
    * Whether or not this RM has been inited
    */
   bool inited() { return _inited; }
-
-  // virtual void set_mesh(const MeshBase * mesh) override { _mesh = mesh; }
 
   /**
    * The object (or Action) this RelationshipManager was built for

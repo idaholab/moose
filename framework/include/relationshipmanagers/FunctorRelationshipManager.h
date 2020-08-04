@@ -47,6 +47,10 @@ public:
 
   virtual void delete_remote_elements() override;
 
+  /**
+   * It is often called after cloning a ghosting functor/RM.
+   * It is essential because the operations in a ghosting functor are mesh-dependent.
+   */
   virtual void set_mesh(const MeshBase * mesh) override
   {
     if (_functor)

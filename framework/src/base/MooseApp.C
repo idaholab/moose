@@ -1985,8 +1985,11 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
 
         mesh->getMesh().add_ghosting_functor(*rm);
 
+        // The reference and displaced meshes should have the same geometric RMs.
+        // It is necessary for keeping both meshes consistent.
         if (_action_warehouse.displacedMesh())
         {
+          // Use shared_ptr here so that mesh can share its ownership
           std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();
           clone_rm->set_mesh(&_action_warehouse.displacedMesh()->getMesh());
           _action_warehouse.displacedMesh()->getMesh().add_ghosting_functor(clone_rm);
@@ -2004,6 +2007,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type)
         // If it's also Geometric but didn't get attached early - then let's attach it now
         if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC) && !rm->attachGeometricEarly())
         {
+          // The reference and displaced meshes should have the same geometric RMs.
+          // It is necessary for keeping both meshes consistent.
           if (_action_warehouse.displacedMesh())
           {
             std::shared_ptr<GhostingFunctor> clone_rm = rm->clone();

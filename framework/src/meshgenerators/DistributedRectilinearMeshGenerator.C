@@ -1214,8 +1214,33 @@ DistributedRectilinearMeshGenerator::generate()
   // not change mesh and there is no point to update anything.
   mesh->allow_renumbering(true);
 
+  // Mesh generator should not call prepare_for_use since RMs and ghosting
+  // functions are not attached yet. If we did call prepare_for_use, we had to
+  // use a lot of hacking methods to preserve valuable information.
+  // Let MOOSE decide to call prepare_for_use at the right place and
+  // at the right time. Precisely, prepare_for_use will be involved
+  // in SetupMeshCompleteAction, in which all geometric ghosting functors
+  // are already set up correctly.
   _mesh->prepared(false);
   _mesh->needsPrepareForUse();
+
+  // In the current implementation, DistributedRectilinearMeshGenerator
+  // will afford one layer of side neighbors and one layer of point neighbors.
+  // The default setting is right for most of the use cases;
+  // it is sufficient for my current use case.
+
+  // TODO: add multi-layer support in the future. There are several possible
+  // ways to achieve this goal:
+  // 1) Add one callback into ghosting functors that ask a mesh generator
+  // for more neighbors.  The mesh generator responds to the requirements
+  // by using vector push-pull. It is very easy to implementate this
+  // for DistributedRectilinearMeshGenerator.
+  // 2) Enhance ghosting functors to grab neighbors from their owners automatically.
+  // The advantage of this method is that it will be available for all mesh types;
+  // FileMesh, GeneratedMesh, or whatever mesh, once it is implementated.
+  // 3) Add a user-specified parameter into the mesh generator so that users
+  // can decide how many layers they want.
+  // 4) Other deep learning-based algorithms.
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

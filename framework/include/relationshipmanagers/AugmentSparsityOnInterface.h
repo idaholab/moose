@@ -47,7 +47,8 @@ public:
                           map_type & coupled_elements) override;
 
   /**
-   *
+   * A clone() is needed because GhostingFunctor can not be shared between
+   * different meshes. The operations in  GhostingFunctor are mesh dependent.
    */
   virtual std::unique_ptr<GhostingFunctor> clone() const override
   { return libmesh_make_unique<AugmentSparsityOnInterface>(*this); }
