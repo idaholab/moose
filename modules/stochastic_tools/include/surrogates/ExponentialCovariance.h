@@ -37,6 +37,17 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
+ void computedKdhyper(RealEigenMatrix & dKdhp,
+                      const RealEigenMatrix & x,
+                      unsigned int hyper_param_id) const override;
+
+ static void computedKdlf(RealEigenMatrix & K,
+                          const RealEigenMatrix & x,
+                          const std::vector<Real> & length_factor,
+                          const Real sigma_f_squared,
+                          const Real gamma,
+                          const int ind);
+
   void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const override;
 
   void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
@@ -56,4 +67,7 @@ private:
 
   /// gamma exponential factor for use in kernel
   Real _gamma;
+
+  /// Contains tuning inforation. Idex of hyperparam, along with min/max bounds
+  std::unordered_map<std::string,std::tuple<unsigned int, Real, Real>> _tuning_data;
 };

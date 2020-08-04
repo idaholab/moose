@@ -62,4 +62,7 @@ protected:
 
   /// noise variance (\sigma_n^2)
   Real _sigma_n_squared;
+
+  /// Contains tuning inforation. Idex of hyperparam, along with min/max bounds
+  std::unordered_map<std::string,std::tuple<unsigned int, Real, Real>> _tuning_data;
 };

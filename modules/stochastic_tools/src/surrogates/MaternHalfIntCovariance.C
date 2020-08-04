@@ -65,7 +65,7 @@ MaternHalfIntCovariance::buildHyperParamBounds(libMesh::PetscVector<Number> & th
                                                libMesh::PetscVector<Number> & theta_u) const
 {
   theta_l.set(0, 0);
-  theta_u.set(0, 1e16);
+  theta_u.set(0, PETSC_INFINITY);
   theta_l.set(1, 0);
   theta_u.set(1, 1e16);
   for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
