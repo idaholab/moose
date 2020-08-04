@@ -26,12 +26,9 @@
     sampler = cartesian
     to_vector_postprocessor = storage
     from_postprocessor = avg
-    # If this is true, the transfer will omit values from sub apps that did not converge
-    skip_solve_not_converge_value = false # Default: false
-    # If this parameter is set,
-    # the transfer will transfer this value for sub apps that did not converge,
-    # otherwise it will transfer whatever the last computed values is
-    # solve_not_converge_value = 0 # Default: none
+    # If this is false, the transfer will transfer NaN for sub apps that did not converge.
+    # If this is true, the transfer will transfer whatever the last computed values are.
+    keep_solve_fail_value = true # Default: false
   []
 []
 
