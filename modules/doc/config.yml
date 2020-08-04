@@ -64,7 +64,7 @@ Extensions:
             #richards: !include modules/richards/doc/hidden.yml
             stochastic_tools: !include modules/stochastic_tools/doc/hidden.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
-            xfem: !include modules/xfem/doc/hidden.yml
+            #xfem: !include modules/xfem/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
             #chemical_reactions: !include modules/chemical_reactions/doc/remove.yml
