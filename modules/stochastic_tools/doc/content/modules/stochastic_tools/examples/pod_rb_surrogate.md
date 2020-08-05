@@ -36,8 +36,8 @@ Dirichlet conditions:
 \psi(\textbf{r}) = 0 \,, \quad \textbf{r}\in\partial\Omega_{refl}
 
 This problem is parametric in a sense that the solution depends on the values of the
-cross-sections and the source: $\psi = \psi\left(\textbf{r},D(\textbf{r}),\Sigma_a(\textbf{r}),q(\textbf{r})\right)$.
-In this example, material region-wise constant cross-sections and source terms are considered
+coefficients and the source: $\psi = \psi\left(\textbf{r},D(\textbf{r}),\Sigma_a(\textbf{r}),q(\textbf{r})\right)$.
+In this example, material region-wise constant coefficients and source terms are considered
 yielding eight uncertain parameters altogether (assuming that Region 4 does not have a source).
 The material properties in each region have [Uniform](Uniform.md) distributions ($\mathcal{U}(a,b)$)
 specified in [param_distributions] with $a$ and $b$ being the lower and upper bounds.
@@ -49,10 +49,10 @@ specified in [param_distributions] with $a$ and $b$ being the lower and upper bo
 | Diffusion coefficient in Region 2 $\left(cm\right)$ | $D_2$ | $\sim\mathcal{U}(0.2, 0.8)$ |
 | Diffusion coefficient in Region 3 $\left(cm\right)$ | $D_3$ | $\sim\mathcal{U}(0.2, 0.8)$ |
 | Diffusion coefficient in Region 4 $\left(cm\right)$ | $D_4$ | $\sim\mathcal{U}(0.15, 0.6)$ |
-| Absorption cross-section in Region 1 $\left(cm^{-1}\right)$ | $\Sigma_{a,1}$ | $\sim\mathcal{U}(0.0425, 0.17)$ |
-| Absorption cross-section in Region 2 $\left(cm^{-1}\right)$ | $\Sigma_{a,2}$ | $\sim\mathcal{U}(0.065, 0.26)$ |
-| Absorption cross-section in Region 3 $\left(cm^{-1}\right)$ | $\Sigma_{a,3}$ | $\sim\mathcal{U}(0.04, 0.16)$ |
-| Absorption cross-section in Region 4 $\left(cm^{-1}\right)$ | $\Sigma_{a,4}$ | $\sim\mathcal{U}(0.005, 0.02)$ |
+| Reaction coefficient in Region 1 $\left(cm^{-1}\right)$ | $\Sigma_{a,1}$ | $\sim\mathcal{U}(0.0425, 0.17)$ |
+| Reaction coefficient in Region 2 $\left(cm^{-1}\right)$ | $\Sigma_{a,2}$ | $\sim\mathcal{U}(0.065, 0.26)$ |
+| Reaction coefficient in Region 3 $\left(cm^{-1}\right)$ | $\Sigma_{a,3}$ | $\sim\mathcal{U}(0.04, 0.16)$ |
+| Reaction coefficient in Region 4 $\left(cm^{-1}\right)$ | $\Sigma_{a,4}$ | $\sim\mathcal{U}(0.005, 0.02)$ |
 | Fixed-source in Region 1 $\left(\frac{n}{cm^3 \cdot s}\right)$ | $q_1$ | $\sim\mathcal{U}(5, 20)$ |
 | Fixed-source in Region 2 $\left(\frac{n}{cm^3 \cdot s}\right)$ | $q_2$ | $\sim\mathcal{U}(5, 20)$ |
 | Fixed-source in Region 3 $\left(\frac{n}{cm^3 \cdot s}\right)$ | $q_3$ | $\sim\mathcal{U}(5, 20)$ |
