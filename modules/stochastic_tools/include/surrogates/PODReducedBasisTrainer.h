@@ -27,7 +27,7 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void initialize() override {};
+  virtual void initialize() override{};
 
   virtual void execute() override;
 
