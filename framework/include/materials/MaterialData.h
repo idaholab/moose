@@ -351,6 +351,7 @@ MaterialData::declareHelper(MaterialProperties & props,
     else
       mooseError("Material has no property named: " + prop_name);
   }
+  prop->name(prop_name);
   return *prop;
 }
 
@@ -374,6 +375,7 @@ MaterialData::declareADHelper(MaterialProperties & props,
     else
       mooseError("Material has no property named: " + prop_name);
   }
+  prop->name(prop_name);
   return *prop;
 }
 

@@ -13,7 +13,9 @@
 
 #include "MooseADWrapper.h"
 #include "MooseArray.h"
+#include "MooseTypes.h"
 #include "DataIO.h"
+#include "MooseError.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/tensor_value.h"
@@ -180,6 +182,21 @@ public:
    */
   virtual void load(std::istream & stream) override;
 
+  void name(const MaterialPropertyName & name_in)
+  {
+    mooseAssert(
+        _name.empty() || _name == name_in,
+        "We're trying to apply a new name to a material property. I don't think that makes sense.");
+    _name = name_in;
+  }
+
+  const MaterialPropertyName & name() const
+  {
+    if (_name.empty())
+      mooseError("Retrieving a material property name before it's set.");
+    return _name;
+  }
+
 private:
   /// private copy constructor to avoid shallow copying of material properties
   MaterialPropertyBase(const MaterialPropertyBase<T, is_ad> & /*src*/)
@@ -192,6 +209,9 @@ private:
   {
     mooseError("Material properties must be assigned to references (missing '&')");
   }
+
+  /// the name of this material property
+  MaterialPropertyName _name;
 
 protected:
   /// Stored parameter value.
