@@ -73,8 +73,6 @@ TensorMechanicsActionBase::validParams()
       "volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<bool>(
       "use_finite_deform_jacobian", false, "Jacobian for corrotational finite strain");
-  params.addParam<bool>(
-      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParam<bool>("add_variables", false, "Add the displacement variables");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
