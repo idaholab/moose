@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#0000'
+  issues = '#15702'
   design = 'DistributedRectilinearMeshGenerator.md'
 
   [./adaptivity]
@@ -32,6 +32,17 @@
     allow_warnings = true
     max_parallel = 4
     min_parallel = 4
+    abs_zero = 1e-7
+    rel_err = 1e-4
+    requirement = "The system shall support a scalable mesh adaptivity with periodic boundary conditions on a distributed generated displaced mesh."
+  [../]
+
+  [./pbc_adaptivity_autoscaling]
+    type = 'Exodiff'
+    input = 'pbc_adaptivity.i'
+    exodiff = 'pbc_adaptivity_out.e'
+    cli_args = 'Outputs/hide="pid" Executioner/automatic_scaling=true Executioner/compute_scaling_once=false'
+    prereq = 'pbc_adaptivity'
     abs_zero = 1e-7
     rel_err = 1e-4
     requirement = "The system shall support a scalable mesh adaptivity with periodic boundary conditions on a distributed generated displaced mesh."

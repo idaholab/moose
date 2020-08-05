@@ -47,16 +47,6 @@ public:
   virtual bool operator==(const RelationshipManager & /*rhs*/) const override;
 
   /**
-   * It is often called after cloning a ghosting functor/RM.
-   * It is essential because the operations in a ghosting functor are mesh-dependent.
-   */
-  virtual void set_mesh(const MeshBase * mesh) override
-  {
-    RelationshipManager::set_mesh(mesh);
-    _this_mesh = mesh;
-  }
-
-  /**
    * A clone() is needed because GhostingFunctor can not be shared between
    * different meshes. The operations in  GhostingFunctor are mesh dependent.
    */
@@ -67,8 +57,6 @@ public:
 
 protected:
   virtual void internalInit() override{};
-
-  const MeshBase * _this_mesh;
 
   System * _other_system;
 };
