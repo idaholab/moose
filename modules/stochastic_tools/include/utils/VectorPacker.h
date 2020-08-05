@@ -19,9 +19,10 @@ namespace Parallel
 {
 
 /**
- * This object is responsible for packing and unpacking data stored in a std::shared_ptr<DenseVector<Real>>.
- * It is also specific to the training process of PODReducedBasisTrainer since it
- * packs the global sample index and variable index together with the vector.
+ * This object is responsible for packing and unpacking data stored in a
+ * std::shared_ptr<DenseVector<Real>>. It is also specific to the training process of
+ * PODReducedBasisTrainer since it packs the global sample index and variable index together with
+ * the vector.
  */
 template <>
 class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>
