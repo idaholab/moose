@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReporterData.h"
-//#include "MooseApp.h"
 
 ReporterData::ReporterData(MooseApp & moose_app) : _app(moose_app) {}
 
@@ -38,7 +37,9 @@ ReporterData::copyValuesBack()
 void
 ReporterData::finalize(const std::string & object_name)
 {
-  auto func = [object_name](auto & ptr) {
+  // FYI, for the miniumum compiler 'auto' doesn't work in argument of the lambda
+  // ReporterData.C:41:29: error: 'auto' not allowed in lambda parameter
+  auto func = [object_name](const std::unique_ptr<ReporterContextBase> & ptr) {
     if (ptr->name().getObjectName() == object_name)
       ptr->finalize();
   };
