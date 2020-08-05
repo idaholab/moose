@@ -1,29 +1,26 @@
 # New Users
 
-Welcome to MOOSE! This page describes some helpful ways to start developing if you are new to MOOSE. Before proceeding, be sure to visit the [installation/index.md] page and follow the instructions to get the framework up and running on your device if you haven't done so already.
+Welcome to MOOSE! This page describes some helpful ways to start developing with MOOSE. Before proceeding, please visit the [installation/index.md] page and follow the instructions to get the framework up and running.
 
 ## Create an Application id=create-an-app
 
-MOOSE is designed for building custom applications, therefore if you plan on working with MOOSE
-then you should create an application.
-
-Your application is where code and input files should be created for your particular problem.
+MOOSE is designed for building custom applications, therefore to use MOOSE an application is required. An application is where code and input files are created for a particular problem or set of problems of interest.
 
 To create an application, run the stork.sh script while sitting outside the MOOSE repository with
-a single argument providing the name you wish to use to name your application:
+a single argument: the name of your application:
 
 ```bash
 cd ~/projects
 ./moose/scripts/stork.sh YourAppName
 ```
 
-Running this script will create a folder named "YourAppName" in the projects directory, this
-application will automatically link against MOOSE. Obviously, the "YourAppName" should be the name
-you want to give to your application; consider the use of an acronym. We prefer animal names for
+Running this script will create a folder named "your_app_name" in the projects directory, this
+application will automatically link against MOOSE. Obviously, the "YourAppName" should be the desired
+name or your application; consider the use of an acronym. Animal names are prefered for
 applications, but you are free to choose whatever name suits your needs.
 
-!alert warning
-You should not attempt to run this script while sitting inside the MOOSE repository. Doing so will result in an error.
+!alert warning title=Execute stork from outside of the MOOSE directory
+Do not attempt to run this script while inside the MOOSE repository. Doing so will result in an error.
 
 ### Compile and Test Your Application id=compile
 
@@ -33,12 +30,12 @@ make -j4
 ./run_tests -j4
 ```
 
-If your application is working correctly, you should see one passing test. This indicates that
-your application is ready to be further developed. Be sure to recompile and tests your application each time you [Update MOOSE](installation/index.md#update).
+If the application is working correctly, the output shows a single passing test. This indicates that
+the application is ready to be further developed. Be sure to recompile and tests the application each time [MOOSE is updated](installation/index.md#update).
 
 ### Enable Physics Modules
 
-To enable use of the various [modules/index.md] available from MOOSE on your application, you have to modify the section of `~/projects/YourAppName/Makefile` that is demonstrated below.
+To enable use of the various [modules/index.md] available from MOOSE in an application, modify the section of `~/projects/your_app_name/Makefile` that is demonstrated below.
 
 ```script
 ################################## MODULES ####################################
@@ -67,15 +64,15 @@ TENSOR_MECHANICS            := no
 XFEM                        := no
 ```
 
-Then, to begin using a modules capabilities, you'll have to recompile your application in the same manner described in the [#compile] section.
+Then, to begin using a modules capabilities, recompile the application in the same manner described in the [#compile] section.
 
-!alert tip
-You probably shouldn't simply enable all of the physics modules, because this will slow down the compilation process. Try to enable modules on an as-needed basis.
+!alert tip title=Only enable modules needed
+Each module enabled will increase compilation times, thus it is recommended to enable modules as-needed.
 
 ## Learn More
 
-Now that you have a working MOOSE Framework stack, consider checking out the [examples_and_tutorials/index.md] page for a beginning tour of how to use input
-files and implement your own custom behavior for MOOSE. Our [first tutorial](tutorial01_app_development/index.md) demonstrates how MOOSE application development works. You may also visit our [framework_development/index.md] to learn how to contribute to MOOSE.
+With a working application next consider looking at the [examples_and_tutorials/index.md] page for a beginning tour of how to use input
+files and implement custom behavior in an application. The [first tutorial](tutorial01_app_development/index.md) demonstrates how MOOSE application development works. If you are interested in contributing to MOOSE please visit [framework_development/index.md].
 
 ## Helpful Software id=helpful-software
 
