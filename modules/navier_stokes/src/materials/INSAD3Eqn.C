@@ -59,9 +59,13 @@ INSAD3Eqn::initialSetup()
   if ((_has_heat_source = _object_tracker->get<bool>("has_heat_source")))
   {
     if (_object_tracker->isTrackerParamValid("heat_source_var"))
-      _heat_source_var = _object_tracker->get<const ADVariableValue *>("heat_source_var");
+      _heat_source_var =
+          &_subproblem
+               .getStandardVariable(_tid, _object_tracker->get<VariableName>("heat_source_var"))
+               .adSln();
     else if (_object_tracker->isTrackerParamValid("heat_source_function"))
-      _heat_source_function = _object_tracker->get<const Function *>("heat_source_function");
+      _heat_source_function = &_fe_problem.getFunction(
+          _object_tracker->get<FunctionName>("heat_source_function"), _tid);
   }
 }
 

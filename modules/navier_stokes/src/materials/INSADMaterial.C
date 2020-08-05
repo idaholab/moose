@@ -11,6 +11,7 @@
 #include "Function.h"
 #include "Assembly.h"
 #include "INSADObjectTracker.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("NavierStokesApp", INSADMaterial);
 
@@ -74,9 +75,18 @@ INSADMaterial::initialSetup()
 
   if ((_has_boussinesq = _object_tracker->get<bool>("has_boussinesq")))
   {
-    _boussinesq_alpha = _object_tracker->get<const ADMaterialProperty<Real> *>("alpha");
-    _temperature = _object_tracker->get<const ADVariableValue *>("temperature");
-    _ref_temp = _object_tracker->get<const MaterialProperty<Real> *>("ref_temp");
+    // Material property retrieval through MaterialPropertyInterface APIs can only happen during
+    // object contruction because we're going to check for material property dependency resolution.
+    // So we have to go through MaterialData here. We already performed the material property
+    // requests through the MaterialPropertyInterface APIs in the INSAD kernels, so we should be
+    // safe for dependencies
+    _boussinesq_alpha =
+        &_material_data->getADProperty<Real>(_object_tracker->get<MaterialPropertyName>("alpha"));
+    _temperature =
+        &_subproblem.getStandardVariable(_tid, _object_tracker->get<VariableName>("temperature"))
+             .adSln();
+    _ref_temp =
+        &_material_data->getProperty<Real>(_object_tracker->get<MaterialPropertyName>("ref_temp"));
   }
 
   _has_gravity = _object_tracker->get<bool>("has_gravity");
@@ -88,11 +98,18 @@ INSADMaterial::initialSetup()
   if ((_has_coupled_force = _object_tracker->get<bool>("has_coupled_force")))
   {
     if (_object_tracker->isTrackerParamValid("coupled_force_var"))
-      _coupled_force_var =
-          _object_tracker->get<std::vector<const ADVectorVariableValue *>>("coupled_force_var");
+    {
+      const auto & var_names = _object_tracker->get<std::vector<VariableName>>("coupled_force_var");
+      for (const auto & var_name : var_names)
+        _coupled_force_var.push_back(&_subproblem.getVectorVariable(_tid, var_name).adSln());
+    }
     if (_object_tracker->isTrackerParamValid("coupled_force_vector_function"))
-      _coupled_force_vector_function =
-          _object_tracker->get<std::vector<const Function *>>("coupled_force_vector_function");
+    {
+      const auto & func_names =
+          _object_tracker->get<std::vector<FunctionName>>("coupled_force_vector_function");
+      for (const auto & func_name : func_names)
+        _coupled_force_vector_function.push_back(&_fe_problem.getFunction(func_name, _tid));
+    }
   }
 }
 
