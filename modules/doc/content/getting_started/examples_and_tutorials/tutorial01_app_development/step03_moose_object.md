@@ -1,7 +1,7 @@
 # Step 3: Introduction to MOOSE Objects
 
 In this step, [#objects], and the purposes they serve, will be introduced.
-To demonstrate this concept, the reader shall consider the same problem discussed in [Step 2](tutorial01_app_development/step02_input_file.md#physics) and explore the basics of how the Laplace equation was developed in the form of a C++ object.
+To demonstrate this concept, consider the same problem discussed in [Step 2](tutorial01_app_development/step02_input_file.md#physics) and explore the basics of how the Laplace equation was developed in the form of a C++ object.
 
 ## Statement of Physics id=physics
 
@@ -19,123 +19,49 @@ In the [next step](tutorial01_app_development/step04_weak_form.md), exactly what
 
 ## MOOSE Objects id=objects
 
-The idea of object-oriented programming is to create many different functions that process a well-defined and unique task, and then call upon them wherever they are needed<!--Provide link to discussion of OOP somewhere on the website here-->. Generally, when one refers to [objects in C++ programming](https://www.w3schools.com/cpp/cpp_classes.asp) it could mean several different things. As a basic example, the creation and use of a C++ object might look like that shown in [c++-object]. The reader is encouraged to try to predict what this code would output.
+The core framework of MOOSE is built around systems, where each system uses object-oriented programming to provide a well-defined interface for using the system via C++ inhertience. In short, the framework provides a set of base class(es) for each system. These base classes are specialized using custom C++ objects within an application to achieve the desired behavior for the problem. Resources for object orientiented are abundant, but a solid starting point is [cplusplus.com](https://www.cplusplus.com). This tutorial assumes a basic understanding of both C++ and object-oriented programming.
 
-!listing! language=C++
-          id=c++-object
-          caption=Example use of some C++ object, `myObj`, of type, `myClass` (from [w3schools.com](https://www.w3schools.com/cpp/cpp_classes.asp)).
-class MyClass {       // The class
-  public:             // Access specifier
-    int myNum;        // Attribute (int variable)
-    string myString;  // Attribute (string variable)
-};
-
-int main() {
-  MyClass myObj;  // Create an object of MyClass
-
-  // Access attributes and set values
-  myObj.myNum = 15;
-  myObj.myString = "Some text";
-
-  // Print attribute values
-  cout << myObj.myNum << "\n";
-  cout << myObj.myString;
-  return 0;
-}
-!listing-end!
-
-More specifically, when one mentions objects in MOOSE, these are usually a reference to a particular C++ *subclass* that exists within the MOOSE source code, or a particular *instance* of a class. A subclass would be one which inherits from another one and uses it as a template. For example, the `Diffusion` class is a MOOSE object that is a subclass of the `Kernel` *base class*. Any instance of a certain class becomes an object. As in the above example, *myObj* is an instance of *myClass*.
-
-Object-oriented programming in MOOSE forms the edifice for the structure and organization of MOOSE input files, which were discussed in the [previous step](tutorial01_app_development/step02_input_file.md#inputs). For example, recall that the `[BCs]` block in [`pressure_diffusion.i`](tutorial01_app_development/step02_input_file.md#input-demo) was the following:
-
-!listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
-         block=BCs
-         link=False
-
-Here, since both the `[inlet]` and `[outlet]` blocks become instances of the `DirichletBC` class, they are both objects. The `DirichletBC` class is also an object, since it is an instance of the `BoundaryCondition` base class.
-
-### Custom MOOSE Objects id=custom
-
-All user-facing objects in MOOSE derive from [`MooseObject`](src/base/MooseObject.h), this allows for a common structure for all applications and is the basis for the modular design of MOOSE. A new `MooseObject` requires a *header file* and a *source file*. The basic setup for each is shown in [basic-header] and [basic-source], respectively.
-In a MOOSE application, header files will be found in the `include/` directory, while source files will be found in the `src/` directory. Within each of those directories, a `MooseObject` must be filed in the subdirectory whose name corresponds with the base class for which the object inherits from. For example, the files for the `Diffusion` object, which will be discussed in the [next section](#demo), are located at [`moose/framework/include/kernels/`](https://github.com/idaholab/moose/tree/master/framework/include/kernels) and [`moose/framework/src/kernels/`](https://github.com/idaholab/moose/tree/master/framework/src/kernels).
-
-!listing! language=C++
-          id=basic-header
-          caption=A basic template used for creating a `MooseObject` header file.
-#pragma once
-
-#include "BaseObject.h"
-
-class CustomObject : public BaseObject
-{
-public:
-  static InputParameters validParams();
-
-  CustomObject(const InputParameters & parameters);
-
-protected:
-
-  virtual Real doSomething() override;
-
-  const Real & _scale;
-};
-!listing-end!
-
-!listing! language=C++
-          id=basic-source
-          caption=A basic template used for creating a `MooseObject` source file.
-#include "CustomObject.h"
-
-registerMooseObject("CustomApp", CustomObject);
-
-InputParameters
-CustomObject::validParams()
-{
-  InputParameters params = BaseObject::validParams();
-  params.addClassDescription("The CustomObject does something with a scale parameter.");
-  params.addParam<Real>("scale", 1, "A scale factor for use when doing something.");
-  return params;
-}
-
-CustomObject::CustomObject(const InputParameters & parameters) :
-    BaseObject(parameters),
-    _scale(getParam<Real>("scale"))
-{
-}
-
-double
-CustomObject::doSomething()
-{
-  // Do some sort of import calculation here that needs a scale factor
-  return _scale;
-}
-!listing-end!
-
-As the tutorial progresses, the basic structure and syntax of the templates given in [basic-header] and [basic-source] will be seen regularly and the purpose and use of functions, like `validParams()`, should become more clear.
-
-## Demonstration id=demo
-
-A `MooseObject` that is capable of solving the Laplace equation was required for [Step 2](tutorial01_app_development/step02_input_file.md). By now, it should be obvious that the `Diffusion` object was perfectly capable of solving [laplace] and so there was no need to develop one for this problem.
-
-!alert tip title=The MOOSE Framework Does a Lot Already
-Before one considers developing a new `MooseObject` that they need for their application, they should confirm that something like it does not already exist in the Framework. All MOOSE Applications posses the full capability of the MOOSE Framework, in addition to their own capabilities.
-
-Still, one should wonder about how exactly this object was developed. First off, consider the header file, `Diffusion.h`:
+In practice, all objects in MOOSE and within an application being developed follow the same pattern. Thus, only a broad understanding is required to begin working with MOOSE. For example, consider the `Diffusion` object contianed within the framework as shown in [diffusion-hdr] and [diffusion-src].
 
 !listing framework/include/kernels/Diffusion.h
-         start=class
-
-In this file, the `Diffusion` class has been identified, as well as the data types and names of the functions it performs. In essence, this is the purpose of header files, which have the `.h` extension, in C++ programming.
-
-Notice that there are no indications of [laplace] nor [weak] here. Actually, [weak] is provided as part of the source file:
+         re=(?P<remove>\S*^class Diffusion;$.*?<Diffusion>\(\);)
+         id=diffusion-hdr
+         caption=Header file that declares the `Diffusion` object.
 
 !listing framework/src/kernels/Diffusion.C
-         re=Real\sDiffusion::computeQpResidual.*?^}
+         id=diffusion-src
+         caption=Source file that define the `Diffusion` object.
 
-In the above code, one should recognize a resemblance to the integrand on the left-hand side of [weak].
-This is why it was necessary to present [weak] - MOOSE is designed to solve [!ac](PDEs) in this format. Now, all that remains is to evaluate the integral. Once that is taken care of, a completed `MooseObject` that can solve [laplace] will be realized. The means by which integration is handled will be discussed later in this tutorial.
+This class can be used to demonstrate the form in which all object created in a MOOSE-based application will follow. First, begin with definition in the header. Foremost, all header classes should start with:
 
-<!--Need to come back here and verify that all of this accurate once I work through more steps and get a clearer picture of how this all works. I DO NOT want to confuse the reader.-->
+!listing framework/include/kernels/Diffusion.h line=#pragma
+
+This line ensures that the compiler does not include the contents of this file more then once.
+
+Next, the base class that is being specialized is included. For the `Diffusion` object, this base class is a `Kernel`, thus the object being created is part of the [Kernels/index.md] system for describing the volumentric term of the weak form. Again, details regarding how the weak form is generated will be covered later in the tutorial.
+
+!listing framework/include/kernels/Diffusion.h line=#include
+
+Finally, the class being created is defined. This definition contains three main compoments common to all object that will be created within an application:
+
+1. a static validParams function for creating input syntax;
+
+   !listing framework/include/kernels/Diffusion.h line=static Input
+
+1. a constructor the has a single input; and
+
+   !listing framework/include/kernels/Diffusion.h line=const InputParameters &
+
+1. one or many methods that are overridden to provide the custo functionality desired for the application.
+
+   !listing framework/include/kernels/Diffusion.h line=virtual
+
+The source (.C) file simply defines the behavior of these three components for the object being created. As the tutorial progresses, this basic structure and syntax of the will be seen regularly and the purpose and use of methods, like `validParams()`, will become more clear.
+
+A `MooseObject` that is capable of solving the Laplace equation was required for [Step 2](tutorial01_app_development/step02_input_file.md). By now, it should be obvious that the `Diffusion` object was capable of solving [laplace] and so there was no need to develop one for this problem.
+
+!alert tip title=The MOOSE does a lot already
+Before developing a new `MooseObject` in an application, confirm that something like it does not already exist. All MOOSE applications posses the full capability of the framework and physics modules (more on this later), in addition to their own capabilities.
 
 !content pagination previous=tutorial01_app_development/step02_input_file.md
                     next=tutorial01_app_development/step04_weak_form.md

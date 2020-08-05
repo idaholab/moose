@@ -147,7 +147,7 @@ class TableOfContentsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['levels'] = (1, 'Heading level(s) to display.')
+        settings['levels'] = ([1], 'Heading level(s) to display.')
         settings['columns'] = (1, 'The number of columns to display.')
         settings['hide'] = ('', "A list of heading ids to hide.")
         return settings

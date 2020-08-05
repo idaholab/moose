@@ -5,7 +5,7 @@ Consider a system containing two pressure vessels at differing temperatures as i
 !media tutorial01_app_development/problem_schematic.png
        style=width:80%;margin-left:auto;margin-right:auto;
        id=problem-schematic
-       caption=Schematic of the pressure vessel system used for demonstrations throughout the tutorial [!cite](pamuk2012friction).
+       caption=Schematic of the pressure vessel system for which a custom MOOSE-based application will be designed to solve [!cite](pamuk2012friction).
 
 For this tutorial, the outlined portion of the pipe of length $L$, shown in [problem-schematic], is of particular interest. This region shall serve as the problem domain, $\Omega$.
 
@@ -52,7 +52,7 @@ then it follows that the two unknowns, $p$ and $T$, must satisfy the following s
 \newline \, \newline
 C \left(\dfrac{\partial T}{\partial t} + \epsilon \bar{u} \cdot \nabla T \right) - \nabla \cdot k \nabla T = 0
 
-The system's overall heat capacity, density, and thermal conductivity are weighted by the contributions of the individual materials and each depend on the porosity of the packed steel sphere medium. These three relationships are defined by the following:
+The system overall heat capacity, density, and thermal conductivity are weighted by the contributions of the individual materials and each depend on the porosity of the packed steel sphere medium. These three relationships are defined by the following:
 
 !equation id=heat-cap
 C \equiv \epsilon \rho_{f} c_{p,f} + (1 - \epsilon) \rho_{s} c_{p,s}
@@ -69,8 +69,13 @@ Here, $c_{p}$ denotes specific heat and the subscripts, $f$ and $s$ refer to the
 
 The material properties of the fluid, $f$, and the solid, $s$, are given in [mats].
 
-<!-- The properties listed here are somewhat inconsistent with what we input in the code. First off, this is not a comprehensive list of all the mat props we'll see in the tutorial. And second, some of these properties depend on the temperature, for which we make different assumptions about its value at different steps in the tutorial. I'll need to update this table once I am clear about what our assumptions are...
--->
+!!!
+TODO: The properties listed here are somewhat inconsistent with what we input in the code. First off,
+this is not a comprehensive list of all the mat props we'll see in the tutorial. And second, some of
+these properties depend on the temperature, for which we make different assumptions about its value
+at different steps in the tutorial. I'll need to update this table once I am clear about what our
+assumptions are...
+!!!
 
 !table id=mats caption=Material property values.
 | Property | Value | Units |

@@ -31,7 +31,7 @@ work well for phase field problems. They are summarized below:
 
 This uses LU decomposition to directly apply the inverse of the Jacobian matrix.  It is typically the
 most accurate approach, but is expensive and does not scale well beyond tens of processors. Parallelization requires
-_SUPERLU_ to be compiled into PETSc (as provided by the [MOOSE redistributable environment package](getting_started/installation/index.md optional=True)).
+_SUPERLU_ to be compiled into PETSc (as provided by the default [installation of MOOSE](getting_started/installation/index.md optional=True)).
 It is often a good debugging tool. Typical options in the block are
 
 ```
