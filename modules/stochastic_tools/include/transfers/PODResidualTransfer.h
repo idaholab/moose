@@ -13,9 +13,8 @@
 #include "PODSamplerSolutionTransfer.h"
 
 /**
- * Transfer Postprocessor from sub-applications to a VectorPostprocessor on the master application.
- *
- * This object transfers the distributed data to a StochasticResults object.
+ * Transfers residuals for given variables and vector tags from a sub-subapplication
+ * to a PODReducedBasisTrainer object.
  */
 class PODResidualTransfer : public PODSamplerSolutionTransfer
 {

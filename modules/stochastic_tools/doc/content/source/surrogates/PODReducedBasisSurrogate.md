@@ -38,6 +38,30 @@ use [!param](/Surrogates/PODReducedBasisSurrogate/change_rank) and [!param](/Sur
 to test the accuracy of the surrogate with different subspace sizes without the
 need of rerunning the training procedure.
 
+## Details of implementation
+
+The approximate solution given by the POD-RB surrogate can be reconstructed using two different
+approaches. Both approaches are implemented by overloading the `evaluateSolution` function:
+
+1. One can call `evaluateSolution` with a simple parameter sample as an input argument:
+
+   !listing PODReducedBasisSurrogate.h re=\s\s/// Get the reduced solution for a given parameter sample(.*?);
+
+   In this case, the approximate solution vectors are reconstructed and stored within the surrogate object and
+   the QoI-s for a given variable can be acquired using the the `getNodalQoI` function.
+   A good example for this approach is the implementation of the `execute` function in [/PODSurrogateTester.C].
+
+   !listing PODSurrogateTester.C re=PODSurrogateTester::execute.*?^}
+
+2. The second option is to supply a reference to an external vector to `evaluateSolution`
+   together with a variable name:
+
+   !listing PODReducedBasisSurrogate.h re=\s\s/// Get the reduced solution for a given parameter sample and reconstruct(.*?);
+
+   In this case, the surrogate will try to reconstruct the approximate solution for the given variable into
+   this vector. This option can be used to couple POD-RB surrogates to other, full-order
+   objects.
+
 ## Example Input File Syntax
 
 To create a POD reduced basis surrogate model, one can use the following syntax:

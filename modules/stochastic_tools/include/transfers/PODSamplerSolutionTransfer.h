@@ -21,7 +21,7 @@ class PODFullSolveMultiApp;
  * Transfer solutions from sub-applications to a container in a Trainer.
  * This object also transfers artificial solution vectors back to sub-applications.
  */
-class PODSamplerSolutionTransfer : public StochasticToolsTransfer
+class PODSamplerSolutionTransfer : public StochasticToolsTransfer, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -50,14 +50,8 @@ protected:
   std::shared_ptr<PODFullSolveMultiApp> _pod_multi_app;
 
   /**
-   * Name of the trainer object which contains the container for the solutions
-   * of the subapp or contains the artificial solution vectors.
-   */
-  std::string _trainer_name;
-
-  /**
    * The trainer object to save the solution vector into or to fetch the
    * artificial solution vectors from.
    */
-  PODReducedBasisTrainer * _trainer = nullptr;
+  PODReducedBasisTrainer & _trainer;
 };

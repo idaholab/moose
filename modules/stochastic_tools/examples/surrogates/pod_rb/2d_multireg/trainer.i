@@ -2,7 +2,7 @@
 []
 
 [Distributions]
-  [D0_dist]
+  [D012_dist]
     type = Uniform
     lower_bound = 0.2
     upper_bound = 0.8
@@ -42,17 +42,7 @@
     lower_bound = 0.005
     upper_bound = 0.02
   []
-  [src0_dist]
-    type = Uniform
-    lower_bound = 5
-    upper_bound = 20
-  []
-  [src1_dist]
-    type = Uniform
-    lower_bound = 5
-    upper_bound = 20
-  []
-  [src2_dist]
+  [src_dist]
     type = Uniform
     lower_bound = 5
     upper_bound = 20
@@ -62,9 +52,9 @@
 [Samplers]
   [sample]
     type = LatinHypercube
-    distributions = 'D0_dist D1_dist D2_dist D3_dist
+    distributions = 'D012_dist D012_dist D012_dist D3_dist
                      absxs0_dist absxs1_dist absxs2_dist absxs3_dist
-                     src0_dist src1_dist src2_dist'
+                     src_dist src_dist src_dist'
     num_rows = 100
     num_bins = 10
     execute_on = PRE_MULTIAPP_SETUP
@@ -145,12 +135,5 @@
     type = SurrogateTrainerOutput
     trainers = 'pod_rb'
     execute_on = FINAL
-  []
-  [pgraph]
-    type = PerfGraphOutput
-    execute_on = 'initial final'  # Default is "final"
-    level = 2                     # Default is 1
-    heaviest_branch = true        # Default is false
-    heaviest_sections = 7         # Default is 0
   []
 []

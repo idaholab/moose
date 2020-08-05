@@ -52,23 +52,24 @@ public:
 
   const std::vector<std::string> & getTagTypes() const { return _tag_types; }
 
-  /// Getting the snapshot size across all of the processors for a given variable.
-  dof_id_type getSnapsSize(dof_id_type v_ind);
+  /// Getting the snapshot size across all of the processors for a given variable
+  /// with index var_i.
+  dof_id_type getSnapsSize(dof_id_type var_i) const;
 
-  /// Getting the base size for a given variable.
-  dof_id_type getBaseSize(dof_id_type v_ind) { return _base[v_ind].size(); }
+  /// Getting the base size for variable with index v_ind.
+  dof_id_type getBaseSize(dof_id_type var_i) const { return _base[var_i].size(); }
 
   /// Getting the overall base size, which is the sum of the individual bases.
-  dof_id_type getSumBaseSize();
+  dof_id_type getSumBaseSize() const;
 
   /// Getting a basis vector for a given variable.
-  const DenseVector<Real> & getBasisVector(dof_id_type v_index, dof_id_type base_i) const;
+  const DenseVector<Real> & getBasisVector(dof_id_type var_i, dof_id_type base_i) const;
 
   /// Getting basis vector based on its global index.
-  const DenseVector<Real> & getBasisVector(dof_id_type g_index) const;
+  const DenseVector<Real> & getBasisVector(dof_id_type glob_i) const;
 
   /// Getting appropriate variable index for a global base index.
-  dof_id_type getVariableIndex(dof_id_type g_index);
+  dof_id_type getVariableIndex(dof_id_type glob_i) const;
 
 protected:
   /// Computes the correlation matrices using the snapshots.

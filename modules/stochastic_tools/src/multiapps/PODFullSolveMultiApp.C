@@ -22,9 +22,10 @@ PODFullSolveMultiApp::validParams()
 {
   InputParameters params = SamplerFullSolveMultiApp::validParams();
   params.addClassDescription(
-      "Creates a full-solve type sub-application for each row of each Sampler matrix. "
-      "Additionally, this runs subapplications with artificial solutions at final time.");
-  params.addRequiredParam<std::string>(
+      "Creates a full-solve type sub-application for each row of a Sampler matrix. "
+      "On second call, this object creates residuals for a PODReducedBasisTrainer with given basis "
+      "functions.");
+  params.addRequiredParam<UserObjectName>(
       "trainer_name", "Trainer object that contains the solutions for different samples.");
 
   return params;
@@ -32,7 +33,8 @@ PODFullSolveMultiApp::validParams()
 
 PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
   : SamplerFullSolveMultiApp(parameters),
-    _trainer_name(getParam<std::string>("trainer_name")),
+    SurrogateModelInterface(this),
+    _trainer(getSurrogateTrainer<PODReducedBasisTrainer>("trainer_name")),
     _snapshot_generation(true)
 {
   // Initializing the subapps
@@ -41,16 +43,6 @@ PODFullSolveMultiApp::PODFullSolveMultiApp(const InputParameters & parameters)
     init(n_processors());
   else
     init(_sampler.getNumberOfRows());
-
-  // Getting a pointer to the requested trainer object
-  std::vector<PODReducedBasisTrainer *> obj;
-
-  _fe_problem.theWarehouse().query().condition<AttribName>(_trainer_name).queryInto(obj);
-
-  if (obj.empty())
-    paramError("trainer_name", "Unable to find Trainer with name '" + _trainer_name + "'!");
-
-  _trainer = obj[0];
 }
 
 void
@@ -59,13 +51,14 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
   // Reinitialize the problem only if the snapshot generation part is done.
   if (!_snapshot_generation)
   {
-    dof_id_type base_size = _trainer->getSumBaseSize();
+    dof_id_type base_size = _trainer.getSumBaseSize();
     if (base_size < 1)
-      mooseError("There are no basis vectors available for residual generation."
-                 " This indicates that the bases have not been created yet."
-                 " The most common cause of this error is the wrong setting"
-                 " of the 'execute_on' flags in the PODMultiApp and/or PODReducedBasisTrainer.");
-    // Since it only works in serial, the number of processes is hardcoded to 1
+      mooseError(
+          "There are no basis vectors available for residual generation."
+          " This indicates that the bases have not been created yet."
+          " The most common cause of this error is the wrong setting"
+          " of the 'execute_on' flags in the PODFullSolveMultiApp and/or PODReducedBasisTrainer.");
+
     if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
         _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
       init(n_processors());
@@ -118,7 +111,7 @@ PODFullSolveMultiApp::computeResidual()
   mooseCheckMPIErr(ierr);
 
   // Getting the necessary tag names.
-  const std::vector<std::string> & trainer_tags = _trainer->getTagNames();
+  const std::vector<std::string> & trainer_tags = _trainer.getTagNames();
 
   // Looping over the subapplications and computing residuals.
   for (unsigned int i = 0; i < _my_num_apps; i++)
@@ -139,7 +132,7 @@ void
 PODFullSolveMultiApp::computeResidualBatch(Real target_time)
 {
   // Getting the overall base size from the trainer.
-  dof_id_type base_size = _trainer->getSumBaseSize();
+  dof_id_type base_size = _trainer.getSumBaseSize();
 
   // Distributing the residual evaluation among processes.
   dof_id_type local_base_begin;

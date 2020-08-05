@@ -41,7 +41,7 @@ public:
   void closeContainer() { _closed = true; };
 
   /// Checking of sample with global ID is locally owned ot not.
-  bool hasGlobalEntry(dof_id_type glob_i);
+  bool hasGlobalEntry(dof_id_type glob_i) const;
 
   /// Getting an itertor to the beginning of the local samples.
   typename std::vector<T>::iterator localEntryBegin() { return _local_entries.begin(); };
@@ -59,16 +59,16 @@ public:
   typename std::vector<dof_id_type>::iterator localEntryIDEnd() { return _local_entry_ids.end(); };
 
   /// Getting a sample using its global index.
-  const T & getEntry(dof_id_type glob_i);
+  const T & getGlobalEntry(dof_id_type glob_i) const;
 
   /// Getting a sample using its local index.
-  const T & getLocalEntry(dof_id_type loc_i);
+  const T & getLocalEntry(dof_id_type loc_i) const;
 
   /// Getting all of the locally owned samples.
-  std::vector<T> & getLocalEntries() { return _local_entries; };
+  const std::vector<T> & getLocalEntries() const { return _local_entries; };
 
   /// Getting the vector of sample IDs for locally owned samples.
-  std::vector<dof_id_type> & getLocalEntryIDs() { return _local_entry_ids; };
+  const std::vector<dof_id_type> & getLocalEntryIDs() const { return _local_entry_ids; };
 
   /// Getting the number of global samples.
   dof_id_type getNumberOfGlobalEntries() const;
@@ -77,10 +77,10 @@ public:
   dof_id_type getNumberOfLocalEntries() const { return _n_local_entries; };
 
   /// Getting the local index of a global sample if locally owned.
-  dof_id_type getLocalIndex(dof_id_type glob_i);
+  dof_id_type getLocalIndex(dof_id_type glob_i) const;
 
   /// Getting the global index of a locally owned sample.
-  dof_id_type getGlobalIndex(dof_id_type loc_i);
+  dof_id_type getGlobalIndex(dof_id_type loc_i) const;
 
 protected:
   /// The vector where the samples are stored.

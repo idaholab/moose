@@ -13,13 +13,14 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "PODReducedBasisTrainer.h"
 #include "SamplerInterface.h"
+#include "SurrogateModelInterface.h"
 
 #include "StochasticToolsTypes.h"
 
 class PODSamplerSolutionTransfer;
 class PODResidualTransfer;
 
-class PODFullSolveMultiApp : public SamplerFullSolveMultiApp
+class PODFullSolveMultiApp : public SamplerFullSolveMultiApp, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -50,12 +51,8 @@ protected:
   /// Evaluating the residuals for every tag in the trainer in batch mode.
   void computeResidualBatch(Real target_time);
 
-  /// Name of the trainer object which this MultiApp generates snaphots/residuals
-  /// for.
-  std::string _trainer_name;
-
   /// Pointer to the trainer object itself.
-  PODReducedBasisTrainer * _trainer = nullptr;
+  PODReducedBasisTrainer & _trainer;
 
   /// Switch used to differentiate between snapshot generation and residual
   /// computation. Residual generation is only possible after the snapshot generation
