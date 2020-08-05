@@ -38,7 +38,7 @@ void
 ReporterData::finalize(const std::string & object_name)
 {
   // FYI, for the miniumum compiler 'auto' doesn't work in argument of the lambda
-  // ReporterData.C:41:29: error: 'auto' not allowed in lambda parameter
+  // ReporterData.C:xx:xx: error: 'auto' not allowed in lambda parameter
   auto func = [object_name](const std::unique_ptr<ReporterContextBase> & ptr) {
     if (ptr->name().getObjectName() == object_name)
       ptr->finalize();

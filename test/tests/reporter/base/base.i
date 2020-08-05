@@ -19,6 +19,8 @@
     vector_reporter = a::vector
     string_reporter = a::string
     broadcast_reporter = a::broadcast
+    scatter_reporter = a::scatter
+    gather_reporter = a::gather
   []
   [a]
     type = TestDeclareReporter

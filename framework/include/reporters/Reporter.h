@@ -51,10 +51,11 @@ protected:
    *           using the ReporterBroadcastContext will automatically broadcast the produced value
    *           from the root processor.
    * @param name A unique name for the value to be produced.
-   * @param default_value (optional) The initial value to be assigned to the value, please see
-   *                      the warning below.
+   * @param args (optional) Any number of optional arguments passed into the Context type given
+   *             by the S template parameter. If S = ReporterContext then the first argument
+   *             can be used as the default value (see ReporterContext.h).
    *
-   * WARNING on "default_value":
+   * WARNING using the "default value" in ReporterContext:
    * The Reporter system, like the systems before it, allow for objects that consume values to be
    * constructed prior to the produce objects. When a value is requested either by a producer
    * (Reporter) or consumer (ReporterInterface) the data is allocated. As such the assigned default
@@ -67,10 +68,8 @@ protected:
    * a declareBroadcastValue, etc. Please refer to the ReporterData object for more information
    * on how the data system operates for Reporter values.
    */
-  template <typename T, template <typename> class S = ReporterContext>
-  T & declareValue(const std::string & value_name);
-  template <typename T, template <typename> class S = ReporterContext>
-  T & declareValue(const std::string & value_name, const T & default_value);
+  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  T & declareValue(const std::string & value_name, Args &&... args0);
   ///@}
 
 private:
@@ -81,19 +80,10 @@ private:
   FEProblemBase * _reporter_fe_problem;
 };
 
-template <typename T, template <typename> class S>
+template <typename T, template <typename> class S, typename... Args>
 T &
-Reporter::declareValue(const std::string & value_name)
+Reporter::declareValue(const std::string & value_name, Args &&... args)
 {
   ReporterName state_name(_reporter_name, value_name);
-  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(state_name);
-}
-
-template <typename T, template <typename> class S>
-T &
-Reporter::declareValue(const std::string & value_name, const T & default_value)
-{
-  ReporterName state_name(_reporter_name, value_name);
-  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(state_name,
-                                                                            default_value);
+  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(state_name, args...);
 }

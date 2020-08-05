@@ -26,6 +26,12 @@ protected:
   std::vector<Real> & _vector;
   std::string & _string;
   Real & _bcast_value;
+
+  std::vector<dof_id_type> _values_to_scatter;
+  dof_id_type & _scatter_value;
+
+  std::vector<dof_id_type> _values_to_gather;
+  std::vector<dof_id_type> & _gather_value;
 };
 
 class TestGetReporter : public GeneralReporter
@@ -45,4 +51,6 @@ protected:
   const std::vector<Real> & _vector;
   const std::string & _string;
   const Real & _bcast_value;
+  const dof_id_type & _scatter_value;
+  const std::vector<dof_id_type> & _gather_value;
 };

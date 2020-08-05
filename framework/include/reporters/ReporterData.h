@@ -11,6 +11,7 @@
 
 #include "RestartableData.h"
 #include "ReporterState.h"
+#include "ReporterContext.h"
 #include "libmesh/parallel_object.h"
 #include "libmesh/auto_ptr.h"
 #include "MooseApp.h"
@@ -71,15 +72,12 @@ public:
    *           the computed value. See ReporterState.C/h for more information.
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
-   * @param default_value (optional )The value to assign to the current reporter value upon
-   * creation.
+   * @param args (optional) Any number of optional arguments passed into the Context type given
+   *             by the S template parameter. If S = ReporterContext then the first argument
+   *             can be used as the default value (see ReporterContext.h).
    */
-  template <typename T, template <typename> class S>
-  T & declareReporterValue(const ReporterName & reporter_name);
-
-  template <typename T, template <typename> class S>
-  T & declareReporterValue(const ReporterName & reporter_name, const T & default_value);
-  ///@}
+  template <typename T, template <typename> class S, typename... Args>
+  T & declareReporterValue(const ReporterName & reporter_name, Args &&... args);
 
   /**
    * Helper function for performing post calculation actions via the ReporterContext objects.
@@ -132,8 +130,9 @@ private:
    * object is often created by the get method before it is declared. Therefore the custom
    * functionality cannot be handled by specializing the RestartableData object directly.
    */
-  template <typename T, template <typename> class S>
-  ReporterState<T> & declareReporterValueHelper(const ReporterName & reporter_name);
+  template <typename T, template <typename> class S, typename... Args>
+  ReporterState<T> & declareReporterValueHelper(const ReporterName & reporter_name,
+                                                Args &&... args);
 
   /// The ReporterContext objects are created when a value is declared. The context objects
   /// include a reference to the associated ReporterState values. This container stores the
@@ -167,12 +166,12 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool de
   return data_ref;
 }
 
-template <typename T, template <typename> class S>
+template <typename T, template <typename> class S, typename... Args>
 ReporterState<T> &
-ReporterData::declareReporterValueHelper(const ReporterName & reporter_name)
+ReporterData::declareReporterValueHelper(const ReporterName & reporter_name, Args &&... args)
 {
   ReporterState<T> & data_ref = getReporterStateHelper<T>(reporter_name, true);
-  auto context_ptr = libmesh_make_unique<S<T>>(_app, data_ref);
+  auto context_ptr = libmesh_make_unique<S<T>>(_app, data_ref, args...);
   _context_ptrs.emplace(std::move(context_ptr));
   return data_ref;
 }
@@ -185,19 +184,10 @@ ReporterData::getReporterValue(const ReporterName & reporter_name, const std::si
   return data_ref.value(time_index);
 }
 
-template <typename T, template <typename> class S>
+template <typename T, template <typename> class S, typename... Args>
 T &
-ReporterData::declareReporterValue(const ReporterName & reporter_name)
+ReporterData::declareReporterValue(const ReporterName & reporter_name, Args &&... args)
 {
-  ReporterState<T> & data_ref = declareReporterValueHelper<T, S>(reporter_name);
-  return data_ref.value();
-}
-
-template <typename T, template <typename> class S>
-T &
-ReporterData::declareReporterValue(const ReporterName & reporter_name, const T & default_value)
-{
-  ReporterState<T> & data_ref = declareReporterValueHelper<T, S>(reporter_name);
-  data_ref.get().first = default_value;
+  ReporterState<T> & data_ref = declareReporterValueHelper<T, S>(reporter_name, args...);
   return data_ref.value();
 }

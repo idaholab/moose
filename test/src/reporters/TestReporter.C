@@ -25,8 +25,17 @@ TestDeclareReporter::TestDeclareReporter(const InputParameters & parameters)
     _real(declareValue<Real>("real")),
     _vector(declareValue<std::vector<Real>>("vector")),
     _string(declareValue<std::string>("string")),
-    _bcast_value(declareValue<Real, ReporterBroadcastContext>("broadcast"))
+    _bcast_value(declareValue<Real, ReporterBroadcastContext>("broadcast")),
+    _scatter_value(
+        declareValue<dof_id_type, ReporterScatterContext>("scatter", _values_to_scatter)),
+    _gather_value(
+        declareValue<std::vector<dof_id_type>, ReporterGatherContext>("gather", _values_to_gather))
 {
+  if (processor_id() == 0)
+    for (dof_id_type rank = 0; rank < n_processors(); ++rank)
+      _values_to_scatter.push_back(rank);
+
+  _values_to_gather.resize(1, processor_id());
 }
 
 void
@@ -50,6 +59,8 @@ TestGetReporter::validParams()
   params.addRequiredParam<ReporterName>("vector_reporter", "'vector' reporter name");
   params.addRequiredParam<ReporterName>("string_reporter", "'string' reporter name");
   params.addRequiredParam<ReporterName>("broadcast_reporter", "'broadcast' reporter name");
+  params.addRequiredParam<ReporterName>("scatter_reporter", "'scatter' reporter name");
+  params.addRequiredParam<ReporterName>("gather_reporter", "'gather' reporter name");
   return params;
 }
 
@@ -60,7 +71,9 @@ TestGetReporter::TestGetReporter(const InputParameters & parameters)
     _real(getReporterValue<Real>("real_reporter")),
     _vector(getReporterValue<std::vector<Real>>("vector_reporter")),
     _string(getReporterValue<std::string>("string_reporter")),
-    _bcast_value(getReporterValue<Real>("broadcast_reporter"))
+    _bcast_value(getReporterValue<Real>("broadcast_reporter")),
+    _scatter_value(getReporterValue<dof_id_type>("scatter_reporter")),
+    _gather_value(getReporterValue<std::vector<dof_id_type>>("gather_reporter"))
 {
 }
 
@@ -84,4 +97,16 @@ TestGetReporter::execute()
 
   if (_bcast_value != 42)
     mooseError("Broadcast reporter test failed");
+
+  if (_scatter_value != processor_id())
+    mooseError("Scatter reporter test failed");
+
+  if (processor_id() == 0)
+  {
+    std::vector<dof_id_type> gold;
+    for (dof_id_type id = 0; id < n_processors(); ++id)
+      gold.push_back(id);
+    if (_gather_value != gold)
+      mooseError("Gather reporter test failed!");
+  }
 }
