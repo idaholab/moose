@@ -77,3 +77,10 @@ addAmbientConvectionParams(InputParameters & params)
                         "The heat transfer coefficient from from ambient surroundings");
   params.addParam<Real>("ambient_temperature", "The ambient temperature");
 }
+
+template <>
+bool
+INSADObjectTracker::notEqual(const MooseEnum & val1, const MooseEnum & val2)
+{
+  return !val1.compareCurrent(val2);
+}
