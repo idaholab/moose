@@ -38,13 +38,6 @@ public:
   RelationshipManager(const RelationshipManager & other);
 
   /**
-   * A clone() is needed because GhostingFunctor can not be shared between
-   * different meshes. The operations in  GhostingFunctor are mesh dependent.
-   * We force all children to implement this.
-   */
-  virtual std::unique_ptr<GhostingFunctor> clone() const override = 0;
-
-  /**
    * Called before this RM is attached.  Will only be called once.
    */
   void init()
@@ -114,8 +107,6 @@ public:
    */
   void setDofMap(const DofMap & dof_map) { _dof_map = &dof_map; }
 
-  void setMooseMesh(MooseMesh * mesh) { _mesh = mesh; }
-
 protected:
   /**
    * Called before this RM is attached.  Only called once
@@ -124,9 +115,6 @@ protected:
 
   /// Whether or not this has been initialized
   bool _inited = false;
-
-  /// Reference to the Mesh object
-  MooseMesh * _mesh;
 
   /// Pointer to the \p MooseMesh object
   MooseMesh * const _moose_mesh;

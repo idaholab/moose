@@ -72,11 +72,10 @@ RelationshipManager::validParams()
 RelationshipManager::RelationshipManager(const InputParameters & parameters)
   : MooseObject(parameters),
     GhostingFunctor(),
-    _mesh(getCheckedPointerParam<MooseMesh *>(
+    _moose_mesh(getCheckedPointerParam<MooseMesh *>(
         "mesh",
         "Mesh is null in RelationshipManager constructor. This could well be because No mesh file "
         "was supplied and no generation block was provided")),
-    _moose_mesh(&_mesh),
     _dof_map(nullptr),
     _attach_geometric_early(getParam<bool>("attach_geometric_early")),
     _rm_type(getParam<Moose::RelationshipManagerType>("rm_type")),
@@ -89,7 +88,7 @@ RelationshipManager::RelationshipManager(const InputParameters & parameters)
 RelationshipManager::RelationshipManager(const RelationshipManager & other)
   : MooseObject(other._pars),
     GhostingFunctor(other),
-    _mesh(other._mesh),
+    _moose_mesh(other._moose_mesh),
     _dof_map(other._dof_map),
     _attach_geometric_early(other._attach_geometric_early),
     _rm_type(other._rm_type),

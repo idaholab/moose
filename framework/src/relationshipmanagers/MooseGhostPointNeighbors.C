@@ -70,7 +70,7 @@ MooseGhostPointNeighbors::operator==(const RelationshipManager & rhs) const
 void
 MooseGhostPointNeighbors::internalInit()
 {
-  auto functor = libmesh_make_unique<GhostPointNeighbors>(_mesh->getMesh());
+  auto functor = libmesh_make_unique<GhostPointNeighbors>(_moose_mesh->getMesh());
 
   _functor = std::move(functor);
 }

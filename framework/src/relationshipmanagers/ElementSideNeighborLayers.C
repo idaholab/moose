@@ -96,7 +96,7 @@ ElementSideNeighborLayers::internalInit()
 
     mooseAssert(periodic_boundaries_ptr, "Periodic Boundaries Pointer is nullptr");
 
-    functor->set_mesh(&_mesh->getMesh());
+    functor->set_mesh(&_moose_mesh->getMesh());
     functor->set_periodic_boundaries(periodic_boundaries_ptr);
   }
 
