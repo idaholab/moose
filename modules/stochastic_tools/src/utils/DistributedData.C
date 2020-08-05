@@ -77,7 +77,7 @@ DistributedData<T>::changeEntry(dof_id_type glob_i, const T & entry)
 
 template <typename T>
 const T &
-DistributedData<T>::getEntry(dof_id_type glob_i)
+DistributedData<T>::getGlobalEntry(dof_id_type glob_i) const
 {
   auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it == _local_entry_ids.end())
@@ -88,7 +88,7 @@ DistributedData<T>::getEntry(dof_id_type glob_i)
 
 template <typename T>
 const T &
-DistributedData<T>::getLocalEntry(dof_id_type loc_i)
+DistributedData<T>::getLocalEntry(dof_id_type loc_i) const
 {
   if (loc_i > _n_local_entries - 1)
     ::mooseError("The requested local index (",
@@ -111,7 +111,7 @@ DistributedData<T>::getNumberOfGlobalEntries() const
 
 template <typename T>
 bool
-DistributedData<T>::hasGlobalEntry(dof_id_type glob_i)
+DistributedData<T>::hasGlobalEntry(dof_id_type glob_i) const
 {
   const auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it != _local_entry_ids.end())
@@ -122,7 +122,7 @@ DistributedData<T>::hasGlobalEntry(dof_id_type glob_i)
 
 template <typename T>
 dof_id_type
-DistributedData<T>::getLocalIndex(dof_id_type glob_i)
+DistributedData<T>::getLocalIndex(dof_id_type glob_i) const
 {
   const auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
   if (it == _local_entry_ids.end())
@@ -133,7 +133,7 @@ DistributedData<T>::getLocalIndex(dof_id_type glob_i)
 
 template <typename T>
 dof_id_type
-DistributedData<T>::getGlobalIndex(dof_id_type loc_i)
+DistributedData<T>::getGlobalIndex(dof_id_type loc_i) const
 {
   if (loc_i > _n_local_entries - 1)
     ::mooseError("The requested local index (",

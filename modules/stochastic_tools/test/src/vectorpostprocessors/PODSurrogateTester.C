@@ -50,31 +50,10 @@ PODSurrogateTester::PODSurrogateTester(const InputParameters & parameters)
   _model.reserve(model_names.size());
   _value_vector.reserve(model_names.size());
 
-  // Fetching the corresponding Surrogate models
-  FEProblemBase & problem = *(this->parameters().get<FEProblemBase *>("_fe_problem_base"));
-
   for (unsigned int model_i = 0; model_i < model_names.size(); ++model_i)
   {
-    std::vector<SurrogateModel *> models;
-    problem.theWarehouse()
-        .query()
-        .condition<AttribName>(model_names[model_i])
-        .condition<AttribSystem>("SurrogateModel")
-        .queryInto(models);
-
-    if (models.empty())
-      mooseError("Unable to find a object with the name '" + model_names[model_i] + "'");
-
-    // Checking if the model can be cast into a PODRBSurrogate
-    auto pod_pointer = dynamic_cast<PODReducedBasisSurrogate *>(models[0]);
-
-    if (pod_pointer)
-      _model.push_back(pod_pointer);
-    else
-      paramError("model",
-                 "The Surrogate model (at index '",
-                 model_i,
-                 "') given is not a PODReducedBasisSurrogate!");
+    // Adding surrogate models first
+    _model.push_back(&getSurrogateModelByName<PODReducedBasisSurrogate>(model_names[model_i]));
 
     // Creating given vector postprocessors for every item in to_compute
     for (unsigned int pp_i = 0; pp_i < _to_compute.size(); ++pp_i)

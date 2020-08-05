@@ -32,7 +32,7 @@ PODResidualTransfer::PODResidualTransfer(const InputParameters & parameters)
 void
 PODResidualTransfer::execute()
 {
-  const unsigned int total_base_num = _trainer->getSumBaseSize();
+  const unsigned int total_base_num = _trainer.getSumBaseSize();
 
   // Looping over sub-apps
   for (unsigned int base_i = 0; base_i < total_base_num; ++base_i)
@@ -49,9 +49,9 @@ PODResidualTransfer::executeFromMultiapp()
 void
 PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_i)
 {
-  const std::vector<std::string> & var_names = _trainer->getVarNames();
-  const std::vector<std::string> & tag_names = _trainer->getTagNames();
-  const std::vector<std::string> & tag_types = _trainer->getTagTypes();
+  const std::vector<std::string> & var_names = _trainer.getVarNames();
+  const std::vector<std::string> & tag_names = _trainer.getTagNames();
+  const std::vector<std::string> & tag_types = _trainer.getTagTypes();
 
   // Getting reference to the non-linear system
   FEProblemBase & app_problem = _multi_app->appProblemBase(multi_app_i);
@@ -84,6 +84,6 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
 
     // Inserting the contribution of this residual into the reduced operator in
     // the trainer.
-    _trainer->addToReducedOperator(base_i, tag_i, split_residual);
+    _trainer.addToReducedOperator(base_i, tag_i, split_residual);
   }
 }

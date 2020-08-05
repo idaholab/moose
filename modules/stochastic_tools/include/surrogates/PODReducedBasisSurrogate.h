@@ -28,7 +28,7 @@ public:
                         std::string var_name);
 
   /// Get a reference to the approximate solutions.
-  std::vector<DenseVector<Real>> & getApproximateSolution() { return _approx_solution; }
+  const std::vector<DenseVector<Real>> & getApproximateSolution() const { return _approx_solution; }
 
   /// Get the nodal QoI of the reconstructed solution for a given variable.
   Real getNodalQoI(std::string var_name, unsigned int qoi_type) const;
@@ -63,22 +63,20 @@ protected:
   /// The final rank that should be used for every variable.
   std::vector<unsigned int> _final_ranks;
 
-  /// Commulative ranks of the system. Used for indexing only.
+  /// Comulative ranks of the system. Used for indexing only.
   std::vector<unsigned int> _comulative_ranks;
 
   /// Vector containing the names of the variables we want to reconstruct.
   const std::vector<std::string> & _var_names;
 
-  /// Names of the tags that should be used to fetch residuals from the MultiApp.
-  const std::vector<std::string> & _tag_names;
-
-  /// Bools describing which operator is indepedent of the solution.
+  /// Strings describing which operator is indepedent of the solution and which
+  /// corresponds to a reduced DirichletBC operator.
   const std::vector<std::string> & _tag_types;
 
   /// The basis vectors for all the variables.
   const std::vector<std::vector<DenseVector<Real>>> & _base;
 
-  /// The power matrix for the terms in the polynomial expressions.
+  /// The reduced operators in the same order as given in tag_types.
   const std::vector<DenseMatrix<Real>> & _red_operators;
 
   /// Coefficients of the reduced order model.
@@ -94,7 +92,7 @@ protected:
   std::vector<DenseVector<Real>> _approx_solution;
 
   /// Penalty parameter for Dirichlet BCs.
-  Real _penalty;
+  const Real _penalty;
 
   /// Switch that is set to see if the ROM matrices and vectors are initialized.
   bool _initialized;

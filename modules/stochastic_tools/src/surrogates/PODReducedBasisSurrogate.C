@@ -33,7 +33,6 @@ PODReducedBasisSurrogate::PODReducedBasisSurrogate(const InputParameters & param
     _change_rank(getParam<std::vector<std::string>>("change_rank")),
     _new_ranks(getParam<std::vector<unsigned int>>("new_ranks")),
     _var_names(getModelData<std::vector<std::string>>("_var_names")),
-    _tag_names(getModelData<std::vector<std::string>>("_tag_names")),
     _tag_types(getModelData<std::vector<std::string>>("_tag_types")),
     _base(getModelData<std::vector<std::vector<DenseVector<Real>>>>("_base")),
     _red_operators(getModelData<std::vector<DenseMatrix<Real>>>("_red_operators")),

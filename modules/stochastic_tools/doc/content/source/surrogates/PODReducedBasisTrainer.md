@@ -5,7 +5,7 @@
 ## Overview
 
 In this trainer, an intrusive Proper Orthogonal Decomposition (POD) based Reduced Basis (RB) method
-is implemented which, unlike non-intrusive surrogates such as Polynomial Regression or
+([!cite](pinnau2008model)) is implemented which, unlike non-intrusive surrogates such as Polynomial Regression or
 Polynomial Chaos Expansion, is capable of considering the physics of the full-order problem
 at surrogate level. Therefore, it is often referred to as a physics-based but still data-driven approach.
 The intrusiveness, however, decreases the range of problems which this method can be used for.
@@ -61,8 +61,8 @@ Therefore, before starting the construction of a POD-RB surrogate model,
 the user must identify the these decompositions first. At input level, this can
 be done by utilizing the `Tagging System`. For each constituent operator a separate
 vector tag has to be created and the tags need to be supplied to the trainer object
-through the `tag_names` input parameter. Furthermore, an indicator shall be added
-to each tag through the `independent` input to show if the tag corresponds to a
+through the [!param](/Trainers/PODReducedBasisTrainer/tag_names) input parameter. Furthermore, an indicator shall be added
+to each tag through the [!param](/Trainers/PODReducedBasisTrainer/tag_types) input to show if the tag corresponds to a
 source term ($\mathcal{b}_i$) or an operator ($\mathcal{A}_i$).
 As a last step, this system is discretized in space using the finite element method to obtain:
 
@@ -86,7 +86,7 @@ thus the size of the full-order system is $\sum\limits_{i=1}^{N_v}N_i$.
 
 As a first step in this process, [fom_affine_decomp_discrete] is solved using $N_s$
 different parameter samples and the solution vectors for each variable defined on the  
-`var_names` input parameter are saved into
+[!param](/Trainers/PODReducedBasisTrainer/var_names) input parameter are saved into
 snapshot matrices
 
 !equation id=fom_parameterized
@@ -118,7 +118,7 @@ which consists of the following four steps for each variable:
    \left(\frac{\sum_{k=1}^{r_i}\lambda_{i,k}}{\sum_{k=1}^{N_s}\lambda_{i,k}} > 1 - \tau_i\right),
 
    where $\tau$ is a given parameter describing the allowed error in the reconstruction of the snapshots.
-   This can be supplied to the trainer using the `error_res` input parameter.
+   This can be supplied to the trainer using the [!param](/Trainers/PODReducedBasisTrainer/error_res) input parameter.
    Of course, this rank can be determined manually as well. For more information about this option, see
    [PODReducedBasisSurrogate.md].
 
@@ -233,7 +233,7 @@ The computation of the reduced operators consists of two step in the current imp
 1. +Computing the effect of the full-order operator on the global basis functions:+ this step
    includes the creation of $\textbf{A}_i\boldsymbol{\Phi}$. In practice, this is done by
    plugging in the basis function into a [PODFullSolveMultiApp.md] object which evaluates the residual for a given
-   vector tag (defined using the `tag_names` input argument). The tagged residual is then
+   vector tag (defined using the [!param](/Trainers/PODReducedBasisTrainer/tag_names) input argument). The tagged residual is then
    transferred back to the trainer using a [PODResidualTransfer.md] object. In case when
    the residual from a kernel contains contributions to both the system matrix and the
    source term (e.g. Dirichlet BC or time derivative), certain input-level tricks
@@ -265,8 +265,9 @@ in the `MultApps` block) which is capable of running simulations for each parame
 The solution vectors (snapshots) for each run are added to the trainer by a
 [PODSamplerSolutionTransfer.md] defined in the `Transfers` block. It is important to mention
 that the multiapp and transfer objects need to know about the trainer. This can be
-ensured using the `trainer` input argument. The number of collected snapshots is
-defined in the sampler object using the `num_rows` parameter.
+ensured using the [!param](/Transfers/PODSamplerSolutionTransfer/trainer_name) input argument.
+The number of collected snapshots is
+defined in the sampler object using the [!param](/Samplers/LatinHypercube/num_rows) parameter.
 
 !listing pod_rb/internal/trainer.i block=Samplers
 
@@ -279,10 +280,10 @@ are transferred back to the trainer using a [PODResidualTransfer.md].
 !listing pod_rb/internal/trainer.i block=Transfers
 
 Finally, the [PODReducedBasisTrainer.md] is defined in the `Trainers` block. It requires
-the names of the variables (`var_names`) one wishes to create reduced basis for and the names of the
-tags (`tag_names`) associated with the affine components of the full-order operator.
+the names of the variables ([!param](/Trainers/PODReducedBasisTrainer/var_names)) one wishes to create reduced basis for and the names of the
+tags ([!param](/Trainers/PODReducedBasisTrainer/tag_names)) associated with the affine components of the full-order operator.
 Additionally, a vector specifying which tag corresponds to a linear operator and which to
-a source term needs to be added as well (`tag_types`). The available tag types are:
+a source term needs to be added as well ([!param](/Trainers/PODReducedBasisTrainer/tag_types)). The available tag types are:
 
 !table
 | Tag type | Description |
@@ -293,8 +294,8 @@ a source term needs to be added as well (`tag_types`). The available tag types a
 | src_dir | Dirichlet operator that does not act on the solution vector (i.e. Dirichlet pensalty source vector). |
 
 To specify the allowed error in the snapshot reconstruction
-for reach variable ($\tau_i$), one needs to specify `error_res`.
-In the following example the `execute_on` parameter is set to '`timestep_begin final`' which means
+for reach variable ($\tau_i$), one needs to specify [!param](/Trainers/PODReducedBasisTrainer/error_res).
+In the following example the [!param](/Trainers/PODReducedBasisTrainer/execute_on) parameter is set to '`timestep_begin final`' which means
 that at the beginning of the training it will create the basis functions while at the
 end it will create the reduced operators.
 

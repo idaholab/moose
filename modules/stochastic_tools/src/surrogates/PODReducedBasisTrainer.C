@@ -248,7 +248,8 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // snapshot.
         send_vectors[elem->processor_id()].insert(i);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-          send_map[elem->processor_id()].emplace_back(i, v_ind, _snapshots[v_ind].getEntry(i));
+          send_map[elem->processor_id()].emplace_back(
+              i, v_ind, _snapshots[v_ind].getGlobalEntry(i));
       }
       else if (_snapshots[0].hasGlobalEntry(j))
       {
@@ -260,7 +261,8 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
         // snapshot.
         send_vectors[elem->processor_id()].insert(j);
         for (dof_id_type v_ind = 0; v_ind < _snapshots.size(); ++v_ind)
-          send_map[elem->processor_id()].emplace_back(j, v_ind, _snapshots[v_ind].getEntry(j));
+          send_map[elem->processor_id()].emplace_back(
+              j, v_ind, _snapshots[v_ind].getGlobalEntry(j));
       }
     }
     else
@@ -523,14 +525,14 @@ PODReducedBasisTrainer::addToReducedOperator(unsigned int base_i,
 }
 
 dof_id_type
-PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i)
+PODReducedBasisTrainer::getSnapsSize(dof_id_type var_i) const
 {
   dof_id_type val = _snapshots[var_i].getNumberOfGlobalEntries();
   return val;
 }
 
 unsigned int
-PODReducedBasisTrainer::getSumBaseSize()
+PODReducedBasisTrainer::getSumBaseSize() const
 {
   unsigned int sum = 0;
 
@@ -541,44 +543,44 @@ PODReducedBasisTrainer::getSumBaseSize()
 }
 
 const DenseVector<Real> &
-PODReducedBasisTrainer::getBasisVector(unsigned int v_ind, unsigned int b_ind) const
+PODReducedBasisTrainer::getBasisVector(unsigned int var_i, unsigned int base_i) const
 {
-  return _base[v_ind][b_ind];
+  return _base[var_i][base_i];
 }
 
 const DenseVector<Real> &
-PODReducedBasisTrainer::getBasisVector(unsigned int g_index) const
+PODReducedBasisTrainer::getBasisVector(unsigned int glob_i) const
 {
   unsigned int counter = 0;
 
   for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
     for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
-      if (g_index == counter)
+      if (glob_i == counter)
         return _base[var_i][base_i];
 
       counter += 1;
     }
 
-  mooseError("The basis vector with global index ", g_index, "is not available!");
+  mooseError("The basis vector with global index ", glob_i, "is not available!");
   return _base[0][0];
 }
 
 unsigned int
-PODReducedBasisTrainer::getVariableIndex(unsigned int g_index)
+PODReducedBasisTrainer::getVariableIndex(unsigned int glob_i) const
 {
   unsigned int counter = 0;
 
   for (unsigned int var_i = 0; var_i < _var_names.size(); ++var_i)
     for (unsigned int base_i = 0; base_i < _base[var_i].size(); ++base_i)
     {
-      if (g_index == counter)
+      if (glob_i == counter)
         return var_i;
 
       counter += 1;
     }
 
-  mooseError("Variable with global base index ", g_index, "is not available!");
+  mooseError("Variable with global base index ", glob_i, "is not available!");
   return 0;
 }
 

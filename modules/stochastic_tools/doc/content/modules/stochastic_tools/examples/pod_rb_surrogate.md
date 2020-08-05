@@ -150,7 +150,7 @@ for the reduced subspaces. Furthermore, it is also responsible for creating
 the reduced-order operators, therefore it needs to be executed twice in the training process.
 The trainer object needs to know what variable needs to be reduced and
 the names of the vector tags from the sub-application to be able to identify the
-affine constituent operators. Furthermore, using the `independent` input argument,
+affine constituent operators. Furthermore, using the [!param](/Trainers/PODReducedBasisTrainer/tag_types) input argument,
 the user has to specify if the reduced affine constituent operator acts on the variable or not.
 The ordering must be the same as the names of the vector tags. The meaning of the
 energy retention limits is discussed in [PODReducedBasisTrainer.md].
@@ -179,7 +179,8 @@ surrogates are orders of magnitudes faster than the full-order model.
 A [PODReducedBasisSurrogate.md] is created in the `Surrogates` block.
 It is constructed using the information available within the corresponding `.rd` file
 and allows the user to change of the rank of the sub-spaces used for different variables
-through `change_rank` and `new_ranks` parameters.
+through [!param](/Surrogates/PODReducedBasisSurrogate/change_rank) and
+[!param](/Surrogates/PODReducedBasisSurrogate/new_ranks) parameters.
 
 !listing surrogates/pod_rb/2d_multireg/surr.i block=Surrogates
 
@@ -242,7 +243,9 @@ The reduced operators are then computed using these 53 basis functions.
           'yaxis':{'type':'log','title':'Corresponding eigenvalue'}}
   style=display:block;margin-left:auto;margin-right:auto;width:40%
 
-As a next step, two surrogate models are prepared using the `change_rank` and `new_ranks`
+As a next step, two surrogate models are prepared using the
+[!param](/Surrogates/PODReducedBasisSurrogate/change_rank) and
+[!param](/Surrogates/PODReducedBasisSurrogate/new_ranks)
 parameters of [PODReducedBasisSurrogate.md] to change the size of the reduced system.
 The first surrogate model has 1 basis function, while the other has 8. Both
 models are then run on a 1000 sample test set and the nodal $L^2$ norms of the approximate solutions

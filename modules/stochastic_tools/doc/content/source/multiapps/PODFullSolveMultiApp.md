@@ -8,7 +8,8 @@ a [PODReducedBasisTrainer.md] object.
 
 ## Example Syntax
 
-This MultiApp type needs a `trainer` parameter which allows to access certain
+This MultiApp type needs a [!param](/MultiApps/PODFullSolveMultiApp/trainer_name)
+ parameter which allows to access certain
 data members of a [PODReducedBasisTrainer.md]. Otherwise, the input syntax is
 the same as in case of [SamplerFullSolveMultiApp.md].
 

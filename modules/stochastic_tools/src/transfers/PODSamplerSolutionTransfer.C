@@ -20,38 +20,27 @@ PODSamplerSolutionTransfer::validParams()
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Transfers solution vectors from the sub-applications to a "
                              "a container in the Trainer object and back.");
-  params.addRequiredParam<std::string>("trainer_name",
-                                       "Trainer object that contains the solutions"
-                                       " for different samples.");
+  params.addRequiredParam<UserObjectName>("trainer_name",
+                                          "Trainer object that contains the solutions"
+                                          " for different samples.");
   return params;
 }
 
 PODSamplerSolutionTransfer::PODSamplerSolutionTransfer(const InputParameters & parameters)
-  : StochasticToolsTransfer(parameters), _trainer_name(getParam<std::string>("trainer_name"))
+  : StochasticToolsTransfer(parameters),
+    SurrogateModelInterface(this),
+    _pod_multi_app(std::dynamic_pointer_cast<PODFullSolveMultiApp>(_multi_app)),
+    _trainer(getSurrogateTrainer<PODReducedBasisTrainer>("trainer_name"))
 {
-  auto pod_pointer = std::dynamic_pointer_cast<PODFullSolveMultiApp>(_multi_app);
-
-  if (pod_pointer)
-    _pod_multi_app = pod_pointer;
-  else
+  if (!_pod_multi_app)
     paramError("multi_app", "The Multiapp given is not a PODFullsolveMultiapp!");
-
-  // Fetching the trainer based on the name specified in the parameters
-  std::vector<PODReducedBasisTrainer *> obj;
-
-  _fe_problem.theWarehouse().query().condition<AttribName>(_trainer_name).queryInto(obj);
-
-  if (obj.empty())
-    mooseError("Unable to find Trainer with name '" + _trainer_name + "'!");
-
-  _trainer = obj[0];
 }
 
 void
 PODSamplerSolutionTransfer::initialSetup()
 {
   // Checking if the subapplication has the requested variables
-  const std::vector<std::string> & var_names = _trainer->getVarNames();
+  const std::vector<std::string> & var_names = _trainer.getVarNames();
   const dof_id_type n = _multi_app->numGlobalApps();
   for (MooseIndex(n) i = 0; i < n; i++)
   {
@@ -66,7 +55,7 @@ void
 PODSamplerSolutionTransfer::execute()
 {
 
-  const std::vector<std::string> & var_names = _trainer->getVarNames();
+  const std::vector<std::string> & var_names = _trainer.getVarNames();
 
   // Selecting the appropriate action based on the drection.
   switch (_direction)
@@ -95,7 +84,7 @@ PODSamplerSolutionTransfer::execute()
           solution.get(var_dofs, tmp->get_values());
 
           // Copying the temporary vector into the trainer.
-          _trainer->addSnapshot(v_index, i, tmp);
+          _trainer.addSnapshot(v_index, i, tmp);
         }
       }
       break;
@@ -109,7 +98,7 @@ PODSamplerSolutionTransfer::execute()
       {
         // Looping over the bases of the given variable and plugging them into
         // a sub-application.
-        unsigned int var_base_num = _trainer->getBaseSize(var_i);
+        unsigned int var_base_num = _trainer.getBaseSize(var_i);
         for (unsigned int base_i = 0; base_i < var_base_num; ++base_i)
         {
           if (_multi_app->hasLocalApp(counter))
@@ -128,7 +117,7 @@ PODSamplerSolutionTransfer::execute()
             const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
             // Fetching the basis vector and plugging it into the solution.
-            const DenseVector<Real> & base_vector = _trainer->getBasisVector(var_i, base_i);
+            const DenseVector<Real> & base_vector = _trainer.getBasisVector(var_i, base_i);
             solution.insert(base_vector, var_dofs);
             solution.close();
 
@@ -153,7 +142,7 @@ PODSamplerSolutionTransfer::executeFromMultiapp()
 {
   if (_pod_multi_app->snapshotGeneration())
   {
-    const std::vector<std::string> & var_names = _trainer->getVarNames();
+    const std::vector<std::string> & var_names = _trainer.getVarNames();
 
     const dof_id_type n = _multi_app->numGlobalApps();
 
@@ -179,7 +168,7 @@ PODSamplerSolutionTransfer::executeFromMultiapp()
           solution.get(var_dofs, tmp->get_values());
 
           // Copying the temporary vector into the trainer.
-          _trainer->addSnapshot(var_i, _global_index, tmp);
+          _trainer.addSnapshot(var_i, _global_index, tmp);
         }
       }
     }
@@ -201,8 +190,8 @@ PODSamplerSolutionTransfer::executeToMultiapp()
 {
   if (!_pod_multi_app->snapshotGeneration())
   {
-    const std::vector<std::string> & var_names = _trainer->getVarNames();
-    dof_id_type var_i = _trainer->getVariableIndex(_global_index);
+    const std::vector<std::string> & var_names = _trainer.getVarNames();
+    dof_id_type var_i = _trainer.getVariableIndex(_global_index);
 
     // Getting the reference to the solution vector in the subapp.
     FEProblemBase & app_problem = _multi_app->appProblemBase(processor_id());
@@ -218,7 +207,7 @@ PODSamplerSolutionTransfer::executeToMultiapp()
     const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
 
     // Fetching the basis vector and plugging it into the solution.
-    const DenseVector<Real> & base_vector = _trainer->getBasisVector(_global_index);
+    const DenseVector<Real> & base_vector = _trainer.getBasisVector(_global_index);
     solution.insert(base_vector, var_dofs);
     solution.close();
 
