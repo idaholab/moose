@@ -39,9 +39,18 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
   auto & obj_tracker = const_cast<INSADObjectTracker &>(
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
   obj_tracker.set("has_boussinesq", true);
-  obj_tracker.set("alpha", &getADMaterialProperty<Real>("alpha_name"));
-  obj_tracker.set("ref_temp", &getMaterialProperty<Real>("ref_temp"));
-  obj_tracker.set("temperature", &adCoupledValue("temperature"));
+
+  // We actually want to perform the material property requests during object construction in order
+  // to ensure that material property dependency is recorded correctly (I don't think this should
+  // actually matter for non-Material MaterialPropertyInterface classes, but might as well be
+  // consistent)
+  obj_tracker.set("alpha", getADMaterialProperty<Real>("alpha_name").name());
+  obj_tracker.set("ref_temp", getMaterialProperty<Real>("ref_temp").name());
+
+  mooseAssert(getParam<std::vector<VariableName>>("temperature").size() == 1,
+              "Only expect one variable name for temperature");
+
+  obj_tracker.set("temperature", getParam<std::vector<VariableName>>("temperature")[0]);
   obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"));
 }
 

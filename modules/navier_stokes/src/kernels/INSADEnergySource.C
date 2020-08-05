@@ -49,9 +49,13 @@ INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
       _fe_problem.getUserObject<INSADObjectTracker>("ins_ad_object_tracker"));
   obj_tracker.set("has_heat_source", true);
   if (has_coupled)
-    obj_tracker.set("heat_source_var", &adCoupledValue("source_variable"));
+  {
+    mooseAssert(getParam<std::vector<VariableName>>("source_variable").size() == 1,
+                "Only expect one VariableName for the heat source var");
+    obj_tracker.set("heat_source_var", getParam<std::vector<VariableName>>("source_variable")[0]);
+  }
   else if (has_function)
-    obj_tracker.set("heat_source_function", &getFunction("source_function"));
+    obj_tracker.set("heat_source_function", getParam<FunctionName>("source_function"));
 }
 
 ADReal
