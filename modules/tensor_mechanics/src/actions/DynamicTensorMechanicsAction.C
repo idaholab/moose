@@ -37,6 +37,8 @@ DynamicTensorMechanicsAction::validParams()
                         "equilibrium under gravity by running a "
                         "quasi-static analysis (by solving Ku = F) "
                         "in the first time step.");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   return params;
 }
 

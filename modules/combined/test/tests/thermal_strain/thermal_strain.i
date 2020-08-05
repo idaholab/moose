@@ -40,7 +40,6 @@
 []
 
 [Modules/TensorMechanics/Master]
-  use_displaced_mesh = true
   add_variables = true
   strain = SMALL
   incremental = true
