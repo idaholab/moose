@@ -1,8 +1,5 @@
 - /UserObjects/StateSimRunner
 - /Postprocessors/StateSimTester
-- /Distributions/BoostLognormalDistribution
-- /Distributions/BoostNormalDistribution
-- /Distributions/BoostWeibullDistribution
 - /Distributions/JohnsonSBDistribution
 - /Distributions/LogisticDistribution
 - /Distributions/NormalDistribution
