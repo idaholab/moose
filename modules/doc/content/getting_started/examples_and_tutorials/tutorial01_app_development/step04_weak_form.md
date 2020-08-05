@@ -71,7 +71,7 @@ From an application developer perspective, it is convenient to express [advectio
 
 When using inner product notation, parenthesis denotes a volume integral and the angled brackets represents a surface integral. To be more clear, the terms enclosed form an inner product or, sometimes, a scalar one, and this represents the integrand.
 
-The weak form expressed using inner product notation closely resembles the syntax used for the [!ac](MOOSE) object computing the residual contribution for each term. Later in this tutorial, the `Kernels` and `BCs` classes will be discussed in greater detail. Here, it should be clear that the kernel terms in [advection-objects] directly contribute to the residual on $\Omega$, while the boundary condition term contributes, indirectly, as a flux through $\Gamma$. This is part of the reason why the two classes are distinct. Also, it should now be evident why the boundary condition term was omitted from [laplace-weak]---this term was taken as zero as part of the [!ac](BVP) used in [Step 2](tutorial01_app_development/step02_input_file.md#physics) and [Step 3](tutorial01_app_development/step03_moose_object.md#physics). Still, there was also Dirichlet type boundary conditions enforced at the inlet and the outlet of the pipe, but these types of boundary conditions override the residual at the specified boundary entirely, and do not reveal themselves in the weak form expressions until explicitly added to them.
+The weak form expressed using inner product notation closely resembles the syntax used for the [!ac](MOOSE) object computing the residual contribution for each term. Later in this tutorial, the `Kernels` and `BCs` classes will be discussed in greater detail. Here, it should be clear that the kernel terms in [advection-objects] directly contribute to the residual on $\Omega$, while the boundary condition term contributes, indirectly, as a flux through $\Gamma$. This is part of the reason why the two classes are distinct. Also, it should now be evident why the boundary condition term was omitted from [laplace-weak], this term was taken as zero as part of the [!ac](BVP) used in [Step 2](tutorial01_app_development/step02_input_file.md#physics) and [Step 3](tutorial01_app_development/step03_moose_object.md#physics). Still, there was also Dirichlet type boundary conditions enforced at the inlet and the outlet of the pipe, but these types of boundary conditions override the residual at the specified boundary entirely, and do not reveal themselves in the weak form expressions until explicitly added to them.
 
 ### Procedure for Generating Weak Forms id=procedure
 
@@ -91,34 +91,36 @@ The [#procedure] shall now be applied to [darcy-strong]. The result of each step
 
 1. Write down the strong form:
 
-!equation
--\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p = 0 \in \Omega
+   !equation
+   -\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p = 0 \in \Omega
 
 2. Rearrange terms: (omit)
 3. Multiply the equation by $\psi$:
 
-!equation
-(-\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p) \psi = 0, \,\,\, \forall \, \psi
+   !equation
+   (-\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p) \psi = 0, \,\,\, \forall \, \psi
 
 4. Integrate the equation over the domain, $\Omega$:
 
-!equation
--\int_{\Omega} \psi (\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p) = 0
+   !equation
+   -\int_{\Omega} \psi (\nabla \cdot \dfrac{\mathbf{K}}{\mu} \nabla p) = 0
 
 5. Integrate by parts:
 
-!equation
-\int_{\Omega} \nabla \psi \cdot \dfrac{\mathbf{K}}{\mu} \nabla p - \int_{\Omega} \nabla \cdot (\psi (\dfrac{\mathbf{K}}{\mu} \nabla p)) = 0
+   !equation
+   \int_{\Omega} \nabla \psi \cdot \dfrac{\mathbf{K}}{\mu} \nabla p - \int_{\Omega} \nabla \cdot (\psi (\dfrac{\mathbf{K}}{\mu} \nabla p)) = 0
 
 6. Apply the divergence theorem:
 
-!equation
-\int_{\Omega} \nabla \psi \cdot \dfrac{\mathbf{K}}{\mu} \nabla p - \oint_{\Gamma} \psi (\dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n}) = 0
+   !equation
+   \int_{\Omega} \nabla \psi \cdot \dfrac{\mathbf{K}}{\mu} \nabla p - \oint_{\Gamma} \psi (\dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n}) = 0
 
-7. Express the final weak form using inner product notation, if desired.
+7. Express the final weak form using inner product notation.
 
-!equation
-\underbrace{(\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p)}_{Kernel} - \underbrace{\langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle}_{Boundary \, Condition} = 0
+   !equation
+   \underbrace{(\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p)}_{Kernel} - \underbrace{\langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle}_{Boundary \, Condition} = 0
+
+   It is important to become comfortable with this notation for weak form expressions, as it shall henceforth be used exclusively in this tutorial.
 
 !content pagination previous=tutorial01_app_development/step03_moose_object.md
                     next=tutorial01_app_development/step05_kernel_object.md

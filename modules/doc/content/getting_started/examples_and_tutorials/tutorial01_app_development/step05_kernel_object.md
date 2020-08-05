@@ -1,6 +1,6 @@
 # Step 5: Creating a Kernel Object
 
-In this step, the basic components of [#kernels] will be presented. To demonstrate their use, an `MooseObject` to solve Darcy's Pressure equation, whose weak form was derived in the [previous step](tutorial01_app_development/step04_weak_form.md#demo), shall be developed and applied. The concept of class *inheritance* shall also be demonstrated, as the object to solve Darcy's equation will inherit from the `Kernel` class. The [!ac](BVP) that will be enforced here shall be identical to that used in [Step 2](tutorial01_app_development/step02_input_file.md#physics). Except now, the pressure diffusion will not be so simple, and will depend on certain coefficients added to the Laplace equation.
+In this step, the basic components of [#kernels] will be presented. To demonstrate their use, a new `Kernel` will be created to solve Darcy's Pressure equation, whose weak form was derived in the [previous step](tutorial01_app_development/step04_weak_form.md#demo). The concept of class *inheritance* shall also be demonstrated, as the object to solve Darcy's equation will inherit from the `Kernel` class. The [!ac](BVP) that will be enforced here shall be identical to that used in [Step 2](tutorial01_app_development/step02_input_file.md#physics). Except now, the pressure diffusion will not be so simple, and will depend on certain coefficients added to the Laplace equation.
 
 ## Statement of Physics id=physics
 
@@ -13,15 +13,8 @@ It was specified on the [Problem Statement](tutorial01_app_development/problem_s
 
 In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it was shown that the weak form of [darcy-strong] is the following:
 
-!equation
-\int_{\Omega} \nabla \psi \cdot \dfrac{\bold{K}}{\mu} \nabla p - \oint_{\Gamma} \psi (\dfrac{\bold{K}}{\mu} \nabla p \cdot \hat{n}) = 0
-
-Or rather, in inner product notation,
-
 !equation id=darcy-weak
 (\nabla \psi, \dfrac{\bold{K}}{\mu} \nabla p) - \langle \psi, \dfrac{\bold{K}}{\mu} \nabla p \cdot \hat{n} \rangle = 0
-
-The reader should become comfortable with this notation for weak form expressions, as it shall henceforth be used exclusively.
 
 Since [darcy-strong] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$, where $\hat{n}$ is the surface normal vector, on the remaining boundaries, it is possible to drop the second term in [darcy-weak] and express it, more simply, as the following:
 
@@ -59,27 +52,17 @@ It can be seen that `Kernel` objects have access to all of the following members
 - `_u`, `_grad_u`\\
   Value and gradient of the variable this Kernel is operating on
 
-
-
 - `_test`, `_grad_test`\\
   Value ($\psi$) and gradient ($\nabla \psi$) of the test functions at the quadrature points
-
-
 
 - `_phi`, `_grad_phi`\\
   Value ($\phi$) and gradient ($\nabla \phi$) of the trial functions at the quadrature points
 
-
-
 - `_q_point`\\
   Coordinates of the current quadrature point
 
-
-
 - `_i`, `_j`\\
   Current index for test and trial functions, respectively
-
-
 
 - `_qp`\\
   Current quadrature point index
