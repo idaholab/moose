@@ -1742,6 +1742,127 @@ Coupleable::coupledGenericGradient<true>(const std::string & var_name, unsigned 
 {
   return adCoupledGradient(var_name, comp);
 }
+
+std::vector<unsigned int>
+Coupleable::coupledIndices(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return coupled(var_name, comp); };
+  return coupledVectorHelper<unsigned int>(var_name, func);
+}
+
+std::vector<VariableName>
+Coupleable::coupledNames(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return getVar(var_name, comp)->name(); };
+  return coupledVectorHelper<VariableName>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledValue(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+template <>
+std::vector<const GenericVariableValue<false> *>
+Coupleable::coupledGenericValues<false>(const std::string & var_name) const
+{
+  return coupledValues(var_name);
+}
+
+template <>
+std::vector<const GenericVariableValue<true> *>
+Coupleable::coupledGenericValues<true>(const std::string & var_name) const
+{
+  return adCoupledValues(var_name);
+}
+
+std::vector<const ADVariableValue *>
+Coupleable::adCoupledValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &adCoupledValue(var_name, comp); };
+  return coupledVectorHelper<const ADVariableValue *>(var_name, func);
+}
+
+std::vector<const ADVectorVariableValue *>
+Coupleable::adCoupledVectorValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) {
+    return &adCoupledVectorValue(var_name, comp);
+  };
+  return coupledVectorHelper<const ADVectorVariableValue *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledVectorTagValues(const std::string & var_name, TagID tag) const
+{
+  auto func = [this, &var_name, &tag](unsigned int comp) {
+    return &coupledVectorTagValue(var_name, tag, comp);
+  };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledVectorTagDofValues(const std::string & var_name, TagID tag) const
+{
+  auto func = [this, &var_name, &tag](unsigned int comp) {
+    return &coupledVectorTagDofValue(var_name, tag, comp);
+  };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledMatrixTagValues(const std::string & var_name, TagID tag) const
+{
+  auto func = [this, &var_name, &tag](unsigned int comp) {
+    return &coupledMatrixTagValue(var_name, tag, comp);
+  };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledValuesOld(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledValueOld(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableGradient *>
+Coupleable::coupledGradients(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledGradient(var_name, comp); };
+  return coupledVectorHelper<const VariableGradient *>(var_name, func);
+}
+
+std::vector<const ADVariableGradient *>
+Coupleable::adCoupledGradients(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &adCoupledGradient(var_name, comp); };
+  return coupledVectorHelper<const ADVariableGradient *>(var_name, func);
+}
+
+std::vector<const VariableGradient *>
+Coupleable::coupledGradientsOld(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledGradientOld(var_name, comp); };
+  return coupledVectorHelper<const VariableGradient *>(var_name, func);
+}
+
+std::vector<const VariableValue *>
+Coupleable::coupledDots(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledDot(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const ADVariableValue *>
+Coupleable::adCoupledDots(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &adCoupledDot(var_name, comp); };
+  return coupledVectorHelper<const ADVariableValue *>(var_name, func);
+}
+
 // Explicit instantiations
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,
