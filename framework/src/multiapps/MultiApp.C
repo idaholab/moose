@@ -831,34 +831,49 @@ MultiApp::buildComm()
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
+  // This will give the minimum processors per app
   unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
+  // This will give the number of apps that have one additional processor
+  unsigned int extra_proc_apps = _orig_num_procs % _total_num_apps;
 
-  if (_max_procs_per_app < procs_per_app)
-    procs_per_app = _max_procs_per_app;
+  // Index for the processor within a block of processors for an app
+  unsigned int block_ind = 0;
+  // Application index
+  unsigned int my_app = 0;
+  for (int i = 0; i < _orig_num_procs; ++i)
+  {
+    if (i == rank)
+    {
+      // Whether or not we have reached the requested maximum number of processors
+      if (block_ind < _max_procs_per_app)
+      {
+        _first_local_app = my_app;
+        _my_num_apps = 1;
+        _has_an_app = true;
+      }
+      else
+      {
+        _my_num_apps = 0;
+        _has_an_app = false;
+      }
+      break;
+    }
+    ++block_ind;
 
-  int my_app = rank / procs_per_app;
-  unsigned int procs_for_my_app = procs_per_app;
+    // Reset block index and increment app index
+    if (block_ind == procs_per_app)
+    {
+      block_ind = 0;
+      ++my_app;
 
-  if ((unsigned int)my_app > _total_num_apps - 1 && procs_for_my_app == _max_procs_per_app)
-  {
-    // If we've already hit the max number of procs per app then this processor
-    // won't have an app at all
-    _my_num_apps = 0;
-    _has_an_app = false;
+      // Increment the number of processors for every app after this point
+      if (my_app == (_total_num_apps - extra_proc_apps))
+        ++procs_per_app;
+    }
   }
-  else if ((unsigned int)my_app >=
-           _total_num_apps - 1) // The last app will gain any left-over procs
-  {
-    my_app = _total_num_apps - 1;
-    //    procs_for_my_app += _orig_num_procs % _total_num_apps;
-    _first_local_app = my_app;
-    _my_num_apps = 1;
-  }
-  else
-  {
-    _first_local_app = my_app;
-    _my_num_apps = 1;
-  }
+
+  if (_first_local_app >= _total_num_apps)
+    mooseError("Internal error, a processor has an undefined app.");
 
   if (_has_an_app)
   {

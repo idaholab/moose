@@ -48,7 +48,8 @@ SamplerParameterTransfer::SamplerParameterTransfer(const InputParameters & param
 void
 SamplerParameterTransfer::execute()
 {
-  mooseAssert(_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps(),
+  mooseAssert((_sampler_ptr->getNumberOfLocalRows() == 0) ||
+                  (_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps()),
               "The number of MultiApps and the number of sample rows must be the same.");
 
   // Loop over all sub-apps
