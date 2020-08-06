@@ -86,7 +86,7 @@ Sampler::init()
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
   // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
-  if (n_processors() > _n_rows)
+  if (_n_rows > 0 && n_processors() > _n_rows)
   {
     // This code is specifically to match what is going on in MulitApp::buildComm()
     // This will give the minimum processors per row
