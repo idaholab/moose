@@ -3,8 +3,8 @@
 #include "AuxKernel.h"
 
 /**
- *  Calculates the current density vector field when given electrostatic potential
- *  (electrostatic = true, default) or electric field.
+ *  Calculates the current density vector field (in A/m^2) when given electrostatic
+ *  potential (electrostatic = true, default) or electric field.
  */
 template <bool is_ad>
 class CurrentDensityTempl : public VectorAuxKernel
