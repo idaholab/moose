@@ -52,7 +52,7 @@ INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
   {
     if (coupledComponents("source_variable") != 1)
       paramError("source_variable", "Only expect one variable for the 'source_variable' parameter");
-    obj_tracker.set("heat_source_var", getVar("source_variable")->name());
+    obj_tracker.set("heat_source_var", getVar("source_variable", 0)->name());
   }
   else if (has_function)
     obj_tracker.set("heat_source_function", getParam<FunctionName>("source_function"));

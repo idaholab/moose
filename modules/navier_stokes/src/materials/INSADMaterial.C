@@ -83,7 +83,7 @@ INSADMaterial::initialSetup()
     _boussinesq_alpha =
         &_material_data->getADProperty<Real>(_object_tracker->get<MaterialPropertyName>("alpha"));
     _temperature =
-        &_subproblem.getStandardVariable(_tid, _object_tracker->get<VariableName>("temperature"))
+        &_subproblem.getStandardVariable(_tid, _object_tracker->get<std::string>("temperature"))
              .adSln();
     _ref_temp =
         &_material_data->getProperty<Real>(_object_tracker->get<MaterialPropertyName>("ref_temp"));

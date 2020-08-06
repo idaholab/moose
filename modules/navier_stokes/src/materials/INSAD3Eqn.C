@@ -61,7 +61,7 @@ INSAD3Eqn::initialSetup()
     if (_object_tracker->isTrackerParamValid("heat_source_var"))
       _heat_source_var =
           &_subproblem
-               .getStandardVariable(_tid, _object_tracker->get<VariableName>("heat_source_var"))
+               .getStandardVariable(_tid, _object_tracker->get<std::string>("heat_source_var"))
                .adSln();
     else if (_object_tracker->isTrackerParamValid("heat_source_function"))
       _heat_source_function = &_fe_problem.getFunction(

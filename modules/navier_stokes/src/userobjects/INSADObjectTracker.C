@@ -36,7 +36,7 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "alpha", "The alpha material property for the boussinesq approximation");
   _tracker_params.addParam<MaterialPropertyName>("ref_temp",
                                                  "The reference temperature material property");
-  _tracker_params.addParam<VariableName>("temperature", "The temperature variable");
+  _tracker_params.addParam<std::string>("temperature", "The temperature variable");
   _tracker_params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   _tracker_params.addParam<bool>(
       "has_gravity",
@@ -50,7 +50,7 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   _tracker_params.addParam<FunctionName>("heat_source_function",
                                          "The function describing the heat source");
-  _tracker_params.addParam<VariableName>(
+  _tracker_params.addParam<std::string>(
       "heat_source_var",
       "Variable describing the volumetric heat source. Note that if this variable evaluates to a "
       "negative number, then this object will be an energy sink");
