@@ -30,18 +30,9 @@ ifeq ($(ALL_MODULES),yes)
         POROUS_FLOW                 := yes
         RDG                         := yes
         RICHARDS                    := yes
-        SOLID_MECHANICS             := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
         XFEM                        := yes
-endif
-
-ifeq ($(XFEM),yes)
-        SOLID_MECHANICS             := yes
-endif
-
-ifeq ($(SOLID_MECHANICS),yes)
-        TENSOR_MECHANICS            := yes
 endif
 
 ifeq ($(PERIDYNAMICS),yes)
@@ -68,8 +59,12 @@ ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
 
+ifeq ($(XFEM),yes)
+        TENSOR_MECHANICS            := yes
+endif
+
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -191,16 +186,6 @@ ifeq ($(RICHARDS),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
-ifeq ($(SOLID_MECHANICS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
-  APPLICATION_NAME   := solid_mechanics
-
-  #Dependency on tensor mechanics
-  DEPEND_MODULES     := tensor_mechanics
-  SUFFIX             := sm
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
 ifeq ($(STOCHASTIC_TOOLS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
   APPLICATION_NAME   := stochastic_tools
@@ -212,8 +197,7 @@ ifeq ($(XFEM),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/xfem
   APPLICATION_NAME   := xfem
 
-  #Dependency on solid_mechanics
-  DEPEND_MODULES     := solid_mechanics
+  DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := xfem
   include $(FRAMEWORK_DIR)/app.mk
 endif

@@ -9,19 +9,6 @@
     issues = '#12053'
     requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to a set of physical displacement quantities.'
   [../]
-  [./test_sm]
-    type = 'Exodiff'
-    input = 'reference_residual_sm.i'
-    cli_args = 'Outputs/file_base=reference_residual_out'
-    exodiff = 'reference_residual_out.e'
-    custom_cmp = 'reference_residual.cmp'
-    scale_refine = 2
-    design = 'ReferenceResidualProblem.md'
-    issues = '#12053'
-    requirement = 'The reference residual based convergence checking system shall determine if convergence is achieved by comparing the residual to physical displacement quantities in a solid mechanics module input file.'
-    prereq = test
-    no_error_deprecated = true
-  [../]
   [./test_scaling]
     type = 'Exodiff'
     custom_cmp = 'reference_residual.cmp'
@@ -34,7 +21,7 @@
     design = 'ReferenceResidualProblem.md'
     issues = '#10403'
     requirement = 'The reference residual based convergence checking system shall apply the variable scaling factor to the reference residual calculation if a scaling factor is applied to a variable.'
-    prereq = test_sm
+    prereq = test
   [../]
   [./group_variables]
     type = 'Exodiff'

@@ -1,1 +1,0 @@
-../../../../../../../contact/test/tests/sliding_block/sliding/sliding_elastic_blocks_2d.e

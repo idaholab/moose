@@ -10,17 +10,4 @@
     max_parallel = 1
     requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature'
   [../]
-
-  [./thermal_strain_test_sm]
-    type = 'Exodiff'
-    input = 'thermal_strain_sm.i'
-    exodiff = 'thermal_strain_sm_out.e'
-    cli_args = 'Outputs/file_base=thermal_strain_sm_out'
-    abs_zero = 2.0e-04
-    scale_refine = 1
-    max_parallel = 1
-    prereq = 'thermal_strain_test'
-    requirement = 'The system shall compute uniform thermal strain for a uniform change in temperature in the solid_mechanics module'
-    no_error_deprecated = true
-  [../]
 []

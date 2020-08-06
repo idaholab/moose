@@ -1,1 +1,0 @@
-../quarter_sym.e

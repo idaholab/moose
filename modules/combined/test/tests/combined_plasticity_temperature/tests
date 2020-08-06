@@ -8,18 +8,6 @@
     design = 'IsotropicPlasticityStressUpdate.md'
     requirement = 'The MOOSE tensor mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion'
   [../]
-  [./temp_dep_yield_sm]
-    type = Exodiff
-    input = plasticity_temperature_dep_yield_sm.i
-    exodiff = plasticity_temperature_dep_yield_out.e
-    abs_zero = 1e-9
-    prereq = 'temp_dep_yield'
-    issues = '#6162'
-    design = 'IsotropicPlasticityStressUpdate.md'
-    requirement = 'The MOOSE solid mechanics module shall provide an isotropic plasticity model with a temperature dependent yield criterion'
-    no_error_deprecated = true
-  [../]
-
   [./ad_temp_dep_yield]
     type = Exodiff
     input = ad_plasticity_temperature_dep_yield.i

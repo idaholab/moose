@@ -1,1 +1,0 @@
-../../gold/notch_out.e

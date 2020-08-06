@@ -1,9 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'reaction.i'
-    exodiff = 'reaction_out.e'
-    custom_cmp = 'reaction_out.exodiff'
-    no_error_deprecated = true
-  [../]
-[]

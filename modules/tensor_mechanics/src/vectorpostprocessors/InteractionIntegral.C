@@ -78,12 +78,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _treat_as_2d(false),
-    _stress(hasMaterialProperty<RankTwoTensor>("stress")
-                ? &getMaterialPropertyByName<RankTwoTensor>("stress")
-                : nullptr),
-    _strain(hasMaterialProperty<RankTwoTensor>("elastic_strain")
-                ? &getMaterialPropertyByName<RankTwoTensor>("elastic_strain")
-                : nullptr),
+    _stress(getMaterialPropertyByName<RankTwoTensor>("stress")),
+    _strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain")),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
     _grad_disp(3),
@@ -107,20 +103,6 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _interaction_integral(declareVector("II_" + Moose::stringify(getParam<MooseEnum>("sif_mode")) +
                                         "_" + Moose::stringify(_ring_index)))
 {
-  if (!hasMaterialProperty<RankTwoTensor>("stress"))
-    mooseError("InteractionIntegral Error: RankTwoTensor material property 'stress' not found. "
-               "This may be because solid mechanics system is being used to calculate a SymmTensor "
-               "'stress' material property. To use interaction integral calculation with solid "
-               "mechanics application, please set 'solid_mechanics = true' in the DomainIntegral "
-               "block.");
-
-  if (!hasMaterialProperty<RankTwoTensor>("elastic_strain"))
-    mooseError("InteractionIntegral Error: RankTwoTensor material property 'elastic_strain' not "
-               "found. This may be because solid mechanics system is being used to calculate a "
-               "SymmTensor 'elastic_strain' material property. To use interaction integral "
-               "calculation with solid mechanics application, please set 'solid_mechanics = true' "
-               "in the DomainIntegral block.");
-
   if (_has_temp && !_total_deigenstrain_dT)
     mooseError("InteractionIntegral Error: To include thermal strain term in interaction integral, "
                "must both couple temperature in DomainIntegral block and compute "
@@ -201,9 +183,9 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
   RankTwoTensor grad_disp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(grad_disp, crack_front_point_index);
   RankTwoTensor stress_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((*_stress)[_qp], crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords((_stress)[_qp], crack_front_point_index);
   RankTwoTensor strain_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((*_strain)[_qp], crack_front_point_index);
+      _crack_front_definition->rotateToCrackFrontCoords((_strain)[_qp], crack_front_point_index);
   RealVectorValue grad_temp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], crack_front_point_index);
 

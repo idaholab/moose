@@ -15,11 +15,10 @@ Extensions:
         executable: ${MOOSE_DIR}/modules/xfem
         hide:
             framework: !include framework/doc/hidden.yml
-            xfem: !include modules/xfem/doc/hidden.yml
+            #xfem: !include modules/xfem/doc/hidden.yml
             tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
         remove:
             framework: !include framework/doc/remove.yml
-            solid_mechanics: !include modules/solid_mechanics/doc/remove.yml
         includes:
             - framework/include
             - modules/xfem/include
