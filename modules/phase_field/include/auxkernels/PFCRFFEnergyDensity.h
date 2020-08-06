@@ -22,13 +22,13 @@ public:
 protected:
   virtual Real computeValue();
 
-  unsigned int _order;
-  std::vector<const VariableValue *> _vals;
+  const unsigned int _order;
+  const std::vector<const VariableValue *> _vals;
 
-  Real _a;
-  Real _b;
-  Real _c;
-  unsigned int _num_exp_terms;
-  MooseEnum _log_approach;
-  Real _tol;
+  const Real _a;
+  const Real _b;
+  const Real _c;
+  const unsigned int _num_exp_terms;
+  const MooseEnum _log_approach;
+  const Real _tol;
 };

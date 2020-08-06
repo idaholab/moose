@@ -27,5 +27,5 @@ protected:
   virtual Real computeValue();
 
   const unsigned int _op_num;
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
 };

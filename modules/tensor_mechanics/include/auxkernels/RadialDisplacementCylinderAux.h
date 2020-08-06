@@ -35,7 +35,7 @@ protected:
   /// Number of displacment components.
   unsigned int _ndisp;
   /// Coupled variable values of the displacement components.
-  std::vector<const VariableValue *> _disp_vals;
+  const std::vector<const VariableValue *> _disp_vals;
 
   /// Axis direction
   RealVectorValue _axis_vector;

@@ -29,34 +29,23 @@ SwitchingFunctionMultiPhaseMaterial::SwitchingFunctionMultiPhaseMaterial(
   : DerivativeMaterialInterface<Material>(parameters),
     _h_name(getParam<MaterialPropertyName>("h_name")),
     _num_eta_p(coupledComponents("phase_etas")),
-    _eta_p(_num_eta_p),
-    _eta_p_names(_num_eta_p),
+    _eta_p(coupledValues("phase_etas")),
+    _eta_p_names(coupledNames("phase_etas")),
     _num_eta(coupledComponents("all_etas")),
-    _eta(_num_eta),
-    _eta_names(_num_eta),
+    _eta(coupledValues("all_etas")),
+    _eta_names(coupledNames("all_etas")),
     _is_p(_num_eta),
     _prop_h(declareProperty<Real>(_h_name)),
     _prop_dh(_num_eta),
     _prop_d2h(_num_eta)
 {
-  // Fetch eta values and names for phase etas
-  for (unsigned int i = 0; i < _num_eta_p; ++i)
-  {
-    _eta_p[i] = &coupledValue("phase_etas", i);
-    _eta_p_names[i] = getVar("phase_etas", i)->name();
-  }
-
-  // Declare h derivative properties, fetch eta values for all eta
+  // Declare h derivative properties
   for (unsigned int i = 0; i < _num_eta; ++i)
-  {
     _prop_d2h[i].resize(_num_eta);
-    _eta_names[i] = getVar("all_etas", i)->name();
-  }
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
     _prop_dh[i] = &declarePropertyDerivative<Real>(_h_name, _eta_names[i]);
-    _eta[i] = &coupledValue("all_etas", i);
     for (unsigned int j = i; j < _num_eta; ++j)
     {
       _prop_d2h[i][j] = _prop_d2h[j][i] =

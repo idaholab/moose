@@ -35,14 +35,14 @@ protected:
   MaterialPropertyName _h_name;
 
   /// Order parameters for phase alpha
-  unsigned int _num_eta_p;
-  std::vector<const VariableValue *> _eta_p;
-  std::vector<VariableName> _eta_p_names;
+  const unsigned int _num_eta_p;
+  const std::vector<const VariableValue *> _eta_p;
+  const std::vector<VariableName> _eta_p_names;
 
   /// Order parameters for all phases (including alpha)
-  unsigned int _num_eta;
-  std::vector<const VariableValue *> _eta;
-  std::vector<VariableName> _eta_names;
+  const unsigned int _num_eta;
+  const std::vector<const VariableValue *> _eta;
+  const std::vector<VariableName> _eta_names;
 
   /// List of which order parameters in the full list of all etas belong to phase p
   std::vector<bool> _is_p;

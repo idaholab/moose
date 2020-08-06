@@ -40,8 +40,8 @@ protected:
 
   /// the coupled displacement and neighbor displacement values
   ///@{
-  std::vector<const VariableValue *> _disp;
-  std::vector<const VariableValue *> _disp_neighbor;
+  const std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp_neighbor;
   ///@}
 
   /// method returning the traction in the interface coordinate system.

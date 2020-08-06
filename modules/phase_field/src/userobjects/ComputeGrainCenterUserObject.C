@@ -24,14 +24,12 @@ ComputeGrainCenterUserObject::ComputeGrainCenterUserObject(const InputParameters
   : ElementUserObject(parameters),
     _ncrys(coupledComponents("etas")), // determine number of grains from the number of names passed
                                        // in.  Note this is the actual number -1
-    _vals(_ncrys),                     // Size variable arrays
+    _vals(coupledValues("etas")),
     _ncomp(4 * _ncrys),
     _grain_data(_ncomp),
     _grain_volumes(_ncrys),
     _grain_centers(_ncrys)
 {
-  for (unsigned int i = 0; i < _ncrys; ++i)
-    _vals[i] = &coupledValue("etas", i);
 }
 
 void

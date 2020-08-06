@@ -28,8 +28,8 @@ public:
 protected:
   const unsigned int _op_num;
 
-  std::vector<const VariableValue *> _vals;
-  std::vector<unsigned int> _vals_var;
+  const std::vector<const VariableValue *> _vals;
+  const std::vector<unsigned int> _vals_var;
 
   const MaterialProperty<Real> & _mu;
 };

@@ -22,15 +22,8 @@ OptionallyVectorCoupledForce::validParams()
 }
 
 OptionallyVectorCoupledForce::OptionallyVectorCoupledForce(const InputParameters & parameters)
-  : Kernel(parameters)
+  : Kernel(parameters), _v_var(coupledIndices("v")), _v(coupledValues("v"))
 {
-  _v_var.resize(coupledComponents("v"));
-  _v.resize(coupledComponents("v"));
-  for (unsigned int j = 0; j < coupledComponents("v"); ++j)
-  {
-    _v_var[j] = coupled("v", j);
-    _v[j] = &coupledValue("v", j);
-  }
 }
 
 Real

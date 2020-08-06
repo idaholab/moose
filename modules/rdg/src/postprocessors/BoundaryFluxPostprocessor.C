@@ -35,10 +35,9 @@ BoundaryFluxPostprocessor::BoundaryFluxPostprocessor(const InputParameters & par
     _boundary_flux_uo(getUserObject<BoundaryFluxBase>("boundary_flux_uo")),
     _flux_index(getParam<unsigned int>("flux_index")),
     _provided_normal(isParamValid("normal")),
-    _n_components(coupledComponents("variables"))
+    _n_components(coupledComponents("variables")),
+    _U(coupledValues("variables"))
 {
-  for (unsigned int i = 0; i < _n_components; i++)
-    _U.push_back(&coupledValue("variables", i));
 }
 
 Real

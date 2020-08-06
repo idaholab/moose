@@ -58,8 +58,8 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
     _JtoeV(6.24150974e18), // Joule to eV conversion
     _mu_qp(0.0),
     _op_num(coupledComponents("v")),
-    _vals(_op_num),
-    _grad_vals(_op_num)
+    _vals(coupledValues("v")),
+    _grad_vals(coupledGradients("v"))
 {
   // reshape vectors
   _sigma.resize(_op_num);
@@ -70,10 +70,6 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
 
   for (unsigned int op = 0; op < _op_num; ++op)
   {
-    // Initialize variables
-    _vals[op] = &coupledValue("v", op);
-    _grad_vals[op] = &coupledGradient("v", op);
-
     _sigma[op].resize(_op_num);
     _mob[op].resize(_op_num);
     _Q[op].resize(_op_num);

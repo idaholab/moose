@@ -36,8 +36,8 @@ ComputeStrainBase::validParams()
 ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _ndisp(coupledComponents("displacements")),
-    _disp(3),
-    _grad_disp(3),
+    _disp(coupledValues("displacements")),
+    _grad_disp(coupledGradients("displacements")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(declareProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
@@ -56,6 +56,10 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
     _eigenstrains[i] = &getMaterialProperty<RankTwoTensor>(_eigenstrain_names[i]);
   }
 
+  // set unused dimensions to zero
+  _disp.resize(3, &_zero);
+  _grad_disp.resize(3, &_grad_zero);
+
   if (_ndisp == 1 && _volumetric_locking_correction)
     paramError("volumetric_locking_correction", "has to be set to false for 1-D problems.");
 
@@ -73,19 +77,6 @@ void
 ComputeStrainBase::initialSetup()
 {
   displacementIntegrityCheck();
-  // fetch coupled variables and gradients (as stateful properties if necessary)
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp[i] = &coupledValue("displacements", i);
-    _grad_disp[i] = &coupledGradient("displacements", i);
-  }
-
-  // set unused dimensions to zero
-  for (unsigned i = _ndisp; i < 3; ++i)
-  {
-    _disp[i] = &_zero;
-    _grad_disp[i] = &_grad_zero;
-  }
 }
 
 void

@@ -64,9 +64,7 @@ AverageGrainVolume::AverageGrainVolume(const InputParameters & parameters)
         mooseError("The number of grains must match the number of OPs if a feature_counter is not "
                    "supplied");
 
-      _vals.resize(num_coupled_vars);
-      for (unsigned int i = 0; i < num_coupled_vars; ++i)
-        _vals[i] = &coupledValue("variable", i);
+      _vals = coupledValues("variable");
 
       _feature_volumes.resize(num_coupled_vars);
 

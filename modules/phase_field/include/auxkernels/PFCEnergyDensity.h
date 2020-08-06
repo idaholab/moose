@@ -22,7 +22,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
   std::vector<const MaterialProperty<Real> *> _coeff;
 
   unsigned int _order;

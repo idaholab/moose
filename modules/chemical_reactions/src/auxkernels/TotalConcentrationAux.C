@@ -29,16 +29,11 @@ TotalConcentrationAux::validParams()
 TotalConcentrationAux::TotalConcentrationAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _primary_species(coupledValue("primary_species")),
-    _sto_v(getParam<std::vector<Real>>("sto_v"))
+    _sto_v(getParam<std::vector<Real>>("sto_v")),
+    _secondary_species(coupledValues("v"))
 {
-  const unsigned int n = coupledComponents("v");
-  _secondary_species.resize(n);
-
-  for (unsigned int i = 0; i < n; ++i)
-    _secondary_species[i] = &coupledValue("v", i);
-
   // Check that the correct number of stoichiometric coefficients have been included
-  if (_sto_v.size() != n)
+  if (_sto_v.size() != coupledComponents("v"))
     mooseError("The number of stoichiometric coefficients and coupled species must be equal in ",
                _name);
 }

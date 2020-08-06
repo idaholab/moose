@@ -35,14 +35,14 @@ MatCoupledForce::validParams()
 MatCoupledForce::MatCoupledForce(const InputParameters & parameters)
   : Kernel(parameters),
     _n_coupled(coupledComponents("v")),
-    _coupled_props(isParamValid("material_properties"))
+    _coupled_props(isParamValid("material_properties")),
+    _v_var(coupledIndices("v")),
+    _v(coupledValues("v")),
+    _coef(isParamValid("coef") ? getParam<std::vector<Real>>("coef")
+                               : std::vector<Real>(_n_coupled, 1))
 {
-  _v_var.resize(_n_coupled);
-  _v.resize(_n_coupled);
-  for (unsigned int j = 0; j < _n_coupled; ++j)
+  for (MooseIndex(_n_coupled) j = 0; j < _n_coupled; ++j)
   {
-    _v_var[j] = coupled("v", j);
-    _v[j] = &coupledValue("v", j);
     _v_var_to_index[_v_var[j]] = j;
 
     if (_var.number() == _v_var[j])
@@ -51,18 +51,8 @@ MatCoupledForce::MatCoupledForce(const InputParameters & parameters)
                  "consider using Reaction or somethig similar");
   }
 
-  if (isParamValid("coef"))
-  {
-    _coef = getParam<std::vector<Real>>("coef");
-    if (_coef.size() != _n_coupled)
-      paramError("coef", "Size of coef must be equal to size of v");
-  }
-  else
-  {
-    _coef.resize(_n_coupled);
-    for (unsigned int j = 0; j < _n_coupled; ++j)
-      _coef[j] = 1;
-  }
+  if (isParamValid("coef") && _coef.size() != _n_coupled)
+    paramError("coef", "Size of coef must be equal to size of v");
 
   if (_coupled_props)
   {

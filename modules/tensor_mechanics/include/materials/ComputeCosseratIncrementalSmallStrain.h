@@ -34,16 +34,16 @@ protected:
   const unsigned int _nrots;
 
   /// The Cosserat rotations
-  std::vector<const VariableValue *> _wc;
+  const std::vector<const VariableValue *> _wc;
 
   /// The Cosserat rotations
-  std::vector<const VariableValue *> _wc_old;
+  const std::vector<const VariableValue *> _wc_old;
 
   /// Grad(Cosserat rotation)
-  std::vector<const VariableGradient *> _grad_wc;
+  const std::vector<const VariableGradient *> _grad_wc;
 
   /// Grad(Cosserat rotation)
-  std::vector<const VariableGradient *> _grad_wc_old;
+  const std::vector<const VariableGradient *> _grad_wc_old;
 
   /// the Cosserat curvature strain: curvature_ij = nabla_j CosseratRotation_i
   const MaterialProperty<RankTwoTensor> & _curvature_old;

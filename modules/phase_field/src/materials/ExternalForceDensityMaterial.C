@@ -36,21 +36,17 @@ ExternalForceDensityMaterial::ExternalForceDensityMaterial(const InputParameters
     _c_name(getVar("c", 0)->name()),
     _k(getParam<Real>("k")),
     _op_num(coupledComponents(
-        "etas")),   // determine number of grains from the number of names passed in.
-    _vals(_op_num), // Size variable arrays
-    _vals_name(_op_num),
+        "etas")), // determine number of grains from the number of names passed in.
+    _vals(coupledValues("etas")),
+    _vals_name(coupledNames("etas")),
     _dF(declareProperty<std::vector<RealGradient>>("force_density_ext")),
     _dFdc(declarePropertyDerivative<std::vector<RealGradient>>("force_density_ext", _c_name)),
     _dFdeta(_op_num)
 {
-  // Loop through grains and load coupled variables into the arrays
+  // Loop through grains and load derivatives
   for (unsigned int i = 0; i < _op_num; ++i)
-  {
-    _vals[i] = &coupledValue("etas", i);
-    _vals_name[i] = getVar("etas", i)->name();
     _dFdeta[i] =
         &declarePropertyDerivative<std::vector<RealGradient>>("force_density_ext", _vals_name[i]);
-  }
 }
 
 void

@@ -44,5 +44,5 @@ protected:
   /// Stoichiometric coefficients for involved primary species
   const std::vector<Real> _sto_v;
   /// Coupled primary species concentrations
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
 };

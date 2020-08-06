@@ -26,8 +26,8 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
   : InterfaceMaterial(parameters),
     _normals(_assembly.normals()),
     _ndisp(coupledComponents("displacements")),
-    _disp(_ndisp),
-    _disp_neighbor(_ndisp),
+    _disp(coupledValues("displacements")),
+    _disp_neighbor(coupledNeighborValues("displacements")),
     _displacement_jump_global(declareProperty<RealVectorValue>("displacement_jump_global")),
     _displacement_jump(declareProperty<RealVectorValue>("displacement_jump")),
     _traction_global(declareProperty<RealVectorValue>("traction_global")),
@@ -40,13 +40,6 @@ CZMMaterialBase::CZMMaterialBase(const InputParameters & parameters)
 
   if (getParam<bool>("use_displaced_mesh") == true)
     mooseError("This material cannot be used with use_displaced_mesh = true");
-
-  // initializing the displacement vectors
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    _disp[i] = &coupledValue("displacements", i);
-    _disp_neighbor[i] = &coupledNeighborValue("displacements", i);
-  }
 }
 
 void

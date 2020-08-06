@@ -28,13 +28,13 @@ protected:
   virtual Real computeQpJacobian();
 
   /// The number of components
-  unsigned int _n_components;
+  const unsigned int _n_components;
   /// Far-field temperature fields for each component
-  std::vector<const VariableValue *> _T_infinity;
+  const std::vector<const VariableValue *> _T_infinity;
   /// Convective heat transfer coefficient
-  std::vector<const VariableValue *> _htc;
+  const std::vector<const VariableValue *> _htc;
   /// Volume fraction of individual phase
-  std::vector<const VariableValue *> _alpha;
+  const std::vector<const VariableValue *> _alpha;
   /// Scale factor
   const VariableValue & _scale_factor;
 };

@@ -43,5 +43,5 @@ protected:
   std::vector<const Function *> _initial_stress_fcn;
 
   /// AuxVariables defining the initial stress
-  std::vector<const VariableValue *> _ini_aux;
+  const std::vector<const VariableValue *> _ini_aux;
 };

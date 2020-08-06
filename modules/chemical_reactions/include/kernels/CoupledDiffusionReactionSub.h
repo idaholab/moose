@@ -38,15 +38,15 @@ private:
   /// Stoichiometric coefficients of the coupled primary species
   const std::vector<Real> _sto_v;
   /// Coupled primary species variable numbers
-  std::vector<unsigned int> _vars;
+  const std::vector<unsigned int> _vars;
   /// Coupled primary species concentrations
-  std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableValue *> _vals;
   /// Coupled gradients of primary species concentrations
-  std::vector<const VariableGradient *> _grad_vals;
+  const std::vector<const VariableGradient *> _grad_vals;
   /// Activity coefficient of primary species in the equilibrium species
   const VariableValue & _gamma_u;
   /// Activity coefficients of coupled primary species in the equilibrium species
-  std::vector<const VariableValue *> _gamma_v;
+  const std::vector<const VariableValue *> _gamma_v;
   /// Activity coefficient of equilibrium species
   const VariableValue & _gamma_eq;
 };

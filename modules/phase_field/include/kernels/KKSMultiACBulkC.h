@@ -33,8 +33,8 @@ protected:
 
   /// Names of phase concentration variables
   MaterialPropertyName _c1_name;
-  std::vector<const VariableValue *> _cjs;
-  std::vector<unsigned int> _cjs_var;
+  const std::vector<const VariableValue *> _cjs;
+  const std::vector<unsigned int> _cjs_var;
 
   /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
   const MaterialProperty<Real> & _prop_dF1dc1;

@@ -27,6 +27,6 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  std::vector<unsigned int> _v_var;
-  std::vector<const VariableValue *> _v;
+  const std::vector<unsigned int> _v_var;
+  const std::vector<const VariableValue *> _v;
 };

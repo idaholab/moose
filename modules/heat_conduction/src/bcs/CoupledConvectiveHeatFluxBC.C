@@ -29,6 +29,9 @@ CoupledConvectiveHeatFluxBC::validParams()
 CoupledConvectiveHeatFluxBC::CoupledConvectiveHeatFluxBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _n_components(coupledComponents("T_infinity")),
+    _T_infinity(coupledValues("T_infinity")),
+    _htc(coupledValues("htc")),
+    _alpha(coupledValues("alpha")),
     _scale_factor(coupledValue("scale_factor"))
 {
   if (coupledComponents("alpha") != _n_components)
@@ -39,16 +42,6 @@ CoupledConvectiveHeatFluxBC::CoupledConvectiveHeatFluxBC(const InputParameters &
     paramError(
         "htc",
         "The number of coupled components does not match the number of `T_infinity` components.");
-
-  _htc.resize(_n_components);
-  _T_infinity.resize(_n_components);
-  _alpha.resize(_n_components);
-  for (std::size_t c = 0; c < _n_components; c++)
-  {
-    _htc[c] = &coupledValue("htc", c);
-    _T_infinity[c] = &coupledValue("T_infinity", c);
-    _alpha[c] = &coupledValue("alpha", c);
-  }
 }
 
 Real

@@ -60,19 +60,19 @@ private:
   const unsigned _ndisp;
 
   /// MOOSE internal variable numbers corresponding to the displacments
-  std::vector<unsigned> _disp_num;
+  const std::vector<unsigned> _disp_num;
 
   /// Displacements
-  std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp;
 
   /// Old value of displacements
-  std::vector<const VariableValue *> _disp_old;
+  const std::vector<const VariableValue *> _disp_old;
 
   /// Old value of velocities
-  std::vector<const VariableValue *> _vel_old;
+  const std::vector<const VariableValue *> _vel_old;
 
   /// Old value of accelerations
-  std::vector<const VariableValue *> _accel_old;
+  const std::vector<const VariableValue *> _accel_old;
 
   /// Acceleration (instantiating this vector avoids re-creating a new vector every residual calculation)
   std::vector<Real> _accel;

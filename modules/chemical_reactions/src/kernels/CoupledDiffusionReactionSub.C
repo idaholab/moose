@@ -43,7 +43,14 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const InputParameters &
     _log_k(coupledValue("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
+    _vars(coupledIndices("v")),
+    _vals(coupledValues("v")),
+    _grad_vals(coupledGradients("v")),
     _gamma_u(coupledValue("gamma_u")),
+    _gamma_v(isCoupled("gamma_v")
+                 ? coupledValues("gamma_v") // have value
+                 : std::vector<const VariableValue *>(coupledComponents("v"),
+                                                      &coupledValue("gamma_v"))), // default
     _gamma_eq(coupledValue("gamma_eq"))
 {
   const unsigned int n = coupledComponents("v");
@@ -59,20 +66,6 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const InputParameters &
       mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
                  "coupled species in ",
                  _name);
-
-  _vars.resize(n);
-  _vals.resize(n);
-  _grad_vals.resize(n);
-  _gamma_v.resize(n);
-
-  for (unsigned int i = 0; i < n; ++i)
-  {
-    _vars[i] = coupled("v", i);
-    _vals[i] = &coupledValue("v", i);
-    _grad_vals[i] = &coupledGradient("v", i);
-    // If gamma_v has been supplied, use those values, but if not, use the default value
-    _gamma_v[i] = (isCoupled("gamma_v") ? &coupledValue("gamma_v", i) : &coupledValue("gamma_v"));
-  }
 }
 
 Real

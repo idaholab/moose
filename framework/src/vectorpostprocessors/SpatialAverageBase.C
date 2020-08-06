@@ -36,7 +36,7 @@ SpatialAverageBase::SpatialAverageBase(const InputParameters & parameters)
     _origin(getParam<Point>("origin")),
     _deltaR(_radius / _nbins),
     _nvals(coupledComponents("variable")),
-    _values(_nvals),
+    _values(coupledValues("variable")),
     _empty_bin_value(getParam<Real>("empty_bin_value")),
     _bin_center(declareVector("radius")),
     _counts(_nbins),
@@ -49,10 +49,7 @@ SpatialAverageBase::SpatialAverageBase(const InputParameters & parameters)
 
   // couple variables initialize vectors
   for (MooseIndex(_average) j = 0; j < _nvals; ++j)
-  {
-    _values[j] = &coupledValue("variable", j);
     _average[j] = &declareVector(getVar("variable", j)->name());
-  }
 
   // initialize the bin center value vector
   _bin_center.resize(_nbins);

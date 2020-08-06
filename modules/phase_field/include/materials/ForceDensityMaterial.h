@@ -39,10 +39,10 @@ private:
   /// stiffness constant
   Real _k;
 
-  unsigned int _op_num;
-  std::vector<const VariableValue *> _vals;
-  std::vector<const VariableGradient *> _grad_vals;
-  std::vector<VariableName> _vals_name;
+  const unsigned int _op_num;
+  const std::vector<const VariableValue *> _vals;
+  const std::vector<const VariableGradient *> _grad_vals;
+  const std::vector<VariableName> _vals_name;
 
   std::vector<Real> _product_etas;
   std::vector<RealGradient> _sum_grad_etas;

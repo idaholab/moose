@@ -34,36 +34,15 @@ ComputeEigenstrainBeamFromVariable::ComputeEigenstrainBeamFromVariable(
   : ComputeEigenstrainBeamBase(parameters),
     _ndisp(coupledComponents("displacement_eigenstrain_variables")),
     _nrot(coupledComponents("rotational_eigenstrain_variables")),
-    _disp(3),
-    _rot(3)
+    _disp(_ndisp > 0 ? coupledValues("displacement_eigenstrain_variables")
+                     : std::vector<const VariableValue *>(3, &_zero)),
+    _rot(_nrot > 0 ? coupledValues("rotational_eigenstrain_variables")
+                   : std::vector<const VariableValue *>(3, &_zero))
 {
   if ((_ndisp != 3 && _ndisp != 0) || (_nrot != 3 && _nrot != 0))
     mooseError("ComputeEigenstrainBeamFromVariable: If the displacement or rotational eigenstrains "
                "are provided, it should contain 3 variables corresponding to the three "
                "components in the global coordinate system.");
-
-  // fetch coupled variables
-  if (_ndisp > 0)
-  {
-    for (unsigned int i = 0; i < _ndisp; ++i)
-      _disp[i] = &coupledValue("displacement_eigenstrain_variables", i);
-  }
-  else
-  {
-    for (unsigned int i = 0; i < 3; ++i)
-      _disp[i] = &_zero;
-  }
-
-  if (_nrot > 0)
-  {
-    for (unsigned int i = 0; i < _nrot; ++i)
-      _rot[i] = &coupledValue("rotational_eigenstrain_variables", i);
-  }
-  else
-  {
-    for (unsigned int i = 0; i < 3; ++i)
-      _rot[i] = &_zero;
-  }
 }
 
 void

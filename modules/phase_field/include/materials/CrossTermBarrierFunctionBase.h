@@ -39,8 +39,8 @@ protected:
 
   /// order parameters
   unsigned int _num_eta;
-  std::vector<VariableName> _eta_names;
-  std::vector<const VariableValue *> _eta;
+  const std::vector<VariableName> _eta_names;
+  const std::vector<const VariableValue *> _eta;
 
   ///@{ Barrier function and its derivatives
   MaterialProperty<Real> & _prop_g;

@@ -51,10 +51,7 @@ Density::Density(const InputParameters & parameters)
     _coord_system = getBlockCoordSystem();
 
     // get coupled gradients
-    const unsigned int ndisp = coupledComponents("displacements");
-    _grad_disp.resize(ndisp);
-    for (unsigned int i = 0; i < ndisp; ++i)
-      _grad_disp[i] = &coupledGradient("displacements", i);
+    _grad_disp = coupledGradients("displacements");
 
     // fill remaining components with zero
     _grad_disp.resize(3, &_grad_zero);

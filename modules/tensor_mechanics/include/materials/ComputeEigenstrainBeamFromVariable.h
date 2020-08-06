@@ -32,8 +32,8 @@ protected:
   const unsigned int _nrot;
 
   /// Displacemenet eigenstrain variable values
-  std::vector<const VariableValue *> _disp;
+  const std::vector<const VariableValue *> _disp;
 
   /// Rotational eigenstrain variable values
-  std::vector<const VariableValue *> _rot;
+  const std::vector<const VariableValue *> _rot;
 };

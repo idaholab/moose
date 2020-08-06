@@ -38,8 +38,8 @@ protected:
   bool _well_only;
 
   /// order parameters
-  unsigned int _num_eta;
-  std::vector<const VariableValue *> _eta;
+  const unsigned int _num_eta;
+  const std::vector<const VariableValue *> _eta;
 
   /// Barrier functions and their drivatives
   MaterialProperty<Real> & _prop_g;
