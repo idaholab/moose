@@ -45,20 +45,9 @@ protected:
   std::vector<MooseVariable *> _disp_var;
   /// Base name of the material system
   const std::string _base_name;
-  // const VariableValue & _youngs_modulus;
-  MaterialProperty<Real> & _total_stretch;
-  MaterialProperty<Real> & _elastic_stretch;
-  // MaterialProperty<Real> & _axial_stress;
-  // MaterialProperty<Real> & _e_over_l;
-
-  // /// Number of coupled rotational variables
-  // unsigned int _nrot;
 
   /// Number of coupled displacement variables
   unsigned int _ndisp;
-
-  // /// Variable numbers corresponding to the rotational variables
-  // std::vector<unsigned int> _rot_num;
 
   /// Variable numbers corresponding to the displacement variables
   std::vector<unsigned int> _disp_num;
@@ -68,7 +57,6 @@ protected:
 
   Real _origin_length;
   Real _current_length;
-
 
   /// Rotational transformation from global coordinate system to initial truss local configuration
   RankTwoTensor _original_local_config;
@@ -82,26 +70,17 @@ protected:
   /// Current total displacement strain integrated over the cross-section in global coordinate system.
   MaterialProperty<RealVectorValue> & _total_disp_strain;
 
-  // /// Current total rotational strain integrated over the cross-section in global coordinate system.
-  // MaterialProperty<RealVectorValue> & _total_rot_strain;
-
   /// Old total displacement strain integrated over the cross-section in global coordinate system.
   const MaterialProperty<RealVectorValue> & _total_disp_strain_old;
 
-  // /// Old total rotational strain integrated over the cross-section in global coordinate system.
-  // const MaterialProperty<RealVectorValue> & _total_rot_strain_old;
-
   /// Mechanical displacement strain increment (after removal of eigenstrains) integrated over the cross-section.
   MaterialProperty<RealVectorValue> & _mech_disp_strain_increment;
-
-  // /// Mechanical rotation strain increment (after removal of eigenstrains) integrated over the cross-section
-  // MaterialProperty<RealVectorValue> & _mech_rot_strain_increment;
 
   /// Material stiffness vector that relates displacement strain increments to force increments
   const MaterialProperty<RealVectorValue> & _material_stiffness;
 
   /// Stiffness matrix between displacement DOFs of same node or across nodes
-  MaterialProperty<RankTwoTensor> & _K11;
+  MaterialProperty<Real> & _K11;
 
   /// Boolean flag to turn on large strain calculation
   const bool _large_strain;
@@ -109,32 +88,26 @@ protected:
   /// Gradient of displacement calculated in the truss local configuration at time t
   RealVectorValue _grad_disp_0_local_t;
 
-  /// Gradient of rotation calculated in the truss local configuration at time t
-  RealVectorValue _grad_rot_0_local_t;
-
-  /// Average rotation calculated in the truss local configuration at time t
-  RealVectorValue _avg_rot_local_t;
-
   /// Vector of truss eigenstrain names
   std::vector<MaterialPropertyName> _eigenstrain_names;
 
   /// Vector of current displacement eigenstrains
   std::vector<const MaterialProperty<RealVectorValue> *> _disp_eigenstrain;
 
-  // /// Vector of current rotational eigenstrains
-  // std::vector<const MaterialProperty<RealVectorValue> *> _rot_eigenstrain;
-
   /// Vector of old displacement eigenstrains
   std::vector<const MaterialProperty<RealVectorValue> *> _disp_eigenstrain_old;
 
-  // /// Vector of old rotational eigenstrains
-  // std::vector<const MaterialProperty<RealVectorValue> *> _rot_eigenstrain_old;
-
   /// Displacement and rotations at the two nodes of the truss in the global coordinate system
-  RealVectorValue _disp0, _disp1, _rot0, _rot1;
+  RealVectorValue _disp0, _disp1;
 
   /// Reference to the nonlinear system object
   NonlinearSystemBase & _nonlinear_sys;
+
+  /// Indices of solution vector corresponding to displacement DOFs at the node 0
+  std::vector<unsigned int> _soln_disp_index_0;
+
+  /// Indices of solution vector corresponding to displacement DOFs at the node 1
+  std::vector<unsigned int> _soln_disp_index_1;
 
   /// Rotational transformation from global coordinate system to initial truss local configuration
   MaterialProperty<RankTwoTensor> & _initial_rotation;

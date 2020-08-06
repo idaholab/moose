@@ -26,6 +26,9 @@ protected:
   virtual void computeQpProperties() override;
   virtual void initQpStatefulProperties() override;
 
+  /// Coupled variable for the beam cross-sectional area
+  // const VariableValue & _area;
+
   /// Mechanical displacement strain increment in truss local coordinate system
   const MaterialProperty<RealVectorValue> & _disp_strain_increment;
 

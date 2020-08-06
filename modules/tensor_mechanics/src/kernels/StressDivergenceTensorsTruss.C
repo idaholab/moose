@@ -72,6 +72,8 @@ StressDivergenceTensorsTruss::computeResidual()
   _local_re(0) = -force_local(_component);
   _local_re(1) = -_local_re(0);
 
+  out << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << std::endl;
+
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)
@@ -101,6 +103,8 @@ StressDivergenceTensorsTruss::computeJacobian()
   for (unsigned int i = 0; i < _test.size(); ++i)
     for (unsigned int j = 0; j < _phi.size(); ++j)
       _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, _component);
+
+  out <<" _component " << _component << " _local_ke " << _local_ke << std::endl;
 
   accumulateTaggedLocalMatrix();
 

@@ -54,12 +54,6 @@ ComputeIncrementalTrussStrain::validParams()
 ComputeIncrementalTrussStrain::ComputeIncrementalTrussStrain(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    // _youngs_modulus(coupledValue("youngs_modulus")),
-    _total_stretch(declareProperty<Real>(_base_name + "total_stretch")),
-    _elastic_stretch(declareProperty<Real>(_base_name + "elastic_stretch")),
-    // _axial_stress(declareProperty<Real>(_base_name + "axial_stress")),
-    // _e_over_l(declareProperty<Real>(_base_name + "e_over_l")),
-
     _ndisp(coupledComponents("displacements")),
     _disp_num(_ndisp),
     _area(coupledValue("area")),
@@ -69,31 +63,26 @@ ComputeIncrementalTrussStrain::ComputeIncrementalTrussStrain(const InputParamete
     _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
     _total_disp_strain_old(getMaterialPropertyOld<RealVectorValue>("total_disp_strain")),
     _mech_disp_strain_increment(declareProperty<RealVectorValue>("mech_disp_strain_increment")),
-    //
+
     _material_stiffness(getMaterialPropertyByName<RealVectorValue>("material_stiffness")),
-    _K11(declareProperty<RankTwoTensor>("Jacobian_11")),
+    _K11(declareProperty<Real>("Jacobian_11")),
     _large_strain(getParam<bool>("large_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _disp_eigenstrain(_eigenstrain_names.size()),
     _disp_eigenstrain_old(_eigenstrain_names.size()),
     _nonlinear_sys(_fe_problem.getNonlinearSystemBase()),
+    _soln_disp_index_0(_ndisp),
+    _soln_disp_index_1(_ndisp),
     _initial_rotation(declareProperty<RankTwoTensor>("initial_rotation")),
     _effective_stiffness(declareProperty<Real>("effective_stiffness")),
     _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
                                                              : nullptr)
 {
-  const std::vector<VariableName> & nl_vnames(getParam<std::vector<VariableName>>("displacements"));
-  _ndisp = nl_vnames.size();
-  // _disp_num = _ndisp;
-
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
-    // MooseVariable * disp_variable = getVar("displacements", i);
-    // _disp_num[i] = disp_variable->number();
-
-    // fetch nonlinear variables
-    _disp_var.push_back(&_fe_problem.getStandardVariable(_tid, nl_vnames[i]));
+    MooseVariable * disp_variable = getVar("displacements", i);
+    _disp_num[i] = disp_variable->number();
   }
 
   if (_large_strain)
@@ -112,12 +101,6 @@ ComputeIncrementalTrussStrain::ComputeIncrementalTrussStrain(const InputParamete
 void
 ComputeIncrementalTrussStrain::initQpStatefulProperties()
 {
-  _total_stretch[_qp] = 0.0;
-  _elastic_stretch[_qp] = 0.0;
-
-  // out<<" in ComputeIncrementalTrussStrain" << std::endl;
-
-
   // compute initial orientation of the truss for calculating initial rotation matrix
   const std::vector<RealGradient> * orientation =
       &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
@@ -159,45 +142,24 @@ ComputeIncrementalTrussStrain::initQpStatefulProperties()
 void
 ComputeIncrementalTrussStrain::computeProperties()
 {
-  // check for consistency of the number of element nodes
-  mooseAssert(_current_elem->n_nodes() == 2, "Truss element needs to have exactly two nodes.");
-
   // fetch the two end nodes for current element
   std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
     node.push_back(_current_elem->node_ptr(i));
 
   // calculate original length of a truss element
+  // Nodal positions do not change with time as undisplaced mesh is used by material classes by
+  // default
   RealGradient dxyz;
   for (unsigned int i = 0; i < _ndisp; ++i)
     dxyz(i) = (*node[1])(i) - (*node[0])(i);
+
   _original_length[0] = dxyz.norm();
 
   // Fetch the solution for the two end nodes at time t
-  // const NumericVector<Number> & sol = *_nonlinear_sys.currentSolution();
-  // const NumericVector<Number> & sol_old = _nonlinear_sys.solutionOld();
-  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
-  const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
+  const NumericVector<Number> & sol = *_nonlinear_sys.currentSolution();
+  const NumericVector<Number> & sol_old = _nonlinear_sys.solutionOld();
 
-  std::vector<Real> disp0, disp1;
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    disp0.push_back(sol(node[0]->dof_number(nonlinear_sys.number(), _disp_var[i]->number(), 0)));
-    disp1.push_back(sol(node[1]->dof_number(nonlinear_sys.number(), _disp_var[i]->number(), 0)));
-  }
-  // calculate current length of a truss element
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    dxyz(i) += disp1[i] - disp0[i];
-  _current_length = dxyz.norm();
-
-  // for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  // {
-  //   // _e_over_l[_qp] = _material_stiffness[0](0) / _origin_length;
-  //
-  //   // computeQpStrain();
-  //   // computeQpStress();
-  // }
-/*
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _soln_disp_index_0[i] = node[0]->dof_number(_nonlinear_sys.number(), _disp_num[i], 0);
@@ -206,41 +168,30 @@ ComputeIncrementalTrussStrain::computeProperties()
     _disp0(i) = sol(_soln_disp_index_0[i]) - sol_old(_soln_disp_index_0[i]);
     _disp1(i) = sol(_soln_disp_index_1[i]) - sol_old(_soln_disp_index_1[i]);
   }
-*/
 
   // For small rotation problems, the rotation matrix is essentially the transformation from the
   // global to original truss local configuration and is never updated. This method has to be
   // overriden for scenarios with finite rotation
   computeRotation();
-  // _initial_rotation[0] = _original_local_config;
+  _initial_rotation[0] = _original_local_config;
 
-  // for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  //   computeQpStrain();
-  //
-  // if (_fe_problem.currentlyComputingJacobian())
-  //   computeStiffnessMatrix();
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+    computeQpStrain();
+
+  if (_fe_problem.currentlyComputingJacobian())
+    computeStiffnessMatrix();
 }
 
 void
 ComputeIncrementalTrussStrain::computeQpStrain()
 {
-  _total_stretch[_qp] = _current_length / _origin_length - 1.0;
-  _elastic_stretch[_qp] = _total_stretch[_qp];
-  // _elastic_stretch[_qp] = _total_stretch[_qp] - _thermal_expansion_coeff * (_T[_qp] - _T0);
-
-/*
-  // const Real A_avg = (_area[0] + _area[1]) / 2.0;
-
   // Rotate the gradient of displacements and rotations at t+delta t from global coordinate
   // frame to truss local coordinate frame
   const RealVectorValue grad_disp_0(1.0 / _original_length[0] * (_disp1 - _disp0));
-  const RealVectorValue grad_rot_0(1.0 / _original_length[0] * (_rot1 - _rot0));
-  const RealVectorValue avg_rot(
-      0.5 * (_rot0(0) + _rot1(0)), 0.5 * (_rot0(1) + _rot1(1)), 0.5 * (_rot0(2) + _rot1(2)));
 
   _grad_disp_0_local_t = _total_rotation[0] * grad_disp_0;
-  _grad_rot_0_local_t = _total_rotation[0] * grad_rot_0;
-  _avg_rot_local_t = _total_rotation[0] * avg_rot;
+
+  const Real A_avg = (_area[0] + _area[1]) / 2.0;
 
 
   // displacement at any location on truss in local coordinate system at t
@@ -255,9 +206,9 @@ ComputeIncrementalTrussStrain::computeQpStrain()
   // e_13 = 2 * 0.5 * (u_1,3 + u_3,1) = (rot_2 + u_n3,1 + rot_1,1 * y)
 
   // axial strain at each qp along the length of the truss
-  _mech_disp_strain_increment[_qp](0) = _grad_disp_0_local_t(0) * _area[_qp];
-  _mech_disp_strain_increment[_qp](1) = 0;
-  _mech_disp_strain_increment[_qp](2) = 0;
+  _mech_disp_strain_increment[_qp](0) = _grad_disp_0_local_t(0) * A_avg;
+  _mech_disp_strain_increment[_qp](1) = _grad_disp_0_local_t(1) * A_avg;
+  _mech_disp_strain_increment[_qp](2) = _grad_disp_0_local_t(2) * A_avg;
 
   if (_large_strain)
   {
@@ -265,13 +216,10 @@ ComputeIncrementalTrussStrain::computeQpStrain()
         0.5 *
         ((Utility::pow<2>(_grad_disp_0_local_t(0)) + Utility::pow<2>(_grad_disp_0_local_t(1)) +
           Utility::pow<2>(_grad_disp_0_local_t(2))) *
-             _area[_qp]);
-    _mech_disp_strain_increment[_qp](1) += (-_avg_rot_local_t(2) * _grad_disp_0_local_t(0) +
-                                            _avg_rot_local_t(0) * _grad_disp_0_local_t(2)) *
-                                           _area[_qp];
-    _mech_disp_strain_increment[_qp](2) += (_avg_rot_local_t(1) * _grad_disp_0_local_t(0) -
-                                            _avg_rot_local_t(0) * _grad_disp_0_local_t(1)) *
-                                           _area[_qp];
+             A_avg);
+    _mech_disp_strain_increment[_qp](1) += 0;
+    _mech_disp_strain_increment[_qp](2) += 0;
+
   }
 
   _total_disp_strain[_qp] = _total_rotation[0].transpose() * _mech_disp_strain_increment[_qp] +
@@ -283,35 +231,30 @@ ComputeIncrementalTrussStrain::computeQpStrain()
   {
     _mech_disp_strain_increment[_qp] -=
         _total_rotation[0] * ((*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp]) *
-        _area[_qp];
+        A_avg;
   }
 
-  // Real c1_paper = std::sqrt(_material_stiffness[0](0));
-  // Real c2_paper = std::sqrt(_material_stiffness[0](1));
-  //
-  // Real effec_stiff_1 = std::max(c1_paper, c2_paper);
-  //
-  // Real effec_stiff_2 = 2 / (c2_paper * std::sqrt(A_avg / Iz_avg));
-  //
-  // _effective_stiffness[_qp] = std::max(effec_stiff_1, _original_length[0] / effec_stiff_2);
-  //
-  // if (_prefactor_function)
-  //   _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
-  */
+  Real c1_paper = std::sqrt(_material_stiffness[0](0));
+  _effective_stiffness[_qp] = c1_paper;
+
+  if (_prefactor_function)
+    _effective_stiffness[_qp] *= std::sqrt(_prefactor_function->value(_t, _q_point[_qp]));
 }
 
 void
 ComputeIncrementalTrussStrain::computeStiffnessMatrix()
 {
-  // _e_over_l[_qp] = _material_stiffness[0](0) / _origin_length;
-
   const Real youngs_modulus = _material_stiffness[0](0);
   const Real A_avg = (_area[0] + _area[1]) / 2.0;
+  // // const Real A_avg = _area[_qp];
+  //
+  // out << "area0 " << _area[0] << "  " << _area[1] << " area qp" << _area[_qp] << std::endl;
 
   Real K11_local = youngs_modulus * A_avg / _original_length[0];
-  _K11[0] = _total_rotation[0].transpose() * K11_local * _total_rotation[0];
+  // _K11[0] = _total_rotation[0].transpose() * K11_local * _total_rotation[0];
+  _K11[0] = K11_local;
 
-  out << " stiffness K11 " << _total_rotation[0].transpose() * K11_local * _total_rotation[0] << std::endl;
+  // out << " orig len "<< _original_length[0] << " E "<< youngs_modulus<< " area "<< _area[_qp] <<" A_avg" << A_avg << " K11_local "<< K11_local<< " rotation "<< _total_rotation[0] << " stiffness K11 " << _total_rotation[0].transpose() * K11_local * _total_rotation[0] << std::endl;
 
   // _K11[0] = K11_local;
 
@@ -569,5 +512,6 @@ ComputeIncrementalTrussStrain::computeStiffnessMatrix()
 void
 ComputeIncrementalTrussStrain::computeRotation()
 {
+  // out << "ComputeIncrementalTrussStrain::computeRotation()" <<std::endl;
   _total_rotation[0] = _original_local_config;
 }

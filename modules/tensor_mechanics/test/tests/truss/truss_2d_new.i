@@ -130,6 +130,10 @@
     type = SMP
     full = true
   [../]
+#  [./FDP]
+#    type = FDP
+#    full = true
+#  [../]
 []
 
 [Executioner]
@@ -140,6 +144,7 @@
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'jacobi   101'
 
+#  l_tol = 1e-2
   nl_max_its = 15
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
