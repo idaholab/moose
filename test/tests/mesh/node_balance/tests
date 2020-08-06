@@ -1,0 +1,40 @@
+[Tests]
+  design = 'MooseMesh.md'
+  issues = '#15721'
+
+  [./petsc]
+    type = 'Exodiff'
+    input = '2d_diffusion.i'
+    exodiff = '2d_diffusion_out.e'
+    max_parallel = 4
+    min_parallel = 4
+  #  expect_out = '    Max(avg):'
+    cli_args = '--load-balanced-nodes-petscpartitioner'
+
+    requirement = 'The system shall support node balance algorithms for simulation efficiency.'
+  [../]
+
+  [./linear]
+    type = 'Exodiff'
+    input = '2d_diffusion.i'
+    exodiff = '2d_diffusion_linear_out.e'
+    max_parallel = 4
+    min_parallel = 4
+  #  expect_out = '    Max(avg):'
+    cli_args = 'Outputs/file_base=2d_diffusion_linear_out --load-balanced-nodes-linear'
+
+    requirement = 'The system shall support node balance algorithms for simulation efficiency.'
+  [../]
+
+  [./bfs]
+    type = 'Exodiff'
+    input = '2d_diffusion.i'
+    exodiff = '2d_diffusion_bfs_out.e'
+    max_parallel = 4
+    min_parallel = 4
+  #  expect_out = '    Max(avg):'
+    cli_args = 'Outputs/file_base=2d_diffusion_bfs_out --load-balanced-nodes-bfs'
+
+    requirement = 'The system shall support node balance algorithms for simulation efficiency.'
+  [../]
+[]

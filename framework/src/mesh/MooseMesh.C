@@ -170,10 +170,9 @@ MooseMesh::validParams()
       true,
       "Whether or not to generate nodesets from the sidesets (usually a good idea).");
 
-   params.addParam<bool>(
-       "mesh_node_balance",
-        false,
-        "Whether or not to balance mesh vertices to have better performance).");
+  params.addParam<bool>("mesh_node_balance",
+                        false,
+                        "Whether or not to balance mesh vertices to have better performance).");
 
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
@@ -264,7 +263,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(false),
     _need_ghost_ghosted_boundaries(true),
-    _mesh_node_balance(false)
+    _mesh_node_balance(getParam<bool>("mesh_node_balance"))
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -327,7 +326,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _ghost_ghosted_boundaries_timer(registerTimedSection("GhostGhostedBoundaries", 3)),
     _need_delete(other_mesh._need_delete),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
-    _mesh_node_balance(false)
+    _mesh_node_balance(other_mesh._mesh_node_balance)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
