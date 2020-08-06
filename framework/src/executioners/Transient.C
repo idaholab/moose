@@ -103,6 +103,10 @@ Transient::validParams()
   params.addParam<std::vector<Real>>("time_period_ends", "The end times of time periods");
   params.addParam<bool>(
       "abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
+  params.addParam<bool>(
+      "error_on_dtmin",
+      true,
+      "Throw error when timestep is less than dtmin instead of just aborting solve.");
   params.addParam<MooseEnum>("scheme", schemes, "Time integration scheme used.");
   params.addParam<Real>("timestep_tolerance",
                         2.0e-14,
@@ -152,6 +156,7 @@ Transient::Transient(const InputParameters & parameters)
     _steady_state_start_time(getParam<Real>("steady_state_start_time")),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
+    _error_on_dtmin(getParam<bool>("error_on_dtmin")),
     _time_interval(declareRecoverableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
@@ -610,6 +615,11 @@ Transient::keepGoing()
   else if (_abort)
   {
     _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
+    keep_going = false;
+  }
+  else if (!_error_on_dtmin && _dt <= _dtmin)
+  {
+    _console << "Aborting as timestep already at or below dtmin" << std::endl;
     keep_going = false;
   }
 
