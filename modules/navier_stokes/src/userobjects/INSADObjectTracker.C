@@ -32,11 +32,11 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "The form of the viscous term. Options are 'traction' or 'laplace'");
   _tracker_params.addParam<bool>(
       "has_boussinesq", false, "Whether the simulation has the boussinesq approximation");
-  _tracker_params.addParam<const ADMaterialProperty<Real> *>(
+  _tracker_params.addParam<MaterialPropertyName>(
       "alpha", "The alpha material property for the boussinesq approximation");
-  _tracker_params.addParam<const MaterialProperty<Real> *>(
-      "ref_temp", "The reference temperature material property");
-  _tracker_params.addParam<const ADVariableValue *>("temperature", "The temperature variable");
+  _tracker_params.addParam<MaterialPropertyName>("ref_temp",
+                                                 "The reference temperature material property");
+  _tracker_params.addParam<std::string>("temperature", "The temperature variable");
   _tracker_params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   _tracker_params.addParam<bool>(
       "has_gravity",
@@ -48,9 +48,9 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
 
   _tracker_params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
-  _tracker_params.addParam<const Function *>("heat_source_function",
-                                             "The function describing the heat source");
-  _tracker_params.addParam<const ADVariableValue *>(
+  _tracker_params.addParam<FunctionName>("heat_source_function",
+                                         "The function describing the heat source");
+  _tracker_params.addParam<std::string>(
       "heat_source_var",
       "Variable describing the volumetric heat source. Note that if this variable evaluates to a "
       "negative number, then this object will be an energy sink");
@@ -59,9 +59,9 @@ INSADObjectTracker::INSADObjectTracker(const InputParameters & parameters)
       "has_coupled_force",
       false,
       "Whether the simulation has a force due to a coupled vector variable/vector function");
-  _tracker_params.addParam<std::vector<const ADVectorVariableValue *>>(
-      "coupled_force_var", "Variables imposing coupled forces");
-  _tracker_params.addParam<std::vector<const Function *>>(
+  _tracker_params.addParam<std::vector<VariableName>>("coupled_force_var",
+                                                      "Variables imposing coupled forces");
+  _tracker_params.addParam<std::vector<FunctionName>>(
       "coupled_force_vector_function", "The function(s) standing in as a coupled force(s)");
 }
 
@@ -76,4 +76,11 @@ addAmbientConvectionParams(InputParameters & params)
   params.addParam<Real>("ambient_convection_alpha",
                         "The heat transfer coefficient from from ambient surroundings");
   params.addParam<Real>("ambient_temperature", "The ambient temperature");
+}
+
+template <>
+bool
+INSADObjectTracker::notEqual(const MooseEnum & val1, const MooseEnum & val2)
+{
+  return !val1.compareCurrent(val2);
 }
