@@ -9,7 +9,7 @@
 
 #include "NormalMortarMechanicalContact.h"
 
-registerMooseObject("MooseApp", NormalMortarMechanicalContact);
+registerMooseObject("ContactApp", NormalMortarMechanicalContact);
 
 InputParameters
 NormalMortarMechanicalContact::validParams()
