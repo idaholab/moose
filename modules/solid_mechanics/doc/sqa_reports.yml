@@ -1,7 +1,0 @@
-Requirements:
-    solid_mechanics:
-        directories:
-            - modules/solid_mechanics
-        log_missing: NONE
-        log_design_files: NONE
-        log_testable: NONE

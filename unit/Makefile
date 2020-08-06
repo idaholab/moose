@@ -24,7 +24,6 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-SOLID_MECHANICS    := yes
 TENSOR_MECHANICS   := yes
 PHASE_FIELD        := yes
 XFEM               := yes
