@@ -8,8 +8,9 @@ InputParameters
 CurrentDensityTempl<is_ad>::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
-  params.addClassDescription("Calculates the current density vector field when given electrostatic "
-                             "potential (electrostatic = true, default) or electric field.");
+  params.addClassDescription(
+      "Calculates the current density vector field (in A/m^2) when given electrostatic "
+      "potential (electrostatic = true, default) or electric field.");
   params.addParam<bool>("electrostatic",
                         true,
                         "Whether the electric field is based on electrostatic potential or is "
@@ -24,8 +25,8 @@ CurrentDensityTempl<is_ad>::CurrentDensityTempl(const InputParameters & paramete
   : VectorAuxKernel(parameters),
 
     _is_es(getParam<bool>("electrostatic")),
-    _grad_potential(coupledGradient("potential")),
-    _electric_field(coupledVectorValue("electric_field")),
+    _grad_potential(isParamValid("potential") ? coupledGradient("potential") : _grad_zero),
+    _electric_field(isParamValid("electric_field") ? coupledVectorValue("electric_field") : _vector_zero),
 
     _conductivity(getGenericMaterialProperty<Real, is_ad>("electrical_conductivity"))
 {
@@ -43,7 +44,7 @@ CurrentDensityTempl<is_ad>::CurrentDensityTempl(const InputParameters & paramete
                name(),
                ", an electrostatic potential variable has been provided when `electrostatic = "
                "FALSE`. Please either provide an electric field vector variable only or set "
-               "`electrostatic = FALSE`!");
+               "`electrostatic = TRUE`!");
   }
   else if (isParamValid("potential") && isParamValid("electric_field"))
   {
