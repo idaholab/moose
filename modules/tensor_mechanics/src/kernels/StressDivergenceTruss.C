@@ -117,6 +117,9 @@ StressDivergenceTruss::computeJacobian()
 void
 StressDivergenceTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
+  RealGradient orientation((*_orientation)[0]);
+  orientation /= orientation.norm();
+
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
@@ -149,6 +152,14 @@ StressDivergenceTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
     }
     else if (false) // Need some code here for coupling with temperature
     {
+      for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+        _local_force_res[_i](component) +=
+            (_i == 0 ? -1 : 1) * _force_local_t[_qp](component) * 0.5;
     }
   }
+
+  // convert residual for each variable from current beam local configuration to global
+  // configuration
+  for (_i = 0; _i < _test.size(); ++_i)
+    global_force_res[_i] = (*total_rotation)[0].transpose() * _local_force_res[_i];
 }
