@@ -182,7 +182,7 @@ public:
    */
   virtual void load(std::istream & stream) override;
 
-  void name(const MaterialPropertyName & name_in)
+  void setName(const MaterialPropertyName & name_in)
   {
     mooseAssert(
         _name.empty() || _name == name_in,
