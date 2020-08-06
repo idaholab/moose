@@ -47,10 +47,10 @@ INSADBoussinesqBodyForce::INSADBoussinesqBodyForce(const InputParameters & param
   obj_tracker.set("alpha", getADMaterialProperty<Real>("alpha_name").name());
   obj_tracker.set("ref_temp", getMaterialProperty<Real>("ref_temp").name());
 
-  mooseAssert(getParam<std::vector<VariableName>>("temperature").size() == 1,
-              "Only expect one variable name for temperature");
+  if (coupledComponents("temperature") != 1)
+    paramError("temperature", "Only one variable should be used for 'temperature'");
 
-  obj_tracker.set("temperature", getParam<std::vector<VariableName>>("temperature")[0]);
+  obj_tracker.set("temperature", getVar("temperature", 0)->name());
   obj_tracker.set("gravity", getParam<RealVectorValue>("gravity"));
 }
 

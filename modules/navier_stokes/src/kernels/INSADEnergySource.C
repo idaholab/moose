@@ -50,9 +50,9 @@ INSADEnergySource::INSADEnergySource(const InputParameters & parameters)
   obj_tracker.set("has_heat_source", true);
   if (has_coupled)
   {
-    mooseAssert(getParam<std::vector<VariableName>>("source_variable").size() == 1,
-                "Only expect one VariableName for the heat source var");
-    obj_tracker.set("heat_source_var", getParam<std::vector<VariableName>>("source_variable")[0]);
+    if (coupledComponents("source_variable") != 1)
+      paramError("source_variable", "Only expect one variable for the 'source_variable' parameter");
+    obj_tracker.set("heat_source_var", getVar("source_variable")->name());
   }
   else if (has_function)
     obj_tracker.set("heat_source_function", getParam<FunctionName>("source_function"));
