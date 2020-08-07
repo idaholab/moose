@@ -4,6 +4,8 @@ Now that you have a working MOOSE Framework stack,
 [consider checking out the MOOSE examples](examples/index.md optional=True) for a beginning tour of how to use input
 files and implement your own custom behavior for MOOSE.
 
+Learning how to utilize multiple cores to solve larger problems via the [Message Passing Interface (MPI)](development/mpi.md).
+
 ## Join the Community
 
 Join one of our mailing lists:
