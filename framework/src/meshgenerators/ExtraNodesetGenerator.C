@@ -77,8 +77,12 @@ ExtraNodesetGenerator::generate()
 
   // add nodes with their ids
   for (const auto & node_id : nodes)
+  {
+    const Node * node_ptr = mesh->query_node_ptr(node_id);
     for (const auto & boundary_id : boundary_ids)
-      boundary_info.add_node(node_id, boundary_id);
+      if (node_ptr)
+        boundary_info.add_node(node_ptr, boundary_id);
+  }
 
   // add nodes with their coordinates
   const auto dim = mesh->mesh_dimension();
