@@ -140,6 +140,6 @@ private:
       std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> &
           local_vectors,
       processor_id_type /*pid*/,
-      const std::vector<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> &
-          vectors);
+      const std::vector<
+          std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> & vectors);
 };
