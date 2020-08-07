@@ -37,13 +37,13 @@ public:
   void initReducedOperators();
 
   /// Adding a snapshot for a variable.
-  void addSnapshot(dof_id_type v_ind,
-                   dof_id_type g_ind,
+  void addSnapshot(unsigned int var_i,
+                   unsigned int glob_i,
                    const std::shared_ptr<DenseVector<Real>> & snapshot);
 
   /// Adding the contribution of a residual to the reduced operators.
-  void addToReducedOperator(dof_id_type base_i,
-                            dof_id_type tag_i,
+  void addToReducedOperator(unsigned int base_i,
+                            unsigned int tag_i,
                             std::vector<DenseVector<Real>> & residual);
 
   const std::vector<std::string> & getVarNames() const { return _var_names; }
@@ -54,22 +54,22 @@ public:
 
   /// Getting the snapshot size across all of the processors for a given variable
   /// with index var_i.
-  dof_id_type getSnapsSize(dof_id_type var_i) const;
+  unsigned int getSnapsSize(unsigned int var_i) const;
 
   /// Getting the base size for variable with index v_ind.
-  dof_id_type getBaseSize(dof_id_type var_i) const { return _base[var_i].size(); }
+  unsigned int getBaseSize(unsigned int var_i) const { return _base[var_i].size(); }
 
   /// Getting the overall base size, which is the sum of the individual bases.
-  dof_id_type getSumBaseSize() const;
+  unsigned int getSumBaseSize() const;
 
   /// Getting a basis vector for a given variable.
-  const DenseVector<Real> & getBasisVector(dof_id_type var_i, dof_id_type base_i) const;
+  const DenseVector<Real> & getBasisVector(unsigned int var_i, unsigned int base_i) const;
 
   /// Getting basis vector based on its global index.
-  const DenseVector<Real> & getBasisVector(dof_id_type glob_i) const;
+  const DenseVector<Real> & getBasisVector(unsigned int glob_i) const;
 
   /// Getting appropriate variable index for a global base index.
-  dof_id_type getVariableIndex(dof_id_type glob_i) const;
+  unsigned int getVariableIndex(unsigned int glob_i) const;
 
 protected:
   /// Computes the correlation matrices using the snapshots.
@@ -135,11 +135,11 @@ private:
   /// correlation matrices on the fly.
   void receiveObjects(
       ReplicatedMesh & mesh,
-      std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+      std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> &
           received_vectors,
-      std::unordered_map<dof_id_type, std::vector<std::shared_ptr<DenseVector<Real>>>> &
+      std::unordered_map<unsigned int, std::vector<std::shared_ptr<DenseVector<Real>>>> &
           local_vectors,
       processor_id_type /*pid*/,
-      const std::vector<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>> &
+      const std::vector<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> &
           vectors);
 };
