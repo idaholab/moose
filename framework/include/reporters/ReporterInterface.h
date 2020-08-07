@@ -21,22 +21,31 @@ public:
   ReporterInterface(const MooseObject * moose_object);
 
 protected:
+  ///@{
   /**
    * Returns read-only reference to a Reporter value that is provided by an input parameter.
    * @tparam T The C++ type of the Reporter value being consumed
    * @param param_name The name of the parameter that gives the name of the Reporter, which
    *                   must be a ReporterName parameter (i.e., getParam<ReporterName>(param_name)).
+   * @param mode The mode that the object will consume the Reporter value
    * @pararm time_index (optional) If zero is provided the current value is returned. Use a positive
    *                    index to return previous values (1 = older, 2 = older, etc.). The maximum
    *                    number of old values is dictated by the ReporterData object.
    */
   template <typename T>
   const T & getReporterValue(const std::string & param_name, const std::size_t time_index = 0);
+  template <typename T>
+  const T & getReporterValue(const std::string & param_name,
+                             Moose::ReporterMode mode,
+                             const std::size_t time_index = 0);
+  ///@}
 
+  ///@{
   /**
    * Returns read-only reference to a Reporter value that is provided by name directly.
    * @tparam T The C++ type of the Reporter value being consumed
    * @param reporter_name A ReporterName object that for the desired Reporter value.
+   * @param mode The mode that the object will consume the Reporter value
    * @pararm time_index (optional) If zero is provided the current value is returned. Use a positive
    *                    index to return previous values (1 = older, 2 = older, etc.). The maximum
    *                    number of old values is dictated by the ReporterData object.
@@ -44,6 +53,11 @@ protected:
   template <typename T>
   const T & getReporterValueByName(const ReporterName & reporter_name,
                                    const std::size_t time_index = 0);
+  template <typename T>
+  const T & getReporterValueByName(const ReporterName & reporter_name,
+                                   Moose::ReporterMode mode,
+                                   const std::size_t time_index = 0);
+  ///@}
 
   /**
    * A method that can be overridden to update the UO dependencies.
@@ -59,14 +73,26 @@ private:
 
   /// Provides access to FEProblemBase::getReporterData
   FEProblemBase & _ri_fe_problem_base;
+
+  /// The name of the object
+  const std::string & _ri_name;
 };
 
 template <typename T>
 const T &
 ReporterInterface::getReporterValue(const std::string & param_name, const std::size_t time_index)
 {
+  return getReporterValue<T>(param_name, Moose::ReporterMode::ROOT, time_index);
+}
+
+template <typename T>
+const T &
+ReporterInterface::getReporterValue(const std::string & param_name,
+                                    Moose::ReporterMode mode,
+                                    const std::size_t time_index)
+{
   const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
-  return getReporterValueByName<T>(reporter_name, time_index);
+  return getReporterValueByName<T>(reporter_name, mode, time_index);
 }
 
 template <typename T>
@@ -74,6 +100,16 @@ const T &
 ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
                                           const std::size_t time_index)
 {
+  return getReporterValueByName<T>(reporter_name, Moose::ReporterMode::ROOT, time_index);
+}
+
+template <typename T>
+const T &
+ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
+                                          Moose::ReporterMode mode,
+                                          const std::size_t time_index)
+{
   addReporterDependencyHelper(reporter_name);
-  return _ri_fe_problem_base.getReporterData().getReporterValue<T>(reporter_name, time_index);
+  return _ri_fe_problem_base.getReporterData().getReporterValue<T>(
+      reporter_name, _ri_name, mode, time_index);
 }

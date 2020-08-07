@@ -20,10 +20,10 @@ ReporterData::init()
   for (const auto & context_ptr : _context_ptrs)
     context_ptr->init();
 
-  // Mark the data as initialized to trigger errors if calls to the declare/get methods are made.
-  // This is here to help application developers avoid creating new data values in arbitrary
-  // objects. It also allows for the vector storing the old/older values to be sized correctly to
-  // only hold the data that is actually required for the simulation.
+  // Mark the data as initialized to trigger errors if calls to the declare/get methods are made
+  // after object creation. This aims to help application developers avoid creating new data values
+  // in arbitrary methods. It also allows for the vector storing the old/older values to be sized
+  // correctly to only hold the data that is actually required for the simulation.
   _initialized = true;
 }
 

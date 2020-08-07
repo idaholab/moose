@@ -21,6 +21,20 @@
  * used by the ReporterData object. The objects provides a convenient method to define
  * Reporter data that has a value as well as some number of old data values. Please refer to
  * ReporterData.h for more information regarding the use of this class.
+ *
+ * @param name The name of the Reporter value
+ *
+ * NOTE:
+ * From a pure design point of view the init/copyValuesBack methods of ReporterContext would be
+ * within this class and the ReporterContext would just be a helper for parallel computation
+ * on the producer side. However, the ReporterState must be of type RestartableData because it
+ * is the object stored within MooseApp restart data structures. As such, it is not easy for this
+ * class to have a non-templated base class that can be stored in ReporterData. Therefore,
+ * these functions are located in ReporterContext. There is additional information regarding this
+ * design choice in the ReporterData object comments.
+ *
+ * The producer/consumer modes must be stored on this object rather than the ReporterContext
+ * for the same as above, since this state is created by either the get or declare calls.
  */
 template <typename T>
 class ReporterState : public RestartableData<std::pair<T, std::vector<T>>>
@@ -46,12 +60,47 @@ public:
    */
   std::size_t getMaxRequestedTimeIndex() const;
 
+  /**
+   * Set the mode that the value is produced
+   * @see ReporterData
+   *
+   * The setter is needed because the producer mode cannot be set in the constructor, because this
+   * state object can be first created by either the consumer or producer.
+   */
+  void setProducerMode(Moose::ReporterMode mode);
+
+  /**
+   * Return the mode that the Reporter value is being produced.
+   * @see ReporterContext
+   */
+  Moose::ReporterMode getProducerMode() const;
+
+  /**
+   * Add a mode that the value is consumed
+   * @param mode The mode that the object will consume the Reporter value
+   * @param object_name The name of the object doing the consuming (for error reporting)
+   * @see ReporterData
+   */
+  void addConsumerMode(Moose::ReporterMode mode, const std::string & object_name);
+
+  /**
+   * Return the mode that the value is being consumed, see ReporterData
+   * @see ReporterContext
+   */
+  const std::set<std::pair<Moose::ReporterMode, std::string>> & getConsumerModes() const;
+
 private:
   /// Tracking of the largest desired old value
   std::size_t _max_requested_time_index = 0;
 
   /// Name of data that state is associated
   const ReporterName _reporter_name;
+
+  /// The mode that the value is being produced
+  Moose::ReporterMode _producer_mode = Moose::ReporterMode::UNSET;
+
+  /// The mode(s) that the value is being consumed
+  std::set<std::pair<Moose::ReporterMode, std::string>> _consumer_modes;
 };
 
 template <typename T>
@@ -90,4 +139,33 @@ std::size_t
 ReporterState<T>::getMaxRequestedTimeIndex() const
 {
   return _max_requested_time_index;
+}
+
+template <typename T>
+Moose::ReporterMode
+ReporterState<T>::getProducerMode() const
+{
+  return _producer_mode;
+}
+
+template <typename T>
+void
+ReporterState<T>::setProducerMode(Moose::ReporterMode mode)
+{
+  _producer_mode = mode;
+}
+
+template <typename T>
+void
+ReporterState<T>::addConsumerMode(Moose::ReporterMode mode, const std::string & object_name)
+{
+  mooseAssert(mode != Moose::ReporterMode::UNSET, "UNSET cannot be used as the consumer mode");
+  _consumer_modes.insert(std::make_pair(mode, object_name));
+}
+
+template <typename T>
+const std::set<std::pair<Moose::ReporterMode, std::string>> &
+ReporterState<T>::getConsumerModes() const
+{
+  return _consumer_modes;
 }

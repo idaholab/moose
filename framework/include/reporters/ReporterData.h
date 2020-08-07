@@ -35,7 +35,7 @@
  *
  * This object also relies on ReporterName objects, which are simply a combination of the
  * Reporter object name and the data name. If you recall the VectorPostprocessor system on which
- * this is based required an object name and a vector name. Th ReporterName class simply provides
+ * this is based required an object name and a vector name. The ReporterName class simply provides
  * a convenient way to provide that information in a single object. Special Parser syntax
  * was also defined so that application developers do not have to have input parameters for
  * both the object and data names (see Parser.C/h).
@@ -55,12 +55,17 @@ public:
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
+   * @param object_name The name of the object consuming the Reporter value (for error reporting)
+   * @param mode The mode that the value will be consumed by the by the ReporterInterface object
    * @param time_index (optional) When not provided or zero is provided the current value is
    *                   returned. If an index greater than zero is provided then the corresponding
    *                   old data is returned (1 = old, 2 = older, etc.).
    */
   template <typename T>
-  const T & getReporterValue(const ReporterName & reporter_name, const std::size_t time_index = 0);
+  const T & getReporterValue(const ReporterName & reporter_name,
+                             const std::string & object_name,
+                             Moose::ReporterMode mode,
+                             const std::size_t time_index = 0);
 
   ///@{
   /**
@@ -72,12 +77,22 @@ public:
    *           the computed value. See ReporterState.C/h for more information.
    * @param reporter_name The name of the reporter value, which includes the object name and the
    *                      data name.
+   * @param mode The mode that the produced value will be computed by the Reporter object
    * @param args (optional) Any number of optional arguments passed into the Context type given
    *             by the S template parameter. If S = ReporterContext then the first argument
    *             can be used as the default value (see ReporterContext.h).
+   *
+   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the value).
+   * The get/declare methods can be called in any order thus an the underlying RestartableData
+   * object is often created by the get method before it is declared. Therefore the custom
+   * functionality cannot be handled by specializing the RestartableData/ReporterState object
+   * directly because the state is often created prior to the declaration that dictates how the
+   * produced value shall be computed. Thus, the reason for the separate ReporterContext objects.
    */
   template <typename T, template <typename> class S, typename... Args>
-  T & declareReporterValue(const ReporterName & reporter_name, Args &&... args);
+  T & declareReporterValue(const ReporterName & reporter_name,
+                           Moose::ReporterMode mode,
+                           Args &&... args);
 
   /**
    * Helper function for performing post calculation actions via the ReporterContext objects.
@@ -85,7 +100,8 @@ public:
    * If you recall, the original VectorPostprocessor system included the ability to perform some
    * scatter and broadcast actions via the special call on the storage helper object. This
    * is a replacement for that method that leverages the RepoorterContext objects to perform
-   * value specific actions.
+   * value specific actions, including some automatic operations depending how the data is
+   * produced and consumed.
    *
    * See FEProblemBase::joinAndFinalize
    */
@@ -101,7 +117,9 @@ public:
 
   /**
    * Copies the current value to all the desired old values and shrinks the old value vector to
-   * the correct size based on the requested values.
+   * the correct size based on the requested values. This also analyzes the mode that the value
+   * is produced verse the modes it is consumed to determine if communication is necessary or
+   * that the data not compatable.
    *
    * See InitReporterAction
    */
@@ -121,18 +139,6 @@ private:
    */
   template <typename T>
   ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare);
-
-  /**
-   * Helper object for declaring Reporter values.
-   *
-   * The ReporterContext objects allow for custom handling of data (e.g., broadcasting the value).
-   * The get/declare methods can be called in any order thus an the underlying RestartableData
-   * object is often created by the get method before it is declared. Therefore the custom
-   * functionality cannot be handled by specializing the RestartableData object directly.
-   */
-  template <typename T, template <typename> class S, typename... Args>
-  ReporterState<T> & declareReporterValueHelper(const ReporterName & reporter_name,
-                                                Args &&... args);
 
   /// The ReporterContext objects are created when a value is declared. The context objects
   /// include a reference to the associated ReporterState values. This container stores the
@@ -162,32 +168,36 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool de
   data_ptr->get().second.resize(ReporterData::HISTORY_CAPACITY);
   RestartableDataValue & value =
       _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
-  auto & data_ref = static_cast<ReporterState<T> &>(value);
-  return data_ref;
-}
-
-template <typename T, template <typename> class S, typename... Args>
-ReporterState<T> &
-ReporterData::declareReporterValueHelper(const ReporterName & reporter_name, Args &&... args)
-{
-  ReporterState<T> & data_ref = getReporterStateHelper<T>(reporter_name, true);
-  auto context_ptr = libmesh_make_unique<S<T>>(_app, data_ref, args...);
-  _context_ptrs.emplace(std::move(context_ptr));
-  return data_ref;
+  auto & state_ref = static_cast<ReporterState<T> &>(value);
+  return state_ref;
 }
 
 template <typename T>
 const T &
-ReporterData::getReporterValue(const ReporterName & reporter_name, const std::size_t time_index)
+ReporterData::getReporterValue(const ReporterName & reporter_name,
+                               const std::string & object_name,
+                               Moose::ReporterMode mode,
+                               const std::size_t time_index)
 {
-  ReporterState<T> & data_ref = getReporterStateHelper<T>(reporter_name, false);
-  return data_ref.value(time_index);
+  ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);
+  state_ref.addConsumerMode(mode, object_name);
+  return state_ref.value(time_index);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
-ReporterData::declareReporterValue(const ReporterName & reporter_name, Args &&... args)
+ReporterData::declareReporterValue(const ReporterName & reporter_name,
+                                   Moose::ReporterMode mode,
+                                   Args &&... args)
 {
-  ReporterState<T> & data_ref = declareReporterValueHelper<T, S>(reporter_name, args...);
-  return data_ref.value();
+  // The mode for the ReporterState must be must be se before ReporterContext is created to allow
+  // for custom context options to override the setting (e.g., BroadcastReporterContext))
+  ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
+  state_ref.setProducerMode(mode);
+
+  // Create the ReporterContext
+  auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
+  _context_ptrs.emplace(std::move(context_ptr));
+
+  return state_ref.value();
 }

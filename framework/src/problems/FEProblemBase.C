@@ -3776,6 +3776,8 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     auto vpp = dynamic_cast<VectorPostprocessor *>(obj);
     if (vpp)
       _vpps_data.broadcastScatterVectors(vpp->PPName());
+
+    // Update Reporter data
     auto reporter = dynamic_cast<Reporter *>(obj);
     if (reporter)
       _reporter_data.finalize(obj->name());

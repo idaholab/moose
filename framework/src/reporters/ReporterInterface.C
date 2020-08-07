@@ -20,6 +20,7 @@ ReporterInterface::validParams()
 
 ReporterInterface::ReporterInterface(const MooseObject * moose_object)
   : _ri_params(moose_object->parameters()),
-    _ri_fe_problem_base(*_ri_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+    _ri_fe_problem_base(*_ri_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _ri_name(moose_object->name())
 {
 }

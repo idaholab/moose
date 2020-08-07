@@ -514,6 +514,36 @@ const std::set<SubdomainID> EMPTY_BLOCK_IDS = {};
 const std::set<BoundaryID> EMPTY_BOUNDARY_IDS = {};
 
 /**
+ * Reporter producer/consumer modes
+ *
+ * @see Reporter, ReporterState, ReporterContext
+ *
+ * This is used to define the "mode" in which the value is being produced or consumed. The default
+ * for both the producer and consumer  is ROOT. This means that it is assumed that the
+ * correct/complete value of the Reporter value exists on the root processor.
+ *
+ * On the producer side, it is the responsibility of the Reporter object to perform the necessary
+ * operations to compute the value in the specified mode. The ReporterContext objects are helpers
+ * for the producer to get the value in the desired mode.
+ *
+ * On the consumer side, if needed the data supplied will be converted to the correct mode
+ * automatically if needed and  possible. If the producer mode is not compatibable with
+ * the consumer mode, then an error is produced. The base ReporterContext handles the automatic
+ * operations and error handling.
+ *
+ * The UNSET is used as the default to allow the ReporterContext objects to set the value
+ * programmatically and error if it is set to something wrong by the user.
+ */
+enum class ReporterMode
+{
+  UNSET = 0,
+  ROOT = 1,
+  REPLICATED = 2,
+  DISTRIBUTED = 4
+};
+std::ostream & operator<<(std::ostream & os, const Moose::ReporterMode & mode);
+
+/**
  * MaterialData types
  *
  * @see FEProblemBase, MaterialPropertyInterface

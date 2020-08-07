@@ -14,7 +14,7 @@
 
 /**
  * Reporter objects allow for the declaration of arbitrary data types that are aggregate values
- * for a simulation. These aggregate values are then available to other objects for used. They
+ * for a simulation. These aggregate values are then available to other objects for use. They
  * operate with the typical producer/consumer relationship. The Reporter object produces values
  * that other objects consume.
  *
@@ -22,7 +22,7 @@
  * single scalar value for consumption by other objects. Then a companion system was created,
  * the VectorPostprocessor system, that allowed for an object to produced many std::vector<Real>
  * values. The Reporter system is the generalization of these two ideas and follows closely the
- * original design of the VectorPostprocessor system which was widely used.
+ * original design of the VectorPostprocessor system.
  *
  * In practice, the Reporter system provided the following features over the two previous systems.
  *
@@ -51,18 +51,33 @@ protected:
    *           using the ReporterBroadcastContext will automatically broadcast the produced value
    *           from the root processor.
    * @param name A unique name for the value to be produced.
-   * @param args (optional) Any number of optional arguments passed into the Context type given
+   * @param mode (optional) The mode that indicates how the value produced is represented in
+   *             parallel, there is more information about this below
+   * @param args (optional) Any number of optional arguments passed into the ReporterContext given
    *             by the S template parameter. If S = ReporterContext then the first argument
    *             can be used as the default value (see ReporterContext.h).
    *
-   * WARNING using the "default value" in ReporterContext:
+   * The 'mode' indicates how the value that is produced is represented in parrallel. It is the
+   * reponsibility of the Reporter object to get it to that state. The ReporterContext objects
+   * are designed to help with this. The mode can be one of the following:
+   *
+   *     Moose::ReporterMode::ROOT Indicates that the value produced is complate/correct on the
+   *                               root processor for the object.
+   *     Moose::ReporterMode::REPLICATED Indicates that the value produced is complate/correct on
+   *                                     all processors AND that the value is the same on all
+   *                                     processors
+   *     Moose::ReporterMode::DISTRIBUTED Indicates that the value produced is complate/correct on
+   *                                      all processors AND that the value is NOT the same on all
+   *                                      processors
+   *
+   * WARNING! Using the "default value" in ReporterContext:
    * The Reporter system, like the systems before it, allow for objects that consume values to be
    * constructed prior to the produce objects. When a value is requested either by a producer
    * (Reporter) or consumer (ReporterInterface) the data is allocated. As such the assigned default
    * value from the producer should not be relied upon on the consumer side during object
    * construction.
    *
-   * Note to MOOSE Developers:
+   * NOTE:
    * The ReporterContext is just a mechanism to allow for handling of values in special ways. In
    * practice it might be better to have specific methods for these special cases. For example,
    * a declareBroadcastValue, etc. Please refer to the ReporterData object for more information
@@ -70,6 +85,8 @@ protected:
    */
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
   T & declareValue(const std::string & value_name, Args &&... args0);
+  template <typename T, template <typename> class S = ReporterContext, typename... Args>
+  T & declareValue(const std::string & value_name, Moose::ReporterMode mode, Args &&... args0);
   ///@}
 
 private:
@@ -84,6 +101,14 @@ template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValue(const std::string & value_name, Args &&... args)
 {
+  return declareValue<T, S>(value_name, Moose::ReporterMode::UNSET, args...);
+}
+
+template <typename T, template <typename> class S, typename... Args>
+T &
+Reporter::declareValue(const std::string & value_name, Moose::ReporterMode mode, Args &&... args)
+{
   ReporterName state_name(_reporter_name, value_name);
-  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(state_name, args...);
+  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(
+      state_name, mode, args...);
 }
