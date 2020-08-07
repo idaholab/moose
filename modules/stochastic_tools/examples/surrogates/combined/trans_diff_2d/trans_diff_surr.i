@@ -58,74 +58,14 @@
 
 # Computing statistics
 [VectorPostprocessors]
-  [pc_max_res]
+  [eval_surr]
     type = EvaluateSurrogate
-    model = pc_max
+    model = 'pc_max pc_min pr_max pr_min np_max np_min'
     sampler = sample
   []
-  [pc_max_stats]
+  [eval_surr_stats]
     type = Statistics
-    vectorpostprocessors = pc_max_res
-    compute = 'mean stddev'
-    ci_method = 'percentile'
-    ci_levels = '0.05'
-  []
-  [pc_min_res]
-    type = EvaluateSurrogate
-    model = pc_min
-    sampler = sample
-  []
-  [pc_min_stats]
-    type = Statistics
-    vectorpostprocessors = pc_min_res
-    compute = 'mean stddev'
-    ci_method = 'percentile'
-    ci_levels = '0.05'
-  []
-  [pr_max_res]
-    type = EvaluateSurrogate
-    model = pr_max
-    sampler = sample
-  []
-  [pr_max_stats]
-    type = Statistics
-    vectorpostprocessors = pr_max_res
-    compute = 'mean stddev'
-    ci_method = 'percentile'
-    ci_levels = '0.05'
-  []
-  [pr_min_res]
-    type = EvaluateSurrogate
-    model = pr_min
-    sampler = sample
-  []
-  [pr_min_stats]
-    type = Statistics
-    vectorpostprocessors = pr_min_res
-    compute = 'mean stddev'
-    ci_method = 'percentile'
-    ci_levels = '0.05'
-  []
-  [np_max_res]
-    type = EvaluateSurrogate
-    model = np_max
-    sampler = sample
-  []
-  [np_max_stats]
-    type = Statistics
-    vectorpostprocessors = np_max_res
-    compute = 'mean stddev'
-    ci_method = 'percentile'
-    ci_levels = '0.05'
-  []
-  [np_min_res]
-    type = EvaluateSurrogate
-    model = np_min
-    sampler = sample
-  []
-  [np_min_stats]
-    type = Statistics
-    vectorpostprocessors = np_min_res
+    vectorpostprocessors = eval_surr
     compute = 'mean stddev'
     ci_method = 'percentile'
     ci_levels = '0.05'

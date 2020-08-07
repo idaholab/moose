@@ -38,12 +38,7 @@
     input = trans_diff_surr.i
     cli_args = "Samplers/sample/num_rows=10
                 Samplers/sample/num_bins=1"
-    csvdiff = 'trans_diff_surr_out_np_max_stats_0001.csv trans_diff_surr_out_np_max_res_0001.csv
-               trans_diff_surr_out_np_min_stats_0001.csv trans_diff_surr_out_np_min_res_0001.csv
-               trans_diff_surr_out_pc_min_stats_0001.csv trans_diff_surr_out_pc_min_res_0001.csv
-               trans_diff_surr_out_pc_max_stats_0001.csv trans_diff_surr_out_pc_max_res_0001.csv
-               trans_diff_surr_out_pr_min_stats_0001.csv trans_diff_surr_out_pr_min_res_0001.csv
-               trans_diff_surr_out_pr_max_stats_0001.csv trans_diff_surr_out_pr_max_res_0001.csv'
+    csvdiff = 'trans_diff_surr_out_eval_surr_stats_0001.csv trans_diff_surr_out_eval_surr_0001.csv'
     prereq = train
 
     detail = "and evaluating the surrogate models"
