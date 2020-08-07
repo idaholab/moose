@@ -30,7 +30,7 @@ public:
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
-  int petscOptimize();
+  int hyperparamOptimize();
 
   static PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
 
@@ -91,5 +91,12 @@ private:
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
 
+  /// Flag to toggle hyperparameter optimization
   bool _optimize;
+
+  /// Command line options to fead to TAO optimization
+  std::string _tao_options;
+
+  /// Flag to toggle printing of TAO output
+  bool _show_tao;
 };

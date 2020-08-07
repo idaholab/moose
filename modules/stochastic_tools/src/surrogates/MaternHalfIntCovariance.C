@@ -25,6 +25,10 @@ MaternHalfIntCovariance::validParams()
                                 "Noise Variance ($\\sigma_n^2$) to use for kernel calculation.");
   params.addRequiredParam<unsigned int>(
       "p", "Integer p to use for Matern Half Integer Covariance Kernel");
+  params.addParam<std::vector<std::string>>("tune_parameters",
+                                            "Select hyperparameters to be tuned");
+  params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
+  params.addParam<std::vector<Real>>("tuning_max", "Maximum allowable tuning value");
   return params;
 }
 
@@ -35,6 +39,43 @@ MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & paramet
     _sigma_n_squared(getParam<Real>("noise_variance")),
     _p(getParam<unsigned int>("p"))
 {
+  _num_tunable = 0;
+  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  // Error Checking
+  if (isParamValid("tuning_min") &&
+      (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
+    ::mooseError("tuning_min size does not match tune_parameters");
+  if (isParamValid("tuning_max") &&
+      (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
+    ::mooseError("tuning_max size does not match tune_parameters");
+  // Fill Out Tunable Paramater information
+  for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
+  {
+    const auto & hp = tune_parameters[ii];
+    if (!isParamValid(hp))
+      ::mooseError("Parameter ", hp, " selected for tuning is not a valid parameter");
+    if ((hp == "noise_variance") || (hp == "signal_variance"))
+    {
+      // For Scalar Hyperparameters
+      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
+      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+                                          : PETSC_INFINITY);
+      _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
+      _num_tunable++;
+    }
+    else if (hp == "length_factor")
+    {
+      // For Vector Hyperparameters
+      int vec_size = getParam<std::vector<Real>>("length_factor").size();
+      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
+      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+                                          : PETSC_INFINITY);
+      _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
+      _num_tunable += vec_size;
+    }
+    else
+      ::mooseError("Tuning not supported for parameter ", hp);
+  }
 }
 
 void
@@ -52,11 +93,21 @@ MaternHalfIntCovariance::buildHyperParamMap(
 void
 MaternHalfIntCovariance::buildHyperParamVec(libMesh::PetscVector<Number> & theta) const
 {
-  theta.set(0, _sigma_n_squared);
-  theta.set(1, _sigma_f_squared);
-  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
+    theta.set(std::get<0>(iter->second), _sigma_n_squared);
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+    theta.set(std::get<0>(iter->second), _sigma_f_squared);
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
   {
-    theta.set(2 + ii, _length_factor[ii]);
+    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+    {
+      theta.set(std::get<0>(iter->second) + ii, _length_factor[ii]);
+    }
   }
 }
 
@@ -64,25 +115,49 @@ void
 MaternHalfIntCovariance::buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
                                                libMesh::PetscVector<Number> & theta_u) const
 {
-  theta_l.set(0, 0);
-  theta_u.set(0, PETSC_INFINITY);
-  theta_l.set(1, 0);
-  theta_u.set(1, 1e16);
-  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
   {
-    theta_l.set(2 + ii, 0);
-    theta_u.set(2 + ii, 1e16);
+    theta_l.set(std::get<0>(iter->second), std::get<1>(iter->second));
+    theta_u.set(std::get<0>(iter->second), std::get<2>(iter->second));
+  }
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+  {
+    theta_l.set(std::get<0>(iter->second), std::get<1>(iter->second));
+    theta_u.set(std::get<0>(iter->second), std::get<2>(iter->second));
+  }
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
+  {
+    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+    {
+      theta_l.set(std::get<0>(iter->second) + ii, std::get<1>(iter->second));
+      theta_u.set(std::get<0>(iter->second) + ii, std::get<2>(iter->second));
+    }
   }
 }
 
 void
 MaternHalfIntCovariance::loadHyperParamVec(libMesh::PetscVector<Number> & theta)
 {
-  _sigma_n_squared = theta(0);
-  _sigma_f_squared = theta(1);
-  for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
+    _sigma_n_squared = theta(std::get<0>(iter->second));
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+    _sigma_f_squared = theta(std::get<0>(iter->second));
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
   {
-    _length_factor[ii] = theta(2 + ii);
+    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
+    {
+      _length_factor[ii] = theta(std::get<0>(iter->second) + ii);
+    }
   }
 }
 
@@ -125,9 +200,9 @@ MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
         r_scaled += pow((x(ii, kk) - xp(jj, kk)) / length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
-      Real summation = 0;
       // tgamma(x+1) == x! when x is a natural number, which should always be the case for
       // MaternHalfInt
+      Real summation = 0;
       for (unsigned int tt = 0; tt < p + 1; ++tt)
         summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) *
                      pow(2 * factor * r_scaled, p - tt);
@@ -136,5 +211,79 @@ MaternHalfIntCovariance::maternHalfIntFunction(RealEigenMatrix & K,
     }
     if (is_self_covariance)
       K(ii, ii) += sigma_n_squared;
+  }
+}
+
+void
+MaternHalfIntCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
+                                         const RealEigenMatrix & x,
+                                         unsigned int hyper_param_id) const
+{
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end() && hyper_param_id == std::get<0>(iter->second))
+    maternHalfIntFunction(dKdhp, x, x, _length_factor, 0, 1, _p, true);
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end() && hyper_param_id == std::get<0>(iter->second))
+    maternHalfIntFunction(dKdhp, x, x, _length_factor, 1, 0, _p, false);
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end() && hyper_param_id >= std::get<0>(iter->second) &&
+      hyper_param_id < std::get<0>(iter->second) + _length_factor.size())
+  {
+    computedKdlf(
+        dKdhp, x, _length_factor, _sigma_f_squared, _p, hyper_param_id - std::get<0>(iter->second));
+  }
+}
+
+void
+MaternHalfIntCovariance::computedKdlf(RealEigenMatrix & K,
+                                      const RealEigenMatrix & x,
+                                      const std::vector<Real> & length_factor,
+                                      const Real sigma_f_squared,
+                                      const unsigned int p,
+                                      const int ind)
+{
+  unsigned int num_samples_x = x.rows();
+  unsigned int num_params_x = x.cols();
+
+  mooseAssert(ind < x.cols(), "Incorrect length factor index");
+
+  // This factor is used over and over, don't calculate each time
+  Real factor = sqrt(2 * p + 1);
+
+  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
+  {
+    for (unsigned int jj = 0; jj < num_samples_x; ++jj)
+    {
+      // Compute distance per parameter, scaled by length factor
+      Real r_scaled = 0;
+      for (unsigned int kk = 0; kk < num_params_x; ++kk)
+        r_scaled += pow((x(ii, kk) - x(jj, kk)) / length_factor[kk], 2);
+      r_scaled = sqrt(r_scaled);
+      if (r_scaled != 0)
+      {
+        // product rule to compute dK/dr_scaled
+        // u'v
+        Real summation = 0;
+        for (unsigned int tt = 0; tt < p + 1; ++tt)
+          summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) *
+                       pow(2 * factor * r_scaled, p - tt);
+        K(ii, jj) = -factor * std::exp(-factor * r_scaled) * summation;
+        // uv'
+        // dont need tt=p, (p-tt) factor ->0. Also avoids unsigned integer subtraction wraparound
+        summation = 0;
+        for (unsigned int tt = 0; tt < p; ++tt)
+          summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) * 2 * factor *
+                       (p - tt) * pow(2 * factor * r_scaled, p - tt - 1);
+        K(ii, jj) += std::exp(-factor * r_scaled) * summation;
+        // Apply chain rule for dr_scaled/dl_i
+        K(ii, jj) *= -std::pow(x(ii, ind) - x(jj, ind), 2) /
+                     (std::pow(length_factor[ind], 3) * r_scaled) * sigma_f_squared *
+                     (tgamma(p + 1) / (tgamma(2 * p + 1)));
+      }
+      else // avoid div by 0. 0/0=0 scenario.
+        K(ii, jj) = 0;
+    }
   }
 }

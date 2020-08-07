@@ -31,26 +31,31 @@ public:
                                          const Real sigma_n_squared,
                                          const bool is_self_covariance);
 
-  /// Used for outputting Hyper-parameter settings
+  /// Used for outputting Hyper-parameter settings for use in surrogate
   void
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
+  /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
                        unsigned int hyper_param_id) const override;
 
+  /// Computes dK/dlf for individual length factors
   static void computedKdlf(RealEigenMatrix & K,
                            const RealEigenMatrix & x,
                            const std::vector<Real> & length_factor,
                            const Real sigma_f_squared,
                            const int ind);
 
+  /// Builds a Petsc Vector of hyperparameters (used for initial condition)
   void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const override;
 
+  /// Builds a Petsc Vector of hyperparameters bounds
   void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
                              libMesh::PetscVector<Number> & theta_u) const override;
 
+  /// Loads a Petsc Vector into hyperparam variables
   void loadHyperParamVec(libMesh::PetscVector<Number> & theta) override;
 
 protected:
@@ -64,5 +69,5 @@ protected:
   Real _sigma_n_squared;
 
   /// Contains tuning inforation. Idex of hyperparam, along with min/max bounds
-  std::unordered_map<std::string,std::tuple<unsigned int, Real, Real>> _tuning_data;
+  std::unordered_map<std::string, std::tuple<unsigned int, Real, Real>> _tuning_data;
 };

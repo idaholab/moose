@@ -42,6 +42,9 @@ GaussianProcessTrainer::validParams()
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
   params.addParam<bool>("optimize", false, "Perform petsc optimize");
+  params.addParam<std::string>(
+      "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
+  params.addParam<bool>("show_tao", false, "Switch to show TAO solver results");
   return params;
 }
 
@@ -62,7 +65,9 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         "_hyperparam_vec_map")),
     _covariance_function(
         getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"))),
-    _optimize(getParam<bool>("optimize"))
+    _optimize(getParam<bool>("optimize")),
+    _tao_options(getParam<std::string>("tao_options")),
+    _show_tao(getParam<bool>("show_tao"))
 
 {
 }
@@ -163,7 +168,7 @@ GaussianProcessTrainer::finalize()
   _K.resize(_training_params.rows(), _training_params.rows());
 
   if (_optimize)
-    petscOptimize();
+    hyperparamOptimize();
 
   _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
@@ -173,71 +178,79 @@ GaussianProcessTrainer::finalize()
 }
 
 int
-GaussianProcessTrainer::petscOptimize()
+GaussianProcessTrainer::hyperparamOptimize()
 {
 ///////////////////////////////
 ///////////////////////////////
+// #ifdef LIBMESH_HAVE_PETSC
+//   std::cout << "have PETSC!" << '\n';
+// #endif // LIBMESH_HAVE_PETSC
+
 #ifdef LIBMESH_HAVE_PETSC
-  std::cout << "have PETSC!" << '\n';
+PetscErrorCode ierr;
+Vec theta_vec, lower_vec, upper_vec;
+Tao tao;
+GaussianProcessTrainer * GP_ptr = this;
+
+int num_hyper_params = _covariance_function->getNumTunable();
+
+// Setup Tao optimization problem
+ierr = TaoCreate(PETSC_COMM_WORLD, &tao);
+CHKERRQ(ierr);
+// ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
+ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
+CHKERRQ(ierr);
+ierr = TaoSetType(tao, TAOBNCG);
+CHKERRQ(ierr);
+ierr = TaoSetFromOptions(tao);
+CHKERRQ(ierr);
+
+// Define petsc vetor to hold tunalbe hyper-params
+VecCreate(PETSC_COMM_WORLD, &theta_vec);
+VecSetSizes(theta_vec, PETSC_DECIDE, num_hyper_params);
+VecSetFromOptions(theta_vec);
+VecSet(theta_vec, 0);
+libMesh::PetscVector<Number> theta(theta_vec, _communicator);
+ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta_vec);
+CHKERRQ(ierr);
+ierr = TaoSetInitialVector(tao, theta_vec);
+CHKERRQ(ierr);
+
+// Get Hyperparameter bounds.
+VecDuplicate(theta_vec, &lower_vec);
+VecDuplicate(theta_vec, &upper_vec);
+libMesh::PetscVector<Number> lower(lower_vec, _communicator);
+libMesh::PetscVector<Number> upper(upper_vec, _communicator);
+_covariance_function->buildHyperParamBounds(lower, upper);
+CHKERRQ(ierr);
+ierr = TaoSetVariableBounds(tao, lower_vec, upper_vec);
+CHKERRQ(ierr);
+
+// Set Objective and Graident Callback
+ierr = TaoSetObjectiveAndGradientRoutine(
+    tao, GaussianProcessTrainer::FormFunctionGradientWrapper, (void *)this);
+CHKERRQ(ierr);
+
+// Solve
+ierr = TaoSolve(tao);
+CHKERRQ(ierr);
+
+if (_show_tao)
+{
+  ierr = TaoView(tao, PETSC_VIEWER_STDOUT_WORLD);
+  theta.print();
+}
+
+_covariance_function->loadHyperParamVec(theta);
+VecDestroy(&theta_vec);
+VecDestroy(&lower_vec);
+VecDestroy(&upper_vec);
+// TODO add cleanup!
+// ierr = PetscOptionsView(NULL,PETSC_VIEWER_STDOUT_WORLD);
+
 #endif // LIBMESH_HAVE_PETSC
 
-  PetscErrorCode ierr;
-  Vec theta_vec, lower_vec, upper_vec;
-  Tao tao;
-  GaussianProcessTrainer * GP_ptr = this;
-
-  int num_hyper_params = _covariance_function->getNumTunable();
-
-  // Setup Tao optimization problem
-  ierr = TaoCreate(PETSC_COMM_WORLD, &tao);CHKERRQ(ierr);CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue(NULL,"-tao_bncg_type","kd");CHKERRQ(ierr);
-  //ierr = PetscOptionsSetValue(NULL,"-tao_fmin","0");
-  //ierr = TaoSetFromOptions(tao);
-  //ierr = TaoSetFromOptions_BNCG(NULL,tao)
-  ierr = TaoSetType(tao, TAOBNCG);CHKERRQ(ierr);
-  ierr = TaoSetFromOptions(tao);CHKERRQ(ierr);
-
-  // Define petsc vetor to hold tunalbe hyper-params
-  VecCreate(PETSC_COMM_WORLD, &theta_vec);
-  VecSetSizes(theta_vec, PETSC_DECIDE, num_hyper_params);
-  VecSetFromOptions(theta_vec);
-  VecSet(theta_vec, 0);
-  libMesh::PetscVector<Number> theta(theta_vec, _communicator);
-  ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta_vec);CHKERRQ(ierr);
-  ierr = TaoSetInitialVector(tao, theta_vec);CHKERRQ(ierr);
-
-  // Get Hyperparameter bounds.
-  VecDuplicate(theta_vec, &lower_vec);
-  VecDuplicate(theta_vec, &upper_vec);
-  libMesh::PetscVector<Number> lower(lower_vec, _communicator);
-  libMesh::PetscVector<Number> upper(upper_vec, _communicator);
-  _covariance_function->buildHyperParamBounds(lower, upper);CHKERRQ(ierr);
-  ierr = TaoSetVariableBounds(tao, lower_vec, upper_vec);CHKERRQ(ierr);
-
-  // Set Objective and Graident Callback
-  ierr = TaoSetObjectiveAndGradientRoutine(
-      tao, GaussianProcessTrainer::FormFunctionGradientWrapper, (void *)this);
-  CHKERRQ(ierr);
-
-  // Solve
-  ierr = TaoSolve(tao);
-  CHKERRQ(ierr);
-
-
-
-  ierr = TaoView(tao,PETSC_VIEWER_STDOUT_WORLD);
-
-  std::cout << "After solve"
-            << "\n";
-  theta.print();
-  _covariance_function->loadHyperParamVec(theta);
-  VecDestroy(&theta_vec);
-  VecDestroy(&lower_vec);
-  VecDestroy(&upper_vec);
-  // TODO add cleanup!
-  //ierr = PetscOptionsView(NULL,PETSC_VIEWER_STDOUT_WORLD);
-
-  return 0;
+return 0;
 }
 
 PetscErrorCode
@@ -258,7 +271,10 @@ GaussianProcessTrainer::FormFunctionGradientWrapper(
 }
 
 void
-GaussianProcessTrainer::FormFunctionGradient(Tao tao, Vec theta_vec, PetscReal * f, Vec grad_vec)
+GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
+                                             Vec theta_vec,
+                                             PetscReal * f,
+                                             Vec grad_vec)
 {
   libMesh::PetscVector<Number> theta(theta_vec, _communicator);
   libMesh::PetscVector<Number> grad(grad_vec, _communicator);
@@ -284,6 +300,6 @@ GaussianProcessTrainer::FormFunctionGradient(Tao tao, Vec theta_vec, PetscReal *
   log_likelihood += -std::log(_K.determinant());
   log_likelihood += -_training_data.rows() * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
-  //std::cout << log_likelihood << '\n';
+  // std::cout << log_likelihood << '\n';
   *f = log_likelihood;
 }
