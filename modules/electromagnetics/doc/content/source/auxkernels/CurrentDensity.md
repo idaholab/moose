@@ -4,8 +4,8 @@
 
 ## Overview
 
-CurrentDensity and ADCurrentDensity allows the calculation of the current density
-given by
+`CurrentDensity` and `ADCurrentDensity` allows the calculation of the electric
+current density given by
 
 \begin{equation}
   \vec{J} = \sigma \vec{E}
@@ -13,8 +13,8 @@ given by
 
 where
 
-- $\vec{J}$ is the current density in units of $A / m^2$,
-- $\sigma$ is the electrical conductivity in units of $S / m$, and
+- $\vec{J}$ is the current density in units of A/m$^2$,
+- $\sigma$ is the electrical conductivity in units of S/m, and
 - $\vec{E}$ is the electric field.
 
 The electric field can be determined either directly via an electromagnetic field
