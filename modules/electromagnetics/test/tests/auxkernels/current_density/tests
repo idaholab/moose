@@ -28,13 +28,13 @@
     input = error_test.i
     cli_args = 'AuxKernels/current_density/electric_field=electric_field'
     expect_err = 'In current_density, an electric field vector variable has been provided when `electrostatic = TRUE`'
-    detail = 'provide an error when an electrostatic calculation is requested but an electromagnetic variable is provided, '
+    detail = 'provide an error when an electrostatic calculation is requested but an electromagnetic variable is provided, and'
   []
   [error_EM_potential_var]
     type = RunException
     input = error_test.i
     cli_args = 'AuxKernels/current_density/potential=potential AuxKernels/current_density/electrostatic=false'
     expect_err = 'In current_density, an electrostatic potential variable has been provided when `electrostatic = FALSE`'
-    detail = 'and provide an error when an electromagnetic calculation is requested but an electrostatic variable is provided.'
+    detail = 'provide an error when an electromagnetic calculation is requested but an electrostatic variable is provided.'
   []
 []
