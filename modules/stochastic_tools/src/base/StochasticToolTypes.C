@@ -7,19 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
+#include "StochasticToolsTypes.h"
+#include "MooseEnumItem.h"
 
-#include "Moose.h"
-
-/// Enum for batch type in stochastic tools MultiApp
-namespace StochasticTools
-{
-enum class MultiAppMode
-{
-  NORMAL = 0,
-  BATCH_RESET = 1,
-  BATCH_RESTORE = 2
-};
-
-extern const ExecFlagType EXEC_POST_SNAPSHOT_GEN;
-}
+const ExecFlagType StochasticTools::EXEC_POST_SNAPSHOT_GEN("POST_SNAPSHOT_GEN");

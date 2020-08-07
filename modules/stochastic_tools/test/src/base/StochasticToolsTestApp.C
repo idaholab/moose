@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "Executioner.h"
 
 InputParameters
 StochasticToolsTestApp::validParams()

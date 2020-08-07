@@ -1,4 +1,9 @@
 [StochasticTools]
+  auto_create_executioner = false
+[]
+
+[Executioner]
+  type = PODSteady
 []
 
 [Distributions]
@@ -35,7 +40,7 @@
     input_files = sub.i
     sampler = sample
     trainer_name = 'pod_rb'
-    execute_on = 'timestep_begin final'
+    execute_on = 'timestep_begin POST_SNAPSHOT_GEN'
   []
 []
 
@@ -64,7 +69,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
-    execute_on = 'final'
+    execute_on = 'POST_SNAPSHOT_GEN'
     check_multiapp_execute_on = false
   []
   [res]
@@ -72,7 +77,7 @@
     multi_app = sub
     sampler = sample
     trainer_name = "pod_rb"
-    execute_on = 'final'
+    execute_on = 'POST_SNAPSHOT_GEN'
     check_multiapp_execute_on = false
   []
 []

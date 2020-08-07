@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "StochasticToolsApp.h"
-#include "Moose.h"
+#include "StochasticToolsTypes.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
@@ -73,6 +73,9 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   // Adds action for loading Covariance data in model
   registerTask("load_covariance_data", true);
   addTaskDependency("load_covariance_data", "load_surrogate_data");
+
+  auto & factory = f; // for registerExecFlags macro
+  registerExecFlag(StochasticTools::EXEC_POST_SNAPSHOT_GEN);
 }
 
 void
