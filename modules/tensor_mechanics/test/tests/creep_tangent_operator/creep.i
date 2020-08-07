@@ -23,7 +23,6 @@
   [./all]
     strain = FINITE
     add_variables = true
-    use_displaced_mesh = true
     use_finite_deform_jacobian = true
     generate_output = 'hydrostatic_stress'
   [../]
