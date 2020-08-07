@@ -55,14 +55,17 @@ protected:
     /// Coupled variable for the truss cross-sectional area
   const VariableValue & _area;
 
-  Real _origin_length;
-  Real _current_length;
+  MaterialProperty<Real> & _total_stretch;
+  MaterialProperty<Real> & _elastic_stretch;
 
   /// Rotational transformation from global coordinate system to initial truss local configuration
   RankTwoTensor _original_local_config;
 
   /// Initial length of the truss
   MaterialProperty<Real> & _original_length;
+
+  /// Current length of the truss
+  MaterialProperty<Real> & _current_length;
 
   /// Rotational transformation from global coordinate system to truss local configuration at time t
   MaterialProperty<RankTwoTensor> & _total_rotation;
@@ -77,7 +80,7 @@ protected:
   MaterialProperty<RealVectorValue> & _mech_disp_strain_increment;
 
   /// Material stiffness vector that relates displacement strain increments to force increments
-  const MaterialProperty<RealVectorValue> & _material_stiffness;
+  const MaterialProperty<Real> & _material_stiffness;
 
   /// Stiffness matrix between displacement DOFs of same node or across nodes
   MaterialProperty<Real> & _K11;

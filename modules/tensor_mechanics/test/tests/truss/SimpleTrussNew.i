@@ -16,7 +16,7 @@
 
 [Mesh]
   type = FileMesh
-  file = truss_2d.e
+  file = simpleTruss.e
   displacements = 'disp_x disp_y'
 []
 
@@ -59,19 +59,6 @@
   [../]
 []
 
-[Functions]
-  [./x2]
-    type = PiecewiseLinear
-    x = '0  1 2 3'
-    y = '0 .5 1 1'
-  [../]
-  [./y2]
-    type = PiecewiseLinear
-    x = '0 1  2 3'
-    y = '0 0 .5 1'
-  [../]
-[]
-
 [BCs]
   [./fixx1]
     type = DirichletBC
@@ -89,7 +76,7 @@
   [./fixy4]
     type = DirichletBC
     variable = disp_y
-    boundary = 4
+    boundary = 2
     value = 0
   [../]
 []
@@ -98,7 +85,7 @@
   [./pull]
     type = ConstantPointSource
     value = -25
-    point = '1 0 0'
+    point = '0.433 0.5 0'
     variable = disp_y
   [../]
 []
@@ -178,11 +165,11 @@
   [./elasticity]
     type = ComputeElasticityTruss
     youngs_modulus = 1e6
-#    block = 0
+    block = 1
   [../]
   [./strain]
     type = ComputeIncrementalTrussStrain
-#    block = '0'
+    block = '1'
     displacements = 'disp_x disp_y'
     youngs_modulus = 1e6
     area = area
@@ -191,8 +178,7 @@
   [../]
   [./stress]
     type = ComputeTrussResultants
-    area = area
-#    block = 0
+    block = 1
   [../]
 #  [./thermal]
 #    type = ComputeThermalExpansionEigenstrainTruss

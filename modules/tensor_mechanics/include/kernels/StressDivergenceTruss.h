@@ -24,14 +24,16 @@ public:
   using Kernel::computeOffDiagJacobian;
 
 protected:
+  virtual void initialSetup() override;
+  virtual Real computeStiffness(unsigned int i, unsigned int j);
   virtual Real computeQpResidual() override { return 0.0; }
   /// Computes the force due to stiffness proportional damping and HHT time integration
-  void computeDynamicTerms(std::vector<RealVectorValue> & global_force_res);
+  // void computeDynamicTerms(std::vector<RealVectorValue> & global_force_res);
 
   /// Computes the residual corresponding to displacement variables given the forces
-  void computeGlobalResidual(const MaterialProperty<RealVectorValue> * force,
-                             const MaterialProperty<RankTwoTensor> * total_rotation,
-                             std::vector<RealVectorValue> & global_force_res);
+  // void computeGlobalResidual(const MaterialProperty<RealVectorValue> * force,
+  //                            const MaterialProperty<RankTwoTensor> * total_rotation,
+  //                            std::vector<RealVectorValue> & global_force_res);
 
   /// Direction along which force is calculated
   const unsigned int _component;
@@ -42,17 +44,11 @@ protected:
   /// Variable numbers corresponding to displacement variables
   std::vector<unsigned int> _disp_var;
 
-  /// Current force vector in global coordinate system
-  const MaterialProperty<RealVectorValue> & _force;
-
   /// Stiffness matrix relating displacement DOFs of same node or across nodes
   const MaterialProperty<Real> & _K11;
 
   /// Initial length of beam
   const MaterialProperty<Real> & _original_length;
-
-  /// Rotational transformation from global to current beam local coordinate system
-  const MaterialProperty<RankTwoTensor> & _total_rotation;
 
   /// Stiffness proportional Rayleigh damping parameter
   const MaterialProperty<Real> & _zeta;
@@ -63,16 +59,25 @@ protected:
   /// Boolean flag to turn on Rayleigh damping or numerical damping due to HHT time integration
   const bool _isDamped;
 
+  /// Current force vector in global coordinate system
+  // const MaterialProperty<RealVectorValue> & _force;
+  const MaterialProperty<Real> & _force;
+
   /// Old force vector in global coordinate system
-  const MaterialProperty<RealVectorValue> * _force_old;
+  // const MaterialProperty<RealVectorValue> * _force_old;
+  const MaterialProperty<Real> * _force_old;
+
+  /// Older force vector in global coordinate system
+  // const MaterialProperty<RealVectorValue> * _force_older;
+  const MaterialProperty<Real> * _force_older;
+
+  /// Rotational transformation from global to current beam local coordinate system
+  const MaterialProperty<RankTwoTensor> & _total_rotation;
 
   /// Rotational transformation from global to old beam local coordinate system
   const MaterialProperty<RankTwoTensor> * _total_rotation_old;
 
   const std::vector<RealGradient> * _orientation;
-
-  /// Older force vector in global coordinate system
-  const MaterialProperty<RealVectorValue> * _force_older;
 
   /// Residual corresponding to displacement DOFs at the nodes in global coordinate system
   std::vector<RealVectorValue> _global_force_res;

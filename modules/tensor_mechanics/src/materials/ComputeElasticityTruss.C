@@ -18,9 +18,6 @@ ComputeElasticityTruss::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Computes the equivalent of the elasticity tensor for the truss "
                              "element, which are vectors of material axial stiffness.");
-  params.addParam<FunctionName>(
-      "elasticity_prefactor",
-      "Optional function to use as a scalar prefactor on the elasticity vector for the truss.");
   params.addRequiredCoupledVar(
       "youngs_modulus",
       "Young's modulus of the material. Can be supplied as either a number or a variable name.");
@@ -29,9 +26,7 @@ ComputeElasticityTruss::validParams()
 
 ComputeElasticityTruss::ComputeElasticityTruss(const InputParameters & parameters)
   : Material(parameters),
-    _material_stiffness(declareProperty<RealVectorValue>("material_stiffness")),
-    _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
-                                                             : nullptr),
+    _material_stiffness(declareProperty<Real>("material_stiffness")),
     _youngs_modulus(coupledValue("youngs_modulus"))
 {
 }
@@ -40,11 +35,5 @@ void
 ComputeElasticityTruss::computeQpProperties()
 {
   // material_stiffness relates the translational strains to forces
-  _material_stiffness[_qp](0) = _youngs_modulus[_qp];
-
-  // Multiply by prefactor
-  if (_prefactor_function)
-  {
-    _material_stiffness[_qp] *= _prefactor_function->value(_t, _q_point[_qp]);
-  }
+  _material_stiffness[_qp] = _youngs_modulus[_qp];
 }

@@ -50,19 +50,24 @@ StressDivergenceTruss::StressDivergenceTruss(const InputParameters & parameters)
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
-    _force(getMaterialPropertyByName<RealVectorValue>("forces")),
     _K11(getMaterialPropertyByName<Real>("Jacobian_11")),
     _original_length(getMaterialPropertyByName<Real>("original_length")),
-    _total_rotation(getMaterialPropertyByName<RankTwoTensor>("total_rotation")),
     _zeta(getMaterialProperty<Real>("zeta")),
     _alpha(getParam<Real>("alpha")),
     _isDamped(getParam<MaterialPropertyName>("zeta") != "0.0" || std::abs(_alpha) > 0.0),
-    _force_old(_isDamped ? &getMaterialPropertyOld<RealVectorValue>("forces") : nullptr),
+    // _force(getMaterialPropertyByName<RealVectorValue>("forces")),
+    // _force_old(_isDamped ? &getMaterialPropertyOld<RealVectorValue>("forces") : nullptr),
+    // _force_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<RealVectorValue>("forces")
+    //                                     : nullptr),
+    _force(getMaterialPropertyByName<Real>("forces")),
+    _force_old(_isDamped ? &getMaterialPropertyOld<Real>("forces") : nullptr),
+    _force_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<Real>("forces")
+                                        : nullptr),
+    _total_rotation(getMaterialPropertyByName<RankTwoTensor>("total_rotation")),
     _total_rotation_old(_isDamped ? &getMaterialPropertyOld<RankTwoTensor>("total_rotation")
                                   : nullptr),
     _orientation(NULL),
-    _force_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<RealVectorValue>("forces")
-                                        : nullptr),
+
     _global_force_res(0),
     _force_local_t(0),
     _local_force_res(0)
@@ -72,29 +77,40 @@ StressDivergenceTruss::StressDivergenceTruss(const InputParameters & parameters)
 }
 
 void
+StressDivergenceTruss::initialSetup()
+{
+  _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
+}
+
+void
 StressDivergenceTruss::computeResidual()
 {
-  // RealGradient orientation((*_orientation)[0]);
-  // orientation /= orientation.norm();
-
   prepareVectorTag(_assembly, _var.number());
 
-  mooseAssert(_local_re.size() == 2,
-              "StressDivergenceTruss: Truss element must have two nodes only.");
-  _global_force_res.resize(_test.size());
+  mooseAssert(_local_re.size() == 2, "Truss element must have two nodes only.");
 
-  computeGlobalResidual(&_force, &_total_rotation, _global_force_res);
+  RealGradient orientation((*_orientation)[0]);
+  orientation /= orientation.norm();
 
-  // add contributions from stiffness proportional damping (non-zero _zeta) or HHT time integration
-  // (non-zero _alpha)
-  if (_isDamped && _dt > 0.0)
-    computeDynamicTerms(_global_force_res);
+  VectorValue<Real> force_local = _force[_qp] * orientation;
 
-  for (_i = 0; _i < _test.size(); ++_i)
-    if (_component < 3)
-      _local_re(_i) = _global_force_res[_i](_component);
+  _local_re(0) = -force_local(_component);
+  _local_re(1) = -_local_re(0);
 
-  out << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << " _local_re(2) " << _local_re(2) << std::endl;
+  // _global_force_res.resize(_test.size());
+  //
+  // computeGlobalResidual(&_force, &_total_rotation, _global_force_res);
+  //
+  // // add contributions from stiffness proportional damping (non-zero _zeta) or HHT time integration
+  // // (non-zero _alpha)
+  // // if (_isDamped && _dt > 0.0)
+  // //   computeDynamicTerms(_global_force_res);
+  //
+  // for (_i = 0; _i < _test.size(); ++_i)
+  //   if (_component < 3)
+  //     _local_re(_i) = _global_force_res[_i](_component);
+
+  out <<  " force " << _force[_qp] << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << std::endl;
 
   accumulateTaggedLocalResidual();
 
@@ -106,25 +122,29 @@ StressDivergenceTruss::computeResidual()
   }
 }
 
-void
-StressDivergenceTruss::computeJacobian()
+Real
+StressDivergenceTruss::computeStiffness(unsigned int i, unsigned int j)
 {
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
+  return orientation(i) * orientation(j) * _K11[_qp];
+}
 
+void
+StressDivergenceTruss::computeJacobian()
+{
   prepareMatrixTag(_assembly, _var.number(), _var.number());
-
   for (unsigned int i = 0; i < _test.size(); ++i)
     for (unsigned int j = 0; j < _phi.size(); ++j)
       if (_component < 3)
-        _local_ke(i, j) = (i == j ? 1 : -1) * _K11[_qp] * orientation(_component) * orientation(_component);
+        _local_ke(i, j) = (i == j ? 1 : -1) * computeStiffness(_component, _component);
         // _local_ke(i, j) = (i == j ? 1 : -1) * _K11[0](_component, _component);
 
-  out <<" _component " << _component << " _local_ke " << _local_ke <<" _K11[0] "<< _K11[_qp] << std::endl;
-
   // scaling factor for Rayliegh damping and HHT time integration
-  if (_isDamped && _dt > 0.0)
-    _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
+  // if (_isDamped && _dt > 0.0)
+  //   _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
+
+  // out <<" _component " << _component << " _local_ke " << _local_ke << std::endl;
 
   accumulateTaggedLocalMatrix();
 
@@ -144,14 +164,15 @@ StressDivergenceTruss::computeJacobian()
 void
 StressDivergenceTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
-  RealGradient orientation((*_orientation)[0]);
-  orientation /= orientation.norm();
-
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
   else
   {
+    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
+    // on the displaced mesh
+    auto phi_size = _sys.getVariable(_tid, jvar.number()).dofIndices().size();
+
     unsigned int coupled_component = 0;
     bool disp_coupled = false;
 
@@ -162,74 +183,80 @@ StressDivergenceTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
         disp_coupled = true;
         break;
       }
-    prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
     if (disp_coupled)
-      for (unsigned int i = 0; i < _test.size(); ++i)
-        for (unsigned int j = 0; j < _phi.size(); ++j)
-          if (_component < 3 && coupled_component < 3)
-            _local_ke(i, j) += (i == j ? 1 : -1) * _K11[_qp] * orientation(_component) * orientation(_component);
-            // _local_ke(i, j) += (i == j ? 1 : -1) * _K11[0](_component, coupled_component);
-
-    // scaling factor for Rayleigh damping and HHT time integration
-    if (_isDamped && _dt > 0.0)
-      _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
-
-    accumulateTaggedLocalMatrix();
-  }
-}
-
-void
-StressDivergenceTruss::computeDynamicTerms(std::vector<RealVectorValue> & global_force_res)
-{
-  mooseAssert(_zeta[0] >= 0.0, "StressDivergenceBeam: Zeta parameter should be non-negative.");
-  std::vector<RealVectorValue> global_force_res_old(_test.size());
-  computeGlobalResidual(_force_old, &_total_rotation, global_force_res_old);
-
-  // For HHT calculation, the global force and moment residual from t_older is required
-  std::vector<RealVectorValue> global_force_res_older(_test.size());
-
-  if (std::abs(_alpha) > 0.0)
-    computeGlobalResidual(_force_older, &_total_rotation, global_force_res_older);
-
-  // Update the global_force_res and global_moment_res to include HHT and Rayleigh damping
-  // contributions
-  for (_i = 0; _i < _test.size(); ++_i)
-  {
-    global_force_res[_i] =
-        global_force_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt) -
-        global_force_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta[0] / _dt) +
-        global_force_res_older[_i] * (_alpha * _zeta[0] / _dt);
-  }
-}
-
-void
-StressDivergenceTruss::computeGlobalResidual(const MaterialProperty<RealVectorValue> * force,
-                                             const MaterialProperty<RankTwoTensor> * total_rotation,
-                                             std::vector<RealVectorValue> & global_force_res)
-{
-  RealVectorValue a;
-  _force_local_t.resize(_qrule->n_points());
-  _local_force_res.resize(_test.size());
-
-  // convert forces/moments from global coordinate system to current truss local configuration
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    _force_local_t[_qp] = (*total_rotation)[0] * (*force)[_qp];
-
-  // residual for displacement variables
-  for (_i = 0; _i < _test.size(); ++_i)
-  {
-    _local_force_res[_i] = a;
-    for (unsigned int component = 0; component < 3; ++component)
     {
-      for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-        _local_force_res[_i](component) +=
-            (_i == 0 ? -1 : 1) * _force_local_t[_qp](component) * 0.5;
+      prepareMatrixTag(_assembly, _var.number(), jvar_num);
+
+      for (unsigned int i = 0; i < _test.size(); ++i)
+        for (unsigned int j = 0; j < phi_size; ++j)
+          _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, coupled_component);
+
+      accumulateTaggedLocalMatrix();
+    }
+    else if (false) // Need some code here for coupling with temperature
+    {
     }
   }
-
-  // convert residual for each variable from current beam local configuration to global
-  // configuration
-  for (_i = 0; _i < _test.size(); ++_i)
-    global_force_res[_i] = (*total_rotation)[0].transpose() * _local_force_res[_i];
 }
+
+// void
+// StressDivergenceTruss::computeDynamicTerms(std::vector<RealVectorValue> & global_force_res)
+// {
+//   mooseAssert(_zeta[0] >= 0.0, "StressDivergenceBeam: Zeta parameter should be non-negative.");
+//   std::vector<RealVectorValue> global_force_res_old(_test.size());
+//   computeGlobalResidual(_force_old, &_total_rotation, global_force_res_old);
+//
+//   // For HHT calculation, the global force and moment residual from t_older is required
+//   std::vector<RealVectorValue> global_force_res_older(_test.size());
+//
+//   if (std::abs(_alpha) > 0.0)
+//     computeGlobalResidual(_force_older, &_total_rotation, global_force_res_older);
+//
+//   // Update the global_force_res and global_moment_res to include HHT and Rayleigh damping
+//   // contributions
+//   for (_i = 0; _i < _test.size(); ++_i)
+//   {
+//     global_force_res[_i] =
+//         global_force_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt) -
+//         global_force_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta[0] / _dt) +
+//         global_force_res_older[_i] * (_alpha * _zeta[0] / _dt);
+//   }
+// }
+//
+// void
+// StressDivergenceTruss::computeGlobalResidual(const MaterialProperty<RealVectorValue> * force,
+//                                              const MaterialProperty<RankTwoTensor> * total_rotation,
+//                                              std::vector<RealVectorValue> & global_force_res)
+// {
+//   // RealGradient orientation((*_orientation)[0]);
+//   // orientation /= orientation.norm();
+//
+//   RealVectorValue a;
+//   _force_local_t.resize(_qrule->n_points());
+//   _local_force_res.resize(_test.size());
+//
+//   // convert forces from global coordinate system to current truss local configuration
+//   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+//     _force_local_t[_qp] = (*total_rotation)[0] * (*force)[_qp];
+//
+//   // residual for displacement variables
+//   for (_i = 0; _i < _test.size(); ++_i)
+//   {
+//     _local_force_res[_i] = a;
+//     for (unsigned int component = 0; component < 3; ++component)
+//     {
+//       for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
+//         _local_force_res[_i](component) +=
+//             (_i == 0 ? -1 : 1) * _force_local_t[_qp](component) * 0.5;
+//     }
+//   }
+//
+//   // convert residual for each variable from current beam local configuration to global
+//   // configuration
+//   for (_i = 0; _i < _test.size(); ++_i)
+//     global_force_res[_i] = (*total_rotation)[0].transpose() * _local_force_res[_i];
+//     // global_force_res[_i] = orientation * _local_force_res[_i];
+//
+//     // out<< " _force_local_t " << _force_local_t[_qp] << " _local_force_res" << _local_force_res[0] << " "<<_local_force_res[1] << " global_force_res " << global_force_res[0] << " " << global_force_res[1] << std::endl;
+// }

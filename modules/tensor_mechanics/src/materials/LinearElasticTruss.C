@@ -41,4 +41,5 @@ void
 LinearElasticTruss::computeQpStress()
 {
   _axial_stress[_qp] = _youngs_modulus[_qp] * _elastic_stretch[_qp];
+  out << " _elastic_stretch " << _elastic_stretch[_qp] << std::endl;
 }

@@ -26,20 +26,8 @@ protected:
   virtual void computeQpProperties() override;
 
   /// Material stiffness vector that relates displacement strain increments to force increments
-  MaterialProperty<RealVectorValue> & _material_stiffness;
-
-  // /// Material flexure vector that relates rotational strain increments to moment increments
-  // MaterialProperty<RealVectorValue> & _material_flexure;
-
-  /// Prefactor function used to modify (i.e., multiply) the material stiffness and flexure vectors
-  const Function * const _prefactor_function;
+  MaterialProperty<Real> & _material_stiffness;
 
   /// Young's modulus of the truss material
   const VariableValue & _youngs_modulus;
-
-  // /// Poisson's ratio of the truss material
-  // const VariableValue & _poissons_ratio;
-
-  // /// Shear coefficient for the truss cross-section
-  // const VariableValue & _shear_coefficient;
 };

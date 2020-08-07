@@ -72,7 +72,7 @@ StressDivergenceTensorsTruss::computeResidual()
   _local_re(0) = -force_local(_component);
   _local_re(1) = -_local_re(0);
 
-  out << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << std::endl;
+  out <<  " force " << _axial_stress[0] * _area[0] << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << std::endl;
 
   accumulateTaggedLocalResidual();
 
@@ -89,9 +89,6 @@ StressDivergenceTensorsTruss::computeStiffness(unsigned int i, unsigned int j)
 {
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
-
-  out << " stiffness " << orientation(i) * orientation(j) * _e_over_l[0] * _area[0] << std::endl;
-
   return orientation(i) * orientation(j) * _e_over_l[0] * _area[0];
 }
 
@@ -104,7 +101,7 @@ StressDivergenceTensorsTruss::computeJacobian()
     for (unsigned int j = 0; j < _phi.size(); ++j)
       _local_ke(i, j) += (i == j ? 1 : -1) * computeStiffness(_component, _component);
 
-  out <<" _component " << _component << " _local_ke " << _local_ke << std::endl;
+  // out <<" _component " << _component << " _local_ke " << _local_ke << std::endl;
 
   accumulateTaggedLocalMatrix();
 
