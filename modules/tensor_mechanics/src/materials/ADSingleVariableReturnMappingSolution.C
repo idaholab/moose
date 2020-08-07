@@ -112,7 +112,7 @@ ADSingleVariableReturnMappingSolution::returnMappingSolve(const ADReal & effecti
   {
     // output suppressed by user, throw immediately
     if (_internal_solve_output_on == InternalSolveOutput::NEVER)
-      throw MooseException("");
+      mooseException("");
 
     // user expects some kind of output, if necessary setup output stream now
     if (!iter_output)
@@ -140,7 +140,7 @@ ADSingleVariableReturnMappingSolution::returnMappingSolve(const ADReal & effecti
 
     // Append summary and throw exception
     outputIterationSummary(iter_output.get(), _iteration);
-    throw MooseException(iter_output->str());
+    mooseException(iter_output->str());
   }
 
   if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)

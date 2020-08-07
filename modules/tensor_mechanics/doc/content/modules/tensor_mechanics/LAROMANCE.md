@@ -9,8 +9,8 @@ utilized in [ADPowerLawCreepStressUpdate](/ADPowerLawCreepStressUpdate.md) inclu
 return method implemented in [ADRadialReturnStressUpdate](/ADRadialReturnStressUpdate.md), however
 in place of a traditional power-law creep model, a ROM is sampled to determine the creep rate as a
 function of temperature, defect concentrations, the von Mises trial stress, and an environmental
-factor. In addition, lower-length scale information, here mobile defect dislocations and immobile
-defect dislocations, are evolved as determined by the ROM.
+factor. In addition, lower-length scale information, here cell dislocations and cell wall dislocations,
+are evolved as determined by the ROM.
 
 `ADLAROMANCEStressUpdateBase` provides the necessary math and implementation for ROMs provided in
 the correct `LAROMANCE` model format, which essentially includes the necessary material specific
@@ -143,7 +143,41 @@ simulations using the physics-based constitutive laws. The maximum degree of the
 selected to maximize fidelity to the data while avoiding an overfitting of the data, where
 overfitting is indicated by a stark difference in the regression fit to training and testing data.
 To validate the obtained regression coefficient values, initial conditions are given to the ROM and
-VPSC, and the resulting simulations are compared.  
+VPSC, and the resulting simulations are compared.
+
+### ROM Tiling
+
+In order to widen the region of applicability without sacrificing ROM accuracy, a ROM tiling method
+can be used to cover a larger the input parameter space with several, separate ROMS. This requires
+smoothing from one ROM to another across regions of shared input space, which is performed internally
+via sigmoidal smoothing functions:
+\begin{equation}
+\dot{\epsilon}_{tot}(\bf{i}) = \dot{\epsilon}_1(\bf{i}) s_{1,2} + \dot{\epsilon}_2(\bf{i}) (1-s_{1,2}).
+\label{eq:smoothing}
+\end{equation}
+Here, $\dot{\epsilon}_j(\bf{i})$ is the strain rate for tile $j$ using inputs $\bf{i}$, and $s_{1,2}$
+is a sigmoid function that smoothly varies from 0 to 1 for a given input value $i$,
+\begin{equation}
+\begin{aligned}
+x_{1,2} &= 2 \frac{i - l_1}{l_2 - l_1} - 1 \\
+s_{1,2} &= \frac{ \exp\left(-\frac{2}{1+x_{1,2}}\right) }{\exp\left(-\frac{2}{1+x_{1,2}}\right)  + \exp\left(-\frac{2}{1-x_{1,2}}\right) },
+\label{eq:sigmoid}
+\end{aligned}
+\end{equation}
+where $l_1$ and $l_2$ are the limits for tiles 1 and 2 over which the strain is smoothed, and $l_1 < i < l_2$.
+
+
+### ROM Input Windows
+
+Due to the nature of formulating the ROM, the input values are limited to a window of applicability,
+outside of which, the ROM can no longer be guaranteed to be valid. `ADLAROMANCEStressUpdateBase` handles
+these limits for some of the coupled state variables internally via input parameters for each input
+that allow for error handling or extrapolation.
+If the input values are to be extrapolated, a sigmoidal function is utilized
+to extrapolate from the lower limit of the out-of-bound input to zero strain. Extrapolation can only
+be performed for temperature, stress, and the environmental factor state variables. The remaining
+ROM inputs (cell dislocations, cell wall dislocations, and previous strain) are calculated internally,
+and thus must be within the window of applicability at the start of the simulation.
 
 ## Writing a LAROMANCE Stress Update Material
 
@@ -162,12 +196,16 @@ the four virtual methods:
 - +getInputLimits+: Returns human-readable limits for the inputs.
 - +getCoefs+: Material specific coefficients multiplied by the Legendre polynomials for each of the input variables.
 
+A fifth virtual method needs to be overridden if a tiled ROM is implemented:
+
+- +getTilings+: Returns the tiling organization.
+
 Additionally, new `LAROMANCE` models can override four input parameter defaults to ensure correct ROM implementation:
 
-- +initial_mobile_dislocation_density+: Initial density of mobile (glissile) dislocations.
-- +max_relative_mobile_dislocation_increment+: Maximum increment of density of mobile (glissile) dislocations.
-- +initial_immobile_dislocation_density+: Immobile (locked) dislocation density initial value.
-- +max_relative_immobile_dislocation_increment+: Maximum increment of immobile (locked) dislocation density initial value.
+- +initial_cell_dislocation_density+: Initial density of cell (glissile) dislocations.
+- +max_relative_cell_dislocation_increment+: Maximum increment of density of cell (glissile) dislocations.
+- +initial_wall_dislocation_density+: Cell wall (locked) dislocation density initial value.
+- +max_relative_wall_dislocation_increment+: Maximum increment of cell wall (locked) dislocation density initial value.
 
 `ADLAROMANCEStressUpdateBase` derived classes must be run in conjunction with an inelastic strain return mapping stress
 calculator such as [ADComputeMultipleInelasticStress](ADComputeMultipleInelasticStress.md).

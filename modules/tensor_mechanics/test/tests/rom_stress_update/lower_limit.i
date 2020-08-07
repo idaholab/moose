@@ -1,9 +1,12 @@
+temp = 800.0160634
+disp = 1.0053264195e6
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 2
-  ny = 2
-  nz = 2
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
 [GlobalParams]
@@ -12,7 +15,36 @@
 
 [AuxVariables]
   [./temperature]
-    initial_condition = 900.0
+    initial_condition = ${temp}
+  [../]
+[]
+
+[Functions]
+  [./temp_weight]
+    type = ParsedFunction
+    vars = 'lower_limit avg'
+    vals = '800.0160634 temp_avg'
+    value = 'val := 2 * avg / lower_limit - 1;
+             clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
+             plus := exp(-2 / (1 + clamped));
+             minus := exp(-2 / (1 - clamped));
+             plus / (plus + minus)'
+  [../]
+  [./stress_weight]
+    type = ParsedFunction
+    vars = 'lower_limit avg'
+    vals = '2.010652839e6 vonmises_stress'
+    value = 'val := 2 * avg / lower_limit - 1;
+             clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
+             plus := exp(-2 / (1 + clamped));
+             minus := exp(-2 / (1 - clamped));
+             plus / (plus + minus)'
+  [../]
+  [./creep_rate_exact]
+    type = ParsedFunction
+    vars = 'lower_limit_strain temp_weight stress_weight'
+    vals = '3.370764e-12       temp_weight stress_weight'
+    value = 'lower_limit_strain * temp_weight * stress_weight'
   [../]
 []
 
@@ -20,8 +52,8 @@
   [./all]
     strain = FINITE
     add_variables = true
-    generate_output = 'vonmises_stress'
     use_automatic_differentiation = true
+    generate_output = vonmises_stress
   [../]
 []
 
@@ -49,21 +81,21 @@
     variable = disp_x
     component = 0
     boundary = right
-    constant = 1.0e5
+    constant = ${disp}
   [../]
   [./pressure_y]
     type = ADPressure
     variable = disp_y
     component = 1
     boundary = top
-    constant = -1.0e5
+    constant = -${disp}
   [../]
   [./pressure_z]
     type = ADPressure
     variable = disp_z
     component = 2
     boundary = front
-    constant = -1.0e5
+    constant = -${disp}
   [../]
 []
 
@@ -83,6 +115,7 @@
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
     outputs = all
+    apply_strain = false
   [../]
 []
 
@@ -95,15 +128,25 @@
   automatic_scaling = true
   compute_scaling_once = false
 
-  num_steps = 5
+  num_steps = 1
+  dt = 1e5
 []
 
 [Postprocessors]
-  [./effective_strain_avg]
-    type = ElementAverageValue
-    variable = effective_creep_strain
+  [./creep_rate_exact]
+    type = FunctionValuePostprocessor
+    function = creep_rate_exact
   [../]
-  [./temperature]
+  [./creep_rate_avg]
+    type = ElementAverageValue
+    variable = creep_rate
+  [../]
+  [./creep_rate_diff]
+    type = DifferencePostprocessor
+    value1 = creep_rate_exact
+    value2 = creep_rate_avg
+  [../]
+  [./temp_avg]
     type = ElementAverageValue
     variable = temperature
   [../]
@@ -114,6 +157,10 @@
   [./wall_disloactions]
     type = ElementAverageValue
     variable = wall_dislocations
+  [../]
+  [./vonmises_stress]
+    type = ElementAverageValue
+    variable = vonmises_stress
   [../]
 []
 
