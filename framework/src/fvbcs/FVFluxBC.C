@@ -125,36 +125,25 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   ADReal r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  const auto & derivs = r.derivatives();
+  mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-  const auto & column_indices = derivs.nude_indices();
-  const auto & values = derivs.nude_data();
+  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    // Even though the elem element is always the non-null pointer on mesh
+    // external boundary faces, this could be an "internal" boundary - one
+    // created by variable block restriction where the var is only defined on
+    // one side of the face (either elem or neighbor).  We need to make sure
+    // that we add the residual contribution to only the correct side - the one
+    // where the variable is defined.
+    // Also, we don't need to worry about ElementNeighbor or NeighborElement
+    // contributions here because, once again, this is a boundary face with the
+    // variable only defined on one side.
+    if (ft == FaceInfo::VarFaceNeighbors::ELEM)
+      computeJacobian(Moose::ElementElement, residual);
+    else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+      computeJacobian(Moose::NeighborNeighbor, residual);
+    else
+      mooseError("should never get here");
+  };
 
-  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
-
-  const auto & row_indices = _var.dofIndices();
-  mooseAssert(row_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
-  const auto row_index = row_indices[0];
-
-  for (std::size_t i = 0; i < column_indices.size(); ++i)
-    _assembly.cacheJacobianContribution(row_index, column_indices[i], values[i], _matrix_tags);
-#else
-
-  // Even though the elem element is always the non-null pointer on mesh
-  // external boundary faces, this could be an "internal" boundary - one
-  // created by variable block restriction where the var is only defined on
-  // one side of the face (either elem or neighbor).  We need to make sure
-  // that we add the residual contribution to only the correct side - the one
-  // where the variable is defined.
-  // Also, we don't need to worry about ElementNeighbor or NeighborElement
-  // contributions here because, once again, this is a boundary face with the
-  // variable only defined on one side.
-  if (ft == FaceInfo::VarFaceNeighbors::ELEM)
-    computeJacobian(Moose::ElementElement, r);
-  else if (ft == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-    computeJacobian(Moose::NeighborNeighbor, r);
-  else
-    mooseError("should never get here");
-#endif
+  _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, local_functor);
 }

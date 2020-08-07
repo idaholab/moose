@@ -1453,6 +1453,20 @@ public:
     return qrule;
   }
 
+  /**
+   * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
+   * simply caches the derivative values for the corresponding column indices for the provided \p
+   * matrix_tags. If not using global indexing, then the user must provide a functor which takes
+   * three arguments: the <tt>ADReal residual</tt> that contains the derivatives to be processed,
+   * the \p row_index corresponding to the row index of the matrices that values should be added to,
+   * and the \p matrix_tags specifying the matrices that will  be added into
+   */
+  template <typename LocalFunctor>
+  void processDerivatives(const ADReal & residual,
+                          dof_id_type dof_index,
+                          const std::set<TagID> & matrix_tags,
+                          LocalFunctor & local_functor);
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2323,4 +2337,30 @@ inline const ADTemplateVariablePhiGradient<RealVectorValue> &
 Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v) const
 {
   return _ad_vector_grad_phi_data.at(v.feType());
+}
+
+template <typename LocalFunctor>
+void
+Assembly::processDerivatives(const ADReal & residual,
+                             dof_id_type row_index,
+                             const std::set<TagID> & matrix_tags,
+                             LocalFunctor &
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+                                 local_functor
+#endif
+)
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  const auto & derivs = residual.derivatives();
+
+  const auto & column_indices = derivs.nude_indices();
+  const auto & values = derivs.nude_data();
+
+  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
+
+  for (std::size_t i = 0; i < column_indices.size(); ++i)
+    cacheJacobianContribution(row_index, column_indices[i], values[i], matrix_tags);
+#else
+  local_functor(residual, row_index, matrix_tags);
+#endif
 }

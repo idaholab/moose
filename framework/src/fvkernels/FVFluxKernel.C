@@ -151,22 +151,6 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
   }
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-void
-FVFluxKernel::processGlobalDerivatives(const ADReal & residual, const dof_id_type row_index)
-{
-  const auto & derivs = residual.derivatives();
-
-  const auto & column_indices = derivs.nude_indices();
-  const auto & values = derivs.nude_data();
-
-  mooseAssert(column_indices.size() == values.size(), "Indices and values size must be the same");
-
-  for (std::size_t i = 0; i < column_indices.size(); ++i)
-    _assembly.cacheJacobianContribution(row_index, column_indices[i], values[i], _matrix_tags);
-}
-#endif
-
 void
 FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
@@ -190,28 +174,28 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   if ((ft == FaceInfo::VarFaceNeighbors::ELEM && _var.hasDirichletBC()) ||
       ft == FaceInfo::VarFaceNeighbors::BOTH)
   {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-    processGlobalDerivatives(r, _var.dofIndices()[0]);
-#else
-    // jacobian contribution of the residual for the elem element to the elem element's DOF:
-    // d/d_elem (residual_elem)
-    computeJacobian(Moose::ElementElement, r);
+    auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+      // jacobian contribution of the residual for the elem element to the elem element's DOF:
+      // d/d_elem (residual_elem)
+      computeJacobian(Moose::ElementElement, residual);
 
-    mooseAssert(
-        (ft == FaceInfo::VarFaceNeighbors::ELEM) == (_var.dofIndicesNeighbor().size() == 0),
-        "If the variable is only defined on the elem hand side of the face, then that "
-        "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
-        "the variable is defined on both sides of the face, then it should have a non-zero "
-        "number of degrees of freedom on the neighbor/neighbor element");
+      mooseAssert(
+          (ft == FaceInfo::VarFaceNeighbors::ELEM) == (_var.dofIndicesNeighbor().size() == 0),
+          "If the variable is only defined on the elem hand side of the face, then that "
+          "means it should have no dof indices on the neighbor/neighbor element. Conversely if "
+          "the variable is defined on both sides of the face, then it should have a non-zero "
+          "number of degrees of freedom on the neighbor/neighbor element");
 
-    // only add residual to neighbor if the variable is defined there.
-    if (ft == FaceInfo::VarFaceNeighbors::BOTH)
-      // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
-      // d/d_neighbor (residual_elem)
-      computeJacobian(Moose::ElementNeighbor, r);
-#endif
+      // only add residual to neighbor if the variable is defined there.
+      if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+        // jacobian contribution of the residual for the elem element to the neighbor element's DOF:
+        // d/d_neighbor (residual_elem)
+        computeJacobian(Moose::ElementNeighbor, residual);
+    };
+
+    _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, element_functor);
   }
 
   if ((ft == FaceInfo::VarFaceNeighbors::NEIGHBOR && _var.hasDirichletBC()) ||
@@ -226,23 +210,23 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     // We switch the sign for the neighbor residual
     ADReal neighbor_r = -r;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
-    processGlobalDerivatives(neighbor_r, _var.dofIndicesNeighbor()[0]);
-#else
+    auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+      // only add residual to elem if the variable is defined there.
+      if (ft == FaceInfo::VarFaceNeighbors::BOTH)
+        // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
+        // d/d_elem (residual_neighbor)
+        computeJacobian(Moose::NeighborElement, residual);
 
-    // only add residual to elem if the variable is defined there.
-    if (ft == FaceInfo::VarFaceNeighbors::BOTH)
-      // jacobian contribution of the residual for the neighbor element to the elem element's DOF:
-      // d/d_elem (residual_neighbor)
-      computeJacobian(Moose::NeighborElement, neighbor_r);
+      // jacobian contribution of the residual for the neighbor element to the neighbor element's
+      // DOF: d/d_neighbor (residual_neighbor)
+      computeJacobian(Moose::NeighborNeighbor, residual);
+    };
 
-    // jacobian contribution of the residual for the neighbor element to the neighbor element's DOF:
-    // d/d_neighbor (residual_neighbor)
-    computeJacobian(Moose::NeighborNeighbor, neighbor_r);
-#endif
+    _assembly.processDerivatives(
+        neighbor_r, _var.dofIndicesNeighbor()[0], _matrix_tags, neighbor_functor);
   }
 }
 
