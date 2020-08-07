@@ -25,7 +25,7 @@ namespace Parallel
  * the vector.
  */
 template <>
-class Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>
+class Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>
 {
 
 public:
@@ -36,19 +36,19 @@ public:
 
   /// Getting the sizes of the packed objects using the object itself.
   static unsigned int packable_size(
-      const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+      const std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> & object,
       const void *);
 
   // Pack the objects on the sending process.
   template <typename Iter, typename Context>
   static void
-  pack(const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+  pack(const std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> & object,
        Iter data_out,
        const Context *);
 
   // Unpack the object on the receiving process.
   template <typename BufferIter, typename Context>
-  static std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
+  static std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
   unpack(BufferIter in, Context *);
 };
 } // namespace Parallel

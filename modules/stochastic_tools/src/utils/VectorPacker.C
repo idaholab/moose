@@ -18,8 +18,8 @@ namespace Parallel
 {
 
 unsigned int
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packable_size(
-    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::packable_size(
+    const std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> & object,
     const void *)
 {
   unsigned int total_size = 0;
@@ -34,7 +34,7 @@ Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
 }
 
 unsigned int
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::packed_size(
+Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::packed_size(
     typename std::vector<Real>::const_iterator in)
 {
   unsigned int total_size = 0;
@@ -53,8 +53,8 @@ Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
 
 template <>
 void
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::pack(
-    const std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> & object,
+Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::pack(
+    const std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> & object,
     std::back_insert_iterator<std::vector<Real>> data_out,
     const void *)
 {
@@ -73,13 +73,13 @@ Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
 }
 
 template <>
-std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>
-Packing<std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>>>::unpack(
+std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
+Packing<std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>>::unpack(
     std::vector<Real>::const_iterator in, void *)
 {
   // Decoding the vector lenght
   const std::size_t data_size = *in++;
-  std::tuple<dof_id_type, dof_id_type, std::shared_ptr<DenseVector<Real>>> object;
+  std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>> object;
 
   // Decoding and filling the global sample index and variable index
   std::get<0>(object) = *in++;
