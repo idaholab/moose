@@ -9,6 +9,7 @@
 
 #include "DualRealOps.h"
 #include "RankFourTensorImplementation.h"
+#include "libmesh/libmesh_common.h"
 
 template class RankFourTensorTempl<Real>;
 template class RankFourTensorTempl<DualReal>;
@@ -53,3 +54,6 @@ template RankFourTensor RankFourTensor::operator*(const RankFourTensor & a) cons
 template ADRankFourTensor ADRankFourTensor::operator*(const RankFourTensor & a) const;
 template ADRankFourTensor RankFourTensor::operator*(const ADRankFourTensor & a) const;
 template ADRankFourTensor ADRankFourTensor::operator*(const ADRankFourTensor & a) const;
+
+template RankTwoTensorTempl<Complex>
+RankFourTensorTempl<Complex>::operator*(const RankTwoTensorTempl<Complex> & a) const;
