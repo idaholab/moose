@@ -24,17 +24,6 @@
       csvdiff = 'master_2dnorm_quad_out_pc_samp_0002.csv'
       detail = 'Quadrature sampler with Normal distribution, and '
     []
-    [gauss_hermite_boost]
-      type = CSVDiff
-      input = master_2dnorm_quad.i
-      allow_test_objects = true
-      cli_args = 'Distributions/D_dist/type=BoostNormal '
-                 'Distributions/S_dist/type=BoostNormal '
-                 'Outputs/file_base=boost_2dnorm_quad'
-      csvdiff = 'boost_2dnorm_quad_pc_samp_0002.csv'
-      boost = true
-      detail = 'Quadrature sampler with BoostNormal distribution.'
-    []
   []
   [statistics]
     issues = '#14836'

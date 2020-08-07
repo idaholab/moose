@@ -40,11 +40,6 @@ makePolynomial(const Distribution * dist)
     return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
                                               dist->getParam<Real>("standard_deviation"));
 
-  const BoostNormal * bn_dist = dynamic_cast<const BoostNormal *>(dist);
-  if (bn_dist)
-    return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
-                                              dist->getParam<Real>("standard_deviation"));
-
   ::mooseError("Polynomials for '", dist->type(), "' distributions have not been implemented.");
   return nullptr;
 }
