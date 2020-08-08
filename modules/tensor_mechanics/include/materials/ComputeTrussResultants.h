@@ -37,23 +37,9 @@ protected:
   /// Material stiffness vector that relates displacement strain increment to force increment
   const MaterialProperty<Real> & _material_stiffness;
 
-  // /// Material flexure vector that relates rotational strain increment to moment increment
-  // const MaterialProperty<RealVectorValue> & _material_flexure;
-
-  /// Rotational transformation from global to current truss local coordinate system
-  // const MaterialProperty<RankTwoTensor> & _total_rotation;
-
   /// Current force vector in global coordinate system
-  // MaterialProperty<RealVectorValue> & _force;
   MaterialProperty<Real> & _force;
 
-  // /// Current moment vector in global coordinate system
-  // MaterialProperty<RealVectorValue> & _moment;
-
   /// Old force vector in global coordinate system
-  // const MaterialProperty<RealVectorValue> & _force_old;
   const MaterialProperty<Real> & _force_old;
-
-  // /// Old force vector in global coordinate system
-  // const MaterialProperty<RealVectorValue> & _moment_old;
 };

@@ -59,6 +59,28 @@
   [../]
 []
 
+[AuxKernels]
+#  [./axial_stress]
+#    type = MaterialRealAux
+#    block = 1
+#    property = axial_stress
+#    variable = axial_stress
+#  [../]
+#  [./e_over_l]
+#    type = MaterialRealAux
+#    block = 1
+#    property = e_over_l
+#    variable = e_over_l
+#  [../]
+  [./area]
+    type = ConstantAux
+    block = 1
+    variable = area
+    value = 0.8
+    execute_on = 'initial timestep_begin'
+  [../]
+[]
+
 [Functions]
   [./x2]
     type = PiecewiseLinear
@@ -100,28 +122,6 @@
     value = -25
     point = '1 0 0'
     variable = disp_y
-  [../]
-[]
-
-[AuxKernels]
-#  [./axial_stress]
-#    type = MaterialRealAux
-#    block = 1
-#    property = axial_stress
-#    variable = axial_stress
-#  [../]
-#  [./e_over_l]
-#    type = MaterialRealAux
-#    block = 1
-#    property = e_over_l
-#    variable = e_over_l
-#  [../]
-  [./area]
-    type = ConstantAux
-    block = 1
-    variable = area
-    value = 0.8
-    execute_on = 'initial timestep_begin'
   [../]
 []
 
@@ -182,12 +182,12 @@
   [../]
   [./strain]
     type = ComputeIncrementalTrussStrain
-#    block = '0'
+    # block = '0'
     displacements = 'disp_x disp_y'
     youngs_modulus = 1e6
     area = area
-    y_orientation = '0.0 0.0 1.0'
-#    eigenstrain_names = 'thermal'
+    # y_orientation = '0.0 0.0 1.0'
+    # eigenstrain_names = 'thermal'
   [../]
   [./stress]
     type = ComputeTrussResultants
