@@ -26,22 +26,25 @@ void
 DistributedData<T>::initializeContainer(unsigned int n_global_entries)
 {
   // This function can be used when a linear partitioning is required and the
-  // number of global samples is known in advance.
-  unsigned int local_entry_begin;
-  unsigned int local_entry_end;
+  // number of global samples is known in advance. Need to do conversion because of
+  // because of 64 bit dof indices.
+  dof_id_type local_entry_begin;
+  dof_id_type local_entry_end;
+  dof_id_type n_local_entries;
+
   MooseUtils::linearPartitionItems(n_global_entries,
                                    n_processors(),
                                    processor_id(),
-                                   _n_local_entries,
+                                   n_local_entries,
                                    local_entry_begin,
                                    local_entry_end);
-
+  _n_local_entries = n_local_entries;
   _local_entries.resize(_n_local_entries);
   _local_entry_ids.resize(_n_local_entries);
 
   // Filling the sample ID vector, leaving the elements of the sample vector
   // with the default constructor.
-  for (unsigned int entry_i = local_entry_begin; entry_i < local_entry_end; ++entry_i)
+  for (dof_id_type entry_i = local_entry_begin; entry_i < local_entry_end; ++entry_i)
   {
     _local_entry_ids[entry_i] = entry_i;
   }
