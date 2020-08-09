@@ -26,6 +26,8 @@ PODSteady::validParams()
   InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for steady-state simulations.");
   params.addParam<Real>("time", 0.0, "System time");
+  ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
+  exec.addAvailableFlags(StochasticTools::EXEC_POST_SNAPSHOT_GEN);
   return params;
 }
 
