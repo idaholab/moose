@@ -438,7 +438,7 @@ ADLAROMANCEStressUpdateBase::checkInputWindow(const ADReal & input,
                                               const WindowFailure behavior,
                                               const std::vector<Real> & global_limits)
 {
-  if (behavior != WindowFailure::WARN || behavior != WindowFailure::ERROR)
+  if (behavior != WindowFailure::WARN && behavior != WindowFailure::ERROR)
     return;
 
   if (input < global_limits[0] || input > global_limits[1])
@@ -794,8 +794,29 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
   _cell_dislocations[_qp] = _old_input_values[_cell_output_index] + _cell_dislocation_increment;
   _wall_dislocations[_qp] = _old_input_values[_wall_output_index] + _wall_dislocation_increment;
 
-  for (unsigned int i = 0; i < _num_inputs; i++)
-    checkInputWindow(_input_values[i], _window_failure[i], _global_limits[i]);
+  // Prevent the ROM from proceeding with new dislocation values that will be out of bounds
+  if ((_cell_dislocations[_qp] < _global_limits[_cell_input_index][0]) ||
+      (_cell_dislocations[_qp] > _global_limits[_cell_input_index][1]))
+  {
+    mooseException("The calculated value of the cell dislocations, ",
+                   MetaPhysicL::raw_value(_cell_dislocations[_qp]),
+                   " is outside of the allowable evolution bounds: ( ",
+                   _global_limits[_cell_input_index][0],
+                   " , ",
+                   _global_limits[_cell_input_index][1],
+                   " ). Cutting the timestep.");
+  }
+  else if ((_wall_dislocations[_qp] < _global_limits[_wall_input_index][0]) ||
+           (_wall_dislocations[_qp] > _global_limits[_wall_input_index][1]))
+  {
+    mooseException("The calculated value of the wall dislocations, ",
+                   MetaPhysicL::raw_value(_wall_dislocations[_qp]),
+                   " is outside of the allowable evolution bounds: ( ",
+                   _global_limits[_wall_input_index][0],
+                   " , ",
+                   _global_limits[_wall_input_index][1],
+                   " ). Cutting the timestep.");
+  }
 
   if (_verbose)
   {
