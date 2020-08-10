@@ -794,28 +794,12 @@ ADLAROMANCEStressUpdateBase::computeStressFinalize(const ADRankTwoTensor & plast
   _cell_dislocations[_qp] = _old_input_values[_cell_output_index] + _cell_dislocation_increment;
   _wall_dislocations[_qp] = _old_input_values[_wall_output_index] + _wall_dislocation_increment;
 
-  // Prevent the ROM from proceeding with new dislocation values that will be out of bounds
-  if ((_cell_dislocations[_qp] < _global_limits[_cell_input_index][0]) ||
-      (_cell_dislocations[_qp] > _global_limits[_cell_input_index][1]))
+  // Prevent the ROM from calculating and proceding with negative dislocations
+  if (_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0)
   {
-    mooseException("The calculated value of the cell dislocations, ",
-                   MetaPhysicL::raw_value(_cell_dislocations[_qp]),
-                   " is outside of the allowable evolution bounds: ( ",
-                   _global_limits[_cell_input_index][0],
-                   " , ",
-                   _global_limits[_cell_input_index][1],
-                   " ). Cutting the timestep.");
-  }
-  else if ((_wall_dislocations[_qp] < _global_limits[_wall_input_index][0]) ||
-           (_wall_dislocations[_qp] > _global_limits[_wall_input_index][1]))
-  {
-    mooseException("The calculated value of the wall dislocations, ",
-                   MetaPhysicL::raw_value(_wall_dislocations[_qp]),
-                   " is outside of the allowable evolution bounds: ( ",
-                   _global_limits[_wall_input_index][0],
-                   " , ",
-                   _global_limits[_wall_input_index][1],
-                   " ). Cutting the timestep.");
+    _cell_dislocations[_qp] = _old_input_values[_cell_output_index];
+    _wall_dislocations[_qp] = _old_input_values[_wall_output_index];
+    mooseException("The negative values of the cell dislocation density, ", MetaPhysicL::raw_value(_cell_dislocations[_qp]), ", and/or wall dislocation density, ", MetaPhysicL::raw_value(_wall_dislocations[_qp]), ". Cutting timestep.");
   }
 
   if (_verbose)
