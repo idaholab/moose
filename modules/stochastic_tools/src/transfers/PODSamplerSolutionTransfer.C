@@ -23,6 +23,8 @@ PODSamplerSolutionTransfer::validParams()
   params.addRequiredParam<UserObjectName>("trainer_name",
                                           "Trainer object that contains the solutions"
                                           " for different samples.");
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags(StochasticTools::EXEC_POST_SNAPSHOT_GEN);
   return params;
 }
 
