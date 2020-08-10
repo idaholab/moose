@@ -38,14 +38,6 @@ public:
 protected:
   std::vector<std::pair<Point, Point>> _cut_line_endpoints;
 
-  bool IntersectSegmentWithCutLine(const Point & segment_point1,
-                                   const Point & segment_point2,
-                                   const std::pair<Point, Point> & cutting_line_points,
-                                   const Real & cutting_line_fraction,
-                                   Real & segment_intersection_fraction) const;
-
-  Real crossProduct2D(const Point & point_a, const Point & point_b) const;
-
   /**
    * Find the fractional distance along a specified cut line for the current time
    * that is currently active. Used for time-based propagation along a line
