@@ -45,7 +45,7 @@ DistributedData<T>::initializeContainer(unsigned int n_global_entries)
 
   // Filling the sample ID vector, leaving the elements of the sample vector
   // with the default constructor.
-  for (dof_id_type entry_i = local_entry_begin; entry_i < local_entry_end; ++entry_i)
+  for (unsigned int entry_i = local_entry_begin; entry_i < (unsigned int)local_entry_end; ++entry_i)
   {
     _local_entry_ids[entry_i] = entry_i;
   }
