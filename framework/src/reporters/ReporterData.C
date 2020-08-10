@@ -45,3 +45,16 @@ ReporterData::finalize(const std::string & object_name)
   };
   std::for_each(_context_ptrs.begin(), _context_ptrs.end(), func);
 }
+
+void
+ReporterData::store(nlohmann::json & json) const
+{
+  for (const auto & context_ptr : _context_ptrs)
+  {
+    auto & node = json.emplace_back();
+    node["object_name"] = context_ptr->name().getObjectName();
+    node["value_name"] = context_ptr->name().getValueName();
+    node["type"] = context_ptr->type();
+    context_ptr->store(node["value"]);
+  }
+}

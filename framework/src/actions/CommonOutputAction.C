@@ -49,6 +49,10 @@ CommonOutputAction::validParams()
                         false,
                         "Output the vector postprocessors to a *.xml "
                         "file using the default XML output.");
+  params.addParam<bool>("json",
+                        false,
+                        "Output Reporter values to a *.json "
+                        "file using the default JSON output.");
   params.addParam<bool>(
       "vtk", false, "Output the results using the default settings for VTKOutput output");
   params.addParam<bool>(
@@ -173,6 +177,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("xml"))
     create("XMLOutput");
+
+  if (getParam<bool>("json"))
+    create("JSONOutput");
 
 #ifdef LIBMESH_HAVE_VTK
   if (getParam<bool>("vtk"))

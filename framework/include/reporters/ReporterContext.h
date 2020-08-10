@@ -9,11 +9,13 @@
 #pragma once
 
 #include <iostream>
+#include <typeinfo>
 
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_object.h"
 
 #include "ReporterName.h"
+#include "nlohmann/json.h"
 
 class ReporterData;
 
@@ -34,6 +36,10 @@ public:
   /// Return the ReporterName that the context is associated
   virtual const ReporterName & name() const = 0;
 
+  /// Return the type of the data stored
+  // This is a helper for ReporterData::store
+  virtual std::string type() const = 0;
+
   /// Called by InitReporterAction via ReporterData
   virtual void init() = 0;
 
@@ -42,6 +48,19 @@ public:
 
   /// Called by FEProblemBase::advanceState via ReporterData
   virtual void performAutoFinalizeOperations() = 0;
+
+  /// Called by ReporterData::store to envoke storage of values for output
+  ///
+  /// This method exists and is distinct from the RestartableData::store method for JSON output
+  /// via the JSONOutput object. The RestartableData::store/load methods are designed for restart
+  /// and include all the data including the old values.
+  ///
+  /// This method only outputs the current value along with other information within the JSONOutput
+  /// object.
+  ///
+  /// @see JsonIO.h
+  /// @see JSONOutput.h
+  virtual void store(nlohmann::json & json) const = 0;
 
   /// Called by FEProblemBase::joinAndFinalize via ReporterData
   virtual void finalize() = 0; // new ReporterContext objects should be override
@@ -80,6 +99,8 @@ private:
   virtual void init() final;
   virtual void copyValuesBack() final;
   virtual void performAutoFinalizeOperations() final;
+  virtual void store(nlohmann::json & json) const final;
+  virtual std::string type() const final;
   friend class ReporterData;
 };
 
@@ -186,6 +207,20 @@ ReporterContext<T>::copyValuesBack()
 
   if (old_values.size() > 0)
     old_values[0] = value;
+}
+
+template <typename T>
+void
+ReporterContext<T>::store(nlohmann::json & json) const
+{
+  storeHelper(json, this->_state.get().first);
+}
+
+template <typename T>
+std::string
+ReporterContext<T>::type() const
+{
+  return demangle(typeid(T).name());
 }
 
 /**

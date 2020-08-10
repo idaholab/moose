@@ -125,6 +125,13 @@ public:
    */
   void init();
 
+  /**
+   * Writes all Reporter values to the supplied JSON node for output to a file.
+   *
+   * @see JSONOutput
+   */
+  void store(nlohmann::json & json) const;
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;

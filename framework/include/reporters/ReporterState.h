@@ -90,8 +90,10 @@ public:
   const std::set<std::pair<Moose::ReporterMode, std::string>> & getConsumerModes() const;
 
 private:
+  // This is mutable because the value() method increments it, but in practice th value() method
+  // should be const, since retrieving the data should not change it.
   /// Tracking of the largest desired old value
-  std::size_t _max_requested_time_index = 0;
+  mutable std::size_t _max_requested_time_index = 0;
 
   /// Name of data that state is associated
   const ReporterName _reporter_name;

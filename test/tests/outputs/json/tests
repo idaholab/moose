@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#11323'
+  design = 'JSONOutput.md'
+  [parallel]
+    type = RunApp
+    input = json.i
+
+    requirement = "The system shall support JSON output for data."
+  []
+[]
