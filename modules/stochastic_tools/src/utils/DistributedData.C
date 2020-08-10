@@ -26,8 +26,9 @@ void
 DistributedData<T>::initializeContainer(unsigned int n_global_entries)
 {
   // This function can be used when a linear partitioning is required and the
-  // number of global samples is known in advance. Need to do conversion because of
-  // because of 64 bit dof indices.
+  // number of global samples is known in advance. We must temporarily
+  // use dof_id_type for the last three args (pass by reference),
+  // but will cast back to unsigned int later
   dof_id_type local_entry_begin;
   dof_id_type local_entry_end;
   dof_id_type n_local_entries;
