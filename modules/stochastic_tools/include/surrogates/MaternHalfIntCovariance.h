@@ -37,10 +37,15 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const override;
 
+  /// Used for setting Hyper-parameter settings
+  void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
+                         std::unordered_map<std::string, std::vector<Real>> & vec_map) override;
+
   /// Redirect dK/dhp for hyperparameter "hp"
   void computedKdhyper(RealEigenMatrix & dKdhp,
                        const RealEigenMatrix & x,
-                       unsigned int hyper_param_id) const override;
+                       std::string hyper_param_name,
+                       unsigned int ind) const override;
 
   /// Computes dK/dlf for individual length factors
   static void computedKdlf(RealEigenMatrix & K,
@@ -49,15 +54,6 @@ public:
                            const Real sigma_f_squared,
                            const unsigned int p,
                            const int ind);
-  /// Builds a Petsc Vector of hyperparameters (used for initial condition)
-  void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const override;
-
-  /// Builds a Petsc Vector of hyperparameters bounds
-  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                             libMesh::PetscVector<Number> & theta_u) const override;
-
-  /// Loads a Petsc Vector into hyperparam variables
-  void loadHyperParamVec(libMesh::PetscVector<Number> & theta) override;
 
 private:
   /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
@@ -71,7 +67,4 @@ private:
 
   /// non-negative p factor for use in Matern half-int. \nu = p+(1/2) in terms of general Matern
   unsigned int _p;
-
-  /// Contains tuning inforation. Idex of hyperparam, along with min/max bounds
-  std::unordered_map<std::string, std::tuple<unsigned int, Real, Real>> _tuning_data;
 };

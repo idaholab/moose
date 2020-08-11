@@ -38,43 +38,44 @@ ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
     _sigma_n_squared(getParam<Real>("noise_variance")),
     _gamma(getParam<Real>("gamma"))
 {
-  _num_tunable = 0;
-  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-  // Error Checking
-  if (isParamValid("tuning_min") &&
-      (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
-    ::mooseError("tuning_min size does not match tune_parameters");
-  if (isParamValid("tuning_max") &&
-      (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
-    ::mooseError("tuning_max size does not match tune_parameters");
-  // Fill Out Tunable Paramater information
-  for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
-  {
-    const auto & hp = tune_parameters[ii];
-    if (!isParamValid(hp))
-      ::mooseError("Parameter ", hp, " selected for tuning is not a valid parameter");
-    if ((hp == "noise_variance") || (hp == "signal_variance"))
-    {
-      // For Scalar Hyperparameters
-      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
-      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
-                                          : PETSC_INFINITY);
-      _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
-      _num_tunable++;
-    }
-    else if (hp == "length_factor")
-    {
-      // For Vector Hyperparameters
-      int vec_size = getParam<std::vector<Real>>("length_factor").size();
-      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
-      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
-                                          : PETSC_INFINITY);
-      _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
-      _num_tunable += vec_size;
-    }
-    else
-      ::mooseError("Tuning not supported for parameter ", hp);
-  }
+  // _num_tunable = 0;
+  // std::vector<std::string>
+  // tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  // // Error Checking
+  // if (isParamValid("tuning_min") &&
+  //     (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
+  //   ::mooseError("tuning_min size does not match tune_parameters");
+  // if (isParamValid("tuning_max") &&
+  //     (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
+  //   ::mooseError("tuning_max size does not match tune_parameters");
+  // // Fill Out Tunable Paramater information
+  // for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
+  // {
+  //   const auto & hp = tune_parameters[ii];
+  //   if (!isParamValid(hp))
+  //     ::mooseError("Parameter ", hp, " selected for tuning is not a valid parameter");
+  //   if ((hp == "noise_variance") || (hp == "signal_variance"))
+  //   {
+  //     // For Scalar Hyperparameters
+  //     Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] :
+  //     1e-9); Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+  //                                         : PETSC_INFINITY);
+  //     _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
+  //     _num_tunable++;
+  //   }
+  //   else if (hp == "length_factor")
+  //   {
+  //     // For Vector Hyperparameters
+  //     int vec_size = getParam<std::vector<Real>>("length_factor").size();
+  //     Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] :
+  //     1e-9); Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+  //                                         : PETSC_INFINITY);
+  //     _tuning_data[hp] = std::make_tuple(_num_tunable, min, max);
+  //     _num_tunable += vec_size;
+  //   }
+  //   else
+  //     ::mooseError("Tuning not supported for parameter ", hp);
+  // }
 }
 
 void
@@ -90,74 +91,15 @@ ExponentialCovariance::buildHyperParamMap(
 }
 
 void
-ExponentialCovariance::buildHyperParamVec(libMesh::PetscVector<Number> & theta) const
+ExponentialCovariance::loadHyperParamMap(
+    std::unordered_map<std::string, Real> & map,
+    std::unordered_map<std::string, std::vector<Real>> & vec_map)
 {
-  auto iter = _tuning_data.find("noise_variance");
-  if (iter != _tuning_data.end())
-    theta.set(std::get<0>(iter->second), _sigma_n_squared);
+  _sigma_n_squared = map["noise_variance"];
+  _sigma_f_squared = map["signal_variance"];
+  _gamma = map["gamma"];
 
-  iter = _tuning_data.find("signal_variance");
-  if (iter != _tuning_data.end())
-    theta.set(std::get<0>(iter->second), _sigma_f_squared);
-
-  iter = _tuning_data.find("length_factor");
-  if (iter != _tuning_data.end())
-  {
-    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
-    {
-      theta.set(std::get<0>(iter->second) + ii, _length_factor[ii]);
-    }
-  }
-}
-
-void
-ExponentialCovariance::buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                                             libMesh::PetscVector<Number> & theta_u) const
-{
-  auto iter = _tuning_data.find("noise_variance");
-  if (iter != _tuning_data.end())
-  {
-    theta_l.set(std::get<0>(iter->second), std::get<1>(iter->second));
-    theta_u.set(std::get<0>(iter->second), std::get<2>(iter->second));
-  }
-
-  iter = _tuning_data.find("signal_variance");
-  if (iter != _tuning_data.end())
-  {
-    theta_l.set(std::get<0>(iter->second), std::get<1>(iter->second));
-    theta_u.set(std::get<0>(iter->second), std::get<2>(iter->second));
-  }
-
-  iter = _tuning_data.find("length_factor");
-  if (iter != _tuning_data.end())
-  {
-    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
-    {
-      theta_l.set(std::get<0>(iter->second) + ii, std::get<1>(iter->second));
-      theta_u.set(std::get<0>(iter->second) + ii, std::get<2>(iter->second));
-    }
-  }
-}
-
-void
-ExponentialCovariance::loadHyperParamVec(libMesh::PetscVector<Number> & theta)
-{
-  auto iter = _tuning_data.find("noise_variance");
-  if (iter != _tuning_data.end())
-    _sigma_n_squared = theta(std::get<0>(iter->second));
-
-  iter = _tuning_data.find("signal_variance");
-  if (iter != _tuning_data.end())
-    _sigma_f_squared = theta(std::get<0>(iter->second));
-
-  iter = _tuning_data.find("length_factor");
-  if (iter != _tuning_data.end())
-  {
-    for (unsigned int ii = 0; ii < _length_factor.size(); ++ii)
-    {
-      _length_factor[ii] = theta(std::get<0>(iter->second) + ii);
-    }
-  }
+  _length_factor = vec_map["length_factor"];
 }
 
 void
@@ -206,27 +148,17 @@ ExponentialCovariance::ExponentialFunction(RealEigenMatrix & K,
 void
 ExponentialCovariance::computedKdhyper(RealEigenMatrix & dKdhp,
                                        const RealEigenMatrix & x,
-                                       unsigned int hyper_param_id) const
+                                       std::string hyper_param_name,
+                                       unsigned int ind) const
 {
-  auto iter = _tuning_data.find("noise_variance");
-  if (iter != _tuning_data.end() && hyper_param_id == std::get<0>(iter->second))
+  if (hyper_param_name == "noise_variance")
     ExponentialFunction(dKdhp, x, x, _length_factor, 0, 1, _gamma, true);
 
-  iter = _tuning_data.find("signal_variance");
-  if (iter != _tuning_data.end() && hyper_param_id == std::get<0>(iter->second))
+  if (hyper_param_name == "signal_variance")
     ExponentialFunction(dKdhp, x, x, _length_factor, 1, 0, _gamma, false);
 
-  iter = _tuning_data.find("length_factor");
-  if (iter != _tuning_data.end() && hyper_param_id >= std::get<0>(iter->second) &&
-      hyper_param_id < std::get<0>(iter->second) + _length_factor.size())
-  {
-    computedKdlf(dKdhp,
-                 x,
-                 _length_factor,
-                 _sigma_f_squared,
-                 _gamma,
-                 hyper_param_id - std::get<0>(iter->second));
-  }
+  if (hyper_param_name == "length_factor")
+    computedKdlf(dKdhp, x, _length_factor, _sigma_f_squared, _gamma, ind);
 }
 
 void

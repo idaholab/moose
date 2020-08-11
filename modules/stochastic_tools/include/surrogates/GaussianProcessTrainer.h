@@ -32,12 +32,20 @@ public:
 
   int hyperparamOptimize();
 
-  static PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
+  PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
 
   static PetscErrorCode
   FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
 
   void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
+
+  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                             libMesh::PetscVector<Number> & theta_u) const;
+  // write stored hyperparam_vecs to PetscVec
+  void mapToVec(libMesh::PetscVector<Number> & theta) const;
+
+  // loads PetscVec to stored hyperparam_vecs
+  void vecToMap(libMesh::PetscVector<Number> & theta);
 
 private:
   /// Sampler from which the parameters were perturbed
@@ -99,4 +107,9 @@ private:
 
   /// Flag to toggle printing of TAO output
   bool _show_tao;
+
+  /// Contains tuning inforation. Idex of hyperparam, size, and min/max bounds
+  std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
+
+  unsigned int _num_tunable = 0;
 };

@@ -45,6 +45,10 @@ GaussianProcessTrainer::validParams()
   params.addParam<std::string>(
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>("show_tao", false, "Switch to show TAO solver results");
+  params.addParam<std::vector<std::string>>("tune_parameters",
+                                            "Select hyperparameters to be tuned");
+  params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
+  params.addParam<std::vector<Real>>("tuning_max", "Maximum allowable tuning value");
   return params;
 }
 
@@ -70,6 +74,43 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _show_tao(getParam<bool>("show_tao"))
 
 {
+  _num_tunable = 0;
+  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
+  // Error Checking
+  if (isParamValid("tuning_min") &&
+      (getParam<std::vector<Real>>("tuning_min").size() != tune_parameters.size()))
+    ::mooseError("tuning_min size does not match tune_parameters");
+  if (isParamValid("tuning_max") &&
+      (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
+    ::mooseError("tuning_max size does not match tune_parameters");
+  // Fill Out Tunable Paramater information
+  for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
+  {
+    const auto & hp = tune_parameters[ii];
+    if (!_covariance_function->isParamValid(hp))
+      ::mooseError("Parameter ", hp, " selected for tuning is not a valid parameter");
+    if ((hp == "noise_variance") || (hp == "signal_variance"))
+    {
+      // For Scalar Hyperparameters
+      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
+      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+                                          : PETSC_INFINITY);
+      _tuning_data[hp] = std::make_tuple(_num_tunable, 1, min, max);
+      _num_tunable++;
+    }
+    else if (hp == "length_factor")
+    {
+      // For Vector Hyperparameters
+      int vec_size = _covariance_function->getParam<std::vector<Real>>("length_factor").size();
+      Real min(isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : 1e-9);
+      Real max(isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii]
+                                          : PETSC_INFINITY);
+      _tuning_data[hp] = std::make_tuple(_num_tunable, vec_size, min, max);
+      _num_tunable += vec_size;
+    }
+    else
+      ::mooseError("Tuning not supported for parameter ", hp);
+  }
 }
 
 void
@@ -192,7 +233,9 @@ Vec theta_vec, lower_vec, upper_vec;
 Tao tao;
 GaussianProcessTrainer * GP_ptr = this;
 
-int num_hyper_params = _covariance_function->getNumTunable();
+// int num_hyper_params = _covariance_function->getNumTunable();
+
+std::cout << "Tunable= " << _num_tunable << '\n';
 
 // Setup Tao optimization problem
 ierr = TaoCreate(PETSC_COMM_WORLD, &tao);
@@ -207,7 +250,7 @@ CHKERRQ(ierr);
 
 // Define petsc vetor to hold tunalbe hyper-params
 VecCreate(PETSC_COMM_WORLD, &theta_vec);
-VecSetSizes(theta_vec, PETSC_DECIDE, num_hyper_params);
+VecSetSizes(theta_vec, PETSC_DECIDE, _num_tunable);
 VecSetFromOptions(theta_vec);
 VecSet(theta_vec, 0);
 libMesh::PetscVector<Number> theta(theta_vec, _communicator);
@@ -221,7 +264,7 @@ VecDuplicate(theta_vec, &lower_vec);
 VecDuplicate(theta_vec, &upper_vec);
 libMesh::PetscVector<Number> lower(lower_vec, _communicator);
 libMesh::PetscVector<Number> upper(upper_vec, _communicator);
-_covariance_function->buildHyperParamBounds(lower, upper);
+buildHyperParamBounds(lower, upper);
 CHKERRQ(ierr);
 ierr = TaoSetVariableBounds(tao, lower_vec, upper_vec);
 CHKERRQ(ierr);
@@ -241,7 +284,7 @@ if (_show_tao)
   theta.print();
 }
 
-_covariance_function->loadHyperParamVec(theta);
+_covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 VecDestroy(&theta_vec);
 VecDestroy(&lower_vec);
 VecDestroy(&upper_vec);
@@ -257,7 +300,9 @@ PetscErrorCode
 GaussianProcessTrainer::FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta_vec)
 {
   libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_communicator);
-  GP_ptr->_covariance_function->buildHyperParamVec(theta);
+  // GP_ptr->_covariance_function->buildHyperParamVec(theta);
+  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  mapToVec(theta);
   return 0;
 }
 
@@ -279,20 +324,24 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
   libMesh::PetscVector<Number> theta(theta_vec, _communicator);
   libMesh::PetscVector<Number> grad(grad_vec, _communicator);
 
-  _covariance_function->loadHyperParamVec(theta);
+  vecToMap(theta);
+  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(_training_data);
 
   // testing auto tuning
-  int num_hyper_params = _covariance_function->getNumTunable();
   RealEigenMatrix dKdhp(_training_params.rows(), _training_params.rows());
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
-  for (int ii = 0; ii < num_hyper_params; ++ii)
+  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
-    _covariance_function->computedKdhyper(dKdhp, _training_params, ii);
-    RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-    grad.set(ii, -tmp.trace() / 2.0);
+    std::string hyper_param_name = iter->first;
+    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    {
+      _covariance_function->computedKdhyper(dKdhp, _training_params, hyper_param_name, ii);
+      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
+      grad.set(std::get<0>(iter->second) + ii, -tmp.trace() / 2.0);
+    }
   }
   //
   Real log_likelihood = 0;
@@ -302,4 +351,75 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
   log_likelihood = -log_likelihood / 2;
   // std::cout << log_likelihood << '\n';
   *f = log_likelihood;
+}
+
+void
+GaussianProcessTrainer::buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
+                                              libMesh::PetscVector<Number> & theta_u) const
+{
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
+  {
+    theta_l.set(std::get<0>(iter->second), std::get<2>(iter->second));
+    theta_u.set(std::get<0>(iter->second), std::get<3>(iter->second));
+  }
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+  {
+    theta_l.set(std::get<0>(iter->second), std::get<2>(iter->second));
+    theta_u.set(std::get<0>(iter->second), std::get<3>(iter->second));
+  }
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
+  {
+    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    {
+      theta_l.set(std::get<0>(iter->second) + ii, std::get<2>(iter->second));
+      theta_u.set(std::get<0>(iter->second) + ii, std::get<3>(iter->second));
+    }
+  }
+}
+
+void
+GaussianProcessTrainer::mapToVec(libMesh::PetscVector<Number> & theta) const
+{
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
+    theta.set(std::get<0>(iter->second), _hyperparam_map["noise_variance"]);
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+    theta.set(std::get<0>(iter->second), _hyperparam_map["signal_variance"]);
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
+  {
+    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    {
+      theta.set(std::get<0>(iter->second) + ii, _hyperparam_vec_map["length_factor"][ii]);
+    }
+  }
+}
+
+void
+GaussianProcessTrainer::vecToMap(libMesh::PetscVector<Number> & theta)
+{
+  auto iter = _tuning_data.find("noise_variance");
+  if (iter != _tuning_data.end())
+    _hyperparam_map["noise_variance"] = theta(std::get<0>(iter->second));
+
+  iter = _tuning_data.find("signal_variance");
+  if (iter != _tuning_data.end())
+    _hyperparam_map["signal_variance"] = theta(std::get<0>(iter->second));
+
+  iter = _tuning_data.find("length_factor");
+  if (iter != _tuning_data.end())
+  {
+    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
+    {
+      _hyperparam_vec_map["length_factor"][ii] = theta(std::get<0>(iter->second) + ii);
+    }
+  }
 }

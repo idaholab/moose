@@ -32,19 +32,15 @@ public:
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
                      std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
 
-  virtual void computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                               const RealEigenMatrix & /*x*/,
-                               unsigned int /*hyper_param_id*/) const {};
+  /// Used for outputting Hyper-parameter settings for use in surrogate
+  virtual void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
+                                 std::unordered_map<std::string, std::vector<Real>> & vec_map) = 0;
 
-  virtual unsigned int getNumTunable() const { return _num_tunable; };
-
-  virtual void buildHyperParamVec(libMesh::PetscVector<Number> & theta) const = 0;
-
-  virtual void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                                     libMesh::PetscVector<Number> & theta_u) const = 0;
-
-  virtual void loadHyperParamVec(libMesh::PetscVector<Number> & theta) = 0;
+  /// Redirect dK/dhp for hyperparameter "hp"
+  virtual void computedKdhyper(RealEigenMatrix & dKdhp,
+                               const RealEigenMatrix & x,
+                               std::string hyper_param_name,
+                               unsigned int ind) const {};
 
 protected:
-  unsigned int _num_tunable = 0;
 };
