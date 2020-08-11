@@ -1,0 +1,10 @@
+[Tests]
+#  issues = "#15361"
+  design = "NeuralNetworkIC.md"
+  requirement = 'The system shall demonstrate a neural network surrogate by '
+  [neural_net_ic]
+    type = Exodiff
+    input = neural_net_ic.i
+    exodiff = neural_net_ic_test.e
+  []
+[]
