@@ -14,8 +14,6 @@
 
 [GlobalParams]
   profile=TANH
-  # op_num = 1
-  # var_name_base = eta
 []
 
 [UserObjects]
@@ -28,40 +26,27 @@
 [Variables]
   #COMPONENT #1
   [./c_Ni]
-    # scaling = 1
   [../]
   [./c_Ni_metal]
-    # scaling = 1
   [../]
   [./c_Ni_melt]
-    # scaling = 1
   [../]
   [./w_Ni]
-    # scaling = 1e-11
   [../]
 
   #COMPONENT #2
   [./c_Cr]
-    # scaling = 1
   [../]
   [./c_Cr_metal]
-    # scaling = 1
   [../]
   [./c_Cr_melt]
-    # scaling = 1
   [../]
   [./w_Cr]
-    # scaling = 1e-11
   [../]
   [./eta] #represents the metal phase
-  # scaling = 1
   [../]
 []
 
-[AuxVariables]
-
-
-[]
 
 [Kernels]
   #COMPONENT #1
@@ -165,7 +150,6 @@
     ca       = c_Ni_melt
     cb       = c_Ni_metal
     fa_name  = f_melt
-    # fb_name  = fd
     h_name = h_metal
     mob_name = L
     args = 'c_Ni_melt c_Ni_metal c_Cr_metal c_Cr_melt'
@@ -176,7 +160,6 @@
     ca       = c_Cr_melt
     cb       = c_Cr_metal
     fa_name  = f_melt
-    # fb_name  = fd
     h_name = h_metal
     mob_name = L
     args = 'c_Cr_melt c_Cr_metal c_Ni_metal c_Ni_melt'
@@ -187,7 +170,6 @@
     variable = eta
     kappa_name = kappa
     mob_name = L
-    # args = 'c_Ni_melt c_Ni_metal c_Cr_metal c_Cr_melt'
   [../]
   [./detadt]
     type = TimeDerivative
@@ -238,7 +220,7 @@
     outvalue = '0.0'
   [../]
 
-#Ni INITIAL CONDITIONS
+##Ni INITIAL CONDITIONS
   [./c_global_inital]
       type = SmoothCircleIC
       variable = 'c_Ni'
@@ -246,21 +228,20 @@
       x1 = 0
       y1 = 0
       radius = 100
-      invalue = '0.8'
-      outvalue = 0.02#'0.003342064232754377'
+      invalue = 0.8
+      outvalue = 0.02
     [../]
-# #Cr INITIAL CONDITIONS
-[./c_Cr_global_inital]
-    type = SmoothCircleIC
-    variable = 'c_Cr'
-    int_width = 20
-    x1 = 0
-    y1 = 0
-    radius = 100
-    invalue = '0.19'
-    outvalue = 0.003
-  [../]
-
+##Cr INITIAL CONDITIONS
+  [./c_Cr_global_inital]
+      type = SmoothCircleIC
+      variable = 'c_Cr'
+      int_width = 20
+      x1 = 0
+      y1 = 0
+      radius = 100
+      invalue = '0.19'
+      outvalue = 0.003
+    [../]
 []
 
 [Materials]
@@ -288,7 +269,7 @@
       function = '6*interface_energy_sigma/interface_thickness_l'
     [../]
 
-        #SWITCHING FUNCTIONS
+    #SWITCHING FUNCTIONS
     [./h_metal]
       type = SwitchingFunctionMaterial
       function_name = 'h_metal'
@@ -393,9 +374,8 @@
   automatic_scaling = true
   compute_scaling_once = false
   scaling_group_variables = 'eta'
-  # scaling_group_variables = ' w_Ni w_Cr; eta'
-  dtmax = 0.05#500.0
-  end_time = 1#8.6e4
+  dtmax = 0.05
+  end_time = 1
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e-2
@@ -404,9 +384,6 @@
     growth_factor = 1.1
     cutback_factor = 0.8
   [../]
-  # num_steps = 1
-
-  # num_steps = 0
 []
 [Postprocessors]
   [./elapsed]

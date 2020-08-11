@@ -9,7 +9,6 @@
   ny   = 1
   ymax = 1000
   uniform_refine = 5
-
 []
 
 [GlobalParams]
@@ -38,11 +37,6 @@
   [../]
   [./eta]
   [../]
-[]
-
-[AuxVariables]
-
-
 []
 
 [Kernels]
@@ -147,7 +141,6 @@
     ca       = c_Ni_melt
     cb       = c_Ni_metal
     fa_name  = f_melt
-    # fb_name  = fd
     h_name = h_metal
     mob_name = L
     args = 'c_Ni_melt c_Ni_metal c_Cr_metal c_Cr_melt'
@@ -158,7 +151,6 @@
     ca       = c_Cr_melt
     cb       = c_Cr_metal
     fa_name  = f_melt
-    # fb_name  = fd
     h_name = h_metal
     mob_name = L
     args = 'c_Cr_melt c_Cr_metal c_Ni_metal c_Ni_melt'
@@ -169,7 +161,6 @@
     variable = eta
     kappa_name = kappa
     mob_name = L
-    # args = 'c_Ni_melt c_Ni_metal c_Cr_metal c_Cr_melt'
   [../]
   [./detadt]
     type = TimeDerivative
@@ -222,38 +213,37 @@
     outvalue = 0.02
   [../]
 
-#Cr INITIAL CONDITIONS
-[./c_Cr_global_inital]
+  #Cr INITIAL CONDITIONS
+  [./c_Cr_global_inital]
+      type = SmoothCircleIC
+      variable = 'c_Cr'
+      int_width = 20
+      x1 = 0
+      y1 = 0
+      radius = 100
+      invalue = '0.19'
+      outvalue = 0.003
+    [../]
+  [./c_Cr_metal_inital]
     type = SmoothCircleIC
-    variable = 'c_Cr'
+    variable = 'c_Cr_metal'
     int_width = 20
     x1 = 0
     y1 = 0
     radius = 100
     invalue = '0.19'
+    outvalue = '8e-4'
+  [../]
+  [./c_Cr_melt_inital]
+    type = SmoothCircleIC
+    variable = 'c_Cr_melt'
+    int_width = 20
+    x1 = 0
+    y1 = 0
+    radius = 100
+    invalue = 0.042
     outvalue = 0.003
   [../]
-[./c_Cr_metal_inital]
-  type = SmoothCircleIC
-  variable = 'c_Cr_metal'
-  int_width = 20
-  x1 = 0
-  y1 = 0
-  radius = 100
-  invalue = '0.19'
-  outvalue = '8e-4'
-[../]
-[./c_Cr_melt_inital]
-  type = SmoothCircleIC
-  variable = 'c_Cr_melt'
-  int_width = 20
-  x1 = 0
-  y1 = 0
-  radius = 100
-  invalue = 0.042
-  outvalue = 0.003
-[../]
-
 
 []
 
@@ -282,7 +272,7 @@
       function = '6*interface_energy_sigma/interface_thickness_l'
     [../]
 
-        #SWITCHING FUNCTIONS
+    #SWITCHING FUNCTIONS
     [./h_metal]
       type = SwitchingFunctionMaterial
       function_name = 'h_metal'
@@ -363,8 +353,6 @@
       outputs = 'exodus'
       derivative_order = 2
     [../]
-
-
 []
 
 [Preconditioning]
@@ -389,7 +377,6 @@
   scaling_group_variables = 'eta'
   dtmax = 0.05
   end_time = 1
-  # num_steps = 1
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e-2
