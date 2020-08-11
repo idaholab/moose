@@ -1,13 +1,17 @@
 [Tests]
-  [./exodiff]
+  [exodiff]
     type = Exodiff
     input = exodiff.i
     exodiff = exodiff_out.e
-  [../]
-
-  [./csvdiff]
+  []
+  [csvdiff]
     type = CSVDiff
     input = csvdiff.i
     csvdiff = csvdiff_out.csv
-  [../]
+  []
+  [jsondiff]
+    type = JSONDiff
+    input = jsondiff.i
+    jsondiff = jsondiff_out.json
+  []
 []

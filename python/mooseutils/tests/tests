@@ -67,5 +67,12 @@
     input = test_find_moose_executable.py
     issues = "#15996"
     requirement = "The system shall include a utility running an executable."
+  [jsondiff]
+    type = PythonUnitTest
+    input = test_jsondiff.py
+    required_python_packages = deepdiff
+
+    requirement = "MOOSE python utilities shall include a tool for reading comparing JSON files."
+    issues = '#11323'
   []
 []
