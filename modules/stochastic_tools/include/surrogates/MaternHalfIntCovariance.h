@@ -56,14 +56,6 @@ public:
                            const int ind);
 
 private:
-  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
-  std::vector<Real> _length_factor;
-
-  /// signal variance (\sigma_f^2)
-  Real _sigma_f_squared;
-
-  /// noise variance (\sigma_n^2)
-  Real _sigma_n_squared;
 
   /// non-negative p factor for use in Matern half-int. \nu = p+(1/2) in terms of general Matern
   unsigned int _p;

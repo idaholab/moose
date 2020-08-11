@@ -30,15 +30,19 @@ public:
 
   CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
-  int hyperparamOptimize();
+  // Routine to perform hyperparameter tuning
+  int hyperparamTuning();
 
   PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
 
+  // Wrapper for PETSc function callback
   static PetscErrorCode
   FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
 
+  // Computes Gradient of the loss function
   void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
 
+  // Sets bounds for hyperparameters
   void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
                              libMesh::PetscVector<Number> & theta_u) const;
   // write stored hyperparam_vecs to PetscVec
@@ -99,17 +103,18 @@ private:
   /// Covariance function object
   CovarianceFunctionBase * _covariance_function = nullptr;
 
-  /// Flag to toggle hyperparameter optimization
-  bool _optimize;
+  /// Flag to toggle hyperparameter tuning/optimization
+  bool _do_tuning;
 
-  /// Command line options to fead to TAO optimization
+  /// Command line options to feed to TAO optimization
   std::string _tao_options;
 
   /// Flag to toggle printing of TAO output
   bool _show_tao;
 
-  /// Contains tuning inforation. Idex of hyperparam, size, and min/max bounds
+  /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
 
-  unsigned int _num_tunable = 0;
+  /// Number of tunable hyperparameters
+  unsigned int _num_tunable;
 };

@@ -30,17 +30,35 @@ public:
   /// Used for outputting Hyper-parameter settings
   virtual void
   buildHyperParamMap(std::unordered_map<std::string, Real> & map,
-                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const = 0;
+                     std::unordered_map<std::string, std::vector<Real>> & vec_map) const;
 
   /// Used for outputting Hyper-parameter settings for use in surrogate
   virtual void loadHyperParamMap(std::unordered_map<std::string, Real> & map,
-                                 std::unordered_map<std::string, std::vector<Real>> & vec_map) = 0;
+                                 std::unordered_map<std::string, std::vector<Real>> & vec_map);
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  virtual void computedKdhyper(RealEigenMatrix & dKdhp,
-                               const RealEigenMatrix & x,
-                               std::string hyper_param_name,
-                               unsigned int ind) const {};
+  virtual void computedKdhyper(RealEigenMatrix & /*dKdhp*/,
+                               const RealEigenMatrix & /*x*/,
+                               std::string /*hyper_param_name*/,
+                               unsigned int /*ind*/) const {};
+
+  virtual bool isTunable(std::string /*name*/) const;
+
+  virtual void getTuningData(std::string /*name*/,
+                             unsigned int & /*size*/,
+                             Real & /*min*/,
+                             Real & /*max*/) const;
 
 protected:
+  /// lengh factor (\ell) for the kernel, in vector form for multiple parameters
+  std::vector<Real> _length_factor;
+
+  /// signal variance (\sigma_f^2)
+  Real _sigma_f_squared;
+
+  /// noise variance (\sigma_n^2)
+  Real _sigma_n_squared;
+
+  /// list of tunable hyper-parameters
+  std::unordered_set<std::string> _tunable_hp;
 };
