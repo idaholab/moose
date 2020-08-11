@@ -140,6 +140,7 @@ The PolynomialChaos user object takes in a list of distributions and constructs 
 ## Example Input File Syntax
 
 The example involves a homogeneous, one-dimensional diffusion-reaction problem, where the diffusion coefficient ($D$) and reaction coefficient ($\Sigma$) are uncertain with a uniform probability:
+
 !equation
 -D\frac{d^2u}{dx^2} + \Sigma u = Q ,
 

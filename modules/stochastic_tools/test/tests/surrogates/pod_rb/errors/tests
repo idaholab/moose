@@ -1,0 +1,84 @@
+[Tests]
+  issues = "#15538"
+  [multiapp]
+    requirement = 'PODFullSolveMultiapp shall throw an error when '
+    design = "PODFullSolveMultiApp.md"
+    [trainer_name]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'MultiApps/sub/trainer_name="doesnt_exist"'
+      detail = 'the trainer object cannot be found.'
+      expect_err = "Unable to find user object with name 'doesnt_exist'"
+    []
+  []
+  [solution_transfer]
+    requirement = 'PODSamplerSolutionTransfer shall throw an error when '
+    design = "PODSamplerSolutionTransfer.md"
+    [trainer_name]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Transfers/snapshot/trainer_name="doesnt_exist"'
+      detail = 'the trainer object cannot be found.'
+      expect_err = "Unable to find user object with name 'doesnt_exist'"
+    []
+  []
+  [trainer]
+    requirement = 'PODReducedBasisTrainer shall throw an error when '
+    design = "PODReducedBasisTrainer.md PODResidualTransfer.md PODSamplerSolutionTransfer.md"
+    [var_names]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/var_names='doesnt_exist'"
+      detail = 'the variable names cannot be found on sub-applications, '
+      expect_err = "Variable 'doesnt_exist' not found on sub-application [0-9]+!"
+    []
+    [en_limits]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = "Trainers/pod_rb/error_res='1e-2 1e-3'"
+      detail = 'the number of energy limits and variable names do not match, '
+      expect_err = "The number of elements is not equal to the number of elements in 'var_names'!"
+    []
+    [tag_types]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Trainers/pod_rb/tag_types="op"'
+      detail = 'the number of tag names and tag types do not match, '
+      expect_err = "The number of elements is not equal to the number of elements in 'tag_names'!"
+    []
+    [dir_tag_names]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Trainers/pod_rb/tag_types="doesnt_exist doesnt_exist doesnt_exist"'
+      detail = "the Dirichlet tag types do not exist, "
+      expect_err = "Tag type 'doesnt_exist' is not valid, available names are: op, op_dir, src, src_dir"
+    []
+    [wrong_res_transfer]
+      type = RunException
+      input = trainer.i
+      allow_test_objects = true
+      cli_args = 'Trainers/pod_rb/execute_on="final"'
+      detail = 'and the residual generation is called before having the basis vectors.'
+      expect_err = "There are no basis vectors available for residual generation. This indicates that the bases have not been created yet. The most common cause of this error is the wrong setting of the 'execute_on' flags in the PODFullSolveMultiApp and/or PODReducedBasisTrainer."
+      match_literal = true
+    []
+  []
+  [surrogate]
+    requirement = 'PODReducedBasisSurrogate shall throw an error when '
+    design = "PODReducedBasisSurrogate.md"
+    [var_name]
+      type = RunException
+      input = trainer_and_surr.i
+      allow_test_objects = true
+      cli_args = "Surrogates/rbpod/change_rank='doesnt_exist'"
+      detail = "the number of inputs in 'change_rank' and 'new_ranks' is not the same."
+      expect_err = "The size of 'new_ranks' is not equal to the size of 'change_rank' 0 != 1"
+    []
+  []
+[]

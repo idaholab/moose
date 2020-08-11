@@ -14,7 +14,6 @@
 #include "DataIO.h"
 #include "Uniform.h"
 #include "Normal.h"
-#include "BoostNormal.h"
 #include "CartesianProduct.h"
 
 /**

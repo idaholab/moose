@@ -42,6 +42,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+  error_on_dtmin = false
 []
 
 [Controls]

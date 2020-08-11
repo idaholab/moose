@@ -28,6 +28,10 @@ SamplerReceiver::SamplerReceiver(const InputParameters & parameters) : Control(p
 void
 SamplerReceiver::execute()
 {
+  // Send parameters from root
+  _communicator.allgather(_parameters);
+  _communicator.allgather(_values);
+
   std::size_t value_position = 0;
 
   // Loop through all the parameters and set the controllable values for each parameter.
@@ -97,6 +101,13 @@ SamplerReceiver::execute()
                ") does not match the number of values consumed by setting parameter values (",
                value_position,
                ").");
+
+  // Clear parameters that aren't on root processor (to avoid duplication of allgather)
+  if (processor_id() != 0)
+  {
+    _parameters.clear();
+    _values.clear();
+  }
 }
 
 void

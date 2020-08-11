@@ -53,7 +53,18 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
 
 {
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+  {
+    if (n_processors() > _sampler.getNumberOfRows())
+      paramError(
+          "mode",
+          "There appears to be more available processors (",
+          n_processors(),
+          ") than samples (",
+          _sampler.getNumberOfRows(),
+          "), this is not supported in "
+          "batch mode. Consider switching to \'normal\' to allow multiple processors per sample.");
     init(n_processors());
+  }
   else if (_mode == StochasticTools::MultiAppMode::NORMAL)
     init(_sampler.getNumberOfRows());
   else

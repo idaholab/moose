@@ -24,6 +24,7 @@
     strain = FINITE
     add_variables = true
     use_automatic_differentiation = true
+    generate_output = vonmises_stress
   [../]
 []
 
@@ -45,6 +46,7 @@
     variable = disp_x
     component = 0
     boundary = right
+    function = t
     constant = 3.1675e5
   [../]
   [./pressure_y]
@@ -52,6 +54,7 @@
     variable = disp_y
     component = 1
     boundary = top
+    function = t
     constant = 6.336e5
   [../]
 []
@@ -69,8 +72,8 @@
   [./rom_stress_prediction]
     type = SS316HLAROMANCEStressUpdateTest
     temperature = temperature
-    initial_mobile_dislocation_density = 6.0e12
-    initial_immobile_dislocation_density = 4.4e11
+    initial_cell_dislocation_density = 6.0e12
+    initial_wall_dislocation_density = 4.4e11
     outputs = all
   [../]
 []
@@ -85,6 +88,7 @@
   compute_scaling_once = false
 
   num_steps = 5
+  dt = 2
 []
 
 [Postprocessors]
@@ -96,13 +100,17 @@
     type = ElementAverageValue
     variable = temperature
   [../]
-  [./mobile_dislocations]
+  [./cell_dislocations]
     type = ElementAverageValue
-    variable = mobile_dislocations
+    variable = cell_dislocations
   [../]
-  [./immobile_disloactions]
+  [./wall_disloactions]
     type = ElementAverageValue
-    variable = immobile_dislocations
+    variable = wall_dislocations
+  [../]
+  [./vonmises_stress]
+    type = ElementAverageValue
+    variable = vonmises_stress
   [../]
 []
 

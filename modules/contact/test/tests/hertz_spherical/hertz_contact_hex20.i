@@ -121,7 +121,6 @@
   [./all]
     add_variables = true
     strain = SMALL
-    use_displaced_mesh = false
     extra_vector_tags = 'ref'
     save_in = 'saved_x saved_y saved_z'
   [../]
