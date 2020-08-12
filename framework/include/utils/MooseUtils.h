@@ -213,11 +213,6 @@ std::string shortName(const std::string & name);
 std::string baseName(const std::string & name);
 
 /**
- * Returns a string up to the first '/' occurrence. Returns empty string if no '/' exists
- */
-std::string basestName(const std::string & name);
-
-/**
  * Get the hostname the current process is running on
  */
 std::string hostname();
