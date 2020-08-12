@@ -1,0 +1,19 @@
+[Tests]
+  [exo]
+    type = Exodiff
+    input = base-params.i
+    exodiff = base-params_out.e
+    requirement = 'The system shall be able to apply top-block-level input file parameters to bottom-level blocks in order to reduce input file size. Additionally, bottom-level blocks shall be able to override the values given at the top level.'
+    design = 'Parser.md'
+    issues = '#13783'
+  []
+  [cli]
+    type = Exodiff
+    input = base-params.i
+    exodiff = cli-arg.e
+    cli_args = 'Kernels/diffusivity=4 Outputs/file_base=cli-arg'
+    requirement = 'The system shall be able to modify top-block level input file parameters from the command line.'
+    design = 'Parser.md'
+    issues = '#13783'
+  []
+[]

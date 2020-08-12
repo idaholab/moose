@@ -34,6 +34,11 @@ MOOSE input file syntax basically works like this:
 ...
 ```
 
+Note that parameters at the `section` level are applied to `MooseObjects` at the
+bottom-most `subsection` level, e.g. at the `type = MooseObjectType` level. If a
+parameter is supplied at the bottom-most level in addition to the `section`
+level, then the value at the bottom-most level wins.
+
 ## Brace Expressions
 
 Brace expressions allow you to assign computed/calculated values to fields in your input files.
@@ -65,7 +70,7 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   of `unit` and converts it to the unit `to_unit` using the [MooseUnit](/utils/Units.md)
   system. For example the expression `${units 1 J/mol -> eV/at}` would evaluate to the value
   `1.0364269656262e-05`. The `to_unit` argument is optional resulting in a no-op that serves
-  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`). 
+  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`).
 
 Examples:
 

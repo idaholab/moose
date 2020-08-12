@@ -480,7 +480,15 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
       {
         object_action->getObjectParams().blockLocation() = params.blockLocation();
         object_action->getObjectParams().blockFullpath() = params.blockFullpath();
+
+        // Potentially extract parameters from the root level, e.g. from the Materials/ or Kernels/
+        // level. Do root level first so that full path params can 'win'
+        const auto & root_name = MooseUtils::basestName(curr_identifier);
+        if (!root_name.empty())
+          extractParams(root_name, object_action->getObjectParams());
+
         extractParams(curr_identifier, object_action->getObjectParams());
+
         object_action->getObjectParams()
             .set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));

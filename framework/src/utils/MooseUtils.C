@@ -394,6 +394,12 @@ baseName(const std::string & name)
 }
 
 std::string
+basestName(const std::string & name)
+{
+  return name.substr(0, name.find_first_of('/') != std::string::npos ? name.find_first_of('/') : 0);
+}
+
+std::string
 hostname()
 {
   char hostname[1024];
