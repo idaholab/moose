@@ -1,6 +1,6 @@
 # Using a neural network IC
 
-This example goes over how to train a neural network to invert concentration from chemical potential, for creating a sub-concentration IC for the KKS model. We use the [NeuralNetworkUserObject.md] and [NeuralNetworkIC.md].
+This example goes over how to train a neural network to invert concentration from chemical potential, for creating a sub-concentration IC for the KKS model. We use the [NeuralNetworkUserObject](NeuralNetworkUserObject.md) and [NeuralNetworkIC](NeuralNetworkIC.md).
 
 ## Overview
 
