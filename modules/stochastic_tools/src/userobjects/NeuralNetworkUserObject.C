@@ -178,5 +178,5 @@ NeuralNetworkUserObject::evaluate(DenseVector<Real> & input, std::size_t op_id) 
     output(i) += _bias[n](i);
   }
 
-  return (output(op_id));
+  return output(op_id);
 }
