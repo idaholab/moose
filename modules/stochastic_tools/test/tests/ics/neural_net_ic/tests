@@ -1,5 +1,5 @@
 [Tests]
-#  issues = "#15361"
+  issues = "#15754"
   design = "NeuralNetworkIC.md"
   requirement = 'The system shall demonstrate a neural network surrogate by '
   [neural_net_ic]
