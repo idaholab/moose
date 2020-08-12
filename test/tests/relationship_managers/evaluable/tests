@@ -29,7 +29,7 @@
   [./edge_neighbor_3D]
     type = 'Exodiff'
     input = 'edge_neighbors.i'
-    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3'
+    cli_args = 'Mesh/dim=3 Mesh/nz=8 Outputs/file_base=edge_neighbors_3D_out Mesh/Partitioner/type=GridPartitioner Mesh/Partitioner/nx=1 Mesh/Partitioner/ny=3 Mesh/Partitioner/nz=1'
     exodiff = 'edge_neighbors_3D_out.e'
     petsc_version = '>3.8'
 
