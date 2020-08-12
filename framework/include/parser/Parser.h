@@ -77,8 +77,12 @@ public:
    * This function attempts to extract values from the input file based on the contents of
    * the passed parameters objects.  It handles a number of various types with dynamic casting
    * including vector types
+   * @param prefix The input file path/prefix from which we are extracting the parameter values
+   * @param p The \p InputParameters object that we will be feeding values into
+   * @param error_on_private Whether to error if the user has specified a value for a private
+   * parameter
    */
-  void extractParams(const std::string & prefix, InputParameters & p);
+  void extractParams(const std::string & prefix, InputParameters & p, bool error_on_private = true);
 
   /**
    * Creates a syntax formatter for printing

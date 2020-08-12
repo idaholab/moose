@@ -489,10 +489,10 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
         {
           pos = curr_identifier.find('/', pos);
           path = curr_identifier.substr(0, pos);
-          if (!path.empty())
-            extractParams(path, object_action->getObjectParams());
           if (pos == std::string::npos)
             reached_end = true;
+          if (!path.empty())
+            extractParams(path, object_action->getObjectParams(), reached_end);
           ++pos;
         }
 
@@ -1113,7 +1113,7 @@ void Parser::setVectorParameter<VariableName, VariableName>(
     GlobalParamsAction * global_block);
 
 void
-Parser::extractParams(const std::string & prefix, InputParameters & p)
+Parser::extractParams(const std::string & prefix, InputParameters & p, bool error_on_private)
 {
   std::ostringstream error_stream;
   static const std::string global_params_task = "set_global_params";
@@ -1197,9 +1197,16 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
     else
     {
       if (p.isPrivate(it.first))
-        mooseError("The parameter '",
-                   full_name,
-                   "' is a private parameter and should not be used in an input file.");
+      {
+        if (error_on_private)
+          mooseError("The parameter '",
+                     full_name,
+                     "' is a private parameter and should not be used in an input file.");
+        else
+          // Even if we have been told not to error, the parameter is private, so we should not set
+          // it
+          continue;
+      }
 
       auto par = it.second;
       auto short_name = it.first;
