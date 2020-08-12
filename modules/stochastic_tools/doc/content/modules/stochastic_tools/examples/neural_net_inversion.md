@@ -10,9 +10,8 @@ Evaluating a neural network requires two objects: NeuralNetworkUserObject and Ne
 
 We will first go over how to run a [modules/phase_field/MultiPhase/KKS.md]  model simulation and train a PyTorch neural network on the output data. KKS simulations numerically solve the equation
 
-\begin{equation}
-  \mu_i = \frac{dF^\beta(c^\beta_0,c^\beta_1,..)}{dc^\beta_i}
-\end{equation}
+!equation
+\mu_i = \frac{dF^\beta(c^\beta_0,c^\beta_1,..)}{dc^\beta_i}
 
 To compute the value of $c^\beta_i$ given $F^\beta(c^\beta_0,c^\beta_1,..)$ is the free energy of phase $\beta$ as a function of the sub-concentrations of components. Usually, we solve KKS simulations using the Newton method solver. To get good convergence with the Newton method, a good initial condition is required. Manually providing these initial conditions is tedious for complex free energy functions with a large number of components. Since neural networks excel at providing approximate solutions to problems, they are a good candidate for automating the initial condition specification. As an example case, we look at an ideal solution model KKS simulation. This simulation is a toy model for the corrosion of an Ni-Cr alloy in a molten salt.
 

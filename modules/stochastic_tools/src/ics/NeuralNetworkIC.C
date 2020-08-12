@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-
 #include "NeuralNetworkIC.h"
 #include "MooseMesh.h"
 
@@ -21,8 +20,9 @@ NeuralNetworkIC::validParams()
   params.addRequiredParam<UserObjectName>(
       "NeuralNetwork_user_object",
       "Name of the neural network user object that evaluates the nodal value");
-  params.addRequiredCoupledVar("InputVariables", "Names of the non-linear variables for inputting to the neural net");
-  params.addParam<std::size_t>("op_id",0,"Index of the output neuron that is used by the IC");
+  params.addRequiredCoupledVar("InputVariables",
+                               "Names of the non-linear variables for inputting to the neural net");
+  params.addParam<std::size_t>("op_id", 0, "Index of the output neuron that is used by the IC");
   return params;
 }
 

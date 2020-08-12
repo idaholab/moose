@@ -41,5 +41,4 @@ protected:
   std::vector<DenseVector<Real>> _bias;
 
   MultiMooseEnum _layerActivationFunctionEnum;
-
 };

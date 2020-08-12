@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+"""
+ExodusReader.py reads MOOSE Exodus output files and returns the requested variable values on cells throughout the mesh.
+The user can specify a time sub-sampling factor S, so that values are read only every Sth time step.
+Users can either run this code as a bash script to store the variable values as a Python pickle file that can be read back
+in a Python script, or directly import this module and call the get_var_vals(fileName,varNames,S) function. 
+"""
+
 import chigger
 import sys
 from os import path

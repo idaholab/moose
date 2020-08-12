@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+#* This file is part of the MOOSE framework
+#* https://www.mooseframework.org
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+"""
+NeuralNet_to_XML.py converts a PyTorch sequential neural network model into an XML file.
+This XML file can then be read by MOOSE to evaluate the neural network.
+"""
+
 import torch
 import xml.etree.ElementTree as ET
 
