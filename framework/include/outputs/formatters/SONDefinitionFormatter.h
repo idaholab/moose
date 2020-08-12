@@ -8,12 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-#include "json/json.h"
+#include "nlohmann/json.h"
 #include <map>
 #include <string>
 #include <vector>
-
-typedef moosecontrib::Json::Value JsonVal;
 
 /**
  * This class produces a dump of the InputFileParameters in the Standard Object
@@ -30,7 +28,7 @@ public:
    * returns a string representation of the tree in input file format
    * @param root - the root node of the tree to output
    */
-  std::string toString(const JsonVal & root);
+  std::string toString(const nlohmann::json & root);
 
 protected:
   /**
@@ -48,22 +46,21 @@ protected:
    * @param is_typeblock  - true only if block being added is a typeblock
    */
   void addBlock(const std::string & block_name,
-                const JsonVal & block,
+                const nlohmann::json & block,
                 bool is_typeblock = false,
                 const std::string & parent_name = "",
-                const JsonVal & parameters_in = JsonVal::null,
-                const JsonVal & subblocks_in = JsonVal::null);
+                const nlohmann::json & parameters_in = nlohmann::json(nullptr),
+                const nlohmann::json & subblocks_in = nlohmann::json(nullptr));
 
   /**
    * adds all parameters from a given block
    * @param params - json holding data for all of the given block's parameters
    */
-  void addParameters(const JsonVal & params);
+  void addParameters(const nlohmann::json & params);
 
   const int _spaces;
   int _level;
   std::ostringstream _stream;
   std::map<std::string, std::vector<std::string>> _assoc_types_map;
-  JsonVal _global_params;
+  nlohmann::json _global_params;
 };
-

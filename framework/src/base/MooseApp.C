@@ -760,7 +760,7 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(search);
     _parser.buildJsonSyntaxTree(tree);
 
-    Moose::out << "**START JSON DATA**\n" << tree.getRoot() << "\n**END JSON DATA**\n";
+    Moose::out << "**START JSON DATA**\n" << tree.getRoot().dump(2) << "\n**END JSON DATA**\n";
     _ready_to_exit = true;
   }
   else if (getParam<bool>("syntax"))

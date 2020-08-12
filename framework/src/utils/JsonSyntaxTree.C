@@ -65,12 +65,12 @@ JsonSyntaxTree::splitPath(const std::string & path)
   return paths;
 }
 
-moosecontrib::Json::Value &
+nlohmann::json &
 JsonSyntaxTree::getJson(const std::string & path)
 {
   auto paths = splitPath(path);
   mooseAssert(paths.size() > 0, "path is empty");
-  moosecontrib::Json::Value * next = &_root["blocks"][paths[0]];
+  auto * next = &(_root["blocks"][paths[0]]);
 
   for (auto pit = paths.begin() + 1; pit != paths.end(); ++pit)
   {
@@ -85,16 +85,16 @@ JsonSyntaxTree::getJson(const std::string & path)
   return *next;
 }
 
-moosecontrib::Json::Value &
+nlohmann::json &
 JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bool is_type)
 {
   if (parent.empty())
   {
     auto & j = getJson(path);
-    if (path.back() == '*' && !j.isMember("subblock_types"))
-      j["subblock_types"] = moosecontrib::Json::Value();
-    else if (path.back() != '*' && !j.isMember("types"))
-      j["types"] = moosecontrib::Json::Value();
+    if (path.back() == '*' && !j.contains("subblock_types"))
+      j["subblock_types"] = nlohmann::json();
+    else if (path.back() != '*' && !j.contains("types"))
+      j["types"] = nlohmann::json();
     return j["actions"];
   }
 
@@ -108,9 +108,7 @@ JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bo
 }
 
 size_t
-JsonSyntaxTree::setParams(InputParameters * params,
-                          bool search_match,
-                          moosecontrib::Json::Value & all_params)
+JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann::json & all_params)
 {
   size_t count = 0;
   for (auto & iter : *params)
@@ -121,7 +119,7 @@ JsonSyntaxTree::setParams(InputParameters * params,
       continue;
 
     ++count;
-    moosecontrib::Json::Value param_json;
+    nlohmann::json param_json;
 
     param_json["required"] = params->isParamRequired(iter.first);
 
@@ -133,11 +131,11 @@ JsonSyntaxTree::setParams(InputParameters * params,
 
     bool out_of_range_allowed = false;
     param_json["options"] = buildOptions(iter, out_of_range_allowed);
-    if (!param_json["options"].asString().empty())
+    if (!nlohmann::to_string(param_json["options"]).empty())
       param_json["out_of_range_allowed"] = out_of_range_allowed;
     auto reserved_values = params->reservedValues(iter.first);
     for (const auto & reserved : reserved_values)
-      param_json["reserved_values"].append(reserved);
+      param_json["reserved_values"].push_back(reserved);
 
     std::string t = prettyCppType(params->type(iter.first));
     param_json["cpp_type"] = t;
@@ -161,15 +159,15 @@ JsonSyntaxTree::addGlobal()
   if (_search.empty())
   {
     auto params = validParams<Action>();
-    moosecontrib::Json::Value jparams;
+    nlohmann::json jparams;
     setParams(&params, true, jparams);
     _root["global"]["parameters"] = jparams;
 
     // Just create a list of registered app names
-    moosecontrib::Json::Value apps;
+    nlohmann::json apps;
     auto factory = AppFactory::instance();
     for (auto app = factory.registeredObjectsBegin(); app != factory.registeredObjectsEnd(); ++app)
-      apps.append(app->first);
+      apps.push_back(app->first);
 
     _root["global"]["registered_apps"] = apps;
   }
@@ -188,7 +186,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
   if (action == "EmptyAction")
     return false;
 
-  moosecontrib::Json::Value all_params;
+  nlohmann::json all_params;
   bool search_match = !_search.empty() && (MooseUtils::wildCardMatch(path, _search) ||
                                            MooseUtils::wildCardMatch(action, _search) ||
                                            MooseUtils::wildCardMatch(parent, _search));
@@ -197,7 +195,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     // no parameters that matched the search string
     return false;
 
-  moosecontrib::Json::Value & json = getJson(parent, path, is_type);
+  nlohmann::json & json = getJson(parent, path, is_type);
 
   if (is_action)
   {
@@ -318,12 +316,12 @@ JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
   if (MooseUtils::wildCardMatch(path, _search))
   {
     auto & j = getJson(path);
-    j["associated_types"].append(type);
+    j["associated_types"].push_back(type);
   }
   // If they are doing a search they probably don't want to see this
   if (_search.empty())
   {
-    _root["global"]["associated_types"][type].append(path);
+    _root["global"]["associated_types"][type].push_back(path);
   }
 }
 
@@ -333,7 +331,7 @@ JsonSyntaxTree::addActionTask(const std::string & path,
                               const std::string & task_name,
                               const FileLineInfo & lineinfo)
 {
-  moosecontrib::Json::Value & json = getJson("", path, false);
+  nlohmann::json & json = getJson("", path, false);
   if (lineinfo.isValid())
     json[action]["tasks"][task_name]["file_info"][lineinfo.file()] = lineinfo.line();
 }
