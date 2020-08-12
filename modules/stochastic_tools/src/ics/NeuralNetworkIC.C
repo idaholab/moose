@@ -40,7 +40,7 @@ NeuralNetworkIC::NeuralNetworkIC(const InputParameters & parameters)
 }
 
 Real
-NeuralNetworkIC::value(const Point & p)
+NeuralNetworkIC::value(const Point & /* p*/)
 {
   DenseVector<Real> _input_layer(_n_inputs);
   for (unsigned int i = 0; i < _n_inputs; ++i)
