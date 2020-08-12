@@ -57,14 +57,12 @@ NeuralNetworkUserObject::setXMLWeights()
 
     switch (_layerActivationFunctionEnum.get(idx))
     {
-      case 0: // SIGMOID
+      case 0: // SIGMOID -> No weights, do nothing
         break;
       case 1: // SOFTSIGN
+        mooseError("This function is not yet implemented");
+      case 2: // TANH -> No weights, do nothing
         break;
-
-      case 2: // TANH
-        break;
-
       case 3: // LINEAR
       {
         size_t m = layer.child("M").text().as_uint();
@@ -145,13 +143,11 @@ NeuralNetworkUserObject::evaluate(DenseVector<Real> & input, std::size_t op_id) 
           feed_forward(i) = 1 / (1 + std::exp(-1 * feed_forward(i)));
         break;
       case 1: // SOFTSIGN
-        break;
-
+        mooseError("This function is not yet implemented");
       case 2: // TANH
         for (std::size_t i = 0; i < _h; ++i)
           feed_forward(i) = std::tanh(feed_forward(i));
         break;
-
       case 3: // LINEAR
       {
         for (std::size_t i = 0; i < _h; ++i)

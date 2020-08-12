@@ -11,12 +11,10 @@
 #include "GeneralUserObject.h"
 #include "MooseVariableInterface.h"
 
-// forward declarations
-class NeuralNetworkUserObject;
-
-template <>
-InputParameters validParams<GeneralUserObject>();
-
+/**
+ * Creates a GeneralUserObject that parses an XML file to generate a neural network model.
+   Evaluates the neural network on an input DenseVector and returns a real value
+ */
 class NeuralNetworkUserObject : public GeneralUserObject
 {
 public:
@@ -26,10 +24,13 @@ public:
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override {}
+  // Evaluates the neural network using the provided input DenseVector values, and returns the value
+  // on the requested index of the output array
   Real evaluate(DenseVector<Real> & input, std::size_t op_idx) const;
 
 protected:
-  void setWeights();
+  // Parses the XML file passed to the object and recovers the structure and weights of the
+  // feed-forward neural network
   void setXMLWeights();
   unsigned int _h;
   unsigned int _d_in;
