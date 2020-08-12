@@ -155,6 +155,14 @@ protected:
                        const bool derivative = false);
 
   /**
+   * Returns the material specific value for the low bound cutoff of the ROM output,
+   * before transformation, and prevents the calculation of a strain value outside
+   * the ROM calibration database. Should be overwritten by inheriting classes.
+   * @return value of the ROM specific strain calibration bound
+   */
+  virtual Real romStrainCutoff() = 0;
+
+  /**
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
    * @param value Input to Legendre polynomial
    * @param degree Degree of Legendre polynomial
