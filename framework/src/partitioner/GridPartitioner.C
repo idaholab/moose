@@ -38,9 +38,8 @@ GridPartitioner::validParams()
   params.suppressParameter<Real>("ymax");
   params.suppressParameter<Real>("zmax");
   params.suppressParameter<MooseEnum>("dim");
-
-  params.set<MooseEnum>("parallel_type") = "REPLICATED";
-  params.set<MooseEnum>("partitioner") = "LINEAR";
+  params.suppressParameter<MooseEnum>("parallel_type");
+  params.suppressParameter<MooseEnum>("partitioner");
 
   params.addClassDescription("Create a uniform grid that overlays the mesh to be partitioned.  "
                              "Assign all elements within each cell of the grid to the same "
@@ -113,6 +112,9 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   params.set<Real>("xmax") = max(0);
   params.set<Real>("ymax") = max(1);
   params.set<Real>("zmax") = max(2);
+
+  params.set<MooseEnum>("parallel_type") = "REPLICATED";
+  params.set<MooseEnum>("partitioner") = "linear";
 
   auto grid_mesh_ptr = _app.getFactory().create<MooseMesh>("GeneratedMesh", name() + "_gm", params);
   grid_mesh_ptr->init();
