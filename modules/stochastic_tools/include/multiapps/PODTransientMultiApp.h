@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "SamplerFullSolveMultiApp.h"
+#include "SamplerTransientMultiApp.h"
 #include "PODReducedBasisTrainer.h"
 #include "SamplerInterface.h"
 #include "SurrogateModelInterface.h"
@@ -20,21 +20,21 @@
 class PODSamplerSolutionTransfer;
 class PODResidualTransfer;
 
-class PODFullSolveMultiApp : public SamplerFullSolveMultiApp, SurrogateModelInterface
+class PODTransientMultiApp : public SamplerTransientMultiApp, SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
 
-  PODFullSolveMultiApp(const InputParameters & parameters);
+  PODTransientMultiApp(const InputParameters & parameters);
 
+  /**
+   * Override solveStep to allow for batch execution.
+   */
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
   /// Overriding preTransfer to reinit the subappliations if the object needs to be
   /// executed twice.
   virtual void preTransfer(Real dt, Real target_time) override;
-
-  /// Returning the value of the snapshot generation flag.
-  bool snapshotGeneration() { return _snapshot_generation; }
 
 protected:
   /// Returning pointers to the solution transfers. Used in batch mode.

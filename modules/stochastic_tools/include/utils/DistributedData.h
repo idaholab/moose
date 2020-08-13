@@ -36,6 +36,9 @@ public:
   /// Adding a new sample locally with a global index.
   void addNewEntry(dof_id_type glob_i, const T & sample);
 
+  /// Adding a new sample locally with an automatically generated global index.
+  void addNewEntry(const T & sample);
+
   /// Closes the container meaning that no new samples can be added or the
   /// already existing samples canot be changed.
   void closeContainer() { _closed = true; };
@@ -73,6 +76,9 @@ public:
   /// Getting the number of global samples.
   dof_id_type getNumberOfGlobalEntries() const;
 
+  /// Getting the maximum global sample index.
+  dof_id_type getMaxGlobalIndex() const;
+
   /// Getting the number of locally owned samples.
   dof_id_type getNumberOfLocalEntries() const { return _n_local_entries; };
 
@@ -81,6 +87,9 @@ public:
 
   /// Getting the global index of a locally owned sample.
   dof_id_type getGlobalIndex(dof_id_type loc_i) const;
+
+  // Reassigning global indices for the samples.
+  void reassignGlobalIndices();
 
 protected:
   /// The vector where the samples are stored.

@@ -13,6 +13,7 @@
 #include "PODReducedBasisTrainer.h"
 #include "StochasticToolsTransfer.h"
 #include "PODFullSolveMultiApp.h"
+#include "PODTransientMultiApp.h"
 
 // Forward declarations
 class PODFullSolveMultiApp;

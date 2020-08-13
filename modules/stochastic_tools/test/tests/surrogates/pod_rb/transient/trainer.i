@@ -3,7 +3,8 @@
 []
 
 [Executioner]
-  type = PODSteady
+  type = Transient
+  num_steps = 2
 []
 
 [Distributions]
@@ -28,7 +29,7 @@
   [sample]
     type = LatinHypercube
     distributions = 'k_dist alpha_dist S_dist'
-    num_rows = 3
+    num_rows = 2
     num_bins = 3
     execute_on = PRE_MULTIAPP_SETUP
   []
@@ -36,11 +37,10 @@
 
 [MultiApps]
   [sub]
-    type = PODFullSolveMultiApp
+    type = PODTransientMultiApp
     input_files = sub.i
     sampler = sample
     trainer_name = 'pod_rb'
-    execute_on = 'timestep_begin post_snapshot_gen'
   []
 []
 
@@ -51,7 +51,7 @@
     sampler = sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
     to_control = 'stochastic'
-    execute_on = 'timestep_begin'
+    execute_on = 'initial'
     check_multiapp_execute_on = false
   []
   [snapshots]
@@ -60,24 +60,7 @@
     sampler = sample
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
-    execute_on = 'timestep_begin'
-    check_multiapp_execute_on = false
-  []
-  [pod_modes]
-    type = PODSamplerSolutionTransfer
-    multi_app = sub
-    sampler = sample
-    trainer_name = 'pod_rb'
-    direction = 'to_multiapp'
-    execute_on = 'post_snapshot_gen'
-    check_multiapp_execute_on = false
-  []
-  [res]
-    type = PODResidualTransfer
-    multi_app = sub
-    sampler = sample
-    trainer_name = "pod_rb"
-    execute_on = 'post_snapshot_gen'
+    execute_on = 'timestep_end'
     check_multiapp_execute_on = false
   []
 []
@@ -89,14 +72,6 @@
     error_res = '1e-9'
     tag_names = 'diff react bodyf'
     tag_types = 'op op src'
-    execute_on = 'timestep_begin final'
-  []
-[]
-
-[Outputs]
-  [out]
-    type = SurrogateTrainerOutput
-    trainers = 'pod_rb'
-    execute_on = FINAL
+    execute_on = 'final'
   []
 []

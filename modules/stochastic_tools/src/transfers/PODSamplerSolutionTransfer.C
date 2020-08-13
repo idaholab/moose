@@ -34,8 +34,21 @@ PODSamplerSolutionTransfer::PODSamplerSolutionTransfer(const InputParameters & p
     _pod_multi_app(std::dynamic_pointer_cast<PODFullSolveMultiApp>(_multi_app)),
     _trainer(getSurrogateTrainer<PODReducedBasisTrainer>("trainer_name"))
 {
+  // This tests if the given multiapp can be cast into a PODFullSolve multiapp.
+  // In the future it would be better to swap this hacky procedure with the
+  // implementation of a PODMultiApp base. The PODTransientMultiapp works as
+  // using a pointer to a fullSolve multiapp too.
+  std::shared_ptr<PODTransientMultiApp> trans_ptr(
+      std::dynamic_pointer_cast<PODTransientMultiApp>(_multi_app));
+  if(trans_ptr)
+  {
+    mooseWarning("Casting PODTransientMultiapp into PODFullSolveMultiapp!");
+    _pod_multi_app = std::dynamic_pointer_cast<PODFullSolveMultiApp>(_multi_app);
+  }
+
   if (!_pod_multi_app)
-    paramError("multi_app", "The Multiapp given is not a PODFullsolveMultiapp!");
+    paramError("multi_app",
+               "The Multiapp given is not a PODFullsolveMultiapp or PODTransientMultiApp!");
 }
 
 void
@@ -86,7 +99,8 @@ PODSamplerSolutionTransfer::execute()
           solution.get(var_dofs, tmp->get_values());
 
           // Copying the temporary vector into the trainer.
-          _trainer.addSnapshot(v_index, i, tmp);
+          // _trainer.addSnapshot(v_index, i, tmp);
+          _trainer.addSnapshot(v_index, tmp);
         }
       }
       break;

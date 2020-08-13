@@ -147,8 +147,24 @@ PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
 }
 
 void
+PODReducedBasisTrainer::addSnapshot(dof_id_type v_ind,
+                                    const std::shared_ptr<DenseVector<Real>> & snapshot)
+{
+  _snapshots[v_ind].addNewEntry(snapshot);
+}
+
+void
 PODReducedBasisTrainer::computeCorrelationMatrix()
 {
+
+  // Reassigning global indices. In case of most stiuations this will not
+  // modify anything. In case of transient simulations, on the other hand, this might
+  // modify the global IDs based on the fact if two elements have the same IDs.
+  for (unsigned int var_i = 0; var_i < _snapshots.size(); ++var_i)
+  {
+    _snapshots[var_i].reassignGlobalIndices();
+  }
+
   // Getting the number of snapshots. It is assumed that every variable has the
   // same number of snapshots. This assumption is used at multiple locations in
   // this source file.

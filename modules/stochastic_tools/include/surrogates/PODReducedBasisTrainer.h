@@ -41,6 +41,9 @@ public:
                    dof_id_type g_ind,
                    const std::shared_ptr<DenseVector<Real>> & snapshot);
 
+  /// Adding a snapshot for a variable with an automatically generated global index.
+  void addSnapshot(dof_id_type v_ind, const std::shared_ptr<DenseVector<Real>> & snapshot);
+
   /// Adding the contribution of a residual to the reduced operators.
   void addToReducedOperator(dof_id_type base_i,
                             dof_id_type tag_i,

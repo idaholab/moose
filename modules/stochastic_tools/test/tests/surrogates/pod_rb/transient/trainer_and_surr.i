@@ -1,9 +1,4 @@
 [StochasticTools]
-  auto_create_executioner = false
-[]
-
-[Executioner]
-  type = PODSteady
 []
 
 [Distributions]
@@ -25,11 +20,19 @@
 []
 
 [Samplers]
-  [sample]
+  [train_sample]
     type = LatinHypercube
     distributions = 'k_dist alpha_dist S_dist'
     num_rows = 3
     num_bins = 3
+    execute_on = PRE_MULTIAPP_SETUP
+  []
+  [test_sample]
+    type = LatinHypercube
+    distributions = 'k_dist alpha_dist S_dist'
+    num_rows = 10
+    num_bins = 3
+    seed = 17
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -38,46 +41,46 @@
   [sub]
     type = PODFullSolveMultiApp
     input_files = sub.i
-    sampler = sample
+    sampler = train_sample
     trainer_name = 'pod_rb'
-    execute_on = 'timestep_begin post_snapshot_gen'
+    execute_on = 'timestep_begin final'
   []
 []
 
 [Transfers]
-  [param]
+  [quad]
     type = SamplerParameterTransfer
     multi_app = sub
-    sampler = sample
+    sampler = train_sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
     to_control = 'stochastic'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
-  [snapshots]
+  [data]
     type = PODSamplerSolutionTransfer
     multi_app = sub
-    sampler = sample
+    sampler = train_sample
     trainer_name = 'pod_rb'
     direction = 'from_multiapp'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
-  [pod_modes]
+  [mode]
     type = PODSamplerSolutionTransfer
     multi_app = sub
-    sampler = sample
+    sampler = train_sample
     trainer_name = 'pod_rb'
     direction = 'to_multiapp'
-    execute_on = 'post_snapshot_gen'
+    execute_on = 'final'
     check_multiapp_execute_on = false
   []
   [res]
     type = PODResidualTransfer
     multi_app = sub
-    sampler = sample
+    sampler = train_sample
     trainer_name = "pod_rb"
-    execute_on = 'post_snapshot_gen'
+    execute_on = 'final'
     check_multiapp_execute_on = false
   []
 []
@@ -93,10 +96,25 @@
   []
 []
 
-[Outputs]
-  [out]
-    type = SurrogateTrainerOutput
-    trainers = 'pod_rb'
-    execute_on = FINAL
+[Surrogates]
+  [rbpod]
+    type = PODReducedBasisSurrogate
+    trainer = pod_rb
   []
+[]
+
+[VectorPostprocessors]
+  [res]
+    type = PODSurrogateTester
+    model = rbpod
+    sampler = test_sample
+    variable_name = "u"
+    to_compute = nodal_max
+    execute_on = 'final'
+  []
+[]
+
+[Outputs]
+  execute_on = 'final'
+  csv = true
 []

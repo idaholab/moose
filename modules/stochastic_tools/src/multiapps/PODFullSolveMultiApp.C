@@ -21,6 +21,7 @@ InputParameters
 PODFullSolveMultiApp::validParams()
 {
   InputParameters params = SamplerFullSolveMultiApp::validParams();
+  params += SurrogateModelInterface::validParams();
   params.addClassDescription(
       "Creates a full-solve type sub-application for each row of a Sampler matrix. "
       "On second call, this object creates residuals for a PODReducedBasisTrainer with given basis "

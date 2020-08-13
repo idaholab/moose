@@ -49,6 +49,44 @@ DistributedData<T>::initializeContainer(dof_id_type n_global_entries)
 
 template <typename T>
 void
+DistributedData<T>::reassignGlobalIndices()
+{
+  std::vector<dof_id_type> tmp_local_entries(n_processors());
+  for (dof_id_type proc_i = 0; proc_i < n_processors(); ++proc_i)
+  {
+    if (proc_i == processor_id())
+    {
+      tmp_local_entries[proc_i] = _n_local_entries;
+    }
+  }
+  _communicator.sum(tmp_local_entries);
+
+  dof_id_type sum = 0;
+  std::vector<dof_id_type> cum_local_entries(n_processors());
+  for (dof_id_type proc_i = 0; proc_i < n_processors(); ++proc_i)
+  {
+    sum += tmp_local_entries[proc_i];
+    cum_local_entries[proc_i] = sum;
+  }
+
+  for (dof_id_type proc_i = 0; proc_i < n_processors(); ++proc_i)
+  {
+    if (proc_i == processor_id())
+    {
+      dof_id_type start_index = 0;
+      if (proc_i != 0)
+        start_index = cum_local_entries[proc_i - 1];
+
+      for (dof_id_type entry_i = start_index; entry_i < cum_local_entries[proc_i]; ++entry_i)
+      {
+        _local_entry_ids[entry_i-start_index] = entry_i;
+      }
+    }
+  }
+}
+
+template <typename T>
+void
 DistributedData<T>::addNewEntry(dof_id_type glob_i, const T & entry)
 {
   auto it = std::find(_local_entry_ids.begin(), _local_entry_ids.end(), glob_i);
@@ -59,6 +97,25 @@ DistributedData<T>::addNewEntry(dof_id_type glob_i, const T & entry)
 
   _local_entries.push_back(entry);
   _local_entry_ids.push_back(glob_i);
+  _n_local_entries += 1;
+}
+
+template <typename T>
+void
+DistributedData<T>::addNewEntry(const T & entry)
+{
+  if (_closed)
+    ::mooseError("DistributeData has already been closed, cannot add new elements!");
+
+  dof_id_type n_global_entries = getNumberOfGlobalEntries();
+
+  if (n_global_entries == 0)
+    _local_entry_ids.push_back(0);
+  else
+    _local_entry_ids.push_back(getMaxGlobalIndex() + 1);
+
+  _local_entries.push_back(entry);
+
   _n_local_entries += 1;
 }
 
@@ -107,6 +164,26 @@ DistributedData<T>::getNumberOfGlobalEntries() const
   dof_id_type val = _n_local_entries;
   _communicator.sum(val);
   return val;
+}
+
+template <typename T>
+dof_id_type
+DistributedData<T>::getMaxGlobalIndex() const
+{
+  long long int max_val = -1;
+  if (!_local_entry_ids.empty())
+  {
+    auto it = std::max_element(_local_entry_ids.begin(), _local_entry_ids.end());
+    max_val = *it;
+  }
+
+  _communicator.max(max_val);
+
+  if (max_val == -1)
+    mooseError("No data entry has been added yet, the maximum global entry ID cannot be "
+               "determined.");
+
+  return (dof_id_type)max_val;
 }
 
 template <typename T>
