@@ -29,8 +29,11 @@ Receiver::validParams()
 Receiver::Receiver(const InputParameters & params)
   : GeneralPostprocessor(params),
     _initialize_old(getParam<bool>("initialize_old")),
-    _my_value(_fe_problem.getPostprocessorValue(_pp_name))
+    _my_value(getPostprocessorValueByName(name()))
 {
+  // Initialize old/older data
+  getPostprocessorValueOldByName(name());
+  getPostprocessorValueOlderByName(name());
 }
 
 Real
@@ -45,12 +48,12 @@ Receiver::initialSetup()
 {
   if (isParamValid("default"))
   {
-    Real value = getParam<Real>("default");
-    _fe_problem.getPostprocessorValue(_pp_name) = value;
+    const Real & value = getParam<Real>("default");
+    _fe_problem.setPostprocessorValueByName(_pp_name, value, 0);
     if (_initialize_old)
     {
-      _fe_problem.getPostprocessorValueOld(_pp_name) = value;
-      _fe_problem.getPostprocessorValueOlder(_pp_name) = value;
+      _fe_problem.setPostprocessorValueByName(_pp_name, value, 1);
+      _fe_problem.setPostprocessorValueByName(_pp_name, value, 2);
     }
   }
 }

@@ -13,7 +13,6 @@
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
 #include "MortarData.h"
-#include "PostprocessorData.h"
 #include "VectorPostprocessorData.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
@@ -792,11 +791,6 @@ public:
                                       const std::string & name,
                                       InputParameters & parameters);
 
-  /**
-   * Initializes the postprocessor data
-   * @see SetupPostprocessorDataAction
-   */
-  void initPostprocessorData(const std::string & name);
 
   /// Initialize the VectorPostprocessor data
   void initVectorPostprocessorData(const std::string & name);
@@ -862,41 +856,58 @@ public:
   bool hasUserObject(const std::string & name) const;
 
   /**
+   * Initializes the postprocessor data
+   * @see SetupPostprocessorDataAction
+   */
+  void initPostprocessorData(const std::string & name);
+
+  /**
    * Check existence of the postprocessor.
    * @param name The name of the post-processor
    * @return true if it exists, otherwise false
    */
-  bool hasPostprocessor(const std::string & name);
+  bool hasPostprocessor(const std::string & name) const;
 
   /**
-   * Get a reference to the value associated with the postprocessor.
+   * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
-   * @return The reference to the old value
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @return The reference to the value at the given time index
    *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
+   * Note: This method is only for retrieving values that already exist, the Postprocessor and
+   *       PostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
+   */
+  const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name,
+                                                         std::size_t t_index = 0) const;
+
+  /**
+   * Set the value of a PostprocessorValue.
+   * @param name The name of the post-processor
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   * @return The reference to the value at the given time index
+   *
+   * Note: This method is only for setting values that already exist, the Postprocessor and
+   *       PostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
+   *
+   * WARNING!
+   * This method should be used with caution. It exists to allow Transfers and other
+   * similar objects to modify Postprocessor values. It is not intended for general use.
+   */
+  void setPostprocessorValueByName(const PostprocessorName & name,
+                                   const PostprocessorValue & value,
+                                   std::size_t t_index = 0);
+  ///@}
+
+  ///@{
+  /**
+   * Deprecated
    */
   PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
-
-  /**
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @return The reference to the old value
-   *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
-   */
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
-
-  /**
-   * Get the reference to the older value of a post-processor
-   * @param name The name of the post-processor
-   * @return The reference to the old value
-   *
-   * Note: This method cannot be marked const. It calls another interface, which creates maps space
-   * in a map on demand.
-   */
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
+  ///@}
 
   ///@{
   /**
@@ -1972,9 +1983,6 @@ protected:
 
   // Marker Warehouse
   MooseObjectWarehouse<Marker> _markers;
-
-  // postprocessors
-  PostprocessorData _pps_data;
 
   // VectorPostprocessors
   VectorPostprocessorData _vpps_data;

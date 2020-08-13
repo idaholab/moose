@@ -16,6 +16,7 @@
 SolveObject::SolveObject(Executioner * ex)
   : MooseObject(ex->parameters()),
     PerfGraphInterface(this),
+    PostprocessorInterface(this),
     _executioner(*ex),
     _problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),

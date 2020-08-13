@@ -52,6 +52,11 @@ public:
    */
   bool operator==(const ReporterName & rhs) const;
 
+  /**
+   * Less than operator
+   */
+  bool operator<(const ReporterName & rhs) const;
+
 private:
   std::string _object_name;
   std::string _value_name;

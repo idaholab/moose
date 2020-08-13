@@ -606,7 +606,7 @@ MultiApp::appPostprocessorValue(unsigned int app, const std::string & name)
   if (!_has_an_app)
     mooseError("No app for ", MultiApp::name(), " on processor ", _orig_rank);
 
-  return appProblemBase(app).getPostprocessorValue(name);
+  return appProblemBase(app).getPostprocessorValueByName(name);
 }
 
 NumericVector<Number> &

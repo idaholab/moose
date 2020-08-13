@@ -20,126 +20,48 @@ PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValue(const std::string & name, unsigned int index)
+PostprocessorInterface::getPostprocessorValue(const std::string & name, unsigned int index) const
 {
-  if (singlePostprocessor(name) && index > 0)
-    mooseError("Postprocessor requested with index ",
-               index,
-               " when only a single postprocessor is coupled.");
-
-  // Return the default if the Postprocessor does not exist and a default does, otherwise
-  // continue as usual
-  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
-    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
-  else
-  {
-    if (singlePostprocessor(name))
-      return _pi_feproblem.getPostprocessorValue(_ppi_params.get<PostprocessorName>(name));
-
-    // check size of parameter array here
-    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
-      mooseError("Postprocessor requested with index ",
-                 index,
-                 " but parameter ",
-                 name,
-                 " has only ",
-                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
-                 " entries.");
-
-    return _pi_feproblem.getPostprocessorValue(
-        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
-  }
+  return getPostprocessorValueHelper(name, index, 0);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOld(const std::string & name, unsigned int index)
+PostprocessorInterface::getPostprocessorValueOld(const std::string & name, unsigned int index) const
 {
-  if (singlePostprocessor(name) && index > 0)
-    mooseError("Postprocessor requested with index ",
-               index,
-               " when only a single postprocessor is coupled.");
-
-  // Return the default if the Postprocessor does not exist and a default does, otherwise
-  // continue as usual
-  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
-    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
-  else
-  {
-    if (singlePostprocessor(name))
-      return _pi_feproblem.getPostprocessorValueOld(_ppi_params.get<PostprocessorName>(name));
-
-    // check size of parameter array here
-    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
-      mooseError("Postprocessor requested with index ",
-                 index,
-                 " but parameter ",
-                 name,
-                 " has only ",
-                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
-                 " entries.");
-
-    return _pi_feproblem.getPostprocessorValueOld(
-        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
-  }
+  return getPostprocessorValueHelper(name, index, 1);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOlder(const std::string & name, unsigned int index)
+PostprocessorInterface::getPostprocessorValueOlder(const std::string & name,
+                                                   unsigned int index) const
 {
-  if (singlePostprocessor(name) && index > 0)
-    mooseError("Postprocessor requested with index ",
-               index,
-               " when only a single postprocessor is coupled.");
-
-  // Return the default if the Postprocessor does not exist and a default does, otherwise
-  // continue as usual
-  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
-    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
-  else
-  {
-    if (singlePostprocessor(name))
-      return _pi_feproblem.getPostprocessorValueOlder(_ppi_params.get<PostprocessorName>(name));
-
-    // check size of parameter array here
-    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
-      mooseError("Postprocessor requested with index ",
-                 index,
-                 " but parameter ",
-                 name,
-                 " has only ",
-                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
-                 " entries.");
-
-    return _pi_feproblem.getPostprocessorValueOlder(
-        _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
-  }
+  return getPostprocessorValueHelper(name, index, 2);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name)
+PostprocessorInterface::getPostprocessorValueByName(const PostprocessorName & name) const
 {
-  return _pi_feproblem.getPostprocessorValue(name);
+  return getPostprocessorValueByNameHelper(name, 0);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name)
+PostprocessorInterface::getPostprocessorValueOldByName(const PostprocessorName & name) const
 {
-  return _pi_feproblem.getPostprocessorValueOld(name);
+  return getPostprocessorValueByNameHelper(name, 1);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName & name)
+PostprocessorInterface::getPostprocessorValueOlderByName(const PostprocessorName & name) const
 {
-  return _pi_feproblem.getPostprocessorValueOlder(name);
+  return getPostprocessorValueByNameHelper(name, 2);
 }
 
 bool
 PostprocessorInterface::hasPostprocessor(const std::string & name, unsigned int index) const
 {
   if (singlePostprocessor(name))
-    return _pi_feproblem.hasPostprocessor(_ppi_params.get<PostprocessorName>(name));
-  return _pi_feproblem.hasPostprocessor(
-      _ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
+    return hasPostprocessorByName(_ppi_params.get<PostprocessorName>(name));
+  return hasPostprocessorByName(_ppi_params.get<std::vector<PostprocessorName>>(name)[index]);
 }
 
 unsigned int
@@ -157,13 +79,60 @@ PostprocessorInterface::singlePostprocessor(const std::string & name) const
 }
 
 bool
-PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name)
+PostprocessorInterface::hasPostprocessorByName(const PostprocessorName & name) const
 {
-  return _pi_feproblem.hasPostprocessor(name);
+  ReporterName r_name(name, "value");
+  return _pi_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(r_name);
 }
 
 const PostprocessorValue &
-PostprocessorInterface::getDefaultPostprocessorValue(const std::string & name)
+PostprocessorInterface::getDefaultPostprocessorValue(const std::string & name) const
 {
   return _ppi_params.getDefaultPostprocessorValue(name);
+}
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueHelper(const std::string & name,
+                                                    unsigned int index,
+                                                    std::size_t t_index) const
+{
+  if (!_ppi_params.isParamValid(name))
+    mooseError("The supplied Postprocessor name(s) parameter '", name, "' is not defined.");
+
+  if (singlePostprocessor(name) && index > 0)
+    mooseError("Postprocessor requested with index ",
+               index,
+               " when only a single postprocessor is coupled.");
+
+  // Return the default if the Postprocessor does not exist and a default does, otherwise
+  // continue as usual
+  if (!hasPostprocessor(name, index) && _ppi_params.hasDefaultPostprocessorValue(name, index))
+    return _ppi_params.getDefaultPostprocessorValue(name, false, index);
+  else
+  {
+    if (singlePostprocessor(name))
+      return getPostprocessorValueByNameHelper(_ppi_params.get<PostprocessorName>(name), t_index);
+
+    // check size of parameter array here
+    if (index >= _ppi_params.get<std::vector<PostprocessorName>>(name).size())
+      mooseError("Postprocessor requested with index ",
+                 index,
+                 " but parameter ",
+                 name,
+                 " has only ",
+                 _ppi_params.get<std::vector<PostprocessorName>>(name).size(),
+                 " entries.");
+
+    return getPostprocessorValueByNameHelper(
+        _ppi_params.get<std::vector<PostprocessorName>>(name)[index], t_index);
+  }
+}
+
+const PostprocessorValue &
+PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorName & name,
+                                                          std::size_t t_index) const
+{
+  ReporterName r_name(name, "value");
+  return _pi_feproblem.getReporterData().getReporterValue<PostprocessorValue>(
+      r_name, name, Moose::ReporterMode::ROOT, t_index);
 }

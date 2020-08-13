@@ -34,6 +34,12 @@ ReporterName::operator==(const ReporterName & rhs) const
   return _combined_name == rhs._combined_name;
 }
 
+bool
+ReporterName::operator<(const ReporterName & rhs) const
+{
+  return _combined_name < rhs._combined_name;
+}
+
 ReporterName::ReporterName(const ReporterName & other)
   : ReporterName(other._object_name, other._value_name)
 {

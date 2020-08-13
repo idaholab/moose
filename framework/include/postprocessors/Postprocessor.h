@@ -9,13 +9,10 @@
 
 #pragma once
 
-// MOOSE includes
 #include "OutputInterface.h"
-
-// libMesh
+#include "FEProblemBase.h"
 #include "libmesh/parallel.h"
 
-// Forward declarations
 class Postprocessor;
 
 template <>
@@ -46,4 +43,3 @@ public:
 protected:
   std::string _pp_name;
 };
-

@@ -51,6 +51,12 @@ public:
   ReporterData(MooseApp & moose_app);
 
   /**
+   * Return True if a Reporter value with the given type and name have been created.
+   */
+  template <typename T>
+  bool hasReporterValue(const ReporterName & reporter_name) const;
+
+  /**
    * Method for returning read only references to Reporter values.
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the
@@ -66,6 +72,39 @@ public:
                              const std::string & object_name,
                              Moose::ReporterMode mode,
                              const std::size_t time_index = 0);
+
+  /**
+   * Method for returning a read-only reference to Reporter values that already exist.
+   * @tparam T The Reporter value C++ type.
+   * @param reporter_name The name of the reporter value, which includes the object name and the
+   *                      data name.
+   * @param time_index (optional) When not provided or zero is provided the current value is
+   *                   returned. If an index greater than zero is provided then the corresponding
+   *                   old data is returned (1 = old, 2 = older, etc.).
+   */
+  template <typename T>
+  const T & getReporterValue(const ReporterName & reporter_name,
+                             const std::size_t time_index = 0) const;
+
+  /**
+   * Method for setting Reporter values that already exist.
+   * @tparam T The Reporter value C++ type.
+   * @param reporter_name The name of the reporter value, which includes the object name and the
+   *                      data name.
+   * @param value The value to which the Reporter will be changed to.
+   * @param time_index (optional) When not provided or zero is provided the current value is
+   *                   returned. If an index greater than zero is provided then the corresponding
+   *                   old data is returned (1 = old, 2 = older, etc.).
+   * WARNING!
+   * This method is designed for setting values outside of the traditional interfaces such as is
+   * necessary for Transfers. This is an advanced capability that should be used with caution.
+   *
+   * @see FEProblemBase::setPostprocessorValueByName
+   */
+  template <typename T>
+  void setReporterValue(const ReporterName & reporter_name,
+                        const T & value,
+                        const std::size_t time_index = 0);
 
   ///@{
   /**
@@ -126,6 +165,20 @@ public:
   void init();
 
   /**
+   * Performs error checking.
+   *
+   * @see FEProblemBase::checkIntegrity FEProblemBase::check Reporters
+   */
+  void check() const;
+
+  /**
+   * Return a set of undeclared names
+   *
+   * @see FEProblemBase::checkPostprocessors
+   */
+  std::set<ReporterName> getUndeclaredNames() const;
+
+  /**
    * Writes all Reporter values to the supplied JSON node for output to a file.
    *
    * @see JSONOutput
@@ -155,6 +208,10 @@ private:
   /// When true an error message is triggered so that the get/declare methods cannot be called
   /// outside of the object constructors.
   bool _initialized = false;
+
+  /// Names of objects that have been retrieved but not declared
+  std::set<ReporterName> _declare_names;
+  std::set<ReporterName> _get_names;
 };
 
 template <typename T>
@@ -171,7 +228,8 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool de
   // Creates the RestartableData object for storage in the MooseApp restart/recover system
   auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
 
-  // Limits the number of old/older values. It is possible to call get
+  // Limits the number of old/older values. It is possible to call get in any order so this
+  // needs to be setup first
   data_ptr->get().second.resize(ReporterData::HISTORY_CAPACITY);
   RestartableDataValue & value =
       _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
@@ -186,6 +244,9 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
                                Moose::ReporterMode mode,
                                const std::size_t time_index)
 {
+  // Update get names list
+  _get_names.insert(reporter_name);
+
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);
   state_ref.addConsumerMode(mode, object_name);
   return state_ref.value(time_index);
@@ -197,14 +258,53 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
                                    Moose::ReporterMode mode,
                                    Args &&... args)
 {
-  // The mode for the ReporterState must be must be se before ReporterContext is created to allow
-  // for custom context options to override the setting (e.g., BroadcastReporterContext))
+  // Update declared names list
+  _declare_names.insert(reporter_name);
+
+  // The mode for the ReporterState must be must be set before ReporterContext is created to allow
+  // for custom context options to override the setting (e.g., BroadcastReporterContext)
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
   state_ref.setProducerMode(mode);
 
   // Create the ReporterContext
   auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
   _context_ptrs.emplace(std::move(context_ptr));
-
   return state_ref.value();
+}
+
+template <typename T>
+bool
+ReporterData::hasReporterValue(const ReporterName & reporter_name) const
+{
+  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
+    return ptr->name() == reporter_name;
+  };
+  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
+  return ptr != _context_ptrs.end();
+}
+
+template <typename T>
+const T &
+ReporterData::getReporterValue(const ReporterName & reporter_name,
+                               const std::size_t time_index) const
+{
+  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
+    return ptr->name() == reporter_name;
+  };
+  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
+  if (ptr == _context_ptrs.end())
+    mooseError("The desired Reporter value '", reporter_name, "' does not exist.");
+  auto context_ptr = static_cast<const ReporterContext<T> *>(ptr->get());
+  return context_ptr->state().value(time_index);
+}
+
+template <typename T>
+void
+ReporterData::setReporterValue(const ReporterName & reporter_name,
+                               const T & value,
+                               const std::size_t time_index)
+{
+  // https://stackoverflow.com/questions/123758/how-do-i-remove-code-duplication-between-similar-const-and-non-const-member-func
+  const auto & me = *this;
+  const_cast<T &>(me.getReporterValue<T>(reporter_name, time_index)) = value;
 }

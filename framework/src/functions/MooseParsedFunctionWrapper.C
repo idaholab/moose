@@ -94,7 +94,7 @@ MooseParsedFunctionWrapper::initialize()
     // Case when a Postprocessor is found by the name given in the input values
     if (_feproblem.hasPostprocessor(_vals_input[i]))
     {
-      Real & pp_val = _feproblem.getPostprocessorValue(_vals_input[i]);
+      const Real & pp_val = _feproblem.getPostprocessorValueByName(_vals_input[i]);
       _initial_vals.push_back(pp_val);
       _pp_vals.push_back(&pp_val);
       _pp_index.push_back(i);

@@ -83,6 +83,7 @@ public:
                   ReporterState<T> & state,
                   const T & default_value);
   virtual const ReporterName & name() const final;
+  const ReporterState<T> & state() const;
   virtual void finalize() {}
 
 protected:
@@ -127,6 +128,13 @@ ReporterContext<T>::name() const
 }
 
 template <typename T>
+const ReporterState<T> &
+ReporterContext<T>::state() const
+{
+  return _state;
+}
+
+template <typename T>
 void
 ReporterContext<T>::init()
 {
@@ -158,7 +166,8 @@ ReporterContext<T>::init()
     //     DISTRIBUTED -> DISTRIBUTED
     //      REPLICATED -> ROOT
 
-    // Perform broadcast in the case of ROOT -> REPLICATED
+    // Perform broadcast in the case
+    //            ROOT -> REPLICATED
     if (producer == Moose::ReporterMode::ROOT && consumer == Moose::ReporterMode::REPLICATED)
       _auto_operation = ReporterContext::AutoOperation::BROADCAST;
 

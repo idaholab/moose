@@ -47,12 +47,15 @@ public:
    */
   const ReporterName & getReporterName() const;
 
+  ///@{
   /**
    * Return a reference to the current value or one of the old values.
    *
    * The time_index of 0 returns the current value, 1 returns old, 2 returns older, etc.
    */
   T & value(const std::size_t time_index = 0);
+  const T & value(const std::size_t time_index = 0) const;
+  ///@}
 
   /**
    * This object tracks the max requested index, which is used by the ReporterContext to manage
@@ -124,16 +127,28 @@ template <typename T>
 T &
 ReporterState<T>::value(const std::size_t time_index)
 {
+  // https://stackoverflow.com/questions/123758/how-do-i-remove-code-duplication-between-similar-const-and-non-const-member-func
+  const auto & me = *this;
+  return const_cast<T &>(me.value(time_index));
+}
+
+template <typename T>
+const T &
+ReporterState<T>::value(const std::size_t time_index) const
+{
   _max_requested_time_index = std::max(_max_requested_time_index, time_index);
   if (time_index == 0)
     return this->get().first;
-  else
-  {
-    mooseAssert(time_index - 1 < this->get().second.size(),
-                "The desired time index " << time_index << " is out of range of the size of "
-                                          << this->get().second.size());
-    return this->get().second[time_index - 1];
-  }
+  else if (time_index > this->get().second.size())
+    mooseError("The desired time index ",
+               time_index,
+               " does not exists for the '",
+               _reporter_name,
+               "' Reporter value, which contains ",
+               this->get().second.size(),
+               "old value(s). The getReporterValue method must be called with the desired time "
+               "index to be able to access data.");
+  return this->get().second[time_index - 1];
 }
 
 template <typename T>

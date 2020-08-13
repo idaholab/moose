@@ -100,8 +100,7 @@ TableOutput::outputPostprocessors()
   // Loop through the postprocessor names and extract the values from the PostprocessorData storage
   for (const auto & out_name : out)
   {
-    PostprocessorValue value = _problem_ptr->getPostprocessorValue(out_name);
-
+    const PostprocessorValue & value = _problem_ptr->getPostprocessorValueByName(out_name);
     _postprocessor_table.addData(out_name, value);
     _all_data_table.addData(out_name, value);
   }

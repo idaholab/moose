@@ -234,7 +234,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         declareRestartableDataWithContext<MaterialPropertyStorage>("bnd_material_props", &_mesh)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "neighbor_material_props", &_mesh)),
-    _pps_data(*this),
     _vpps_data(*this),
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
@@ -3333,13 +3332,6 @@ FEProblemBase::swapBackMaterialsNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblemBase::initPostprocessorData(const std::string & name)
-{
-  _pps_data.init(name);
-}
-
-void
-
 FEProblemBase::initVectorPostprocessorData(const std::string & name)
 {
   _vpps_data.init(name);
@@ -3479,28 +3471,64 @@ FEProblemBase::hasUserObject(const std::string & name) const
   return !objs.empty();
 }
 
-bool
-FEProblemBase::hasPostprocessor(const std::string & name)
+void
+FEProblemBase::initPostprocessorData(const std::string & name)
 {
-  return _pps_data.hasPostprocessor(name);
+  ReporterName r_name(name, "value");
+  if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
+    getReporterData().declareReporterValue<PostprocessorValue, ReporterContext>(
+        r_name, Moose::ReporterMode::UNSET);
+}
+
+bool
+FEProblemBase::hasPostprocessor(const std::string & name) const
+{
+  ReporterName r_name(name, "value");
+  return _reporter_data.hasReporterValue<PostprocessorValue>(r_name);
+}
+
+const PostprocessorValue &
+FEProblemBase::getPostprocessorValueByName(const PostprocessorName & name,
+                                           std::size_t t_index) const
+{
+  ReporterName r_name(name, "value");
+  return _reporter_data.getReporterValue<PostprocessorValue>(r_name, t_index);
+}
+
+void
+FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
+                                           const PostprocessorValue & value,
+                                           std::size_t t_index)
+{
+  ReporterName r_name(name, "value");
+  _reporter_data.setReporterValue<PostprocessorValue>(r_name, value, t_index);
 }
 
 PostprocessorValue &
 FEProblemBase::getPostprocessorValue(const PostprocessorName & name)
 {
-  return _pps_data.getPostprocessorValue(name);
+  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
+                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
+  const PostprocessorValue & value = getPostprocessorValueByName(name, 0);
+  return const_cast<PostprocessorValue &>(value);
 }
 
 PostprocessorValue &
 FEProblemBase::getPostprocessorValueOld(const std::string & name)
 {
-  return _pps_data.getPostprocessorValueOld(name);
+  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
+                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
+  const PostprocessorValue & value = getPostprocessorValueByName(name, 1);
+  return const_cast<PostprocessorValue &>(value);
 }
 
 PostprocessorValue &
 FEProblemBase::getPostprocessorValueOlder(const std::string & name)
 {
-  return _pps_data.getPostprocessorValueOlder(name);
+  mooseDeprecated("The 'FEProblemBase::getPostpostProcessorValue' is being removed to improve "
+                  "'const' correctness, it has been replaced by getPostprocessorValueByName");
+  const PostprocessorValue & value = getPostprocessorValueByName(name, 2);
+  return const_cast<PostprocessorValue &>(value);
 }
 
 const VectorPostprocessorData &
@@ -3772,7 +3800,8 @@ FEProblemBase::joinAndFinalize(TheWarehouse::Query query, bool isgen)
     // don't.
     auto pp = dynamic_cast<Postprocessor *>(obj);
     if (pp)
-      _pps_data.storeValue(pp->PPName(), pp->getValue());
+      setPostprocessorValueByName(obj->name(), pp->getValue());
+
     auto vpp = dynamic_cast<VectorPostprocessor *>(obj);
     if (vpp)
       _vpps_data.broadcastScatterVectors(vpp->PPName());
@@ -5077,7 +5106,6 @@ FEProblemBase::advanceState()
     _displaced_problem->auxSys().copyOldSolutions();
   }
 
-  _pps_data.copyValuesBack();
   _vpps_data.copyValuesBack();
   _reporter_data.copyValuesBack();
 
@@ -6290,7 +6318,6 @@ FEProblemBase::checkProblemIntegrity()
       checkDependMaterialsHelper(_all_materials.getActiveBlockObjects());
   }
 
-  // Check UserObjects and Postprocessors
   checkUserObjects();
 
   // Verify that we don't have any Element type/Coordinate Type conflicts
@@ -6376,13 +6403,6 @@ FEProblemBase::checkUserObjects()
     for (const auto & id : difference)
       oss << id << "\n";
     mooseError(oss.str());
-  }
-
-  // check that all requested UserObjects were defined in the input file
-  for (const auto & it : _pps_data.values())
-  {
-    if (names.find(it.first) == names.end())
-      mooseError("Postprocessor '" + it.first + "' requested but not specified in the input file.");
   }
 }
 

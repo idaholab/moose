@@ -69,11 +69,11 @@ MultiAppPostprocessorTransfer::execute()
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
 
-      Real pp_value = from_problem.getPostprocessorValue(_from_pp_name);
+      const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
         if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblemBase(i).getPostprocessorValue(_to_pp_name) = pp_value;
+          _multi_app->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
       break;
     }
     case FROM_MULTIAPP:
@@ -102,7 +102,8 @@ MultiAppPostprocessorTransfer::execute()
       {
         if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
         {
-          Real curr_pp_value = _multi_app->appProblemBase(i).getPostprocessorValue(_from_pp_name);
+          const Real & curr_pp_value =
+              _multi_app->appProblemBase(i).getPostprocessorValueByName(_from_pp_name);
           switch (_reduction_type)
           {
             case AVERAGE:
@@ -142,7 +143,7 @@ MultiAppPostprocessorTransfer::execute()
               "Can't get here unless someone adds a new enum and fails to add it to this switch");
       }
 
-      to_problem.getPostprocessorValue(_to_pp_name) = reduced_pp_value;
+      to_problem.setPostprocessorValueByName(_to_pp_name, reduced_pp_value);
       break;
     }
   }

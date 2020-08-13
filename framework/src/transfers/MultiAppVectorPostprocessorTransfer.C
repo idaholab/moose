@@ -69,7 +69,7 @@ MultiAppVectorPostprocessorTransfer::executeToMultiapp()
 
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
     if (_multi_app->hasLocalApp(i))
-      _multi_app->appProblemBase(i).getPostprocessorValue(_sub_pp_name) = vpp[i];
+      _multi_app->appProblemBase(i).setPostprocessorValueByName(_sub_pp_name, vpp[i]);
 }
 
 void
@@ -92,7 +92,7 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
 
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
     if (_multi_app->hasLocalApp(i))
-      vpp[i] = _multi_app->appProblemBase(i).getPostprocessorValue(_sub_pp_name);
+      vpp[i] = _multi_app->appProblemBase(i).getPostprocessorValueByName(_sub_pp_name);
 
   for (auto & v : vpp)
     _communicator.sum(v);

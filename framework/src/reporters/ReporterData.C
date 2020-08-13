@@ -25,6 +25,24 @@ ReporterData::init()
   // in arbitrary methods. It also allows for the vector storing the old/older values to be sized
   // correctly to only hold the data that is actually required for the simulation.
   _initialized = true;
+
+  // Create a set of values requested but not declared
+  std::set<ReporterName> undeclared;
+  std::set_difference(_get_names.begin(),
+                      _get_names.end(),
+                      _declare_names.begin(),
+                      _declare_names.end(),
+                      std::inserter(undeclared, undeclared.begin()));
+
+  // Perform error checking that all gets have a declare
+  if (!undeclared.empty())
+  {
+    std::ostringstream oss;
+    oss << "The following Reporter values were not declared:";
+    for (const auto & name : undeclared)
+      oss << "\n    " << name;
+    mooseError(oss.str());
+  }
 }
 
 void
@@ -37,7 +55,7 @@ ReporterData::copyValuesBack()
 void
 ReporterData::finalize(const std::string & object_name)
 {
-  // FYI, for the miniumum compiler 'auto' doesn't work in argument of the lambda
+  // FYI, for the minimum compiler 'auto' doesn't work in argument of the lambda
   // ReporterData.C:xx:xx: error: 'auto' not allowed in lambda parameter
   auto func = [object_name](const std::unique_ptr<ReporterContextBase> & ptr) {
     if (ptr->name().getObjectName() == object_name)
