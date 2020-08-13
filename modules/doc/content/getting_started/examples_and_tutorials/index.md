@@ -40,14 +40,14 @@ demonstrates and how to use it is provided here:
 - [Tutorial 1. Application Development](tutorial01_app_development/index.md)\\
   Learn how to develop a MOOSE-based application to solve coupled systems of differential equations in a multiphysics setting. This tutorial teaches you how to create custom MOOSE objects, setup input files to invoke these objects, and how to process and visualize the results of your simulations.
 
-## Workshop
+## Workshop id=workshop
 
-The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live workshops. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the workshop slides as well a recent video recordings of the workshop.
+The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live workshops. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the workshop slides and a recent video recording of the workshop<!--change this sentence to be a plural reference, "recording(s)," when/if more workshop recordings become available-->.
 
 - [Workshop Slideshow](https://www.mooseframework.org/workshop)
 - [MOOSE Workshop (Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
 
-MOOSE training events will typically be announced on the [home page](/), but be sure to join one of the [mailing lists](new_users.md#join) for further updates!
+MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join one of the [mailing lists](new_users.md#join) for further updates!
 
 ## C++ Programming References id=programming
 

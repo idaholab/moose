@@ -5,26 +5,33 @@ The first step of this tutorial is to create a custom MOOSE application. The app
 ## Create a GitHub Account
 
 Development of [!ac](MOOSE) is facilitated by [GitHub](https://github.com). It is recommend that applications
-also use GitHub if possible. Thus, the reader is encourgaged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created.. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
+also use GitHub if possible. Thus, the reader is encourgaged to [open an account](#account) and [create a *repository*](#repo) to store and track the progress of the new application that will be created. Following the completion of each tutorial step, for which new files have been created and tested, the additions and changes shall be saved (*commit*) and uploaded (*push*) to a remote repository.
 
 ## Run the Stork Script and Initialize the New Application id=stork
 
-To begin, please visit the [getting_started/installation/index.md] page to obtain instructions on how to install the MOOSE dependencies. Once these have been installed, and a local copy, or *clone*, of the [MOOSE repository](https://github.com/idaholab/moose) has been downloaded to `~/projects/moose`, a template application can be automatically generated. Before proceeding, be sure that the local copy of MOOSE is up-to-date (see [getting_started/installation/index.md#update]). MOOSE is constantly evolving, and it is important that the local copy of MOOSE is updated as often as possible to ensure that the application being developed operates with the mose current version of MOOSE..
-To initialize a new application, a name must be selected. For MOOSE applications, this is usually the name of an animal, e.g., [BISON](https://mooseframework.org/bison/). Sometimes, the application name is also an acronym for a more descriptive title, e.g., [MASTODON](https://mooseframework.org/mastodon/) stands for "Multi-hazard Analysis for STOchastic time-DOmaiN phenomena."
-For this application the name +Babbler+ was selected, but please feel free to choose another name. This tutorial application is designed to teach people the core concepts of MOOSE for creating custom applications. The name "Babbler" is in reference to the [pied babblers](https://en.wikipedia.org/wiki/Southern_pied_babbler), which is one animial known to teach it's young [(Thorton and Raihani, 2008)](https://doi.org/10.1016/j.anbehav.2007.12.014). A "babbler" is also defined as a ["a person who talks constantly"](https://www.merriam-webster.com/thesaurus/babbler), which in context of the live training is also true for the MOOSE team.
+To begin, please visit the [getting_started/installation/index.md] page to obtain instructions on how to install the MOOSE dependencies. Once these have been installed, and a local copy (*clone*) of the [MOOSE repository](https://github.com/idaholab/moose) has been downloaded to `~/projects/moose`, a template application can be automatically generated. Before proceeding, be sure that the local copy of MOOSE is up-to-date (see [getting_started/installation/index.md#update]). MOOSE is constantly evolving, and it is important that the local copy of MOOSE is updated as often as possible to ensure that the application being developed operates with the most current version of MOOSE.
 
-Once a name has been selected, exeucte the following command using the name chosen:
+To initialize a new application, a name must be selected. For MOOSE applications, this is usually the name of an animal, e.g., [BISON](https://mooseframework.org/bison/). Sometimes, the application name is also an acronym for a more descriptive title, e.g., [MASTODON](https://mooseframework.org/mastodon/) stands for "Multi-hazard Analysis for STOchastic time-DOmaiN phenomena."
+
+The name +Babbler+ was selected for the application referenced by demonstrations throughout this tutorial, but please feel free to choose another name. This tutorial application is designed to teach people the core concepts of MOOSE for creating custom applications. "Babbler" is a reference to [pied babblers](https://en.wikipedia.org/wiki/Southern_pied_babbler), an animal known to teach its young [(Thorton and Raihani, 2008)](https://doi.org/10.1016/j.anbehav.2007.12.014). A "babbler" is also defined as a ["a person who talks constantly"](https://www.merriam-webster.com/thesaurus/babbler), which, in context of the live training, is a fair description of MOOSE team members.
+
+!media tutorial01_app_development/pied_babblers.jpg
+       style=width:60%;margin-left:auto;margin-right:auto;
+       caption=Image of two Southern pied babblers. "Babbler" is used as a placeholder application name in demonstrations provided throughout this tutorial.
+<!--Probably will have to delete this, but I think this picture is adorable XD-->
+
+Once a name has been selected, execute the following command:
 
 ```bash
 cd ~/projects
-./moose/scripts/stork.sh Babbler
+./moose/scripts/stork.sh Babbler # substitute "Babbler" for some other name, if desired
 ```
 
 This will create directory, `~/projects/babbler`, that contains a new MOOSE application. The terminal will also prompt the user to initialize the new application as a GitHub repository, which will be discussed in the [#git] section.
 
 ### Compile the Application Executable id=make
 
-C++ is a compiled language. Therfore, the application code must be first transcribed into a single binary file. During this transcription, the code will be optimized for speed and data allocation. To compile the new application, run the following commands in a terminal, the number following the `make` command should be the number of processors available on you machine.
+C++ is a compiled language. Therefore, the application code must be first transcribed into a single binary file. During this transcription, the code will be optimized for speed and data allocation. To compile the new application, run the following commands in a terminal (the number following "`make -j`" should be less than, or equal to, the number of CPUs available):
 
 ```bash
 cd ~/projects/babbler
@@ -34,7 +41,7 @@ make -j4
 This will create an executable (binary) file called `babbler-opt` in the application root directory that can be used to run simulations. In addition to the application code, the above command will also compile code available from [`moose/framework/`](https://github.com/idaholab/moose/tree/master/framework). A MOOSE-based application always has the full power of MOOSE plus its own.
 
 !alert note title=Compiling C++ Code
-Each time a change is made to an application C++ file, the application will need to be recompiled by running `make` for the changes to take effect.
+Each time a change is made to a C++ file, the application will need to be recompiled, by running `make`, for the changes to take effect.
 
 *For more information about compiling MOOSE applications, please visit the [application_development/build_system.md] page.*
 
@@ -56,13 +63,13 @@ Ran 1 tests in 0.3 seconds.
 1 passed, 0 skipped, 0 pending, 0 failed
 ```
 
-Later in this tutorial, the testing system will be explored in greater detail and tests will be created for the babbler application.
+Later in this tutorial, the testing system will be explored in greater detail and tests will be created for the Babbler application.
 
 *For more information about the MOOSE testing system, please visit the [application_development/test_system.md] page.*
 
 ## Enable Use of GitHub id=git
 
-[Git](https://git-scm.com) is a version control system that enables teams of software developers to manage contributions to a single code base. When using Git, a `commit` is an update to the repository that marks a checkpoint to be revisited even after further changes are made. A repository's *commit log* shows the history of commits, and helps track the progression of code. A `push` uploads the local version of the repository with the local changes commited to the remote (online) repository.
+[Git](https://git-scm.com) is a version control system that enables teams of software developers to manage contributions to a single code base. When using Git, a `commit` is an update to the repository that marks a checkpoint to be revisited even after further changes are made. A repository's *commit log* shows the history of commits, and helps track the progression of code. A `push` uploads the local version of the repository to the remote (online) one.
 
 ### Open an Account id=account
 
@@ -70,9 +77,9 @@ To create an account with GitHub, please proceed to [github.com/join](https://gi
 
 ### Create a Repository id=repo
 
-Once an account has been created, Github's root page will transform into the user's personal dashboard. To create a new repository, click on the dashboard link that says "new," and name the repository `babbler` (or whatever name you selected). A description of the new MOOSE-based application may be helpful, but the user need not include a README, since the application directory that was created by the stork script already has one.
+Once an account has been created, Github's root page will transform into the user's personal dashboard. To create a new repository, click on the dashboard link that says "new," and name the repository `babbler` (or whatever the name of the application directory is). A description of the new MOOSE-based application may be helpful, but the user need not include a README, since the application directory that was created by the stork script already has one.
 
-The stork script initializes a new application with a single git commit whose message is "Initial Files." To publish the application to the new GitHub repository, run the following commands:
+The stork script initializes a new application with a single git commit whose message is "Initial files." To publish the application to the new GitHub repository, run the following commands:
 
 ```bash
 cd ~/projects/babbler
@@ -80,7 +87,7 @@ git remote add origin https://github.com/YourGitHubUserName/babbler
 git push -u origin master
 ```
 
-The terminal will prompt for GitHub account credentials before uploading the new repository. Once the data has been uploaded, a copy of the application will be found at `github.com/YourGitHubUserName/YourAppName`
+The terminal will prompt for GitHub account credentials before uploading the new repository. Once the data has been uploaded it can be viewed at `github.com/YourGitHubUserName/babbler`.
 
 ### Interacting with Git Using a Secure Shell (SSH) id=ssh
 

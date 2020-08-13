@@ -64,7 +64,7 @@ TENSOR_MECHANICS            := no
 XFEM                        := no
 ```
 
-Then, to begin using a modules capabilities, recompile the application in the same manner described in the [#compile] section.
+Then, to begin using a module's capabilities, recompile the application in the same manner described in the [#compile] section.
 
 !alert tip title=Only enable modules needed
 Each module enabled will increase compilation times, thus it is recommended to enable modules as-needed.
