@@ -114,9 +114,7 @@ cd $SCRIPT_DIR/../libmesh
 # If PETSC_DIR is not set in the environment (perhaps because the user is not using the MOOSE
 # package), we use the PETSc submodule
 if [ -z "$PETSC_DIR" ]; then
-  echo "We could not find an installed PETSc (no PETSC_DIR environment variable set), so the"
-  echo "PETSc submodule will be used. You may see some test failures until we officially support the"
-  echo "PETSc maint branch."
+  echo "PETSc submodule will be used. PETSc submodule is our default solver."
   echo "IMPORTANT: If you did not run the update_and_rebuild_petsc.sh script yet, please run it before building libMesh"
   export PETSC_DIR=$SCRIPT_DIR/../petsc
   if [ -z "$PETSC_ARCH" ]; then
@@ -149,7 +147,7 @@ if [ -z "$go_fast" ]; then
   if [[ -n "$CXXFLAGS" ]]; then
     export CXXFLAGS=${CXXFLAGS//-O2/}
   fi
-  
+
   $SCRIPT_DIR/../libmesh/configure INSTALL="${INSTALL_BINARY}" \
                                    --with-methods="${METHODS}" \
                                    --prefix=$LIBMESH_DIR \

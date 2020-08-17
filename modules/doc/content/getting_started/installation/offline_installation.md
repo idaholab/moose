@@ -60,18 +60,9 @@ git submodule foreach --recursive git submodule update --init
 With PETSc cloned as part of the group obtained above, we can use a configure option in PETSc, to obtain a list of contributions we will need to download manually (`--with-package-download-dir`):
 
 ```bash
-cd ~/offline/moose/petsc
-./configure \
- --download-mumps=1 \
- --download-hypre=1 \
- --download-slepc=1 \
- --download-metis=1 \
- --download-ptscotch=1 \
- --download-parmetis=1 \
- --download-scalapack=1 \
- --download-fblaslapack=1 \
- --download-superlu_dist=1 \
- --with-packages-download-dir=~/offline/downloads
+cd ~/offline/moose
+
+./scripts/update_and_rebuild_petsc.sh  --with-packages-download-dir=~/offline/downloads
 ```
 
 As an example, the above command, should return something like this:
@@ -82,15 +73,15 @@ As an example, the above command, should return something like this:
 ===============================================================================
 Download the following packages to /home/you/offline/downloads
 
-fblaslapack ['git://https://bitbucket.org/petsc/pkg-fblaslapack', 'https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p2.tar.gz']
+fblaslapack ['git://https://bitbucket.org/petsc/pkg-fblaslapack', 'https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p3.tar.gz']
 hypre ['git://https://github.com/hypre-space/hypre', 'https://github.com/hypre-space/hypre/archive/93baaa8c9.tar.gz']
 metis ['git://https://bitbucket.org/petsc/pkg-metis.git', 'https://bitbucket.org/petsc/pkg-metis/get/v5.1.0-p8.tar.gz']
 parmetis ['git://https://bitbucket.org/petsc/pkg-parmetis.git', 'https://bitbucket.org/petsc/pkg-parmetis/get/v4.0.3-p6.tar.gz']
-ptscotch ['git:https://gitlab.inria.fr/scotch/scotch', 'http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-v6.0.8.tar.gz']
+ptscotch ['git://https://gitlab.inria.fr/scotch/scotch.git', 'https://gitlab.inria.fr/scotch/scotch/-/archive/v6.0.9/scotch-v6.0.9.tar.gz', 'http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-v6.0.9.tar.gz']
 mumps ['git://https://bitbucket.org/petsc/pkg-mumps.git', 'https://bitbucket.org/petsc/pkg-mumps/get/v5.2.1-p2.tar.gz']
-scalapack ['git://https://bitbucket.org/petsc/pkg-scalapack', 'https://bitbucket.org/petsc/pkg-scalapack/get/v2.0.2-p2.tar.gz']
-superlu_dist ['git://https://github.com/xiaoyeli/superlu_dist', 'https://github.com/xiaoyeli/superlu_dist/archive/v6.2.0.tar.gz']
-slepc ['git://https://gitlab.com/slepc/slepc.git', 'https://gitlab.com/slepc/slepc/-/archive/bda551b/slepc-bda551b.tar.gz']
+scalapack ['git://https://bitbucket.org/petsc/pkg-scalapack', 'https://bitbucket.org/petsc/pkg-scalapack/get/v2.1.0-p1.tar.gz']
+superlu_dist ['git://https://github.com/xiaoyeli/superlu_dist', 'https://github.com/xiaoyeli/superlu_dist/archive/v6.3.0.tar.gz']
+slepc ['git://https://gitlab.com/slepc/slepc.git', 'https://gitlab.com/slepc/slepc/-/archive/v3.13.3/slepc-v3.13.3.tar.gz']
 ```
 
 Your job, will be to parse through the above jargon, and download these packages to `~/offline/downloads`. Be certain to preserve the file name. PETSc is listing several means for which you can obtain these contributions (using either git or traditional web link). For the purpose of simplicity, we will use the traditional web method.
@@ -99,15 +90,15 @@ Your job, will be to parse through the above jargon, and download these packages
 
 ```bash
 cd ~/offline/downloads
-curl -L -O https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p2.tar.gz
+curl -L -O https://bitbucket.org/petsc/pkg-fblaslapack/get/v3.4.2-p3.tar.gz
 curl -L -O https://github.com/hypre-space/hypre/archive/93baaa8c9.tar.gz
 curl -L -O https://bitbucket.org/petsc/pkg-metis/get/v5.1.0-p8.tar.gz
 curl -L -O https://bitbucket.org/petsc/pkg-parmetis/get/v4.0.3-p6.tar.gz
-curl -L -O http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-v6.0.8.tar.gz
+curl -L -O http://ftp.mcs.anl.gov/pub/petsc/externalpackages/scotch-v6.0.9.tar.gz
 curl -L -O https://bitbucket.org/petsc/pkg-mumps/get/v5.2.1-p2.tar.gz
-curl -L -O https://bitbucket.org/petsc/pkg-scalapack/get/v2.0.2-p2.tar.gz
-curl -L -O https://github.com/xiaoyeli/superlu_dist/archive/v6.2.0.tar.gz
-curl -L -O https://gitlab.com/slepc/slepc/-/archive/bda551b/slepc-bda551b.tar.gz
+curl -L -O https://bitbucket.org/petsc/pkg-scalapack/get/v2.1.0-p1.tar.gz
+curl -L -O https://github.com/xiaoyeli/superlu_dist/archive/v6.3.0.tar.gz
+curl -L -O https://gitlab.com/slepc/slepc/-/archive/v3.13.3/slepc-v3.13.3.tar.gz
 ```
 
 At this point, everything necessary should be downloaded and available in the directory hierarchy at `~/offline`. At this time, you may copy this directory to your offline-no-internet access machine's home directory. At the time of this writing, tallying up the disc space used equates to approximately ~2GB. Depending on your internet connection, you may want to compress the entire ~/offline directory instead (saves about 500Mb):
@@ -119,6 +110,7 @@ tar -pzcf offline.tar.gz offline
 
 !alert note
 If operating on a Macintosh machine, creating a tarball to be extracted on a Linux machine produces warnings. They are warnings only, and can be safely ignored.
+!alert-end!
 
 If copying the tarball over, you can extract it with:
 
@@ -147,29 +139,40 @@ The `which` command above should return the paths to your MPI wrappers establish
 With your compilers ready for use, we can now build PETSc:
 
 ```bash
-cd ~/offline/moose/petsc
-./configure \
- --download-mumps=1 \
- --download-hypre=1 \
- --download-slepc=1 \
- --download-metis=1 \
- --download-ptscotch=1 \
- --download-parmetis=1 \
- --download-scalapack=1 \
- --download-fblaslapack=1 \
- --download-superlu_dist=1 \
- --with-packages-download-dir=~/offline/downloads \
- --with-mpi=1 \
- --with-debugging=no \
- --with-cxx-dialect=C++11 \
- --with-fortran-bindings=0 \
- --with-shared-libraries=1 \
- --prefix=$HOME/libs/petsc && make && make install
+cd ~/offline/moose
+
+./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads --prefix=$HOME/libs/petsc
 ```
 
 Unfortunately, any errors incurred during the above step is going to be beyond the scope of this document. Most likely, an error will be related to a missing library by one of the myriad contributions we are asking to build PETSc with. Please submit a detailed log of the error, to our [moose-users mailing list](https://groups.google.com/forum/#!forum/moose-users). But do be prepared to be asked to contact your system administrator; Errors of this nature normally require admin rights to fulfill the dependency.
 
 Proceed only if PETSc completed successfully.
+
+!alert! note
+If you plan to run large-scale simulation, we recommend building petsc with 64-bit indices.
+That can be accomplished by using the following script:
+
+```bash
+cd ~/offline/moose
+
+unset PETSC_DIR PETSC_ARCH
+./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads --prefix=$HOME/libs/petsc --download-mumps=0 --with-64-bit-indices=1
+```
+!alert-end!
+
+!alert! note
+If you prefer to install PETSc in place (moose/petsc), then you need to take out `--prefix`, that is,
+
+```bash
+cd ~/offline/moose
+
+unset PETSC_DIR PETSC_ARCH
+./scripts/update_and_rebuild_petsc.sh --skip-submodule-update --with-packages-download-dir=~/offline/downloads
+```
+
+In this case, you need to `unset PETSC_DIR PETSC_ARCH` during libmesh compile.
+
+!alert-end!
 
 ### libMesh
 
@@ -179,24 +182,36 @@ First, we need to tell libMesh where PETSc is installed, and instruct libMesh to
 
 ```bash
 export PETSC_DIR=$HOME/libs/petsc
+export LIBMESH_DIR=$HOME/libs/libmesh
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
 ```
+
+!alert! note
+If you selected to install PETSc in place earlier, you do not need to set `PETSC_DIR`. libMesh
+will pick up PETSc from petsc submodule. You may do the following to unset `PETSC_DIR`:
+
+```bash
+unset PETSC_DIR PETSC_ARCH
+```
+
+!alert-end!
+
+!alert! note
+If you want to install libMesh in place, you do not need to set `LIBMESH_DIR`. libMesh
+will be installed to inside of libMesh submodule. You may do the following to unset `LIBMESH_DIR`:
+
+```bash
+unset LIBMESH_DIR
+```
+
+!alert-end!
+
 
 Now we can configure, build, and install libMesh:
 
 ```bash
-cd ~/offline/moose/libmesh
-./configure \
- --enable-silent-rules \
- --enable-unique-id \
- --disable-warnings \
- --enable-glibcxx-debugging \
- --with-thread-model=openmp \
- --disable-maintainer-mode \
- --enable-petsc-hypre-required \
- --enable-metaphysicl-required \
- --with-methods="opt dbg devel" \
- --prefix=$HOME/libs/libmesh && make -j 6 && make install
+cd ~/offline/moose
+./scripts/update_and_rebuild_libmesh.sh --skip-submodule-update
 ```
 
 Unfortunately, any errors incurred during these steps is going to be beyond the scope of this document. Please submit a detailed log of the error, to our [moose-users mailing list](https://groups.google.com/forum/#!forum/moose-users).
@@ -210,6 +225,16 @@ First, we need to tell MOOSE  where libMesh is:
 ```bash
 export LIBMESH_DIR=$HOME/libs/libmesh
 ```
+
+!alert! note
+As mentioned earlier, if libMesh is installed in place, you do no need to set `LIBMESH_DIR`.
+MOOSE will look for libMesh submodule.  
+
+```bash
+unset LIBMESH_DIR
+```
+
+!alert-end!
 
 Now we can build MOOSE:
 
@@ -228,8 +253,6 @@ With all the libraries built, you are now able to build your application. To rec
 ```bash
 export PATH=/some/path/to/MPI/bin:/some/path/to/GCC/bin:$PATH <--EXAMPLE, CHANGE ME
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
-export PETSC_DIR=$HOME/libs/petsc
-export LIBMESH_DIR=$HOME/libs/libmesh
 export MOOSE_DIR=$HOME/offline/moose
 ```
 

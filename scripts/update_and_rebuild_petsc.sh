@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 
 function exitIfExitCode() {
-    if [ $1 -ne 0 ]; then
+    # When --with-packages-download-dir=path is used, PETSc will print out how to
+    # download external packages. A system code 10 is used in this case. We should
+    # not consider it as error.
+    if [ $1 -eq 10 ]; then
+        exit 0
+    elif [ $1 -ne 0 ]; then
         printf "There was an error. Exiting...\n"
         exit 1
     fi
 }
 
+PFX_STR=''
 # Set go_fast flag if "--fast" is found in command line args.
 for i in "$@"
 do
@@ -23,6 +29,11 @@ do
     skip_sub_update=1;
   else # Remove the skip submodule update argument before passing to PETSc configure
     set -- "$@" "$i"
+  fi
+
+  # If users specify "--prefix", we need to make install
+  if [[ "$i" == "--prefix="* ]]; then
+    PFX_STR=$i
   fi
 done
 
@@ -74,11 +85,9 @@ if [[ -z "$go_fast" && -z "$skip_sub_update" && $? == 0 && "x$git_dir" == "x" ]]
 fi
 
 # Set installation prefix if given
-PFX_STR=''
 if [ ! -z "$PETSC_PREFIX" ]; then
   PFX_STR="--prefix=$PETSC_PREFIX"
 fi
-
 
 cd $SCRIPT_DIR/../petsc
 
@@ -110,7 +119,7 @@ fi
 make all -j ${MOOSE_JOBS:-1}
 exitIfExitCode $?
 
-if [ ! -z "$PETSC_PREFIX" ]; then
+if [ ! -z "$PFX_STR" ]; then
   make install
   exitIfExitCode $?
 fi

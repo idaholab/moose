@@ -1,64 +1,71 @@
-## PETSc
+## Compile PETSc
 
-Download PETSc [!package!petsc_default]
+By default, we use PETSc submodule inside of MOOSE as our nonlinear/linear solvers.
+PETSc can be built using the following script:
 
-!package code
-cd $STACK_SRC
-curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-__PETSC_DEFAULT__.tar.gz
-tar -xf petsc-__PETSC_DEFAULT__.tar.gz -C .
+```bash
+cd ~/projects/moose
 
+unset PETSC_DIR PETSC_ARCH
+./scripts/update_and_rebuild_petsc.sh
+```
 
-Now we configure, build, and install it
+!alert! note
+If you plan to run a large-scale simulation, we recommend building petsc with 64-bit indices.
+That can be accomplished by using the following scripts:
+
+```bash
+cd ~/projects/moose
+
+unset PETSC_DIR PETSC_ARCH
+./scripts/update_and_rebuild_petsc.sh --download-mumps=0 --with-64-bit-indices=1
+```
+
+!alert-end!
+
+!alert! note
+If you prefer to install PETSc into a specified location, you could use the following script:
+
+```bash
+cd ~/projects/moose
+
+unset PETSC_DIR PETSC_ARCH
+./scripts/update_and_rebuild_petsc.sh --prefix=/where/you/want/to/put/petsc
+```
+
+During the follow-up libMesh compile, you need to set `PETSC_DIR`, that is,
+
+```bash
+export PETSC_DIR=/where/you/want/to/put/petsc
+```
+!alert-end!
+
+If PETSc is built successfully, you should see some output like the following:
 
 !package! code max-height=400
-cd $STACK_SRC/petsc-__PETSC_DEFAULT__
+Now to check if the libraries are working do:
+make PETSC_DIR=/your/home/projects/moose/scripts/../petsc PETSC_ARCH=arch-moose check
 
-./configure \
---prefix=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ \
---with-debugging=0 \
---with-ssl=0 \
---with-pic=1 \
---with-openmp=1 \
---with-mpi=1 \
---with-shared-libraries=1 \
---with-cxx-dialect=C++11 \
---with-fortran-bindings=0 \
---with-sowing=0 \
---download-hypre=1 \
---download-fblaslapack=1 \
---download-metis=1 \
---download-ptscotch=1 \
---download-parmetis=1 \
---download-superlu_dist=1 \
---download-scalapack=1 \
---download-mumps=1 \
---download-slepc=1 \
-PETSC_DIR=`pwd` PETSC_ARCH=linux-opt
 !package-end!
 
-Once configure is done, we build PETSc
+You could optionally check if PETSc works as follows:
 
-!package code
-make PETSC_DIR=$STACK_SRC/petsc-__PETSC_DEFAULT__ PETSC_ARCH=linux-opt all
+```bash
+cd ./petsc
 
-Everything good so far? PETSc should be asking to run more make commands
+make PETSC_DIR=/your/home/projects/moose/scripts/../petsc PETSC_ARCH=arch-moose check
+```
 
-!package code
-make PETSC_DIR=$STACK_SRC/petsc-__PETSC_DEFAULT__ PETSC_ARCH=linux-opt install
+PETSc should produce the output like this:
 
-And now after the install, we can run some built-in tests
-
-!package code
-make PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ PETSC_ARCH="" test
-
-Running the tests should produce some output like the following:
-
-!package code
-[moose@centos-8 petsc-__PETSC_DEFAULT__]$ make PETSC_DIR=$PACKAGES_DIR/petsc-__PETSC_DEFAULT__ PETSC_ARCH="" test
-Running test examples to verify correct installation
-Using PETSC_DIR=/opt/moose/petsc-__PETSC_DEFAULT__ and PETSC_ARCH=
-C/C++ example src/snes/examples/tutorials/ex19 run successfully with 1 MPI process
-C/C++ example src/snes/examples/tutorials/ex19 run successfully with 2 MPI processes
-Fortran example src/snes/examples/tutorials/ex5f run successfully with 1 MPI process
+!package! code max-height=400
+Running check examples to verify correct installation
+Using PETSC_DIR=/your/home/projects/moose/scripts/../petsc and PETSC_ARCH=arch-moose
+C/C++ example src/snes/tutorials/ex19 run successfully with 1 MPI process
+C/C++ example src/snes/tutorials/ex19 run successfully with 2 MPI processes
+C/C++ example src/snes/tutorials/ex19 run successfully with hypre
+C/C++ example src/snes/tutorials/ex19 run successfully with mumps
+C/C++ example src/snes/tutorials/ex19 run successfully with superlu_dist
 Completed test examples
-=========================================
+
+!package-end!
