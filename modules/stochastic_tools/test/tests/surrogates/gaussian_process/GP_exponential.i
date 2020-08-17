@@ -74,6 +74,11 @@
     output_samples = true
     execute_on = final
   []
+  [hyperparams]
+    type = GaussianProcessData
+    gp_name = 'GP_avg'
+    execute_on = final
+  []
 []
 
 [Trainers]
@@ -87,6 +92,11 @@
     sampler = train_sample
     results_vpp = results
     results_vector = data:avg
+    tune = 'false'
+    tao_options = '-tao_bncg_type kd'
+    tune_parameters = ' signal_variance length_factor'
+    tuning_min = ' 1e-9 1e-9'
+    tuning_max = ' 1e16  1e16'
   []
 []
 
