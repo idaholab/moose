@@ -25,6 +25,9 @@ public:
 protected:
   ADRealTensorValue precomputeQpResidual() override;
 
+  /// This model calculates a kinematic viscosity, so rho must multiply this
+  const ADMaterialProperty<Real> & _rho;
+
   /// Value of Smagorinsky constant (dimensionless). The theory predicts this to be 0.18.
   Real _smagorinsky_constant;
 };

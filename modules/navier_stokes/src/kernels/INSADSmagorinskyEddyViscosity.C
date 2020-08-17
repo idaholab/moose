@@ -17,11 +17,15 @@ INSADSmagorinskyEddyViscosity::validParams()
   InputParameters params = ADVectorKernelGrad::validParams();
   params.addClassDescription("Computes eddy viscosity term using Smagorinky's LES model");
   params.addParam<Real>("smagorinsky_constant", 0.18, "Value of Smagorinsky's constant to use");
+  params.addParam<MaterialPropertyName>(
+      "rho_name", "rho", "The name of the density material property");
   return params;
 }
 
 INSADSmagorinskyEddyViscosity::INSADSmagorinskyEddyViscosity(const InputParameters & parameters)
-  : ADVectorKernelGrad(parameters), _smagorinsky_constant(getParam<Real>("smagorinsky_constant"))
+  : ADVectorKernelGrad(parameters),
+  _rho(getADMaterialProperty<Real>("rho_name")),
+  _smagorinsky_constant(getParam<Real>("smagorinsky_constant"))
 {
 }
 
@@ -40,6 +44,6 @@ INSADSmagorinskyEddyViscosity::precomputeQpResidual()
   return strain_rate_tensor_mag *
          std::pow(_smagorinsky_constant * std::pow(_current_elem_volume, one_third) /
                       _current_elem->default_order(),
-                  2) *
+                  2) * _rho[_qp] *
          _grad_u[_qp];
 }
