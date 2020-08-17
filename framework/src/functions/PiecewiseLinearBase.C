@@ -53,10 +53,18 @@ PiecewiseLinearBase::value(Real t, const Point & p) const
 }
 
 Real
-PiecewiseLinearBase::timeDerivative(Real t, const Point & p) const
+PiecewiseLinearBase::timeDerivative(Real t, const Point &) const
 {
-  const Real x = _has_axis ? p(_axis) : t;
-  return _scale_factor * _linear_interp->sampleDerivative(x);
+  return _has_axis ? 0.0 : _scale_factor * _linear_interp->sampleDerivative(t);
+}
+
+RealGradient
+PiecewiseLinearBase::gradient(Real, const Point & p) const
+{
+  RealGradient ret;
+  if (_has_axis)
+    ret(_axis) = _scale_factor * _linear_interp->sampleDerivative(p(_axis));
+  return ret;
 }
 
 Real
