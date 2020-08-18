@@ -27,7 +27,8 @@ def make_extension(**kwargs):
 ContentToken = tokens.newToken('ContentToken', location='', level=None)
 AtoZToken = tokens.newToken('AtoZToken', location='', level=None, buttons=True)
 TableOfContents = tokens.newToken('TableOfContents', levels=list(), columns=1, hide=[])
-ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6, hide=[])
+ContentOutline = tokens.newToken('ContentOutline', location=None, pages=list(), max_level=6,
+                                 hide=[], no_prefix=[], no_count=[])
 PaginationToken = tokens.newToken('PaginationToken', previous=None, next=None, use_title=False)
 
 LATEX_CONTENTLIST = """
@@ -177,6 +178,8 @@ class ContentOutlineCommand(command.CommandComponent):
         settings['pages'] = ('', "The pages to include in outline in desired order of appearance.")
         settings['max_level'] = (1, 'Maximum heading level to display.')
         settings['hide'] = ('', "A list of heading ids to hide.")
+        settings['no_prefix'] = ('', "A list of heading levels and/or ids to not show the prefixes for.")
+        settings['no_count'] = ('', "A list of heading levels and/or ids to not count the indices for.")
         return settings
 
     def createToken(self, parent, info, page):
@@ -184,14 +187,28 @@ class ContentOutlineCommand(command.CommandComponent):
             msg = "Either the 'location' or the 'pages' setting is required for the !content outline command."
             raise exceptions.MooseDocsException(msg)
         if self.settings['location'] is not None and self.settings['pages']:
-            msg = "The 'location' and 'pages' may not be specified simultaneously."
+            msg = "The 'location' and 'pages' settings must be used exclusively."
             raise exceptions.MooseDocsException(msg)
+
+        # split strings into lists and convert floats to ints to lists of strings
+        no_prefix = self.settings['no_prefix']
+        no_count = self.settings['no_count']
+        if isinstance(no_prefix, (str, str)):
+            no_prefix = no_prefix.split()
+        else:
+            no_prefix = [str(int(no_prefix))]
+        if isinstance(no_count, (str, str)):
+            no_count = no_count.split()
+        else:
+            no_count = [str(int(no_count))]
 
         return ContentOutline(parent,
                               location=self.settings['location'],
                               pages=self.settings['pages'].split(),
                               max_level=int(self.settings['max_level']),
-                              hide=self.settings['hide'].split())
+                              hide=self.settings['hide'].split(),
+                              no_prefix=no_prefix,
+                              no_count=no_count)
 
 class PaginationCommand(command.CommandComponent):
     COMMAND = 'content'
@@ -349,12 +366,14 @@ class RenderContentOutline(components.RenderComponent):
         elif token['pages'] and token['location'] is None:
             nodes = [self.translator.findPage(p) for p in token['pages']]
         else:
-            msg = "The 'location' and 'pages' tokens must be used exclusively."
+            msg = "The 'location' and 'pages' settings must be used exclusively."
             raise exceptions.MooseDocsException(msg)
 
         # Define convenience variables
-        hide = token['hide']
         max_level = token['max_level']
+        hide = token['hide']
+        no_prefix = token['no_prefix']
+        no_count = token['no_count']
         if max_level > 6 or max_level < 1:
             raise exceptions.MooseDocsException("The 'max_level' must be set in range of 1 to 6.")
 
@@ -387,6 +406,12 @@ class RenderContentOutline(components.RenderComponent):
                         for i in range(-diff):
                             ol = ol.parent.parent
                         li = html.Tag(ol, 'li')
+
+                    # override classes if list indices are being hidden or not counted
+                    if str(current) in no_count or key in no_count:
+                        li.addClass('moose-outline-no-count')
+                    elif str(current) in no_prefix or key in no_prefix:
+                        li.addClass('moose-outline-no-prefix')
 
                     url = pageref + '#{}'.format(key)
                     link = core.Link(None, url=url)
