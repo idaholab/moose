@@ -160,7 +160,7 @@ Transient::Transient(const InputParameters & parameters)
     _time_interval(declareRecoverableData<bool>("time_interval", false)),
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
-    _target_time(declareRecoverableData<Real>("target_time", -1)),
+    _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
@@ -535,8 +535,9 @@ Transient::computeConstrainedDT()
          << std::left << dt_cur << std::endl;
   }
 
-  // Adjust to a target time if set
-  if (_target_time > 0 && _time + dt_cur + _timestep_tolerance >= _target_time)
+  // If a target time is set and the current dt would exceed it, limit dt to match the target
+  if (_target_time > -std::numeric_limits<Real>::max() + _timestep_tolerance &&
+      _time + dt_cur + _timestep_tolerance >= _target_time)
   {
     dt_cur = _target_time - _time;
     _at_sync_point = true;
