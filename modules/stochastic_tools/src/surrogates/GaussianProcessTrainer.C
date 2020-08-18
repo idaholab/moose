@@ -220,14 +220,11 @@ GaussianProcessTrainer::hyperparamTuning()
 
 #ifdef LIBMESH_HAVE_PETSC
 PetscErrorCode ierr;
-Vec theta_vec, lower_vec, upper_vec;
 Tao tao;
 GaussianProcessTrainer * GP_ptr = this;
 
-// int num_hyper_params = _covariance_function->getNumTunable();
-
 // Setup Tao optimization problem
-ierr = TaoCreate(PETSC_COMM_WORLD, &tao);
+ierr = TaoCreate(MPI_COMM_WORLD, &tao);
 CHKERRQ(ierr);
 // ierr = PetscOptionsSetValue(NULL, "-tao_bncg_type", "kd");
 ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
@@ -238,24 +235,18 @@ ierr = TaoSetFromOptions(tao);
 CHKERRQ(ierr);
 
 // Define petsc vetor to hold tunalbe hyper-params
-VecCreate(PETSC_COMM_WORLD, &theta_vec);
-VecSetSizes(theta_vec, PETSC_DECIDE, _num_tunable);
-VecSetFromOptions(theta_vec);
-VecSet(theta_vec, 0);
-libMesh::PetscVector<Number> theta(theta_vec, _communicator);
-ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta_vec);
+libMesh::PetscVector<Number> theta(_communicator, _num_tunable);
+ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta.vec());
 CHKERRQ(ierr);
-ierr = TaoSetInitialVector(tao, theta_vec);
+ierr = TaoSetInitialVector(tao, theta.vec());
 CHKERRQ(ierr);
 
 // Get Hyperparameter bounds.
-VecDuplicate(theta_vec, &lower_vec);
-VecDuplicate(theta_vec, &upper_vec);
-libMesh::PetscVector<Number> lower(lower_vec, _communicator);
-libMesh::PetscVector<Number> upper(upper_vec, _communicator);
+libMesh::PetscVector<Number> lower(_communicator, _num_tunable);
+libMesh::PetscVector<Number> upper(_communicator, _num_tunable);
 buildHyperParamBounds(lower, upper);
 CHKERRQ(ierr);
-ierr = TaoSetVariableBounds(tao, lower_vec, upper_vec);
+ierr = TaoSetVariableBounds(tao, lower.vec(), upper.vec());
 CHKERRQ(ierr);
 
 // Set Objective and Graident Callback
@@ -266,7 +257,7 @@ CHKERRQ(ierr);
 // Solve
 ierr = TaoSolve(tao);
 CHKERRQ(ierr);
-
+//
 if (_show_tao)
 {
   ierr = TaoView(tao, PETSC_VIEWER_STDOUT_WORLD);
@@ -274,9 +265,6 @@ if (_show_tao)
 }
 
 _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-VecDestroy(&theta_vec);
-VecDestroy(&lower_vec);
-VecDestroy(&upper_vec);
 
 #endif // LIBMESH_HAVE_PETSC
 

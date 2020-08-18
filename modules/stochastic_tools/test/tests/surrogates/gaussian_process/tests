@@ -42,7 +42,7 @@
     type = CSVDiff
     input = GP_squared_exponential.i
     allow_test_objects = true
-    cli_args = 'Trainers/GP_avg_trainer/tune=true Outputs/file_base=GP_squared_exponential_tuned'
+    cli_args = 'Trainers/GP_avg_trainer/tune=true Covariance/covar/noise_variance=1e-3 Outputs/file_base=GP_squared_exponential_tuned'
     csvdiff = 'GP_squared_exponential_tuned_samp_avg_0002.csv GP_squared_exponential_tuned_results_0002.csv GP_squared_exponential_tuned_hyperparams_0002.csv'
     detail = 'then testing hyperparameter tuning for the squared exponential kernel, '
   []
@@ -50,7 +50,7 @@
     type = CSVDiff
     input = GP_exponential.i
     allow_test_objects = true
-    cli_args = 'Trainers/GP_avg_trainer/tune=true Outputs/file_base=GP_exponential_tuned'
+    cli_args = 'Trainers/GP_avg_trainer/tune=true Covariance/covar/noise_variance=1e-3 Outputs/file_base=GP_exponential_tuned'
     csvdiff = 'GP_exponential_tuned_samp_avg_0002.csv GP_exponential_tuned_results_0002.csv GP_exponential_tuned_hyperparams_0002.csv'
     detail = 'exponential kernel, '
   []
@@ -58,7 +58,7 @@
     type = CSVDiff
     input = GP_Matern_half_int.i
     allow_test_objects = true
-    cli_args = 'Trainers/GP_avg_trainer/tune=true Outputs/file_base=GP_Matern_half_int_tuned'
+    cli_args = 'Trainers/GP_avg_trainer/tune=true Covariance/covar/noise_variance=1e-3 Outputs/file_base=GP_Matern_half_int_tuned'
     csvdiff = 'GP_Matern_half_int_tuned_samp_avg_0002.csv GP_Matern_half_int_tuned_results_0002.csv GP_Matern_half_int_tuned_hyperparams_0002.csv'
     detail = 'and Matern half integer kernel.'
   []

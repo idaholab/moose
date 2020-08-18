@@ -26,7 +26,7 @@ public:
   virtual void finalize() override{};
 
 protected:
-  /// Reference to PolynomialChaos
+  /// Reference to GaussianProcess
   const GaussianProcess & _gp_uo;
 
   /// Vector of hyperparamater values

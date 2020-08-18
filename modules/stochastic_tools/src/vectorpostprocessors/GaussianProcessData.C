@@ -17,8 +17,9 @@ GaussianProcessData::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
   params += SurrogateModelInterface::validParams();
-  params.addClassDescription("Tool for extracting data from polynomial chaos user object and "
-                             "storing in VectorPostprocessor vectors.");
+  params.addClassDescription(
+      "Tool for extracting hyperparameter data from gaussian process user object and "
+      "storing in VectorPostprocessor vectors.");
   params.addRequiredParam<UserObjectName>("gp_name", "Name of GaussianProcess.");
   return params;
 }
