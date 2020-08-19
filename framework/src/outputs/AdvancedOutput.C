@@ -524,6 +524,9 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       _execute_data["postprocessors"].show.insert(var_name);
     else if (_problem_ptr->hasVectorPostprocessor(var_name))
       _execute_data["vector_postprocessors"].show.insert(var_name);
+    else if ((var_name.find("/") != std::string::npos) &&
+             (_problem_ptr->getReporterData().hasReporterValue(ReporterName(var_name))))
+      _execute_data["reporters"].show.insert(var_name);
     else
       unknown.insert(var_name);
   }

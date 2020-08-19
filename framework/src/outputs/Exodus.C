@@ -29,7 +29,8 @@ Exodus::validParams()
 {
   // Get the base class parameters
   InputParameters params = OversampleOutput::validParams();
-  params += AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor input");
+  params +=
+      AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor reporter input");
 
   // Enable sequential file output (do not set default, the use_displace criteria relies on
   // isParamValid, see Constructor)
@@ -300,6 +301,22 @@ Exodus::outputPostprocessors()
   {
     _global_names.push_back(name);
     _global_values.push_back(_problem_ptr->getPostprocessorValueByName(name));
+  }
+}
+
+void
+Exodus::outputReporters()
+{
+  for (const auto & combined_name : getReporterOutput())
+  {
+    ReporterName r_name(combined_name);
+    if (_problem_ptr->getReporterData().hasReporterValue<Real>(r_name) &&
+        !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
+    {
+      const Real & value = _problem_ptr->getReporterData().getReporterValue<Real>(r_name);
+      _global_names.push_back(r_name.getValueName());
+      _global_values.push_back(value);
+    }
   }
 }
 

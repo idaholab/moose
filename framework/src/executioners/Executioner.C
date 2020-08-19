@@ -104,24 +104,20 @@ Executioner::feProblem()
 PostprocessorValue &
 Executioner::addAttributeReporter(const std::string & name, Real initial_value)
 {
-  // TODO: Rather than create a Postprocessor object ReporterData::declareReporterValue can
-  //       just be called directly. Then to get it to show up in the CSV output the CSV output
-  //       object should just inspect for Reporter data of type Real
   FEProblemBase * problem = getCheckedPointerParam<FEProblemBase *>(
       "_fe_problem_base",
       "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
-  InputParameters params = _app.getFactory().getValidParams("Receiver");
-  params.set<Real>("default") = initial_value;
-  problem->addPostprocessor("Receiver", name, params);
-  problem->setPostprocessorValueByName(name, initial_value);
 
-  // Get a reference to the PP value
-  const PostprocessorValue & value = problem->getPostprocessorValueByName(name);
+  // Get a reference to the  value
+  ReporterName r_name(this->name(), name);
+  PostprocessorValue & value =
+      problem->getReporterData().declareReporterValue<Real, ReporterContext>(
+          r_name, Moose::ReporterMode::ROOT, initial_value);
 
   // Create storage for the old/older values
-  problem->getPostprocessorValueByName(name, 1);
-  problem->getPostprocessorValueByName(name, 2);
-
-  // This is a temporary solution until the above is implemented.
-  return const_cast<PostprocessorValue &>(value);
+  problem->getReporterData().getReporterValue<Real>(
+      r_name, this->name(), Moose::ReporterMode::ROOT, 1);
+  problem->getReporterData().getReporterValue<Real>(
+      r_name, this->name(), Moose::ReporterMode::ROOT, 2);
+  return value;
 }

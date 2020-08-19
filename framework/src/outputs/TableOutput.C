@@ -92,10 +92,11 @@ TableOutput::outputPostprocessors()
   // Add new row to the tables
   if (_postprocessor_table.empty() ||
       !MooseUtils::absoluteFuzzyEqual(_postprocessor_table.getLastTime(), time(), _new_row_tol))
-  {
     _postprocessor_table.addRow(time());
+
+  if (_all_data_table.empty() ||
+      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
     _all_data_table.addRow(time());
-  }
 
   // List of names of the postprocessors to output
   const std::set<std::string> & out = getPostprocessorOutput();
@@ -114,10 +115,11 @@ TableOutput::outputReporters()
 {
   if (_reporter_table.empty() ||
       !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
-  {
     _reporter_table.addRow(time());
+
+  if (_all_data_table.empty() ||
+      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
     _all_data_table.addRow(time());
-  }
 
   for (const auto & combined_name : getReporterOutput())
   {
