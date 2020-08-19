@@ -146,6 +146,20 @@ public:
   const std::set<std::string> & getVectorPostprocessorOutput();
 
   /**
+   * Returns true if there exists Reporter for output
+   * @return True if Reporter output exists
+   * @see getReporterOutput
+   */
+  bool hasReporterOutput();
+
+  /**
+   * The list of Reporter names that are set for output
+   * @return A vector  containing the names of the Reporter names for output
+   * @see hasReporterOutput
+   */
+  const std::set<std::string> & getReporterOutput();
+
+  /**
    * A method for enabling individual output type control
    * @param names (optional) Space separated of output type names that are supported by this Output
    * object,
@@ -254,6 +268,13 @@ protected:
    * By default this method does nothing and is not called by output()
    */
   virtual void outputSystemInformation();
+
+  /**
+   * Output Reporter values.
+   * The child class must define this method to output the Reporter values as desired
+   * @see CSV::outputReporters
+   */
+  virtual void outputReporters();
 
   /**
    * Flags to control nodal output

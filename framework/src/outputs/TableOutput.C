@@ -32,7 +32,7 @@ TableOutput::validParams()
 
   // Base class parameters
   InputParameters params = AdvancedOutput::validParams();
-  params += AdvancedOutput::enableOutputTypes("postprocessor scalar vector_postprocessor");
+  params += AdvancedOutput::enableOutputTypes("postprocessor scalar vector_postprocessor reporter");
 
   // Option for writing vector_postprocessor time file
   params.addParam<bool>("time_data",
@@ -71,6 +71,8 @@ TableOutput::TableOutput(const InputParameters & parameters)
                                   "vector_postprocessor_time_table")),
     _scalar_table(_tables_restartable ? declareRestartableData<FormattedTable>("scalar_table")
                                       : declareRecoverableData<FormattedTable>("scalar_table")),
+    _reporter_table(_tables_restartable ? declareRestartableData<FormattedTable>("reporter_table")
+                                        : declareRecoverableData<FormattedTable>("reporter_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table")
                                         : declareRecoverableData<FormattedTable>("all_data_table")),
     _new_row_tol(getParam<Real>("new_row_tolerance")),
@@ -79,6 +81,7 @@ TableOutput::TableOutput(const InputParameters & parameters)
 
 {
   // Set a Boolean indicating whether or not we will output the time column
+  _reporter_table.outputTimeColumn(_time_column);
   _postprocessor_table.outputTimeColumn(_time_column);
   _all_data_table.outputTimeColumn(_time_column);
 }
@@ -103,6 +106,29 @@ TableOutput::outputPostprocessors()
     const PostprocessorValue & value = _problem_ptr->getPostprocessorValueByName(out_name);
     _postprocessor_table.addData(out_name, value);
     _all_data_table.addData(out_name, value);
+  }
+}
+
+void
+TableOutput::outputReporters()
+{
+  if (_reporter_table.empty() ||
+      !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
+  {
+    _reporter_table.addRow(time());
+    _all_data_table.addRow(time());
+  }
+
+  for (const auto & combined_name : getReporterOutput())
+  {
+    ReporterName r_name(combined_name);
+    if (_problem_ptr->getReporterData().hasReporterValue<Real>(r_name) &&
+        !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
+    {
+      const Real & value = _problem_ptr->getReporterData().getReporterValue<Real>(r_name);
+      _reporter_table.addData(combined_name, value);
+      _all_data_table.addData(combined_name, value);
+    }
   }
 }
 

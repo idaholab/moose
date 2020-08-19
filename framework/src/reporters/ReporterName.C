@@ -10,8 +10,20 @@
 ReporterName::ReporterName(const std::string & object_name, const std::string & value_name)
   : _object_name(object_name),
     _value_name(value_name),
-    _combined_name(object_name + "_" + value_name)
+    _combined_name(object_name + "/" + value_name)
 {
+}
+
+ReporterName::ReporterName(const std::string & combined_name) : _combined_name(combined_name)
+{
+  std::size_t idx = combined_name.rfind("/");
+  if (idx != std::string::npos)
+  {
+    _object_name = combined_name.substr(0, idx);
+    _value_name = combined_name.substr(idx + 1);
+  }
+  else
+    mooseError("Invalid combined Reporter name: ", combined_name);
 }
 
 const std::string &
@@ -26,12 +38,24 @@ ReporterName::getValueName() const
   return _value_name;
 }
 
+const std::string &
+ReporterName::getCombinedName() const
+{
+  return _combined_name;
+}
+
 ReporterName::operator std::string() const { return _combined_name; }
 
 bool
 ReporterName::operator==(const ReporterName & rhs) const
 {
   return _combined_name == rhs._combined_name;
+}
+
+bool
+ReporterName::operator==(const std::string & combined_name) const
+{
+  return _combined_name == combined_name;
 }
 
 bool
@@ -57,6 +81,6 @@ ReporterName::operator=(const ReporterName & other)
 std::ostream &
 operator<<(std::ostream & os, const ReporterName & state)
 {
-  os << state.getObjectName() << "/" << state.getValueName();
+  os << state.getCombinedName();
   return os;
 }

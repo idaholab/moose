@@ -76,3 +76,22 @@ ReporterData::store(nlohmann::json & json) const
     context_ptr->store(node["value"]);
   }
 }
+
+bool
+ReporterData::hasReporterValue(const ReporterName & reporter_name) const
+{
+  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
+    return ptr->name() == reporter_name;
+  };
+  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
+  return ptr != _context_ptrs.end();
+}
+
+std::set<ReporterName>
+ReporterData::getReporterNames() const
+{
+  std::set<ReporterName> output;
+  for (const auto & context_ptr : _context_ptrs)
+    output.insert(context_ptr->name());
+  return output;
+}

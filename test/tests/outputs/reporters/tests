@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#11323'
+  design = 'Reporters/index.md'
+
+  [csv]
+    type = CSVDiff
+    input = reporter.i
+    csvdiff = reporter_out.csv
+
+    requirement = "The system shall automatically output scalar aggregated values to a comma separated (CSV) file."
+  []
+[]

@@ -119,6 +119,13 @@ CSV::outputVectorPostprocessors()
   _write_vector_table = true;
 }
 
+void
+CSV::outputReporters()
+{
+  TableOutput::outputReporters();
+  _write_all_table = true;
+}
+
 std::string
 CSV::getVectorPostprocessorFileName(const std::string & vpp_name,
                                     bool include_time_step,

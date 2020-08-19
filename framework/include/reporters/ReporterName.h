@@ -28,6 +28,7 @@ class ReporterName
 {
 public:
   ReporterName(const std::string & object_name, const std::string & value_name);
+  ReporterName(const std::string & object_and_value_name);
   ReporterName(const ReporterName & other);
   ReporterName & operator=(const ReporterName & other);
   ReporterName() {} // empty constructor for InputParameters
@@ -43,14 +44,20 @@ public:
   const std::string & getValueName() const;
 
   /**
+   * Return the data name for the Reporter value.
+   */
+  const std::string & getCombinedName() const;
+
+  /**
    * std::string operator allows this object to behave as a std::sting object
    */
   operator std::string() const;
 
   /**
-   * Compare with another object
+   * Compare with another object or string
    */
   bool operator==(const ReporterName & rhs) const;
+  bool operator==(const std::string & combined_name) const;
 
   /**
    * Less than operator

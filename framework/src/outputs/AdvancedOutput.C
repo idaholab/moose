@@ -94,7 +94,7 @@ MultiMooseEnum
 AdvancedOutput::getOutputTypes()
 {
   return MultiMooseEnum("nodal=0 elemental=1 scalar=2 postprocessor=3 vector_postprocessor=4 "
-                        "input=5 system_information=6");
+                        "input=5 system_information=6 reporter=7");
 }
 
 // Enables the output types (see getOutputTypes) for an AdvancedOutput object
@@ -144,7 +144,7 @@ AdvancedOutput::initialSetup()
   initShowHideLists(getParam<std::vector<VariableName>>("show"),
                     getParam<std::vector<VariableName>>("hide"));
 
-  // If 'elemental_as_nodal = true' the elemental variable names must be appended to the
+  // If 'elemental_as_nodal = true' the elemental variable names must be appended to thec
   // nodal variable names. Thus, when libMesh::EquationSystem::build_solution_vector is called
   // it will create the correct nodal variable from the elemental
   if (_elemental_as_nodal)
@@ -236,6 +236,13 @@ AdvancedOutput::outputInput()
              "'");
 }
 
+void
+AdvancedOutput::outputReporters()
+{
+  mooseError(
+      "Output of the Reporter value(s) is not support for this output object named '", name(), "'");
+}
+
 bool
 AdvancedOutput::shouldOutput(const ExecFlagType & type)
 {
@@ -292,6 +299,12 @@ AdvancedOutput::output(const ExecFlagType & type)
   {
     outputInput();
     _last_execute_time["input"] = _time;
+  }
+
+  if (wantOutput("reporters", type))
+  {
+    outputReporters();
+    _last_execute_time["reporters"] = _time;
   }
 }
 
@@ -426,6 +439,10 @@ AdvancedOutput::initAvailableLists()
     else if (_problem_ptr->hasScalarVariable(var_name))
       _execute_data["scalars"].available.insert(var_name);
   }
+
+  // Initialize Reporter name list
+  for (auto && r_name : _problem_ptr->getReporterData().getReporterNames())
+    _execute_data["reporters"].available.insert(r_name);
 }
 
 void
@@ -693,6 +710,14 @@ AdvancedOutput::addValidParams(InputParameters & params, const MultiMooseEnum & 
     params.addParamNamesToGroup("execute_vector_postprocessors_on", "Variables");
   }
 
+  // Reporters
+  if (types.contains("reporter"))
+  {
+    params.addParam<ExecFlagEnum>(
+        "execute_reporters_on", empty_execute_on, "Control of when Reporter values are output");
+    params.addParamNamesToGroup("execute_reporters_on", "Variables");
+  }
+
   // Input file
   if (types.contains("input"))
   {
@@ -781,6 +806,18 @@ const std::set<std::string> &
 AdvancedOutput::getVectorPostprocessorOutput()
 {
   return _execute_data["vector_postprocessors"].output;
+}
+
+bool
+AdvancedOutput::hasReporterOutput()
+{
+  return hasOutputHelper("reporters");
+}
+
+const std::set<std::string> &
+AdvancedOutput::getReporterOutput()
+{
+  return _execute_data["reporters"].output;
 }
 
 const OutputOnWarehouse &

@@ -122,6 +122,11 @@ protected:
   };
 
   /**
+   * Prints the Reporter values to the screen
+   */
+  virtual void outputReporters() override;
+
+  /**
    * Print system information
    */
   virtual void outputSystemInformation() override;

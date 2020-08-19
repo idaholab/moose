@@ -57,6 +57,16 @@ public:
   bool hasReporterValue(const ReporterName & reporter_name) const;
 
   /**
+   * Return True if a Reporter value with any type existss with the given name.
+   */
+  bool hasReporterValue(const ReporterName & reporter_name) const;
+
+  /**
+   * Return a list of all reporter names
+   */
+  std::set<ReporterName> getReporterNames() const;
+
+  /**
    * Method for returning read only references to Reporter values.
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the
@@ -280,7 +290,12 @@ ReporterData::hasReporterValue(const ReporterName & reporter_name) const
     return ptr->name() == reporter_name;
   };
   auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  return ptr != _context_ptrs.end();
+  if (ptr != _context_ptrs.end())
+  {
+    auto context = dynamic_cast<const ReporterContext<T> *>(ptr->get());
+    return context != nullptr;
+  }
+  return false;
 }
 
 template <typename T>
