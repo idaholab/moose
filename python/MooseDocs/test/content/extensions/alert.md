@@ -36,3 +36,6 @@ int x;
 
 !alert tip title=[Google](https://google.com)
 Title with link.
+
+!alert note title=[!ac](INL)
+Title with the [!ac](INL) acronym.
