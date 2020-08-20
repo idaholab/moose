@@ -110,6 +110,10 @@ MultiApp::validParams()
                                 "Maximum number of processors to give to each App in this "
                                 "MultiApp.  Useful for restricting small solves to just a few "
                                 "procs so they don't get spread out");
+  params.addParam<unsigned int>("min_procs_per_app",
+                                1,
+                                "Minimum number of processors to give to each App in this "
+                                "MultiApp.  Useful for larger, distributed mesh solves.");
 
   params.addParam<bool>(
       "output_in_position",
@@ -201,6 +205,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _inflation(getParam<Real>("bounding_box_inflation")),
     _bounding_box_padding(getParam<Point>("bounding_box_padding")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
+    _min_procs_per_app(getParam<unsigned int>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
     _reset_time(getParam<Real>("reset_time")),
@@ -776,6 +781,64 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     return _cli_args[local_app + _first_local_app];
 }
 
+LocalRankConfig
+rankConfig(unsigned int rank,
+           unsigned int nprocs,
+           unsigned int napps,
+           unsigned int min_app_procs,
+           unsigned int max_app_procs)
+{
+  if (min_app_procs > nprocs)
+    mooseError("minimum number of procs per app is higher than the available number of procs");
+  else if (min_app_procs > max_app_procs)
+    mooseError("minimum number of procs per app must be lower than the max procs per app");
+
+  mooseAssert(rank < nprocs, "rank must be smaller than the number of procs");
+
+  auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
+  unsigned int nslots = std::min(nprocs / slot_size, napps);
+  auto leftover_procs = nprocs - nslots * slot_size;
+  auto apps_per_slot = napps / nslots;
+  auto leftover_apps = napps % nslots;
+
+  std::vector<int> slot_for_rank(nprocs);
+  unsigned int slot = 0;
+  unsigned int procs_in_slot = 0;
+  for (unsigned int rankiter = 0; rankiter <= rank; rankiter++)
+  {
+    if (slot < nslots)
+      slot_for_rank[rankiter] = slot;
+    else
+      slot_for_rank[rankiter] = -1;
+    procs_in_slot++;
+    // this slot keeps growing until we reach slot size plus possibly an extra
+    // proc if there were any leftover from the slotization of nprocs - this
+    // must also make sure we don't go over max app procs.
+    if (procs_in_slot == slot_size + 1 * (slot < leftover_procs && slot_size < max_app_procs))
+    {
+      procs_in_slot = 0;
+      slot++;
+    }
+  }
+
+  auto slot_num = slot_for_rank[rank];
+  bool am_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_num);
+  auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
+
+  // ranks assigned a negative slot don't have any apps running on them.
+  if (slot_num < 0)
+    return {0, 0, false};
+
+  unsigned int app_index = 0;
+  for (unsigned int slot = 0; slot < slot_num; slot++)
+  {
+    auto num_slot_apps = apps_per_slot + 1 * (slot < leftover_apps);
+    app_index += num_slot_apps;
+  }
+
+  return {n_local_apps, app_index, am_first_local_rank};
+}
+
 void
 MultiApp::buildComm()
 {
@@ -794,90 +857,22 @@ MultiApp::buildComm()
   _node_name = "Unknown";
 #endif
 
-  // If we have more apps than processors then we're just going to divide up the work
-  if (_total_num_apps >= (unsigned)_orig_num_procs)
-  {
-    _my_comm = MPI_COMM_SELF;
-    _my_rank = 0;
-
-    _my_num_apps = _total_num_apps / _orig_num_procs;
-    unsigned int jobs_left = _total_num_apps - (_my_num_apps * _orig_num_procs);
-
-    if (jobs_left != 0)
-    {
-      // Spread the remaining jobs out over the first set of processors
-      if ((unsigned)_orig_rank < jobs_left) // (these are the "jobs_left_pids" ie the pids that are
-                                            // snatching up extra jobs)
-      {
-        _my_num_apps += 1;
-        _first_local_app = _my_num_apps * _orig_rank;
-      }
-      else
-      {
-        unsigned int num_apps_in_jobs_left_pids = (_my_num_apps + 1) * jobs_left;
-        unsigned int distance_to_jobs_left_pids = _orig_rank - jobs_left;
-
-        _first_local_app = num_apps_in_jobs_left_pids + (_my_num_apps * distance_to_jobs_left_pids);
-      }
-    }
-    else
-      _first_local_app = _my_num_apps * _orig_rank;
-
-    return;
-  }
-
-  // In this case we need to divide up the processors that are going to work on each app
   int rank;
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
-  // This will give the minimum processors per app
-  unsigned int procs_per_app = _orig_num_procs / _total_num_apps;
-  // This will give the number of apps that have one additional processor
-  unsigned int extra_proc_apps = _orig_num_procs % _total_num_apps;
+  auto config = rankConfig(
+      _orig_rank, _orig_num_procs, _total_num_apps, _min_procs_per_app, _max_procs_per_app);
+  _my_num_apps = config.num_local_apps;
+  _first_local_app = config.first_local_app_index;
 
-  // Index for the processor within a block of processors for an app
-  unsigned int block_ind = 0;
-  // Application index
-  unsigned int my_app = 0;
-  for (int i = 0; i < _orig_num_procs; ++i)
-  {
-    if (i == rank)
-    {
-      // Whether or not we have reached the requested maximum number of processors
-      if (block_ind < _max_procs_per_app)
-      {
-        _first_local_app = my_app;
-        _my_num_apps = 1;
-        _has_an_app = true;
-      }
-      else
-      {
-        _my_num_apps = 0;
-        _has_an_app = false;
-      }
-      break;
-    }
-    ++block_ind;
-
-    // Reset block index and increment app index
-    if (block_ind == procs_per_app)
-    {
-      block_ind = 0;
-      ++my_app;
-
-      // Increment the number of processors for every app after this point
-      if (my_app == (_total_num_apps - extra_proc_apps))
-        ++procs_per_app;
-    }
-  }
-
-  if (_first_local_app >= _total_num_apps)
+  bool has_an_app = config.num_local_apps > 0;
+  if (config.first_local_app_index >= _total_num_apps)
     mooseError("Internal error, a processor has an undefined app.");
 
-  if (_has_an_app)
+  if (has_an_app)
   {
-    _communicator.split(_first_local_app, rank, _my_communicator);
+    _communicator.split(config.first_local_app_index, rank, _my_communicator);
 
     ierr = MPI_Comm_rank(_my_comm, &_my_rank);
     mooseCheckMPIErr(ierr);
@@ -885,7 +880,6 @@ MultiApp::buildComm()
   else
   {
     _communicator.split(MPI_UNDEFINED, rank, _my_communicator);
-
     _my_rank = 0;
   }
 }
