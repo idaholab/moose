@@ -31,7 +31,7 @@ TODOs:
 
 ## Acronyms
 
-!acronym list
+!acronym list location=getting_started/examples_and_tutorials/tutorial01_app_development
 
 !content pagination previous=tutorial01_app_development/index.md
                     next=tutorial01_app_development/problem_statement.md
