@@ -29,13 +29,13 @@ protected:
   /// Coupled variable for the beam cross-sectional area
   const VariableValue & _area;
 
-  const MaterialProperty<Real> & _elastic_stretch;
-
   /// Mechanical displacement strain increment in truss local coordinate system
-  // const MaterialProperty<RealVectorValue> & _disp_strain_increment;
+  const MaterialProperty<RealVectorValue> & _disp_strain_increment;
 
   /// Material stiffness vector that relates displacement strain increment to force increment
   const MaterialProperty<Real> & _material_stiffness;
+
+  MaterialProperty<Real> & _axial_stress;
 
   /// Current force vector in global coordinate system
   MaterialProperty<Real> & _force;

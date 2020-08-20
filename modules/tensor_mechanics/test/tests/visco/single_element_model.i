@@ -5,7 +5,7 @@
   ny = 1
   nz = 1
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
+  # displacements = 'disp_x disp_y disp_z'
 []
 
 [Variables]
@@ -41,7 +41,7 @@
 [Kernels]
   [./TensorMechanics]
     displacements = 'disp_x disp_y disp_z'
-    use_displaced_mesh = true
+    # use_displaced_mesh = true
   [../]
 []
 
@@ -75,6 +75,7 @@
 [BCs]
   [./symmy]
     type = DirichletBC
+    # type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
@@ -91,47 +92,41 @@
     boundary = back
     value = 0
   [../]
-  # [./axial_load]
-  #   type = NeumannBC
-  #   variable = disp_x
-  #   boundary = right
-  #   value    = 10e6
-  # [../]
   [./axial_load]
     type = DirichletBC
     variable = disp_x
     boundary = right
-    value    = -1.97e-04
+    value    = -1.97e-4
   [../]
 []
 
 [Materials]
-  [./kelvin_voigt]
+  [./burgers]
     type = GeneralizedKelvinVoigtModel
-    # creep_modulus = '10e9 10e9'
-    # creep_viscosity = '1 10'
-    # poisson_ratio = 0.2
-    # young_modulus = 10e9
-    creep_modulus =   ' 1.515918662e3
-                        5.319148936e9
-                        6.150855892e1
-                        6.861628402e1
-                        4.484787600e1
-                        1.050831891e9'
-    creep_viscosity = ' 1.515918662e3
-                        5.319148936e10
-                        6.150855892e3
-                        6.861628402e4
-                        4.484787600e5
-                        1.050830000e14'
+    creep_modulus = '   1.52e06
+                        5.32e12
+                        6.15e04
+                        6.86e04
+                        4.48e04
+                        1.05e122' # data from TAMU
+    creep_viscosity = ' 1
+                        10
+                        100
+                        1000
+                        10000
+                        100000'  # data from TAMU
     poisson_ratio = 0.2
-    young_modulus = 3.368284903e10
+    young_modulus = 33682.84903
   [../]
   [./stress]
-    type = ComputeLinearViscoelasticStress
+    type = ComputeMultipleInelasticStress
+    inelastic_models = 'creep'
+  [../]
+  [./creep]
+    type = LinearViscoelasticStressUpdate
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -139,7 +134,7 @@
 [UserObjects]
   [./update]
     type = LinearViscoelasticityManager
-    viscoelastic_model = kelvin_voigt
+    viscoelastic_model = burgers
   [../]
 []
 
@@ -171,34 +166,32 @@
 [Executioner]
   type = Transient
 
-  l_max_its  = 100
-  l_tol      = 1e-8
-  nl_max_its = 50
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-8
+  l_max_its  = 50
+  l_tol      = 1e-10
+  nl_max_its = 20
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
 
   dtmin = 0.01
-  # end_time = 100
   end_time = 17000
   [./TimeStepper]
     type = LogConstantDT
     first_dt = 0.1
     log_dt = 0.1
   [../]
-
 []
 
 [Outputs]
-  # file_base = visco_small_strain_out
+  # file_base = single_element_creep_out
   # exodus = true
-  perf_graph     = true
-  csv = true
-  [./Console]
-    type = Console
-  [../]
-  [./Exo]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
 
+ perf_graph     = true
+ csv = true
+ [./Console]
+   type = Console
+ [../]
+ [./Exo]
+   type = Exodus
+   elemental_as_nodal = true
+ [../]
 []

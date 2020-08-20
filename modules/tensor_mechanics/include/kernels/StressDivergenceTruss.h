@@ -37,11 +37,11 @@ protected:
   /// Variable numbers corresponding to displacement variables
   std::vector<unsigned int> _disp_var;
 
-  /// Stiffness matrix relating displacement DOFs of same node or across nodes
-  const MaterialProperty<Real> & _e_over_l;
-
   /// Current force vector in global coordinate system
   const MaterialProperty<Real> & _force;
+
+  /// Stiffness matrix relating displacement DOFs of same node or across nodes
+  const MaterialProperty<Real> & _e_over_l;
 
   const std::vector<RealGradient> * _orientation;
 };

@@ -34,6 +34,5 @@ ComputeElasticityTruss::ComputeElasticityTruss(const InputParameters & parameter
 void
 ComputeElasticityTruss::computeQpProperties()
 {
-  // material_stiffness relates the translational strains to forces
   _material_stiffness[_qp] = _youngs_modulus[_qp];
 }

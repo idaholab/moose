@@ -72,8 +72,6 @@ StressDivergenceTensorsTruss::computeResidual()
   _local_re(0) = -force_local(_component);
   _local_re(1) = -_local_re(0);
 
-  out <<  " force " << _axial_stress[0] * _area[0] << " _local_re(0) "<<_local_re(0)<< " _local_re(1) " << _local_re(1) << std::endl;
-
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)

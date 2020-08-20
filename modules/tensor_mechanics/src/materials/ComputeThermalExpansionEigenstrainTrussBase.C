@@ -37,7 +37,7 @@ ComputeThermalExpansionEigenstrainTrussBase::computeQpEigenstrain()
   for (unsigned int i = 0; i < 2; ++i)
     node.push_back(_current_elem->node_ptr(i));
 
-  // calculate initial axis of the beam element
+  // calculate initial axis of the truss element
   for (unsigned int i = 0; i < 2; ++i)
     _initial_axis(i) = (*node[1])(i) - (*node[0])(i);
 
@@ -48,6 +48,6 @@ ComputeThermalExpansionEigenstrainTrussBase::computeQpEigenstrain()
   computeThermalStrain(thermal_strain);
 
   _disp_eigenstrain[_qp].zero();
-  // _rot_eigenstrain[_qp].zero();
-  _disp_eigenstrain[_qp] = _initial_axis * thermal_strain;
+  // _disp_eigenstrain[_qp] = _initial_axis * thermal_strain;
+  _disp_eigenstrain[_qp](0) = thermal_strain;
 }

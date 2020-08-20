@@ -43,8 +43,8 @@ StressDivergenceTruss::StressDivergenceTruss(const InputParameters & parameters)
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
-    _e_over_l(getMaterialPropertyByName<Real>("e_over_l")),
     _force(getMaterialPropertyByName<Real>("forces")),
+    _e_over_l(getMaterialPropertyByName<Real>("e_over_l")),
     _orientation(NULL)
 {
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -54,18 +54,23 @@ StressDivergenceTruss::StressDivergenceTruss(const InputParameters & parameters)
 void
 StressDivergenceTruss::initialSetup()
 {
+  out << "StressDivergenceTruss::initialSetup qp "<< _qp << std::endl;
   _orientation = &_subproblem.assembly(_tid).getFE(FEType(), 1)->get_dxyzdxi();
 }
 
 void
 StressDivergenceTruss::computeResidual()
 {
+  out << "computeResidual qp "<< _qp << std::endl;
+
   prepareVectorTag(_assembly, _var.number());
 
   mooseAssert(_local_re.size() == 2, "Truss element must have two nodes only.");
 
   RealGradient orientation((*_orientation)[0]);
   orientation /= orientation.norm();
+
+  out << " computeResidual " << _qp << " force " << _force[_qp] << std::endl;
 
   VectorValue<Real> force_local = _force[_qp] * orientation;
 
@@ -85,14 +90,18 @@ StressDivergenceTruss::computeResidual()
 Real
 StressDivergenceTruss::computeStiffness(unsigned int i, unsigned int j)
 {
+  out << "computeStiffness qp "<< _qp << std::endl;
   RealGradient orientation((*_orientation)[0]);
+  out << "computeStiffness1 orientation "<< orientation << std::endl;
   orientation /= orientation.norm();
+  out << "computeStiffness2 orientation "<< orientation << " _e_over_l "<< _e_over_l[_qp] << " return value " << orientation(i) * orientation(j) * _e_over_l[_qp] << std::endl;
   return orientation(i) * orientation(j) * _e_over_l[_qp];
 }
 
 void
 StressDivergenceTruss::computeJacobian()
 {
+  out << "computeJacobian qp "<< _qp << std::endl;
   prepareMatrixTag(_assembly, _var.number(), _var.number());
   for (unsigned int i = 0; i < _test.size(); ++i)
     for (unsigned int j = 0; j < _phi.size(); ++j)
@@ -117,6 +126,7 @@ StressDivergenceTruss::computeJacobian()
 void
 StressDivergenceTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
+  out << "computeOffDiagJacobian qp "<< _qp << std::endl;
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
