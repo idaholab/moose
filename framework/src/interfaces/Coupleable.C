@@ -260,13 +260,13 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
 VectorMooseVariable *
 Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
 {
-  if (_c_nodal)
-    mooseError("Nodal object '",
-               _c_name,
-               "' uses vector variables which are not required to be continuous. Don't use vector "
-               "variables"
-               "with nodal compute objects.");
-  return const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
+  auto * const var =
+      const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
+
+  if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
+    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+
+  return var;
 }
 
 ArrayMooseVariable *
@@ -284,13 +284,12 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp) const
 const VectorMooseVariable *
 Coupleable::getVectorVar(const std::string & var_name, unsigned int comp) const
 {
-  if (_c_nodal)
-    mooseError("Nodal object '",
-               _c_name,
-               "' uses vector variables which are not required to be continuous. Don't use vector "
-               "variables"
-               "with nodal compute objects.");
-  return getVarHelper<VectorMooseVariable>(var_name, comp);
+  const auto * const var = getVarHelper<VectorMooseVariable>(var_name, comp);
+
+  if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
+    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+
+  return var;
 }
 
 const ArrayMooseVariable *
