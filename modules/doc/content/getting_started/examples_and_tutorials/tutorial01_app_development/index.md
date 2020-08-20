@@ -11,11 +11,13 @@ This tutorial is the focus of the live hosted [examples_and_tutorials/index.md#w
        style=width:80%;margin-left:auto;margin-right:auto;
 <!--Delete this image from `large_media/` or just use it here? I think it looks kind of nice here-->
 
-## Tutorial Steps id=steps
+## Tutorial Contents id=contents
 
 !content outline location=getting_started/examples_and_tutorials/tutorial01_app_development
-                 hide=tutorial-1 steps
                  max_level=6
+                 hide=tutorial-1 contents
+                 no_prefix=1
+                 no_count=preface problem-statement
 
 !!!
 Each step should have the following basic components:
