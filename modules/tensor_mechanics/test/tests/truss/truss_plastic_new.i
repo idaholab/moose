@@ -54,7 +54,7 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = right
-    function = 't'
+    function = '-t'
   [../]
 []
 
@@ -82,18 +82,18 @@
     type = ElementIntegralMaterialProperty
     mat_prop = axial_stress
   [../]
-  [./e_xx]
-    type = ElementIntegralMaterialProperty
-    mat_prop = total_stretch
-  [../]
-  [./ee_xx]
-    type = ElementIntegralMaterialProperty
-    mat_prop = elastic_stretch
-  [../]
-  [./ep_xx]
-    type = ElementIntegralMaterialProperty
-    mat_prop = plastic_stretch
-  [../]
+  # [./e_xx]
+  #   type = ElementIntegralMaterialProperty
+  #   mat_prop = total_stretch
+  # [../]
+  # [./ee_xx]
+  #   type = ElementIntegralMaterialProperty
+  #   mat_prop = elastic_stretch
+  # [../]
+  # [./ep_xx]
+  #   type = ElementIntegralMaterialProperty
+  #   mat_prop = plastic_stretch
+  # [../]
 []
 
 [Executioner]
@@ -105,24 +105,34 @@
   nl_abs_tol = 1e-11
   l_max_its = 20
   dt = 5e-5
-  num_steps = 10
+  num_steps = 100
 []
 
 [Kernels]
   [./solid]
-    type = StressDivergenceTensorsTruss
+    type = StressDivergenceTruss
     component = 0
     variable = disp_x
-    area = area
+    # area = area
     save_in = react_x
   [../]
 []
 
 [Materials]
+  [./elasticity]
+    type = ComputeElasticityTruss
+    youngs_modulus = 1e6
+  [../]
+  [./strain]
+    type = ComputeIncrementalTrussStrain
+    displacements = 'disp_x'
+    area = area
+  [../]
   [./truss]
-    type = PlasticTruss
-    youngs_modulus = 2.0e11
+    type = ComputePlasticTrussResultants
+    area = area
     yield_stress = 500e5
+    hardening_constant = 0.
     outputs = exodus
   [../]
 []

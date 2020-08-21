@@ -43,16 +43,17 @@ ComputeIncrementalTrussStrain::validParams()
 ComputeIncrementalTrussStrain::ComputeIncrementalTrussStrain(const InputParameters & parameters)
   : Material(parameters),
     _ndisp(coupledComponents("displacements")),
-    _disp_num(_ndisp),
     _area(coupledValue("area")),
+    _material_stiffness(getMaterialPropertyByName<Real>("material_stiffness")),
+    _e_over_l(declareProperty<Real>("e_over_l")),
+
     _original_length(declareProperty<Real>("original_length")),
     _current_length(declareProperty<Real>("current_length")),
+
+    _large_strain(getParam<bool>("large_strain")),
     _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
     _total_disp_strain_old(getMaterialPropertyOld<RealVectorValue>("total_disp_strain")),
     _mech_disp_strain_increment(declareProperty<RealVectorValue>("mech_disp_strain_increment")),
-    _material_stiffness(getMaterialPropertyByName<Real>("material_stiffness")),
-    _e_over_l(declareProperty<Real>("e_over_l")),
-    _large_strain(getParam<bool>("large_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _disp_eigenstrain(_eigenstrain_names.size()),
     _disp_eigenstrain_old(_eigenstrain_names.size())
@@ -61,13 +62,6 @@ ComputeIncrementalTrussStrain::ComputeIncrementalTrussStrain(const InputParamete
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp_var.push_back(&_fe_problem.getStandardVariable(_tid, nl_vnames[i]));
-
-  // fetch coupled variables and gradients (as stateful properties if necessary)
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    MooseVariable * disp_variable = getVar("displacements", i);
-    _disp_num[i] = disp_variable->number();
-  }
 
   if (_large_strain)
     mooseError("ComputeIncrementalTrussStrain: Large strain calculation does not currently "
@@ -92,13 +86,22 @@ ComputeIncrementalTrussStrain::initQpStatefulProperties()
 void
 ComputeIncrementalTrussStrain::computeProperties()
 {
-  // check for consistency of the number of element nodes
-  mooseAssert(_current_elem->n_nodes() == 2, "Truss element needs to have exactly two nodes.");
+  // fetch the two end nodes for current element
+  std::vector<const Node *> node;
+  for (unsigned int i = 0; i < 2; ++i)
+    node.push_back(_current_elem->node_ptr(i));
 
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp){
-    out << "_qp " << _qp << " _qrule " << _qrule  << std::endl;
+  // calculate original length of a truss element
+  // Nodal positions do not change with time as undisplaced mesh is used by material classes by
+  // default
+  RealGradient dxyz;
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    dxyz(i) = (*node[1])(i) - (*node[0])(i);
+
+  _original_length[_qp] = dxyz.norm();
+
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpStrain();
-  }
 
   if (_fe_problem.currentlyComputingJacobian())
     computeStiffnessMatrix();
@@ -107,8 +110,6 @@ ComputeIncrementalTrussStrain::computeProperties()
 void
 ComputeIncrementalTrussStrain::computeQpStrain()
 {
-  out << "computeQpStrain qp "<< _qp << std::endl;
-
   std::vector<const Node *> node;
   for (unsigned int i = 0; i < 2; ++i)
     node.push_back(_current_elem->node_ptr(i));
@@ -133,37 +134,24 @@ ComputeIncrementalTrussStrain::computeQpStrain()
     dxyz(i) += disp1[i] - disp0[i];
   _current_length[_qp] = dxyz.norm();
 
-  _mech_disp_strain_increment[_qp](0) = (_current_length[_qp] / _original_length[_qp] - 1.0)* _area[_qp];
+  _mech_disp_strain_increment[_qp](0) = _current_length[_qp] / _original_length[_qp] - 1.0;
   _mech_disp_strain_increment[_qp](1) = 0.;
   _mech_disp_strain_increment[_qp](2) = 0.;
+
+  out << " _original_length " << _original_length[_qp] << " _current_length " << _current_length[_qp]<< " qp "<< _qp << " _mech_disp_strain_increment "<< _mech_disp_strain_increment[_qp](0) << std::endl;
 
   _total_disp_strain[_qp] = _mech_disp_strain_increment[_qp];
   for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
   {
-    _mech_disp_strain_increment[_qp] -=
-        ((*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp]) * _area[_qp];
-    // _mech_disp_strain_increment[_qp] -=
-    //     _total_rotation[0] * ((*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp]) *
-    //     _area[_qp];
+    _mech_disp_strain_increment[_qp] -= (*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp];
+
   }
 }
 
 void
 ComputeIncrementalTrussStrain::computeStiffnessMatrix()
 {
-  out << "computeStiffnessMatrix qp "<< _qp << std::endl;
-
-  std::vector<const Node *> node;
-  for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->node_ptr(i));
-  // calculate original length of a truss element
-  // Nodal positions do not change with time as undisplaced mesh is used by material classes by
-  // default
-  RealGradient dxyz;
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    dxyz(i) = (*node[1])(i) - (*node[0])(i);
-  _original_length[_qp] = dxyz.norm();
-
-  Real _e_over_l_local = _material_stiffness[_qp] * _area[_qp]  / _original_length[_qp];
+  const Real A_avg = (_area[0] + _area[1]) / 2.0;
+  Real _e_over_l_local = _material_stiffness[0] * A_avg / _original_length[0];
   _e_over_l[_qp] = _e_over_l_local;
 }

@@ -51,8 +51,10 @@ ComputePlasticTrussResultants::ComputePlasticTrussResultants(const InputParamete
 
     _plastic_strain(declareProperty<Real>("plastic_stretch")),
     _plastic_strain_old(getMaterialPropertyOld<Real>("plastic_stretch")),
-    // _stress_old(getMaterialPropertyOld<Real>("axial_stress")),
-    _force(getMaterialProperty<Real>("forces")),
+
+    _axial_stress(declareProperty<Real>("axial_stress")),
+    _axial_stress_old(declarePropertyOld<Real>("axial_stress")),
+    _force(declareProperty<Real>("forces")),
     _force_old(getMaterialPropertyOld<Real>("forces")),
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
@@ -74,23 +76,14 @@ ComputePlasticTrussResultants::initQpStatefulProperties()
   _hardening_variable[_qp] = 0.0;
 }
 
-// void
-// ComputePlasticTrussResultants::computeQpStrain()
-// {
-//   _total_stretch[_qp] = _current_length / _origin_length - 1.0;
-// }
-
 void
 ComputePlasticTrussResultants::computeQpStress()
 {
-
-
   // Real strain_increment = _total_stretch[_qp] - _total_stretch_old[_qp];
   Real strain_increment =_disp_strain_increment[_qp](0);
 
   // Real trial_stress = _stress_old[_qp] + _material_stiffness[_qp] * strain_increment;
-  Real stress_old = _force_old[_qp] / _area[_qp];
-  Real trial_stress = stress_old + _material_stiffness[_qp] * strain_increment;
+  Real trial_stress = _axial_stress_old[_qp] + _material_stiffness[_qp] * strain_increment / _area[_qp];
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
@@ -133,9 +126,10 @@ ComputePlasticTrussResultants::computeQpStress()
     elastic_strain_increment = strain_increment - plastic_strain_increment;
   }
   // _elastic_stretch[_qp] = _total_stretch[_qp] - _plastic_strain[_qp];
-  _elastic_stretch[_qp] = _disp_strain_increment[_qp] - _plastic_strain[_qp];
   // _axial_stress[_qp] = _stress_old[_qp] + _material_stiffness[_qp] * elastic_strain_increment;
+  _axial_stress[_qp] = _axial_stress_old[_qp] + _material_stiffness[_qp] * elastic_strain_increment;
   _force[_qp] = _force_old[_qp] * _area[_qp] + _material_stiffness[_qp] * elastic_strain_increment * _area[_qp];
+
 }
 
 Real

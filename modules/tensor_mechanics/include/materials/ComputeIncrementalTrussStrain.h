@@ -23,11 +23,11 @@ class ComputeIncrementalTrussStrain : public Material
 {
 public:
   static InputParameters validParams();
-  virtual void initQpStatefulProperties() override;
   ComputeIncrementalTrussStrain(const InputParameters & parameters);
   virtual void computeProperties() override;
 
 protected:
+  virtual void initQpStatefulProperties() override;
   /// Computes the displacement and rotation strain increments
   void computeQpStrain();
   /// Computes the stiffness matrices
@@ -37,20 +37,35 @@ protected:
 
   std::vector<MooseVariable *> _disp_var;
 
+  // /// Base name of the material system
+  // const std::string _base_name;
+
   /// Number of coupled displacement variables
   unsigned int _ndisp;
 
-  /// Variable numbers corresponding to the displacement variables
-  std::vector<unsigned int> _disp_num;
-
   /// Coupled variable for the truss cross-sectional area
   const VariableValue & _area;
+
+  /// Material stiffness vector that relates displacement strain increments to force increments
+  const MaterialProperty<Real> & _material_stiffness;
+
+  /// Stiffness matrix between displacement DOFs of same node or across nodes
+  MaterialProperty<Real> & _e_over_l;
 
   /// Initial length of the truss
   MaterialProperty<Real> & _original_length;
 
   /// Current length of the truss
   MaterialProperty<Real> & _current_length;
+
+  // MaterialProperty<Real> & _total_stretch;
+  // MaterialProperty<Real> & _elastic_stretch;
+
+  /// Boolean flag to turn on large strain calculation
+  const bool _large_strain;
+
+  /// Rotational transformation from global coordinate system to initial truss local configuration
+  RankTwoTensor _original_local_config;
 
   /// Current total displacement strain integrated over the cross-section in global coordinate system.
   MaterialProperty<RealVectorValue> & _total_disp_strain;
@@ -60,15 +75,6 @@ protected:
 
   /// Mechanical displacement strain increment (after removal of eigenstrains) integrated over the cross-section.
   MaterialProperty<RealVectorValue> & _mech_disp_strain_increment;
-
-  /// Material stiffness vector that relates displacement strain increments to force increments
-  const MaterialProperty<Real> & _material_stiffness;
-
-  /// Stiffness matrix between displacement DOFs of same node or across nodes
-  MaterialProperty<Real> & _e_over_l;
-
-  /// Boolean flag to turn on large strain calculation
-  const bool _large_strain;
 
   /// Vector of truss eigenstrain names
   std::vector<MaterialPropertyName> _eigenstrain_names;

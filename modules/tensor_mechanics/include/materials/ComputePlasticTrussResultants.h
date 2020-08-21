@@ -47,14 +47,16 @@ protected:
   // const MaterialProperty<Real> & _total_stretch_old;
   MaterialProperty<Real> & _plastic_strain;
   const MaterialProperty<Real> & _plastic_strain_old;
-  // const MaterialProperty<Real> & _stress_old;
+
+  MaterialProperty<Real> & _axial_stress;
+
+  const MaterialProperty<Real> & _axial_stress_old;
 
   // /// Current force vector in global coordinate system
   MaterialProperty<Real> & _force;
 
   /// Old force vector in global coordinate system
   const MaterialProperty<Real> & _force_old;
-
 
   MaterialProperty<Real> & _hardening_variable;
   const MaterialProperty<Real> & _hardening_variable_old;

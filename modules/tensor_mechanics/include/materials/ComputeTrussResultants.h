@@ -37,6 +37,8 @@ protected:
 
   MaterialProperty<Real> & _axial_stress;
 
+  const MaterialProperty<Real> & _axial_stress_old;
+
   /// Current force vector in global coordinate system
   MaterialProperty<Real> & _force;
 

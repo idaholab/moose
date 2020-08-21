@@ -29,6 +29,7 @@ ComputeTrussResultants::ComputeTrussResultants(const InputParameters & parameter
         getMaterialPropertyByName<RealVectorValue>("mech_disp_strain_increment")),
     _material_stiffness(getMaterialPropertyByName<Real>("material_stiffness")),
     _axial_stress(declareProperty<Real>("axial_stress")),
+    _axial_stress_old(getMaterialPropertyOld<Real>("axial_stress")),
     _force(declareProperty<Real>("forces")),
     _force_old(getMaterialPropertyOld<Real>("forces"))
 {
@@ -44,8 +45,8 @@ ComputeTrussResultants::initQpStatefulProperties()
 void
 ComputeTrussResultants::computeQpProperties()
 {
-  _force[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0) + _force_old[_qp];
-  _axial_stress[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0)/_area[_qp] + _force_old[_qp]/_area[_qp];
-
+  _force[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0) * _area[_qp] + _force_old[_qp];
+  _axial_stress[_qp] = _material_stiffness[_qp] * _disp_strain_increment[_qp](0) + _axial_stress_old[_qp];
+  
   out << " ComputeTrussResultants " << _qp << " force " << _force[_qp] << " disp strain_increment " << _disp_strain_increment[_qp] << std::endl;
 }
