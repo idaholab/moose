@@ -22,6 +22,17 @@
       detail = 'Weibull (3 parameter),'
     []
 
+    [betapearson]
+      type = CSVDiff
+      input = betapearson.i
+      csvdiff = 'betapearson_out.csv'
+      allow_test_objects = true
+      abs_zero = 5e-7
+      rel_err = 1e-3
+
+      detail = 'Beta (Pearson type 1)'
+    []
+
     [normal]
       type = CSVDiff
       input = normal.i
