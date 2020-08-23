@@ -38,7 +38,7 @@ HeatConductionBPD::computeLocalResidual()
 void
 HeatConductionBPD::computeLocalJacobian()
 {
-  for (_i = 0; _i < _test.size(); ++_i)
-    for (_j = 0; _j < _phi.size(); ++_j)
+  for (_i = 0; _i < _nnodes; ++_i)
+    for (_j = 0; _j < _nnodes; ++_j)
       _local_ke(_i, _j) += -1 * (_i == _j ? 1 : -1) * _bond_dQdT[0] * _bond_status;
 }

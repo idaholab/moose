@@ -33,11 +33,11 @@ ComputeSmallStrainVariableHorizonMaterialOSPD::computePeridynamicsParams()
   _a = 0.5 * (_bulk_modulus - (8.0 - _dim) / 3.0 * _shear_modulus);
 
   // _b = _bij * _horizon_i + _bji * _horizon_j
-  _b = _dim * _dim * (_bulk_modulus / 2.0 - _a) * (1.0 / _horiz_vol[0] + 1.0 / _horiz_vol[1]);
+  _b = _dim * _dim * (_bulk_modulus / 2.0 - _a) * (1.0 / _horizon_vol[0] + 1.0 / _horizon_vol[1]);
 
   // _d_i = _di * _horizon_i = _dim / _nvsum_i
-  _d[0] = _dim / _horiz_vol[0];
+  _d[0] = _dim / _horizon_vol[0];
 
   // _d_j = _dj * _horizon_j = _dim / _nvsum_j
-  _d[1] = _dim / _horiz_vol[1];
+  _d[1] = _dim / _horizon_vol[1];
 }

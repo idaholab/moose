@@ -30,6 +30,6 @@ ComputeSmallStrainVariableHorizonMaterialBPD::ComputeSmallStrainVariableHorizonM
 void
 ComputeSmallStrainVariableHorizonMaterialBPD::computePeridynamicsParams()
 {
-  _Cij = _dim * _dim * _bulk_modulus * (1.0 / _horiz_vol[0] + 1.0 / _horiz_vol[1]) /
+  _Cij = _dim * _dim * _bulk_modulus * (1.0 / _horizon_vol[0] + 1.0 / _horizon_vol[1]) /
          _origin_vec.norm();
 }

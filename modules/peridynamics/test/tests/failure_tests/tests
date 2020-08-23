@@ -8,19 +8,19 @@
     design = 'modules/peridynamics/StretchBasedFailureCriterionPD.md'
     issues = '#11561'
   [../]
-  [./2D_stress_failure_HNOSPD]
+  [./2D_stress_failure_H1NOSPD]
     type = 'Exodiff'
-    input = '2D_stress_failure_HNOSPD.i'
-    exodiff = '2D_stress_failure_HNOSPD.e'
+    input = '2D_stress_failure_H1NOSPD.i'
+    exodiff = '2D_stress_failure_H1NOSPD.e'
     map = false
     requirement = 'RankTwoBasedFailureCriteriaNOSPD shall determine the bond status based on given critical stress.'
     design = 'modules/peridynamics/RankTwoBasedFailureCriteriaNOSPD.md'
     issues = '#11561'
   [../]
-  [./2D_singular_shape_tensor_HNOSPD]
+  [./2D_singular_shape_tensor_H1NOSPD]
     type = 'Exodiff'
-    input = '2D_singular_shape_tensor_HNOSPD.i'
-    exodiff = '2D_singular_shape_tensor_HNOSPD.e'
+    input = '2D_singular_shape_tensor_H1NOSPD.i'
+    exodiff = '2D_singular_shape_tensor_H1NOSPD.e'
     map = false
     requirement = 'SingularShapeTensorEliminatorUserObjectPD shall remove singular shape tensor.'
     design = 'modules/peridynamics/SingularShapeTensorEliminatorUserObjectPD.md'
@@ -36,10 +36,10 @@
     design = 'modules/peridynamics/BondStatusConvergedPostprocessorPD.md'
     issues = '#15532'
   [../]
-  [./2D_bond_status_convergence_HNOSPD]
+  [./2D_bond_status_convergence_H1NOSPD]
     type = 'Exodiff'
-    input = '2D_bond_status_convergence_HNOSPD.i'
-    exodiff = '2D_bond_status_convergence_HNOSPD.e'
+    input = '2D_bond_status_convergence_H1NOSPD.i'
+    exodiff = '2D_bond_status_convergence_H1NOSPD.e'
     map = false
     requirement = 'The system shall provide a means for computing the number of peridynamic bonds that changed status during
                    the last Picard update to check convergence of the Picard iterations.'

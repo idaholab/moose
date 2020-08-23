@@ -49,18 +49,19 @@ MechanicsBPD::computeLocalJacobian()
                   (1.0 - _current_unit_vec(_component) * _current_unit_vec(_component)) /
                   _current_vec.norm();
 
-  for (_i = 0; _i < _test.size(); _i++)
-    for (_j = 0; _j < _phi.size(); _j++)
+  for (_i = 0; _i < _nnodes; ++_i)
+    for (_j = 0; _j < _nnodes; ++_j)
       _local_ke(_i, _j) += (_i == _j ? 1 : -1) * diag * _bond_status;
 }
 
 void
-MechanicsBPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
+MechanicsBPD::computeLocalOffDiagJacobian(unsigned int /* jvar_num */,
+                                          unsigned int coupled_component)
 {
   if (coupled_component == 3)
   {
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
+    for (_i = 0; _i < _nnodes; ++_i)
+      for (_j = 0; _j < _nnodes; ++_j)
         _local_ke(_i, _j) += (_i == 1 ? 1 : -1) * _current_unit_vec(_component) *
                              _bond_local_dfdT[_j] * _bond_status;
   }
@@ -70,8 +71,8 @@ MechanicsBPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
         _current_unit_vec(_component) * _current_unit_vec(coupled_component) * _bond_local_dfdU[0] -
         _bond_local_force[0] * _current_unit_vec(_component) *
             _current_unit_vec(coupled_component) / _current_vec.norm();
-    for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
+    for (_i = 0; _i < _nnodes; ++_i)
+      for (_j = 0; _j < _nnodes; ++_j)
         _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
   }
 }

@@ -2,7 +2,7 @@
 
 ## Description
 
-The `ComputePlaneSmallStrainNOSPD` Material calculates the strain tensor used in peridynamic correspondence model under small strain assumptions for two dimensional analysis.
+The `ComputePlaneSmallStrainNOSPD` Material calculates the strain tensor used in peridynamic correspondence models under small strain assumptions for two dimensional analysis.
 
 Note that Material `ComputePlaneFiniteStrainNOSPD` must be used for _weak_ plane stress and generalized plane strain models to incorporate the out-of-plane strain components.
 

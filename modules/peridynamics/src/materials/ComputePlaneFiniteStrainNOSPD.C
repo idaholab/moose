@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputePlaneFiniteStrainNOSPD.h"
-#include "RankTwoTensor.h"
 
 registerMooseObject("PeridynamicsApp", ComputePlaneFiniteStrainNOSPD);
 
@@ -18,7 +17,7 @@ ComputePlaneFiniteStrainNOSPD::validParams()
   InputParameters params = ComputeFiniteStrainNOSPD::validParams();
   params.addClassDescription(
       "Class for computing nodal quantities for residual and jacobian calculation "
-      "for peridynamic correspondence model under planar finite strain "
+      "for peridynamic correspondence models under planar finite strain "
       "assumptions");
 
   params.addCoupledVar("scalar_out_of_plane_strain",

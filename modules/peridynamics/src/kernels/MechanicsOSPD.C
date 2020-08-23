@@ -65,16 +65,17 @@ MechanicsOSPD::computeNonlocalResidual()
     for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
       if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       {
-        const Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
-        ivardofs[1 - nd] = neighbor_nb->dof_number(_sys.number(), _var.number(), 0);
-        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+        ivardofs[1 - nd] =
+            _pdmesh.nodePtr(neighbors[nb])->dof_number(_sys.number(), _var.number(), 0);
+        vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
-        // obtain bond ik's origin length and current orientation
-        origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb =
+            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-        for (unsigned int k = 0; k < _dim; ++k)
-          current_vec_nb(k) = origin_vec_nb(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
-                              _disp_var[k]->getNodalValue(*_current_elem->node_ptr(nd));
+        for (_i = 0; _i < _dim; ++_i)
+          current_vec_nb(_i) = origin_vec_nb(_i) +
+                               _disp_var[_i]->getNodalValue(*_pdmesh.nodePtr(neighbors[nb])) -
+                               _disp_var[_i]->getNodalValue(*_current_elem->node_ptr(nd));
 
         current_vec_nb /= current_vec_nb.norm();
 
@@ -90,15 +91,16 @@ MechanicsOSPD::computeNonlocalResidual()
         if (_has_save_in)
         {
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          for (unsigned int i = 0; i < _save_in.size(); ++i)
+          for (_i = 0; _i < _save_in.size(); ++_i)
           {
             std::vector<dof_id_type> save_in_dofs(2);
             save_in_dofs[nd] = _current_elem->node_ptr(nd)->dof_number(
-                _save_in[i]->sys().number(), _save_in[i]->number(), 0);
+                _save_in[_i]->sys().number(), _save_in[_i]->number(), 0);
             save_in_dofs[1 - nd] =
-                neighbor_nb->dof_number(_save_in[i]->sys().number(), _save_in[i]->number(), 0);
+                _pdmesh.nodePtr(neighbors[nb])
+                    ->dof_number(_save_in[_i]->sys().number(), _save_in[_i]->number(), 0);
 
-            _save_in[i]->sys().solution().add_vector(_local_re, save_in_dofs);
+            _save_in[_i]->sys().solution().add_vector(_local_re, save_in_dofs);
           }
         }
       }
@@ -113,18 +115,19 @@ MechanicsOSPD::computeLocalJacobian()
       _bond_local_force[0] * (1.0 - _current_unit_vec(_component) * _current_unit_vec(_component)) /
           _current_vec.norm();
 
-  for (_i = 0; _i < _test.size(); ++_i)
-    for (_j = 0; _j < _phi.size(); ++_j)
+  for (_i = 0; _i < _nnodes; ++_i)
+    for (_j = 0; _j < _nnodes; ++_j)
       _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
 }
 
 void
-MechanicsOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
+MechanicsOSPD::computeLocalOffDiagJacobian(unsigned int /* jvar_num */,
+                                           unsigned int coupled_component)
 {
   if (coupled_component == 3)
   {
-    for (_i = 0; _i < _test.size(); ++_i)
-      for (_j = 0; _j < _phi.size(); ++_j)
+    for (_i = 0; _i < _nnodes; ++_i)
+      for (_j = 0; _j < _nnodes; ++_j)
         _local_ke(_i, _j) +=
             (_i == 1 ? 1 : -1) * _current_unit_vec(_component) * _bond_local_dfdT[0] * _bond_status;
   }
@@ -135,8 +138,8 @@ MechanicsOSPD::computeLocalOffDiagJacobian(unsigned int coupled_component)
         _bond_local_force[0] * _current_unit_vec(_component) *
             _current_unit_vec(coupled_component) / _current_vec.norm();
 
-    for (_i = 0; _i < _test.size(); ++_i)
-      for (_j = 0; _j < _phi.size(); ++_j)
+    for (_i = 0; _i < _nnodes; ++_i)
+      for (_j = 0; _j < _nnodes; ++_j)
         _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
   }
 }
@@ -158,15 +161,16 @@ MechanicsOSPD::computeNonlocalJacobian()
     for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
       if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       {
-        const Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
-        ivardofs[1 - nd] = neighbor_nb->dof_number(_sys.number(), _var.number(), 0);
-        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+        ivardofs[1 - nd] =
+            _pdmesh.nodePtr(neighbors[nb])->dof_number(_sys.number(), _var.number(), 0);
+        vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
-        // obtain bond ik's origin length and current orientation
-        origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb =
+            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
         for (unsigned int k = 0; k < _dim; ++k)
-          current_vec_nb(k) = origin_vec_nb(k) + _disp_var[k]->getNodalValue(*neighbor_nb) -
+          current_vec_nb(k) = origin_vec_nb(k) +
+                              _disp_var[k]->getNodalValue(*_pdmesh.nodePtr(neighbors[nb])) -
                               _disp_var[k]->getNodalValue(*_current_elem->node_ptr(nd));
 
         current_vec_nb /= current_vec_nb.norm();
@@ -175,8 +179,8 @@ MechanicsOSPD::computeNonlocalJacobian()
                          _current_unit_vec(_component) * _bond_nonlocal_dfdU[nd];
 
         _local_ke.zero();
-        for (_i = 0; _i < _test.size(); ++_i)
-          for (_j = 0; _j < _phi.size(); ++_j)
+        for (_i = 0; _i < _nnodes; ++_i)
+          for (_j = 0; _j < _nnodes; ++_j)
             _local_ke(_i, _j) +=
                 (_i == _j ? 1 : -1) * val / origin_vec_nb.norm() * vol_nb * _bond_status;
 
@@ -184,23 +188,24 @@ MechanicsOSPD::computeNonlocalJacobian()
 
         if (_has_diag_save_in)
         {
-          unsigned int rows = _test.size();
+          unsigned int rows = _nnodes;
           DenseVector<Real> diag(rows);
-          for (unsigned int i = 0; i < rows; ++i)
-            diag(i) = _local_ke(i, i);
+          for (_i = 0; _i < rows; ++_i)
+            diag(_i) = _local_ke(_i, _i);
 
           diag(1 - nd) = 0;
 
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
+          for (_i = 0; _i < _diag_save_in.size(); ++_i)
           {
             std::vector<dof_id_type> diag_save_in_dofs(2);
             diag_save_in_dofs[nd] = _current_elem->node_ptr(nd)->dof_number(
-                _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
-            diag_save_in_dofs[1 - nd] = neighbor_nb->dof_number(
-                _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
+                _diag_save_in[_i]->sys().number(), _diag_save_in[_i]->number(), 0);
+            diag_save_in_dofs[1 - nd] =
+                _pdmesh.nodePtr(neighbors[nb])
+                    ->dof_number(_diag_save_in[_i]->sys().number(), _diag_save_in[_i]->number(), 0);
 
-            _diag_save_in[i]->sys().solution().add_vector(diag, diag_save_in_dofs);
+            _diag_save_in[_i]->sys().solution().add_vector(diag, diag_save_in_dofs);
           }
         }
 
@@ -209,8 +214,8 @@ MechanicsOSPD::computeNonlocalJacobian()
                           current_vec_nb.norm();
 
         _local_ke.zero();
-        for (_i = 0; _i < _test.size(); ++_i)
-          for (_j = 0; _j < _phi.size(); ++_j)
+        for (_i = 0; _i < _nnodes; ++_i)
+          for (_j = 0; _j < _nnodes; ++_j)
             _local_ke(_i, _j) +=
                 (_i == _j ? 1 : -1) * val2 / origin_vec_nb.norm() * vol_nb * _bond_status;
 
@@ -218,21 +223,22 @@ MechanicsOSPD::computeNonlocalJacobian()
 
         if (_has_diag_save_in)
         {
-          unsigned int rows = _test.size();
+          unsigned int rows = _nnodes;
           DenseVector<Real> diag(rows);
-          for (unsigned int i = 0; i < rows; ++i)
-            diag(i) = _local_ke(i, i);
+          for (_i = 0; _i < rows; ++_i)
+            diag(_i) = _local_ke(_i, _i);
 
           Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-          for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
+          for (_i = 0; _i < _diag_save_in.size(); ++_i)
           {
             std::vector<dof_id_type> diag_save_in_dofs(2);
             diag_save_in_dofs[nd] = _current_elem->node_ptr(nd)->dof_number(
-                _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
-            diag_save_in_dofs[1 - nd] = neighbor_nb->dof_number(
-                _diag_save_in[i]->sys().number(), _diag_save_in[i]->number(), 0);
+                _diag_save_in[_i]->sys().number(), _diag_save_in[_i]->number(), 0);
+            diag_save_in_dofs[1 - nd] =
+                _pdmesh.nodePtr(neighbors[nb])
+                    ->dof_number(_diag_save_in[_i]->sys().number(), _diag_save_in[_i]->number(), 0);
 
-            _diag_save_in[i]->sys().solution().add_vector(diag, diag_save_in_dofs);
+            _diag_save_in[_i]->sys().solution().add_vector(diag, diag_save_in_dofs);
           }
         }
       }
@@ -262,17 +268,18 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
     for (unsigned int nb = 0; nb < neighbors.size(); ++nb)
       if (_bond_status_var->getElementalValue(_pdmesh.elemPtr(bonds[nb])) > 0.5)
       {
-        const Node * neighbor_nb = _pdmesh.nodePtr(neighbors[nb]);
-        ivardofs[1 - nd] = neighbor_nb->dof_number(_sys.number(), _var.number(), 0);
-        jvardofs[1 - nd] = neighbor_nb->dof_number(_sys.number(), jvar_num, 0);
-        vol_nb = _pdmesh.getPDNodeVolume(neighbors[nb]);
+        ivardofs[1 - nd] =
+            _pdmesh.nodePtr(neighbors[nb])->dof_number(_sys.number(), _var.number(), 0);
+        jvardofs[1 - nd] = _pdmesh.nodePtr(neighbors[nb])->dof_number(_sys.number(), jvar_num, 0);
+        vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
-        // obtain bond nb's origin length and current orientation
-        origin_vec_nb = *neighbor_nb - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb =
+            *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
 
-        for (unsigned int j = 0; j < _dim; ++j)
-          current_vec_nb(j) = origin_vec_nb(j) + _disp_var[j]->getNodalValue(*neighbor_nb) -
-                              _disp_var[j]->getNodalValue(*_current_elem->node_ptr(nd));
+        for (_i = 0; _i < _dim; ++_i)
+          current_vec_nb(_i) = origin_vec_nb(_i) +
+                               _disp_var[_i]->getNodalValue(*_pdmesh.nodePtr(neighbors[nb])) -
+                               _disp_var[_i]->getNodalValue(*_current_elem->node_ptr(nd));
 
         current_vec_nb /= current_vec_nb.norm();
 
@@ -281,6 +288,7 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
         {
           const Real val =
               current_vec_nb(_component) * _bond_nonlocal_dfdT[nd] / origin_vec_nb.norm() * vol_nb;
+
           _local_ke(0, nd) += (nd == 0 ? -1 : 1) * val * _bond_status;
           _local_ke(1, nd) += (nd == 0 ? 1 : -1) * val * _bond_status;
         }
@@ -290,8 +298,8 @@ MechanicsOSPD::computePDNonlocalOffDiagJacobian(unsigned int jvar_num,
                            _current_unit_vec(coupled_component) * _bond_nonlocal_dfdU[nd] /
                            origin_vec_nb.norm() * vol_nb;
 
-          for (_i = 0; _i < _test.size(); ++_i)
-            for (_j = 0; _j < _phi.size(); ++_j)
+          for (_i = 0; _i < _nnodes; ++_i)
+            for (_j = 0; _j < _nnodes; ++_j)
               _local_ke(_i, _j) += (_i == _j ? 1 : -1) * val * _bond_status;
         }
 
