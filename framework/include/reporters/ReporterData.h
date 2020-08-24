@@ -43,11 +43,6 @@
 class ReporterData
 {
 public:
-  // The old/older values are stored in vector and this vector must have memory that doesn't
-  // get reallocated. This is because the calls to getReporterValue can occur in any order using
-  // any time index.
-  constexpr static std::size_t HISTORY_CAPACITY = 2; // old and older
-
   ReporterData(MooseApp & moose_app);
 
   /**
@@ -165,23 +160,6 @@ public:
   void copyValuesBack();
 
   /**
-   * Copies the current value to all the desired old values and shrinks the old value vector to
-   * the correct size based on the requested values. This also analyzes the mode that the value
-   * is produced verse the modes it is consumed to determine if communication is necessary or
-   * that the data not compatable.
-   *
-   * See InitReporterAction
-   */
-  void init();
-
-  /**
-   * Performs error checking.
-   *
-   * @see FEProblemBase::checkIntegrity FEProblemBase::check Reporters
-   */
-  void check() const;
-
-  /**
    * Return a set of undeclared names
    *
    * @see FEProblemBase::checkPostprocessors
@@ -195,12 +173,17 @@ public:
    */
   void store(nlohmann::json & json) const;
 
+  /**
+   * Perform integrity check for get/declare calls
+   */
+  void check() const;
+
 private:
   /// For accessing the restart/recover system, which is where Reporter values are stored
   MooseApp & _app;
 
   /**
-   * Helper object that for creating the necessary RestartableData for Reporter values.
+   * Helper method for creating the necessary RestartableData for Reporter values.
    * @tparam T The desired C++ type for the Reporter value
    * @param reporter_name Object/data name for the Reporter value
    * @param declare Flag indicating if the ReporterValue is being declared or read. This flag
@@ -210,16 +193,22 @@ private:
   template <typename T>
   ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare);
 
+  /**
+   * Helper method for returning the ReporterContextBase object, if it exists.
+   * @param reporter_name Object/data name for the Reporter value
+   */
+  const ReporterContextBase *
+  getReporterContextBaseHelper(const ReporterName & reporter_name) const;
+
   /// The ReporterContext objects are created when a value is declared. The context objects
   /// include a reference to the associated ReporterState values. This container stores the
   /// context object for each Reporter value.
+  ///
+  /// The declareReporterValue method relies on the emplace method, so this muse remain a std::set
+  /// to operate correctly with the initialization process.
   std::set<std::unique_ptr<ReporterContextBase>> _context_ptrs;
 
-  /// When true an error message is triggered so that the get/declare methods cannot be called
-  /// outside of the object constructors.
-  bool _initialized = false;
-
-  /// Names of objects that have been retrieved but not declared
+  /// Names of objects that have been declared
   std::set<ReporterName> _declare_names;
   std::set<ReporterName> _get_names;
 };
@@ -228,21 +217,11 @@ template <typename T>
 ReporterState<T> &
 ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool declare)
 {
-  // Avoid calling get/declare methods after object construction
-  if (_initialized)
-    mooseError("An attempt was made to declare or get Reporter data with the name '",
-               reporter_name,
-               "' after Reporter data was initialized, calls to get or declare Reporter data "
-               "should be made in the object constructor.");
-
   // Creates the RestartableData object for storage in the MooseApp restart/recover system
   auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
-
-  // Limits the number of old/older values. It is possible to call get in any order so this
-  // needs to be setup first
-  data_ptr->get().second.resize(ReporterData::HISTORY_CAPACITY);
   RestartableDataValue & value =
       _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
+
   auto & state_ref = static_cast<ReporterState<T> &>(value);
   return state_ref;
 }
@@ -254,9 +233,7 @@ ReporterData::getReporterValue(const ReporterName & reporter_name,
                                Moose::ReporterMode mode,
                                const std::size_t time_index)
 {
-  // Update get names list
   _get_names.insert(reporter_name);
-
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);
   state_ref.addConsumerMode(mode, object_name);
   return state_ref.value(time_index);
@@ -279,6 +256,11 @@ ReporterData::declareReporterValue(const ReporterName & reporter_name,
   // Create the ReporterContext
   auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
   _context_ptrs.emplace(std::move(context_ptr));
+
+  // Set the default state producer mode, if it remains UNSET after ReporterContext creation
+  if (state_ref.getProducerMode() == Moose::ReporterMode::UNSET)
+    state_ref.setProducerMode(Moose::ReporterMode::ROOT);
+
   return state_ref.value();
 }
 
@@ -286,13 +268,10 @@ template <typename T>
 bool
 ReporterData::hasReporterValue(const ReporterName & reporter_name) const
 {
-  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
-    return ptr->name() == reporter_name;
-  };
-  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  if (ptr != _context_ptrs.end())
+  auto ptr = getReporterContextBaseHelper(reporter_name);
+  if (ptr != nullptr)
   {
-    auto context = dynamic_cast<const ReporterContext<T> *>(ptr->get());
+    auto context = dynamic_cast<const ReporterContext<T> *>(ptr);
     return context != nullptr;
   }
   return false;
@@ -303,13 +282,10 @@ const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const std::size_t time_index) const
 {
-  auto func = [reporter_name](const std::unique_ptr<ReporterContextBase> & ptr) {
-    return ptr->name() == reporter_name;
-  };
-  auto ptr = std::find_if(_context_ptrs.begin(), _context_ptrs.end(), func);
-  if (ptr == _context_ptrs.end())
+  auto ptr = getReporterContextBaseHelper(reporter_name);
+  if (ptr == nullptr)
     mooseError("The desired Reporter value '", reporter_name, "' does not exist.");
-  auto context_ptr = static_cast<const ReporterContext<T> *>(ptr->get());
+  auto context_ptr = static_cast<const ReporterContext<T> *>(ptr);
   return context_ptr->state().value(time_index);
 }
 

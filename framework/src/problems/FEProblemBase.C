@@ -6327,6 +6327,9 @@ FEProblemBase::checkProblemIntegrity()
   // variables matches the order of the elements in the displaced
   // mesh.
   checkDisplacementOrders();
+
+  // Perform Reporter get/declare check
+  _reporter_data.check();
 }
 
 void

@@ -24,20 +24,12 @@
  *
  * @param name The name of the Reporter value
  *
- * NOTE:
- * From a pure design point of view the init/copyValuesBack methods of ReporterContext would be
- * within this class and the ReporterContext would just be a helper for parallel computation
- * on the producer side. However, the ReporterState must be of type RestartableData because it
- * is the object stored within MooseApp restart data structures. As such, it is not easy for this
- * class to have a non-templated base class that can be stored in ReporterData. Therefore,
- * these functions are located in ReporterContext. There is additional information regarding this
- * design choice in the ReporterData object comments.
- *
- * The producer/consumer modes must be stored on this object rather than the ReporterContext
- * for the same as above, since this state is created by either the get or declare calls.
+ * This class stores the old/older/... data using a std::list to allow for values to be inserted
+ * into the data structure without corrupting references to the other values. This allows for
+ * arbitrary time data to be stored.
  */
 template <typename T>
-class ReporterState : public RestartableData<std::pair<T, std::vector<T>>>
+class ReporterState : public RestartableData<std::pair<T, std::list<T>>>
 {
 public:
   ReporterState(const ReporterName & name);
@@ -56,12 +48,6 @@ public:
   T & value(const std::size_t time_index = 0);
   const T & value(const std::size_t time_index = 0) const;
   ///@}
-
-  /**
-   * This object tracks the max requested index, which is used by the ReporterContext to manage
-   * the old values
-   */
-  std::size_t getMaxRequestedTimeIndex() const;
 
   /**
    * Set the mode that the value is produced
@@ -92,12 +78,12 @@ public:
    */
   const std::set<std::pair<Moose::ReporterMode, std::string>> & getConsumerModes() const;
 
-private:
-  // This is mutable because the value() method increments it, but in practice th value() method
-  // should be const, since retrieving the data should not change it.
-  /// Tracking of the largest desired old value
-  mutable std::size_t _max_requested_time_index = 0;
+  /**
+   * Copy stored values back in time to old/older etc.
+   */
+  void copyValuesBack();
 
+private:
   /// Name of data that state is associated
   const ReporterName _reporter_name;
 
@@ -110,7 +96,7 @@ private:
 
 template <typename T>
 ReporterState<T>::ReporterState(const ReporterName & name)
-  : RestartableData<std::pair<T, std::vector<T>>>(
+  : RestartableData<std::pair<T, std::list<T>>>(
         "ReporterData/" + name.getObjectName() + "/" + name.getValueName(), nullptr),
     _reporter_name(name)
 {
@@ -127,16 +113,30 @@ template <typename T>
 T &
 ReporterState<T>::value(const std::size_t time_index)
 {
-  // https://stackoverflow.com/questions/123758/how-do-i-remove-code-duplication-between-similar-const-and-non-const-member-func
-  const auto & me = *this;
-  return const_cast<T &>(me.value(time_index));
+  if (time_index == 0)
+    return this->get().first;
+
+  else if (time_index > this->get().second.size())
+  {
+    // Get the current oldest value from the list
+    std::list<T> & old_values = this->get().second;
+    const T & oldest = old_values.empty() ? this->get().first : old_values.back();
+
+    // Add new elements to the current max size, filling with the oldest value that exists
+    for (std::size_t i = old_values.size(); i < time_index; ++i)
+      old_values.emplace_back(oldest);
+  }
+
+  // Return the desired value
+  auto iter = this->get().second.begin();
+  std::advance(iter, time_index - 1);
+  return *(iter);
 }
 
 template <typename T>
 const T &
 ReporterState<T>::value(const std::size_t time_index) const
 {
-  _max_requested_time_index = std::max(_max_requested_time_index, time_index);
   if (time_index == 0)
     return this->get().first;
   else if (time_index > this->get().second.size())
@@ -148,14 +148,10 @@ ReporterState<T>::value(const std::size_t time_index) const
                this->get().second.size(),
                "old value(s). The getReporterValue method must be called with the desired time "
                "index to be able to access data.");
-  return this->get().second[time_index - 1];
-}
 
-template <typename T>
-std::size_t
-ReporterState<T>::getMaxRequestedTimeIndex() const
-{
-  return _max_requested_time_index;
+  auto iter = this->get().second.begin();
+  std::advance(iter, time_index - 1);
+  return *(iter);
 }
 
 template <typename T>
@@ -185,4 +181,25 @@ const std::set<std::pair<Moose::ReporterMode, std::string>> &
 ReporterState<T>::getConsumerModes() const
 {
   return _consumer_modes;
+}
+
+template <typename T>
+void
+ReporterState<T>::copyValuesBack()
+{
+  // Ref. to the current
+  T & value = this->set().first;
+  std::list<T> & old_values = this->set().second;
+
+  // Copy data back in time
+  for (typename std::list<T>::reverse_iterator iter = old_values.rbegin();
+       iter != old_values.rend();
+       ++iter)
+  {
+    auto next_iter = std::next(iter, 1);
+    if (next_iter == old_values.rend())
+      (*iter) = value;
+    else
+      (*iter) = (*next_iter);
+  }
 }

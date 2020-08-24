@@ -473,7 +473,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddReporterAction", "Reporters/*");
   syntax.registerSyntaxType("Reporters/*", "ReporterName");
-  // registerSyntaxTask("InitReporterAction", "Reporters");
 
   registerSyntax("AddDamperAction", "Dampers/*");
 
