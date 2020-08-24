@@ -56,7 +56,7 @@ struct LocalRankConfig
   /// This is important for things like multiapp transfers where you want to
   /// only transfer data to a given subapp once even though it may be running on
   /// multiple procs/ranks.
-  bool am_first_local_rank;
+  bool is_first_local_rank;
 };
 
 /// Returns app partitioning information relevant to the given rank for a

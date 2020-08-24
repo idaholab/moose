@@ -112,7 +112,12 @@ public:
   dof_id_type getLocalRowBegin() const;
   dof_id_type getLocalRowEnd() const;
   ///@}
-  //
+
+  /// Any multiapps that use samplers should call this in their constructors
+  /// so that the sampler can retrieve relevant parameters for generating a
+  /// consistent rank<-->app partitioning with the multiapp for parallel runs.
+  /// This cannot be called with different/multiple multiapps on a single
+  /// sampler instance.
   void initForMultiApp(const MultiApp * multiapp);
 
 protected:

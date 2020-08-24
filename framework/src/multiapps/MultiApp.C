@@ -795,6 +795,9 @@ rankConfig(unsigned int rank,
 
   mooseAssert(rank < nprocs, "rank must be smaller than the number of procs");
 
+  // A "slot" is a group of procs/ranks that are grouped together to run a
+  // single (sub)app/sim in parallel.
+
   auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
   unsigned int nslots = std::min(nprocs / slot_size, napps);
   auto leftover_procs = nprocs - nslots * slot_size;
@@ -821,13 +824,13 @@ rankConfig(unsigned int rank,
     }
   }
 
-  auto slot_num = slot_for_rank[rank];
-  bool am_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_num);
-  auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
-
-  // ranks assigned a negative slot don't have any apps running on them.
-  if (slot_num < 0)
+  if (slot_for_rank[rank] < 0)
+    // ranks assigned a negative slot don't have any apps running on them.
     return {0, 0, false};
+  unsigned int slot_num = slot_for_rank[rank];
+
+  bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
+  auto n_local_apps = apps_per_slot + 1 * (slot_num < leftover_apps);
 
   unsigned int app_index = 0;
   for (unsigned int slot = 0; slot < slot_num; slot++)
@@ -836,7 +839,7 @@ rankConfig(unsigned int rank,
     app_index += num_slot_apps;
   }
 
-  return {n_local_apps, app_index, am_first_local_rank};
+  return {n_local_apps, app_index, is_first_local_rank};
 }
 
 void

@@ -116,7 +116,7 @@ Sampler::initForMultiApp(const MultiApp * multiapp)
   LocalRankConfig config;
   if (multiapp)
     // we must generate a partioning consistent with the one used by the
-    // multiapp and its subapps.
+    // multiapp and its subapps. See MultiApp::buildComm
     config = rankConfig(processor_id(),
                         n_processors(),
                         _n_rows,
@@ -132,7 +132,7 @@ Sampler::initForMultiApp(const MultiApp * multiapp)
 
   // Only one processor can "own" each sample - even if the sample/app itself
   // will run on multiple procs/ranks:
-  if (config.am_first_local_rank)
+  if (config.is_first_local_rank)
     _n_local_rows = config.num_local_apps;
   else
     _n_local_rows = 0;
