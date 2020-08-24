@@ -19,6 +19,7 @@ ifeq ($(ALL_MODULES),yes)
         CONTACT                     := yes
         EXTERNAL_PETSC_SOLVER       := yes
         FLUID_PROPERTIES            := yes
+        FLUID_STRUCTURE_INTERACTION := yes
         FUNCTIONAL_EXPANSION_TOOLS  := yes
         GEOCHEMISTRY                := yes
         HEAT_CONDUCTION             := yes
@@ -63,8 +64,16 @@ ifeq ($(XFEM),yes)
         TENSOR_MECHANICS            := yes
 endif
 
+ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
+        TENSOR_MECHANICS            := yes
+        NAVIER_STOKES               := yes
+	FLUID_PROPERTIES            := yes
+	RDG                         := yes
+	HEAT_CONDUCTION             := yes
+endif
+
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fluid_structure_interaction functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -217,6 +226,15 @@ ifeq ($(CONTACT),yes)
 	# Dependency on tensor mechanics
   DEPEND_MODULES     := tensor_mechanics
   SUFFIX             := con
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(FLUID_STRUCTURE_INTERACTION),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_structure_interaction
+  APPLICATION_NAME   := fluid_structure_interaction
+
+  DEPEND_MODULES     := tensor_mechanics navier_stokes
+  SUFFIX             := fsi
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
