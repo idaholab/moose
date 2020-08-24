@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "Sampler.h"
+#include "MultiApp.h"
 
 defineLegacyParams(Sampler);
 
@@ -85,54 +86,9 @@ Sampler::init()
   if (_initialized)
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
-  // TODO: If Sampler is updated to be threaded, this partitioning must also include threads
-  if (_n_rows > 0 && n_processors() > _n_rows)
-  {
-    // This code is specifically to match what is going on in MulitApp::buildComm()
-    // This will give the minimum processors per row
-    unsigned int procs_per_row = n_processors() / _n_rows;
-    // This will give the number of rows that have one additional processor
-    unsigned int extra_proc_rows = n_processors() % _n_rows;
-
-    // Index for the processor within a block of processors for a row
-    unsigned int block_ind = 0;
-    // Sample row
-    _local_row_begin = 0;
-    for (unsigned int i = 0; i < n_processors(); ++i)
-    {
-      if (i == processor_id())
-      {
-        if (block_ind == 0)
-          _n_local_rows = 1;
-        else
-        {
-          ++_local_row_begin;
-          _n_local_rows = 0;
-        }
-        break;
-      }
-      ++block_ind;
-
-      // Reset block index and increment row index
-      if (block_ind == procs_per_row)
-      {
-        block_ind = 0;
-        ++_local_row_begin;
-
-        // Increment the number of processors for every app after this point
-        if (_local_row_begin == (_n_rows - extra_proc_rows))
-          ++procs_per_row;
-      }
-    }
-
-    _local_row_end = _local_row_begin + _n_local_rows;
-  }
-  else
-    MooseUtils::linearPartitionItems(
-        _n_rows, n_processors(), processor_id(), _n_local_rows, _local_row_begin, _local_row_end);
-
-  // Set the next row iterator index
-  _next_local_row = _local_row_begin;
+  // do generic initialization in case no multi-apps are in use that will
+  // call this themselves.
+  initForMultiApp(nullptr);
 
   // Seed the "master" seed generator
   const unsigned int seed = getParam<unsigned int>("seed");
@@ -148,6 +104,42 @@ Sampler::init()
 
   // Mark class as initialized, which locks out certain methods
   _initialized = true;
+}
+
+void
+Sampler::initForMultiApp(const MultiApp * multiapp)
+{
+  if (_curr_multiapp)
+    mooseError("1 sampler cannot be shared by more than 1 MultiApp");
+  _curr_multiapp = multiapp;
+
+  LocalRankConfig config;
+  if (multiapp)
+    // we must generate a partioning consistent with the one used by the
+    // multiapp and its subapps.
+    config = rankConfig(processor_id(),
+                        n_processors(),
+                        _n_rows,
+                        multiapp->minProcsPerApp(),
+                        multiapp->maxProcsPerApp());
+  else
+    // if multiapp is nullptr, then we just use vanilla 1 and ~infinite for
+    // max/min procs per app to generate the rank partitioning.  This
+    // will/should be overridden by a later call to initForMultiApp if a
+    // sampler multiapp exists
+    config = rankConfig(
+        processor_id(), n_processors(), _n_rows, 1, std::numeric_limits<unsigned int>::max());
+
+  // Only one processor can "own" each sample - even if the sample/app itself
+  // will run on multiple procs/ranks:
+  if (config.am_first_local_rank)
+    _n_local_rows = config.num_local_apps;
+  else
+    _n_local_rows = 0;
+
+  _local_row_begin = config.first_local_app_index;
+  _local_row_end = _local_row_begin + _n_local_rows;
+  _next_local_row = _local_row_begin;
 }
 
 void

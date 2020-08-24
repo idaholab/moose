@@ -17,6 +17,8 @@
 #include "PerfGraphInterface.h"
 #include "SamplerInterface.h"
 
+class MultiApp;
+
 template <>
 InputParameters validParams<Sampler>();
 
@@ -110,6 +112,8 @@ public:
   dof_id_type getLocalRowBegin() const;
   dof_id_type getLocalRowEnd() const;
   ///@}
+  //
+  void initForMultiApp(const MultiApp * multiapp);
 
 protected:
   // The following methods are the basic methods that should be utilized my most application
@@ -229,6 +233,8 @@ private:
    */
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
+
+  const MultiApp * _curr_multiapp = nullptr;
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;

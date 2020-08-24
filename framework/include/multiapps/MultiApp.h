@@ -40,18 +40,38 @@ class NumericVector;
 template <>
 InputParameters validParams<MultiApp>();
 
+/// Holds app partitioning information relevant to the a particular rank for a
+/// multiapp scenario.
 struct LocalRankConfig
 {
+  /// The number of apps that should/will be run locally on this rank.
   unsigned int num_local_apps;
+  /// The (global) index of the first local app for this rank.  All ranks that
+  /// are used to perform multi-proc parallel runs for a given app will have the
+  /// same first_local_app_index as each other.
   unsigned int first_local_app_index;
+  /// This is true if this rank is the primary/zero rank for a (sub)app slot.
+  /// A slot is all ranks that are grouped together to run a single (sub)app
+  /// together.  This field will be true for exactly one rank in each slot.
+  /// This is important for things like multiapp transfers where you want to
+  /// only transfer data to a given subapp once even though it may be running on
+  /// multiple procs/ranks.
   bool am_first_local_rank;
 };
 
+/// Returns app partitioning information relevant to the given rank for a
+/// multiapp scenario with the given number of apps (napps) and parallel/mpi
+/// procs (nprocs).  min_app_procs and max_app_procs define the min and max
+/// number of procs that must/can be used in parallel to run a given (sub)app.
+///
+/// Each proc calls this function in order to determine which (sub)apps among
+/// the global list of all subapps for a multiapp should be run by the given
+/// rank.
 LocalRankConfig rankConfig(unsigned int rank,
-                          unsigned int nprocs,
-                          unsigned int napps,
-                          unsigned int min_app_procs,
-                          unsigned int max_app_procs);
+                           unsigned int nprocs,
+                           unsigned int napps,
+                           unsigned int min_app_procs,
+                           unsigned int max_app_procs);
 
 /**
  * Helper class for holding Sub-app backups

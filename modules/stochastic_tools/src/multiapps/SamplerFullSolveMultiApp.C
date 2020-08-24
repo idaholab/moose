@@ -66,6 +66,7 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
   }
   else
     init(_sampler.getNumberOfRows());
+  _sampler.initForMultiApp(this);
 }
 
 bool
