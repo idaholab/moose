@@ -80,7 +80,9 @@ void
 ComputeIncrementalTrussStrain::initQpStatefulProperties()
 {
   RealVectorValue temp;
-  _total_disp_strain[_qp] = temp;
+  _total_disp_strain[_qp](0) = 0;
+  _total_disp_strain[_qp](1) = 0;
+  _total_disp_strain[_qp](2) = 0;
 }
 
 void
@@ -138,20 +140,14 @@ ComputeIncrementalTrussStrain::computeQpStrain()
   _mech_disp_strain_increment[_qp](1) = 0.;
   _mech_disp_strain_increment[_qp](2) = 0.;
 
-  out << " _original_length " << _original_length[_qp] << " _current_length " << _current_length[_qp]<< " qp "<< _qp << " _mech_disp_strain_increment "<< _mech_disp_strain_increment[_qp](0) << std::endl;
-
   _total_disp_strain[_qp] = _mech_disp_strain_increment[_qp];
   for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
-  {
     _mech_disp_strain_increment[_qp] -= (*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp];
-
-  }
 }
 
 void
 ComputeIncrementalTrussStrain::computeStiffnessMatrix()
 {
   const Real A_avg = (_area[0] + _area[1]) / 2.0;
-  Real _e_over_l_local = _material_stiffness[0] * A_avg / _original_length[0];
-  _e_over_l[_qp] = _e_over_l_local;
+  _e_over_l[_qp] = _material_stiffness[0] * A_avg / _original_length[0];
 }

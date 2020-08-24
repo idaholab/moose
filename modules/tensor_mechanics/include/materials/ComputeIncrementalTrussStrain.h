@@ -16,7 +16,7 @@
 class Function;
 
 /**
- * ComputeIncrementalTrussStrain defines a displacement and rotation strain increment and rotation
+ * ComputeIncrementalTrussStrain defines a displacement strain increment and rotation
  * increment (=1), for small strains.
  */
 class ComputeIncrementalTrussStrain : public Material
@@ -28,17 +28,14 @@ public:
 
 protected:
   virtual void initQpStatefulProperties() override;
+
   /// Computes the displacement and rotation strain increments
   void computeQpStrain();
+
   /// Computes the stiffness matrices
   void computeStiffnessMatrix();
-  /// Computes the rotation matrix at time t. For small rotation scenarios, the rotation matrix at time t is same as the intiial rotation matrix
-  // virtual void computeRotation();
 
   std::vector<MooseVariable *> _disp_var;
-
-  // /// Base name of the material system
-  // const std::string _base_name;
 
   /// Number of coupled displacement variables
   unsigned int _ndisp;
@@ -57,9 +54,6 @@ protected:
 
   /// Current length of the truss
   MaterialProperty<Real> & _current_length;
-
-  // MaterialProperty<Real> & _total_stretch;
-  // MaterialProperty<Real> & _elastic_stretch;
 
   /// Boolean flag to turn on large strain calculation
   const bool _large_strain;

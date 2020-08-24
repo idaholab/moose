@@ -108,10 +108,6 @@
 [Materials]
   [./kelvin_voigt]
     type = GeneralizedKelvinVoigtModel
-    # creep_modulus = '10e9 10e9'
-    # creep_viscosity = '1 10'
-    # poisson_ratio = 0.2
-    # young_modulus = 10e9
     creep_modulus =   ' 1.515918662e3
                         5.319148936e9
                         6.150855892e1

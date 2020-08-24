@@ -19,8 +19,7 @@ public:
   ComputePlasticTrussResultants(const InputParameters & parameters);
 
 protected:
-  // virtual void computeQpStrain();
-  virtual void computeQpStress();
+  virtual void computeQpProperties();
   virtual void initQpStatefulProperties();
 
   virtual Real computeHardeningValue(Real scalar);
@@ -39,6 +38,12 @@ protected:
 
   /// Material stiffness vector that relates displacement strain increment to force increment
   const MaterialProperty<Real> & _material_stiffness;
+
+  /// Current total displacement strain integrated over the cross-section in global coordinate system.
+  const MaterialProperty<RealVectorValue> & _total_disp_strain;
+
+  /// Old total displacement strain integrated over the cross-section in global coordinate system.
+  const MaterialProperty<RealVectorValue> & _total_disp_strain_old;
 
   /// convergence tolerance
   Real _absolute_tolerance;

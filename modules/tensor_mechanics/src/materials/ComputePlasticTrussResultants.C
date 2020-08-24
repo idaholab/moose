@@ -45,15 +45,17 @@ ComputePlasticTrussResultants::ComputePlasticTrussResultants(const InputParamete
                                                            : NULL),
     _area(coupledValue("area")),
     _material_stiffness(getMaterialPropertyByName<Real>("material_stiffness")),
+    _total_disp_strain(getMaterialProperty<RealVectorValue>("total_disp_strain")),
+    _total_disp_strain_old(getMaterialPropertyOld<RealVectorValue>("total_disp_strain")),
 
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
 
-    _plastic_strain(declareProperty<Real>("plastic_stretch")),
-    _plastic_strain_old(getMaterialPropertyOld<Real>("plastic_stretch")),
+    _plastic_strain(declareProperty<Real>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<Real>("plastic_strain")),
 
     _axial_stress(declareProperty<Real>("axial_stress")),
-    _axial_stress_old(declarePropertyOld<Real>("axial_stress")),
+    _axial_stress_old(getMaterialPropertyOld<Real>("axial_stress")),
     _force(declareProperty<Real>("forces")),
     _force_old(getMaterialPropertyOld<Real>("forces")),
     _hardening_variable(declareProperty<Real>("hardening_variable")),
@@ -64,8 +66,7 @@ ComputePlasticTrussResultants::ComputePlasticTrussResultants(const InputParamete
     mooseError("ComputePlasticTrussResultants: Either hardening_constant or hardening_function must be defined");
 
   if (parameters.isParamSetByUser("hardening_constant") && isParamValid("hardening_function"))
-    mooseError("ComputePlasticTrussResultants: Only the hardening_constant or only the hardening_function can be "
-               "defined but not both");
+    mooseError("ComputePlasticTrussResultants: Only the hardening_constant or only the hardening_function can be defined but not both");
 }
 
 void
@@ -77,13 +78,14 @@ ComputePlasticTrussResultants::initQpStatefulProperties()
 }
 
 void
-ComputePlasticTrussResultants::computeQpStress()
+ComputePlasticTrussResultants::computeQpProperties()
 {
   // Real strain_increment = _total_stretch[_qp] - _total_stretch_old[_qp];
-  Real strain_increment =_disp_strain_increment[_qp](0);
+  // Real strain_increment = _disp_strain_increment[_qp](0);
+  Real strain_increment = _total_disp_strain[_qp](0) - _total_disp_strain_old[_qp](0);
 
   // Real trial_stress = _stress_old[_qp] + _material_stiffness[_qp] * strain_increment;
-  Real trial_stress = _axial_stress_old[_qp] + _material_stiffness[_qp] * strain_increment / _area[_qp];
+  Real trial_stress = _axial_stress_old[_qp] + _material_stiffness[_qp] * strain_increment;
 
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
@@ -125,11 +127,8 @@ ComputePlasticTrussResultants::computeQpStress()
     _plastic_strain[_qp] += plastic_strain_increment;
     elastic_strain_increment = strain_increment - plastic_strain_increment;
   }
-  // _elastic_stretch[_qp] = _total_stretch[_qp] - _plastic_strain[_qp];
-  // _axial_stress[_qp] = _stress_old[_qp] + _material_stiffness[_qp] * elastic_strain_increment;
   _axial_stress[_qp] = _axial_stress_old[_qp] + _material_stiffness[_qp] * elastic_strain_increment;
-  _force[_qp] = _force_old[_qp] * _area[_qp] + _material_stiffness[_qp] * elastic_strain_increment * _area[_qp];
-
+  _force[_qp] = _force_old[_qp] + _material_stiffness[_qp] * elastic_strain_increment * _area[_qp];
 }
 
 Real
