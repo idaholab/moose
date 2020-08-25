@@ -226,13 +226,13 @@ MultiApp::MultiApp(const InputParameters & parameters)
 {
 }
 
-void
+LocalRankConfig
 MultiApp::init(unsigned int num)
 {
   TIME_SECTION(_perf_init);
 
   _total_num_apps = num;
-  buildComm();
+  auto rank_config = buildComm();
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
@@ -243,6 +243,7 @@ MultiApp::init(unsigned int num)
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
     paramError("cli_args",
                "The number of items supplied must be 1 or equal to the number of sub apps.");
+  return rank_config;
 }
 
 void
@@ -781,6 +782,16 @@ MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     return _cli_args[local_app + _first_local_app];
 }
 
+unsigned int
+nSlots(unsigned int nprocs,
+       unsigned int napps,
+       unsigned int min_app_procs,
+       unsigned int max_app_procs)
+{
+  auto slot_size = std::max(std::min(nprocs / napps, max_app_procs), min_app_procs);
+  return std::min(nprocs / slot_size, napps);
+}
+
 LocalRankConfig
 rankConfig(unsigned int rank,
            unsigned int nprocs,
@@ -842,7 +853,7 @@ rankConfig(unsigned int rank,
   return {n_local_apps, app_index, is_first_local_rank};
 }
 
-void
+LocalRankConfig
 MultiApp::buildComm()
 {
   int ierr;
@@ -885,6 +896,7 @@ MultiApp::buildComm()
     _communicator.split(MPI_UNDEFINED, rank, _my_communicator);
     _my_rank = 0;
   }
+  return config;
 }
 
 unsigned int

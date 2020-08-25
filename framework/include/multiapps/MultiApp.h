@@ -59,6 +59,20 @@ struct LocalRankConfig
   bool is_first_local_rank;
 };
 
+inline bool
+operator==(const LocalRankConfig & lhs, const LocalRankConfig & rhs)
+{
+  return (lhs.num_local_apps == rhs.num_local_apps) &&
+         (lhs.first_local_app_index == rhs.first_local_app_index) &&
+         (lhs.is_first_local_rank == rhs.is_first_local_rank);
+}
+
+inline bool
+operator!=(const LocalRankConfig & lhs, const LocalRankConfig & rhs)
+{
+  return !(lhs == rhs);
+}
+
 /// Returns app partitioning information relevant to the given rank for a
 /// multiapp scenario with the given number of apps (napps) and parallel/mpi
 /// procs (nprocs).  min_app_procs and max_app_procs define the min and max
@@ -72,6 +86,11 @@ LocalRankConfig rankConfig(unsigned int rank,
                            unsigned int napps,
                            unsigned int min_app_procs,
                            unsigned int max_app_procs);
+
+unsigned int nSlots(unsigned int nprocs,
+                    unsigned int napps,
+                    unsigned int min_app_procs,
+                    unsigned int max_app_procs);
 
 /**
  * Helper class for holding Sub-app backups
@@ -337,7 +356,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  void buildComm();
+  LocalRankConfig buildComm();
 
   /**
    * Map a global App number to the local number.
@@ -363,7 +382,7 @@ protected:
    *
    * This is called in the constructor, by default it utilizes the 'positions' input parameters.
    */
-  void init(unsigned int num);
+  LocalRankConfig init(unsigned int num);
 
   /**
    * Reserve the solution from the previous simulation,

@@ -16,8 +16,7 @@
 #include "DistributionInterface.h"
 #include "PerfGraphInterface.h"
 #include "SamplerInterface.h"
-
-class MultiApp;
+#include "MultiApp.h"
 
 template <>
 InputParameters validParams<Sampler>();
@@ -113,12 +112,13 @@ public:
   dof_id_type getLocalRowEnd() const;
   ///@}
 
-  /// Any multiapps that use samplers should call this in their constructors
-  /// so that the sampler can retrieve relevant parameters for generating a
-  /// consistent rank<-->app partitioning with the multiapp for parallel runs.
-  /// This cannot be called with different/multiple multiapps on a single
-  /// sampler instance.
-  void initForMultiApp(const MultiApp * multiapp);
+  /// Other systems that deal with deploying parallel runs related to  samplers
+  /// will likely need to call this in their constructors (e.g. stochastic
+  /// tools multiapps) so that they can retrieve relevant parameters for generating a
+  /// consistent rank<-->subapp partitioning with the multiapp for parallel runs.
+  /// This can only be called with one particular LocalRankConfig ever - it is
+  /// an error to call it consecutively with different LocalRankConfig's.
+  void setRankConfig(const LocalRankConfig & config);
 
 protected:
   // The following methods are the basic methods that should be utilized my most application
@@ -239,7 +239,8 @@ private:
   void execute();
   friend void FEProblemBase::objectExecuteHelper<Sampler>(const std::vector<Sampler *> & objects);
 
-  const MultiApp * _curr_multiapp = nullptr;
+  LocalRankConfig _curr_rank_config;
+  bool _rank_config_set = false;
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;

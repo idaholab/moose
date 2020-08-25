@@ -50,23 +50,21 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
     _perf_solve_batch_step(registerTimedSection("solveStepBatch", 1)),
     _perf_command_line_args(registerTimedSection("getCommandLineArgsParamHelper", 4))
 {
+  auto napps = _sampler.getNumberOfRows();
+  // for batch mode, we only want one subapp per group of procs that run a
+  // single sim in parallel
   if (_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
       _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-  {
-    if (n_processors() > _sampler.getNumberOfRows())
-      paramError(
-          "mode",
-          "There appears to be more available processors (",
-          n_processors(),
-          ") than samples (",
-          _sampler.getNumberOfRows(),
-          "), this is not supported in "
-          "batch mode. Consider switching to \'normal\' to allow multiple processors per sample.");
-    init(n_processors());
-  }
-  else
-    init(_sampler.getNumberOfRows());
-  _sampler.initForMultiApp(this);
+    napps = nSlots(n_processors(), napps, _min_procs_per_app, _max_procs_per_app);
+  // TODO: bug here - the sampler wants a rank config with the number of
+  // samples per rank.  But the multiapp want a rank config with the number of
+  // subapps/slots per rank.  In batch mode, these are not the same value - we
+  // only have one subapp per slot instead of one subapp per sample.  So the
+  // sampler needs to know the number of samples per rank and the multiapp
+  // needs to know the number of subapps per rank.  Maybe add separate fields
+  // to LocalRankConfig to handle this somehow - but we will also need extra
+  // input args to the rankConfig function as well. hmmm.....
+  _sampler.setRankConfig(init(napps));
 }
 
 bool

@@ -86,9 +86,12 @@ Sampler::init()
   if (_initialized)
     mooseError("The Sampler::init() method is called automatically and should not be called.");
 
-  // do generic initialization in case no multi-apps are in use that will
-  // call this themselves.
-  initForMultiApp(nullptr);
+  // do generic default initialization in case no systems/multi-apps are in
+  // use that will call this themselves.
+  setRankConfig(rankConfig(
+      processor_id(), n_processors(), _n_rows, 1, std::numeric_limits<unsigned int>::max()));
+  // unset this from true because we still want to allow external setRankConfig calls to succeed.
+  _rank_config_set = false;
 
   // Seed the "master" seed generator
   const unsigned int seed = getParam<unsigned int>("seed");
@@ -107,28 +110,13 @@ Sampler::init()
 }
 
 void
-Sampler::initForMultiApp(const MultiApp * multiapp)
+Sampler::setRankConfig(const LocalRankConfig & config)
 {
-  if (_curr_multiapp)
-    mooseError("1 sampler cannot be shared by more than 1 MultiApp");
-  _curr_multiapp = multiapp;
-
-  LocalRankConfig config;
-  if (multiapp)
-    // we must generate a partioning consistent with the one used by the
-    // multiapp and its subapps. See MultiApp::buildComm
-    config = rankConfig(processor_id(),
-                        n_processors(),
-                        _n_rows,
-                        multiapp->minProcsPerApp(),
-                        multiapp->maxProcsPerApp());
-  else
-    // if multiapp is nullptr, then we just use vanilla 1 and ~infinite for
-    // max/min procs per app to generate the rank partitioning.  This
-    // will/should be overridden by a later call to initForMultiApp if a
-    // sampler multiapp exists
-    config = rankConfig(
-        processor_id(), n_processors(), _n_rows, 1, std::numeric_limits<unsigned int>::max());
+  if (_rank_config_set && (_curr_rank_config != config))
+    mooseError("multiple inconsistent calls to Sampler::setRankConfig. You may have more than one "
+               "multiapp per sampler.");
+  _rank_config_set = true;
+  _curr_rank_config = config;
 
   // Only one processor can "own" each sample - even if the sample/app itself
   // will run on multiple procs/ranks:
