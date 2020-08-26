@@ -341,9 +341,6 @@ public:
    */
   bool isRootProcessor() { return _my_rank == 0; }
 
-  inline unsigned int maxProcsPerApp() const { return _max_procs_per_app; }
-  inline unsigned int minProcsPerApp() const { return _min_procs_per_app; }
-
 protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps
