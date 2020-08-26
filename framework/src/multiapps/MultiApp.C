@@ -227,12 +227,12 @@ MultiApp::MultiApp(const InputParameters & parameters)
 }
 
 LocalRankConfig
-MultiApp::init(unsigned int num)
+MultiApp::init(unsigned int num_apps, bool batch_mode)
 {
   TIME_SECTION(_perf_init);
 
-  _total_num_apps = num;
-  auto rank_config = buildComm();
+  _total_num_apps = num_apps;
+  auto rank_config = buildComm(batch_mode);
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
@@ -797,7 +797,8 @@ rankConfig(unsigned int rank,
            unsigned int nprocs,
            unsigned int napps,
            unsigned int min_app_procs,
-           unsigned int max_app_procs)
+           unsigned int max_app_procs,
+           bool batch_mode)
 {
   if (min_app_procs > nprocs)
     mooseError("minimum number of procs per app is higher than the available number of procs");
@@ -837,7 +838,7 @@ rankConfig(unsigned int rank,
 
   if (slot_for_rank[rank] < 0)
     // ranks assigned a negative slot don't have any apps running on them.
-    return {0, 0, false};
+    return {0, 0, 0, 0, false};
   unsigned int slot_num = slot_for_rank[rank];
 
   bool is_first_local_rank = rank == 0 || (slot_for_rank[rank - 1] != slot_for_rank[rank]);
@@ -850,11 +851,13 @@ rankConfig(unsigned int rank,
     app_index += num_slot_apps;
   }
 
-  return {n_local_apps, app_index, is_first_local_rank};
+  if (batch_mode)
+    return {n_local_apps, app_index, 1, slot_num, is_first_local_rank};
+  return {n_local_apps, app_index, n_local_apps, app_index, is_first_local_rank};
 }
 
 LocalRankConfig
-MultiApp::buildComm()
+MultiApp::buildComm(bool batch_mode)
 {
   int ierr;
 
@@ -875,8 +878,12 @@ MultiApp::buildComm()
   ierr = MPI_Comm_rank(_communicator.get(), &rank);
   mooseCheckMPIErr(ierr);
 
-  auto config = rankConfig(
-      _orig_rank, _orig_num_procs, _total_num_apps, _min_procs_per_app, _max_procs_per_app);
+  auto config = rankConfig(_orig_rank,
+                           _orig_num_procs,
+                           _total_num_apps,
+                           _min_procs_per_app,
+                           _max_procs_per_app,
+                           batch_mode);
   _my_num_apps = config.num_local_apps;
   _first_local_app = config.first_local_app_index;
 

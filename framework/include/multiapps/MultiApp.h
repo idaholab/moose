@@ -44,11 +44,22 @@ InputParameters validParams<MultiApp>();
 /// multiapp scenario.
 struct LocalRankConfig
 {
-  /// The number of apps that should/will be run locally on this rank.
+  /// The number of simulations that should/will be run locally on this rank.
+  unsigned int num_local_sims;
+  /// The (global) index of the first local simulation for this rank.  All
+  /// ranks that are used to perform multi-proc parallel runs for a given
+  /// simulation will have the same first_local_sim_index as each other.
+  unsigned int first_local_sim_index;
+  /// The number of (sub)apps that should/will be run locally on this rank.
+  /// This will generally be identical to num_local_sims unless operating in
+  /// some sort of "batch" mode where a single subapp is reused for multiple
+  /// simulations.
   unsigned int num_local_apps;
   /// The (global) index of the first local app for this rank.  All ranks that
-  /// are used to perform multi-proc parallel runs for a given app will have the
-  /// same first_local_app_index as each other.
+  /// are used to perform multi-proc parallel runs for a given app will have
+  /// the same first_local_app_index as each other.  This will generally be
+  /// identical to num_local_sims unless operating in some sort of "batch" mode
+  /// where a single subapp is reused for multiple simulations.
   unsigned int first_local_app_index;
   /// This is true if this rank is the primary/zero rank for a (sub)app slot.
   /// A slot is all ranks that are grouped together to run a single (sub)app
@@ -85,12 +96,8 @@ LocalRankConfig rankConfig(unsigned int rank,
                            unsigned int nprocs,
                            unsigned int napps,
                            unsigned int min_app_procs,
-                           unsigned int max_app_procs);
-
-unsigned int nSlots(unsigned int nprocs,
-                    unsigned int napps,
-                    unsigned int min_app_procs,
-                    unsigned int max_app_procs);
+                           unsigned int max_app_procs,
+                           bool batch_mode = false);
 
 /**
  * Helper class for holding Sub-app backups
@@ -356,7 +363,7 @@ protected:
    *
    * Also find out which communicator we are using and what our first local app is.
    */
-  LocalRankConfig buildComm();
+  LocalRankConfig buildComm(bool batch_mode);
 
   /**
    * Map a global App number to the local number.
@@ -382,7 +389,7 @@ protected:
    *
    * This is called in the constructor, by default it utilizes the 'positions' input parameters.
    */
-  LocalRankConfig init(unsigned int num);
+  LocalRankConfig init(unsigned int num_apps, bool batch_mode = false);
 
   /**
    * Reserve the solution from the previous simulation,

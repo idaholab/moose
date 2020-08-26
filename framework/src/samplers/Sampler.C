@@ -121,11 +121,11 @@ Sampler::setRankConfig(const LocalRankConfig & config)
   // Only one processor can "own" each sample - even if the sample/app itself
   // will run on multiple procs/ranks:
   if (config.is_first_local_rank)
-    _n_local_rows = config.num_local_apps;
+    _n_local_rows = config.num_local_sims;
   else
     _n_local_rows = 0;
 
-  _local_row_begin = config.first_local_app_index;
+  _local_row_begin = config.first_local_sim_index;
   _local_row_end = _local_row_begin + _n_local_rows;
   _next_local_row = _local_row_begin;
 }
