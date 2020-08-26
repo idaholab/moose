@@ -88,6 +88,9 @@ operator!=(const LocalRankConfig & lhs, const LocalRankConfig & rhs)
 /// multiapp scenario with the given number of apps (napps) and parallel/mpi
 /// procs (nprocs).  min_app_procs and max_app_procs define the min and max
 /// number of procs that must/can be used in parallel to run a given (sub)app.
+/// batch_mode affects whether 1 subapp is assigned per rank to be re-used to
+/// run each of the (napps) simulations or whether 1 subapp is created for
+/// each napps simulation (globally).
 ///
 /// Each proc calls this function in order to determine which (sub)apps among
 /// the global list of all subapps for a multiapp should be run by the given
