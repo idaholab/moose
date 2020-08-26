@@ -54,7 +54,7 @@ void
 HeatConductionModel::addMaterials()
 {
   const auto & blocks = _hs.getSubdomainNames();
-  const auto & names = _hs.getParam<std::vector<std::string>>("names");
+  const auto & names = _hs.getNames();
   const auto & material_names = _hs.getParam<std::vector<std::string>>("materials");
 
   for (std::size_t i = 0; i < names.size(); i++)

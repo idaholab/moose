@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Component.h"
+#include "libmesh/enum_elem_type.h"
 
 /**
  * Intermediate class for all geometrical components (i.e components that have position, direction,
@@ -39,6 +40,7 @@ public:
 protected:
   Node * addNode(const Point & pt);
 
+  Elem * addElement(libMesh::ElemType elem_type, const std::vector<dof_id_type> & node_ids);
   Elem * addElementEdge2(dof_id_type node0, dof_id_type node1);
   Elem * addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2);
   Elem *

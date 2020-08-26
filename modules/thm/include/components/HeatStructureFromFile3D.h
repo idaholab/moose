@@ -6,10 +6,10 @@
 /**
  * Heat structure component that can load the mesh from an ExodusII file
  */
-class HeatStructureFromFile : public HeatStructureBase
+class HeatStructureFromFile3D : public HeatStructureBase
 {
 public:
-  HeatStructureFromFile(const InputParameters & params);
+  HeatStructureFromFile3D(const InputParameters & params);
 
   virtual void buildMesh() override;
   virtual void addVariables() override;

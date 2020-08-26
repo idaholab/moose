@@ -39,6 +39,13 @@ public:
   bool hasBlock(const std::string & name) const;
 
   /**
+   * Return the names of heat structure blocks
+   *
+   * @return The vector of heat structure block names
+   */
+  const std::vector<std::string> & getNames() const { return _names; }
+
+  /**
    * Get index of the block from its name
    * @param name The name of the block
    * @return Index of the block with name 'name'
