@@ -155,7 +155,8 @@ Console::validParams()
                            /*quiet_mode=*/true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.set<ExecFlagEnum>("execute_scalars_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
                                                                          EXEC_TIMESTEP_END};
-
+  params.set<ExecFlagEnum>("execute_reporters_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
+                                                                           EXEC_TIMESTEP_END};
   return params;
 }
 

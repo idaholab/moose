@@ -192,6 +192,7 @@ private:
    */
   template <typename T>
   ReporterState<T> & getReporterStateHelper(const ReporterName & reporter_name, bool declare);
+  friend class VectorPostprocessorInterface;
 
   /**
    * Helper method for returning the ReporterContextBase object, if it exists.

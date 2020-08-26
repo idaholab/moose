@@ -21,7 +21,6 @@ ReporterData::copyValuesBack()
 void
 ReporterData::finalize(const std::string & object_name)
 {
-
   // FYI, for the minimum compiler 'auto' doesn't work in argument of the lambda
   // ReporterData.C:xx:xx: error: 'auto' not allowed in lambda parameter
   auto func = [object_name, this](const std::unique_ptr<ReporterContextBase> & ptr) {

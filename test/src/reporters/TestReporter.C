@@ -72,7 +72,7 @@ TestGetReporter::TestGetReporter(const InputParameters & parameters)
     _vector(getReporterValue<std::vector<Real>>("vector_reporter")),
     _string(getReporterValue<std::string>("string_reporter")),
     _bcast_value(getReporterValue<Real>("broadcast_reporter")),
-    _scatter_value(getReporterValue<dof_id_type>("scatter_reporter", REPORTER_MODE_DISTRIBUTED)),
+    _scatter_value(getReporterValue<dof_id_type>("scatter_reporter")),
     _gather_value(getReporterValue<std::vector<dof_id_type>>("gather_reporter"))
 {
 }

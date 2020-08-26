@@ -13,6 +13,7 @@
 #include "MooseTypes.h"
 #include "OutputInterface.h"
 #include "MooseEnum.h"
+#include "ReporterContext.h"
 
 // libMesh
 #include "libmesh/parallel.h"
@@ -22,7 +23,6 @@ class FEProblemBase;
 class InputParameters;
 class SamplerBase;
 class VectorPostprocessor;
-class VectorPostprocessorData;
 
 template <typename T>
 InputParameters validParams();
@@ -43,11 +43,6 @@ public:
   virtual ~VectorPostprocessor() = default;
 
   /**
-   * This will get called to actually grab the final value the VectorPostprocessor has calculated.
-   */
-  virtual VectorPostprocessorValue & getVector(const std::string & vector_name);
-
-  /**
    * Returns the name of the VectorPostprocessor.
    */
   std::string PPName() { return _vpp_name; }
@@ -61,6 +56,11 @@ public:
    * Return true if the VPP is operating in distributed mode.
    */
   bool isDistributed() const { return _is_distributed; }
+
+  /**
+   * Return the names of the vectors associated with this object.
+   */
+  const std::set<std::string> & getVectorNames() const;
 
 protected:
   /**
@@ -89,4 +89,36 @@ private:
   const bool _is_broadcast;
 
   std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
+
+  std::set<std::string> _vector_names;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following itmes were created to maintain the various getScatter methods in the
+// VectorPostprocessorInterface.
+
+// Special consumer modue add
+extern const ReporterMode REPORTER_MODE_VPP_SCATTER;
+
+/*
+ * Special ReporterContext that performs a scatter operation if a getScatter method is called on the
+ * VPP value.
+ *
+ * The source file contains an explicit instantiation.
+ * @see VectorPostprocessorInterface
+ */
+template <typename T>
+class VectorPostprocessorContext : public ReporterContext<T>
+{
+public:
+  VectorPostprocessorContext(const libMesh::ParallelObject & other, ReporterState<T> & state);
+  virtual void finalize() override;
+  virtual void copyValuesBack() override;
+
+  const ScatterVectorPostprocessorValue & getScatterValue() const;
+  const ScatterVectorPostprocessorValue & getScatterValueOld() const;
+
+private:
+  ScatterVectorPostprocessorValue _scatter_value;
+  ScatterVectorPostprocessorValue _scatter_value_old;
 };

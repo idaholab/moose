@@ -59,40 +59,41 @@ XMLOutput::outputVectorPostprocessors()
   if (_execute_enum.contains(EXEC_NONLINEAR))
     vec_node.append_attribute("nonlinear_iteration") = _nonlinear_iter;
 
-  // VPP data object for determining if vectors are distributed
-  const auto & vpp_data = _problem_ptr->getVectorPostprocessorData();
-
-  // Loop through the VPP objects that should be output
+  // The VPP objects to be output
   const std::set<std::string> & out = getVectorPostprocessorOutput();
-  for (const auto & vpp_name : out)
-  {
-    if (_problem_ptr->vectorPostprocessorHasVectors(vpp_name))
-    {
-      // Loop through the vectors to be output
-      const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
-      for (const auto & vec_it : vectors)
-      {
-        const bool distributed = vpp_data.isDistributed(vpp_name);
-        if (processor_id() == 0 || distributed)
-        {
-          // Create a Vector node and associated operators
-          auto data_node = vec_node.append_child("Vector");
-          data_node.append_attribute("object") = vpp_name.c_str();
-          data_node.append_attribute("name") = vec_it.first.c_str();
-          data_node.append_attribute("distributed") = distributed;
-          if (distributed)
-          {
-            data_node.append_attribute("processor_id") = processor_id();
-            data_node.append_attribute("n_processors") = n_processors();
-            _distributed = true;
-          }
 
-          // Write the vector of data
-          const auto & vector = *vec_it.second.current;
-          std::ostringstream oss;
-          std::copy(vector.begin(), vector.end(), infix_ostream_iterator<Real>(oss, " "));
-          data_node.text().set(oss.str().c_str());
+  // Loop through Reporter values and search for VPP objects that should be output
+  for (const auto & r_name : _problem_ptr->getReporterData().getReporterNames())
+  {
+    const std::string & vpp_name = r_name.getObjectName();
+    const std::string & vec_name = r_name.getValueName();
+    const bool vpp_out = out.find(vpp_name) != out.end();
+    if (vpp_out &&
+        (_problem_ptr->getReporterData().hasReporterValue<VectorPostprocessorValue>(r_name)))
+    {
+      const VectorPostprocessor & vpp_obj =
+          _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
+      auto distributed = vpp_obj.isDistributed();
+      if (processor_id() == 0 || distributed)
+      {
+        // Create a Vector node and associated operators
+        auto data_node = vec_node.append_child("Vector");
+        data_node.append_attribute("object") = vpp_name.c_str();
+        data_node.append_attribute("name") = vec_name.c_str();
+        data_node.append_attribute("distributed") = distributed;
+        if (distributed)
+        {
+          data_node.append_attribute("processor_id") = processor_id();
+          data_node.append_attribute("n_processors") = n_processors();
+          _distributed = true;
         }
+
+        // Write the vector of data
+        const auto & vector =
+            _problem_ptr->getReporterData().getReporterValue<VectorPostprocessorValue>(r_name);
+        std::ostringstream oss;
+        std::copy(vector.begin(), vector.end(), infix_ostream_iterator<Real>(oss, " "));
+        data_node.text().set(oss.str().c_str());
       }
     }
   }

@@ -113,20 +113,20 @@ TableOutput::outputPostprocessors()
 void
 TableOutput::outputReporters()
 {
-  if (_reporter_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
-    _reporter_table.addRow(time());
-
-  if (_all_data_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
-    _all_data_table.addRow(time());
-
   for (const auto & combined_name : getReporterOutput())
   {
     ReporterName r_name(combined_name);
     if (_problem_ptr->getReporterData().hasReporterValue<Real>(r_name) &&
         !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
     {
+      if (_reporter_table.empty() ||
+          !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))
+        _reporter_table.addRow(time());
+
+      if (_all_data_table.empty() ||
+          !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
+        _all_data_table.addRow(time());
+
       const Real & value = _problem_ptr->getReporterData().getReporterValue<Real>(r_name);
       _reporter_table.addData(combined_name, value);
       _all_data_table.addData(combined_name, value);
@@ -137,30 +137,26 @@ TableOutput::outputReporters()
 void
 TableOutput::outputVectorPostprocessors()
 {
-  // List of names of the postprocessors to output
+  // List of VPP objects with output
   const std::set<std::string> & out = getVectorPostprocessorOutput();
 
-  // Loop through the postprocessor names and extract the values from the VectorPostprocessorData
-  // storage
-  for (const auto & vpp_name : out)
+  for (const auto & r_name : _problem_ptr->getReporterData().getReporterNames())
   {
-    if (_problem_ptr->vectorPostprocessorHasVectors(vpp_name))
+    const std::string & vpp_name = r_name.getObjectName();
+    const std::string & vec_name = r_name.getValueName();
+    const bool vpp_out = out.find(vpp_name) != out.end();
+    if (vpp_out &&
+        (_problem_ptr->getReporterData().hasReporterValue<VectorPostprocessorValue>(r_name)))
     {
-      const auto & vectors = _problem_ptr->getVectorPostprocessorVectors(vpp_name);
-
       auto insert_pair =
           moose_try_emplace(_vector_postprocessor_tables, vpp_name, FormattedTable());
 
       FormattedTable & table = insert_pair.first->second;
-
-      table.clear();
       table.outputTimeColumn(false);
 
-      for (const auto & vec_it : vectors)
-      {
-        const auto & vector = *vec_it.second.current;
-        table.addData(vec_it.first, vector);
-      }
+      const auto & vector =
+          _problem_ptr->getReporterData().getReporterValue<VectorPostprocessorValue>(r_name);
+      table.addData(vec_name, vector);
 
       if (_time_data)
       {
@@ -248,6 +244,7 @@ TableOutput::outputScalarVariables()
 void
 TableOutput::clear()
 {
+  _reporter_table.clear();
   _postprocessor_table.clear();
   for (auto & pair : _vector_postprocessor_tables)
     pair.second.clear();

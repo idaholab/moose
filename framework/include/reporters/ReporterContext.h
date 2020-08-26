@@ -16,6 +16,7 @@
 
 #include "ReporterName.h"
 #include "ReporterMode.h"
+#include "ReporterState.h"
 #include "nlohmann/json.h"
 
 class ReporterData;
@@ -116,15 +117,12 @@ protected:
   /// The state on which this context object operates
   ReporterState<T> & _state;
 
-  /// Defines how the Reporter value can be produced and how it is being produded
+  /// Defines how the Reporter value can be produced and how it is being produced
   ReporterProducerEnum _producer_enum;
 
-private:
-  // The following methods are called by the ReporterData and are not indented for external use, as
-  // such they are changed to private. See the comments in ReporterState for why these are here
-  // rather than in the ReporterState object directly.
-  virtual void copyValuesBack() final;
-  virtual void store(nlohmann::json & json) const final;
+  // The following are called by the ReporterData and are not indented for external use
+  virtual void copyValuesBack() override;
+  virtual void store(nlohmann::json & json) const override;
   friend class ReporterData;
 };
 
@@ -286,7 +284,7 @@ ReporterBroadcastContext<T>::finalize()
   {
     const ReporterMode consumer = pair.first;
     const std::string & object_name = pair.second;
-    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_REPLICATED)
+    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_REPLICATED))
       mooseError("The Reporter value '",
                  this->name(),
                  "' is being produced in ",
@@ -352,7 +350,7 @@ ReporterScatterContext<T>::finalize()
   {
     const ReporterMode consumer = pair.first;
     const std::string & object_name = pair.second;
-    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_DISTRIBUTED)
+    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_DISTRIBUTED))
       mooseError("The Reporter value '",
                  this->name(),
                  "' is being produced in ",
@@ -365,9 +363,10 @@ ReporterScatterContext<T>::finalize()
   }
 
   mooseAssert(this->processor_id() == 0 ? _values.size() == this->n_processors() : true,
-              "Vector to be scatter must be sized to match the number of processors");
-  mooseAssert(this->processor_id() > 0 ? _values.size() == 0 : true,
-              "Vector to be scatter must be sized to on processors except for the root processor");
+              "Vector to be scattered must be sized to match the number of processors");
+  mooseAssert(
+      this->processor_id() > 0 ? _values.size() == 0 : true,
+      "Vector to be scattered must be sized to zero on processors except for the root processor");
   this->comm().scatter(_values, this->_state.set().first);
 }
 
@@ -422,7 +421,7 @@ ReporterGatherContext<T>::finalize()
   {
     const ReporterMode consumer = pair.first;
     const std::string & object_name = pair.second;
-    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_ROOT)
+    if (!(consumer == REPORTER_MODE_UNSET || consumer == REPORTER_MODE_ROOT))
       mooseError("The Reporter value '",
                  this->name(),
                  "' is being produced in ",

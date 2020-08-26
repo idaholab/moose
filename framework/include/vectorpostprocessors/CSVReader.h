@@ -25,8 +25,8 @@ public:
   static InputParameters validParams();
 
   CSVReader(const InputParameters & parameters);
-  void virtual initialize() override;
-  void virtual execute() override;
+  virtual void initialize() override;
+  virtual void execute() override;
 
 protected:
   /// The MOOSE delimited file reader.

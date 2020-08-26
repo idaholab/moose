@@ -223,7 +223,7 @@ public:
   /**
    * Return the old scatter value for the post processor
    *
-   * This is only valid when you expec the vector to be of lenghth "num_procs"
+   * This is only valid when you expect the vector to be of length "num_procs"
    * In that case - this will return a reference to a value that will be _this_ processor's
    * value from that vector
    *
@@ -262,15 +262,34 @@ public:
   ///@}
 
 private:
+  /**
+   * Helper function for extracting VPP data from ReporterData object
+   */
+  const VectorPostprocessorValue &
+  getVectorPostprocessorByNameHelper(const std::string & object_name,
+                                     const std::string & vector_name,
+                                     bool broadcast,
+                                     std::size_t t_index) const;
+
+  /**
+   * Helper for getting the VPP context that handles scatter values
+   */
+  const VectorPostprocessorContext<VectorPostprocessorValue> *
+  getVectorPostprocessorContextByNameHelper(const std::string & object_name,
+                                            const std::string & vector_name) const;
+
   /// Whether or not to force broadcasting by default
   bool _broadcast_by_default;
 
   /// VectorPostprocessorInterface Parameters
   const InputParameters & _vpi_params;
 
-  /// Reference the the FEProblemBase class
+  /// Reference the FEProblemBase class
   FEProblemBase & _vpi_feproblem;
 
   /// Thread ID
   THREAD_ID _vpi_tid;
+
+  /// REference to the ReporterData that stores the vector
+  ReporterData & _vpi_reporter_data;
 };

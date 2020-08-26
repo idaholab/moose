@@ -13,7 +13,6 @@
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
 #include "MortarData.h"
-#include "VectorPostprocessorData.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
@@ -78,6 +77,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
+class VectorPostprocessor;
 
 // libMesh forward declarations
 namespace libMesh
@@ -792,9 +792,6 @@ public:
                                       InputParameters & parameters);
 
 
-  /// Initialize the VectorPostprocessor data
-  void initVectorPostprocessorData(const std::string & name);
-
   /**
    * Add a Reporter object to the simulation.
    * @param name A uniquely identifying object name
@@ -923,112 +920,63 @@ public:
    * @param name The name of the post-processor
    * @return true if it exists, otherwise false
    */
-  bool hasVectorPostprocessor(const std::string & name);
+  bool hasVectorPostprocessorByName(const std::string & name) const;
 
   /**
-   * DEPRECATED: Use the new version where you need to specify whether or
-   * not the vector must be broadcast
+   * Get a read-only reference to the vector value associated with the VectorPostprocessor.
+   * @param object_name The name of the VPP object.
+   * @param vector_name The namve of the decalred vector within the object.
+   * @return Referent to the vector of data.
    *
-   * Get a reference to the value associated with the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the current value
+   * Note: This method is only for retrieving values that already exist, the VectorPostprocessor and
+   *       VectorPostprocessorInterface objects should be used rather than this method for creating
+   *       and getting values within objects.
    */
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const std::string & object_name,
+                                    const std::string & vector_name,
+                                    std::size_t t_index = 0) const;
+
+  /**
+   * Set the value of a VectorPostprocessor vector
+   * @param object_name The name of the VPP object
+   * @param vector_name The name of the declared vector
+   * @param value The data to apply to the vector
+   * @partm t_index Flag for getting current (0), old (1), or older (2) values
+   */
+  void setVectorPostprocessorValueByName(const std::string & object_name,
+                                         const std::string & vector_name,
+                                         const VectorPostprocessorValue & value,
+                                         std::size_t t_index = 0);
+
+  /**
+   * Return the VPP object given the name.
+   * @param object_name The name of the VPP object
+   * @return Desired VPP object
+   *
+   * This is used by various output objects as well as the scatter value handling.
+   * @see CSV.C, XMLOutput.C, VectorPostprocessorInterface.C
+   */
+  const VectorPostprocessor & getVectorPostprocessorObjectByName(const std::string & object_name,
+                                                                 THREAD_ID tid = 0) const;
+
+  ///@{
+  /**
+   * DEPRECATED
+   */
+  bool hasVectorPostprocessor(const std::string & name);
   VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
                                                          const std::string & vector_name);
-
-  /**
-   * DEPRECATED: Use the new version where you need to specify whether or
-   * not the vector must be broadcast
-   *
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the old value
-   */
   VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
                                                             const std::string & vector_name);
-
-  /**
-   * Get a reference to the value associated with the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the current value
-   */
   VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
                                                          const std::string & vector_name,
                                                          bool needs_broadcast);
-
-  /**
-   * Get the reference to the old value of a post-processor
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @return The reference to the old value
-   */
   VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
                                                             const std::string & vector_name,
                                                             bool needs_broadcast);
-
-  /**
-   * Return the scatter value for the post processor
-   *
-   * This is only valid when you expec the vector to be of lenghth "num_procs"
-   * In that case - this will return a reference to a value that will be _this_ processor's value
-   * from that vector
-   *
-   * @param vpp_name The name of the VectorPostprocessor
-   * @param vector_name The name of the vector
-   * @return The reference to the current scatter value
-   */
-  ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
-                                     const std::string & vector_name);
-
-  /**
-   * Return the scatter value for the post processor
-   *
-   * This is only valid when you expec the vector to be of lenghth "num_procs"
-   * In that case - this will return a reference to a value that will be _this_ processor's value
-   * from that vector
-   *
-   * @param vpp_name The name of the VectorPostprocessor
-   * @param vector_name The name of the vector
-   * @return The reference to the old scatter value
-   */
-  ScatterVectorPostprocessorValue &
-  getScatterVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
-                                        const std::string & vector_name);
-
-  /**
-   * Declare a new VectorPostprocessor vector
-   * @param name The name of the post-processor
-   * @param vector_name The name of the post-processor
-   * @param contains_complete_history True if the vector will naturally contain the complete time
-   * history of the values
-   * @param is_broadcast True if the vector will already be replicated by the VPP.  This prevents
-   * unnecessary broadcasting by MOOSE.
-   * @return The reference to the vector declared
-   */
-  VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                              const std::string & vector_name,
-                                                              bool contains_complete_history,
-                                                              bool is_broadcast,
-                                                              bool is_distributed);
-
-  /**
-   * Whether or not the specified VectorPostprocessor has declared any vectors
-   */
-  bool vectorPostprocessorHasVectors(const std::string & vpp_name)
-  {
-    return _vpps_data.hasVectors(vpp_name);
-  }
-
-  /**
-   * Get the vectors for a specific VectorPostprocessor.
-   * @param vpp_name The name of the VectorPostprocessor
-   */
-  const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
-  getVectorPostprocessorVectors(const std::string & vpp_name);
+  bool vectorPostprocessorHasVectors(const std::string & vpp_name);
+  ///@}
 
   // Dampers /////
   virtual void addDamper(const std::string & damper_name,
@@ -1715,8 +1663,6 @@ public:
 
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
-  const VectorPostprocessorData & getVectorPostprocessorData() const;
-
   /**
    * Returns _has_jacobian
    */
@@ -1983,9 +1929,6 @@ protected:
 
   // Marker Warehouse
   MooseObjectWarehouse<Marker> _markers;
-
-  // VectorPostprocessors
-  VectorPostprocessorData _vpps_data;
 
   // Helper class to access Reporter object values
   ReporterData _reporter_data;

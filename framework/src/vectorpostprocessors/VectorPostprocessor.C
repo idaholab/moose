@@ -12,7 +12,6 @@
 #include "SubProblem.h"
 #include "Conversion.h"
 #include "UserObject.h"
-#include "VectorPostprocessorData.h"
 #include "FEProblem.h"
 
 defineLegacyParams(VectorPostprocessor);
@@ -64,17 +63,78 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
 }
 
 VectorPostprocessorValue &
-VectorPostprocessor::getVector(const std::string & vector_name)
-{
-  return _vpp_fe_problem->getVectorPostprocessorValue(_vpp_name, vector_name);
-}
-
-VectorPostprocessorValue &
 VectorPostprocessor::declareVector(const std::string & vector_name)
 {
+  _vector_names.insert(vector_name);
+
   if (_vpp_tid)
     return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
-  else
-    return _vpp_fe_problem->declareVectorPostprocessorVector(
-        _vpp_name, vector_name, _contains_complete_history, _is_broadcast, _is_distributed);
+
+  ReporterName r_name(_vpp_name, vector_name);
+  return _vpp_fe_problem->getReporterData()
+      .declareReporterValue<VectorPostprocessorValue, VectorPostprocessorContext>(
+          r_name, REPORTER_MODE_ROOT);
+}
+
+const std::set<std::string> &
+VectorPostprocessor::getVectorNames() const
+{
+  return _vector_names;
+}
+
+// Explicit instantiation
+template class VectorPostprocessorContext<VectorPostprocessorValue>;
+const ReporterMode REPORTER_MODE_VPP_SCATTER("VPP_SCATTER");
+
+template <typename T>
+VectorPostprocessorContext<T>::VectorPostprocessorContext(const libMesh::ParallelObject & other,
+                                                          ReporterState<T> & state)
+  : ReporterContext<T>(other, state)
+{
+}
+
+template <typename T>
+void
+VectorPostprocessorContext<T>::finalize()
+{
+  ReporterContext<T>::finalize();
+
+  const auto & consumer_modes = this->state().getConsumerModes();
+  auto func = [](const std::pair<ReporterMode, std::string> & mode_pair) {
+    return mode_pair.first == REPORTER_MODE_VPP_SCATTER;
+  };
+  if (std::find_if(consumer_modes.begin(), consumer_modes.end(), func) != consumer_modes.end())
+  {
+    const T & value = this->state().value();
+    if (this->processor_id() == 0 && value.size() != this->n_processors())
+      mooseError("The VectorPostprocessor value to be scatter has a length of ",
+                 value.size(),
+                 "; it must be the same length as the number of processors (",
+                 this->n_processors(),
+                 ").");
+
+    this->comm().scatter(value, _scatter_value);
+  }
+}
+
+template <typename T>
+void
+VectorPostprocessorContext<T>::copyValuesBack()
+{
+  ReporterContext<T>::copyValuesBack();
+  _scatter_value_old = _scatter_value;
+}
+
+template <typename T>
+const ScatterVectorPostprocessorValue &
+VectorPostprocessorContext<T>::getScatterValue() const
+{
+  return _scatter_value;
+}
+
+template <typename T>
+const ScatterVectorPostprocessorValue &
+VectorPostprocessorContext<T>::getScatterValueOld() const
+{
+  return _scatter_value_old;
 }
