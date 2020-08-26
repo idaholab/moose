@@ -36,7 +36,7 @@ protected:
   const T & getReporterValue(const std::string & param_name, const std::size_t time_index = 0);
   template <typename T>
   const T & getReporterValue(const std::string & param_name,
-                             Moose::ReporterMode mode,
+                             ReporterMode mode,
                              const std::size_t time_index = 0);
   ///@}
 
@@ -55,7 +55,7 @@ protected:
                                    const std::size_t time_index = 0);
   template <typename T>
   const T & getReporterValueByName(const ReporterName & reporter_name,
-                                   Moose::ReporterMode mode,
+                                   ReporterMode mode,
                                    const std::size_t time_index = 0);
   ///@}
 
@@ -82,13 +82,13 @@ template <typename T>
 const T &
 ReporterInterface::getReporterValue(const std::string & param_name, const std::size_t time_index)
 {
-  return getReporterValue<T>(param_name, Moose::ReporterMode::ROOT, time_index);
+  return getReporterValue<T>(param_name, REPORTER_MODE_UNSET, time_index);
 }
 
 template <typename T>
 const T &
 ReporterInterface::getReporterValue(const std::string & param_name,
-                                    Moose::ReporterMode mode,
+                                    ReporterMode mode,
                                     const std::size_t time_index)
 {
   const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
@@ -100,13 +100,13 @@ const T &
 ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
                                           const std::size_t time_index)
 {
-  return getReporterValueByName<T>(reporter_name, Moose::ReporterMode::ROOT, time_index);
+  return getReporterValueByName<T>(reporter_name, REPORTER_MODE_UNSET, time_index);
 }
 
 template <typename T>
 const T &
 ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
-                                          Moose::ReporterMode mode,
+                                          ReporterMode mode,
                                           const std::size_t time_index)
 {
   addReporterDependencyHelper(reporter_name);

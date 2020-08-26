@@ -75,7 +75,7 @@ public:
   template <typename T>
   const T & getReporterValue(const ReporterName & reporter_name,
                              const std::string & object_name,
-                             Moose::ReporterMode mode,
+                             const ReporterMode & mode,
                              const std::size_t time_index = 0);
 
   /**
@@ -135,7 +135,7 @@ public:
    */
   template <typename T, template <typename> class S, typename... Args>
   T & declareReporterValue(const ReporterName & reporter_name,
-                           Moose::ReporterMode mode,
+                           const ReporterMode & mode,
                            Args &&... args);
 
   /**
@@ -230,36 +230,32 @@ template <typename T>
 const T &
 ReporterData::getReporterValue(const ReporterName & reporter_name,
                                const std::string & object_name,
-                               Moose::ReporterMode mode,
+                               const ReporterMode & mode,
                                const std::size_t time_index)
 {
   _get_names.insert(reporter_name);
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, false);
-  state_ref.addConsumerMode(mode, object_name);
+  if (mode != REPORTER_MODE_UNSET)
+    state_ref.addConsumerMode(mode, object_name);
   return state_ref.value(time_index);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
 ReporterData::declareReporterValue(const ReporterName & reporter_name,
-                                   Moose::ReporterMode mode,
+                                   const ReporterMode & mode,
                                    Args &&... args)
 {
   // Update declared names list
   _declare_names.insert(reporter_name);
 
-  // The mode for the ReporterState must be must be set before ReporterContext is created to allow
-  // for custom context options to override the setting (e.g., BroadcastReporterContext)
+  // Get/create the ReporterState
   ReporterState<T> & state_ref = getReporterStateHelper<T>(reporter_name, true);
-  state_ref.setProducerMode(mode);
 
   // Create the ReporterContext
   auto context_ptr = libmesh_make_unique<S<T>>(_app, state_ref, args...);
+  context_ptr->init(mode); // initialize the mode, see ContextReporter
   _context_ptrs.emplace(std::move(context_ptr));
-
-  // Set the default state producer mode, if it remains UNSET after ReporterContext creation
-  if (state_ref.getProducerMode() == Moose::ReporterMode::UNSET)
-    state_ref.setProducerMode(Moose::ReporterMode::ROOT);
 
   return state_ref.value();
 }

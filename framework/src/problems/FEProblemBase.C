@@ -3477,7 +3477,7 @@ FEProblemBase::initPostprocessorData(const std::string & name)
   ReporterName r_name(name, "value");
   if (!getReporterData().hasReporterValue<PostprocessorValue>(r_name))
     getReporterData().declareReporterValue<PostprocessorValue, ReporterContext>(
-        r_name, Moose::ReporterMode::UNSET);
+        r_name, REPORTER_MODE_UNSET);
 }
 
 bool

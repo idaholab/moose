@@ -15,6 +15,7 @@
 
 #include "ReporterName.h"
 #include "RestartableData.h"
+#include "ReporterMode.h"
 
 /**
  * A special version of RestartableData to aid in storing Reporter values. This object is
@@ -50,33 +51,18 @@ public:
   ///@}
 
   /**
-   * Set the mode that the value is produced
-   * @see ReporterData
-   *
-   * The setter is needed because the producer mode cannot be set in the constructor, because this
-   * state object can be first created by either the consumer or producer.
-   */
-  void setProducerMode(Moose::ReporterMode mode);
-
-  /**
-   * Return the mode that the Reporter value is being produced.
-   * @see ReporterContext
-   */
-  Moose::ReporterMode getProducerMode() const;
-
-  /**
    * Add a mode that the value is consumed
    * @param mode The mode that the object will consume the Reporter value
    * @param object_name The name of the object doing the consuming (for error reporting)
    * @see ReporterData
    */
-  void addConsumerMode(Moose::ReporterMode mode, const std::string & object_name);
+  void addConsumerMode(ReporterMode mode, const std::string & object_name);
 
   /**
    * Return the mode that the value is being consumed, see ReporterData
    * @see ReporterContext
    */
-  const std::set<std::pair<Moose::ReporterMode, std::string>> & getConsumerModes() const;
+  const std::set<std::pair<ReporterMode, std::string>> & getConsumerModes() const;
 
   /**
    * Copy stored values back in time to old/older etc.
@@ -87,11 +73,8 @@ private:
   /// Name of data that state is associated
   const ReporterName _reporter_name;
 
-  /// The mode that the value is being produced
-  Moose::ReporterMode _producer_mode = Moose::ReporterMode::UNSET;
-
   /// The mode(s) that the value is being consumed
-  std::set<std::pair<Moose::ReporterMode, std::string>> _consumer_modes;
+  std::set<std::pair<ReporterMode, std::string>> _consumer_modes;
 };
 
 template <typename T>
@@ -155,29 +138,15 @@ ReporterState<T>::value(const std::size_t time_index) const
 }
 
 template <typename T>
-Moose::ReporterMode
-ReporterState<T>::getProducerMode() const
-{
-  return _producer_mode;
-}
-
-template <typename T>
 void
-ReporterState<T>::setProducerMode(Moose::ReporterMode mode)
+ReporterState<T>::addConsumerMode(ReporterMode mode, const std::string & object_name)
 {
-  _producer_mode = mode;
-}
-
-template <typename T>
-void
-ReporterState<T>::addConsumerMode(Moose::ReporterMode mode, const std::string & object_name)
-{
-  mooseAssert(mode != Moose::ReporterMode::UNSET, "UNSET cannot be used as the consumer mode");
+  mooseAssert(mode != REPORTER_MODE_UNSET, "UNSET cannot be used as the consumer mode");
   _consumer_modes.insert(std::make_pair(mode, object_name));
 }
 
 template <typename T>
-const std::set<std::pair<Moose::ReporterMode, std::string>> &
+const std::set<std::pair<ReporterMode, std::string>> &
 ReporterState<T>::getConsumerModes() const
 {
   return _consumer_modes;

@@ -134,5 +134,5 @@ PostprocessorInterface::getPostprocessorValueByNameHelper(const PostprocessorNam
 {
   ReporterName r_name(name, "value");
   return _pi_feproblem.getReporterData().getReporterValue<PostprocessorValue>(
-      r_name, name, Moose::ReporterMode::ROOT, t_index);
+      r_name, name, REPORTER_MODE_ROOT, t_index);
 }

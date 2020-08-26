@@ -61,14 +61,14 @@ protected:
    * reponsibility of the Reporter object to get it to that state. The ReporterContext objects
    * are designed to help with this. The mode can be one of the following:
    *
-   *     Moose::ReporterMode::ROOT Indicates that the value produced is complate/correct on the
-   *                               root processor for the object.
-   *     Moose::ReporterMode::REPLICATED Indicates that the value produced is complate/correct on
-   *                                     all processors AND that the value is the same on all
-   *                                     processors
-   *     Moose::ReporterMode::DISTRIBUTED Indicates that the value produced is complate/correct on
-   *                                      all processors AND that the value is NOT the same on all
-   *                                      processors
+   *     ReporterMode::ROOT Indicates that the value produced is complete/correct on the
+   *                        root processor for the object.
+   *     ReporterMode::REPLICATED Indicates that the value produced is complate/correct on
+   *                              all processors AND that the value is the same on all
+   *                              processors
+   *     ReporterMode::DISTRIBUTED Indicates that the value produced is complate/correct on
+   *                               all processors AND that the value is NOT the same on all
+   *                               processors
    *
    * WARNING! Using the "default value" in ReporterContext:
    * The Reporter system, like the systems before it, allow for objects that consume values to be
@@ -86,7 +86,7 @@ protected:
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
   T & declareValue(const std::string & value_name, Args &&... args0);
   template <typename T, template <typename> class S = ReporterContext, typename... Args>
-  T & declareValue(const std::string & value_name, Moose::ReporterMode mode, Args &&... args0);
+  T & declareValue(const std::string & value_name, ReporterMode mode, Args &&... args0);
   ///@}
 
 private:
@@ -101,12 +101,12 @@ template <typename T, template <typename> class S, typename... Args>
 T &
 Reporter::declareValue(const std::string & value_name, Args &&... args)
 {
-  return declareValue<T, S>(value_name, Moose::ReporterMode::UNSET, args...);
+  return declareValue<T, S>(value_name, REPORTER_MODE_UNSET, args...);
 }
 
 template <typename T, template <typename> class S, typename... Args>
 T &
-Reporter::declareValue(const std::string & value_name, Moose::ReporterMode mode, Args &&... args)
+Reporter::declareValue(const std::string & value_name, ReporterMode mode, Args &&... args)
 {
   ReporterName state_name(_reporter_name, value_name);
   return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(

@@ -38,10 +38,31 @@ MooseEnum::MooseEnum() : _current("", MooseEnumItem::INVALID_ID) {}
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {
+  assign(name);
+  return *this;
+}
+
+MooseEnum &
+MooseEnum::operator=(int value)
+{
+  assign(value);
+  return *this;
+}
+
+MooseEnum &
+MooseEnum::operator=(const MooseEnumItem & item)
+{
+  assign(item);
+  return *this;
+}
+
+void
+MooseEnum::assign(const std::string & name)
+{
   if (name == "")
   {
     _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
-    return *this;
+    return;
   }
 
   std::set<MooseEnumItem>::const_iterator iter = find(name);
@@ -63,17 +84,15 @@ MooseEnum::operator=(const std::string & name)
     _current = *iter;
 
   checkDeprecated();
-
-  return *this;
 }
 
-MooseEnum &
-MooseEnum::operator=(int value)
+void
+MooseEnum::assign(int value)
 {
   if (value == MooseEnumItem::INVALID_ID)
   {
     _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
-    return *this;
+    return;
   }
 
   std::set<MooseEnumItem>::const_iterator iter = find(value);
@@ -87,8 +106,22 @@ MooseEnum::operator=(int value)
     _current = *iter;
 
   checkDeprecated();
+}
 
-  return *this;
+void
+MooseEnum::assign(const MooseEnumItem & item)
+{
+  std::set<MooseEnumItem>::const_iterator iter = find(item);
+  if (iter == _items.end())
+    mooseError("Invalid item \"",
+               item,
+               "\" in MooseEnum. Valid ids are \"",
+               Moose::stringify(items()),
+               "\".");
+  else
+    _current = *iter;
+
+  checkDeprecated();
 }
 
 bool

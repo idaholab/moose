@@ -20,28 +20,4 @@ const BoundaryID ANY_BOUNDARY_ID = static_cast<BoundaryID>(-1);
 const BoundaryID INVALID_BOUNDARY_ID = libMesh::BoundaryInfo::invalid_id;
 const TagID INVALID_TAG_ID = static_cast<TagID>(-1);
 const TagTypeID INVALID_TAG_TYPE_ID = static_cast<TagTypeID>(-1);
-
-std::ostream &
-operator<<(std::ostream & os, const ReporterMode & mode)
-{
-  switch (mode)
-  {
-    case ReporterMode::UNSET:
-      os << "UNSET";
-      break;
-    case ReporterMode::ROOT:
-      os << "ROOT";
-      break;
-    case ReporterMode::REPLICATED:
-      os << "REPLICATED";
-      break;
-    case ReporterMode::DISTRIBUTED:
-      os << "DISTRIBUTED";
-      break;
-    default:
-      mooseError("Unkown ReporterMode");
-      break;
-  }
-  return os;
-}
 }

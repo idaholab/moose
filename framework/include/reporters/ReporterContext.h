@@ -15,6 +15,7 @@
 #include "libmesh/parallel_object.h"
 
 #include "ReporterName.h"
+#include "ReporterMode.h"
 #include "nlohmann/json.h"
 
 class ReporterData;
@@ -97,6 +98,16 @@ public:
   virtual std::string type() const final;
 
   /**
+   * Initialize the producer mode.
+   *
+   * This done after construction to allow the constructor to define the available values in the
+   * ReporterProducerEnum.
+   *
+   * @see ReporterData::declareReporterValue
+   */
+  void init(const ReporterMode & mode);
+
+  /**
    * Perform automatic parallel communication based on the producer/consumer modes
    */
   virtual void finalize() override;
@@ -104,6 +115,9 @@ public:
 protected:
   /// The state on which this context object operates
   ReporterState<T> & _state;
+
+  /// Defines how the Reporter value can be produced and how it is being produded
+  ReporterProducerEnum _producer_enum;
 
 private:
   // The following methods are called by the ReporterData and are not indented for external use, as
@@ -118,6 +132,7 @@ template <typename T>
 ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other, ReporterState<T> & state)
   : ReporterContextBase(other), _state(state)
 {
+  _producer_enum.insert(REPORTER_MODE_ROOT, REPORTER_MODE_REPLICATED, REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename T>
@@ -127,6 +142,14 @@ ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
   : ReporterContext(other, state)
 {
   _state.get().first = default_value;
+}
+
+template <typename T>
+void
+ReporterContext<T>::init(const ReporterMode & mode)
+{
+  if (mode != REPORTER_MODE_UNSET)
+    _producer_enum.assign(mode);
 }
 
 template <typename T>
@@ -150,11 +173,15 @@ ReporterContext<T>::finalize()
   // Automatic parallel operation to perform
   ReporterContext::AutoOperation auto_operation = ReporterContext::AutoOperation::NONE;
 
+  // Set the default producer mode to ROOT
+  if (!_producer_enum.isValid())
+    _producer_enum.assign(REPORTER_MODE_ROOT);
+
   // Determine auto parallel operation to perform
-  const Moose::ReporterMode producer = _state.getProducerMode();
+  const auto & producer = _producer_enum; // convenience
   for (const auto & pair : _state.getConsumerModes())
   {
-    const Moose::ReporterMode consumer = pair.first;
+    const ReporterMode consumer = pair.first;
     const std::string & object_name = pair.second;
 
     // The following sets up the automatic operations and performs error checking for the various
@@ -169,7 +196,7 @@ ReporterContext<T>::finalize()
 
     // Perform broadcast in the case
     //            ROOT -> REPLICATED
-    if (producer == Moose::ReporterMode::ROOT && consumer == Moose::ReporterMode::REPLICATED)
+    if (producer == REPORTER_MODE_ROOT && consumer == REPORTER_MODE_REPLICATED)
       auto_operation = ReporterContext::AutoOperation::BROADCAST;
 
     // The following are not support and create an error
@@ -177,14 +204,10 @@ ReporterContext<T>::finalize()
     //      REPLICATED -> DISTRIBUTED
     //     DISTRIBUTED -> ROOT
     //     DISTRIBUTED -> REPLICATED
-    else if ((producer == Moose::ReporterMode::ROOT &&
-              consumer == Moose::ReporterMode::DISTRIBUTED) ||
-             (producer == Moose::ReporterMode::REPLICATED &&
-              consumer == Moose::ReporterMode::DISTRIBUTED) ||
-             (producer == Moose::ReporterMode::DISTRIBUTED &&
-              consumer == Moose::ReporterMode::ROOT) ||
-             (producer == Moose::ReporterMode::DISTRIBUTED &&
-              consumer == Moose::ReporterMode::REPLICATED))
+    else if ((producer == REPORTER_MODE_ROOT && consumer == REPORTER_MODE_DISTRIBUTED) ||
+             (producer == REPORTER_MODE_REPLICATED && consumer == REPORTER_MODE_DISTRIBUTED) ||
+             (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_ROOT) ||
+             (producer == REPORTER_MODE_DISTRIBUTED && consumer == REPORTER_MODE_REPLICATED))
       mooseError("The Reporter value '",
                  name(),
                  "' is being produced in ",
@@ -241,10 +264,8 @@ ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObj
                                                       ReporterState<T> & state)
   : ReporterContext<T>(other, state)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError(
-        "Reporter values using the ReporterBroadcastConxtext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::REPLICATED);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_ROOT);
 }
 
 template <typename T>
@@ -253,16 +274,30 @@ ReporterBroadcastContext<T>::ReporterBroadcastContext(const libMesh::ParallelObj
                                                       const T & default_value)
   : ReporterContext<T>(other, state, default_value)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError(
-        "Reporter values using the ReporterBroadcastConxtext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::REPLICATED);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_ROOT);
 }
 
 template <typename T>
 void
 ReporterBroadcastContext<T>::finalize()
 {
+  for (const auto & pair : this->_state.getConsumerModes())
+  {
+    const ReporterMode consumer = pair.first;
+    const std::string & object_name = pair.second;
+    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_REPLICATED)
+      mooseError("The Reporter value '",
+                 this->name(),
+                 "' is being produced in ",
+                 REPORTER_MODE_ROOT,
+                 " mode, but the '",
+                 object_name,
+                 "' object is requesting to consume it in ",
+                 consumer,
+                 " mode, which is not supported. The mode must be UNSET or REPLICATED.");
+  }
+
   this->comm().broadcast(this->_state.set().first);
 }
 
@@ -294,9 +329,8 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
                                                   const std::vector<T> & values)
   : ReporterContext<T>(other, state), _values(values)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError("Reporter values using the ReporterScatterContext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::DISTRIBUTED);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_ROOT);
 }
 
 template <typename T>
@@ -306,15 +340,30 @@ ReporterScatterContext<T>::ReporterScatterContext(const libMesh::ParallelObject 
                                                   const std::vector<T> & values)
   : ReporterContext<T>(other, state, default_value), _values(values)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError("Reporter values using the ReporterScatterContext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::DISTRIBUTED);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_ROOT);
 }
 
 template <typename T>
 void
 ReporterScatterContext<T>::finalize()
 {
+  for (const auto & pair : this->_state.getConsumerModes())
+  {
+    const ReporterMode consumer = pair.first;
+    const std::string & object_name = pair.second;
+    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_DISTRIBUTED)
+      mooseError("The Reporter value '",
+                 this->name(),
+                 "' is being produced in ",
+                 REPORTER_MODE_ROOT,
+                 " mode, but the '",
+                 object_name,
+                 "' object is requesting to consume it in ",
+                 consumer,
+                 " mode, which is not supported. The mode must be UNSET or DISTRIBUTED.");
+  }
+
   mooseAssert(this->processor_id() == 0 ? _values.size() == this->n_processors() : true,
               "Vector to be scatter must be sized to match the number of processors");
   mooseAssert(this->processor_id() > 0 ? _values.size() == 0 : true,
@@ -350,9 +399,8 @@ ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & 
                                                 const T & value)
   : ReporterContext<T>(other, state), _value(value)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError("Reporter values using the ReporterGatherContext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::ROOT);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename T>
@@ -362,15 +410,30 @@ ReporterGatherContext<T>::ReporterGatherContext(const libMesh::ParallelObject & 
                                                 const T & value)
   : ReporterContext<T>(other, state, default_value), _value(value)
 {
-  if (state.getProducerMode() != Moose::ReporterMode::UNSET)
-    mooseError("Reporter values using the ReporterGatherContext must not set the Reporter mode.");
-  state.setProducerMode(Moose::ReporterMode::ROOT);
+  this->_producer_enum.clear();
+  this->_producer_enum.insert(REPORTER_MODE_DISTRIBUTED);
 }
 
 template <typename T>
 void
 ReporterGatherContext<T>::finalize()
 {
+  for (const auto & pair : this->_state.getConsumerModes())
+  {
+    const ReporterMode consumer = pair.first;
+    const std::string & object_name = pair.second;
+    if (consumer != REPORTER_MODE_UNSET || consumer != REPORTER_MODE_ROOT)
+      mooseError("The Reporter value '",
+                 this->name(),
+                 "' is being produced in ",
+                 REPORTER_MODE_DISTRIBUTED,
+                 " mode, but the '",
+                 object_name,
+                 "' object is requesting to consume it in ",
+                 consumer,
+                 " mode, which is not supported. The mode must be UNSET or ROOT.");
+  }
+
   this->_state.set().first = _value;
   this->comm().gather(0, this->_state.set().first);
 }

@@ -112,12 +112,10 @@ Executioner::addAttributeReporter(const std::string & name, Real initial_value)
   ReporterName r_name(this->name(), name);
   PostprocessorValue & value =
       problem->getReporterData().declareReporterValue<Real, ReporterContext>(
-          r_name, Moose::ReporterMode::ROOT, initial_value);
+          r_name, REPORTER_MODE_ROOT, initial_value);
 
   // Create storage for the old/older values
-  problem->getReporterData().getReporterValue<Real>(
-      r_name, this->name(), Moose::ReporterMode::ROOT, 1);
-  problem->getReporterData().getReporterValue<Real>(
-      r_name, this->name(), Moose::ReporterMode::ROOT, 2);
+  problem->getReporterData().getReporterValue<Real>(r_name, this->name(), REPORTER_MODE_ROOT, 1);
+  problem->getReporterData().getReporterValue<Real>(r_name, this->name(), REPORTER_MODE_ROOT, 2);
   return value;
 }
