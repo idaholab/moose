@@ -887,14 +887,13 @@ MultiApp::buildComm(bool batch_mode)
   _my_num_apps = config.num_local_apps;
   _first_local_app = config.first_local_app_index;
 
-  bool has_an_app = config.num_local_apps > 0;
+  _has_an_app = config.num_local_apps > 0;
   if (config.first_local_app_index >= _total_num_apps)
     mooseError("Internal error, a processor has an undefined app.");
 
-  if (has_an_app)
+  if (_has_an_app)
   {
     _communicator.split(config.first_local_app_index, rank, _my_communicator);
-
     ierr = MPI_Comm_rank(_my_comm, &_my_rank);
     mooseCheckMPIErr(ierr);
   }
