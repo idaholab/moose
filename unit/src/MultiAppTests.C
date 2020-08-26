@@ -21,21 +21,26 @@
 struct Case
 {
   unsigned int nprocs;
-  unsigned int napps;
+  unsigned int nsims;
   unsigned int min_app_procs;
   unsigned int max_app_procs;
+  unsigned int batch_mode;
 
   // map[apps/proc --> num procs with that many apps]
   std::map<int, int> apps_per_proc;
   // map[procs/app --> num apps with that many procs]
   std::map<int, int> procs_per_app;
+  // map[sims/proc --> num procs with that many sims]
+  std::map<int, int> sims_per_proc;
+  // map[procs/sim --> num sims with that many procs]
+  std::map<int, int> procs_per_sim;
 };
 
 std::string
 caseStr(const Case & c)
 {
   std::stringstream ss;
-  ss << c.nprocs << " procs for " << c.napps << " apps (" << c.min_app_procs << " to "
+  ss << c.nprocs << " procs for " << c.nsims << " apps (" << c.min_app_procs << " to "
      << c.max_app_procs << " procs)";
   return ss.str();
 }
@@ -48,14 +53,18 @@ TEST(MultiAppTests, OldRevamp)
   Case cases[] = {
    //                          sum(napps) = total_napps
    //                          sum(nprocs) = total_nprocs
-   //                      and ??? sum(apps/proc * nprocs) = total_nprocs
-   // nprocs napps min  max  {apps/proc,nprocs}... {procs/app, napps}...
-      {10,     1,  1, 999,     {{1, 10}},          {{10, 1}}},
-      { 1,    10,  1, 999,     {{10, 1}},          {{1, 10}}},
-      {10,     1,  1,   3,     {{1, 3}, {0, 7}},   {{3, 1}}},
-      {10,     1,  1,   1,     {{1, 1}, {0, 9}},   {{1, 1}}},
-      {10,    23,  1, 999,     {{3, 3}, {2, 7}},   {{1, 23}}},
-      {23,    10,  1, 999,     {{1, 23}},          {{3, 3}, {2, 7}}},
+   //                      and sum(apps/proc * nprocs) = procs_per_app * napps (for non-batch mode)
+   // nprocs nsims min  max  batch  {apps/proc,nprocs}...        {procs/app, napps}...     {sims/proc, nprocs}... {procs/sim, nsims}...
+      {10,     1,  1,   999, false,    {{1, 10}},                 {{10, 1}},                 {},                   {}},
+      { 1,    10,  1,   999, false,    {{10, 1}},                 {{1, 10}},                 {},                   {}},
+      {10,     1,  1,     3, false,    {{1, 3}, {0, 7}},          {{3, 1}},                  {},                   {}},
+      {10,     1,  1,     1, false,    {{1, 1}, {0, 9}},          {{1, 1}},                  {},                   {}},
+      {10,    23,  1,   999, false,    {{3, 3}, {2, 7}},          {{1, 23}},                 {},                   {}},
+      {23,    10,  1,   999, false,    {{1, 23}},                 {{3, 3}, {2, 7}},          {},                   {}},
+      {23,    10,  7,     7, false,    {{3, 14}, {4, 7}, {0, 2}}, {{7, 10}},                 {},                   {}},
+      {10,    23,  3,   999, false,    {{8, 7}, {7, 3}},          {{4, 8}, {3, 15}},         {},                   {}},
+      {10,    23,  1,   999, true,     {{1, 10}},                 {{1, 10}, {0, 13}},        {{3, 3}, {2, 7}},     {{1, 23}}},
+      {10,    23,  3,   999, true,     {{1, 10}},                 {{3, 2}, {4, 1}, {0, 20}}, {{8, 7}, {7, 3}},     {{4, 8}, {3, 15}}},
   };
   // clang-format on
 
@@ -66,17 +75,23 @@ TEST(MultiAppTests, OldRevamp)
 
     std::map<int, int> procs_per_app;
     std::map<int, int> apps_per_proc;
+    std::map<int, int> procs_per_sim;
+    std::map<int, int> sims_per_proc;
     std::map<int, int> app_to_nprocs;
+    std::map<int, int> sim_to_nprocs;
     for (unsigned int rank = 0; rank < test.nprocs; rank++)
     {
-      auto config =
-          rankConfig(rank, test.nprocs, test.napps, test.min_app_procs, test.max_app_procs);
+      auto config = rankConfig(
+          rank, test.nprocs, test.nsims, test.min_app_procs, test.max_app_procs, test.batch_mode);
       apps_per_proc[config.num_local_apps] += 1;
+      sims_per_proc[config.num_local_sims] += 1;
       for (unsigned int n = 0; n < config.num_local_apps; n++)
         app_to_nprocs[config.first_local_app_index + n] += 1;
+      for (unsigned int n = 0; n < config.num_local_sims; n++)
+        sim_to_nprocs[config.first_local_sim_index + n] += 1;
     }
 
-    for (unsigned int n = 0; n < test.napps; n++)
+    for (unsigned int n = 0; n < test.nsims; n++)
       procs_per_app[app_to_nprocs[n]] += 1;
 
     for (auto entry : procs_per_app)
@@ -84,18 +99,44 @@ TEST(MultiAppTests, OldRevamp)
       auto key = entry.first;
       auto napps = entry.second;
       auto want = test.procs_per_app[key];
+      auto got = procs_per_app[key];
       if (napps != want)
         err << "case " << i + 1 << " FAIL " << caseStr(test) << ": at " << key << " procs/app want "
-            << want << ", got " << napps << "\n";
+            << want << ", got " << got << "\n";
     }
     for (auto entry : apps_per_proc)
     {
       auto key = entry.first;
       auto nprocs = entry.second;
       auto want = test.apps_per_proc[key];
+      auto got = apps_per_proc[key];
       if (nprocs != want)
         err << "case " << i + 1 << " FAIL " << caseStr(test) << ": at " << key << " apps/proc want "
-            << want << ", got " << nprocs << "\n";
+            << want << ", got " << got << "\n";
+    }
+
+    if (test.batch_mode)
+    {
+      for (auto entry : procs_per_sim)
+      {
+        auto key = entry.first;
+        auto nsims = entry.second;
+        auto want = test.procs_per_sim[key];
+        auto got = procs_per_sim[key];
+        if (nsims != want)
+          err << "case " << i + 1 << " FAIL " << caseStr(test) << ": at " << key
+              << " procs/sim want " << want << ", got " << got << "\n";
+      }
+      for (auto entry : sims_per_proc)
+      {
+        auto key = entry.first;
+        auto nprocs = entry.second;
+        auto want = test.sims_per_proc[key];
+        auto got = sims_per_proc[key];
+        if (nprocs != want)
+          err << "case " << i + 1 << " FAIL " << caseStr(test) << ": at " << key
+              << " sims/proc want " << want << ", got " << got << "\n";
+      }
     }
   }
 
