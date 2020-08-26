@@ -65,24 +65,18 @@
   []
 []
 
-[VectorPostprocessors]
-  [results]
-    type = StochasticResults
-  []
-[]
 
 [Trainers]
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    covariance_function = 'rbf'
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
-    optimize = 'false'
     distributions = 'q_dist'
     sampler = train_sample
     results_vpp = results
     results_vector = data:avg
+    covariance_function = 'rbf'
+    standardize_params = 'true'               #Center and scale the training params
+    standardize_data = 'true'                 #Center and scale the training data
   []
 []
 
@@ -90,7 +84,7 @@
   [rbf]
     type=SquaredExponentialCovariance
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
     length_factor = '0.38971'         #Select a length factor for each parameter (k and q)
   []
 []
@@ -104,6 +98,9 @@
 
 # # Computing statistics
 [VectorPostprocessors]
+  [results]
+    type = StochasticResults
+  []
   [cart_avg]
     type = GaussianProcessTester
     model = gauss_process_avg

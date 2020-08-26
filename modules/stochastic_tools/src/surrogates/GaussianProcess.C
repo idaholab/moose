@@ -31,6 +31,7 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
     _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(getModelData<RealEigenMatrix>("_K")),
     _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
+    _K_cho_decomp(getModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _covar_type(getModelData<std::string>("_covar_type")),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
@@ -61,10 +62,6 @@ GaussianProcess::evaluate(const std::vector<Real> & x) const
 Real
 GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
 {
-
-  // TODO: This decomposition should be in an initalize() function, it only needs to be called once.
-  // Issue #15482
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp(_K);
 
   unsigned int _n_params = _training_params.cols();
   unsigned int _num_tests = 1;

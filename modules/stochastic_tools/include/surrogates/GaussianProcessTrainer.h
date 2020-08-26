@@ -83,7 +83,7 @@ private:
   RealEigenMatrix & _K_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
+  Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
@@ -118,3 +118,8 @@ private:
   /// Number of tunable hyperparameters
   unsigned int _num_tunable;
 };
+
+template <>
+void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+template <>
+void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);

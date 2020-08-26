@@ -61,6 +61,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
     _K(declareModelData<RealEigenMatrix>("_K")),
     _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
+    _K_cho_decomp(declareModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _covar_type(declareModelData<std::string>("_covar_type")),
@@ -378,4 +379,23 @@ GaussianProcessTrainer::vecToMap(libMesh::PetscVector<Number> & theta)
       }
     }
   }
+}
+
+template <>
+void
+dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+{
+  // Store the L matrix as opposed to the full matrix to avoid compounding
+  // roundoff error and decomposition error
+  RealEigenMatrix L(decomp.matrixL());
+  dataStore(stream, L, context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+{
+  RealEigenMatrix L;
+  dataLoad(stream, L, context);
+  decomp.compute(L * L.transpose());
 }

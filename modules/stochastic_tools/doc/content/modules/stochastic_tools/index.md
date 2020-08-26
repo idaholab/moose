@@ -22,6 +22,8 @@ used independently or in combination to meet the needs of the application develo
 - Example 9: [examples/poly_regression_surrogate.md]
 - Example 10: [examples/pod_rb_surrogate.md]
 - Example 11: [examples/combined_example_2d_trans_diff.md]
+- Example 12: [examples/gaussian_process_surrogate.md]
+
 ## Performance
 
 The stochastic tools module is optimized in two ways for memory use. First, sub-applications can be

@@ -1,0 +1,106 @@
+# Gaussian Process Surrogate
+
+## Problem Statement
+
+ The full order model we wish to emulate with this surrogate is a one-dimensional heat conduction model with four input parameters $\lbrace k, q, L, T_{\infty}$ \rbrace$.
+
+!equation
+-k\frac{d^2T}{dx^2} = q \,, \quad x\in[0, L]
+
+!equation
+\begin{aligned}
+\left.\frac{dT}{dx}\right|_{x=0} &= 0 \\
+T(x=L) &= T_{\infty}
+\end{aligned}
+
+When creating a surrogate using Gaussian Processes, a quantity of interest should be chosen (as opposed to attempting to model $T(x)$ directly). In this The quantity of interest chosen for this example is the average temperature:
+
+
+### Input Parameters
+
+!equation
+\begin{aligned}
+\bar{T} = \frac{\int_{0}^{L}T(x)dx}{L} = \\
+\end{aligned}
+
+!table
+| Parameter | Symbol | Uniform | Normal |
+| :- | - | - | - |
+| Conductivity | $k$ | $\sim\mathcal{U}(1, 10)$ | $\sim\mathcal{N}(5, 2)$ |
+| Volumetric Heat Source | $q$ | $\sim\mathcal{U}(9000, 11000)$ | $\sim\mathcal{N}(10000, 500)$ |
+| Domain Size | $L$ | $\sim\mathcal{U}(0.01, 0.05)$ | $\sim\mathcal{N}(0.03, 0.01)$ |
+| Right Boundary Temperature | $T_{\infty}$ | $\sim\mathcal{U}(290, 310)$ | $\sim\mathcal{N}(300, 10)$ |
+
+
+### Analytical Solutions
+
+This simple model problem has analytical descriptions for the field temperature and average temperature:
+
+!equation
+\begin{aligned}
+T(x,k,q,L,T_{\infty}) &= \frac{q}{2k}\left(L^2 - x^2\right) + T_{\infty} \\
+\bar{T}(k,q,L,T_{\infty}) &= \frac{qL^2}{3k} + T_{\infty} \\
+\end{aligned}
+
+
+### Setting up a 1D Problem
+
+Problems with a single input variable are a good place to provide insight on Gaussian Process regression. To accomplish this three parameters of our model system are fixed $\lbrace k=5, L=0.03, T_{\infty}=300 \rbrace$, leaving the surrogate to only model the action of varying $q$.
+
+6 training values for $q$ were selected from $\sim\mathcal{U}(1, 10)$ and evaluated using a full model evaluation. The Gaussian Process model was fitted to these data points.
+
+The Gaussian Process was chosen to use a [SquaredExponentialCovariance.md] covariance function, using three user selected hyperparameter settings: $\lbrace \sigma_n=1E-3, \sigma_f=1 , \ell_q=0.38971 \rbrace$. To set up the training for this surrogate we require the standard `Trainers` block found in all surrogate models in addition to the Gaussian Process specific `Covariance` block. Hyperparameters vary depending on the covariance function selected, and are therefor specified in the `Covariance` block.
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Trainers Covariance
+
+Creation of the `Surrogate` block follows the standard procedure laid out for other surrogate models.
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Surrogates
+
+One advantage of Gaussian Process surrogates is the ability to provide an model for uncertainty. To output this data the standard `EvaluateSurrogate` vector post processor is replaced with the `EvaluateGaussianProcess` vector post processor, which functions similarly but also outputs the standard deviation of the surrogate at the evaluation point.  
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=VectorPostprocessors
+
+The Gaussian Process surrogate model can only be evaluated at discrete points in the parameter space, so if we wish to visualize the response model fine sampling is required. To accomplish this sampling a `CartesianProduct` sampler evaluates the model for 100 evenly spaced $q$ values in $[9000,11000]$. This sampling is plotted below in Figure __ (space between the 100 sampled points are filled by simple linear interpolation, so strictly speaking the plot is not exactly the model)
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D.i block=Samplers
+
+!media gaussian_process_uniform_1D.svg id=1D_untuned
+
+Figure __ demonstrates some basic principles of the gaussian process surrogate for this covariance function. Near training points (red + markers), the uncertainty in the model trends towards the measurement noise $\sigma_n$. The model function is smooth and infinitely differentiable. As we move away from the data points the model tends to just predict the mean of the training data, particularly noticeable in the extrapolation regions of the graph.
+
+However, given that in this scenario we know the model should be a simple linear fit, we may conclude that this fit should be better. To achieve a better fit the model needs to be adjusted, specifically better hyperparameters for the covariance function likely need to be tested. For many hyperparameters this can be accomplished automatically by the system. To enable this the `tune=true` option is set for the Trainer. Which hyperparameters should be tuned can be specified by the `tune_parameters` option, and tuning bounds can be placed using `tuning_min` and `tuning_max`.
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_1D_tuned.i block=Trainers Covariance
+
+To demonstrate the importance of hyperparameter tuning, the same data set was then used to train a surrogate with hyperparameter auto-tuning enabled. In this mode the system attempts to learn an optimal hyperparameter configuration to maximize the likelihood of observing the data from the fitted model. The results is a nearly linear fit, with very little uncertainty in the fit, which is what we expect from the analytical form.
+
+
+!media gaussian_process_uniform_1D_tuned.svg id=1D_tuned
+
+Inspection of the final hyperparameter values after tuning gives $\lbrace \sigma_n=3.79E-6, \sigma_f=3.87 , \ell_q=4.59 \rbrace$, the significant increase in the length scale $\ell_q$ is a primary factor in the improved fit.
+
+
+### 2D Problem
+
+Next the idea is extended to two input dimensions and attempt to model the QoI behavior due to varying $k$ and $q$, while fixing values of $\lbrace L=0.03, T_{\infty}=300 \rbrace$.
+
+Due to the increased dimensionality, 50 training samples were selected from $q \in [9000,11000]$ and $k \in [1,10]$. An extra hyperparameter $\ell_k$ is also added to the set of hyperparameters to be tuned.  
+
+!listing examples/surrogates/gaussian_process/gaussian_process_uniform_2D_tuned.i block=Samplers Trainers Covariance
+
+As was done in the 1D case above, first the surrogate was fitted using fixed hyperparameters $\lbrace \sigma_n=1E-3, \sigma_f=10, \ell_q=0.38971 , \ell_k=0.38971 \rbrace$ (hyperparameter tuning disabled by setting `tune=false` option). The QoI surface is shown in Figure __ , with the color map corresponding to the surrogate model's uncertainty at that point. As was the case in the 1D mode, uncertainty is highest at points furthest from training data points, and the overall response deviates strongly from the expected $\frac{q}{k}$ behavior predicted.  
+
+!media gaussian_process_uniform_2D.svg id=2D_untuned
+
+Hyperparameter tuning is then enabled by setting `tune=true`, and the surrogate recreated with trained hyperparameters. Figure __ shows the fit with automatically tuned hyperparameters using the same data set. This results in a fit that much better captures the $\frac{q}{k}$ nature of the QoI response, with "high" uncertainty occurring primarily in extrapolation zones.
+
+!media gaussian_process_uniform_2D_tuned.svg id=2D_tuned
+
+<!-- !plot scatter id=GP_1D_untuned caption=1D results
+  filename=examples/surrogates/gaussian_process/gaussian_process_uniform_1D_out_train_avg_0002.csv
+  data=[{'x':'sample_p0', 'y':'gauss_process_avg'}]
+  layout={'xaxis':{'title':'Number of Training Points'},
+          'yaxis':{'title':'Relative Moment Error'}} -->
+
+#### Noise and Signal Variance

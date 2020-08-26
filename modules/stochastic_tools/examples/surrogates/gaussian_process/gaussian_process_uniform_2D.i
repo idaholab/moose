@@ -12,28 +12,19 @@
     lower_bound = 9000
     upper_bound = 11000
   []
-  [L_dist]
-    type = Uniform
-    lower_bound = 0.01
-    upper_bound = 0.05
-  []
-  [Tinf_dist]
-    type = Uniform
-    lower_bound = 290
-    upper_bound = 310
-  []
 []
 
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 6
-    distributions = 'q_dist'
+    num_rows = 50
+    distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
   [cart_sample]
     type = CartesianProduct
-    linear_space_items = '9000 20 100'
+    linear_space_items = '1 0.09 100
+                          9000 20 100 '
     execute_on = initial
   []
 []
@@ -51,7 +42,7 @@
     type = MultiAppCommandLineControl
     multi_app = sub
     sampler = train_sample
-    param_names = 'Kernels/source/value'
+    param_names = 'Materials/conductivity/prop_values Kernels/source/value'
   []
 []
 
@@ -65,6 +56,12 @@
   []
 []
 
+[VectorPostprocessors]
+  [results]
+    type = StochasticResults
+  []
+[]
+
 [Trainers]
   [GP_avg_trainer]
     type = GaussianProcessTrainer
@@ -72,77 +69,75 @@
     covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
-    distributions = 'q_dist'
+    tune = 'false'
+    tao_options = '-tao_bncg_type kd'
+    show_tao = 'true'
+    distributions = 'k_dist q_dist'
     sampler = train_sample
     results_vpp = results
     results_vector = data:avg
-    tune = 'true'
-    tao_options = '-tao_bncg_type kd'
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-9'
     tuning_max = ' 1e16  1e16'
-    show_tao = 'true'
   []
 []
+
 
 [Covariance]
   [rbf]
     type=SquaredExponentialCovariance
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.38971'         #Select a length factor for each parameter (k and q)
+    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
+    length_factor = '0.38971 0.38971'         #Select a length factor for each parameter (k and q)
   []
-  [expon]
+  [exp]
     type=ExponentialCovariance
+    gamma = 1                                #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133'         #Select a length factor for each parameter (k and q)
-    gamma = 2
+    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
   []
   [matern]
-    type=MaternHalfIntCovariance
+    type=MaternHalfIntCovariance                               #Define the exponential factor
     signal_variance = 1                       #Use a signal variance of 1 in the kernel
     noise_variance = 1e-3                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133'         #Select a length factor for each parameter (k and q)
-    p = 1
+    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
+    p = 2
   []
 []
 
 [Surrogates]
-  [gauss_process_avg]
+  [GP_avg]
     type = GaussianProcess
     trainer = 'GP_avg_trainer'
   []
 []
 
-# # Computing statistics
 [VectorPostprocessors]
-  [results]
-    type = StochasticResults
-  []
-  [hyperparams]
-    type = GaussianProcessData
-    gp_name = 'gauss_process_avg'
-    execute_on = final
-  []
-  [cart_avg]
-    type = GaussianProcessTester
-    model = gauss_process_avg
-    sampler = cart_sample
-    output_samples = true
-    execute_on = final
-  []
   [train_avg]
     type = GaussianProcessTester
-    model = gauss_process_avg
+    model = GP_avg
     sampler = train_sample
     output_samples = true
     execute_on = final
   []
+  [cart_avg]
+    type = GaussianProcessTester
+    model = GP_avg
+    sampler = cart_sample
+    output_samples = true
+    execute_on = final
+  []
+  [hyperparams]
+    type = GaussianProcessData
+    gp_name = 'GP_avg'
+    execute_on = final
+  []
 []
 
-
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [out]
+    type = CSV
+    execute_on = FINAL
+  []
 []

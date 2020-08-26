@@ -17,7 +17,7 @@
 [Samplers]
   [train_sample]
     type = MonteCarlo
-    num_rows = 10
+    num_rows = 50
     distributions = 'k_dist q_dist'
     execute_on = PRE_MULTIAPP_SETUP
   []
@@ -66,7 +66,7 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    covariance_function = 'matern'
+    covariance_function = 'rbf'
     standardize_params = 'true'               #Center and scale the training params
     standardize_data = 'true'                 #Center and scale the training data
     tune = 'true'
