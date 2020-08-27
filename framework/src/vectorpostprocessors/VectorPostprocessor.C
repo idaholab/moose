@@ -70,10 +70,16 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
   if (_vpp_tid)
     return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
 
+  // _is_broadcast = true (_auto_broadcast = false) then data is produced in a replicated manner
+  ReporterMode mode = REPORTER_MODE_ROOT;
+  if (_is_broadcast)
+    mode = REPORTER_MODE_REPLICATED;
+  if (_is_distributed)
+    mode = REPORTER_MODE_DISTRIBUTED;
+
   ReporterName r_name(_vpp_name, vector_name);
   return _vpp_fe_problem->getReporterData()
-      .declareReporterValue<VectorPostprocessorValue, VectorPostprocessorContext>(
-          r_name, REPORTER_MODE_ROOT);
+      .declareReporterValue<VectorPostprocessorValue, VectorPostprocessorContext>(r_name, mode);
 }
 
 const std::set<std::string> &

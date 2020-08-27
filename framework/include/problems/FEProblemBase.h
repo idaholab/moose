@@ -791,7 +791,6 @@ public:
                                       const std::string & name,
                                       InputParameters & parameters);
 
-
   /**
    * Add a Reporter object to the simulation.
    * @param name A uniquely identifying object name
@@ -859,13 +858,6 @@ public:
   void initPostprocessorData(const std::string & name);
 
   /**
-   * Check existence of the postprocessor.
-   * @param name The name of the post-processor
-   * @return true if it exists, otherwise false
-   */
-  bool hasPostprocessor(const std::string & name) const;
-
-  /**
    * Get a read-only reference to the value associated with a Postprocessor that exists.
    * @param name The name of the post-processor
    * @partm t_index Flag for getting current (0), old (1), or older (2) values
@@ -901,6 +893,7 @@ public:
   /**
    * Deprecated
    */
+  bool hasPostprocessor(const std::string & name) const;
   PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);

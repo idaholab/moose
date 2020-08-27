@@ -3360,7 +3360,6 @@ FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
 }
 
 void
-
 FEProblemBase::addReporter(const std::string & type,
                            const std::string & name,
                            InputParameters & parameters)
@@ -3472,13 +3471,6 @@ FEProblemBase::initPostprocessorData(const std::string & name)
         r_name, REPORTER_MODE_UNSET);
 }
 
-bool
-FEProblemBase::hasPostprocessor(const std::string & name) const
-{
-  ReporterName r_name(name, "value");
-  return _reporter_data.hasReporterValue(r_name);
-}
-
 const PostprocessorValue &
 FEProblemBase::getPostprocessorValueByName(const PostprocessorName & name,
                                            std::size_t t_index) const
@@ -3494,6 +3486,15 @@ FEProblemBase::setPostprocessorValueByName(const PostprocessorName & name,
 {
   ReporterName r_name(name, "value");
   _reporter_data.setReporterValue<PostprocessorValue>(r_name, value, t_index);
+}
+
+bool
+FEProblemBase::hasPostprocessor(const std::string & name) const
+{
+  mooseDeprecated("The 'FEProblemBase::hasPostprocssor' is being removed, use the method in the "
+                  "PostprocessorInterface");
+  ReporterName r_name(name, "value");
+  return _reporter_data.hasReporterValue(r_name);
 }
 
 PostprocessorValue &
@@ -6331,7 +6332,7 @@ FEProblemBase::checkProblemIntegrity()
   checkDisplacementOrders();
 
   // Perform Reporter get/declare check
-  //_reporter_data.check();
+  _reporter_data.check();
 }
 
 void

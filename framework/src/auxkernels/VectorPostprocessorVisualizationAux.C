@@ -66,7 +66,6 @@ VectorPostprocessorVisualizationAux::timestepSetup()
 Real
 VectorPostprocessorVisualizationAux::computeValue()
 {
-  // std::cout << "use_broadcast = " << _use_broadcast << std::endl;
   if (_use_broadcast)
   {
     mooseAssert(_vpp_vector.size() > _my_pid,
@@ -74,7 +73,5 @@ VectorPostprocessorVisualizationAux::computeValue()
                     << name());
     return _vpp_vector[_my_pid];
   }
-  // else
-  // std::cout << "_vpp_scatter = " << _vpp_scatter << std::endl;
   return _vpp_scatter;
 }

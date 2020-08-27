@@ -23,15 +23,11 @@ class CSVReader : public GeneralVectorPostprocessor
 {
 public:
   static InputParameters validParams();
-
   CSVReader(const InputParameters & parameters);
-  virtual void initialize() override;
-  virtual void execute() override;
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
 protected:
-  /// The MOOSE delimited file reader.
-  MooseUtils::DelimitedFileReader _csv_reader;
-
   /// The vector variables storing the data read from the csv
   std::map<std::string, VectorPostprocessorValue *> _column_data;
 };

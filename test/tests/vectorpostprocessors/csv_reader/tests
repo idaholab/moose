@@ -44,7 +44,7 @@
 
     issues = '#14785'
     requirement = 'The system shall support the ability to read a comma separated file into an '
-                  'object during PREIC.'
+                  'object prior to initial setup.'
   []
   [multi_read_fail]
     type = RunException
