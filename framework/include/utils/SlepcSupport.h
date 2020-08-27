@@ -44,6 +44,8 @@ void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputPara
 void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcOutputOptions(EigenProblem & eigen_problem);
+void setNonlinearPowerOptions();
+void setNewtonOptions();
 
 void moosePetscSNESFormMatrixTag(SNES snes, Vec x, Mat mat, void * ctx, TagID tag);
 void moosePetscSNESFormMatricesTags(

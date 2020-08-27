@@ -43,6 +43,11 @@ public:
    */
   virtual void postSolve() override;
 
+  /*
+   * Prepare right petsc options
+   */
+  void prepareSolverOptions();
+
 protected:
   EigenProblem & _eigen_problem;
   /// Postprocessor value that scales solution when eigensolve is finished

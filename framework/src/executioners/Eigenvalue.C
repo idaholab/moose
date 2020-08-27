@@ -97,10 +97,23 @@ Eigenvalue::init()
       getParam<bool>("precond_matrix_includes_eigen"));
 #endif
   Steady::init();
+
+#if LIBMESH_HAVE_SLEPC
+  // Let do an initial solve if a nonlinear eigen solver but not power is used.
+  // The initial solver is a Inverse Power, and it is used to compute a good initial
+  // guess for Newton
+  if (_eigen_problem.isNonlinearEigenvalueSolver() && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
+    execute();
+ #endif
 }
 
 void
 Eigenvalue::execute()
+{
+  Steady::execute();
+}
+
+void Eigenvalue::prepareSolverOptions()
 {
 #if LIBMESH_HAVE_SLEPC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
@@ -123,8 +136,6 @@ Eigenvalue::execute()
   }
 #endif
 #endif
-
-  Steady::execute();
 }
 
 void

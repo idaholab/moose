@@ -106,6 +106,8 @@ getSlepcEigenProblemValidParams()
 
   params.addParam<unsigned int>("free_power_iterations", 4, "The number of free power iterations");
 
+  params.addParam<unsigned int>("extra_power_iterations", 0, "The number of extra free power iterations");
+
   return params;
 }
 
@@ -341,6 +343,27 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
 }
 
 void
+setNonlinearPowerOptions()
+{
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
+  Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
+  if (solver_params._eigen_matrix_free)
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
+
+  if (solver_params._customized_pc_for_eigen)
+    Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
+
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
+#endif
+#else
+  mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
+#endif
+}
+
+void
 setEigenSolverOptions(SolverParams & solver_params, const InputParameters & params)
 {
   // Avoid unused variable warnings when you have SLEPc but not PETSc-dev.
@@ -365,22 +388,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_NONLINEAR_POWER:
-#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
-      Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
-      Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
-      if (solver_params._eigen_matrix_free)
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
-
-      if (solver_params._customized_pc_for_eigen)
-        Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_pc_type", "moosepc");
-
-#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
-      Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
-#endif
-#else
-      mooseError("Nonlinear Inverse Power requires SLEPc 3.7.3 or higher");
-#endif
+      setNonlinearPowerOptions();
       break;
     case Moose::EST_NEWTON:
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
