@@ -1,0 +1,13 @@
+[Tests]
+  design = "Eigenvalue.md"
+  issues = "#15513"
+
+  [./newton_intial_guess]
+    type = 'CSVDiff'
+    input = 'ne_ic.i'
+    csvdiff = 'ne_ic_out_eigenvalues_0001.csv'
+    absent_out = 'init_ solve'
+    slepc_version = '>=3.8.0'
+    requirement = "The system shall provide an initial guess to Newton if users request."
+  [../]
+[]

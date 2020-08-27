@@ -51,6 +51,11 @@ Eigenvalue::validParams()
   params.addParam<Real>(
       "normal_factor", 1.0, "Normalize eigenvector to make a defined norm equal to this factor");
 
+  params.addParam<bool>("auto_initialization",
+                        false,
+                        "If true, we will set an initial eigen vector in moose, otherwise EPS "
+                        "solver will initial eigen vector");
+
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
   Moose::SlepcSupport::getSlepcValidParams(params);
@@ -73,6 +78,9 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
+
+  // If need to initialize eigen vector
+  _eigen_problem.needInitializeEigenVector(getParam<bool>("auto_initialization"));
 #endif
 
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))

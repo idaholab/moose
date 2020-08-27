@@ -57,6 +57,17 @@ public:
    */
   bool negativeSignEigenKernel() { return _negative_sign_eigen_kernel; }
 
+  /**
+   * If we need to initialize eigen vector. We initialize the eigen vector
+   * only when "auto_initialization" is on and nonlinear eigen solver is selected.
+   */
+  bool needInitializeEigenVector();
+
+  /*
+   * Specify whether or not to initialize eigenvector automatically
+   */
+  void needInitializeEigenVector(bool need) { _auto_initilize_eigen_vector = need; }
+
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
@@ -105,7 +116,16 @@ public:
                                  TagID tagA,
                                  TagID tagB);
 
+  /**
+   * Scale eigenvector. Scaling_factor is often computed based on physics.
+   */
   void scaleEigenvector(const Real scaling_factor);
+
+  /**
+   * For nonlinear eigen solver, a good initial value can help convergence.
+   * Should set initial values for only eigen variables.
+   */
+  void initEigenvector(const Real initial_value);
 
   /**
    * Which eigenvalue is active
@@ -121,6 +141,9 @@ protected:
   bool _negative_sign_eigen_kernel;
 
   unsigned int _active_eigen_index;
+
+  bool _auto_initilize_eigen_vector;
+
   /// Timers
   PerfID _compute_jacobian_tag_timer;
   PerfID _compute_jacobian_ab_timer;

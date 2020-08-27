@@ -239,6 +239,13 @@ NonlinearEigenSystem::solve()
   if (sys().has_matrix_B())
     sys().get_matrix_B().close();
 #endif
+
+  if (_eigen_problem.needInitializeEigenVector())
+  {
+    _eigen_problem.initEigenvector(1.0);
+    _transient_sys.set_initial_space(solution());
+  }
+
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
   if (_time_integrator)
@@ -430,8 +437,10 @@ std::pair<Real, Real>
 NonlinearEigenSystem::getConvergedEigenpair(dof_id_type n) const
 {
   unsigned int n_converged_eigenvalues = getNumConvergedEigenvalues();
+
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
+
   return _transient_sys.get_eigenpair(n);
 }
 
