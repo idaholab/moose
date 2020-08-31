@@ -128,6 +128,13 @@ public:
   void initEigenvector(const Real initial_value);
 
   /**
+   *
+   */
+  bool doInitialFreePowerIteration() { return _do_initial_free_power_iteration; }
+
+  void doInitialFreePowerIteration(bool do_power) { _do_initial_free_power_iteration = do_power; }
+
+  /**
    * Which eigenvalue is active
    */
   unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
@@ -143,6 +150,7 @@ protected:
   unsigned int _active_eigen_index;
 
   bool _auto_initilize_eigen_vector;
+  bool _do_initial_free_power_iteration;
 
   /// Timers
   PerfID _compute_jacobian_tag_timer;

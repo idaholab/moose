@@ -12,6 +12,7 @@
 #include "libmesh/libmesh_config.h"
 
 #include "NonlinearSystemBase.h"
+#include "SlepcEigenSolverConfiguration.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/eigen_system.h"
@@ -187,6 +188,7 @@ protected:
 
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;
+  std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;
   unsigned int _n_eigen_pairs_required;
   NumericVector<Number> & _work_rhs_vector_AX;

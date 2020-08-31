@@ -56,6 +56,10 @@ Eigenvalue::validParams()
                         "If true, we will set an initial eigen vector in moose, otherwise EPS "
                         "solver will initial eigen vector");
 
+  params.addParam<bool>("newton_inverse_power",
+                        true,
+                        "If Newton and Inverse Power is combined in SLEPc side");
+
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
   Moose::SlepcSupport::getSlepcValidParams(params);
@@ -99,17 +103,55 @@ Eigenvalue::init()
   Steady::init();
 
 #if LIBMESH_HAVE_SLEPC
+
+  // Make sure all PETSc options are setup correctly
+  prepareSolverOptions();
+
   // Let do an initial solve if a nonlinear eigen solver but not power is used.
   // The initial solver is a Inverse Power, and it is used to compute a good initial
   // guess for Newton
-  if (_eigen_problem.isNonlinearEigenvalueSolver() && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
-    execute();
+  auto free_power_iterations = _pars.get<unsigned int>("free_power_iterations");
+  if (free_power_iterations
+    && _eigen_problem.isNonlinearEigenvalueSolver()
+    && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
+    {
+      _eigen_problem.doInitialFreePowerIteration(true);
+      // Set free power iterations
+      setFreeNonlinearPowerIterations(free_power_iterations);
+      // Provide vector of ones to solver
+      if (_eigen_problem.needInitializeEigenVector())
+        _eigen_problem.initEigenvector(1.0);
+
+      // Call solver
+      _eigen_problem.solve();
+      // Clear free power iterations
+      clearFreeNonlinearPowerIterations();
+
+      _eigen_problem.doInitialFreePowerIteration(false);
+    }
  #endif
 }
 
 void
 Eigenvalue::execute()
 {
+  // Let us do extra power iterations here if necessary
+  auto extra_power_iterations = _pars.get<unsigned int>("extra_power_iterations");
+  if (extra_power_iterations
+    && _eigen_problem.isNonlinearEigenvalueSolver()
+    && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
+  {
+    _eigen_problem.doInitialFreePowerIteration(true);
+    // Set free power iterations
+    setFreeNonlinearPowerIterations(extra_power_iterations);
+    // Call solver
+    _eigen_problem.solve();
+    // Clear free power iterations
+    clearFreeNonlinearPowerIterations();
+
+    _eigen_problem.doInitialFreePowerIteration(false);
+  }
+
   Steady::execute();
 }
 
@@ -159,5 +201,43 @@ Eigenvalue::postSolve()
         _problem.execute(flag);
     }
   }
+#endif
+}
+
+void
+Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+{
+#if LIBMESH_HAVE_SLEPC
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+#endif
+
+ Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
+
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
+#endif
+}
+
+void
+Eigenvalue::clearFreeNonlinearPowerIterations()
+{
+#if LIBMESH_HAVE_SLEPC
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  // Master app has the default data base
+  if (!_app.isUltimateMaster())
+    PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
+#endif
+
+ Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
+
+#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+  if (!_app.isUltimateMaster())
+    PetscOptionsPop();
+#endif
 #endif
 }

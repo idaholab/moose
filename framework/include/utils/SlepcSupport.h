@@ -20,6 +20,8 @@
 
 /* We need this in order to implement moose PC */
 #include <petsc/private/pcimpl.h>
+#include <slepceps.h>
+#include <slepc/private/epsimpl.h>  
 /* In order to use libMesh preconditioner */
 #include "libmesh/linear_solver.h"
 #include "libmesh/preconditioner.h"
@@ -44,9 +46,8 @@ void storeSlepcEigenProblemOptions(EigenProblem & eigen_problem, const InputPara
 void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
 void setSlepcOutputOptions(EigenProblem & eigen_problem);
-void setNonlinearPowerOptions();
-void setNewtonOptions();
-
+void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+void clearFreeNonlinearPowerIterations(const InputParameters & params);
 void moosePetscSNESFormMatrixTag(SNES snes, Vec x, Mat mat, void * ctx, TagID tag);
 void moosePetscSNESFormMatricesTags(
     SNES snes, Vec x, std::vector<Mat> & mats, void * ctx, const std::set<TagID> & tags);
@@ -55,6 +56,7 @@ PetscErrorCode mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, v
 PetscErrorCode mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx);
 PetscErrorCode mooseSlepcEigenFormFunctionAB(SNES snes, Vec x, Vec Ax, Vec Bx, void * ctx);
+PetscErrorCode mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,PetscInt nev,EPSConvergedReason *reason,void *ctx);
 
 void attachCallbacksToMat(EigenProblem & eigen_problem, Mat mat, bool eigen);
 

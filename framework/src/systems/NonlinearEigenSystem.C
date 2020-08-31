@@ -101,11 +101,23 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
         eigen_problem, eigen_problem.es().add_system<TransientEigenSystem>(name), name),
     _transient_sys(eigen_problem.es().get_system<TransientEigenSystem>(name)),
     _eigen_problem(eigen_problem),
+    _solver_configuration(nullptr),
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired()),
     _work_rhs_vector_AX(addVector("work_rhs_vector_Ax", false, PARALLEL)),
     _work_rhs_vector_BX(addVector("work_rhs_vector_Bx", false, PARALLEL))
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
+
+  SlepcEigenSolver<Number> * solver =
+    libmesh_cast_ptr<SlepcEigenSolver<Number>* >(&(*_transient_sys.eigen_solver));
+
+  if (!solver)
+    mooseError("A slepc eigen solver is required");
+
+  // setup of our class @SlepcSolverConfiguration
+  _solver_configuration = std::make_unique<SlepcEigenSolverConfiguration>(eigen_problem, *solver);
+
+  solver->set_solver_configuration(*_solver_configuration);
 
   _Ax_tag = eigen_problem.addVectorTag("Ax_tag");
 
@@ -240,11 +252,9 @@ NonlinearEigenSystem::solve()
     sys().get_matrix_B().close();
 #endif
 
-  if (_eigen_problem.needInitializeEigenVector())
-  {
-    _eigen_problem.initEigenvector(1.0);
+  // We apply initial guess for only nonlinear solver
+  if (_eigen_problem.isNonlinearEigenvalueSolver())
     _transient_sys.set_initial_space(solution());
-  }
 
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.

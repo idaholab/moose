@@ -370,32 +370,56 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
   }
 }
 
+void setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
+{
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "0");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_it", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it",stringify(free_power_iterations));
+}
+
+void clearFreeNonlinearPowerIterations(const InputParameters & params)
+{
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_max_it","1");
+  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_max_it", stringify(params.get<unsigned int>("nl_max_its")));
+}
+
 void
 setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & params)
 {
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
+  // Whether or not we need to involve an initial inverse power
+  bool initial_power = params.get<bool>("newton_inverse_power");
+
   Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
-  Moose::PetscSupport::setSinglePetscOption(
-      "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
+  if (initial_power)
+  {
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_max_it", "1");
+    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_rtol", "1e-2");
+    Moose::PetscSupport::setSinglePetscOption(
+        "-init_eps_max_it", stringify(params.get<unsigned int>("free_power_iterations")));
+  }
   Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
   if (solver_params._eigen_matrix_free)
   {
     Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
-    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
+    if (initial_power)
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_mf_operator", "1");
   }
 
   if (solver_params._customized_pc_for_eigen)
   {
     Moose::PetscSupport::setSinglePetscOption("-eps_power_pc_type", "moosepc");
-    Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
+
+    if (initial_power)
+      Moose::PetscSupport::setSinglePetscOption("-init_eps_power_pc_type", "moosepc");
   }
 #if PETSC_RELEASE_LESS_THAN(3, 13, 0)
   Moose::PetscSupport::setSinglePetscOption("-st_type", "sinvert");
-  Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
+  if (initial_power)
+    Moose::PetscSupport::setSinglePetscOption("-init_st_type", "sinvert");
 #endif
 #else
   mooseError("Newton-based eigenvalue solver requires SLEPc 3.7.3 or higher");
@@ -403,7 +427,7 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
 }
 
 void
-setNonlinearPowerOptions()
+setNonlinearPowerOptions(SolverParams & solver_params)
 {
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
   Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
@@ -448,7 +472,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_NONLINEAR_POWER:
-      setNonlinearPowerOptions();
+      setNonlinearPowerOptions(solver_params);
       break;
 
     case Moose::EST_NEWTON:
@@ -972,6 +996,27 @@ PCSetUp_MoosePC(PC pc)
     preconditioner->init();
 
   preconditioner->setup();
+
+  return 0;
+}
+
+PetscErrorCode
+mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,PetscInt nev,EPSConvergedReason *reason,void *ctx)
+{
+  PetscErrorCode ierr;
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+
+  ierr = EPSStoppingBasic(eps,its,max_it,nconv,nev,reason,NULL);
+  LIBMESH_CHKERR(ierr);
+
+  if (eigen_problem->doInitialFreePowerIteration() && its==max_it && *reason<=0)
+  {
+    *reason = EPS_CONVERGED_USER;
+    eps->nconv = 1;
+  }
+
+
+  std::cout<<"its "<<its<<" max_it "<<max_it<<" nconv "<<nconv<<" nev "<<nev<<" reason "<<*reason<<std::endl;
 
   return 0;
 }
