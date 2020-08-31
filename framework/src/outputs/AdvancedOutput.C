@@ -123,7 +123,9 @@ AdvancedOutput::AdvancedOutput(const InputParameters & parameters)
   : FileOutput(parameters),
     _elemental_as_nodal(isParamValid("elemental_as_nodal") ? getParam<bool>("elemental_as_nodal")
                                                            : false),
-    _scalar_as_nodal(isParamValid("scalar_as_nodal") ? getParam<bool>("scalar_as_nodal") : false)
+    _scalar_as_nodal(isParamValid("scalar_as_nodal") ? getParam<bool>("scalar_as_nodal") : false),
+    // const_cast forces call to the public, const version of getRporterData
+    _reporter_data(const_cast<const FEProblemBase *>(_problem_ptr)->getReporterData())
 {
   _is_advanced = true;
   _advanced_execute_on = OutputOnWarehouse(_execute_on, parameters);
@@ -441,7 +443,7 @@ AdvancedOutput::initAvailableLists()
   }
 
   // Initialize Reporter name list
-  for (auto && r_name : _problem_ptr->getReporterData().getReporterNames())
+  for (auto && r_name : _reporter_data.getReporterNames())
     _execute_data["reporters"].available.insert(r_name);
 }
 
@@ -525,7 +527,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
     else if (_problem_ptr->hasVectorPostprocessor(var_name))
       _execute_data["vector_postprocessors"].show.insert(var_name);
     else if ((var_name.find("/") != std::string::npos) &&
-             (_problem_ptr->getReporterData().hasReporterValue(ReporterName(var_name))))
+             (_reporter_data.hasReporterValue(ReporterName(var_name))))
       _execute_data["reporters"].show.insert(var_name);
     else
       unknown.insert(var_name);

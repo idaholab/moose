@@ -26,7 +26,10 @@ JSONOutput::validParams()
   return params;
 }
 
-JSONOutput::JSONOutput(const InputParameters & parameters) : FileOutput(parameters)
+JSONOutput::JSONOutput(const InputParameters & parameters)
+  : FileOutput(parameters),
+    // const_cast forces call to the public, const version of getRporterData
+    _reporter_data(const_cast<const FEProblemBase *>(_problem_ptr)->getReporterData())
 {
   // Write the MooseApp information to the JSON file
   storeHelper(_json, _app);
@@ -61,7 +64,7 @@ JSONOutput::output(const ExecFlagType & /*type*/)
     current_node["nonlinear_iteration"] = _nonlinear_iter;
 
   // Add Reporter values to the current node
-  _problem_ptr->getReporterData().store(current_node["reporters"]);
+  _reporter_data.store(current_node["reporters"]);
 
   std::ofstream out(filename().c_str());
   out << std::setw(4) << _json << std::endl;

@@ -116,7 +116,7 @@ TableOutput::outputReporters()
   for (const auto & combined_name : getReporterOutput())
   {
     ReporterName r_name(combined_name);
-    if (_problem_ptr->getReporterData().hasReporterValue<Real>(r_name) &&
+    if (_reporter_data.hasReporterValue<Real>(r_name) &&
         !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
     {
       if (_reporter_table.empty() ||
@@ -127,7 +127,7 @@ TableOutput::outputReporters()
           !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), time(), _new_row_tol))
         _all_data_table.addRow(time());
 
-      const Real & value = _problem_ptr->getReporterData().getReporterValue<Real>(r_name);
+      const Real & value = _reporter_data.getReporterValue<Real>(r_name);
       _reporter_table.addData(combined_name, value);
       _all_data_table.addData(combined_name, value);
     }
@@ -140,13 +140,12 @@ TableOutput::outputVectorPostprocessors()
   // List of VPP objects with output
   const std::set<std::string> & out = getVectorPostprocessorOutput();
 
-  for (const auto & r_name : _problem_ptr->getReporterData().getReporterNames())
+  for (const auto & r_name : _reporter_data.getReporterNames())
   {
     const std::string & vpp_name = r_name.getObjectName();
     const std::string & vec_name = r_name.getValueName();
     const bool vpp_out = out.find(vpp_name) != out.end();
-    if (vpp_out &&
-        (_problem_ptr->getReporterData().hasReporterValue<VectorPostprocessorValue>(r_name)))
+    if (vpp_out && (_reporter_data.hasReporterValue<VectorPostprocessorValue>(r_name)))
     {
       auto insert_pair =
           moose_try_emplace(_vector_postprocessor_tables, vpp_name, FormattedTable());
@@ -154,8 +153,7 @@ TableOutput::outputVectorPostprocessors()
       FormattedTable & table = insert_pair.first->second;
       table.outputTimeColumn(false);
 
-      const auto & vector =
-          _problem_ptr->getReporterData().getReporterValue<VectorPostprocessorValue>(r_name);
+      const auto & vector = _reporter_data.getReporterValue<VectorPostprocessorValue>(r_name);
       table.addData(vec_name, vector);
 
       if (_time_data)

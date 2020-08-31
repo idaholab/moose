@@ -10,7 +10,8 @@
 #pragma once
 
 #include "OutputInterface.h"
-#include "FEProblemBase.h"
+#include "ReporterData.h"
+class FEProblemBase;
 
 /**
  * Reporter objects allow for the declaration of arbitrary data types that are aggregate values
@@ -95,6 +96,9 @@ private:
 
   /// Needed for access to FEProblemBase::getReporterData
   FEProblemBase * _reporter_fe_problem;
+
+  /// Data storage
+  ReporterData & _reporter_data;
 };
 
 template <typename T, template <typename> class S, typename... Args>
@@ -109,6 +113,5 @@ T &
 Reporter::declareValue(const std::string & value_name, ReporterMode mode, Args &&... args)
 {
   ReporterName state_name(_reporter_name, value_name);
-  return _reporter_fe_problem->getReporterData().declareReporterValue<T, S>(
-      state_name, mode, args...);
+  return _reporter_data.declareReporterValue<T, S>(state_name, mode, args...);
 }

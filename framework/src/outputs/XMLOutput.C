@@ -63,13 +63,12 @@ XMLOutput::outputVectorPostprocessors()
   const std::set<std::string> & out = getVectorPostprocessorOutput();
 
   // Loop through Reporter values and search for VPP objects that should be output
-  for (const auto & r_name : _problem_ptr->getReporterData().getReporterNames())
+  for (const auto & r_name : _reporter_data.getReporterNames())
   {
     const std::string & vpp_name = r_name.getObjectName();
     const std::string & vec_name = r_name.getValueName();
     const bool vpp_out = out.find(vpp_name) != out.end();
-    if (vpp_out &&
-        (_problem_ptr->getReporterData().hasReporterValue<VectorPostprocessorValue>(r_name)))
+    if (vpp_out && (_reporter_data.hasReporterValue<VectorPostprocessorValue>(r_name)))
     {
       const VectorPostprocessor & vpp_obj =
           _problem_ptr->getVectorPostprocessorObjectByName(vpp_name);
@@ -89,8 +88,7 @@ XMLOutput::outputVectorPostprocessors()
         }
 
         // Write the vector of data
-        const auto & vector =
-            _problem_ptr->getReporterData().getReporterValue<VectorPostprocessorValue>(r_name);
+        const auto & vector = _reporter_data.getReporterValue<VectorPostprocessorValue>(r_name);
         std::ostringstream oss;
         std::copy(vector.begin(), vector.end(), infix_ostream_iterator<Real>(oss, " "));
         data_node.text().set(oss.str().c_str());

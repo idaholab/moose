@@ -310,10 +310,10 @@ Exodus::outputReporters()
   for (const auto & combined_name : getReporterOutput())
   {
     ReporterName r_name(combined_name);
-    if (_problem_ptr->getReporterData().hasReporterValue<Real>(r_name) &&
+    if (_reporter_data.hasReporterValue<Real>(r_name) &&
         !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
     {
-      const Real & value = _problem_ptr->getReporterData().getReporterValue<Real>(r_name);
+      const Real & value = _reporter_data.getReporterValue<Real>(r_name);
       _global_names.push_back(r_name.getValueName());
       _global_values.push_back(value);
     }

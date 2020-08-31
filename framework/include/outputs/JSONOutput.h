@@ -23,6 +23,8 @@ protected:
   virtual void output(const ExecFlagType & type) override;
   virtual std::string filename() override;
 
+  const ReporterData & _reporter_data;
+
 private:
   nlohmann::json _json;
 

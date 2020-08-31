@@ -28,6 +28,8 @@ Executioner::validParams()
   InputParameters params = MooseObject::validParams();
   params += FEProblemSolve::validParams();
   params += PicardSolve::validParams();
+  params += Reporter::validParams();
+  params += ReporterInterface::validParams();
 
   params.addDeprecatedParam<FileNameNoExtension>(
       "restart_file_base",
@@ -44,6 +46,8 @@ Executioner::validParams()
 
 Executioner::Executioner(const InputParameters & parameters)
   : MooseObject(parameters),
+    Reporter(parameters),
+    ReporterInterface(this),
     UserObjectInterface(this),
     PostprocessorInterface(this),
     Restartable(this, "Executioners"),
@@ -104,18 +108,13 @@ Executioner::feProblem()
 PostprocessorValue &
 Executioner::addAttributeReporter(const std::string & name, Real initial_value)
 {
-  FEProblemBase * problem = getCheckedPointerParam<FEProblemBase *>(
-      "_fe_problem_base",
-      "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
-
-  // Get a reference to the  value
-  ReporterName r_name(this->name(), name);
-  PostprocessorValue & value =
-      problem->getReporterData().declareReporterValue<Real, ReporterContext>(
-          r_name, REPORTER_MODE_ROOT, initial_value);
+  // Get a reference to the value
+  PostprocessorValue & value = declareValue<PostprocessorValue>(name, initial_value);
 
   // Create storage for the old/older values
-  problem->getReporterData().getReporterValue<Real>(r_name, this->name(), REPORTER_MODE_ROOT, 1);
-  problem->getReporterData().getReporterValue<Real>(r_name, this->name(), REPORTER_MODE_ROOT, 2);
+  ReporterName r_name(this->name(), name);
+  getReporterValueByName<PostprocessorValue>(r_name, 1);
+  getReporterValueByName<PostprocessorValue>(r_name, 2);
+
   return value;
 }

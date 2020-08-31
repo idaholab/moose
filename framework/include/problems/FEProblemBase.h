@@ -802,13 +802,12 @@ public:
   addReporter(const std::string & type, const std::string & name, InputParameters & parameters);
 
   /**
-   * Provides means to access the ReporterData object that is used to store reporter values. This
-   * method is an internal method that should not be used. Only Reporter
-   * objects (see Reporter.C/h) should to produce (declare) values. And only objects that
-   * inherit from ReporterInterface are allowed to consume values.
+   * Provides const access the ReporterData object.
+   *
+   * NOTE: There is a private non-const version of this function with the correct friends. This
+   * was done by design to encourge the use of the Reporter and ReporterInterface classes.
    */
-  ReporterData & getReporterData() { return _reporter_data; }
-  ///@}
+  const ReporterData & getReporterData() const { return _reporter_data; }
 
   // UserObjects /////
   virtual void addUserObject(const std::string & user_object_name,
@@ -2112,6 +2111,19 @@ private:
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
+
+  /**
+   * Provides non-const access the ReporterData object that is used to store reporter values.
+   *
+   * An attempt was made to limit access to the ReporterData as much as possible to encourage
+   * developers to use the Reporter and ReporterInterface.
+   */
+  ReporterData & getReporterData() { return _reporter_data; }
+  friend class Reporter;
+  friend class ReporterInterface;
+  friend class VectorPostprocessor;
+  friend class VectorPostprocessorInterface;
+  friend class PostprocessorInterface;
 
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;

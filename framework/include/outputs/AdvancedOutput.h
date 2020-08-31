@@ -281,6 +281,9 @@ protected:
    */
   bool _elemental_as_nodal, _scalar_as_nodal;
 
+  /// Storage for Reporter values
+  const ReporterData & _reporter_data;
+
 private:
   /**
    * Initializes the available lists for each of the output types
