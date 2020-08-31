@@ -498,13 +498,21 @@ public:
       QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
 
   /**
-   * Increases the elemennt/volume quadrature order for the specified mesh
+   * Increases the element/volume quadrature order for the specified mesh
    * block if and only if the current volume quadrature order is lower.  This
-   * can only cause the quadrature level to increase.  If volume_order is
-   * lower than or equal to the current volume/elem quadrature rule order,
-   * then nothing is done (i.e. this function is idempotent).
+   * works exactly like the bumpAllQRuleOrder function, except it only
+   * affects the volume quadrature rule (not face quadrature).
    */
   void bumpVolumeQRuleOrder(Order volume_order, SubdomainID block);
+
+  /**
+   * Increases the element/volume and face/area quadrature orders for the specified mesh
+   * block if and only if the current volume or face quadrature order is lower.  This
+   * can only cause the quadrature level to increase.  If order is
+   * lower than or equal to the current volume+face quadrature rule order,
+   * then nothing is done (i.e. this function is idempotent).
+   */
+  void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   /**
    * Set the qrule to be used for volume integration.
@@ -2082,12 +2090,42 @@ private:
   /// qrules() function.
   std::unordered_map<SubdomainID, std::vector<QRules>> _qrules;
 
+  /// This is an abstraction over the internal qrules function.  This is
+  /// necessary for faces because (nodes of) faces can exists in more than one
+  /// subdomain.  When this is the case, we need to use the quadrature rule from
+  /// the subdomain that has the highest specified quadrature order.  So when
+  /// you need to access a face quadrature rule, you should retrieve it via this
+  /// function.
+  QBase * qruleFace(const Elem * elem, unsigned int side);
+  ArbitraryQuadrature * qruleArbitraryFace(const Elem * elem, unsigned int side);
+
+  template <typename T>
+  T * qruleFaceHelper(const Elem * elem, unsigned int side, std::function<T *(QRules &)> rule_fn)
+  {
+    auto dim = elem->dim();
+    auto neighbor = elem->neighbor_ptr(side);
+    auto q = rule_fn(qrules(dim, elem->subdomain_id()));
+    if (!neighbor)
+      return q;
+
+    // find the maximum face quadrature order for all blocks the face is in
+    auto neighbor_block = neighbor->subdomain_id();
+    if (neighbor_block == elem->subdomain_id())
+      return q;
+
+    auto q_neighbor = rule_fn(qrules(dim, neighbor_block));
+    if (q->get_order() > q_neighbor->get_order())
+      return q;
+    return q_neighbor;
+  }
+
+  inline QRules & qrules(unsigned int dim) { return qrules(dim, _current_subdomain_id); }
+
   /// This is a helper function for accessing quadrature rules for a
   /// particular dimensionality of element.  All access to quadrature rules in
   /// Assembly should be done via this accessor function.
-  inline QRules & qrules(unsigned int dim)
+  inline QRules & qrules(unsigned int dim, SubdomainID block)
   {
-    auto block = _current_subdomain_id;
     if (_qrules.find(block) == _qrules.end())
     {
       mooseAssert(_qrules.find(Moose::ANY_BLOCK_ID) != _qrules.end(),

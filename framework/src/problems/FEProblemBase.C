@@ -4749,6 +4749,18 @@ FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 }
 
 void
+FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
+{
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    _assembly[tid]->bumpAllQRuleOrder(order, block);
+
+  if (_displaced_problem)
+    _displaced_problem->bumpAllQRuleOrder(order, block);
+
+  updateMaxQps();
+}
+
+void
 FEProblemBase::createQRules(
     QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
 {
