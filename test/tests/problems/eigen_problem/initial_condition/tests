@@ -1,6 +1,6 @@
 [Tests]
   design = "Eigenvalue.md"
-  issues = "#15513"
+  issues = "#15513  #12767 #14292"
 
   [./newton_intial_guess]
     type = 'CSVDiff'
@@ -9,5 +9,14 @@
     absent_out = 'init_ solve'
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an initial guess to Newton if users request."
+  [../]
+
+  [./output_inverse_eigenvalue]
+    type = 'CSVDiff'
+    input = 'ne_ic.i'
+    csvdiff = 'ne_ic_out_inverse_eigenvalues_0001.csv'
+    cli_args = 'Executioner/output_inverse_eigenvalue=true Outputs/file_base=ne_ic_out_inverse'
+    slepc_version = '>=3.8.0'
+    requirement = "The system shall provide an option to output the eigenvalue as its inverse."
   [../]
 []

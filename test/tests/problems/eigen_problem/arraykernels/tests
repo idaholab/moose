@@ -1,6 +1,6 @@
 [Tests]
    design = "Eigenvalue.md"
-   issues = "#7398"
+   issues = "#15513 #14292 #12767"
 
   [./array_kernel]
     type = 'CSVDiff'

@@ -1013,7 +1013,10 @@ mooseSlepcEPSMonitor(EPS /*eps*/,
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(mctx);
   auto & console = eigen_problem->console();
 
-  console << " Iteration " << its << std::setprecision(8) << " eigenvalue = " << *eigr << std::endl;
+  auto eigenvalue = eigen_problem->outputInverseEigenvalue() ? 1.0 / (*eigr) : (*eigr);
+
+  console << " Iteration " << its << std::setprecision(8) << " eigenvalue = " << eigenvalue
+          << std::endl;
 
   return 0;
 }

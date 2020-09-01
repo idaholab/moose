@@ -143,6 +143,10 @@ public:
 
   virtual void initPetscOutput() override;
 
+  bool outputInverseEigenvalue() { return _output_inverse_eigenvalue; }
+
+  void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
+
 #endif
 
 protected:
@@ -156,6 +160,7 @@ protected:
 
   bool _auto_initilize_eigen_vector;
   bool _do_initial_free_power_iteration;
+  bool _output_inverse_eigenvalue;
 
   /// Timers
   PerfID _compute_jacobian_tag_timer;

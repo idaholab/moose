@@ -59,6 +59,11 @@ Eigenvalue::validParams()
   params.addParam<bool>(
       "newton_inverse_power", false, "If Newton and Inverse Power is combined in SLEPc side");
 
+  params.addParam<bool>("output_inverse_eigenvalue",
+                        false,
+                        " Whether or not the system output the inverse of eigenvaue. It is useful "
+                        "for neutronic simulation.");
+
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
   Moose::SlepcSupport::getSlepcValidParams(params);
@@ -84,6 +89,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 
   // If need to initialize eigen vector
   _eigen_problem.needInitializeEigenVector(getParam<bool>("auto_initialization"));
+
+  // Whether or not the system outputs the inverse of eigenvaue.
+  // It is useful for neutron calculations. The inverse of the eigenvalue is the multiplication
+  // factor.
+  _eigen_problem.outputInverseEigenvalue(getParam<bool>("output_inverse_eigenvalue"));
 #endif
 
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
