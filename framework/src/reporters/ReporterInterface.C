@@ -21,6 +21,20 @@ ReporterInterface::validParams()
 ReporterInterface::ReporterInterface(const MooseObject * moose_object)
   : _ri_params(moose_object->parameters()),
     _ri_fe_problem_base(*_ri_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _ri_reporter_data(_ri_fe_problem_base.getReporterDataInternal()),
     _ri_name(moose_object->name())
 {
+}
+
+bool
+ReporterInterface::hasReporterValue(const std::string & param_name) const
+{
+  const ReporterName & reporter_name = _ri_params.template get<ReporterName>(param_name);
+  return hasReporterValueByName(reporter_name);
+}
+
+bool
+ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) const
+{
+  return _ri_reporter_data.hasReporterValue(reporter_name);
 }

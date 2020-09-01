@@ -16,6 +16,9 @@
 class FEProblemBase;
 class InputParameters;
 class MooseObject;
+template <typename T>
+class VectorPostprocessorContext;
+class ReporterData;
 
 class VectorPostprocessorInterface
 {
@@ -290,6 +293,6 @@ private:
   /// Thread ID
   THREAD_ID _vpi_tid;
 
-  /// REference to the ReporterData that stores the vector
+  /// Reference to the ReporterData that stores the vector
   ReporterData & _vpi_reporter_data;
 };

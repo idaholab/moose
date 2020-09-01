@@ -852,7 +852,9 @@ public:
 
   /**
    * Initializes the postprocessor data
-   * @see SetupPostprocessorDataAction
+   *
+   * This is needed to correctly handle the default values
+   * @see SetupPostprocessorDataAction, PostprocessorInterface
    */
   void initPostprocessorData(const std::string & name);
 
@@ -897,22 +899,6 @@ public:
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
   ///@}
-
-  ///@{
-  /**
-   * Returns whether or not the current simulation has any multiapps
-   */
-  bool hasMultiApps() const { return _multi_apps.hasActiveObjects(); }
-  bool hasMultiApps(ExecFlagType type) const;
-  bool hasMultiApp(const std::string & name) const;
-  ///@}
-
-  /**
-   * Check existence of the VectorPostprocessor.
-   * @param name The name of the post-processor
-   * @return true if it exists, otherwise false
-   */
-  bool hasVectorPostprocessorByName(const std::string & name) const;
 
   /**
    * Get a read-only reference to the vector value associated with the VectorPostprocessor.
@@ -968,6 +954,15 @@ public:
                                                             const std::string & vector_name,
                                                             bool needs_broadcast);
   bool vectorPostprocessorHasVectors(const std::string & vpp_name);
+  ///@}
+
+  ///@{
+  /**
+   * Returns whether or not the current simulation has any multiapps
+   */
+  bool hasMultiApps() const { return _multi_apps.hasActiveObjects(); }
+  bool hasMultiApps(ExecFlagType type) const;
+  bool hasMultiApp(const std::string & name) const;
   ///@}
 
   // Dampers /////
@@ -2118,7 +2113,7 @@ private:
    * An attempt was made to limit access to the ReporterData as much as possible to encourage
    * developers to use the Reporter and ReporterInterface.
    */
-  ReporterData & getReporterData() { return _reporter_data; }
+  ReporterData & getReporterDataInternal() { return _reporter_data; }
   friend class Reporter;
   friend class ReporterInterface;
   friend class VectorPostprocessor;

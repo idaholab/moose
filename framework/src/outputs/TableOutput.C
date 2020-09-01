@@ -117,7 +117,7 @@ TableOutput::outputReporters()
   {
     ReporterName r_name(combined_name);
     if (_reporter_data.hasReporterValue<Real>(r_name) &&
-        !_problem_ptr->hasPostprocessor(r_name.getObjectName()))
+        !hasPostprocessorByName(r_name.getObjectName()))
     {
       if (_reporter_table.empty() ||
           !MooseUtils::absoluteFuzzyEqual(_reporter_table.getLastTime(), time(), _new_row_tol))

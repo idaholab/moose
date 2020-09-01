@@ -92,7 +92,8 @@ MooseParsedFunctionWrapper::initialize()
   for (unsigned int i = 0; i < _vals_input.size(); ++i)
   {
     // Case when a Postprocessor is found by the name given in the input values
-    if (_feproblem.hasPostprocessor(_vals_input[i]))
+    ReporterName r_name(_vals_input[i], "value");
+    if (_feproblem.getReporterData().hasReporterValue<PostprocessorValue>(r_name))
     {
       const Real & pp_val = _feproblem.getPostprocessorValueByName(_vals_input[i]);
       _initial_vals.push_back(pp_val);

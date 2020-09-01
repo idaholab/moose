@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VectorPostprocessorInterface.h"
-#include "FEProblem.h"
+#include "FEProblemBase.h"
+#include "ReporterData.h"
 #include "VectorPostprocessor.h"
 #include "MooseTypes.h"
 
@@ -19,7 +20,7 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
     _vpi_feproblem(*_vpi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vpi_tid(_vpi_params.have_parameter<THREAD_ID>("_tid") ? _vpi_params.get<THREAD_ID>("_tid")
                                                            : 0),
-    _vpi_reporter_data(_vpi_feproblem.getReporterData())
+    _vpi_reporter_data(_vpi_feproblem.getReporterDataInternal())
 {
 }
 
@@ -129,7 +130,7 @@ bool
 VectorPostprocessorInterface::hasVectorPostprocessorByName(
     const VectorPostprocessorName & name) const
 {
-  return _vpi_feproblem.hasVectorPostprocessorByName(name);
+  return _vpi_feproblem.hasUserObject(name);
 }
 
 bool

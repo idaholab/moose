@@ -27,9 +27,7 @@ JSONOutput::validParams()
 }
 
 JSONOutput::JSONOutput(const InputParameters & parameters)
-  : FileOutput(parameters),
-    // const_cast forces call to the public, const version of getRporterData
-    _reporter_data(const_cast<const FEProblemBase *>(_problem_ptr)->getReporterData())
+  : FileOutput(parameters), _reporter_data(_problem_ptr->getReporterData())
 {
   // Write the MooseApp information to the JSON file
   storeHelper(_json, _app);

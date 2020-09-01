@@ -8,8 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 #include "MooseTypes.h"
-#include "InputParameters.h"
-#include "FEProblemBase.h"
+#include "ReporterData.h"
+
+class InputParameters;
+class FEProblemBase;
 
 /**
  * Interface to allow object to consume Reporter values.
@@ -59,6 +61,16 @@ protected:
                                    const std::size_t time_index = 0);
   ///@}
 
+  ///@{
+  /**
+   * Return True if the Reporter value exists.
+   * @tparam T The C++ type of the Reporter value being consumed
+   * @param reporter_name A ReporterName object that for the desired Reporter value.
+   */
+  bool hasReporterValue(const std::string & param_name) const;
+  bool hasReporterValueByName(const ReporterName & reporter_name) const;
+  ///@}
+
   /**
    * A method that can be overridden to update the UO dependencies.
    *
@@ -74,8 +86,14 @@ private:
   /// Provides access to FEProblemBase::getReporterData
   FEProblemBase & _ri_fe_problem_base;
 
+  /// Non-const access to Reporter data (keep it private please)
+  ReporterData & _ri_reporter_data;
+
   /// The name of the object
   const std::string & _ri_name;
+
+  /// A few helpers to avoid cyclic include problems
+  const ReporterName & getReporterNameHelper(const std::string & param_name) const;
 };
 
 template <typename T>
@@ -110,6 +128,5 @@ ReporterInterface::getReporterValueByName(const ReporterName & reporter_name,
                                           const std::size_t time_index)
 {
   addReporterDependencyHelper(reporter_name);
-  return _ri_fe_problem_base.getReporterData().getReporterValue<T>(
-      reporter_name, _ri_name, mode, time_index);
+  return _ri_reporter_data.getReporterValue<T>(reporter_name, _ri_name, mode, time_index);
 }

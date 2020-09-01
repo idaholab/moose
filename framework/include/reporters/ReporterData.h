@@ -14,7 +14,8 @@
 #include "ReporterContext.h"
 #include "libmesh/parallel_object.h"
 #include "libmesh/auto_ptr.h"
-#include "MooseApp.h"
+
+class MooseApp;
 
 /**
  * This is a helper class for managing the storage of declared Reporter object values. This design
@@ -52,7 +53,7 @@ public:
   bool hasReporterValue(const ReporterName & reporter_name) const;
 
   /**
-   * Return True if a Reporter value with any type existss with the given name.
+   * Return True if a Reporter value with any type exists with the given name.
    */
   bool hasReporterValue(const ReporterName & reporter_name) const;
 
@@ -201,6 +202,12 @@ private:
   const ReporterContextBase *
   getReporterContextBaseHelper(const ReporterName & reporter_name) const;
 
+  /**
+   * Helper for registering data with the MooseApp to avoid cyclic includes
+   */
+  RestartableDataValue & getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
+                                                  bool declare) const;
+
   /// The ReporterContext objects are created when a value is declared. The context objects
   /// include a reference to the associated ReporterState values. This container stores the
   /// context object for each Reporter value.
@@ -220,9 +227,7 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name, bool de
 {
   // Creates the RestartableData object for storage in the MooseApp restart/recover system
   auto data_ptr = libmesh_make_unique<ReporterState<T>>(reporter_name);
-  RestartableDataValue & value =
-      _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
-
+  RestartableDataValue & value = getRestartableDataHelper(std::move(data_ptr), declare);
   auto & state_ref = static_cast<ReporterState<T> &>(value);
   return state_ref;
 }

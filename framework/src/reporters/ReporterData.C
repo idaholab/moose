@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReporterData.h"
+#include "MooseApp.h"
 
 ReporterData::ReporterData(MooseApp & moose_app) : _app(moose_app) {}
 
@@ -98,4 +99,11 @@ ReporterData::check() const
       oss << "\n    " << name;
     mooseError(oss.str());
   }
+}
+
+RestartableDataValue &
+ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
+                                       bool declare) const
+{
+  return _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
 }

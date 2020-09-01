@@ -78,7 +78,7 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
     mode = REPORTER_MODE_DISTRIBUTED;
 
   ReporterName r_name(_vpp_name, vector_name);
-  return _vpp_fe_problem->getReporterData()
+  return _vpp_fe_problem->getReporterDataInternal()
       .declareReporterValue<VectorPostprocessorValue, VectorPostprocessorContext>(r_name, mode);
 }
 

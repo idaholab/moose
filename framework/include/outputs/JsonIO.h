@@ -28,8 +28,9 @@
 //     4. Implement a means via Checkpoint to use the JSON format
 
 #pragma once
-
 #include "nlohmann/json.h"
+
+class MooseApp;
 
 void to_json(nlohmann::json & json, const MooseApp & app);
 
