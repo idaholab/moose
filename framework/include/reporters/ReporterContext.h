@@ -139,7 +139,7 @@ ReporterContext<T>::ReporterContext(const libMesh::ParallelObject & other,
                                     const T & default_value)
   : ReporterContext(other, state)
 {
-  _state.get().first = default_value;
+  _state.value() = default_value;
 }
 
 template <typename T>
@@ -219,7 +219,7 @@ ReporterContext<T>::finalize()
 
   // Perform desired auto parallel operation
   if (auto_operation == ReporterContext::AutoOperation::BROADCAST)
-    this->comm().broadcast(this->_state.set().first);
+    this->comm().broadcast(this->_state.value());
 }
 
 template <typename T>
@@ -233,7 +233,7 @@ template <typename T>
 void
 ReporterContext<T>::store(nlohmann::json & json) const
 {
-  storeHelper(json, this->_state.get().first);
+  storeHelper(json, this->_state.value());
 }
 
 template <typename T>
@@ -296,7 +296,7 @@ ReporterBroadcastContext<T>::finalize()
                  " mode, which is not supported. The mode must be UNSET or REPLICATED.");
   }
 
-  this->comm().broadcast(this->_state.set().first);
+  this->comm().broadcast(this->_state.value());
 }
 
 /**
@@ -367,7 +367,7 @@ ReporterScatterContext<T>::finalize()
   mooseAssert(
       this->processor_id() > 0 ? _values.size() == 0 : true,
       "Vector to be scattered must be sized to zero on processors except for the root processor");
-  this->comm().scatter(_values, this->_state.set().first);
+  this->comm().scatter(_values, this->_state.value());
 }
 
 /**
@@ -433,6 +433,6 @@ ReporterGatherContext<T>::finalize()
                  " mode, which is not supported. The mode must be UNSET or ROOT.");
   }
 
-  this->_state.set().first = _value;
-  this->comm().gather(0, this->_state.set().first);
+  this->_state.value() = _value;
+  this->comm().gather(0, this->_state.value());
 }

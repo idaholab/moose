@@ -25,12 +25,15 @@
  *
  * @param name The name of the Reporter value
  *
- * This class stores the old/older/... data using a std::list to allow for values to be inserted
+ * This class stores the current/old/older/... data using a std::list to allow values to be inserted
  * into the data structure without corrupting references to the other values. This allows for
  * arbitrary time data to be stored.
+ *
+ * NOTE:
+ * Access to the data should be through the value() method to ensure the data is allocated correctly
  */
 template <typename T>
-class ReporterState : public RestartableData<std::pair<T, std::list<T>>>
+class ReporterState : public RestartableData<std::list<T>>
 {
 public:
   ReporterState(const ReporterName & name);
@@ -69,6 +72,19 @@ public:
    */
   void copyValuesBack();
 
+  /**
+   * Load the data from stream (e.g., restart)
+   *
+   * This is a special version that handles the fact that the calls declare/getReporterValue
+   * occur within the constructor of objects. As such, the storage list already contains data
+   * and the references to this data must remain valid.
+   *
+   * The default dataLoad assumes the list being populated is empty and simply uses push_back.
+   * Therefore, this function loads the data directly into the container to avoid this problem
+   * and unnecessary copies.
+   */
+  virtual void load(std::istream & stream) override;
+
 private:
   /// Name of data that state is associated
   const ReporterName _reporter_name;
@@ -79,7 +95,7 @@ private:
 
 template <typename T>
 ReporterState<T>::ReporterState(const ReporterName & name)
-  : RestartableData<std::pair<T, std::list<T>>>(
+  : RestartableData<std::list<T>>(
         "ReporterData/" + name.getObjectName() + "/" + name.getValueName(), nullptr),
     _reporter_name(name)
 {
@@ -96,45 +112,31 @@ template <typename T>
 T &
 ReporterState<T>::value(const std::size_t time_index)
 {
-  if (time_index == 0)
-    return this->get().first;
+  // Initialize the data; the first entry is the "current" data
+  if (this->get().empty())
+    this->set().resize(1);
 
-  else if (time_index > this->get().second.size())
-  {
-    // Get the current oldest value from the list
-    std::list<T> & old_values = this->get().second;
-    const T & oldest = old_values.empty() ? this->get().first : old_values.back();
+  // Initialize old, older, ... data
+  if (this->get().size() <= time_index)
+    this->set().resize(time_index + 1, this->get().back());
 
-    // Add new elements to the current max size, filling with the oldest value that exists
-    for (std::size_t i = old_values.size(); i < time_index; ++i)
-      old_values.emplace_back(oldest);
-  }
-
-  // Return the desired value
-  auto iter = this->get().second.begin();
-  std::advance(iter, time_index - 1);
-  return *(iter);
+  return *(std::next(this->get().begin(), time_index));
 }
 
 template <typename T>
 const T &
 ReporterState<T>::value(const std::size_t time_index) const
 {
-  if (time_index == 0)
-    return this->get().first;
-  else if (time_index > this->get().second.size())
+  if (this->get().size() <= time_index)
     mooseError("The desired time index ",
                time_index,
                " does not exists for the '",
                _reporter_name,
                "' Reporter value, which contains ",
-               this->get().second.size(),
-               "old value(s). The getReporterValue method must be called with the desired time "
+               this->get().size(),
+               " old value(s). The getReporterValue method must be called with the desired time "
                "index to be able to access data.");
-
-  auto iter = this->get().second.begin();
-  std::advance(iter, time_index - 1);
-  return *(iter);
+  return *(std::next(this->get().begin(), time_index));
 }
 
 template <typename T>
@@ -156,19 +158,30 @@ template <typename T>
 void
 ReporterState<T>::copyValuesBack()
 {
-  // Ref. to the current
-  T & value = this->set().first;
-  std::list<T> & old_values = this->set().second;
-
-  // Copy data back in time
-  for (typename std::list<T>::reverse_iterator iter = old_values.rbegin();
-       iter != old_values.rend();
+  std::list<T> & values = this->set();
+  for (typename std::list<T>::reverse_iterator iter = values.rbegin();
+       std::next(iter) != values.rend();
        ++iter)
+    (*iter) = (*std::next(iter));
+}
+
+template <typename T>
+void
+ReporterState<T>::load(std::istream & stream)
+{
+  // Read the container size
+  unsigned int size = 0;
+  stream.read((char *)&size, sizeof(size));
+
+  // If the current container is undersized, expand it to fit the loaded data
+  if (this->get().size() < size)
+    this->set().resize(size);
+
+  // Load each entry of the list directly into the storage
+  typename std::list<T>::iterator iter = this->set().begin();
+  for (unsigned int i = 0; i < size; i++)
   {
-    auto next_iter = std::next(iter, 1);
-    if (next_iter == old_values.rend())
-      (*iter) = value;
-    else
-      (*iter) = (*next_iter);
+    loadHelper(stream, *iter, nullptr);
+    std::advance(iter, 1);
   }
 }
