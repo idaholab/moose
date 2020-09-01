@@ -14,7 +14,7 @@
 #include "string"
 
 GeochemicalDatabaseValidator::GeochemicalDatabaseValidator(const FileName filename,
-                                                           const moosecontrib::Json::Value & db)
+                                                           const nlohmann::json & db)
   : _filename(filename), _root(db)
 {
 }
@@ -23,7 +23,7 @@ void
 GeochemicalDatabaseValidator::validate()
 {
   // Check that the database has a Header key (required)
-  if (!_root.isMember("Header"))
+  if (!_root.contains("Header"))
     mooseError("The MOOSE database ", _filename, " does not have a required \"Header\" field");
 
   // Check that temperatures are present
@@ -61,70 +61,69 @@ GeochemicalDatabaseValidator::validate()
   checkHeaderField("fugacity model");
 
   // If there are neutral species, check their arrays of coefficients
-  if (_root["Header"].isMember("neutral species"))
-    for (auto ns : _root["Header"]["neutral species"].getMemberNames())
-      for (auto coeffs : _root["Header"]["neutral species"][ns].getMemberNames())
+  if (_root["Header"].contains("neutral species"))
+    for (auto & ns : _root["Header"]["neutral species"].items())
+      for (auto & coeffs : ns.value().items())
       {
-        if (coeffs == "note")
+        if (coeffs.key() == "note")
           continue;
 
         // Check that all temperature values are real numbers
-        auto values = _root["Header"]["neutral species"][ns][coeffs];
-
-        checkArraySize(values, "Header:nutral species:" + ns + ":" + coeffs);
-        checkArrayValues(values, "Header:nutral species:" + ns + ":" + coeffs);
+        auto values = coeffs.value();
+        checkArraySize(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
+        checkArrayValues(values, "Header:nutral species:" + ns.key() + ":" + coeffs.key());
       }
 
   // Check the element data
-  for (auto & el : _root["elements"].getMemberNames())
-    checkElements(el);
+  for (auto & el : _root["elements"].items())
+    checkElements(el.key());
 
   // Check the basis species data
-  for (auto & species : _root["basis species"].getMemberNames())
-    checkBasisSpecies(species);
+  for (auto & species : _root["basis species"].items())
+    checkBasisSpecies(species.key());
 
   // Check the secondary species data
-  if (_root.isMember("secondary species"))
-    for (auto & species : _root["secondary species"].getMemberNames())
-      checkSecondarySpecies(species);
+  if (_root.contains("secondary species"))
+    for (auto & species : _root["secondary species"].items())
+      checkSecondarySpecies(species.key());
 
   // Check the mineral species data
-  if (_root.isMember("mineral species"))
-    for (auto & species : _root["mineral species"].getMemberNames())
-      checkMineralSpecies(species);
+  if (_root.contains("mineral species"))
+    for (auto & species : _root["mineral species"].items())
+      checkMineralSpecies(species.key());
 
   // Check the sorbing mineral species data
-  if (_root.isMember("sorbing minerals"))
-    for (auto & species : _root["sorbing minerals"].getMemberNames())
-      checkSorbingMineralSpecies(species);
+  if (_root.contains("sorbing minerals"))
+    for (auto & species : _root["sorbing minerals"].items())
+      checkSorbingMineralSpecies(species.key());
 
   // Check the gas species data
-  if (_root.isMember("gas species"))
-    for (auto & species : _root["gas species"].getMemberNames())
-      checkGasSpecies(species);
+  if (_root.contains("gas species"))
+    for (auto & species : _root["gas species"].items())
+      checkGasSpecies(species.key());
 
   // Check the redox couple data
-  if (_root.isMember("redox couples"))
-    for (auto & species : _root["redox couples"].getMemberNames())
-      checkRedoxSpecies(species);
+  if (_root.contains("redox couples"))
+    for (auto & species : _root["redox couples"].items())
+      checkRedoxSpecies(species.key());
 
   // Check the oxide species data
-  if (_root.isMember("oxides"))
-    for (auto & species : _root["oxides"].getMemberNames())
-      checkOxideSpecies(species);
+  if (_root.contains("oxides"))
+    for (auto & species : _root["oxides"].items())
+      checkOxideSpecies(species.key());
 
   // Check the surface species data
-  if (_root.isMember("surface species"))
-    for (auto & species : _root["surface species"].getMemberNames())
-      checkSurfaceSpecies(species);
+  if (_root.contains("surface species"))
+    for (auto & species : _root["surface species"].items())
+      checkSurfaceSpecies(species.key());
 }
 
 bool
-GeochemicalDatabaseValidator::isValueReal(const moosecontrib::Json::Value & value) const
+GeochemicalDatabaseValidator::isValueReal(const nlohmann::json & value) const
 {
   try
   {
-    MooseUtils::convert<Real>(value.asString(), true);
+    MooseUtils::convert<Real>(value, true);
   }
   catch (const std::invalid_argument & err)
   {
@@ -135,14 +134,14 @@ GeochemicalDatabaseValidator::isValueReal(const moosecontrib::Json::Value & valu
 }
 
 void
-GeochemicalDatabaseValidator::checkArrayValues(const moosecontrib::Json::Value & array,
+GeochemicalDatabaseValidator::checkArrayValues(const nlohmann::json & array,
                                                const std::string field) const
 {
   // Check each value in the array can be successfully converted to a Real
-  for (auto & value : array)
-    if (!isValueReal(value))
+  for (auto & item : array.items())
+    if (!isValueReal(item.value()))
       mooseError("Array value ",
-                 value.asString(),
+                 nlohmann::to_string(item.value()),
                  " in the ",
                  field,
                  " field of ",
@@ -156,10 +155,10 @@ GeochemicalDatabaseValidator::checkArrayValues(const std::string type,
                                                const std::string field) const
 {
   // Check each value in the array can be successfully converted to a Real
-  for (auto & value : _root[type][species][field])
-    if (!isValueReal(value))
+  for (auto & item : _root[type][species][field].items())
+    if (!isValueReal(item.value()))
       mooseError("Array value ",
-                 value.asString(),
+                 nlohmann::to_string(item.value()),
                  " in the ",
                  field,
                  " field of ",
@@ -172,7 +171,7 @@ GeochemicalDatabaseValidator::checkArrayValues(const std::string type,
 }
 
 void
-GeochemicalDatabaseValidator::checkArraySize(const moosecontrib::Json::Value & array,
+GeochemicalDatabaseValidator::checkArraySize(const nlohmann::json & array,
                                              const std::string field) const
 {
   if (array.size() != _temperature_size)
@@ -203,7 +202,7 @@ GeochemicalDatabaseValidator::checkArraySize(const std::string type,
 void
 GeochemicalDatabaseValidator::checkHeaderField(const std::string field) const
 {
-  if (!_root["Header"].isMember(field))
+  if (!_root["Header"].contains(field))
     mooseError(
         "The MOOSE database ", _filename, " does not have a required \"Header:", field, "\" field");
 }
@@ -230,7 +229,7 @@ GeochemicalDatabaseValidator::checkSpeciesValue(const std::string type,
   if (!isValueReal(_root[type][species][field]))
     mooseError(field,
                " value ",
-               _root[type][species][field].asString(),
+               nlohmann::to_string(_root[type][species][field]),
                " of the ",
                type,
                " ",
@@ -249,12 +248,12 @@ GeochemicalDatabaseValidator::checkSpeciesWeightValue(const std::string type,
     mooseError("The ", type, " ", species, " in ", _filename, " does not have a ", field);
 
   // Each weight value for each constituent should be a real number
-  for (auto & item : _root[type][species][field].getMemberNames())
-    if (!isValueReal(_root[type][species][field][item]))
+  for (auto & item : _root[type][species][field].items())
+    if (!isValueReal(item.value()))
       mooseError("Weight value ",
-                 _root[type][species][field][item].asString(),
+                 nlohmann::to_string(item.value()),
                  " of constituent ",
-                 item,
+                 item.key(),
                  " of the ",
                  type,
                  " ",
@@ -348,16 +347,16 @@ GeochemicalDatabaseValidator::checkGasSpecies(const std::string species) const
   checkArrayValues("gas species", species, "logk");
 
   // Check optional fugacity coefficients
-  if (_root["gas species"][species].isMember("chi"))
+  if (_root["gas species"][species].contains("chi"))
     checkArrayValues("gas species", species, "chi");
 
-  if (_root["gas species"][species].isMember("Pcrit"))
+  if (_root["gas species"][species].contains("Pcrit"))
     checkSpeciesValue("gas species", species, "Pcrit");
 
-  if (_root["gas species"][species].isMember("Tcrit"))
+  if (_root["gas species"][species].contains("Tcrit"))
     checkSpeciesValue("gas species", species, "Tcrit");
 
-  if (_root["gas species"][species].isMember("omega"))
+  if (_root["gas species"][species].contains("omega"))
     checkSpeciesValue("gas species", species, "omega");
 }
 
