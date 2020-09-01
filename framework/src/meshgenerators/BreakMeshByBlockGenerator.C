@@ -12,6 +12,7 @@
 
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
+#include "libmesh/partitioner.h"
 
 #include <typeinfo>
 
@@ -45,6 +46,7 @@ BreakMeshByBlockGenerator::generate()
 
   // initialize the node to element map
   std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
+  std::set<dof_id_type> base_nodes;
   for (const auto & elem : mesh->active_element_ptr_range())
     for (unsigned int n = 0; n < elem->n_nodes(); n++)
       node_to_elem_map[elem->node_id(n)].push_back(elem->id());
@@ -69,6 +71,7 @@ BreakMeshByBlockGenerator::generate()
       // check if current_node need to be duplicated
       if (node_multiplicity > 1)
       {
+        base_nodes.insert(current_node_id);
         // retrieve connected elements from the map
         const std::vector<dof_id_type> & connected_elems = node_it->second;
 
@@ -161,6 +164,39 @@ BreakMeshByBlockGenerator::generate()
       } // end multiplicity check
     }   // end loop over nodes
   }     // end nodeptr check
+
+  // we need to make sure that any of the original nodes is now touched
+  // let's recreate the node to element map
+  node_to_elem_map.clear();
+  for (const auto & elem : mesh->active_element_ptr_range())
+    for (unsigned int n = 0; n < elem->n_nodes(); n++)
+      node_to_elem_map[elem->node_id(n)].push_back(elem->id());
+
+  // here we loop over the new map. If current_node belongs to base_nodes we make sure tha current
+  // node its owned by ht eprocessor id of one of elements connected to it.
+  for (auto node_it = node_to_elem_map.begin(); node_it != node_to_elem_map.end(); ++node_it)
+  {
+    const dof_id_type current_node_id = node_it->first;
+    Node * current_node = mesh->node_ptr(current_node_id);
+
+    if (current_node != nullptr)
+    {
+      if (base_nodes.find(current_node_id) != base_nodes.end())
+      {
+        // find elem processors
+        std::set<processor_id_type> my_proc_set;
+        for (auto elem_id = node_it->second.begin(); elem_id != node_it->second.end(); elem_id++)
+        {
+          const Elem * current_elem = mesh->elem_ptr(*elem_id);
+          my_proc_set.insert(current_elem->processor_id());
+        }
+
+        // check ownership and fixit if necessary
+        if (my_proc_set.find(current_node->processor_id()) == my_proc_set.end())
+          current_node->processor_id(*my_proc_set.begin());
+      }
+    }
+  }
 
   addInterfaceBoundary(*mesh);
   return dynamic_pointer_cast<MeshBase>(mesh);

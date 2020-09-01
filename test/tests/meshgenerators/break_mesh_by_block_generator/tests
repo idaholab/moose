@@ -70,4 +70,19 @@
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
+
+  [./hanging_nodes]
+    type = 'Exodiff'
+    input = 'hanging_nodes_parallel.i'
+    cli_args = '--mesh-only'
+    exodiff = 'hanging_nodes_parallel_in.e'
+    requirement = 'MOOSE shall be able to create separate blocks in a mesh in parallel'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    min_parallel = 4
+    max_parallel = 5
+    recover = false
+  [../]
+
 []

@@ -80,6 +80,24 @@
     coord = '1.25 1.33333333 0.75'
     new_boundary = fix_z
   []
+  [./sidesets]
+    type = SideSetsFromNormalsGenerator
+    input = node_set3
+    normals = '1  0  0
+              -1  0  0
+               0  1  0
+               0 -1  0
+               0  0  1
+               0  0  -1'
+    fixed_normal = false
+    new_boundary = 'x1 x0 y1 y0 z1 z0'
+  []
+  [./node_move]
+    input = sidesets
+    type = ExtraNodesetGenerator
+    nodes = '130'
+    new_boundary = node_move
+  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -99,26 +117,68 @@
 
 [BCs]
   [./Periodic]
-    [./x]
+    [x_x]
       variable = disp_x
-      auto_direction = 'x y z'
-    [../]
-    [./y]
+      primary  = x0
+      secondary = x1
+      translation = '5 0 0'
+    []
+    [y_x]
       variable = disp_y
-      auto_direction = 'x y z'
-    [../]
-    [./z]
+      primary  = x0
+      secondary = x1
+      translation = '5 0 0'
+    []
+    [z_x]
       variable = disp_z
-      auto_direction = 'x y z'
-    [../]
+      primary  = x0
+      secondary = x1
+      translation = '5 0 0'
+    []
+    [x_y]
+      variable = disp_x
+      primary  = y0
+      secondary = y1
+      translation = '0 4 0'
+    []
+    [y_y]
+      variable = disp_y
+      primary  = y0
+      secondary = y1
+      translation = '0 4 0'
+    []
+    [z_y]
+      variable = disp_z
+      primary  = y0
+      secondary = y1
+      translation = '0 4 0'
+    []
+    [x_z]
+      variable = disp_x
+      primary  = z0
+      secondary = z1
+      translation = '0 0 3'
+    []
+    [y_z]
+      variable = disp_y
+      primary  = z0
+      secondary = z1
+      translation = '0 0 3'
+    []
+    [z_z]
+      variable = disp_z
+      primary  = z0
+      secondary = z1
+      translation = '0 0 3'
+    []
   [../]
 
 
   [./displacement_z]
     type = FunctionDirichletBC
-    boundary = top
+    boundary = node_move
     variable = disp_y
-    function = '0.01*t'
+    function = '0.1*t'
   [../]
 
   [./fix1_x]
@@ -195,8 +255,8 @@
     boundary = 'interface'
     normal_gap_at_maximum_normal_traction = 1
     tangential_gap_at_maximum_shear_traction = 0.5
-    maximum_normal_traction = 100
-    maximum_shear_traction = 70
+    maximum_normal_traction = 1000
+    maximum_shear_traction = 700
     displacements = 'disp_x disp_y disp_z'
   [../]
 []
@@ -262,8 +322,8 @@
   solve_type = 'newton'
   line_search = none
 
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
 
   l_max_its = 2
   l_tol = 1e-14
@@ -279,4 +339,5 @@
 [Outputs]
   exodus = true
   csv = true
+  # nemesis = true
 []
