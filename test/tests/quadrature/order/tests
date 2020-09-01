@@ -15,7 +15,9 @@
     csvdiff = 'block-order_out.csv'
 
     requirement = 'The system shall support the ability to manually specify'
-                  ' the quadrature order used for numerical integration on a per-block basis.'
+                  ' the quadrature order used for numerical integration on a per-block basis'
+                  ' with face quadrature between blocks preferring the higher-order between'
+                  ' the two sides.'
     issues = '#14055'
     design = 'Quadrature/index.md'
   [../]
