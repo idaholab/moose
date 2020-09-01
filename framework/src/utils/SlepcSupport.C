@@ -269,52 +269,10 @@ setEigenProblemOptions(SolverParams & solver_params)
 }
 
 void
-setNewtonOutputOptions()
-{
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor_conv");
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_monitor");
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
-  Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_snes_monitor");
-  Moose::PetscSupport::setSinglePetscOption("-init_eps_power_ksp_monitor");
-}
-
-void
-setSlepcOutputOptions(EigenProblem & eigen_problem)
+setSlepcOutputOptions()
 {
   Moose::PetscSupport::setSinglePetscOption("-eps_monitor_conv");
   Moose::PetscSupport::setSinglePetscOption("-eps_monitor");
-  switch (eigen_problem.solverParams()._eigen_solve_type)
-  {
-    case Moose::EST_NONLINEAR_POWER:
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_monitor");
-      Moose::PetscSupport::setSinglePetscOption("-eps_power_ksp_monitor");
-      break;
-
-    case Moose::EST_NEWTON:
-      setNewtonOutputOptions();
-      break;
-
-    case Moose::EST_PJFNK:
-      setNewtonOutputOptions();
-      break;
-
-    case Moose::EST_JFNK:
-      setNewtonOutputOptions();
-      break;
-
-    case Moose::EST_POWER:
-      break;
-
-    case Moose::EST_ARNOLDI:
-      break;
-
-    case Moose::EST_KRYLOVSCHUR:
-      break;
-
-    case Moose::EST_JACOBI_DAVIDSON:
-      break;
-  }
 }
 
 void
@@ -504,7 +462,7 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
   setEigenProblemOptions(eigen_problem.solverParams());
   setWhichEigenPairsOptions(eigen_problem.solverParams());
   setSlepcEigenSolverTolerances(eigen_problem, params);
-  setSlepcOutputOptions(eigen_problem);
+  setSlepcOutputOptions();
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
@@ -1014,9 +972,48 @@ mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,Petsc
     *reason = EPS_CONVERGED_USER;
     eps->nconv = 1;
   }
+  return 0;
+}
 
+PetscErrorCode
+epsGetSNES(EPS eps, SNES * snes)
+{
+  PetscErrorCode ierr;
+  PetscBool same, nonlinear;
 
-  std::cout<<"its "<<its<<" max_it "<<max_it<<" nconv "<<nconv<<" nev "<<nev<<" reason "<<*reason<<std::endl;
+  ierr = PetscObjectTypeCompare((PetscObject)eps, EPSPOWER, &same);
+  LIBMESH_CHKERR(ierr);
+
+  if (!same)
+    mooseError("It is not eps power, and there is no snes");
+
+  ierr = EPSPowerGetNonlinear(eps, &nonlinear);
+  LIBMESH_CHKERR(ierr);
+
+  if (!nonlinear)
+    mooseError("It is not a nonlinear eigen solver");
+
+  ierr = EPSPowerGetSNES(eps, snes);
+  LIBMESH_CHKERR(ierr);
+
+  return 0;
+}
+
+PetscErrorCode
+mooseSlepcEPSMonitor(EPS /*eps*/,
+                     int its,
+                     int /*nconv*/,
+                     PetscScalar * eigr,
+                     PetscScalar * /*eigi*/,
+                     PetscReal * /*errest*/,
+                     int /*nest*/,
+                     void * mctx)
+{
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(mctx);
+  auto & console = eigen_problem->console();
+
+  console << " Iteration " << its << std::setprecision(8) << " eigenvalue = " << *eigr << std::endl;
 
   return 0;
 }

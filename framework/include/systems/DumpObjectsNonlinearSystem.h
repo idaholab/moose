@@ -31,6 +31,7 @@ public:
   virtual void stopSolve() override {}
   virtual bool converged() override { return true; }
   virtual NumericVector<Number> & RHS() override { return *_dummy; }
+  virtual SNES getSNES() override { return nullptr; }
 
   virtual unsigned int getCurrentNonlinearIterationNumber() override { return 0; }
   virtual void setupFiniteDifferencedPreconditioner() override {}

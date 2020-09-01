@@ -138,6 +138,11 @@ public:
    * Which eigenvalue is active
    */
   unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
+
+  const ConsoleStream & console() { return _console; }
+
+  virtual void initPetscOutput() override;
+
 #endif
 
 protected:

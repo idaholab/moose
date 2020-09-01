@@ -93,6 +93,8 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
+  virtual SNES getSNES() override;
+
   virtual TransientEigenSystem & sys() { return _transient_sys; }
 
   /**

@@ -194,6 +194,12 @@ public:
   /// Reset the output system
   void reset();
 
+  /**
+   * Calls the timestepSetup function for each of the output objects
+   * @see FEProblemBase::solve()
+   */
+  void solveSetup();
+
 private:
   /**
    * Calls the outputStep method for each output object
@@ -246,12 +252,6 @@ private:
    * @see FEProblemBase::timestepSetup()
    */
   void timestepSetup();
-
-  /**
-   * Calls the timestepSetup function for each of the output objects
-   * @see FEProblemBase::solve()
-   */
-  void solveSetup();
 
   /**
    * Calls the jacobianSetup function for each of the output objects

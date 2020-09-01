@@ -85,6 +85,8 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() = 0;
 
+  virtual SNES getSNES() = 0;
+
   virtual unsigned int getCurrentNonlinearIterationNumber() = 0;
 
   /**

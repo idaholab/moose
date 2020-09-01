@@ -396,6 +396,26 @@ NonlinearEigenSystem::nonlinearSolver()
   return NULL;
 }
 
+SNES
+NonlinearEigenSystem::getSNES()
+{
+  SlepcEigenSolver<Number> * solver =
+      libmesh_cast_ptr<SlepcEigenSolver<Number> *>(&(*_transient_sys.eigen_solver));
+
+  if (!solver)
+    mooseError("There is no a eigen solver");
+
+  if (_eigen_problem.isNonlinearEigenvalueSolver())
+  {
+    EPS eps = solver->eps();
+    SNES snes = nullptr;
+    Moose::SlepcSupport::epsGetSNES(eps, &snes);
+    return snes;
+  }
+  else
+    mooseError("There is no SNES in linear eigen solver");
+}
+
 void
 NonlinearEigenSystem::checkIntegrity()
 {

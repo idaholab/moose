@@ -51,10 +51,7 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = true
-  solve_type = NEWTON
-  auto_initialization = true
-  newton_inverse_power = false
+  solve_type = PJFNK
   eigen_problem_type = GEN_NON_HERMITIAN
 []
 

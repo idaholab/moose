@@ -52,13 +52,12 @@ Eigenvalue::validParams()
       "normal_factor", 1.0, "Normalize eigenvector to make a defined norm equal to this factor");
 
   params.addParam<bool>("auto_initialization",
-                        false,
+                        true,
                         "If true, we will set an initial eigen vector in moose, otherwise EPS "
                         "solver will initial eigen vector");
 
-  params.addParam<bool>("newton_inverse_power",
-                        true,
-                        "If Newton and Inverse Power is combined in SLEPc side");
+  params.addParam<bool>(
+      "newton_inverse_power", false, "If Newton and Inverse Power is combined in SLEPc side");
 
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
@@ -122,6 +121,8 @@ Eigenvalue::init()
       if (_eigen_problem.needInitializeEigenVector())
         _eigen_problem.initEigenvector(1.0);
 
+      _console << " Free power iteration starts" << std::endl;
+
       // Call solver
       _eigen_problem.solve();
       // Clear free power iterations
@@ -144,6 +145,9 @@ Eigenvalue::execute()
     _eigen_problem.doInitialFreePowerIteration(true);
     // Set free power iterations
     setFreeNonlinearPowerIterations(extra_power_iterations);
+
+    _console << " Extra Free power iteration starts" << std::endl;
+
     // Call solver
     _eigen_problem.solve();
     // Clear free power iterations
@@ -151,6 +155,11 @@ Eigenvalue::execute()
 
     _eigen_problem.doInitialFreePowerIteration(false);
   }
+
+  if (_eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+    _console << " Nonlinear Newton iteration starts" << std::endl;
+  else
+    _console << " Nonlinear power iteration starts" << std::endl;
 
   Steady::execute();
 }

@@ -528,7 +528,7 @@ public:
   /**
    * Reinitialize petsc output for proper linear/nonlinear iteration display
    */
-  void initPetscOutput();
+  virtual void initPetscOutput();
 
 #ifdef LIBMESH_HAVE_PETSC
   /**

@@ -49,7 +49,7 @@
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
     cli_args = 'Executioner/precond_matrix_free=true Executioner/precond_matrix_includes_eigen=true'
     prereq = 'newton_pbp_shell_precond'
-    expect_out = '6 KSP Residual norm'
+    expect_out = '6 Linear |R|'
     slepc_version = '>=3.8.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with including eigen kernels in the preconditioning matrix"
   [../]

@@ -26,10 +26,20 @@ SlepcEigenSolverConfiguration::SlepcEigenSolverConfiguration(EigenProblem & eige
 void
 SlepcEigenSolverConfiguration::configure_solver()
 {
-  PetscErrorCode ierr;
+  PetscErrorCode ierr = 0;
 
-  std::cout<<" configure_solver "<<std::endl;
+  if (_eigen_problem.isNonlinearEigenvalueSolver())
+  {
+    _eigen_problem.initPetscOutput();
 
-  ierr = EPSSetStoppingTestFunction(_slepc_solver.eps(),Moose::SlepcSupport::mooseSlepcStoppingTest,&_eigen_problem,NULL);
-  LIBMESH_CHKERR(ierr);
+    ierr = EPSSetStoppingTestFunction(
+        _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcStoppingTest, &_eigen_problem, NULL);
+    LIBMESH_CHKERR(ierr);
+
+    ierr = EPSMonitorCancel(_slepc_solver.eps());
+    LIBMESH_CHKERR(ierr);
+    ierr = EPSMonitorSet(
+        _slepc_solver.eps(), Moose::SlepcSupport::mooseSlepcEPSMonitor, &_eigen_problem, NULL);
+    LIBMESH_CHKERR(ierr);
+  }
 }
