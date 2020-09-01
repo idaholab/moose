@@ -10,6 +10,7 @@
 #pragma once
 
 #include "BreakMeshByBlockGeneratorBase.h"
+#include <unordered_set>
 
 class BreakMeshByBlockGenerator;
 
@@ -26,7 +27,14 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  subdomain_id_type blockRestricteElementSubdomainID(const Elem * elem);
+
   std::unique_ptr<MeshBase> & _input;
+  std::vector<SubdomainID> _block;
+  std::unordered_set<SubdomainID> _block_set;
+  const bool _block_restricted;
+  const bool _add_transition_interface;
+  const bool _split_transition_interface;
 
 private:
   /// generate the new boundary interface
@@ -37,4 +45,3 @@ private:
            std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map;
 };
-
