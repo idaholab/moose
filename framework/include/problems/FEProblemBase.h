@@ -831,7 +831,12 @@ public:
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
     std::vector<T *> objs;
-    theWarehouse().query().condition<AttribThread>(tid).condition<AttribName>(name).queryInto(objs);
+    theWarehouse()
+        .query()
+        .condition<AttribSystem>("UserObject")
+        .condition<AttribThread>(tid)
+        .condition<AttribName>(name)
+        .queryInto(objs);
     if (objs.empty())
       mooseError("Unable to find user object with name '" + name + "'");
     return *(objs[0]);
