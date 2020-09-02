@@ -348,7 +348,7 @@ setNewtonPetscOptions(SolverParams & solver_params, const InputParameters & para
 {
 #if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
   // Whether or not we need to involve an initial inverse power
-  bool initial_power = params.get<bool>("newton_inverse_power");
+  bool initial_power = params.get<bool>("_newton_inverse_power");
 
   Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
   Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");

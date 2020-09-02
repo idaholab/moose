@@ -24,7 +24,8 @@ Eigenvalue::validParams()
 {
   InputParameters params = Steady::validParams();
 
-  params.addClassDescription("Eigenvalue solves a standard/generalized eigenvaue problem");
+  params.addClassDescription(
+      "Eigenvalue solves a standard/generalized linear or nonlinear eigenvaue problem");
 
   params.addParam<bool>(
       "matrix_free",
@@ -56,13 +57,15 @@ Eigenvalue::validParams()
                         "If true, we will set an initial eigen vector in moose, otherwise EPS "
                         "solver will initial eigen vector");
 
-  params.addParam<bool>(
-      "newton_inverse_power", false, "If Newton and Inverse Power is combined in SLEPc side");
+  // If Newton and Inverse Power is combined in SLEPc side
+  params.addPrivateParam<bool>("_newton_inverse_power", false);
 
   params.addParam<bool>("output_inverse_eigenvalue",
                         false,
                         " Whether or not the system output the inverse of eigenvaue. It is useful "
                         "for neutronic simulation.");
+
+  params.addParam<Real>("time", 0.0, "System time");
 
 // Add slepc options and eigen problems
 #ifdef LIBMESH_HAVE_SLEPC
@@ -74,15 +77,19 @@ Eigenvalue::validParams()
 }
 
 Eigenvalue::Eigenvalue(const InputParameters & parameters)
-  : Steady(parameters),
+  : Executioner(parameters),
     _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh")),
     _normalization(isParamValid("normalization") ? &getPostprocessorValue("normalization")
-                                                 : nullptr)
+                                                 : nullptr),
+    _system_time(getParam<Real>("time")),
+    _time_step(_eigen_problem.timeStep()),
+    _time(_eigen_problem.time()),
+    _final_timer(registerTimedSection("final", 1))
 {
 // Extract and store SLEPc options
 #if LIBMESH_HAVE_SLEPC
-  Moose::SlepcSupport::storeSlepcOptions(_fe_problem, parameters);
+  Moose::SlepcSupport::storeSlepcOptions(_eigen_problem, parameters);
 
   Moose::SlepcSupport::storeSlepcEigenProblemOptions(_eigen_problem, parameters);
   _eigen_problem.setEigenproblemType(_eigen_problem.solverParams()._eigen_problem_type);
@@ -99,6 +106,11 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   if (!parameters.isParamValid("normalization") && parameters.isParamSetByUser("normal_factor"))
     paramError("normal_factor",
                "Cannot set scaling factor without defining normalization postprocessor.");
+
+  // _feproblem_solve calls FEProblemBase
+  _picard_solve.setInnerSolve(_feproblem_solve);
+
+  _time = _system_time;
 }
 
 void
@@ -109,7 +121,17 @@ Eigenvalue::init()
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 #endif
-  Steady::init();
+  if (_app.isRecovering())
+  {
+    _console << "\nCannot recover eigenvaue solves!\nExiting...\n" << std::endl;
+    return;
+  }
+
+  // Does not allow time kernels
+  checkIntegrity();
+  // Some setup
+  _eigen_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _eigen_problem.initialSetup();
 
 #ifdef LIBMESH_HAVE_SLEPC
 
@@ -146,35 +168,111 @@ Eigenvalue::init()
 void
 Eigenvalue::execute()
 {
-  // Let us do extra power iterations here if necessary
-  auto extra_power_iterations = getParam<unsigned int>("extra_power_iterations");
-  if (extra_power_iterations
-    && _eigen_problem.isNonlinearEigenvalueSolver()
-    && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
+  // Recovering makes sense for only transient simulations since the solution from
+  // the previous time steps is required.
+  if (_app.isRecovering())
+    return;
+
+  // Several lines of code are needed to make the output system work (copy from "Steady")
+  _time_step = 0;
+  _time = _time_step;
+  _eigen_problem.outputStep(EXEC_INITIAL);
+  _time = _system_time;
+
+  preExecute();
+
+  // The following code of this function is copied from "Steady"
+  // "Eigenvalue" implementation can be considered a one-time-step simulation to
+  // have the code compatible with the rest moose world.
+  _eigen_problem.advanceState();
+
+  // First step in any eigenvalue state solve is always 1 (preserving backwards compatibility)
+  _time_step = 1;
+
+#ifdef LIBMESH_ENABLE_AMR
+
+  // Define the refinement loop
+  unsigned int steps = _eigen_problem.adaptivity().getSteps();
+  for (unsigned int r_step = 0; r_step <= steps; r_step++)
   {
-    _eigen_problem.doInitialFreePowerIteration(true);
-    // Set free power iterations
-    setFreeNonlinearPowerIterations(extra_power_iterations);
+#endif // LIBMESH_ENABLE_AMR
+    _eigen_problem.timestepSetup();
 
-    _console << " Extra Free power iteration starts" << std::endl;
+    // This loop is for nonlinear multigrids (developed by Alex)
+    for (MooseIndex(_num_grid_steps) grid_step = 0; grid_step <= _num_grid_steps; ++grid_step)
+    {
 
-    // Call solver
-    _eigen_problem.solve();
-    // Clear free power iterations
-    clearFreeNonlinearPowerIterations();
+      // Let us do extra power iterations here if necessary
+      auto extra_power_iterations = getParam<unsigned int>("extra_power_iterations");
+      if (extra_power_iterations && _eigen_problem.isNonlinearEigenvalueSolver() &&
+          _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+      {
+        _eigen_problem.doInitialFreePowerIteration(true);
+        // Set free power iterations
+        setFreeNonlinearPowerIterations(extra_power_iterations);
 
-    _eigen_problem.doInitialFreePowerIteration(false);
+        _console << " Extra Free power iteration starts" << std::endl;
+
+        // Call solver
+        _eigen_problem.solve();
+        // Clear free power iterations
+        clearFreeNonlinearPowerIterations();
+
+        _eigen_problem.doInitialFreePowerIteration(false);
+      }
+
+      if (_eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+        _console << " Nonlinear Newton iteration starts" << std::endl;
+      else
+        _console << " Nonlinear power iteration starts" << std::endl;
+
+      _last_solve_converged = _picard_solve.solve();
+
+      if (!lastSolveConverged())
+      {
+        _console << "Aborting as solve did not converge\n";
+        break;
+      }
+
+      if (grid_step != _num_grid_steps)
+        _eigen_problem.uniformRefine();
+    }
+
+    // Compute markers and indicators only when we do have at least one adaptivity step
+    if (steps)
+    {
+      _eigen_problem.computeIndicators();
+      _eigen_problem.computeMarkers();
+    }
+    // need to keep _time in sync with _time_step to get correct output
+    _time = _time_step;
+    _eigen_problem.outputStep(EXEC_TIMESTEP_END);
+    _time = _system_time;
+
+#ifdef LIBMESH_ENABLE_AMR
+    if (r_step < steps)
+    {
+      _eigen_problem.adaptMesh();
+    }
+
+    _time_step++;
+  }
+#endif
+
+  {
+    TIME_SECTION(_final_timer)
+    _eigen_problem.execMultiApps(EXEC_FINAL);
+    _eigen_problem.execute(EXEC_FINAL);
+    _time = _time_step;
+    _eigen_problem.outputStep(EXEC_FINAL);
+    _time = _system_time;
   }
 
-  if (_eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
-    _console << " Nonlinear Newton iteration starts" << std::endl;
-  else
-    _console << " Nonlinear power iteration starts" << std::endl;
-
-  Steady::execute();
+  postExecute();
 }
 
-void Eigenvalue::prepareSolverOptions()
+void
+Eigenvalue::prepareSolverOptions()
 {
 #ifdef LIBMESH_HAVE_SLEPC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
@@ -217,7 +315,7 @@ Eigenvalue::postSolve()
       _eigen_problem.scaleEigenvector(val);
       // update all aux variables and user objects
       for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
-        _problem.execute(flag);
+        _eigen_problem.execute(flag);
     }
   }
 #endif
@@ -259,4 +357,12 @@ Eigenvalue::clearFreeNonlinearPowerIterations()
    PetscOptionsPop();
 #endif
 #endif
+}
+
+void
+Eigenvalue::checkIntegrity()
+{
+  // check to make sure that we don't have any time kernels in eigenvaue simulation
+  if (_eigen_problem.getNonlinearSystemBase().containsTimeKernel())
+    mooseError("You have specified time kernels in your eigenvaue simulation");
 }

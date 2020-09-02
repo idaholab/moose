@@ -21,7 +21,15 @@ InputParameters validParams();
 template <>
 InputParameters validParams<Eigenvalue>();
 
-class Eigenvalue : public Steady
+/**
+ * Eigenvalue executioner is used to drive the eigenvalue calculations. At the end,
+ * SLEPc will be involved.
+ * We derive from Executioner instead of Steady because 1) we want to have a fine-grain
+ * control such as recovering; 2) Conceptually, Steady is very different from Eigenvalue,
+ * where the former handles a nonlinear system of equations while the later targets
+ * at an eigenvalue problem.
+ */
+class Eigenvalue : public Executioner
 {
 public:
   /**
@@ -48,12 +56,28 @@ public:
    */
   void prepareSolverOptions();
 
+  /**
+   * Eigenvalue executioner does not allow time kernels
+   */
+  virtual void checkIntegrity();
+
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
+private:
+  void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
+  void clearFreeNonlinearPowerIterations();
+
 protected:
   EigenProblem & _eigen_problem;
   /// Postprocessor value that scales solution when eigensolve is finished
   const PostprocessorValue * const _normalization;
 
+  Real _system_time;
+  int & _time_step;
+  Real & _time;
+
+  PerfID _final_timer;
+
 private:
-  void setFreeNonlinearPowerIterations(unsigned int free_power_iterations);
-  void clearFreeNonlinearPowerIterations();
+  bool _last_solve_converged;
 };
