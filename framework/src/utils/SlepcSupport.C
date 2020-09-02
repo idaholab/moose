@@ -968,7 +968,13 @@ mooseSlepcStoppingTest(EPS eps,PetscInt its,PetscInt max_it,PetscInt nconv,Petsc
   ierr = EPSStoppingBasic(eps,its,max_it,nconv,nev,reason,NULL);
   LIBMESH_CHKERR(ierr);
 
-  if (eigen_problem->doInitialFreePowerIteration() && its==max_it && *reason<=0)
+  // If we do free power iteration, we need to mark the solver as converged.
+  // It is because SLEPc does not offer a way to copy unconverged solution.
+  // If the solver is not marked as "converged", we have no way to get solution
+  // from slepc. Note marking as "converged" has no side-effects at all for us.
+  // If free power iteration is used as a stand-alone solver, we won't trigger
+  // as "doFreePowerIteration()" is false.
+  if (eigen_problem->doFreePowerIteration() && its == max_it && *reason <= 0)
   {
     *reason = EPS_CONVERGED_USER;
     eps->nconv = 1;
@@ -1014,10 +1020,13 @@ mooseSlepcEPSMonitor(EPS /*eps*/,
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(mctx);
   auto & console = eigen_problem->console();
 
-  auto eigenvalue = eigen_problem->outputInverseEigenvalue() ? 1.0 / (*eigr) : (*eigr);
+  auto inverse = eigen_problem->outputInverseEigenvalue();
 
-  console << " Iteration " << its << std::setprecision(8) << " eigenvalue = " << eigenvalue
-          << std::endl;
+  auto eigenvalue = inverse ? 1.0 / (*eigr) : (*eigr);
+
+  // The term "k-eigenvalue" is adopted from the neutronics community.
+  console << " Iteration " << its << std::setprecision(8)
+          << (inverse ? " k-eigenvalue = " : " eigenvalue = ") << eigenvalue << std::endl;
 
   return 0;
 }

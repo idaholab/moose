@@ -167,6 +167,11 @@ NonlinearEigenSystem::initialSetup()
     // IntegratedBCs
     addPrecondTagToMooseObjects(_integrated_bcs);
   }
+
+  // Mark a variable an eigen variable if it operates on eigen kernels
+  markEigenVariables(_dg_kernels);
+  markEigenVariables(_kernels);
+  markEigenVariables(_scalar_kernels);
 }
 
 template <typename T>
@@ -181,6 +186,26 @@ NonlinearEigenSystem::addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & w
     // Assign precond tag to all objects
     for (auto & object : objects)
       object->useMatrixTag(_precond_tag);
+  }
+}
+
+template <typename T>
+void
+NonlinearEigenSystem::markEigenVariables(MooseObjectTagWarehouse<T> & warehouse)
+{
+  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  {
+    // Get all objects out from the warehouse
+    auto & objects = warehouse.getObjects(tid);
+
+    for (auto & object : objects)
+    {
+      auto & vtags = object->getVectorTags();
+      auto & mtags = object->getMatrixTags();
+      // If it is an eigen kernel, mark its variable as eigen
+      if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
+        object->variable().eigen(true);
+    }
   }
 }
 

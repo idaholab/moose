@@ -77,6 +77,12 @@ public:
   template <typename T>
   void addPrecondTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
 
+  /**
+   * Mark a variable an eigen variable if it operates on eigen kernels
+   */
+  template <typename T>
+  void markEigenVariables(MooseObjectTagWarehouse<T> & warehouse);
+
   virtual void initialSetup() override;
 
   void attachSLEPcCallbacks();
@@ -93,6 +99,10 @@ public:
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override;
 
+  /**
+   * Retrieve snes from slepc eigen solver. It is valid for only nonlinear eigen solver.
+   * You should see a big error if you do this for linear solver.
+   */
   virtual SNES getSNES() override;
 
   virtual TransientEigenSystem & sys() { return _transient_sys; }

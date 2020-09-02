@@ -18,6 +18,7 @@
   [./v]
     order = FIRST
     family = LAGRANGE
+    eigen = true
   [../]
 []
 

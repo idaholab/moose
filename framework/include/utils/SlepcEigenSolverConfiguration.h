@@ -34,7 +34,7 @@ private:
   EigenProblem & _eigen_problem;
 
   /**
-   *The linear solver object that we are configuring
+   *The slepc eigen solver object that we are configuring
    */
   libMesh::SlepcEigenSolver<libMesh::Number> & _slepc_solver;
 };

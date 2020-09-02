@@ -128,23 +128,41 @@ public:
   void initEigenvector(const Real initial_value);
 
   /**
-   *
+   * Whether or not we do free power iteration. It is used in convergence check.
+   * We need to mark the solver as "converged" when doing free power to retrieve
+   * the final solution from SLPEc
    */
-  bool doInitialFreePowerIteration() { return _do_initial_free_power_iteration; }
+  bool doFreePowerIteration() { return _do_free_power_iteration; }
 
-  void doInitialFreePowerIteration(bool do_power) { _do_initial_free_power_iteration = do_power; }
+  /**
+   * Set a flag to indicate whether or not we do free power iteration.
+   */
+  void doFreePowerIteration(bool do_power) { _do_free_power_iteration = do_power; }
 
   /**
    * Which eigenvalue is active
    */
   unsigned int activeEigenvalueIndex() { return _active_eigen_index; }
 
+  /**
+   * Return console handle, and we use that in EPSMonitor to print out eigenvalue
+   */
   const ConsoleStream & console() { return _console; }
 
+  /**
+   * Hook up monitors for SNES and KSP
+   */
   virtual void initPetscOutput() override;
 
+  /**
+   * Whether or not to output eigenvalue inverse. The inverse is useful for
+   * neutronics community
+   */
   bool outputInverseEigenvalue() { return _output_inverse_eigenvalue; }
 
+  /**
+   * Set a flag to indicate whether or not to output eigenvalue inverse.
+   */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
 
 #endif
@@ -159,7 +177,7 @@ protected:
   unsigned int _active_eigen_index;
 
   bool _auto_initilize_eigen_vector;
-  bool _do_initial_free_power_iteration;
+  bool _do_free_power_iteration;
   bool _output_inverse_eigenvalue;
 
   /// Timers

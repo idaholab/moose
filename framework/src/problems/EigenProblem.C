@@ -335,7 +335,7 @@ EigenProblem::scaleEigenvector(const Real scaling_factor)
   for (auto & vn : var_names)
   {
     MooseVariableFEBase & var = getVariable(0, vn);
-    if (var.parameters().get<bool>("eigen"))
+    if (var.eigen())
       for (unsigned int vc = 0; vc < var.count(); ++vc)
       {
         std::set<dof_id_type> var_indices;
@@ -352,10 +352,16 @@ void
 EigenProblem::initEigenvector(const Real initial_value)
 {
   std::vector<VariableName> var_names = getVariableNames();
+  // Yaqi's note: the following code will set a flat solution for lagrange and
+  // constant monomial variables. For the first or higher order variables,
+  // the solution is not flat. Fortunately, the initial guess does not affect
+  // the final solution as long as it is not perpendicular to the true solution.
+  // We, in general, do not need to worry about that.
   for (auto & vn : var_names)
   {
     MooseVariableFEBase & var = getVariable(0, vn);
-    if (var.parameters().get<bool>("eigen"))
+    // We set values for only eigen variables
+    if (var.eigen())
       for (unsigned int vc = 0; vc < var.count(); ++vc)
       {
         std::set<dof_id_type> var_indices;

@@ -146,10 +146,17 @@ Eigenvalue::init()
     && _eigen_problem.isNonlinearEigenvalueSolver()
     && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
     {
-      _eigen_problem.doInitialFreePowerIteration(true);
+      _eigen_problem.doFreePowerIteration(true);
       // Set free power iterations
       setFreeNonlinearPowerIterations(free_power_iterations);
+
       // Provide vector of ones to solver
+      // "auto_initialization" is on by default and we init the vector values associated
+      // with eigen-variables as ones. If "auto_initialization" is turned off by users,
+      // it is up to users to provide an initial guess. If "auto_initialization" is off
+      // and users does not provide an initial guess, slepc will automatically generate
+      // a random vector as the initial guess. The motivation to offer this option is
+      // that we have to initialize  ONLY eigen variables in multiphysics simulation.
       if (_eigen_problem.needInitializeEigenVector())
         _eigen_problem.initEigenvector(1.0);
 
@@ -157,10 +164,11 @@ Eigenvalue::init()
 
       // Call solver
       _eigen_problem.solve();
+
       // Clear free power iterations
       clearFreeNonlinearPowerIterations();
 
-      _eigen_problem.doInitialFreePowerIteration(false);
+      _eigen_problem.doFreePowerIteration(false);
     }
  #endif
 }
@@ -207,7 +215,7 @@ Eigenvalue::execute()
       if (extra_power_iterations && _eigen_problem.isNonlinearEigenvalueSolver() &&
           _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
       {
-        _eigen_problem.doInitialFreePowerIteration(true);
+        _eigen_problem.doFreePowerIteration(true);
         // Set free power iterations
         setFreeNonlinearPowerIterations(extra_power_iterations);
 
@@ -218,7 +226,7 @@ Eigenvalue::execute()
         // Clear free power iterations
         clearFreeNonlinearPowerIterations();
 
-        _eigen_problem.doInitialFreePowerIteration(false);
+        _eigen_problem.doFreePowerIteration(false);
       }
 
       if (_eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)

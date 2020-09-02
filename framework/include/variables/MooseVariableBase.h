@@ -144,6 +144,16 @@ public:
    */
   virtual unsigned int numberOfDofs() const { return _dof_indices.size(); }
 
+  /**
+   * Whether or not this variable operates on an eigen kernel
+   */
+  virtual bool eigen() const { return _is_eigen; }
+
+  /**
+   * Mark this variable as an eigen var or non-eigen var
+   */
+  virtual void eigen(bool eigen) { _is_eigen = eigen; }
+
 protected:
   /// System this variable is part of
   SystemBase & _sys;
@@ -156,6 +166,9 @@ protected:
 
   /// variable number within MOOSE
   unsigned int _index;
+
+  /// Whether or not this variable operates on eigen kernels
+  bool _is_eigen;
 
   /// Variable type (see MooseTypes.h)
   Moose::VarKindType _var_kind;
