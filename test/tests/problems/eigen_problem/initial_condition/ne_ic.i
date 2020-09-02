@@ -52,7 +52,8 @@
 [Executioner]
   type = Eigenvalue
   solve_type = PJFNK
-  eigen_problem_type = GEN_NON_HERMITIAN
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-6
 []
 
 [VectorPostprocessors]
@@ -63,6 +64,7 @@
 []
 
 [Outputs]
+  exodus = true
   csv = true
   execute_on = 'timestep_end'
 []

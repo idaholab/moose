@@ -19,4 +19,23 @@
     slepc_version = '>=3.8.0'
     requirement = "The system shall provide an option to output the eigenvalue as its inverse."
   [../]
+
+  [./extra_power_iterations]
+    type = 'Exodiff'
+    input = 'ne_ic.i'
+    exodiff = 'ne_ic_out_extra.e'
+    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra'
+    slepc_version = '>=3.8.0'
+    requirement = "The system shall support extra power iterations."
+  [../]
+
+  [./extra_power_iterations_csv]
+    type = 'CSVDiff'
+    input = 'ne_ic.i'
+    csvdiff = 'ne_ic_out_extra_eigenvalues_0001.csv'
+    cli_args = 'Executioner/extra_power_iterations=2 Outputs/file_base=ne_ic_out_extra'
+    slepc_version = '>=3.8.0'
+    prereq = 'extra_power_iterations'
+    requirement = "The system shall support extra power iterations and check eigenvaue."
+  [../]
 []
