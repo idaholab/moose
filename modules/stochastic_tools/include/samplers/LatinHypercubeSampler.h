@@ -33,7 +33,7 @@ protected:
   const std::vector<DistributionName> & _distribution_names;
 
   /// Number of intervals for each distribution
-  const std::vector<unsigned int> & _num_bins_input;
+  const unsigned int & _num_bins_input;
 
   /// Upper limit to probability for each distribution
   const std::vector<Real> & _upper_limits_input;
@@ -45,10 +45,8 @@ protected:
   std::vector<Real> _size_bins;
 
 private:
-  ///@{
-  /// Bin sizes and limits for each distribution; these are populated during sample setup so in the
-  /// future each can be controlled
-  std::vector<unsigned int> _num_bins;
+  /// map<distribution_index, map<row_index, bin_number>>
+  std::vector<std::vector<unsigned int>> _bin_sequence;
 
   /// Upper limit to probability for each distribution
   std::vector<Real> _upper_limits;

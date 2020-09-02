@@ -17,15 +17,12 @@ LatinHypercubeSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Latin Hypercube Sampler.");
-  params.addRequiredParam<dof_id_type>("num_rows",
-                                       "The number of rows per matrix to generate; a single value "
-                                       "or one value per distribution may be supplied.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions",
       "The distribution names to be sampled, the number of distributions provided defines the "
       "number of columns per matrix.");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "num_bins", "The number of intervals to consider within the sampling.");
+  params.addRequiredParam<unsigned int>("num_bins",
+                                        "The number of intervals to consider within the sampling.");
   params.addParam<std::vector<Real>>(
       "lower_limits",
       std::vector<Real>(1, 0),
@@ -40,7 +37,7 @@ LatinHypercubeSampler::validParams()
 LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
   : Sampler(parameters),
     _distribution_names(getParam<std::vector<DistributionName>>("distributions")),
-    _num_bins_input(getParam<std::vector<unsigned int>>("num_bins")),
+    _num_bins_input(getParam<unsigned int>("num_bins")),
     _upper_limits_input(getParam<std::vector<Real>>("upper_limits")),
     _lower_limits_input(getParam<std::vector<Real>>("lower_limits"))
 {
@@ -55,9 +52,8 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
     paramError("lower_limits",
                "The length of 'lower_limits' must be one or match the length of 'distributions'");
 
-  if (_num_bins_input.size() != 1 && _num_bins_input.size() != _distributions.size())
-    paramError("num_bins",
-               "The length of 'num_bins' must be one or match the length of 'distributions'");
+  if (_num_bins_input < 1)
+    paramError("num_bins", "must have at least one bin");
 
   for (const auto & lim : _upper_limits_input)
     if (lim < 0 || lim > 1)
@@ -74,8 +70,21 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
           "The items in 'lower_limits' must be less than the corresponding 'upper_limits' value");
 
   setNumberOfRandomSeeds(2); // 0 = Bin seed; 1 = distribution sample seed
-  setNumberOfRows(getParam<dof_id_type>("num_rows"));
+  setNumberOfRows(getParam<dof_id_type>("num_bins"));
   setNumberOfCols(_distributions.size());
+}
+
+template <typename T>
+void shuffle(std::function<uint32_t()> rng, std::vector<T> & v)
+{
+  std::vector<std::pair<uint32_t, T *>> shuffled(v.size());
+  for (size_t i = 0; i < shuffled.size(); i++)
+    shuffled[i] = std::make_pair(rng(), &v[i]);
+
+  std::sort(shuffled.begin(), shuffled.end());
+
+  for (size_t i = 0; i < v.size(); i++)
+    v[i] = *(shuffled[i].second);
 }
 
 void
@@ -84,8 +93,7 @@ LatinHypercubeSampler::sampleSetUp()
   // Setup bin and limit information
   const std::size_t num_dists = _distributions.size();
   _size_bins.resize(num_dists);
-  _num_bins = _num_bins_input.size() == 1 ? std::vector<unsigned int>(num_dists, _num_bins_input[0])
-                                          : _num_bins_input;
+  _bin_sequence.resize(num_dists);
 
   _lower_limits = _lower_limits_input.size() == 1
                       ? std::vector<Real>(num_dists, _lower_limits_input[0])
@@ -96,17 +104,24 @@ LatinHypercubeSampler::sampleSetUp()
 
   for (std::size_t dist_idx = 0; dist_idx < num_dists; ++dist_idx)
   {
+    auto & seq = _bin_sequence[dist_idx];
+    seq.resize(_num_bins_input);
+    for (size_t i = 0; i < seq.size(); i++)
+      seq[i] = i;
+
+    shuffle([this](){return getRandl(1, std::numeric_limits<uint32_t>::min(), std::numeric_limits<uint32_t>::max());}, seq);
+
     const Real lower = _lower_limits[dist_idx];
     const Real upper = _upper_limits[dist_idx];
-    _size_bins[dist_idx] = (upper - lower) / _num_bins[dist_idx];
+    _size_bins[dist_idx] = (upper - lower) / _num_bins_input;
   }
 }
 
 Real
-LatinHypercubeSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_index)
+LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   // Determine the bin
-  const uint32_t bin_num = getRandl(0, 0, _num_bins[col_index]);
+  const uint32_t bin_num = _bin_sequence[col_index][row_index];
 
   // Compute probability in the range within the bin
   Real lower = bin_num * _size_bins[col_index] + _lower_limits[col_index];
@@ -121,6 +136,6 @@ LatinHypercubeSampler::computeSample(dof_id_type /*row_index*/, dof_id_type col_
 void
 LatinHypercubeSampler::sampleTearDown()
 {
-  _num_bins.clear();
+  _bin_sequence.clear();
   _size_bins.clear();
 }
