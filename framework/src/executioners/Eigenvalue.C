@@ -104,14 +104,14 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 void
 Eigenvalue::init()
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 #endif
   Steady::init();
 
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 
   // Make sure all PETSc options are setup correctly
   prepareSolverOptions();
@@ -119,7 +119,7 @@ Eigenvalue::init()
   // Let do an initial solve if a nonlinear eigen solver but not power is used.
   // The initial solver is a Inverse Power, and it is used to compute a good initial
   // guess for Newton
-  auto free_power_iterations = _pars.get<unsigned int>("free_power_iterations");
+  auto free_power_iterations = getParam<unsigned int>("free_power_iterations");
   if (free_power_iterations
     && _eigen_problem.isNonlinearEigenvalueSolver()
     && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
@@ -147,7 +147,7 @@ void
 Eigenvalue::execute()
 {
   // Let us do extra power iterations here if necessary
-  auto extra_power_iterations = _pars.get<unsigned int>("extra_power_iterations");
+  auto extra_power_iterations = getParam<unsigned int>("extra_power_iterations");
   if (extra_power_iterations
     && _eigen_problem.isNonlinearEigenvalueSolver()
     && _eigen_problem.solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER )
@@ -176,7 +176,7 @@ Eigenvalue::execute()
 
 void Eigenvalue::prepareSolverOptions()
 {
-#if LIBMESH_HAVE_SLEPC
+#ifdef LIBMESH_HAVE_SLEPC
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Make sure the SLEPc options are setup for this app
   Moose::SlepcSupport::slepcSetOptions(_eigen_problem, _pars);
@@ -226,8 +226,8 @@ Eigenvalue::postSolve()
 void
 Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
-#if LIBMESH_HAVE_SLEPC
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+#ifdef LIBMESH_HAVE_SLEPC
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master app has the default data base
   if (!_app.isUltimateMaster())
     PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
@@ -235,9 +235,9 @@ Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 
  Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+ if (!_app.isUltimateMaster())
+   PetscOptionsPop();
 #endif
 #endif
 }
@@ -245,8 +245,8 @@ Eigenvalue::setFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 void
 Eigenvalue::clearFreeNonlinearPowerIterations()
 {
-#if LIBMESH_HAVE_SLEPC
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
+#ifdef LIBMESH_HAVE_SLEPC
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master app has the default data base
   if (!_app.isUltimateMaster())
     PetscOptionsPush(_eigen_problem.petscOptionsDatabase());
@@ -254,9 +254,9 @@ Eigenvalue::clearFreeNonlinearPowerIterations()
 
  Moose::SlepcSupport::clearFreeNonlinearPowerIterations(_pars);
 
-#if PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+#if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
+ if (!_app.isUltimateMaster())
+   PetscOptionsPop();
 #endif
 #endif
 }

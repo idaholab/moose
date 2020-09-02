@@ -41,8 +41,9 @@
   [../]
 
   [./rhs]
-    type = Reaction
+    type = CoefReaction
     variable = u
+    coefficient = -1.0
     extra_vector_tags = 'eigen'
   [../]
 []
@@ -86,9 +87,9 @@
 
 [Executioner]
   type = Eigenvalue
-  matrix_free = true
-  solve_type = NEWTON
-  eigen_problem_type = GEN_NON_HERMITIAN
+  solve_type = PJFNK
+  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-6
   picard_max_its = 10
   picard_rel_tol = 1e-6
 []
@@ -110,6 +111,7 @@
 
 [Outputs]
   csv = true
+  exodus =true
   execute_on = 'timestep_end'
 []
 
@@ -123,14 +125,14 @@
 
 [Transfers]
   [./T_from_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = from_multiapp
     multi_app = sub
     source_variable = T
     variable = T
   [../]
   [./power_to_sub]
-    type = MultiAppNearestNodeTransfer
+    type = MultiAppMeshFunctionTransfer
     direction = to_multiapp
     multi_app = sub
     source_variable = power

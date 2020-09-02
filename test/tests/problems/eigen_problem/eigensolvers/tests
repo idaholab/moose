@@ -111,20 +111,42 @@
     requirement = "Eigenvalue system should be able to handle DG kernels"
   []
 
-  [./ne_coupled_picard_eigen_master]
+  [./eigen_as_master]
     type = 'CSVDiff'
     input = 'ne_coupled_picard.i'
     csvdiff = 'ne_coupled_picard_out_eigenvalues_0001.csv'
     slepc_version = '>=3.12.0'
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master"
+    issues = "#15513"
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master."
   []
 
-  [./ne_coupled_picard_eigen_sub]
+  [./eigen_as_master_exodus]
+    type = 'Exodiff'
+    input = 'ne_coupled_picard.i'
+    exodiff = 'ne_coupled_picard_out.e ne_coupled_picard_out_sub0.e'
+    prereq = 'eigen_as_master'
+    slepc_version = '>=3.12.0'
+    issues = "#15513"
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a master and output eigen vectors as an exodus file."
+  []
+
+  [./eigen_as_sub]
     type = 'CSVDiff'
     input = 'ne_coupled_picard_subT.i'
     csvdiff = 'ne_coupled_picard_subT_out_sub0_eigenvalues_0001.csv'
     slepc_version = '>=3.12.0'
-    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app"
+    issues = "#15513"
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app."
+  []
+
+  [./eigen_as_sub_exodus]
+    type = 'Exodiff'
+    input = 'ne_coupled_picard_subT.i'
+    exodiff = 'ne_coupled_picard_subT_out.e ne_coupled_picard_subT_out_sub0.e'
+    slepc_version = '>=3.12.0'
+    issues = "#15513"
+    prereq = 'eigen_as_sub'
+    requirement = "Eigenvalue system shall support Picard iteration using eigenvalue executioner as a sub app and output eigen vectors as an exodus file."
   []
 
   [./scaled_eigenvector]

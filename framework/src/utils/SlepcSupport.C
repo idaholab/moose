@@ -67,7 +67,8 @@ getSlepcEigenProblemValidParams()
 
   // We are solving a Non-Hermitian eigenvalue problem by default
   MooseEnum eigen_problem_type("HERMITIAN NON_HERMITIAN GEN_HERMITIAN GEN_NON_HERMITIAN "
-                               "GEN_INDEFINITE POS_GEN_NON_HERMITIAN SLEPC_DEFAULT");
+                               "GEN_INDEFINITE POS_GEN_NON_HERMITIAN SLEPC_DEFAULT",
+                               "GEN_NON_HERMITIAN");
   params.addParam<MooseEnum>(
       "eigen_problem_type",
       eigen_problem_type,
