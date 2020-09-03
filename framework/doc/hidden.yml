@@ -166,7 +166,6 @@
 - /Postprocessors/ElementL2Norm
 - /Postprocessors/ElementW1pError
 - /Postprocessors/EmptyPostprocessor
-- /Postprocessors/ExecutionerAttributeReporter
 - /Postprocessors/FunctionSideIntegral
 - /Postprocessors/NodalExtremeValue
 - /Postprocessors/NodalL2Error
