@@ -3342,7 +3342,6 @@ FEProblemBase::addPostprocessor(const std::string & pp_name,
                "\" already exists.  You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
-  initPostprocessorData(name);
 }
 
 void
@@ -3432,6 +3431,12 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     if (guo && !tguo)
       break;
   }
+
+  // Ideally the call to initPostprocssorData would be within the addPostprocessor method, but
+  // to maintain support for including Postprocessor objects within the [UserObjects] block
+  // (e.g., FeatureFloadCount) the data must be initialized here.
+  if (parameters.get<std::string>("_moose_base") == "Postprocessor")
+    initPostprocessorData(name);
 }
 
 const UserObject &
