@@ -105,5 +105,7 @@ RestartableDataValue &
 ReporterData::getRestartableDataHelper(std::unique_ptr<RestartableDataValue> data_ptr,
                                        bool declare) const
 {
-  return _app.registerRestartableData(data_ptr->name(), std::move(data_ptr), 0, !declare);
+  // get the name to avoid problems with arbitrary function argument evaluation
+  std::string name = data_ptr->name();
+  return _app.registerRestartableData(name, std::move(data_ptr), 0, !declare);
 }
