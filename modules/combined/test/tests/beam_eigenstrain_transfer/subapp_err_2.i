@@ -127,7 +127,7 @@
     type = LineValueSampler
     start_point = '0.5 0.0 0.0'
     end_point = '0.5 0.150080 0.0'
-    variable = 'axial_strain axial_strain'
+    variable = 'axial_strain temp'
     num_points = 21
     sort_by = 'y'
   [../]
