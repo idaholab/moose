@@ -11,44 +11,40 @@
 
 #include "GeneralReporter.h"
 class Transient;
+// class NonlinearSystem;
+// class AuxiliarySystem;
+// class EquationSystems;
 
 /**
  * Report the time and iteration information for the simulation.
  */
-class IterationInfo : public GeneralReporter
+class MeshInfo : public GeneralReporter
 {
 public:
   static InputParameters validParams();
-  IterationInfo(const InputParameters & parameters);
+  MeshInfo(const InputParameters & parameters);
   virtual void initialize() override {}
   virtual void finalize() override {}
   virtual void execute() override;
 
 protected:
-  Transient * _transient_executioner = nullptr;
   const MultiMooseEnum & _items;
 
-  // Reporter values to return (all are computed as "replicated" values)
-  Real & _time_value;
-  unsigned int & _time_step_value;
-  unsigned int & _num_linear;
-  unsigned int & _num_nonlinear;
-  unsigned int & _num_picard;
+  // Reporter values to return (all are computed as "distributed" values)
+  unsigned int & _num_dofs;
+  unsigned int & _num_dofs_nl;
+  unsigned int & _num_dofs_aux;
+  unsigned int & _num_elem;
+  unsigned int & _num_node;
 
   // Used to allow for optional declare
-  Real _dummy_real = 0;
   unsigned int _dummy_unsigned_int = 0;
 
   // Helper to perform optional declaration based on "_items"
-  template <typename T>
-  T & declareHelper(const std::string & item_name, T & _dummy, bool extra_check = true);
-};
+  unsigned int & declareHelper(const std::string & item_name);
 
-template <typename T>
-T &
-IterationInfo::declareHelper(const std::string & item_name, T & _dummy, bool extra_check)
-{
-  return (extra_check && (!_items.isValid() || _items.contains(item_name)))
-             ? declareValue<T>(item_name, REPORTER_MODE_REPLICATED)
-             : _dummy;
-}
+private:
+  // const EquationSystems & _equation_systems;
+  // const NonlinearSystem & _nonlinear_system;
+  // const AuxiliarySystem & _aux_system;
+};

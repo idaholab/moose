@@ -1,0 +1,45 @@
+[Tests]
+  issue = '#11323'
+  design = 'IterationInfo.md'
+  [info]
+    requirement = "The system shall include the ability to report iteration information:"
+
+    [default]
+      type = JSONDiff
+      input = iteration_info.i
+      jsondiff = iteration_info_out.json
+      recover = false # iteration info changes with --recover
+
+      detail = "that outputs all information be default;"
+    []
+
+    [limit]
+      type = JSONDiff
+      input = iteration_info.i
+      jsondiff = limit_out.json
+      cli_args = 'Reporters/iteration_info/items=time timestep Outputs/file_base=limit_out'
+      recover = false # iteration info changes with --recover
+
+      detail = "that outputs specific information;"
+    []
+
+    [steady]
+      type = JSONDiff
+      input = iteration_info_steady.i
+      jsondiff = iteration_info_steady_out.json
+      recover = false # iteration info changes with --recover
+
+      detail = "automatically disables items based on execution;"
+    []
+
+    [steady_rror]
+      type = RunException
+      input = iteration_info_steady.i
+      cli_args = 'Reporters/iteration_info/items=num_picard_iterations'
+      expect_err = "The number of picard iterations was requested but the executioner is not of type Transient"
+      recover = false # iteration info changes with --recover
+
+      detail = "errors if requested item(s) are invalid for the execution method."
+    []
+  []
+[]

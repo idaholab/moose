@@ -10,6 +10,7 @@
 import os
 import argparse
 import json
+import collections
 import mooseutils
 
 def parse_args():
@@ -54,9 +55,9 @@ class JSONDiffer(object):
     def _load(input0):
         if os.path.isfile(input0):
             with open(input0, 'r', encoding='utf-8') as fid:
-                return json.load(fid)
+                return json.load(fid, object_pairs_hook=collections.OrderedDict)
         elif isinstance(input0, str):
-            return json.loads(input0)
+            return json.loads(input0, object_pairs_hook=collections.OrderedDict)
         return input0
 
 
@@ -64,4 +65,3 @@ if __name__ == '__main__':
     args = parse_args()
     obj = JSONDiff(*args.files)
     print(obj)
-1

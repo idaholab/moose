@@ -19,7 +19,7 @@ class Parameter;
  *
  * 1. It provides a single "name" for accessing the data. When developing the Reporter system the
  *    original implementation required this object to serve as a key in a std::unordered_map. That
- * is no longer the case, but those items remain in case that changes again in the future.
+ *    is no longer the case, but those items remain in case that changes again in the future.
  * 2. Provide a means for defining special Parser syntax to allow for a single input parameter
  *    to define both the object and value name. This is the primary reason for this class, please
  *    refer to Parser.C for the specialization.
